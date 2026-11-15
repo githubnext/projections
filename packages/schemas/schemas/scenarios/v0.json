@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/scenarios/v0.json",
+  "title": "Projections scenarios",
+  "description": "Authored renderer scenarios: extractions, or before and after extractions with an optional comparator, shown with a renderer. Paths are relative to this file. Scenario IDs are unique within the file.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "scenarios"],
+  "properties": {
+    "format": {"type": "string", "const": "projections.scenarios"},
+    "version": {"type": "number", "const": 0},
+    "title": {"$ref": "#/$defs/title", "description": "Default group for this file's scenarios."},
+    "renderer": {"$ref": "#/$defs/renderer", "description": "Default renderer for scenarios that omit one."},
+    "scenarios": {"type": "array", "items": {"$ref": "#/$defs/scenario"}, "maxItems": 1000}
+  },
+  "if": {"not": {"required": ["renderer"]}},
+  "then": {"properties": {"scenarios": {"type": "array", "items": {"type": "object", "required": ["renderer"]}}}},
+  "$defs": {
+    "title": {"type": "string", "minLength": 1, "maxLength": 1000},
+    "path": {
+      "description": "A path relative to the scenarios file. `..` segments are allowed; absolute paths, URLs, backslashes and control characters are not.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^(?!/)(?!.*//)(?!.*\\/$)(?!.*[\\\\\\u0000-\\u001f\\u007f])[^?#:]+$"
+    },
+    "renderer": {
+      "anyOf": [
+        {"$ref": "https://schemas.projections.githubnext.com/definition/v0.json#/$defs/identifier"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["bundle"],
+          "properties": {"bundle": {"$ref": "#/$defs/path", "description": "A renderer bundle directory."}}
+        }
+      ]
+    },
+    "extraction": {
+      "description": "An inline extraction, or the path (relative to the scenarios file) of a JSON file holding an extraction or a `projections.extraction` document, whose `extraction` is used.",
+      "anyOf": [{"$ref": "#/$defs/path"}, {"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"}]
+    },
+    "comparator": {
+      "description": "A comparator file (`<name>.comparator.yaml`) by path relative to the scenarios file, as a string or `{file, options}`; an object without `file` is the default comparator with options.",
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "options": {
+              "$ref": "https://schemas.projections.githubnext.com/definition/v0.json#/$defs/defaultComparatorOptions"
+            }
+          }
+        },
+        {"allOf": [{"$ref": "#/$defs/path"}, {"type": "string", "pattern": "\\.comparator\\.ya?ml$"}]},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["file"],
+          "properties": {
+            "file": {"allOf": [{"$ref": "#/$defs/path"}, {"type": "string", "pattern": "\\.comparator\\.ya?ml$"}]},
+            "options": {"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json#/$defs/data"}
+          }
+        }
+      ]
+    },
+    "scenario": {
+      "description": "One authored renderer scenario: a single extraction, or before and after extractions.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title"],
+      "properties": {
+        "id": {
+          "description": "Unique within the file and safe as a file name.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$"
+        },
+        "title": {"$ref": "#/$defs/title"},
+        "group": {"$ref": "#/$defs/title", "description": "Overrides the document title for grouping."},
+        "description": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "renderer": {
+          "$ref": "#/$defs/renderer",
+          "description": "A renderer name, or a bundle directory relative to the scenarios file. Defaults to the document's."
+        },
+        "before": {"$ref": "#/$defs/extraction"},
+        "after": {"$ref": "#/$defs/extraction"},
+        "extraction": {"$ref": "#/$defs/extraction"},
+        "comparator": {"$ref": "#/$defs/comparator", "description": "Only with before and after."},
+        "presentation": {"$ref": "https://schemas.projections.githubnext.com/definition/v0.json#/$defs/presentation"}
+      },
+      "oneOf": [
+        {
+          "required": ["extraction"],
+          "not": {"anyOf": [{"required": ["before"]}, {"required": ["after"]}, {"required": ["comparator"]}]}
+        },
+        {"required": ["before", "after"], "not": {"required": ["extraction"]}}
+      ]
+    }
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/comparator/v0.json",
+  "title": "Projections comparator file",
+  "description": "A custom comparator file (`<name>.comparator.yaml`): YAML declarations the rules interpreter runs over the default comparator, sandboxed. Identity passes add correspondences; comparator rules, CEL expressions checked against declared types when the file loads, classify changes, order them into steps and add metadata. See the guide's \"Write a custom comparator\" and docs/design/declarative-comparators.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version"],
+  "properties": {
+    "$schema": {
+      "description": "Editors: `# yaml-language-server: $schema=<url>` at the top of the file works too.",
+      "type": "string"
+    },
+    "format": {"const": "projections.comparator"},
+    "version": {"const": 0},
+    "description": {"type": "string"},
+    "defaults": {
+      "description": "Option values for options the comparison doesn't set. Every expression, functions included, reads them as `options.<name>`; an option the definition sets replaces its default.",
+      "type": "object"
+    },
+    "functions": {
+      "description": "Named, typed expressions. A body sees its parameters, its own variables and the inputs (`before`, `after`, `lookup`, `options`, `baseline`), never its caller's variables or the file's (share option defaults through `defaults`). The call graph must be acyclic, so every evaluation terminates.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["body"],
+        "properties": {
+          "description": {"type": "string"},
+          "params": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {"$ref": "#/$defs/identifier"},
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["name"],
+                  "properties": {
+                    "name": {"$ref": "#/$defs/identifier"},
+                    "type": {"$ref": "#/$defs/type"},
+                    "values": {"$ref": "#/$defs/values"}
+                  }
+                }
+              ]
+            }
+          },
+          "returns": {"$ref": "#/$defs/type"},
+          "variables": {"$ref": "#/$defs/variables"},
+          "body": {"$ref": "#/$defs/cel"}
+        }
+      },
+      "propertyNames": {"$ref": "#/$defs/identifier"}
+    },
+    "checks": {
+      "description": "Evaluated first, in order. The first `assert` that isn't true fails the comparison with `code` (default `invalid-options`), `path` (default `/options`) and `message`.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["assert", "message"],
+        "properties": {
+          "assert": {"$ref": "#/$defs/cel"},
+          "code": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+          "path": {"$ref": "#/$defs/cel"},
+          "message": {"$ref": "#/$defs/cel"}
+        }
+      }
+    },
+    "identity": {
+      "description": "Identity passes, in order. Each pass sees only the items earlier passes left unmatched. Entity passes all run before relationship passes.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": {"$ref": "#/$defs/identifier"},
+          "description": {"type": "string"},
+          "collections": {
+            "type": "array",
+            "items": {"enum": ["entities", "relationships"]},
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "when": {"$ref": "#/$defs/cel", "description": "Skips the pass unless true. Sees `pairs`."},
+          "key": {
+            "$ref": "#/$defs/cel",
+            "description": "A key per unmatched `item` (on `side` `before` or `after`): any JSON value, compared as canonical JSON, such as `[item.kind, item.label]`; null skips the item. Items whose key is unique on both sides correspond."
+          },
+          "claims": {
+            "$ref": "#/$defs/cel",
+            "description": "The other side's IDs an unmatched `item` claims to be. Each connected group of claims is one change: one-to-one, a split, a merge, or an ambiguous-correspondence error."
+          }
+        },
+        "oneOf": [{"required": ["key"]}, {"required": ["claims"]}]
+      }
+    },
+    "classify": {
+      "description": "Evaluated per change, in change order, with `change`, `origin` (the identity pass that matched it, or null), `befores`, `afters`, `beforeItem`, `afterItem`, `changes`, `pairs` and `changeOf`.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "where": {"$ref": "#/$defs/cel"},
+        "summary": {"$ref": "#/$defs/cel", "description": "A string, or null to leave the summary unset."},
+        "annotation": {
+          "$ref": "#/$defs/cel",
+          "description": "Any JSON value, or null; available afterwards as `annotations[change.id]`."
+        },
+        "variables": {"$ref": "#/$defs/variables"}
+      }
+    },
+    "steps": {
+      "description": "How the steps are made. Declarative: start from the baseline's steps (dropping changes the comparison no longer has), `add` new steps, `rank` them, then `summary`. Or `value`, one CEL expression for the whole list (the escape hatch).",
+      "oneOf": [
+        {"$ref": "#/$defs/cel"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value"],
+          "properties": {
+            "value": {
+              "$ref": "#/$defs/cel",
+              "description": "The steps, as a list of `{changes, kind?, summary?}`, with `changes`, `annotations`, `pairs` and `changeOf`."
+            },
+            "variables": {"$ref": "#/$defs/variables"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "add": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["changes"],
+                "properties": {
+                  "changes": {
+                    "$ref": "#/$defs/cel",
+                    "description": "Per change (`change`, `origin`, `annotation`): whether it belongs to the new step. Selected changes leave the steps they were in; steps left empty go."
+                  },
+                  "kind": {"enum": ["remove", "restructure", "add"]},
+                  "sort": {
+                    "$ref": "#/$defs/cel",
+                    "description": "Per change: a sort key (null, bool, number, string or list of them; strings in UTF-16 order). Default: entities, then relationships, each by ID."
+                  },
+                  "summary": {
+                    "$ref": "#/$defs/cel",
+                    "description": "With `members`, the step's changes: a string, or null for none."
+                  },
+                  "place": {
+                    "description": "Where the step goes: `start`, `end` (default), `before:<kind>` (before the first step of that kind, else last) or `after:<kind>` (after the last, else first).",
+                    "type": "string",
+                    "pattern": "^(start|end|(before|after):(remove|restructure|add))$"
+                  }
+                }
+              }
+            },
+            "rank": {
+              "$ref": "#/$defs/cel",
+              "description": "Per change (`change`, `origin`, `annotation`): a number, a list of numbers (the least counts) or null. Steps are stably sorted by their best-ranked change; steps without a rank keep their order after the ranked ones."
+            },
+            "descending": {"description": "Higher ranks first.", "type": "boolean"},
+            "summary": {
+              "$ref": "#/$defs/cel",
+              "description": "Per step, with `step`, `members` and `lead` (the first change with the best rank, or null): a string, or null to keep the step's summary."
+            },
+            "variables": {"$ref": "#/$defs/variables"}
+          }
+        }
+      ]
+    },
+    "metadata": {
+      "description": "Comparison metadata keys, merged over the baseline's; a null value is omitted.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["values"],
+      "properties": {
+        "values": {"type": "object", "additionalProperties": {"$ref": "#/$defs/cel"}},
+        "variables": {"$ref": "#/$defs/variables"}
+      }
+    },
+    "variables": {"$ref": "#/$defs/variables"}
+  },
+  "$defs": {
+    "identifier": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+    "cel": {"description": "A CEL expression.", "type": "string", "minLength": 1},
+    "variables": {
+      "description": "Named values, evaluated once and in order, each able to use the earlier ones; expressions read them as `variables.<name>`.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "expression"],
+        "properties": {
+          "name": {"$ref": "#/$defs/identifier"},
+          "description": {"type": "string"},
+          "expression": {"$ref": "#/$defs/cel"},
+          "values": {"$ref": "#/$defs/values"}
+        }
+      }
+    },
+    "values": {
+      "description": "The values a variable or parameter can take. A `match` on it warns about keys outside them and values it doesn't handle.",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"oneOf": [{"type": "string"}, {"type": "integer"}]}
+    },
+    "type": {
+      "description": "A declared type: `string`, `int`, `double`, `bool`, `dyn`, `list<T>`, `map<K, V>`, `optional<T>`, or one of the protocol's object types (`Extraction`, `Entity`, `Relationship`, `Item`, `Change`, `Step`, `Comparison`, `Side`, `Lookup`, `Finding`, `Classification`, `Pairs`).",
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

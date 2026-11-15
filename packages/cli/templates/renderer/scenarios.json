@@ -1,0 +1,54 @@
+{
+  "format": "projections.scenarios",
+  "version": 0,
+  "title": "{{title}}",
+  "renderer": "{{name}}",
+  "scenarios": [
+    {
+      "id": "split",
+      "title": "Checkout splits out payments",
+      "description": "Replace these sample extractions with your own, for example saved with projections show -p ID --json.",
+      "before": {
+        "protocolVersion": 0,
+        "schema": "graph/v0",
+        "entities": [
+          {"id": "service:checkout", "kind": "service", "label": "Checkout", "data": {"owner": "web"}},
+          {"id": "service:billing", "kind": "service", "label": "Legacy billing"},
+          {"id": "service:orders", "kind": "service", "label": "Orders"}
+        ],
+        "relationships": [
+          {"id": "calls:checkout->billing", "kind": "calls", "from": "service:checkout", "to": "service:billing"},
+          {"id": "calls:checkout->orders", "kind": "calls", "from": "service:checkout", "to": "service:orders"}
+        ]
+      },
+      "after": {
+        "protocolVersion": 0,
+        "schema": "graph/v0",
+        "entities": [
+          {"id": "service:checkout", "kind": "service", "label": "Checkout", "data": {"owner": "payments"}},
+          {"id": "service:orders", "kind": "service", "label": "Orders"},
+          {"id": "service:payments", "kind": "service", "label": "Payments"},
+          {"id": "job:fraud", "kind": "job", "label": "Fraud checks"}
+        ],
+        "relationships": [
+          {"id": "calls:checkout->orders", "kind": "calls", "from": "service:checkout", "to": "service:orders"},
+          {"id": "calls:checkout->payments", "kind": "calls", "from": "service:checkout", "to": "service:payments"},
+          {"id": "calls:payments->fraud", "kind": "calls", "from": "service:payments", "to": "job:fraud"}
+        ]
+      }
+    },
+    {
+      "id": "single",
+      "title": "One revision",
+      "extraction": {
+        "protocolVersion": 0,
+        "schema": "graph/v0",
+        "entities": [
+          {"id": "service:checkout", "kind": "service", "label": "Checkout", "data": {"owner": "payments"}},
+          {"id": "service:orders", "kind": "service", "label": "Orders"}
+        ],
+        "relationships": [{"id": "calls:checkout->orders", "kind": "calls", "from": "service:checkout", "to": "service:orders"}]
+      }
+    }
+  ]
+}

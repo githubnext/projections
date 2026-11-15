@@ -1,0 +1,550 @@
+{
+  "changes": [
+    {
+      "after": [
+        "M:Base.Concat(System.String[])"
+      ],
+      "before": [
+        "M:Base.Concat(System.String[])"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:Base.Concat(System.String[])",
+      "status": "modified",
+      "summary": "Breaking (source): Parameter `parts` was renamed to `items`, breaking named arguments."
+    },
+    {
+      "after": [
+        "M:Base.Fill(System.Int32@)"
+      ],
+      "before": [
+        "M:Base.Fill(System.Int32@)"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:Base.Fill(System.Int32@)",
+      "status": "modified",
+      "summary": "Breaking (source): Parameter `value` changed from `ref` to `out`."
+    },
+    {
+      "after": [
+        "M:Base.Fly"
+      ],
+      "before": [
+        "M:Base.Fly"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:Base.Fly",
+      "status": "modified",
+      "summary": "Breaking (binary, source): Became `sealed`; derived types can no longer override it."
+    },
+    {
+      "after": [
+        "M:Base.Max(System.Int32[])"
+      ],
+      "before": [
+        "M:Base.Max(System.Int32[])"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:Base.Max(System.Int32[])",
+      "status": "modified",
+      "summary": "Additive: Parameter `values` became `params`."
+    },
+    {
+      "after": [
+        "M:Base.Retry(System.Int32)"
+      ],
+      "before": [
+        "M:Base.Retry(System.Int32)"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:Base.Retry(System.Int32)",
+      "status": "modified",
+      "summary": "Breaking (source): Parameter `times` no longer has a default value; callers must pass it."
+    },
+    {
+      "after": [
+        "M:Base.Run"
+      ],
+      "before": [
+        "M:Base.Run"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:Base.Run",
+      "status": "modified",
+      "summary": "Breaking (binary, source): Is no longer `abstract` or `virtual`."
+    },
+    {
+      "after": [
+        "M:Base.Stop"
+      ],
+      "before": [
+        "M:Base.Stop"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:Base.Stop",
+      "status": "modified",
+      "summary": "Compatible: Became `virtual`."
+    },
+    {
+      "after": [
+        "M:Base.Sum(System.Int32[])"
+      ],
+      "before": [
+        "M:Base.Sum(System.Int32[])"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:Base.Sum(System.Int32[])",
+      "status": "modified",
+      "summary": "Breaking (source): Parameter `values` is no longer `params`."
+    },
+    {
+      "after": [
+        "M:Base.Swim"
+      ],
+      "before": [
+        "M:Base.Swim"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:Base.Swim",
+      "status": "modified",
+      "summary": "Compatible: Attribute `System.ObsoleteAttribute` was added."
+    },
+    {
+      "after": [
+        "M:Base.Wait(System.Int32)"
+      ],
+      "before": [
+        "M:Base.Wait(System.Int32)"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:Base.Wait(System.Int32)",
+      "status": "modified",
+      "summary": "Compatible: Parameter `ms`'s default changed from `10` to `20`; callers compiled earlier keep `10`."
+    },
+    {
+      "after": [
+        "M:Base.Walk"
+      ],
+      "before": [
+        "M:Base.Walk"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:Base.Walk",
+      "status": "modified",
+      "summary": "Compatible: Became `virtual`."
+    },
+    {
+      "after": [
+        "M:Final.Fly"
+      ],
+      "before": [
+        "M:Final.Fly"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:Final.Fly",
+      "status": "modified",
+      "summary": "Compatible: Became `sealed`; its type can't be inherited, so nothing overrode it."
+    },
+    {
+      "after": [
+        "M:Final.Go"
+      ],
+      "before": [
+        "M:Final.Go"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:Final.Go",
+      "status": "modified",
+      "summary": "Compatible: Is no longer `virtual`; its type can't be inherited, so nothing overrode it."
+    },
+    {
+      "after": [
+        "M:IStore.Describe"
+      ],
+      "before": [
+        "M:IStore.Describe"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:IStore.Describe",
+      "status": "modified",
+      "summary": "Breaking (binary, source): Became `sealed` in its interface."
+    },
+    {
+      "after": [
+        "M:IStore.Parse(System.String)"
+      ],
+      "before": [
+        "M:IStore.Parse(System.String)"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "M:IStore.Parse(System.String)",
+      "status": "modified",
+      "summary": "Breaking (binary, source): Became `sealed` in its interface."
+    },
+    {
+      "after": [
+        "P:Base.Id"
+      ],
+      "before": [
+        "P:Base.Id"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "P:Base.Id",
+      "status": "modified",
+      "summary": "Additive: Gained an `init` accessor."
+    },
+    {
+      "after": [
+        "P:Base.Key"
+      ],
+      "before": [
+        "P:Base.Key"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "P:Base.Key",
+      "status": "modified",
+      "summary": "Breaking (binary, source): Lost its `init` accessor."
+    },
+    {
+      "after": [
+        "P:Base.Name"
+      ],
+      "before": [
+        "P:Base.Name"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "P:Base.Name",
+      "status": "modified",
+      "summary": "Additive: Gained a getter."
+    }
+  ],
+  "metadata": {
+    "compatibility": {
+      "changes": {
+        "M:Base.Concat(System.String[])": {
+          "findings": [
+            {
+              "kinds": [
+                "source"
+              ],
+              "level": "breaking",
+              "reason": "Parameter `parts` was renamed to `items`, breaking named arguments",
+              "rule": "CP0017"
+            }
+          ],
+          "kinds": [
+            "source"
+          ],
+          "level": "breaking",
+          "reason": "Parameter `parts` was renamed to `items`, breaking named arguments"
+        },
+        "M:Base.Fill(System.Int32@)": {
+          "findings": [
+            {
+              "kinds": [
+                "source"
+              ],
+              "level": "breaking",
+              "reason": "Parameter `value` changed from `ref` to `out`",
+              "rule": "ref-kind"
+            }
+          ],
+          "kinds": [
+            "source"
+          ],
+          "level": "breaking",
+          "reason": "Parameter `value` changed from `ref` to `out`"
+        },
+        "M:Base.Fly": {
+          "findings": [
+            {
+              "kinds": [
+                "binary",
+                "source"
+              ],
+              "level": "breaking",
+              "reason": "Became `sealed`; derived types can no longer override it",
+              "rule": "sealed"
+            }
+          ],
+          "kinds": [
+            "binary",
+            "source"
+          ],
+          "level": "breaking",
+          "reason": "Became `sealed`; derived types can no longer override it"
+        },
+        "M:Base.Max(System.Int32[])": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "Parameter `values` became `params`",
+              "rule": "parameter-default"
+            }
+          ],
+          "level": "additive",
+          "reason": "Parameter `values` became `params`"
+        },
+        "M:Base.Retry(System.Int32)": {
+          "findings": [
+            {
+              "kinds": [
+                "source"
+              ],
+              "level": "breaking",
+              "reason": "Parameter `times` no longer has a default value; callers must pass it",
+              "rule": "parameter-default"
+            }
+          ],
+          "kinds": [
+            "source"
+          ],
+          "level": "breaking",
+          "reason": "Parameter `times` no longer has a default value; callers must pass it"
+        },
+        "M:Base.Run": {
+          "findings": [
+            {
+              "kinds": [
+                "binary",
+                "source"
+              ],
+              "level": "breaking",
+              "reason": "Is no longer `abstract` or `virtual`",
+              "rule": "CP0012"
+            }
+          ],
+          "kinds": [
+            "binary",
+            "source"
+          ],
+          "level": "breaking",
+          "reason": "Is no longer `abstract` or `virtual`"
+        },
+        "M:Base.Stop": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Became `virtual`",
+              "rule": "CP0013"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Became `virtual`"
+        },
+        "M:Base.Sum(System.Int32[])": {
+          "findings": [
+            {
+              "kinds": [
+                "source"
+              ],
+              "level": "breaking",
+              "reason": "Parameter `values` is no longer `params`",
+              "rule": "parameter-default"
+            }
+          ],
+          "kinds": [
+            "source"
+          ],
+          "level": "breaking",
+          "reason": "Parameter `values` is no longer `params`"
+        },
+        "M:Base.Swim": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Attribute `System.ObsoleteAttribute` was added",
+              "rule": "CP0016"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Attribute `System.ObsoleteAttribute` was added"
+        },
+        "M:Base.Wait(System.Int32)": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Parameter `ms`'s default changed from `10` to `20`; callers compiled earlier keep `10`",
+              "rule": "parameter-default"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Parameter `ms`'s default changed from `10` to `20`; callers compiled earlier keep `10`"
+        },
+        "M:Base.Walk": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Became `virtual`",
+              "rule": "CP0013"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Became `virtual`"
+        },
+        "M:Final.Fly": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Became `sealed`; its type can't be inherited, so nothing overrode it",
+              "rule": "sealed"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Became `sealed`; its type can't be inherited, so nothing overrode it"
+        },
+        "M:Final.Go": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Is no longer `virtual`; its type can't be inherited, so nothing overrode it",
+              "rule": "CP0012"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Is no longer `virtual`; its type can't be inherited, so nothing overrode it"
+        },
+        "M:IStore.Describe": {
+          "findings": [
+            {
+              "kinds": [
+                "binary",
+                "source"
+              ],
+              "level": "breaking",
+              "reason": "Became `sealed` in its interface",
+              "rule": "CP0018"
+            }
+          ],
+          "kinds": [
+            "binary",
+            "source"
+          ],
+          "level": "breaking",
+          "reason": "Became `sealed` in its interface"
+        },
+        "M:IStore.Parse(System.String)": {
+          "findings": [
+            {
+              "kinds": [
+                "binary",
+                "source"
+              ],
+              "level": "breaking",
+              "reason": "Became `sealed` in its interface",
+              "rule": "CP0018"
+            },
+            {
+              "level": "compatible",
+              "reason": "Gained a default implementation",
+              "rule": "default-implementation"
+            }
+          ],
+          "kinds": [
+            "binary",
+            "source"
+          ],
+          "level": "breaking",
+          "reason": "Became `sealed` in its interface"
+        },
+        "P:Base.Id": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "Gained an `init` accessor",
+              "rule": "accessor"
+            }
+          ],
+          "level": "additive",
+          "reason": "Gained an `init` accessor"
+        },
+        "P:Base.Key": {
+          "findings": [
+            {
+              "kinds": [
+                "binary",
+                "source"
+              ],
+              "level": "breaking",
+              "reason": "Lost its `init` accessor",
+              "rule": "accessor"
+            }
+          ],
+          "kinds": [
+            "binary",
+            "source"
+          ],
+          "level": "breaking",
+          "reason": "Lost its `init` accessor"
+        },
+        "P:Base.Name": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "Gained a getter",
+              "rule": "accessor"
+            }
+          ],
+          "level": "additive",
+          "reason": "Gained a getter"
+        }
+      },
+      "counts": {
+        "additive": 3,
+        "breaking": 9,
+        "compatible": 6,
+        "unknown": 0
+      },
+      "ecosystem": "dotnet",
+      "notices": [],
+      "rules": "ApiCompat (default mode), reproduced",
+      "version": 0
+    }
+  },
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "M:Base.Concat(System.String[])",
+        "M:Base.Fill(System.Int32@)",
+        "M:Base.Fly",
+        "M:Base.Max(System.Int32[])",
+        "M:Base.Retry(System.Int32)",
+        "M:Base.Run",
+        "M:Base.Stop",
+        "M:Base.Sum(System.Int32[])",
+        "M:Base.Swim",
+        "M:Base.Wait(System.Int32)",
+        "M:Base.Walk",
+        "M:Final.Fly",
+        "M:Final.Go",
+        "M:IStore.Describe",
+        "M:IStore.Parse(System.String)",
+        "P:Base.Id",
+        "P:Base.Key",
+        "P:Base.Name"
+      ],
+      "kind": "restructure"
+    }
+  ]
+}

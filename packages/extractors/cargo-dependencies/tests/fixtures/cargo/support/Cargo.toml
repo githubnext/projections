@@ -1,0 +1,4 @@
+[package]
+name = "example-support"
+version = "0.3.0"
+edition = "2021"

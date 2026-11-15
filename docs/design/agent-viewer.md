@@ -1,0 +1,371 @@
+# Agent viewer
+
+Status: **decided; being built in four phases (below).** VS Code stays the only
+interactive authoring surface. This adds a second, narrower surface: a browser
+page that a coding agent drives and a person watches.
+
+## Why
+
+An agent working in a terminal (GitHub Copilot CLI, Codex, Claude Code) can
+compare revisions and read summaries, but the person beside it can't see the
+projection. They want to watch the animation, scrub it, zoom in and point at a
+card. They don't want to edit anything there: if they don't like what they see,
+they tell the agent. The page must work in any browser an agent can launch, and
+inside the GitHub Copilot app's canvas.
+
+## Decisions
+
+### 1. `projections view` serves one page on loopback
+
+`projections view` serves a single page on `127.0.0.1`, on port 0 (any free
+port) unless `--port` is given. It prints the URL; `--open` also opens the
+default browser. The URL's path starts with a random 256-bit session token,
+`http://127.0.0.1:PORT/TOKEN/`, so every relative URL the page loads (its
+script, the shared engine, renderer frames, the API) carries it. The server
+refuses any request whose path doesn't start with the token, with 404 and no
+body that would tell anyone the token. Nothing is served to other hosts: the
+listener binds loopback only, and requests whose `Host` isn't a loopback name
+are refused, so DNS rebinding can't reach it.
+
+The server is a thin listener in front of the existing CLI service
+(`inspector::Service`), the same one `serve --stdio` and `projections mcp` use.
+It reuses its jobs, pairs, identity, working-tree changes and the extraction
+cache. There is no new extraction logic. It forwards only what a viewer needs:
+reading definitions, revisions, pairs, scenarios, renderers and the comparator,
+running and cancelling extraction jobs, and long-polling changes. It never
+forwards writes (`/api/definition`, adopt, prepare, sweeps, comparator test
+runs).
+
+The page's policy is the Inspector's (`INSPECTOR_CSP`), except that it may be
+framed (`frame-ancestors` is omitted), because the Copilot app shows it in a
+canvas. Framing grants nothing: the page has no writes, and a framer must
+already know the token.
+
+A per-repository **state file** records the running server: its URL, token,
+process ID and whether it was started with `--trust`. It lives in the per-user
+cache (`views/<digest of the repository root>.json`, written `0600`), never in
+the repository. The subcommands and `projections mcp` find a running server
+through it. A record outlives a viewer that was killed or a machine that
+restarted, so it is believed only when its process is alive and its server
+answers at its URL as that process (`control/state` carries the process ID);
+otherwise it is stale, removed and replaced.
+
+`projections view stop` stops the running viewer (`control/stop`); a stopping
+viewer gives open requests two seconds, then closes them, so a page's open
+streams never keep it alive. `projections view --trust` (and
+`projections view show --trust`) replaces a viewer running without trust: it
+stops it and serves at the same port and token when the port is free, so open
+pages, including the Copilot app's canvas, reconnect to the trusted viewer.
+
+### 2. The server owns the view state
+
+The **view state** is
+`{projection, choice or before/after, mode, selection, scenario, generation}`.
+The server holds it; pages render it. Pages long-poll it
+(`GET TOKEN/view/state?since=N`), as the Inspector long-polls working-tree
+changes, and report the person's interactions with `POST TOKEN/view/report`: the
+selection, mode, playback position and what the page presents (the same
+`PageView` shape VS Code's projection tabs report). A long poll plus POST is
+simpler than Server-Sent Events or a WebSocket here: the state changes rarely,
+the reports are small, and it needs no new dependency.
+
+Several open pages mirror one another: a report that changes the selection or
+mode becomes the state, and every page receives it. The newest report wins.
+
+**Live updates.** The page shows the pair with the working-tree definition, so
+editing a definition, an extractor's input or a renderer re-extracts and
+replays, by the Inspector's own rules (the same as a VS Code tab in its default
+"your edits" mode). When the pair names committed revisions only, nothing on
+disk changes it. When the page can't tell whether a result is current (a
+renderer is rebuilding, say), it says so in the status line; the agent's
+`refresh` (or `projections view refresh`) extracts again.
+
+`projections view --definition-revision REV` extracts every side with another
+revision's definition instead, as `compare --definition-revision` does; the
+`screenshot` tool uses the same definition the page does, so its image matches
+the screen.
+
+### 3. The page shows the stage and nothing else
+
+The page mounts the Inspector bundle with a new `chrome: 'viewer'`: the bare
+stage VS Code's tabs use (`chrome: 'none'`), with the Default UI host
+(`@githubnext/projections-host`): the toolbar (Diff, Side by side, Animated,
+Swipe), playback, zoom, the settings menu, the renderer frame, the summary bar
+and its notices. Above it:
+
+- a **one-line header**: the Projections mark and the projection's title, and at
+  the row's end, muted, what is compared, in words: "Branch changes",
+  "Uncommitted changes", "Last commit", "Current state", a bookmark's title, or
+  the two revisions' commit subjects. Never file paths or raw refs. What is
+  compared keeps its words up to about half the row, two revisions as chips,
+  each shortened with an ellipsis and whole in its tooltip; a long title
+  shortens first. Its text is centred by cap height: a capital E has the
+  header's padding above and below, and the mark before the title as much space
+  above, below and to its left;
+- a quiet **status line**, before what is compared: "Extracting…", "Building
+  renderer…", "Waiting for the agent…", "Out of date".
+
+Under the header the chrome lies flat, edge to edge, as the default UI lays it
+everywhere: the toolbar and the summary bar are bands of the header's colour, a
+hairline from the stage, with no card, border or corners, and the stage (the
+single frame and the comparison panes) runs to both edges with no inset. A
+renderer's legend is a band of the same colour between the stage and the summary
+bar. Every boundary in the stack (header, toolbar, stage, legend, summary bar)
+is one 1px hairline in the divider colour; a renderer frame runs a pixel past
+its clipped host, so a frame whose height has a fraction of a pixel never leaves
+a strip that reads as a second line. The toolbar spans the page in every state.
+Each fact appears once: the header says what is shown, so a one-revision view's
+toolbar adds only the revision it shows (a commit's short hash) at its start,
+where a comparison's mode switch sits, when that isn't the working tree. While a
+job runs, a renderer pane that is still loading says what it waits on
+("Extracting…") rather than that it is loading the renderer.
+
+**A page that loses its server** (the viewer exited, or the machine slept) says
+"Viewer stopped" in its status line and over the stage, with what to do: ask the
+agent to show the projection again, or reopen the page. The stage takes no input
+meanwhile, so no control seems to work and doesn't. The page keeps asking and
+resumes if the same viewer answers again.
+
+There is no sidebar, no Definition or file rows, no **+ New**, no editing and no
+code paths. Errors are said in plain words ("The extractor didn't run. The agent
+has the details."); the diagnostics, with their paths, reach the agent through
+`current_view`. A notice that names a path is left out of the page for the same
+reason. The page names no commands. When a projection needs trust the viewer
+lacks, it says what to do in the person's terms: ask the agent to review the
+projection's code and restart the viewer with trust, and the page reconnects.
+`current_view` tells the agent how (`projections view --trust`, which replaces
+the viewer at its URL). The agent decides; the page grants nothing.
+
+The person can switch mode, play and scrub, zoom, use the settings menu and
+select cards and items. Selecting is reported, so the agent can read it ("this
+one's wrong").
+
+**Theme.** The default light and dark themes follow `prefers-color-scheme`.
+Inside the Copilot app, a small adapter maps the canvas's tokens onto ours when
+they are present: `--background-color-default`, `--border-color-default`,
+`--text-color-default`, `--text-color-muted`, `--color-focus-outline`,
+`--font-sans`, `--font-mono`, `--text-body-medium` and `data-color-mode`, as
+`host-vscode` maps VS Code's, and sends renderer frames the theme tokens they
+map to, so the stage is the app's too. It also sets `--status-bar-color`.
+
+### 4. One tool catalog, answered by whichever surface shows the view
+
+The agent tools are **identical** in every surface: one catalog, one set of
+names and schemas. Only the surface that answers the view tools differs.
+
+<!-- prettier-ignore -->
+| Tool | VS Code | `projections mcp` |
+| --- | --- | --- |
+| `open_projection` | Opens or focuses a projection tab | Starts or reuses the viewer and shows it there; returns its URL |
+| `current_view` | What the projection tab in front shows | What the viewer shows, from the page's latest report |
+| `refresh` | Extracts the front tab's pair again | Extracts the viewer's pair again |
+| `screenshot` | Rendered by the CLI from the front tab's pair, mode, playback, theme and size | The same, from the viewer's |
+
+- `open_projection`, `current_view` and `refresh` are the **view actions**
+  (`view: true` in the catalog, replacing `editor`): the surface that shows the
+  view answers them. `serve --stdio` lists them and leaves them to the
+  extension; `projections mcp` lists them and answers them with the viewer, in
+  its own process or, through the per-repository record, a viewer another
+  process runs.
+- `open_projection` keeps its inputs (projection, before and after, entity, pin)
+  and gains `choice` (`branch`, `uncommitted`, `last-commit`, `now`, `release`
+  or `bookmark:<id>`, the ids VS Code's choices use), `mode` and `scenario` (a
+  scenario from the projection's `scenarios.json`). `pin` only applies in VS
+  Code, where several tabs exist; the viewer has one view and ignores it.
+- `current_view` has one result shape (the model in
+  `packages/integrations/vscode/src/current-view/types.ts`, which the viewer's
+  Rust twin follows): the projection and definition file, the choice and
+  resolved revisions, the mode, the selection, the summary bar's figures, the
+  changed items, why an extraction failed, whether it is out of date and whether
+  it uses uncommitted definition edits. The viewer's first line names the viewer
+  and its URL instead of a tab.
+- `screenshot` is not a view action: it is an ordinary tool that renders
+  server-side with the CLI's headless renderer (`--png`), so it works when the
+  agent can't see the person's browser and when no page is open. Its omitted
+  projection, revisions, mode, playback position, theme and size default to the
+  current view, as the other tools' projections do, so both surfaces answer it
+  with the same code; VS Code fills them from the tab in front and calls the
+  backend. The image is an MCP image content part, and a `LanguageModelDataPart`
+  in VS Code.
+- The tab defaults apply everywhere: `compare`, `check`, `describe_part`,
+  `set_part` and `screenshot` default to the current view, the viewer's in
+  `projections mcp` (`with_view_defaults`) as the projection tab's in VS Code
+  (`withTabDefaults`), and say so. Their projection is therefore optional in the
+  catalog, and their descriptions say where it comes from, so the schemas and
+  descriptions are the same in every surface.
+
+`tools/list` is the same for `serve --stdio` and `projections mcp`, and VS
+Code's `languageModelTools` are generated from it;
+`packages/integrations/vscode/test/tools.test.mjs` holds them equal, tool for
+tool. The only differences are VS Code's own: its contributions add a `folder`
+input (which workspace folder) and drop `confirm` (VS Code asks the person to
+approve a write itself). No tool is left out of either surface.
+
+**The same as CLI subcommands**, for agents without MCP:
+`projections view show …`, `projections view current [--json]`,
+`projections view screenshot --out FILE` and `projections view refresh`. They
+call the running server's token-protected control endpoints
+(`TOKEN/control/tool/NAME`), which answer with exactly the tool's result, so the
+text and JSON match the tools'. `view show` starts a server in the background
+when none is running, which stops itself after it has had no page and no call
+for 15 minutes; `projections view stop` stops one sooner (decision 1).
+
+### 5. Renderer builds move into the CLI service
+
+A custom renderer's `watch` script ran as a VS Code task
+(`packages/integrations/vscode/src/renderer-builds.ts` spawned npm). Its
+orchestration moves into the CLI service (`packages/cli/src/renderer_builds/`),
+so `projections view` rebuilds on save too: the service runs the package's
+`watch` script (else `build` once per save), reads its output for the build's
+state, and keeps the output. Views tell it when they show a projection
+(`opened`), when its renderer's sources were saved (`saved`, from VS Code's save
+events) or may have changed (`changed`, from the viewer's working-tree changes;
+it builds only when the sources' fingerprint differs) and when they stop showing
+it (`closed`, which stops a watcher). VS Code consumes it: each run is still a
+background task whose terminal relays the output the backend sends
+(`rendererBuilds` notifications), so Problems and the Renderer row's states are
+as before. The viewer's status line says **Building renderer…**, and
+`current_view` says how the build went, with its error. Trust rules don't
+change: repository code (a `watch` script) runs only with `--trust`.
+
+### 6. The Copilot app canvas is a thin adapter
+
+A Copilot CLI extension (`packages/integrations/copilot-canvas/extension.mjs`,
+an ES module with no `package.json`, which never writes to standard output)
+ships in this repository. `projections canvas install` writes it to
+`.github/extensions/projections/`. Its `open()` runs `projections view show`,
+which starts or reuses the viewer, and returns its URL, keyed by the repository
+rather than the canvas instance, so it is idempotent and rehydrates. An
+instance's open input is applied once (a small record in the session's
+workspace), so the app rehydrating a canvas after a reload never undoes what the
+agent showed since. Its actions, `open_projection`, `current_view`, `screenshot`
+(an image result) and `refresh`, have the tools' names, and their schemas and
+descriptions are read from the CLI's own catalog (`projections mcp`'s
+`tools/list`), so they can't drift. An `onSessionStart` hook's
+`additionalContext` tells the agent, briefly, that the viewer exists.
+
+**The app's theme.** The app mirrors its theme tokens onto a canvas document,
+maybe after it loads. While `--background-color-default` is defined the page
+marks its root `pi-app-theme`, and styles.css maps the app's
+`--background-color-default`, `--border-color-default`, `--text-color-default`,
+`--text-color-muted`, `--color-focus-outline`, `--font-sans`, `--font-mono` and
+`--text-body-medium` onto ours; the page's color mode follows `data-color-mode`
+on the root, else `prefers-color-scheme`. Renderer frames get the same theme:
+host core's `copilotCanvasThemeTokens` maps the app's documented canvas
+variables onto renderer token overrides, sent in `theme.tokens` and again
+whenever the app changes its theme (the page watches the root, the body and the
+app's stylesheet), as VS Code's variables are mapped for its webviews
+(`vscodeThemeTokens`). A color the mapping can't parse (`oklch()`, a name) is
+resolved to sRGB by the browser first.
+
+<!-- prettier-ignore -->
+| Renderer tokens | App variable |
+|---|---|
+| `color-bg`, `color-surface-canvas` (the stage) | `--background-color-default` |
+| `color-surface-raised`, `color-bg-overlay` (cards) | the stage, one visible step lighter (on a white stage, a step toward the text) |
+| `color-surface-header` (bands in cards) | the card, one step toward the text |
+| `color-surface-inset`, `color-bg-subtle`, `color-bg-inset` | the stage, a slight step darker |
+| `color-fg` | `--text-color-default` |
+| `color-fg-muted` | `--text-color-muted` |
+| `color-fg-subtle` | muted text, toward the stage |
+| `color-fg-on-emphasis` | the stage |
+| `color-border`, `color-border-muted` | `--border-color-default` (muted at 70%) |
+| `color-divider`, `color-border-emphasis` | `--border-color-default`, moved toward the text to 3:1 |
+| `color-accent`, `color-accent-emphasis` | `--color-focus-outline`, else `--true-color-blue` |
+| `color-accent-muted`, `color-highlight` | the accent, translucent |
+| `color-focus` | `--color-focus-outline` |
+| `font-family`, `font-family-mono` | `--font-sans`, `--font-mono` |
+
+Every override keeps the contrast the token set promises (text 4.5:1 on every
+surface, the divider, edges and focus 3:1, fills behind text keep it readable):
+an app color that falls short is moved toward the text (or white, or black) just
+far enough. A variable that is missing, isn't a color, or isn't a plain font
+list keeps its default; without `--background-color-default` nothing is
+overridden. Type sizes, spacing and radii keep the token set's, which the
+renderers' layouts are measured against. **Change colors and the categorical
+palette stay Projections'**: added, removed, modified and moved carry meaning
+and are calibrated as families (text, fill, edge, highlight), the palette's
+first eight hues avoid them, and the app's true colors are a general palette
+with no diff meaning, so mapping them would blur both. They are moved only where
+the app's surfaces would take them below their contrast. The page sets
+`--status-bar-color` to its header's color, so the app's header continues its
+top edge.
+
+**The app's layout** is the page's own: its flat chrome lies on the app's
+colour, the toolbar and the summary bar taking the header's (the app's
+`--background-color-default` when mirrored).
+
+**Trust after a restart.** The canvas starts a viewer without trust when none
+runs (after a reboot, say), so a projection that runs repository code shows only
+that it needs trust. The canvas doesn't remember that a repository's viewer was
+trusted and restore it: trust is a review of the code as it is, granted for one
+viewer, and the next checkout or pull may run different code that nobody
+reviewed. The agent restarts the viewer with `projections view --trust` after
+reviewing the projections, and the canvas reconnects to it at the same URL.
+
+**One long poll per page.** Browsers allow about six connections to a host. Each
+page holds two long polls (the view state, which carries the shown projection's
+build phase, and the Inspector's working-tree changes), so a few pages in one
+browser never starve the renderer frames' requests.
+
+### 7. MCP Apps hosts get the viewer as a view they show
+
+Hosts that show MCP servers' interactive views (MCP Apps, SEP-1865; Claude
+Desktop among them) show a server's HTML page in a sandboxed frame, in the
+conversation, a side panel or full screen. `projections mcp` gives them the
+viewer that way, so the person needn't open a browser at all.
+
+The host's sandbox decides the design. Claude loads a view as an opaque-origin
+`srcdoc` document under a policy that allows WebAssembly, Blob Workers and Blob
+or data frames, and no network beyond its own origin: not loopback, and it
+refuses IP addresses and local origins as framed sites. So the view can't frame
+or fetch the viewer's page on loopback. Instead the view **is** the viewer's
+page, bundled (`packages/integrations/mcp-apps`): one self-contained document
+with the page's script, the shared engine and its Wasm, and the built-in
+renderers inline, which it starts from Blob URLs, as the VS Code webview does.
+Its requests reach the viewer through the server: `viewer_request`, a tool hosts
+offer only to views (`visibility: ["app"]`), relays the page's requests to the
+viewer's URL as a browser's would go (the state's long poll and reports, the
+service's reads and extraction jobs, renderer bundles), never its control
+endpoints, and keeps its token from the view. Long answers come in parts. The
+viewer stays the one source of the view state: the view is one more of its
+pages, mirrored by and mirroring the others, and `current_view` and `screenshot`
+read what it shows.
+
+`open_projection` is linked to the view (`_meta.ui.resourceUri`), so each call
+shows it; the view asks to open beside the conversation (Claude's
+`preferredDisplayMode`) and its header offers the host's larger mode. It follows
+the host's theme: its light or dark mode, and its standardized style variables
+mapped onto the renderer tokens and the chrome as the Copilot app's are
+(`mcpAppThemeTokens`). All of it is offered only to a host whose `initialize`
+declares the extension; other clients' tools are unchanged.
+
+## Not VS Code's
+
+VS Code's agent tools answer `open_projection`, `current_view`, `screenshot` and
+`refresh` with its own projection tabs, not the viewer: the person is already
+looking at a tab beside their code, which offers more (the authoring loop,
+evidence links that open files). Starting a browser page from VS Code would put
+a second, lesser view of the same thing next to it.
+
+## Phases
+
+- **A.** This record, and `projections view`: the server, view state, page,
+  header and status line, token and the default theme.
+- **B.** The view tools in `projections mcp` and the CLI subcommands, with
+  server-side screenshots; one catalog for every surface.
+- **C.** Renderer builds in the CLI service, with VS Code consuming them.
+- **D.** The Copilot canvas adapter and the app theme adapter.
+
+## Security
+
+- Loopback only, a token in every path and a `Host` check. The token is compared
+  in constant time.
+- Read-only: the server forwards no write route, and the page offers no editing.
+- Repository code runs only with `--trust`, as everywhere else. A viewer started
+  by an agent's `open_projection` in `projections mcp` inherits that server's
+  trust; `projections view show` starts one with `--trust` only when given.
+- Renderers run in the Inspector's sandboxed frames with their own policy
+  (`RENDERER_CSP`), as in VS Code.
+- The page shows no paths, commands or raw errors; diagnostics go only to the
+  agent.

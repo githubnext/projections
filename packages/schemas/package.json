@@ -1,0 +1,37 @@
+{
+  "name": "@githubnext/projections-schemas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Language-neutral Projections contracts and conformance fixtures",
+  "files": [
+    "dist",
+    "schemas",
+    "fixtures"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./typebox": {
+      "types": "./dist/typebox/index.d.ts",
+      "import": "./dist/typebox/index.js"
+    },
+    "./schemas/*": "./schemas/*",
+    "./fixtures/*": "./fixtures/*"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "generate": "tsc -p tsconfig.json && node scripts/generate.mjs",
+    "test": "node scripts/generate.mjs --check && node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1"
+  },
+  "dependencies": {
+    "typebox": "^1.4.3"
+  }
+}

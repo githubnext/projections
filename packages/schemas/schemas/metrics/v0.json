@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/metrics/v0.json",
+  "title": "Projections domain schema metrics/v0",
+  "description": "Measurements: every entity carries a numeric `data.value`, and optionally a `data.unit`.",
+  "allOf": [{"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"}, {"$ref": "#/$defs/refinement"}],
+  "$defs": {
+    "refinement": {
+      "description": "What `metrics/v0` adds to the extraction envelope.",
+      "type": "object",
+      "properties": {
+        "schema": {"const": "metrics/v0"},
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["data"],
+            "properties": {
+              "data": {
+                "type": "object",
+                "required": ["value"],
+                "properties": {
+                  "value": {"description": "The measurement.", "type": "number"},
+                  "unit": {
+                    "description": "The measurement's unit, an exact label such as `lines` or `ms`.",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

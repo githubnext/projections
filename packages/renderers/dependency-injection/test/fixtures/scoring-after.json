@@ -1,0 +1,290 @@
+{
+  "protocolVersion": 0,
+  "schema": "architecture/v0",
+  "vocabularies": ["dependency-injection/v0"],
+  "entities": [
+    {
+      "id": "service:Scoring:IRanker:unkeyed",
+      "kind": "service",
+      "label": "IRanker",
+      "data": {
+        "key": "unkeyed"
+      }
+    },
+    {
+      "id": "service:Scoring:IRanker:unkeyed:registration:0",
+      "kind": "registration",
+      "label": "IRanker [0]",
+      "data": {
+        "lifetime": "Scoped",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Scoring:Ranker"
+      }
+    },
+    {
+      "id": "implementation:Scoring:Ranker",
+      "kind": "implementation",
+      "label": "Ranker"
+    },
+    {
+      "id": "service:Scoring:IEvaluator:unkeyed",
+      "kind": "service",
+      "label": "IEvaluator",
+      "data": {
+        "key": "unkeyed"
+      }
+    },
+    {
+      "id": "service:Scoring:IEvaluator:unkeyed:registration:0",
+      "kind": "registration",
+      "label": "IEvaluator [0]",
+      "data": {
+        "lifetime": "Scoped",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Scoring:Evaluator"
+      }
+    },
+    {
+      "id": "implementation:Scoring:Evaluator",
+      "kind": "implementation",
+      "label": "Evaluator"
+    },
+    {
+      "id": "service:Scoring:IModelClient:unkeyed",
+      "kind": "service",
+      "label": "IModelClient",
+      "data": {
+        "key": "unkeyed"
+      }
+    },
+    {
+      "id": "service:Scoring:IModelClient:unkeyed:registration:0",
+      "kind": "registration",
+      "label": "IModelClient [0]",
+      "data": {
+        "lifetime": "Singleton",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Scoring:ModelClient"
+      }
+    },
+    {
+      "id": "implementation:Scoring:ModelClient",
+      "kind": "implementation",
+      "label": "ModelClient"
+    },
+    {
+      "id": "service:Scoring:IResultCache:unkeyed",
+      "kind": "service",
+      "label": "IResultCache",
+      "data": {
+        "key": "unkeyed"
+      }
+    },
+    {
+      "id": "service:Scoring:IResultCache:unkeyed:registration:0",
+      "kind": "registration",
+      "label": "IResultCache [0]",
+      "data": {
+        "lifetime": "Singleton",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Scoring:ResultCache"
+      }
+    },
+    {
+      "id": "implementation:Scoring:ResultCache",
+      "kind": "implementation",
+      "label": "ResultCache"
+    },
+    {
+      "id": "service:Scoring:IPromptTemplates:unkeyed",
+      "kind": "service",
+      "label": "IPromptTemplates",
+      "data": {
+        "key": "unkeyed"
+      }
+    },
+    {
+      "id": "service:Scoring:IPromptTemplates:unkeyed:registration:0",
+      "kind": "registration",
+      "label": "IPromptTemplates [0]",
+      "data": {
+        "lifetime": "Singleton",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Scoring:PromptTemplates"
+      }
+    },
+    {
+      "id": "implementation:Scoring:PromptTemplates",
+      "kind": "implementation",
+      "label": "PromptTemplates"
+    },
+    {
+      "id": "service:Scoring:IScoreNormalizer:unkeyed",
+      "kind": "service",
+      "label": "IScoreNormalizer",
+      "data": {
+        "key": "unkeyed"
+      }
+    },
+    {
+      "id": "service:Scoring:IScoreNormalizer:unkeyed:registration:0",
+      "kind": "registration",
+      "label": "IScoreNormalizer [0]",
+      "data": {
+        "lifetime": "Scoped",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Scoring:ScoreNormalizer"
+      }
+    },
+    {
+      "id": "implementation:Scoring:ScoreNormalizer",
+      "kind": "implementation",
+      "label": "ScoreNormalizer"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "registration:IRanker:0",
+      "kind": "registration",
+      "from": "service:Scoring:IRanker:unkeyed",
+      "to": "service:Scoring:IRanker:unkeyed:registration:0"
+    },
+    {
+      "id": "implements:IRanker:0",
+      "kind": "implements",
+      "from": "service:Scoring:IRanker:unkeyed:registration:0",
+      "to": "implementation:Scoring:Ranker"
+    },
+    {
+      "id": "registration:IEvaluator:0",
+      "kind": "registration",
+      "from": "service:Scoring:IEvaluator:unkeyed",
+      "to": "service:Scoring:IEvaluator:unkeyed:registration:0"
+    },
+    {
+      "id": "implements:IEvaluator:0",
+      "kind": "implements",
+      "from": "service:Scoring:IEvaluator:unkeyed:registration:0",
+      "to": "implementation:Scoring:Evaluator"
+    },
+    {
+      "id": "registration:IModelClient:0",
+      "kind": "registration",
+      "from": "service:Scoring:IModelClient:unkeyed",
+      "to": "service:Scoring:IModelClient:unkeyed:registration:0"
+    },
+    {
+      "id": "implements:IModelClient:0",
+      "kind": "implements",
+      "from": "service:Scoring:IModelClient:unkeyed:registration:0",
+      "to": "implementation:Scoring:ModelClient"
+    },
+    {
+      "id": "registration:IResultCache:0",
+      "kind": "registration",
+      "from": "service:Scoring:IResultCache:unkeyed",
+      "to": "service:Scoring:IResultCache:unkeyed:registration:0"
+    },
+    {
+      "id": "implements:IResultCache:0",
+      "kind": "implements",
+      "from": "service:Scoring:IResultCache:unkeyed:registration:0",
+      "to": "implementation:Scoring:ResultCache"
+    },
+    {
+      "id": "registration:IPromptTemplates:0",
+      "kind": "registration",
+      "from": "service:Scoring:IPromptTemplates:unkeyed",
+      "to": "service:Scoring:IPromptTemplates:unkeyed:registration:0"
+    },
+    {
+      "id": "implements:IPromptTemplates:0",
+      "kind": "implements",
+      "from": "service:Scoring:IPromptTemplates:unkeyed:registration:0",
+      "to": "implementation:Scoring:PromptTemplates"
+    },
+    {
+      "id": "dependsOn:Ranker:evaluator",
+      "kind": "dependsOn",
+      "from": "implementation:Scoring:Ranker",
+      "to": "service:Scoring:IEvaluator:unkeyed",
+      "data": {
+        "parameter": "evaluator",
+        "position": 0,
+        "collection": false,
+        "optional": false
+      }
+    },
+    {
+      "id": "dependsOn:Evaluator:cache",
+      "kind": "dependsOn",
+      "from": "implementation:Scoring:Evaluator",
+      "to": "service:Scoring:IResultCache:unkeyed",
+      "data": {
+        "parameter": "cache",
+        "position": 1,
+        "collection": false,
+        "optional": false
+      }
+    },
+    {
+      "id": "dependsOn:Evaluator:templates",
+      "kind": "dependsOn",
+      "from": "implementation:Scoring:Evaluator",
+      "to": "service:Scoring:IPromptTemplates:unkeyed",
+      "data": {
+        "parameter": "templates",
+        "position": 2,
+        "collection": false,
+        "optional": false
+      }
+    },
+    {
+      "id": "registration:IScoreNormalizer:0",
+      "kind": "registration",
+      "from": "service:Scoring:IScoreNormalizer:unkeyed",
+      "to": "service:Scoring:IScoreNormalizer:unkeyed:registration:0"
+    },
+    {
+      "id": "implements:IScoreNormalizer:0",
+      "kind": "implements",
+      "from": "service:Scoring:IScoreNormalizer:unkeyed:registration:0",
+      "to": "implementation:Scoring:ScoreNormalizer"
+    },
+    {
+      "id": "dependsOn:Evaluator:normalizer",
+      "kind": "dependsOn",
+      "from": "implementation:Scoring:Evaluator",
+      "to": "service:Scoring:IScoreNormalizer:unkeyed",
+      "data": {
+        "parameter": "normalizer",
+        "position": 0,
+        "collection": false,
+        "optional": false
+      }
+    },
+    {
+      "id": "dependsOn:ScoreNormalizer:model",
+      "kind": "dependsOn",
+      "from": "implementation:Scoring:ScoreNormalizer",
+      "to": "service:Scoring:IModelClient:unkeyed",
+      "data": {
+        "parameter": "model",
+        "position": 0,
+        "collection": false,
+        "optional": false
+      }
+    }
+  ],
+  "metadata": {
+    "limitations": [
+      "Synthetic container composition; no extractor ran."
+    ]
+  }
+}

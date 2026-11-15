@@ -1,0 +1,129 @@
+name: Publish npm package
+# A dist post-announce job (post-announce-jobs in dist-workspace.toml): once a release is announced, publishes
+# @githubnext/projections (packages/sdk/) to npm at the release's version, with provenance. The package's version is the
+# CLI's: a release whose tag, Cargo.toml and packages/sdk/package.json disagree publishes nothing. Run it by hand to publish
+# a release again; a version already on npm is left as it is.
+#
+# Inert until configured: until the NPM_PUBLISHING repository variable says how it authenticates (trusted publishing,
+# or an NPM_TOKEN secret in the npm environment), it only says so. npm publishing awaits security approval, so it stays
+# unconfigured; meanwhile every release attaches the packed package, which renderers depend on by URL (release-proof.yml).
+# docs/maintainers/npm-publishing.md describes the setup.
+on:
+  workflow_call:
+    inputs:
+      plan:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The release tag to publish, such as v0.2.0
+        required: true
+        type: string
+permissions: {}
+env:
+  # Package sources (see CONTRIBUTING.md) for installs; publishing names registry.npmjs.org itself.
+  npm_config_registry: https://packagefeedproxy.microsoft.io/npm/
+  # Vulnerabilities are gated by dependency review and Dependabot (SECURITY.md), not npm's audit endpoint.
+  npm_config_audit: 'false'
+jobs:
+  configured:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        shell: bash
+        # A repository variable, not the secret itself: this job can't see the npm environment's secrets.
+        env:
+          METHOD: ${{ vars.NPM_PUBLISHING }}
+        run: |
+          case "$METHOD" in
+            trusted | token) echo ready=true >> "$GITHUB_OUTPUT" ;;
+            '') echo "::notice title=npm package not published::npm publishing isn't configured. Set it up as docs/maintainers/npm-publishing.md describes (the NPM_PUBLISHING repository variable), then run Publish npm package for this release." ;;
+            *)
+              echo "::error title=Unknown npm publishing method::NPM_PUBLISHING is '$METHOD'; set it to trusted or token (docs/maintainers/npm-publishing.md)."
+              exit 1
+              ;;
+          esac
+  publish:
+    needs: configured
+    if: needs.configured.outputs.ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # npm trusts this repository, workflow and environment (trusted publishing), or the environment holds NPM_TOKEN.
+    environment: npm
+    concurrency:
+      group: publish-npm
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      # Trusted publishing and provenance both sign with the job's OIDC token.
+      id-token: write
+    steps:
+      - id: release
+        shell: bash
+        env:
+          PLAN: ${{ inputs.plan }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [ -z "$TAG" ]; then TAG=$(jq -r '.announcement_tag' <<< "$PLAN"); fi
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error title=Not a release tag::$TAG is not a release tag such as v0.2.0."
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ steps.release.outputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          registry-url: https://registry.npmjs.org
+      - name: Check the version
+        shell: bash
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
+          # Every shipped manifest carries the release's version (docs/maintainers/releasing.md).
+          npm run --silent tools -- version --tag "$TAG"
+          # Trusted publishing needs npm 11.5.1 or later.
+          npm --version
+      - name: Build and check the package
+        shell: bash
+        run: |
+          for workspace in packages/schemas packages/renderers/sdk packages/renderers/kit packages/renderers/testing packages/sdk; do
+            npm run build --workspace "$workspace"
+          done
+          node packages/sdk/scripts/check-pack.mjs --contents
+      - name: Publish
+        shell: bash
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+          METHOD: ${{ vars.NPM_PUBLISHING }}
+          # Unused with trusted publishing, which needs no token.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ "$METHOD" = token ] && [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error title=No npm token::NPM_PUBLISHING is token, but the npm environment has no NPM_TOKEN secret."
+            exit 1
+          fi
+          registry=https://registry.npmjs.org/
+          if npm view "@githubnext/projections@$VERSION" version --registry "$registry" > /dev/null 2>&1; then
+            echo "::notice title=Already published::@githubnext/projections@$VERSION is already on npm; versions are immutable."
+            exit 0
+          fi
+          # A prerelease such as 0.3.0-beta.1 is published under the next tag, so latest stays the latest stable.
+          tag=latest
+          if [[ "$VERSION" == *-* ]]; then tag=next; fi
+          # npm uploads package.json as the version's registry metadata too, so it is the published manifest on disk
+          # (without the internal workspaces it is built from) before publishing starts.
+          node packages/sdk/scripts/manifest.mjs strip
+          npm publish --workspace packages/sdk --registry "$registry" --access public --provenance --tag "$tag"

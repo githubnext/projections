@@ -1,0 +1,199 @@
+{
+ "entities": [
+  {
+   "id": "table:/Article",
+   "kind": "table",
+   "label": "Article",
+   "data": {
+    "namespace": null,
+    "provider": "mysql"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FArticle/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:/Article",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FArticle/title",
+   "kind": "column",
+   "label": "title",
+   "data": {
+    "table": "table:/Article",
+    "type": "String",
+    "nativeType": [
+     "VarChar",
+     [
+      "240"
+     ]
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FArticle/body",
+   "kind": "column",
+   "label": "body",
+   "data": {
+    "table": "table:/Article",
+    "type": "String",
+    "nativeType": [
+     "VarChar",
+     [
+      "240"
+     ]
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FArticle/primary-key/%5B%22id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (id)",
+   "data": {
+    "table": "table:/Article",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FArticle/index/article_prefix",
+   "kind": "constraint",
+   "label": "article_prefix",
+   "data": {
+    "table": "table:/Article",
+    "type": "index",
+    "indexType": "normal",
+    "fields": [
+     {
+      "name": "title",
+      "sortOrder": "desc",
+      "length": 32
+     }
+    ],
+    "databaseName": "article_prefix"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FArticle/index/article_search",
+   "kind": "constraint",
+   "label": "article_search",
+   "data": {
+    "table": "table:/Article",
+    "type": "index",
+    "indexType": "fulltext",
+    "fields": [
+     {
+      "name": "title"
+     },
+     {
+      "name": "body"
+     }
+    ],
+    "databaseName": "article_search"
+   },
+   "confidence": "authoritative"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "contains:table%3A%2FArticle/column%3Atable%253A%252FArticle%2Fid/",
+   "kind": "contains",
+   "from": "table:/Article",
+   "to": "column:table%3A%2FArticle/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FArticle/column%3Atable%253A%252FArticle%2Ftitle/",
+   "kind": "contains",
+   "from": "table:/Article",
+   "to": "column:table%3A%2FArticle/title",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FArticle/column%3Atable%253A%252FArticle%2Fbody/",
+   "kind": "contains",
+   "from": "table:/Article",
+   "to": "column:table%3A%2FArticle/body",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FArticle/constraint%3Atable%253A%252FArticle%2Fprimary-key%2F%255B%2522id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Article",
+   "to": "constraint:table%3A%2FArticle/primary-key/%5B%22id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FArticle%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FArticle%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FArticle/primary-key/%5B%22id%22%5D",
+   "to": "column:table%3A%2FArticle/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FArticle/constraint%3Atable%253A%252FArticle%2Findex%2Farticle_prefix/",
+   "kind": "contains",
+   "from": "table:/Article",
+   "to": "constraint:table%3A%2FArticle/index/article_prefix",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FArticle%2Findex%2Farticle_prefix/column%3Atable%253A%252FArticle%2Ftitle/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FArticle/index/article_prefix",
+   "to": "column:table%3A%2FArticle/title",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FArticle/constraint%3Atable%253A%252FArticle%2Findex%2Farticle_search/",
+   "kind": "contains",
+   "from": "table:/Article",
+   "to": "constraint:table%3A%2FArticle/index/article_search",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FArticle%2Findex%2Farticle_search/column%3Atable%253A%252FArticle%2Ftitle/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FArticle/index/article_search",
+   "to": "column:table%3A%2FArticle/title",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FArticle%2Findex%2Farticle_search/column%3Atable%253A%252FArticle%2Fbody/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FArticle/index/article_search",
+   "to": "column:table%3A%2FArticle/body",
+   "confidence": "authoritative"
+  }
+ ]
+}

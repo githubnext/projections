@@ -1,0 +1,24 @@
+{
+  "name": "@githubnext/projections-tools",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "The repository's own agent-optimized command line: context, map, checks, tests, generated files and vendored updates",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/githubnext/projections.git",
+    "directory": "tools/cli"
+  },
+  "bin": {
+    "tools": "src/bin.ts"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "incur": "0.7.1",
+    "typescript": "^5.9.3"
+  }
+}

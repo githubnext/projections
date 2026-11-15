@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=../../../packages/schemas/schemas/comparator/v0.json
+#
+# For test results whose extractor declares durations volatile: a duration
+# within its tolerance is noise, beyond it a regression worth a sentence.
+format: projections.comparator
+version: 0
+description: >-
+  Test results whose durations are volatile: a test that got slower or faster beyond its declared
+  tolerance says so; variation within tolerance stays an unchanged change in no step.
+
+classify:
+  where: change.status == 'modified'
+  variables:
+    - name: duration
+      expression: "change.varied.filter(v, v.path == '/data/durationMs' && !v.within)"
+  summary: |-
+    size(variables.duration) == 0 ? null
+      : afterItem.data.durationMs > beforeItem.data.durationMs
+        ? 'Test `%s` got slower beyond tolerance'.format([item.label])
+        : 'Test `%s` got faster beyond tolerance'.format([item.label])
+
+metadata:
+  values:
+    # The changes that are only expected variation, for a reviewer who wants
+    # to see the noise.
+    noise: "changes.filter(c, c.status == 'unchanged' && size(c.varied) > 0).map(c, c.id)"

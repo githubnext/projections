@@ -1,0 +1,71 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+/// A documented user.
+model User {
+  id         String   @id @default(uuid()) @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt
+  managerId  String?  @db.Uuid
+  manager    User?    @relation("Reports", fields: [managerId], references: [id], onDelete: SetNull)
+  reports    User[]   @relation("Reports")
+  followers  User[]   @relation("Follows")
+  following  User[]   @relation("Follows")
+  score      Float    @default(1.5)
+  big        BigInt   @default(10)
+  tags       String[] @default(["a", "b"])
+  active     Boolean  @default(true)
+  data       Json?    @default("{}")
+  bytes      Bytes?
+  money      Decimal  @default(0.5) @db.Decimal(10, 2)
+  status     Status   @default(ACTIVE)
+  statuses   Status[] @default([ACTIVE, INACTIVE])
+  dbgen      String   @default(dbgenerated("gen_random_uuid()"))
+  cuid       String   @default(cuid())
+  cuid2      String   @default(cuid(2))
+  nano       String   @default(nanoid(10))
+  ulid       String   @default(ulid())
+  uuid7      String   @default(uuid(7))
+  profile    Profile?
+  posts      Post[]
+
+  @@unique([score, big])
+  @@index([createdAt(sort: Desc)])
+  @@map("users")
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE @map("inactive")
+}
+
+model Profile {
+  id     Int    @id @default(autoincrement())
+  userId String @unique @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], map: "profile_user_fk")
+  bio    String @db.Text
+}
+
+model Post {
+  id         Int        @id @default(autoincrement())
+  authorId   String     @db.Uuid
+  author     User       @relation(fields: [authorId], references: [id])
+  categories Category[]
+  unsupported Unsupported("tsvector")?
+  ignoredF   Int?       @ignore
+
+  @@index([authorId], map: "posts_author_idx")
+  @@index([id], name: "legacy_name")
+}
+
+model Category {
+  id    Int    @id
+  name  String
+  posts Post[]
+}

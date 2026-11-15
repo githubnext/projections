@@ -1,0 +1,4 @@
+model User {
+  id BigInt @id @default(sequence(maxValue: 4, start: 2))
+  posts Post[]
+}

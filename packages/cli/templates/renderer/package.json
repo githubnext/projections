@@ -1,0 +1,30 @@
+{
+  "name": "{{name}}-renderer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Renderer for the {{id}} projection",
+  "projections": {
+    "renderer": "dist"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "watch": "vite build --watch",
+    "workbench": "projections-renderer-workbench --fixtures scenarios.json --renderer .",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && playwright test"
+  },
+  "dependencies": {
+    "@githubnext/projections": "https://github.com/githubnext/projections/releases/download/v{{version}}/githubnext-projections-{{version}}.tgz",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.0"
+  }
+}

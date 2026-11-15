@@ -1,0 +1,312 @@
+{
+  "changes": [
+    {
+      "after": [
+        "AuthProvider"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "AuthProvider",
+      "status": "added",
+      "summary": "Additive: `AuthProvider` was added."
+    },
+    {
+      "after": [
+        "Client"
+      ],
+      "before": [
+        "Client"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "Client",
+      "status": "modified",
+      "summary": "Unknown: The declaration changed, and no ecosystem's rules apply to classify the change."
+    },
+    {
+      "after": [
+        "Client.request"
+      ],
+      "before": [
+        "Client.request"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "Client.request",
+      "status": "modified",
+      "summary": "Unknown: The declaration changed, and no ecosystem's rules apply to classify the change."
+    },
+    {
+      "after": [],
+      "before": [
+        "Client.setToken"
+      ],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "Client.setToken",
+      "status": "removed",
+      "summary": "Breaking: `Client.setToken` was removed."
+    },
+    {
+      "after": [
+        "Client.stream"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "Client.stream",
+      "status": "added",
+      "summary": "Additive: `Client.stream` was added."
+    },
+    {
+      "after": [
+        "ClientOptions"
+      ],
+      "before": [
+        "ClientOptions"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ClientOptions",
+      "status": "modified",
+      "summary": "Unknown: The declaration changed, and no ecosystem's rules apply to classify the change."
+    },
+    {
+      "after": [
+        "ClientOptions.retries"
+      ],
+      "before": [
+        "ClientOptions.retries"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ClientOptions.retries",
+      "status": "modified",
+      "summary": "Unknown: The declaration changed, and no ecosystem's rules apply to classify the change."
+    },
+    {
+      "after": [],
+      "before": [
+        "LogLevel"
+      ],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "LogLevel",
+      "status": "removed",
+      "summary": "Breaking: `LogLevel` was removed."
+    },
+    {
+      "after": [
+        "RetryPolicy"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "RetryPolicy",
+      "status": "added",
+      "summary": "Additive: `RetryPolicy` was added."
+    },
+    {
+      "after": [
+        "createClient"
+      ],
+      "before": [
+        "createClient"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "createClient",
+      "status": "modified",
+      "summary": "Unknown: The declaration changed, and no ecosystem's rules apply to classify the change."
+    },
+    {
+      "after": [
+        "getJson"
+      ],
+      "before": [
+        "fetchJson"
+      ],
+      "collection": "entities",
+      "correspondence": "declared",
+      "id": "getJson",
+      "status": "modified",
+      "summary": "Breaking: Renamed from `fetchJson` to `getJson`; code using `fetchJson` fails."
+    }
+  ],
+  "metadata": {
+    "compatibility": {
+      "changes": {
+        "AuthProvider": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "`AuthProvider` was added",
+              "rule": "added"
+            }
+          ],
+          "level": "additive",
+          "reason": "`AuthProvider` was added"
+        },
+        "Client": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "The declaration changed, and no ecosystem's rules apply to classify the change",
+              "rule": "unclassified"
+            }
+          ],
+          "level": "unknown",
+          "reason": "The declaration changed, and no ecosystem's rules apply to classify the change"
+        },
+        "Client.request": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "The declaration changed, and no ecosystem's rules apply to classify the change",
+              "rule": "unclassified"
+            }
+          ],
+          "level": "unknown",
+          "reason": "The declaration changed, and no ecosystem's rules apply to classify the change"
+        },
+        "Client.setToken": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "`Client.setToken` was removed",
+              "rule": "removed"
+            }
+          ],
+          "level": "breaking",
+          "reason": "`Client.setToken` was removed"
+        },
+        "Client.stream": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "`Client.stream` was added",
+              "rule": "added"
+            }
+          ],
+          "level": "additive",
+          "reason": "`Client.stream` was added"
+        },
+        "ClientOptions": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "The declaration changed, and no ecosystem's rules apply to classify the change",
+              "rule": "unclassified"
+            }
+          ],
+          "level": "unknown",
+          "reason": "The declaration changed, and no ecosystem's rules apply to classify the change"
+        },
+        "ClientOptions.retries": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "The declaration changed, and no ecosystem's rules apply to classify the change",
+              "rule": "unclassified"
+            }
+          ],
+          "level": "unknown",
+          "reason": "The declaration changed, and no ecosystem's rules apply to classify the change"
+        },
+        "LogLevel": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "`LogLevel` was removed",
+              "rule": "removed"
+            }
+          ],
+          "level": "breaking",
+          "reason": "`LogLevel` was removed"
+        },
+        "RetryPolicy": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "`RetryPolicy` was added",
+              "rule": "added"
+            }
+          ],
+          "level": "additive",
+          "reason": "`RetryPolicy` was added"
+        },
+        "createClient": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "The declaration changed, and no ecosystem's rules apply to classify the change",
+              "rule": "unclassified"
+            }
+          ],
+          "level": "unknown",
+          "reason": "The declaration changed, and no ecosystem's rules apply to classify the change"
+        },
+        "getJson": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Renamed from `fetchJson` to `getJson`; code using `fetchJson` fails",
+              "rule": "renamed"
+            },
+            {
+              "level": "unknown",
+              "reason": "The declaration changed, and no ecosystem's rules apply to classify the change",
+              "rule": "unclassified"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Renamed from `fetchJson` to `getJson`; code using `fetchJson` fails"
+        }
+      },
+      "counts": {
+        "additive": 3,
+        "breaking": 3,
+        "compatible": 0,
+        "unknown": 5
+      },
+      "notices": [
+        "The extractions don't declare `metadata.ecosystem`; only the rules every ecosystem shares apply."
+      ],
+      "rules": "Shared rules",
+      "version": 0
+    }
+  },
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "Client.setToken",
+        "LogLevel"
+      ],
+      "kind": "remove"
+    },
+    {
+      "changes": [
+        "Client",
+        "Client.request",
+        "ClientOptions",
+        "ClientOptions.retries",
+        "createClient",
+        "getJson"
+      ],
+      "kind": "restructure"
+    },
+    {
+      "changes": [
+        "AuthProvider",
+        "Client.stream",
+        "RetryPolicy"
+      ],
+      "kind": "add"
+    }
+  ]
+}

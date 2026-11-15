@@ -1,0 +1,161 @@
+{
+  "changes": [
+    {
+      "after": [
+        "ts:kit:.:Job:size"
+      ],
+      "before": [
+        "ts:kit:.:Job:size"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:Job:size",
+      "status": "modified",
+      "summary": "Breaking: Became optional; code reading it must handle `undefined`."
+    },
+    {
+      "after": [
+        "ts:kit:.:mode"
+      ],
+      "before": [
+        "ts:kit:.:mode"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:mode",
+      "status": "modified",
+      "summary": "Compatible: Its type is equivalent."
+    },
+    {
+      "after": [
+        "ts:kit:.:run"
+      ],
+      "before": [
+        "ts:kit:.:run"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:run",
+      "status": "modified",
+      "summary": "Unknown: Its contract changed (`signatures`) in a way the rules don't classify."
+    },
+    {
+      "after": [
+        "ts:kit:.:started"
+      ],
+      "before": [
+        "ts:kit:.:started"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:started",
+      "status": "modified",
+      "summary": "Unknown: Its type changed from `?` to `Date`."
+    },
+    {
+      "after": [
+        "ts:kit:.:stop"
+      ],
+      "before": [
+        "ts:kit:.:stop"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:stop",
+      "status": "modified",
+      "summary": "Compatible: Parameter `code` changed from `Code` to `Code`, which are mutually assignable."
+    }
+  ],
+  "metadata": {
+    "compatibility": {
+      "changes": {
+        "ts:kit:.:Job:size": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Became optional; code reading it must handle `undefined`",
+              "rule": "optionality"
+            },
+            {
+              "level": "unknown",
+              "reason": "Its type changed from `?` to `number`",
+              "rule": "property-type"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Became optional; code reading it must handle `undefined`"
+        },
+        "ts:kit:.:mode": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Its type is equivalent",
+              "rule": "type"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Its type is equivalent"
+        },
+        "ts:kit:.:run": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Its contract changed (`signatures`) in a way the rules don't classify",
+              "rule": "unclassified"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Its contract changed (`signatures`) in a way the rules don't classify"
+        },
+        "ts:kit:.:started": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Its type changed from `?` to `Date`",
+              "rule": "type"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Its type changed from `?` to `Date`"
+        },
+        "ts:kit:.:stop": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Parameter `code` changed from `Code` to `Code`, which are mutually assignable",
+              "rule": "parameter-type"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Parameter `code` changed from `Code` to `Code`, which are mutually assignable"
+        }
+      },
+      "counts": {
+        "additive": 0,
+        "breaking": 1,
+        "compatible": 2,
+        "unknown": 2
+      },
+      "ecosystem": "typescript",
+      "notices": [],
+      "rules": "TypeScript assignability over the checker's types",
+      "version": 0
+    }
+  },
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "ts:kit:.:Job:size",
+        "ts:kit:.:mode",
+        "ts:kit:.:run",
+        "ts:kit:.:started",
+        "ts:kit:.:stop"
+      ],
+      "kind": "restructure"
+    }
+  ]
+}

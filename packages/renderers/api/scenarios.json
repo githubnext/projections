@@ -1,0 +1,145 @@
+{
+  "format": "projections.scenarios",
+  "version": 0,
+  "title": "API",
+  "renderer": "api",
+  "scenarios": [
+    {
+      "id": "dotnet-payments-compatibility",
+      "title": "Payments library 2.0 (.NET)",
+      "group": "Compatibility",
+      "description": "A C# library's real Roslyn extraction, classified by ApiCompat's rules: an interface gains a member without a default implementation, an inheritable class gains an abstract member, Card becomes sealed, an enum value and a constant change, and a parameter is renamed; a type, members and a default-implemented interface member are added.",
+      "before": "fixtures/dotnet-before.json",
+      "after": "fixtures/dotnet-after.json",
+      "comparator": "../../comparators/api-compatibility/api-compatibility.comparator.yaml"
+    },
+    {
+      "id": "rust-throttle-compatibility",
+      "title": "Rate limiter 2.0 (Rust)",
+      "group": "Compatibility",
+      "description": "A crate's real rustdoc extraction, classified by the Cargo SemVer reference: an exhaustive enum gains a variant, an all-public struct gains a field, a trait gains a method without a default, a method gains a parameter and loses const, a private Rc field drops Send and Sync, and a constant's value changes.",
+      "before": "fixtures/rust-before.json",
+      "after": "fixtures/rust-after.json",
+      "comparator": "../../comparators/api-compatibility/api-compatibility.comparator.yaml"
+    },
+    {
+      "id": "go-ledger-compatibility",
+      "title": "Ledger 2.0 (Go)",
+      "group": "Compatibility",
+      "description": "A module's real go/types extraction, classified by apidiff's rules: an interface gains a method, so a type stops implementing it; a struct gains a slice field and stops being comparable; a method moves to the pointer method set; a function gains a variadic parameter; and constants change value. A numeric type grows, compatibly.",
+      "before": "fixtures/go-before.json",
+      "after": "fixtures/go-after.json",
+      "comparator": "../../comparators/api-compatibility/api-compatibility.comparator.yaml"
+    },
+    {
+      "id": "typescript-queue-compatibility",
+      "title": "Job queue 2.0 (TypeScript)",
+      "group": "Compatibility",
+      "description": "A TypeScript package's real checker extraction, classified by assignability: a required parameter and a required interface member are added, a parameter narrows and a method is removed; optional parameters, members and union members are added, and a return type narrows.",
+      "before": "fixtures/typescript-before.json",
+      "after": "fixtures/typescript-after.json",
+      "comparator": "../../comparators/api-compatibility/api-compatibility.comparator.yaml"
+    },
+    {
+      "id": "http-client-major-release",
+      "title": "HTTP client 2.0",
+      "description": "A major release removes token handling and an enum, widens several signatures, renames fetchJson to getJson, and adds streaming and retry types.",
+      "before": "fixtures/http-client-v1.json",
+      "after": "fixtures/http-client-v2.json"
+    },
+    {
+      "id": "parser-options",
+      "title": "Parser options",
+      "description": "Parsing and printing gain options, errors become diagnostics, the visitor helper is removed, and Element stays as it was.",
+      "before": {
+        "protocolVersion": 0,
+        "schema": "api/v0",
+        "entities": [
+          {"id": "parse", "kind": "function", "label": "parse", "data": {"signature": "export function parse(source: string): Document"}},
+          {
+            "id": "stringify",
+            "kind": "function",
+            "label": "stringify",
+            "data": {"signature": "export function stringify(document: Document): string"}
+          },
+          {
+            "id": "Document",
+            "kind": "interface",
+            "label": "Document",
+            "data": {"signature": "export interface Document { root: Node; errors: ParseError[] }"}
+          },
+          {
+            "id": "Element",
+            "kind": "interface",
+            "label": "Element",
+            "data": {"signature": "export interface Element { name: string; attributes: Map<string, string>; children: Node[] }"}
+          },
+          {"id": "Node", "kind": "type", "label": "Node", "data": {"signature": "export type Node = Element | Text | Comment"}},
+          {
+            "id": "ParseError",
+            "kind": "class",
+            "label": "ParseError",
+            "data": {"signature": "export class ParseError extends SyntaxError"}
+          },
+          {
+            "id": "visit",
+            "kind": "function",
+            "label": "visit",
+            "data": {"signature": "export function visit(node: Node, visitor: (node: Node) => void): void"}
+          }
+        ],
+        "relationships": []
+      },
+      "after": {
+        "protocolVersion": 0,
+        "schema": "api/v0",
+        "entities": [
+          {
+            "id": "parse",
+            "kind": "function",
+            "label": "parse",
+            "data": {"signature": "export function parse(source: string, options?: ParseOptions): Document"}
+          },
+          {
+            "id": "stringify",
+            "kind": "function",
+            "label": "stringify",
+            "data": {"signature": "export function stringify(document: Document, options?: {indent?: number}): string"}
+          },
+          {
+            "id": "Document",
+            "kind": "interface",
+            "label": "Document",
+            "data": {"signature": "export interface Document { root: Node; diagnostics: Diagnostic[] }"}
+          },
+          {
+            "id": "Element",
+            "kind": "interface",
+            "label": "Element",
+            "data": {"signature": "export interface Element { name: string; attributes: Map<string, string>; children: Node[] }"}
+          },
+          {"id": "Node", "kind": "type", "label": "Node", "data": {"signature": "export type Node = Element | Text | Comment | CData"}},
+          {
+            "id": "ParseOptions",
+            "kind": "interface",
+            "label": "ParseOptions",
+            "data": {"signature": "export interface ParseOptions { strict?: boolean; preserveWhitespace?: boolean }"}
+          },
+          {
+            "id": "Diagnostic",
+            "kind": "interface",
+            "label": "Diagnostic",
+            "data": {"signature": "export interface Diagnostic { message: string; severity: \"error\" | \"warning\"; offset: number }"}
+          }
+        ],
+        "relationships": []
+      }
+    },
+    {
+      "id": "http-client-surface",
+      "title": "HTTP client surface",
+      "description": "The exported declarations of one release, with their signatures.",
+      "extraction": "fixtures/http-client-v2.json"
+    }
+  ]
+}

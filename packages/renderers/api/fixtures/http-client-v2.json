@@ -1,0 +1,18 @@
+{
+  "protocolVersion": 0,
+  "schema": "api/v0",
+  "entities": [
+    {"id": "createClient", "kind": "function", "label": "createClient", "data": {"signature": "export function createClient(options: ClientOptions, signal?: AbortSignal): Client"}},
+    {"id": "Client", "kind": "class", "label": "Client", "data": {"signature": "export class Client implements AsyncDisposable"}},
+    {"id": "Client.request", "kind": "method", "label": "Client.request", "data": {"signature": "request<T>(path: string, init?: RequestInit & {retry?: RetryPolicy}): Promise<Result<T, HttpError>>"}},
+    {"id": "Client.get", "kind": "method", "label": "Client.get", "data": {"signature": "get<T>(path: string): Promise<T>"}},
+    {"id": "Client.stream", "kind": "method", "label": "Client.stream", "data": {"signature": "stream(path: string): AsyncIterable<Uint8Array>"}},
+    {"id": "ClientOptions", "kind": "interface", "label": "ClientOptions", "data": {"signature": "export interface ClientOptions { baseUrl: URL | string; auth?: AuthProvider; timeout?: number }"}},
+    {"id": "ClientOptions.retries", "kind": "property", "label": "ClientOptions.retries", "data": {"signature": "retries?: number | RetryPolicy"}},
+    {"id": "getJson", "kind": "function", "label": "getJson", "data": {"signature": "export function getJson<T>(url: string, signal?: AbortSignal): Promise<T>"}, "previousIds": ["fetchJson"]},
+    {"id": "HttpError", "kind": "class", "label": "HttpError", "data": {"signature": "export class HttpError extends Error"}},
+    {"id": "RetryPolicy", "kind": "type", "label": "RetryPolicy", "data": {"signature": "export type RetryPolicy = {attempts: number; backoff: \"linear\" | \"exponential\"}"}},
+    {"id": "AuthProvider", "kind": "interface", "label": "AuthProvider", "data": {"signature": "export interface AuthProvider { header(): Promise<string> }"}}
+  ],
+  "relationships": []
+}

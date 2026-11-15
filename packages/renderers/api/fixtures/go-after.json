@@ -1,0 +1,894 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "package",
+          "term": "package",
+          "visibility": "public"
+        },
+        "signature": "package ledger"
+      },
+      "id": "go:example.com/ledger",
+      "kind": "package",
+      "label": "example.com/ledger"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "type",
+          "native": {
+            "comparable": true,
+            "numeric": {
+              "family": "signed",
+              "size32": 8,
+              "size64": 8
+            },
+            "underlying": "int64"
+          },
+          "term": "type",
+          "underlying": "int64",
+          "visibility": "public"
+        },
+        "signature": "type Amount int64"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 21
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Amount",
+      "kind": "type",
+      "label": "Amount"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "type",
+          "native": {
+            "comparable": true,
+            "underlying": "string"
+          },
+          "term": "type",
+          "underlying": "string",
+          "visibility": "public"
+        },
+        "signature": "type Currency string"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 24
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Currency",
+      "kind": "type",
+      "label": "Currency"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "struct",
+          "term": "type",
+          "visibility": "public"
+        },
+        "signature": "type Entry struct"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 27
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Entry",
+      "kind": "type",
+      "label": "Entry"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "field",
+          "term": "field",
+          "type": {
+            "text": "Amount"
+          },
+          "visibility": "public"
+        },
+        "signature": "Amount Amount"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 29
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Entry.Amount",
+      "kind": "field",
+      "label": "Amount"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "field",
+          "term": "field",
+          "type": {
+            "text": "string"
+          },
+          "visibility": "public"
+        },
+        "signature": "ID string"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 28
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Entry.ID",
+      "kind": "field",
+      "label": "ID"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "field",
+          "term": "field",
+          "type": {
+            "text": "string"
+          },
+          "visibility": "public"
+        },
+        "signature": "Memo string"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 30
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Entry.Memo",
+      "kind": "field",
+      "label": "Memo"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "field",
+          "term": "field",
+          "type": {
+            "text": "[]string"
+          },
+          "visibility": "public"
+        },
+        "signature": "Tags []string"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 31
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Entry.Tags",
+      "kind": "field",
+      "label": "Tags"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "variable",
+          "term": "var",
+          "type": {
+            "text": "error"
+          },
+          "visibility": "public"
+        },
+        "signature": "var ErrNotFound error"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 18
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.ErrNotFound",
+      "kind": "variable",
+      "label": "ErrNotFound"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "function",
+          "term": "func",
+          "type": {
+            "text": "func(Amount, Currency) string"
+          },
+          "visibility": "public"
+        },
+        "signature": "func Format(amount Amount, currency Currency) string"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 88
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Format",
+      "kind": "function",
+      "label": "Format"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "struct",
+          "term": "type",
+          "visibility": "public"
+        },
+        "signature": "type Ledger struct"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 60
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Ledger",
+      "kind": "type",
+      "label": "Ledger"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "native": {
+            "receiver": "pointer"
+          },
+          "term": "method",
+          "type": {
+            "text": "func(Entry) error"
+          },
+          "visibility": "public"
+        },
+        "signature": "func (*Ledger) Append(entry Entry) error"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 76
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Ledger.Append",
+      "kind": "method",
+      "label": "Append"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "native": {
+            "receiver": "pointer"
+          },
+          "term": "method",
+          "type": {
+            "text": "func() int"
+          },
+          "visibility": "public"
+        },
+        "signature": "func (*Ledger) Len() int"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 85
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Ledger.Len",
+      "kind": "method",
+      "label": "Len"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "constant",
+          "term": "const",
+          "type": {
+            "text": "untyped int"
+          },
+          "value": "5000",
+          "visibility": "public"
+        },
+        "signature": "const MaxEntries = 5000"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 15
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.MaxEntries",
+      "kind": "constant",
+      "label": "MaxEntries"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "function",
+          "term": "func",
+          "type": {
+            "text": "func(Store, ...Option) *Ledger"
+          },
+          "visibility": "public"
+        },
+        "signature": "func New(store Store, options ...Option) *Ledger"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 67
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.New",
+      "kind": "function",
+      "label": "New"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "type",
+          "native": {
+            "underlying": "func"
+          },
+          "term": "type",
+          "underlying": "func(*Ledger)",
+          "visibility": "public"
+        },
+        "signature": "type Option func(*Ledger)"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 54
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Option",
+      "kind": "type",
+      "label": "Option"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "struct",
+          "term": "type",
+          "visibility": "public"
+        },
+        "signature": "type ReadOnlyStore struct"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 42
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.ReadOnlyStore",
+      "kind": "type",
+      "label": "ReadOnlyStore"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "field",
+          "term": "field",
+          "type": {
+            "text": "map[string]Entry"
+          },
+          "visibility": "public"
+        },
+        "signature": "Entries map[string]Entry"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 42
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.ReadOnlyStore.Entries",
+      "kind": "field",
+      "label": "Entries"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "native": {
+            "receiver": "value"
+          },
+          "term": "method",
+          "type": {
+            "text": "func(string) (Entry, error)"
+          },
+          "visibility": "public"
+        },
+        "signature": "func (ReadOnlyStore) Get(id string) (Entry, error)"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 46
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.ReadOnlyStore.Get",
+      "kind": "method",
+      "label": "Get"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "native": {
+            "receiver": "value"
+          },
+          "term": "method",
+          "type": {
+            "text": "func(Entry) error"
+          },
+          "visibility": "public"
+        },
+        "signature": "func (ReadOnlyStore) Put(Entry) error"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 44
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.ReadOnlyStore.Put",
+      "kind": "method",
+      "label": "Put"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "interface",
+          "native": {
+            "comparable": true
+          },
+          "term": "type",
+          "visibility": "public"
+        },
+        "signature": "type Store interface"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 35
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Store",
+      "kind": "type",
+      "label": "Store"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "abstract": true,
+          "declaration": "method",
+          "term": "method",
+          "type": {
+            "text": "func(string) error"
+          },
+          "visibility": "public"
+        },
+        "signature": "Delete(id string) error"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 38
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Store.Delete",
+      "kind": "method",
+      "label": "Delete"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "abstract": true,
+          "declaration": "method",
+          "term": "method",
+          "type": {
+            "text": "func(string) (Entry, error)"
+          },
+          "visibility": "public"
+        },
+        "signature": "Get(id string) (Entry, error)"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 37
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Store.Get",
+      "kind": "method",
+      "label": "Get"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "abstract": true,
+          "declaration": "method",
+          "term": "method",
+          "type": {
+            "text": "func(Entry) error"
+          },
+          "visibility": "public"
+        },
+        "signature": "Put(entry Entry) error"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 36
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Store.Put",
+      "kind": "method",
+      "label": "Put"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "constant",
+          "term": "const",
+          "type": {
+            "text": "untyped string"
+          },
+          "value": "\"2.0.0\"",
+          "visibility": "public"
+        },
+        "signature": "const Version = \"2.0.0\""
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 12
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.Version",
+      "kind": "constant",
+      "label": "Version"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "function",
+          "term": "func",
+          "type": {
+            "text": "func(int) Option"
+          },
+          "visibility": "public"
+        },
+        "signature": "func WithLimit(limit int) Option"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 57
+          },
+          "source": "ledger.go"
+        }
+      ],
+      "id": "go:example.com/ledger.WithLimit",
+      "kind": "function",
+      "label": "WithLimit"
+    }
+  ],
+  "metadata": {
+    "analysis": "`go/types` exported package-level declarations, method sets and selectable fields of importable packages",
+    "ecosystem": "go"
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger",
+      "id": "contains:go:example.com/ledger->go:example.com/ledger.Amount",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Amount"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger",
+      "id": "contains:go:example.com/ledger->go:example.com/ledger.Currency",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Currency"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger",
+      "id": "contains:go:example.com/ledger->go:example.com/ledger.Entry",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Entry"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger",
+      "id": "contains:go:example.com/ledger->go:example.com/ledger.ErrNotFound",
+      "kind": "contains",
+      "to": "go:example.com/ledger.ErrNotFound"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger",
+      "id": "contains:go:example.com/ledger->go:example.com/ledger.Format",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Format"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger",
+      "id": "contains:go:example.com/ledger->go:example.com/ledger.Ledger",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Ledger"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger",
+      "id": "contains:go:example.com/ledger->go:example.com/ledger.MaxEntries",
+      "kind": "contains",
+      "to": "go:example.com/ledger.MaxEntries"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger",
+      "id": "contains:go:example.com/ledger->go:example.com/ledger.New",
+      "kind": "contains",
+      "to": "go:example.com/ledger.New"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger",
+      "id": "contains:go:example.com/ledger->go:example.com/ledger.Option",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Option"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger",
+      "id": "contains:go:example.com/ledger->go:example.com/ledger.ReadOnlyStore",
+      "kind": "contains",
+      "to": "go:example.com/ledger.ReadOnlyStore"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger",
+      "id": "contains:go:example.com/ledger->go:example.com/ledger.Store",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Store"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger",
+      "id": "contains:go:example.com/ledger->go:example.com/ledger.Version",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Version"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger",
+      "id": "contains:go:example.com/ledger->go:example.com/ledger.WithLimit",
+      "kind": "contains",
+      "to": "go:example.com/ledger.WithLimit"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger.Entry",
+      "id": "contains:go:example.com/ledger.Entry->go:example.com/ledger.Entry.Amount",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Entry.Amount"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger.Entry",
+      "id": "contains:go:example.com/ledger.Entry->go:example.com/ledger.Entry.ID",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Entry.ID"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger.Entry",
+      "id": "contains:go:example.com/ledger.Entry->go:example.com/ledger.Entry.Memo",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Entry.Memo"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger.Entry",
+      "id": "contains:go:example.com/ledger.Entry->go:example.com/ledger.Entry.Tags",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Entry.Tags"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger.Ledger",
+      "id": "contains:go:example.com/ledger.Ledger->go:example.com/ledger.Ledger.Append",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Ledger.Append"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger.Ledger",
+      "id": "contains:go:example.com/ledger.Ledger->go:example.com/ledger.Ledger.Len",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Ledger.Len"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger.ReadOnlyStore",
+      "id": "contains:go:example.com/ledger.ReadOnlyStore->go:example.com/ledger.ReadOnlyStore.Entries",
+      "kind": "contains",
+      "to": "go:example.com/ledger.ReadOnlyStore.Entries"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger.ReadOnlyStore",
+      "id": "contains:go:example.com/ledger.ReadOnlyStore->go:example.com/ledger.ReadOnlyStore.Get",
+      "kind": "contains",
+      "to": "go:example.com/ledger.ReadOnlyStore.Get"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger.ReadOnlyStore",
+      "id": "contains:go:example.com/ledger.ReadOnlyStore->go:example.com/ledger.ReadOnlyStore.Put",
+      "kind": "contains",
+      "to": "go:example.com/ledger.ReadOnlyStore.Put"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger.Store",
+      "id": "contains:go:example.com/ledger.Store->go:example.com/ledger.Store.Delete",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Store.Delete"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger.Store",
+      "id": "contains:go:example.com/ledger.Store->go:example.com/ledger.Store.Get",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Store.Get"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "go:example.com/ledger.Store",
+      "id": "contains:go:example.com/ledger.Store->go:example.com/ledger.Store.Put",
+      "kind": "contains",
+      "to": "go:example.com/ledger.Store.Put"
+    }
+  ],
+  "schema": "api/v0"
+}

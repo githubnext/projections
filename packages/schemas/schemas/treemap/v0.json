@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/treemap/v0.json",
+  "title": "Projections domain schema treemap/v0",
+  "description": "A containment forest (at most one parent each, no cycles) whose leaves carry a nonnegative `data.value`. The engine checks the forest and that leaves are weighted.",
+  "allOf": [{"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"}, {"$ref": "#/$defs/refinement"}],
+  "$defs": {
+    "refinement": {
+      "description": "What `treemap/v0` adds to the extraction envelope.",
+      "type": "object",
+      "properties": {
+        "schema": {"const": "treemap/v0"},
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "description": "The entity's weight. Required on leaves (entities that contain nothing); optional on containers.",
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

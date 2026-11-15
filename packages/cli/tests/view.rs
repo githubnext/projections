@@ -1,0 +1,523 @@
+//! The agent viewer's server (`projections view`): its token, its loopback
+//! `Host` check, the routes it forwards and refuses, the view state pages poll
+//! and report to, and `open_projection`'s choices.
+
+use std::{fs, path::Path, process::Command, sync::Arc, time::Duration};
+
+use projections_cli::{
+    service::{InspectorOptions, Service},
+    view::{Viewer, ViewerOptions, client, registry},
+};
+use serde_json::{Value, json};
+use uuid::Uuid;
+
+fn git(root: &Path, arguments: &[&str]) {
+    let output = Command::new("git")
+        .args(["--no-pager", "-c", "core.hooksPath=/dev/null"])
+        .args(["-c", "user.name=Viewer Fixture", "-c", "user.email=fixture@example.invalid"])
+        .args(arguments)
+        .env("GIT_CONFIG_NOSYSTEM", "1")
+        .env("GIT_CONFIG_GLOBAL", "/dev/null")
+        .current_dir(root)
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
+}
+
+fn assets(root: &Path) {
+    fs::create_dir_all(root.join("engine")).unwrap();
+    fs::write(root.join("mount.js"), "export {};").unwrap();
+    fs::write(root.join("mount.css"), "body{margin:0}").unwrap();
+    for name in ["worker-entry.js", "wasm-transport.js", "transport.js"] {
+        fs::write(root.join("engine").join(name), "export {};").unwrap();
+    }
+    fs::write(root.join("engine/engine.wasm"), b"\0asm\x01\0\0\0").unwrap();
+}
+
+struct Fixture {
+    root: std::path::PathBuf,
+    repo: std::path::PathBuf,
+    viewer: Viewer,
+    service: Arc<Service>,
+}
+
+impl Fixture {
+    async fn new() -> Self {
+        Self::with(false, |_| {}).await
+    }
+
+    /// A fixture whose repository `prepare` adds to, with a service that may run repository code.
+    async fn with(trust: bool, prepare: impl FnOnce(&Path)) -> Self {
+        let root = std::env::current_dir()
+            .unwrap()
+            .join("target")
+            .join(format!("view-test-{}", Uuid::new_v4()));
+        let repo = root.join("repo");
+        assets(&root.join("assets"));
+        fs::create_dir_all(repo.join(".github/projections")).unwrap();
+        fs::create_dir_all(repo.join("packages/a")).unwrap();
+        fs::write(
+            repo.join("package.json"),
+            r#"{"name": "root", "private": true, "workspaces": ["packages/*"]}"#,
+        )
+        .unwrap();
+        fs::write(repo.join("packages/a/package.json"), r#"{"name": "a", "version": "1.0.0"}"#).unwrap();
+        fs::write(
+            repo.join(".github/projections/packages.json"),
+            r#"{"id": "packages", "title": "Package map", "extractor": "workspace-dependencies", "renderer": "dependencies"}"#,
+        )
+        .unwrap();
+        prepare(&repo);
+        git(&repo, &["init", "--quiet", "--initial-branch=main"]);
+        git(&repo, &["add", "."]);
+        git(&repo, &["commit", "--quiet", "-m", "Add the package map"]);
+        fs::write(repo.join("packages/a/package.json"), r#"{"name": "a", "version": "2.0.0"}"#).unwrap();
+        git(&repo, &["commit", "--quiet", "-am", "Bump a"]);
+        let service = Arc::new(
+            Service::new(InspectorOptions {
+                repo: repo.clone(),
+                trust,
+                document: None,
+                custom_renderers: false,
+                assets: root.join("assets"),
+                fixtures: None,
+                executable: Some(env!("CARGO_BIN_EXE_projections").into()),
+                explore: None,
+                candidates: Vec::new(),
+                execution: Default::default(),
+            })
+            .await
+            .unwrap(),
+        );
+        let viewer = Viewer::start(
+            service.clone(),
+            ViewerOptions {
+                port: 0,
+                idle: None,
+                definition_revision: None,
+                token: None,
+            },
+        )
+        .unwrap();
+        Self {
+            root,
+            repo,
+            viewer,
+            service,
+        }
+    }
+
+    async fn request(&self, method: &str, path: &str, body: Option<&Value>) -> client::Response {
+        client::request(self.viewer.url(), method, path, body, Duration::from_secs(30))
+            .await
+            .unwrap()
+    }
+
+    async fn close(self) {
+        self.viewer.close().await;
+        self.service.close().await;
+        let _ = fs::remove_dir_all(&self.root);
+    }
+}
+
+/// A raw request to the viewer's port, without its token or with another `Host`.
+async fn raw(url: &str, path: &str, host: Option<&str>) -> u16 {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    let address = url.trim_start_matches("http://").split('/').next().unwrap().to_owned();
+    let mut stream = tokio::net::TcpStream::connect(&address).await.unwrap();
+    let host = host.unwrap_or(&address);
+    stream
+        .write_all(format!("GET {path} HTTP/1.1\r\nHost: {host}\r\nConnection: close\r\n\r\n").as_bytes())
+        .await
+        .unwrap();
+    let mut answer = String::new();
+    stream.read_to_string(&mut answer).await.unwrap();
+    answer.split(' ').nth(1).unwrap().parse().unwrap()
+}
+
+#[tokio::test]
+async fn requests_need_the_token_and_a_loopback_host() {
+    let fixture = Fixture::new().await;
+    let url = fixture.viewer.url().to_owned();
+    let token = url.trim_end_matches('/').rsplit('/').next().unwrap().to_owned();
+    assert_eq!(raw(&url, "/", None).await, 404);
+    assert_eq!(raw(&url, "/mount.js", None).await, 404);
+    assert_eq!(raw(&url, &format!("/{}/", "0".repeat(64)), None).await, 404);
+    assert_eq!(raw(&url, &format!("/{token}x/"), None).await, 404);
+    assert_eq!(raw(&url, &format!("/{token}/"), Some("attacker.example")).await, 403);
+    assert_eq!(raw(&url, &format!("/{token}/"), None).await, 200);
+    let page = fixture.request("GET", "", None).await;
+    assert_eq!(page.status, 200);
+    assert!(page.content_type.starts_with("text/html"));
+    assert!(String::from_utf8_lossy(&page.body).contains("./viewer.js"));
+    assert_eq!(fixture.request("GET", "mount.js", None).await.status, 200);
+    fixture.close().await;
+}
+
+#[tokio::test]
+async fn it_reads_but_never_writes() {
+    let fixture = Fixture::new().await;
+    let definitions = fixture.request("GET", "api/definitions?ref=working-tree", None).await;
+    assert_eq!(definitions.status, 200);
+    let listed = definitions.json().unwrap();
+    assert_eq!(listed["definitions"][0]["id"], "packages", "{listed}");
+    for path in [
+        "api/definition",
+        "api/adopt",
+        "api/prepare",
+        "api/sweep",
+        "api/comparator-tests/run",
+    ] {
+        let refused = fixture.request("POST", path, Some(&json!({}))).await;
+        assert_eq!(refused.status, 403, "{path}");
+    }
+    assert_eq!(fixture.request("GET", "api/sweep/thumbnail", None).await.status, 403);
+    fixture.close().await;
+}
+
+#[tokio::test]
+async fn show_resolves_choices_and_pages_follow_and_report() {
+    let fixture = Fixture::new().await;
+    let shown = fixture
+        .request(
+            "POST",
+            "control/show",
+            Some(&json!({"choice": "last-commit", "mode": "side-by-side"})),
+        )
+        .await;
+    assert_eq!(shown.status, 200);
+    let state = &shown.json().unwrap()["state"];
+    assert_eq!(state["projection"], "packages");
+    assert_eq!(state["title"], "Package map");
+    assert_eq!((state["before"].as_str(), state["after"].as_str()), (Some("HEAD~1"), Some("HEAD")));
+    assert_eq!(state["compared"], "Last commit");
+    assert_eq!(state["mode"], "side-by-side");
+    let generation = state["generation"].as_u64().unwrap();
+
+    // Named revisions are said by their subjects.
+    let named = fixture
+        .request("POST", "control/show", Some(&json!({"before": "HEAD~1", "after": "working-tree"})))
+        .await
+        .json()
+        .unwrap();
+    assert_eq!(named["state"]["compared"], "“Add the package map” → your files");
+    assert_eq!(named["state"]["mode"], "side-by-side", "the same projection keeps its mode");
+
+    // A page long-polls for the next generation; a report from a page that has caught up applies the selection.
+    let poll = fixture
+        .request("GET", &format!("view/state?page=p1&since={generation}"), None)
+        .await;
+    let current = poll.json().unwrap();
+    assert_eq!(current["generation"], generation + 1);
+    let notice = "`packages.json` doesn't exist at `caf6ab7e`, so its contents show as added.";
+    let report = json!({"page": "p1", "generation": current["generation"], "selection": "workspace:a", "mode": "swipe", "view": {"status": "ok"},
+        "summary": {"projection": {"id": "packages"}, "status": "ok", "notices": [notice]}});
+    assert_eq!(fixture.request("POST", "view/report", Some(&report)).await.status, 200);
+    let control = fixture.request("GET", "control/state", None).await.json().unwrap();
+    assert_eq!(control["state"]["selection"], "workspace:a");
+    assert_eq!(control["state"]["mode"], "swipe");
+    assert_eq!(control["pages"], 1);
+    assert_eq!(control["page"]["view"]["status"], "ok");
+    // The agent reads the notices the page shows, as VS Code's current view says its tab's.
+    let read = fixture
+        .request("POST", "control/tool/current_view", Some(&json!({})))
+        .await
+        .json()
+        .unwrap();
+    let text = read["content"][0]["text"].as_str().unwrap();
+    assert!(text.contains(&format!("\nNotice: {notice}\n")), "{text}");
+    // A page that hasn't caught up never undoes the agent's change.
+    let stale = json!({"page": "p2", "generation": 1, "selection": null});
+    fixture.request("POST", "view/report", Some(&stale)).await;
+    let control = fixture.request("GET", "control/state", None).await.json().unwrap();
+    assert_eq!(control["state"]["selection"], "workspace:a");
+
+    let refreshed = fixture.request("POST", "control/refresh", None).await.json().unwrap();
+    assert_eq!(refreshed["state"]["refresh"], 1);
+
+    for (input, error) in [
+        (json!({"projection": "nope"}), "no projection nope"),
+        (json!({"choice": "branch"}), "Branch changes don't apply"),
+        (json!({"scenario": "nope"}), "no scenario nope"),
+        (json!({"before": "no-such-ref"}), "no-such-ref"),
+    ] {
+        let refused = fixture.request("POST", "control/show", Some(&input)).await;
+        assert_eq!(refused.status, 400, "{input}");
+        let message = refused.json().unwrap()["diagnostics"][0]["message"].as_str().unwrap().to_owned();
+        assert!(message.contains(error), "{message}");
+    }
+    fixture.close().await;
+}
+
+#[tokio::test]
+async fn the_shown_projections_renderer_builds_and_rebuilds_on_save() {
+    let fixture = Fixture::with(true, |repo| {
+        let package = repo.join("cards");
+        fs::create_dir_all(package.join("src")).unwrap();
+        fs::create_dir_all(package.join("node_modules")).unwrap();
+        fs::write(package.join("src/main.ts"), "export const cards = 1\n").unwrap();
+        // The build copies its source into the bundle, and says it built.
+        let build = "node -e \"const fs=require('fs');fs.mkdirSync('dist',{recursive:true});fs.writeFileSync('dist/index.html',fs.readFileSync('src/main.ts'));console.log('built in 1ms')\"";
+        fs::write(package.join("package.json"), json!({"scripts": {"build": build}}).to_string()).unwrap();
+        fs::write(
+            repo.join(".github/projections/cards.json"),
+            r#"{"id": "cards", "title": "Cards", "extractor": "workspace-dependencies", "renderer": {"bundle": "cards/dist"}}"#,
+        )
+        .unwrap();
+        fs::write(repo.join(".gitignore"), "node_modules\ndist\n").unwrap();
+    })
+    .await;
+    let builds = || async { fixture.request("GET", "api/renderer-builds", None).await.json().unwrap()["builds"][0].clone() };
+    let until = |run: u64| async move {
+        for _ in 0..400 {
+            let build = builds().await;
+            if build["run"] == run && build["exit"] == 0 {
+                return build;
+            }
+            tokio::time::sleep(Duration::from_millis(50)).await;
+        }
+        panic!("run {run} never built: {}", builds().await);
+    };
+    // Shown with no bundle yet: its sources are newer, so it builds.
+    let shown = fixture
+        .request("POST", "control/show", Some(&json!({"projection": "cards", "choice": "now"})))
+        .await;
+    assert_eq!(shown.status, 200);
+    let first = until(1).await;
+    assert_eq!(
+        (first["projection"].as_str(), first["phase"].as_str()),
+        (Some("cards"), Some("built"))
+    );
+    assert_eq!(
+        fs::read_to_string(fixture.repo.join("cards/dist/index.html")).unwrap(),
+        "export const cards = 1\n"
+    );
+    // A saved source: the viewer sees the working tree change and builds again.
+    tokio::time::sleep(Duration::from_millis(1100)).await;
+    fs::write(fixture.repo.join("cards/src/main.ts"), "export const cards = 2\n").unwrap();
+    until(2).await;
+    assert_eq!(
+        fs::read_to_string(fixture.repo.join("cards/dist/index.html")).unwrap(),
+        "export const cards = 2\n"
+    );
+    // The agent reads the build.
+    let current = fixture
+        .request("POST", "control/tool/current_view", Some(&json!({})))
+        .await
+        .json()
+        .unwrap();
+    assert_eq!(current["structuredContent"]["rendererBuild"]["phase"], "built");
+    assert!(
+        current["content"][0]["text"]
+            .as_str()
+            .unwrap()
+            .contains("Renderer build: built (npm run build in cards)")
+    );
+    fixture.close().await;
+}
+
+/// Waits up to 30 seconds for `ready`, polling.
+fn wait_for<T>(what: &str, mut ready: impl FnMut() -> Option<T>) -> T {
+    for _ in 0..300 {
+        if let Some(value) = ready() {
+            return value;
+        }
+        std::thread::sleep(Duration::from_millis(100));
+    }
+    panic!("timed out waiting for {what}")
+}
+
+#[test]
+fn a_stale_record_is_replaced_and_a_viewer_stops_or_is_replaced_with_trust() {
+    let root = std::env::current_dir()
+        .unwrap()
+        .join("target")
+        .join(format!("view-cli-test-{}", Uuid::new_v4()));
+    let repo = root.join("repo");
+    assets(&root.join("assets"));
+    fs::create_dir_all(repo.join(".github/projections")).unwrap();
+    fs::write(repo.join("package.json"), r#"{"name": "root", "private": true}"#).unwrap();
+    fs::write(
+        repo.join(".github/projections/packages.json"),
+        r#"{"id": "packages", "title": "Package map", "extractor": "workspace-dependencies", "renderer": "dependencies"}"#,
+    )
+    .unwrap();
+    git(&repo, &["init", "--quiet", "--initial-branch=main"]);
+    git(&repo, &["add", "."]);
+    git(&repo, &["commit", "--quiet", "-m", "Start"]);
+    // The repository's root as the CLI keys its record: canonical, in the platform's own spelling (on Windows, Git
+    // reports C:/… where the CLI keys C:\…).
+    let top = projections_extractor_sdk::canonical(&repo).unwrap();
+    let cache = root.join("cache");
+    let record_file = registry::path_in(&cache, &top, "");
+    let record = || {
+        let value: Value = serde_json::from_slice(&fs::read(&record_file).ok()?).ok()?;
+        Some((
+            value["url"].as_str()?.to_owned(),
+            value["pid"].as_u64()? as u32,
+            value["trust"] == true,
+        ))
+    };
+    let projections = |arguments: &[&str]| {
+        let mut command = Command::new(env!("CARGO_BIN_EXE_projections"));
+        command
+            .arg("-C")
+            .arg(&repo)
+            .args(arguments)
+            .env("PROJECTIONS_CACHE_DIR", &cache)
+            .env("PROJECTIONS_INSPECTOR_ASSETS", root.join("assets"))
+            .stdin(std::process::Stdio::null())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped());
+        command
+    };
+    let exits = |child: &mut std::process::Child| wait_for("the viewer to exit", || child.try_wait().unwrap());
+    // Which server answers a page at `url`: a page that reconnects to another one loads afresh.
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+    let instance = |url: &str| {
+        let state = runtime
+            .block_on(client::request(url, "GET", "view/state", None, Duration::from_secs(10)))
+            .unwrap();
+        state.json().unwrap()["instance"].as_str().unwrap().to_owned()
+    };
+
+    // A viewer that was killed left its record: a process that is gone, at a port nothing answers.
+    let mut gone = Command::new(if cfg!(windows) { "cmd" } else { "true" })
+        .args(if cfg!(windows) { &["/C", "exit"][..] } else { &[][..] })
+        .spawn()
+        .unwrap();
+    gone.wait().unwrap();
+    let port = std::net::TcpListener::bind("127.0.0.1:0").unwrap().local_addr().unwrap().port();
+    let stale = format!("http://127.0.0.1:{port}/{}/", "a".repeat(64));
+    fs::create_dir_all(record_file.parent().unwrap()).unwrap();
+    let json = registry::Record {
+        url: stale.clone(),
+        pid: gone.id(),
+        trust: false,
+    }
+    .json();
+    fs::write(&record_file, json.to_string()).unwrap();
+
+    let mut first = projections(&["view"]).spawn().unwrap();
+    let (url, _, trusted) = wait_for("the stale record to be replaced", || {
+        record().filter(|(_, pid, _)| *pid == first.id())
+    });
+    assert_ne!(url, stale);
+    assert!(!trusted);
+    // Recorded only once it shows its first pair: a process that starts it (`view show --choice now`) and shows
+    // something else through it is never undone by that first show.
+    let state = runtime
+        .block_on(client::request(&url, "GET", "view/state", None, Duration::from_secs(10)))
+        .unwrap()
+        .json()
+        .unwrap();
+    assert_eq!(
+        (state["generation"].as_u64(), state["projection"].as_str()),
+        (Some(1), Some("packages"))
+    );
+    let again = projections(&["view"]).output().unwrap();
+    assert!(
+        String::from_utf8_lossy(&again.stdout).contains(&format!("already running for this repository: {url}")),
+        "{}",
+        String::from_utf8_lossy(&again.stderr)
+    );
+
+    // Asked for trust, the untrusted viewer is replaced at its URL, so its open pages reconnect, and load afresh.
+    let untrusted = instance(&url);
+    let mut trusting = projections(&["view", "--trust"]).spawn().unwrap();
+    exits(&mut first);
+    let (replaced, _, trusted) = wait_for("the trusted viewer", || record().filter(|(_, pid, _)| *pid == trusting.id()));
+    assert_eq!((replaced.as_str(), trusted), (url.as_str(), true));
+    assert_ne!(instance(&url), untrusted);
+
+    let stopped = projections(&["view", "stop"]).output().unwrap();
+    assert!(stopped.status.success(), "{}", String::from_utf8_lossy(&stopped.stderr));
+    assert!(String::from_utf8_lossy(&stopped.stdout).contains(&format!("Stopped the viewer at {url}")));
+    exits(&mut trusting);
+    assert!(record().is_none(), "a stopped viewer's record is removed");
+    let none = projections(&["view", "stop"]).output().unwrap();
+    assert!(String::from_utf8_lossy(&none.stdout).contains("No viewer is running"));
+    let _ = fs::remove_dir_all(&root);
+}
+
+#[test]
+fn a_nested_project_has_a_viewer_of_its_own() {
+    let root = std::env::current_dir()
+        .unwrap()
+        .join("target")
+        .join(format!("view-project-test-{}", Uuid::new_v4()));
+    let repo = root.join("repo");
+    assets(&root.join("assets"));
+    fs::create_dir_all(repo.join("sub/.github/projections")).unwrap();
+    fs::write(
+        repo.join("sub/.github/projections/files.json"),
+        r#"{"id": "files", "title": "Files", "extractor": "repository-map", "renderer": "tree"}"#,
+    )
+    .unwrap();
+    git(&repo, &["init", "--quiet", "--initial-branch=main"]);
+    git(&repo, &["add", "."]);
+    git(&repo, &["commit", "--quiet", "-m", "Start"]);
+    let top = projections_extractor_sdk::canonical(&repo).unwrap();
+    let cache = root.join("cache");
+    let projections = |directory: &Path, arguments: &[&str]| {
+        Command::new(env!("CARGO_BIN_EXE_projections"))
+            .arg("-C")
+            .arg(directory)
+            .args(arguments)
+            .env("PROJECTIONS_CACHE_DIR", &cache)
+            .env("PROJECTIONS_INSPECTOR_ASSETS", root.join("assets"))
+            .stdin(std::process::Stdio::null())
+            .output()
+            .unwrap()
+    };
+    // Shown from inside the project, the background viewer serves that project, recorded as its own.
+    let shown = projections(&repo.join("sub"), &["view", "show", "--json"]);
+    assert!(shown.status.success(), "{}", String::from_utf8_lossy(&shown.stderr));
+    assert!(registry::path_in(&cache, &top, "sub").exists());
+    assert!(
+        !registry::path_in(&cache, &top, "").exists(),
+        "the root project's viewer is another"
+    );
+    let current = projections(&repo.join("sub"), &["view", "current", "--json"]);
+    assert!(current.status.success(), "{}", String::from_utf8_lossy(&current.stderr));
+    let stopped = projections(&repo.join("sub"), &["view", "stop"]);
+    assert!(String::from_utf8_lossy(&stopped.stdout).contains("Stopped the viewer"));
+    let _ = fs::remove_dir_all(&root);
+}
+
+#[test]
+fn canvas_install_writes_the_copilot_extension_once() {
+    let root = std::env::current_dir()
+        .unwrap()
+        .join("target")
+        .join(format!("canvas-test-{}", Uuid::new_v4()));
+    fs::create_dir_all(&root).unwrap();
+    git(&root, &["init", "--quiet"]);
+    let install = |extra: &[&str]| {
+        Command::new(env!("CARGO_BIN_EXE_projections"))
+            .args(["-C"])
+            .arg(&root)
+            .args(["canvas", "install"])
+            .args(extra)
+            .output()
+            .unwrap()
+    };
+    let file = root.join(".github/extensions/projections/extension.mjs");
+    let written = install(&[]);
+    assert!(written.status.success(), "{}", String::from_utf8_lossy(&written.stderr));
+    let source = fs::read_to_string(&file).unwrap();
+    assert!(source.contains("createCanvas") && source.contains("joinSession"));
+    assert!(
+        !source.contains("console.log"),
+        "standard output is the extension's JSON-RPC channel"
+    );
+    // Again: up to date. A changed file is replaced only with --force.
+    assert!(String::from_utf8_lossy(&install(&[]).stdout).contains("up to date"));
+    fs::write(&file, "// mine\n").unwrap();
+    let refused = install(&[]);
+    assert!(!refused.status.success());
+    assert!(String::from_utf8_lossy(&refused.stderr).contains("--force"));
+    assert!(install(&["--force"]).status.success());
+    assert_eq!(fs::read_to_string(&file).unwrap(), source);
+    let _ = fs::remove_dir_all(&root);
+}

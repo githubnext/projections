@@ -1,0 +1,7 @@
+# The Verus release that proves this crate (packages/engine/VERIFICATION.md). `tools verify`
+# and CI read this file, through scripts/verify.mjs, and nothing else pins Verus.
+# `toolchain` is the Rust toolchain the release needs; `macros` is the
+# `verus_builtin_macros` version it was built with, which Cargo.toml must use.
+release = "0.2026.11.02.8bf68ee"
+toolchain = "1.99.1"
+macros = "0.0.0-2026-11-01-0251"

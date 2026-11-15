@@ -1,0 +1,118 @@
+:root {
+  color-scheme: light dark;
+  background: light-dark(#edf0f4, #10151c);
+  color: light-dark(#202833, #e8edf3);
+  font-family: system-ui, sans-serif;
+}
+body {
+  margin: 0;
+}
+.demo {
+  max-width: 1440px;
+  margin: auto;
+  padding: 28px 32px 48px;
+}
+.demo-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+.demo-header h1 {
+  font-size: 24px;
+  margin: 0 0 6px;
+  font-weight: 650;
+}
+.demo-header p {
+  font-size: 13px;
+  margin: 0;
+}
+.demo-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+}
+.demo-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.demo-controls select {
+  height: 36px;
+  min-height: 36px;
+  border: 1px solid #8290a1;
+  border-radius: 5px;
+  font: inherit;
+  padding: 6px 10px;
+}
+.demo-controls .demo-checkbox {
+  flex-direction: row;
+  align-items: center;
+  min-height: 36px;
+}
+.demo-evidence {
+  font-size: 12px;
+  margin-top: 20px;
+}
+@media (max-width: 700px) {
+  .demo {
+    padding: 18px 12px 32px;
+  }
+  .demo-header {
+    flex-direction: column;
+    align-items: start;
+    gap: 16px;
+  }
+}
+.demo-host-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 700px;
+}
+.demo .ph-explorer {
+  border-radius: 8px;
+  padding: 16px;
+}
+/* The explorer fills its container; the harness gives it the viewport's height below the controls. */
+.demo-view {
+  height: 100dvh;
+}
+.demo-header > div:first-child {
+  min-width: 0;
+}
+.demo-tour {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+.demo-targets {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 16px;
+}
+.demo-targets output {
+  font-family: ui-monospace, monospace;
+  overflow-wrap: anywhere;
+}
+.demo-targets input {
+  font: inherit;
+  min-width: 16rem;
+  max-width: 100%;
+}
+.demo-slot {
+  font-size: 12px;
+  display: grid;
+  gap: 4px;
+}
+.demo-slot output {
+  font-family: ui-monospace, monospace;
+  overflow-wrap: anywhere;
+}

@@ -1,0 +1,137 @@
+/* Host theme tokens arrive as --projections-<token> on <html>; always give a fallback. */
+:root {
+  color-scheme: light dark;
+  --fg: var(--projections-color-fg, #1f2328);
+  --muted: var(--projections-color-fg-muted, #59636e);
+  /* The stage: the host frame's own field, behind any cards. */
+  --bg: var(--projections-color-surface-canvas, #f6f8fa);
+  --subtle: var(--projections-color-bg-subtle, #f6f8fa);
+  --border: var(--projections-color-border, #d1d9e0);
+  --accent: var(--projections-color-accent, #0969da);
+  --focus: var(--projections-color-focus, var(--accent));
+  --added: var(--projections-color-added, #1a7f37);
+  --removed: var(--projections-color-removed, #d1242f);
+  --modified: var(--projections-color-modified, #9a6700);
+}
+:root[data-color-mode='dark'] {
+  --fg: var(--projections-color-fg, #f0f6fc);
+  --muted: var(--projections-color-fg-muted, #9198a1);
+  --bg: var(--projections-color-surface-canvas, #010409);
+  --subtle: var(--projections-color-bg-subtle, #151b23);
+  --border: var(--projections-color-border, #3d444d);
+  --accent: var(--projections-color-accent, #4493f8);
+  --added: var(--projections-color-added, #3fb950);
+  --removed: var(--projections-color-removed, #f85149);
+  --modified: var(--projections-color-modified, #d29922);
+}
+/* No margins, so the observed body height is exactly the content height. */
+html,
+body {
+  margin: 0;
+}
+body {
+  color: var(--fg);
+  background: var(--bg);
+  font-family: var(--projections-font-family, system-ui, sans-serif);
+  font-size: var(--projections-font-size, 14px);
+  line-height: 1.5;
+}
+/* The content starts at the top of the frame: the host draws the header. */
+main,
+.waiting,
+.error {
+  padding: var(--projections-space-2, 8px) var(--projections-space-3, 12px);
+}
+.waiting {
+  color: var(--muted);
+}
+.error {
+  color: var(--removed);
+}
+/* Sizes, spacing and colors are theme tokens: the renderer checks hold every value to the theme's scale. */
+h2 {
+  font-size: var(--projections-font-size, 14px);
+  margin: 0 0 var(--projections-space-2, 8px);
+}
+code,
+.kind,
+.ids {
+  font-family: var(--projections-font-family-mono, ui-monospace, monospace);
+  font-size: var(--projections-font-size-sm, 13px);
+}
+ul,
+ol {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.step {
+  padding: var(--projections-space-3, 12px) 0;
+  border-top: 1px solid var(--border);
+}
+.step:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+.step ul {
+  margin-top: var(--projections-space-2, 8px);
+}
+/* Steps the host's progress has not reached yet are dimmed. */
+.step[data-reached='false'] {
+  opacity: 0.45;
+}
+.item {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.item > * {
+  position: relative;
+}
+/* Change emphasis: a tint whose strength is the host's highlighting (0 at both endpoints). */
+.item[data-status]:not([data-status='unchanged'])::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border-inline-start: 3px solid var(--status-color);
+  background: color-mix(in srgb, var(--status-color) 14%, transparent);
+  opacity: var(--highlighting, 0);
+  pointer-events: none;
+}
+.item[data-status='added'] {
+  --status-color: var(--added);
+}
+.item[data-status='removed'] {
+  --status-color: var(--removed);
+}
+.item[data-status='modified'] {
+  --status-color: var(--modified);
+}
+/* Hover, focus and selection rings are the SDK's: an outline on each item's own element (connectRenderer adds them). */
+.item-label {
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: start;
+}
+.item-label:hover {
+  text-decoration: underline;
+}
+.kind,
+.status,
+.change-summary {
+  color: var(--muted);
+}
+:root[data-reduced-motion='true'] * {
+  transition: none !important;
+  animation: none !important;
+}

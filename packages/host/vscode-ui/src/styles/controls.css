@@ -1,0 +1,468 @@
+/* Pair pickers: VS Code dropdowns. */
+.phv-pair-picker {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.phv-pair-field {
+  min-width: 0;
+}
+/* A block, not an inline box on a line: a line box would add the font's descent under the dropdown (a pixel or so with
+   some fonts), making the row taller than the 26px control and its insets uneven. */
+.phv-pair-field vscode-single-select {
+  display: block;
+  width: 13rem;
+}
+.phv-pair-field[data-compact] vscode-single-select {
+  width: 7.5rem;
+}
+.phv-pair-popover .phv-pair-picker {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  width: 16rem;
+}
+.phv-pair-popover .phv-pair-field vscode-single-select {
+  width: 100%;
+}
+.phv-pair-popover .phv-swap {
+  justify-self: center;
+  transform: rotate(90deg);
+}
+.phv-pair-button-text {
+  font-size: 12px;
+}
+
+/* The mode switch, like the diff editor's toggles: checked is VS Code's input option (`--vscode-inputOption-*`). */
+.phv-mode-switch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px;
+  border: 1px solid var(--vscode-input-border, var(--phv-border));
+  border-radius: 5px;
+}
+
+/* Playback, like the debug toolbar: play in the continue color, pause in the pause color, steps in the step color. */
+.phv-playback {
+  display: flex;
+  align-items: center;
+  gap: 2px 6px;
+  min-width: 0;
+}
+.phv-play {
+  color: var(--vscode-debugIcon-continueForeground, #75beff);
+}
+.phv-playback[data-playing] .phv-play {
+  color: var(--vscode-debugIcon-pauseForeground, #75beff);
+}
+.phv-step {
+  color: var(--vscode-debugIcon-stepOverForeground, #75beff);
+}
+.phv-playback .phv-progress {
+  flex: 1 1 160px;
+  min-width: 160px;
+}
+@container (max-width: 479.98px) {
+  .phv-playback .phv-progress {
+    min-width: 120px;
+  }
+}
+.phv-slider-end {
+  max-width: 10ch;
+  overflow: hidden;
+  color: var(--phv-muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+}
+.phv-output {
+  font-variant-numeric: tabular-nums;
+}
+.phv-percent {
+  min-width: 4ch;
+  color: var(--phv-muted);
+  font-size: 12px;
+  text-align: end;
+}
+
+/* VS Code's slider: a 4px track in the scrollbar slider color, the filled part and the thumb in the progress color. */
+.phv-range {
+  appearance: none;
+  height: 16px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.phv-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--vscode-progressBar-background, #0078d4) var(--phv-fill, 0%),
+    var(--vscode-scrollbarSlider-background, #79797966) var(--phv-fill, 0%)
+  );
+}
+.phv-range::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--vscode-progressBar-background, #0078d4) var(--phv-fill, 0%),
+    var(--vscode-scrollbarSlider-background, #79797966) var(--phv-fill, 0%)
+  );
+}
+.phv-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border: 1px solid var(--vscode-contrastBorder, var(--phv-surface-canvas));
+  border-radius: 50%;
+  background: var(--vscode-progressBar-background, #0078d4);
+}
+.phv-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--vscode-contrastBorder, var(--phv-surface-canvas));
+  border-radius: 50%;
+  background: var(--vscode-progressBar-background, #0078d4);
+}
+.phv-range:focus-visible {
+  outline: 1px solid var(--phv-focus);
+  outline-offset: 1px;
+}
+
+/* Zoom and other declared controls. */
+.phv-zoom {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.phv-zoom .phv-control-range {
+  width: 6rem;
+}
+.phv-renderer-controls {
+  display: grid;
+  gap: 12px;
+}
+.phv-control-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.phv-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.phv-control-label {
+  font-weight: 600;
+}
+.phv-control-range {
+  width: 8rem;
+}
+.phv-field {
+  min-width: 0;
+}
+
+/* The view tabs: VSCode Elements' panel tabs. */
+.phv-view-switch .phv-view-icon {
+  vertical-align: text-bottom;
+}
+
+/* The "Showing table" chip: VS Code's badge shape in the toolbar, dismissible back to the renderer. */
+.phv-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 6px;
+  border: 1px solid var(--vscode-contrastBorder, transparent);
+  border-radius: 10px;
+  background: var(--vscode-badge-background, #616161);
+  color: var(--vscode-badge-foreground, #f8f8f8);
+  font: inherit;
+  font-size: 11px;
+}
+.phv-chip[data-dismissible] {
+  cursor: pointer;
+}
+.phv-chip[data-dismissible]:hover {
+  outline: 1px dashed var(--phv-hover-outline);
+}
+.phv-chip .codicon {
+  font-size: 14px;
+}
+/*
+ * The varied count (VariedToggle): a neutral text toggle in description foreground, never a change hue; pressed, it
+ * takes VS Code's input option toggle colors, like the mode switch.
+ */
+.phv-varied-toggle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  margin-inline: 2px;
+  padding: 0 6px;
+  border: 1px solid var(--vscode-input-border, var(--vscode-widget-border, transparent));
+  border-radius: 5px;
+  background: transparent;
+  color: var(--vscode-descriptionForeground, #9d9d9d);
+  font: inherit;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.phv-varied-toggle:hover {
+  background: var(--vscode-toolbar-hoverBackground, #5a5d5e50);
+  color: var(--vscode-foreground, #cccccc);
+}
+.phv-varied-toggle:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, #0078d4);
+  outline-offset: -1px;
+}
+.phv-varied-toggle[aria-pressed='true'] {
+  border-color: var(--vscode-inputOption-activeBorder, #2488db);
+  background: var(--vscode-inputOption-activeBackground, #2489db82);
+  color: var(--vscode-inputOption-activeForeground, #ffffff);
+}
+.phv-varied-toggle .codicon {
+  font-size: 14px;
+}
+/*
+ * Chrome text is centred by its cap height, not its line box (`.phv-cap`: a label's text in a flex row): trimmed to
+ * the cap height and the baseline, a capital E has the same space above and below it in its strip or button. Engines
+ * without `text-box` take a line box one cap high, which centres the cap height to within a font's ascent and descent
+ * difference.
+ */
+.phv-cap {
+  text-box: trim-both cap alphabetic;
+}
+@supports not (text-box: trim-both cap alphabetic) {
+  .phv-cap {
+    line-height: 1cap;
+  }
+}
+/*
+ * The summary bar (SummaryBar): VS Code's status bar strip along the bottom of the view, 22px of 12px description
+ * text over the side bar's background under a hairline. Figures are borderless text buttons that take the toolbar's
+ * hover background; pressed, a figure takes the input option toggle colors, like the mode switch. Only the change
+ * figures take a hue, VS Code's Git decoration colors. A capital E sits optically centred in the whole strip, hairline
+ * included as in VS Code's status bar (the bottom padding balances it), with the same space to its left; in a
+ * figure's 18px pill, the same around it again.
+ */
+.phv-summary-bar {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  box-sizing: border-box;
+  height: 22px;
+  min-width: 0;
+  padding: 0 2px 1px;
+  overflow: hidden;
+  border-top: 1px solid var(--phv-divider);
+  background: var(--phv-surface-inset);
+  color: var(--phv-muted);
+  font-family: var(--phv-font);
+  font-size: 12px;
+  line-height: 20px;
+}
+.phv-summary-figures,
+.phv-summary-measure-row,
+.phv-summary-list {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.phv-summary-measure {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+.phv-summary-measure-row {
+  width: max-content;
+}
+.phv-summary-list {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  color: var(--phv-muted);
+  font-size: 12px;
+}
+.phv-summary-figure {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+/*
+ * Between two figures, a round 3px dot in the muted text colour, as the default UI draws it: 6px clear of each
+ * figure's pill, so its text is about 10px away, and on the x-height's centre (the labels are centred by cap height,
+ * so the dot goes half the difference lower). After a figure ending in its tighter change counts, it keeps 1px more on
+ * its left, so the text on either side stays the same distance away.
+ */
+.phv-summary-separator {
+  flex: none;
+  width: 3px;
+  height: 3px;
+  margin-inline: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+  opacity: 0.7;
+  translate: 0 calc((1cap - 1ex) / 2);
+}
+.phv-summary-figure:has(> [data-summary-delta]:last-child) + .phv-summary-figure > .phv-summary-separator {
+  margin-inline-start: 7px;
+}
+@media (forced-colors: active) {
+  .phv-summary-separator {
+    forced-color-adjust: none;
+    background-color: GrayText;
+    opacity: 1;
+  }
+}
+.phv-summary-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  height: 18px;
+  padding: 0 3px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.phv-summary-button:hover {
+  background: var(--vscode-toolbar-hoverBackground, #5a5d5e50);
+  color: var(--phv-fg);
+  outline: 1px dashed var(--phv-hover-outline);
+  outline-offset: -1px;
+}
+.phv-summary-button:focus-visible {
+  outline: 1px solid var(--phv-focus);
+  outline-offset: -1px;
+}
+.phv-summary-button[aria-pressed='true'] {
+  border-color: var(--vscode-inputOption-activeBorder, #2488db);
+  background: var(--vscode-inputOption-activeBackground, #2489db82);
+  color: var(--vscode-inputOption-activeForeground, #ffffff);
+}
+.phv-summary-delta {
+  padding: 0 2px;
+  font-variant-numeric: tabular-nums;
+}
+.phv-summary-delta[data-summary-delta='added']:not([aria-pressed='true']) {
+  color: var(--phv-added);
+}
+.phv-summary-delta[data-summary-delta='removed']:not([aria-pressed='true']) {
+  color: var(--phv-removed);
+}
+.phv-summary-delta[data-summary-delta='modified']:not([aria-pressed='true']) {
+  color: var(--phv-modified);
+}
+/* A fact's changes: text in the change colors, not a filter. */
+.phv-summary-fact-delta {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  white-space: nowrap;
+}
+/* A fact figure: icon, count and noun; its tone colors the figure only. */
+.phv-summary-fact {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 3px;
+  white-space: nowrap;
+}
+.phv-summary-fact[data-tone='added']:not([aria-pressed='true']) {
+  color: var(--phv-added);
+}
+.phv-summary-fact[data-tone='removed']:not([aria-pressed='true']) {
+  color: var(--phv-removed);
+}
+.phv-summary-fact[data-tone='modified']:not([aria-pressed='true']) {
+  color: var(--phv-modified);
+}
+.phv-summary-more {
+  width: 20px;
+  justify-content: center;
+  padding: 0;
+}
+.phv-summary-measure-row .phv-summary-more {
+  display: inline-flex;
+  height: 18px;
+}
+.phv-summary-button .codicon {
+  font-size: 14px;
+}
+.phv-summary-spacer {
+  flex: 1 1 0;
+}
+.phv-summary-fixed {
+  display: flex;
+  flex: none;
+}
+/* A running job's slot at the bar's end: kept while none runs, so the spinner never moves the figures. */
+.phv-summary-running {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+.phv-summary-running > .codicon {
+  font-size: 14px;
+}
+.phv-summary-running[data-motion='reduced'] > .codicon-modifier-spin,
+.vscode-reduce-motion .phv-summary-running > .codicon-modifier-spin {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .phv-summary-running > .codicon-modifier-spin {
+    animation: none;
+  }
+}
+.phv-summary-popover {
+  padding: 6px;
+}
+/* An active filter or More holding one: VS Code's activity dot. */
+.phv-popover-anchor {
+  position: relative;
+  display: inline-flex;
+}
+.phv-popover-anchor[data-active]::after,
+.phv-more-button[data-active]::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--vscode-activityBarBadge-background, #0078d4);
+  pointer-events: none;
+}
+.phv-more-button {
+  position: relative;
+}
+.phv-info[data-active]::after {
+  background: var(--vscode-errorForeground, #f85149);
+}

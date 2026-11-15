@@ -1,0 +1,7 @@
+{
+  "id": "services-node",
+  "title": "Services extracted by Node",
+  "extractor": {"command": ["node", "collect.mjs"], "sources": ["collect.mjs"]},
+  "renderer": "architecture",
+  "execution": {"timeoutMs": 5000, "network": false}
+}

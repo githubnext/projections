@@ -1,0 +1,5 @@
+bin/
+obj/
+.work/
+# Output of scripts/publish.mjs: the prebuilt helper a source checkout resolves.
+publish/

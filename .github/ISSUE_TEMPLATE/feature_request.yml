@@ -1,0 +1,16 @@
+name: Feature request
+description: Suggest a projection, extractor, renderer or improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to see or do?
+      description: The change or system you want to understand, and what's missing today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: How you'd like it to work. Alternatives you considered are welcome too.

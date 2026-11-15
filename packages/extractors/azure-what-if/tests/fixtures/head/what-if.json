@@ -1,0 +1,671 @@
+{
+  "changes": [
+    {
+      "after": null,
+      "before": {
+        "apiVersion": "2024-03-02",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/disks/vm-api_OsDisk_1_8c3f0e2a",
+        "name": "vm-api_OsDisk_1_8c3f0e2a",
+        "type": "Microsoft.Compute/disks",
+        "location": "westus3",
+        "sku": {
+          "name": "Premium_LRS"
+        },
+        "properties": {
+          "diskSizeGB": 30,
+          "osType": "Linux",
+          "managedBy": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/virtualMachines/vm-api"
+        }
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/disks/vm-api_OsDisk_1_8c3f0e2a",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-07-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/virtualMachines/vm-api",
+        "name": "vm-api",
+        "type": "Microsoft.Compute/virtualMachines",
+        "location": "westus3",
+        "properties": {
+          "hardwareProfile": {
+            "vmSize": "Standard_D4s_v5"
+          },
+          "osProfile": {
+            "computerName": "vm-api",
+            "adminUsername": "shop",
+            "linuxConfiguration": {
+              "disablePasswordAuthentication": false
+            }
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "Canonical",
+              "offer": "ubuntu-24_04-lts",
+              "sku": "server",
+              "version": "latest"
+            },
+            "osDisk": {
+              "createOption": "FromImage",
+              "name": "vm-api_OsDisk_1_8c3f0e2a",
+              "managedDisk": {
+                "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/disks/vm-api_OsDisk_1_8c3f0e2a",
+                "storageAccountType": "Premium_LRS"
+              }
+            }
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkInterfaces/nic-api"
+              }
+            ]
+          },
+          "vmId": "6d1c5c1e-2f4b-4d8a-9b77-0f6a1e2c3d4b"
+        }
+      },
+      "before": {
+        "apiVersion": "2024-07-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/virtualMachines/vm-api",
+        "name": "vm-api",
+        "type": "Microsoft.Compute/virtualMachines",
+        "location": "westus3",
+        "properties": {
+          "hardwareProfile": {
+            "vmSize": "Standard_D2s_v5"
+          },
+          "osProfile": {
+            "computerName": "vm-api",
+            "adminUsername": "shop",
+            "linuxConfiguration": {
+              "disablePasswordAuthentication": false
+            }
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "Canonical",
+              "offer": "ubuntu-24_04-lts",
+              "sku": "server",
+              "version": "latest"
+            },
+            "osDisk": {
+              "createOption": "FromImage",
+              "name": "vm-api_OsDisk_1_8c3f0e2a",
+              "managedDisk": {
+                "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/disks/vm-api_OsDisk_1_8c3f0e2a",
+                "storageAccountType": "Premium_LRS"
+              }
+            }
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkInterfaces/nic-api"
+              }
+            ]
+          },
+          "vmId": "6d1c5c1e-2f4b-4d8a-9b77-0f6a1e2c3d4b"
+        }
+      },
+      "changeType": "Modify",
+      "delta": [
+        {
+          "after": "Standard_D4s_v5",
+          "before": "Standard_D2s_v5",
+          "children": null,
+          "path": "properties.hardwareProfile.vmSize",
+          "propertyChangeType": "Modify"
+        }
+      ],
+      "identifiers": null,
+      "resourceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/virtualMachines/vm-api",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-07-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/virtualMachines/vm-api/extensions/AzureMonitorLinuxAgent",
+        "name": "vm-api/AzureMonitorLinuxAgent",
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "location": "westus3",
+        "properties": {
+          "publisher": "Microsoft.Azure.Monitor",
+          "type": "AzureMonitorLinuxAgent",
+          "typeHandlerVersion": "1.33",
+          "autoUpgradeMinorVersion": true
+        }
+      },
+      "before": {
+        "apiVersion": "2024-07-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/virtualMachines/vm-api/extensions/AzureMonitorLinuxAgent",
+        "name": "vm-api/AzureMonitorLinuxAgent",
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "location": "westus3",
+        "properties": {
+          "publisher": "Microsoft.Azure.Monitor",
+          "type": "AzureMonitorLinuxAgent",
+          "typeHandlerVersion": "1.33",
+          "autoUpgradeMinorVersion": true
+        }
+      },
+      "changeType": "NoChange",
+      "delta": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/virtualMachines/vm-api/extensions/AzureMonitorLinuxAgent",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-11-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.KeyVault/vaults/kv-shop-prod",
+        "name": "kv-shop-prod",
+        "type": "Microsoft.KeyVault/vaults",
+        "location": "westus3",
+        "properties": {
+          "tenantId": "72f988bf-0000-4000-8000-2d7cd011db47",
+          "sku": {
+            "family": "A",
+            "name": "standard"
+          },
+          "publicNetworkAccess": "Disabled",
+          "networkAcls": {
+            "defaultAction": "Deny",
+            "bypass": "AzureServices",
+            "virtualNetworkRules": [
+              {
+                "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/app"
+              }
+            ]
+          },
+          "vaultUri": "https://kv-shop-prod.vault.azure.net/"
+        }
+      },
+      "before": {
+        "apiVersion": "2024-11-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.KeyVault/vaults/kv-shop-prod",
+        "name": "kv-shop-prod",
+        "type": "Microsoft.KeyVault/vaults",
+        "location": "westus3",
+        "properties": {
+          "tenantId": "72f988bf-0000-4000-8000-2d7cd011db47",
+          "sku": {
+            "family": "A",
+            "name": "standard"
+          },
+          "publicNetworkAccess": "Enabled",
+          "networkAcls": {
+            "defaultAction": "Deny",
+            "bypass": "AzureServices",
+            "virtualNetworkRules": [
+              {
+                "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/app"
+              }
+            ]
+          },
+          "vaultUri": "https://kv-shop-prod.vault.azure.net/"
+        }
+      },
+      "changeType": "Modify",
+      "delta": [
+        {
+          "after": "Disabled",
+          "before": "Enabled",
+          "children": null,
+          "path": "properties.publicNetworkAccess",
+          "propertyChangeType": "Modify"
+        }
+      ],
+      "identifiers": null,
+      "resourceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.KeyVault/vaults/kv-shop-prod",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkInterfaces/nic-api",
+        "name": "nic-api",
+        "type": "Microsoft.Network/networkInterfaces",
+        "location": "westus3",
+        "properties": {
+          "ipConfigurations": [
+            {
+              "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkInterfaces/nic-api/ipConfigurations/ipconfig1",
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAddress": "10.40.1.4",
+                "subnet": {
+                  "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/app"
+                },
+                "publicIPAddress": {
+                  "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/publicIPAddresses/pip-api"
+                }
+              }
+            }
+          ],
+          "virtualMachine": {
+            "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/virtualMachines/vm-api"
+          }
+        }
+      },
+      "before": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkInterfaces/nic-api",
+        "name": "nic-api",
+        "type": "Microsoft.Network/networkInterfaces",
+        "location": "westus3",
+        "properties": {
+          "ipConfigurations": [
+            {
+              "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkInterfaces/nic-api/ipConfigurations/ipconfig1",
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAddress": "10.40.1.4",
+                "subnet": {
+                  "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/app"
+                },
+                "publicIPAddress": {
+                  "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/publicIPAddresses/pip-api"
+                }
+              }
+            }
+          ],
+          "virtualMachine": {
+            "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/virtualMachines/vm-api"
+          }
+        }
+      },
+      "changeType": "NoChange",
+      "delta": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkInterfaces/nic-api",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkSecurityGroups/nsg-app",
+        "name": "nsg-app",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "location": "westus3",
+        "etag": "W/\"1\"",
+        "properties": {
+          "securityRules": [],
+          "subnets": [
+            {
+              "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/app"
+            }
+          ],
+          "provisioningState": "Succeeded",
+          "resourceGuid": "a1"
+        }
+      },
+      "before": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkSecurityGroups/nsg-app",
+        "name": "nsg-app",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "location": "westus3",
+        "etag": "W/\"1\"",
+        "properties": {
+          "securityRules": [],
+          "subnets": [
+            {
+              "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/app"
+            }
+          ],
+          "provisioningState": "Succeeded",
+          "resourceGuid": "a1"
+        }
+      },
+      "changeType": "NoChange",
+      "delta": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkSecurityGroups/nsg-app",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkSecurityGroups/nsg-private-endpoints",
+        "name": "nsg-private-endpoints",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "location": "westus3",
+        "properties": {}
+      },
+      "before": null,
+      "changeType": "Create",
+      "delta": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkSecurityGroups/nsg-private-endpoints",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/privateEndpoints/pe-kv-shop-prod",
+        "name": "pe-kv-shop-prod",
+        "type": "Microsoft.Network/privateEndpoints",
+        "location": "westus3",
+        "properties": {
+          "subnet": {
+            "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/private-endpoints"
+          },
+          "privateLinkServiceConnections": [
+            {
+              "name": "vault",
+              "properties": {
+                "privateLinkServiceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.KeyVault/vaults/kv-shop-prod",
+                "groupIds": [
+                  "vault"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "before": null,
+      "changeType": "Create",
+      "delta": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/privateEndpoints/pe-kv-shop-prod",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/publicIPAddresses/pip-api",
+        "name": "pip-api",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "location": "westus3",
+        "sku": {
+          "name": "Standard",
+          "tier": "Regional"
+        },
+        "properties": {
+          "publicIPAllocationMethod": "Static",
+          "ipAddress": "20.168.12.40",
+          "ipConfiguration": {
+            "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkInterfaces/nic-api/ipConfigurations/ipconfig1"
+          }
+        }
+      },
+      "before": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/publicIPAddresses/pip-api",
+        "name": "pip-api",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "location": "westus3",
+        "sku": {
+          "name": "Standard",
+          "tier": "Regional"
+        },
+        "properties": {
+          "publicIPAllocationMethod": "Static",
+          "ipAddress": "20.168.12.40",
+          "ipConfiguration": {
+            "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkInterfaces/nic-api/ipConfigurations/ipconfig1"
+          }
+        }
+      },
+      "changeType": "NoChange",
+      "delta": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/publicIPAddresses/pip-api",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "changeType": "NoChange",
+      "before": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop",
+        "name": "vnet-shop",
+        "type": "Microsoft.Network/virtualNetworks",
+        "location": "westus3",
+        "properties": {
+          "addressSpace": {
+            "addressPrefixes": [
+              "10.40.0.0/16"
+            ]
+          },
+          "subnets": [
+            {
+              "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/app",
+              "name": "app"
+            },
+            {
+              "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/data",
+              "name": "data"
+            }
+          ],
+          "provisioningState": "Succeeded"
+        }
+      },
+      "after": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop",
+        "name": "vnet-shop",
+        "type": "Microsoft.Network/virtualNetworks",
+        "location": "westus3",
+        "properties": {
+          "addressSpace": {
+            "addressPrefixes": [
+              "10.40.0.0/16"
+            ]
+          },
+          "subnets": [
+            {
+              "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/app",
+              "name": "app"
+            },
+            {
+              "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/data",
+              "name": "data"
+            },
+            {
+              "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/private-endpoints",
+              "name": "private-endpoints"
+            }
+          ],
+          "provisioningState": "Succeeded"
+        }
+      },
+      "delta": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/app",
+        "name": "vnet-shop/app",
+        "type": "Microsoft.Network/virtualNetworks/subnets",
+        "properties": {
+          "addressPrefix": "10.40.1.0/24",
+          "networkSecurityGroup": {
+            "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkSecurityGroups/nsg-app"
+          },
+          "ipConfigurations": [
+            {
+              "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkInterfaces/nic-api/ipConfigurations/ipconfig1"
+            }
+          ]
+        }
+      },
+      "before": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/app",
+        "name": "vnet-shop/app",
+        "type": "Microsoft.Network/virtualNetworks/subnets",
+        "properties": {
+          "addressPrefix": "10.40.1.0/24",
+          "networkSecurityGroup": {
+            "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkSecurityGroups/nsg-app"
+          },
+          "ipConfigurations": [
+            {
+              "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkInterfaces/nic-api/ipConfigurations/ipconfig1"
+            }
+          ]
+        }
+      },
+      "changeType": "NoChange",
+      "delta": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/app",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/data",
+        "name": "vnet-shop/data",
+        "type": "Microsoft.Network/virtualNetworks/subnets",
+        "properties": {
+          "addressPrefix": "10.40.2.0/24",
+          "serviceEndpoints": [
+            {
+              "service": "Microsoft.Storage",
+              "locations": [
+                "westus3"
+              ]
+            }
+          ]
+        }
+      },
+      "before": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/data",
+        "name": "vnet-shop/data",
+        "type": "Microsoft.Network/virtualNetworks/subnets",
+        "properties": {
+          "addressPrefix": "10.40.2.0/24",
+          "serviceEndpoints": [
+            {
+              "service": "Microsoft.Storage",
+              "locations": [
+                "westus3"
+              ]
+            }
+          ]
+        }
+      },
+      "changeType": "NoChange",
+      "delta": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/data",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-05-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/private-endpoints",
+        "name": "vnet-shop/private-endpoints",
+        "type": "Microsoft.Network/virtualNetworks/subnets",
+        "properties": {
+          "addressPrefix": "10.40.3.0/24",
+          "networkSecurityGroup": {
+            "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkSecurityGroups/nsg-private-endpoints"
+          },
+          "privateEndpointNetworkPolicies": "Enabled"
+        }
+      },
+      "before": null,
+      "changeType": "Create",
+      "delta": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/private-endpoints",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-01-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Storage/storageAccounts/stshopprod",
+        "name": "stshopprod",
+        "type": "Microsoft.Storage/storageAccounts",
+        "location": "westus3",
+        "kind": "StorageV2",
+        "sku": {
+          "name": "Standard_ZRS",
+          "tier": "Standard"
+        },
+        "properties": {
+          "networkAcls": {
+            "defaultAction": "Deny",
+            "bypass": "AzureServices",
+            "virtualNetworkRules": [
+              {
+                "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/data",
+                "action": "Allow"
+              }
+            ]
+          },
+          "primaryEndpoints": {
+            "blob": "https://stshopprod.blob.core.windows.net/"
+          },
+          "keyCreationTime": {
+            "key1": "2026-03-02T17:40:11Z",
+            "key2": "2026-03-02T17:40:11Z"
+          }
+        }
+      },
+      "before": {
+        "apiVersion": "2024-01-01",
+        "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Storage/storageAccounts/stshopprod",
+        "name": "stshopprod",
+        "type": "Microsoft.Storage/storageAccounts",
+        "location": "westus3",
+        "kind": "StorageV2",
+        "sku": {
+          "name": "Standard_ZRS",
+          "tier": "Standard"
+        },
+        "properties": {
+          "networkAcls": {
+            "defaultAction": "Deny",
+            "bypass": "AzureServices",
+            "virtualNetworkRules": [
+              {
+                "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/data",
+                "action": "Allow"
+              }
+            ]
+          },
+          "primaryEndpoints": {
+            "blob": "https://stshopprod.blob.core.windows.net/"
+          },
+          "keyCreationTime": {
+            "key1": "2026-03-02T17:40:11Z",
+            "key2": "2026-03-02T17:40:11Z"
+          }
+        }
+      },
+      "changeType": "NoChange",
+      "delta": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Storage/storageAccounts/stshopprod",
+      "symbolicName": null,
+      "unsupportedReason": null
+    }
+  ],
+  "diagnostics": null,
+  "error": null,
+  "potentialChanges": null,
+  "status": "Succeeded"
+}

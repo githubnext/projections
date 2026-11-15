@@ -1,0 +1,45 @@
+{
+  "id": "self-topology",
+  "title": "System topology",
+  "description": "Every component of the open-source product (crates, npm packages, WebAssembly modules, helpers): what it is for, its size, languages and assurance, where it ships and runs, how it depends on, bundles, loads, spawns or messages the others, and what its source does (JSON, filesystem, process, network, DOM, unsafe…). Structural rules flag a change that breaks them.",
+  "extractor": {
+    "command": ["node", ".github/projections/self-topology/extract.mjs"],
+    "sources": [
+      ".github/projections/self-topology/extract.mjs",
+      ".github/projections/self-topology/facts.mjs",
+      ".github/projections/self-topology/releases.mjs"
+    ]
+  },
+  "comparator": {
+    "file": ".github/projections/self-topology/self-topology.comparator.yaml",
+    "options": {
+      "engineJsonBoundary": ["src/main", "src/parse", "src/wasm"],
+      "pureRendererCapabilities": ["fs", "network", "process"],
+      "rendererExemptions": ["packages/renderers/harness", "packages/renderers/testing"]
+    }
+  },
+  "renderer": "architecture",
+  "presentation": {
+    "rendererOptions": {
+      "subtitle": "/data/description",
+      "icon": "/data/icon",
+      "sizeBy": "/data/tokens",
+      "colorBy": "/data/language",
+      "highlights": "/data/verification",
+      "labels": "/data/traits",
+      "tags": "/data/runs",
+      "relationships": "depends-on"
+    }
+  },
+  "inputs": {
+    "roots": [{"path": "."}],
+    "exclude": ["examples/", "cli/templates/"],
+    "devDependencies": false
+  },
+  "execution": {
+    "timeoutMs": 120000,
+    "environment": ["HOME", "CARGO_HOME", "RUSTUP_HOME"],
+    "network": false,
+    "determinism": "environmental"
+  }
+}

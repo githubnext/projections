@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=../../../packages/schemas/schemas/comparator/v0.json
+#
+# For extractions with generated values (summaries a model wrote) whose basis
+# records the model: a change that only regenerated text with another model
+# is still a change, but a minor one, so it goes last and says so.
+format: projections.comparator
+version: 0
+description: >-
+  Generated values regenerated only because the model changed are classified as model upgrades and gathered
+  in a final step; changes whose input or prompt moved keep their place.
+
+classify:
+  where: generated.only(change, ['model'])
+  summary: "'%s was regenerated with a different model'.format([prose.code(item.label)])"
+
+steps:
+  add:
+    - changes: generated.only(change, ['model'])
+      kind: restructure
+      place: end
+      summary: "'Regenerated with a different model'"
+
+metadata:
+  values:
+    # Which basis parts moved, per change with generated values.
+    regenerated: 'maps.fromEntries(changes.filter(c, size(generated.because(c)) > 0).map(c, [c.id, generated.because(c)]))'

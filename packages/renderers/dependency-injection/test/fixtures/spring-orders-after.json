@@ -1,0 +1,1078 @@
+{
+  "protocolVersion": 0,
+  "schema": "architecture/v0",
+  "vocabularies": ["dependency-injection/v0"],
+  "entities": [
+    {
+      "id": "implementation:amountValidator",
+      "kind": "implementation",
+      "label": "AmountValidator",
+      "data": {
+        "type": "com.example.orders.orders.AmountValidator"
+      }
+    },
+    {
+      "id": "implementation:auditConfiguration",
+      "kind": "implementation",
+      "label": "AuditConfiguration",
+      "data": {
+        "type": "com.example.orders.audit.AuditConfiguration"
+      }
+    },
+    {
+      "id": "implementation:auditLog",
+      "kind": "implementation",
+      "label": "AuditLog",
+      "data": {
+        "type": "com.example.orders.audit.AuditLog"
+      }
+    },
+    {
+      "id": "implementation:fraudCheck",
+      "kind": "implementation",
+      "label": "FraudCheck",
+      "data": {
+        "type": "com.example.orders.fraud.FraudCheck"
+      }
+    },
+    {
+      "id": "implementation:notificationService",
+      "kind": "implementation",
+      "label": "NotificationService",
+      "data": {
+        "type": "com.example.orders.orders.NotificationService"
+      }
+    },
+    {
+      "id": "implementation:ordersApplication",
+      "kind": "implementation",
+      "label": "OrdersApplication",
+      "data": {
+        "type": "com.example.orders.OrdersApplication"
+      }
+    },
+    {
+      "id": "implementation:ordersController",
+      "kind": "implementation",
+      "label": "OrdersController",
+      "data": {
+        "type": "com.example.orders.orders.OrdersController"
+      }
+    },
+    {
+      "id": "implementation:ordersRepository",
+      "kind": "implementation",
+      "label": "OrdersRepository",
+      "data": {
+        "type": "com.example.orders.orders.OrdersRepository"
+      }
+    },
+    {
+      "id": "implementation:ordersService",
+      "kind": "implementation",
+      "label": "OrdersService",
+      "data": {
+        "type": "com.example.orders.orders.OrdersService"
+      }
+    },
+    {
+      "id": "implementation:paymentGateway",
+      "kind": "implementation",
+      "label": "AdyenGateway",
+      "data": {
+        "type": "com.example.orders.payments.AdyenGateway"
+      }
+    },
+    {
+      "id": "implementation:payments-com.example.orders.payments.PaymentProperties",
+      "kind": "implementation",
+      "label": "PaymentProperties",
+      "data": {
+        "type": "com.example.orders.payments.PaymentProperties"
+      }
+    },
+    {
+      "id": "implementation:paymentsConfiguration",
+      "kind": "implementation",
+      "label": "PaymentsConfiguration",
+      "data": {
+        "type": "com.example.orders.payments.PaymentsConfiguration"
+      }
+    },
+    {
+      "id": "implementation:reportService",
+      "kind": "implementation",
+      "label": "ReportService",
+      "data": {
+        "type": "com.example.orders.orders.ReportService"
+      }
+    },
+    {
+      "id": "implementation:requestContext",
+      "kind": "implementation",
+      "label": "RequestContext",
+      "data": {
+        "type": "com.example.orders.orders.RequestContext"
+      }
+    },
+    {
+      "id": "implementation:seed",
+      "kind": "implementation",
+      "label": "CommandLineRunner",
+      "data": {
+        "type": "org.springframework.boot.CommandLineRunner"
+      }
+    },
+    {
+      "id": "implementation:stockValidator",
+      "kind": "implementation",
+      "label": "StockValidator",
+      "data": {
+        "type": "com.example.orders.orders.StockValidator"
+      }
+    },
+    {
+      "id": "implementation:systemClock",
+      "kind": "implementation",
+      "label": "SystemClock",
+      "data": {
+        "type": "java.time.Clock.SystemClock"
+      }
+    },
+    {
+      "id": "implementation:timeConfiguration",
+      "kind": "implementation",
+      "label": "TimeConfiguration",
+      "data": {
+        "type": "com.example.orders.time.TimeConfiguration"
+      }
+    },
+    {
+      "id": "implementation:utcClock",
+      "kind": "implementation",
+      "label": "SystemClock",
+      "data": {
+        "type": "java.time.Clock.SystemClock"
+      }
+    },
+    {
+      "id": "service:amountValidator",
+      "kind": "service",
+      "label": "amountValidator",
+      "data": {
+        "type": "com.example.orders.orders.AmountValidator",
+        "name": "amountValidator"
+      }
+    },
+    {
+      "id": "service:amountValidator:registration",
+      "kind": "registration",
+      "label": "amountValidator (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "component",
+        "implementation": "com.example.orders.orders.AmountValidator",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:auditConfiguration",
+      "kind": "service",
+      "label": "auditConfiguration",
+      "data": {
+        "type": "com.example.orders.audit.AuditConfiguration",
+        "name": "auditConfiguration"
+      }
+    },
+    {
+      "id": "service:auditConfiguration:registration",
+      "kind": "registration",
+      "label": "auditConfiguration (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "component",
+        "implementation": "com.example.orders.audit.AuditConfiguration",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:auditLog",
+      "kind": "service",
+      "label": "auditLog",
+      "data": {
+        "type": "com.example.orders.audit.AuditLog",
+        "name": "auditLog",
+        "aliases": [
+          "auditTrail"
+        ]
+      }
+    },
+    {
+      "id": "service:auditLog:registration",
+      "kind": "registration",
+      "label": "auditLog (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "factory-method",
+        "implementation": "com.example.orders.audit.AuditLog",
+        "factory": "com.example.orders.audit.AuditConfiguration#auditLog()",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:fraudCheck",
+      "kind": "service",
+      "label": "fraudCheck",
+      "data": {
+        "type": "com.example.orders.fraud.FraudCheck",
+        "name": "fraudCheck"
+      }
+    },
+    {
+      "id": "service:fraudCheck:registration",
+      "kind": "registration",
+      "label": "fraudCheck (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "component",
+        "implementation": "com.example.orders.fraud.FraudCheck",
+        "role": "application",
+        "conditions": [
+          "@ConditionalOnProperty (orders.fraud-check.enabled=true) matched"
+        ],
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:notificationService",
+      "kind": "service",
+      "label": "notificationService",
+      "data": {
+        "type": "com.example.orders.orders.NotificationService",
+        "name": "notificationService"
+      }
+    },
+    {
+      "id": "service:notificationService:registration",
+      "kind": "registration",
+      "label": "notificationService (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "component",
+        "implementation": "com.example.orders.orders.NotificationService",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:ordersApplication",
+      "kind": "service",
+      "label": "ordersApplication",
+      "data": {
+        "type": "com.example.orders.OrdersApplication",
+        "name": "ordersApplication"
+      }
+    },
+    {
+      "id": "service:ordersApplication:registration",
+      "kind": "registration",
+      "label": "ordersApplication (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "component",
+        "implementation": "com.example.orders.OrdersApplication",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:ordersController",
+      "kind": "service",
+      "label": "ordersController",
+      "data": {
+        "type": "com.example.orders.orders.OrdersController",
+        "name": "ordersController"
+      }
+    },
+    {
+      "id": "service:ordersController:registration",
+      "kind": "registration",
+      "label": "ordersController (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "component",
+        "implementation": "com.example.orders.orders.OrdersController",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:ordersRepository",
+      "kind": "service",
+      "label": "ordersRepository",
+      "data": {
+        "type": "com.example.orders.orders.OrdersRepository",
+        "name": "ordersRepository"
+      }
+    },
+    {
+      "id": "service:ordersRepository:registration",
+      "kind": "registration",
+      "label": "ordersRepository (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "component",
+        "implementation": "com.example.orders.orders.OrdersRepository",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:ordersService",
+      "kind": "service",
+      "label": "ordersService",
+      "data": {
+        "type": "com.example.orders.orders.OrdersService",
+        "name": "ordersService"
+      }
+    },
+    {
+      "id": "service:ordersService:registration",
+      "kind": "registration",
+      "label": "ordersService (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "component",
+        "implementation": "com.example.orders.orders.OrdersService",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:paymentGateway",
+      "kind": "service",
+      "label": "paymentGateway",
+      "data": {
+        "type": "com.example.orders.payments.PaymentGateway",
+        "name": "paymentGateway"
+      }
+    },
+    {
+      "id": "service:paymentGateway:registration",
+      "kind": "registration",
+      "label": "paymentGateway (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "factory-method",
+        "implementation": "com.example.orders.payments.AdyenGateway",
+        "factory": "com.example.orders.payments.PaymentsConfiguration#paymentGateway(PaymentProperties)",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:payments-com.example.orders.payments.PaymentProperties",
+      "kind": "service",
+      "label": "payments-com.example.orders.payments.PaymentProperties",
+      "data": {
+        "type": "com.example.orders.payments.PaymentProperties",
+        "name": "payments-com.example.orders.payments.PaymentProperties"
+      }
+    },
+    {
+      "id": "service:payments-com.example.orders.payments.PaymentProperties:registration",
+      "kind": "registration",
+      "label": "payments-com.example.orders.payments.PaymentProperties (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "component",
+        "implementation": "com.example.orders.payments.PaymentProperties",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:paymentsConfiguration",
+      "kind": "service",
+      "label": "paymentsConfiguration",
+      "data": {
+        "type": "com.example.orders.payments.PaymentsConfiguration",
+        "name": "paymentsConfiguration"
+      }
+    },
+    {
+      "id": "service:paymentsConfiguration:registration",
+      "kind": "registration",
+      "label": "paymentsConfiguration (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "component",
+        "implementation": "com.example.orders.payments.PaymentsConfiguration",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:reportService",
+      "kind": "service",
+      "label": "reportService",
+      "data": {
+        "type": "com.example.orders.orders.ReportService",
+        "name": "reportService"
+      }
+    },
+    {
+      "id": "service:reportService:registration",
+      "kind": "registration",
+      "label": "reportService (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "component",
+        "implementation": "com.example.orders.orders.ReportService",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:requestContext",
+      "kind": "service",
+      "label": "requestContext",
+      "data": {
+        "type": "com.example.orders.orders.RequestContext",
+        "name": "requestContext"
+      }
+    },
+    {
+      "id": "service:requestContext:registration",
+      "kind": "registration",
+      "label": "requestContext (request)",
+      "data": {
+        "lifetime": "scoped",
+        "scope": "request",
+        "ordinal": 0,
+        "registrationKind": "component",
+        "implementation": "com.example.orders.orders.RequestContext",
+        "role": "application",
+        "proxied": true,
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:seed",
+      "kind": "service",
+      "label": "seed",
+      "data": {
+        "type": "org.springframework.boot.CommandLineRunner",
+        "name": "seed"
+      }
+    },
+    {
+      "id": "service:seed:registration",
+      "kind": "registration",
+      "label": "seed (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "factory-method",
+        "implementation": "org.springframework.boot.CommandLineRunner",
+        "factory": "com.example.orders.OrdersApplication#seed()",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:stockValidator",
+      "kind": "service",
+      "label": "stockValidator",
+      "data": {
+        "type": "com.example.orders.orders.StockValidator",
+        "name": "stockValidator"
+      }
+    },
+    {
+      "id": "service:stockValidator:registration",
+      "kind": "registration",
+      "label": "stockValidator (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "component",
+        "implementation": "com.example.orders.orders.StockValidator",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:systemClock",
+      "kind": "service",
+      "label": "systemClock",
+      "data": {
+        "type": "java.time.Clock",
+        "name": "systemClock"
+      }
+    },
+    {
+      "id": "service:systemClock:registration",
+      "kind": "registration",
+      "label": "systemClock (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "factory-method",
+        "implementation": "java.time.Clock.SystemClock",
+        "factory": "com.example.orders.time.TimeConfiguration#systemClock()",
+        "primary": true,
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:timeConfiguration",
+      "kind": "service",
+      "label": "timeConfiguration",
+      "data": {
+        "type": "com.example.orders.time.TimeConfiguration",
+        "name": "timeConfiguration"
+      }
+    },
+    {
+      "id": "service:timeConfiguration:registration",
+      "kind": "registration",
+      "label": "timeConfiguration (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "component",
+        "implementation": "com.example.orders.time.TimeConfiguration",
+        "role": "application",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:utcClock",
+      "kind": "service",
+      "label": "utcClock",
+      "data": {
+        "type": "java.time.Clock",
+        "name": "utcClock"
+      }
+    },
+    {
+      "id": "service:utcClock:registration",
+      "kind": "registration",
+      "label": "utcClock (singleton)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "singleton",
+        "ordinal": 0,
+        "registrationKind": "factory-method",
+        "implementation": "java.time.Clock.SystemClock",
+        "factory": "com.example.orders.time.TimeConfiguration#utcClock()",
+        "role": "application",
+        "origin": "application"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "implementation:notificationService:dependsOn:constructor:0",
+      "kind": "dependsOn",
+      "from": "implementation:notificationService",
+      "to": "service:auditLog",
+      "label": "audit",
+      "data": {
+        "injection": "constructor",
+        "parameter": "audit",
+        "position": 0,
+        "requestedType": "com.example.orders.audit.AuditLog",
+        "optional": false,
+        "collection": false
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:ordersController:dependsOn:constructor:0",
+      "kind": "dependsOn",
+      "from": "implementation:ordersController",
+      "to": "service:ordersService",
+      "label": "orders",
+      "data": {
+        "injection": "constructor",
+        "parameter": "orders",
+        "position": 0,
+        "requestedType": "com.example.orders.orders.OrdersService",
+        "optional": false,
+        "collection": false
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:ordersController:dependsOn:constructor:1",
+      "kind": "dependsOn",
+      "from": "implementation:ordersController",
+      "to": "service:requestContext",
+      "label": "context",
+      "data": {
+        "injection": "constructor",
+        "parameter": "context",
+        "position": 1,
+        "requestedType": "com.example.orders.orders.RequestContext",
+        "optional": false,
+        "collection": false
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:ordersService:dependsOn:constructor:0",
+      "kind": "dependsOn",
+      "from": "implementation:ordersService",
+      "to": "service:ordersRepository",
+      "label": "repository",
+      "data": {
+        "injection": "constructor",
+        "parameter": "repository",
+        "position": 0,
+        "requestedType": "com.example.orders.orders.OrdersRepository",
+        "optional": false,
+        "collection": false
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:ordersService:dependsOn:constructor:1",
+      "kind": "dependsOn",
+      "from": "implementation:ordersService",
+      "to": "service:paymentGateway",
+      "label": "payments",
+      "data": {
+        "injection": "constructor",
+        "parameter": "payments",
+        "position": 1,
+        "requestedType": "com.example.orders.payments.PaymentGateway",
+        "optional": false,
+        "collection": false
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:ordersService:dependsOn:constructor:2:amountValidator",
+      "kind": "dependsOn",
+      "from": "implementation:ordersService",
+      "to": "service:amountValidator",
+      "label": "validators",
+      "data": {
+        "injection": "constructor",
+        "parameter": "validators",
+        "position": 2,
+        "requestedType": "com.example.orders.orders.OrderValidator",
+        "optional": false,
+        "collection": true
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:ordersService:dependsOn:constructor:2:stockValidator",
+      "kind": "dependsOn",
+      "from": "implementation:ordersService",
+      "to": "service:stockValidator",
+      "label": "validators",
+      "data": {
+        "injection": "constructor",
+        "parameter": "validators",
+        "position": 2,
+        "requestedType": "com.example.orders.orders.OrderValidator",
+        "optional": false,
+        "collection": true
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:ordersService:dependsOn:constructor:3",
+      "kind": "dependsOn",
+      "from": "implementation:ordersService",
+      "to": "service:systemClock",
+      "label": "clock",
+      "data": {
+        "injection": "constructor",
+        "parameter": "clock",
+        "position": 3,
+        "requestedType": "java.time.Clock",
+        "optional": false,
+        "collection": false
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:ordersService:dependsOn:constructor:4",
+      "kind": "dependsOn",
+      "from": "implementation:ordersService",
+      "to": "service:auditLog",
+      "label": "audit",
+      "data": {
+        "injection": "constructor",
+        "parameter": "audit",
+        "position": 4,
+        "requestedType": "com.example.orders.audit.AuditLog",
+        "optional": false,
+        "collection": false
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:ordersService:dependsOn:constructor:5",
+      "kind": "dependsOn",
+      "from": "implementation:ordersService",
+      "to": "service:fraudCheck",
+      "label": "fraud",
+      "data": {
+        "injection": "constructor",
+        "parameter": "fraud",
+        "position": 5,
+        "requestedType": "com.example.orders.fraud.FraudCheck",
+        "optional": true,
+        "collection": false
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:ordersService:dependsOn:constructor:7",
+      "kind": "dependsOn",
+      "from": "implementation:ordersService",
+      "to": "service:notificationService",
+      "label": "notifications",
+      "data": {
+        "injection": "constructor",
+        "parameter": "notifications",
+        "position": 7,
+        "requestedType": "com.example.orders.orders.NotificationService",
+        "optional": false,
+        "collection": false
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:paymentGateway:dependsOn:factory-method:0",
+      "kind": "dependsOn",
+      "from": "implementation:paymentGateway",
+      "to": "service:payments-com.example.orders.payments.PaymentProperties",
+      "label": "properties",
+      "data": {
+        "injection": "factory-method",
+        "parameter": "properties",
+        "position": 0,
+        "requestedType": "com.example.orders.payments.PaymentProperties",
+        "optional": false,
+        "collection": false
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:reportService:dependsOn:constructor:0",
+      "kind": "dependsOn",
+      "from": "implementation:reportService",
+      "to": "service:utcClock",
+      "label": "clock",
+      "data": {
+        "injection": "constructor",
+        "parameter": "clock",
+        "position": 0,
+        "requestedType": "java.time.Clock",
+        "qualifier": "utcClock",
+        "optional": false,
+        "collection": false
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:reportService:dependsOn:field:repository",
+      "kind": "dependsOn",
+      "from": "implementation:reportService",
+      "to": "service:ordersRepository",
+      "label": "repository",
+      "data": {
+        "injection": "field",
+        "parameter": "repository",
+        "requestedType": "com.example.orders.orders.OrdersRepository",
+        "optional": false,
+        "collection": false
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "service:amountValidator:registration:binds",
+      "kind": "registration",
+      "from": "service:amountValidator",
+      "to": "service:amountValidator:registration"
+    },
+    {
+      "id": "service:amountValidator:registration:implements",
+      "kind": "implements",
+      "from": "service:amountValidator:registration",
+      "to": "implementation:amountValidator"
+    },
+    {
+      "id": "service:auditConfiguration:registration:binds",
+      "kind": "registration",
+      "from": "service:auditConfiguration",
+      "to": "service:auditConfiguration:registration"
+    },
+    {
+      "id": "service:auditConfiguration:registration:implements",
+      "kind": "implements",
+      "from": "service:auditConfiguration:registration",
+      "to": "implementation:auditConfiguration"
+    },
+    {
+      "id": "service:auditLog:registration:binds",
+      "kind": "registration",
+      "from": "service:auditLog",
+      "to": "service:auditLog:registration"
+    },
+    {
+      "id": "service:auditLog:registration:implements",
+      "kind": "implements",
+      "from": "service:auditLog:registration",
+      "to": "implementation:auditLog"
+    },
+    {
+      "id": "service:fraudCheck:registration:binds",
+      "kind": "registration",
+      "from": "service:fraudCheck",
+      "to": "service:fraudCheck:registration"
+    },
+    {
+      "id": "service:fraudCheck:registration:implements",
+      "kind": "implements",
+      "from": "service:fraudCheck:registration",
+      "to": "implementation:fraudCheck"
+    },
+    {
+      "id": "service:notificationService:registration:binds",
+      "kind": "registration",
+      "from": "service:notificationService",
+      "to": "service:notificationService:registration"
+    },
+    {
+      "id": "service:notificationService:registration:implements",
+      "kind": "implements",
+      "from": "service:notificationService:registration",
+      "to": "implementation:notificationService"
+    },
+    {
+      "id": "service:ordersApplication:registration:binds",
+      "kind": "registration",
+      "from": "service:ordersApplication",
+      "to": "service:ordersApplication:registration"
+    },
+    {
+      "id": "service:ordersApplication:registration:implements",
+      "kind": "implements",
+      "from": "service:ordersApplication:registration",
+      "to": "implementation:ordersApplication"
+    },
+    {
+      "id": "service:ordersController:registration:binds",
+      "kind": "registration",
+      "from": "service:ordersController",
+      "to": "service:ordersController:registration"
+    },
+    {
+      "id": "service:ordersController:registration:implements",
+      "kind": "implements",
+      "from": "service:ordersController:registration",
+      "to": "implementation:ordersController"
+    },
+    {
+      "id": "service:ordersRepository:registration:binds",
+      "kind": "registration",
+      "from": "service:ordersRepository",
+      "to": "service:ordersRepository:registration"
+    },
+    {
+      "id": "service:ordersRepository:registration:implements",
+      "kind": "implements",
+      "from": "service:ordersRepository:registration",
+      "to": "implementation:ordersRepository"
+    },
+    {
+      "id": "service:ordersService:registration:binds",
+      "kind": "registration",
+      "from": "service:ordersService",
+      "to": "service:ordersService:registration"
+    },
+    {
+      "id": "service:ordersService:registration:implements",
+      "kind": "implements",
+      "from": "service:ordersService:registration",
+      "to": "implementation:ordersService"
+    },
+    {
+      "id": "service:paymentGateway:registration:binds",
+      "kind": "registration",
+      "from": "service:paymentGateway",
+      "to": "service:paymentGateway:registration"
+    },
+    {
+      "id": "service:paymentGateway:registration:implements",
+      "kind": "implements",
+      "from": "service:paymentGateway:registration",
+      "to": "implementation:paymentGateway"
+    },
+    {
+      "id": "service:payments-com.example.orders.payments.PaymentProperties:registration:binds",
+      "kind": "registration",
+      "from": "service:payments-com.example.orders.payments.PaymentProperties",
+      "to": "service:payments-com.example.orders.payments.PaymentProperties:registration"
+    },
+    {
+      "id": "service:payments-com.example.orders.payments.PaymentProperties:registration:implements",
+      "kind": "implements",
+      "from": "service:payments-com.example.orders.payments.PaymentProperties:registration",
+      "to": "implementation:payments-com.example.orders.payments.PaymentProperties"
+    },
+    {
+      "id": "service:paymentsConfiguration:registration:binds",
+      "kind": "registration",
+      "from": "service:paymentsConfiguration",
+      "to": "service:paymentsConfiguration:registration"
+    },
+    {
+      "id": "service:paymentsConfiguration:registration:implements",
+      "kind": "implements",
+      "from": "service:paymentsConfiguration:registration",
+      "to": "implementation:paymentsConfiguration"
+    },
+    {
+      "id": "service:reportService:registration:binds",
+      "kind": "registration",
+      "from": "service:reportService",
+      "to": "service:reportService:registration"
+    },
+    {
+      "id": "service:reportService:registration:implements",
+      "kind": "implements",
+      "from": "service:reportService:registration",
+      "to": "implementation:reportService"
+    },
+    {
+      "id": "service:requestContext:registration:binds",
+      "kind": "registration",
+      "from": "service:requestContext",
+      "to": "service:requestContext:registration"
+    },
+    {
+      "id": "service:requestContext:registration:implements",
+      "kind": "implements",
+      "from": "service:requestContext:registration",
+      "to": "implementation:requestContext"
+    },
+    {
+      "id": "service:seed:registration:binds",
+      "kind": "registration",
+      "from": "service:seed",
+      "to": "service:seed:registration"
+    },
+    {
+      "id": "service:seed:registration:implements",
+      "kind": "implements",
+      "from": "service:seed:registration",
+      "to": "implementation:seed"
+    },
+    {
+      "id": "service:stockValidator:registration:binds",
+      "kind": "registration",
+      "from": "service:stockValidator",
+      "to": "service:stockValidator:registration"
+    },
+    {
+      "id": "service:stockValidator:registration:implements",
+      "kind": "implements",
+      "from": "service:stockValidator:registration",
+      "to": "implementation:stockValidator"
+    },
+    {
+      "id": "service:systemClock:registration:binds",
+      "kind": "registration",
+      "from": "service:systemClock",
+      "to": "service:systemClock:registration"
+    },
+    {
+      "id": "service:systemClock:registration:implements",
+      "kind": "implements",
+      "from": "service:systemClock:registration",
+      "to": "implementation:systemClock"
+    },
+    {
+      "id": "service:timeConfiguration:registration:binds",
+      "kind": "registration",
+      "from": "service:timeConfiguration",
+      "to": "service:timeConfiguration:registration"
+    },
+    {
+      "id": "service:timeConfiguration:registration:implements",
+      "kind": "implements",
+      "from": "service:timeConfiguration:registration",
+      "to": "implementation:timeConfiguration"
+    },
+    {
+      "id": "service:utcClock:registration:binds",
+      "kind": "registration",
+      "from": "service:utcClock",
+      "to": "service:utcClock:registration"
+    },
+    {
+      "id": "service:utcClock:registration:implements",
+      "kind": "implements",
+      "from": "service:utcClock:registration",
+      "to": "implementation:utcClock"
+    }
+  ],
+  "metadata": {
+    "springFramework": "7.0.10",
+    "springBoot": "4.1.2",
+    "mainClass": "com.example.orders.OrdersApplication",
+    "include": "application",
+    "applicationPackages": [
+      "com.example.orders"
+    ],
+    "limitations": [
+      "Built without a web server (spring.main.web-application-type=none) and abandoned before runners: web-only auto-configuration is absent.",
+      "Dependencies are the bean factory's own resolutions while the context refreshed; beans it did not create (prototypes never requested, request or session scoped targets, lazy beans) are resolved from their constructors, factory methods and @Autowired members without creating them, and are derived.",
+      "Resolvable dependencies that are not beans (BeanFactory, ApplicationContext, ResourceLoader, ApplicationEventPublisher) and @Value injections are not dependencies.",
+      "Beans defined in the application's packages, plus the beans they inject."
+    ]
+  }
+}

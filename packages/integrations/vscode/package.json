@@ -1,0 +1,1522 @@
+{
+  "name": "projections-vscode",
+  "displayName": "Projections",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "description": "See the systems in your codebase, and how a change reshapes them: the Projections Inspector, Explore, Adopt and Add to CI in VS Code, backed by the projections CLI",
+  "icon": "media/icon.png",
+  "publisher": "githubnext",
+  "homepage": "https://github.com/githubnext/projections/tree/main/packages/integrations/vscode#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/githubnext/projections.git",
+    "directory": "packages/integrations/vscode"
+  },
+  "bugs": {
+    "url": "https://github.com/githubnext/projections/issues"
+  },
+  "type": "module",
+  "main": "./dist/extension.cjs",
+  "engines": {
+    "vscode": "^1.95.0",
+    "node": ">=26.12.1"
+  },
+  "categories": [
+    "Visualization",
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "projections",
+    "architecture",
+    "diagram",
+    "dependencies",
+    "code review",
+    "pull request",
+    "visualization",
+    "json schema"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/*.comparator.test.yaml",
+    "workspaceContains:**/*.comparator.test.yml",
+    "workspaceContains:**/*.comparator.yaml",
+    "workspaceContains:**/*.comparator.yml",
+    "workspaceContains:.github/projections/*.json",
+    "workspaceContains:.projections/*.json"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "In a Restricted Mode workspace the Inspector runs only built-in extractors and renderers; the repository's own extractor and renderer code runs once the workspace is trusted (projections serve --stdio --trust)."
+    },
+    "virtualWorkspaces": false
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "projections.exploreRepository",
+        "title": "Explore Repository",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.choosePullRequest",
+        "title": "Show a Pull Request…",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.goToSource",
+        "title": "Go to Source…",
+        "category": "Projections",
+        "icon": "$(code)"
+      },
+      {
+        "command": "projections.findRecentChanges",
+        "title": "Find Recent Changes",
+        "category": "Projections",
+        "icon": "$(refresh)",
+        "enablement": "workspaceFolderCount > 0"
+      },
+      {
+        "command": "projections.viewing.choose",
+        "title": "Show This",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.viewing.bookmark",
+        "title": "Bookmark",
+        "category": "Projections",
+        "icon": "$(bookmark)"
+      },
+      {
+        "command": "projections.viewing.remove",
+        "title": "Remove",
+        "category": "Projections",
+        "icon": "$(close)"
+      },
+      {
+        "command": "projections.openInspector",
+        "title": "Open Inspector",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.compareBranchWithDefault",
+        "title": "Compare Branch With Default",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.adopt",
+        "title": "Adopt…",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.addToCi",
+        "title": "Add to CI…",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.newProjection",
+        "title": "New Projection…",
+        "category": "Projections",
+        "icon": "$(add)",
+        "enablement": "workspaceFolderCount > 0"
+      },
+      {
+        "command": "projections.openArtifact",
+        "title": "Open Artifact…",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.openScenarios",
+        "title": "Open Renderer Scenarios…",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.openProjection",
+        "title": "Open Projection",
+        "category": "Projections",
+        "icon": "$(projections-mark)"
+      },
+      {
+        "command": "projections.refresh",
+        "title": "Refresh",
+        "category": "Projections",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "projections.adoptCandidate",
+        "title": "Adopt",
+        "category": "Projections",
+        "icon": "$(add)"
+      },
+      {
+        "command": "projections.openDefinitionProblem",
+        "title": "Open Definition",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.setPair",
+        "title": "Compare These Revisions",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.swapPair",
+        "title": "Swap Before and After",
+        "category": "Projections",
+        "icon": "$(arrow-swap)"
+      },
+      {
+        "command": "projections.changePair",
+        "title": "Choose What to Show…",
+        "category": "Projections",
+        "icon": "$(git-compare)"
+      },
+      {
+        "command": "projections.compareAll",
+        "title": "Compare All Projections",
+        "category": "Projections",
+        "icon": "$(run-all)"
+      },
+      {
+        "command": "projections.mode.animated",
+        "title": "Comparison Mode: Animated (Next Mode)",
+        "category": "Projections",
+        "icon": "$(play-circle)"
+      },
+      {
+        "command": "projections.mode.side-by-side",
+        "title": "Comparison Mode: Side by Side (Next Mode)",
+        "category": "Projections",
+        "icon": "$(split-horizontal)"
+      },
+      {
+        "command": "projections.mode.swipe",
+        "title": "Comparison Mode: Swipe (Next Mode)",
+        "category": "Projections",
+        "icon": "$(arrow-both)"
+      },
+      {
+        "command": "projections.mode.diff",
+        "title": "Comparison Mode: Diff (Next Mode)",
+        "category": "Projections",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "projections.chooseMode",
+        "title": "Comparison Mode…",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.play",
+        "title": "Play",
+        "category": "Projections",
+        "icon": "$(play)"
+      },
+      {
+        "command": "projections.pause",
+        "title": "Pause",
+        "category": "Projections",
+        "icon": "$(debug-pause)"
+      },
+      {
+        "command": "projections.showAs.renderer",
+        "title": "Show as Renderer",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.showAs.table",
+        "title": "Show as Table",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.showAs.text",
+        "title": "Show as Text",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.changesOnly.on",
+        "title": "Show Changes Only",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.changesOnly.off",
+        "title": "Show Everything",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.openDefinition",
+        "title": "Open Definition",
+        "category": "Projections",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "projections.zoom.fit",
+        "title": "Zoom to Fit",
+        "category": "Projections",
+        "icon": "$(screen-normal)"
+      },
+      {
+        "command": "projections.zoom.in",
+        "title": "Zoom In",
+        "category": "Projections",
+        "icon": "$(zoom-in)"
+      },
+      {
+        "command": "projections.zoom.out",
+        "title": "Zoom Out",
+        "category": "Projections",
+        "icon": "$(zoom-out)"
+      },
+      {
+        "command": "projections.openPart",
+        "title": "Open Definition Entry",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.definition.pin",
+        "title": "Pin to This Projection",
+        "category": "Projections",
+        "icon": "$(pin)"
+      },
+      {
+        "command": "projections.definition.unpin",
+        "title": "Follow the Active Projection",
+        "category": "Projections",
+        "icon": "$(pinned)"
+      },
+      {
+        "command": "projections.showExtractionOutput",
+        "title": "Show Extraction Output",
+        "category": "Projections",
+        "icon": "$(output)"
+      },
+      {
+        "command": "projections.configureComparator",
+        "title": "Configure…",
+        "category": "Projections",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "projections.openPartEntry",
+        "title": "Open Definition Entry",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.openDocumentation",
+        "title": "Open Documentation",
+        "category": "Projections",
+        "icon": "$(book)"
+      },
+      {
+        "command": "projections.openDocumentationOnGitHub",
+        "title": "Open Documentation on GitHub",
+        "category": "Projections",
+        "icon": "$(link-external)"
+      },
+      {
+        "command": "projections.choosePair",
+        "title": "Compare Two Revisions…",
+        "category": "Projections",
+        "icon": "$(git-compare)"
+      },
+      {
+        "command": "projections.setChoice",
+        "title": "Show a Choice",
+        "category": "Projections"
+      },
+      {
+        "command": "projections.refreshProjection",
+        "title": "Refresh Projection",
+        "category": "Projections",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "projections.prepareEnvironment",
+        "title": "Prepare Environment",
+        "category": "Projections",
+        "enablement": "isWorkspaceTrusted"
+      }
+    ],
+    "icons": {
+      "projections-mark": {
+        "description": "The Projections mark: a projector seen from the side.",
+        "default": {
+          "fontPath": "./media/icons/projections-icons.woff",
+          "fontCharacter": "\\E000"
+        }
+      },
+      "projections-extractor": {
+        "description": "A projection's extractor: strokes converging on the extraction's dot.",
+        "default": {
+          "fontPath": "./media/icons/projections-icons.woff",
+          "fontCharacter": "\\E001"
+        }
+      },
+      "projections-comparator": {
+        "description": "A projection's comparator: two extractions' dots either side of a dashed divider.",
+        "default": {
+          "fontPath": "./media/icons/projections-icons.woff",
+          "fontCharacter": "\\E002"
+        }
+      },
+      "projections-renderer": {
+        "description": "A projection's renderer: strokes leaving the extraction's dot.",
+        "default": {
+          "fontPath": "./media/icons/projections-icons.woff",
+          "fontCharacter": "\\E003"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "projections",
+          "title": "Projections",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "projections": [
+        {
+          "id": "projections.viewing",
+          "name": "Viewing",
+          "when": "projections.hasDefinitions",
+          "initialSize": 360
+        },
+        {
+          "id": "projections.projections",
+          "name": "Projections",
+          "icon": "media/icon.svg",
+          "contextualTitle": "Projections",
+          "initialSize": 240
+        },
+        {
+          "id": "projections.definition",
+          "name": "Definition",
+          "when": "projections.hasDefinitions",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "projections.suggested",
+          "name": "Suggested",
+          "when": "projections.hasSuggestions || projections.offerAddToCi"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "projections.definition",
+        "contents": "Open a projection to see its definition."
+      },
+      {
+        "view": "projections.suggested",
+        "contents": "Your projections are adopted. Add them to your CI so pull requests show what they change: your coding agent proposes where the step goes.\n[Add to CI…](command:projections.addToCi)",
+        "when": "projections.offerAddToCi && !projections.hasSuggestions"
+      },
+      {
+        "view": "projections.projections",
+        "contents": "Open a repository folder to see its projections.\n[Open Folder](command:vscode.openFolder)",
+        "when": "workspaceFolderCount == 0"
+      },
+      {
+        "view": "projections.projections",
+        "contents": "This repository defines no projections yet. Find the ones that apply here and try them on recent changes, or start one of your own.\n[Explore this repository](command:projections.exploreRepository)\n[New projection…](command:projections.newProjection)\nSee what each built-in reads and shows in the [built-ins' documentation](command:projections.openDocumentation?%5B%22index.md%22%5D).",
+        "when": "workspaceFolderCount > 0 && projections.loaded && !projections.hasDefinitions"
+      },
+      {
+        "view": "projections.projections",
+        "contents": "Reading this repository's projections…",
+        "when": "workspaceFolderCount > 0 && !projections.loaded"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "projections.projection",
+        "displayName": "Projection",
+        "selector": [
+          {
+            "filenamePattern": "projection:/**"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "configuration": {
+      "title": "Projections",
+      "properties": {
+        "projections.cliPath": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "The `projections` executable to use instead of the one this extension bundles. Empty: `PROJECTIONS_CLI`, then the bundled executable, then a development build beside this extension, then `projections` on `PATH`. It must be a release compatible with the extension (the same minor version while `0.x`).",
+          "scope": "machine"
+        },
+        "projections.workspace": {
+          "type": "string",
+          "enum": [
+            "",
+            "fresh",
+            "worktree",
+            "clone",
+            "sparse",
+            "none"
+          ],
+          "default": "",
+          "markdownDescription": "Where a toolchain extractor examines a commit that isn't checked out: `worktree` (a reused, prepared Git worktree), `clone` (copy-on-write), `sparse` (only the projection's scope), `fresh` (a temporary copy) or `none` (no copies). Empty: the user configuration, the repository's environment file, else chosen from the repository's size and free disk space. Passed to the backend as `--workspace`.",
+          "scope": "machine-overridable"
+        }
+      }
+    },
+    "jsonValidation": [
+      {
+        "fileMatch": [
+          ".github/projections/*.json",
+          ".projections/*.json",
+          "!.github/projections/environment.json",
+          "!.projections/environment.json"
+        ],
+        "url": "./dist/schemas/definition/v0.json"
+      },
+      {
+        "fileMatch": [
+          ".github/projections/environment.json",
+          ".projections/environment.json"
+        ],
+        "url": "./dist/schemas/environment/v0.json"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "projections-renderer",
+        "required": [
+          "projection"
+        ],
+        "properties": {
+          "projection": {
+            "type": "string",
+            "description": "The projection whose custom renderer the task builds."
+          },
+          "script": {
+            "type": "string",
+            "description": "The renderer package script it runs: watch, else build."
+          }
+        }
+      }
+    ],
+    "problemMatchers": [
+      {
+        "name": "projections-renderer",
+        "owner": "projections-renderer",
+        "source": "renderer build",
+        "fileLocation": "absolute",
+        "pattern": {
+          "regexp": "^(?:✘ \\[ERROR\\] )?(?:\\S.*?\\s)?(\\/[^:]+|[A-Za-z]:\\\\[^:]+):(\\d+):(\\d+):\\s+(?:ERROR:\\s+)?(.+)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
+        },
+        "background": {
+          "activeBegin": true,
+          "beginsPattern": "build started|building .*for production",
+          "endsPattern": "built in \\d|: ERROR: |^\\[[\\w:-]+\\]:? .*(failed|error)|error during build"
+        }
+      }
+    ],
+    "yamlValidation": [
+      {
+        "fileMatch": [
+          "*.comparator.yaml",
+          "*.comparator.yml"
+        ],
+        "url": "./dist/schemas/comparator/v0.json"
+      },
+      {
+        "fileMatch": [
+          "*.comparator.test.yaml",
+          "*.comparator.test.yml"
+        ],
+        "url": "./dist/schemas/comparator-tests/v0.json"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "projections.openArtifact",
+          "when": "resourceExtname == .json",
+          "group": "navigation@90"
+        },
+        {
+          "command": "projections.openScenarios",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation@90"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "projections.refresh",
+          "when": "view == projections.viewing",
+          "group": "navigation@1"
+        },
+        {
+          "command": "projections.newProjection",
+          "when": "view == projections.projections",
+          "group": "navigation@0"
+        },
+        {
+          "command": "projections.compareAll",
+          "when": "view == projections.projections",
+          "group": "navigation@1"
+        },
+        {
+          "command": "projections.refresh",
+          "when": "view == projections.projections",
+          "group": "navigation@2"
+        },
+        {
+          "command": "projections.addToCi",
+          "when": "view == projections.projections && projections.hasDefinitions",
+          "group": "1_share@1"
+        },
+        {
+          "command": "projections.definition.pin",
+          "when": "view == projections.definition && projections.definitionShown && !projections.definitionPinned",
+          "group": "navigation@1"
+        },
+        {
+          "command": "projections.definition.unpin",
+          "when": "view == projections.definition && projections.definitionPinned",
+          "group": "navigation@1"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "projections.viewing.bookmark",
+          "when": "view == projections.viewing && viewItem =~ /\\bbookmarkable\\b/",
+          "group": "inline@1"
+        },
+        {
+          "command": "projections.viewing.remove",
+          "when": "view == projections.viewing && viewItem =~ /\\bremovable\\b/",
+          "group": "inline@2"
+        },
+        {
+          "command": "projections.swapPair",
+          "when": "view == projections.viewing && viewItem =~ /\\bswappable\\b/",
+          "group": "inline@0"
+        },
+        {
+          "command": "projections.findRecentChanges",
+          "when": "view == projections.viewing && viewItem == viewing-group-recent",
+          "group": "inline"
+        },
+        {
+          "command": "projections.showExtractionOutput",
+          "when": "view == projections.definition && viewItem =~ /^definition-extractor\\b/",
+          "group": "inline"
+        },
+        {
+          "command": "projections.configureComparator",
+          "when": "view == projections.definition && viewItem =~ /^definition-comparator\\b/",
+          "group": "inline"
+        },
+        {
+          "command": "projections.openPartEntry",
+          "when": "view == projections.definition && viewItem =~ /^definition-(extractor|comparator|renderer)\\b/",
+          "group": "navigation@1"
+        },
+        {
+          "command": "projections.openDocumentation",
+          "when": "view == projections.definition && viewItem =~ /^definition-(extractor|comparator|renderer) docs$/",
+          "group": "navigation@2"
+        },
+        {
+          "command": "projections.openDocumentationOnGitHub",
+          "when": "view == projections.definition && viewItem =~ /^definition-(extractor|comparator|renderer) docs$/",
+          "group": "navigation@3"
+        },
+        {
+          "command": "projections.openDocumentationOnGitHub",
+          "when": "view == projections.definition && viewItem =~ /^definition-(extractor|comparator|renderer) docs$/",
+          "group": "inline@9"
+        },
+        {
+          "command": "projections.adoptCandidate",
+          "when": "view == projections.suggested && viewItem == candidate",
+          "group": "inline"
+        },
+        {
+          "command": "projections.refreshProjection",
+          "when": "view == projections.projections && viewItem == projection",
+          "group": "inline@2"
+        },
+        {
+          "command": "projections.openDefinition",
+          "when": "view == projections.projections && viewItem == projection",
+          "group": "navigation@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "projections.viewing.remove",
+          "when": "false"
+        },
+        {
+          "command": "projections.viewing.bookmark",
+          "when": "false"
+        },
+        {
+          "command": "projections.viewing.choose",
+          "when": "false"
+        },
+        {
+          "command": "projections.goToSource",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.showExtractionOutput",
+          "when": "projections.definitionShown"
+        },
+        {
+          "command": "projections.configureComparator",
+          "when": "projections.definitionShown"
+        },
+        {
+          "command": "projections.openPartEntry",
+          "when": "false"
+        },
+        {
+          "command": "projections.openDocumentation",
+          "when": "false"
+        },
+        {
+          "command": "projections.openDocumentationOnGitHub",
+          "when": "false"
+        },
+        {
+          "command": "projections.openProjection",
+          "when": "false"
+        },
+        {
+          "command": "projections.adoptCandidate",
+          "when": "false"
+        },
+        {
+          "command": "projections.openDefinitionProblem",
+          "when": "false"
+        },
+        {
+          "command": "projections.setPair",
+          "when": "false"
+        },
+        {
+          "command": "projections.chooseMode",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.play",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.pause",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.showAs.renderer",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.showAs.table",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.showAs.text",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.changesOnly.on",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.changesOnly.off",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.openDefinition",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.mode.animated",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.mode.side-by-side",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.mode.swipe",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.mode.diff",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.zoom.fit",
+          "when": "activeCustomEditorId == projections.projection && projections.tabZoom"
+        },
+        {
+          "command": "projections.zoom.in",
+          "when": "activeCustomEditorId == projections.projection && projections.tabZoom"
+        },
+        {
+          "command": "projections.zoom.out",
+          "when": "activeCustomEditorId == projections.projection && projections.tabZoom"
+        },
+        {
+          "command": "projections.openPart",
+          "when": "false"
+        },
+        {
+          "command": "projections.setChoice",
+          "when": "false"
+        },
+        {
+          "command": "projections.refreshProjection",
+          "when": "activeCustomEditorId == projections.projection"
+        },
+        {
+          "command": "projections.definition.pin",
+          "when": "projections.definitionShown && !projections.definitionPinned"
+        },
+        {
+          "command": "projections.definition.unpin",
+          "when": "projections.definitionPinned"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "projections.goToSource",
+          "when": "activeCustomEditorId == projections.projection",
+          "group": "navigation@1"
+        },
+        {
+          "command": "projections.changePair",
+          "when": "activeCustomEditorId == projections.projection",
+          "group": "3_pair@1"
+        },
+        {
+          "command": "projections.openDefinition",
+          "when": "activeCustomEditorId == projections.projection",
+          "group": "4_definition@1"
+        }
+      ]
+    },
+    "languageModelTools": [
+      {
+        "name": "projections_list_projections",
+        "toolReferenceName": "projections_list_projections",
+        "displayName": "List projections",
+        "icon": "$(list-tree)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections"
+        ],
+        "userDescription": "List the projections this repository defines (in .github/projections or .projections): each one's ID, title, extractor, renderer and comparator, whether it runs repository code (and so needs trust), and definition files that are invalid, with their errors.",
+        "modelDescription": "List the projections this repository defines (in .github/projections or .projections): each one's ID, title, extractor, renderer and comparator, whether it runs repository code (and so needs trust), and definition files that are invalid, with their errors. Call it first to learn the projection IDs the other tools take. Runs nothing.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "ref": {
+              "description": "The revision whose definitions to list: a branch, tag or commit; default working-tree (the files on disk)",
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      {
+        "name": "projections_compare",
+        "toolReferenceName": "projections_compare",
+        "displayName": "Compare revisions",
+        "icon": "$(git-compare)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections"
+        ],
+        "userDescription": "Compare two revisions through one projection and summarize how the change reshapes that system: the steps in the order the change is told, each change (added, removed, modified, renamed, split or merged) with its label and summary, counts by status, and the comparator's classification, such as API compatibility levels (breaking, additive, compatible, unknown).",
+        "modelDescription": "Compare two revisions through one projection and summarize how the change reshapes that system: the steps in the order the change is told, each change (added, removed, modified, renamed, split or merged) with its label and summary, counts by status, and the comparator's classification, such as API compatibility levels (breaking, additive, compatible, unknown). Without before and after it compares the pair Projections suggests (a bookmark, the branch since the default branch, the last tag, the last commit, or uncommitted changes). Extracting runs the projection's extractor; one that is repository code needs trust. An omitted projection, before and after default to what the current view shows (current_view), and the result says which revisions it compared and where they came from: never present another comparison as the one on screen.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "after": {
+              "description": "The After revision: a branch, tag or commit, or working-tree for the files on disk (uncommitted changes included); default working-tree when before is given",
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "before": {
+              "description": "The Before revision: a branch, tag or commit, or working-tree for the files on disk; with neither before nor after, the revisions the current view shows",
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "definition": {
+              "description": "Which revision's definition explains the comparison: base (default) or head",
+              "enum": [
+                "base",
+                "head"
+              ],
+              "type": "string"
+            },
+            "maxChanges": {
+              "description": "The most changes to describe (default 100); the counts always cover every change",
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "projection": {
+              "description": "The projection ID (list_projections lists them); default the current view's (current_view)",
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      {
+        "name": "projections_explore",
+        "toolReferenceName": "projections_explore",
+        "displayName": "Explore projections",
+        "icon": "$(search)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections"
+        ],
+        "userDescription": "Find the built-in projections that apply to this repository, each with the files that suggested it (its reason), whether it is already adopted, and whether it runs repository code.",
+        "modelDescription": "Find the built-in projections that apply to this repository, each with the files that suggested it (its reason), whether it is already adopted, and whether it runs repository code. Runs nothing. Follow with sweep to see what each shows on recent changes; adopt only what the person chooses.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      {
+        "name": "projections_sweep",
+        "toolReferenceName": "projections_sweep",
+        "displayName": "Find recent changes",
+        "icon": "$(history)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections"
+        ],
+        "userDescription": "Try projections on the repository's recent changes (the last merges into this branch, else its commits) and summarize, per projection, how many changes it showed something on (changed in N of M), the median size of those changes, and the changes it showed most on, plus the changes where several projections changed.",
+        "modelDescription": "Try projections on the repository's recent changes (the last merges into this branch, else its commits) and summarize, per projection, how many changes it showed something on (changed in N of M), the median size of those changes, and the changes it showed most on, plus the changes where several projections changed. Use it to tell signal from noise before adopting or tuning. Defaults to every explore candidate and defined projection over the last 20 changes. Projections that run repository code are skipped without trust. It can take a minute.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "last": {
+              "description": "How many recent changes to sweep (default 20)",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "latest": {
+              "description": "Summarize the latest sweep (one the person ran in the Explore view, or an earlier call) instead of running another",
+              "type": "boolean"
+            },
+            "projections": {
+              "description": "The projections to sweep; default every explore candidate and defined projection",
+              "items": {
+                "description": "A projection ID",
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 50,
+              "minItems": 1,
+              "type": "array"
+            },
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      {
+        "name": "projections_check",
+        "toolReferenceName": "projections_check",
+        "displayName": "Check projections",
+        "icon": "$(pass)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections"
+        ],
+        "userDescription": "Verify projections end to end, as `projections check` does: the definition is valid, the working tree extracts, HEAD compares with the working tree, comparator tests pass, and with render, a custom renderer's bundle is current and passes the renderer checks in a headless browser.",
+        "modelDescription": "Verify projections end to end, as `projections check` does: the definition is valid, the working tree extracts, HEAD compares with the working tree, comparator tests pass, and with render, a custom renderer's bundle is current and passes the renderer checks in a headless browser. Reports each check as pass, fail, warn or skip, with why. Run it after every change to a projection, before saying it works. Omitted projections default to the one the current view shows (current_view).",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "projections": {
+              "description": "The projections to check; default the current view's (current_view), else every one the working tree defines",
+              "items": {
+                "description": "A projection ID",
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 50,
+              "minItems": 1,
+              "type": "array"
+            },
+            "render": {
+              "description": "Also run the renderer checks in a headless browser (slower; default false)",
+              "type": "boolean"
+            },
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      {
+        "name": "projections_prepare",
+        "toolReferenceName": "projections_prepare",
+        "displayName": "Prepare the environment",
+        "icon": "$(package)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections"
+        ],
+        "userDescription": "Run the prepare steps the repository's environment file (.github/projections/environment.json) declares, such as npm ci, as `projections prepare` does: in the working tree by default, or in the workspace Projections keeps for a revision.",
+        "modelDescription": "Run the prepare steps the repository's environment file (.github/projections/environment.json) declares, such as npm ci, as `projections prepare` does: in the working tree by default, or in the workspace Projections keeps for a revision. Each step runs only when its key files (lockfiles) changed since it last ran there, unless force. Steps are repository code and may use the network. Use it when a toolchain extractor needs installed dependencies, after adding or changing the environment file.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "force": {
+              "description": "Run the steps even when their key files are unchanged",
+              "type": "boolean"
+            },
+            "revision": {
+              "description": "Prepare the workspace for this commit instead of the working tree",
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "steps": {
+              "description": "Only these step IDs; default every step",
+              "items": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "type": "array"
+            },
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      {
+        "name": "projections_run_comparator_tests",
+        "toolReferenceName": "projections_run_comparator_tests",
+        "displayName": "Run comparator tests",
+        "icon": "$(beaker)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections"
+        ],
+        "userDescription": "Run custom comparator tests (the X.comparator.test.yaml beside a comparator file X.comparator.yaml), sandboxed, and report each case as pass, fail or skip, with each failure's expectation, message and diff.",
+        "modelDescription": "Run custom comparator tests (the X.comparator.test.yaml beside a comparator file X.comparator.yaml), sandboxed, and report each case as pass, fail or skip, with each failure's expectation, message and diff. Defaults to every test file; path selects one, cases some of its cases, projection one projection's run. coverage also reports rule coverage: which of the comparator file's functions, expressions and branches the cases run, and the line of each that none does. Never writes: update_snapshots rewrites snapshots.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "cases": {
+              "description": "Only these cases of that file, by name (needs path)",
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 200,
+              "type": "array"
+            },
+            "coverage": {
+              "description": "Also report rule coverage, with what the cases leave uncovered by line",
+              "type": "boolean"
+            },
+            "path": {
+              "description": "One test file, repository-relative (for example .github/projections/map/map.comparator.test.yaml)",
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "projection": {
+              "description": "Only the run for this projection's options and revisions",
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      {
+        "name": "projections_describe_part",
+        "toolReferenceName": "projections_describe_part",
+        "displayName": "Describe a built-in part",
+        "icon": "$(book)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections"
+        ],
+        "userDescription": "Describe a built-in part a projection definition can use: an extractor (what it reads, its schema, its inputs, its default renderer, whether it runs repository code, and a definition template), a renderer (the schemas it accepts, the names it answers to and its comparison modes) or the comparator (the default one's options, and rules).",
+        "modelDescription": "Describe a built-in part a projection definition can use: an extractor (what it reads, its schema, its inputs, its default renderer, whether it runs repository code, and a definition template), a renderer (the schemas it accepts, the names it answers to and its comparison modes) or the comparator (the default one's options, and rules). Without id, lists the built-ins of that part.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "description": "The built-in's ID or name (for a comparator: default or custom); omit to list them",
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "part": {
+              "description": "Which part",
+              "enum": [
+                "extractor",
+                "renderer",
+                "comparator"
+              ],
+              "type": "string"
+            },
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [
+            "part"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "projections_open_projection",
+        "toolReferenceName": "projections_open_projection",
+        "displayName": "Open a projection",
+        "icon": "$(projections-mark)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections"
+        ],
+        "userDescription": "Show a projection to the person: in VS Code, in a projection tab; with projections mcp, in the viewer, a page on this machine that you drive and the person watches.",
+        "modelDescription": "Show a projection to the person: in VS Code, in a projection tab; with projections mcp, in the viewer, a page on this machine that you drive and the person watches. The viewer's URL is in the result: open it for them, in your own browser if you have one, else in the system browser (projections view show --open); give them the link only when you can't. Use it when they ask to see or open a projection (\"in the inspector\" too), and to show them what you set up or changed. Shows a pair of revisions (by default the folder's current pair in VS Code, or the pair the viewer shows, else the one Projections suggests), or a choice such as branch, uncommitted or last-commit, or a renderer scenario; optionally in a comparison mode and selecting an entity (an entity ID from compare). In VS Code, without pin it sets the folder's pair, so every projection tab follows; with pin only this tab shows the pair. An omitted projection defaults to the one the current view shows (current_view).",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "after": {
+              "description": "The After revision: a branch, tag or commit, or working-tree for the files on disk (uncommitted changes included)",
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "before": {
+              "description": "The Before revision: a branch, tag or commit, or working-tree for the files on disk",
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "choice": {
+              "description": "What to compare instead of before and after: branch (this branch's changes), uncommitted, last-commit, now (the working tree alone), release (since the last tag) or bookmark:<id>",
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "entity": {
+              "description": "An entity ID to select (compare lists each change's entities)",
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "mode": {
+              "description": "The comparison mode, when the renderer offers it",
+              "enum": [
+                "side-by-side",
+                "animated",
+                "swipe",
+                "diff"
+              ],
+              "type": "string"
+            },
+            "pin": {
+              "description": "In VS Code, pin the pair to this tab instead of setting the folder's pair (default false); the viewer has one view, so it ignores pin",
+              "type": "boolean"
+            },
+            "projection": {
+              "description": "The projection ID; default the current view's (current_view)",
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "scenario": {
+              "description": "A scenario from the projection's renderer scenarios (scenarios.json) to show instead of revisions",
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      {
+        "name": "projections_current_view",
+        "toolReferenceName": "projections_current_view",
+        "displayName": "Current projection view",
+        "icon": "$(eye)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections"
+        ],
+        "userDescription": "What the person is looking at: in VS Code, their projection tab (the one in front, else the one shown last); with projections mcp, the viewer.",
+        "modelDescription": "What the person is looking at: in VS Code, their projection tab (the one in front, else the one shown last); with projections mcp, the viewer. Says the projection's ID, title and definition file, the choice it shows (Current state, Branch changes, a pull request, a bookmark…) with its resolved Before → After revisions, the comparison mode, the selected item, the summary bar's counts, the changed items with their status (added, removed, modified…), why an extraction failed, and whether the result is out of date or uses the person's uncommitted definition edits. Call it first whenever the person says \"this projection\", \"this view\", \"this tab\", \"what am I looking at\", \"what changed\", \"this one's wrong\" or \"what was removed\", or otherwise asks about what's on screen, rather than asking them which projection they mean. Says so when nothing is shown.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      {
+        "name": "projections_refresh",
+        "toolReferenceName": "projections_refresh",
+        "displayName": "Refresh the view",
+        "icon": "$(refresh)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections"
+        ],
+        "userDescription": "Extract what the current view shows again and compare it, as the person's Refresh does: after changing a projection's code, its inputs or its renderer, when the view says it is out of date.",
+        "modelDescription": "Extract what the current view shows again and compare it, as the person's Refresh does: after changing a projection's code, its inputs or its renderer, when the view says it is out of date. Returns what it shows then, as current_view does.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      {
+        "name": "projections_screenshot",
+        "toolReferenceName": "projections_screenshot",
+        "displayName": "Screenshot a projection",
+        "icon": "$(device-camera)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections"
+        ],
+        "userDescription": "Render a projection as a PNG image with its real renderer in a headless browser, as projections compare --png does, and return the image: to see what the person sees, or to check a renderer's output.",
+        "modelDescription": "Render a projection as a PNG image with its real renderer in a headless browser, as projections compare --png does, and return the image: to see what the person sees, or to check a renderer's output. Without arguments it renders what the current view shows (its projection, revisions, comparison mode, playback position, theme and size), whether or not you can see the person's screen. Extracting runs the projection's extractor; one that is repository code needs trust. Needs Chrome, Chromium or Edge.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "after": {
+              "description": "The After revision: a branch, tag or commit, or working-tree for the files on disk (uncommitted changes included)",
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "before": {
+              "description": "The Before revision: a branch, tag or commit, or working-tree for the files on disk; with neither before nor after, the revisions the current view shows",
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "definitionRevision": {
+              "description": "The revision whose definition extracts every side; default the current view's, else working-tree",
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "entity": {
+              "description": "Open the image on one item, by its ID, centred with what it connects to",
+              "type": "string"
+            },
+            "fit": {
+              "description": "Fit what the image opens on whole, even when its text is drawn smaller than the renderer would open at",
+              "type": "boolean"
+            },
+            "focus": {
+              "description": "Open the image on a comparison's changes or on everything; default the renderer's choice (a diff opens on its changes when they don't all fit)",
+              "enum": [
+                "changes",
+                "all"
+              ],
+              "type": "string"
+            },
+            "height": {
+              "description": "Viewport height in CSS pixels; default the current view's, else 800",
+              "maximum": 1600,
+              "minimum": 240,
+              "type": "integer"
+            },
+            "mode": {
+              "description": "How to present a comparison; default the current view's, else the renderer's",
+              "enum": [
+                "side-by-side",
+                "animated",
+                "diff"
+              ],
+              "type": "string"
+            },
+            "progress": {
+              "description": "Animated mode: the transition's progress, 0 (before) to 1 (after); default the current view's playback position",
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            "projection": {
+              "description": "The projection ID; default the current view's (current_view)",
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "theme": {
+              "description": "Default the current view's, else light",
+              "enum": [
+                "light",
+                "dark"
+              ],
+              "type": "string"
+            },
+            "width": {
+              "description": "Viewport width in CSS pixels; default the current view's, else 1280",
+              "maximum": 2560,
+              "minimum": 320,
+              "type": "integer"
+            },
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      {
+        "name": "projections_adopt",
+        "toolReferenceName": "projections_adopt",
+        "displayName": "Adopt projections",
+        "icon": "$(add)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections",
+          "projections-write",
+          "projections-onboarding"
+        ],
+        "userDescription": "Adopt explore candidates the person chose: write each one's definition to .github/projections/<id>.json (never over a file) and bookmark the recent changes it showed most on when recent changes were last checked.",
+        "modelDescription": "Adopt explore candidates the person chose: write each one's definition to .github/projections/<id>.json (never over a file) and bookmark the recent changes it showed most on when recent changes were last checked. Never adopt on your own. The first call previews the files; nothing is written until the write is confirmed. Writing needs trust once the repository defines projections of its own.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "bookmarks": {
+              "description": "Bookmark each projection's N most-changed changes from the latest check of recent changes (default 3; 0 for none)",
+              "maximum": 20,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "projections": {
+              "description": "The candidates to adopt (explore lists them)",
+              "items": {
+                "description": "A projection ID",
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 50,
+              "minItems": 1,
+              "type": "array"
+            },
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [
+            "projections"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "projections_set_part",
+        "toolReferenceName": "projections_set_part",
+        "displayName": "Set a definition's part",
+        "icon": "$(edit)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections",
+          "projections-write"
+        ],
+        "userDescription": "Change parts of a projection's definition file, keeping its other fields and their order: the extractor (a built-in ID, or {command, sources?}), the comparator ({options: {order: {by, direction?}}} for the default one, or a comparator file: \"<path>.comparator.yaml\" or {file, sources?, options?}) or the renderer (a built-in name, or {bundle, sources?}); null removes an optional part.",
+        "modelDescription": "Change parts of a projection's definition file, keeping its other fields and their order: the extractor (a built-in ID, or {command, sources?}), the comparator ({options: {order: {by, direction?}}} for the default one, or a comparator file: \"<path>.comparator.yaml\" or {file, sources?, options?}) or the renderer (a built-in name, or {bundle, sources?}); null removes an optional part. The first call validates the new definition and previews the diff; writing needs trust. An omitted projection defaults to the one the current view shows (current_view).",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "comparator": {
+              "description": "The new comparator: {options} for the default one, a comparator file's path or {file: path, sources?, options?} for a custom one, or null for the default one without options",
+              "type": [
+                "string",
+                "object",
+                "null"
+              ]
+            },
+            "extractor": {
+              "description": "The new extractor: a built-in extractor ID, or {command: [argv], sources?: [paths]}",
+              "type": [
+                "string",
+                "object",
+                "null"
+              ]
+            },
+            "projection": {
+              "description": "The projection ID; default the current view's (current_view)",
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "renderer": {
+              "description": "The new renderer: a built-in renderer name, or {bundle: directory, sources?}",
+              "type": [
+                "string",
+                "object",
+                "null"
+              ]
+            },
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      {
+        "name": "projections_update_snapshots",
+        "toolReferenceName": "projections_update_snapshots",
+        "displayName": "Update comparator test snapshots",
+        "icon": "$(save-all)",
+        "canBeReferencedInPrompt": true,
+        "tags": [
+          "projections",
+          "projections-write"
+        ],
+        "userDescription": "Rewrite comparator tests' snapshots (never their expectations) to what the comparator produces now.",
+        "modelDescription": "Rewrite comparator tests' snapshots (never their expectations) to what the comparator produces now. The first call previews which snapshots differ and how; confirm only once the new output is right, since it becomes what the tests expect. Writing needs trust.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "cases": {
+              "description": "Only these cases of that file, by name (needs path)",
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 200,
+              "type": "array"
+            },
+            "path": {
+              "description": "One test file, repository-relative; default every test file",
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "projection": {
+              "description": "Only the run for this projection",
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "folder": {
+              "type": "string",
+              "description": "The workspace folder to act on, by name or path, when several are open; default the active editor's folder, else the projection tab's, else the first"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "test:vscode": "node test/smoke/run.mjs",
+    "screenshots": "node scripts/screenshots/screenshots.mjs",
+    "screenshots:rules": "node scripts/screenshots/rules-screenshots.mjs",
+    "screenshots:jobs": "node scripts/screenshots/jobs-screenshots.mjs",
+    "screenshots:new-projection": "node scripts/screenshots/new-projection-screenshots.mjs"
+  },
+  "dependencies": {
+    "@githubnext/projections-host-vscode": "0.1.0",
+    "@githubnext/projections-inspector": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "@types/vscode": "^1.95.0",
+    "@vscode/test-electron": "^3.1.0",
+    "esbuild": "^0.28.2",
+    "react": "^19.1.0"
+  }
+}

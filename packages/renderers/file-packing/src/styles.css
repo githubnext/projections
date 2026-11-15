@@ -1,0 +1,138 @@
+/* Fills the frame (the kit's `useFrameFill`); the packing is laid out at the stage's size, so it fills it. */
+.fp-view {
+  display: flex;
+  flex-direction: column;
+}
+.fp-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--projections-space-2);
+  background: var(--stage);
+}
+.fp-canvas {
+  position: relative;
+  margin: 0 auto;
+}
+.fp-packing {
+  /* A folder is a raised panel on the stage, as a card is. */
+  --fp-folder: var(--raised);
+  display: block;
+  overflow: visible;
+}
+/*
+ * What a circle stands on (`data-ground`): the stage at the top level, else its folder's fill. Its name, status and
+ * flags are haloed in that colour, so they read as cut through to the surface around the circle.
+ */
+.fp-packing [data-ground='stage'] {
+  --fp-ground: var(--stage);
+}
+.fp-packing [data-ground='folder'] {
+  --fp-ground: var(--fp-folder);
+}
+.fp-node {
+  cursor: pointer;
+}
+.fp-node:focus {
+  outline: none;
+}
+/* Folders: outlined containers, as in the original; files: filled with their type's color (set inline). */
+.fp-folder .fp-surface {
+  fill: var(--fp-folder);
+  stroke: var(--border-emphasis);
+  stroke-width: var(--stroke);
+}
+.fp-file .fp-surface {
+  stroke: none;
+}
+/* Flags: dots in their colors (set inline) on a ring of the ground's color, so they read on any fill. */
+.fp-flag {
+  stroke: var(--fp-ground);
+  stroke-width: var(--stroke);
+  pointer-events: none;
+}
+.fp-emphasis {
+  fill: none;
+  pointer-events: none;
+  stroke-width: calc(var(--stroke-strong) + var(--stroke));
+}
+.fp-emphasis.added {
+  stroke: var(--green-border);
+}
+.fp-emphasis.removed {
+  stroke: var(--red-border);
+  stroke-dasharray: 5 3;
+}
+.fp-emphasis.modified {
+  stroke: var(--amber);
+}
+.fp-emphasis.renamed {
+  stroke: var(--violet);
+}
+/* Hover, focus and selection: the SDK's ring, inside each circle's own edge. */
+/* Labels sit on a halo of the ground's color, so they read over fills and break folder outlines. */
+.fp-label {
+  font-size: var(--projections-font-size-xs);
+  fill: var(--text);
+  stroke: var(--fp-ground);
+  stroke-width: calc(var(--stroke) * 3);
+  stroke-linejoin: round;
+  paint-order: stroke;
+  pointer-events: none;
+}
+.fp-folder-label {
+  font-weight: var(--projections-font-weight-semibold);
+  fill: var(--muted);
+}
+/* A folder's name across its inside, and its status in the band at its foot, sit on its own fill. */
+.fp-folder-label[data-arc='inside'],
+[data-folder] > :is(.fp-status, .fp-glyph) {
+  stroke: var(--fp-folder);
+}
+.fp-status,
+.fp-glyph {
+  font-size: var(--projections-font-size-xs);
+  stroke: var(--fp-ground);
+  stroke-width: calc(var(--stroke) * 3);
+  stroke-linejoin: round;
+  paint-order: stroke;
+  pointer-events: none;
+}
+.fp-glyph {
+  font-family: var(--font-mono);
+  font-weight: var(--projections-font-weight-bold);
+}
+.fp-tooltip {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--projections-space-1) / 2);
+  max-width: min(360px, 90%);
+  padding: var(--projections-space-1) var(--projections-space-2);
+  border: var(--projections-border-width) solid var(--border-strong);
+  border-radius: var(--projections-radius-sm);
+  background: var(--overlay);
+  box-shadow: var(--projections-shadow-md);
+  color: var(--text);
+  font-size: var(--projections-font-size-xs);
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+}
+.fp-tooltip[data-placement='below'] {
+  transform: translate(-50%, 0);
+}
+.fp-tooltip-path {
+  overflow-wrap: anywhere;
+}
+.fp-tooltip-size,
+.fp-tooltip-flags,
+.fp-tooltip-change {
+  color: var(--muted);
+}
+/* The single root is the background: invisible, ringed by the SDK when selected or focused. */
+.fp-root .fp-surface {
+  fill: transparent;
+  stroke: none;
+  cursor: default;
+}

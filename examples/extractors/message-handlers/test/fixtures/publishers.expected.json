@@ -1,0 +1,87 @@
+{
+ "entities": [
+  {
+   "id": "messages:event:messages:archived",
+   "kind": "event",
+   "label": "archived",
+   "data": {},
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:event:messages:created",
+   "kind": "event",
+   "label": "created",
+   "data": {},
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:handler:%40example%2Fapp:receive:named",
+   "kind": "handler",
+   "label": "receive",
+   "data": {
+    "package": "@example/app"
+   },
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:package:%40example%2Fapp",
+   "kind": "package",
+   "label": "@example/app",
+   "data": {},
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:publisher:%40example%2Fapp:create",
+   "kind": "publisher",
+   "label": "create",
+   "data": {
+    "package": "@example/app"
+   },
+   "confidence": "derived"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "messages:consumes:messages%3Ahandler%3A%2540example%252Fapp%3Areceive%3Anamed:messages%3Aevent%3Amessages%3Aarchived",
+   "kind": "consumes",
+   "from": "messages:handler:%40example%2Fapp:receive:named",
+   "to": "messages:event:messages:archived",
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:consumes:messages%3Ahandler%3A%2540example%252Fapp%3Areceive%3Anamed:messages%3Aevent%3Amessages%3Acreated",
+   "kind": "consumes",
+   "from": "messages:handler:%40example%2Fapp:receive:named",
+   "to": "messages:event:messages:created",
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:owns:messages%3Apackage%3A%2540example%252Fapp:messages%3Apublisher%3A%2540example%252Fapp%3Acreate",
+   "kind": "owns",
+   "from": "messages:package:%40example%2Fapp",
+   "to": "messages:publisher:%40example%2Fapp:create",
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:publishes:messages%3Apublisher%3A%2540example%252Fapp%3Acreate:messages%3Aevent%3Amessages%3Acreated",
+   "kind": "publishes",
+   "from": "messages:publisher:%40example%2Fapp:create",
+   "to": "messages:event:messages:created",
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:registers:messages%3Apackage%3A%2540example%252Fapp:messages%3Ahandler%3A%2540example%252Fapp%3Areceive%3Anamed",
+   "kind": "registers",
+   "from": "messages:package:%40example%2Fapp",
+   "to": "messages:handler:%40example%2Fapp:receive:named",
+   "confidence": "derived"
+  }
+ ],
+ "metadata": {
+  "analysis": "Static TypeScript symbol resolution with explicit domain conventions",
+  "limitations": [
+   "Dynamic registrations and runtime control flow are not evaluated.",
+   "A known publish call had a dynamic event; it is not represented."
+  ]
+ }
+}

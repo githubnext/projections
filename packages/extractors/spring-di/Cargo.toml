@@ -1,0 +1,15 @@
+[package]
+name = "projections-extractor-spring-di"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow = "1"
+projections-extractor-sdk = { path = "../sdk" }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+
+[dev-dependencies]
+projections-extractor-sdk = { path = "../sdk", features = ["testing"] }

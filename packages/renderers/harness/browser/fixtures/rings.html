@@ -1,0 +1,211 @@
+<!doctype html>
+<!--
+  A deliberately adversarial third-party renderer document for the item ring:
+  items marked only with data-entity-id, with their own CSS. The ring element is
+  nested in a wrapper, items clip their overflow and have positioned children
+  over their edge, are transformed, have per-corner elliptical radii, borders
+  of 0, 1 and 2 px or an outer spread shadow, sit in a rounded group as rows,
+  and are SVG shapes (a rounded rect, a circle, a scaled viewBox, a curved
+  relationship with an arrowhead, an SVG item with no marked edge). Rings are
+  the SDK's styling on each item (`?approach=sdk`, the default); `outline` and
+  `pseudo` draw the earlier alternatives for comparison. Some items are author
+  errors on purpose (a wrapper, an edge drawn outside the box, a positioned
+  header painting over the edge, rows that don't
+  take their group's inner radius, an unmarked SVG edge, an unmarked edge drawn over the marked one): the `rings` check
+  must name the fix for each.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ring fixture</title>
+    <style>
+      :root {
+        --projections-color-accent: #0969da;
+        --projections-color-focus: #0969da;
+        --projections-color-bg: #ffffff;
+        --projections-border-width: 1px;
+        --projections-border-width-thick: 2px;
+        color-scheme: light;
+      }
+      :root[data-color-mode='dark'] {
+        --projections-color-accent: #4493f8;
+        --projections-color-focus: #4493f8;
+        --projections-color-bg: #0d1117;
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #f6f8fa;
+        font: 13px/1.4 system-ui, sans-serif;
+        color: #1f2328;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, 220px);
+        gap: 28px;
+      }
+      [data-color-mode='dark'] body {
+        background: #010409;
+        color: #e6edf3;
+      }
+      .card {
+        box-sizing: border-box;
+        height: 84px;
+        padding: 8px;
+        background: #ffffff;
+        border: 1px solid #57606a;
+        border-radius: 8px;
+      }
+      [data-color-mode='dark'] .card,
+      [data-color-mode='dark'] .group {
+        background: #161b22;
+        border-color: #8b949e;
+      }
+      .group {
+        align-self: start;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        border: 1px solid #57606a;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #ffffff;
+      }
+      .group > li {
+        box-sizing: border-box;
+        height: 28px;
+        padding: 4px 8px;
+        /* One line in any font: a wrapped label would spill out of the row and across its ring. */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .group > li + li {
+        border-top: 1px solid #d0d7de;
+      }
+      svg text {
+        font: 12px system-ui, sans-serif;
+        fill: currentColor;
+      }
+      /* The approaches compared with the SDK's ring layer. */
+      [data-approach='outline'] [data-ring] {
+        outline: 3px solid var(--projections-color-accent);
+        outline-offset: -3px;
+      }
+      [data-approach='pseudo'] [data-entity-id] {
+        position: relative;
+      }
+      [data-approach='pseudo'] [data-ring]::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        border-radius: inherit;
+        box-shadow: inset 0 0 0 3px var(--projections-color-accent);
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card" data-entity-id="plain" tabindex="0">Plain card</div>
+    <div data-entity-id="wrapper" tabindex="0">
+      <div class="card" style="margin: 6px; border-radius: 14px; height: 72px">Card in a bare wrapper</div>
+    </div>
+    <div class="card" data-entity-id="overflow" tabindex="0" style="position: relative; overflow: hidden; border-radius: 12px">
+      <div style="position: absolute; inset: 0 0 auto 0; z-index: 2; height: 30px; background: #ddf4ff; border-bottom: 1px solid #54aeff"></div>
+      <div style="position: relative; z-index: 2; margin-top: 30px">Clips, positioned header</div>
+    </div>
+    <div style="height: 84px">
+      <div class="card" data-entity-id="transform" tabindex="0" style="width: 220px; transform: translate(10px, 4px) scale(0.85); transform-origin: 0 0">
+        Scaled card
+      </div>
+    </div>
+    <div class="card" data-entity-id="per-corner" tabindex="0" style="border-width: 2px; border-radius: 26px 4px 14px 0 / 14px 4px 30px 0">
+      Per-corner elliptical radii, 2px border
+    </div>
+    <div data-entity-id="border-0" tabindex="0" style="height: 84px; padding: 8px; box-sizing: border-box; background: #d0d7de; border-radius: 10px">No border</div>
+    <div class="card" data-entity-id="border-2" tabindex="0" style="border-width: 2px; border-radius: 6px">2px border</div>
+    <div data-entity-id="spread" tabindex="0" style="height: 84px; padding: 8px; box-sizing: border-box; background: #fff; border-radius: 6px; box-shadow: 0 0 0 1px #57606a">
+      Edge drawn by a spread shadow
+    </div>
+    <ul class="group" aria-label="Rows">
+      <li data-entity-id="row-first" tabindex="0">First row</li>
+      <li data-entity-id="row-middle" tabindex="0">Middle row</li>
+      <li data-entity-id="row-last" tabindex="0">Last row</li>
+    </ul>
+    <svg width="220" height="96" aria-label="SVG rect">
+      <g data-entity-id="svg-rect" tabindex="0" transform="translate(10 8)">
+        <rect data-projections-edge width="200" height="80" rx="10" fill="#ffffff" stroke="#57606a" stroke-width="1" />
+        <text x="12" y="24">SVG rect, rx</text>
+      </g>
+    </svg>
+    <svg width="220" height="96" aria-label="SVG circle">
+      <g data-entity-id="svg-circle" tabindex="0">
+        <circle data-projections-edge cx="110" cy="48" r="40" fill="#ffffff" stroke="#57606a" stroke-width="2" />
+      </g>
+    </svg>
+    <svg width="220" height="96" viewBox="0 0 110 48" aria-label="Scaled SVG">
+      <g data-entity-id="svg-scaled" tabindex="0">
+        <rect data-projections-edge x="4" y="4" width="102" height="40" rx="6" style="fill: #ffffff; stroke: #57606a; stroke-width: 1" />
+      </g>
+    </svg>
+    <svg width="220" height="96" aria-label="SVG relationship">
+      <g data-entity-id="svg-edge" tabindex="0">
+        <path data-projections-edge="line" d="M12 70 C 70 0, 130 110, 196 40" fill="none" stroke="#57606a" stroke-width="1.5" stroke-linecap="round" />
+        <path data-projections-edge="fill" d="M206 34 L194.6 34.9 L199.4 44.5 Z" fill="#57606a" stroke="#57606a" stroke-linejoin="round" />
+      </g>
+    </svg>
+    <svg width="220" height="96" aria-label="Unmarked SVG">
+      <g data-entity-id="svg-unmarked" tabindex="0" transform="translate(10 8)">
+        <rect class="card-surface" width="200" height="80" rx="10" fill="#ffffff" stroke="#57606a" stroke-width="1" />
+      </g>
+    </svg>
+    <svg width="220" height="96" aria-label="SVG edge drawn over the marked one">
+      <g data-entity-id="svg-covered" tabindex="0" transform="translate(10 8)">
+        <rect data-projections-edge width="200" height="80" rx="10" fill="#ffffff" stroke="#57606a" stroke-width="1" />
+        <rect class="change-edge" width="200" height="80" rx="10" fill="none" stroke="#bf8700" stroke-width="2" />
+      </g>
+    </svg>
+    <ul class="group" aria-label="Rounded rows">
+      <li data-entity-id="rounded-first" tabindex="0" style="border-radius: 9px 9px 0 0">First row, the group's inner radius</li>
+      <li data-entity-id="rounded-last" tabindex="0" style="border-radius: 0 0 9px 9px">Last row, the group's inner radius</li>
+    </ul>
+    <script type="module">
+      const params = new URLSearchParams(location.search)
+      const approach = params.get('approach') ?? 'sdk'
+      document.documentElement.dataset.approach = approach
+      if (params.get('color') === 'dark') document.documentElement.dataset.colorMode = 'dark'
+      let rings = null
+      if (approach === 'sdk') {
+        const {connectRings} = await import('/sdk/rings.js')
+        rings = connectRings(window)
+      }
+      // The renderer checks' probe, connected from this page (it is its own parent).
+      await import('/probe.js')
+      const channel = new MessageChannel()
+      const pending = new Map()
+      let next = 1
+      channel.port1.onmessage = ({data}) => pending.get(data.id)?.(data)
+      postMessage({projectionsProbe: 0, type: 'connect'}, '*', [channel.port2])
+      window.probe = (call, args) =>
+        new Promise((resolve, reject) => {
+          const id = next++
+          pending.set(id, data => (data.error ? reject(new Error(data.error)) : resolve(data.result)))
+          channel.port1.postMessage({id, call, args})
+        })
+      window.ring = async (id, state = 'selected') => {
+        for (const element of document.querySelectorAll('[data-ring]')) element.removeAttribute('data-ring')
+        document.activeElement?.blur?.()
+        rings?.set({selected: null, hovered: null})
+        if (id) {
+          document.querySelector(`[data-entity-id="${id}"]`)?.scrollIntoView({block: 'center', inline: 'center'})
+          if (state === 'focus') document.querySelector(`[data-entity-id="${id}"]`)?.focus({focusVisible: true})
+          else if (rings) rings.set(state === 'hover' ? {hovered: id} : {selected: id})
+          for (const element of document.querySelectorAll(`[data-entity-id="${id}"]`)) element.setAttribute('data-ring', '')
+        }
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      }
+      document.documentElement.dataset.ready = 'true'
+    </script>
+  </body>
+</html>

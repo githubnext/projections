@@ -1,0 +1,363 @@
+/* Graph canvas */
+/* A filling renderer (`useFrameFill`) takes the frame's height; its top element is a column whose flexible child gets the rest. */
+.pk[data-fill] {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.pk[data-fill] > * {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.graph-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--graph-bg);
+}
+/*
+ * The dot grid behind zoomable content, on its scroll container: the grid scrolls with the content (`local`), and
+ * zoom.ts (`useDotGrid`, part of `useStageZoom`) spaces it by the zoom, keeps it on the content and fades it out
+ * when zoomed far out. Without those, it is the stage's fixed grid.
+ */
+.pk-dot-grid {
+  --pk-dot-radius: calc(var(--stroke) * 0.6);
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--dot) calc(var(--pk-grid-opacity, 1) * 100%), transparent) var(--pk-dot-radius),
+    transparent var(--pk-dot-radius)
+  );
+  background-size: var(--pk-grid-spacing, var(--projections-space-4)) var(--pk-grid-spacing, var(--projections-space-4));
+  background-position: var(--pk-grid-x, 0) var(--pk-grid-y, 0);
+  background-attachment: local;
+}
+.graph-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+}
+.graph-scroll > .empty-state {
+  flex: 1 1 auto;
+}
+/* Layout usually finishes before the host reveals the frame; the message only appears for a slow one. */
+.graph-loading {
+  flex: 1 1 auto;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: var(--projections-font-size-xs);
+}
+.graph-loading span {
+  opacity: 0;
+  animation: graph-loading-reveal 0s linear 0.6s forwards;
+}
+@keyframes graph-loading-reveal {
+  to {
+    opacity: 1;
+  }
+}
+.graph {
+  display: block;
+  flex: none;
+  margin: auto;
+  box-sizing: content-box;
+  /* `graphPadding` (framing.ts), or across the host's stage inset (`useGraphPadding`). */
+  padding: 16px var(--projections-stage-inset, 16px);
+}
+/* Cards are controls: clicking one (twice, too) activates it rather than selecting its text. */
+.graph-node {
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.graph-node .node-surface {
+  fill: var(--raised);
+  stroke: var(--divider);
+  stroke-width: var(--stroke);
+  rx: var(--projections-radius);
+}
+.graph-group .node-surface {
+  rx: var(--projections-radius-lg);
+}
+.node-emphasis {
+  pointer-events: none;
+  stroke-width: var(--stroke-strong);
+  rx: var(--projections-radius);
+}
+.graph-group .node-emphasis {
+  rx: var(--projections-radius-lg);
+}
+.node-emphasis.added {
+  fill: var(--green-soft);
+  stroke: var(--green-border);
+}
+.node-emphasis.removed {
+  fill: var(--red-soft);
+  stroke: var(--red-border);
+  stroke-dasharray: 5 3;
+}
+.node-emphasis.modified {
+  fill: var(--amber-soft);
+  stroke: var(--amber-border);
+}
+.node-emphasis.renamed {
+  fill: var(--violet-soft);
+  stroke: var(--violet-border);
+}
+.node-kind {
+  fill: var(--muted);
+  font-size: var(--projections-font-size-xs);
+}
+.node-detail {
+  fill: var(--muted);
+  font-size: var(--projections-font-size-xs);
+}
+/* A card's icon before its kind line (GraphCanvas `icon`): Lucide strokes in the kind line's muted color. */
+.node-icon {
+  color: var(--muted);
+}
+/* Cards and relationships outside a focus (see GraphCanvas `focus`) recede; filter opacity composes with fades. */
+.graph-node.receded,
+.graph-link.receded {
+  filter: opacity(0.28);
+}
+.node-label {
+  fill: var(--text);
+  font-size: var(--projections-font-size-xs);
+  font-weight: var(--projections-font-weight-semibold);
+}
+.node-subtitle {
+  fill: var(--muted);
+  font-size: var(--projections-font-size-xs);
+}
+/* The expander of a card that opens or closes a group: muted until the card is hovered or focused. */
+.node-expander {
+  color: var(--muted);
+  pointer-events: none;
+}
+.graph-node:hover .node-expander,
+.graph-node:focus-visible .node-expander {
+  color: var(--text);
+}
+.node-file-icon {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: var(--stroke);
+  stroke-linejoin: round;
+}
+/*
+ * A card's status footer: while the change is emphasized, the band under its content takes the status's highlight
+ * tint, a step stronger than the card's, ruled off in the card's change edge, and the status reads in its own hue.
+ */
+.node-footer-band {
+  pointer-events: none;
+  stroke: none;
+}
+.node-footer-band.added {
+  fill: var(--green-highlight);
+}
+.node-footer-band.removed {
+  fill: var(--red-highlight);
+}
+.node-footer-band.modified {
+  fill: var(--amber-highlight);
+}
+.node-footer-band.renamed {
+  fill: var(--violet-highlight);
+}
+.node-footer-rule {
+  pointer-events: none;
+  stroke-width: var(--stroke);
+}
+.node-footer-rule.added {
+  stroke: var(--green-border);
+}
+.node-footer-rule.removed {
+  stroke: var(--red-border);
+  stroke-dasharray: 5 3;
+}
+.node-footer-rule.modified {
+  stroke: var(--amber-border);
+}
+.node-footer-rule.renamed {
+  stroke: var(--violet-border);
+}
+.graph-edge {
+  stroke: var(--edge);
+  stroke-width: var(--stroke);
+  stroke-linecap: round;
+  fill: none;
+  pointer-events: none;
+}
+.graph-edge-halo {
+  stroke: var(--accent-soft);
+  stroke-width: calc(var(--projections-space-2) - var(--stroke));
+  stroke-linecap: round;
+  fill: none;
+  pointer-events: none;
+  opacity: 0;
+}
+/* Drawn over its shaft; its fill, stroke and round-joined stroke width come from the kit's arrowHeadStyle. */
+.graph-arrowhead {
+  pointer-events: none;
+}
+.graph-arrowheads {
+  pointer-events: none;
+}
+/* An arrowhead recedes with its relationship (see GraphCanvas `focus`). */
+.graph-link-head.receded {
+  filter: opacity(0.28);
+}
+/* A selected or hovered card's relationships show their whole course under a halo, so each can be traced into a hub. */
+.graph-link[data-incident] > .graph-edge-halo {
+  opacity: 1;
+}
+/* Synthetic relationships (no entity ID) aren't ringed by the SDK: their halo shows hover and focus. */
+[data-graph-synthetic] > .edge-hit:is(:hover, :focus-visible) + .graph-edge-halo {
+  opacity: 1;
+}
+.graph-edge-emphasis {
+  pointer-events: none;
+}
+.graph-edge-emphasis.removed {
+  stroke-dasharray: 5 3;
+}
+.graph-edge.inferred {
+  stroke-dasharray: 2 4;
+}
+.graph-junction {
+  fill: var(--edge);
+  pointer-events: none;
+}
+.edge-hit {
+  stroke: transparent;
+  stroke-width: var(--projections-space-4);
+  fill: none;
+  cursor: pointer;
+}
+.edge-hit:focus-visible {
+  outline: none;
+}
+.graph-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--projections-space-2);
+  padding: var(--projections-space-2) var(--projections-space-4);
+  font-size: var(--projections-font-size-xs);
+  color: var(--muted);
+  border-top: var(--projections-border-width) solid var(--border);
+  background: var(--surface);
+}
+/* The caption takes the strip's free width (one line where it fits); the shared-dependencies button keeps its own. */
+.graph-footer > span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.shared-routes {
+  position: relative;
+}
+.shared-routes > button {
+  min-height: var(--projections-control-height-sm);
+  font-size: var(--projections-font-size-xs);
+}
+.shared-routes-list {
+  position: absolute;
+  bottom: calc(100% + var(--projections-space-1));
+  left: 0;
+  z-index: 2;
+  min-width: 240px;
+  max-height: 260px;
+  overflow: auto;
+  margin: 0;
+  padding: var(--projections-space-1);
+  list-style: none;
+  background: var(--overlay);
+  border: var(--projections-border-width) solid var(--border-strong);
+  border-radius: var(--projections-radius-lg);
+  box-shadow: var(--projections-shadow-lg);
+}
+.shared-routes-list button {
+  width: 100%;
+  justify-content: flex-start;
+  border: 0;
+  min-height: var(--projections-control-height-sm);
+  font-size: var(--projections-font-size-xs);
+}
+
+@media (max-width: 760px) {
+  .graph-footer {
+    padding: var(--projections-space-2) var(--projections-space-3);
+    gap: var(--projections-space-3);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pk *,
+  .pk *::before,
+  .pk *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+
+/* Items outside the host's find or "changes only" filter (`data-projections-filtered`) recede. */
+.pk [data-projections-filtered] {
+  opacity: 0.25;
+}
+/* A card's facts (see GraphCanvas `badges` and `accent`): pills under its text, and a band along its leading edge. */
+.node-badge-surface {
+  fill: var(--inset);
+  stroke: var(--divider);
+  stroke-width: var(--stroke);
+}
+.node-badge-text {
+  fill: var(--muted);
+  font-size: var(--projections-font-size-xs);
+}
+/* A highlight is a fact to see first: the accent hue, with a shield check. */
+.node-badge.highlight .node-badge-surface {
+  fill: var(--accent-soft);
+  stroke: var(--accent-border);
+}
+.node-badge.highlight .node-badge-text {
+  fill: var(--text);
+  font-weight: var(--projections-font-weight-semibold);
+}
+.node-badge.highlight .node-badge-icon {
+  color: var(--accent);
+}
+/* Quiet tags have no pill: in the diff, a gained one reads in the added hue. */
+.node-badge.quiet.added .node-badge-text {
+  fill: var(--green);
+}
+/* In the diff, badges a modified card gained or lost: the added hue, or struck through on a dashed outline. */
+.node-badge.added .node-badge-surface {
+  fill: var(--green-soft);
+  stroke: var(--green-border);
+}
+.node-badge.added .node-badge-text {
+  fill: var(--text);
+}
+.node-badge.removed .node-badge-surface {
+  fill: var(--red-soft);
+  stroke: var(--red-border);
+  stroke-dasharray: 3 2;
+}
+.node-badge.removed .node-badge-text {
+  text-decoration: line-through;
+}
+.node-accent {
+  pointer-events: none;
+}
+/* A card's weight gauge (see GraphCanvas `weight`): its accent's paint (inline), or the muted ink without one. */
+.node-gauge {
+  fill: var(--muted);
+  pointer-events: none;
+}

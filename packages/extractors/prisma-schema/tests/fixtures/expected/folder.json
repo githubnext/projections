@@ -1,0 +1,208 @@
+{
+ "entities": [
+  {
+   "id": "table:/User",
+   "kind": "table",
+   "label": "User",
+   "data": {
+    "namespace": null,
+    "provider": "cockroachdb"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FUser/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:/User",
+    "type": "BigInt",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "sequence",
+     "args": []
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "table:/Post",
+   "kind": "table",
+   "label": "Post",
+   "data": {
+    "namespace": null,
+    "provider": "cockroachdb"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FPost/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:/Post",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "sequence",
+     "args": []
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FPost/userId",
+   "kind": "column",
+   "label": "userId",
+   "data": {
+    "table": "table:/Post",
+    "type": "BigInt",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FUser/primary-key/%5B%22id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (id)",
+   "data": {
+    "table": "table:/User",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FPost/primary-key/%5B%22id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (id)",
+   "data": {
+    "table": "table:/Post",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FPost/foreign-key/%5B%22userId%22%5D/table%3A%2FUser",
+   "kind": "constraint",
+   "label": "foreign-key (userId)",
+   "data": {
+    "table": "table:/Post",
+    "type": "foreign-key",
+    "columns": [
+     "userId"
+    ],
+    "target": "table:/User",
+    "references": [
+     "id"
+    ],
+    "onDelete": null,
+    "onUpdate": null
+   },
+   "confidence": "authoritative"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "contains:table%3A%2FUser/column%3Atable%253A%252FUser%2Fid/",
+   "kind": "contains",
+   "from": "table:/User",
+   "to": "column:table%3A%2FUser/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FPost/column%3Atable%253A%252FPost%2Fid/",
+   "kind": "contains",
+   "from": "table:/Post",
+   "to": "column:table%3A%2FPost/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FPost/column%3Atable%253A%252FPost%2FuserId/",
+   "kind": "contains",
+   "from": "table:/Post",
+   "to": "column:table%3A%2FPost/userId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FUser/constraint%3Atable%253A%252FUser%2Fprimary-key%2F%255B%2522id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/User",
+   "to": "constraint:table%3A%2FUser/primary-key/%5B%22id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FUser%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FUser%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FUser/primary-key/%5B%22id%22%5D",
+   "to": "column:table%3A%2FUser/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FPost/constraint%3Atable%253A%252FPost%2Fprimary-key%2F%255B%2522id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Post",
+   "to": "constraint:table%3A%2FPost/primary-key/%5B%22id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FPost%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FPost%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FPost/primary-key/%5B%22id%22%5D",
+   "to": "column:table%3A%2FPost/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FPost/constraint%3Atable%253A%252FPost%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252FUser/",
+   "kind": "contains",
+   "from": "table:/Post",
+   "to": "constraint:table%3A%2FPost/foreign-key/%5B%22userId%22%5D/table%3A%2FUser",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "references:constraint%3Atable%253A%252FPost%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252FUser/table%3A%2FUser/",
+   "kind": "references",
+   "from": "constraint:table%3A%2FPost/foreign-key/%5B%22userId%22%5D/table%3A%2FUser",
+   "to": "table:/User",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FPost%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252FUser/column%3Atable%253A%252FPost%2FuserId/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FPost/foreign-key/%5B%22userId%22%5D/table%3A%2FUser",
+   "to": "column:table%3A%2FPost/userId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "foreign-key:column%3Atable%253A%252FPost%2FuserId/column%3Atable%253A%252FUser%2Fid/constraint%3Atable%253A%252FPost%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252FUser",
+   "kind": "foreign-key",
+   "from": "column:table%3A%2FPost/userId",
+   "to": "column:table%3A%2FUser/id",
+   "confidence": "authoritative"
+  }
+ ]
+}

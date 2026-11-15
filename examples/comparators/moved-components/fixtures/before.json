@@ -1,0 +1,25 @@
+{
+  "protocolVersion": 0,
+  "schema": "architecture/v0",
+  "entities": [
+    {"id": "module:api", "kind": "module", "label": "api"},
+    {"id": "module:billing", "kind": "module", "label": "billing"},
+    {"id": "module:invoicing", "kind": "module", "label": "invoicing"},
+    {"id": "component:api/CheckoutController", "kind": "component", "label": "CheckoutController"},
+    {"id": "component:billing/PaymentService", "kind": "component", "label": "PaymentService"},
+    {"id": "component:billing/InvoiceService", "kind": "component", "label": "InvoiceService"},
+    {"id": "component:billing/TaxCalculator", "kind": "component", "label": "TaxCalculator"},
+    {"id": "component:invoicing/InvoiceRenderer", "kind": "component", "label": "InvoiceRenderer"}
+  ],
+  "relationships": [
+    {"id": "contains:api/CheckoutController", "kind": "contains", "from": "module:api", "to": "component:api/CheckoutController"},
+    {"id": "contains:billing/PaymentService", "kind": "contains", "from": "module:billing", "to": "component:billing/PaymentService"},
+    {"id": "contains:billing/InvoiceService", "kind": "contains", "from": "module:billing", "to": "component:billing/InvoiceService"},
+    {"id": "contains:billing/TaxCalculator", "kind": "contains", "from": "module:billing", "to": "component:billing/TaxCalculator"},
+    {"id": "contains:invoicing/InvoiceRenderer", "kind": "contains", "from": "module:invoicing", "to": "component:invoicing/InvoiceRenderer"},
+    {"id": "uses:api/CheckoutController>billing/PaymentService", "kind": "uses", "from": "component:api/CheckoutController", "to": "component:billing/PaymentService"},
+    {"id": "uses:api/CheckoutController>billing/InvoiceService", "kind": "uses", "from": "component:api/CheckoutController", "to": "component:billing/InvoiceService"},
+    {"id": "uses:billing/InvoiceService>billing/TaxCalculator", "kind": "uses", "from": "component:billing/InvoiceService", "to": "component:billing/TaxCalculator"},
+    {"id": "uses:billing/InvoiceService>invoicing/InvoiceRenderer", "kind": "uses", "from": "component:billing/InvoiceService", "to": "component:invoicing/InvoiceRenderer"}
+  ]
+}

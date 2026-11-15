@@ -1,0 +1,35 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["views", "multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["public", "auth"]
+}
+
+model Account {
+  id    Int    @id
+  email String
+  @@schema("auth")
+  @@map("accounts")
+}
+
+view AccountSummary {
+  id    Int    @unique
+  email String
+  @@schema("public")
+}
+
+enum Kind {
+  A
+  B
+  @@schema("auth")
+}
+
+model Ignored {
+  id Int @id
+  @@ignore
+  @@schema("public")
+}

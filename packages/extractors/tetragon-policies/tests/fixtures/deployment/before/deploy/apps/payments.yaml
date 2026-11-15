@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-api
+  namespace: payments
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/part-of: payments
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/example/payments-api:1.4.2
+        - name: proxy
+          image: envoyproxy/envoy@sha256:0123
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: settlement
+  namespace: payments
+spec:
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/part-of: payments
+        spec:
+          containers:
+            - name: settle
+              image: ghcr.io/example/settlement:2

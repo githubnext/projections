@@ -1,0 +1,13 @@
+[package]
+name = "projections-extractor-command-output"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow = "1"
+projections-extractor-sdk = { path = "../sdk" }
+regex = "1"
+serde_json = { version = "1", features = ["float_roundtrip"] }

@@ -1,0 +1,179 @@
+{
+ "entities": [
+  {
+   "id": "http:handler:%40example%2Fapp:handler:named",
+   "kind": "handler",
+   "label": "handler",
+   "data": {
+    "package": "@example/app"
+   },
+   "confidence": "derived"
+  },
+  {
+   "id": "http:package:%40example%2Fapp",
+   "kind": "package",
+   "label": "@example/app",
+   "data": {},
+   "confidence": "derived"
+  },
+  {
+   "id": "http:route:%40example%2Fapp:GET:%2Fhealth",
+   "kind": "route",
+   "label": "GET /health",
+   "data": {
+    "package": "@example/app",
+    "method": "GET",
+    "path": "/health"
+   },
+   "confidence": "inferred"
+  },
+  {
+   "id": "http:route:%40example%2Fapp:GET:%2Fitems",
+   "kind": "route",
+   "label": "GET /items",
+   "data": {
+    "package": "@example/app",
+    "method": "GET",
+    "path": "/items"
+   },
+   "confidence": "inferred"
+  },
+  {
+   "id": "http:route:%40example%2Fapp:GET:%2Forders",
+   "kind": "route",
+   "label": "GET /orders",
+   "data": {
+    "package": "@example/app",
+    "method": "GET",
+    "path": "/orders"
+   },
+   "confidence": "inferred"
+  },
+  {
+   "id": "http:route:%40example%2Fapp:GET:%2Fusers",
+   "kind": "route",
+   "label": "GET /users",
+   "data": {
+    "package": "@example/app",
+    "method": "GET",
+    "path": "/users"
+   },
+   "confidence": "inferred"
+  },
+  {
+   "id": "http:route:%40example%2Fapp:POST:%2Forders",
+   "kind": "route",
+   "label": "POST /orders",
+   "data": {
+    "package": "@example/app",
+    "method": "POST",
+    "path": "/orders"
+   },
+   "confidence": "inferred"
+  },
+  {
+   "id": "http:route:%40example%2Fapp:PUT:%2Fitems",
+   "kind": "route",
+   "label": "PUT /items",
+   "data": {
+    "package": "@example/app",
+    "method": "PUT",
+    "path": "/items"
+   },
+   "confidence": "inferred"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "http:handled-by:http%3Aroute%3A%2540example%252Fapp%3AGET%3A%252Fhealth:http%3Ahandler%3A%2540example%252Fapp%3Ahandler%3Anamed",
+   "kind": "handled-by",
+   "from": "http:route:%40example%2Fapp:GET:%2Fhealth",
+   "to": "http:handler:%40example%2Fapp:handler:named",
+   "confidence": "derived"
+  },
+  {
+   "id": "http:handled-by:http%3Aroute%3A%2540example%252Fapp%3AGET%3A%252Fitems:http%3Ahandler%3A%2540example%252Fapp%3Ahandler%3Anamed",
+   "kind": "handled-by",
+   "from": "http:route:%40example%2Fapp:GET:%2Fitems",
+   "to": "http:handler:%40example%2Fapp:handler:named",
+   "confidence": "derived"
+  },
+  {
+   "id": "http:handled-by:http%3Aroute%3A%2540example%252Fapp%3AGET%3A%252Forders:http%3Ahandler%3A%2540example%252Fapp%3Ahandler%3Anamed",
+   "kind": "handled-by",
+   "from": "http:route:%40example%2Fapp:GET:%2Forders",
+   "to": "http:handler:%40example%2Fapp:handler:named",
+   "confidence": "derived"
+  },
+  {
+   "id": "http:handled-by:http%3Aroute%3A%2540example%252Fapp%3AGET%3A%252Fusers:http%3Ahandler%3A%2540example%252Fapp%3Ahandler%3Anamed",
+   "kind": "handled-by",
+   "from": "http:route:%40example%2Fapp:GET:%2Fusers",
+   "to": "http:handler:%40example%2Fapp:handler:named",
+   "confidence": "derived"
+  },
+  {
+   "id": "http:handled-by:http%3Aroute%3A%2540example%252Fapp%3APOST%3A%252Forders:http%3Ahandler%3A%2540example%252Fapp%3Ahandler%3Anamed",
+   "kind": "handled-by",
+   "from": "http:route:%40example%2Fapp:POST:%2Forders",
+   "to": "http:handler:%40example%2Fapp:handler:named",
+   "confidence": "derived"
+  },
+  {
+   "id": "http:handled-by:http%3Aroute%3A%2540example%252Fapp%3APUT%3A%252Fitems:http%3Ahandler%3A%2540example%252Fapp%3Ahandler%3Anamed",
+   "kind": "handled-by",
+   "from": "http:route:%40example%2Fapp:PUT:%2Fitems",
+   "to": "http:handler:%40example%2Fapp:handler:named",
+   "confidence": "derived"
+  },
+  {
+   "id": "http:owns:http%3Apackage%3A%2540example%252Fapp:http%3Aroute%3A%2540example%252Fapp%3AGET%3A%252Fhealth",
+   "kind": "owns",
+   "from": "http:package:%40example%2Fapp",
+   "to": "http:route:%40example%2Fapp:GET:%2Fhealth",
+   "confidence": "derived"
+  },
+  {
+   "id": "http:owns:http%3Apackage%3A%2540example%252Fapp:http%3Aroute%3A%2540example%252Fapp%3AGET%3A%252Fitems",
+   "kind": "owns",
+   "from": "http:package:%40example%2Fapp",
+   "to": "http:route:%40example%2Fapp:GET:%2Fitems",
+   "confidence": "derived"
+  },
+  {
+   "id": "http:owns:http%3Apackage%3A%2540example%252Fapp:http%3Aroute%3A%2540example%252Fapp%3AGET%3A%252Forders",
+   "kind": "owns",
+   "from": "http:package:%40example%2Fapp",
+   "to": "http:route:%40example%2Fapp:GET:%2Forders",
+   "confidence": "derived"
+  },
+  {
+   "id": "http:owns:http%3Apackage%3A%2540example%252Fapp:http%3Aroute%3A%2540example%252Fapp%3AGET%3A%252Fusers",
+   "kind": "owns",
+   "from": "http:package:%40example%2Fapp",
+   "to": "http:route:%40example%2Fapp:GET:%2Fusers",
+   "confidence": "derived"
+  },
+  {
+   "id": "http:owns:http%3Apackage%3A%2540example%252Fapp:http%3Aroute%3A%2540example%252Fapp%3APOST%3A%252Forders",
+   "kind": "owns",
+   "from": "http:package:%40example%2Fapp",
+   "to": "http:route:%40example%2Fapp:POST:%2Forders",
+   "confidence": "derived"
+  },
+  {
+   "id": "http:owns:http%3Apackage%3A%2540example%252Fapp:http%3Aroute%3A%2540example%252Fapp%3APUT%3A%252Fitems",
+   "kind": "owns",
+   "from": "http:package:%40example%2Fapp",
+   "to": "http:route:%40example%2Fapp:PUT:%2Fitems",
+   "confidence": "derived"
+  }
+ ],
+ "metadata": {
+  "analysis": "Static TypeScript symbol resolution with explicit domain conventions",
+  "limitations": [
+   "Dynamic registrations and runtime control flow are not evaluated.",
+   "Router mounting, middleware and Fastify plugin prefixes are not composed; paths are local registration paths."
+  ]
+ }
+}

@@ -1,0 +1,9 @@
+packages:
+  - "packages/*"
+
+catalog:
+  is-number: ^7.0.0
+
+catalogs:
+  legacy:
+    is-odd: ^3.0.1

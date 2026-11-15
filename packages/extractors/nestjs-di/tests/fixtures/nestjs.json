@@ -1,0 +1,748 @@
+{
+  "protocolVersion": 0,
+  "schema": "architecture/v0",
+  "entities": [
+    {
+      "id": "implementation:OrdersModule:class:AuditLogger",
+      "kind": "implementation",
+      "label": "AuditLogger",
+      "data": {
+        "type": "AuditLogger"
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/orders/audit.logger.ts"
+        }
+      ]
+    },
+    {
+      "id": "implementation:OrdersModule:class:OrdersController",
+      "kind": "implementation",
+      "label": "OrdersController",
+      "data": {
+        "type": "OrdersController"
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/orders/orders.controller.ts"
+        }
+      ]
+    },
+    {
+      "id": "implementation:OrdersModule:class:OrdersRepository",
+      "kind": "implementation",
+      "label": "OrdersRepository",
+      "data": {
+        "type": "OrdersRepository"
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/orders/orders.repository.ts"
+        }
+      ]
+    },
+    {
+      "id": "implementation:OrdersModule:class:OrdersService",
+      "kind": "implementation",
+      "label": "OrdersService",
+      "data": {
+        "type": "OrdersService"
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/orders/orders.service.ts"
+        }
+      ]
+    },
+    {
+      "id": "implementation:OrdersModule:class:RequestContext",
+      "kind": "implementation",
+      "label": "RequestContext",
+      "data": {
+        "type": "RequestContext"
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/orders/request-context.ts"
+        }
+      ]
+    },
+    {
+      "id": "implementation:OrdersModule:symbol:clock",
+      "kind": "implementation",
+      "label": "systemClock()",
+      "data": {
+        "factory": "systemClock"
+      }
+    },
+    {
+      "id": "implementation:PaymentsModule:class:PaymentGateway",
+      "kind": "implementation",
+      "label": "StripeGateway",
+      "data": {
+        "type": "StripeGateway"
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/payments/stripe.gateway.ts"
+        }
+      ]
+    },
+    {
+      "id": "module:AppModule",
+      "kind": "module",
+      "label": "AppModule",
+      "data": {
+        "global": false,
+        "origin": "application",
+        "root": true
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/app.module.ts"
+        }
+      ]
+    },
+    {
+      "id": "module:ConfigModule",
+      "kind": "module",
+      "label": "ConfigModule",
+      "data": {
+        "global": true,
+        "origin": "application",
+        "root": false
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/config/config.module.ts"
+        }
+      ]
+    },
+    {
+      "id": "module:OrdersModule",
+      "kind": "module",
+      "label": "OrdersModule",
+      "data": {
+        "global": false,
+        "origin": "application",
+        "root": false
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/orders/orders.module.ts"
+        }
+      ]
+    },
+    {
+      "id": "module:PaymentsModule",
+      "kind": "module",
+      "label": "PaymentsModule",
+      "data": {
+        "global": false,
+        "origin": "application",
+        "root": false
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/payments/payments.module.ts"
+        }
+      ]
+    },
+    {
+      "id": "service:ConfigModule:string:APP_CONFIG",
+      "kind": "service",
+      "label": "APP_CONFIG",
+      "data": {
+        "token": "string:APP_CONFIG",
+        "tokenKind": "string",
+        "module": "ConfigModule",
+        "exported": true
+      }
+    },
+    {
+      "id": "service:ConfigModule:string:APP_CONFIG:registration",
+      "kind": "registration",
+      "label": "APP_CONFIG (ConfigModule)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "DEFAULT",
+        "ordinal": 0,
+        "registrationKind": "value",
+        "module": "ConfigModule",
+        "exported": true,
+        "role": "provider",
+        "origin": "application"
+      }
+    },
+    {
+      "id": "service:OrdersModule:class:AuditLogger",
+      "kind": "service",
+      "label": "AuditLogger",
+      "data": {
+        "token": "class:AuditLogger",
+        "tokenKind": "class",
+        "module": "OrdersModule",
+        "exported": false
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/orders/audit.logger.ts"
+        }
+      ]
+    },
+    {
+      "id": "service:OrdersModule:class:AuditLogger:registration",
+      "kind": "registration",
+      "label": "AuditLogger (OrdersModule)",
+      "data": {
+        "lifetime": "transient",
+        "scope": "TRANSIENT",
+        "ordinal": 0,
+        "registrationKind": "class",
+        "module": "OrdersModule",
+        "exported": false,
+        "role": "provider",
+        "origin": "application",
+        "implementation": "AuditLogger"
+      }
+    },
+    {
+      "id": "service:OrdersModule:class:OrdersController",
+      "kind": "service",
+      "label": "OrdersController",
+      "data": {
+        "token": "class:OrdersController",
+        "tokenKind": "class",
+        "module": "OrdersModule",
+        "exported": false
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/orders/orders.controller.ts"
+        }
+      ]
+    },
+    {
+      "id": "service:OrdersModule:class:OrdersController:registration",
+      "kind": "registration",
+      "label": "OrdersController (OrdersModule)",
+      "data": {
+        "lifetime": "scoped",
+        "scope": "DEFAULT",
+        "ordinal": 0,
+        "registrationKind": "class",
+        "module": "OrdersModule",
+        "exported": false,
+        "role": "controller",
+        "origin": "application",
+        "declaredLifetime": "singleton",
+        "implementation": "OrdersController"
+      }
+    },
+    {
+      "id": "service:OrdersModule:class:OrdersRepository",
+      "kind": "service",
+      "label": "OrdersRepository",
+      "data": {
+        "token": "class:OrdersRepository",
+        "tokenKind": "class",
+        "module": "OrdersModule",
+        "exported": false
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/orders/orders.repository.ts"
+        }
+      ]
+    },
+    {
+      "id": "service:OrdersModule:class:OrdersRepository:registration",
+      "kind": "registration",
+      "label": "OrdersRepository (OrdersModule)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "DEFAULT",
+        "ordinal": 0,
+        "registrationKind": "class",
+        "module": "OrdersModule",
+        "exported": false,
+        "role": "provider",
+        "origin": "application",
+        "implementation": "OrdersRepository"
+      }
+    },
+    {
+      "id": "service:OrdersModule:class:OrdersService",
+      "kind": "service",
+      "label": "OrdersService",
+      "data": {
+        "token": "class:OrdersService",
+        "tokenKind": "class",
+        "module": "OrdersModule",
+        "exported": false
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/orders/orders.service.ts"
+        }
+      ]
+    },
+    {
+      "id": "service:OrdersModule:class:OrdersService:registration",
+      "kind": "registration",
+      "label": "OrdersService (OrdersModule)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "DEFAULT",
+        "ordinal": 0,
+        "registrationKind": "class",
+        "module": "OrdersModule",
+        "exported": false,
+        "role": "provider",
+        "origin": "application",
+        "implementation": "OrdersService"
+      }
+    },
+    {
+      "id": "service:OrdersModule:class:RequestContext",
+      "kind": "service",
+      "label": "RequestContext",
+      "data": {
+        "token": "class:RequestContext",
+        "tokenKind": "class",
+        "module": "OrdersModule",
+        "exported": false
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/orders/request-context.ts"
+        }
+      ]
+    },
+    {
+      "id": "service:OrdersModule:class:RequestContext:registration",
+      "kind": "registration",
+      "label": "RequestContext (OrdersModule)",
+      "data": {
+        "lifetime": "scoped",
+        "scope": "REQUEST",
+        "ordinal": 0,
+        "registrationKind": "class",
+        "module": "OrdersModule",
+        "exported": false,
+        "role": "provider",
+        "origin": "application",
+        "implementation": "RequestContext"
+      }
+    },
+    {
+      "id": "service:OrdersModule:symbol:clock",
+      "kind": "service",
+      "label": "Symbol(clock)",
+      "data": {
+        "token": "symbol:clock",
+        "tokenKind": "symbol",
+        "module": "OrdersModule",
+        "exported": false
+      }
+    },
+    {
+      "id": "service:OrdersModule:symbol:clock:registration",
+      "kind": "registration",
+      "label": "Symbol(clock) (OrdersModule)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "DEFAULT",
+        "ordinal": 0,
+        "registrationKind": "factory",
+        "module": "OrdersModule",
+        "exported": false,
+        "role": "provider",
+        "origin": "application",
+        "factory": "systemClock"
+      }
+    },
+    {
+      "id": "service:PaymentsModule:class:PaymentGateway",
+      "kind": "service",
+      "label": "PaymentGateway",
+      "data": {
+        "token": "class:PaymentGateway",
+        "tokenKind": "class",
+        "module": "PaymentsModule",
+        "exported": true
+      },
+      "evidence": [
+        {
+          "kind": "nestjs",
+          "source": "src/payments/payment-gateway.ts"
+        }
+      ]
+    },
+    {
+      "id": "service:PaymentsModule:class:PaymentGateway:registration",
+      "kind": "registration",
+      "label": "PaymentGateway (PaymentsModule)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "DEFAULT",
+        "ordinal": 0,
+        "registrationKind": "class",
+        "module": "PaymentsModule",
+        "exported": true,
+        "role": "provider",
+        "origin": "application",
+        "implementation": "StripeGateway"
+      }
+    },
+    {
+      "id": "service:PaymentsModule:string:PAYMENTS",
+      "kind": "service",
+      "label": "PAYMENTS",
+      "data": {
+        "token": "string:PAYMENTS",
+        "tokenKind": "string",
+        "module": "PaymentsModule",
+        "exported": true
+      }
+    },
+    {
+      "id": "service:PaymentsModule:string:PAYMENTS:registration",
+      "kind": "registration",
+      "label": "PAYMENTS (PaymentsModule)",
+      "data": {
+        "lifetime": "singleton",
+        "scope": "DEFAULT",
+        "ordinal": 0,
+        "registrationKind": "alias",
+        "module": "PaymentsModule",
+        "exported": true,
+        "role": "provider",
+        "origin": "application"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "implementation:OrdersModule:class:OrdersController:dependsOn:constructor:0",
+      "kind": "dependsOn",
+      "from": "implementation:OrdersModule:class:OrdersController",
+      "to": "service:OrdersModule:class:OrdersService",
+      "label": "orders",
+      "data": {
+        "injection": "constructor",
+        "optional": false,
+        "collection": false,
+        "parameter": "orders",
+        "position": 0,
+        "token": "class:OrdersService"
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:OrdersModule:class:OrdersController:dependsOn:constructor:1",
+      "kind": "dependsOn",
+      "from": "implementation:OrdersModule:class:OrdersController",
+      "to": "service:OrdersModule:class:RequestContext",
+      "label": "context",
+      "data": {
+        "injection": "constructor",
+        "optional": false,
+        "collection": false,
+        "parameter": "context",
+        "position": 1,
+        "token": "class:RequestContext"
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:OrdersModule:class:OrdersService:dependsOn:constructor:0",
+      "kind": "dependsOn",
+      "from": "implementation:OrdersModule:class:OrdersService",
+      "to": "service:OrdersModule:class:OrdersRepository",
+      "label": "repository",
+      "data": {
+        "injection": "constructor",
+        "optional": false,
+        "collection": false,
+        "parameter": "repository",
+        "position": 0,
+        "token": "class:OrdersRepository"
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:OrdersModule:class:OrdersService:dependsOn:constructor:1",
+      "kind": "dependsOn",
+      "from": "implementation:OrdersModule:class:OrdersService",
+      "to": "service:PaymentsModule:class:PaymentGateway",
+      "label": "payments",
+      "data": {
+        "injection": "constructor",
+        "optional": false,
+        "collection": false,
+        "parameter": "payments",
+        "position": 1,
+        "token": "class:PaymentGateway"
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:OrdersModule:class:OrdersService:dependsOn:constructor:2",
+      "kind": "dependsOn",
+      "from": "implementation:OrdersModule:class:OrdersService",
+      "to": "service:OrdersModule:symbol:clock",
+      "label": "clock",
+      "data": {
+        "injection": "constructor",
+        "optional": false,
+        "collection": false,
+        "parameter": "clock",
+        "position": 2,
+        "token": "symbol:clock"
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:OrdersModule:class:OrdersService:dependsOn:property:audit",
+      "kind": "dependsOn",
+      "from": "implementation:OrdersModule:class:OrdersService",
+      "to": "service:OrdersModule:class:AuditLogger",
+      "label": "audit",
+      "data": {
+        "injection": "property",
+        "optional": false,
+        "collection": false,
+        "parameter": "audit",
+        "token": "class:AuditLogger"
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "implementation:PaymentsModule:class:PaymentGateway:dependsOn:constructor:0",
+      "kind": "dependsOn",
+      "from": "implementation:PaymentsModule:class:PaymentGateway",
+      "to": "service:ConfigModule:string:APP_CONFIG",
+      "label": "config",
+      "data": {
+        "injection": "constructor",
+        "optional": false,
+        "collection": false,
+        "parameter": "config",
+        "position": 0,
+        "token": "string:APP_CONFIG"
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "module:AppModule:imports:ConfigModule",
+      "kind": "imports",
+      "from": "module:AppModule",
+      "to": "module:ConfigModule",
+      "data": {
+        "reexported": false
+      }
+    },
+    {
+      "id": "module:AppModule:imports:OrdersModule",
+      "kind": "imports",
+      "from": "module:AppModule",
+      "to": "module:OrdersModule",
+      "data": {
+        "reexported": false
+      }
+    },
+    {
+      "id": "module:ConfigModule:provides:service:ConfigModule:string:APP_CONFIG:registration",
+      "kind": "provides",
+      "from": "module:ConfigModule",
+      "to": "service:ConfigModule:string:APP_CONFIG:registration"
+    },
+    {
+      "id": "module:OrdersModule:imports:PaymentsModule",
+      "kind": "imports",
+      "from": "module:OrdersModule",
+      "to": "module:PaymentsModule",
+      "data": {
+        "reexported": false
+      }
+    },
+    {
+      "id": "module:OrdersModule:provides:service:OrdersModule:class:AuditLogger:registration",
+      "kind": "provides",
+      "from": "module:OrdersModule",
+      "to": "service:OrdersModule:class:AuditLogger:registration"
+    },
+    {
+      "id": "module:OrdersModule:provides:service:OrdersModule:class:OrdersController:registration",
+      "kind": "provides",
+      "from": "module:OrdersModule",
+      "to": "service:OrdersModule:class:OrdersController:registration"
+    },
+    {
+      "id": "module:OrdersModule:provides:service:OrdersModule:class:OrdersRepository:registration",
+      "kind": "provides",
+      "from": "module:OrdersModule",
+      "to": "service:OrdersModule:class:OrdersRepository:registration"
+    },
+    {
+      "id": "module:OrdersModule:provides:service:OrdersModule:class:OrdersService:registration",
+      "kind": "provides",
+      "from": "module:OrdersModule",
+      "to": "service:OrdersModule:class:OrdersService:registration"
+    },
+    {
+      "id": "module:OrdersModule:provides:service:OrdersModule:class:RequestContext:registration",
+      "kind": "provides",
+      "from": "module:OrdersModule",
+      "to": "service:OrdersModule:class:RequestContext:registration"
+    },
+    {
+      "id": "module:OrdersModule:provides:service:OrdersModule:symbol:clock:registration",
+      "kind": "provides",
+      "from": "module:OrdersModule",
+      "to": "service:OrdersModule:symbol:clock:registration"
+    },
+    {
+      "id": "module:PaymentsModule:provides:service:PaymentsModule:class:PaymentGateway:registration",
+      "kind": "provides",
+      "from": "module:PaymentsModule",
+      "to": "service:PaymentsModule:class:PaymentGateway:registration"
+    },
+    {
+      "id": "module:PaymentsModule:provides:service:PaymentsModule:string:PAYMENTS:registration",
+      "kind": "provides",
+      "from": "module:PaymentsModule",
+      "to": "service:PaymentsModule:string:PAYMENTS:registration"
+    },
+    {
+      "id": "service:ConfigModule:string:APP_CONFIG:registration:binds",
+      "kind": "registration",
+      "from": "service:ConfigModule:string:APP_CONFIG",
+      "to": "service:ConfigModule:string:APP_CONFIG:registration"
+    },
+    {
+      "id": "service:OrdersModule:class:AuditLogger:registration:binds",
+      "kind": "registration",
+      "from": "service:OrdersModule:class:AuditLogger",
+      "to": "service:OrdersModule:class:AuditLogger:registration"
+    },
+    {
+      "id": "service:OrdersModule:class:AuditLogger:registration:implements",
+      "kind": "implements",
+      "from": "service:OrdersModule:class:AuditLogger:registration",
+      "to": "implementation:OrdersModule:class:AuditLogger"
+    },
+    {
+      "id": "service:OrdersModule:class:OrdersController:registration:binds",
+      "kind": "registration",
+      "from": "service:OrdersModule:class:OrdersController",
+      "to": "service:OrdersModule:class:OrdersController:registration"
+    },
+    {
+      "id": "service:OrdersModule:class:OrdersController:registration:implements",
+      "kind": "implements",
+      "from": "service:OrdersModule:class:OrdersController:registration",
+      "to": "implementation:OrdersModule:class:OrdersController"
+    },
+    {
+      "id": "service:OrdersModule:class:OrdersRepository:registration:binds",
+      "kind": "registration",
+      "from": "service:OrdersModule:class:OrdersRepository",
+      "to": "service:OrdersModule:class:OrdersRepository:registration"
+    },
+    {
+      "id": "service:OrdersModule:class:OrdersRepository:registration:implements",
+      "kind": "implements",
+      "from": "service:OrdersModule:class:OrdersRepository:registration",
+      "to": "implementation:OrdersModule:class:OrdersRepository"
+    },
+    {
+      "id": "service:OrdersModule:class:OrdersService:registration:binds",
+      "kind": "registration",
+      "from": "service:OrdersModule:class:OrdersService",
+      "to": "service:OrdersModule:class:OrdersService:registration"
+    },
+    {
+      "id": "service:OrdersModule:class:OrdersService:registration:implements",
+      "kind": "implements",
+      "from": "service:OrdersModule:class:OrdersService:registration",
+      "to": "implementation:OrdersModule:class:OrdersService"
+    },
+    {
+      "id": "service:OrdersModule:class:RequestContext:registration:binds",
+      "kind": "registration",
+      "from": "service:OrdersModule:class:RequestContext",
+      "to": "service:OrdersModule:class:RequestContext:registration"
+    },
+    {
+      "id": "service:OrdersModule:class:RequestContext:registration:implements",
+      "kind": "implements",
+      "from": "service:OrdersModule:class:RequestContext:registration",
+      "to": "implementation:OrdersModule:class:RequestContext"
+    },
+    {
+      "id": "service:OrdersModule:symbol:clock:registration:binds",
+      "kind": "registration",
+      "from": "service:OrdersModule:symbol:clock",
+      "to": "service:OrdersModule:symbol:clock:registration"
+    },
+    {
+      "id": "service:OrdersModule:symbol:clock:registration:implements",
+      "kind": "implements",
+      "from": "service:OrdersModule:symbol:clock:registration",
+      "to": "implementation:OrdersModule:symbol:clock"
+    },
+    {
+      "id": "service:PaymentsModule:class:PaymentGateway:registration:binds",
+      "kind": "registration",
+      "from": "service:PaymentsModule:class:PaymentGateway",
+      "to": "service:PaymentsModule:class:PaymentGateway:registration"
+    },
+    {
+      "id": "service:PaymentsModule:class:PaymentGateway:registration:implements",
+      "kind": "implements",
+      "from": "service:PaymentsModule:class:PaymentGateway:registration",
+      "to": "implementation:PaymentsModule:class:PaymentGateway"
+    },
+    {
+      "id": "service:PaymentsModule:string:PAYMENTS:registration:aliases",
+      "kind": "aliases",
+      "from": "service:PaymentsModule:string:PAYMENTS:registration",
+      "to": "service:PaymentsModule:class:PaymentGateway",
+      "confidence": "authoritative"
+    },
+    {
+      "id": "service:PaymentsModule:string:PAYMENTS:registration:binds",
+      "kind": "registration",
+      "from": "service:PaymentsModule:string:PAYMENTS",
+      "to": "service:PaymentsModule:string:PAYMENTS:registration"
+    }
+  ],
+  "metadata": {
+    "nestjs": "11.2.8",
+    "rootModule": "AppModule",
+    "include": "application",
+    "limitations": [
+      "Composed in NestJS preview mode: no provider is instantiated and factories are not invoked, so a value provider's implementation is its value's class only when that class is known.",
+      "Enhancers (guards, interceptors, pipes and filters bound with decorators) and middleware are not registrations; providers bound to APP_GUARD and similar tokens are.",
+      "Application modules' providers and controllers, plus the framework providers they inject."
+    ],
+    "entry": "src/main.ts"
+  }
+}

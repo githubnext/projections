@@ -1,0 +1,177 @@
+# yaml-language-server: $schema=../../../../schemas/schemas/comparator/v0.json
+format: projections.comparator
+version: 0
+description: >-
+  The default comparator as rules over the core. Identity: exact IDs, then explicit
+  previousIds claims in either direction. Order: coherent groups, peers at the same depth
+  together, removals leaves first and additions roots first as mirror images, at most five
+  waves of each, relationships with their last arriving or first departing endpoint,
+  everything else in one restructure step; options.order sorts steps within each phase.
+checks:
+  - assert: 'type(options) == map'
+    message: "'Expected an object'"
+  - assert: "options.all(key, key == 'order')"
+    path: |-
+      '/options/' + options.filter(key, key != 'order').sort()[0].replace('~', '~0').replace('/', '~1')
+    message: "'Unknown default comparator option'"
+  - assert: '!has(options.order) || type(options.order) == map'
+    path: "'/options/order'"
+    message: "'Expected an object'"
+  - assert: |-
+      !has(options.order) || options.order.all(key, key in ['by', 'direction'])
+    path: |-
+      '/options/order/' + options.order.filter(key, !(key in ['by', 'direction'])).sort()[0].replace('~', '~0').replace('/', '~1')
+    message: "'Unknown default comparator option'"
+  - assert: |-
+      !has(options.order) || (has(options.order.by) && type(options.order.by) == string
+        && (options.order.by == 'dependents' || (options.order.by.startsWith('data.')
+            && size(options.order.by) > 5)))
+    path: "'/options/order/by'"
+    message: "'Expected dependents or data.<key>'"
+  - assert: |-
+      !has(options.order) || !has(options.order.direction) || options.order.direction in ['descending', 'ascending']
+    path: "'/options/order/direction'"
+    message: "'Expected ascending or descending'"
+functions:
+  alias:
+    description: "An entity's comparison identity: its change, or itself."
+    params: ['changed', 'id']
+    body: 'id in changed ? changed[id] : id'
+  byId:
+    description: IDs in UTF-16 code-unit order.
+    params: ['list']
+    body: 'ids.sort(list)'
+  depthOf:
+    params: ['depth', 'id']
+    body: 'id in depth ? depth[id] : 0'
+  graphOf:
+    description: >-
+      Nodes and edges of one extraction, entities replaced by their comparison identity.
+    params: ['extraction', 'changed']
+    body: |-
+      {'nodes': extraction.entities.map(e, alias(changed, e.id)), 'edges': extraction.relationships.map(r, [alias(changed, r.from), alias(changed, r.to)])}
+  layersOf:
+    description: >-
+      Coherent groups, ranked by their shallowest member; groups at the same depth share a
+      layer.
+    params: ['groups', 'depth']
+    body: |-
+      groups.map(g, depthOf(depth, g[0])).distinct().map(d, groups.filter(g, depthOf(depth, g[0]) == d).flatten())
+  layersAt:
+    params: ['ids', 'shape', 'depth']
+    body: |-
+      layersOf(graph.components(byId(ids).sortBy(id, depthOf(depth, id)), shape.edges), depth)
+  layers:
+    description: |-
+      Changed entities layered by depth: shallow to deep, then by ID.
+    params: ['ids', 'shape']
+    body: 'layersAt(ids, shape, graph.depths(shape.nodes, shape.edges))'
+  chunks:
+    params: ['stack', 'width']
+    body: |-
+      lists.range((size(stack) + width - 1) / width).map(k, stack.slice(k * width, math.least((k
+              + 1) * width, size(stack))).flatten())
+  waves:
+    description: 'At most five waves, made by merging whole adjacent layers.'
+    params: ['stack']
+    body: |-
+      size(stack) == 0 ? [] : chunks(stack, (size(stack) + math.least(5, size(stack)) - 1) / math.least(5, size(stack)))
+  endpoints:
+    params: ['ids', 'items', 'changed']
+    body: |-
+      ids.map(id, [alias(changed, items[id].from), alias(changed, items[id].to)]).flatten()
+  first:
+    params: ['xs']
+    body: 'size(xs) == 0 ? -1 : xs[0]'
+  last:
+    params: ['xs']
+    body: 'size(xs) == 0 ? -1 : xs[size(xs) - 1]'
+  number:
+    params: ['value']
+    body: |-
+      type(value) == int || type(value) == uint || type(value) == double
+      ? [double(value)] : []
+  itemOf:
+    description: >-
+      The item an ID names on one side; a relationship wins over an entity with the same ID.
+    params: ['side', 'id']
+    body: |-
+      id in side.relationships ? side.relationships[id] : side.entities[id]
+  datum:
+    params: ['item', 'key']
+    body: |-
+      has(item.data) && key in item.data ? number(item.data[key]) : []
+  dependents:
+    params: ['side', 'id']
+    body: 'double(id in side.incoming ? size(side.incoming[id]) : 0)'
+  members:
+    description: "A change's items, with the side they are on: the after side, or the before side for removals."
+    params: ['change']
+    body: |-
+      size(change.after) == 0 ? {'side': lookup.before, 'ids': change.before} : {'side': lookup.after, 'ids': change.after}
+  values:
+    description: A change's order values.
+    params: ['change', 'by']
+    variables:
+      - name: members
+        expression: members(change)
+    body: |-
+      by == 'dependents'
+        ? (change.collection == 'entities' ? variables.members.ids.map(id, dependents(variables.members.side, id)) : [])
+        : variables.members.ids.map(id, datum(itemOf(variables.members.side, id), by.substring(5))).flatten()
+  scored:
+    params: ['step', 'changes', 'by']
+    body: |-
+      {'step': step, 'values': step.changes.map(id, values(changes.filter(c, c.id == id)[0], by)).flatten()}
+  sorted:
+    description: >-
+      Steps sorted by the largest value of their members; ties keep their order and steps
+      without values go last.
+    params: ['steps', 'changes', 'by', 'descending']
+    body: |-
+      steps.map(s, scored(s, changes, by)).filter(s, size(s.values) > 0).sortBy(s, descending
+        ? -math.greatest(s.values) : math.greatest(s.values)).map(s, s.step)
+      + steps.map(s, scored(s, changes, by)).filter(s, size(s.values) == 0).map(s, s.step)
+steps:
+  variables:
+    # Expected variation, exact pairs unchanged within tolerance, belongs to no step.
+    - name: stepped
+      expression: "changes.filter(c, !(c.correspondence == 'exact' && c.status == 'unchanged'))"
+    - name: entityChanges
+      expression: "variables.stepped.filter(c, c.collection == 'entities')"
+    - name: beforeGraph
+      expression: 'graphOf(before, changeOf.entities.before)'
+    - name: afterGraph
+      expression: 'graphOf(after, changeOf.entities.after)'
+    - name: removals
+      expression: |-
+        waves(layers(variables.entityChanges.filter(c, c.status == 'removed').map(c, c.id), variables.beforeGraph)).reverse()
+    - name: additions
+      expression: |-
+        waves(layers(variables.entityChanges.filter(c, c.status == 'added').map(c, c.id), variables.afterGraph))
+    - name: placed
+      expression: |-
+        variables.stepped.filter(c, c.collection == 'relationships').map(c, {'id': c.id, 'arrive': last(lists.range(size(variables.additions)).filter(k, endpoints(c.after, lookup.after.relationships, changeOf.entities.after).exists(e, e in variables.additions[k]))), 'depart': first(lists.range(size(variables.removals)).filter(k, endpoints(c.before, lookup.before.relationships, changeOf.entities.before).exists(e, e in variables.removals[k])))})
+    - name: restructure
+      expression: |-
+        byId(variables.entityChanges.filter(c, c.status != 'added' && c.status != 'removed').map(c, c.id))
+        + byId(variables.placed.filter(p, p.arrive == -1 && p.depart == -1).map(p, p.id))
+    - name: remove
+      expression: |-
+        lists.range(size(variables.removals)).map(k, {'changes': variables.removals[k]
+            + byId(variables.placed.filter(p, p.arrive == -1 && p.depart == k).map(p, p.id)), 'kind': 'remove'})
+    - name: restructured
+      expression: |-
+        size(variables.restructure) == 0 ? [] : [{'changes': variables.restructure, 'kind': 'restructure'}]
+    - name: add
+      expression: |-
+        lists.range(size(variables.additions)).map(k, {'changes': variables.additions[k]
+            + byId(variables.placed.filter(p, p.arrive == k).map(p, p.id)), 'kind': 'add'})
+    - name: descending
+      expression: |-
+        !has(options.order) || !has(options.order.direction) || options.order.direction == 'descending'
+  value: |-
+    has(options.order) ? sorted(variables.remove, changes, options.order.by, variables.descending)
+    + sorted(variables.restructured, changes, options.order.by, variables.descending)
+    + sorted(variables.add, changes, options.order.by, variables.descending) : variables.remove
+    + variables.restructured + variables.add

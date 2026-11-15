@@ -1,0 +1,302 @@
+/* The Inspector shell in VS Code style, for `mountInspector` roots marked `data-host-ui="vscode"` (the VS Code
+   extension's webview). It maps VS Code's `--vscode-*` variables onto the shell's `--pj-*` tokens
+   (@githubnext/projections-host/ui.css), so every shell control follows the person's color theme, and restyles the
+   shell's own regions as VS Code's: the title bar as an editor's title area, the Explorer as side bar view sections
+   with tree rows, the bottom panel's tabs as panel tabs, the palette and projection switcher as quick picks, and the
+   status bar as VS Code's status bar. The projection view itself is the VS Code UI's (`./styles.css`). */
+
+[data-host-ui='vscode'] .pj-root.pj-root {
+  --pj-background: var(--vscode-editor-background, #1f1f1f);
+  --pj-foreground: var(--vscode-foreground, #cccccc);
+  --pj-card: var(--vscode-sideBar-background, #181818);
+  --pj-card-foreground: var(--vscode-sideBar-foreground, var(--vscode-foreground, #cccccc));
+  --pj-popover: var(--vscode-menu-background, var(--vscode-editorWidget-background, #1f1f1f));
+  --pj-popover-foreground: var(--vscode-menu-foreground, var(--vscode-foreground, #cccccc));
+  --pj-primary: var(--vscode-button-background, #0078d4);
+  --pj-primary-foreground: var(--vscode-button-foreground, #ffffff);
+  --pj-secondary: var(--vscode-button-secondaryBackground, #313131);
+  --pj-secondary-foreground: var(--vscode-button-secondaryForeground, #cccccc);
+  --pj-muted: var(--vscode-list-hoverBackground, #2a2d2e);
+  --pj-muted-foreground: var(--vscode-descriptionForeground, #9d9d9d);
+  --pj-accent: var(--vscode-list-hoverBackground, #2a2d2e);
+  --pj-accent-foreground: var(--vscode-list-hoverForeground, var(--vscode-foreground, #cccccc));
+  --pj-destructive: var(--vscode-errorForeground, #f85149);
+  --pj-destructive-foreground: var(--vscode-button-foreground, #ffffff);
+  --pj-border: var(--vscode-contrastBorder, var(--vscode-panel-border, #2b2b2b));
+  --pj-input: var(--vscode-contrastBorder, var(--vscode-input-border, var(--vscode-dropdown-border, #3c3c3c)));
+  --pj-control-border: var(--vscode-contrastBorder, var(--vscode-input-border, var(--vscode-dropdown-border, #3c3c3c)));
+  --pj-ring: var(--vscode-focusBorder, #0078d4);
+  --pj-lens: var(--vscode-focusBorder, #0078d4);
+  --pj-lens-foreground: var(--vscode-button-foreground, #ffffff);
+  --pj-lens-muted: var(--vscode-list-inactiveSelectionBackground, #37373d);
+  --pj-lens-highlight: var(--vscode-editor-selectionHighlightBackground, #add6ff26);
+  --pj-lens-face: var(--vscode-button-background, #0078d4);
+  --pj-lens-face-playing: var(--vscode-button-hoverBackground, #026ec1);
+  --pj-surface-canvas: var(--vscode-editor-background, #1f1f1f);
+  --pj-surface-raised: var(--vscode-editorWidget-background, #202020);
+  --pj-surface-header: var(--vscode-sideBarSectionHeader-background, #181818);
+  --pj-surface-inset: var(--vscode-sideBar-background, #181818);
+  --pj-divider: var(--vscode-contrastBorder, var(--vscode-panel-border, #2b2b2b));
+  --pj-added: var(--vscode-gitDecoration-addedResourceForeground, #81b88b);
+  --pj-removed: var(--vscode-gitDecoration-deletedResourceForeground, #c74e39);
+  --pj-modified: var(--vscode-gitDecoration-modifiedResourceForeground, #e2c08d);
+  --pj-moved: var(--vscode-gitDecoration-renamedResourceForeground, #73c991);
+  --pj-added-muted: var(--vscode-diffEditor-insertedLineBackground, #9bb95533);
+  --pj-removed-muted: var(--vscode-diffEditor-removedLineBackground, #ff000033);
+  --pj-modified-muted: color-mix(in srgb, var(--pj-modified) 16%, transparent);
+  --pj-moved-muted: color-mix(in srgb, var(--pj-moved) 16%, transparent);
+  --pj-added-border: var(--pj-added);
+  --pj-removed-border: var(--pj-removed);
+  --pj-modified-border: var(--pj-modified);
+  --pj-moved-border: var(--pj-moved);
+  --pj-font-family: var(--vscode-font-family, -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', sans-serif);
+  --pj-font-family-mono: var(--vscode-editor-font-family, Menlo, Monaco, 'Courier New', monospace);
+  --pj-radius: 6px;
+  --pj-bevel: none;
+  --pj-shadow-pop: 0 0 8px 2px var(--vscode-widget-shadow, #0000005c);
+  --pj-loading-color: var(--vscode-descriptionForeground, #9d9d9d);
+  font-family: var(--pj-font-family);
+  font-size: var(--vscode-font-size, 13px);
+}
+
+/* VS Code's panes are flat, separated by one rule: no gutter, no card corners. */
+[data-host-ui='vscode'] .pi-shell {
+  --pi-gutter: 0px;
+}
+[data-host-ui='vscode'] .pi-shell .pi-card {
+  border-width: 0;
+  border-radius: 0;
+  background-color: var(--vscode-sideBar-background, #181818);
+}
+[data-host-ui='vscode'] .pi-shell .pi-main,
+[data-host-ui='vscode'] .pi-shell .pi-main > .pi-view.pi-card {
+  background-color: var(--vscode-editor-background, #1f1f1f);
+}
+[data-host-ui='vscode'] .pi-shell .pi-body > :not(.pi-center, .pi-scrim) {
+  border-inline-end: 1px solid var(--vscode-sideBar-border, var(--pj-border));
+}
+[data-host-ui='vscode'] .pi-shell .pi-body > .pi-center + * {
+  border-inline-start: 1px solid var(--vscode-sideBar-border, var(--pj-border));
+}
+
+/* The title bar: an editor's title area, its actions as action bar buttons. */
+[data-host-ui='vscode'] .pi-shell .pi-titlebar {
+  height: 35px;
+  border-bottom: 1px solid var(--vscode-editorGroupHeader-tabsBorder, var(--vscode-editorGroupHeader-border, var(--pj-border)));
+  background-color: var(--vscode-editorGroupHeader-tabsBackground, #181818);
+  color: var(--vscode-tab-activeForeground, var(--pj-foreground));
+}
+[data-host-ui='vscode'] .pi-shell .pi-titlebar :is(button, [role='button'], a) {
+  border-radius: 5px;
+  box-shadow: none;
+}
+[data-host-ui='vscode'] .pi-shell .pi-titlebar :is(button, [role='button']):hover {
+  background-color: var(--vscode-toolbar-hoverBackground, #5a5d5e50);
+  outline: 1px dashed var(--vscode-toolbar-hoverOutline, transparent);
+  outline-offset: -1px;
+}
+[data-host-ui='vscode'] .pi-shell .pi-titlebar :is(button, [role='button']):active {
+  background-color: var(--vscode-toolbar-activeBackground, #63666750);
+}
+[data-host-ui='vscode'] .pi-shell .pi-titlebar svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Focus everywhere: VS Code's 1px focus border, inside the control. */
+[data-host-ui='vscode'] .pi-shell :is(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, #0078d4);
+  outline-offset: -1px;
+  box-shadow: none;
+}
+
+/* The Explorer: side bar view sections. Headers are 22px in VS Code's 11px bold capitals; rows are 22px tree rows. */
+[data-host-ui='vscode'] .pi-explorer {
+  --pi-x-inset: 0px;
+  --pi-x-pad: 8px;
+  --pi-x-gap: 6px;
+  padding-block: 0;
+  background-color: var(--vscode-sideBar-background, #181818);
+  color: var(--vscode-sideBar-foreground, var(--pj-foreground));
+}
+[data-host-ui='vscode'] .pi-shell .pi-explorer {
+  --pj-accent: var(--vscode-list-inactiveSelectionBackground, #37373d);
+}
+[data-host-ui='vscode'] .pi-explorer .pi-explorer-section > :first-child {
+  height: 22px;
+  background-color: var(--vscode-sideBarSectionHeader-background, var(--vscode-sideBar-background, #181818));
+  border-top: 1px solid var(--vscode-sideBarSectionHeader-border, transparent);
+}
+[data-host-ui='vscode'] .pi-explorer .pi-explorer-section + .pi-explorer-section::before {
+  display: none;
+}
+[data-host-ui='vscode'] .pi-explorer .pi-x-header {
+  height: 22px;
+  padding-inline: 2px 4px;
+  color: var(--vscode-sideBarSectionHeader-foreground, var(--vscode-sideBarTitle-foreground, var(--pj-foreground)));
+  font-size: 11px;
+  font-weight: 700;
+}
+[data-host-ui='vscode'] .pi-explorer .pi-x-header:hover {
+  color: var(--vscode-sideBarSectionHeader-foreground, var(--pj-foreground));
+}
+[data-host-ui='vscode'] .pi-explorer .pi-x-body {
+  padding: 2px 0 8px;
+}
+[data-host-ui='vscode'] .pi-explorer .pi-x-row {
+  min-height: 22px;
+  padding-block: 0;
+  border: 1px solid transparent;
+  border-radius: 0;
+}
+[data-host-ui='vscode'] .pi-explorer .pi-x-row:has(.pi-x-detail) {
+  min-height: 36px;
+}
+[data-host-ui='vscode'] .pi-explorer :is(.pi-x-row, [role='option'], [role='treeitem']):hover {
+  background-color: var(--vscode-list-hoverBackground, #2a2d2e);
+  outline: 1px dashed var(--vscode-contrastActiveBorder, transparent);
+  outline-offset: -1px;
+}
+[data-host-ui='vscode'] .pi-explorer :is([aria-selected='true'], [aria-current='true'], [aria-pressed='true'], [data-selected]) {
+  background-color: var(--vscode-list-inactiveSelectionBackground, #37373d);
+  color: var(--vscode-list-inactiveSelectionForeground, inherit);
+}
+[data-host-ui='vscode'] .pi-explorer .pi-x-sublabel {
+  min-height: 22px;
+  margin-top: 6px;
+  text-transform: none;
+}
+[data-host-ui='vscode'] .pi-explorer .pi-x-sublabel h3 {
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* Inputs and dropdowns in the shell: VS Code's input and dropdown colors, 26px, 2px corners. */
+[data-host-ui='vscode'] .pi-shell :is(input:not([type='checkbox'], [type='radio'], [type='range']), select, textarea) {
+  border-color: var(--vscode-input-border, var(--vscode-dropdown-border, #3c3c3c));
+  border-radius: 2px;
+  background-color: var(--vscode-input-background, #313131);
+  color: var(--vscode-input-foreground, #cccccc);
+  box-shadow: none;
+}
+[data-host-ui='vscode'] .pi-shell select {
+  background-color: var(--vscode-dropdown-background, #313131);
+  color: var(--vscode-dropdown-foreground, #cccccc);
+}
+[data-host-ui='vscode'] .pi-shell :is(input, select, textarea)::placeholder {
+  color: var(--vscode-input-placeholderForeground, #989898);
+}
+
+/* The bottom panel: VS Code's panel with its uppercase tabs and the active tab's underline. */
+[data-host-ui='vscode'] .pi-shell .pi-panel-tabs {
+  height: 35px;
+  gap: 4px;
+  padding-inline: 8px;
+  border-top: 1px solid var(--vscode-panel-border, var(--pj-border));
+  background-color: var(--vscode-panel-background, var(--vscode-editor-background, #1f1f1f));
+}
+[data-host-ui='vscode'] .pi-shell .pi-panel-tabs [role='tab'] {
+  height: 35px;
+  padding-inline: 8px;
+  border-radius: 0;
+  color: var(--vscode-panelTitle-inactiveForeground, #9d9d9d);
+  font-size: 11px;
+}
+[data-host-ui='vscode'] .pi-shell .pi-panel-tabs [role='tab'][aria-selected='true'] {
+  background: none;
+  color: var(--vscode-panelTitle-activeForeground, #cccccc);
+  box-shadow: inset 0 -1px 0 var(--vscode-panelTitle-activeBorder, #0078d4);
+}
+[data-host-ui='vscode'] .pi-shell .pi-card-header {
+  height: 22px;
+  background-color: var(--vscode-sideBarSectionHeader-background, #181818);
+}
+[data-host-ui='vscode'] .pi-shell .pi-card-header h2 {
+  color: var(--vscode-sideBarSectionHeader-foreground, var(--pj-foreground));
+  font-weight: 700;
+}
+
+/* The status bar: VS Code's, 22px, 12px type, items with the status bar's hover. */
+[data-host-ui='vscode'] .pi-shell .pi-statusbar {
+  gap: 0;
+  padding-inline: 5px;
+  border-top: 1px solid var(--vscode-statusBar-border, transparent);
+  background-color: var(--vscode-statusBar-background, #181818);
+  color: var(--vscode-statusBar-foreground, #cccccc);
+  font-size: 12px;
+}
+[data-host-ui='vscode'] .pi-shell .pi-statusbar > * {
+  height: 22px;
+  padding-inline: 5px;
+  color: inherit;
+}
+[data-host-ui='vscode'] .pi-shell .pi-statusbar :is(button, a):hover {
+  background-color: var(--vscode-statusBarItem-hoverBackground, #ffffff1f);
+}
+
+/* The command palette and the projection switcher: VS Code's quick input widget. */
+[data-host-ui='vscode'] :is(.pi-palette, .pi-switcher-layer) [role='dialog'] {
+  border: 1px solid var(--vscode-contrastBorder, var(--vscode-widget-border, transparent));
+  border-radius: 6px;
+  background-color: var(--vscode-quickInput-background, #222222);
+  color: var(--vscode-quickInput-foreground, #cccccc);
+  box-shadow: 0 0 8px 2px var(--vscode-widget-shadow, #0000005c);
+}
+[data-host-ui='vscode'] :is(.pi-palette, .pi-switcher-layer) [role='dialog'] > :first-child {
+  margin: 6px;
+  border: 1px solid var(--vscode-input-border, transparent);
+  border-radius: 2px;
+  background-color: var(--vscode-input-background, #313131);
+}
+[data-host-ui='vscode'] :is(.pi-palette, .pi-switcher-layer) [role='combobox'] {
+  height: 24px;
+  color: var(--vscode-input-foreground, #cccccc);
+  font-size: 13px;
+}
+[data-host-ui='vscode'] :is(.pi-palette, .pi-switcher-layer) [role='option'] {
+  min-height: 22px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  font-size: 13px;
+}
+[data-host-ui='vscode'] :is(.pi-palette, .pi-switcher-layer) [role='option'][aria-selected='true'] {
+  border-color: var(--vscode-list-focusOutline, transparent);
+  background-color: var(--vscode-quickInputList-focusBackground, #04395e);
+  color: var(--vscode-quickInputList-focusForeground, var(--vscode-list-activeSelectionForeground, inherit));
+}
+[data-host-ui='vscode'] :is(.pi-palette, .pi-switcher-layer) kbd {
+  border-color: var(--vscode-keybindingLabel-border, #33333399);
+  background-color: var(--vscode-keybindingLabel-background, #8080802b);
+  color: var(--vscode-keybindingLabel-foreground, #cccccc);
+}
+[data-host-ui='vscode'] .pi-switcher {
+  border-radius: 5px;
+  font-weight: 400;
+}
+
+/* Menus and popovers from the shell: VS Code's menu. */
+[data-host-ui='vscode'] .pj-root [role='menu'] {
+  border: 1px solid var(--vscode-menu-border, #454545);
+  border-radius: 5px;
+  background-color: var(--vscode-menu-background, #1f1f1f);
+  color: var(--vscode-menu-foreground, #cccccc);
+}
+[data-host-ui='vscode'] .pj-root [role^='menuitem']:is(:hover, :focus, [data-highlighted]) {
+  background-color: var(--vscode-menu-selectionBackground, #0078d4);
+  color: var(--vscode-menu-selectionForeground, var(--vscode-list-activeSelectionForeground, var(--vscode-menu-foreground, inherit)));
+}
+[data-host-ui='vscode'] .pj-root [role='separator'] {
+  background-color: var(--vscode-menu-separatorBackground, #454545);
+}
+
+/* Buttons the shell draws with its primary and secondary variants keep VS Code's 2px corners and no bevel. */
+[data-host-ui='vscode'] .pi-shell [data-slot='button'] {
+  border-radius: 2px;
+  box-shadow: none;
+}
+
+/* High contrast: every region keeps its edge in the contrast border. */
+[data-host-ui='vscode'] :is(.vscode-high-contrast, .vscode-high-contrast-light) .pi-shell .pi-card,
+:is(.vscode-high-contrast, .vscode-high-contrast-light) [data-host-ui='vscode'] .pi-shell .pi-card {
+  border: 1px solid var(--vscode-contrastBorder, currentColor);
+}

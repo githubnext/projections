@@ -1,0 +1,402 @@
+# yaml-language-server: $schema=../../schemas/schemas/comparator/v0.json
+#
+# The runtime security policy comparator as rules, from the runtime policy model
+# (docs/models/runtime-policy-model.md).
+format: projections.comparator
+version: 0
+description: >-
+  Interprets each entity change in security terms (a rule that now kills or denies,
+  enforcement elided by monitor mode, a policy that now applies to more workloads, a hook
+  nothing watches any more), writes one summary per change, orders the steps so the
+  riskiest changes come first, and records the interpretations in metadata.runtimePolicy.
+
+checks:
+  - assert: size(options) == 0
+    message: >-
+      'invalid options: unknown field `%s`; this comparator takes none'.format([maps.keys(options)[0]])
+
+functions:
+  rank:
+    description: An interpretation's severity, most severe first.
+    params: [{name: name, type: string}]
+    returns: int
+    variables:
+      - name: severity
+        expression: >-
+          {'newly-enforced': 0, 'enforcement-removed': 1, 'enforcement-elided': 2,
+          'scope-broadened': 3, 'mode-changed': 4, 'warning-added': 5, 'agent-changed': 6,
+          'coverage-lost': 7, 'scope-narrowed': 8, 'scope-changed': 9, 'nodes-changed': 10,
+          'binaries-changed': 11, 'condition-changed': 12, 'action-changed': 13,
+          'newly-covered': 14, 'newly-observed': 15, 'observation-removed': 16,
+          'policy-added': 17, 'policy-removed': 18, 'capture-changed': 19}
+    body: variables.severity[name]
+
+  differs:
+    description: Whether `data[key]` differs between the two sides.
+    params: [{name: before, type: Item}, {name: after, type: Item}, {name: key, type: string}]
+    returns: bool
+    body: before.data[?key].orValue(null) != after.data[?key].orValue(null)
+
+  enforcing:
+    params: [{name: entity, type: Item}]
+    returns: bool
+    body: entity.data.?effect.orValue(null) == 'enforce' && entity.data.?enforcement.orValue(null) == 'active'
+
+  observing:
+    params: [{name: entity, type: Item}]
+    returns: bool
+    body: entity.data.?effect.orValue(null) in ['observe', 'respond']
+
+  actions:
+    params: [{name: entity, type: Item}]
+    returns: string
+    body: |-
+      entity.data.?actions.orValue([])
+        .map(action, action.?display.orValue(action.action))
+        .join(', ')
+
+  conditions:
+    params: [{name: entity, type: Item}]
+    returns: string
+    body: entity.data.?conditions.orValue([]).map(condition, condition.display).join(' and ')
+
+  alternatives:
+    description: Values as inline code spans, the last joined by `or`.
+    params: [{name: values, type: list<string>}]
+    returns: string
+    body: |-
+      size(values) < 2 ? values.map(value, prose.code(value)).join('')
+        : values.slice(0, size(values) - 1).map(value, prose.code(value)).join(', ')
+          + ' or ' + prose.code(values[size(values) - 1])
+
+  binaryFilter:
+    description: >-
+      One binary filter, as the processes it matches: `/usr/bin/curl` or `/usr/bin/wget`;
+      binaries other than `/usr/bin/kmod`; descendants of binaries starting with `/tmp/`.
+    params: [filter]
+    returns: string
+    variables:
+      - name: values
+        expression: alternatives(filter.?values.orValue([]).map(value, string(value)))
+      - name: parent
+        expression: filter.?parent.orValue(false)
+      - name: follow
+        expression: filter.?followChildren.orValue(false)
+      - name: of
+        expression: "variables.parent ? (variables.follow ? 'descendants of ' : 'children of ') : ''"
+    body: |-
+      variables.of + match(filter.?operator.orValue(''), {
+        'In': variables.values,
+        'NotIn': 'binaries other than ' + variables.values,
+        'Prefix': 'binaries starting with ' + variables.values,
+        'NotPrefix': 'binaries not starting with ' + variables.values,
+        'Postfix': 'binaries ending with ' + variables.values,
+        'NotPostfix': 'binaries not ending with ' + variables.values
+      }, 'binaries ' + prose.code(string(filter.?operator.orValue('?'))) + ' ' + variables.values)
+        + (variables.follow && !variables.parent ? ' and their children' : '')
+
+  binaries:
+    description: The processes a selector's binary filters match, or empty when it has none.
+    params: [{name: entity, type: Item}]
+    returns: string
+    body: entity.data.?binaries.orValue([]).map(filter, binaryFilter(filter)).join(' and ')
+
+  warnings:
+    description: "Final-state warnings: the extractor's findings and CRD violations."
+    params: [{name: entity, type: Item}]
+    returns: list<string>
+    body: |-
+      entity.data.?invalid.orValue([]).map(line, "The repository's CRD rejects it: " + prose.escape(line))
+        + entity.data.?findings.orValue([]).map(finding, finding.message)
+
+  newWarnings:
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    returns: list<string>
+    body: |-
+      before == null ? warnings(after) : warnings(after).filter(warning, !(warning in warnings(before)))
+
+  # Workload scopes: Kubernetes label selectors, compared by provable containment.
+
+  implied:
+    description: Whether label requirement `need` holds for every label set satisfying all of `have`.
+    params: [need, have]
+    returns: bool
+    body: |-
+      have.exists(given, given.key == need.key && match(need.operator, {
+        'In': given.operator == 'In' && given.values.all(v, v in need.values),
+        'NotIn': (given.operator == 'In' && given.values.all(v, !(v in need.values)))
+          || (given.operator == 'NotIn' && need.values.all(v, v in given.values)),
+        'Exists': given.operator in ['In', 'Exists'],
+        'DoesNotExist': given.operator == 'DoesNotExist'
+      }, false))
+
+  selects:
+    description: Whether every object selected by `narrow` is selected by `wide`.
+    params: [wide, narrow]
+    returns: bool
+    body: wide.all(need, implied(need, narrow))
+
+  containers:
+    description: A scope's container selector; an empty one, like an absent one, selects every container.
+    params: [scope]
+    body: |-
+      scope.?containers.orValue(null) != null && size(scope.containers) > 0 ? scope.containers : null
+
+  covers:
+    description: >-
+      Whether workloads `wide` provably include every workload of `narrow`. A scope is
+      `{all, host, namespace, pods, containers}`: every workload; the host too; one namespace
+      or (null) every one; a pod label selector or (null) none; a container selector.
+    params: [wide, narrow]
+    returns: bool
+    variables:
+      - name: wideContainers
+        expression: containers(wide)
+      - name: narrowContainers
+        expression: containers(narrow)
+    body: |-
+      cond({
+        wide.?all.orValue(false): true,
+        narrow.?all.orValue(false): false,
+        narrow.?host.orValue(false) && !wide.?host.orValue(false): false,
+        wide.?namespace.orValue(null) != null && wide.namespace != narrow.?namespace.orValue(null): false,
+        narrow.?pods.orValue(null) == null: true,
+        wide.?pods.orValue(null) == null || !selects(wide.pods, narrow.pods): false
+      }, variables.wideContainers == null
+        || (variables.narrowContainers != null && selects(variables.wideContainers, variables.narrowContainers)))
+
+  scopeChange:
+    params: [before, after]
+    returns: string
+    variables:
+      - name: wider
+        expression: covers(after, before)
+      - name: narrower
+        expression: covers(before, after)
+    body: |-
+      cond({
+        variables.wider && !variables.narrower: 'scope-broadened',
+        variables.narrower && !variables.wider: 'scope-narrowed'
+      }, 'scope-changed')
+
+  # Where things are: a selector filters a probe, which a policy declares and
+  # which attaches to a hook; a policy applies to a workload scope.
+
+  entity:
+    params: [{name: side, type: string}, {name: ids, type: list<string>}]
+    body: 'size(ids) == 0 ? null : graph.entity(side, ids[0])'
+
+  where:
+    description: >-
+      The policy and the hook a selector belongs to, as code spans of their labels, or `A policy`
+      (a rule's sentence starts with it) and `a hook` when the extraction doesn't place it.
+    params: [{name: side, type: string}, {name: selector, type: string}]
+    variables:
+      - name: probe
+        expression: graph.parents(side, selector, 'filters')
+      - name: hook
+        expression: "size(variables.probe) == 0 ? null : entity(side, graph.children(side, variables.probe[0], 'attaches'))"
+      - name: policy
+        expression: "size(variables.probe) == 0 ? null : entity(side, graph.parents(side, variables.probe[0], 'declares'))"
+    body: |-
+      {
+        'hook': cond({
+          variables.hook != null: prose.code(variables.hook.label),
+          entity(side, variables.probe) != null: prose.code(entity(side, variables.probe).label)
+        }, 'a hook'),
+        'policy': variables.policy != null ? prose.code(variables.policy.label) : 'A policy'
+      }
+
+  # Interpretations.
+
+  selectorAdded:
+    params: [{name: after, type: Item}]
+    returns: list<string>
+    body: |-
+      cond({
+        enforcing(after): ['newly-enforced'],
+        after.data.?effect.orValue(null) == 'enforce': ['enforcement-elided'],
+        observing(after): ['newly-observed']
+      }, [])
+
+  selectorRemoved:
+    params: [{name: before, type: Item}]
+    returns: list<string>
+    body: |-
+      cond({enforcing(before): ['enforcement-removed'], observing(before): ['observation-removed']}, [])
+
+  selectorChanged:
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    returns: list<string>
+    body: |-
+      collect({
+        !enforcing(before) && enforcing(after): 'newly-enforced',
+        enforcing(before) && !enforcing(after):
+          after.data.?effect.orValue(null) == 'enforce' ? 'enforcement-elided' : 'enforcement-removed',
+        differs(before, after, 'conditions'): 'condition-changed',
+        differs(before, after, 'binaries'): 'binaries-changed',
+        differs(before, after, 'actions') && enforcing(before) == enforcing(after): 'action-changed'
+      })
+
+  policyFound:
+    params: [{name: id, type: string}, {name: before, type: Item}, {name: after, type: Item}]
+    returns: list<string>
+    variables:
+      - name: from
+        expression: entity('before', graph.children('before', id, 'applies-to'))
+      - name: to
+        expression: entity('after', graph.children('after', id, 'applies-to'))
+    body: |-
+      cond({before == null: ['policy-added'], after == null: ['policy-removed']}, collect({
+        differs(before, after, 'mode'): 'mode-changed',
+        variables.from != null && variables.to != null && variables.from.id != variables.to.id:
+          scopeChange(variables.from.data, variables.to.data),
+        differs(before, after, 'nodes'): 'nodes-changed'
+      }))
+
+  interpret:
+    description: A change's interpretations, most severe first.
+    params: [{name: id, type: string}, {name: before, type: Item}, {name: after, type: Item}]
+    returns: list<string>
+    variables:
+      - name: kind
+        expression: '(after != null ? after : before).kind'
+      - name: both
+        expression: before != null && after != null
+    body: |-
+      (collect({
+        after != null && size(newWarnings(before, after)) > 0: 'warning-added',
+        variables.kind == 'agent' && variables.both && settings(before, after) != '': 'agent-changed'
+      }) + match(variables.kind, {
+        'selector': cond({before == null: selectorAdded(after), after == null: selectorRemoved(before)}, selectorChanged(before, after)),
+        'hook': collect({before == null: 'newly-covered', after == null: 'coverage-lost'}),
+        'policy': policyFound(id, before, after),
+        'probe': collect({variables.both: 'capture-changed'})
+      }, [])).distinct().sortBy(name, rank(name))
+
+  settings:
+    description: 'The agent settings that differ, as `key`: `old` → `new`.'
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    returns: string
+    body: |-
+      ids.sort((maps.keys(before.data) + maps.keys(after.data)).distinct())
+        .filter(key, key != 'findings' && differs(before, after, key))
+        .map(key, template('{key}: {old} → {new}', {
+          'key': prose.code(key),
+          'old': prose.code(json(before.data[?key].orValue(null))),
+          'new': prose.code(json(after.data[?key].orValue(null)))
+        }))
+        .join(', ')
+
+  sentence:
+    description: One sentence for a change, by its most severe interpretation.
+    params:
+      - name: found
+        type: string
+        values:
+          - newly-enforced
+          - enforcement-removed
+          - enforcement-elided
+          - scope-broadened
+          - scope-narrowed
+          - scope-changed
+          - mode-changed
+          - warning-added
+          - agent-changed
+          - coverage-lost
+          - newly-covered
+          - newly-observed
+          - observation-removed
+          - nodes-changed
+          - binaries-changed
+          - condition-changed
+          - action-changed
+          - policy-added
+          - policy-removed
+          - capture-changed
+      - {name: before, type: Item}
+      - {name: after, type: Item}
+      - {name: name, type: string}
+      - {name: rule, type: string}
+    variables:
+      - name: when
+        expression: |-
+          (after != null && binaries(after) != '' ? ' for ' + binaries(after) : '')
+            + (after != null && conditions(after) != '' ? ' when ' + conditions(after) : '')
+    body: |-
+      match(found, {
+        'newly-enforced': template('{rule} now enforces: {actions}{when}.', {'rule': rule, 'actions': actions(after), 'when': variables.when}),
+        'enforcement-removed': template('{rule} no longer enforces (was {actions}).', {'rule': rule, 'actions': actions(before)}),
+        'enforcement-elided': template('{rule} enforcement is elided because its policy is in monitor mode.', {'rule': rule}),
+        'scope-broadened': template('Policy {name} now applies to more workloads: {scope}.', {'name': name, 'scope': after.data.?scope.orValue('unknown')}),
+        'scope-narrowed': template('Policy {name} now applies to fewer workloads: {scope}.', {'name': name, 'scope': after.data.?scope.orValue('unknown')}),
+        'scope-changed': template('Policy {name} now applies to {new} (was {old}).', {
+          'name': name,
+          'new': after.data.?scope.orValue('unknown'),
+          'old': before.data.?scope.orValue('unknown')
+        }),
+        'mode-changed': template('Policy {name} switched from {old} to {new} mode.', {
+          'name': name,
+          'old': prose.code(before.data.?mode.orValue('unknown')),
+          'new': prose.code(after.data.?mode.orValue('unknown'))
+        }),
+        'warning-added': template('{what} gains a warning: {warning}', {
+          'what': cond({after.kind == 'selector': rule, after.kind == 'agent': 'The ' + name},
+            after.kind.substring(0, 1).upperAscii() + after.kind.substring(1) + ' ' + name),
+          'warning': newWarnings(before, after)[0]
+        }),
+        'agent-changed': template('The {name} configuration changed ({settings}).', {'name': name, 'settings': settings(before, after)}),
+        'coverage-lost': template('No policy attaches to {name} any more.', {'name': name}),
+        'newly-covered': template('{name} is newly watched.', {'name': name}),
+        'newly-observed': template('{rule} newly reports events{when}.', {'rule': rule, 'when': variables.when}),
+        'observation-removed': template('{rule} no longer reports events.', {'rule': rule}),
+        'nodes-changed': template('Policy {name} now loads on {new} (was {old}).', {
+          'name': name,
+          'new': after.data.?nodes.orValue('unknown'),
+          'old': before.data.?nodes.orValue('unknown')
+        }),
+        'binaries-changed': template('{rule} applies to different binaries.', {'rule': rule}),
+        'condition-changed': template('{rule} acts under different conditions.', {'rule': rule}),
+        'action-changed': template('{rule} now does {new} (was {old}).', {
+          'rule': rule,
+          'new': actions(after) != '' ? actions(after) : 'nothing but report',
+          'old': actions(before) != '' ? actions(before) : 'report'
+        }),
+        'policy-added': template('Policy {name} is added.', {'name': name}),
+        'policy-removed': template('Policy {name} is removed.', {'name': name}),
+        'capture-changed': template('{name} captures different arguments or messages.', {'name': name})
+        // coverage-ignore: `found` is always one of the values declared above (interpret's names)
+      }, '')
+
+classify:
+  # An entity change always has one item: a change of several on both sides is ambiguous, which the Engine rejects.
+  where: change.collection == 'entities'
+  variables:
+    - name: found
+      expression: interpret(change.id, beforeItem, afterItem)
+    - name: name
+      expression: |-
+        item.kind == 'agent' ? prose.escape(item.label) : prose.code(item.label)
+    - name: at
+      expression: |-
+        item.kind == 'selector' ? where(afterItem != null ? 'after' : 'before', item.id) : null
+    - name: rule
+      expression: |-
+        variables.at != null
+          ? template('{policy} rule {name} at {hook}', {'policy': variables.at.policy, 'name': variables.name, 'hook': variables.at.hook})
+          : item.kind + ' ' + variables.name
+  summary: |-
+    size(variables.found) == 0 ? null
+      : sentence(variables.found[0], beforeItem, afterItem, variables.name, variables.rule)
+  annotation: 'size(variables.found) == 0 ? null : variables.found'
+
+steps:
+  # Riskiest first: a change ranks by its most severe interpretation, a step by
+  # its riskiest change, and a step takes the summary of that change. A ranked
+  # change is interpreted, so a step's lead, if any, has a summary.
+  rank: 'annotation != null ? rank(annotation[0]) : null'
+  summary: 'lead != null ? lead.summary : null'
+
+metadata:
+  values:
+    runtimePolicy: "{'version': 0, 'interpretations': annotations}"

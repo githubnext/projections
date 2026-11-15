@@ -1,0 +1,28 @@
+{
+  "name": "@githubnext/projections-typescript-support",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Builds the self-contained Node helper the native CLI ships for the TypeScript public API extractor",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test test/*.test.ts",
+    "test:packed": "node test/self-contained.mjs",
+    "test:toolchains": "node test/toolchains.mjs"
+  },
+  "devDependencies": {
+    "@githubnext/projections-engine": "0.1.0",
+    "@githubnext/projections-schemas": "0.1.0",
+    "@nestjs/common": "^11.2.8",
+    "@nestjs/core": "^11.2.8",
+    "esbuild": "^0.28.2",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

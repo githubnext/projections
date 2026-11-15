@@ -1,0 +1,33 @@
+[package]
+name = "projections-extractor-catalog"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow = "1"
+projections-extractor-azure-what-if = { path = "../azure-what-if" }
+projections-extractor-cargo-dependencies = { path = "../cargo-dependencies" }
+projections-extractor-code-statistics = { path = "../code-statistics" }
+projections-extractor-django-schema = { path = "../django-schema" }
+projections-extractor-dotnet-di = { path = "../dotnet-di" }
+projections-extractor-dotnet-public-api = { path = "../dotnet-public-api" }
+projections-extractor-efcore-schema = { path = "../efcore-schema" }
+projections-extractor-github-actions-jobs = { path = "../github-actions-jobs" }
+projections-extractor-go-public-api = { path = "../go-public-api" }
+projections-extractor-scip-file-references = { path = "../scip-file-references" }
+projections-extractor-spring-di = { path = "../spring-di" }
+projections-extractor-nestjs-di = { path = "../nestjs-di" }
+projections-extractor-nuget-dependencies = { path = "../nuget-dependencies" }
+projections-extractor-prisma-schema = { path = "../prisma-schema" }
+projections-extractor-repository-map = { path = "../repository-map" }
+projections-extractor-rust-public-api = { path = "../rust-public-api" }
+projections-extractor-sdk = { path = "../sdk" }
+projections-extractor-terraform-infrastructure = { path = "../terraform-infrastructure" }
+projections-extractor-tetragon-policies = { path = "../tetragon-policies" }
+projections-extractor-command-output = { path = "../command-output" }
+projections-extractor-typescript-public-api = { path = "../typescript-public-api" }
+projections-extractor-workspace-dependencies = { path = "../workspace-dependencies" }
+serde_json = { version = "1", features = ["float_roundtrip"] }

@@ -1,0 +1,128 @@
+# yaml-language-server: $schema=../../../packages/schemas/schemas/comparator-tests/v0.json
+#
+# What self-topology.comparator.yaml is for, as cases: `projections check -p self-topology`
+# runs them.
+format: projections.comparator-tests
+version: 0
+options:
+  engineJsonBoundary: [src/main, src/parse, src/wasm]
+  pureRendererCapabilities: [fs, network, process]
+  rendererExemptions: [packages/renderers/testing]
+
+cases:
+  - name: a renderer that starts using the network breaks purity
+    before:
+      extraction:
+        protocolVersion: 0
+        schema: architecture/v0
+        entities:
+          - {
+              id: npm:graph,
+              kind: npm-package,
+              label: renderers/graph,
+              data: {area: '.', path: packages/renderers/graph, capabilities: [dom]},
+            }
+          - {
+              id: npm:testing,
+              kind: npm-package,
+              label: renderers/testing,
+              data: {area: '.', path: packages/renderers/testing, capabilities: [fs]},
+            }
+        relationships: []
+    after:
+      extraction:
+        protocolVersion: 0
+        schema: architecture/v0
+        entities:
+          - {
+              id: npm:graph,
+              kind: npm-package,
+              label: renderers/graph,
+              data: {area: '.', path: packages/renderers/graph, capabilities: [dom, network]},
+            }
+          - {
+              id: npm:testing,
+              kind: npm-package,
+              label: renderers/testing,
+              data: {area: '.', path: packages/renderers/testing, capabilities: [fs, network]},
+            }
+        relationships: []
+    expect:
+      changes:
+        - {item: npm:graph, status: modified, summary: 'Breaks a structural rule: a renderer uses `network`.'}
+        # Test infrastructure is exempt.
+        - {item: npm:testing, status: modified, summary: null}
+      metadata:
+        topologyRules:
+          counts: {violations: 1, introduced: 1, resolved: 0}
+          introduced: [{change: npm:graph, rules: ['renderers-stay-pure:network']}]
+
+  - name: another engine file reading untyped JSON is a new violation, even when others already are
+    before:
+      extraction:
+        protocolVersion: 0
+        schema: architecture/v0
+        entities:
+          - {
+              id: crate:projections-engine,
+              kind: rust-crate,
+              label: engine,
+              data: {area: '.', capabilityModules: {jsonValue: [src/lib, src/parse]}},
+            }
+        relationships: []
+    after:
+      extraction:
+        protocolVersion: 0
+        schema: architecture/v0
+        entities:
+          - {
+              id: crate:projections-engine,
+              kind: rust-crate,
+              label: engine,
+              data: {area: '.', capabilityModules: {jsonValue: [src/lib, src/order, src/parse]}},
+            }
+        relationships: []
+    expect:
+      changes:
+        - item: crate:projections-engine
+          status: modified
+          summary: 'Breaks a structural rule: untyped JSON (`serde_json::Value`) in `src/order`, outside the engine boundary.'
+      metadata:
+        topologyRules:
+          counts: {violations: 1, introduced: 1, resolved: 0}
+
+  - name: typing the engine core resolves its violations
+    before:
+      extraction:
+        protocolVersion: 0
+        schema: architecture/v0
+        entities:
+          - {
+              id: crate:projections-engine,
+              kind: rust-crate,
+              label: engine,
+              data: {area: '.', capabilityModules: {jsonValue: [src/lib, src/parse]}},
+            }
+        relationships: []
+    after:
+      extraction:
+        protocolVersion: 0
+        schema: architecture/v0
+        entities:
+          - {id: crate:projections-engine, kind: rust-crate, label: engine, data: {area: '.', capabilityModules: {jsonValue: [src/parse]}}}
+        relationships: []
+    expect:
+      changes:
+        - item: crate:projections-engine
+          status: modified
+          summary: 'Now keeps a structural rule: no longer untyped JSON (`serde_json::Value`) in `src/lib`, outside the engine boundary.'
+      metadata:
+        topologyRules:
+          counts: {violations: 0, introduced: 0, resolved: 1}
+
+  - name: unknown options are refused
+    options: {renderersArePure: true}
+    before: {extraction: {protocolVersion: 0, schema: architecture/v0, entities: [], relationships: []}}
+    after: {extraction: {protocolVersion: 0, schema: architecture/v0, entities: [], relationships: []}}
+    expect:
+      error: 'unknown option `renderersArePure`'

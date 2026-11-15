@@ -1,0 +1,13 @@
+{
+  "protocolVersion": 0,
+  "schema": "api/v0",
+  "metadata": {"ecosystem":"typescript"},
+  "entities": [
+    {"id":"ts:kit:.:started","kind":"export","label":"started","data":{"signature":"const started: Date","contract":{"declaration":"variable","term":"variable","visibility":"public","type":{"text":"Date"}}}},
+    {"id":"ts:kit:.:mode","kind":"export","label":"mode","data":{"signature":"const mode: Mode","contract":{"declaration":"variable","term":"variable","visibility":"public","type":{"text":"Mode","union":[{"text":"\"fast\"","primitive":"string"},{"text":"\"slow\"","primitive":"string"}]}}}},
+    {"id":"ts:kit:.:run","kind":"export","label":"run","data":{"signature":"function run(): void","contract":{"declaration":"function","term":"function","visibility":"public"}}},
+    {"id":"ts:kit:.:stop","kind":"export","label":"stop","data":{"signature":"function stop(code: Code): void","contract":{"declaration":"function","term":"function","visibility":"public","signatures":[{"parameters":[{"name":"code","type":{"text":"Code","union":[{"text":"1","primitive":"number"}]},"optional":false,"variadic":false,"passing":"value"}],"returns":{"text":"void"}}]}}},
+    {"id":"ts:kit:.:Job:size","kind":"member","label":"size","data":{"signature":"size?: number","contract":{"declaration":"property","term":"property","visibility":"public","type":{"text":"number"},"optional":true}}}
+  ],
+  "relationships": []
+}

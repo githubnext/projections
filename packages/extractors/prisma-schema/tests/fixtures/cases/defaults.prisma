@@ -1,0 +1,41 @@
+// leading comment
+datasource db {
+  provider = "postgresql" // trailing comment
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT")
+  extensions = [pg_trgm, postgis(version: "2.1")]
+}
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+  binaryTargets = ["native"]
+}
+
+model Edge {
+  id    Int      @id(map: "edge_pk")
+  neg   Int      @default(-1)
+  negf  Float    @default(-2.5)
+  f1    Float    @default(1)
+  dec   Decimal  @default(1)
+  decs  Decimal  @default("1.25")
+  big2  BigInt   @default(-9007199254740993)
+  when  DateTime @default("2020-01-01T00:00:00Z") @db.Timestamptz(3)
+  s1    String   @default("line\nbreak \u0041 \\ tab\t")
+  s2    String   @default("")
+  nano  String   @default(nanoid())
+  dbg   String   @default(dbgenerated())
+  bytes Bytes    @default("AQID")
+  js    Json     @default("[1, 2]")
+  ints  Int[]    @default([1, 2])
+  e     String   @unique(sort: Asc, map: "edge_e_key") @db.VarChar(20)
+  g     String   @unique(map: "g_key")
+  h     String   @db.VarChar(200)
+  i     String
+  weird String? @map("quoted")
+
+  @@index([i(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([h], type: BTree)
+  @@index([i(sort: Desc)], map: "i_idx")
+  @@unique([h, i], map: "hi")
+}

@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=../../../packages/schemas/schemas/comparator/v0.json
+#
+# An extractor whose IDs include a component's module
+# (`component:billing/InvoiceService`) gives a moved component a new ID; these
+# rules recognize it as one component that moved.
+format: projections.comparator
+version: 0
+description: >-
+  Pairs each removed entity with the added entity of the same kind and label, when exactly
+  one of each exists, as one component that moved; relationships whose kind and endpoints
+  match once moved endpoints are mapped pair the same way. The moves form one step between
+  the removals and the additions.
+
+identity:
+  - name: moved
+    description: Unmatched entities with the same kind and label.
+    collections: [entities]
+    key: '[item.kind, item.label]'
+  - name: links
+    description: >-
+      Unmatched relationships with the same kind and endpoints, once moved endpoints are
+      mapped onto their new IDs; only when something moved.
+    collections: [relationships]
+    when: has(pairs.moved)
+    key: '[item.kind, moved(pairs.moved, item.from), moved(pairs.moved, item.to)]'
+
+functions:
+  moved:
+    description: An entity's ID after the moves.
+    params:
+      - {name: moves, type: 'map<string, string>'}
+      - {name: id, type: string}
+    returns: string
+    body: 'id in moves ? moves[id] : id'
+
+classify:
+  where: origin == 'moved'
+  summary: "'`%s` moved from `%s` to `%s`.'.format([afterItem.label, beforeItem.id, afterItem.id])"
+
+steps:
+  add:
+    # The moves leave the baseline's removal and addition steps and form one
+    # step between them, entities first, each in the order they were removed.
+    - changes: origin in ['moved', 'links']
+      kind: restructure
+      place: before:add
+      sort: '[change.collection, change.before[0]]'
+      summary: |-
+        size(members.filter(m, m.collection == 'entities')) == 1
+          ? 'Move `%s`'.format([graph.entity('after', members[0].after[0]).label])
+          : 'Move %d components'.format([size(members.filter(m, m.collection == 'entities'))])

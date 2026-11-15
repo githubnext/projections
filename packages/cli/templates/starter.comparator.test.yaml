@@ -1,0 +1,44 @@
+# Tests for {{id}}.comparator.yaml: each case gives two extractions and what the
+# comparator must make of them. `projections check -p {{id}}` runs them (add
+# `--no-render` for a fast loop). Replace these cases with your domain's:
+#
+#   before, after   fixture files (relative to this file), {extraction: ...}
+#                   written here, or {revision: HEAD} to extract a revision
+#   expect          partial expectations: order, steps, changes, count,
+#                   metadata, or the error the comparator must fail with
+#   snapshot        the whole comparison, in a JSON file that
+#                   `projections check --update` writes
+format: projections.comparator-tests
+version: 0
+
+cases:
+  - name: steps touching a listed kind come first
+    before:
+      extraction:
+        protocolVersion: 0
+        schema: graph/v0
+        entities:
+          - {id: file:readme, kind: file, label: README}
+        relationships: []
+    after:
+      extraction:
+        protocolVersion: 0
+        schema: graph/v0
+        entities:
+          - {id: service:billing, kind: service, label: billing}
+        relationships: []
+    options: {kinds: [service]}
+    expect:
+      # The default order removes first; the service's step moves ahead of it.
+      order: [service:billing, file:readme]
+      changes:
+        - {item: service:billing, status: added}
+
+  - name: invalid options are rejected
+    before:
+      extraction: {protocolVersion: 0, schema: graph/v0, entities: [], relationships: []}
+    after:
+      extraction: {protocolVersion: 0, schema: graph/v0, entities: [], relationships: []}
+    options: {kinds: service}
+    expect:
+      error: '`kinds` must be an array of entity kinds'

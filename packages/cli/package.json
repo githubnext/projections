@@ -1,0 +1,26 @@
+{
+  "name": "@githubnext/projections-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Builds and tests the self-contained native Projections CLI executable (released on GitHub, never published to npm)",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "cargo test -p projections-cli --locked && node --test test/*.test.mjs",
+    "test:installed": "node test/installed.mjs",
+    "test:gh": "node test/installed.mjs --gh-extension",
+    "test:container": "node test/container-native.mjs",
+    "test:binary": "node test/binary.mjs",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@githubnext/projections-engine": "0.1.0",
+    "@githubnext/projections-inspector": "0.1.0",
+    "@githubnext/projections-mcp-apps": "0.1.0",
+    "@githubnext/projections-renderer-testing": "0.1.0",
+    "@githubnext/projections-typescript-support": "0.1.0",
+    "@playwright/test": "^1.55.0",
+    "yaml": "^2.8.0"
+  }
+}

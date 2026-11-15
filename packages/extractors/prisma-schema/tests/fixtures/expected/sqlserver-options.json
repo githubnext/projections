@@ -1,0 +1,245 @@
+{
+ "entities": [
+  {
+   "id": "table:/M",
+   "kind": "table",
+   "label": "M",
+   "data": {
+    "namespace": null,
+    "provider": "sqlserver"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FM/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:/M",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FM/s",
+   "kind": "column",
+   "label": "s",
+   "data": {
+    "table": "table:/M",
+    "type": "String",
+    "nativeType": [
+     "NVarChar",
+     [
+      "Max"
+     ]
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FM/t",
+   "kind": "column",
+   "label": "t",
+   "data": {
+    "table": "table:/M",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FM/u",
+   "kind": "column",
+   "label": "u",
+   "data": {
+    "table": "table:/M",
+    "type": "String",
+    "nativeType": [
+     "VarChar",
+     [
+      "100"
+     ]
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FM/primary-key/%5B%22id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (id)",
+   "data": {
+    "table": "table:/M",
+    "type": "primary-key",
+    "clustered": true,
+    "fields": [
+     {
+      "name": "id",
+      "sortOrder": "desc"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FM/unique/%5B%22t%22%5D",
+   "kind": "constraint",
+   "label": "unique (t)",
+   "data": {
+    "table": "table:/M",
+    "type": "unique",
+    "fields": [
+     {
+      "name": "t",
+      "sortOrder": "asc"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FM/index/%5B%22u%22%5D",
+   "kind": "constraint",
+   "label": "index (u)",
+   "data": {
+    "table": "table:/M",
+    "type": "index",
+    "clustered": false,
+    "indexType": "normal",
+    "fields": [
+     {
+      "name": "u",
+      "sortOrder": "asc"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FM/index/plain",
+   "kind": "constraint",
+   "label": "plain",
+   "data": {
+    "table": "table:/M",
+    "type": "index",
+    "indexType": "normal",
+    "fields": [
+     {
+      "name": "u"
+     }
+    ],
+    "databaseName": "plain"
+   },
+   "confidence": "authoritative"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "contains:table%3A%2FM/column%3Atable%253A%252FM%2Fid/",
+   "kind": "contains",
+   "from": "table:/M",
+   "to": "column:table%3A%2FM/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FM/column%3Atable%253A%252FM%2Fs/",
+   "kind": "contains",
+   "from": "table:/M",
+   "to": "column:table%3A%2FM/s",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FM/column%3Atable%253A%252FM%2Ft/",
+   "kind": "contains",
+   "from": "table:/M",
+   "to": "column:table%3A%2FM/t",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FM/column%3Atable%253A%252FM%2Fu/",
+   "kind": "contains",
+   "from": "table:/M",
+   "to": "column:table%3A%2FM/u",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FM/constraint%3Atable%253A%252FM%2Fprimary-key%2F%255B%2522id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/M",
+   "to": "constraint:table%3A%2FM/primary-key/%5B%22id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FM%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FM%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FM/primary-key/%5B%22id%22%5D",
+   "to": "column:table%3A%2FM/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FM/constraint%3Atable%253A%252FM%2Funique%2F%255B%2522t%2522%255D/",
+   "kind": "contains",
+   "from": "table:/M",
+   "to": "constraint:table%3A%2FM/unique/%5B%22t%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FM%2Funique%2F%255B%2522t%2522%255D/column%3Atable%253A%252FM%2Ft/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FM/unique/%5B%22t%22%5D",
+   "to": "column:table%3A%2FM/t",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FM/constraint%3Atable%253A%252FM%2Findex%2F%255B%2522u%2522%255D/",
+   "kind": "contains",
+   "from": "table:/M",
+   "to": "constraint:table%3A%2FM/index/%5B%22u%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FM%2Findex%2F%255B%2522u%2522%255D/column%3Atable%253A%252FM%2Fu/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FM/index/%5B%22u%22%5D",
+   "to": "column:table%3A%2FM/u",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FM/constraint%3Atable%253A%252FM%2Findex%2Fplain/",
+   "kind": "contains",
+   "from": "table:/M",
+   "to": "constraint:table%3A%2FM/index/plain",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FM%2Findex%2Fplain/column%3Atable%253A%252FM%2Fu/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FM/index/plain",
+   "to": "column:table%3A%2FM/u",
+   "confidence": "authoritative"
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+model M {
+  id  Int    @id(sort: Desc, clustered: true)
+  s   String @db.NVarChar(Max)
+  t   String @unique(sort: Asc)
+  u   String @db.VarChar(100)
+  @@index([u(sort: Asc)], clustered: false)
+  @@index([u], map: "plain")
+}

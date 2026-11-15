@@ -1,0 +1,58 @@
+{
+  "$comment": "The upstream license texts in notices/ and the exact locked crate versions each covers. tools/scripts/crate-notices.mjs reads this; node tools/scripts/notices.mjs checks it against Cargo.lock and writes notices/README.md's table from it (--write).",
+  "notices": [
+    {
+      "directory": "cel",
+      "crates": {"cel": ["0.15.0"]},
+      "repository": "https://github.com/cel-rust/cel-rust",
+      "tag": "v0.15.0",
+      "files": {"LICENSE": "LICENSE"}
+    },
+    {
+      "directory": "convert_case",
+      "crates": {"convert_case": ["0.4.0"]},
+      "repository": "https://github.com/rutrum/convert-case",
+      "tag": "0.5.0",
+      "files": {"LICENSE": "LICENSE"},
+      "note": "A dependency of `verus_builtin_macros`. Its repository has no license file at `0.4.0`; this is the MIT text it added at `0.5.0`."
+    },
+    {
+      "directory": "verus_builtin_macros",
+      "crates": {"verus_builtin_macros": ["0.0.0-2026-11-01-0251"]},
+      "repository": "https://github.com/verus-lang/verus",
+      "tag": "release/0.2026.11.02.8bf68ee",
+      "files": {"LICENSE": "LICENSE"},
+      "note": "Erases `packages/engine/verified`'s proofs at build time. Published from `9efe4d9` (merged as `a58c936`), first released in this tag; `LICENSE` is identical at all three."
+    },
+    {
+      "directory": "wasmi",
+      "crates": {
+        "wasmi": ["2.0.0"],
+        "wasmi_collections": ["2.0.0"],
+        "wasmi_core": ["2.0.0"],
+        "wasmi_ir": ["2.0.0"]
+      },
+      "repository": "https://github.com/wasmi-labs/wasmi",
+      "tag": "v2.0.0",
+      "files": {"LICENSE-APACHE": "LICENSE-APACHE", "LICENSE-MIT": "LICENSE-MIT"}
+    },
+    {
+      "directory": "wasmparser",
+      "crates": {"wasmparser": ["0.228.0"]},
+      "repository": "https://github.com/bytecodealliance/wasm-tools",
+      "tag": "v1.228.0",
+      "files": {
+        "LICENSE-APACHE": "LICENSE-APACHE",
+        "LICENSE-Apache-2.0_WITH_LLVM-exception": "LICENSE-Apache-2.0_WITH_LLVM-exception",
+        "LICENSE-MIT": "LICENSE-MIT"
+      }
+    },
+    {
+      "directory": "yaml-rust2",
+      "crates": {"yaml-rust2": ["0.13.0"]},
+      "repository": "https://github.com/Ethiraric/yaml-rust2",
+      "tag": "v0.13.0",
+      "files": {"LICENSE-APACHE": "Apache-LICENSE", "LICENSE-MIT": "MIT-LICENSE"}
+    }
+  ]
+}

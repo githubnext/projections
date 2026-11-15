@@ -1,0 +1,161 @@
+# yaml-language-server: $schema=../../schemas/schemas/comparator-tests/v0.json
+#
+# What a security reviewer should read in runtime policy changes, as cases over
+# the tetragon-policies extractor's fixtures. Run them with
+# `projections check -p <id>` in a repository whose projection uses these rules.
+format: projections.comparator-tests
+version: 0
+
+cases:
+  - name: the credentials pull request leads with enforcement, then scope, then coverage
+    before: ../../extractors/tetragon-policies/tests/fixtures/credentials/before.expected.json
+    after: ../../extractors/tetragon-policies/tests/fixtures/credentials/after.expected.json
+    expect:
+      metadata:
+        runtimePolicy:
+          interpretations:
+            selector:tetragon:TracingPolicy:protect-credentials/kprobe:security_file_permission/token-read-by-downloader: [newly-enforced]
+            policy:tetragon:TracingPolicy:protect-credentials: [scope-broadened]
+            hook:kprobe:security_mmap_file: [coverage-lost]
+      order:
+        - selector:tetragon:TracingPolicy:protect-credentials/kprobe:security_file_permission/token-read-by-downloader
+        - policy:tetragon:TracingPolicy:protect-credentials
+        - hook:kprobe:security_mmap_file
+      changes:
+        - id: selector:tetragon:TracingPolicy:protect-credentials/kprobe:security_file_permission/token-read-by-downloader
+          summary: >-
+            `protect-credentials` rule `token-read-by-downloader` at `security_file_permission` now enforces:
+            Kill (`Sigkill`) for `/usr/bin/curl` or `/usr/bin/wget` when `arg0` (`file`) starts with
+            `/var/run/secrets/kubernetes.io/serviceaccount` and `arg1` (`int`) = `4`.
+        - id: policy:tetragon:TracingPolicy:protect-credentials
+          summary: >-
+            Policy `protect-credentials` now applies to more workloads: pods where
+            `app.kubernetes.io/part-of in (checkout, payments)`.
+          # Correspondence and statuses are the default comparator's.
+          status: modified
+          correspondence: exact
+        - {id: hook:kprobe:security_mmap_file, summary: No policy attaches to `security_mmap_file` any more.}
+    snapshot: snapshots/credentials.json
+
+  - name: the reverse change narrows scope and removes enforcement
+    before: ../../extractors/tetragon-policies/tests/fixtures/credentials/after.expected.json
+    after: ../../extractors/tetragon-policies/tests/fixtures/credentials/before.expected.json
+    expect:
+      metadata:
+        runtimePolicy:
+          interpretations:
+            selector:tetragon:TracingPolicy:protect-credentials/kprobe:security_file_permission/token-read-by-downloader:
+              [enforcement-removed]
+            policy:tetragon:TracingPolicy:protect-credentials: [scope-narrowed]
+            hook:kprobe:security_mmap_file: [newly-covered]
+
+  - name: enrichment changes are interpreted, a new warning and the agent configuration
+    before: ../../extractors/tetragon-policies/tests/fixtures/deployment/before.expected.json
+    after: ../../extractors/tetragon-policies/tests/fixtures/deployment/after.expected.json
+    expect:
+      metadata:
+        runtimePolicy:
+          interpretations:
+            agent:tetragon: [agent-changed]
+            policy:tetragon:TracingPolicy:protect-credentials: [scope-broadened, warning-added]
+            policy:tetragon:TracingPolicyNamespaced:payments:shell-guard: [warning-added, policy-added]
+      changes:
+        - id: agent:tetragon
+          summary: 'The Tetragon agent configuration changed (`policyFilter`: `true` → `false`).'
+
+  - name: identical extractions need no interpretation
+    before: ../../extractors/tetragon-policies/tests/fixtures/credentials/after.expected.json
+    after: ../../extractors/tetragon-policies/tests/fixtures/credentials/after.expected.json
+    expect:
+      count: {changes: 0, steps: 0}
+
+  - name: options are rejected
+    before: ../../extractors/tetragon-policies/tests/fixtures/credentials/before.expected.json
+    after: ../../extractors/tetragon-policies/tests/fixtures/credentials/after.expected.json
+    options: {x: 1}
+    expect:
+      error: takes none
+
+  - name: scopes are compared by provable containment, and rules are placed and worded
+    # Hand-made: a policy, rule or agent for each decision the tetragon-policies
+    # fixtures don't reach; their names say which.
+    before: fixtures/edges-before.json
+    after: fixtures/edges-after.json
+    expect:
+      metadata:
+        runtimePolicy:
+          interpretations:
+            # Every workload covers any scope; host workloads, other namespaces and
+            # operators it doesn't know can't be compared.
+            policy:tetragon:TracingPolicy:everything: [scope-broadened]
+            policy:tetragon:TracingPolicy:namespace-wide: [scope-broadened]
+            policy:tetragon:TracingPolicy:host-joins: [scope-changed]
+            policy:tetragon:TracingPolicy:host-moves: [scope-changed]
+            policy:tetragon:TracingPolicy:unknown-operator: [scope-changed]
+            # Label requirements as sets: fewer `In` values, a `NotIn` that an `In`
+            # implies or of fewer values, `Exists` implied by `In`; `In` and `NotIn`
+            # of one value exclude each other.
+            policy:tetragon:TracingPolicy:fewer-values: [scope-narrowed]
+            policy:tetragon:TracingPolicy:not-in-implied: [scope-broadened]
+            policy:tetragon:TracingPolicy:not-in-fewer: [scope-broadened]
+            policy:tetragon:TracingPolicy:exists: [scope-narrowed]
+            policy:tetragon:TracingPolicy:in-to-not-in: [scope-changed]
+            # Equivalent scopes described differently are a change, not a broadening or narrowing.
+            policy:tetragon:TracingPolicy:same-pods: [scope-changed]
+            # An empty container selector selects every container.
+            policy:tetragon:TracingPolicy:containers-cleared: [scope-broadened]
+            policy:tetragon:TracingPolicy:fewer-containers: [scope-narrowed]
+            # A scope on one side only isn't compared.
+            policy:tetragon:TracingPolicy:gains-scope: [nodes-changed]
+            policy:tetragon:TracingPolicy:switches-mode: [mode-changed]
+            policy:tetragon:TracingPolicy:arrives: [policy-added]
+            policy:tetragon:TracingPolicy:leaves: [policy-removed]
+            policy:tetragon:TracingPolicy:more-findings: [warning-added]
+            probe:tetragon:TracingPolicy:rules/kprobe:capture: [capture-changed]
+            probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/starts-enforcing: [newly-enforced]
+            probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/stops-enforcing: [enforcement-removed]
+            probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/becomes-elided: [enforcement-elided]
+            probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/elided-from-the-start: [enforcement-elided]
+            probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/other-conditions: [condition-changed]
+            probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/other-binaries: [binaries-changed]
+            probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/reports-more: [action-changed]
+            probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/reports-less: [action-changed]
+            probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/gains-finding: [warning-added]
+            probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/stopped-observing: [observation-removed]
+            probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/every-binary-filter: [newly-observed]
+            probe:tetragon:TracingPolicy:rules/kprobe:loose/unhooked: [newly-observed]
+            probe:none/orphan: [newly-observed]
+            agent:tetragon: [warning-added]
+            agent:edge: [agent-changed]
+      changes:
+        - id: policy:tetragon:TracingPolicy:loses-scope
+          summary: null
+        # A rule that neither enforced nor reported leaves unremarked, as does a new agent.
+        - id: probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/did-nothing
+          summary: null
+        - id: agent:new
+          summary: null
+        - id: policy:tetragon:TracingPolicy:more-findings
+          summary: 'Policy `more-findings` gains a warning: New.'
+        - id: probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/reports-more
+          summary: '`rules` rule `reports-more` at `security_bprm_check` now does Post (was report).'
+        - id: probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/reports-less
+          summary: '`rules` rule `reports-less` at `security_bprm_check` now does nothing but report (was Post).'
+        - id: probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/every-binary-filter
+          summary: >-
+            `rules` rule `every-binary-filter` at `security_bprm_check` newly reports events for binaries
+            not starting with `/tmp/` and children of binaries ending with `sh` or `bash` and binaries not
+            ending with `.so` and their children and binaries `Glob` `/opt/*` and binaries other than `/bin/true`.
+        - id: probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/stops-enforcing
+          summary: '`rules` rule `stops-enforcing` at `security_bprm_check` no longer enforces (was Kill (`Sigkill`)).'
+        # A rule of a probe attached to no hook is at the probe; a rule of no probe, at no policy or hook.
+        - id: probe:tetragon:TracingPolicy:rules/kprobe:loose/unhooked
+          summary: '`rules` rule `unhooked` at `loose` newly reports events.'
+        - id: probe:none/orphan
+          summary: A policy rule `orphan` at a hook newly reports events.
+        # Findings are warnings, not settings.
+        - id: agent:tetragon
+          summary: 'The Tetragon agent gains a warning: A note.'
+        - id: agent:edge
+          summary: 'The Edge agent configuration changed (`exportRateLimit`: `100` → `500`).'
+    snapshot: snapshots/edges.json

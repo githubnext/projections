@@ -1,0 +1,148 @@
+/*
+ * Diff mode (see `diffModel` and `changeMark`). Every item of the union carries `data-change` with its change; the
+ * hue follows it into the item, so a mark always pairs a fill with a same-hue edge. HTML regions use `pk-region`
+ * (above); an SVG item draws its own shape (`pk-diff-shape`) the same way, dashed when removed. Text of a removed item
+ * (`pk-diff-text`) is struck through and muted, so removal never rests on color alone.
+ */
+.pk [data-change='added'] {
+  --pk-region-fill: var(--green-soft);
+  --pk-region-edge: var(--green-border);
+  --pk-change-ink: var(--green);
+}
+.pk [data-change='removed'] {
+  --pk-region-fill: var(--red-soft);
+  --pk-region-edge: var(--red-border);
+  --pk-change-ink: var(--red);
+}
+.pk [data-change='modified'] {
+  --pk-region-fill: var(--amber-soft);
+  --pk-region-edge: var(--amber-border);
+  --pk-change-ink: var(--amber);
+}
+.pk :is([data-change='renamed'], [data-change='moved']) {
+  --pk-region-fill: var(--violet-soft);
+  --pk-region-edge: var(--violet-border);
+  --pk-change-ink: var(--violet);
+}
+.pk [data-change] > .pk-diff-shape {
+  fill: color-mix(in srgb, var(--pk-region-fill) calc(var(--emphasis, 1) * 100%), var(--raised));
+  stroke: color-mix(in srgb, var(--pk-region-edge) calc(var(--emphasis, 1) * 100%), var(--divider));
+  stroke-width: var(--stroke-strong);
+}
+.pk [data-change='removed'] > .pk-diff-shape {
+  stroke-dasharray: 5 3;
+}
+.pk [data-change='removed'] .pk-diff-text {
+  color: var(--muted);
+  fill: var(--muted);
+  text-decoration: line-through;
+}
+
+/* Replace is neutral, neither added nor removed: its badge is gray beside any status word. */
+.pk [data-icon='replace'] {
+  color: var(--muted);
+}
+
+/*
+ * Change pills: an old value struck through in the removed hue above (or before) the new one in the added hue
+ * (`ValueChange`), and lists whose items arrive and leave (`ChangePills`). Data is shown verbatim.
+ */
+.pk-value-change {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  max-width: 100%;
+  vertical-align: top;
+}
+.pk-value-change[data-layout='inline'] {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--projections-space-1);
+}
+.pk-value-arrow {
+  color: var(--muted);
+}
+.pk-change-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--projections-space-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pk-change-pill-item {
+  display: contents;
+}
+.pk .pk-change-pill {
+  appearance: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0 var(--projections-label-padding-x);
+  border: var(--projections-border-width) solid var(--divider);
+  border-radius: var(--projections-radius-sm);
+  background: var(--raised);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--projections-font-size-xs);
+  line-height: var(--projections-line-height);
+  text-align: left;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.pk button.pk-change-pill {
+  cursor: pointer;
+}
+.pk .pk-change-pill[data-change] {
+  border-color: color-mix(in srgb, var(--pk-region-edge) calc(var(--emphasis, 1) * 100%), var(--divider));
+  background: color-mix(in srgb, var(--pk-region-fill) calc(var(--emphasis, 1) * 100%), var(--raised));
+}
+.pk .pk-change-pill[data-change='removed'] :is(.pk-pill-label),
+.pk del.pk-change-pill {
+  text-decoration: line-through;
+}
+.pk-pill-sign {
+  flex: none;
+  font-family: var(--font-mono);
+  font-weight: var(--projections-font-weight-semibold);
+  color: color-mix(in srgb, var(--pk-change-ink) calc(var(--emphasis, 1) * 100%), var(--muted));
+}
+/* Selected: the part tint; the SDK's ring marks the pill's unit, so the pill draws no ring of its own. */
+.pk .pk-change-pill.selected {
+  background-image: linear-gradient(var(--pk-part-tint), var(--pk-part-tint));
+}
+.pk .pk-change-pill:focus-visible {
+  outline: var(--projections-focus-ring-width) solid var(--focus);
+  outline-offset: var(--projections-focus-ring-offset);
+}
+
+/* `SvgValueChange`: old struck in the removed hue, an arrow, then the new value in the added hue. */
+.pk-svg-was {
+  fill: var(--red);
+  text-decoration: line-through;
+}
+.pk-svg-arrow {
+  fill: var(--muted);
+}
+.pk-svg-now {
+  fill: var(--green);
+}
+/* A diff card's field changes (GraphCanvas `changedFields`). */
+.node-field-key,
+.node-field-value {
+  font-size: var(--projections-font-size-xs);
+}
+.node-field-key {
+  fill: var(--muted);
+}
+/* A note on a diff card's kind line (`· inferred`) is human language, in the text font even beside an identifier. */
+.node-note {
+  font-family: var(--projections-font-family);
+  fill: var(--muted);
+}

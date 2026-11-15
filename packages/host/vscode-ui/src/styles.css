@@ -1,0 +1,12 @@
+/* @githubnext/projections-host-vscode: the VS Code UI's look, from VS Code's own `--vscode-*` variables (a webview gets
+   them on `html`; outside VS Code apply a captured theme with `applyVscodeTheme`). Fallbacks are Dark Modern's values.
+   VSCode Elements draw their own controls; these rules lay them out and draw what the library has no component for. */
+
+@import './styles/base.css';
+@import './styles/toolbar.css';
+@import './styles/controls.css';
+@import './styles/overlays.css';
+@import './styles/notices.css';
+@import './styles/layout.css';
+@import './styles/views.css';
+@import './styles/details.css';

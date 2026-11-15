@@ -1,0 +1,61 @@
+name: Engine coverage and mutation testing
+description: Enforce coverage thresholds or run cargo-mutants on the core Engine and the default comparator
+inputs:
+  workspace:
+    description: Workspace path relative to the repository checkout
+    default: '.'
+  task:
+    description: coverage, mutants-diff (needs base-ref and full history) or mutants
+    required: true
+  base-ref:
+    description: Branch to diff against for mutants-diff
+    default: ''
+  shard:
+    description: cargo-mutants shard (k/n, 0-based) for the mutants and mutants-diff tasks
+    default: '0/1'
+  artifact:
+    description: Name for the uploaded mutants.out artifact
+    default: mutants
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+      with:
+        node-version-file: ${{ inputs.workspace }}/.node-version
+    - uses: taiki-e/install-action@b80e2bb2635f28eb98b9fce1e2f0887e1535c6b2 # v2.90.0
+      with:
+        tool: cargo-llvm-cov@0.9.1,cargo-mutants@27.1.0
+    - shell: bash
+      working-directory: ${{ inputs.workspace }}
+      env:
+        TASK: ${{ inputs.task }}
+        BASE_REF: ${{ inputs.base-ref }}
+        SHARD: ${{ inputs.shard }}
+      run: |
+        set -euo pipefail
+        rustc --version
+        case "$TASK" in
+          coverage)
+            rustup component add llvm-tools
+            npm run test:rust:coverage
+            ;;
+          mutants-diff)
+            git diff --relative "origin/$BASE_REF...HEAD" > "$RUNNER_TEMP/mutants.diff"
+            # Round-robin, so the slower mutants (one file's are adjacent in the list) spread across shards.
+            npm run test:rust:mutants -- --jobs 2 --in-diff "$RUNNER_TEMP/mutants.diff" --shard "$SHARD" --sharding round-robin --output "$RUNNER_TEMP"
+            ;;
+          mutants)
+            npm run test:rust:mutants -- --jobs 2 --shard "$SHARD" --output "$RUNNER_TEMP"
+            ;;
+          *)
+            echo "Unknown task $TASK" >&2
+            exit 1
+            ;;
+        esac
+    - if: always() && inputs.task != 'coverage'
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: ${{ inputs.artifact }}
+        path: ${{ runner.temp }}/mutants.out
+        if-no-files-found: ignore
+        retention-days: 14

@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/artifact/v0.json",
+  "title": "Projections CI artifact manifest",
+  "description": "projections.artifact.json at the root of the `projections` Actions artifact: what one workflow run extracted or compared, and the full-byte SHA-256 of every document it uploaded.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "protocolVersion", "producer", "repository", "run", "subject", "trust", "projections"],
+  "properties": {
+    "format": {"type": "string", "const": "projections.artifact"},
+    "version": {"type": "number", "const": 0},
+    "protocolVersion": {"type": "number", "const": 0},
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cli"],
+      "properties": {
+        "cli": {"type": "string", "minLength": 1, "maxLength": 100},
+        "action": {"type": "string", "minLength": 1, "maxLength": 200}
+      }
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "id", "owner", "name"],
+      "properties": {
+        "provider": {"type": "string", "const": "github"},
+        "id": {"$ref": "#/$defs/id"},
+        "owner": {"type": "string", "minLength": 1, "maxLength": 100},
+        "name": {"type": "string", "minLength": 1, "maxLength": 100}
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "attempt"],
+      "properties": {"id": {"$ref": "#/$defs/id"}, "attempt": {"$ref": "#/$defs/id"}}
+    },
+    "subject": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "number", "base", "head", "mergeBase", "definition"],
+          "properties": {
+            "kind": {"type": "string", "const": "pull-request"},
+            "number": {"$ref": "#/$defs/id"},
+            "base": {"$ref": "#/$defs/commit"},
+            "head": {"$ref": "#/$defs/commit"},
+            "mergeBase": {"$ref": "#/$defs/commit"},
+            "definition": {"enum": ["base", "head"]}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "ref", "revision"],
+          "properties": {
+            "kind": {"type": "string", "const": "push"},
+            "ref": {"type": "string", "pattern": "^refs/(?:heads|tags)/[^\\u0000-\\u001f\\u007f]{1,250}$"},
+            "revision": {"$ref": "#/$defs/commit"}
+          }
+        }
+      ]
+    },
+    "trust": {
+      "description": "Whether the workflow author passed `--trust`, allowing extractors that run repository code.",
+      "type": "boolean"
+    },
+    "projections": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "status", "path", "sha256"],
+            "properties": {
+              "id": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$"},
+              "status": {"enum": ["changed", "unchanged", "extracted", "head-only", "base-only"]},
+              "path": {"$ref": "#/$defs/path"},
+              "sha256": {"$ref": "#/$defs/sha256"},
+              "notices": {"$ref": "#/$defs/notices"}
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "status", "diagnostics"],
+            "properties": {
+              "id": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$"},
+              "status": {"type": "string", "const": "error"},
+              "title": {"type": "string", "minLength": 1, "maxLength": 200},
+              "diagnostics": {"type": "array", "items": {"$ref": "#/$defs/diagnostic"}, "minItems": 1, "maxItems": 20},
+              "notices": {"$ref": "#/$defs/notices"}
+            }
+          }
+        ]
+      },
+      "maxItems": 60
+    }
+  },
+  "$defs": {
+    "commit": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+    "id": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+    "notices": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 4096}, "maxItems": 20},
+    "path": {"type": "string", "pattern": "^projections/[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}\\.json$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity", "code", "path", "message"],
+      "properties": {
+        "severity": {"enum": ["error", "warning"]},
+        "code": {"type": "string", "minLength": 1, "maxLength": 100},
+        "path": {"type": "string", "maxLength": 1024},
+        "message": {"type": "string", "minLength": 1, "maxLength": 4096}
+      }
+    }
+  }
+}

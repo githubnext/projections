@@ -1,0 +1,143 @@
+{
+  "packages": [
+    {
+      "name": "example-api",
+      "version": "1.2.0",
+      "id": "path+file:///fixture/checkout/tests/fixtures/ecosystems/cargo/api#example-api@1.2.0",
+      "license": null,
+      "license_file": null,
+      "description": null,
+      "source": null,
+      "dependencies": [
+        {
+          "name": "example-support",
+          "source": null,
+          "req": "*",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null,
+          "path": "/fixture/checkout/tests/fixtures/ecosystems/cargo/support"
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "example_api",
+          "src_path": "/fixture/checkout/tests/fixtures/ecosystems/cargo/api/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      ],
+      "features": {},
+      "manifest_path": "/fixture/checkout/tests/fixtures/ecosystems/cargo/api/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [],
+      "categories": [],
+      "keywords": [],
+      "readme": null,
+      "repository": null,
+      "homepage": null,
+      "documentation": null,
+      "edition": "2021",
+      "links": null,
+      "default_run": null,
+      "rust_version": null
+    },
+    {
+      "name": "example-support",
+      "version": "0.3.0",
+      "id": "path+file:///fixture/checkout/tests/fixtures/ecosystems/cargo/support#example-support@0.3.0",
+      "license": null,
+      "license_file": null,
+      "description": null,
+      "source": null,
+      "dependencies": [],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "example_support",
+          "src_path": "/fixture/checkout/tests/fixtures/ecosystems/cargo/support/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      ],
+      "features": {},
+      "manifest_path": "/fixture/checkout/tests/fixtures/ecosystems/cargo/support/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [],
+      "categories": [],
+      "keywords": [],
+      "readme": null,
+      "repository": null,
+      "homepage": null,
+      "documentation": null,
+      "edition": "2021",
+      "links": null,
+      "default_run": null,
+      "rust_version": null
+    }
+  ],
+  "workspace_members": [
+    "path+file:///fixture/checkout/tests/fixtures/ecosystems/cargo/api#example-api@1.2.0",
+    "path+file:///fixture/checkout/tests/fixtures/ecosystems/cargo/support#example-support@0.3.0"
+  ],
+  "workspace_default_members": [
+    "path+file:///fixture/checkout/tests/fixtures/ecosystems/cargo/api#example-api@1.2.0",
+    "path+file:///fixture/checkout/tests/fixtures/ecosystems/cargo/support#example-support@0.3.0"
+  ],
+  "resolve": {
+    "nodes": [
+      {
+        "id": "path+file:///fixture/checkout/tests/fixtures/ecosystems/cargo/api#example-api@1.2.0",
+        "dependencies": [
+          "path+file:///fixture/checkout/tests/fixtures/ecosystems/cargo/support#example-support@0.3.0"
+        ],
+        "deps": [
+          {
+            "name": "example_support",
+            "pkg": "path+file:///fixture/checkout/tests/fixtures/ecosystems/cargo/support#example-support@0.3.0",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          }
+        ],
+        "features": []
+      },
+      {
+        "id": "path+file:///fixture/checkout/tests/fixtures/ecosystems/cargo/support#example-support@0.3.0",
+        "dependencies": [],
+        "deps": [],
+        "features": []
+      }
+    ],
+    "root": null
+  },
+  "target_directory": "/fixture/checkout/tests/fixtures/ecosystems/cargo/target",
+  "build_directory": "/fixture/checkout/tests/fixtures/ecosystems/cargo/target",
+  "version": 1,
+  "workspace_root": "/fixture/checkout/tests/fixtures/ecosystems/cargo",
+  "metadata": null
+}

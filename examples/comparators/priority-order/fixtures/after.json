@@ -1,0 +1,85 @@
+{
+  "protocolVersion": 0,
+  "schema": "graph/v0",
+  "entities": [
+    {
+      "id": "package:@acme/auth",
+      "kind": "package",
+      "label": "@acme/auth",
+      "data": {
+        "version": "1.5.0"
+      }
+    },
+    {
+      "id": "package:@acme/billing",
+      "kind": "package",
+      "label": "@acme/billing",
+      "data": {
+        "version": "0.1.0"
+      }
+    },
+    {
+      "id": "package:@acme/core",
+      "kind": "package",
+      "label": "@acme/core",
+      "data": {
+        "version": "2.1.0"
+      }
+    },
+    {
+      "id": "package:@acme/ui",
+      "kind": "package",
+      "label": "@acme/ui",
+      "data": {
+        "version": "3.1.0"
+      }
+    },
+    {
+      "id": "package:@acme/web",
+      "kind": "package",
+      "label": "@acme/web",
+      "data": {
+        "version": "5.3.0"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "dependency:@acme/auth->@acme/core",
+      "kind": "depends-on",
+      "from": "package:@acme/auth",
+      "to": "package:@acme/core"
+    },
+    {
+      "id": "dependency:@acme/billing->@acme/core",
+      "kind": "depends-on",
+      "from": "package:@acme/billing",
+      "to": "package:@acme/core"
+    },
+    {
+      "id": "dependency:@acme/ui->@acme/core",
+      "kind": "depends-on",
+      "from": "package:@acme/ui",
+      "to": "package:@acme/core"
+    },
+    {
+      "id": "dependency:@acme/web->@acme/auth",
+      "kind": "depends-on",
+      "from": "package:@acme/web",
+      "to": "package:@acme/auth"
+    },
+    {
+      "id": "dependency:@acme/web->@acme/billing",
+      "kind": "depends-on",
+      "from": "package:@acme/web",
+      "to": "package:@acme/billing"
+    },
+    {
+      "id": "dependency:@acme/web->@acme/ui",
+      "kind": "depends-on",
+      "from": "package:@acme/web",
+      "to": "package:@acme/ui"
+    }
+  ],
+  "metadata": {}
+}

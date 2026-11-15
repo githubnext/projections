@@ -1,0 +1,8 @@
+{
+  "protocolVersion": 0,
+  "schema": "api/v0",
+  "entities": [
+    {"id":"go:example.com/units.Limit","kind":"export","label":"Limit","data":{"signature":"const Limit = 20","contract":{"declaration":"constant","term":"const","visibility":"public","value":"20"}}}
+  ],
+  "relationships": []
+}

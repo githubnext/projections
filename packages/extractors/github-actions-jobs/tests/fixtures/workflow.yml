@@ -1,0 +1,19 @@
+name: Build
+on: [push, pull_request]
+jobs:
+  build:
+    name: Build packages
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - run: npm test
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run lint
+  publish:
+    needs: [build, lint]
+    if: github.ref == 'refs/heads/main'
+    uses: example/workflows/.github/workflows/publish.yml@main

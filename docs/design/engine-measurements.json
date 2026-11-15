@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-03",
+  "scope": "Remeasured renamed ProjectionEngine APIs, projections-engine executable and engine.wasm artifact",
+  "environment": {
+    "node": "v26.12.1",
+    "rust": "1.97.1",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpu": "Apple M5 Max",
+    "browser": "Chromium 156.0.8078.4"
+  },
+  "artifacts": {
+    "nativeBytes": 583952,
+    "wasmBytes": 348971,
+    "wasmGzipBytes": 130633,
+    "browserStartupMs": 6.8
+  },
+  "samples": [
+    {
+      "nodes": 1000,
+      "edges": 5000,
+      "stateBytes": 524541,
+      "repetitions": 5,
+      "operations": {
+        "decode": {"nativeMedianMs": 32.083, "wasmMedianMs": 21.4, "responseBytes": 574541, "agreement": true},
+        "normalize": {"nativeMedianMs": 41.976, "wasmMedianMs": 24.3, "responseBytes": 574541, "agreement": true},
+        "canonicalize": {"nativeMedianMs": 50.838, "wasmMedianMs": 35.5, "responseBytes": 623753, "agreement": true},
+        "compare": {"nativeMedianMs": 112.39, "wasmMedianMs": 86.4, "responseBytes": 2025236, "agreement": true}
+      }
+    },
+    {
+      "nodes": 10000,
+      "edges": 50000,
+      "stateBytes": 5274741,
+      "repetitions": 1,
+      "operations": {
+        "decode": {"nativeMedianMs": 298.513, "wasmMedianMs": 286.6, "responseBytes": 5774741, "agreement": true},
+        "normalize": {"nativeMedianMs": 313.048, "wasmMedianMs": 272.7, "responseBytes": 5774741, "agreement": true},
+        "canonicalize": {"nativeMedianMs": 489.314, "wasmMedianMs": 397.8, "responseBytes": 6255953, "agreement": true},
+        "compare": {"nativeMedianMs": 1194.645, "wasmMedianMs": 1765.8, "responseBytes": 20309637, "agreement": true}
+      }
+    }
+  ],
+  "conformance": {
+    "rustTests": 13,
+    "nodeTests": 142,
+    "nativeBrowserCasesPerEngine": 61,
+    "browserEngines": ["Chromium", "WebKit"],
+    "workerMaxGraphNativeAgreement": true,
+    "rawArtifactBytes": 30859072,
+    "escapedArtifactRequestBytes": 37139176,
+    "workerArtifactNativeAgreement": true,
+    "cleanTarballRuntimeAndTypecheck": true
+  },
+  "qualifications": [
+    "Native includes process startup and JSON transport; browser excludes Playwright transfer.",
+    "Maximum graph is one sample, not a latency guarantee or distribution.",
+    "Figures are rounded; rerun packages/engine/js/scripts/measure.mjs for a new receipt.",
+    "Only macOS arm64 native execution was verified.",
+    "Browser semantic work should use the Worker facade; caller serialization and result parsing remain synchronous."
+  ]
+}

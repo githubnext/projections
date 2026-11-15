@@ -1,0 +1,21 @@
+@import '@githubnext/projections-renderer-sdk/icons.css';
+
+/*
+ * Renderer kit base styles: the shared look, for any renderer, with or without React. Every visual value comes from
+ * the host's theme tokens (`--projections-<token>`, token set 1, applied to <html> by the renderer SDK with defaults
+ * for any a host omits): colors, the categorical palette, type scale, spacing, radii, borders, shadows, control and
+ * label metrics. Nothing here hard-codes a color, size or shadow. The short custom properties in `styles/root.css`
+ * (`--text`, `--green`, `--edge`, …) are the kit's semantic aliases of those tokens; renderer styles use them, or the
+ * tokens directly. Everything is scoped under a `.pk` root: `mountRenderer` creates it, and a renderer without React
+ * puts `class="pk"` on its own root element.
+ *
+ * The rules live in `styles/`, imported here in cascade order: the page and the `.pk` root, change regions (`pk-region`
+ * with `data-change`), content buttons and hover, badges, status lines and icons, and text (names, identifiers, code,
+ * empty and error states). `react.css` adds the kit components' rules after them. The published package inlines the
+ * partials into one file.
+ */
+@import './styles/root.css';
+@import './styles/regions.css';
+@import './styles/controls.css';
+@import './styles/status.css';
+@import './styles/text.css';

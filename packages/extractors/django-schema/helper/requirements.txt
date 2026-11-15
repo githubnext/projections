@@ -1,0 +1,2 @@
+# Use the target project's compatible environment when collecting real projects.
+Django>=4.2,<6

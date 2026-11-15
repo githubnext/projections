@@ -1,0 +1,768 @@
+{
+  "changes": [
+    {
+      "after": [
+        "ts:kit:.:Color"
+      ],
+      "before": [
+        "ts:kit:.:Color"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:Color",
+      "status": "modified",
+      "summary": "Compatible: Only the presentation of the signature changed."
+    },
+    {
+      "after": [
+        "ts:kit:.:DEBUG"
+      ],
+      "before": [
+        "ts:kit:.:DEBUG"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:DEBUG",
+      "status": "modified",
+      "summary": "Compatible: Only the presentation of the signature changed."
+    },
+    {
+      "after": [
+        "ts:kit:.:Handler"
+      ],
+      "before": [
+        "ts:kit:.:Handler"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:Handler",
+      "status": "modified",
+      "summary": "Unknown: Its type changed from `Callback` to `Listener`."
+    },
+    {
+      "after": [
+        "ts:kit:.:Id"
+      ],
+      "before": [
+        "ts:kit:.:Id"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:Id",
+      "status": "modified",
+      "summary": "Compatible: Its type is equivalent."
+    },
+    {
+      "after": [
+        "ts:kit:.:Job:code"
+      ],
+      "before": [
+        "ts:kit:.:Job:code"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:Job:code",
+      "status": "modified",
+      "summary": "Compatible: Its type is equivalent."
+    },
+    {
+      "after": [
+        "ts:kit:.:Job:data"
+      ],
+      "before": [
+        "ts:kit:.:Job:data"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:Job:data",
+      "status": "modified",
+      "summary": "Unknown: Its type changed from `Foo` to `Bar`."
+    },
+    {
+      "after": [
+        "ts:kit:.:Job:id"
+      ],
+      "before": [
+        "ts:kit:.:Job:id"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:Job:id",
+      "status": "modified",
+      "summary": "Compatible: Its type narrowed to `string`."
+    },
+    {
+      "after": [
+        "ts:kit:.:Job:kind"
+      ],
+      "before": [
+        "ts:kit:.:Job:kind"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:Job:kind",
+      "status": "modified",
+      "summary": "Breaking: Its type changed from `\"a\"` to `\"a\" | \"b\"`."
+    },
+    {
+      "after": [
+        "ts:kit:.:Job:name"
+      ],
+      "before": [
+        "ts:kit:.:Job:name"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:Job:name",
+      "status": "modified",
+      "summary": "Breaking: Its type changed from `string` to `string | number`; it is both read and written, so it must stay the same."
+    },
+    {
+      "after": [
+        "ts:kit:.:Job:note"
+      ],
+      "before": [
+        "ts:kit:.:Job:note"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:Job:note",
+      "status": "modified",
+      "summary": "Breaking: Became optional; code reading it must handle `undefined`; Its type changed from `string` to `number | undefined`; it is both read and written, so it must stay the same."
+    },
+    {
+      "after": [
+        "ts:kit:.:Job:tag"
+      ],
+      "before": [
+        "ts:kit:.:Job:tag"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:Job:tag",
+      "status": "modified",
+      "summary": "Breaking: Its type changed from `string` to `string | number`; it is both read and written, so it must stay the same."
+    },
+    {
+      "after": [
+        "ts:kit:.:LIMIT"
+      ],
+      "before": [
+        "ts:kit:.:LIMIT"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:LIMIT",
+      "status": "modified",
+      "summary": "Compatible: Its type narrowed to `number`."
+    },
+    {
+      "after": [
+        "ts:kit:.:Options:call"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "ts:kit:.:Options:call",
+      "status": "added",
+      "summary": "Breaking: `(input: string)` was added to `Options`; implementations must provide it."
+    },
+    {
+      "after": [
+        "ts:kit:.:Options:index"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "ts:kit:.:Options:index",
+      "status": "added",
+      "summary": "Breaking: Index signature `[key: string]` was added to `Options`; existing objects may not satisfy it."
+    },
+    {
+      "after": [
+        "ts:kit:.:Options:new"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "ts:kit:.:Options:new",
+      "status": "added",
+      "summary": "Breaking: `new (input: string)` was added to `Options`; implementations must provide it."
+    },
+    {
+      "after": [
+        "ts:kit:.:VERSION"
+      ],
+      "before": [
+        "ts:kit:.:VERSION"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:VERSION",
+      "status": "modified",
+      "summary": "Breaking: Its type changed from `\"1.0\"` to `string`."
+    },
+    {
+      "after": [
+        "ts:kit:.:config"
+      ],
+      "before": [
+        "ts:kit:.:config"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:config",
+      "status": "modified",
+      "summary": "Unknown: Its type changed from `Config` to `Settings`."
+    },
+    {
+      "after": [
+        "ts:kit:.:emit"
+      ],
+      "before": [
+        "ts:kit:.:emit"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:emit",
+      "status": "modified",
+      "summary": "Unknown: Its overloads changed from 2 to 1."
+    },
+    {
+      "after": [
+        "ts:kit:.:fail"
+      ],
+      "before": [
+        "ts:kit:.:fail"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:fail",
+      "status": "modified",
+      "summary": "Compatible: Returns the narrower `never`."
+    },
+    {
+      "after": [
+        "ts:kit:.:format"
+      ],
+      "before": [
+        "ts:kit:.:format"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:format",
+      "status": "modified",
+      "summary": "Compatible: Parameter `value` changed from `string` to `any`, which are mutually assignable."
+    },
+    {
+      "after": [
+        "ts:kit:.:join"
+      ],
+      "before": [
+        "ts:kit:.:join"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:join",
+      "status": "modified",
+      "summary": "Breaking: Parameter `first` is now required."
+    },
+    {
+      "after": [
+        "ts:kit:.:off"
+      ],
+      "before": [
+        "ts:kit:.:off"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:off",
+      "status": "modified",
+      "summary": "Breaking: Lost an overload; calls that resolved to it may fail."
+    },
+    {
+      "after": [
+        "ts:kit:.:on"
+      ],
+      "before": [
+        "ts:kit:.:on"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:on",
+      "status": "modified",
+      "summary": "Additive: Gained an overload."
+    },
+    {
+      "after": [
+        "ts:kit:.:once"
+      ],
+      "before": [
+        "ts:kit:.:once"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:once",
+      "status": "modified",
+      "summary": "Additive: Overload 2: Parameter `a` now also accepts `number | boolean`."
+    },
+    {
+      "after": [
+        "ts:kit:.:pad"
+      ],
+      "before": [
+        "ts:kit:.:pad"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:pad",
+      "status": "modified",
+      "summary": "Compatible: Parameter `value` changed from `string | number` to `number | string`, which are mutually assignable."
+    },
+    {
+      "after": [
+        "ts:kit:.:pick"
+      ],
+      "before": [
+        "ts:kit:.:pick"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:pick",
+      "status": "modified",
+      "summary": "Breaking: Rest parameter `rest` was removed; calls passing more arguments fail."
+    },
+    {
+      "after": [
+        "ts:kit:.:sum"
+      ],
+      "before": [
+        "ts:kit:.:sum"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts:kit:.:sum",
+      "status": "modified",
+      "summary": "Breaking: Parameter `b` was removed; calls passing it fail."
+    },
+    {
+      "after": [
+        "contains:ts:kit:.:Options>ts:kit:.:Options:call"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:ts:kit:.:Options>ts:kit:.:Options:call",
+      "status": "added"
+    },
+    {
+      "after": [
+        "contains:ts:kit:.:Options>ts:kit:.:Options:index"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:ts:kit:.:Options>ts:kit:.:Options:index",
+      "status": "added"
+    },
+    {
+      "after": [
+        "contains:ts:kit:.:Options>ts:kit:.:Options:new"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:ts:kit:.:Options>ts:kit:.:Options:new",
+      "status": "added"
+    }
+  ],
+  "metadata": {
+    "compatibility": {
+      "changes": {
+        "ts:kit:.:Color": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Only the presentation of the signature changed",
+              "rule": "presentation"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Only the presentation of the signature changed"
+        },
+        "ts:kit:.:DEBUG": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Only the presentation of the signature changed",
+              "rule": "presentation"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Only the presentation of the signature changed"
+        },
+        "ts:kit:.:Handler": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Its type changed from `Callback` to `Listener`",
+              "rule": "alias"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Its type changed from `Callback` to `Listener`"
+        },
+        "ts:kit:.:Id": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Its type is equivalent",
+              "rule": "alias"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Its type is equivalent"
+        },
+        "ts:kit:.:Job:code": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Its type is equivalent",
+              "rule": "property-type"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Its type is equivalent"
+        },
+        "ts:kit:.:Job:data": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Its type changed from `Foo` to `Bar`",
+              "rule": "property-type"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Its type changed from `Foo` to `Bar`"
+        },
+        "ts:kit:.:Job:id": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Its type narrowed to `string`",
+              "rule": "property-type"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Its type narrowed to `string`"
+        },
+        "ts:kit:.:Job:kind": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its type changed from `\"a\"` to `\"a\" | \"b\"`",
+              "rule": "property-type"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its type changed from `\"a\"` to `\"a\" | \"b\"`"
+        },
+        "ts:kit:.:Job:name": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its type changed from `string` to `string | number`; it is both read and written, so it must stay the same",
+              "rule": "property-type"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its type changed from `string` to `string | number`; it is both read and written, so it must stay the same"
+        },
+        "ts:kit:.:Job:note": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Became optional; code reading it must handle `undefined`",
+              "rule": "optionality"
+            },
+            {
+              "level": "breaking",
+              "reason": "Its type changed from `string` to `number | undefined`; it is both read and written, so it must stay the same",
+              "rule": "property-type"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Became optional; code reading it must handle `undefined`; Its type changed from `string` to `number | undefined`; it is both read and written, so it must stay the same"
+        },
+        "ts:kit:.:Job:tag": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Is no longer `readonly`",
+              "rule": "readonly"
+            },
+            {
+              "level": "breaking",
+              "reason": "Its type changed from `string` to `string | number`; it is both read and written, so it must stay the same",
+              "rule": "property-type"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its type changed from `string` to `string | number`; it is both read and written, so it must stay the same"
+        },
+        "ts:kit:.:LIMIT": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Its type narrowed to `number`",
+              "rule": "type"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Its type narrowed to `number`"
+        },
+        "ts:kit:.:Options:call": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "`(input: string)` was added to `Options`; implementations must provide it",
+              "rule": "member-added"
+            }
+          ],
+          "level": "breaking",
+          "reason": "`(input: string)` was added to `Options`; implementations must provide it"
+        },
+        "ts:kit:.:Options:index": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Index signature `[key: string]` was added to `Options`; existing objects may not satisfy it",
+              "rule": "member-added"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Index signature `[key: string]` was added to `Options`; existing objects may not satisfy it"
+        },
+        "ts:kit:.:Options:new": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "`new (input: string)` was added to `Options`; implementations must provide it",
+              "rule": "member-added"
+            }
+          ],
+          "level": "breaking",
+          "reason": "`new (input: string)` was added to `Options`; implementations must provide it"
+        },
+        "ts:kit:.:VERSION": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its type changed from `\"1.0\"` to `string`",
+              "rule": "type"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its type changed from `\"1.0\"` to `string`"
+        },
+        "ts:kit:.:config": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Its type changed from `Config` to `Settings`",
+              "rule": "type"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Its type changed from `Config` to `Settings`"
+        },
+        "ts:kit:.:emit": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Its overloads changed from 2 to 1",
+              "rule": "overloads"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Its overloads changed from 2 to 1"
+        },
+        "ts:kit:.:fail": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Returns the narrower `never`",
+              "rule": "return-narrowed"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Returns the narrower `never`"
+        },
+        "ts:kit:.:format": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Parameter `value` changed from `string` to `any`, which are mutually assignable",
+              "rule": "parameter-type"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Parameter `value` changed from `string` to `any`, which are mutually assignable"
+        },
+        "ts:kit:.:join": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Parameter `first` is now required",
+              "rule": "required-parameter-added"
+            },
+            {
+              "level": "unknown",
+              "reason": "Parameter `first` changed from `string[]` to `string`",
+              "rule": "parameter-type"
+            },
+            {
+              "level": "compatible",
+              "reason": "Parameter `parts` was renamed to `first`; arguments are passed by position",
+              "rule": "parameter-renamed"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Parameter `first` is now required"
+        },
+        "ts:kit:.:off": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Lost an overload; calls that resolved to it may fail",
+              "rule": "overloads"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Lost an overload; calls that resolved to it may fail"
+        },
+        "ts:kit:.:on": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "Gained an overload",
+              "rule": "overloads"
+            }
+          ],
+          "level": "additive",
+          "reason": "Gained an overload"
+        },
+        "ts:kit:.:once": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "Overload 2: Parameter `a` now also accepts `number | boolean`",
+              "rule": "parameter-widened"
+            }
+          ],
+          "level": "additive",
+          "reason": "Overload 2: Parameter `a` now also accepts `number | boolean`"
+        },
+        "ts:kit:.:pad": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Parameter `value` changed from `string | number` to `number | string`, which are mutually assignable",
+              "rule": "parameter-type"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Parameter `value` changed from `string | number` to `number | string`, which are mutually assignable"
+        },
+        "ts:kit:.:pick": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Rest parameter `rest` was removed; calls passing more arguments fail",
+              "rule": "parameter-removed"
+            },
+            {
+              "level": "unknown",
+              "reason": "Parameter `b` changed from `string[]` to `string`",
+              "rule": "parameter-type"
+            },
+            {
+              "level": "compatible",
+              "reason": "Parameter `rest` was renamed to `b`; arguments are passed by position",
+              "rule": "parameter-renamed"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Rest parameter `rest` was removed; calls passing more arguments fail"
+        },
+        "ts:kit:.:sum": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Parameter `b` was removed; calls passing it fail",
+              "rule": "parameter-removed"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Parameter `b` was removed; calls passing it fail"
+        }
+      },
+      "counts": {
+        "additive": 2,
+        "breaking": 12,
+        "compatible": 9,
+        "unknown": 4
+      },
+      "ecosystem": "typescript",
+      "notices": [],
+      "rules": "TypeScript assignability over the checker's types",
+      "version": 0
+    }
+  },
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "ts:kit:.:Color",
+        "ts:kit:.:DEBUG",
+        "ts:kit:.:Handler",
+        "ts:kit:.:Id",
+        "ts:kit:.:Job:code",
+        "ts:kit:.:Job:data",
+        "ts:kit:.:Job:id",
+        "ts:kit:.:Job:kind",
+        "ts:kit:.:Job:name",
+        "ts:kit:.:Job:note",
+        "ts:kit:.:Job:tag",
+        "ts:kit:.:LIMIT",
+        "ts:kit:.:VERSION",
+        "ts:kit:.:config",
+        "ts:kit:.:emit",
+        "ts:kit:.:fail",
+        "ts:kit:.:format",
+        "ts:kit:.:join",
+        "ts:kit:.:off",
+        "ts:kit:.:on",
+        "ts:kit:.:once",
+        "ts:kit:.:pad",
+        "ts:kit:.:pick",
+        "ts:kit:.:sum"
+      ],
+      "kind": "restructure"
+    },
+    {
+      "changes": [
+        "ts:kit:.:Options:call",
+        "ts:kit:.:Options:index",
+        "ts:kit:.:Options:new",
+        "contains:ts:kit:.:Options>ts:kit:.:Options:call",
+        "contains:ts:kit:.:Options>ts:kit:.:Options:index",
+        "contains:ts:kit:.:Options>ts:kit:.:Options:new"
+      ],
+      "kind": "add"
+    }
+  ]
+}

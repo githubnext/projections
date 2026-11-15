@@ -1,0 +1,492 @@
+/*
+ * Fills the frame (the kit's `useFrameFill`) and centres the schema, fitted to the stage; a zoomed schema scrolls.
+ * `.database-zoom` takes the schema's drawn (scaled) size and `.database-content` is the schema at its own size.
+ */
+.database-view {
+  /* Content starts at the top of the frame: the host owns the header. */
+  padding: var(--projections-space-2) var(--projections-stage-inset, var(--projections-space-5));
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+.database-zoom {
+  margin: auto;
+  flex: none;
+}
+.database-content {
+  transform-origin: 0 0;
+}
+/*
+ * Geometry here must match src/text.ts (`textMetrics`, `defaultChrome`): 38px one-line headers, rows of 16px lines with
+ * 8px padding. Every name, type, key and value is data, shown whole: the layout measures it in these fonts, sizes cards
+ * to fit it on one line where the frame has room, and otherwise wraps it at its <wbr> break points and grows the row.
+ */
+.database-canvas {
+  position: relative;
+  margin: 0 auto;
+}
+.database-links {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.database-link {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* The kit's arrowhead, drawn over its shaft; never a pointer target of its own. */
+.database-arrowhead {
+  pointer-events: none;
+}
+/* Links are selectable: a wide transparent stroke is the pointer and focus target. */
+.database-link-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: var(--projections-space-3);
+  pointer-events: stroke;
+  cursor: pointer;
+}
+.database-link-hit:focus {
+  outline: none;
+}
+/* A table is a raised card on the stage, edged with the divider; its name is a header band. */
+.database-view {
+  background: var(--stage);
+}
+/*
+ * The card's edge is its own outline, inside its box; the SDK's ring restyles that outline. The card is a stacking
+ * context and its positioned rows sit at z-index -1 in it, above its background and under its outline: browsers paint
+ * an outline under positioned descendants at z-index auto.
+ */
+.database-table {
+  position: absolute;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--raised);
+  border-radius: var(--projections-radius);
+  outline: var(--projections-border-width) solid var(--divider);
+  outline-offset: calc(-1 * var(--projections-border-width));
+}
+/* In normal flow at the card's top: a positioned header would paint over the card's ring (browsers paint outlines
+   under positioned descendants). */
+:is(.database-table, .database-measure-card) header {
+  position: static;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--projections-space-3);
+  padding: 0 var(--projections-space-3);
+  line-height: 18px;
+  background: var(--band);
+  box-shadow: inset 0 calc(-1 * var(--projections-border-width)) 0 var(--divider);
+}
+.database-table header + .database-column {
+  border-top-color: transparent;
+}
+.database-table header .entity-link {
+  flex: none;
+  min-height: 0;
+  line-height: 18px;
+  overflow-wrap: anywhere;
+}
+/* Too narrow for the name beside its kind and status: the name takes the first lines, the kind and status the last. */
+.database-table header.wrapped {
+  flex-wrap: wrap;
+  align-content: center;
+  row-gap: 0;
+  padding-block: 8px;
+}
+.database-table header.wrapped .entity-link {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+/* A view's card is dashed and labeled, so it isn't mistaken for a stored table. */
+.database-view-card {
+  outline-style: dashed;
+}
+.database-kind {
+  margin-right: auto;
+  font-size: var(--projections-font-size-xs);
+  color: var(--muted);
+}
+:is(.database-column, .database-measure-row) {
+  --key-width: calc(var(--projections-font-size-xs) * 1.75);
+  position: absolute;
+  /* Under the card's own paint, where its ring is: rows reach the card's sides (see .database-table). */
+  z-index: -1;
+  left: 0;
+  right: 0;
+  height: 32px;
+  display: flex;
+  align-items: flex-start;
+  padding: 8px var(--projections-space-3) 8px var(--projections-space-2);
+  line-height: 16px;
+  gap: var(--projections-space-2);
+  border-top: var(--projections-border-width) solid var(--border);
+}
+.database-key {
+  flex: 0 0 var(--key-width);
+  font-family: var(--font-mono);
+  font-size: var(--projections-font-size-xs);
+  font-weight: var(--projections-font-weight-semibold);
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+/*
+ * Keys and indexes are rows of their table, under its columns and ruled off from them: a kind marker (UK, IX, a
+ * composite PK…), the columns they cover, and their own name when they have one. A single-column primary key or foreign
+ * key is its column's marker instead, selectable as the constraint it stands for.
+ */
+.database-keyrow.first {
+  border-top-color: var(--divider);
+}
+.database-column .database-key,
+.database-column .database-glyph {
+  height: 16px;
+  line-height: 16px;
+}
+/*
+ * A row's text: a column's name and type, a key's columns and name, an enum value. On one line when the card has
+ * room; otherwise each part wraps at its break points and the second goes under the first, right-aligned.
+ */
+.database-rowtext {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--projections-space-2);
+}
+.database-rowtext > * {
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 0;
+  line-height: 16px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.database-rowtext > :nth-child(2) {
+  margin-left: auto;
+  text-align: right;
+}
+:is(.database-keyrow, .database-measure-row.key) .database-rowtext {
+  font-size: var(--projections-font-size-xs);
+}
+:is(.database-keyrow, .database-measure-row.key) .database-rowtext .entity-link {
+  font-size: inherit;
+  font-weight: var(--projections-font-weight-normal);
+}
+.database-marker {
+  align-self: flex-start;
+  border-radius: var(--projections-radius-sm);
+  cursor: pointer;
+}
+.database-marker.selected {
+  color: var(--text);
+  background: var(--accent-soft);
+}
+/* A marker whose constraint changes takes the change's color while emphasized; the row's status cell names it. */
+.database-key[data-change='added'] {
+  color: color-mix(in srgb, var(--green) calc(var(--emphasis) * 100%), var(--muted));
+}
+.database-key[data-change='removed'] {
+  color: color-mix(in srgb, var(--red) calc(var(--emphasis) * 100%), var(--muted));
+}
+.database-key[data-change='modified'] {
+  color: color-mix(in srgb, var(--amber) calc(var(--emphasis) * 100%), var(--muted));
+}
+.database-key[data-change='renamed'] {
+  color: color-mix(in srgb, var(--violet) calc(var(--emphasis) * 100%), var(--muted));
+}
+/* An enum is a card of its values. */
+:is(.database-value, .database-measure-row.value) .database-rowtext code.database-value-name {
+  text-align: left;
+  color: var(--text);
+  font-size: var(--projections-font-size-xs);
+}
+:is(.database-column, .database-measure-row.column) .database-rowtext .entity-link {
+  font-weight: var(--projections-font-weight-medium);
+}
+:is(.database-column, .database-measure-row.column) .database-rowtext code {
+  font-size: var(--projections-font-size-xs);
+  color: var(--muted);
+}
+.database-row .badge {
+  flex: none;
+}
+/*
+ * Change status sits in a fixed-width cell at the end of each header and row, reserved at all times, so names and
+ * types never reflow: the word in a header, the icon alone (the word for assistive technology) in a column row.
+ */
+.database-status {
+  /* Room for this card's own status words (layout.ts measures them); a card the comparison doesn't change reserves none. */
+  --pk-status-width: var(--database-status-width, 10ch);
+  margin-left: auto;
+  justify-content: flex-end;
+}
+.database-status.empty {
+  display: none;
+}
+/* A reserved cell with no status shown keeps its width but has no height, so it paints nothing at either endpoint. */
+.database-status:empty {
+  min-height: 0;
+  height: 0;
+}
+/* The status words' font, as the kit's .pk-status-part draws them, for measuring. */
+.database-measure-status {
+  font-size: var(--projections-font-size-xs);
+  font-weight: var(--projections-font-weight-semibold);
+  column-gap: var(--projections-space-2);
+}
+.database-status .pk-status-text {
+  justify-content: flex-end;
+}
+:is(.database-glyph, .database-measure-glyph) {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2ch;
+  font-family: var(--font-mono);
+  font-size: var(--projections-font-size-xs);
+  line-height: 1;
+}
+.database-glyph .pk-status-text {
+  gap: 0;
+}
+.database-row {
+  cursor: pointer;
+}
+/*
+ * A table card is one item: the SDK rings the whole card, header included, over its own edge. A column is a part:
+ * hovering it tints it quietly; selecting it tints it with an accent bar.
+ */
+.database-row .entity-link:hover {
+  text-decoration: none;
+}
+.database-column:hover {
+  background: var(--hover);
+}
+.database-column.selected {
+  background: var(--accent-soft);
+  box-shadow: inset var(--projections-border-width-thick) 0 0 var(--accent);
+}
+.database-empty {
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  padding: var(--projections-space-2) var(--projections-space-3);
+  color: var(--muted);
+  font-size: var(--projections-font-size-xs);
+  border-top: var(--projections-border-width) solid var(--border);
+}
+
+.database-tags {
+  position: relative;
+  margin-top: var(--projections-space-5);
+  /* The gaps balancedWrap places slots with (read from here, so they stay tokens). */
+  column-gap: var(--projections-space-2);
+  row-gap: var(--projections-space-2);
+}
+/* Natural slot sizes, measured once: unconstrained, unwrapped and invisible, never widening the page. */
+.database-tags-measure {
+  position: absolute;
+  inset: 0 auto auto 0;
+  display: flex;
+  align-items: flex-start;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+.database-tags-measure .database-tag-slot {
+  position: static;
+  flex: none;
+}
+/*
+ * A slot is the pill with its status tab's room reserved below it (kit `StatusTab`, drawn inside the pill and hanging
+ * off its bottom edge), at a fixed place for the whole comparison.
+ */
+.database-tag-slot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding-bottom: calc(var(--pk-tab-height) - var(--projections-border-width));
+}
+/* The pill: one line, the same height and padding on every tag; status hangs off it as a tab. */
+.database-tag {
+  --tag-pad: var(--projections-space-3);
+  /* Positions the status tab hanging off the pill. */
+  position: relative;
+  box-sizing: border-box;
+  display: block;
+  min-width: 0;
+  padding: var(--projections-space-1) var(--tag-pad);
+  border: var(--projections-border-width) solid var(--divider);
+  border-radius: var(--projections-radius);
+  background: var(--raised);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--projections-font-size-xs);
+  text-align: left;
+  white-space: normal;
+  cursor: pointer;
+}
+.database-tag-name {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+.database-tag-slot .database-tag {
+  width: 100%;
+}
+.database-tags > .database-tag-slot {
+  max-width: 100%;
+}
+/* Change tints follow the host's highlighting through --emphasis, so they are gone at both endpoints. */
+.database-tag.added {
+  border-color: color-mix(in srgb, var(--green-border) calc(var(--emphasis) * 100%), var(--divider));
+  background: color-mix(in srgb, var(--green-soft) calc(var(--emphasis) * 100%), var(--raised));
+}
+.database-tag.removed {
+  border-color: color-mix(in srgb, var(--red-border) calc(var(--emphasis) * 100%), var(--divider));
+  background: color-mix(in srgb, var(--red-soft) calc(var(--emphasis) * 100%), var(--raised));
+}
+.database-tag.modified {
+  border-color: color-mix(in srgb, var(--amber-border) calc(var(--emphasis) * 100%), var(--divider));
+  background: color-mix(in srgb, var(--amber-soft) calc(var(--emphasis) * 100%), var(--raised));
+}
+.database-tag.renamed {
+  border-color: color-mix(in srgb, var(--violet-border) calc(var(--emphasis) * 100%), var(--divider));
+  background: color-mix(in srgb, var(--violet-soft) calc(var(--emphasis) * 100%), var(--raised));
+}
+.database-tag-label {
+  display: inline-grid;
+  min-width: 0;
+}
+.database-tag-label > span {
+  grid-area: 1 / 1;
+}
+
+/* A line of data as the layout broke it (measure.tsx): whole, breaking only between lines. */
+.database-line {
+  white-space: nowrap;
+}
+/* The hidden copy of a header and rows the layout measures fonts and widths from (measure.tsx). */
+.database-measure {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 400px;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+.database-measure .database-measure-card,
+.database-measure header,
+.database-measure .database-measure-row {
+  position: static;
+}
+
+/*
+ * Diff mode: the union of both revisions, laid out once, with the summary line above it. Changed cards are edged in
+ * their change's hue (dashed when removed); a wholly added or removed card is tinted, its rows marked by glyph only.
+ * Changed rows of a card in both revisions are the kit's change regions. Every tint follows --emphasis, so with
+ * highlighting off the diff draws plain.
+ */
+.database-view[data-diff] .database-zoom {
+  margin: 0 auto auto;
+}
+.pk .database-view[data-diff] .database-table[data-change] {
+  outline: var(--stroke-strong) solid color-mix(in srgb, var(--pk-region-edge) calc(var(--emphasis) * 100%), var(--divider));
+  outline-offset: calc(-1 * var(--stroke-strong));
+}
+.pk .database-view[data-diff] .database-table:is([data-change='added'], [data-change='removed']) {
+  background: color-mix(in srgb, var(--pk-region-fill) calc(var(--emphasis) * 100%), var(--raised));
+}
+.pk .database-view[data-diff] .database-table[data-change] > header {
+  background: color-mix(in srgb, var(--pk-region-fill) calc(var(--emphasis) * 100%), var(--band));
+}
+.pk .database-view[data-diff] .database-table[data-change='removed'] {
+  outline: var(--stroke-strong) dashed color-mix(in srgb, var(--pk-region-edge) calc(var(--emphasis) * 100%), var(--divider));
+  outline-offset: calc(-1 * var(--stroke-strong));
+}
+/* Selection stays visible on a changed row: the accent tint and bar, inside the change edge. */
+.pk .database-column.pk-region[data-change].selected {
+  background-color: var(--accent-soft);
+  box-shadow:
+    inset var(--projections-border-width-thick) 0 0 var(--accent),
+    inset 0 0 0 var(--stroke) var(--pk-region-edge-color);
+}
+/*
+ * A changed row with change lines spans a row slot per line: its own line, then each change. The layout sizes each
+ * slot for its text (text.ts) and the row's grid takes those heights (grid-template-rows, set inline).
+ */
+.database-column.database-spanning {
+  display: grid;
+  align-items: stretch;
+  row-gap: 0;
+  padding: 0;
+}
+.database-slot {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--projections-space-2);
+  min-width: 0;
+  padding: 8px var(--projections-space-3) 8px var(--projections-space-2);
+  line-height: 16px;
+}
+/*
+ * A change line starts under the key marker, so its old and new values keep as much of the row as they can. Its pills
+ * are a line plus their border, so it pads a pixel less to keep a one-line slot a row tall (text.ts counts the border).
+ */
+.database-change-line {
+  padding-block: 7px;
+  font-size: var(--projections-font-size-xs);
+  color: var(--muted);
+}
+.database-change-word {
+  flex: none;
+  white-space: nowrap;
+}
+.pk .database-change-values.pk-value-change {
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
+}
+.pk .database-change-values .pk-value-arrow {
+  flex: none;
+}
+.pk .database-change-values .pk-change-pill {
+  display: block;
+  flex: 0 1 auto;
+  min-width: 0;
+  line-height: 16px;
+}
+/* Too narrow for the word and both values on one line: the word, then each value under it, each wrapping whole. */
+.database-change-line.wrapped {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+.pk .database-change-line.wrapped .database-change-values.pk-value-change {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+.pk header .database-change-values.pk-value-change {
+  justify-content: flex-start;
+}

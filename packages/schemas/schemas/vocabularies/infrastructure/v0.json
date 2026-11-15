@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/vocabularies/infrastructure/v0.json",
+  "title": "Projections vocabulary infrastructure/v0",
+  "description": "Infrastructure as code and deployment plans: resources, data sources, modules and resource groups, with planned actions. Defined in docs/models/infrastructure-model.md.",
+  "allOf": [
+    {"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"},
+    {
+      "type": "object",
+      "required": ["vocabularies"],
+      "properties": {"vocabularies": {"contains": {"const": "infrastructure/v0"}}}
+    },
+    {"$ref": "#/$defs/refinement"}
+  ],
+  "$defs": {
+    "refinement": {
+      "description": "What `infrastructure/v0` adds to an extraction that declares it.",
+      "type": "object",
+      "properties": {
+        "schema": {"enum": ["architecture/v0"]},
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "type": {"description": "The ecosystem's resource type.", "type": "string"},
+                  "provider": {
+                    "description": "Terraform's provider source address, or ARM's resource provider namespace.",
+                    "type": "string"
+                  },
+                  "action": {
+                    "description": "The planned action: `create`, `update`, `replace`, `delete`, `read`, `import`, `forget` or `deploy`; absent when nothing happens.",
+                    "type": "string"
+                  },
+                  "replaceOrder": {
+                    "description": "`destroy-before-create` or `create-before-destroy`.",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

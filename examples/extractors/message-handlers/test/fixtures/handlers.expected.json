@@ -1,0 +1,93 @@
+{
+ "entities": [
+  {
+   "id": "messages:event:messages:created",
+   "kind": "event",
+   "label": "created",
+   "data": {},
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:event:messages:deleted",
+   "kind": "event",
+   "label": "deleted",
+   "data": {},
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:event:messages:updated",
+   "kind": "event",
+   "label": "updated",
+   "data": {},
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:handler:%40example%2Fapp:Worker.run:named",
+   "kind": "handler",
+   "label": "Worker.run",
+   "data": {
+    "package": "@example/app"
+   },
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:handler:%40example%2Fapp:receive:named",
+   "kind": "handler",
+   "label": "receive",
+   "data": {
+    "package": "@example/app"
+   },
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:package:%40example%2Fapp",
+   "kind": "package",
+   "label": "@example/app",
+   "data": {},
+   "confidence": "derived"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "messages:consumes:messages%3Ahandler%3A%2540example%252Fapp%3AWorker.run%3Anamed:messages%3Aevent%3Amessages%3Aupdated",
+   "kind": "consumes",
+   "from": "messages:handler:%40example%2Fapp:Worker.run:named",
+   "to": "messages:event:messages:updated",
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:consumes:messages%3Ahandler%3A%2540example%252Fapp%3Areceive%3Anamed:messages%3Aevent%3Amessages%3Acreated",
+   "kind": "consumes",
+   "from": "messages:handler:%40example%2Fapp:receive:named",
+   "to": "messages:event:messages:created",
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:consumes:messages%3Ahandler%3A%2540example%252Fapp%3Areceive%3Anamed:messages%3Aevent%3Amessages%3Adeleted",
+   "kind": "consumes",
+   "from": "messages:handler:%40example%2Fapp:receive:named",
+   "to": "messages:event:messages:deleted",
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:registers:messages%3Apackage%3A%2540example%252Fapp:messages%3Ahandler%3A%2540example%252Fapp%3AWorker.run%3Anamed",
+   "kind": "registers",
+   "from": "messages:package:%40example%2Fapp",
+   "to": "messages:handler:%40example%2Fapp:Worker.run:named",
+   "confidence": "derived"
+  },
+  {
+   "id": "messages:registers:messages%3Apackage%3A%2540example%252Fapp:messages%3Ahandler%3A%2540example%252Fapp%3Areceive%3Anamed",
+   "kind": "registers",
+   "from": "messages:package:%40example%2Fapp",
+   "to": "messages:handler:%40example%2Fapp:receive:named",
+   "confidence": "derived"
+  }
+ ],
+ "metadata": {
+  "analysis": "Static TypeScript symbol resolution with explicit domain conventions",
+  "limitations": [
+   "Dynamic registrations and runtime control flow are not evaluated."
+  ]
+ }
+}

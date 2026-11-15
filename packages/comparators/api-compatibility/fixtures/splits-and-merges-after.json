@@ -1,0 +1,11 @@
+{
+  "protocolVersion": 0,
+  "schema": "api/v0",
+  "metadata": {"ecosystem":"typescript"},
+  "entities": [
+    {"id":"ts:kit:.:Reader","kind":"export","label":"Reader","previousIds":["ts:kit:.:Client"],"data":{"signature":"class Reader","contract":{"declaration":"class","term":"class","visibility":"public"}}},
+    {"id":"ts:kit:.:Writer","kind":"export","label":"Writer","previousIds":["ts:kit:.:Client"],"data":{"signature":"class Writer","contract":{"declaration":"class","term":"class","visibility":"public"}}},
+    {"id":"ts:kit:.:send","kind":"export","label":"send","previousIds":["ts:kit:.:get","ts:kit:.:put"],"data":{"signature":"function send(): void","contract":{"declaration":"function","term":"function","visibility":"public"}}}
+  ],
+  "relationships": []
+}

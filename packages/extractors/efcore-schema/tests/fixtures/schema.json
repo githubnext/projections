@@ -1,0 +1,9 @@
+{
+  "protocolVersion": 0,
+  "schema": "database/v0",
+  "entities": [
+    { "id": "table:customers", "kind": "table", "label": "customers" },
+    { "id": "column:customers:name", "kind": "column", "label": "name", "data": { "type": "TEXT", "nullable": false, "maxLength": 100 } }
+  ],
+  "relationships": [{ "id": "contains:customers:name", "kind": "contains", "from": "table:customers", "to": "column:customers:name" }]
+}

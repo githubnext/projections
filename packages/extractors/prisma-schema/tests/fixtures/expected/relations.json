@@ -1,0 +1,1184 @@
+{
+ "entities": [
+  {
+   "id": "enum:Status",
+   "kind": "enum",
+   "label": "Status",
+   "data": {
+    "values": [
+     "ACTIVE",
+     "inactive"
+    ]
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "table:/users",
+   "kind": "table",
+   "label": "users",
+   "data": {
+    "namespace": null,
+    "provider": "postgresql"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:/users",
+    "type": "String",
+    "nativeType": [
+     "Uuid",
+     []
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "uuid",
+     "args": [
+      4
+     ]
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/created_at",
+   "kind": "column",
+   "label": "created_at",
+   "data": {
+    "table": "table:/users",
+    "type": "DateTime",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "now",
+     "args": []
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/updatedAt",
+   "kind": "column",
+   "label": "updatedAt",
+   "data": {
+    "table": "table:/users",
+    "type": "DateTime",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": true
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/managerId",
+   "kind": "column",
+   "label": "managerId",
+   "data": {
+    "table": "table:/users",
+    "type": "String",
+    "nativeType": [
+     "Uuid",
+     []
+    ],
+    "nullable": true,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/score",
+   "kind": "column",
+   "label": "score",
+   "data": {
+    "table": "table:/users",
+    "type": "Float",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": 1.5,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/big",
+   "kind": "column",
+   "label": "big",
+   "data": {
+    "table": "table:/users",
+    "type": "BigInt",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": "10",
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/tags",
+   "kind": "column",
+   "label": "tags",
+   "data": {
+    "table": "table:/users",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": true,
+    "hasDefault": true,
+    "default": [
+     "a",
+     "b"
+    ],
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/active",
+   "kind": "column",
+   "label": "active",
+   "data": {
+    "table": "table:/users",
+    "type": "Boolean",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": true,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/data",
+   "kind": "column",
+   "label": "data",
+   "data": {
+    "table": "table:/users",
+    "type": "Json",
+    "nativeType": null,
+    "nullable": true,
+    "list": false,
+    "hasDefault": true,
+    "default": "{}",
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/bytes",
+   "kind": "column",
+   "label": "bytes",
+   "data": {
+    "table": "table:/users",
+    "type": "Bytes",
+    "nativeType": null,
+    "nullable": true,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/money",
+   "kind": "column",
+   "label": "money",
+   "data": {
+    "table": "table:/users",
+    "type": "Decimal",
+    "nativeType": [
+     "Decimal",
+     [
+      "10",
+      "2"
+     ]
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": 0.5,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/status",
+   "kind": "column",
+   "label": "status",
+   "data": {
+    "table": "table:/users",
+    "type": "enum:Status",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": "ACTIVE",
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/statuses",
+   "kind": "column",
+   "label": "statuses",
+   "data": {
+    "table": "table:/users",
+    "type": "enum:Status",
+    "nativeType": null,
+    "nullable": false,
+    "list": true,
+    "hasDefault": true,
+    "default": [
+     "ACTIVE",
+     "inactive"
+    ],
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/dbgen",
+   "kind": "column",
+   "label": "dbgen",
+   "data": {
+    "table": "table:/users",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "dbgenerated",
+     "args": [
+      "gen_random_uuid()"
+     ]
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/cuid",
+   "kind": "column",
+   "label": "cuid",
+   "data": {
+    "table": "table:/users",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "cuid",
+     "args": [
+      1
+     ]
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/cuid2",
+   "kind": "column",
+   "label": "cuid2",
+   "data": {
+    "table": "table:/users",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "cuid",
+     "args": [
+      2
+     ]
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/nano",
+   "kind": "column",
+   "label": "nano",
+   "data": {
+    "table": "table:/users",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "nanoid",
+     "args": [
+      10
+     ]
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/ulid",
+   "kind": "column",
+   "label": "ulid",
+   "data": {
+    "table": "table:/users",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "ulid",
+     "args": []
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/uuid7",
+   "kind": "column",
+   "label": "uuid7",
+   "data": {
+    "table": "table:/users",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "uuid",
+     "args": [
+      7
+     ]
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "table:/Profile",
+   "kind": "table",
+   "label": "Profile",
+   "data": {
+    "namespace": null,
+    "provider": "postgresql"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FProfile/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:/Profile",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "autoincrement",
+     "args": []
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FProfile/userId",
+   "kind": "column",
+   "label": "userId",
+   "data": {
+    "table": "table:/Profile",
+    "type": "String",
+    "nativeType": [
+     "Uuid",
+     []
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FProfile/bio",
+   "kind": "column",
+   "label": "bio",
+   "data": {
+    "table": "table:/Profile",
+    "type": "String",
+    "nativeType": [
+     "Text",
+     []
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "table:/Post",
+   "kind": "table",
+   "label": "Post",
+   "data": {
+    "namespace": null,
+    "provider": "postgresql"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FPost/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:/Post",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "autoincrement",
+     "args": []
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FPost/authorId",
+   "kind": "column",
+   "label": "authorId",
+   "data": {
+    "table": "table:/Post",
+    "type": "String",
+    "nativeType": [
+     "Uuid",
+     []
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "table:/Category",
+   "kind": "table",
+   "label": "Category",
+   "data": {
+    "namespace": null,
+    "provider": "postgresql"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FCategory/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:/Category",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FCategory/name",
+   "kind": "column",
+   "label": "name",
+   "data": {
+    "table": "table:/Category",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2Fusers/primary-key/%5B%22id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (id)",
+   "data": {
+    "table": "table:/users",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2Fusers/index/%5B%22created_at%22%5D",
+   "kind": "constraint",
+   "label": "index (created_at)",
+   "data": {
+    "table": "table:/users",
+    "type": "index",
+    "indexType": "normal",
+    "fields": [
+     {
+      "name": "created_at",
+      "sortOrder": "desc"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2Fusers/unique/%5B%22score%22%2C%22big%22%5D",
+   "kind": "constraint",
+   "label": "unique (score, big)",
+   "data": {
+    "table": "table:/users",
+    "type": "unique",
+    "fields": [
+     {
+      "name": "score"
+     },
+     {
+      "name": "big"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FProfile/primary-key/%5B%22id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (id)",
+   "data": {
+    "table": "table:/Profile",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FProfile/unique/%5B%22userId%22%5D",
+   "kind": "constraint",
+   "label": "unique (userId)",
+   "data": {
+    "table": "table:/Profile",
+    "type": "unique",
+    "fields": [
+     {
+      "name": "userId"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FPost/primary-key/%5B%22id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (id)",
+   "data": {
+    "table": "table:/Post",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FPost/index/posts_author_idx",
+   "kind": "constraint",
+   "label": "posts_author_idx",
+   "data": {
+    "table": "table:/Post",
+    "type": "index",
+    "indexType": "normal",
+    "fields": [
+     {
+      "name": "authorId"
+     }
+    ],
+    "databaseName": "posts_author_idx"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FPost/index/legacy_name",
+   "kind": "constraint",
+   "label": "legacy_name",
+   "data": {
+    "table": "table:/Post",
+    "type": "index",
+    "indexType": "normal",
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": "legacy_name"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FCategory/primary-key/%5B%22id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (id)",
+   "data": {
+    "table": "table:/Category",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2Fusers/foreign-key/%5B%22managerId%22%5D/table%3A%2Fusers",
+   "kind": "constraint",
+   "label": "foreign-key (managerId)",
+   "data": {
+    "table": "table:/users",
+    "type": "foreign-key",
+    "columns": [
+     "managerId"
+    ],
+    "target": "table:/users",
+    "references": [
+     "id"
+    ],
+    "onDelete": "SetNull",
+    "onUpdate": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FProfile/foreign-key/%5B%22userId%22%5D/table%3A%2Fusers",
+   "kind": "constraint",
+   "label": "foreign-key (userId)",
+   "data": {
+    "table": "table:/Profile",
+    "type": "foreign-key",
+    "columns": [
+     "userId"
+    ],
+    "target": "table:/users",
+    "references": [
+     "id"
+    ],
+    "onDelete": null,
+    "onUpdate": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FPost/foreign-key/%5B%22authorId%22%5D/table%3A%2Fusers",
+   "kind": "constraint",
+   "label": "foreign-key (authorId)",
+   "data": {
+    "table": "table:/Post",
+    "type": "foreign-key",
+    "columns": [
+     "authorId"
+    ],
+    "target": "table:/users",
+    "references": [
+     "id"
+    ],
+    "onDelete": null,
+    "onUpdate": null
+   },
+   "confidence": "authoritative"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fid/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fcreated_at/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/created_at",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2FupdatedAt/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/updatedAt",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2FmanagerId/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/managerId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fscore/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/score",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fbig/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/big",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Ftags/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/tags",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Factive/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/active",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fdata/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/data",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fbytes/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/bytes",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fmoney/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/money",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fstatus/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/status",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "enum-type:column%3Atable%253A%252Fusers%2Fstatus/enum%3AStatus/",
+   "kind": "enum-type",
+   "from": "column:table%3A%2Fusers/status",
+   "to": "enum:Status",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fstatuses/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/statuses",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "enum-type:column%3Atable%253A%252Fusers%2Fstatuses/enum%3AStatus/",
+   "kind": "enum-type",
+   "from": "column:table%3A%2Fusers/statuses",
+   "to": "enum:Status",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fdbgen/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/dbgen",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fcuid/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/cuid",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fcuid2/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/cuid2",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fnano/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/nano",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fulid/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/ulid",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fuuid7/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/uuid7",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FProfile/column%3Atable%253A%252FProfile%2Fid/",
+   "kind": "contains",
+   "from": "table:/Profile",
+   "to": "column:table%3A%2FProfile/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FProfile/column%3Atable%253A%252FProfile%2FuserId/",
+   "kind": "contains",
+   "from": "table:/Profile",
+   "to": "column:table%3A%2FProfile/userId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FProfile/column%3Atable%253A%252FProfile%2Fbio/",
+   "kind": "contains",
+   "from": "table:/Profile",
+   "to": "column:table%3A%2FProfile/bio",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FPost/column%3Atable%253A%252FPost%2Fid/",
+   "kind": "contains",
+   "from": "table:/Post",
+   "to": "column:table%3A%2FPost/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FPost/column%3Atable%253A%252FPost%2FauthorId/",
+   "kind": "contains",
+   "from": "table:/Post",
+   "to": "column:table%3A%2FPost/authorId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FCategory/column%3Atable%253A%252FCategory%2Fid/",
+   "kind": "contains",
+   "from": "table:/Category",
+   "to": "column:table%3A%2FCategory/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FCategory/column%3Atable%253A%252FCategory%2Fname/",
+   "kind": "contains",
+   "from": "table:/Category",
+   "to": "column:table%3A%2FCategory/name",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/constraint%3Atable%253A%252Fusers%2Fprimary-key%2F%255B%2522id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "constraint:table%3A%2Fusers/primary-key/%5B%22id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252Fusers%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252Fusers%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2Fusers/primary-key/%5B%22id%22%5D",
+   "to": "column:table%3A%2Fusers/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/constraint%3Atable%253A%252Fusers%2Findex%2F%255B%2522created_at%2522%255D/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "constraint:table%3A%2Fusers/index/%5B%22created_at%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252Fusers%2Findex%2F%255B%2522created_at%2522%255D/column%3Atable%253A%252Fusers%2Fcreated_at/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2Fusers/index/%5B%22created_at%22%5D",
+   "to": "column:table%3A%2Fusers/created_at",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/constraint%3Atable%253A%252Fusers%2Funique%2F%255B%2522score%2522%252C%2522big%2522%255D/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "constraint:table%3A%2Fusers/unique/%5B%22score%22%2C%22big%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252Fusers%2Funique%2F%255B%2522score%2522%252C%2522big%2522%255D/column%3Atable%253A%252Fusers%2Fscore/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2Fusers/unique/%5B%22score%22%2C%22big%22%5D",
+   "to": "column:table%3A%2Fusers/score",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252Fusers%2Funique%2F%255B%2522score%2522%252C%2522big%2522%255D/column%3Atable%253A%252Fusers%2Fbig/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2Fusers/unique/%5B%22score%22%2C%22big%22%5D",
+   "to": "column:table%3A%2Fusers/big",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FProfile/constraint%3Atable%253A%252FProfile%2Fprimary-key%2F%255B%2522id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Profile",
+   "to": "constraint:table%3A%2FProfile/primary-key/%5B%22id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FProfile%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FProfile%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FProfile/primary-key/%5B%22id%22%5D",
+   "to": "column:table%3A%2FProfile/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FProfile/constraint%3Atable%253A%252FProfile%2Funique%2F%255B%2522userId%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Profile",
+   "to": "constraint:table%3A%2FProfile/unique/%5B%22userId%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FProfile%2Funique%2F%255B%2522userId%2522%255D/column%3Atable%253A%252FProfile%2FuserId/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FProfile/unique/%5B%22userId%22%5D",
+   "to": "column:table%3A%2FProfile/userId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FPost/constraint%3Atable%253A%252FPost%2Fprimary-key%2F%255B%2522id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Post",
+   "to": "constraint:table%3A%2FPost/primary-key/%5B%22id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FPost%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FPost%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FPost/primary-key/%5B%22id%22%5D",
+   "to": "column:table%3A%2FPost/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FPost/constraint%3Atable%253A%252FPost%2Findex%2Fposts_author_idx/",
+   "kind": "contains",
+   "from": "table:/Post",
+   "to": "constraint:table%3A%2FPost/index/posts_author_idx",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FPost%2Findex%2Fposts_author_idx/column%3Atable%253A%252FPost%2FauthorId/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FPost/index/posts_author_idx",
+   "to": "column:table%3A%2FPost/authorId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FPost/constraint%3Atable%253A%252FPost%2Findex%2Flegacy_name/",
+   "kind": "contains",
+   "from": "table:/Post",
+   "to": "constraint:table%3A%2FPost/index/legacy_name",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FPost%2Findex%2Flegacy_name/column%3Atable%253A%252FPost%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FPost/index/legacy_name",
+   "to": "column:table%3A%2FPost/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FCategory/constraint%3Atable%253A%252FCategory%2Fprimary-key%2F%255B%2522id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Category",
+   "to": "constraint:table%3A%2FCategory/primary-key/%5B%22id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FCategory%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FCategory%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FCategory/primary-key/%5B%22id%22%5D",
+   "to": "column:table%3A%2FCategory/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/constraint%3Atable%253A%252Fusers%2Fforeign-key%2F%255B%2522managerId%2522%255D%2Ftable%253A%252Fusers/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "constraint:table%3A%2Fusers/foreign-key/%5B%22managerId%22%5D/table%3A%2Fusers",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "references:constraint%3Atable%253A%252Fusers%2Fforeign-key%2F%255B%2522managerId%2522%255D%2Ftable%253A%252Fusers/table%3A%2Fusers/",
+   "kind": "references",
+   "from": "constraint:table%3A%2Fusers/foreign-key/%5B%22managerId%22%5D/table%3A%2Fusers",
+   "to": "table:/users",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252Fusers%2Fforeign-key%2F%255B%2522managerId%2522%255D%2Ftable%253A%252Fusers/column%3Atable%253A%252Fusers%2FmanagerId/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2Fusers/foreign-key/%5B%22managerId%22%5D/table%3A%2Fusers",
+   "to": "column:table%3A%2Fusers/managerId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "foreign-key:column%3Atable%253A%252Fusers%2FmanagerId/column%3Atable%253A%252Fusers%2Fid/constraint%3Atable%253A%252Fusers%2Fforeign-key%2F%255B%2522managerId%2522%255D%2Ftable%253A%252Fusers",
+   "kind": "foreign-key",
+   "from": "column:table%3A%2Fusers/managerId",
+   "to": "column:table%3A%2Fusers/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "many-to-many:table%3A%2Fusers/table%3A%2Fusers/Follows",
+   "kind": "many-to-many",
+   "from": "table:/users",
+   "to": "table:/users",
+   "data": {
+    "implicit": true
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FProfile/constraint%3Atable%253A%252FProfile%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252Fusers/",
+   "kind": "contains",
+   "from": "table:/Profile",
+   "to": "constraint:table%3A%2FProfile/foreign-key/%5B%22userId%22%5D/table%3A%2Fusers",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "references:constraint%3Atable%253A%252FProfile%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252Fusers/table%3A%2Fusers/",
+   "kind": "references",
+   "from": "constraint:table%3A%2FProfile/foreign-key/%5B%22userId%22%5D/table%3A%2Fusers",
+   "to": "table:/users",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FProfile%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252Fusers/column%3Atable%253A%252FProfile%2FuserId/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FProfile/foreign-key/%5B%22userId%22%5D/table%3A%2Fusers",
+   "to": "column:table%3A%2FProfile/userId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "foreign-key:column%3Atable%253A%252FProfile%2FuserId/column%3Atable%253A%252Fusers%2Fid/constraint%3Atable%253A%252FProfile%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252Fusers",
+   "kind": "foreign-key",
+   "from": "column:table%3A%2FProfile/userId",
+   "to": "column:table%3A%2Fusers/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FPost/constraint%3Atable%253A%252FPost%2Fforeign-key%2F%255B%2522authorId%2522%255D%2Ftable%253A%252Fusers/",
+   "kind": "contains",
+   "from": "table:/Post",
+   "to": "constraint:table%3A%2FPost/foreign-key/%5B%22authorId%22%5D/table%3A%2Fusers",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "references:constraint%3Atable%253A%252FPost%2Fforeign-key%2F%255B%2522authorId%2522%255D%2Ftable%253A%252Fusers/table%3A%2Fusers/",
+   "kind": "references",
+   "from": "constraint:table%3A%2FPost/foreign-key/%5B%22authorId%22%5D/table%3A%2Fusers",
+   "to": "table:/users",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FPost%2Fforeign-key%2F%255B%2522authorId%2522%255D%2Ftable%253A%252Fusers/column%3Atable%253A%252FPost%2FauthorId/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FPost/foreign-key/%5B%22authorId%22%5D/table%3A%2Fusers",
+   "to": "column:table%3A%2FPost/authorId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "foreign-key:column%3Atable%253A%252FPost%2FauthorId/column%3Atable%253A%252Fusers%2Fid/constraint%3Atable%253A%252FPost%2Fforeign-key%2F%255B%2522authorId%2522%255D%2Ftable%253A%252Fusers",
+   "kind": "foreign-key",
+   "from": "column:table%3A%2FPost/authorId",
+   "to": "column:table%3A%2Fusers/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "many-to-many:table%3A%2FCategory/table%3A%2FPost/CategoryToPost",
+   "kind": "many-to-many",
+   "from": "table:/Category",
+   "to": "table:/Post",
+   "data": {
+    "implicit": true
+   },
+   "confidence": "authoritative"
+  }
+ ]
+}

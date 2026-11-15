@@ -1,0 +1,226 @@
+/*
+ * Projector material and accent over the vendored shadcn/ui components. The rules key on the components'
+ * `data-slot` hooks, so the component sources stay as upstream. This layer comes after `utilities` (the build keeps
+ * the declared layer order and appends later layers), so it overrides the components' own classes for these few
+ * properties; it also outranks utilities a consumer adds for them.
+ */
+@layer projector {
+  /* Focus: a solid 2px lens outline 2px off the control, instead of the components' translucent 3px ring. */
+  .pj-root
+    :is(
+      a,
+      button,
+      input,
+      select,
+      textarea,
+      summary,
+      iframe,
+      [tabindex],
+      [role='tab'],
+      [role='radio'],
+      [role='checkbox'],
+      [role='slider'],
+      [role='separator']
+    ):focus-visible:not(.pj-range, [role='option'], [role='menuitem'], [role='menuitemradio'], [role='menuitemcheckbox']) {
+    outline: 2px solid var(--pj-ring);
+    outline-offset: 2px;
+    --tw-ring-shadow: 0 0 #0000;
+  }
+  /* Large focusable regions draw it inside, where scrolling ancestors can't clip it. */
+  .pj-root :is([role='tabpanel'], [role='region'], main, [role='log']):focus-visible {
+    outline-offset: -2px;
+  }
+  /* So does a renderer's frame, which its clipping host would otherwise cut (components.css `.ph-frame-host`). */
+  .pj-root.pj-root.ph .ph-frame:focus-visible {
+    outline-offset: -2px;
+  }
+  /* Text fields draw it inside their own box too, so a toolbar, popover or scrolling panel never clips it (the doubled
+     class outranks the rule above). */
+  .pj-root.pj-root
+    :is(input:not([type='checkbox'], [type='radio'], [type='range'], [type='button'], [type='submit']), textarea):focus-visible {
+    outline-offset: -2px;
+  }
+  /*
+   * A field that holds focus the whole time it is shown (a command palette's search) shows focus with its caret, and
+   * the active choice with its highlighted row: no ring at all.
+   */
+  .pj-root.pj-root [data-focus-ring='none'][data-focus-ring]:focus-visible {
+    outline: none;
+  }
+  /*
+   * A summary figure that filters is pressed as a filled pill, and nothing else (summary-bar.tsx). The bar clips anything outside it, so
+   * its keyboard focus is drawn inside its edge instead: the ring, then a gap of the bar's colour
+   * (`--pj-summary-surface`) before the fill, so ring and fill never merge into one outline.
+   */
+  .pj-root .ph-summary-button[aria-pressed='true'] {
+    /* A tint of the text, so the pill shows on any surface the bar takes (raised, header, an app's background). */
+    background-color: color-mix(in oklab, var(--pj-foreground) 11%, transparent);
+    color: var(--pj-foreground);
+  }
+  .pj-root.pj-root .ph-summary-button:focus-visible {
+    outline: none;
+    box-shadow:
+      inset 0 0 0 1px var(--pj-ring),
+      inset 0 0 0 2px var(--pj-summary-surface, var(--pj-surface-raised));
+  }
+  /*
+   * Between two figures, a round 3px dot in the muted text colour, 6px clear of each figure's pill, so its text is
+   * about 10px away. It sits where a middot does, on the x-height's centre: the labels are centred by cap height, so
+   * the dot goes half the difference lower. After a figure ending in its tighter change counts, it keeps 2px more on
+   * its left, so the text on either side stays the same distance away.
+   */
+  .pj-root .ph-summary-separator {
+    flex: none;
+    width: 3px;
+    height: 3px;
+    margin-inline: 6px;
+    border-radius: 50%;
+    background-color: color-mix(in oklab, var(--pj-muted-foreground) 70%, transparent);
+    translate: 0 calc((1cap - 1ex) / 2);
+  }
+  .pj-root .ph-summary-figure:has(> [data-summary-delta]:last-child) + .ph-summary-figure > .ph-summary-separator {
+    margin-inline-start: 8px;
+  }
+  @media (forced-colors: active) {
+    .pj-root .ph-summary-separator {
+      forced-color-adjust: none;
+      background-color: GrayText;
+    }
+  }
+
+  /*
+   * Press: every pressable control (buttons, menu and popover triggers, toggle and segmented items, select triggers,
+   * the play lens, a file button's face) moves its content, not its box, 1px down while pressed, and springs back on
+   * release, whether or not it opened a menu or popover. The hit box and layout never move. `translate` composes with
+   * an icon's own `transform`/`scale` (the mirrored play glyph). None under reduced motion.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .pj-root
+      :is(button, [role='button'], [role='radio'], [role='tab'], [role='checkbox'], [data-slot='select-trigger']):not(
+        :disabled,
+        [aria-disabled='true']
+      ):active
+      > :not(input),
+    .pj-root :has(> input[type='file']:active:not(:disabled)) > :not(input),
+    .pj-root .pj-lens:not(:disabled):active::before {
+      translate: 0 1px;
+    }
+  }
+
+  /* Bevel: cards and overlays catch light on their top edge; overlays also float on the soft pop shadow. */
+  .pj-root [data-slot='card'] {
+    --tw-inset-shadow: var(--pj-bevel);
+  }
+  .pj-root
+    :is(
+      [data-slot='select-content'],
+      [data-slot='popover-content'],
+      [data-slot='dropdown-menu-content'],
+      [data-slot='dropdown-menu-sub-content']
+    ) {
+    --tw-inset-shadow: var(--pj-bevel);
+    --tw-shadow: var(--pj-shadow-pop);
+  }
+
+  /* Segments: the active tab is a raised card-colored segment in a bordered well. */
+  .pj-root [data-slot='tabs-list'][data-variant='default'] {
+    box-shadow: inset 0 0 0 1px var(--pj-border);
+  }
+  .pj-root [data-slot='tabs-list'][data-variant='default'] > [data-slot='tabs-trigger'][data-state='active'] {
+    border-color: transparent;
+    background-color: var(--pj-card);
+    color: var(--pj-foreground);
+    box-shadow:
+      var(--pj-bevel),
+      0 1px 2px oklch(0 0 0 / 0.12);
+  }
+
+  /*
+   * Control boundaries (WCAG 1.4.11): fields, checkboxes, select triggers and the slider track take `control-border`
+   * (3:1 against background and card); `border` and `input` stay the decorative hairlines. Focus, invalid and checked
+   * states keep their own colors.
+   */
+  /* (0,2,0): over the components' `border-input`, under their focus and invalid state utilities. */
+  .pj-root
+    [data-slot]:where(
+      [data-slot='input'],
+      [data-slot='native-select'],
+      [data-slot='select-trigger'],
+      [data-slot='checkbox']:not([data-state='checked'])
+    ) {
+    border-color: var(--pj-control-border);
+  }
+  .pj-root [data-slot='slider-track'] {
+    box-shadow: inset 0 0 0 1px var(--pj-control-border);
+  }
+
+  /*
+   * The selected item of a Select (and the chosen radio item of a DropdownMenu) is marked by a small lens dot with a
+   * lens-muted halo, on the left, instead of a checkmark; every item's text keeps the same indent whether or not it is
+   * selected.
+   */
+  .pj-root :is([data-slot='select-item'], [data-slot='dropdown-menu-radio-item']) {
+    padding-left: 28px;
+    padding-right: 8px;
+  }
+  .pj-root :is([data-slot='select-item'], [data-slot='dropdown-menu-radio-item']) > span:first-child {
+    left: 8px;
+    right: auto;
+  }
+  .pj-root :is([data-slot='select-item'], [data-slot='dropdown-menu-radio-item']) > span:first-child svg {
+    display: none;
+  }
+  .pj-root :is([data-slot='select-item'], [data-slot='dropdown-menu-radio-item'])[data-state='checked'] > span:first-child::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: var(--pj-lens);
+    box-shadow: 0 0 0 3px var(--pj-lens-muted);
+  }
+
+  /*
+   * Settings menus: checkbox items mark their check on the left like radio items, and every item, submenu and heading
+   * keeps the same text indent.
+   */
+  .pj-root .ph-settings-menu [data-slot='dropdown-menu-checkbox-item'] {
+    padding-left: 28px;
+    padding-right: 8px;
+  }
+  .pj-root .ph-settings-menu [data-slot='dropdown-menu-checkbox-item'] > span:first-child {
+    left: 8px;
+    right: auto;
+  }
+  .pj-root
+    .ph-settings-menu
+    :is([data-slot='dropdown-menu-item'], [data-slot='dropdown-menu-sub-trigger'], [data-slot='dropdown-menu-label']) {
+    padding-left: 28px;
+  }
+  /* Dense rows (26px, as VS Code's menus), so the top level fits a short view. */
+  .pj-root .ph-settings-menu [data-slot^='dropdown-menu-']:is([role^='menuitem']) {
+    padding-block: 3px;
+  }
+  .pj-root .ph-settings-menu [data-slot='dropdown-menu-label'] {
+    padding-block: 6px 2px;
+  }
+
+  /* A tinted region keeps a same-hue edge, never a fill alone: the destructive badge's faint red fill is edged in red. */
+  .pj-root [data-slot='badge'][data-variant='destructive'] {
+    border-color: var(--pj-destructive);
+  }
+
+  /* The Slider's thumb carries a lens dot. */
+  .pj-root [data-slot='slider-thumb'] {
+    border-color: var(--pj-control-border);
+    background: radial-gradient(circle, var(--pj-lens) 0 3px, var(--pj-card) 3.5px);
+  }
+  .pj-root [data-slot='slider-range'] {
+    background-color: var(--pj-foreground);
+  }
+
+  /* Leading the playback row, the lens has no neighbor before it: it sits as far from the row's start as from its top
+     and bottom, as every toolbar edge control does. */
+  .pj-root .ph-toolbar-playback-row .ph-transport > :first-child {
+    padding-inline-start: 0;
+  }
+}

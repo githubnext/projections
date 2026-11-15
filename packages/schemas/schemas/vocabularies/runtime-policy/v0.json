@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/vocabularies/runtime-policy/v0.json",
+  "title": "Projections vocabulary runtime-policy/v0",
+  "description": "Kernel runtime policies, such as Tetragon: policies, probes, the hooks they attach to, selectors and the workloads they cover. Defined in docs/models/runtime-policy-model.md.",
+  "allOf": [
+    {"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"},
+    {
+      "type": "object",
+      "required": ["vocabularies"],
+      "properties": {"vocabularies": {"contains": {"const": "runtime-policy/v0"}}}
+    },
+    {"$ref": "#/$defs/refinement"}
+  ],
+  "$defs": {
+    "refinement": {
+      "description": "What `runtime-policy/v0` adds to an extraction that declares it.",
+      "type": "object",
+      "properties": {
+        "schema": {"enum": ["architecture/v0"]},
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "allOf": [
+              {
+                "if": {"type": "object", "required": ["kind"], "properties": {"kind": {"enum": ["policy"]}}},
+                "then": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "namespace": {
+                          "description": "The namespace of a namespaced policy, empty when it comes from where the policy is applied; null for a cluster-wide policy.",
+                          "type": ["string", "null"]
+                        },
+                        "mode": {"description": "`enforce` or `monitor`.", "type": "string"},
+                        "scope": {
+                          "description": "The workloads it applies to, in plain language.",
+                          "type": "string"
+                        },
+                        "nodes": {"description": "Where the agent loads it.", "type": "string"},
+                        "effect": {"description": "The strongest effect of its selectors.", "type": "string"}
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {"type": "object", "required": ["kind"], "properties": {"kind": {"enum": ["hook"]}}},
+                "then": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "hookType": {
+                          "description": "`kprobe`, `fentry`, `tracepoint`, `lsm`, `uprobe`, `usdt` or `loader`.",
+                          "type": "string"
+                        },
+                        "stability": {
+                          "description": "How stable the hook is across kernels, such as `stable` or `kernel-internal`.",
+                          "type": "string"
+                        },
+                        "category": {
+                          "description": "What the hook observes, such as `file` or `network`.",
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {"type": "object", "required": ["kind"], "properties": {"kind": {"enum": ["selector"]}}},
+                "then": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "effect": {
+                          "description": "What happens when it matches, such as `enforce` or `observe`.",
+                          "type": "string"
+                        },
+                        "enforcement": {
+                          "description": "`active`, `elided` (in a `monitor` policy) or `none`.",
+                          "type": "string"
+                        },
+                        "ordinal": {"description": "Its position in its probe.", "type": "number"}
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {"type": "object", "required": ["kind"], "properties": {"kind": {"enum": ["subject"]}}},
+                "then": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {"subjectKind": {"description": "`workloads` or `binary`.", "type": "string"}}
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "if": {
+              "type": "object",
+              "required": ["kind"],
+              "properties": {"kind": {"enum": ["matches", "excludes"]}}
+            },
+            "then": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "operator": {
+                      "description": "How the binary path matches, such as `In` or `Prefix`.",
+                      "type": "string"
+                    },
+                    "parent": {"description": "Whether it filters on the parent binary.", "type": "boolean"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

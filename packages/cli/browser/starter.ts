@@ -1,0 +1,43 @@
+// Shared by the starter renderer specs: one scaffolded, installed and built
+// renderer per worker, and its development server.
+import {execFileSync, spawn} from 'node:child_process'
+import {existsSync, mkdtempSync, readFileSync, writeFileSync} from 'node:fs'
+import {tmpdir} from 'node:os'
+import {join, resolve} from 'node:path'
+
+// `projections init --renderer custom` scaffolds the renderer package every
+// custom renderer starts from. Built the way an author builds it (npm install,
+// npm run build), it must pass the checks every built-in renderer is held to.
+// It installs @githubnext/projections from this workspace's npm pack tarball
+// (build it first: npm run build), as a renderer built from a submodule does.
+const cli = process.env.PROJECTIONS_CLI!
+const workspace = resolve(import.meta.dirname, '../../..')
+const packages = mkdtempSync(join(tmpdir(), 'projections-packages-'))
+// The npm that runs these tests, so they work whatever is on PATH.
+const npmCli = process.env.npm_execpath
+const npm = (args: string[], cwd: string, env = process.env) =>
+  npmCli
+    ? execFileSync(process.execPath, [npmCli, ...args], {cwd, env, stdio: 'pipe'})
+    : execFileSync('npm', args, {cwd, env, stdio: 'pipe'})
+// The scaffold installs outside the workspace, with the workspace's registry (the committed .npmrc, or CI's
+// npm_config_registry) rather than npm's default.
+const registry = {...process.env, npm_config_registry: npm(['config', 'get', 'registry'], workspace).toString().trim()}
+npm(['pack', '--workspace', 'packages/sdk', '--pack-destination', packages], workspace)
+export const repository = mkdtempSync(join(tmpdir(), 'projections-starter-'))
+execFileSync('git', ['init', '-q'], {cwd: repository})
+execFileSync(cli, ['init', 'service-map', '--language', 'node', '--renderer', 'custom'], {
+  cwd: repository,
+  env: {...process.env, PROJECTIONS_RENDERER_PACKAGES: packages},
+})
+export const renderer = join(repository, '.github/projections/service-map/renderer')
+npm(['install', '--no-audit', '--no-fund'], renderer, registry)
+npm(['run', 'build'], renderer)
+
+// `npm run dev`: Vite's development server, which the Inspector prefers while it runs.
+const vite = spawn(process.execPath, [join(renderer, 'node_modules/vite/bin/vite.js'), '--port', '0'], {cwd: renderer, stdio: 'ignore'})
+process.once('exit', () => vite.kill())
+export const record = join(renderer, 'node_modules/.projections/renderer-dev-server.json')
+for (let waited = 0; !existsSync(record); waited += 100) {
+  if (waited > 30_000) throw new Error('The renderer development server did not start')
+  await new Promise(resolve => setTimeout(resolve, 100))
+}

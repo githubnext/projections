@@ -1,0 +1,26 @@
+name: CI
+on: [push]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps: [{run: npm run lint}]
+  test:
+    runs-on: ubuntu-latest
+    steps: [{run: npm test}]
+  build:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps: [{run: npm run build}]
+  e2e:
+    needs: build
+    runs-on: ubuntu-latest
+    steps: [{run: npm run e2e}]
+  deploy-staging:
+    needs: build
+    runs-on: ubuntu-latest
+    steps: [{run: npm run deploy -- staging}]
+  deploy-production:
+    needs: [e2e, deploy-staging]
+    runs-on: ubuntu-latest
+    environment: production
+    steps: [{run: npm run deploy -- production}]

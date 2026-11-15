@@ -1,0 +1,16 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextIndex"]
+}
+model Q {
+  id String @id(length: 5) @db.VarChar(20)
+  t  String @unique(length: 10, sort: Desc) @db.VarChar(100)
+  b  String @db.Text
+  c  Int    @db.UnsignedInt
+  @@index([b(length: 20)], map: "b_prefix")
+  @@fulltext([b, t])
+}

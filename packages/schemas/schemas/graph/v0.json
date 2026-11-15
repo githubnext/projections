@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/graph/v0.json",
+  "title": "Projections domain schema graph/v0",
+  "description": "Entities and directed relationships between them; the general choice. Adds no rules to the envelope.",
+  "allOf": [{"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"}, {"$ref": "#/$defs/refinement"}],
+  "$defs": {
+    "refinement": {
+      "description": "What `graph/v0` adds to the extraction envelope.",
+      "type": "object",
+      "properties": {"schema": {"const": "graph/v0"}}
+    }
+  }
+}

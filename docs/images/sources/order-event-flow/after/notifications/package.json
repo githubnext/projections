@@ -1,0 +1,4 @@
+{
+  "name": "@shop/notifications",
+  "types": "./index.ts"
+}

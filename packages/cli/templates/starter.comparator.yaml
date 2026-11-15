@@ -1,0 +1,56 @@
+# The custom comparator of the "{{id}}" projection.
+#
+# Comparators are rarely needed: the default comparator already matches items
+# by ID (and declared `previousIds`) and groups connected changes into steps.
+# A comparator file adds what only your domain knows, on top of it:
+#
+#   identity   pair items the default matching left unmatched (renames, moves)
+#   classify   a sentence, and any annotation, per change
+#   steps      the order the changes are told in
+#   metadata   verdicts and counts a renderer or a workflow reads
+#
+# Expressions are CEL (https://cel.dev). Comparator rules are data, not code: they run
+# sandboxed wherever a comparison is viewed, and `projections check -p {{id}}`
+# reports any problem with its line and column. Heavy logic (a type checker, a
+# version resolver) belongs in the extractor, as facts in `data`.
+#
+# This starter keeps the default comparison and moves the steps that touch the
+# entity kinds the definition lists first, in the order of the list:
+#   "comparator": {"file": ".../{{id}}.comparator.yaml", "options": {"kinds": ["service"]}}
+format: projections.comparator
+version: 0
+description: >-
+  Steps touching the entity kinds listed in options.kinds come first, in the order of the
+  list.
+
+checks:
+  - assert: >-
+      !has(options.kinds) || options.kinds == null
+      || (type(options.kinds) == list && options.kinds.all(kind, type(kind) == string))
+    message: "'invalid options: `kinds` must be an array of entity kinds'"
+
+variables:
+  - name: kinds
+    expression: 'has(options.kinds) && options.kinds != null ? options.kinds : []'
+
+functions:
+  changeKind:
+    description: "The kind of a change's entity (the after one's when both exist), or '' for a relationship."
+    params: [{name: change, type: Change}]
+    returns: string
+    variables:
+      - name: id
+        expression: 'size(change.after) > 0 ? change.after[0] : change.before[0]'
+      - name: entity
+        expression: |-
+          graph.entity('after', variables.id) != null ? graph.entity('after', variables.id)
+            : graph.entity('before', variables.id)
+    body: "change.collection == 'entities' && variables.entity != null ? variables.entity.kind : ''"
+
+steps:
+  # A change ranks at the position of its entity's kind in the list; a step
+  # ranks by its best change, and steps without one keep their order after.
+  rank: |-
+    changeKind(change) != ''
+      ? lists.range(size(variables.kinds)).filter(i, variables.kinds[i] == changeKind(change))
+      : null

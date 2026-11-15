@@ -1,0 +1,17 @@
+{
+  "name": "@githubnext/projections-action",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "The Projections GitHub Action's dependency-free scripts (action.yml is at the repository root)",
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "@githubnext/projections-cli": "0.1.0",
+    "@githubnext/projections-schemas": "0.1.0",
+    "ajv": "^8.17.1",
+    "yaml": "^2.8.0"
+  }
+}

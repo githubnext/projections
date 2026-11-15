@@ -1,0 +1,11 @@
+[package]
+name = "fixture-app"
+version = "0.0.0"
+
+[[bin]]
+name = "app"
+path = "src/main.rs"
+
+[dependencies]
+fixture-core = { path = "../core" }
+serde = "1"

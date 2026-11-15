@@ -1,0 +1,345 @@
+{
+  "entities": [
+    {
+      "confidence": "derived",
+      "data": {
+        "blank": 0,
+        "bytes": 42,
+        "code": 2,
+        "comment": 1,
+        "files": 1,
+        "language": "Dockerfile",
+        "lines": 3,
+        "testBlank": 0,
+        "testCode": 0,
+        "testComment": 0,
+        "testFiles": 0,
+        "testLines": 0,
+        "unit": "lines of code",
+        "value": 2
+      },
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "Dockerfile"
+        }
+      ],
+      "id": "language:Dockerfile",
+      "kind": "language",
+      "label": "Dockerfile"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "blank": 3,
+        "bytes": 152,
+        "code": 7,
+        "comment": 1,
+        "files": 2,
+        "language": "Go",
+        "lines": 11,
+        "testBlank": 2,
+        "testCode": 3,
+        "testComment": 0,
+        "testFiles": 1,
+        "testLines": 5,
+        "unit": "lines of code",
+        "value": 7
+      },
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "cmd/server.go"
+        },
+        {
+          "kind": "counted-file",
+          "source": "cmd/server_test.go"
+        }
+      ],
+      "id": "language:Go",
+      "kind": "language",
+      "label": "Go"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "blank": 0,
+        "bytes": 143,
+        "code": 8,
+        "comment": 2,
+        "files": 1,
+        "language": "HTML",
+        "lines": 10,
+        "testBlank": 0,
+        "testCode": 0,
+        "testComment": 0,
+        "testFiles": 0,
+        "testLines": 0,
+        "unit": "lines of code",
+        "value": 8
+      },
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "index.html"
+        }
+      ],
+      "id": "language:HTML",
+      "kind": "language",
+      "label": "HTML"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "blank": 1,
+        "bytes": 29,
+        "code": 1,
+        "comment": 1,
+        "files": 1,
+        "language": "JavaScript",
+        "lines": 3,
+        "testBlank": 0,
+        "testCode": 0,
+        "testComment": 0,
+        "testFiles": 0,
+        "testLines": 0,
+        "unit": "lines of code",
+        "value": 1
+      },
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "web/bom.js"
+        }
+      ],
+      "id": "language:JavaScript",
+      "kind": "language",
+      "label": "JavaScript"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "blank": 1,
+        "bytes": 49,
+        "code": 2,
+        "comment": 1,
+        "files": 1,
+        "language": "Makefile",
+        "lines": 4,
+        "testBlank": 0,
+        "testCode": 0,
+        "testComment": 0,
+        "testFiles": 0,
+        "testLines": 0,
+        "unit": "lines of code",
+        "value": 2
+      },
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "Makefile"
+        }
+      ],
+      "id": "language:Makefile",
+      "kind": "language",
+      "label": "Makefile"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "blank": 2,
+        "bytes": 105,
+        "code": 3,
+        "comment": 5,
+        "files": 1,
+        "language": "Markdown",
+        "lines": 10,
+        "testBlank": 0,
+        "testCode": 0,
+        "testComment": 0,
+        "testFiles": 0,
+        "testLines": 0,
+        "unit": "lines of code",
+        "value": 3
+      },
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "README.md"
+        }
+      ],
+      "id": "language:Markdown",
+      "kind": "language",
+      "label": "Markdown"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "blank": 7,
+        "bytes": 288,
+        "code": 10,
+        "comment": 3,
+        "files": 2,
+        "language": "Python",
+        "lines": 20,
+        "testBlank": 2,
+        "testCode": 4,
+        "testComment": 0,
+        "testFiles": 1,
+        "testLines": 6,
+        "unit": "lines of code",
+        "value": 10
+      },
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "app/main.py"
+        },
+        {
+          "kind": "counted-file",
+          "source": "app/test_main.py"
+        }
+      ],
+      "id": "language:Python",
+      "kind": "language",
+      "label": "Python"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "blank": 3,
+        "bytes": 253,
+        "code": 10,
+        "comment": 5,
+        "files": 2,
+        "language": "Rust",
+        "lines": 18,
+        "testBlank": 0,
+        "testCode": 4,
+        "testComment": 1,
+        "testFiles": 1,
+        "testLines": 5,
+        "unit": "lines of code",
+        "value": 10
+      },
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/lib.rs"
+        },
+        {
+          "kind": "counted-file",
+          "source": "tests/integration.rs"
+        }
+      ],
+      "id": "language:Rust",
+      "kind": "language",
+      "label": "Rust"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "blank": 1,
+        "bytes": 48,
+        "code": 2,
+        "comment": 2,
+        "files": 1,
+        "language": "Shell",
+        "lines": 5,
+        "testBlank": 0,
+        "testCode": 0,
+        "testComment": 0,
+        "testFiles": 0,
+        "testLines": 0,
+        "unit": "lines of code",
+        "value": 2
+      },
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "scripts/build.sh"
+        }
+      ],
+      "id": "language:Shell",
+      "kind": "language",
+      "label": "Shell"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "blank": 0,
+        "bytes": 83,
+        "code": 3,
+        "comment": 1,
+        "files": 1,
+        "language": "TSX",
+        "lines": 4,
+        "testBlank": 0,
+        "testCode": 0,
+        "testComment": 0,
+        "testFiles": 0,
+        "testLines": 0,
+        "unit": "lines of code",
+        "value": 3
+      },
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "web/view.tsx"
+        }
+      ],
+      "id": "language:TSX",
+      "kind": "language",
+      "label": "TSX"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "blank": 2,
+        "bytes": 258,
+        "code": 6,
+        "comment": 5,
+        "files": 2,
+        "language": "TypeScript",
+        "lines": 13,
+        "testBlank": 1,
+        "testCode": 2,
+        "testComment": 1,
+        "testFiles": 1,
+        "testLines": 4,
+        "unit": "lines of code",
+        "value": 6
+      },
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "web/index.test.ts"
+        },
+        {
+          "kind": "counted-file",
+          "source": "web/index.ts"
+        }
+      ],
+      "id": "language:TypeScript",
+      "kind": "language",
+      "label": "TypeScript"
+    }
+  ],
+  "metadata": {
+    "counter": "tokei 15.0.0",
+    "counting": "Physical lines per file, classified by tokei. A line holding both code and a comment counts as code; documentation strings count as comments; code embedded in another language counts as its host file's language.",
+    "limitations": [
+      "Only files tokei recognizes by filename or extension are counted; every other file, including an extensionless script recognizable only by its shebang, is ignored rather than guessed at.",
+      "Test files are classified by path globs, not by their contents."
+    ],
+    "skipped": {
+      "binary": 1,
+      "oversize": 0,
+      "unreadable": 0,
+      "unrecognized": 2
+    }
+  },
+  "protocolVersion": 0,
+  "relationships": [],
+  "schema": "metrics/v0"
+}

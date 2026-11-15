@@ -1,0 +1,12 @@
+/*
+ * Renderer kit styles for its React components (the kit's `react` entry): the base styles
+ * (`base.css`, the shared look and the `.pk` root's aliases of the theme tokens), then the rules of the kit's
+ * components, in cascade order: generated fields (`GeneratedText`), the graph canvas, diff mode and the layout
+ * components. Like the base styles, every value is a theme token, scoped under the `.pk` root `mountRenderer` creates.
+ * The published package inlines the partials into one file.
+ */
+@import './base.css';
+@import './styles/generated.css';
+@import './styles/graph.css';
+@import './styles/diff.css';
+@import './styles/layout.css';

@@ -1,0 +1,67 @@
+/* The icon stories' gallery: a panel per theme, side by side where they fit. */
+.sb-icon-panels {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+}
+.sb-icon-frame {
+  max-width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+}
+.sb-icon-panel {
+  display: grid;
+  gap: 20px;
+  padding: 16px;
+  background: var(--projections-color-bg);
+  color: var(--projections-color-fg);
+  font-family: var(--projections-font-family);
+  font-size: var(--projections-font-size-sm);
+}
+.sb-icon-panel h2 {
+  margin: 0;
+  font-size: var(--projections-font-size);
+  font-weight: var(--projections-font-weight-semibold);
+}
+.sb-icon-table {
+  border-collapse: collapse;
+}
+.sb-icon-table caption {
+  padding-bottom: 4px;
+  font-weight: var(--projections-font-weight-semibold);
+  text-align: start;
+}
+.sb-icon-table :is(th, td) {
+  padding: 6px 12px 6px 0;
+  border-top: var(--projections-border-width) solid var(--projections-color-border-muted);
+  font-weight: var(--projections-font-weight-normal);
+  text-align: start;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.sb-icon-table thead th {
+  color: var(--projections-color-fg-muted);
+  font-size: var(--projections-font-size-xs);
+}
+/* Icon names are identifiers. */
+.sb-icon-table code {
+  font-family: var(--projections-font-family-mono);
+  font-size: var(--projections-font-size-xs);
+}
+/* The kit's root draws its own surface; in a cell it takes the panel's. */
+.sb-icon-kit {
+  background: transparent;
+}
+.sb-icon-size .sb-icon-kit {
+  display: flex;
+  line-height: 0;
+}
+.sb-icon-card {
+  display: block;
+  overflow: visible;
+  fill: currentColor;
+}
+.sb-icon-summary {
+  width: max-content;
+}

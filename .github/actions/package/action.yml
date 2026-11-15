@@ -1,0 +1,25 @@
+name: Check the npm package
+description: Build @githubnext/projections and check it as it would be published, including a scaffolded custom renderer
+inputs:
+  workspace:
+    description: Workspace path relative to the repository checkout
+    default: '.'
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+      with:
+        node-version-file: ${{ inputs.workspace }}/.node-version
+        cache: npm
+        cache-dependency-path: ${{ inputs.workspace }}/package-lock.json
+    - shell: bash
+      working-directory: ${{ inputs.workspace }}
+      run: |
+        # The build includes the native CLI, which scaffolds the renderer and serves its checks.
+        rustc --version
+        npm ci --no-audit --no-fund
+        npm run build
+        tools/scripts/install-browsers.sh chromium
+        # npm pack; the tarball's contents; every entry and its types under moduleResolution bundler and node16;
+        # and `projections init --renderer custom` installing the tarball, building and passing its renderer checks.
+        npm run check:pack --workspace packages/sdk

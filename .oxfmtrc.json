@@ -1,0 +1,48 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 140,
+  "semi": false,
+  "singleQuote": true,
+  "bracketSpacing": false,
+  "arrowParens": "avoid",
+  "trailingComma": "all",
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "examples/comparators/*/fixtures/**",
+    "packages/comparators/*/fixtures/**",
+    "packages/host/vscode-ui/fixtures/**",
+    "packages/renderers/*/fixtures/**",
+    "packages/renderers/harness/browser/fixtures/**",
+    "packages/schemas/fixtures/**",
+    "**/tests/**/fixtures/**",
+    "**/test/**/fixtures/**",
+    "packages/comparators/rules/tests/golden/**",
+    "**/snapshots/*.json",
+    "packages/comparators/rules/language.json",
+    "package-lock.json",
+    "**/notices/**",
+    "**/THIRD_PARTY_NOTICES.txt",
+    "**/THIRD_PARTY_NOTICES.md",
+    "**/static/**",
+    "**/storybook-static/**",
+    "**/dist/**",
+    "**/target/**",
+    ".github/workflows/release.yml",
+    "**/.vscode-test/**",
+    "packages/comparators/rules/language.json",
+    "docs/reference/**",
+    "docs/agents/**",
+    "packages/cli/templates/**",
+    "packages/host/core/src/ui/components/upstream/**"
+  ],
+  "overrides": [
+    {
+      "files": ["**/*.md"],
+      "options": {
+        "proseWrap": "always",
+        "printWidth": 80,
+        "embeddedLanguageFormatting": "off"
+      }
+    }
+  ]
+}

@@ -1,0 +1,456 @@
+{
+  "changes": [
+    {
+      "after": [
+        "go:example.com/units.Box"
+      ],
+      "before": [
+        "go:example.com/units.Box"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Box",
+      "status": "modified",
+      "summary": "Breaking: Its type parameters changed from none to `[T any]`."
+    },
+    {
+      "after": [
+        "go:example.com/units.Celsius"
+      ],
+      "before": [
+        "go:example.com/units.Celsius"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Celsius",
+      "status": "modified",
+      "summary": "Breaking: Now names `float64` instead of `float32`."
+    },
+    {
+      "after": [
+        "go:example.com/units.Code"
+      ],
+      "before": [
+        "go:example.com/units.Code"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Code",
+      "status": "modified",
+      "summary": "Breaking: Changed from `int32` to `uint32`, which can't hold every value."
+    },
+    {
+      "after": [
+        "go:example.com/units.Count"
+      ],
+      "before": [
+        "go:example.com/units.Count"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Count",
+      "status": "modified",
+      "summary": "Breaking: Became an alias of `int`; it is no longer a distinct type."
+    },
+    {
+      "after": [
+        "go:example.com/units.Events"
+      ],
+      "before": [
+        "go:example.com/units.Events"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Events",
+      "status": "modified",
+      "summary": "Breaking: Its element type changed from `int` to `string`."
+    },
+    {
+      "after": [
+        "go:example.com/units.Feed"
+      ],
+      "before": [
+        "go:example.com/units.Feed"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Feed",
+      "status": "modified",
+      "summary": "Additive: Now implements `Closer`."
+    },
+    {
+      "after": [
+        "go:example.com/units.Handler"
+      ],
+      "before": [
+        "go:example.com/units.Handler"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Handler",
+      "status": "modified",
+      "summary": "Breaking: Changed from a `func` to a `var`."
+    },
+    {
+      "after": [
+        "go:example.com/units.ID"
+      ],
+      "before": [
+        "go:example.com/units.ID"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.ID",
+      "status": "modified",
+      "summary": "Breaking: Changed from a `int` to a `string`."
+    },
+    {
+      "after": [
+        "go:example.com/units.Inbox"
+      ],
+      "before": [
+        "go:example.com/units.Inbox"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Inbox",
+      "status": "modified",
+      "summary": "Compatible: Lost its direction; both sends and receives compile."
+    },
+    {
+      "after": [
+        "go:example.com/units.Index"
+      ],
+      "before": [
+        "go:example.com/units.Index"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Index",
+      "status": "modified",
+      "summary": "Breaking: Changed from a `map` to a `slice`."
+    },
+    {
+      "after": [
+        "go:example.com/units.List"
+      ],
+      "before": [
+        "go:example.com/units.List"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.List",
+      "status": "modified",
+      "summary": "Breaking: Its type parameters changed from `[T any]` to `[T comparable]`."
+    },
+    {
+      "after": [
+        "go:example.com/units.Meters"
+      ],
+      "before": [
+        "go:example.com/units.Meters"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Meters",
+      "status": "modified",
+      "summary": "Compatible: Only the presentation of the signature changed."
+    },
+    {
+      "after": [
+        "go:example.com/units.Outbox"
+      ],
+      "before": [
+        "go:example.com/units.Outbox"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Outbox",
+      "status": "modified",
+      "summary": "Breaking: Its direction changed."
+    },
+    {
+      "after": [
+        "go:example.com/units.Pair"
+      ],
+      "before": [
+        "go:example.com/units.Pair"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Pair",
+      "status": "modified",
+      "summary": "Breaking: Its underlying type changed from `[2]int` to `[2]func()`."
+    },
+    {
+      "after": [
+        "go:example.com/units.Size"
+      ],
+      "before": [
+        "go:example.com/units.Size"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Size",
+      "status": "modified",
+      "summary": "Breaking: Changed from `int` to `int32`, which can't hold every value."
+    },
+    {
+      "after": [
+        "go:example.com/units.Stream"
+      ],
+      "before": [
+        "go:example.com/units.Stream"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Stream",
+      "status": "modified",
+      "summary": "Breaking: Changed from a `chan` to a `slice`."
+    },
+    {
+      "after": [
+        "go:example.com/units.Total"
+      ],
+      "before": [
+        "go:example.com/units.Total"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Total",
+      "status": "modified",
+      "summary": "Breaking: Is no longer an alias of `int`, but a distinct type."
+    }
+  ],
+  "metadata": {
+    "compatibility": {
+      "changes": {
+        "go:example.com/units.Box": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its type parameters changed from none to `[T any]`",
+              "rule": "type-params"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its type parameters changed from none to `[T any]`"
+        },
+        "go:example.com/units.Celsius": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Now names `float64` instead of `float32`",
+              "rule": "underlying"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Now names `float64` instead of `float32`"
+        },
+        "go:example.com/units.Code": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Changed from `int32` to `uint32`, which can't hold every value",
+              "rule": "numeric"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Changed from `int32` to `uint32`, which can't hold every value"
+        },
+        "go:example.com/units.Count": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Became an alias of `int`; it is no longer a distinct type",
+              "rule": "underlying"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Became an alias of `int`; it is no longer a distinct type"
+        },
+        "go:example.com/units.Events": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its element type changed from `int` to `string`",
+              "rule": "channel"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its element type changed from `int` to `string`"
+        },
+        "go:example.com/units.Feed": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "Now implements `Closer`",
+              "rule": "implements"
+            }
+          ],
+          "level": "additive",
+          "reason": "Now implements `Closer`"
+        },
+        "go:example.com/units.Handler": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Changed from a `func` to a `var`",
+              "rule": "kind"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Changed from a `func` to a `var`"
+        },
+        "go:example.com/units.ID": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Changed from a `int` to a `string`",
+              "rule": "underlying"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Changed from a `int` to a `string`"
+        },
+        "go:example.com/units.Inbox": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Lost its direction; both sends and receives compile",
+              "rule": "channel"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Lost its direction; both sends and receives compile"
+        },
+        "go:example.com/units.Index": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Changed from a `map` to a `slice`",
+              "rule": "underlying"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Changed from a `map` to a `slice`"
+        },
+        "go:example.com/units.List": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its type parameters changed from `[T any]` to `[T comparable]`",
+              "rule": "type-params"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its type parameters changed from `[T any]` to `[T comparable]`"
+        },
+        "go:example.com/units.Meters": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Only the presentation of the signature changed",
+              "rule": "presentation"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Only the presentation of the signature changed"
+        },
+        "go:example.com/units.Outbox": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its direction changed",
+              "rule": "channel"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its direction changed"
+        },
+        "go:example.com/units.Pair": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its underlying type changed from `[2]int` to `[2]func()`",
+              "rule": "underlying"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its underlying type changed from `[2]int` to `[2]func()`"
+        },
+        "go:example.com/units.Size": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Changed from `int` to `int32`, which can't hold every value",
+              "rule": "numeric"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Changed from `int` to `int32`, which can't hold every value"
+        },
+        "go:example.com/units.Stream": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Changed from a `chan` to a `slice`",
+              "rule": "underlying"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Changed from a `chan` to a `slice`"
+        },
+        "go:example.com/units.Total": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Is no longer an alias of `int`, but a distinct type",
+              "rule": "underlying"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Is no longer an alias of `int`, but a distinct type"
+        }
+      },
+      "counts": {
+        "additive": 1,
+        "breaking": 14,
+        "compatible": 2,
+        "unknown": 0
+      },
+      "ecosystem": "go",
+      "notices": [],
+      "rules": "apidiff, reproduced",
+      "version": 0
+    }
+  },
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "go:example.com/units.Box",
+        "go:example.com/units.Celsius",
+        "go:example.com/units.Code",
+        "go:example.com/units.Count",
+        "go:example.com/units.Events",
+        "go:example.com/units.Feed",
+        "go:example.com/units.Handler",
+        "go:example.com/units.ID",
+        "go:example.com/units.Inbox",
+        "go:example.com/units.Index",
+        "go:example.com/units.List",
+        "go:example.com/units.Meters",
+        "go:example.com/units.Outbox",
+        "go:example.com/units.Pair",
+        "go:example.com/units.Size",
+        "go:example.com/units.Stream",
+        "go:example.com/units.Total"
+      ],
+      "kind": "restructure"
+    }
+  ]
+}

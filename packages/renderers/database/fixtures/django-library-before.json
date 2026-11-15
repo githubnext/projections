@@ -1,0 +1,1416 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "date",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": null,
+        "nullable": true,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": false,
+        "scale": null,
+        "table": "table:catalog_author",
+        "tablespace": null,
+        "type": "DateField",
+        "unique": false
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Author"
+        }
+      ],
+      "id": "column:table%3Acatalog_author/born",
+      "kind": "column",
+      "label": "born"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": true,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "integer",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": null,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": true,
+        "scale": null,
+        "table": "table:catalog_author",
+        "tablespace": null,
+        "type": "BigAutoField",
+        "unique": true
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Author"
+        }
+      ],
+      "id": "column:table%3Acatalog_author/id",
+      "kind": "column",
+      "label": "id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "varchar(120)",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": 120,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": false,
+        "scale": null,
+        "table": "table:catalog_author",
+        "tablespace": null,
+        "type": "CharField",
+        "unique": false
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Author"
+        }
+      ],
+      "id": "column:table%3Acatalog_author/name",
+      "kind": "column",
+      "label": "name"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "bigint",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": null,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": false,
+        "scale": null,
+        "table": "table:catalog_book",
+        "tablespace": null,
+        "type": "ForeignKey",
+        "unique": false
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Book"
+        }
+      ],
+      "id": "column:table%3Acatalog_book/author_id",
+      "kind": "column",
+      "label": "author_id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": true,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "integer",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": null,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": true,
+        "scale": null,
+        "table": "table:catalog_book",
+        "tablespace": null,
+        "type": "BigAutoField",
+        "unique": true
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Book"
+        }
+      ],
+      "id": "column:table%3Acatalog_book/id",
+      "kind": "column",
+      "label": "id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "varchar(13)",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": 13,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": false,
+        "scale": null,
+        "table": "table:catalog_book",
+        "tablespace": null,
+        "type": "CharField",
+        "unique": true
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Book"
+        }
+      ],
+      "id": "column:table%3Acatalog_book/isbn",
+      "kind": "column",
+      "label": "isbn"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "integer",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": null,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": false,
+        "scale": null,
+        "table": "table:catalog_book",
+        "tablespace": null,
+        "type": "IntegerField",
+        "unique": false
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Book"
+        }
+      ],
+      "id": "column:table%3Acatalog_book/pages",
+      "kind": "column",
+      "label": "pages"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "date",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": null,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": false,
+        "scale": null,
+        "table": "table:catalog_book",
+        "tablespace": null,
+        "type": "DateField",
+        "unique": false
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Book"
+        }
+      ],
+      "id": "column:table%3Acatalog_book/published",
+      "kind": "column",
+      "label": "published"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "varchar(200)",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": 200,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": false,
+        "scale": null,
+        "table": "table:catalog_book",
+        "tablespace": null,
+        "type": "CharField",
+        "unique": false
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Book"
+        }
+      ],
+      "id": "column:table%3Acatalog_book/title",
+      "kind": "column",
+      "label": "title"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "bigint",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": null,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": false,
+        "scale": null,
+        "table": "table:catalog_loan",
+        "tablespace": null,
+        "type": "ForeignKey",
+        "unique": false
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Loan"
+        }
+      ],
+      "id": "column:table%3Acatalog_loan/book_id",
+      "kind": "column",
+      "label": "book_id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "datetime",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": null,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": false,
+        "scale": null,
+        "table": "table:catalog_loan",
+        "tablespace": null,
+        "type": "DateTimeField",
+        "unique": false
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Loan"
+        }
+      ],
+      "id": "column:table%3Acatalog_loan/borrowed_at",
+      "kind": "column",
+      "label": "borrowed_at"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "date",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": null,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": false,
+        "scale": null,
+        "table": "table:catalog_loan",
+        "tablespace": null,
+        "type": "DateField",
+        "unique": false
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Loan"
+        }
+      ],
+      "id": "column:table%3Acatalog_loan/due",
+      "kind": "column",
+      "label": "due"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": true,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "integer",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": null,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": true,
+        "scale": null,
+        "table": "table:catalog_loan",
+        "tablespace": null,
+        "type": "BigAutoField",
+        "unique": true
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Loan"
+        }
+      ],
+      "id": "column:table%3Acatalog_loan/id",
+      "kind": "column",
+      "label": "id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "bigint",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": null,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": false,
+        "scale": null,
+        "table": "table:catalog_loan",
+        "tablespace": null,
+        "type": "ForeignKey",
+        "unique": false
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Loan"
+        }
+      ],
+      "id": "column:table%3Acatalog_loan/member_id",
+      "kind": "column",
+      "label": "member_id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "datetime",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": null,
+        "nullable": true,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": false,
+        "scale": null,
+        "table": "table:catalog_loan",
+        "tablespace": null,
+        "type": "DateTimeField",
+        "unique": false
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Loan"
+        }
+      ],
+      "id": "column:table%3Acatalog_loan/returned_at",
+      "kind": "column",
+      "label": "returned_at"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "varchar(254)",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": 254,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": false,
+        "scale": null,
+        "table": "table:catalog_member",
+        "tablespace": null,
+        "type": "CharField",
+        "unique": true
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Member"
+        }
+      ],
+      "id": "column:table%3Acatalog_member/email",
+      "kind": "column",
+      "label": "email"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": true,
+        "autoNow": false,
+        "autoNowAdd": false,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "integer",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": null,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": true,
+        "scale": null,
+        "table": "table:catalog_member",
+        "tablespace": null,
+        "type": "BigAutoField",
+        "unique": true
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Member"
+        }
+      ],
+      "id": "column:table%3Acatalog_member/id",
+      "kind": "column",
+      "label": "id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "autoNow": false,
+        "autoNowAdd": true,
+        "check": null,
+        "collation": null,
+        "comment": null,
+        "databaseType": "datetime",
+        "dbDefault": null,
+        "default": null,
+        "generated": null,
+        "hasDefault": false,
+        "maxLength": null,
+        "nullable": false,
+        "persisted": null,
+        "precision": null,
+        "primaryKey": false,
+        "scale": null,
+        "table": "table:catalog_member",
+        "tablespace": null,
+        "type": "DateTimeField",
+        "unique": false
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Member"
+        }
+      ],
+      "id": "column:table%3Acatalog_member/joined",
+      "kind": "column",
+      "label": "joined"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "id"
+        ],
+        "databaseName": null,
+        "table": "table:catalog_author",
+        "type": "primary-key"
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Author"
+        }
+      ],
+      "id": "constraint:table%3Acatalog_author/primary-key/%5B%22id%22%5D",
+      "kind": "constraint",
+      "label": "primary-key (id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [],
+        "databaseName": "book_pages_positive",
+        "definition": {
+          "args": [],
+          "class": "django.db.models.constraints.CheckConstraint",
+          "options": {
+            "check": {
+              "args": [
+                [
+                  "pages__gt",
+                  0
+                ]
+              ],
+              "expression": "django.db.models.Q",
+              "kwargs": {}
+            }
+          }
+        },
+        "table": "table:catalog_book",
+        "type": "check"
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Book"
+        }
+      ],
+      "id": "constraint:table%3Acatalog_book/check/book_pages_positive",
+      "kind": "constraint",
+      "label": "book_pages_positive"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "author_id"
+        ],
+        "databaseConstraint": true,
+        "databaseName": null,
+        "onDelete": {
+          "callable": "django.db.models.deletion.CASCADE"
+        },
+        "references": [
+          "id"
+        ],
+        "table": "table:catalog_book",
+        "target": "table:catalog_author",
+        "type": "foreign-key"
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Book"
+        }
+      ],
+      "id": "constraint:table%3Acatalog_book/foreign-key/%5B%22author_id%22%5D",
+      "kind": "constraint",
+      "label": "foreign-key (author_id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "author_id"
+        ],
+        "databaseName": null,
+        "table": "table:catalog_book",
+        "type": "index"
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Book"
+        }
+      ],
+      "id": "constraint:table%3Acatalog_book/index/%5B%22author_id%22%5D",
+      "kind": "constraint",
+      "label": "index (author_id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "id"
+        ],
+        "databaseName": null,
+        "table": "table:catalog_book",
+        "type": "primary-key"
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Book"
+        }
+      ],
+      "id": "constraint:table%3Acatalog_book/primary-key/%5B%22id%22%5D",
+      "kind": "constraint",
+      "label": "primary-key (id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "isbn"
+        ],
+        "databaseName": null,
+        "table": "table:catalog_book",
+        "type": "unique"
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Book"
+        }
+      ],
+      "id": "constraint:table%3Acatalog_book/unique/%5B%22isbn%22%5D",
+      "kind": "constraint",
+      "label": "unique (isbn)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "book_id"
+        ],
+        "databaseConstraint": true,
+        "databaseName": null,
+        "onDelete": {
+          "callable": "django.db.models.deletion.PROTECT"
+        },
+        "references": [
+          "id"
+        ],
+        "table": "table:catalog_loan",
+        "target": "table:catalog_book",
+        "type": "foreign-key"
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Loan"
+        }
+      ],
+      "id": "constraint:table%3Acatalog_loan/foreign-key/%5B%22book_id%22%5D",
+      "kind": "constraint",
+      "label": "foreign-key (book_id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "member_id"
+        ],
+        "databaseConstraint": true,
+        "databaseName": null,
+        "onDelete": {
+          "callable": "django.db.models.deletion.CASCADE"
+        },
+        "references": [
+          "id"
+        ],
+        "table": "table:catalog_loan",
+        "target": "table:catalog_member",
+        "type": "foreign-key"
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Loan"
+        }
+      ],
+      "id": "constraint:table%3Acatalog_loan/foreign-key/%5B%22member_id%22%5D",
+      "kind": "constraint",
+      "label": "foreign-key (member_id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "book_id"
+        ],
+        "databaseName": null,
+        "table": "table:catalog_loan",
+        "type": "index"
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Loan"
+        }
+      ],
+      "id": "constraint:table%3Acatalog_loan/index/%5B%22book_id%22%5D",
+      "kind": "constraint",
+      "label": "index (book_id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "member_id"
+        ],
+        "databaseName": null,
+        "table": "table:catalog_loan",
+        "type": "index"
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Loan"
+        }
+      ],
+      "id": "constraint:table%3Acatalog_loan/index/%5B%22member_id%22%5D",
+      "kind": "constraint",
+      "label": "index (member_id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "id"
+        ],
+        "databaseName": null,
+        "table": "table:catalog_loan",
+        "type": "primary-key"
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Loan"
+        }
+      ],
+      "id": "constraint:table%3Acatalog_loan/primary-key/%5B%22id%22%5D",
+      "kind": "constraint",
+      "label": "primary-key (id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "id"
+        ],
+        "databaseName": null,
+        "table": "table:catalog_member",
+        "type": "primary-key"
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Member"
+        }
+      ],
+      "id": "constraint:table%3Acatalog_member/primary-key/%5B%22id%22%5D",
+      "kind": "constraint",
+      "label": "primary-key (id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "email"
+        ],
+        "databaseName": null,
+        "table": "table:catalog_member",
+        "type": "unique"
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Member"
+        }
+      ],
+      "id": "constraint:table%3Acatalog_member/unique/%5B%22email%22%5D",
+      "kind": "constraint",
+      "label": "unique (email)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "comment": null,
+        "managed": true,
+        "tablespace": null
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Author"
+        }
+      ],
+      "id": "table:catalog_author",
+      "kind": "table",
+      "label": "catalog_author"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "comment": null,
+        "managed": true,
+        "tablespace": null
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Book"
+        }
+      ],
+      "id": "table:catalog_book",
+      "kind": "table",
+      "label": "catalog_book"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "comment": null,
+        "managed": true,
+        "tablespace": null
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Loan"
+        }
+      ],
+      "id": "table:catalog_loan",
+      "kind": "table",
+      "label": "catalog_loan"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "autoCreated": false,
+        "comment": null,
+        "managed": true,
+        "tablespace": null
+      },
+      "evidence": [
+        {
+          "kind": "django-meta",
+          "source": "catalog.Member"
+        }
+      ],
+      "id": "table:catalog_member",
+      "kind": "table",
+      "label": "catalog_member"
+    }
+  ],
+  "metadata": {
+    "authority": "django.setup / apps.get_models / Model._meta",
+    "backend": "django.db.backends.sqlite3",
+    "framework": "django",
+    "frameworkVersion": "4.2.30",
+    "limitations": [
+      "Desired initialized model registry, not live database state or migration history; no SQL is executed.",
+      "ORM connection/cursor access is blocked, including startup hooks. Trusted repository code can still perform arbitrary non-ORM side effects.",
+      "Abstract/proxy/swapped models have no separate table; unmanaged and auto-created many-to-many tables are included.",
+      "Database types are backend field metadata; routers, backend feature support, generated SQL names, and migration-only objects are not inferred.",
+      "onDelete describes Django ORM behavior, not a database ON DELETE action. Defaults are serialized, never evaluated.",
+      "Constraint expressions use Django deconstruction, retaining framework field references; unsupported opaque values fail rather than use memory-address repr."
+    ],
+    "pythonVersion": "3.9.6",
+    "settings": "library.settings"
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_author/primary-key/%5B%22id%22%5D",
+      "id": "constrains:constraint%3Atable%253Acatalog_author%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253Acatalog_author%2Fid/",
+      "kind": "constrains",
+      "to": "column:table%3Acatalog_author/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_book/foreign-key/%5B%22author_id%22%5D",
+      "id": "constrains:constraint%3Atable%253Acatalog_book%2Fforeign-key%2F%255B%2522author_id%2522%255D/column%3Atable%253Acatalog_book%2Fauthor_id/",
+      "kind": "constrains",
+      "to": "column:table%3Acatalog_book/author_id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_book/index/%5B%22author_id%22%5D",
+      "id": "constrains:constraint%3Atable%253Acatalog_book%2Findex%2F%255B%2522author_id%2522%255D/column%3Atable%253Acatalog_book%2Fauthor_id/",
+      "kind": "constrains",
+      "to": "column:table%3Acatalog_book/author_id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_book/primary-key/%5B%22id%22%5D",
+      "id": "constrains:constraint%3Atable%253Acatalog_book%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253Acatalog_book%2Fid/",
+      "kind": "constrains",
+      "to": "column:table%3Acatalog_book/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_book/unique/%5B%22isbn%22%5D",
+      "id": "constrains:constraint%3Atable%253Acatalog_book%2Funique%2F%255B%2522isbn%2522%255D/column%3Atable%253Acatalog_book%2Fisbn/",
+      "kind": "constrains",
+      "to": "column:table%3Acatalog_book/isbn"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_loan/foreign-key/%5B%22book_id%22%5D",
+      "id": "constrains:constraint%3Atable%253Acatalog_loan%2Fforeign-key%2F%255B%2522book_id%2522%255D/column%3Atable%253Acatalog_loan%2Fbook_id/",
+      "kind": "constrains",
+      "to": "column:table%3Acatalog_loan/book_id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_loan/foreign-key/%5B%22member_id%22%5D",
+      "id": "constrains:constraint%3Atable%253Acatalog_loan%2Fforeign-key%2F%255B%2522member_id%2522%255D/column%3Atable%253Acatalog_loan%2Fmember_id/",
+      "kind": "constrains",
+      "to": "column:table%3Acatalog_loan/member_id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_loan/index/%5B%22book_id%22%5D",
+      "id": "constrains:constraint%3Atable%253Acatalog_loan%2Findex%2F%255B%2522book_id%2522%255D/column%3Atable%253Acatalog_loan%2Fbook_id/",
+      "kind": "constrains",
+      "to": "column:table%3Acatalog_loan/book_id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_loan/index/%5B%22member_id%22%5D",
+      "id": "constrains:constraint%3Atable%253Acatalog_loan%2Findex%2F%255B%2522member_id%2522%255D/column%3Atable%253Acatalog_loan%2Fmember_id/",
+      "kind": "constrains",
+      "to": "column:table%3Acatalog_loan/member_id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_loan/primary-key/%5B%22id%22%5D",
+      "id": "constrains:constraint%3Atable%253Acatalog_loan%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253Acatalog_loan%2Fid/",
+      "kind": "constrains",
+      "to": "column:table%3Acatalog_loan/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_member/primary-key/%5B%22id%22%5D",
+      "id": "constrains:constraint%3Atable%253Acatalog_member%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253Acatalog_member%2Fid/",
+      "kind": "constrains",
+      "to": "column:table%3Acatalog_member/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_member/unique/%5B%22email%22%5D",
+      "id": "constrains:constraint%3Atable%253Acatalog_member%2Funique%2F%255B%2522email%2522%255D/column%3Atable%253Acatalog_member%2Femail/",
+      "kind": "constrains",
+      "to": "column:table%3Acatalog_member/email"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_author",
+      "id": "contains:table%3Acatalog_author/column%3Atable%253Acatalog_author%2Fborn/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_author/born"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_author",
+      "id": "contains:table%3Acatalog_author/column%3Atable%253Acatalog_author%2Fid/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_author/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_author",
+      "id": "contains:table%3Acatalog_author/column%3Atable%253Acatalog_author%2Fname/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_author/name"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_author",
+      "id": "contains:table%3Acatalog_author/constraint%3Atable%253Acatalog_author%2Fprimary-key%2F%255B%2522id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3Acatalog_author/primary-key/%5B%22id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_book",
+      "id": "contains:table%3Acatalog_book/column%3Atable%253Acatalog_book%2Fauthor_id/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_book/author_id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_book",
+      "id": "contains:table%3Acatalog_book/column%3Atable%253Acatalog_book%2Fid/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_book/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_book",
+      "id": "contains:table%3Acatalog_book/column%3Atable%253Acatalog_book%2Fisbn/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_book/isbn"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_book",
+      "id": "contains:table%3Acatalog_book/column%3Atable%253Acatalog_book%2Fpages/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_book/pages"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_book",
+      "id": "contains:table%3Acatalog_book/column%3Atable%253Acatalog_book%2Fpublished/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_book/published"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_book",
+      "id": "contains:table%3Acatalog_book/column%3Atable%253Acatalog_book%2Ftitle/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_book/title"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_book",
+      "id": "contains:table%3Acatalog_book/constraint%3Atable%253Acatalog_book%2Fcheck%2Fbook_pages_positive/",
+      "kind": "contains",
+      "to": "constraint:table%3Acatalog_book/check/book_pages_positive"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_book",
+      "id": "contains:table%3Acatalog_book/constraint%3Atable%253Acatalog_book%2Fforeign-key%2F%255B%2522author_id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3Acatalog_book/foreign-key/%5B%22author_id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_book",
+      "id": "contains:table%3Acatalog_book/constraint%3Atable%253Acatalog_book%2Findex%2F%255B%2522author_id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3Acatalog_book/index/%5B%22author_id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_book",
+      "id": "contains:table%3Acatalog_book/constraint%3Atable%253Acatalog_book%2Fprimary-key%2F%255B%2522id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3Acatalog_book/primary-key/%5B%22id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_book",
+      "id": "contains:table%3Acatalog_book/constraint%3Atable%253Acatalog_book%2Funique%2F%255B%2522isbn%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3Acatalog_book/unique/%5B%22isbn%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_loan",
+      "id": "contains:table%3Acatalog_loan/column%3Atable%253Acatalog_loan%2Fbook_id/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_loan/book_id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_loan",
+      "id": "contains:table%3Acatalog_loan/column%3Atable%253Acatalog_loan%2Fborrowed_at/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_loan/borrowed_at"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_loan",
+      "id": "contains:table%3Acatalog_loan/column%3Atable%253Acatalog_loan%2Fdue/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_loan/due"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_loan",
+      "id": "contains:table%3Acatalog_loan/column%3Atable%253Acatalog_loan%2Fid/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_loan/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_loan",
+      "id": "contains:table%3Acatalog_loan/column%3Atable%253Acatalog_loan%2Fmember_id/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_loan/member_id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_loan",
+      "id": "contains:table%3Acatalog_loan/column%3Atable%253Acatalog_loan%2Freturned_at/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_loan/returned_at"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_loan",
+      "id": "contains:table%3Acatalog_loan/constraint%3Atable%253Acatalog_loan%2Fforeign-key%2F%255B%2522book_id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3Acatalog_loan/foreign-key/%5B%22book_id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_loan",
+      "id": "contains:table%3Acatalog_loan/constraint%3Atable%253Acatalog_loan%2Fforeign-key%2F%255B%2522member_id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3Acatalog_loan/foreign-key/%5B%22member_id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_loan",
+      "id": "contains:table%3Acatalog_loan/constraint%3Atable%253Acatalog_loan%2Findex%2F%255B%2522book_id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3Acatalog_loan/index/%5B%22book_id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_loan",
+      "id": "contains:table%3Acatalog_loan/constraint%3Atable%253Acatalog_loan%2Findex%2F%255B%2522member_id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3Acatalog_loan/index/%5B%22member_id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_loan",
+      "id": "contains:table%3Acatalog_loan/constraint%3Atable%253Acatalog_loan%2Fprimary-key%2F%255B%2522id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3Acatalog_loan/primary-key/%5B%22id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_member",
+      "id": "contains:table%3Acatalog_member/column%3Atable%253Acatalog_member%2Femail/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_member/email"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_member",
+      "id": "contains:table%3Acatalog_member/column%3Atable%253Acatalog_member%2Fid/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_member/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_member",
+      "id": "contains:table%3Acatalog_member/column%3Atable%253Acatalog_member%2Fjoined/",
+      "kind": "contains",
+      "to": "column:table%3Acatalog_member/joined"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_member",
+      "id": "contains:table%3Acatalog_member/constraint%3Atable%253Acatalog_member%2Fprimary-key%2F%255B%2522id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3Acatalog_member/primary-key/%5B%22id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "table:catalog_member",
+      "id": "contains:table%3Acatalog_member/constraint%3Atable%253Acatalog_member%2Funique%2F%255B%2522email%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3Acatalog_member/unique/%5B%22email%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "column:table%3Acatalog_book/author_id",
+      "id": "foreign-key:column%3Atable%253Acatalog_book%2Fauthor_id/column%3Atable%253Acatalog_author%2Fid/constraint%3Atable%253Acatalog_book%2Fforeign-key%2F%255B%2522author_id%2522%255D",
+      "kind": "foreign-key",
+      "to": "column:table%3Acatalog_author/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "column:table%3Acatalog_loan/book_id",
+      "id": "foreign-key:column%3Atable%253Acatalog_loan%2Fbook_id/column%3Atable%253Acatalog_book%2Fid/constraint%3Atable%253Acatalog_loan%2Fforeign-key%2F%255B%2522book_id%2522%255D",
+      "kind": "foreign-key",
+      "to": "column:table%3Acatalog_book/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "column:table%3Acatalog_loan/member_id",
+      "id": "foreign-key:column%3Atable%253Acatalog_loan%2Fmember_id/column%3Atable%253Acatalog_member%2Fid/constraint%3Atable%253Acatalog_loan%2Fforeign-key%2F%255B%2522member_id%2522%255D",
+      "kind": "foreign-key",
+      "to": "column:table%3Acatalog_member/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_book/foreign-key/%5B%22author_id%22%5D",
+      "id": "references:constraint%3Atable%253Acatalog_book%2Fforeign-key%2F%255B%2522author_id%2522%255D/table%3Acatalog_author/",
+      "kind": "references",
+      "to": "table:catalog_author"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_loan/foreign-key/%5B%22book_id%22%5D",
+      "id": "references:constraint%3Atable%253Acatalog_loan%2Fforeign-key%2F%255B%2522book_id%2522%255D/table%3Acatalog_book/",
+      "kind": "references",
+      "to": "table:catalog_book"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "constraint:table%3Acatalog_loan/foreign-key/%5B%22member_id%22%5D",
+      "id": "references:constraint%3Atable%253Acatalog_loan%2Fforeign-key%2F%255B%2522member_id%2522%255D/table%3Acatalog_member/",
+      "kind": "references",
+      "to": "table:catalog_member"
+    }
+  ],
+  "schema": "database/v0"
+}

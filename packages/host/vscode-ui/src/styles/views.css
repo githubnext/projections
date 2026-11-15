@@ -1,0 +1,115 @@
+/* The table and text views. */
+.phv-table-view,
+.phv-text-view {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  color: var(--phv-fg);
+  font-family: var(--phv-font);
+  font-size: var(--phv-size);
+}
+.phv-row-count,
+.phv-lead {
+  margin: 0;
+}
+.phv-table {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.phv-table vscode-table-row[data-change] > vscode-table-cell:first-child {
+  box-shadow: inset 2px 0 0 var(--phv-change-border);
+}
+.phv-table vscode-table-row[data-selected] {
+  background: var(--phv-selected);
+  color: var(--phv-selected-fg);
+  outline: 1px solid var(--vscode-list-inactiveFocusOutline, transparent);
+  outline-offset: -1px;
+}
+.phv-empty {
+  margin: 0;
+}
+.phv-more {
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+}
+.phv-select {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--phv-link);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.phv-select:hover {
+  text-decoration: underline;
+}
+.phv-select[aria-pressed='true'] {
+  font-weight: 600;
+}
+.phv-change-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 6px;
+  border: 1px solid var(--phv-change-border, var(--phv-border));
+  border-radius: 9px;
+  color: var(--phv-change, var(--phv-muted));
+  font-size: 11px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.phv-change-tag {
+  display: inline-flex;
+  padding: 0 6px;
+  border: 1px solid var(--phv-border);
+  border-radius: 9px;
+  color: var(--phv-muted);
+  font-size: 11px;
+  line-height: 16px;
+}
+.phv-text-view ul,
+.phv-text-view ol {
+  margin: 0;
+}
+.phv-outline {
+  display: grid;
+  gap: 4px;
+  padding-left: 20px;
+}
+.phv-steps {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+.phv-steps > li {
+  display: grid;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--phv-divider);
+  border-left-width: 2px;
+}
+.phv-steps > li[aria-current='step'] {
+  border-left-color: var(--phv-focus);
+  background: var(--phv-selected);
+}
+.phv-steps ul {
+  display: grid;
+  gap: 4px;
+  padding: 0;
+  list-style: none;
+}
+.phv-steps ul > li[data-change] {
+  padding-left: 8px;
+  box-shadow: inset 2px 0 0 var(--phv-change-border);
+}
+.phv-step-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--phv-size);
+  font-weight: 600;
+}

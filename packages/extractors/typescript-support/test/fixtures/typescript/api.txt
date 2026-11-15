@@ -1,0 +1,19 @@
+export interface Box<T extends string = string> {
+  readonly value: T;
+  transform<U>(fn: (value: T) => U): U;
+}
+export type Wrapped<T> = { [K in keyof T]?: T[K] };
+interface Result { count: number; name: string }
+export function choose(input: string): string;
+export function choose(input: number): number;
+export function choose(input: string | number): string | number { return input; }
+export function result(): Result { return { count: 1, name: 'one' }; }
+export class Service<T extends string = string> {
+  private secret = 1;
+  static version: number = 1;
+  readonly name: T;
+  constructor(name: T) { this.name = name; }
+  run(input: string): string;
+  run(input: number): number;
+  run(input: string | number): string | number { return input; }
+}

@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/extractor-request/v0.json",
+  "title": "Projections extractor stdin",
+  "description": "The document an extractor receives on stdin.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocolVersion", "projection", "repository", "capabilities"],
+  "properties": {
+    "protocolVersion": {"type": "number", "const": 0},
+    "projection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "definition"],
+      "properties": {
+        "id": {"$ref": "https://schemas.projections.githubnext.com/definition/v0.json#/$defs/identifier"},
+        "definition": {"$ref": "https://schemas.projections.githubnext.com/definition/v0.json"}
+      }
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "revision"],
+      "properties": {
+        "mode": {
+          "description": "How the revision is given: the user's checkout read in place, a reused workspace, a temporary materialization, or Git objects with nothing on disk.",
+          "enum": ["in-place", "workspace", "materialized", "git-objects"]
+        },
+        "root": {
+          "description": "The directory holding the examined revision. Absent in `git-objects` mode.",
+          "type": "string",
+          "minLength": 1
+        },
+        "git": {
+          "description": "In `git-objects` mode: the Git directory and the examined tree.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["directory", "tree"],
+          "properties": {
+            "directory": {"type": "string", "minLength": 1},
+            "tree": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"}
+          }
+        },
+        "revision": {
+          "$ref": "https://schemas.projections.githubnext.com/extraction-document/v0.json#/$defs/revision"
+        },
+        "project": {
+          "description": "The definition's project: the directory holding its `.github/projections` or `.projections`, relative to `root` (and to the Git tree in `git-objects` mode), `/`-separated; empty for the repository's root. The definition's paths and inputs are relative to it, and the extractor runs there. Absent means the root.",
+          "type": "string",
+          "maxLength": 1024,
+          "pattern": "^(?:[^/.\\\\][^/\\\\]*|\\.[^/.\\\\][^/\\\\]*|\\.\\.[^/\\\\]+)(?:/(?:[^/.\\\\][^/\\\\]*|\\.[^/.\\\\][^/\\\\]*|\\.\\.[^/\\\\]+))*$|^$"
+        },
+        "checkout": {
+          "description": "Where the repository's dependencies (such as `node_modules`) are installed for this run: the root itself in place or in a prepared workspace, or the user's checkout when a materialized revision borrows them; a nested project's are in its `project` directory there. Absent under container isolation and in `git-objects` mode.",
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "description": "The enforced scope, repository-relative (the definition's own, resolved from its project): files outside it are not listed and reads fail.",
+          "type": "array",
+          "items": {
+            "description": "A repository-relative file or directory, `/`-separated, without `.` or `..` segments.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trusted", "network"],
+      "properties": {"trusted": {"type": "boolean"}, "network": {"type": "boolean"}}
+    },
+    "upstream": {
+      "description": "The normalized extractions of the definition's `extractor.upstream` built-ins, keyed by the names the definition gives them. Present only when it declares some.",
+      "type": "object",
+      "additionalProperties": {"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"}
+    },
+    "generations": {
+      "description": "Earlier generated values to reuse for an equal basis. Absent when the store is empty or the run regenerates.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file"],
+      "properties": {
+        "file": {
+          "description": "A read-only JSON Lines snapshot of the generation store: one `{\"path\", \"basis\", \"value\"}` per line, keyed by a generated declaration's `path` and its basis digest.",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

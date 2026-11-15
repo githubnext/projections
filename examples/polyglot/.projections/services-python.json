@@ -1,0 +1,7 @@
+{
+  "id": "services-python",
+  "title": "Services extracted by Python",
+  "extractor": {"command": ["python3", "collect.py"], "sources": ["collect.py"]},
+  "renderer": "architecture",
+  "execution": {"timeoutMs": 5000, "network": false}
+}

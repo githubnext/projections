@@ -1,0 +1,46 @@
+# cargo-mutants configuration for the core Rust Engine and the default
+# comparator. Policy (packages/engine/TESTING.md): kill every viable mutant with a
+# behavioral test; exclude only equivalent or natively untestable mutants, each
+# with a reason.
+
+examine_globs = ["packages/engine/src/**/*.rs", "packages/comparators/default/src/**/*.rs"]
+
+exclude_globs = [
+  # Compiled only for wasm32, so native tests cannot reach them. The Engine ABI
+  # is exercised by packages/engine/js tests and the comparator ABI by the comparator
+  # runtime's tests against the built module.
+  "packages/engine/src/wasm.rs",
+  "packages/comparators/default/src/wasm.rs",
+]
+
+# packages/engine/verified is not examined here: Verus proves it for every input, and
+# its own mutation check (packages/engine/verified/scripts/mutants.mjs) plants a bug in
+# every clause and requires Verus to reject it. The glue that calls it, in
+# the Engine and the default comparator, is examined as usual.
+
+# Each entry is anchored to one mutant name from `cargo mutants --list`. Where a
+# function has several identical mutations, the entry names the line and column.
+exclude_re = [
+  # Equivalent. `Value::default()` is `Value::Null`, which `visit_unit` returns.
+  "^packages/engine/src/parse/json\\.rs:\\d+:\\d+: replace <impl Visitor<'de> for Seed<'_>>::visit_unit -> Result<Value, E> with Ok\\(Default::default\\(\\)\\)$",
+  # Equivalent. Ordering by dependents scores a step by the maximum over its
+  # members. A relationship ID is never an entity ID, so it would score 0, and
+  # every step of a phase with more than one step contains an entity, whose
+  # score is at least 0.
+  '^packages/comparators/default/src/order\.rs:\d+:\d+: replace match guard change\.collection == Collection::Entities with true in value$',
+  # The following never terminate, so the suite detects them only by timing
+  # out: the change ID suffix loop never finds a free ID, the depth queue index
+  # stops advancing, and union-find never reaches its root.
+  '^packages/comparators/default/src/matching\.rs:\d+:\d+: delete ! in unique_ids$',
+  '^packages/comparators/default/src/matching\.rs:\d+:\d+: replace \+= with \*= in unique_ids$',
+  '^packages/comparators/default/src/order\.rs:44:15: replace \+= with \*= in layer_depths$',
+  '^packages/comparators/default/src/order\.rs:\d+:\d+: replace != with == in components::find$',
+  # The claim groups' union-find: a root is its own parent, so breaking only
+  # when the parent differs walks that self-loop forever.
+  '^packages/comparators/default/src/matching\.rs:\d+:\d+: replace == with != in groups::find$',
+]
+
+# The comparator module test builds a release Wasm module from source to inspect
+# its imports and exports; it does not observe behavior and only reaches
+# wasm.rs, which is excluded above.
+additional_cargo_test_args = ["--", "--skip", "module_has_zero_imports_and_the_comparator_abi_exports"]

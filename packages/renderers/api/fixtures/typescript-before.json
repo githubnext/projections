@@ -1,0 +1,914 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "property",
+          "term": "property",
+          "type": {
+            "text": "number",
+            "union": [
+              {
+                "primitive": "number",
+                "text": "number"
+              }
+            ]
+          },
+          "visibility": "public"
+        },
+        "signature": "\"attempts\": number"
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 3,
+            "line": 10
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AJob:instance:attempts",
+      "kind": "member",
+      "label": "attempts"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "property",
+          "term": "property",
+          "type": {
+            "text": "T",
+            "union": [
+              {
+                "text": "T"
+              }
+            ]
+          },
+          "visibility": "public"
+        },
+        "signature": "\"data\": T"
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 3,
+            "line": 9
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AJob:instance:data",
+      "kind": "member",
+      "label": "data"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "property",
+          "term": "property",
+          "type": {
+            "text": "string",
+            "union": [
+              {
+                "primitive": "string",
+                "text": "string"
+              }
+            ]
+          },
+          "visibility": "public"
+        },
+        "signature": "\"id\": string"
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 3,
+            "line": 8
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AJob:instance:id",
+      "kind": "member",
+      "label": "id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "property",
+          "optional": true,
+          "term": "property",
+          "type": {
+            "text": "number | undefined",
+            "union": [
+              {
+                "primitive": "number",
+                "text": "number"
+              },
+              {
+                "primitive": "undefined",
+                "text": "undefined"
+              }
+            ]
+          },
+          "visibility": "public"
+        },
+        "signature": "\"attempts\"?: number | undefined"
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 3,
+            "line": 2
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:attempts",
+      "kind": "member",
+      "label": "attempts"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "property",
+          "term": "property",
+          "type": {
+            "text": "number",
+            "union": [
+              {
+                "primitive": "number",
+                "text": "number"
+              }
+            ]
+          },
+          "visibility": "public"
+        },
+        "signature": "\"delay\": number"
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 3,
+            "line": 3
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:delay",
+      "kind": "member",
+      "label": "delay"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "property",
+          "term": "property",
+          "type": {
+            "text": "\"high\" | \"low\" | \"normal\"",
+            "union": [
+              {
+                "primitive": "string",
+                "text": "\"high\""
+              },
+              {
+                "primitive": "string",
+                "text": "\"low\""
+              },
+              {
+                "primitive": "string",
+                "text": "\"normal\""
+              }
+            ]
+          },
+          "visibility": "public"
+        },
+        "signature": "\"priority\": \"high\" | \"low\" | \"normal\""
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 3,
+            "line": 4
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:priority",
+      "kind": "member",
+      "label": "priority"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "constructor",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "name",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "string",
+                    "union": [
+                      {
+                        "primitive": "string",
+                        "text": "string"
+                      }
+                    ]
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Queue<T>",
+                "union": [
+                  {
+                    "text": "Queue<T>"
+                  }
+                ]
+              }
+            }
+          ],
+          "term": "constructor",
+          "visibility": "public"
+        },
+        "signature": "new (name: string): Queue<T>"
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 1,
+            "line": 15
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:constructor",
+      "kind": "member",
+      "label": "constructor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "data",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "T",
+                    "union": [
+                      {
+                        "text": "T"
+                      }
+                    ]
+                  },
+                  "variadic": false
+                },
+                {
+                  "name": "options",
+                  "optional": true,
+                  "passing": "value",
+                  "type": {
+                    "text": "JobOptions | undefined",
+                    "union": [
+                      {
+                        "text": "JobOptions"
+                      },
+                      {
+                        "primitive": "undefined",
+                        "text": "undefined"
+                      }
+                    ]
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Job<T>",
+                "union": [
+                  {
+                    "text": "Job<T>"
+                  }
+                ]
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "\"add\"(data: T, options?: JobOptions | undefined): Job<T>"
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 3,
+            "line": 23
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:add",
+      "kind": "member",
+      "label": "add"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "id",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "string",
+                    "union": [
+                      {
+                        "primitive": "string",
+                        "text": "string"
+                      }
+                    ]
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Job<T> | undefined",
+                "union": [
+                  {
+                    "text": "Job<T>"
+                  },
+                  {
+                    "primitive": "undefined",
+                    "text": "undefined"
+                  }
+                ]
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "\"get\"(id: string): Job<T> | undefined"
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 3,
+            "line": 29
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:get",
+      "kind": "member",
+      "label": "get"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "property",
+          "readonly": true,
+          "term": "property",
+          "type": {
+            "text": "string",
+            "union": [
+              {
+                "primitive": "string",
+                "text": "string"
+              }
+            ]
+          },
+          "visibility": "public"
+        },
+        "signature": "readonly \"name\": string"
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 3,
+            "line": 16
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:name",
+      "kind": "member",
+      "label": "name"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [],
+              "returns": {
+                "text": "void",
+                "union": [
+                  {
+                    "primitive": "void",
+                    "text": "void"
+                  }
+                ]
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "\"pause\"(): void"
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 3,
+            "line": 37
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:pause",
+      "kind": "member",
+      "label": "pause"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "id",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "string",
+                    "union": [
+                      {
+                        "primitive": "string",
+                        "text": "string"
+                      }
+                    ]
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "false | true",
+                "union": [
+                  {
+                    "primitive": "boolean",
+                    "text": "false"
+                  },
+                  {
+                    "primitive": "boolean",
+                    "text": "true"
+                  }
+                ]
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "\"remove\"(id: string): false | true"
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 3,
+            "line": 33
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:remove",
+      "kind": "member",
+      "label": "remove"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "interface",
+          "term": "interface",
+          "visibility": "public"
+        },
+        "package": "@acme/queue",
+        "signature": "interface Job<T>",
+        "subpath": "."
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 1,
+            "line": 7
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api:%40acme%2Fqueue:.:Job",
+      "kind": "type",
+      "label": "Job"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "interface",
+          "term": "interface",
+          "visibility": "public"
+        },
+        "package": "@acme/queue",
+        "signature": "interface JobOptions",
+        "subpath": "."
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 1,
+            "line": 1
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api:%40acme%2Fqueue:.:JobOptions",
+      "kind": "type",
+      "label": "JobOptions"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "class",
+          "native": {
+            "nominalBrand": true
+          },
+          "term": "class",
+          "visibility": "public"
+        },
+        "package": "@acme/queue",
+        "signature": "class Queue<T>",
+        "subpath": "."
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 1,
+            "line": 15
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api:%40acme%2Fqueue:.:Queue",
+      "kind": "export",
+      "label": "Queue"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "alias",
+          "term": "alias",
+          "type": {
+            "text": "\"active\" | \"done\" | \"waiting\"",
+            "union": [
+              {
+                "primitive": "string",
+                "text": "\"active\""
+              },
+              {
+                "primitive": "string",
+                "text": "\"done\""
+              },
+              {
+                "primitive": "string",
+                "text": "\"waiting\""
+              }
+            ]
+          },
+          "visibility": "public"
+        },
+        "package": "@acme/queue",
+        "signature": "type Status = \"active\" | \"done\" | \"waiting\"",
+        "subpath": "."
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 1,
+            "line": 13
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api:%40acme%2Fqueue:.:Status",
+      "kind": "type",
+      "label": "Status"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "variable",
+          "term": "variable",
+          "type": {
+            "text": "string",
+            "union": [
+              {
+                "primitive": "string",
+                "text": "string"
+              }
+            ]
+          },
+          "visibility": "public"
+        },
+        "package": "@acme/queue",
+        "signature": "VERSION: string",
+        "subpath": "."
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 14,
+            "line": 48
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api:%40acme%2Fqueue:.:VERSION",
+      "kind": "export",
+      "label": "VERSION"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "function",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "name",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "string",
+                    "union": [
+                      {
+                        "primitive": "string",
+                        "text": "string"
+                      }
+                    ]
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Queue<T>",
+                "union": [
+                  {
+                    "text": "Queue<T>"
+                  }
+                ]
+              },
+              "typeParameters": [
+                {
+                  "constraints": [],
+                  "name": "T"
+                }
+              ]
+            }
+          ],
+          "term": "function",
+          "visibility": "public"
+        },
+        "package": "@acme/queue",
+        "signature": "createQueue<T>(name: string): Queue<T>",
+        "subpath": "."
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 1,
+            "line": 40
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api:%40acme%2Fqueue:.:createQueue",
+      "kind": "export",
+      "label": "createQueue"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "function",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "job",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Job<unknown>",
+                    "union": [
+                      {
+                        "text": "Job<unknown>"
+                      }
+                    ]
+                  },
+                  "variadic": false
+                },
+                {
+                  "name": "attempts",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "number | string",
+                    "union": [
+                      {
+                        "primitive": "number",
+                        "text": "number"
+                      },
+                      {
+                        "primitive": "string",
+                        "text": "string"
+                      }
+                    ]
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "void",
+                "union": [
+                  {
+                    "primitive": "void",
+                    "text": "void"
+                  }
+                ]
+              }
+            }
+          ],
+          "term": "function",
+          "visibility": "public"
+        },
+        "package": "@acme/queue",
+        "signature": "retry(job: Job<unknown>, attempts: number | string): void",
+        "subpath": "."
+      },
+      "evidence": [
+        {
+          "kind": "typescript",
+          "location": {
+            "column": 1,
+            "line": 44
+          },
+          "source": "index.ts"
+        }
+      ],
+      "id": "ts-api:%40acme%2Fqueue:.:retry",
+      "kind": "export",
+      "label": "retry"
+    }
+  ],
+  "metadata": {
+    "analysis": "TypeScript checker public exports; implementation bodies and private members excluded",
+    "ecosystem": "typescript",
+    "limitations": [
+      "Conditional exports are combined; conflicting surfaces require explicit subpath entrypoints.",
+      "Declaration merging and structural types use checker-visible public shape."
+    ]
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "data": {},
+      "from": "ts-api:%40acme%2Fqueue:.:Job",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJob:ts-api%253A%252540acme%25252Fqueue%253A.%253AJob%3Ainstance%3Aattempts",
+      "kind": "contains",
+      "to": "ts-api%3A%2540acme%252Fqueue%3A.%3AJob:instance:attempts"
+    },
+    {
+      "data": {},
+      "from": "ts-api:%40acme%2Fqueue:.:Job",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJob:ts-api%253A%252540acme%25252Fqueue%253A.%253AJob%3Ainstance%3Adata",
+      "kind": "contains",
+      "to": "ts-api%3A%2540acme%252Fqueue%3A.%3AJob:instance:data"
+    },
+    {
+      "data": {},
+      "from": "ts-api:%40acme%2Fqueue:.:Job",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJob:ts-api%253A%252540acme%25252Fqueue%253A.%253AJob%3Ainstance%3Aid",
+      "kind": "contains",
+      "to": "ts-api%3A%2540acme%252Fqueue%3A.%3AJob:instance:id"
+    },
+    {
+      "data": {},
+      "from": "ts-api:%40acme%2Fqueue:.:JobOptions",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AJobOptions%3Ainstance%3Aattempts",
+      "kind": "contains",
+      "to": "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:attempts"
+    },
+    {
+      "data": {},
+      "from": "ts-api:%40acme%2Fqueue:.:JobOptions",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AJobOptions%3Ainstance%3Adelay",
+      "kind": "contains",
+      "to": "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:delay"
+    },
+    {
+      "data": {},
+      "from": "ts-api:%40acme%2Fqueue:.:JobOptions",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AJobOptions%3Ainstance%3Apriority",
+      "kind": "contains",
+      "to": "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:priority"
+    },
+    {
+      "data": {},
+      "from": "ts-api:%40acme%2Fqueue:.:Queue",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Aconstructor",
+      "kind": "contains",
+      "to": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:constructor"
+    },
+    {
+      "data": {},
+      "from": "ts-api:%40acme%2Fqueue:.:Queue",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aadd",
+      "kind": "contains",
+      "to": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:add"
+    },
+    {
+      "data": {},
+      "from": "ts-api:%40acme%2Fqueue:.:Queue",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aget",
+      "kind": "contains",
+      "to": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:get"
+    },
+    {
+      "data": {},
+      "from": "ts-api:%40acme%2Fqueue:.:Queue",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aname",
+      "kind": "contains",
+      "to": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:name"
+    },
+    {
+      "data": {},
+      "from": "ts-api:%40acme%2Fqueue:.:Queue",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Apause",
+      "kind": "contains",
+      "to": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:pause"
+    },
+    {
+      "data": {},
+      "from": "ts-api:%40acme%2Fqueue:.:Queue",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aremove",
+      "kind": "contains",
+      "to": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:remove"
+    }
+  ],
+  "schema": "api/v0"
+}

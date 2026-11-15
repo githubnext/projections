@@ -1,0 +1,284 @@
+/* The host UI's component styles; imported by ../theme.css. */
+@layer components {
+  /*
+   * Component styles utilities can't express. `Range` (components/range.tsx): a native range input styled like
+   * shadcn's Slider; `--pj-range-fill` is the filled share of the track.
+   */
+  .pj-root .pj-range {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 16px;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .pj-root .pj-range:focus-visible {
+    outline: none;
+  }
+  .pj-root .pj-range:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  /* Projector: a muted, hairline-bordered track filled with the foreground; the thumb carries a lens dot. */
+  .pj-root .pj-range::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 9999px;
+    background: linear-gradient(to right, var(--pj-foreground) var(--pj-range-fill, 0%), var(--pj-muted) var(--pj-range-fill, 0%));
+    box-shadow: inset 0 0 0 1px var(--pj-control-border);
+  }
+  .pj-root .pj-range::-moz-range-track {
+    height: 6px;
+    border-radius: 9999px;
+    background: var(--pj-muted);
+    box-shadow: inset 0 0 0 1px var(--pj-control-border);
+  }
+  .pj-root .pj-range::-moz-range-progress {
+    height: 6px;
+    border-radius: 9999px;
+    background: var(--pj-foreground);
+  }
+  .pj-root .pj-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    width: 16px;
+    height: 16px;
+    margin-top: -5px;
+    border: 1px solid var(--pj-input);
+    border-radius: 9999px;
+    background: radial-gradient(circle, var(--pj-lens) 0 3px, var(--pj-card) 3.5px);
+    box-shadow: 0 1px 3px oklch(0 0 0 / 0.2);
+    transition: box-shadow 150ms;
+  }
+  .pj-root .pj-range::-moz-range-thumb {
+    box-sizing: border-box;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--pj-input);
+    border-radius: 9999px;
+    background: radial-gradient(circle, var(--pj-lens) 0 3px, var(--pj-card) 3.5px);
+    box-shadow: 0 1px 3px oklch(0 0 0 / 0.2);
+  }
+  .pj-root .pj-range:focus-visible::-webkit-slider-thumb {
+    box-shadow:
+      0 0 0 2px var(--pj-background),
+      0 0 0 4px var(--pj-ring);
+  }
+  .pj-root .pj-range:focus-visible::-moz-range-thumb {
+    box-shadow:
+      0 0 0 2px var(--pj-background),
+      0 0 0 4px var(--pj-ring);
+  }
+
+  /*
+   * The lens: the round play control, in the primary colors with a soft top-lit face, an inset top highlight and
+   * a concentric 1px ring (input color, 2px off the face). While playing (`data-playing`) the ring becomes 2px of
+   * lens and, in light mode only, the face picks up a faint lens tint. From the Projector preview's `.lens`. The
+   * button is a toolbar control's 32px square: the face and its rings are drawn inside it (`::before`, 4px in), so the
+   * play button is as tall as the buttons beside it and nothing it draws reaches past its box.
+   */
+  .pj-root .pj-lens {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 9999px;
+    cursor: pointer;
+    color: var(--pj-primary-foreground);
+    background: transparent;
+  }
+  .pj-root .pj-lens::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: inherit;
+    background: var(--pj-lens-face);
+    box-shadow:
+      var(--pj-lens-highlight),
+      0 0 0 2px var(--pj-card),
+      0 0 0 3px var(--pj-input);
+    transition: box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .pj-root .pj-lens:hover::before {
+    box-shadow:
+      var(--pj-lens-highlight),
+      0 0 0 2px var(--pj-card),
+      0 0 0 3px var(--pj-muted-foreground);
+  }
+  .pj-root .pj-lens[data-playing]::before {
+    background: var(--pj-lens-face-playing);
+    box-shadow:
+      var(--pj-lens-highlight),
+      0 0 0 2px var(--pj-card),
+      0 0 0 4px var(--pj-lens);
+  }
+  .pj-root .pj-lens:disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
+  .pj-root .pj-lens svg {
+    position: relative;
+    width: 11px;
+    height: 11px;
+  }
+
+  /* Vent ribs: the grip of a resize handle or splitter, a 1px input-colored hairline every 3px, 4×28px. */
+  .pj-root .pj-vent {
+    position: relative;
+  }
+  .pj-root .pj-vent::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 28px;
+    transform: translate(-50%, -50%);
+    border-radius: 1px;
+    background: repeating-linear-gradient(to right, var(--pj-input) 0 1px, transparent 1px 3px);
+    pointer-events: none;
+  }
+  .pj-root .pj-vent[aria-orientation='horizontal']::before {
+    width: 28px;
+    height: 4px;
+    background: repeating-linear-gradient(to bottom, var(--pj-input) 0 1px, transparent 1px 3px);
+  }
+
+  /*
+   * Chrome text centred by its cap height, not its line box: the summary bar's labels (`.ph-cap`) and the toolbar's
+   * mode, varied and Show as labels, each a flex item, trimmed to the cap height and the baseline, so a capital E has
+   * the same space above and below it in its strip or button. Engines without `text-box` take a line box one cap high,
+   * which centres the cap height to within the font's ascent and descent difference.
+   */
+  .pj-root :is(.ph-cap, .ph-mode-label, .ph-varied-toggle > span, .ph-show-as-chip > span) {
+    text-box: trim-both cap alphabetic;
+  }
+  @supports not (text-box: trim-both cap alphabetic) {
+    .pj-root :is(.ph-cap, .ph-mode-label, .ph-varied-toggle > span, .ph-show-as-chip > span) {
+      line-height: 1cap;
+    }
+  }
+
+  /*
+   * The prebuilt views' roots (ScopedRoot elements, which utilities can't style): a column of the toolbar row,
+   * notices, the workspace and the summary bar, flat and edge to edge, with no gutter between them: the toolbar and the
+   * summary bar are bands of the header's surface, and each boundary is one hairline in the divider colour. Filling
+   * (`data-fill`, the default), they take their container's height, keeping a usable minimum when it has none, and the
+   * explorer's view takes what its own rows leave.
+   */
+  .pj-root.ph,
+  .pj-root.ph-explorer {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-width: 0;
+  }
+  /* A renderer's legend (stage/legend.tsx) is a band of the chrome's header surface, ruled by its divider. */
+  .pj-root.ph {
+    --pj-legend-border-color: var(--pj-divider);
+    --pj-legend-surface: var(--pj-surface-header);
+    --pj-legend-chip-border: color-mix(in oklab, var(--pj-foreground) 20%, transparent);
+  }
+  .pj-root.ph[data-fill],
+  .pj-root.ph-explorer[data-fill] {
+    height: 100%;
+    min-height: min(28rem, 75dvh);
+  }
+  .pj-root.ph-explorer[data-fill] > .pj-root.ph {
+    flex: 1 1 0;
+    height: auto;
+    min-height: 0;
+  }
+  /* Full screen: the view over the whole screen, natively or (where element full screen is unavailable) as a fixed overlay. */
+  .pj-root.ph:fullscreen,
+  .pj-root.ph[data-fullscreen='fallback'] {
+    height: 100%;
+    min-height: 0;
+    background-color: var(--pj-background);
+  }
+  .pj-root.ph[data-fullscreen='fallback'] {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    height: 100dvh;
+  }
+
+  /*
+   * Swipe's divider: its 1px line takes the thumb's outline color, so the two read as one control, and both change
+   * together, to the accent's emphasis (and a tinted thumb) while pointed at or dragged and to the focus color under
+   * keyboard focus. The stage styles them inline, so these override it.
+   */
+  .pj-root .ph-swipe-handle {
+    --pj-swipe-edge: var(--projections-color-accent);
+  }
+  .pj-root .ph-swipe-handle:is([data-dragging], :has(.ph-swipe-grab:hover)) {
+    --pj-swipe-edge: var(--projections-color-accent-emphasis);
+  }
+  .pj-root .ph-swipe-handle[data-focus-visible] {
+    --pj-swipe-edge: var(--projections-color-focus);
+  }
+  .pj-root .ph-swipe-line {
+    background: var(--pj-swipe-edge) !important;
+  }
+  .pj-root .ph-swipe-thumb {
+    border-color: var(--pj-swipe-edge) !important;
+    color: var(--pj-swipe-edge) !important;
+  }
+  .pj-root .ph-swipe-handle:is([data-dragging], :has(.ph-swipe-grab:hover)) .ph-swipe-thumb {
+    background: color-mix(in srgb, var(--pj-swipe-edge) 16%, var(--projections-color-bg)) !important;
+  }
+  /*
+   * The stage runs edge to edge: a single frame, like a pane of side by side or swipe (the stage's `[data-pane-card]`,
+   * edged by the view's flat `paneEdge`), has no edge or corners of its own, and the frames (frame.ts styles them
+   * inline with `border: 0`) draw none either: the stage, a canvas like the views'.
+   */
+  .pj-root .ph-single {
+    box-sizing: border-box;
+    overflow: clip;
+  }
+  .pj-root .ph-frame {
+    background-color: var(--pj-surface-canvas);
+  }
+  /*
+   * A renderer's frame runs 1px past its host, which clips it: a frame shows only its whole pixels, so one whose height
+   * has a fraction of a pixel would otherwise leave a strip of the host below them, a second line above the legend or
+   * the summary bar. Its focus ring is drawn inside, where the clip can't hide it (projector.css).
+   */
+  .pj-root.ph .ph-frame-host {
+    overflow: clip;
+  }
+  .pj-root.ph .ph-frame {
+    margin-bottom: -1px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pj-root :where(*),
+    .pj-root :where(*)::before,
+    .pj-root :where(*)::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .pj-root [role='tab'][aria-selected='true'],
+    .pj-root [role='radio'][aria-checked='true'] {
+      outline: 2px solid Highlight;
+    }
+  }
+
+  /* Long, unbroken labels and IDs wrap within narrow screens instead of widening the page. */
+  .pj-root .ph-text-view,
+  .pj-root .ph-text-view * {
+    overflow-wrap: anywhere;
+  }
+}

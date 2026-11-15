@@ -1,0 +1,301 @@
+// The repository's gates, as `npm run check` and CI run them, and a runner that summarises each one.
+import type {Affected} from './affected.ts'
+import {TOOLS} from './invocation.ts'
+import {cliBinary, unmet} from './needs.ts'
+import {linkProblems} from './links.ts'
+import {inDependencyOrder, readmeProblems, type Unit} from './packages.ts'
+import {parseConsidered, parseFormatCheck, parseProblems, parseStalePages, tail, type Problem} from './problems.ts'
+import {display, run, type Command} from './repo.ts'
+import {versionProblems} from './release-check.ts'
+import {existsSync} from 'node:fs'
+import {join} from 'node:path'
+
+export {TOOLS}
+
+export type GateContext = {root: string; units: readonly Unit[]; affected?: Affected | undefined; files?: readonly string[] | undefined}
+
+export type Plan = {commands: Command[]} | {skip: string} | {internal: () => Problem[]}
+
+export type Gate = {
+  name: string
+  description: string
+  /** Gates that must pass first. */
+  after?: string[]
+  /** Run only when asked for (`--only`, or a flag). */
+  optional?: boolean
+  plan(context: GateContext): Plan
+  parse?(output: string, root: string): Problem[]
+  /** The command that fixes this gate's failures, when one does. */
+  fix?: string
+}
+
+const npm = (...argv: string[]): Command => ({argv: ['npm', ...argv]})
+const npx = (...argv: string[]): Command => ({argv: ['npx', '--no-install', ...argv]})
+
+/** Workspaces the change touches (changed and dependants) with `script`, in dependency order. */
+function affectedWorkspaces(context: GateContext, script: string): Unit[] {
+  const affected = context.affected
+  if (!affected) return []
+  const paths = inDependencyOrder(context.units, [...affected.changed, ...affected.dependants])
+  return paths
+    .map(path => context.units.find(unit => unit.path === path) as Unit)
+    .filter(unit => unit.kinds.includes('npm') && unit.scripts.includes(script))
+}
+
+function workspaceCommands(context: GateContext, script: string): Plan {
+  const units = affectedWorkspaces(context, script)
+  return units.length
+    ? {commands: units.map(unit => npm('run', script, '--workspace', unit.names[0] as string))}
+    : {skip: `no affected workspace has a ${script} script`}
+}
+
+const changedFiles = (context: GateContext, pattern: RegExp) =>
+  (context.files ?? []).filter(path => pattern.test(path) && existsSync(join(context.root, path)))
+
+const affectedCrates = (context: GateContext) =>
+  context.units
+    .filter(
+      unit =>
+        unit.kinds.includes('crate') && [...(context.affected?.changed ?? []), ...(context.affected?.dependants ?? [])].includes(unit.path),
+    )
+    .map(unit => unit.names.at(-1) as string)
+
+export const gates: Gate[] = [
+  {
+    name: 'boundaries',
+    description: 'Dependency and import boundaries (npm run check:boundaries)',
+    plan: () => ({commands: [npm('run', '--silent', 'check:boundaries')]}),
+  },
+  {
+    name: 'casing',
+    description: 'No style recases text: data verbatim, human text in sentence case (npm run check:casing)',
+    plan: () => ({commands: [npm('run', '--silent', 'check:casing')]}),
+  },
+  {
+    name: 'icons',
+    description: 'The product icons and their generated outputs are current (npm run check:icons)',
+    plan: () => ({commands: [npm('run', '--silent', 'check:icons')]}),
+    fix: 'npm run icons',
+  },
+  {
+    name: 'considered',
+    description: 'File size, line length, code lines and complexity against .considered.yaml (npm run check:considered)',
+    plan: () => ({commands: [{argv: ['node', 'tools/scripts/considered.mjs', 'check', '--json']}]}),
+    parse: (output, root) => {
+      const violations = parseConsidered(output)
+      return violations.length ? violations : parseProblems(output, root)
+    },
+  },
+  {
+    name: 'tsdoc',
+    description: 'Every public TypeScript symbol has a documentation comment (npm run check:tsdoc)',
+    plan: context =>
+      context.affected && !context.affected.kinds.some(kind => kind === 'ts' || kind === 'manifests')
+        ? {skip: 'no TypeScript or manifest changed'}
+        : {commands: [npm('run', '--silent', 'check:tsdoc')]},
+  },
+  {
+    name: 'lockfile',
+    description: 'Lockfile registry URLs (npm run check:lockfile)',
+    plan: context =>
+      context.affected && !context.affected.kinds.includes('manifests')
+        ? {skip: 'no manifest changed'}
+        : {commands: [npm('run', '--silent', 'check:lockfile')]},
+    fix: 'node tools/scripts/lockfile-registry.mjs --fix',
+  },
+  {
+    name: 'readmes',
+    description: 'Every workspace and crate README has a front matter description (npm run check:readmes)',
+    plan: context => ({internal: () => readmeProblems(context.units)}),
+  },
+  {
+    name: 'links',
+    description: 'Relative Markdown links and anchors resolve, and docs/ pages named in source exist (npm run check:links)',
+    plan: context => ({internal: () => linkProblems(context.root)}),
+  },
+  {
+    name: 'versions',
+    description:
+      'Every shipped manifest, their dependencies on each other and both lockfiles carry the release version (npm run check:versions)',
+    plan: context => ({internal: () => versionProblems(context.root).map(({file, line, message}) => ({file, line, message}))}),
+    fix: `${TOOLS} version <version>`,
+  },
+  {
+    name: 'format',
+    description: 'Formatting (oxfmt --check)',
+    plan: context => {
+      if (!context.affected) return {commands: [npx('oxfmt', '--check')]}
+      const files = changedFiles(context, /\.([cm]?[jt]sx?|json|jsonc|ya?ml|css|html|toml)$/)
+      return files.length
+        ? {commands: [npx('oxfmt', '--check', '--no-error-on-unmatched-pattern', ...files)]}
+        : {skip: 'no formattable file changed'}
+    },
+    parse: parseFormatCheck,
+    fix: `${TOOLS} fix --only format`,
+  },
+  {
+    name: 'lint',
+    description: 'ESLint (npm run lint)',
+    plan: context => {
+      if (!context.affected) return {commands: [npx('eslint', '.', '--quiet')]}
+      const files = changedFiles(context, /\.([cm]?[jt]sx?)$/)
+      return files.length
+        ? {commands: [npx('eslint', '--quiet', '--no-warn-ignored', ...files)]}
+        : {skip: 'no TypeScript or JavaScript changed'}
+    },
+  },
+  {
+    name: 'cargo-fmt',
+    description: 'Rust formatting (cargo fmt --check)',
+    plan: context =>
+      context.affected && !context.affected.kinds.includes('rust')
+        ? {skip: 'no Rust changed'}
+        : {commands: [{argv: ['cargo', 'fmt', '--all', '--', '--check']}]},
+    fix: `${TOOLS} fix --only cargo-fmt`,
+  },
+  {
+    name: 'build',
+    description: 'Build every workspace in dependency order (npm run build)',
+    plan: context => (context.affected ? workspaceCommands(context, 'build') : {commands: [npm('run', 'build')]}),
+  },
+  {
+    name: 'notices',
+    description:
+      "notices/notices.json covers exactly the locked versions of the crates that ship no license files, and notices/README.md's table is current (npm run check:notices)",
+    // The build fetches the crate sources it reads license files from.
+    after: ['build'],
+    plan: context =>
+      context.affected &&
+      !context.affected.kinds.includes('rust') &&
+      !(context.files ?? []).some(path => /^notices\/|^tools\/scripts\/(crate-)?notices\.mjs$|^dist-workspace\.toml$/.test(path))
+        ? {skip: 'no crate, notices or release target changed'}
+        : {commands: [npm('run', '--silent', 'check:notices')]},
+  },
+  {
+    name: 'comparators',
+    description: 'Comparator files and docs examples against the schema and the rules interpreter (npm run check:comparators)',
+    after: ['build'],
+    plan: context =>
+      context.affected && !context.affected.kinds.some(kind => kind === 'comparators' || kind === 'docs')
+        ? {skip: 'no comparator, schema or docs change'}
+        : {commands: [npm('run', '--silent', 'check:comparators')]},
+  },
+  {
+    name: 'typecheck',
+    description: 'Unfiltered TypeScript in every workspace (npm run typecheck)',
+    after: ['build'],
+    plan: context => (context.affected ? workspaceCommands(context, 'typecheck') : {commands: [npm('run', 'typecheck')]}),
+  },
+  {
+    name: 'docs',
+    description: 'Generated reference pages are current (npm run docs:check)',
+    after: ['build'],
+    plan: context => {
+      if (
+        context.affected &&
+        !context.affected.regenerate.some(generator => generator.name === 'reference-docs' || generator.name === 'builtin-docs') &&
+        !(context.files ?? []).some(path => /^docs\/(reference|agents|builtins)\//.test(path))
+      )
+        return {skip: 'no reference docs source changed'}
+      const missing = unmet(context.root, ['nightly'])
+      if (missing.length) return {skip: `needs the pinned nightly: ${missing[0]?.fix}`}
+      if (!existsSync(join(context.root, cliBinary))) return {skip: 'needs the built CLI: npm run build'}
+      return {commands: [npm('run', '--silent', 'docs:check')]}
+    },
+    parse: (output, root) => [...parseStalePages(output), ...parseProblems(output, root)],
+    fix: `${TOOLS} fix --only reference-docs`,
+  },
+  {
+    name: 'clippy',
+    description: 'Clippy with warnings denied (part of npm run test:rust)',
+    optional: true,
+    plan: context => {
+      if (context.affected && !context.affected.kinds.includes('rust')) return {skip: 'no Rust changed'}
+      const crates = context.affected ? affectedCrates(context) : []
+      return {
+        commands: [
+          {
+            argv: [
+              'cargo',
+              'clippy',
+              ...(crates.length ? crates.flatMap(crate => ['-p', crate]) : ['--workspace']),
+              '--all-targets',
+              '--locked',
+              '--message-format',
+              'short',
+              '--',
+              '-D',
+              'warnings',
+            ],
+          },
+        ],
+      }
+    },
+  },
+]
+
+export type GateResult = {
+  gate: string
+  status: 'pass' | 'fail' | 'skip'
+  durationMs?: number
+  commands?: string[]
+  reason?: string
+  problems?: Problem[]
+  moreProblems?: number
+  tail?: string[]
+  fix?: string
+}
+
+/** Bounds a problem list for output. */
+export function bound(problems: readonly Problem[], limit: number): {problems: Problem[]; moreProblems?: number} {
+  return problems.length > limit ? {problems: problems.slice(0, limit), moreProblems: problems.length - limit} : {problems: [...problems]}
+}
+
+/** A command for display, with long file lists shortened. */
+export function abbreviate(command: Command, keep = 4): string {
+  const files = command.argv.filter(word => /\.\w+$/.test(word) && !word.startsWith('-'))
+  if (files.length <= keep) return display(command)
+  const shown = new Set(files.slice(0, keep))
+  const argv = command.argv.filter(word => !files.includes(word) || shown.has(word))
+  return `${display({...command, argv})} … (+${files.length - keep} files)`
+}
+
+export async function runGate(
+  gate: Gate,
+  context: GateContext,
+  options: {limit?: number; progress?: (line: string) => void} = {},
+): Promise<GateResult> {
+  const plan = gate.plan(context)
+  if ('skip' in plan) return {gate: gate.name, status: 'skip', reason: plan.skip}
+  const started = Date.now()
+  if ('internal' in plan) {
+    const problems = plan.internal()
+    return {
+      gate: gate.name,
+      status: problems.length ? 'fail' : 'pass',
+      durationMs: Date.now() - started,
+      ...(problems.length ? bound(problems, options.limit ?? 5) : {}),
+    }
+  }
+  const commands: string[] = []
+  for (const command of plan.commands) {
+    options.progress?.(`  $ ${command.argv.join(' ')}`)
+    const ran = await run(context.root, command)
+    commands.push(abbreviate(command))
+    if (ran.exitCode !== 0) {
+      const problems = ran.missing
+        ? [{file: undefined, line: undefined, message: `${ran.missing} is not installed or not on PATH`}]
+        : (gate.parse ?? parseProblems)(ran.output, context.root)
+      return {
+        gate: gate.name,
+        status: 'fail',
+        durationMs: Date.now() - started,
+        commands,
+        ...bound(problems, options.limit ?? 5),
+        ...(problems.length ? {} : {tail: tail(ran.output)}),
+        ...(gate.fix ? {fix: gate.fix} : {}),
+      }
+    }
+  }
+  return {gate: gate.name, status: 'pass', durationMs: Date.now() - started, commands}
+}

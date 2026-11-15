@@ -1,0 +1,474 @@
+{
+  "protocolVersion": 0,
+  "schema": "architecture/v0",
+  "vocabularies": ["dependency-injection/v0"],
+  "entities": [
+    {
+      "id": "service:Orders:OrdersController:unkeyed",
+      "kind": "service",
+      "label": "OrdersController",
+      "data": {
+        "key": "unkeyed"
+      }
+    },
+    {
+      "id": "service:Orders:OrdersController:unkeyed:registration:0",
+      "kind": "registration",
+      "label": "OrdersController [0]",
+      "data": {
+        "lifetime": "Transient",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Orders:OrdersController"
+      }
+    },
+    {
+      "id": "implementation:Orders:OrdersController",
+      "kind": "implementation",
+      "label": "OrdersController"
+    },
+    {
+      "id": "service:Orders:IOrderService:unkeyed",
+      "kind": "service",
+      "label": "IOrderService",
+      "data": {
+        "key": "unkeyed"
+      }
+    },
+    {
+      "id": "service:Orders:IOrderService:unkeyed:registration:0",
+      "kind": "registration",
+      "label": "IOrderService [0]",
+      "data": {
+        "lifetime": "Scoped",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Orders:OrderService"
+      }
+    },
+    {
+      "id": "implementation:Orders:OrderService",
+      "kind": "implementation",
+      "label": "OrderService"
+    },
+    {
+      "id": "service:Orders:IOrderRepository:unkeyed",
+      "kind": "service",
+      "label": "IOrderRepository",
+      "data": {
+        "key": "unkeyed"
+      }
+    },
+    {
+      "id": "service:Orders:IOrderRepository:unkeyed:registration:0",
+      "kind": "registration",
+      "label": "IOrderRepository [0]",
+      "data": {
+        "lifetime": "Scoped",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Orders:SqlOrderRepository"
+      }
+    },
+    {
+      "id": "implementation:Orders:SqlOrderRepository",
+      "kind": "implementation",
+      "label": "SqlOrderRepository"
+    },
+    {
+      "id": "service:Orders:IDbConnectionFactory:unkeyed",
+      "kind": "service",
+      "label": "IDbConnectionFactory",
+      "data": {
+        "key": "unkeyed"
+      }
+    },
+    {
+      "id": "service:Orders:IDbConnectionFactory:unkeyed:registration:0",
+      "kind": "registration",
+      "label": "IDbConnectionFactory [0]",
+      "data": {
+        "lifetime": "Singleton",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Orders:SqlConnectionFactory"
+      }
+    },
+    {
+      "id": "implementation:Orders:SqlConnectionFactory",
+      "kind": "implementation",
+      "label": "SqlConnectionFactory"
+    },
+    {
+      "id": "service:Orders:IClock:unkeyed",
+      "kind": "service",
+      "label": "IClock",
+      "data": {
+        "key": "unkeyed"
+      }
+    },
+    {
+      "id": "service:Orders:IClock:unkeyed:registration:0",
+      "kind": "registration",
+      "label": "IClock [0]",
+      "data": {
+        "lifetime": "Singleton",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Orders:SystemClock"
+      }
+    },
+    {
+      "id": "implementation:Orders:SystemClock",
+      "kind": "implementation",
+      "label": "SystemClock"
+    },
+    {
+      "id": "service:Orders:ILogger:unkeyed",
+      "kind": "service",
+      "label": "ILogger",
+      "data": {
+        "key": "unkeyed"
+      }
+    },
+    {
+      "id": "service:Orders:ILogger:unkeyed:registration:0",
+      "kind": "registration",
+      "label": "ILogger [0]",
+      "data": {
+        "lifetime": "Singleton",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Orders:ConsoleLogger"
+      }
+    },
+    {
+      "id": "implementation:Orders:ConsoleLogger",
+      "kind": "implementation",
+      "label": "ConsoleLogger"
+    },
+    {
+      "id": "service:Orders:IValidator:unkeyed",
+      "kind": "service",
+      "label": "IValidator",
+      "data": {
+        "key": "unkeyed"
+      }
+    },
+    {
+      "id": "service:Orders:IValidator:unkeyed:registration:0",
+      "kind": "registration",
+      "label": "IValidator [0]",
+      "data": {
+        "lifetime": "Transient",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Orders:AddressValidator"
+      }
+    },
+    {
+      "id": "implementation:Orders:AddressValidator",
+      "kind": "implementation",
+      "label": "AddressValidator"
+    },
+    {
+      "id": "service:Orders:IValidator:unkeyed:registration:1",
+      "kind": "registration",
+      "label": "IValidator [1]",
+      "data": {
+        "lifetime": "Transient",
+        "ordinal": 1,
+        "registrationKind": "type",
+        "implementation": "Orders:OrderValidator"
+      }
+    },
+    {
+      "id": "implementation:Orders:OrderValidator",
+      "kind": "implementation",
+      "label": "OrderValidator"
+    },
+    {
+      "id": "service:Orders:IFeatureFlags:orders",
+      "kind": "service",
+      "label": "IFeatureFlags",
+      "data": {
+        "key": "orders"
+      }
+    },
+    {
+      "id": "service:Orders:IFeatureFlags:orders:registration:0",
+      "kind": "registration",
+      "label": "IFeatureFlags [0]",
+      "data": {
+        "lifetime": "Singleton",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Orders:OrderFlags"
+      }
+    },
+    {
+      "id": "implementation:Orders:OrderFlags",
+      "kind": "implementation",
+      "label": "OrderFlags"
+    },
+    {
+      "id": "service:Orders:IPricing:unkeyed",
+      "kind": "service",
+      "label": "IPricing",
+      "data": {
+        "key": "unkeyed"
+      }
+    },
+    {
+      "id": "service:Orders:IPricing:unkeyed:registration:0",
+      "kind": "registration",
+      "label": "IPricing [0]",
+      "data": {
+        "lifetime": "Transient",
+        "ordinal": 0,
+        "registrationKind": "type",
+        "implementation": "Orders:LegacyPricing"
+      }
+    },
+    {
+      "id": "implementation:Orders:LegacyPricing",
+      "kind": "implementation",
+      "label": "LegacyPricing"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "registration:OrdersController:unkeyed:0",
+      "kind": "registration",
+      "from": "service:Orders:OrdersController:unkeyed",
+      "to": "service:Orders:OrdersController:unkeyed:registration:0"
+    },
+    {
+      "id": "implements:OrdersController:unkeyed:0",
+      "kind": "implements",
+      "from": "service:Orders:OrdersController:unkeyed:registration:0",
+      "to": "implementation:Orders:OrdersController"
+    },
+    {
+      "id": "registration:IOrderService:unkeyed:0",
+      "kind": "registration",
+      "from": "service:Orders:IOrderService:unkeyed",
+      "to": "service:Orders:IOrderService:unkeyed:registration:0"
+    },
+    {
+      "id": "implements:IOrderService:unkeyed:0",
+      "kind": "implements",
+      "from": "service:Orders:IOrderService:unkeyed:registration:0",
+      "to": "implementation:Orders:OrderService"
+    },
+    {
+      "id": "registration:IOrderRepository:unkeyed:0",
+      "kind": "registration",
+      "from": "service:Orders:IOrderRepository:unkeyed",
+      "to": "service:Orders:IOrderRepository:unkeyed:registration:0"
+    },
+    {
+      "id": "implements:IOrderRepository:unkeyed:0",
+      "kind": "implements",
+      "from": "service:Orders:IOrderRepository:unkeyed:registration:0",
+      "to": "implementation:Orders:SqlOrderRepository"
+    },
+    {
+      "id": "registration:IDbConnectionFactory:unkeyed:0",
+      "kind": "registration",
+      "from": "service:Orders:IDbConnectionFactory:unkeyed",
+      "to": "service:Orders:IDbConnectionFactory:unkeyed:registration:0"
+    },
+    {
+      "id": "implements:IDbConnectionFactory:unkeyed:0",
+      "kind": "implements",
+      "from": "service:Orders:IDbConnectionFactory:unkeyed:registration:0",
+      "to": "implementation:Orders:SqlConnectionFactory"
+    },
+    {
+      "id": "registration:IClock:unkeyed:0",
+      "kind": "registration",
+      "from": "service:Orders:IClock:unkeyed",
+      "to": "service:Orders:IClock:unkeyed:registration:0"
+    },
+    {
+      "id": "implements:IClock:unkeyed:0",
+      "kind": "implements",
+      "from": "service:Orders:IClock:unkeyed:registration:0",
+      "to": "implementation:Orders:SystemClock"
+    },
+    {
+      "id": "registration:ILogger:unkeyed:0",
+      "kind": "registration",
+      "from": "service:Orders:ILogger:unkeyed",
+      "to": "service:Orders:ILogger:unkeyed:registration:0"
+    },
+    {
+      "id": "implements:ILogger:unkeyed:0",
+      "kind": "implements",
+      "from": "service:Orders:ILogger:unkeyed:registration:0",
+      "to": "implementation:Orders:ConsoleLogger"
+    },
+    {
+      "id": "registration:IValidator:unkeyed:0",
+      "kind": "registration",
+      "from": "service:Orders:IValidator:unkeyed",
+      "to": "service:Orders:IValidator:unkeyed:registration:0"
+    },
+    {
+      "id": "implements:IValidator:unkeyed:0",
+      "kind": "implements",
+      "from": "service:Orders:IValidator:unkeyed:registration:0",
+      "to": "implementation:Orders:AddressValidator"
+    },
+    {
+      "id": "registration:IValidator:unkeyed:1",
+      "kind": "registration",
+      "from": "service:Orders:IValidator:unkeyed",
+      "to": "service:Orders:IValidator:unkeyed:registration:1"
+    },
+    {
+      "id": "implements:IValidator:unkeyed:1",
+      "kind": "implements",
+      "from": "service:Orders:IValidator:unkeyed:registration:1",
+      "to": "implementation:Orders:OrderValidator"
+    },
+    {
+      "id": "registration:IFeatureFlags:orders:0",
+      "kind": "registration",
+      "from": "service:Orders:IFeatureFlags:orders",
+      "to": "service:Orders:IFeatureFlags:orders:registration:0"
+    },
+    {
+      "id": "implements:IFeatureFlags:orders:0",
+      "kind": "implements",
+      "from": "service:Orders:IFeatureFlags:orders:registration:0",
+      "to": "implementation:Orders:OrderFlags"
+    },
+    {
+      "id": "registration:IPricing:unkeyed:0",
+      "kind": "registration",
+      "from": "service:Orders:IPricing:unkeyed",
+      "to": "service:Orders:IPricing:unkeyed:registration:0"
+    },
+    {
+      "id": "implements:IPricing:unkeyed:0",
+      "kind": "implements",
+      "from": "service:Orders:IPricing:unkeyed:registration:0",
+      "to": "implementation:Orders:LegacyPricing"
+    },
+    {
+      "id": "dependsOn:OrdersController:orders",
+      "kind": "dependsOn",
+      "from": "implementation:Orders:OrdersController",
+      "to": "service:Orders:IOrderService:unkeyed",
+      "data": {
+        "parameter": "orders",
+        "position": 0,
+        "collection": false,
+        "optional": false
+      }
+    },
+    {
+      "id": "dependsOn:OrdersController:logger",
+      "kind": "dependsOn",
+      "from": "implementation:Orders:OrdersController",
+      "to": "service:Orders:ILogger:unkeyed",
+      "data": {
+        "parameter": "logger",
+        "position": 1,
+        "collection": false,
+        "optional": false
+      }
+    },
+    {
+      "id": "dependsOn:OrderService:repository",
+      "kind": "dependsOn",
+      "from": "implementation:Orders:OrderService",
+      "to": "service:Orders:IOrderRepository:unkeyed",
+      "data": {
+        "parameter": "repository",
+        "position": 0,
+        "collection": false,
+        "optional": false
+      }
+    },
+    {
+      "id": "dependsOn:OrderService:validators",
+      "kind": "dependsOn",
+      "from": "implementation:Orders:OrderService",
+      "to": "service:Orders:IValidator:unkeyed",
+      "data": {
+        "parameter": "validators",
+        "position": 1,
+        "collection": true,
+        "optional": false
+      }
+    },
+    {
+      "id": "dependsOn:OrderService:flags",
+      "kind": "dependsOn",
+      "from": "implementation:Orders:OrderService",
+      "to": "service:Orders:IFeatureFlags:orders",
+      "data": {
+        "parameter": "flags",
+        "position": 2,
+        "collection": false,
+        "optional": true
+      }
+    },
+    {
+      "id": "dependsOn:SqlOrderRepository:connections",
+      "kind": "dependsOn",
+      "from": "implementation:Orders:SqlOrderRepository",
+      "to": "service:Orders:IDbConnectionFactory:unkeyed",
+      "data": {
+        "parameter": "connections",
+        "position": 0,
+        "collection": false,
+        "optional": false
+      }
+    },
+    {
+      "id": "dependsOn:SqlOrderRepository:clock",
+      "kind": "dependsOn",
+      "from": "implementation:Orders:SqlOrderRepository",
+      "to": "service:Orders:IClock:unkeyed",
+      "data": {
+        "parameter": "clock",
+        "position": 1,
+        "collection": false,
+        "optional": false
+      }
+    },
+    {
+      "id": "dependsOn:OrderService:pricing",
+      "kind": "dependsOn",
+      "from": "implementation:Orders:OrderService",
+      "to": "service:Orders:IPricing:unkeyed",
+      "data": {
+        "parameter": "pricing",
+        "position": 3,
+        "collection": false,
+        "optional": false
+      }
+    },
+    {
+      "id": "dependsOn:LegacyPricing:clock",
+      "kind": "dependsOn",
+      "from": "implementation:Orders:LegacyPricing",
+      "to": "service:Orders:IClock:unkeyed",
+      "data": {
+        "parameter": "clock",
+        "position": 0,
+        "collection": false,
+        "optional": false
+      }
+    }
+  ],
+  "metadata": {
+    "limitations": [
+      "Synthetic container composition; no extractor ran."
+    ]
+  }
+}

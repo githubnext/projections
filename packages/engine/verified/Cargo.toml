@@ -1,0 +1,25 @@
+[package]
+name = "projections-engine-verified"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "The Engine's formally verified decisions: correspondence shapes and one-to-one key matching, proved with Verus"
+
+# Verus checks src/lib.rs on its own (see README.md), so nothing it verifies
+# depends on another crate: serde and serde_json only encode values, in code
+# compiled out under Verus. Ordinary builds only expand the `verus!` macro,
+# which erases specifications and proofs, so nothing of Verus is linked into
+# the Engine, natively or as Wasm.
+[dependencies]
+serde = "1.0"
+serde_json = { version = "1.0", features = ["float_roundtrip"] }
+verus_builtin_macros = "=0.0.0-2026-11-01-0251"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(verus_keep_ghost)"] }
+
+# The engine ships inside the CLI and as Wasm, never as a release of its own.
+[package.metadata.dist]
+dist = false

@@ -1,0 +1,204 @@
+/*
+ * Every visual value is a host theme token. Surfaces stack in the kit's elevation order: the stage, each command's
+ * group (kit `Group`: raised, edged with the divider, its command or title in a header band with the status cell at
+ * its end), the Before and After strip, and the line-number gutter inset; room with no line in it is hatched.
+ */
+.text-diff-view {
+  display: grid;
+  background: var(--stage);
+  gap: var(--projections-space-3);
+  padding: var(--projections-space-2) var(--projections-stage-inset, var(--projections-space-3)) var(--projections-space-3);
+  min-width: 0;
+}
+/* Hover, focus and selection rings are the SDK's, over the command's own edge. */
+
+/*
+ * One line box per text line, from the host's line heights: empty lines keep it too. The body has no padding, and
+ * the Before and After strip no margin, so the line-number gutter's inset column runs unbroken from the strip (or the
+ * header) to the card's bottom edge.
+ */
+.td-body {
+  --td-line-height: calc(1em * var(--projections-line-height-relaxed));
+  overflow-x: auto;
+}
+.td-body[data-presentation='formatted'] {
+  font-family: var(--font-mono);
+  font-size: var(--projections-font-size-xs);
+}
+.td-body[data-presentation='prose'] {
+  font-size: var(--projections-font-size);
+  --td-line-height: calc(1em * var(--projections-line-height));
+}
+/* Formatted text in one column never wraps; the output scrolls sideways inside its own frame. */
+.td-body[data-presentation='formatted']:not([data-layout='split']) .td-lines {
+  width: max-content;
+  min-width: 100%;
+}
+
+.td-row,
+.td-cell {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+  min-height: var(--td-line-height);
+  line-height: var(--td-line-height);
+}
+.td-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 var(--projections-space-3) 0 var(--projections-space-1);
+  white-space: pre;
+}
+.td-body[data-presentation='prose'] .td-text,
+.td-split .td-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.td-body[data-presentation='prose'] .td-text {
+  max-width: 75ch;
+}
+.td-body[data-layout='plain'] .td-text {
+  padding-left: var(--projections-space-2);
+}
+
+/* Line-number gutters: the digits plus one spacing step either side. */
+.td-num {
+  --td-gutter: var(--projections-space-2);
+  flex: none;
+  box-sizing: content-box;
+  width: calc(var(--digits) * 1ch);
+  padding: 0 var(--td-gutter);
+  align-self: stretch;
+  text-align: right;
+  color: var(--muted);
+  background: var(--inset);
+  box-shadow: inset calc(-1 * var(--projections-border-width)) 0 0 var(--border);
+  font-family: var(--font-mono);
+  font-size: var(--projections-font-size-xs);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  white-space: nowrap;
+}
+/* On a changed line the gutter takes the line's tint, so the region's left edge runs unbroken. */
+.td-diff .pk-region .td-num {
+  background: none;
+  box-shadow: none;
+}
+.td-diff .td-num-old {
+  --digits: var(--digits-old);
+}
+.td-diff .td-num-new {
+  --digits: var(--digits-new);
+}
+.td-placeholder {
+  color: var(--muted);
+  font-style: italic;
+  padding-left: var(--projections-space-3);
+}
+.td-ending {
+  flex: none;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--projections-font-size-xs);
+  font-style: italic;
+  white-space: nowrap;
+  padding-right: var(--projections-space-3);
+}
+
+/*
+ * Diff marks. The − and + markers always show; line tints and coloured line
+ * numbers scale with `--emphasis` (the host's highlighting), so with
+ * highlighting off the diff stays readable but untinted.
+ */
+.td-mark {
+  flex: none;
+  width: 2ch;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: var(--projections-font-weight-bold);
+  color: var(--muted);
+  user-select: none;
+}
+.td-delete .td-mark {
+  color: color-mix(in srgb, var(--red) calc(var(--emphasis) * 100%), var(--muted));
+}
+.td-insert .td-mark {
+  color: color-mix(in srgb, var(--green) calc(var(--emphasis) * 100%), var(--muted));
+}
+/* Changed lines are kit change regions (`pk-region`): the tint and its edges both scale with --emphasis. */
+/* Words a changed line doesn't share with the line it pairs with: tinted and underlined, so they don't rest on color alone. */
+.td-word {
+  border-radius: var(--projections-radius-sm);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: var(--projections-border-width);
+  text-decoration-color: color-mix(in srgb, currentColor calc(var(--emphasis) * 100%), transparent);
+}
+.td-delete .td-word {
+  background: color-mix(in srgb, var(--red) calc(var(--emphasis) * 22%), transparent);
+}
+.td-insert .td-word {
+  background: color-mix(in srgb, var(--green) calc(var(--emphasis) * 22%), transparent);
+}
+.td-diff .td-delete .td-num {
+  color: color-mix(in srgb, var(--red) calc(var(--emphasis) * 100%), var(--muted));
+}
+.td-diff .td-insert .td-num {
+  color: color-mix(in srgb, var(--green) calc(var(--emphasis) * 100%), var(--muted));
+}
+
+/* Two columns: one grid, so a wrapped line and the cell facing it share a row. */
+.td-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+.td-pair {
+  display: contents;
+}
+.td-split .td-side-after {
+  border-left: var(--projections-border-width) solid var(--divider);
+}
+/* No line here: the shorter side's room is hatched over the inset surface, never a blank row. */
+.td-filler {
+  background: var(--pk-vacant);
+}
+/* Before and After: a quieter labelled strip under the command's band. */
+.td-caption {
+  padding: 0 var(--projections-space-3);
+  font-family: var(--projections-font-family);
+  font-size: var(--projections-font-size-xs);
+  font-weight: var(--projections-font-weight-semibold);
+  color: var(--muted);
+  line-height: var(--td-line-height);
+  background: color-mix(in srgb, var(--band) 45%, var(--raised));
+  border-bottom: var(--projections-border-width) solid var(--border);
+}
+
+/* A folded run of unchanged lines. */
+.td-gap {
+  background: var(--inset);
+  border-block: var(--projections-border-width) solid var(--border);
+}
+.td-gap.td-span {
+  grid-column: 1 / -1;
+}
+.td-expand {
+  flex: 1 1 auto;
+  text-align: left;
+  padding: 0 var(--projections-space-3);
+  min-height: var(--td-line-height);
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-family: var(--projections-font-family);
+  font-size: var(--projections-font-size-xs);
+}
+.td-expand:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+.td-notice {
+  margin: var(--projections-space-2) var(--projections-space-3) 0;
+  border-radius: var(--projections-radius-sm);
+}

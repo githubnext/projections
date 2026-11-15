@@ -1,0 +1,11 @@
+{
+  "protocolVersion": 0,
+  "schema": "graph/v0",
+  "entities": [
+    {"id": "version", "kind": "output", "label": "parcel --version", "data": {"text": "parcel 2.4.0 (darwin-arm64)\n"}},
+    {"id": "report", "kind": "output", "label": "parcel report shipments.json", "data": {"text": "$ parcel report shipments.json\nID       City        Carrier   Status\nPKG-101  Seattle     Northway  delivered\nPKG-102  Portland    Northway  late: Missed carrier handoff\nPKG-104  Denver      Summit    late: Weather hold at depot\nPKG-106  Boston      Harbor    in transit\nPKG-108  Chicago     Lakeside  delivered\nPKG-111  Dallas      Summit    late: Address verification needed\n\nTotal: 14 shipments, 9 in transit, 3 late\n"}},
+    {"id": "help", "kind": "output", "label": "parcel help report", "data": {"text": "Usage: parcel report <file> [options]\n\nOptions:\n  --format <table|json|csv>  Output format (default: table)\n  --carrier <name>           Only show one carrier\n  --late-only                Only show late shipments\n  -h, --help                 Show this help\n"}},
+    {"id": "late", "kind": "output", "label": "parcel report shipments.json --late-only", "data": {"text": "PKG-102  Portland    late: Missed carrier handoff\nPKG-104  Denver      late: Weather hold at depot\nPKG-111  Dallas      late: Address verification needed\n"}}
+  ],
+  "relationships": []
+}

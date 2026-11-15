@@ -1,0 +1,216 @@
+/* Every visual value is a host theme token. The declarations are one raised panel on the stage, as a table is a card. */
+.api-view {
+  min-width: 0;
+  container-type: inline-size;
+  padding: var(--projections-space-2) var(--projections-stage-inset, var(--projections-space-3)) var(--projections-space-3);
+  background: var(--stage);
+}
+.api-panel {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--raised);
+  border: var(--projections-border-width) solid var(--divider);
+  border-radius: var(--projections-radius);
+}
+.api-declaration:last-child {
+  border-bottom: 0;
+}
+/* A row in a corner of the panel follows its curve, so its ring does. */
+.api-panel > .api-declarations:first-child > .api-declaration:first-child {
+  border-start-start-radius: calc(var(--projections-radius) - var(--projections-border-width));
+  border-start-end-radius: calc(var(--projections-radius) - var(--projections-border-width));
+}
+.api-panel > .api-declarations:last-child > .api-declaration:last-child {
+  border-end-start-radius: calc(var(--projections-radius) - var(--projections-border-width));
+  border-end-end-radius: calc(var(--projections-radius) - var(--projections-border-width));
+}
+/*
+ * A declaration is a row: its name beside its signature, stacked when the frame is narrow, and in a comparison a
+ * change footer across the row's foot (kit `ChangeFooter`), reserved on every row so status never moves anything.
+ * Rows share one name column (subgrid) as wide as the longest name line, up to 45% of the list;
+ * a name only truncates when it can't fit in that.
+ */
+.api-declarations {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: fit-content(45%) minmax(0, 1fr);
+  column-gap: var(--projections-space-5);
+}
+.api-declaration {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  row-gap: var(--projections-space-1);
+  align-items: baseline;
+  padding: var(--projections-space-2) var(--projections-space-4);
+  border-bottom: var(--projections-border-width) solid var(--border);
+}
+/* Hover, focus and selection: the SDK's ring, over the row's own edge, its separator included. */
+.api-declaration-name {
+  min-width: 0;
+}
+.api-declaration-footer {
+  grid-column: 1 / -1;
+}
+/* The name line: a long or renamed name truncates. */
+.api-declaration-head {
+  display: flex;
+  align-items: center;
+  gap: var(--projections-space-2);
+  min-width: 0;
+  max-width: 100%;
+}
+.api-declaration-head .entity-link {
+  min-height: 0;
+  flex: 0 1 auto;
+}
+/* A renamed declaration's previous label gives up its room (down to a letter and the arrow) before the current name does. */
+.api-declaration-head .api-previous-label {
+  display: flex;
+  align-items: baseline;
+  column-gap: 0.5ch;
+  min-width: 5ch;
+  flex: 0 100 auto;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.api-declaration-head .api-previous-label > [aria-hidden] {
+  flex: none;
+}
+.api-view del,
+.api-view ins {
+  text-decoration-thickness: var(--projections-border-width);
+}
+.semantic-id {
+  display: block;
+  color: var(--muted);
+  font-size: var(--projections-font-size-xs);
+  overflow-wrap: anywhere;
+}
+.api-declaration-signature {
+  min-width: 0;
+}
+.api-signature-change {
+  min-width: 0;
+}
+/* Signatures leave a gutter for the `+`/`−` marker, so every line's text starts at the same edge. */
+.api-signature {
+  position: relative;
+  margin: 0;
+  padding: calc(var(--projections-space-1) / 2) var(--projections-space-2) calc(var(--projections-space-1) / 2) var(--projections-space-5);
+  font-size: var(--projections-font-size-xs);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border-radius: var(--projections-radius-sm);
+}
+.api-signature + .api-signature {
+  margin-top: calc(var(--projections-space-1) / 2);
+}
+.api-line-mark {
+  position: absolute;
+  left: var(--projections-space-2);
+  font-weight: var(--projections-font-weight-bold);
+  color: var(--muted);
+  user-select: none;
+}
+.api-signature :is(mark, del, ins) {
+  color: inherit;
+  border-radius: var(--projections-radius-sm);
+}
+.api-signature mark {
+  background: transparent;
+}
+/* A replacement reads as two runs, not one word. */
+.api-signature del + ins {
+  margin-left: 0.2ch;
+}
+
+/* Change emphasis: line tints, run highlights and colored markers. Without highlighting the same content stays, neutral. */
+/* A tinted line always has its edge in the same hue (the kit's change-region pairing), never a fill alone. */
+[data-highlighting='on'] .api-signature.added {
+  background: var(--green-soft);
+  box-shadow: inset 0 0 0 var(--projections-border-width) var(--green-border);
+}
+[data-highlighting='on'] .api-signature.removed {
+  background: var(--red-soft);
+  box-shadow: inset 0 0 0 var(--projections-border-width) var(--red-border);
+}
+[data-highlighting='on'] .api-signature.added .api-line-mark {
+  color: var(--green);
+}
+[data-highlighting='on'] .api-signature.removed .api-line-mark {
+  color: var(--red);
+}
+[data-highlighting='on'] .api-signature.added mark,
+[data-highlighting='on'] .api-signature ins {
+  background: var(--green-highlight);
+}
+[data-highlighting='on'] .api-signature.removed mark,
+[data-highlighting='on'] .api-signature del {
+  background: var(--red-highlight);
+}
+/* Changed runs never rest on color alone: removed text is struck, added and marked text underlined. */
+.api-signature :is(ins, mark) {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+@container (max-width: 640px) {
+  .api-declarations {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .api-declaration {
+    padding: var(--projections-space-3);
+  }
+  .api-declaration-signature {
+    margin-top: var(--projections-space-1);
+  }
+}
+
+/*
+ * Compatibility, from the api-compatibility comparator: an icon and a word, never color alone. Change tokens stay
+ * reserved for change status, so a breaking change reads in the foreground color and bold, the other levels muted.
+ */
+.api-declaration-footer {
+  gap: var(--projections-space-2);
+}
+/* In a classified comparison, every row's change status is one width, so compatibility lines up in a column. */
+.api-change-status {
+  flex: none;
+  width: var(--pk-status-width);
+}
+.api-compatibility {
+  display: inline-flex;
+  flex: none;
+  align-items: baseline;
+  gap: var(--projections-space-1);
+  color: var(--muted);
+  font-weight: var(--projections-font-weight-semibold);
+}
+.api-compatibility.breaking {
+  color: var(--text);
+  font-weight: var(--projections-font-weight-bold);
+}
+/* The reason, under the signature in the diff: reserved on every classified row, shown while the change is emphasized. */
+.api-compatibility-reason {
+  margin: calc(var(--projections-space-1) / 2) 0 0;
+  padding-left: var(--projections-space-5);
+  color: var(--muted);
+  font-size: var(--projections-font-size-xs);
+  overflow-wrap: anywhere;
+}
+.api-compatibility-reason[data-compatibility='breaking'] {
+  color: var(--text);
+}
+/* The classification's caveats, above the declarations; the host's summary bar counts the levels. */
+.api-compatibility-notices {
+  display: grid;
+  gap: var(--projections-space-1);
+  padding: var(--projections-space-2) var(--projections-space-4);
+  border-bottom: var(--projections-border-width) solid var(--border);
+}
+.api-compatibility-notice {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--projections-font-size-xs);
+}

@@ -1,0 +1,149 @@
+/* The surface scale and change edges, read from the variables `vscodeTokenMap` (src/theme.ts) sends renderers, so host
+   chrome and renderer frames stack the same surfaces: canvas (the editor) < raised (a widget) < header (a section
+   header) and inset (the side bar). High contrast themes draw edges in `--vscode-contrastBorder`, and change edges in
+   the git decoration colors, which every theme defines. */
+.phv-root,
+.phv-explorer,
+.phv-table-view,
+.phv-text-view,
+.phv-details,
+.phv-detail-card,
+.phv-legend,
+.phv-overlay {
+  --phv-fg: var(--vscode-foreground, #cccccc);
+  --phv-muted: var(--vscode-descriptionForeground, #9d9d9d);
+  --phv-surface-canvas: var(--vscode-editor-background, #1f1f1f);
+  --phv-surface-raised: var(--vscode-editorWidget-background, #202020);
+  --phv-surface-header: var(--vscode-sideBarSectionHeader-background, var(--vscode-editorGroupHeader-tabsBackground, #181818));
+  --phv-surface-inset: var(--vscode-sideBar-background, #181818);
+  --phv-divider: var(--vscode-contrastBorder, var(--vscode-panel-border, #2b2b2b));
+  --phv-border: var(--vscode-contrastBorder, var(--vscode-widget-border, #313131));
+  --phv-focus: var(--vscode-focusBorder, #0078d4);
+  --phv-link: var(--vscode-textLink-foreground, #4daafc);
+  --phv-hover: var(--vscode-list-hoverBackground, #2a2d2e);
+  --phv-selected: var(--vscode-list-inactiveSelectionBackground, #37373d);
+  --phv-selected-fg: var(--vscode-list-inactiveSelectionForeground, var(--phv-fg));
+  --phv-hover-outline: var(--vscode-contrastActiveBorder, transparent);
+  /* Change hues: the renderer tokens the view resolved (`--projections-*`, VS Code's git decoration colors kept at
+     4.5:1 on every surface), so chrome and renderers draw one hue; a block used alone reads VS Code's own. */
+  --phv-added: var(--projections-color-added, var(--vscode-gitDecoration-addedResourceForeground, #81b88b));
+  --phv-removed: var(--projections-color-removed, var(--vscode-gitDecoration-deletedResourceForeground, #c74e39));
+  --phv-modified: var(--projections-color-modified, var(--vscode-gitDecoration-modifiedResourceForeground, #e2c08d));
+  --phv-moved: var(--projections-color-moved, var(--vscode-charts-purple, #b180d7));
+  --phv-added-muted: var(--projections-color-added-muted, var(--vscode-diffEditor-insertedLineBackground, #9bb95533));
+  --phv-added-border: var(--projections-color-added-border, var(--vscode-diffEditor-insertedTextBorder, var(--phv-added)));
+  --phv-removed-muted: var(--projections-color-removed-muted, var(--vscode-diffEditor-removedLineBackground, #ff000033));
+  --phv-removed-border: var(--projections-color-removed-border, var(--vscode-diffEditor-removedTextBorder, var(--phv-removed)));
+  --phv-modified-muted: var(--projections-color-modified-muted, color-mix(in srgb, var(--phv-modified) 16%, transparent));
+  --phv-modified-border: var(--projections-color-modified-border, var(--phv-modified));
+  --phv-moved-muted: var(--projections-color-moved-muted, color-mix(in srgb, var(--phv-moved) 16%, transparent));
+  --phv-moved-border: var(--projections-color-moved-border, var(--phv-moved));
+  --phv-font: var(--vscode-font-family, -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', sans-serif);
+  --phv-mono: var(--vscode-editor-font-family, Menlo, Monaco, 'Courier New', monospace);
+  --phv-size: var(--vscode-font-size, 13px);
+  --phv-radius: var(--vscode-cornerRadius-small, 4px);
+}
+/* High contrast themes leave diff fills translucent or unset and draw edges instead. */
+:is(.vscode-high-contrast, [data-vscode-theme-kind^='high-contrast']) :is(.phv-root, .phv-explorer, .phv-overlay, .phv-detail-card) {
+  --phv-added-border: var(--phv-added);
+  --phv-removed-border: var(--phv-removed);
+  --phv-hover-outline: var(--vscode-contrastActiveBorder, var(--phv-focus));
+}
+/* Each change hue, for rules that take one: `[data-change]` chooses the color, the fill and its edge. */
+[data-change='added'] {
+  --phv-change: var(--phv-added);
+  --phv-change-muted: var(--phv-added-muted);
+  --phv-change-border: var(--phv-added-border);
+}
+[data-change='removed'] {
+  --phv-change: var(--phv-removed);
+  --phv-change-muted: var(--phv-removed-muted);
+  --phv-change-border: var(--phv-removed-border);
+}
+[data-change='modified'] {
+  --phv-change: var(--phv-modified);
+  --phv-change-muted: var(--phv-modified-muted);
+  --phv-change-border: var(--phv-modified-border);
+}
+[data-change='moved'] {
+  --phv-change: var(--phv-moved);
+  --phv-change-muted: var(--phv-moved-muted);
+  --phv-change-border: var(--phv-moved-border);
+}
+
+.phv-root,
+.phv-explorer {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  color: var(--phv-fg);
+  font-family: var(--phv-font);
+  font-size: var(--phv-size);
+  font-weight: var(--vscode-font-weight, normal);
+  line-height: 1.4;
+}
+.phv-root :is(h2, h3, h4),
+.phv-overlay :is(h2, h3, h4, p) {
+  margin: 0;
+}
+.phv-muted {
+  color: var(--phv-muted);
+}
+.phv-code {
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: var(--vscode-textPreformat-background, #ffffff1a);
+  color: var(--vscode-textPreformat-foreground, #d0d0d0);
+  font-family: var(--phv-mono);
+  font-size: 0.92em;
+  overflow-wrap: anywhere;
+}
+.phv-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.phv-list {
+  margin: 4px 0 0;
+  padding-left: 20px;
+}
+.phv-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--phv-link);
+  font: inherit;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+.phv-link:hover {
+  color: var(--vscode-textLink-activeForeground, var(--phv-link));
+  text-decoration: underline;
+}
+/* VS Code's focus: a 1px outline in the focus border color, inside the control. */
+:is(.phv-root, .phv-overlay, .phv-explorer) :is(button, a, [tabindex], input[type='range']):focus-visible {
+  outline: 1px solid var(--phv-focus);
+  outline-offset: -1px;
+}
+.phv-section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--vscode-sideBarSectionHeader-foreground, var(--phv-fg));
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.phv-field-label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--phv-fg);
+  font-weight: 600;
+}

@@ -1,0 +1,77 @@
+name: Projections browser suites
+description: Build the workspace and run browser suites on native Chromium and WebKit
+inputs:
+  workspace:
+    description: Workspace path relative to the repository checkout
+    default: '.'
+  suite:
+    description: Workspace directory whose browser suite runs, or `rest` for every browser suite not listed in `sharded`
+    required: true
+  project:
+    description: Playwright project of `suite` to run, such as webkit-desktop; empty runs every project
+    default: ''
+  shard:
+    description: Playwright shard of `suite` (of `project`, when set), such as 1/3; empty runs all of it
+    default: ''
+  sharded:
+    description: With suite `rest`, the workspace directories whose browser suites run in their own jobs
+    default: ''
+runs:
+  using: composite
+  steps:
+    # The build (native engine, CLI and helpers), the browsers and the suites' artifacts outgrow a hosted runner's free
+    # disk (ENOSPC in the Inspector and Storybook suites). As in the check action: no incremental caches, line tables
+    # only, and the preinstalled toolchains no suite uses removed (which takes a minute or two).
+    - shell: bash
+      run: |
+        echo CARGO_INCREMENTAL=0 >> "$GITHUB_ENV"
+        echo CARGO_PROFILE_DEV_DEBUG=line-tables-only >> "$GITHUB_ENV"
+    - if: runner.os == 'Linux' && runner.environment == 'github-hosted'
+      shell: bash
+      run: |
+        df -h /
+        sudo rm -rf /usr/local/lib/android /usr/local/.ghcup /opt/ghc /usr/share/swift \
+          /usr/local/julia* /opt/hostedtoolcache/PyPy /opt/hostedtoolcache/CodeQL
+        df -h /
+    - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+      with:
+        node-version-file: ${{ inputs.workspace }}/.node-version
+        cache: npm
+        cache-dependency-path: ${{ inputs.workspace }}/package-lock.json
+    - id: run
+      shell: bash
+      working-directory: ${{ inputs.workspace }}
+      env:
+        SUITE: ${{ inputs.suite }}
+        PROJECT: ${{ inputs.project }}
+        SHARD: ${{ inputs.shard }}
+        SHARDED: ${{ inputs.sharded }}
+      run: |
+        # Names this job's failure artifact.
+        name="$SUITE${PROJECT:+-$PROJECT}${SHARD:+-$SHARD}"
+        echo "artifact=public-browser-failure-$RUNNER_OS-${name//\//-}" >> "$GITHUB_OUTPUT"
+        # Installs the toolchain rust-toolchain.toml pins; the build includes the native engine and CLI.
+        rustc --version
+        npm ci --no-audit --no-fund
+        npm run build
+        tools/scripts/install-browsers.sh chromium webkit
+        if [ "$SUITE" = rest ]; then
+          npm run test:browser -- --except "$SHARDED"
+        else
+          npm run test:browser --workspace "$SUITE" -- ${PROJECT:+"--project=$PROJECT"} ${SHARD:+"--shard=$SHARD"}
+        fi
+    - if: failure()
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: ${{ steps.run.outputs.artifact }}
+        path: |
+          ${{ inputs.workspace }}/packages/host/core/test-results/
+          ${{ inputs.workspace }}/packages/host/vscode-ui/test-results/
+          ${{ inputs.workspace }}/packages/engine/js/test-results/
+          ${{ inputs.workspace }}/tools/storybook/test-results/
+          ${{ inputs.workspace }}/packages/host/inspector/test-results/
+          ${{ inputs.workspace }}/packages/renderers/harness/test-results/
+          ${{ inputs.workspace }}/packages/cli/test-results/
+          ${{ inputs.workspace }}/packages/integrations/mcp-apps/test-results/
+        if-no-files-found: warn
+        retention-days: 7

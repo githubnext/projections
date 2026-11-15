@@ -1,0 +1,109 @@
+{
+  "entities": [
+    {
+      "confidence": "derived",
+      "data": {
+        "blank": 0,
+        "bytes": 19,
+        "code": 1,
+        "comment": 0,
+        "files": 1,
+        "language": "JavaScript",
+        "lines": 1,
+        "testBlank": 0,
+        "testCode": 0,
+        "testComment": 0,
+        "testFiles": 0,
+        "testLines": 0,
+        "unit": "lines of code",
+        "value": 1
+      },
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "vendor/index.js"
+        }
+      ],
+      "id": "language:JavaScript",
+      "kind": "language",
+      "label": "JavaScript"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "blank": 1,
+        "bytes": 62,
+        "code": 4,
+        "comment": 2,
+        "files": 2,
+        "language": "PHP",
+        "lines": 7,
+        "testBlank": 0,
+        "testCode": 2,
+        "testComment": 0,
+        "testFiles": 1,
+        "testLines": 2,
+        "unit": "lines of code",
+        "value": 4
+      },
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "checks/check.inc"
+        },
+        {
+          "kind": "counted-file",
+          "source": "lib.inc"
+        }
+      ],
+      "id": "language:PHP",
+      "kind": "language",
+      "label": "PHP"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "blank": 0,
+        "bytes": 19,
+        "code": 1,
+        "comment": 0,
+        "files": 1,
+        "language": "TypeScript",
+        "lines": 1,
+        "testBlank": 0,
+        "testCode": 0,
+        "testComment": 0,
+        "testFiles": 0,
+        "testLines": 0,
+        "unit": "lines of code",
+        "value": 1
+      },
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "a.test.ts"
+        }
+      ],
+      "id": "language:TypeScript",
+      "kind": "language",
+      "label": "TypeScript"
+    }
+  ],
+  "metadata": {
+    "counter": "tokei 15.0.0",
+    "counting": "Physical lines per file, classified by tokei. A line holding both code and a comment counts as code; documentation strings count as comments; code embedded in another language counts as its host file's language.",
+    "limitations": [
+      "Only files tokei recognizes by filename or extension are counted; every other file, including an extensionless script recognizable only by its shebang, is ignored rather than guessed at.",
+      "Test files are classified by path globs, not by their contents."
+    ],
+    "skipped": {
+      "binary": 0,
+      "oversize": 0,
+      "unreadable": 0,
+      "unrecognized": 0
+    }
+  },
+  "protocolVersion": 0,
+  "relationships": [],
+  "schema": "metrics/v0"
+}

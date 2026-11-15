@@ -1,0 +1,496 @@
+{
+  "changes": [
+    {
+      "after": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AJob:instance:createdAt"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AJob:instance:createdAt",
+      "status": "added",
+      "summary": "Breaking: Required member `createdAt` was added to `Job`; implementations and object literals must provide it."
+    },
+    {
+      "after": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:delay"
+      ],
+      "before": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:delay"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:delay",
+      "status": "modified",
+      "summary": "Breaking: Became optional; code reading it must handle `undefined`."
+    },
+    {
+      "after": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:priority"
+      ],
+      "before": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:priority"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:priority",
+      "status": "modified",
+      "summary": "Breaking: Its type changed from `\"high\" | \"low\" | \"normal\"` to `\"critical\" | \"high\" | \"low\" | \"normal\"`; it is both read and written, so it must stay the same."
+    },
+    {
+      "after": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:timeout"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:timeout",
+      "status": "added",
+      "summary": "Additive: `timeout` was added."
+    },
+    {
+      "after": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:constructor"
+      ],
+      "before": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:constructor"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:constructor",
+      "status": "modified",
+      "summary": "Additive: Optional parameter `options` was added."
+    },
+    {
+      "after": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:add"
+      ],
+      "before": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:add"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:add",
+      "status": "modified",
+      "summary": "Additive: Optional parameter `signal` was added."
+    },
+    {
+      "after": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:drain"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:drain",
+      "status": "added",
+      "summary": "Additive: `drain` was added."
+    },
+    {
+      "after": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:get"
+      ],
+      "before": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:get"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:get",
+      "status": "modified",
+      "summary": "Compatible: Returns the narrower `Job<T>`."
+    },
+    {
+      "after": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:options"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:options",
+      "status": "added",
+      "summary": "Additive: `options` was added."
+    },
+    {
+      "after": [],
+      "before": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:remove"
+      ],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:remove",
+      "status": "removed",
+      "summary": "Breaking: `remove` was removed."
+    },
+    {
+      "after": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueueOptions:instance:concurrency"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueueOptions:instance:concurrency",
+      "status": "added",
+      "summary": "Additive: `concurrency` was added."
+    },
+    {
+      "after": [
+        "ts-api:%40acme%2Fqueue:.:QueueOptions"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "ts-api:%40acme%2Fqueue:.:QueueOptions",
+      "status": "added",
+      "summary": "Additive: `QueueOptions` was added."
+    },
+    {
+      "after": [
+        "ts-api:%40acme%2Fqueue:.:Status"
+      ],
+      "before": [
+        "ts-api:%40acme%2Fqueue:.:Status"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts-api:%40acme%2Fqueue:.:Status",
+      "status": "modified",
+      "summary": "Additive: Now also allows values outside `\"active\" | \"done\" | \"waiting\"`; exhaustive checks over it may fail."
+    },
+    {
+      "after": [
+        "ts-api:%40acme%2Fqueue:.:createQueue"
+      ],
+      "before": [
+        "ts-api:%40acme%2Fqueue:.:createQueue"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts-api:%40acme%2Fqueue:.:createQueue",
+      "status": "modified",
+      "summary": "Breaking: Parameter `options` is now required."
+    },
+    {
+      "after": [
+        "ts-api:%40acme%2Fqueue:.:isJob"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "ts-api:%40acme%2Fqueue:.:isJob",
+      "status": "added",
+      "summary": "Additive: `isJob` was added."
+    },
+    {
+      "after": [
+        "ts-api:%40acme%2Fqueue:.:retry"
+      ],
+      "before": [
+        "ts-api:%40acme%2Fqueue:.:retry"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "ts-api:%40acme%2Fqueue:.:retry",
+      "status": "modified",
+      "summary": "Breaking: Parameter `attempts` no longer accepts `number | string` (now `number`)."
+    },
+    {
+      "after": [
+        "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJob:ts-api%253A%252540acme%25252Fqueue%253A.%253AJob%3Ainstance%3AcreatedAt"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJob:ts-api%253A%252540acme%25252Fqueue%253A.%253AJob%3Ainstance%3AcreatedAt",
+      "status": "added"
+    },
+    {
+      "after": [
+        "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AJobOptions%3Ainstance%3Atimeout"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AJobOptions%3Ainstance%3Atimeout",
+      "status": "added"
+    },
+    {
+      "after": [
+        "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Adrain"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Adrain",
+      "status": "added"
+    },
+    {
+      "after": [
+        "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aoptions"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aoptions",
+      "status": "added"
+    },
+    {
+      "after": [],
+      "before": [
+        "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aremove"
+      ],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aremove",
+      "status": "removed"
+    },
+    {
+      "after": [
+        "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueueOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueueOptions%3Ainstance%3Aconcurrency"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueueOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueueOptions%3Ainstance%3Aconcurrency",
+      "status": "added"
+    }
+  ],
+  "metadata": {
+    "compatibility": {
+      "changes": {
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AJob:instance:createdAt": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Required member `createdAt` was added to `Job`; implementations and object literals must provide it",
+              "rule": "member-added"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Required member `createdAt` was added to `Job`; implementations and object literals must provide it"
+        },
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:delay": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Became optional; code reading it must handle `undefined`",
+              "rule": "optionality"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Became optional; code reading it must handle `undefined`"
+        },
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:priority": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its type changed from `\"high\" | \"low\" | \"normal\"` to `\"critical\" | \"high\" | \"low\" | \"normal\"`; it is both read and written, so it must stay the same",
+              "rule": "property-type"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its type changed from `\"high\" | \"low\" | \"normal\"` to `\"critical\" | \"high\" | \"low\" | \"normal\"`; it is both read and written, so it must stay the same"
+        },
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:timeout": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "`timeout` was added",
+              "rule": "member-added"
+            }
+          ],
+          "level": "additive",
+          "reason": "`timeout` was added"
+        },
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:constructor": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "Optional parameter `options` was added",
+              "rule": "parameter-added"
+            }
+          ],
+          "level": "additive",
+          "reason": "Optional parameter `options` was added"
+        },
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:add": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "Optional parameter `signal` was added",
+              "rule": "parameter-added"
+            }
+          ],
+          "level": "additive",
+          "reason": "Optional parameter `signal` was added"
+        },
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:drain": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "`drain` was added",
+              "rule": "member-added"
+            }
+          ],
+          "level": "additive",
+          "reason": "`drain` was added"
+        },
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:get": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Returns the narrower `Job<T>`",
+              "rule": "return-narrowed"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Returns the narrower `Job<T>`"
+        },
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:options": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "`options` was added",
+              "rule": "member-added"
+            }
+          ],
+          "level": "additive",
+          "reason": "`options` was added"
+        },
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:remove": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "`remove` was removed",
+              "rule": "removed"
+            }
+          ],
+          "level": "breaking",
+          "reason": "`remove` was removed"
+        },
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueueOptions:instance:concurrency": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "`concurrency` was added",
+              "rule": "added"
+            }
+          ],
+          "level": "additive",
+          "reason": "`concurrency` was added"
+        },
+        "ts-api:%40acme%2Fqueue:.:QueueOptions": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "`QueueOptions` was added",
+              "rule": "added"
+            }
+          ],
+          "level": "additive",
+          "reason": "`QueueOptions` was added"
+        },
+        "ts-api:%40acme%2Fqueue:.:Status": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "Now also allows values outside `\"active\" | \"done\" | \"waiting\"`; exhaustive checks over it may fail",
+              "rule": "alias-widened"
+            }
+          ],
+          "level": "additive",
+          "reason": "Now also allows values outside `\"active\" | \"done\" | \"waiting\"`; exhaustive checks over it may fail"
+        },
+        "ts-api:%40acme%2Fqueue:.:createQueue": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Parameter `options` is now required",
+              "rule": "required-parameter-added"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Parameter `options` is now required"
+        },
+        "ts-api:%40acme%2Fqueue:.:isJob": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "`isJob` was added",
+              "rule": "added"
+            }
+          ],
+          "level": "additive",
+          "reason": "`isJob` was added"
+        },
+        "ts-api:%40acme%2Fqueue:.:retry": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Parameter `attempts` no longer accepts `number | string` (now `number`)",
+              "rule": "parameter-narrowed"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Parameter `attempts` no longer accepts `number | string` (now `number`)"
+        }
+      },
+      "counts": {
+        "additive": 9,
+        "breaking": 6,
+        "compatible": 1,
+        "unknown": 0
+      },
+      "ecosystem": "typescript",
+      "notices": [],
+      "rules": "TypeScript assignability over the checker's types",
+      "version": 0
+    }
+  },
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:remove",
+        "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aremove"
+      ],
+      "kind": "remove"
+    },
+    {
+      "changes": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:delay",
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:priority",
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:constructor",
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:add",
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:get",
+        "ts-api:%40acme%2Fqueue:.:Status",
+        "ts-api:%40acme%2Fqueue:.:createQueue",
+        "ts-api:%40acme%2Fqueue:.:retry"
+      ],
+      "kind": "restructure"
+    },
+    {
+      "changes": [
+        "ts-api:%40acme%2Fqueue:.:QueueOptions",
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueueOptions:instance:concurrency",
+        "ts-api:%40acme%2Fqueue:.:isJob",
+        "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueueOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueueOptions%3Ainstance%3Aconcurrency"
+      ],
+      "kind": "add"
+    },
+    {
+      "changes": [
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AJob:instance:createdAt",
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:timeout",
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:drain",
+        "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:options",
+        "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJob:ts-api%253A%252540acme%25252Fqueue%253A.%253AJob%3Ainstance%3AcreatedAt",
+        "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AJobOptions%3Ainstance%3Atimeout",
+        "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Adrain",
+        "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aoptions"
+      ],
+      "kind": "add"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+[package]
+name = "throttle"
+version = "1.4.0"
+edition = "2021"
+
+[lib]
+path = "src/lib.rs"
+
+[workspace]

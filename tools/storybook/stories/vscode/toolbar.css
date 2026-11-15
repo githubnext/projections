@@ -1,0 +1,29 @@
+.sb-ladder {
+  display: grid;
+}
+.sb-ladder-theme {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+.sb-ladder-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.sb-ladder-cell {
+  display: grid;
+  gap: 4px;
+}
+/* Each explorer cut to its toolbar and the top of its stage. */
+.sb-ladder-view {
+  height: 150px;
+  overflow: hidden;
+  border: 1px solid var(--vscode-panel-border, transparent);
+}
+.sb-ladder-view .phv-explorer[data-fill] {
+  min-height: 0;
+}
+.sb-ladder-view .phv-root[data-fill] {
+  min-height: 0;
+}

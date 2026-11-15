@@ -1,0 +1,25 @@
+[
+  {
+    "name": "flags",
+    "inputs": {
+      "flagApis": [
+        {
+          "module": "flags",
+          "symbol": "enabled"
+        }
+      ]
+    }
+  },
+  {
+    "name": "nested",
+    "inputs": {
+      "flagApis": [
+        {
+          "module": "provider",
+          "symbol": "client.variation"
+        }
+      ],
+      "flagArgument": 1
+    }
+  }
+]

@@ -1,0 +1,195 @@
+/* Dependency-injection composition. Colors come from the kit's semantic palette;
+   type, strokes and radii from the host's tokens. Card text sits on geometry from
+   `diMetrics` and is truncated in src/renderer.tsx for these type sizes. */
+.di-view {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+/* Fills the frame (the kit's `useFrameFill`): the canvas takes the height above the legend and centres the fitted composition. */
+.di-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  overflow: auto;
+  background-color: var(--graph-bg);
+}
+.di-scroll:focus-visible {
+  outline: var(--projections-focus-ring-width) solid var(--focus);
+  outline-offset: calc(-1 * var(--projections-focus-ring-width));
+}
+.di-canvas {
+  display: block;
+  flex: none;
+  margin: auto;
+  box-sizing: content-box;
+  padding: 16px;
+}
+.di-card {
+  cursor: pointer;
+}
+/* A card is a kit graph card (see the kit's `CardChangeMarks` for its change marks and status band, and `node-kind`,
+   `node-label` and `node-detail` for its text). */
+.di-card-surface,
+.di-card-stack,
+.di-card-clip {
+  rx: var(--projections-radius);
+}
+.di-card-surface {
+  fill: var(--raised);
+  stroke: var(--divider);
+  stroke-width: var(--stroke);
+}
+.di-card-stack {
+  fill: var(--recessed);
+  stroke: var(--border);
+  stroke-width: var(--stroke);
+}
+/* The lifetime mark (src/card.tsx `LifetimeMark`): solid, dashed or dotted in the text color, one weight for every
+   lifetime so the pattern alone says which; round caps make transient's dots round. Muted on a removed card, like its
+   struck text, and faint when no registration resolves the implementation. */
+.di-lifetime {
+  stroke: var(--text);
+  stroke-linecap: round;
+  fill: none;
+  opacity: 0.8;
+  pointer-events: none;
+}
+.di-lifetime.unknown {
+  stroke: var(--muted);
+  opacity: 0.6;
+}
+.pk [data-change='removed'] .di-lifetime {
+  stroke: var(--muted);
+}
+.di-zone {
+  fill: transparent;
+  cursor: pointer;
+}
+/*
+ * A card is one item: the SDK rings it once, over its own edge, for hover, focus and selection of the card or any of
+ * its parts (registration, contract, implementation), which are tinted under their text, clipped to the card's
+ * shape, never outlined.
+ */
+.di-tint {
+  fill: transparent;
+  pointer-events: none;
+}
+.di-zone-highlight {
+  fill: var(--accent-soft);
+  pointer-events: none;
+}
+.di-card:has(.di-zone-registration:is(:hover, [data-projections-hovered])) .di-tint-registration,
+.di-card:has(.di-zone-contract:is(:hover, [data-projections-hovered])) .di-tint-contract,
+.di-card:has(.di-zone-implementation:is(:hover, [data-projections-hovered])) .di-tint-implementation,
+.di-card:has(.di-zone-whole:is(:hover, [data-projections-hovered])) .di-tint-whole {
+  fill: var(--hover);
+}
+/* A focused part: the kit's quieter part tint; the card's SDK ring carries the focus color. */
+.di-card:has(.di-zone-registration:focus-visible) .di-tint-registration,
+.di-card:has(.di-zone-contract:focus-visible) .di-tint-contract,
+.di-card:has(.di-zone-implementation:focus-visible) .di-tint-implementation,
+.di-card:has(.di-zone-whole:focus-visible) .di-tint-whole {
+  fill: var(--pk-part-tint);
+}
+
+.di-link {
+  stroke: var(--edge);
+  stroke-width: calc(var(--stroke) * 1.4);
+  stroke-linecap: round;
+  fill: none;
+  pointer-events: none;
+}
+.di-link.collection {
+  stroke-dasharray: 6 3;
+}
+.di-link.resolution {
+  stroke-dasharray: 4 4;
+}
+/* An alias forwards to another registration: dotted, so it never reads as an injection. */
+.di-link.alias {
+  stroke-dasharray: 1 4;
+}
+.di-link.optional {
+  opacity: 0.45;
+}
+.di-link-emphasis {
+  pointer-events: none;
+  stroke-width: var(--stroke-strong);
+}
+.di-link-emphasis.added {
+  stroke: var(--green);
+}
+.di-link-emphasis.removed {
+  stroke: var(--red);
+  stroke-dasharray: 5 3;
+}
+.di-link-emphasis.modified {
+  stroke: var(--amber);
+}
+.di-link-emphasis.renamed {
+  stroke: var(--violet);
+}
+.di-link-origin {
+  fill: var(--edge);
+  pointer-events: none;
+}
+.di-link-hit {
+  stroke: transparent;
+  stroke-width: var(--projections-space-4);
+  fill: none;
+  cursor: pointer;
+}
+.di-link-hit:focus-visible {
+  outline: none;
+}
+.di-parameter {
+  fill: var(--muted);
+  font-size: var(--projections-font-size-xs);
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: var(--graph-bg);
+  stroke-width: calc(var(--stroke-strong) + var(--stroke));
+  stroke-linejoin: round;
+}
+/*
+ * Diff mode (src/diff.tsx): the kit's change hues (`data-change`, scaled by `--emphasis`). A changed card's fill is
+ * drawn in slices: each part that changed tints its own slice with its change, under the text, and the card the rest.
+ */
+.di-part-change,
+.di-slice {
+  fill: transparent;
+  pointer-events: none;
+}
+.di-part[data-change] > .di-part-change,
+.di-card-fill[data-change] > .di-slice {
+  fill: color-mix(in srgb, var(--pk-region-fill) calc(var(--emphasis, 1) * 100%), transparent);
+}
+.di-dependencies {
+  font-size: var(--projections-font-size-xs);
+  fill: var(--text);
+  pointer-events: none;
+}
+.di-facet {
+  fill: var(--muted);
+}
+.di-arrow {
+  fill: var(--muted);
+}
+/* The old value struck through in the removed hue, then the new one in the added hue; plain with highlighting off. */
+.di-was {
+  fill: color-mix(in srgb, var(--red) calc(var(--emphasis, 1) * 100%), var(--muted));
+  text-decoration: line-through;
+}
+.di-now {
+  fill: color-mix(in srgb, var(--green) calc(var(--emphasis, 1) * 100%), var(--text));
+}
+.di-dependency-sign {
+  font-family: var(--font-mono);
+  font-weight: var(--projections-font-weight-semibold);
+  fill: color-mix(in srgb, var(--pk-change-ink) calc(var(--emphasis, 1) * 100%), var(--muted));
+}
+.di-dependency[data-change='removed'] > .di-dependency-name {
+  fill: var(--muted);
+  text-decoration: line-through;
+}

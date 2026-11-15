@@ -1,0 +1,26 @@
+name: Verus proofs
+description: Prove packages/engine/verified with the Verus release packages/engine/verified/verus.toml pins, then run its mutation check
+inputs:
+  workspace:
+    description: Workspace path relative to the repository checkout
+    default: '.'
+runs:
+  using: composite
+  steps:
+    # The pin is read from verus.toml, the one place it is written, so the cache key follows it.
+    - id: pins
+      shell: bash
+      working-directory: ${{ inputs.workspace }}
+      run: echo "release=$(sed -n 's/^release = "\(.*\)"$/\1/p' packages/engine/verified/verus.toml)" >> "$GITHUB_OUTPUT"
+    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.cache/projections/verus/${{ steps.pins.outputs.release }}
+        key: verus-${{ runner.os }}-${{ runner.arch }}-${{ steps.pins.outputs.release }}
+    # Needs only the runner's Node, curl, unzip and rustup: no npm install or workspace build. --install downloads the
+    # release on a cache miss and installs the Rust toolchain it needs.
+    - shell: bash
+      working-directory: ${{ inputs.workspace }}
+      run: |
+        set -euo pipefail
+        node --version
+        node packages/engine/verified/scripts/verify.mjs --install

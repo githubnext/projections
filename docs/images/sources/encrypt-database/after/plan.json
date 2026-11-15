@@ -1,0 +1,718 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.9.8",
+  "variables": {
+    "db_password": {
+      "value": "fixture-db-password-never-persist"
+    },
+    "api_count": {
+      "value": 2
+    }
+  },
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_ssm_parameter.database_url",
+          "mode": "managed",
+          "type": "aws_ssm_parameter",
+          "name": "database_url",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 0,
+          "values": {
+            "arn": "arn:aws:ssm:us-east-1:111122223333:parameter/shop/database-url",
+            "name": "/shop/database-url",
+            "type": "SecureString"
+          },
+          "sensitive_values": {
+            "value": true
+          }
+        },
+        {
+          "address": "aws_route53_record.database",
+          "mode": "managed",
+          "type": "aws_route53_record",
+          "name": "database",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 0,
+          "values": {
+            "name": "db.shop.internal",
+            "type": "CNAME",
+            "ttl": 60,
+            "zone_id": "Z0SHOPINTERNAL"
+          },
+          "sensitive_values": {}
+        },
+        {
+          "address": "aws_secretsmanager_secret.database",
+          "mode": "managed",
+          "type": "aws_secretsmanager_secret",
+          "name": "database",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 0,
+          "values": {
+            "name": "shop/database",
+            "recovery_window_in_days": 7
+          },
+          "sensitive_values": {}
+        },
+        {
+          "address": "aws_secretsmanager_secret_version.database",
+          "mode": "managed",
+          "type": "aws_secretsmanager_secret_version",
+          "name": "database",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 0,
+          "values": {},
+          "sensitive_values": {
+            "secret_string": true
+          }
+        }
+      ],
+      "child_modules": [
+        {
+          "resources": [
+            {
+              "address": "module.database.aws_db_subnet_group.main",
+              "mode": "managed",
+              "type": "aws_db_subnet_group",
+              "name": "main",
+              "provider_name": "registry.terraform.io/hashicorp/aws",
+              "schema_version": 0,
+              "values": {
+                "id": "shop-prod",
+                "name": "shop-prod",
+                "subnet_ids": ["subnet-01aa", "subnet-02bb"]
+              },
+              "sensitive_values": {}
+            },
+            {
+              "address": "module.database.aws_db_parameter_group.postgres",
+              "mode": "managed",
+              "type": "aws_db_parameter_group",
+              "name": "postgres",
+              "provider_name": "registry.terraform.io/hashicorp/aws",
+              "schema_version": 0,
+              "values": {
+                "family": "postgres16",
+                "id": "shop-prod-pg16",
+                "name": "shop-prod-pg16"
+              },
+              "sensitive_values": {}
+            },
+            {
+              "address": "module.database.aws_db_instance.main",
+              "mode": "managed",
+              "type": "aws_db_instance",
+              "name": "main",
+              "provider_name": "registry.terraform.io/hashicorp/aws",
+              "schema_version": 0,
+              "values": {
+                "allocated_storage": 100,
+                "engine": "postgres",
+                "engine_version": "16.4",
+                "identifier": "shop-prod",
+                "instance_class": "db.r6g.large",
+                "storage_encrypted": true,
+                "username": "shop",
+                "password": "fixture-db-password-never-persist",
+                "multi_az": true,
+                "db_subnet_group_name": "shop-prod",
+                "parameter_group_name": "shop-prod-pg16",
+                "vpc_security_group_ids": ["sg-0db"]
+              },
+              "sensitive_values": {
+                "password": true
+              }
+            },
+            {
+              "address": "module.database.aws_db_instance.replica",
+              "mode": "managed",
+              "type": "aws_db_instance",
+              "name": "replica",
+              "provider_name": "registry.terraform.io/hashicorp/aws",
+              "schema_version": 0,
+              "values": {
+                "identifier": "shop-prod-replica",
+                "instance_class": "db.r6g.large",
+                "address": "shop-prod-replica.c9x1.us-east-1.rds.amazonaws.com"
+              },
+              "sensitive_values": {}
+            }
+          ],
+          "address": "module.database"
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "aws_instance.bastion",
+      "mode": "managed",
+      "type": "aws_instance",
+      "name": "bastion",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": ["delete"],
+        "before": {
+          "ami": "ami-0e2c8caa4b6378d8c",
+          "id": "i-0bastion",
+          "instance_type": "t4g.micro",
+          "subnet_id": "subnet-01aa",
+          "vpc_security_group_ids": ["sg-0app"]
+        },
+        "after": null,
+        "after_unknown": false,
+        "before_sensitive": {},
+        "after_sensitive": false
+      },
+      "action_reason": "delete_because_no_resource_config"
+    },
+    {
+      "address": "aws_route53_record.database",
+      "mode": "managed",
+      "type": "aws_route53_record",
+      "name": "database",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": ["update"],
+        "before": {
+          "name": "db.shop.internal",
+          "type": "CNAME",
+          "ttl": 60,
+          "records": ["shop-prod.c9x1.us-east-1.rds.amazonaws.com"],
+          "zone_id": "Z0SHOPINTERNAL"
+        },
+        "after": {
+          "name": "db.shop.internal",
+          "type": "CNAME",
+          "ttl": 60,
+          "zone_id": "Z0SHOPINTERNAL"
+        },
+        "after_unknown": {
+          "records": true
+        },
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "previous_address": "aws_route53_record.db"
+    },
+    {
+      "address": "aws_secretsmanager_secret.database",
+      "mode": "managed",
+      "type": "aws_secretsmanager_secret",
+      "name": "database",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name": "shop/database",
+          "recovery_window_in_days": 7
+        },
+        "after_unknown": {
+          "arn": true,
+          "id": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {}
+      }
+    },
+    {
+      "address": "aws_secretsmanager_secret_version.database",
+      "mode": "managed",
+      "type": "aws_secretsmanager_secret_version",
+      "name": "database",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {},
+        "after_unknown": {
+          "secret_string": true,
+          "id": true,
+          "version_id": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "secret_string": true
+        }
+      }
+    },
+    {
+      "address": "aws_ssm_parameter.database_url",
+      "mode": "managed",
+      "type": "aws_ssm_parameter",
+      "name": "database_url",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": ["update"],
+        "before": {
+          "arn": "arn:aws:ssm:us-east-1:111122223333:parameter/shop/database-url",
+          "name": "/shop/database-url",
+          "type": "SecureString",
+          "value": "postgres://shop@shop-prod.c9x1.us-east-1.rds.amazonaws.com:5432/shop"
+        },
+        "after": {
+          "arn": "arn:aws:ssm:us-east-1:111122223333:parameter/shop/database-url",
+          "name": "/shop/database-url",
+          "type": "SecureString"
+        },
+        "after_unknown": {
+          "value": true
+        },
+        "before_sensitive": {
+          "value": true
+        },
+        "after_sensitive": {
+          "value": true
+        }
+      }
+    },
+    {
+      "address": "module.database.aws_db_instance.main",
+      "mode": "managed",
+      "type": "aws_db_instance",
+      "name": "main",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": ["delete", "create"],
+        "before": {
+          "allocated_storage": 100,
+          "engine": "postgres",
+          "engine_version": "16.4",
+          "identifier": "shop-prod",
+          "instance_class": "db.r6g.large",
+          "storage_encrypted": false,
+          "address": "shop-prod.c9x1.us-east-1.rds.amazonaws.com",
+          "endpoint": "shop-prod.c9x1.us-east-1.rds.amazonaws.com:5432",
+          "username": "shop",
+          "password": "fixture-db-password-never-persist",
+          "multi_az": true,
+          "db_subnet_group_name": "shop-prod",
+          "parameter_group_name": "shop-prod-pg16",
+          "vpc_security_group_ids": ["sg-0db"]
+        },
+        "after": {
+          "allocated_storage": 100,
+          "engine": "postgres",
+          "engine_version": "16.4",
+          "identifier": "shop-prod",
+          "instance_class": "db.r6g.large",
+          "storage_encrypted": true,
+          "username": "shop",
+          "password": "fixture-db-password-never-persist",
+          "multi_az": true,
+          "db_subnet_group_name": "shop-prod",
+          "parameter_group_name": "shop-prod-pg16",
+          "vpc_security_group_ids": ["sg-0db"]
+        },
+        "after_unknown": {
+          "address": true,
+          "endpoint": true,
+          "id": true,
+          "kms_key_id": true
+        },
+        "before_sensitive": {
+          "password": true
+        },
+        "after_sensitive": {
+          "password": true
+        },
+        "replace_paths": [["storage_encrypted"]]
+      },
+      "module_address": "module.database",
+      "action_reason": "replace_because_cannot_update"
+    },
+    {
+      "address": "module.database.aws_db_instance.replica",
+      "mode": "managed",
+      "type": "aws_db_instance",
+      "name": "replica",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": ["update"],
+        "before": {
+          "identifier": "shop-prod-replica",
+          "instance_class": "db.r6g.large",
+          "replicate_source_db": "shop-prod",
+          "address": "shop-prod-replica.c9x1.us-east-1.rds.amazonaws.com"
+        },
+        "after": {
+          "identifier": "shop-prod-replica",
+          "instance_class": "db.r6g.large",
+          "address": "shop-prod-replica.c9x1.us-east-1.rds.amazonaws.com"
+        },
+        "after_unknown": {
+          "replicate_source_db": true
+        },
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "module_address": "module.database"
+    },
+    {
+      "address": "module.database.aws_db_parameter_group.postgres",
+      "mode": "managed",
+      "type": "aws_db_parameter_group",
+      "name": "postgres",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": ["no-op"],
+        "before": {
+          "family": "postgres16",
+          "id": "shop-prod-pg16",
+          "name": "shop-prod-pg16"
+        },
+        "after": {
+          "family": "postgres16",
+          "id": "shop-prod-pg16",
+          "name": "shop-prod-pg16"
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "module_address": "module.database"
+    },
+    {
+      "address": "module.database.aws_db_subnet_group.main",
+      "mode": "managed",
+      "type": "aws_db_subnet_group",
+      "name": "main",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": ["no-op"],
+        "before": {
+          "id": "shop-prod",
+          "name": "shop-prod",
+          "subnet_ids": ["subnet-01aa", "subnet-02bb"]
+        },
+        "after": {
+          "id": "shop-prod",
+          "name": "shop-prod",
+          "subnet_ids": ["subnet-01aa", "subnet-02bb"]
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "module_address": "module.database"
+    }
+  ],
+  "prior_state": {
+    "format_version": "1.0",
+    "terraform_version": "1.9.8",
+    "values": {
+      "root_module": {
+        "resources": [
+          {
+            "address": "aws_ssm_parameter.database_url",
+            "mode": "managed",
+            "type": "aws_ssm_parameter",
+            "name": "database_url",
+            "provider_name": "registry.terraform.io/hashicorp/aws",
+            "schema_version": 0,
+            "values": {
+              "arn": "arn:aws:ssm:us-east-1:111122223333:parameter/shop/database-url",
+              "name": "/shop/database-url",
+              "type": "SecureString",
+              "value": "postgres://shop@shop-prod.c9x1.us-east-1.rds.amazonaws.com:5432/shop"
+            },
+            "sensitive_values": {
+              "value": true
+            }
+          },
+          {
+            "address": "aws_route53_record.db",
+            "mode": "managed",
+            "type": "aws_route53_record",
+            "name": "db",
+            "provider_name": "registry.terraform.io/hashicorp/aws",
+            "schema_version": 0,
+            "values": {
+              "name": "db.shop.internal",
+              "type": "CNAME",
+              "ttl": 60,
+              "records": ["shop-prod.c9x1.us-east-1.rds.amazonaws.com"],
+              "zone_id": "Z0SHOPINTERNAL"
+            },
+            "sensitive_values": {}
+          },
+          {
+            "address": "aws_instance.bastion",
+            "mode": "managed",
+            "type": "aws_instance",
+            "name": "bastion",
+            "provider_name": "registry.terraform.io/hashicorp/aws",
+            "schema_version": 0,
+            "values": {
+              "ami": "ami-0e2c8caa4b6378d8c",
+              "id": "i-0bastion",
+              "instance_type": "t4g.micro",
+              "subnet_id": "subnet-01aa",
+              "vpc_security_group_ids": ["sg-0app"]
+            },
+            "sensitive_values": {}
+          }
+        ],
+        "child_modules": [
+          {
+            "resources": [
+              {
+                "address": "module.database.aws_db_subnet_group.main",
+                "mode": "managed",
+                "type": "aws_db_subnet_group",
+                "name": "main",
+                "provider_name": "registry.terraform.io/hashicorp/aws",
+                "schema_version": 0,
+                "values": {
+                  "id": "shop-prod",
+                  "name": "shop-prod",
+                  "subnet_ids": ["subnet-01aa", "subnet-02bb"]
+                },
+                "sensitive_values": {}
+              },
+              {
+                "address": "module.database.aws_db_parameter_group.postgres",
+                "mode": "managed",
+                "type": "aws_db_parameter_group",
+                "name": "postgres",
+                "provider_name": "registry.terraform.io/hashicorp/aws",
+                "schema_version": 0,
+                "values": {
+                  "family": "postgres16",
+                  "id": "shop-prod-pg16",
+                  "name": "shop-prod-pg16"
+                },
+                "sensitive_values": {}
+              },
+              {
+                "address": "module.database.aws_db_instance.main",
+                "mode": "managed",
+                "type": "aws_db_instance",
+                "name": "main",
+                "provider_name": "registry.terraform.io/hashicorp/aws",
+                "schema_version": 0,
+                "values": {
+                  "allocated_storage": 100,
+                  "engine": "postgres",
+                  "engine_version": "16.4",
+                  "identifier": "shop-prod",
+                  "instance_class": "db.r6g.large",
+                  "storage_encrypted": false,
+                  "address": "shop-prod.c9x1.us-east-1.rds.amazonaws.com",
+                  "endpoint": "shop-prod.c9x1.us-east-1.rds.amazonaws.com:5432",
+                  "username": "shop",
+                  "password": "fixture-db-password-never-persist",
+                  "multi_az": true,
+                  "db_subnet_group_name": "shop-prod",
+                  "parameter_group_name": "shop-prod-pg16",
+                  "vpc_security_group_ids": ["sg-0db"]
+                },
+                "sensitive_values": {
+                  "password": true
+                }
+              },
+              {
+                "address": "module.database.aws_db_instance.replica",
+                "mode": "managed",
+                "type": "aws_db_instance",
+                "name": "replica",
+                "provider_name": "registry.terraform.io/hashicorp/aws",
+                "schema_version": 0,
+                "values": {
+                  "identifier": "shop-prod-replica",
+                  "instance_class": "db.r6g.large",
+                  "replicate_source_db": "shop-prod",
+                  "address": "shop-prod-replica.c9x1.us-east-1.rds.amazonaws.com"
+                },
+                "sensitive_values": {}
+              }
+            ],
+            "address": "module.database"
+          }
+        ]
+      }
+    }
+  },
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "expressions": {
+          "region": {
+            "constant_value": "us-east-1"
+          }
+        }
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_ssm_parameter.database_url",
+          "mode": "managed",
+          "type": "aws_ssm_parameter",
+          "name": "database_url",
+          "provider_config_key": "aws",
+          "schema_version": 0,
+          "expressions": {
+            "value": {
+              "references": ["module.database.endpoint", "module.database"]
+            }
+          }
+        },
+        {
+          "address": "aws_route53_record.database",
+          "mode": "managed",
+          "type": "aws_route53_record",
+          "name": "database",
+          "provider_config_key": "aws",
+          "schema_version": 0,
+          "expressions": {
+            "records": {
+              "references": ["module.database.address", "module.database"]
+            }
+          }
+        },
+        {
+          "address": "aws_secretsmanager_secret.database",
+          "mode": "managed",
+          "type": "aws_secretsmanager_secret",
+          "name": "database",
+          "provider_config_key": "aws",
+          "schema_version": 0,
+          "expressions": {}
+        },
+        {
+          "address": "aws_secretsmanager_secret_version.database",
+          "mode": "managed",
+          "type": "aws_secretsmanager_secret_version",
+          "name": "database",
+          "provider_config_key": "aws",
+          "schema_version": 0,
+          "expressions": {
+            "secret_id": {
+              "references": ["aws_secretsmanager_secret.database.id", "aws_secretsmanager_secret.database"]
+            },
+            "secret_string": {
+              "references": ["module.database.address", "module.database", "var.db_password"]
+            }
+          }
+        }
+      ],
+      "module_calls": {
+        "database": {
+          "source": "./modules/database",
+          "expressions": {
+            "subnet_ids": {
+              "references": ["module.network.private_subnet_ids", "module.network"]
+            },
+            "security_group_id": {
+              "references": ["module.network.database_security_group_id", "module.network"]
+            },
+            "password": {
+              "references": ["var.db_password"]
+            }
+          },
+          "module": {
+            "resources": [
+              {
+                "address": "aws_db_subnet_group.main",
+                "mode": "managed",
+                "type": "aws_db_subnet_group",
+                "name": "main",
+                "provider_config_key": "aws",
+                "schema_version": 0,
+                "expressions": {
+                  "subnet_ids": {
+                    "references": ["var.subnet_ids"]
+                  }
+                }
+              },
+              {
+                "address": "aws_db_parameter_group.postgres",
+                "mode": "managed",
+                "type": "aws_db_parameter_group",
+                "name": "postgres",
+                "provider_config_key": "aws",
+                "schema_version": 0,
+                "expressions": {}
+              },
+              {
+                "address": "aws_db_instance.main",
+                "mode": "managed",
+                "type": "aws_db_instance",
+                "name": "main",
+                "provider_config_key": "aws",
+                "schema_version": 0,
+                "expressions": {
+                  "db_subnet_group_name": {
+                    "references": ["aws_db_subnet_group.main.name", "aws_db_subnet_group.main"]
+                  },
+                  "parameter_group_name": {
+                    "references": ["aws_db_parameter_group.postgres.name", "aws_db_parameter_group.postgres"]
+                  },
+                  "vpc_security_group_ids": {
+                    "references": ["var.security_group_id"]
+                  },
+                  "password": {
+                    "references": ["var.password"]
+                  }
+                }
+              },
+              {
+                "address": "aws_db_instance.replica",
+                "mode": "managed",
+                "type": "aws_db_instance",
+                "name": "replica",
+                "provider_config_key": "aws",
+                "schema_version": 0,
+                "expressions": {
+                  "replicate_source_db": {
+                    "references": ["aws_db_instance.main.identifier", "aws_db_instance.main"]
+                  }
+                }
+              }
+            ],
+            "outputs": {
+              "endpoint": {
+                "expression": {
+                  "references": ["aws_db_instance.main.endpoint", "aws_db_instance.main"]
+                }
+              },
+              "address": {
+                "expression": {
+                  "references": ["aws_db_instance.main.address", "aws_db_instance.main"]
+                }
+              },
+              "identifier": {
+                "expression": {
+                  "references": ["aws_db_instance.main.identifier", "aws_db_instance.main"]
+                }
+              }
+            },
+            "variables": {
+              "subnet_ids": {},
+              "security_group_id": {},
+              "password": {}
+            }
+          }
+        }
+      },
+      "variables": {
+        "db_password": {
+          "sensitive": true
+        },
+        "api_count": {
+          "default": 2
+        }
+      }
+    }
+  },
+  "timestamp": "2026-11-05T18:00:00Z",
+  "applyable": true,
+  "complete": true,
+  "errored": false
+}

@@ -1,0 +1,10 @@
+{
+  "protocolVersion": 0,
+  "schema": "api/v0",
+  "metadata": {"ecosystem":"rust"},
+  "entities": [
+    {"id":"rust:kit::Point","kind":"struct","label":"Point","data":{"signature":"pub struct Point { .. }","contract":{"declaration":"struct","term":"struct","visibility":"public"}}},
+    {"id":"rust:kit::prelude::Clock","kind":"export","label":"Clock","data":{"signature":"pub use crate::time::Clock as Clock","contract":{"declaration":"re-export","term":"re-export","visibility":"public"}}}
+  ],
+  "relationships": []
+}

@@ -1,0 +1,439 @@
+/*
+ * Embedding-safe styles for the Projections host UI (Tailwind CSS v4, shadcn/ui).
+ *
+ * Everything here applies only inside an element with the `pj-root` class (add `pj-dark` to the same element
+ * for dark mode). Utilities are written with the `pj:` prefix (`pj:flex`, `pj:hover:bg-muted`). The build
+ * (scripts/build-ui-css.mjs) compiles this with @tailwindcss/postcss without preflight, then makes the output
+ * embedding-safe: it removes the cascade layers (keeping their order) so an embedding page's unlayered CSS can't
+ * outrank them, scopes every selector under `.pj-root`, turns `@property` registrations into scoped defaults,
+ * prefixes keyframe names with `pj-`, converts rem to px, and fails if anything escapes the root.
+ *
+ * Specificity: the reset below is (0,1,0) (`.pj-root :where(...)`), which beats an embedding page's element and
+ * universal selectors; utilities become (0,2,0) (`.pj-root .pj\:...`) and win over the reset. Page rules with an
+ * ID, or with a class plus elements (for example `.app button`), can still override reset properties that no
+ * utility sets.
+ */
+
+/* The cascade order; the build keeps it when it removes the layers. `projector` (the theme's skin) comes last. */
+@layer theme, base, components, utilities, projector;
+
+@import 'tailwindcss/theme.css' layer(theme) prefix(pj);
+@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+@import 'tw-animate-css/prefix';
+/* The component styles utilities can't express, and the Projector skin over the components, each in its layer. */
+@import './styles/components.css';
+@import './styles/projector.css';
+
+@source "./**/*.{ts,tsx}";
+/* The Inspector and static-site shells compose the same components (`@githubnext/projections-host/ui/components`). */
+@source "../../../inspector/src/**/*.{ts,tsx}";
+
+/* Dark mode follows `pj-dark` on the scoped root. */
+@custom-variant dark (&:where(.pj-dark, .pj-dark *));
+
+/*
+ * State variants the shadcn/ui components use, from shadcn's `tailwind.css` (MIT, Copyright (c) 2023 shadcn; see
+ * components/LICENSE.shadcn.txt). Only the variants are vendored; its scroll-fade and shimmer utilities are unused.
+ */
+@custom-variant data-open {
+  &:where([data-state='open']),
+  &:where([data-open]:not([data-open='false'])) {
+    @slot;
+  }
+}
+@custom-variant data-closed {
+  &:where([data-state='closed']),
+  &:where([data-closed]:not([data-closed='false'])) {
+    @slot;
+  }
+}
+@custom-variant data-checked {
+  &:where([data-state='checked']),
+  &:where([data-checked]:not([data-checked='false'])) {
+    @slot;
+  }
+}
+@custom-variant data-unchecked {
+  &:where([data-state='unchecked']),
+  &:where([data-unchecked]:not([data-unchecked='false'])) {
+    @slot;
+  }
+}
+@custom-variant data-selected {
+  &:where([data-selected='true']) {
+    @slot;
+  }
+}
+@custom-variant data-disabled {
+  &:where([data-disabled='true']),
+  &:where([data-disabled]:not([data-disabled='false'])) {
+    @slot;
+  }
+}
+@custom-variant data-active {
+  &:where([data-state='active']),
+  &:where([data-active]:not([data-active='false'])) {
+    @slot;
+  }
+}
+@custom-variant data-horizontal {
+  &:where([data-orientation='horizontal']) {
+    @slot;
+  }
+}
+@custom-variant data-vertical {
+  &:where([data-orientation='vertical']) {
+    @slot;
+  }
+}
+
+/*
+ * Design tokens: the Projector theme (oklch, shadcn/ui token names plus `lens`, change colors, `--pj-bevel` and
+ * `--pj-shadow-pop`), all `--pj-` prefixed, and the surface scale and change fills it shares with renderers
+ * (`surface-canvas|raised|header|inset`, `divider`, `<change>-muted|border`: `pj:bg-surface-raised`,
+ * `pj:border-divider`, `pj:border-added-border`). `@theme inline` maps them to Tailwind colors (`pj:bg-lens`), shadows
+ * (`pj:shadow-pop`, `pj:inset-shadow-bevel`), radii (10px: 8px controls, 6px small items) and fonts. Keep in sync
+ * with lib/tokens.ts (the embed browser test compares them; test/theme.test.mjs checks their contrast).
+ */
+@theme inline {
+  --color-background: var(--pj-background);
+  --color-foreground: var(--pj-foreground);
+  --color-card: var(--pj-card);
+  --color-card-foreground: var(--pj-card-foreground);
+  --color-popover: var(--pj-popover);
+  --color-popover-foreground: var(--pj-popover-foreground);
+  --color-primary: var(--pj-primary);
+  --color-primary-foreground: var(--pj-primary-foreground);
+  --color-secondary: var(--pj-secondary);
+  --color-secondary-foreground: var(--pj-secondary-foreground);
+  --color-muted: var(--pj-muted);
+  --color-muted-foreground: var(--pj-muted-foreground);
+  --color-accent: var(--pj-accent);
+  --color-accent-foreground: var(--pj-accent-foreground);
+  --color-destructive: var(--pj-destructive);
+  --color-destructive-foreground: var(--pj-destructive-foreground);
+  --color-border: var(--pj-border);
+  --color-input: var(--pj-input);
+  --color-control-border: var(--pj-control-border);
+  --color-ring: var(--pj-ring);
+  --color-lens: var(--pj-lens);
+  --color-lens-foreground: var(--pj-lens-foreground);
+  --color-lens-muted: var(--pj-lens-muted);
+  --color-added: var(--pj-added);
+  --color-removed: var(--pj-removed);
+  --color-modified: var(--pj-modified);
+  --color-moved: var(--pj-moved);
+  --color-surface-canvas: var(--pj-surface-canvas);
+  --color-surface-raised: var(--pj-surface-raised);
+  --color-surface-header: var(--pj-surface-header);
+  --color-surface-inset: var(--pj-surface-inset);
+  --color-divider: var(--pj-divider);
+  --color-added-muted: var(--pj-added-muted);
+  --color-added-border: var(--pj-added-border);
+  --color-removed-muted: var(--pj-removed-muted);
+  --color-removed-border: var(--pj-removed-border);
+  --color-modified-muted: var(--pj-modified-muted);
+  --color-modified-border: var(--pj-modified-border);
+  --color-moved-muted: var(--pj-moved-muted);
+  --color-moved-border: var(--pj-moved-border);
+  --shadow-pop: var(--pj-shadow-pop);
+  --inset-shadow-bevel: var(--pj-bevel);
+  --radius-sm: calc(var(--pj-radius) * 0.6);
+  --radius-md: calc(var(--pj-radius) * 0.8);
+  --radius-lg: var(--pj-radius);
+  --radius-xl: calc(var(--pj-radius) * 1.4);
+  --radius-2xl: calc(var(--pj-radius) * 1.8);
+  --radius-3xl: calc(var(--pj-radius) * 2.2);
+  --radius-4xl: calc(var(--pj-radius) * 2.6);
+  --font-sans: var(--pj-font-family);
+  --font-mono: var(--pj-font-family-mono);
+}
+
+@layer base {
+  /*
+   * Projector: light is the screen (matte, faintly warm white), dark is the chassis (neutral graphite with a
+   * bevelled top edge). The lens coating (cyan, hue 220) is the only chroma in the chrome: focus, selection and
+   * playback. Change colors keep their meanings, retuned in lightness to sit on these neutrals.
+   */
+  .pj-root {
+    --pj-background: oklch(0.985 0.003 95);
+    --pj-foreground: oklch(0.22 0.004 265);
+    --pj-card: oklch(0.998 0.0015 95);
+    --pj-card-foreground: oklch(0.22 0.004 265);
+    --pj-popover: oklch(0.998 0.0015 95);
+    --pj-popover-foreground: oklch(0.22 0.004 265);
+    --pj-primary: oklch(0.255 0.005 265);
+    --pj-primary-foreground: oklch(0.985 0.003 95);
+    --pj-secondary: oklch(0.948 0.004 95);
+    --pj-secondary-foreground: oklch(0.255 0.005 265);
+    --pj-muted: oklch(0.962 0.004 95);
+    --pj-muted-foreground: oklch(0.48 0.006 265);
+    --pj-accent: oklch(0.945 0.005 95);
+    --pj-accent-foreground: oklch(0.22 0.004 265);
+    --pj-destructive: oklch(0.55 0.2 27);
+    --pj-destructive-foreground: oklch(0.985 0.003 95);
+    --pj-border: oklch(0.905 0.005 95);
+    --pj-input: oklch(0.8 0.006 95);
+    --pj-control-border: oklch(0.62 0.006 95);
+    --pj-ring: oklch(0.52 0.12 220);
+    --pj-lens: oklch(0.52 0.12 220);
+    --pj-lens-foreground: oklch(0.99 0.005 95);
+    --pj-lens-muted: oklch(0.965 0.018 220);
+    --pj-bevel: inset 0 1px 0 oklch(1 0 0 / 0.9);
+    --pj-shadow-pop: 0 1px 2px oklch(0.22 0.004 265 / 0.06), 0 8px 24px -6px oklch(0.22 0.004 265 / 0.16);
+    --pj-added: oklch(0.52 0.14 150);
+    --pj-removed: oklch(0.55 0.2 27);
+    --pj-modified: oklch(0.535 0.12 68);
+    --pj-moved: oklch(0.52 0.19 295);
+    /*
+     * The shared surface scale and change fills, the renderer token set's own values (sRGB hex, `defaultThemeTokens`
+     * in the renderer SDK; test/theme.test.mjs keeps them equal), so the host's chrome and its renderers stack the
+     * same surfaces: canvas (the stage behind cards) < raised (a card) < header (a band in a card) and inset (a
+     * recessed gutter or empty room); `divider` edges and rules any two of them at 3:1 or more. A change fill
+     * (`-muted`) always has its same-hue edge (`-border`), never a fill alone.
+     */
+    --pj-surface-canvas: #efeee9;
+    --pj-surface-raised: #fdfcfa;
+    --pj-surface-header: #e6e5df;
+    --pj-surface-inset: #f1f0eb;
+    --pj-divider: #83827d;
+    --pj-added-muted: #e0f7e4;
+    --pj-added-border: #2b9551;
+    --pj-removed-muted: #ffe8e4;
+    --pj-removed-border: #dc4b47;
+    --pj-modified-muted: #ffecd8;
+    --pj-modified-border: #b07415;
+    --pj-moved-muted: #f1ecff;
+    --pj-moved-border: #8a64d4;
+    --pj-radius: 10px;
+    /* The play control's face (see `.pj-lens` below): lit from the top, tinted by the lens while playing. */
+    --pj-lens-face: linear-gradient(to bottom, color-mix(in oklch, var(--pj-primary) 82%, white), var(--pj-primary));
+    --pj-lens-face-playing: linear-gradient(to bottom, color-mix(in oklch, var(--pj-lens) 22%, var(--pj-primary)), var(--pj-primary));
+    --pj-lens-highlight: inset 0 1px 0 oklch(1 0 0 / 0.16);
+    --pj-font-family:
+      ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+      'Noto Color Emoji';
+    --pj-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    /* The core's `LoadingStatus` in this UI's muted text, also outside a view (the explorer's comparison). */
+    --pj-loading-color: var(--pj-muted-foreground);
+    --pj-loading-font-size: 0.875rem;
+    color-scheme: light;
+  }
+
+  .pj-root.pj-dark {
+    --pj-background: oklch(0.175 0.003 265);
+    --pj-foreground: oklch(0.955 0.004 95);
+    --pj-card: oklch(0.21 0.004 265);
+    --pj-card-foreground: oklch(0.955 0.004 95);
+    --pj-popover: oklch(0.235 0.004 265);
+    --pj-popover-foreground: oklch(0.955 0.004 95);
+    --pj-primary: oklch(0.955 0.004 95);
+    --pj-primary-foreground: oklch(0.21 0.004 265);
+    --pj-secondary: oklch(0.255 0.004 265);
+    --pj-secondary-foreground: oklch(0.955 0.004 95);
+    --pj-muted: oklch(0.235 0.004 265);
+    --pj-muted-foreground: oklch(0.72 0.006 265);
+    --pj-accent: oklch(0.27 0.004 265);
+    --pj-accent-foreground: oklch(0.955 0.004 95);
+    --pj-destructive: oklch(0.66 0.19 25);
+    --pj-destructive-foreground: oklch(0.175 0.003 265);
+    --pj-border: oklch(0.3 0.004 265);
+    --pj-input: oklch(0.42 0.005 265);
+    --pj-control-border: oklch(0.54 0.006 265);
+    --pj-ring: oklch(0.75 0.12 220);
+    --pj-lens: oklch(0.75 0.12 220);
+    --pj-lens-foreground: oklch(0.18 0.01 265);
+    --pj-lens-muted: oklch(0.26 0.035 220);
+    --pj-bevel: inset 0 1px 0 oklch(1 0 0 / 0.07);
+    --pj-shadow-pop: 0 1px 2px oklch(0 0 0 / 0.4), 0 10px 28px -6px oklch(0 0 0 / 0.55);
+    --pj-added: oklch(0.74 0.16 150);
+    --pj-removed: oklch(0.7 0.17 25);
+    --pj-modified: oklch(0.8 0.14 80);
+    --pj-moved: oklch(0.74 0.14 295);
+    --pj-surface-canvas: #0b0b0d;
+    --pj-surface-raised: #18191b;
+    --pj-surface-header: #26272b;
+    --pj-surface-inset: #0f1012;
+    --pj-divider: #727378;
+    --pj-added-muted: #51c67226;
+    --pj-added-border: #3a9d58;
+    --pj-removed-muted: #f66d6726;
+    --pj-removed-border: #cf514c;
+    --pj-modified-muted: #edb34526;
+    --pj-modified-border: #b8862a;
+    --pj-moved-muted: #b298f926;
+    --pj-moved-border: #8a72d0;
+    --pj-lens-face: linear-gradient(to bottom, var(--pj-primary), color-mix(in oklch, var(--pj-primary) 86%, black));
+    --pj-lens-face-playing: var(--pj-lens-face);
+    --pj-lens-highlight: inset 0 1px 0 oklch(1 0 0 / 0.6);
+    color-scheme: dark;
+  }
+
+  /* The root re-establishes the inherited properties a page commonly sets, so its body styles stop here. */
+  .pj-root {
+    font: normal normal 400 normal 14px / 1.5 var(--pj-font-family);
+    font-feature-settings: normal;
+    font-variation-settings: normal;
+    font-kerning: auto;
+    font-optical-sizing: auto;
+    font-size-adjust: none;
+    color: var(--pj-foreground);
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-align: start;
+    text-indent: 0;
+    text-transform: none;
+    text-shadow: none;
+    text-rendering: auto;
+    text-underline-offset: auto;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: manual;
+    tab-size: 4;
+    line-break: auto;
+    writing-mode: horizontal-tb;
+    list-style: disc outside none;
+    border-collapse: separate;
+    border-spacing: 0;
+    caption-side: top;
+    empty-cells: show;
+    quotes: auto;
+    cursor: auto;
+    caret-color: auto;
+    accent-color: auto;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-text-fill-color: currentcolor;
+    -webkit-text-stroke-width: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /*
+   * Scoped replacement for Tailwind's preflight. `all: revert` first rolls every page (author) declaration back to
+   * the browser default; SVG content is excluded because it would also override SVG presentation attributes.
+   */
+  .pj-root :where(*:not(svg, svg *)),
+  .pj-root :where(*)::before,
+  .pj-root :where(*)::after,
+  .pj-root::before,
+  .pj-root::after {
+    all: revert;
+  }
+
+  .pj-root :where(*),
+  .pj-root :where(*)::before,
+  .pj-root :where(*)::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid var(--pj-border);
+    outline-color: var(--pj-ring);
+  }
+
+  .pj-root :where(h1, h2, h3, h4, h5, h6) {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+  .pj-root :where(a) {
+    color: inherit;
+    text-decoration: inherit;
+  }
+  .pj-root :where(b, strong) {
+    font-weight: bolder;
+  }
+  .pj-root :where(code, kbd, samp, pre) {
+    font-family: var(--pj-font-family-mono);
+    font-size: 1em;
+  }
+  .pj-root :where(small) {
+    font-size: 80%;
+  }
+  .pj-root :where(sub, sup) {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+  .pj-root :where(sub) {
+    bottom: -0.25em;
+  }
+  .pj-root :where(sup) {
+    top: -0.5em;
+  }
+  .pj-root :where(hr) {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+  .pj-root :where(table) {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+  .pj-root :where(ol, ul, menu) {
+    list-style: none;
+  }
+  .pj-root :where(textarea) {
+    resize: vertical;
+  }
+  .pj-root :where(summary) {
+    display: list-item;
+  }
+  .pj-root :where(progress) {
+    vertical-align: baseline;
+  }
+  .pj-root :where(button, input, optgroup, select, textarea) {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    text-transform: none;
+  }
+  .pj-root :where(button, input:where([type='button'], [type='reset'], [type='submit'])) {
+    -webkit-appearance: button;
+    background-color: transparent;
+    background-image: none;
+  }
+  .pj-root :where(button, [role='button']) {
+    cursor: pointer;
+  }
+  .pj-root :where(:disabled) {
+    cursor: default;
+  }
+  .pj-root :where(input, textarea)::placeholder {
+    opacity: 1;
+    color: var(--pj-muted-foreground);
+  }
+  .pj-root :where(img, svg, video, canvas, audio, iframe, embed, object) {
+    display: block;
+    vertical-align: middle;
+  }
+  .pj-root :where(img, video) {
+    max-width: 100%;
+    height: auto;
+  }
+  /* As in Tailwind v4, the hidden attribute beats display utilities. */
+  .pj-root :where([hidden]:not([hidden='until-found'])) {
+    display: none !important;
+  }
+  /* Keep the icon presentation attributes lucide uses authoritative over page `svg` rules. */
+  .pj-root :where(svg[fill='none']) {
+    fill: none;
+  }
+  .pj-root :where(svg[stroke='currentColor']) {
+    stroke: currentColor;
+  }
+  .pj-root ::selection {
+    color: revert;
+    background-color: revert;
+  }
+
+  /* The scoped root paints the UI surface. */
+  .pj-root {
+    background-color: var(--pj-background);
+  }
+}

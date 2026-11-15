@@ -1,0 +1,11 @@
+{
+  "protocolVersion": 0,
+  "schema": "api/v0",
+  "metadata": {"ecosystem":"go"},
+  "entities": [
+    {"id":"go:example.com/units.Weight","kind":"type","label":"Weight","data":{"signature":"type Weight int64","contract":{"declaration":"type","term":"type","visibility":"public","underlying":"int64","native":{"underlying":"int64","numeric":{"family":"signed"}}}}},
+    {"id":"go:example.com/units.Queue","kind":"type","label":"Queue","data":{"signature":"type Queue chan string","contract":{"declaration":"type","term":"type","visibility":"public","underlying":"chan string","native":{"underlying":"chan"}}}},
+    {"id":"go:example.com/units.Unit","kind":"type","label":"Unit","data":{"signature":"type Unit struct{ name string }"}}
+  ],
+  "relationships": []
+}

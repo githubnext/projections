@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/definition/v0.json",
+  "title": "Projections projection definition",
+  "description": "A projection: an extractor, an optional comparator and a renderer, with their configuration.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "extractor", "renderer"],
+  "properties": {
+    "id": {"$ref": "#/$defs/identifier"},
+    "title": {"type": "string", "minLength": 1},
+    "description": {"type": "string", "minLength": 1},
+    "extractor": {
+      "anyOf": [
+        {"type": "string", "minLength": 1},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["command"],
+          "properties": {
+            "command": {
+              "type": "array",
+              "items": {"type": "string", "pattern": "^[^\\u0000]*$"},
+              "minItems": 1,
+              "maxItems": 256,
+              "prefixItems": [{"type": "string", "minLength": 1, "pattern": "^[^\\u0000]+$"}]
+            },
+            "sources": {"$ref": "#/$defs/sources"},
+            "upstream": {
+              "description": "Built-in extractions the command builds on, by name. The runner extracts each from the examined revision first, with the definition's scope and timeout, and passes them in the request's `upstream`, keyed by the same names.",
+              "type": "object",
+              "additionalProperties": {"$ref": "#/$defs/upstream"},
+              "minProperties": 1,
+              "maxProperties": 8,
+              "propertyNames": {"pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$"}
+            }
+          }
+        }
+      ]
+    },
+    "comparator": {
+      "description": "How changes are matched, explained and ordered. A string or an object with `file` names a custom comparator file (`<name>.comparator.yaml`); an object without `file` is the default comparator, with its options. Omitted, the default comparator with no options.",
+      "anyOf": [
+        {"$ref": "#/$defs/comparatorFile"},
+        {
+          "description": "A custom comparator: its comparator file, with options it reads as `options` and any other files it depends on.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["file"],
+          "properties": {
+            "file": {"$ref": "#/$defs/comparatorFile"},
+            "sources": {"$ref": "#/$defs/sources"},
+            "options": {"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json#/$defs/data"}
+          }
+        },
+        {
+          "description": "The default comparator, with its options. An object without `file` is always the default comparator.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {"options": {"$ref": "#/$defs/defaultComparatorOptions"}}
+        }
+      ]
+    },
+    "renderer": {"$ref": "#/$defs/renderer"},
+    "inputs": {"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json#/$defs/data"},
+    "correspondence": {
+      "type": "object",
+      "additionalProperties": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true},
+      "propertyNames": {"minLength": 1}
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "timeoutMs": {"type": "integer", "minimum": 1, "maximum": 300000},
+        "environment": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+          "uniqueItems": true
+        },
+        "network": {"type": "boolean"},
+        "reproducibility": {"$ref": "#/$defs/reproducibility"},
+        "determinism": {"$ref": "#/$defs/determinism"},
+        "scope": {
+          "description": "Files and directories the extractor reads, not globs, relative to the definition's project: `.` is the project itself, and leading `../` segments widen a nested project's scope beyond it. Optional and enforced where reads are mediated; the default is the whole repository, or a nested project's own directory.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "pattern": "^[^/*?\\[\\\\]([^*?\\[\\\\]*[^/*?\\[\\\\])?/?$"
+          },
+          "minItems": 1,
+          "maxItems": 100
+        }
+      }
+    },
+    "presentation": {"$ref": "#/$defs/presentation"}
+  },
+  "$defs": {
+    "identifier": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$"},
+    "path": {
+      "description": "Relative to the definition's project (the directory holding its `.github/projections` or `.projections`); leading `../` segments leave a nested project.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^(?:\\.\\.(?:/\\.\\.)*|(?:\\.\\./)*(?!\\.{1,2}(?:/|$))(?!.*/\\.{1,2}(?:/|$))(?!.*//)(?!.*/$)(?!.*[\\\\\\u0000-\\u001f\\u007f])[^/?#:][^?#:]*)$"
+    },
+    "sources": {"type": "array", "items": {"$ref": "#/$defs/path"}, "maxItems": 256, "uniqueItems": true},
+    "defaultComparatorOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "order": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["by"],
+          "properties": {
+            "by": {"type": "string", "pattern": "^(?:dependents|data\\..+)$"},
+            "direction": {"enum": ["ascending", "descending"]}
+          }
+        }
+      }
+    },
+    "upstream": {
+      "description": "A built-in extractor, with its inputs, whose extraction of the same revision the command receives.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["extractor"],
+      "properties": {
+        "extractor": {"$ref": "#/$defs/identifier"},
+        "inputs": {"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json#/$defs/data"}
+      }
+    },
+    "comparatorFile": {
+      "description": "A comparator file (`<name>.comparator.yaml` or `.comparator.yml`), relative to the definition's project: the custom comparator, run sandboxed over the default comparator.",
+      "allOf": [{"$ref": "#/$defs/path"}, {"type": "string", "pattern": "\\.comparator\\.ya?ml$"}]
+    },
+    "renderer": {
+      "anyOf": [
+        {"$ref": "#/$defs/identifier"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["bundle"],
+          "properties": {"bundle": {"$ref": "#/$defs/path"}, "sources": {"$ref": "#/$defs/sources"}}
+        }
+      ]
+    },
+    "reproducibility": {"enum": ["hermetic", "pinned-toolchain", "local", "unknown", "external"]},
+    "determinism": {
+      "description": "How reproducible the extraction is, like a test's, declared and never enforced: `pure`, a function of the revision's files (cached by tree, and a rerun must match); `environmental`, the files plus the toolchain and dependencies (cached only within one environment; the default for custom extractors); `observed`, live or varying data such as timings or coverage (never reused silently).",
+      "enum": ["pure", "environmental", "observed"]
+    },
+    "kindPresentation": {
+      "description": "How viewers present one extraction kind.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "description": "The color its items take where a renderer colors by kind: a meaning (`danger`, `warning`, `success`, `info`, `neutral`) or a categorical hue. Renderers paint it with theme tokens.",
+          "enum": [
+            "danger",
+            "warning",
+            "success",
+            "info",
+            "neutral",
+            "blue",
+            "teal",
+            "pink",
+            "lime",
+            "purple",
+            "cyan",
+            "indigo",
+            "sky",
+            "orange",
+            "green",
+            "red",
+            "violet",
+            "emerald",
+            "rose",
+            "amber",
+            "citron"
+          ]
+        },
+        "noun": {
+          "description": "The words for one item and for any other count, such as `{\"singular\": \"hidden key\", \"plural\": \"hidden keys\"}`.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["singular", "plural"],
+          "properties": {
+            "singular": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "\\S"},
+            "plural": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "\\S"}
+          }
+        }
+      }
+    },
+    "kinds": {
+      "description": "How viewers present extraction kinds, keyed by kind: a color for renderers that color items by kind, and the summary bar's noun. A kind's key also names the flag of that name (`data.flags`) where a renderer draws flags.",
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/kindPresentation"},
+      "maxProperties": 64,
+      "propertyNames": {"minLength": 1, "maxLength": 256}
+    },
+    "presentation": {
+      "description": "Initial host and renderer settings for viewers. Viewers can still change them.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "highlighting": {
+          "description": "Change highlighting: fading with the transition, always, or off.",
+          "enum": ["animated", "on", "off"]
+        },
+        "changesOnly": {"description": "Show only changed items.", "type": "boolean"},
+        "mode": {
+          "description": "Initial comparison mode; hosts use it only when the renderer supports it.",
+          "enum": ["animated", "side-by-side", "swipe", "diff"]
+        },
+        "durationMs": {
+          "description": "Playback duration from before to after at 1× speed, in milliseconds. Omitted, it scales with the number of steps.",
+          "type": "integer",
+          "minimum": 500,
+          "maximum": 120000
+        },
+        "rendererOptions": {
+          "description": "Initial values of the renderer's declared controls, keyed by control ID. Hosts ignore unknown IDs and invalid values, with a notice.",
+          "type": "object",
+          "additionalProperties": {"anyOf": [{"type": "string"}, {"type": "number"}, {"type": "boolean"}]},
+          "maxProperties": 32,
+          "propertyNames": {"pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"}
+        },
+        "kinds": {"$ref": "#/$defs/kinds"}
+      }
+    }
+  }
+}

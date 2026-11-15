@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/architecture/v0.json",
+  "title": "Projections domain schema architecture/v0",
+  "description": "Components and their connections, as `graph/v0`, for architecture and infrastructure.",
+  "allOf": [{"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"}, {"$ref": "#/$defs/refinement"}],
+  "$defs": {
+    "refinement": {
+      "description": "What `architecture/v0` adds to the extraction envelope.",
+      "type": "object",
+      "properties": {"schema": {"const": "architecture/v0"}}
+    }
+  }
+}

@@ -1,0 +1,37 @@
+# Steps dist runs in each build job before `dist build` (github-build-setup in
+# dist-workspace.toml): the shared embedded inputs, the pinned toolchain with the
+# target, and the extractor helpers embedded and required.
+- name: Download the embedded inputs
+  uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+  with:
+    name: embedded-inputs
+    # The artifact is rooted at its paths' common ancestor, packages/.
+    path: packages
+- name: Install the pinned Rust toolchain and target
+  shell: bash
+  env:
+    TARGET: ${{ join(matrix.targets, '') }}
+  run: |
+    if ! command -v rustup >/dev/null; then
+      if [ "$RUNNER_OS" = Windows ]; then
+        curl --proto '=https' -sSfLo "$RUNNER_TEMP/rustup-init.exe" "https://static.rust-lang.org/rustup/dist/${TARGET%%-*}-pc-windows-msvc/rustup-init.exe"
+        "$RUNNER_TEMP/rustup-init.exe" -y --profile minimal --default-toolchain none
+        cygpath -w "$USERPROFILE/.cargo/bin" >> "$GITHUB_PATH"
+        export PATH="$USERPROFILE/.cargo/bin:$PATH"
+      else
+        curl --proto '=https' -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none
+        echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+        export PATH="$HOME/.cargo/bin:$PATH"
+      fi
+    fi
+    rustup toolchain install
+    rustup target add "$TARGET"
+    if [ "$RUNNER_OS" = Linux ]; then
+      # Static musl executables; dist installs musl-tools.
+      echo "CC_${TARGET//-/_}=musl-gcc" >> "$GITHUB_ENV"
+    fi
+- name: Embed and require the extractor helpers
+  shell: bash
+  run: |
+    echo PROJECTIONS_EMBED_HELPERS=1 >> "$GITHUB_ENV"
+    echo PROJECTIONS_REQUIRE_HELPERS=1 >> "$GITHUB_ENV"

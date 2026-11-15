@@ -1,0 +1,233 @@
+{
+  "protocolVersion": 0,
+  "schema": "metrics/v0",
+  "entities": [
+    {
+      "id": "language:JavaScript",
+      "kind": "language",
+      "label": "JavaScript",
+      "data": {
+        "language": "JavaScript",
+        "files": 148,
+        "code": 18420,
+        "comment": 2310,
+        "blank": 2875,
+        "lines": 23605,
+        "value": 18420,
+        "unit": "lines of code"
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/example.js"
+        }
+      ]
+    },
+    {
+      "id": "language:TypeScript",
+      "kind": "language",
+      "label": "TypeScript",
+      "data": {
+        "language": "TypeScript",
+        "files": 36,
+        "code": 4210,
+        "comment": 640,
+        "blank": 590,
+        "lines": 5440,
+        "value": 4210,
+        "unit": "lines of code"
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/example.ts"
+        }
+      ]
+    },
+    {
+      "id": "language:CoffeeScript",
+      "kind": "language",
+      "label": "CoffeeScript",
+      "data": {
+        "language": "CoffeeScript",
+        "files": 22,
+        "code": 2940,
+        "comment": 180,
+        "blank": 410,
+        "lines": 3530,
+        "value": 2940,
+        "unit": "lines of code"
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/example.coffee"
+        }
+      ]
+    },
+    {
+      "id": "language:Go",
+      "kind": "language",
+      "label": "Go",
+      "data": {
+        "language": "Go",
+        "files": 18,
+        "code": 3120,
+        "comment": 420,
+        "blank": 380,
+        "lines": 3920,
+        "value": 3120,
+        "unit": "lines of code"
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/example.go"
+        }
+      ]
+    },
+    {
+      "id": "language:YAML",
+      "kind": "language",
+      "label": "YAML",
+      "data": {
+        "language": "YAML",
+        "files": 41,
+        "code": 1980,
+        "comment": 120,
+        "blank": 160,
+        "lines": 2260,
+        "value": 1980,
+        "unit": "lines of code"
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/example.yaml"
+        }
+      ]
+    },
+    {
+      "id": "language:Markdown",
+      "kind": "language",
+      "label": "Markdown",
+      "data": {
+        "language": "Markdown",
+        "files": 27,
+        "code": 2210,
+        "comment": 0,
+        "blank": 640,
+        "lines": 2850,
+        "value": 2210,
+        "unit": "lines of code"
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/example.md"
+        }
+      ]
+    },
+    {
+      "id": "language:Shell",
+      "kind": "language",
+      "label": "Shell",
+      "data": {
+        "language": "Shell",
+        "files": 14,
+        "code": 860,
+        "comment": 210,
+        "blank": 120,
+        "lines": 1190,
+        "value": 860,
+        "unit": "lines of code"
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/example.sh"
+        }
+      ]
+    },
+    {
+      "id": "language:SQL",
+      "kind": "language",
+      "label": "SQL",
+      "data": {
+        "language": "SQL",
+        "files": 12,
+        "code": 1340,
+        "comment": 90,
+        "blank": 150,
+        "lines": 1580,
+        "value": 1340,
+        "unit": "lines of code"
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/example.sql"
+        }
+      ]
+    },
+    {
+      "id": "language:JSON",
+      "kind": "language",
+      "label": "JSON",
+      "data": {
+        "language": "JSON",
+        "files": 30,
+        "code": 2650,
+        "comment": 0,
+        "blank": 12,
+        "lines": 2662,
+        "value": 2650,
+        "unit": "lines of code"
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/example.json"
+        }
+      ]
+    },
+    {
+      "id": "language:Dockerfile",
+      "kind": "language",
+      "label": "Dockerfile",
+      "data": {
+        "language": "Dockerfile",
+        "files": 3,
+        "code": 96,
+        "comment": 24,
+        "blank": 18,
+        "lines": 138,
+        "value": 96,
+        "unit": "lines of code"
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "Dockerfile"
+        }
+      ]
+    }
+  ],
+  "relationships": [],
+  "metadata": {
+    "presentation": "code-statistics",
+    "limitations": [
+      "Synthetic language counts; no extractor ran."
+    ]
+  }
+}

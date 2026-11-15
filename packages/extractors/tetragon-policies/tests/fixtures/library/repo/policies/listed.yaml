@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: List
+items:
+  - apiVersion: cilium.io/v1alpha1
+    kind: TracingPolicy
+    metadata:
+      name: all-syscalls
+    spec:
+      lists:
+        - name: everything
+          type: generated_syscalls
+      podSelector:
+        matchLabels:
+          k8s:io.kubernetes.pod.namespace: kube-system
+      kprobes:
+        - call: list:everything
+          selectors:
+            - matchWorkloads:
+                hostSelector: {}
+              matchActions:
+                - action: NoPost
+                - action: TrackSock
+                  argSock: 0
+  - apiVersion: cilium.io/v1alpha1
+    kind: TracingPolicyNamespaced
+    metadata:
+      name: egress
+      namespace: checkout
+    spec:
+      fentries:
+        - call: tcp_connect
+          syscall: false
+          args:
+            - index: 0
+              type: sock
+          selectors:
+            - matchArgs:
+                - index: 0
+                  operator: NotDAddr
+                  values: ['${SERVICE_CIDR}']
+              matchParentBinaries:
+                - operator: Prefix
+                  values: [/usr/local/bin/]
+                  followChildren: true

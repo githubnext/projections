@@ -1,0 +1,23 @@
+{
+  "protocolVersion": 0,
+  "schema": "architecture/v0",
+  "entities": [
+    {"id": "platform", "kind": "module", "label": "platform"},
+    {"id": "api", "kind": "resource", "label": "api"},
+    {"id": "bucket", "kind": "resource", "label": "bucket"},
+    {"id": "database", "kind": "resource", "label": "database"},
+    {"id": "gateway", "kind": "resource", "label": "gateway"},
+    {"id": "network", "kind": "resource", "label": "network"}
+  ],
+  "relationships": [
+    {"id": "platform->api", "kind": "contains", "from": "platform", "to": "api"},
+    {"id": "platform->bucket", "kind": "contains", "from": "platform", "to": "bucket"},
+    {"id": "platform->database", "kind": "contains", "from": "platform", "to": "database"},
+    {"id": "platform->gateway", "kind": "contains", "from": "platform", "to": "gateway"},
+    {"id": "platform->network", "kind": "contains", "from": "platform", "to": "network"},
+    {"id": "api->database", "kind": "references", "from": "api", "to": "database"},
+    {"id": "api->gateway", "kind": "references", "from": "api", "to": "gateway"},
+    {"id": "gateway->network", "kind": "references", "from": "gateway", "to": "network"},
+    {"id": "api->bucket", "kind": "references", "from": "api", "to": "bucket"}
+  ]
+}

@@ -1,0 +1,39 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("SCHEMA_FIXTURE_DATABASE_URL")
+}
+
+enum Role {
+  USER  @map("user")
+  ADMIN @map("admin")
+  @@map("roles")
+}
+
+model User {
+  id    Int    @id @default(autoincrement())
+  email String @unique(map: "users_email_key") @map("email_address") @db.VarChar(160)
+  role  Role   @default(USER)
+  name  String?
+  posts Post[]
+  tags  Tag[]
+
+  @@map("users")
+  @@index([name(sort: Desc), email], map: "users_search")
+}
+
+model Post {
+  tenantId Int
+  id       Int
+  authorId Int
+  title    String @default("Untitled")
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@id([tenantId, id], map: "posts_pk")
+  @@unique([authorId, title], map: "posts_author_title")
+  @@map("posts")
+}
+
+model Tag {
+  id    Int    @id
+  users User[]
+}

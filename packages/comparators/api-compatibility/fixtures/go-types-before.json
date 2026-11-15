@@ -1,0 +1,25 @@
+{
+  "protocolVersion": 0,
+  "schema": "api/v0",
+  "metadata": {"ecosystem":"go"},
+  "entities": [
+    {"id":"go:example.com/units.Handler","kind":"function","label":"Handler","data":{"signature":"func Handler(int)","contract":{"declaration":"function","term":"func","visibility":"public","type":{"text":"func(int)"}}}},
+    {"id":"go:example.com/units.Celsius","kind":"type","label":"Celsius","data":{"signature":"type Celsius = float32","contract":{"declaration":"alias","term":"type","visibility":"public","type":{"text":"float32"}}}},
+    {"id":"go:example.com/units.Meters","kind":"type","label":"Meters","data":{"signature":"type Meters = float64","contract":{"declaration":"alias","term":"type","visibility":"public","type":{"text":"float64"}}}},
+    {"id":"go:example.com/units.Count","kind":"type","label":"Count","data":{"signature":"type Count int","contract":{"declaration":"type","term":"type","visibility":"public","underlying":"int","native":{"underlying":"int","comparable":true,"numeric":{"family":"signed","size32":4,"size64":8}}}}},
+    {"id":"go:example.com/units.Total","kind":"type","label":"Total","data":{"signature":"type Total = int","contract":{"declaration":"alias","term":"type","visibility":"public","type":{"text":"int"}}}},
+    {"id":"go:example.com/units.List","kind":"type","label":"List","data":{"signature":"type List[T any] struct","contract":{"declaration":"struct","term":"type","visibility":"public","typeParameters":[{"name":"T","constraints":["any"]}],"native":{"comparable":true}}}},
+    {"id":"go:example.com/units.Box","kind":"type","label":"Box","data":{"signature":"type Box struct","contract":{"declaration":"struct","term":"type","visibility":"public","native":{"comparable":true}}}},
+    {"id":"go:example.com/units.Events","kind":"type","label":"Events","data":{"signature":"type Events chan int","contract":{"declaration":"type","term":"type","visibility":"public","underlying":"chan int","native":{"underlying":"chan","comparable":true,"channel":{"dir":"both","elem":"int"}}}}},
+    {"id":"go:example.com/units.Inbox","kind":"type","label":"Inbox","data":{"signature":"type Inbox <-chan int","contract":{"declaration":"type","term":"type","visibility":"public","underlying":"<-chan int","native":{"underlying":"chan","comparable":true,"channel":{"dir":"receive","elem":"int"}}}}},
+    {"id":"go:example.com/units.Outbox","kind":"type","label":"Outbox","data":{"signature":"type Outbox chan int","contract":{"declaration":"type","term":"type","visibility":"public","underlying":"chan int","native":{"underlying":"chan","comparable":true,"channel":{"dir":"both","elem":"int"}}}}},
+    {"id":"go:example.com/units.Feed","kind":"type","label":"Feed","data":{"signature":"type Feed chan int","contract":{"declaration":"type","term":"type","visibility":"public","underlying":"chan int","native":{"underlying":"chan","comparable":true,"channel":{"dir":"both","elem":"int"}}}}},
+    {"id":"go:example.com/units.ID","kind":"type","label":"ID","data":{"signature":"type ID int","contract":{"declaration":"type","term":"type","visibility":"public","underlying":"int","native":{"underlying":"int","comparable":true,"numeric":{"family":"signed","size32":4,"size64":8}}}}},
+    {"id":"go:example.com/units.Index","kind":"type","label":"Index","data":{"signature":"type Index map[string]int","contract":{"declaration":"type","term":"type","visibility":"public","underlying":"map[string]int","native":{"underlying":"map","comparable":false}}}},
+    {"id":"go:example.com/units.Pair","kind":"type","label":"Pair","data":{"signature":"type Pair [2]int","contract":{"declaration":"type","term":"type","visibility":"public","underlying":"[2]int","native":{"underlying":"array","comparable":true}}}},
+    {"id":"go:example.com/units.Code","kind":"type","label":"Code","data":{"signature":"type Code int32","contract":{"declaration":"type","term":"type","visibility":"public","underlying":"int32","native":{"underlying":"int32","comparable":true,"numeric":{"family":"signed","size32":4,"size64":4}}}}},
+    {"id":"go:example.com/units.Size","kind":"type","label":"Size","data":{"signature":"type Size int","contract":{"declaration":"type","term":"type","visibility":"public","underlying":"int","native":{"underlying":"int","comparable":true,"numeric":{"family":"signed","size32":4,"size64":8}}}}},
+    {"id":"go:example.com/units.Stream","kind":"type","label":"Stream","data":{"signature":"type Stream chan int","contract":{"declaration":"type","term":"type","visibility":"public","underlying":"chan int","native":{"underlying":"chan","comparable":true,"channel":{"dir":"both","elem":"int"}}}}}
+  ],
+  "relationships": []
+}

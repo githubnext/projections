@@ -1,0 +1,119 @@
+{
+  "changes": [
+    {
+      "after": [
+        "package:@acme/auth"
+      ],
+      "before": [
+        "package:@acme/auth"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "package:@acme/auth",
+      "status": "modified"
+    },
+    {
+      "after": [
+        "package:@acme/billing"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "package:@acme/billing",
+      "status": "added"
+    },
+    {
+      "after": [
+        "package:@acme/core"
+      ],
+      "before": [
+        "package:@acme/core"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "package:@acme/core",
+      "status": "modified"
+    },
+    {
+      "after": [],
+      "before": [
+        "package:@acme/docs-site"
+      ],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "package:@acme/docs-site",
+      "status": "removed"
+    },
+    {
+      "after": [
+        "package:@acme/web"
+      ],
+      "before": [
+        "package:@acme/web"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "package:@acme/web",
+      "status": "modified"
+    },
+    {
+      "after": [
+        "dependency:@acme/billing->@acme/core"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "dependency:@acme/billing->@acme/core",
+      "status": "added"
+    },
+    {
+      "after": [],
+      "before": [
+        "dependency:@acme/docs-site->@acme/ui"
+      ],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "dependency:@acme/docs-site->@acme/ui",
+      "status": "removed"
+    },
+    {
+      "after": [
+        "dependency:@acme/web->@acme/billing"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "dependency:@acme/web->@acme/billing",
+      "status": "added"
+    }
+  ],
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "package:@acme/auth",
+        "package:@acme/core",
+        "package:@acme/web"
+      ],
+      "kind": "restructure"
+    },
+    {
+      "changes": [
+        "package:@acme/docs-site",
+        "dependency:@acme/docs-site->@acme/ui"
+      ],
+      "kind": "remove"
+    },
+    {
+      "changes": [
+        "package:@acme/billing",
+        "dependency:@acme/billing->@acme/core",
+        "dependency:@acme/web->@acme/billing"
+      ],
+      "kind": "add"
+    }
+  ]
+}

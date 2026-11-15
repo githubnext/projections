@@ -1,0 +1,19 @@
+{
+  "name": "@githubnext/projections-example-extractors",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Custom extractor samples that use the examined project's own TypeScript",
+  "scripts": {
+    "test": "node --test */test/*.test.mjs"
+  },
+  "devDependencies": {
+    "@githubnext/projections": "0.1.0",
+    "@githubnext/projections-engine": "0.1.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

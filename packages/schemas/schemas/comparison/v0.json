@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/comparison/v0.json",
+  "title": "Projections comparison",
+  "description": "How one extraction became another: correspondence, status, optional summaries and presentation order. Never positions, colors or timing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocolVersion", "changes", "steps"],
+  "properties": {
+    "protocolVersion": {"type": "number", "const": 0},
+    "changes": {"type": "array", "items": {"$ref": "#/$defs/change"}, "maxItems": 120000},
+    "steps": {"$ref": "#/$defs/steps"},
+    "order": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reverse"],
+      "properties": {"reverse": {"enum": ["mirror", "explicit"]}}
+    },
+    "reverseSteps": {"$ref": "#/$defs/steps"},
+    "variation": {
+      "description": "Present exactly when a change has `varied`.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["within", "beyond"],
+      "properties": {
+        "within": {
+          "description": "Unchanged changes with `varied`: variation within tolerance only.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "beyond": {
+          "description": "Modified changes with at least one `varied` value beyond tolerance.",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "metadata": {"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json#/$defs/data"}
+  },
+  "if": {"required": ["order"], "properties": {"order": {"properties": {"reverse": {"const": "explicit"}}}}},
+  "then": {"required": ["reverseSteps"]},
+  "else": {"not": {"required": ["reverseSteps"]}},
+  "$defs": {
+    "text": {"type": "string", "minLength": 1},
+    "ids": {"type": "array", "items": {"$ref": "#/$defs/text"}, "maxItems": 60000, "uniqueItems": true},
+    "varied": {
+      "description": "One volatile value that differs between a matched pair.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "within"],
+      "properties": {
+        "path": {"$ref": "#/$defs/text", "description": "The concrete pointer into the item, under `/data/`."},
+        "within": {"description": "Whether the difference is within the declared tolerance.", "type": "boolean"},
+        "reason": {
+          "$ref": "#/$defs/text",
+          "description": "Why a tolerance couldn't be applied: only when a spread was unavailable and no other bound held, or a generated value is on one side only."
+        },
+        "generated": {
+          "description": "A generated value, judged by its basis: within exactly when the bases are equal.",
+          "type": "boolean",
+          "const": true
+        },
+        "because": {
+          "description": "A generated value's basis parts that differ, in UTF-16 order; absent when the bases are equal.",
+          "type": "array",
+          "items": {"$ref": "#/$defs/text"},
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "collection", "before", "after", "status", "correspondence"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/text",
+          "description": "Unique within the comparison: by convention the first after ID, or the before ID for removals."
+        },
+        "collection": {"enum": ["entities", "relationships"]},
+        "before": {"$ref": "#/$defs/ids"},
+        "after": {"$ref": "#/$defs/ids"},
+        "status": {"enum": ["added", "removed", "modified", "unchanged"]},
+        "correspondence": {"enum": ["exact", "declared", "split", "merge", "none"]},
+        "varied": {
+          "description": "The volatile values that differ, sorted by path; present exactly when one does. Only on `exact` and `declared` changes. An `exact` change whose every difference is within is `unchanged` and belongs to no step.",
+          "type": "array",
+          "items": {"$ref": "#/$defs/varied"},
+          "minItems": 1,
+          "maxItems": 60000
+        },
+        "summary": {"$ref": "#/$defs/text"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "added"}}},
+          "then": {
+            "properties": {
+              "before": {"maxItems": 0},
+              "after": {"minItems": 1, "maxItems": 1},
+              "correspondence": {"const": "none"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"status": {"const": "removed"}}},
+          "then": {
+            "properties": {
+              "before": {"minItems": 1, "maxItems": 1},
+              "after": {"maxItems": 0},
+              "correspondence": {"const": "none"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"correspondence": {"enum": ["exact", "declared"]}}},
+          "then": {
+            "properties": {
+              "before": {"minItems": 1, "maxItems": 1},
+              "after": {"minItems": 1, "maxItems": 1},
+              "status": {"enum": ["modified", "unchanged"]}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"correspondence": {"const": "split"}}},
+          "then": {
+            "properties": {
+              "before": {"minItems": 1, "maxItems": 1},
+              "after": {"minItems": 2},
+              "status": {"enum": ["modified", "unchanged"]},
+              "varied": false
+            }
+          }
+        },
+        {
+          "if": {"properties": {"correspondence": {"const": "merge"}}},
+          "then": {
+            "properties": {
+              "before": {"minItems": 2},
+              "after": {"minItems": 1, "maxItems": 1},
+              "status": {"enum": ["modified", "unchanged"]},
+              "varied": false
+            }
+          }
+        },
+        {
+          "if": {"properties": {"correspondence": {"const": "none"}}},
+          "then": {"properties": {"status": {"enum": ["added", "removed"]}, "varied": false}}
+        }
+      ]
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["changes"],
+      "properties": {
+        "changes": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/text"},
+          "minItems": 1,
+          "maxItems": 120000,
+          "uniqueItems": true
+        },
+        "kind": {"enum": ["remove", "restructure", "add"]},
+        "summary": {"$ref": "#/$defs/text"}
+      }
+    },
+    "steps": {"type": "array", "items": {"$ref": "#/$defs/step"}, "maxItems": 120000}
+  }
+}

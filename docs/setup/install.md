@@ -1,0 +1,130 @@
+# Install the CLI
+
+Projections is one self-contained executable per platform. It needs Git, and
+only the toolchains your own projections use: it never needs Node.js unless your
+project already does.
+
+Paste this into your coding agent, or follow the steps below yourself:
+
+```prompt Copy install prompt
+Install the Projections CLI by following https://github.com/githubnext/projections/blob/main/docs/agents/install.md
+```
+
+## Download and verify
+
+Download the executable for your platform from the repository's
+[GitHub releases](https://github.com/githubnext/projections/releases), with its
+`.sha256` file:
+
+| Platform                               | Asset                              |
+| -------------------------------------- | ---------------------------------- |
+| macOS, Apple silicon                   | `gh-projections-darwin-arm64`      |
+| macOS, Intel                           | `gh-projections-darwin-amd64`      |
+| Linux x64 (static, any distribution)   | `gh-projections-linux-amd64`       |
+| Linux arm64 (static, any distribution) | `gh-projections-linux-arm64`       |
+| Windows x64                            | `gh-projections-windows-amd64.exe` |
+| Windows arm64                          | `gh-projections-windows-arm64.exe` |
+
+```sh
+gh release download --repo githubnext/projections --pattern 'gh-projections-darwin-arm64*'
+```
+
+Verify it before running it. Every asset has a GitHub artifact attestation
+binding it to the release workflow run and commit that built it, and its
+`.sha256` file holds its digest:
+
+```sh
+gh attestation verify gh-projections-darwin-arm64 --repo githubnext/projections
+shasum -a 256 --check gh-projections-darwin-arm64.sha256      # Linux: sha256sum --check
+```
+
+On Windows (PowerShell), after `gh attestation verify`, compare the digest with
+its `.sha256` file:
+
+```powershell
+gh attestation verify gh-projections-windows-amd64.exe --repo githubnext/projections
+(Get-FileHash gh-projections-windows-amd64.exe).Hash.ToLower()
+Get-Content gh-projections-windows-amd64.exe.sha256
+```
+
+Then put it on your PATH as `projections`:
+
+```sh
+install -m 755 gh-projections-darwin-arm64 ~/.local/bin/projections
+projections --version
+```
+
+On Windows, rename it to `projections.exe` in a directory on your `Path`.
+Browsers may mark a downloaded file as quarantined (macOS) or from the internet
+(Windows); `gh release download` doesn't.
+
+Each release also has installer scripts, `projections-cli-installer.sh` and
+`projections-cli-installer.ps1`, which download the platform's archive
+(`projections-cli-<target>.tar.xz` or `.zip`, also in the release with its own
+`.sha256`) and install `projections` into `$PROJECTIONS_INSTALL_DIR`, by default
+`~/.projections/bin`, adding it to PATH. They install no updater, and check the
+archive against the SHA-256 they hold. The installers have no `.sha256` of their
+own, but are attested like every asset: verify one with `gh attestation verify`
+and read it before running it. The gh-named executables above are the same
+binaries.
+
+## The VS Code extension
+
+Each release also attaches the VS Code extension, one `.vsix` per platform with
+that platform's `projections` executable inside, so it needs no CLI on your
+`PATH`. It isn't on the Visual Studio Marketplace yet.
+
+| Platform             | Asset                                            |
+| -------------------- | ------------------------------------------------ |
+| macOS, Apple silicon | `projections-vscode-<version>-darwin-arm64.vsix` |
+| macOS, Intel         | `projections-vscode-<version>-darwin-x64.vsix`   |
+| Linux x64            | `projections-vscode-<version>-linux-x64.vsix`    |
+| Linux arm64          | `projections-vscode-<version>-linux-arm64.vsix`  |
+| Windows x64          | `projections-vscode-<version>-win32-x64.vsix`    |
+| Windows arm64        | `projections-vscode-<version>-win32-arm64.vsix`  |
+
+Download, verify and install it like the CLI:
+
+```sh
+gh release download --repo githubnext/projections --pattern 'projections-vscode-*-darwin-arm64.vsix*'
+gh attestation verify projections-vscode-*-darwin-arm64.vsix --repo githubnext/projections
+shasum -a 256 --check projections-vscode-*-darwin-arm64.vsix.sha256
+code --install-extension projections-vscode-*-darwin-arm64.vsix   # or code-insiders
+```
+
+or install the file with **Extensions: Install from VSIX…** in the Command
+Palette. A `.vsix` doesn't update itself: install the next release's the same
+way.
+
+## As a GitHub CLI extension
+
+To use it as `gh projections`, install the downloaded binary as a local GitHub
+CLI extension from a directory named `gh-projections` holding the executable
+under the same name:
+
+```sh
+mkdir -p ~/gh-projections
+install -m 755 gh-projections-darwin-arm64 ~/gh-projections/gh-projections
+cd ~/gh-projections && gh extension install .
+gh projections --version
+```
+
+On Windows, GitHub CLI runs local extensions through Git for Windows' `sh` and
+requires a file named exactly `gh-projections`, so place the download in the
+directory under both names:
+
+```powershell
+New-Item -ItemType Directory $HOME\gh-projections
+Copy-Item gh-projections-windows-amd64.exe $HOME\gh-projections\gh-projections.exe
+Copy-Item gh-projections-windows-amd64.exe $HOME\gh-projections\gh-projections
+cd $HOME\gh-projections; gh extension install .
+```
+
+A local extension is upgraded by replacing the file. A release-only companion
+repository, `githubnext/gh-projections`, will later mirror these assets
+unchanged, so `gh extension install githubnext/gh-projections` and
+`gh extension upgrade projections` work; until then use the download above.
+There is no self-update command; download a newer release to upgrade.
+
+`projections licenses` prints the MIT license and the notices for everything the
+executable includes.

@@ -1,0 +1,24 @@
+# Sample for the eBPF policy projection proposal. Unchanged by the pull
+# request; it gives the coverage view context. Identical in before/ and after/.
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicyNamespaced
+metadata:
+  name: egress-audit
+  namespace: checkout
+spec:
+  kprobes:
+    - call: tcp_connect
+      syscall: false
+      message: 'Outbound TCP connection'
+      tags: ['network']
+      args:
+        - index: 0
+          type: sock
+      selectors:
+        - label: leaves-cluster
+          matchArgs:
+            - index: 0
+              operator: NotDAddr
+              values:
+                - 10.0.0.0/8
+                - 127.0.0.1

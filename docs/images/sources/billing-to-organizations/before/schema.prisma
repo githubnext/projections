@@ -1,0 +1,29 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int       @id @default(autoincrement())
+  email            String    @unique
+  name             String
+  plan             String    @default("free")
+  stripeCustomerId String?   @unique
+  projects         Project[]
+  invoices         Invoice[]
+}
+
+model Project {
+  id      Int    @id @default(autoincrement())
+  name    String
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId Int
+}
+
+model Invoice {
+  id     Int       @id @default(autoincrement())
+  amount Decimal   @db.Decimal(10, 2)
+  paidAt DateTime?
+  user   User      @relation(fields: [userId], references: [id])
+  userId Int
+}

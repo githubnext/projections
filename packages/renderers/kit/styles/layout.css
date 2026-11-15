@@ -1,0 +1,241 @@
+/*
+ * Layout components (layout-components.tsx). Every value is a theme token, so renderers composed from them meet the
+ * renderer checks without CSS of their own.
+ */
+/* The content root is the stage that groups and cards stand on. */
+.pk .pk-content-view {
+  padding: var(--projections-space-2) var(--projections-stage-inset, var(--projections-space-2));
+  background: var(--stage);
+}
+/*
+ * A group (`Group`) is a titled panel: raised, edged with the divider and clipping its body to its corners, with its
+ * title in a header band inside its edge. The band holds one line: the title, which truncates with an ellipsis, muted
+ * meta, then actions and the status cell at its end (`--pk-status-width`, reserved on every group in a comparison).
+ */
+.pk .pk-group {
+  min-width: 0;
+  border: var(--projections-border-width) solid var(--divider);
+  border-radius: var(--projections-radius);
+  background: var(--raised);
+  overflow: hidden;
+}
+.pk .pk-content-view > .pk-group + .pk-group {
+  margin-top: var(--projections-space-3);
+}
+.pk .pk-group-header {
+  display: flex;
+  align-items: center;
+  gap: var(--projections-space-3);
+  min-width: 0;
+  padding: var(--projections-space-1) var(--projections-space-3);
+  background: var(--band);
+  border-bottom: var(--projections-border-width) solid var(--divider);
+}
+.pk .pk-group-title {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: baseline;
+  gap: var(--projections-space-1);
+  min-width: 0;
+  margin: 0 0 0 calc(-1 * var(--projections-space-1));
+  color: var(--text);
+  font-size: var(--projections-font-size-sm);
+  font-weight: var(--projections-font-weight-semibold);
+  line-height: var(--projections-line-height);
+}
+/*
+ * The title keeps the band's size in either font: a code title has no sans text beside it to line up with. Its text
+ * starts at the band's inset, aligned with the strips and cells under it: the room for its hover tint reaches before
+ * it (the heading's negative margin).
+ */
+/*
+ * The subject's icon leads the title, muted, at the band's inset (cancelling the heading's negative margin), so it
+ * lines up with the cells under it and the title follows it. Its box is a line in the title's font, so it sits on the
+ * title's baseline; the icon is lowered from the baseline by half the difference between its square and the cap
+ * height, so it is centred on the capitals.
+ */
+.pk .pk-group-icon {
+  flex: none;
+  margin-inline-start: var(--projections-space-1);
+  color: var(--muted);
+}
+.pk .pk-group-icon > [data-icon] {
+  vertical-align: calc(0.5cap - 0.5em);
+}
+.pk .pk-group-label {
+  flex: 0 1 auto;
+  padding: var(--projections-space-1);
+  border-radius: var(--projections-radius-sm);
+  font-size: inherit;
+}
+/* A title that selects its item. The reset has a single class's weight, so an identifier keeps the monospace font. */
+.pk :where(button.pk-group-label) {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: start;
+}
+.pk button.pk-group-label:hover {
+  background: var(--accent-soft);
+}
+/* Hover, focus and selection rings are the SDK's, over the group's own edge. */
+.pk .pk-group-meta {
+  flex: 0 100 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--projections-font-size-xs);
+  font-weight: var(--projections-font-weight-normal);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pk .pk-group-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--projections-space-1);
+  margin-inline-start: auto;
+}
+.pk .pk-group-status {
+  justify-content: flex-end;
+  margin-inline-start: auto;
+}
+.pk .pk-group-actions + .pk-group-status {
+  margin-inline-start: 0;
+}
+/* A body that isn't a table, such as a card grid, keeps the band's inset from the group's edge. */
+.pk .pk-group > .pk-card-grid {
+  padding: var(--projections-space-3);
+}
+.pk .pk-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  gap: var(--projections-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pk .pk-entity-card {
+  --emphasis: 0;
+  --change: var(--border);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: var(--projections-border-width) solid var(--border-strong);
+  border-radius: var(--projections-radius-sm);
+  background: var(--canvas);
+}
+/* The change's hue on the card's leading edge, drawn inside it, so emphasis never overlaps a neighbour. */
+.pk .pk-entity-card:not(.pk-region) {
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--change) calc(var(--emphasis) * 100%), transparent);
+}
+.pk .pk-entity-card[data-status='added'] {
+  --change: var(--green);
+}
+.pk .pk-entity-card[data-status='removed'] {
+  --change: var(--red);
+}
+.pk .pk-entity-card[data-status='modified'] {
+  --change: var(--amber);
+}
+.pk .pk-entity-card:is([data-status='renamed'], [data-status='moved'], [data-status='unchanged']) {
+  --change: var(--violet);
+}
+/* Hover, keyboard focus and selection rings are the renderer SDK's, on the card's own element. */
+.pk .pk-entity-card-select {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--projections-space-1);
+  padding: var(--projections-space-2) var(--projections-space-3) 0;
+  border: 0;
+  border-radius: calc(var(--projections-radius-sm) - var(--projections-border-width))
+    calc(var(--projections-radius-sm) - var(--projections-border-width)) 0 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.pk .pk-entity-card-label {
+  font-weight: var(--projections-font-weight-semibold);
+  overflow-wrap: anywhere;
+}
+.pk .pk-entity-card-id {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+/*
+ * A card's footer strip centres its status, icon and word together, and a word too long for it ends in an ellipsis
+ * (its line box tall enough for descenders, which the clip would otherwise cut). The strip keeps its full reserved
+ * height for that line above its bottom padding, so the padding never squeezes the line into the clip.
+ */
+.pk .pk-entity-card > .pk-change-footer {
+  justify-content: center;
+  height: calc(var(--pk-footer-height) + var(--projections-space-2));
+  padding: 0 var(--projections-space-3) var(--projections-space-2);
+}
+.pk .pk-entity-card > .pk-change-footer .pk-status-part {
+  min-width: 0;
+}
+.pk .pk-entity-card > .pk-change-footer .pk-status-word {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: var(--projections-line-height-tight);
+}
+.pk .pk-relationship-list {
+  margin: var(--projections-space-1) 0 0;
+  padding: 0 var(--projections-space-2);
+  list-style: none;
+}
+.pk .pk-relationship {
+  overflow: hidden;
+  border-radius: calc(var(--projections-radius-sm) - var(--projections-border-width-thick));
+  line-height: var(--projections-line-height);
+  overflow-wrap: anywhere;
+}
+.pk .pk-relationship.pk-region {
+  margin-block: 1px;
+}
+.pk .pk-relationship > button {
+  width: 100%;
+  padding: 0 var(--projections-space-1);
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.pk .pk-fields {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 var(--projections-space-2);
+  margin: var(--projections-space-1) 0 0;
+  padding: 0 var(--projections-space-3);
+}
+.pk .pk-field {
+  display: contents;
+}
+.pk .pk-field > dt {
+  color: var(--muted);
+}
+.pk .pk-field > dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.pk .pk-field > dd .pk-value-change {
+  vertical-align: baseline;
+}
+.pk .pk-stack {
+  display: flex;
+  flex-direction: column;
+}
+.pk .pk-inline {
+  display: flex;
+  flex-wrap: wrap;
+}

@@ -1,0 +1,62 @@
+[workspace]
+members = [
+  "packages/engine",
+  "packages/engine/verified",
+  "packages/cli",
+  "packages/extractors/*",
+  "packages/comparators/default",
+  "packages/comparators/rules",
+  "packages/comparators/rules/yaml",
+  "packages/comparators/rules/editor",
+  "packages/comparators/runtime",
+  "examples/extractors/cargo-features",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+# Where releases are published; dist builds installer download URLs from it.
+repository = "https://github.com/githubnext/projections"
+rust-version = "1.85"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
+
+# The profile dist builds releases with.
+[profile.dist]
+inherits = "release"
+
+# The rules suites run whole corpora through CEL and through the rules interpreter compiled to WebAssembly on wasmi;
+# unoptimized, interpreting a large rules file takes a minute per comparison, and the suites took a third of an hour
+# on CI (more on Windows). Debug builds and tests optimize the interpreters. wasmi's own debug assertions and overflow
+# checks are off as in a release build: optimized with them, its interpreter loop overflowed the stack. The suites'
+# crates keep theirs, and the Engine and default comparator stay unoptimized for coverage.
+[profile.dev.package.wasmi]
+opt-level = 3
+debug-assertions = false
+overflow-checks = false
+[profile.dev.package.wasmi_core]
+opt-level = 3
+debug-assertions = false
+overflow-checks = false
+[profile.dev.package.wasmi_ir]
+opt-level = 3
+debug-assertions = false
+overflow-checks = false
+[profile.dev.package.wasmi_collections]
+opt-level = 3
+debug-assertions = false
+overflow-checks = false
+[profile.dev.package.cel]
+opt-level = 3
+[profile.dev.package.antlr4rust]
+opt-level = 3
+[profile.dev.package.projections-comparator-rules]
+opt-level = 3
+[profile.dev.package.projections-comparator-runtime]
+opt-level = 3

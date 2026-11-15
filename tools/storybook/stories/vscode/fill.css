@@ -1,0 +1,10 @@
+.sb-fill {
+  box-sizing: border-box;
+  height: calc(100dvh - 48px);
+  min-height: 0;
+}
+@media (max-width: 543.98px) {
+  .sb-fill {
+    height: calc(100dvh - 24px);
+  }
+}

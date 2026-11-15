@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/dag/v0.json",
+  "title": "Projections domain schema dag/v0",
+  "description": "Like `graph/v0`, with no cycles: steps, stages, job or build order. The engine rejects cycles.",
+  "allOf": [{"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"}, {"$ref": "#/$defs/refinement"}],
+  "$defs": {
+    "refinement": {
+      "description": "What `dag/v0` adds to the extraction envelope.",
+      "type": "object",
+      "properties": {"schema": {"const": "dag/v0"}}
+    }
+  }
+}

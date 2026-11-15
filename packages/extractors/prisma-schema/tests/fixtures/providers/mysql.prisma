@@ -1,0 +1,18 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextIndex"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("PROJECTIONS_MISSING_DATABASE_URL")
+}
+
+model Article {
+  id    Int    @id
+  title String @db.VarChar(240)
+  body  String @db.VarChar(240)
+
+  @@index([title(length: 32, sort: Desc)], map: "article_prefix")
+  @@fulltext([title, body], map: "article_search")
+}

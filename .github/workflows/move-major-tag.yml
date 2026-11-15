@@ -1,0 +1,99 @@
+name: Move major version tag
+# A dist post-announce job (post-announce-jobs in dist-workspace.toml): once a stable release is announced, creates
+# its major version's tag (v0 for v0.3.1), or moves it to the release's commit, so `uses: githubnext/projections@v0`
+# runs the newest stable v0 release. A prerelease never moves it, nor does an older release than the one it marks
+# (tools/scripts/major-tag.mjs). Full vX.Y.Z tags are immutable, and a tag ruleset lets only a deploy key create, move
+# or delete vN tags: this job runs in the major-tag environment, whose MAJOR_TAG_DEPLOY_KEY secret is that key's private
+# half, and pushes the tag over SSH (docs/maintainers/releasing.md). The environment lets only v*.*.* tags deploy, so
+# to move the tag for a release again, run this by hand on that release's tag:
+#   gh workflow run move-major-tag.yml --ref v0.2.0 -f tag=v0.2.0
+on:
+  workflow_call:
+    inputs:
+      plan:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The release tag, such as v0.2.0
+        required: true
+        type: string
+permissions: {}
+jobs:
+  move:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    concurrency:
+      group: move-major-tag
+      cancel-in-progress: false
+    # No reviewers: the release was approved in the release environment. Only v*.*.* tags may deploy here.
+    environment: major-tag
+    permissions:
+      contents: read
+    steps:
+      - id: release
+        shell: bash
+        env:
+          PLAN: ${{ inputs.plan }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [ -z "$TAG" ]; then TAG=$(jq -r '.announcement_tag' <<< "$PLAN"); fi
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error title=Not a release tag::$TAG is not a release tag such as v0.2.0."
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+      # The default branch's rules, not the release's: the decision reads only the release list.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            .node-version
+            tools/scripts/major-tag.mjs
+            packages/integrations/github-action/src/release.mjs
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      - name: Move the tag
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          TAG: ${{ steps.release.outputs.tag }}
+          DEPLOY_KEY: ${{ secrets.MAJOR_TAG_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          releases=$(gh release list --repo "$REPOSITORY" --limit 1000 --json tagName,isDraft,isPrerelease)
+          major=$(node tools/scripts/major-tag.mjs "$TAG" <<< "$releases" 2> reason.txt)
+          if [ -z "$major" ]; then
+            echo "::notice title=$TAG leaves its major version tag::$(cat reason.txt)"
+            exit 0
+          fi
+          commit=$(gh api "repos/$REPOSITORY/commits/$TAG" --jq .sha)
+          current=$(gh api "repos/$REPOSITORY/git/ref/tags/$major" --jq .object.sha 2> /dev/null || true)
+          if [ "$current" = "$commit" ]; then
+            echo "$major already points at $TAG ($commit)"
+            exit 0
+          fi
+          if [ -z "$DEPLOY_KEY" ]; then
+            echo "::error title=No deploy key::The major-tag environment has no MAJOR_TAG_DEPLOY_KEY secret, so $major can't move to $TAG. Set it up as docs/maintainers/releasing.md describes."
+            exit 1
+          fi
+          # The deploy key, the only bypass of the major tag ruleset, pushes the tag; GitHub's API supplies its host keys.
+          ssh=$(mktemp -d)
+          trap 'rm -rf "$ssh"' EXIT
+          printf '%s\n' "$DEPLOY_KEY" > "$ssh/key"
+          chmod 600 "$ssh/key"
+          gh api meta --jq '.ssh_keys[] | "github.com " + .' > "$ssh/known_hosts"
+          export GIT_SSH_COMMAND="ssh -i $ssh/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$ssh/known_hosts -o StrictHostKeyChecking=yes"
+          remote="git@github.com:$REPOSITORY.git"
+          git init -q --bare "$ssh/repository.git"
+          git -C "$ssh/repository.git" fetch -q --depth=1 "$remote" "refs/tags/$TAG"
+          git -C "$ssh/repository.git" push -q --force "$remote" "$commit:refs/tags/$major"
+          if [ -n "$current" ]; then
+            echo "::notice title=$major moved::$major now points at $TAG ($commit), not $current"
+          else
+            echo "::notice title=$major created::$major points at $TAG ($commit)"
+          fi

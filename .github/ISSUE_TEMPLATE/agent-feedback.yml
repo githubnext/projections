@@ -1,0 +1,34 @@
+# Friction a coding agent (or a person) hit with this repository's tooling or docs. `npm run tools -- feedback` drafts
+# these: it prefills the fields below by their ids, or files the same headings with `gh issue create --label agent-feedback`.
+name: Agent feedback
+description: Friction with the repository's tooling, checks or docs, usually drafted by `npm run tools -- feedback`
+title: '[agent feedback] '
+labels: [agent-feedback]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: What were you trying to do?
+      description: One line on the task and what got in the way.
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What happened, what you expected, and what you tried.
+  - type: textarea
+    id: command
+    attributes:
+      label: Command and inputs
+      render: sh
+  - type: textarea
+    id: error
+    attributes:
+      label: Error
+      render: text
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: tools version, OS, Node and Rust versions, and the Git ref.

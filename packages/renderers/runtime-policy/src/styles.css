@@ -1,0 +1,464 @@
+/* Runtime security policies.
+ *
+ * Each section is a kit `Group` on the stage: a raised panel, edged with the
+ * divider, whose header band names it in the UI font. It holds one table that
+ * reaches its sides and is clipped to its corners: a quiet column-header strip
+ * (as text diff's Before and After strip), then rows sharing the table's
+ * column grid through subgrid: sign · main · effect · applies to · status,
+ * each sized to its content. A category's table is grouped by hook: each lane
+ * opens with its hook's header row over its own column headers, and lanes are
+ * ruled off by the divider.
+ *
+ * Type: two sizes (row text, secondary text), one muted tone, weight only for
+ * names and headings, sentence case for human text and data verbatim. Change fills always come with an edge in
+ * the change's hue; both follow --emphasis, so endpoints and highlighting off
+ * draw nothing. Effects and status are words, never color alone.
+ */
+.rp-view {
+  /* The shared divider and container tokens, through one alias each. */
+  --rp-inner: calc(var(--projections-radius) - var(--projections-border-width));
+  --rp-sign: 0px;
+  --rp-effect: 10rem;
+  --rp-side: 17rem;
+  --rp-status: 0px;
+  --rp-pad-x: var(--projections-space-3);
+  display: grid;
+  gap: var(--projections-space-3);
+  min-width: 0;
+  padding: 0 var(--projections-stage-inset, var(--projections-space-3)) var(--projections-space-3);
+  background: var(--stage);
+  font-size: var(--projections-font-size-sm);
+  color: var(--text);
+}
+.rp-view[data-side='diff'] {
+  --rp-sign: 1.5rem;
+}
+.rp-view[data-comparing] {
+  --rp-status: 13rem;
+}
+/* Without a summary line above it, the first panel keeps the stage's inset at the top, as text diff's commands do. */
+.rp-view > .rp-panel:first-child {
+  margin-top: var(--projections-space-2);
+}
+/* The band's inset is the cells', so its icon leads the column at every width. */
+.rp-view > .rp-panel > .pk-group-header {
+  padding-inline: var(--rp-pad-x);
+}
+
+.rp-table {
+  display: grid;
+  grid-template-columns: [sign] var(--rp-sign) [main] minmax(0, 1fr) [effect] var(--rp-effect) [side] var(--rp-side) [status] var(
+      --rp-status
+    ) [end];
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rp-table > *,
+.rp-region,
+.rp-rules,
+.rp-row {
+  grid-column: sign / end;
+  display: grid;
+  grid-template-columns: subgrid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rp-row,
+.rp-region {
+  position: relative;
+}
+/*
+ * A hook lane is a unit of its own, and its rows and regions reach its sides. They sit under its paint
+ * (z-index -1 in the lane's stacking context), so its ring, an outline, shows above their fills: browsers paint an
+ * outline under positioned descendants at z-index auto.
+ */
+.rp-lane {
+  isolation: isolate;
+  background: var(--raised);
+}
+.rp-lane > * {
+  position: relative;
+  z-index: -1;
+}
+/* Rows sit between the quieter rule; a category's hook lanes are ruled off from each other by the divider. */
+.rp-table > * + *,
+.rp-lane > * + *,
+.rp-region > * + *,
+.rp-rules > * + * {
+  border-top: var(--projections-border-width) solid var(--border);
+}
+.rp-lanes > .rp-lane + .rp-lane {
+  border-top-color: var(--divider);
+}
+/* What reaches the panel's bottom edge takes its inner corners, so a fill, edge or ring there follows the corner. */
+.rp-panel > .rp-table > :last-child,
+.rp-panel > .rp-table > .rp-lane:last-child > :last-child,
+.rp-panel > .rp-table > .rp-lane:last-child > .rp-region:last-child > .rp-rules:last-child > .rp-row:last-child {
+  border-bottom-left-radius: var(--rp-inner);
+  border-bottom-right-radius: var(--rp-inner);
+}
+
+/* Rows are compact, as text diff's lines: one spacing step above and below their text. */
+.rp-cell {
+  min-width: 0;
+  padding: var(--projections-space-1) var(--rp-pad-x);
+  overflow-wrap: anywhere;
+}
+.rp-sign {
+  grid-column: sign;
+  padding-inline: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: var(--projections-font-weight-semibold);
+  color: color-mix(in srgb, var(--change, var(--muted)) calc(var(--emphasis, 0) * 100%), var(--muted));
+}
+.rp-main {
+  grid-column: main;
+}
+.rp-effect {
+  grid-column: effect;
+}
+.rp-side {
+  grid-column: side;
+}
+.rp-status {
+  grid-column: status;
+  grid-row: 1;
+}
+/* Warnings close their row: an edged block keeps a full step of room under it. */
+.rp-warnings {
+  grid-column: main / end;
+  display: flex;
+  flex-direction: column;
+  gap: var(--projections-space-1);
+  padding-top: 0;
+  padding-bottom: var(--projections-space-2);
+}
+.rp-list > .rp-row > .rp-main,
+.rp-hook > .rp-main {
+  grid-column: main / side;
+}
+.rp-list > .rp-row:not(:has(> .rp-side)) > .rp-main,
+.rp-hook > .rp-main {
+  grid-column: main / status;
+}
+
+/*
+ * Column headers: a quiet labelled strip, as text diff's Before and After strip under its band: small semibold
+ * muted labels on a lighter band, one line box high, aligned with the cells under them.
+ */
+.rp-head {
+  background: color-mix(in srgb, var(--band) 45%, var(--raised));
+  font-family: var(--projections-font-family);
+  font-size: var(--projections-font-size-xs);
+  font-weight: var(--projections-font-weight-semibold);
+  line-height: var(--projections-line-height-relaxed);
+}
+.rp-row.rp-head > .rp-cell {
+  padding-block: 0;
+  color: var(--muted);
+}
+
+/* The selection button covers its whole row; chips stay above it. */
+.rp-select {
+  appearance: none;
+  position: static;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: inherit;
+}
+.rp-select > .rp-arrow {
+  display: none;
+}
+.rp-select::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+}
+.rp-row > .rp-cell:not(.rp-select) {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+.rp-row > .rp-cell :is(button, a) {
+  pointer-events: auto;
+}
+/*
+ * Hover, focus and selection: a group row (a policy, a workload, the agent, a
+ * kernel) and a hook lane are items, which the SDK rings over their own edge
+ * (a row's outer sides and corners are its group's); a rule or probe inside a
+ * lane, and a chip, is a part, tinted quietly (pk-part). Tints are layered as
+ * images, so change fills stay.
+ */
+.rp-row.pk-part:hover,
+.rp-chip.pk-part:hover {
+  background-image: linear-gradient(var(--hover), var(--hover));
+}
+.rp-row.pk-part.selected,
+.rp-chip.pk-part.selected {
+  background-image: linear-gradient(var(--pk-part-tint), var(--pk-part-tint));
+}
+/* A selected part also carries an accent bar on its leading edge, drawn as an image so a change edge stays. */
+.rp-row.pk-part.selected {
+  background-image:
+    linear-gradient(to right, var(--accent) var(--projections-border-width-thick), transparent var(--projections-border-width-thick)),
+    linear-gradient(var(--pk-part-tint), var(--pk-part-tint));
+}
+
+/*
+ * Change regions are the kit's (pk-region with data-change): a fill and a
+ * same-hue edge, both following --emphasis. A changed row, a probe's own
+ * region and a changed hook lane are regions; rows inside one inherit it.
+ * The change hue here only colors signs and chip edges.
+ */
+:is(.rp-row, .rp-region, .rp-lane)[data-change],
+.rp-chip {
+  --change: var(--violet);
+  --change-soft: var(--violet-soft);
+  --change-edge: var(--violet-border);
+}
+:is(.rp-row, .rp-region, .rp-lane)[data-change='added'],
+.rp-chip.added {
+  --change: var(--green);
+  --change-soft: var(--green-soft);
+  --change-edge: var(--green-border);
+}
+:is(.rp-row, .rp-region, .rp-lane)[data-change='removed'],
+.rp-chip.removed {
+  --change: var(--red);
+  --change-soft: var(--red-soft);
+  --change-edge: var(--red-border);
+}
+:is(.rp-row, .rp-region, .rp-lane)[data-change='modified'] {
+  --change: var(--amber);
+  --change-soft: var(--amber-soft);
+  --change-edge: var(--amber-border);
+}
+/* Removed content is struck once, wherever its region was marked. */
+:is(.rp-row.departed, .rp-region.departed, .rp-lane.departed) :is(.rp-main, .rp-effect) {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+/* Column headers stay plain inside a removed lane. */
+.rp-lane.departed > .rp-head > .rp-cell {
+  text-decoration: none;
+}
+
+/* The column's label, for phones, where column headers are hidden. */
+.rp-side-label {
+  display: none;
+  color: var(--muted);
+}
+
+/* Icons stand beside their words, at the text's size, in its color. */
+.rp-icon {
+  flex: none;
+  margin-inline-end: 0.3em;
+  vertical-align: -0.125em;
+}
+.rp-warning-label {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Text. */
+.rp-name {
+  font-weight: var(--projections-font-weight-semibold);
+}
+.rp-meta,
+.rp-separator,
+.rp-status,
+.rp-any,
+.rp-chip-prefix,
+.rp-muted,
+.rp-was {
+  color: var(--muted);
+}
+.rp-meta,
+.rp-separator,
+.rp-status {
+  font-size: var(--projections-font-size-xs);
+}
+.rp-message,
+.rp-conditions,
+.rp-effect {
+  color: var(--text);
+}
+.rp-conditions {
+  display: flex;
+  flex-direction: column;
+}
+/* A changed value: the old struck, the new plain, each behind text diff's word highlight while the change is emphasized. */
+.rp-old,
+.rp-new {
+  border-radius: var(--projections-radius-sm);
+}
+.rp-old {
+  color: var(--muted);
+  text-decoration: line-through;
+  background: color-mix(in srgb, var(--red-highlight) calc(var(--emphasis, 0) * 100%), transparent);
+}
+.rp-new {
+  text-decoration: none;
+  background: color-mix(in srgb, var(--green-highlight) calc(var(--emphasis, 0) * 100%), transparent);
+}
+:is(.rp-old, .rp-new) > .rp-conditions {
+  background: inherit;
+  border-radius: inherit;
+}
+.rp-arrow {
+  color: var(--muted);
+}
+/*
+ * Status is a stack of icon-led lines, the change first, then each interpretation: no separators, every icon on one
+ * column, and a line that wraps continues under its words, not its icon.
+ */
+.rp-status-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.rp-status-text > * {
+  display: block;
+  padding-inline-start: 1.3em;
+  text-indent: -1.3em;
+}
+.rp-status .pk-status-part {
+  font-weight: var(--projections-font-weight-semibold);
+}
+.rp-interpretation {
+  color: var(--text);
+}
+
+/*
+ * A lane's header row: the hook that heads its group of the table, a step taller than its rows, its name in the code
+ * font at the band's weight, over the column headers of its rules. Inside a changed lane the column-header strip
+ * gives way to the region, so fill and edge read as one.
+ */
+.rp-hook > .rp-cell:not(.rp-warnings) {
+  padding-block: var(--projections-space-2);
+}
+.rp-lane.pk-region > .rp-head {
+  background: transparent;
+}
+.rp-hook > .rp-select {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--projections-space-1);
+}
+
+/* Warnings: an edged block under the row's cells. */
+.rp-warning {
+  display: flex;
+  align-items: baseline;
+  gap: var(--projections-space-2);
+  padding: var(--projections-space-1) var(--projections-space-2);
+  border: var(--projections-border-width) solid var(--divider);
+  border-radius: var(--projections-radius-sm);
+  background: var(--inset);
+  font-size: var(--projections-font-size-xs);
+}
+.rp-warning-label {
+  flex: none;
+  font-weight: var(--projections-font-weight-semibold);
+}
+
+/* Chips: edged in their change's hue when they arrive or leave on their own. */
+.rp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--projections-space-1);
+  min-width: 0;
+}
+.rp-chip {
+  appearance: none;
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  max-width: 100%;
+  padding: 0 var(--projections-label-padding-x);
+  border: var(--projections-border-width) solid var(--divider);
+  border-radius: var(--projections-radius-sm);
+  background: var(--raised);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--projections-font-size-xs);
+  line-height: var(--projections-line-height);
+  text-align: left;
+  cursor: pointer;
+}
+.rp-chip.filled {
+  border-color: color-mix(in srgb, var(--change-edge) calc(var(--emphasis, 0) * 100%), var(--divider));
+  background: color-mix(in srgb, var(--change-soft) calc(var(--emphasis, 0) * 100%), var(--raised));
+}
+.rp-chip-label {
+  min-width: 0;
+}
+.rp-chip.removed .rp-chip-label {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+.rp-chip-sign {
+  flex: none;
+  font-family: var(--font-mono);
+  font-weight: var(--projections-font-weight-semibold);
+  color: color-mix(in srgb, var(--change) calc(var(--emphasis, 0) * 100%), var(--muted));
+}
+
+/* Narrower frames: narrower columns. */
+@media (max-width: 1100px) {
+  .rp-view {
+    --rp-effect: 8rem;
+    --rp-side: 13rem;
+  }
+  .rp-view[data-comparing] {
+    --rp-status: 10rem;
+  }
+}
+
+/* Phones: one column; effect, subjects and status stack under the rule. */
+@media (max-width: 640px) {
+  .rp-side-label {
+    display: inline;
+  }
+  .rp-view {
+    --rp-pad-x: var(--projections-space-2);
+    padding-inline: var(--projections-space-2);
+  }
+  .rp-table {
+    grid-template-columns: [sign] var(--rp-sign) [main effect side status] minmax(0, 1fr) [end];
+  }
+  .rp-head {
+    display: none;
+  }
+  .rp-row > .rp-cell:not(.rp-select, .rp-sign) {
+    padding-top: 0;
+  }
+  .rp-row > .rp-select {
+    padding-bottom: var(--projections-space-1);
+  }
+  .rp-status {
+    grid-row: auto;
+  }
+  .rp-status:empty {
+    display: none;
+  }
+  .rp-list > .rp-row > .rp-main,
+  .rp-hook > .rp-main {
+    grid-column: main;
+  }
+}

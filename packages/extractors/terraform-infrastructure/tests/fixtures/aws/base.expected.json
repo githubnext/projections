@@ -1,0 +1,842 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "aws_cloudwatch_metric_alarm.database_cpu",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_cloudwatch_metric_alarm",
+        "values": {
+          "alarm_name": "shop-prod-database-cpu",
+          "dimensions": {
+            "DBInstanceIdentifier": "shop-prod"
+          },
+          "threshold": 80
+        }
+      },
+      "id": "aws_cloudwatch_metric_alarm.database_cpu",
+      "kind": "resource",
+      "label": "database_cpu"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "aws_iam_instance_profile.api",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_iam_instance_profile",
+        "values": {
+          "id": "shop-api",
+          "name": "shop-api",
+          "role": "shop-api"
+        }
+      },
+      "id": "aws_iam_instance_profile.api",
+      "kind": "resource",
+      "label": "api"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "aws_iam_role.api",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_iam_role",
+        "values": {
+          "arn": "arn:aws:iam::111122223333:role/shop-api",
+          "id": "shop-api",
+          "name": "shop-api"
+        }
+      },
+      "id": "aws_iam_role.api",
+      "kind": "resource",
+      "label": "api"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "aws_iam_role_policy.read_config",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_iam_role_policy",
+        "values": {
+          "id": "shop-api:read-config",
+          "role": "shop-api"
+        }
+      },
+      "id": "aws_iam_role_policy.read_config",
+      "kind": "resource",
+      "label": "read_config"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "aws_instance.api[0]",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_instance",
+        "values": {
+          "ami": "ami-0e2c8caa4b6378d8c",
+          "id": "i-0api0",
+          "instance_type": "m7g.large",
+          "subnet_id": "subnet-01aa",
+          "tags": {
+            "Name": "shop-api-0"
+          },
+          "vpc_security_group_ids": [
+            "sg-0app"
+          ]
+        }
+      },
+      "id": "aws_instance.api[0]",
+      "kind": "resource",
+      "label": "api[0]"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "aws_instance.api[1]",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_instance",
+        "values": {
+          "ami": "ami-0e2c8caa4b6378d8c",
+          "id": "i-0api1",
+          "instance_type": "m7g.large",
+          "subnet_id": "subnet-02bb",
+          "tags": {
+            "Name": "shop-api-1"
+          },
+          "vpc_security_group_ids": [
+            "sg-0app"
+          ]
+        }
+      },
+      "id": "aws_instance.api[1]",
+      "kind": "resource",
+      "label": "api[1]"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "aws_instance.bastion",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_instance",
+        "values": {
+          "ami": "ami-0e2c8caa4b6378d8c",
+          "id": "i-0bastion",
+          "instance_type": "t4g.micro",
+          "subnet_id": "subnet-01aa",
+          "vpc_security_group_ids": [
+            "sg-0app"
+          ]
+        }
+      },
+      "id": "aws_instance.bastion",
+      "kind": "resource",
+      "label": "bastion"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "aws_route53_record.db",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_route53_record",
+        "values": {
+          "name": "db.shop.internal",
+          "records": [
+            "shop-prod.c9x1.us-east-1.rds.amazonaws.com"
+          ],
+          "ttl": 60,
+          "type": "CNAME",
+          "zone_id": "Z0SHOPINTERNAL"
+        }
+      },
+      "id": "aws_route53_record.db",
+      "kind": "resource",
+      "label": "db"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "aws_ssm_parameter.database_url",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_ssm_parameter",
+        "values": {
+          "arn": "arn:aws:ssm:us-east-1:111122223333:parameter/shop/database-url",
+          "name": "/shop/database-url",
+          "type": "SecureString",
+          "value": "(sensitive value)"
+        }
+      },
+      "id": "aws_ssm_parameter.database_url",
+      "kind": "resource",
+      "label": "database_url"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "data.aws_ami.ubuntu",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_ami"
+      },
+      "id": "data.aws_ami.ubuntu",
+      "kind": "data-source",
+      "label": "ubuntu"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "module.database",
+        "source": "./modules/database"
+      },
+      "id": "module.database",
+      "kind": "module",
+      "label": "database"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "module.database.aws_db_instance.main",
+        "module": "module.database",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_db_instance",
+        "values": {
+          "address": "shop-prod.c9x1.us-east-1.rds.amazonaws.com",
+          "allocated_storage": 100,
+          "db_subnet_group_name": "shop-prod",
+          "endpoint": "shop-prod.c9x1.us-east-1.rds.amazonaws.com:5432",
+          "engine": "postgres",
+          "engine_version": "16.4",
+          "identifier": "shop-prod",
+          "instance_class": "db.r6g.large",
+          "multi_az": true,
+          "parameter_group_name": "shop-prod-pg16",
+          "password": "(sensitive value)",
+          "storage_encrypted": false,
+          "username": "shop",
+          "vpc_security_group_ids": [
+            "sg-0db"
+          ]
+        }
+      },
+      "id": "module.database.aws_db_instance.main",
+      "kind": "resource",
+      "label": "main"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "module.database.aws_db_instance.replica",
+        "module": "module.database",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_db_instance",
+        "values": {
+          "address": "shop-prod-replica.c9x1.us-east-1.rds.amazonaws.com",
+          "identifier": "shop-prod-replica",
+          "instance_class": "db.r6g.large",
+          "replicate_source_db": "shop-prod"
+        }
+      },
+      "id": "module.database.aws_db_instance.replica",
+      "kind": "resource",
+      "label": "replica"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "module.database.aws_db_parameter_group.postgres",
+        "module": "module.database",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_db_parameter_group",
+        "values": {
+          "family": "postgres16",
+          "id": "shop-prod-pg16",
+          "name": "shop-prod-pg16"
+        }
+      },
+      "id": "module.database.aws_db_parameter_group.postgres",
+      "kind": "resource",
+      "label": "postgres"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "module.database.aws_db_subnet_group.main",
+        "module": "module.database",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_db_subnet_group",
+        "values": {
+          "id": "shop-prod",
+          "name": "shop-prod",
+          "subnet_ids": [
+            "subnet-01aa",
+            "subnet-02bb"
+          ]
+        }
+      },
+      "id": "module.database.aws_db_subnet_group.main",
+      "kind": "resource",
+      "label": "main"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "module.network",
+        "source": "./modules/network"
+      },
+      "id": "module.network",
+      "kind": "module",
+      "label": "network"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "module.network.aws_security_group.app",
+        "module": "module.network",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_security_group",
+        "values": {
+          "id": "sg-0app",
+          "name": "shop-prod-app",
+          "vpc_id": "vpc-0a1b2c3d4e5f60718"
+        }
+      },
+      "id": "module.network.aws_security_group.app",
+      "kind": "resource",
+      "label": "app"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "module.network.aws_security_group.database",
+        "module": "module.network",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_security_group",
+        "values": {
+          "id": "sg-0db",
+          "ingress": [
+            {
+              "from_port": 5432,
+              "protocol": "tcp",
+              "security_groups": [
+                "sg-0app"
+              ],
+              "to_port": 5432
+            }
+          ],
+          "name": "shop-prod-database",
+          "vpc_id": "vpc-0a1b2c3d4e5f60718"
+        }
+      },
+      "id": "module.network.aws_security_group.database",
+      "kind": "resource",
+      "label": "database"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "module.network.aws_subnet.private[\"us-east-1a\"]",
+        "module": "module.network",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_subnet",
+        "values": {
+          "availability_zone": "us-east-1a",
+          "cidr_block": "10.20.1.0/24",
+          "id": "subnet-01aa",
+          "vpc_id": "vpc-0a1b2c3d4e5f60718"
+        }
+      },
+      "id": "module.network.aws_subnet.private[\"us-east-1a\"]",
+      "kind": "resource",
+      "label": "private[\"us-east-1a\"]"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "module.network.aws_subnet.private[\"us-east-1b\"]",
+        "module": "module.network",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_subnet",
+        "values": {
+          "availability_zone": "us-east-1b",
+          "cidr_block": "10.20.2.0/24",
+          "id": "subnet-02bb",
+          "vpc_id": "vpc-0a1b2c3d4e5f60718"
+        }
+      },
+      "id": "module.network.aws_subnet.private[\"us-east-1b\"]",
+      "kind": "resource",
+      "label": "private[\"us-east-1b\"]"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "module.network.aws_vpc.main",
+        "module": "module.network",
+        "provider": "registry.terraform.io/hashicorp/aws",
+        "type": "aws_vpc",
+        "values": {
+          "cidr_block": "10.20.0.0/16",
+          "enable_dns_hostnames": true,
+          "id": "vpc-0a1b2c3d4e5f60718",
+          "tags": {
+            "Name": "shop-prod"
+          }
+        }
+      },
+      "id": "module.network.aws_vpc.main",
+      "kind": "resource",
+      "label": "main"
+    }
+  ],
+  "metadata": {
+    "limitations": [
+      "References come from the configuration and conservatively connect every count and for_each instance.",
+      "Locals, variables without a module call and provider configuration are not resolved to resources.",
+      "Values Terraform marks sensitive are replaced, including unmarked copies of them elsewhere in the plan; secrets Terraform never marked cannot be detected.",
+      "Data sources carry no values, because every plan reads them again."
+    ],
+    "source": "terraform show -json (plan)",
+    "sourceConfidence": "authoritative",
+    "terraformVersion": "1.9.8",
+    "unresolvedReferences": 0
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "from": "module.database",
+      "id": "contains:module.database:module.database.aws_db_instance.main",
+      "kind": "contains",
+      "to": "module.database.aws_db_instance.main"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "module.database",
+      "id": "contains:module.database:module.database.aws_db_instance.replica",
+      "kind": "contains",
+      "to": "module.database.aws_db_instance.replica"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "module.database",
+      "id": "contains:module.database:module.database.aws_db_parameter_group.postgres",
+      "kind": "contains",
+      "to": "module.database.aws_db_parameter_group.postgres"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "module.database",
+      "id": "contains:module.database:module.database.aws_db_subnet_group.main",
+      "kind": "contains",
+      "to": "module.database.aws_db_subnet_group.main"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "module.network",
+      "id": "contains:module.network:module.network.aws_security_group.app",
+      "kind": "contains",
+      "to": "module.network.aws_security_group.app"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "module.network",
+      "id": "contains:module.network:module.network.aws_security_group.database",
+      "kind": "contains",
+      "to": "module.network.aws_security_group.database"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "module.network",
+      "id": "contains:module.network:module.network.aws_subnet.private%5B%22us-east-1a%22%5D",
+      "kind": "contains",
+      "to": "module.network.aws_subnet.private[\"us-east-1a\"]"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "module.network",
+      "id": "contains:module.network:module.network.aws_subnet.private%5B%22us-east-1b%22%5D",
+      "kind": "contains",
+      "to": "module.network.aws_subnet.private[\"us-east-1b\"]"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "module.network",
+      "id": "contains:module.network:module.network.aws_vpc.main",
+      "kind": "contains",
+      "to": "module.network.aws_vpc.main"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "dimensions"
+        ]
+      },
+      "from": "aws_cloudwatch_metric_alarm.database_cpu",
+      "id": "references:aws_cloudwatch_metric_alarm.database_cpu:module.database.aws_db_instance.main",
+      "kind": "references",
+      "to": "module.database.aws_db_instance.main"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "role"
+        ]
+      },
+      "from": "aws_iam_instance_profile.api",
+      "id": "references:aws_iam_instance_profile.api:aws_iam_role.api",
+      "kind": "references",
+      "to": "aws_iam_role.api"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "role"
+        ]
+      },
+      "from": "aws_iam_role_policy.read_config",
+      "id": "references:aws_iam_role_policy.read_config:aws_iam_role.api",
+      "kind": "references",
+      "to": "aws_iam_role.api"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "policy"
+        ]
+      },
+      "from": "aws_iam_role_policy.read_config",
+      "id": "references:aws_iam_role_policy.read_config:aws_ssm_parameter.database_url",
+      "kind": "references",
+      "to": "aws_ssm_parameter.database_url"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "iam_instance_profile"
+        ]
+      },
+      "from": "aws_instance.api[0]",
+      "id": "references:aws_instance.api%5B0%5D:aws_iam_instance_profile.api",
+      "kind": "references",
+      "to": "aws_iam_instance_profile.api"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "ami"
+        ]
+      },
+      "from": "aws_instance.api[0]",
+      "id": "references:aws_instance.api%5B0%5D:data.aws_ami.ubuntu",
+      "kind": "references",
+      "to": "data.aws_ami.ubuntu"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "vpc_security_group_ids"
+        ]
+      },
+      "from": "aws_instance.api[0]",
+      "id": "references:aws_instance.api%5B0%5D:module.network.aws_security_group.app",
+      "kind": "references",
+      "to": "module.network.aws_security_group.app"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "subnet_id"
+        ]
+      },
+      "from": "aws_instance.api[0]",
+      "id": "references:aws_instance.api%5B0%5D:module.network.aws_subnet.private%5B%22us-east-1a%22%5D",
+      "kind": "references",
+      "to": "module.network.aws_subnet.private[\"us-east-1a\"]"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "subnet_id"
+        ]
+      },
+      "from": "aws_instance.api[0]",
+      "id": "references:aws_instance.api%5B0%5D:module.network.aws_subnet.private%5B%22us-east-1b%22%5D",
+      "kind": "references",
+      "to": "module.network.aws_subnet.private[\"us-east-1b\"]"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "iam_instance_profile"
+        ]
+      },
+      "from": "aws_instance.api[1]",
+      "id": "references:aws_instance.api%5B1%5D:aws_iam_instance_profile.api",
+      "kind": "references",
+      "to": "aws_iam_instance_profile.api"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "ami"
+        ]
+      },
+      "from": "aws_instance.api[1]",
+      "id": "references:aws_instance.api%5B1%5D:data.aws_ami.ubuntu",
+      "kind": "references",
+      "to": "data.aws_ami.ubuntu"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "vpc_security_group_ids"
+        ]
+      },
+      "from": "aws_instance.api[1]",
+      "id": "references:aws_instance.api%5B1%5D:module.network.aws_security_group.app",
+      "kind": "references",
+      "to": "module.network.aws_security_group.app"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "subnet_id"
+        ]
+      },
+      "from": "aws_instance.api[1]",
+      "id": "references:aws_instance.api%5B1%5D:module.network.aws_subnet.private%5B%22us-east-1a%22%5D",
+      "kind": "references",
+      "to": "module.network.aws_subnet.private[\"us-east-1a\"]"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "subnet_id"
+        ]
+      },
+      "from": "aws_instance.api[1]",
+      "id": "references:aws_instance.api%5B1%5D:module.network.aws_subnet.private%5B%22us-east-1b%22%5D",
+      "kind": "references",
+      "to": "module.network.aws_subnet.private[\"us-east-1b\"]"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "ami"
+        ]
+      },
+      "from": "aws_instance.bastion",
+      "id": "references:aws_instance.bastion:data.aws_ami.ubuntu",
+      "kind": "references",
+      "to": "data.aws_ami.ubuntu"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "vpc_security_group_ids"
+        ]
+      },
+      "from": "aws_instance.bastion",
+      "id": "references:aws_instance.bastion:module.network.aws_security_group.app",
+      "kind": "references",
+      "to": "module.network.aws_security_group.app"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "subnet_id"
+        ]
+      },
+      "from": "aws_instance.bastion",
+      "id": "references:aws_instance.bastion:module.network.aws_subnet.private%5B%22us-east-1a%22%5D",
+      "kind": "references",
+      "to": "module.network.aws_subnet.private[\"us-east-1a\"]"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "subnet_id"
+        ]
+      },
+      "from": "aws_instance.bastion",
+      "id": "references:aws_instance.bastion:module.network.aws_subnet.private%5B%22us-east-1b%22%5D",
+      "kind": "references",
+      "to": "module.network.aws_subnet.private[\"us-east-1b\"]"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "records"
+        ]
+      },
+      "from": "aws_route53_record.db",
+      "id": "references:aws_route53_record.db:module.database.aws_db_instance.main",
+      "kind": "references",
+      "to": "module.database.aws_db_instance.main"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "value"
+        ]
+      },
+      "from": "aws_ssm_parameter.database_url",
+      "id": "references:aws_ssm_parameter.database_url:module.database.aws_db_instance.main",
+      "kind": "references",
+      "to": "module.database.aws_db_instance.main"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "parameter_group_name"
+        ]
+      },
+      "from": "module.database.aws_db_instance.main",
+      "id": "references:module.database.aws_db_instance.main:module.database.aws_db_parameter_group.postgres",
+      "kind": "references",
+      "to": "module.database.aws_db_parameter_group.postgres"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "db_subnet_group_name"
+        ]
+      },
+      "from": "module.database.aws_db_instance.main",
+      "id": "references:module.database.aws_db_instance.main:module.database.aws_db_subnet_group.main",
+      "kind": "references",
+      "to": "module.database.aws_db_subnet_group.main"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "vpc_security_group_ids"
+        ]
+      },
+      "from": "module.database.aws_db_instance.main",
+      "id": "references:module.database.aws_db_instance.main:module.network.aws_security_group.database",
+      "kind": "references",
+      "to": "module.network.aws_security_group.database"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "replicate_source_db"
+        ]
+      },
+      "from": "module.database.aws_db_instance.replica",
+      "id": "references:module.database.aws_db_instance.replica:module.database.aws_db_instance.main",
+      "kind": "references",
+      "to": "module.database.aws_db_instance.main"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "subnet_ids"
+        ]
+      },
+      "from": "module.database.aws_db_subnet_group.main",
+      "id": "references:module.database.aws_db_subnet_group.main:module.network.aws_subnet.private%5B%22us-east-1a%22%5D",
+      "kind": "references",
+      "to": "module.network.aws_subnet.private[\"us-east-1a\"]"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "subnet_ids"
+        ]
+      },
+      "from": "module.database.aws_db_subnet_group.main",
+      "id": "references:module.database.aws_db_subnet_group.main:module.network.aws_subnet.private%5B%22us-east-1b%22%5D",
+      "kind": "references",
+      "to": "module.network.aws_subnet.private[\"us-east-1b\"]"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "vpc_id"
+        ]
+      },
+      "from": "module.network.aws_security_group.app",
+      "id": "references:module.network.aws_security_group.app:module.network.aws_vpc.main",
+      "kind": "references",
+      "to": "module.network.aws_vpc.main"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "ingress"
+        ]
+      },
+      "from": "module.network.aws_security_group.database",
+      "id": "references:module.network.aws_security_group.database:module.network.aws_security_group.app",
+      "kind": "references",
+      "to": "module.network.aws_security_group.app"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "vpc_id"
+        ]
+      },
+      "from": "module.network.aws_security_group.database",
+      "id": "references:module.network.aws_security_group.database:module.network.aws_vpc.main",
+      "kind": "references",
+      "to": "module.network.aws_vpc.main"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "vpc_id"
+        ]
+      },
+      "from": "module.network.aws_subnet.private[\"us-east-1a\"]",
+      "id": "references:module.network.aws_subnet.private%5B%22us-east-1a%22%5D:module.network.aws_vpc.main",
+      "kind": "references",
+      "to": "module.network.aws_vpc.main"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "vpc_id"
+        ]
+      },
+      "from": "module.network.aws_subnet.private[\"us-east-1b\"]",
+      "id": "references:module.network.aws_subnet.private%5B%22us-east-1b%22%5D:module.network.aws_vpc.main",
+      "kind": "references",
+      "to": "module.network.aws_vpc.main"
+    }
+  ],
+  "schema": "architecture/v0",
+  "vocabularies": [
+    "infrastructure/v0"
+  ]
+}

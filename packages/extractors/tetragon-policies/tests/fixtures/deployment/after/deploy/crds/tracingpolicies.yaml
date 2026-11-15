@@ -1,0 +1,132 @@
+# A reduced TracingPolicy CRD in the shape Tetragon publishes, for tests.
+# Both CRDs in one List document, so they can share the schema anchor.
+apiVersion: v1
+kind: List
+items:
+  - apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: tracingpolicies.cilium.io
+    spec:
+      group: cilium.io
+      names: {kind: TracingPolicy, plural: tracingpolicies}
+      scope: Cluster
+      versions:
+        - name: v1alpha1
+          served: true
+          storage: true
+          schema:
+            openAPIV3Schema: &schema
+              type: object
+              required: [metadata, spec]
+              properties:
+                apiVersion: {type: string}
+                kind: {type: string}
+                metadata: {type: object}
+                spec:
+                  type: object
+                  properties:
+                    hostSelector: {type: object, x-kubernetes-preserve-unknown-fields: true}
+                    podSelector:
+                      type: object
+                      properties:
+                        matchLabels: {type: object, additionalProperties: {type: string}}
+                        matchExpressions:
+                          type: array
+                          items:
+                            type: object
+                            required: [key, operator]
+                            properties:
+                              key: {type: string}
+                              operator: {type: string, enum: [In, NotIn, Exists, DoesNotExist]}
+                              values: {type: array, items: {type: string}}
+                    options:
+                      type: array
+                      items:
+                        type: object
+                        required: [name]
+                        properties:
+                          name: {type: string, pattern: '^[a-z][a-z-]*$'}
+                          value: {type: string}
+                    kprobes: &probes
+                      type: array
+                      maxItems: 128
+                      items:
+                        type: object
+                        required: [call]
+                        properties:
+                          call: {type: string}
+                          syscall: {type: boolean, default: true}
+                          return: {type: boolean, default: false}
+                          message: {type: string}
+                          tags: {type: array, maxItems: 16, items: {type: string}}
+                          args: &args
+                            type: array
+                            items:
+                              type: object
+                              required: [index]
+                              properties:
+                                index: {type: integer, minimum: 0}
+                                type: {type: string, default: auto}
+                                label: {type: string}
+                          returnArg: {type: object, properties: {index: {type: integer}, type: {type: string}}}
+                          selectors: &selectors
+                            type: array
+                            maxItems: 5
+                            items:
+                              type: object
+                              properties:
+                                label: {type: string}
+                                matchArgs:
+                                  type: array
+                                  items:
+                                    type: object
+                                    required: [operator]
+                                    properties:
+                                      index: {type: integer, minimum: 0}
+                                      operator: {type: string}
+                                      values: {type: array, items: {type: string}}
+                                matchBinaries:
+                                  type: array
+                                  maxItems: 1
+                                  items:
+                                    type: object
+                                    required: [operator, values]
+                                    properties:
+                                      operator: {type: string, enum: [In, NotIn, Prefix, NotPrefix, Postfix, NotPostfix]}
+                                      values: {type: array, items: {type: string}}
+                                      followChildren: {type: boolean}
+                                matchActions:
+                                  type: array
+                                  maxItems: 3
+                                  items:
+                                    type: object
+                                    required: [action]
+                                    properties:
+                                      action: {type: string, enum: [Post, NoPost, Sigkill, Signal, Override, GetUrl, DnsLookup, TrackSock, UntrackSock, NotifyEnforcer]}
+                                      argError: {type: integer}
+                                      argSig: {type: integer}
+                    lsmhooks:
+                      type: array
+                      items:
+                        type: object
+                        required: [hook]
+                        properties:
+                          hook: {type: string}
+                          message: {type: string}
+                          args: *args
+                          selectors: *selectors
+  - apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: tracingpoliciesnamespaced.cilium.io
+    spec:
+      group: cilium.io
+      names: {kind: TracingPolicyNamespaced, plural: tracingpoliciesnamespaced}
+      scope: Namespaced
+      versions:
+        - name: v1alpha1
+          served: true
+          storage: true
+          schema:
+            openAPIV3Schema: *schema

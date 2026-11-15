@@ -1,0 +1,148 @@
+{
+  "protocolVersion": 0,
+  "schema": "metrics/v0",
+  "entities": [
+    {
+      "id": "language:TypeScript",
+      "kind": "language",
+      "label": "TypeScript",
+      "data": {
+        "language": "TypeScript",
+        "files": 14,
+        "code": 1400,
+        "comment": 180,
+        "blank": 170,
+        "lines": 1750,
+        "value": 1400,
+        "unit": "lines of code",
+        "testFiles": 6,
+        "testCode": 560,
+        "testComment": 72,
+        "testBlank": 68,
+        "testLines": 700
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/example.ts"
+        }
+      ]
+    },
+    {
+      "id": "language:Go",
+      "kind": "language",
+      "label": "Go",
+      "data": {
+        "language": "Go",
+        "files": 4,
+        "code": 400,
+        "comment": 40,
+        "blank": 60,
+        "lines": 500,
+        "value": 400,
+        "unit": "lines of code",
+        "testFiles": 1,
+        "testCode": 120,
+        "testComment": 12,
+        "testBlank": 18,
+        "testLines": 150
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/example.go"
+        }
+      ]
+    },
+    {
+      "id": "language:Python",
+      "kind": "language",
+      "label": "Python",
+      "data": {
+        "language": "Python",
+        "files": 3,
+        "code": 300,
+        "comment": 90,
+        "blank": 40,
+        "lines": 430,
+        "value": 300,
+        "unit": "lines of code",
+        "testFiles": 1,
+        "testCode": 90,
+        "testComment": 27,
+        "testBlank": 12,
+        "testLines": 129
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/example.py"
+        }
+      ]
+    },
+    {
+      "id": "language:CSS",
+      "kind": "language",
+      "label": "CSS",
+      "data": {
+        "language": "CSS",
+        "files": 5,
+        "code": 520,
+        "comment": 18,
+        "blank": 70,
+        "lines": 608,
+        "value": 520,
+        "unit": "lines of code",
+        "testFiles": 0,
+        "testCode": 0,
+        "testComment": 0,
+        "testBlank": 0,
+        "testLines": 0
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/example.css"
+        }
+      ]
+    },
+    {
+      "id": "language:Shell",
+      "kind": "language",
+      "label": "Shell",
+      "data": {
+        "language": "Shell",
+        "files": 3,
+        "code": 80,
+        "comment": 25,
+        "blank": 12,
+        "lines": 117,
+        "value": 80,
+        "unit": "lines of code",
+        "testFiles": 0,
+        "testCode": 0,
+        "testComment": 0,
+        "testBlank": 0,
+        "testLines": 0
+      },
+      "confidence": "derived",
+      "evidence": [
+        {
+          "kind": "counted-file",
+          "source": "src/example.sh"
+        }
+      ]
+    }
+  ],
+  "relationships": [],
+  "metadata": {
+    "presentation": "code-statistics",
+    "limitations": [
+      "Synthetic language counts; no extractor ran."
+    ]
+  }
+}

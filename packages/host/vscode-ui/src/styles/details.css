@@ -1,0 +1,485 @@
+/* Raw details: a side bar view section with tree rows. */
+.phv-details {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 0 0 12px;
+  color: var(--vscode-sideBar-foreground, var(--phv-fg));
+  font-family: var(--phv-font);
+  font-size: var(--phv-size);
+}
+.phv-details-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+  padding: 0 4px 0 12px;
+  background: var(--phv-surface-header);
+}
+.phv-details-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+}
+.phv-details-title:focus {
+  outline: none;
+}
+.phv-details > :not(.phv-details-header) {
+  margin-inline: 12px;
+}
+.phv-details p {
+  margin: 0;
+}
+.phv-facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 12px;
+  margin: 0;
+}
+.phv-facts dt {
+  color: var(--phv-muted);
+}
+.phv-facts dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  min-width: 0;
+}
+.phv-details-item {
+  display: grid;
+  gap: 6px;
+}
+.phv-properties {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.phv-property {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 22px;
+  padding: 0 4px;
+  border: 1px solid transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+}
+button.phv-property {
+  cursor: pointer;
+}
+button.phv-property:hover {
+  background: var(--phv-hover);
+  outline: 1px dashed var(--phv-hover-outline);
+  outline-offset: -1px;
+}
+.phv-property[data-selected] {
+  background: var(--vscode-list-activeSelectionBackground, #04395e);
+  color: var(--vscode-list-activeSelectionForeground, inherit);
+}
+.phv-property-icon {
+  flex: none;
+  color: var(--vscode-symbolIcon-propertyForeground, var(--phv-fg));
+}
+.phv-property-key {
+  flex: none;
+}
+.phv-property-value {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--phv-muted);
+  font-family: var(--phv-mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.phv-property[data-selected] .phv-property-value {
+  color: inherit;
+}
+.phv-property-mark {
+  margin-inline-start: auto;
+}
+.phv-evidence {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.phv-evidence li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.phv-evidence-link {
+  font-family: var(--phv-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.phv-details-consumer {
+  padding-top: 8px;
+  border-top: 1px solid var(--phv-divider);
+}
+
+/* The detail card: VS Code's hover widget (`--vscode-editorHoverWidget-*`) over the stage beside the selected item (a
+   bottom sheet on narrow stages). Its fields read old → new in removed and added pills, each fill with its edge. */
+.phv-detail-card {
+  display: flex;
+  flex-direction: column;
+  width: 20rem;
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--vscode-editorHoverWidget-border, #454545);
+  border-radius: var(--phv-radius);
+  background: var(--vscode-editorHoverWidget-background, #202020);
+  color: var(--vscode-editorHoverWidget-foreground, var(--phv-fg));
+  box-shadow: 0 2px 8px var(--vscode-widget-shadow, #0000005c);
+  font-family: var(--phv-font);
+  font-size: var(--phv-size);
+  line-height: 1.4;
+}
+.phv-detail-card[data-placement='sheet'] {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+.phv-detail-card-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 8px;
+  border-bottom: 1px solid var(--vscode-editorHoverWidget-border, #454545);
+  background: var(--vscode-editorHoverWidget-statusBarBackground, var(--vscode-editorHoverWidget-background, #202020));
+}
+.phv-detail-card-title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--phv-size);
+  font-weight: 600;
+}
+.phv-detail-card-title:focus {
+  outline: none;
+}
+.phv-detail-section {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 6px 8px 8px;
+}
+.phv-detail-section + .phv-detail-section {
+  border-top: 1px solid var(--vscode-editorHoverWidget-border, #454545);
+}
+.phv-detail-heading {
+  margin: 0;
+  color: var(--phv-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+.phv-detail-section p {
+  margin: 0;
+}
+.phv-detail-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.phv-fields {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.phv-detail-card .phv-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 8px;
+  align-items: start;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 3px 4px;
+  border: 1px solid transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  text-align: start;
+}
+.phv-detail-card .phv-field > :is(.phv-property-key, .phv-value, .phv-value-change) {
+  grid-column: 1;
+}
+.phv-detail-card .phv-field > .phv-property-mark {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+.phv-detail-card button.phv-field {
+  cursor: pointer;
+}
+.phv-detail-card button.phv-field:hover {
+  background: var(--phv-hover);
+}
+.phv-detail-card .phv-field[data-selected] {
+  background: var(--vscode-list-activeSelectionBackground, #04395e);
+  color: var(--vscode-list-activeSelectionForeground, inherit);
+}
+.phv-value {
+  font-family: var(--phv-mono);
+}
+/* A change's volatile values (VariedList): neutral rows, paths and values in the monospace font, no change hues. */
+.phv-varied {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.phv-varied-heading {
+  margin: 0;
+  font-size: 12px;
+}
+.phv-varied-fields {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--phv-border);
+  border-radius: 3px;
+  list-style: none;
+}
+.phv-varied-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  min-width: 0;
+  padding: 3px 4px;
+  font-size: 12px;
+}
+.phv-varied-field + .phv-varied-field {
+  border-top: 1px solid var(--phv-border);
+}
+.phv-varied-name {
+  color: var(--phv-muted);
+  font-family: var(--phv-mono);
+  overflow-wrap: anywhere;
+}
+.phv-varied-values {
+  font-family: var(--phv-mono);
+  overflow-wrap: anywhere;
+}
+.phv-varied-words {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--phv-muted);
+}
+.phv-varied-words .codicon {
+  align-self: center;
+  font-size: 12px;
+}
+.phv-varied-reason {
+  flex-basis: 100%;
+  color: var(--phv-muted);
+}
+/*
+ * Generated values (GeneratedList): the name, a quiet Generated mark, and the value in the form its change calls
+ * for. Toggled forms share one grid cell, so the box keeps the taller one's height and nothing moves.
+ */
+.phv-generated-fields {
+  margin-bottom: 4px;
+}
+.phv-generated {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 3px 4px;
+  font-size: 12px;
+}
+.phv-generated + .phv-generated {
+  border-top: 1px solid var(--phv-border);
+}
+.phv-generated-label,
+.phv-generated-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  min-width: 0;
+}
+.phv-generated-note {
+  align-items: center;
+  justify-content: space-between;
+}
+.phv-generated-mark,
+.phv-generated-why {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--phv-muted);
+}
+.phv-generated-mark .codicon,
+.phv-generated-why .codicon {
+  align-self: center;
+  font-size: 12px;
+}
+.phv-generated-stack {
+  display: grid;
+}
+.phv-generated-layer {
+  grid-area: 1 / 1;
+  min-width: 0;
+  visibility: hidden;
+}
+.phv-generated-layer[data-active] {
+  visibility: visible;
+}
+.phv-generated-passage {
+  margin: 0;
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.phv-generated-json {
+  font-family: var(--phv-mono);
+}
+.phv-generated-pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  gap: 4px;
+}
+.phv-generated-side {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  min-width: 0;
+  padding: 3px 4px;
+  border: 1px solid var(--phv-border);
+  border-radius: 3px;
+}
+.phv-generated-diff del {
+  background: var(--phv-removed-muted);
+}
+.phv-generated-diff ins {
+  background: var(--phv-added-muted);
+  text-decoration: none;
+}
+.phv-generated-toggle {
+  padding: 0 6px;
+  border: 1px solid var(--vscode-input-border, var(--vscode-widget-border, transparent));
+  border-radius: 3px;
+  background: transparent;
+  color: var(--phv-muted);
+  font: inherit;
+  cursor: pointer;
+}
+.phv-generated-toggle:hover {
+  color: var(--vscode-foreground, #cccccc);
+}
+.phv-generated-toggle:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, #0078d4);
+  outline-offset: -1px;
+}
+.phv-generated-toggle[aria-pressed='true'] {
+  border-color: var(--vscode-inputOption-activeBorder, #2488db);
+  background: var(--vscode-inputOption-activeBackground, #2489db82);
+  color: var(--vscode-inputOption-activeForeground, #ffffff);
+}
+.phv-value-change {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 4px;
+  min-width: 0;
+}
+.phv-value-pill {
+  padding: 0 4px;
+  border: 1px solid var(--phv-change-border);
+  border-radius: 3px;
+  background: var(--phv-change-muted);
+  font-family: var(--phv-mono);
+  text-decoration: none;
+  box-decoration-break: clone;
+}
+.phv-value-pill[data-change='removed'] {
+  text-decoration: line-through;
+}
+.phv-value-arrow {
+  color: var(--phv-muted);
+}
+.phv-connections {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.phv-connection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 3px 4px;
+  border: 1px solid transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  text-align: start;
+  cursor: pointer;
+}
+.phv-connection:hover {
+  background: var(--phv-hover);
+}
+.phv-connection-label {
+  min-width: 0;
+  color: var(--phv-link);
+}
+.phv-connection .phv-change-label {
+  margin-inline-start: auto;
+}
+
+/* Annotation markers: a comment codicon and VS Code's count badge; tones never use change colors. */
+.phv-annotation {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-inline-start: 4px;
+  padding: 0 2px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: none;
+  color: var(--phv-muted);
+  vertical-align: middle;
+  cursor: pointer;
+}
+.phv-annotation:hover {
+  background: var(--vscode-toolbar-hoverBackground, #5a5d5e50);
+}
+.phv-annotation[data-tone='attention'] {
+  color: var(--vscode-editorInfo-foreground, var(--phv-link));
+}
+.phv-annotation[data-tone='subtle'] {
+  border-style: dashed;
+  border-color: var(--phv-border);
+}
+
+.phv-comparator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+}
+.phv-comparator .phv-code {
+  padding: 0;
+  background: none;
+}

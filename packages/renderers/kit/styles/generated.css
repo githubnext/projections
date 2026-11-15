@@ -1,0 +1,111 @@
+/*
+ * A generated field (GeneratedText): its name, the quiet Generated mark and its value. Regenerated from the same
+ * inputs it shows After's text with a neutral note; regenerated from a changed basis, both passages. Toggled forms
+ * share one grid cell (.pk-generated-stack), so the box keeps the taller one's height and nothing moves.
+ */
+.pk-generated {
+  display: flex;
+  flex-direction: column;
+  gap: var(--projections-space-1);
+  min-width: 0;
+}
+.pk-generated-label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--projections-space-2);
+  min-width: 0;
+}
+.pk-generated-name {
+  font-family: var(--font-mono);
+  font-weight: var(--projections-font-weight-semibold);
+  overflow-wrap: anywhere;
+}
+.pk-generated-mark,
+.pk-generated-why {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--projections-space-1);
+  color: var(--muted);
+  font-size: var(--projections-font-size-xs);
+}
+.pk-generated-mark .pk-icon,
+.pk-generated-why .pk-icon {
+  align-self: center;
+}
+.pk-generated-stack {
+  display: grid;
+}
+.pk-generated-layer {
+  grid-area: 1 / 1;
+  min-width: 0;
+  visibility: hidden;
+}
+.pk-generated-layer[data-active] {
+  visibility: visible;
+}
+.pk-generated-passage {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+/* JSON is an identifier (`data-projections-identifier`), drawn at an identifier's size (text.css). */
+.pk-generated-json {
+  font-family: var(--font-mono);
+}
+.pk-generated-absent {
+  color: var(--muted);
+}
+.pk-generated-pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--projections-space-2);
+}
+.pk-generated-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--projections-space-1);
+  min-width: 0;
+  padding: var(--projections-space-2);
+  border: var(--stroke) solid var(--border);
+  border-radius: var(--projections-radius);
+}
+.pk-generated-side-label {
+  color: var(--muted);
+  font-size: var(--projections-font-size-xs);
+}
+.pk-generated-diff del,
+.pk-generated-diff ins {
+  text-decoration: none;
+  border-radius: var(--projections-radius-sm);
+}
+.pk-generated-diff del {
+  background: var(--red-highlight);
+  text-decoration: line-through;
+}
+.pk-generated-diff ins {
+  background: var(--green-highlight);
+}
+.pk-generated-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--projections-space-2);
+}
+.pk-generated-toggle {
+  font: inherit;
+  font-size: var(--projections-font-size-xs);
+  color: var(--muted);
+  background: transparent;
+  border: var(--stroke) solid var(--border);
+  border-radius: var(--projections-radius);
+  padding: 0 var(--projections-space-2);
+  cursor: pointer;
+}
+.pk-generated-toggle:hover {
+  color: var(--text);
+}
+.pk-generated-toggle[aria-pressed='true'] {
+  color: var(--text);
+  border-color: var(--edge);
+}

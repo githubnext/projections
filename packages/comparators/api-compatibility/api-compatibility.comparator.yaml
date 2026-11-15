@@ -1,0 +1,1598 @@
+# yaml-language-server: $schema=../../schemas/schemas/comparator/v0.json
+#
+# The API compatibility comparator as rules: each ecosystem's official rules over
+# the language-neutral contract facts of api/v0 (`data.contract`, defined in
+# packages/schemas/src/domains.ts), and the ecosystem-specific facts in `contract.native`.
+format: projections.comparator
+version: 0
+description: >-
+  packages/comparators/api-compatibility: classifies every changed api/v0 declaration as breaking,
+  additive, compatible or unknown, with a reason and the rule that decided it, by each
+  ecosystem's official rules (.NET ApiCompat, TypeScript assignability, the Cargo SemVer
+  reference, Go apidiff) over the contract facts the extractors read from the compiler.
+  Each entity change gets the classification as its summary; metadata.compatibility
+  records them with counts and notices.
+checks:
+  - assert: "options.all(key, key == 'ecosystem')"
+    message: |-
+      'invalid options: unknown field `' + options.filter(key, key != 'ecosystem').sort()[0]
+      + '`, expected `ecosystem`'
+  - assert: |-
+      !has(options.ecosystem) || options.ecosystem == null || type(options.ecosystem) == string
+    message: "'invalid options: `ecosystem` must be a string'"
+  # The engine compares only extractions of one schema.
+  - assert: "before.schema == 'api/v0'"
+    message: |-
+      template('`api-compatibility` compares `api/v0` extractions, not {schema} ones', {'schema': prose.code(before.schema)})
+  - assert: |-
+      !has(options.ecosystem) || options.ecosystem == null || options.ecosystem in ['dotnet', 'typescript', 'rust', 'go']
+    message: |-
+      '`options.ecosystem` must be one of `dotnet`, `typescript`, `rust`, `go`, not '
+      + prose.code(options.ecosystem)
+variables:
+  - name: requested
+    expression: 'options.?ecosystem.orValue(null)'
+  - name: conflict
+    expression: |-
+      variables.requested == null && declared(before) != null && declared(after) != null
+      && declared(before) != declared(after)
+  - name: named
+    expression: |-
+      cond({
+        variables.requested != null: variables.requested,
+        variables.conflict: null,
+        declared(before) != null: declared(before),
+      }, declared(after))
+  - name: ecosystem
+    expression: |-
+      variables.named in ['dotnet', 'typescript', 'rust', 'go'] ? variables.named : null
+  - name: notices
+    expression: |-
+      cond({
+        variables.requested != null: [],
+        variables.conflict: [template(
+          'The revisions declare different ecosystems ({before} and {after}); only the rules every ecosystem shares apply.',
+          {'before': prose.code(declared(before)), 'after': prose.code(declared(after))})],
+        variables.named == null: [
+          "The extractions don't declare `metadata.ecosystem`; only the rules every ecosystem shares apply."],
+        variables.ecosystem == null: [template(
+          'No compatibility rules are known for the {named} ecosystem; only the rules every ecosystem shares apply.',
+          {'named': prose.code(variables.named)})],
+      }, [])
+functions:
+  # Text helpers.
+  orElse:
+    params: ['value', 'fallback']
+    body: 'value == null ? fallback : value'
+  missing:
+    description: 'The items of one list that another lacks, in order.'
+    params: ['items', 'others']
+    body: 'items.filter(item, !(item in others))'
+  shown:
+    description: 'A fact as an inline code span, or none.'
+    params: ['value']
+    body: "value == null || value == '' ? 'none' : prose.code(value)"
+  codeOr:
+    description: 'A fact as an inline code span, `?` when it is unknown.'
+    params: ['value']
+    body: "prose.code(orElse(value, '?'))"
+  codes:
+    params: [{name: texts, type: list<string>}]
+    returns: string
+    body: "texts.map(text, prose.code(text)).join(', ')"
+  changedText:
+    description: 'Both revisions state the text, and it differs.'
+    params: ['old', 'new']
+    body: 'old != null && new != null && old != new'
+  textOf:
+    description: "A type's text, or empty."
+    params: ['t']
+    body: "t == null ? '' : t.text"
+  typeCode:
+    description: A type as an inline code span, `?` when it is unknown.
+    params: ['t']
+    body: 'codeOr(t == null ? null : t.text)'
+  fill:
+    description: >-
+      A policy message with its fields filled: each `{name}` by `fields.name`, in one pass, so a
+      filled value is never read as a field.
+    params: [{name: text, type: string}, fields]
+    returns: string
+    body: |-
+      lists.enumerate(text.split('{')).map(piece, piece[0] == 0 ? piece[1] : fillField(piece[1], fields)).join('')
+  fillField:
+    description: 'The text after a `{`: the field it starts with filled, or the text as it was.'
+    params: [{name: piece, type: string}, fields]
+    returns: string
+    variables:
+      - name: name
+        expression: "piece.split('}')[0]"
+    body: |-
+      variables.name in fields && variables.name != piece
+        ? fields[variables.name] + piece.substring(size(variables.name) + 1) : '{' + piece
+  # Generic parameters and bounds as each ecosystem writes them (`policy('syntax')`).
+  typeParameterText:
+    description: "A generic parameter as its ecosystem writes it: Go's `K comparable`, Rust's `T: Clone + Send`."
+    params: [{name: ecosystem, values: [rust, go]}, 'p']
+    variables:
+      - name: syntax
+        expression: policy('syntax')[ecosystem]
+    body: |-
+      cond({
+        variables.syntax.valueParameters && has(p.type): 'const ' + p.name + ': ' + p.type,
+        variables.syntax.bareName && size(p.constraints) == 0: p.name,
+      }, p.name + variables.syntax.bound + bounds(ecosystem, p.constraints))
+  typeParametersText:
+    description: "A generic parameter list as its ecosystem writes it, such as Go's `[K comparable, V any]`, or empty."
+    params: [{name: ecosystem, values: [rust, go]}, 'params']
+    variables:
+      - name: syntax
+        expression: policy('syntax')[ecosystem]
+    body: |-
+      size(params) == 0 ? ''
+      : variables.syntax.open + params.map(p, typeParameterText(ecosystem, p)).join(', ') + variables.syntax.close
+  bounds:
+    description: "Bounds as its ecosystem joins them: Rust's `Clone + Send`."
+    params: [{name: ecosystem, values: [rust, go]}, 'items']
+    body: "items.join(policy('syntax')[ecosystem].separator)"
+  # Declarations: an entity with its side, its contract facts and its neighbours. Contract
+  # facts are typed by the api/v0 schema; optional ones may be absent.
+  decl:
+    description: 'A declaration: an entity and the side (`before` or `after`) it belongs to.'
+    params: [{name: item, type: Entity}, {name: side, type: string}]
+    body: "{'item': item, 'side': side}"
+  labelCode:
+    description: "A declaration's label as an inline code span."
+    params: ['d']
+    body: 'prose.code(d.item.label)'
+  hasContract:
+    params: ['d']
+    body: 'has(d.item.data.contract)'
+  facts:
+    description: >-
+      A declaration's contract facts (`data.contract`), typed by the api/v0 schema; none when it
+      has no contract. Absent booleans are false.
+    params: ['d']
+    body: 'd.item.data.?contract.orValue({})'
+  kind:
+    description: 'What kind of declaration it is (`declaration`), or null.'
+    params: ['d']
+    body: "fact(d, 'declaration')"
+  term:
+    description: "The ecosystem's own word for its kind (`term`), or null."
+    params: ['d']
+    body: "fact(d, 'term')"
+  kindOf:
+    description: "A declaration's kind, or null when there is no declaration."
+    params: ['d']
+    body: 'd == null ? null : kind(d)'
+  fact:
+    description: 'An optional fact, or null; a required one (`visibility`) is null only without a contract.'
+    params: ['d', 'name']
+    body: 'facts(d)[?name].orValue(null)'
+  listed:
+    description: 'An optional list of facts, or an empty list.'
+    params: ['d', 'name']
+    body: 'facts(d)[?name].orValue([])'
+  is:
+    description: 'Whether a boolean fact holds.'
+    params: ['d', 'name']
+    body: 'facts(d)[?name].orValue(false)'
+  typeText:
+    description: "The text of the declaration's `type`, or null."
+    params: ['d']
+    body: "fact(d, 'type') == null ? null : facts(d).type.text"
+  signature:
+    description: "The declaration's first signature (most have one), or null."
+    params: ['d']
+    body: "listed(d, 'signatures')[?0].orValue(null)"
+  parameters:
+    description: "The parameters of the declaration's first signature, or null."
+    params: ['d']
+    body: 'signature(d) == null ? null : signature(d).parameters'
+  signatureList:
+    description: "An optional list fact of the declaration's first signature, or an empty list."
+    params: ['d', 'name']
+    body: 'signature(d) == null ? [] : signature(d)[?name].orValue([])'
+  returnsOf:
+    description: "What the declaration's first signature returns, or null."
+    params: ['d']
+    body: 'signature(d) == null ? null : signature(d).returns'
+  returnText:
+    description: "The text of what the declaration's first signature returns, or null."
+    params: ['d']
+    body: 'returnsOf(d) == null ? null : returnsOf(d).text'
+  generics:
+    description: "A declaration's generic parameters: its own, and a callable's signature's."
+    params: ['d']
+    body: "listed(d, 'typeParameters') + signatureList(d, 'typeParameters')"
+  isGeneric:
+    params: ['d']
+    body: 'size(generics(d)) > 0'
+  supertypes:
+    description: 'The types it derives from (`extends`) or implements.'
+    params: ['d', 'relation']
+    body: "listed(d, 'supertypes').filter(s, s.relation == relation).map(s, s.type)"
+  rank:
+    description: 'How widely a `visibility` (`public` or `protected`, as api/v0 requires) reaches: `public` furthest.'
+    params: ['visibility']
+    body: "visibility == 'public' ? 2 : 1"
+  # Native facts are open JSON: these read them defensively.
+  holds:
+    description: 'Whether a native fact is `true`.'
+    params: ['d', 'key']
+    body: 'type(nativeFact(d, key)) == bool && nativeFact(d, key)'
+  nativeText:
+    description: 'A native fact that is a string, or null.'
+    params: ['d', 'key']
+    body: 'type(nativeFact(d, key)) == string ? nativeFact(d, key) : null'
+  nativeFact:
+    description: "One of a declaration's ecosystem-specific facts (`contract.native`), or null."
+    params: ['d', 'key']
+    body: 'facts(d).?native.orValue({})[?key].orValue(null)'
+  field:
+    description: '`value[key]` of a native fact, or null when it is no map or lacks the key.'
+    params: ['value', 'key']
+    body: 'type(value) == map ? value[?key].orValue(null) : null'
+  parentOf:
+    description: >-
+      The declaration that contains this one: the source of its first incoming `contains`
+      relationship (the engine rejects relationships whose endpoints aren't entities).
+    params: [d]
+    variables:
+      - name: id
+        expression: graph.parents(d.side, d.item.id, 'contains')[?0].orValue(null)
+    body: |-
+      variables.id != null ? decl(lookup[d.side].entities[variables.id], d.side) : null
+  counterpart:
+    description: The same ID in the other extraction.
+    params: [d]
+    variables:
+      - name: other
+        expression: "d.side == 'before' ? 'after' : 'before'"
+    body: |-
+      d.item.id in lookup[variables.other].entities
+        ? decl(lookup[variables.other].entities[d.item.id], variables.other)
+        : null
+  # Findings and classifications.
+  finding:
+    params: [{name: level, type: string}, {name: rule, type: string}, {name: reason, type: string}]
+    returns: Finding
+    body: "{'level': level, 'rule': rule, 'reason': reason}"
+  breaking:
+    params: ['rule', 'reason']
+    body: "finding('breaking', rule, reason)"
+  additive:
+    params: ['rule', 'reason']
+    body: "finding('additive', rule, reason)"
+  compatible:
+    params: ['rule', 'reason']
+    body: "finding('compatible', rule, reason)"
+  unknown:
+    params: ['rule', 'reason']
+    body: "finding('unknown', rule, reason)"
+  kinded:
+    params: [{name: f, type: Finding}, {name: kind, type: string}]
+    returns: Finding
+    body: |-
+      {'level': f.level, 'rule': f.rule, 'reason': f.reason, 'kinds': f.?kinds.orValue([]) + [kind]}
+  binary:
+    description: |-
+      Breaks code compiled against the old revision, without recompiling.
+    params: ['f']
+    body: "kinded(f, 'binary')"
+  source:
+    description: "Breaks consumers' source."
+    params: ['f']
+    body: "kinded(f, 'source')"
+  classification:
+    description: "A change's classification: its most severe findings (every change has one: see `findings`)."
+    params: [{name: found, type: list<Finding>}]
+    returns: Classification
+    body: "findings.classify(found, ['compatible', 'additive', 'unknown', 'breaking'])"
+  sentence:
+    description: "One sentence for the change's summary: `Breaking (binary, source): reason.`"
+    params: [{name: c, type: Classification}]
+    returns: string
+    body: |-
+      template('{level}{kinds}: {reason}.', {
+        'level': {'compatible': 'Compatible', 'additive': 'Additive', 'unknown': 'Unknown', 'breaking': 'Breaking'}[c.level],
+        'kinds': has(c.kinds) ? template(' ({kinds})', {'kinds': c.kinds.join(', ')}) : '',
+        'reason': c.reason})
+  found:
+    description: >-
+      The finding a policy row prescribes: its `level`, `rule` and break `kinds`, with its
+      `text`'s fields filled.
+    params: ['row', 'fields']
+    returns: Finding
+    body: |-
+      has(row.kinds) ? {'level': row.level, 'rule': row.rule, 'reason': fill(row.text, fields), 'kinds': row.kinds}
+      : finding(row.level, row.rule, fill(row.text, fields))
+  # The policy every ecosystem's rules share: one rule per concept, and each ecosystem's
+  # rule IDs, levels, break kinds and wording for it.
+  policy:
+    description: >-
+      Each shared concept's outcomes per ecosystem, keyed by the situation the ecosystem's rules
+      name: a row's `level`, `rule`, break `kinds` (.NET's `binary` and `source`) and `text`, whose
+      `{fields}` the concept's rule fills (`fill`). `syntax` is how each ecosystem writes generic
+      parameters.
+    params: [{name: concept, values: [added, kind, supertypes, visibility, arity, retyped, value, toggles, syntax]}]
+    body: |-
+      {
+        'added': {
+          'dotnet': {
+            'implement': {'level': 'breaking', 'rule': 'CP0006', 'kinds': ['binary', 'source'],
+              'text': '{member} was added to interface {owner} without a default implementation'},
+            'inherit': {'level': 'breaking', 'rule': 'CP0005', 'kinds': ['binary', 'source'],
+              'text': 'Abstract member {member} was added to {owner}, which can be inherited'},
+          },
+          'typescript': {
+            'implement': {'level': 'breaking', 'rule': 'member-added',
+              'text': 'Required member {member} was added to {owner}; implementations and object literals must provide it'},
+            'implement-index': {'level': 'breaking', 'rule': 'member-added',
+              'text': 'Index signature {member} was added to {owner}; existing objects may not satisfy it'},
+            'implement-call': {'level': 'breaking', 'rule': 'member-added',
+              'text': '{member} was added to {owner}; implementations must provide it'},
+            'inherit': {'level': 'breaking', 'rule': 'member-added',
+              'text': 'Abstract member {member} was added to {owner}; subclasses must implement it'},
+            'added': {'level': 'additive', 'rule': 'member-added', 'text': '{member} was added'},
+          },
+          'rust': {
+            'implement': {'level': 'breaking', 'rule': 'trait-new-item-no-default',
+              'text': '{member} was added to {owner} without a default; implementations must add it'},
+            'implement-sealed': {'level': 'additive', 'rule': 'trait-new-item-no-default',
+              'text': '{member} was added to sealed trait {owner}'},
+            'default-item': {'level': 'additive', 'rule': 'trait-new-default-item', 'text': '{member} was added to {owner} with a default'},
+            'variant': {'level': 'breaking', 'rule': 'enum-variant-new',
+              'text': 'Variant {member} was added to exhaustive enum {owner}; exhaustive matches fail'},
+            'variant-field': {'level': 'breaking', 'rule': 'enum-fields-new',
+              'text': 'Field {member} was added to variant {owner}; patterns and constructions of it fail'},
+            'struct-field': {'level': 'breaking', 'rule': 'struct-add-public-field-when-no-private',
+              'text': 'Public field {member} was added to {owner}, whose fields were all public; struct literals fail'},
+            'field': {'level': 'additive', 'rule': 'item-new', 'text': 'Field {member} was added'},
+            'added': {'level': 'additive', 'rule': 'item-new', 'text': '{member} was added'},
+            'new': {'level': 'additive', 'rule': 'item-new', 'text': '{member} was added'},
+          },
+          'go': {
+            'implement': {'level': 'breaking', 'rule': 'interface-method-added',
+              'text': 'Method {member} was added to interface {owner}; types implementing {owner} elsewhere no longer do'},
+            'implement-sealed': {'level': 'additive', 'rule': 'interface-method-added',
+              'text': 'Method {member} was added to {owner}, which only embedding can implement'},
+          },
+        },
+        'kind': {
+          'dotnet': {'level': 'breaking', 'rule': 'type-kind', 'kinds': ['binary', 'source'], 'text': 'Changed from {old} to {new}'},
+          'typescript': {'level': 'breaking', 'rule': 'declaration', 'text': 'Changed from a {old} to a {new}'},
+          'rust': {'level': 'breaking', 'rule': 'item-kind', 'text': 'Changed from a {old} to a {new}'},
+          'go': {'level': 'breaking', 'rule': 'kind', 'text': 'Changed from a {old} to a {new}', 'withoutFacts': true},
+        },
+        'supertypes': {
+          'dotnet': [
+            {'relation': 'extends', 'lost': true, 'level': 'breaking', 'rule': 'CP0007', 'kinds': ['binary', 'source'],
+              'text': 'No longer derives from {type}'},
+            {'relation': 'extends', 'lost': false, 'level': 'additive', 'rule': 'base-type', 'text': 'Now derives from {type}'},
+            {'relation': 'implements', 'lost': true, 'level': 'breaking', 'rule': 'CP0008', 'kinds': ['binary', 'source'],
+              'text': 'No longer implements {type}'},
+            {'relation': 'implements', 'lost': false, 'level': 'additive', 'rule': 'interface', 'text': 'Now implements {type}'},
+          ],
+          'typescript': [
+            {'relation': 'extends', 'lost': true, 'level': 'breaking', 'rule': 'heritage', 'text': 'No longer {clause}'},
+            {'relation': 'implements', 'lost': true, 'level': 'breaking', 'rule': 'heritage', 'text': 'No longer {clause}'},
+            {'relation': 'extends', 'lost': false, 'level': 'additive', 'rule': 'heritage', 'text': 'Now {clause}'},
+            {'relation': 'implements', 'lost': false, 'level': 'additive', 'rule': 'heritage', 'text': 'Now {clause}'},
+          ],
+          'rust': [],
+          'go': [
+            {'relation': 'implements', 'lost': true, 'level': 'breaking', 'rule': 'implements', 'text': 'No longer implements {type}'},
+            {'relation': 'implements', 'lost': false, 'level': 'additive', 'rule': 'implements', 'text': 'Now implements {type}'},
+          ],
+        },
+        'visibility': {
+          'dotnet': {
+            'reduced': {'level': 'breaking', 'rule': 'CP0019', 'kinds': ['binary', 'source'],
+              'text': '{subject} was reduced from {old} to {new}'},
+            'expanded': {'level': 'compatible', 'rule': 'CP0020', 'text': '{subject} was expanded from {old} to {new}'},
+          },
+          'typescript': {
+            'reduced': {'level': 'breaking', 'rule': 'protected', 'text': 'Became `protected`; only subclasses can use it'},
+            'expanded': {'level': 'additive', 'rule': 'protected', 'text': 'Became `public`'},
+          },
+        },
+        'arity': {
+          'dotnet': {
+            'more': {'level': 'breaking', 'rule': 'CP0002', 'kinds': ['binary', 'source'],
+              'text': 'Its parameter count changed from {old} to {new}'},
+            'fewer': {'level': 'breaking', 'rule': 'CP0002', 'kinds': ['binary', 'source'],
+              'text': 'Its parameter count changed from {old} to {new}'},
+          },
+          'rust': {
+            'more': {'level': 'breaking', 'rule': 'fn-change-arity', 'text': 'Parameter {names} was added; every call fails'},
+            'fewer': {'level': 'breaking', 'rule': 'fn-change-arity', 'text': 'Parameter {names} was removed; every call fails'},
+          },
+        },
+        'retyped': {
+          'dotnet': {
+            'type': {'level': 'breaking', 'rule': 'CP0002', 'kinds': ['binary', 'source'], 'text': 'Type changed from {old} to {new}'},
+            'returns': {'level': 'breaking', 'rule': 'CP0002', 'kinds': ['binary', 'source'],
+              'text': 'Return type changed from {old} to {new}'},
+            'parameter': {'level': 'breaking', 'rule': 'CP0002', 'kinds': ['binary', 'source'],
+              'text': "Parameter {name}'s type changed from {old} to {new}"},
+          },
+          'rust': {
+            'type': {'level': 'breaking', 'rule': 'type-changed', 'text': 'Its type changed from {old} to {new}'},
+            'type-generic': {'level': 'unknown', 'rule': 'type-changed',
+              'text': 'Its type changed from {old} to {new}, with generics involved'},
+            'parameter': {'level': 'breaking', 'rule': 'type-changed', 'text': "Parameter {name}'s type changed from {old} to {new}"},
+            'parameter-generic': {'level': 'unknown', 'rule': 'type-changed',
+              'text': "Parameter {name}'s type changed from {old} to {new}, with generics involved"},
+            'returns': {'level': 'breaking', 'rule': 'type-changed', 'text': 'Returns {new} instead of {old}'},
+            'returns-generic': {'level': 'unknown', 'rule': 'type-changed',
+              'text': 'Returns {new} instead of {old}, with generics involved'},
+          },
+          'go': {
+            'type': {'level': 'breaking', 'rule': 'type', 'text': 'Its type changed from {old} to {new}'},
+          },
+        },
+        'value': {
+          'dotnet': {
+            'constant': {'level': 'breaking', 'rule': 'constant-value', 'kinds': ['binary'],
+              'text': 'Value changed from {old} to {new}; code compiled earlier keeps {old}'},
+            'variant': {'level': 'breaking', 'rule': 'CP0011', 'kinds': ['binary'],
+              'text': 'Value changed from {old} to {new}; code compiled earlier keeps {old}'},
+          },
+          'rust': {
+            'constant': {'level': 'unknown', 'rule': 'constant-value',
+              'text': 'Its value changed from {old} to {new}; code using it in a type, such as an array length, may fail'},
+            'variant': {'level': 'breaking', 'rule': 'repr-int-enum-change', 'text': 'Its discriminant changed from {old} to {new}'},
+          },
+          'go': {
+            'constant': {'level': 'breaking', 'rule': 'value', 'text': 'Its value changed from {old} to {new}'},
+          },
+        },
+        'toggles': {
+          'dotnet': {
+            'static': {'fact': 'static',
+              'set': {'level': 'breaking', 'rule': 'static', 'kinds': ['binary', 'source'], 'text': 'Became `static`'},
+              'cleared': {'level': 'breaking', 'rule': 'static', 'kinds': ['binary', 'source'], 'text': 'Is no longer `static`'}},
+            'readonly': {'fact': 'readonly',
+              'set': {'level': 'breaking', 'rule': 'readonly', 'kinds': ['source'], 'text': 'Became `readonly`'},
+              'cleared': {'level': 'compatible', 'rule': 'readonly', 'text': 'Is no longer `readonly`'}},
+            'required': {'fact': 'required',
+              'set': {'level': 'breaking', 'rule': 'required', 'kinds': ['source'], 'text': 'Became `required`'},
+              'cleared': {'level': 'compatible', 'rule': 'required', 'text': 'Is no longer `required`'}},
+            'default-implementation': {'fact': 'abstract',
+              'set': {'level': 'breaking', 'rule': 'default-implementation', 'kinds': ['binary', 'source'],
+                'text': 'Lost its default implementation; implementers must now implement it'},
+              'cleared': {'level': 'compatible', 'rule': 'default-implementation', 'text': 'Gained a default implementation'}},
+          },
+          'typescript': {
+            'static': {'fact': 'static',
+              'set': {'level': 'breaking', 'rule': 'static', 'text': 'Became `static`'},
+              'cleared': {'level': 'breaking', 'rule': 'static', 'text': 'Is no longer `static`'}},
+            'abstract-class': {'fact': 'abstract',
+              'set': {'level': 'breaking', 'rule': 'abstract', 'text': 'Became `abstract`; it can no longer be instantiated'},
+              'cleared': {'level': 'compatible', 'rule': 'abstract', 'text': 'Is no longer `abstract`'}},
+            'abstract': {'fact': 'abstract',
+              'set': {'level': 'breaking', 'rule': 'abstract', 'text': 'Became `abstract`; subclasses must implement it'},
+              'cleared': {'level': 'compatible', 'rule': 'abstract', 'text': 'Is no longer `abstract`'}},
+            'readonly': {'fact': 'readonly',
+              'set': {'level': 'breaking', 'rule': 'readonly', 'text': 'Became `readonly`; assignments to it fail'},
+              'cleared': {'level': 'compatible', 'rule': 'readonly', 'text': 'Is no longer `readonly`'}},
+            'optional': {'fact': 'optional',
+              'set': {'level': 'breaking', 'rule': 'optionality', 'text': 'Became optional; code reading it must handle `undefined`'},
+              'cleared': {'level': 'compatible', 'rule': 'optionality', 'text': 'Became required'}},
+            'optional-interface': {'fact': 'optional',
+              'set': {'level': 'breaking', 'rule': 'optionality', 'text': 'Became optional; code reading it must handle `undefined`'},
+              'cleared': {'level': 'breaking', 'rule': 'optionality',
+                'text': 'Became required; implementations and object literals must provide it'}},
+            'nominal': {'fact': 'nominalBrand', 'native': true,
+              'set': {'level': 'breaking', 'rule': 'nominal',
+                'text': 'Gained private members, so only instances of the class are assignable to it'},
+              'cleared': {'level': 'compatible', 'rule': 'nominal', 'text': 'Lost its private members'}},
+          },
+          'rust': {
+            'non-exhaustive': {'fact': 'nonExhaustive',
+              'set': {'level': 'breaking', 'rule': 'attr-adding-non-exhaustive',
+                'text': 'Became `#[non_exhaustive]`; downstream literals and exhaustive matches fail'},
+              'cleared': {'level': 'compatible', 'rule': 'attr-adding-non-exhaustive', 'text': 'Is no longer `#[non_exhaustive]`'}},
+            'hidden-members': {'fact': 'hiddenMembers',
+              'set': {'level': 'breaking', 'rule': 'struct-add-private-field-when-public',
+                'text': 'Gained a private field; it can no longer be constructed or destructured downstream'},
+              'cleared': {'level': 'additive', 'rule': 'struct-private-fields-with-private', 'text': 'Its fields are now all public'}},
+            'default': {'fact': 'abstract',
+              'set': {'level': 'breaking', 'rule': 'trait-item-default-removed', 'text': 'Lost its default; implementations must now provide it'},
+              'cleared': {'level': 'compatible', 'rule': 'trait-new-default-item', 'text': 'Gained a default'}},
+            'const': {'fact': 'const', 'native': true,
+              'set': {'level': 'compatible', 'rule': 'const-fn', 'text': 'Became `const`'},
+              'cleared': {'level': 'breaking', 'rule': 'const-fn-removed', 'text': 'Is no longer `const`; uses in constants fail'}},
+            'unsafe-fn': {'fact': 'unsafe', 'native': true,
+              'set': {'level': 'breaking', 'rule': 'fn-safe-unsafe', 'text': 'Became `unsafe`; calls outside `unsafe` blocks fail'},
+              'cleared': {'level': 'compatible', 'rule': 'fn-unsafe-safe', 'text': 'Is no longer `unsafe`'}},
+            'async': {'fact': 'async', 'native': true,
+              'set': {'level': 'breaking', 'rule': 'fn-async', 'text': 'Became `async`; it now returns a future'},
+              'cleared': {'level': 'breaking', 'rule': 'fn-async', 'text': 'Is no longer `async`'}},
+            'unsafe-trait': {'fact': 'unsafe', 'native': true,
+              'set': {'level': 'breaking', 'rule': 'trait-unsafe', 'text': 'Became `unsafe` to implement'},
+              'cleared': {'level': 'breaking', 'rule': 'trait-unsafe', 'text': 'Is no longer `unsafe`; `unsafe impl`s of it fail'}},
+            'dyn-compatible': {'fact': 'dynCompatible', 'native': true,
+              'set': {'level': 'additive', 'rule': 'trait-object-safety', 'text': 'Became usable as `dyn Trait`'},
+              'cleared': {'level': 'breaking', 'rule': 'trait-object-safety', 'text': 'Is no longer usable as `dyn Trait`'}},
+            'sealed': {'fact': 'sealed',
+              'set': {'level': 'breaking', 'rule': 'trait-sealed', 'text': 'Became sealed; downstream implementations fail'},
+              'cleared': {'level': 'additive', 'rule': 'trait-sealed', 'text': 'Is no longer sealed'}},
+          },
+          'go': {
+            'sealed': {'fact': 'sealed',
+              'set': {'level': 'breaking', 'rule': 'interface-unexported-method',
+                'text': 'Gained an unexported method; only embedding can implement it now'},
+              'cleared': {'level': 'additive', 'rule': 'interface-unexported-method',
+                'text': 'Lost its unexported methods; other packages can implement it now'}},
+          },
+        },
+        'syntax': {
+          'rust': {'open': '', 'close': '', 'bound': ': ', 'separator': ' + ', 'bareName': true, 'valueParameters': true},
+          'go': {'open': '[', 'close': ']', 'bound': ' ', 'separator': ' ', 'bareName': false, 'valueParameters': false},
+        },
+      }[concept]
+  # The rules every ecosystem shares, and dispatch to each ecosystem's.
+  sharedAdded:
+    params: ['after']
+    body: "additive('added', labelCode(after) + ' was added')"
+  sharedRemoved:
+    params: ['before']
+    body: |-
+      breaking('removed', removedWith(before) == null ? labelCode(before) + ' was removed'
+        : template('{label} was removed with {container}',
+          {'label': labelCode(before), 'container': labelCode(removedWith(before))}))
+  removedWith:
+    description: >-
+      The declaration's container, when it was removed too and isn't an assembly; or null.
+    params: ['d']
+    variables:
+      - name: parent
+        expression: parentOf(d)
+    body: |-
+      variables.parent != null && counterpart(variables.parent) == null
+      && variables.parent.item.kind != 'assembly' ? variables.parent : null
+  renamedReason:
+    params: ['correspondence', 'olds', 'news']
+    variables:
+      - name: old
+        expression: codes(olds.map(d, d.item.label))
+      - name: new
+        expression: codes(news.map(d, d.item.label))
+    body: |-
+      cond({
+        correspondence == 'split': template('Split from {old} into {new}; code using {old} fails'),
+        correspondence == 'merge': template('Merged {old} into {new}; code using them fails'),
+        variables.old == variables.new: template('Moved from {from} to {to}; code using its old path fails',
+          {'from': codes(olds.map(d, d.item.id)), 'to': codes(news.map(d, d.item.id))}),
+      }, template('Renamed from {old} to {new}; code using {old} fails'))
+  renamed:
+    description: |-
+      A rename, move, split or merge: code naming the old identity fails.
+    params: ['ecosystem', 'correspondence', 'olds', 'news']
+    body: |-
+      breaks(ecosystem, breaking('renamed', renamedReason(correspondence, olds, news)))
+  kindChanged:
+    description: >-
+      A declaration that became another kind of declaration (its `term` changed; callers check):
+      code using it as the old kind fails. Go counts a declaration that lost or gained its contract
+      facts too.
+    params: [{name: ecosystem, values: [dotnet, typescript, rust, go]}, 'before', 'after']
+    variables:
+      - name: row
+        expression: policy('kind')[ecosystem]
+    body: |-
+      collect({
+        variables.row.?withoutFacts.orValue(false) || (term(before) != null && term(after) != null):
+          found(variables.row, {'old': codeOr(term(before)), 'new': codeOr(term(after))}),
+      })
+  added:
+    description: >-
+      Findings for an added declaration: when it was added to a container, the ecosystem's
+      policy for what that obliges.
+    params: [{name: ecosystem, values: [dotnet, typescript, rust, go]}, 'after']
+    variables:
+      - name: parent
+        expression: parentOf(after)
+    body: |-
+      [variables.parent == null || ecosystem == null ? sharedAdded(after)
+        : addedTo(ecosystem, after, variables.parent, counterpart(variables.parent))]
+  addedTo:
+    description: >-
+      A declaration added to a container: the policy row for the situation the ecosystem names
+      (`new` when the container is new too), or the shared finding.
+    params: [{name: ecosystem, values: [dotnet, typescript, rust, go]}, 'after', 'parent', 'existing']
+    variables:
+      - name: situation
+        expression: |-
+          existing == null ? 'new' : {
+            'dotnet': dotnetAdded(after, parent, existing),
+            'typescript': typescriptAdded(after, parent),
+            'rust': rustAdded(after, existing),
+            'go': goAdded(after, existing),
+          }[ecosystem]
+      - name: rows
+        expression: policy('added')[ecosystem]
+    body: |-
+      variables.situation in variables.rows
+        ? found(variables.rows[variables.situation], {'member': labelCode(after), 'owner': labelCode(parent)})
+        : sharedAdded(after)
+  supertypeChanges:
+    description: "The supertypes a declaration lost or gained, in the order and words of its ecosystem's policy."
+    params: [{name: ecosystem, values: [dotnet, typescript, rust, go]}, 'before', 'after']
+    body: |-
+      policy('supertypes')[ecosystem].map(row, missing(
+          supertypes(row.lost ? before : after, row.relation), supertypes(row.lost ? after : before, row.relation))
+        .map(t, found(row, {'type': prose.code(t), 'clause': prose.code(row.relation + ' ' + t)}))).flatten()
+  visibilityChanged:
+    description: >-
+      Who can use a declaration or accessor (`subject`) was reduced or expanded; nothing when
+      either revision doesn't say.
+    params: [{name: ecosystem, values: [dotnet, typescript]}, 'subject', 'old', 'new']
+    variables:
+      - name: rows
+        expression: policy('visibility')[ecosystem]
+      - name: fields
+        expression: "{'subject': subject, 'old': prose.code(orElse(old, '')), 'new': prose.code(orElse(new, ''))}"
+    body: |-
+      old == null || new == null ? [] : collect({
+        rank(old) > rank(new): found(variables.rows.reduced, variables.fields),
+        rank(old) < rank(new): found(variables.rows.expanded, variables.fields),
+      })
+  arityChanged:
+    description: 'Parameters added or removed, so that every call fails (`olds` and `news` differ in size).'
+    params: [{name: ecosystem, values: [dotnet, rust]}, 'olds', 'news']
+    variables:
+      - name: more
+        expression: size(news) > size(olds)
+    body: |-
+      found(policy('arity')[ecosystem][variables.more ? 'more' : 'fewer'], {
+        'old': string(size(olds)), 'new': string(size(news)),
+        'names': codes(variables.more ? missing(news.map(p, p.name), olds.map(p, p.name))
+          : missing(olds.map(p, p.name), news.map(p, p.name)))})
+  retyped:
+    description: >-
+      A type where values flow changed (`situation`: its own `type`, what it `returns`, a
+      `parameter`'s); when generics are involved (`generic`, which only Rust's rules pass) the
+      `-generic` row, which can't decide it.
+    params: [{name: ecosystem, values: [dotnet, rust, go]}, 'situation', 'generic', 'fields']
+    variables:
+      - name: rows
+        expression: policy('retyped')[ecosystem]
+    body: |-
+      found(variables.rows[generic ? situation + '-generic' : situation], fields)
+  valueChanged:
+    description: "A constant's or enum member's value changed (`situation`: `constant` or `variant`)."
+    params: [{name: ecosystem, values: [dotnet, rust, go]}, 'situation', 'fields']
+    body: "found(policy('value')[ecosystem][situation], fields)"
+  toggles:
+    description: >-
+      Modifiers that changed, each named by its situation in the ecosystem's policy: a modifier
+      that now holds (`set`) or no longer does (`cleared`), in the listed order.
+    params: [{name: ecosystem, values: [dotnet, typescript, rust, go]}, 'before', 'after', 'situations']
+    variables:
+      - name: rows
+        expression: policy('toggles')[ecosystem]
+    body: 'situations.map(s, toggled(variables.rows[s], before, after)).flatten()'
+  toggled:
+    params: ['row', 'before', 'after']
+    variables:
+      - name: old
+        expression: modifierHolds(before, row)
+      - name: new
+        expression: modifierHolds(after, row)
+    body: |-
+      collect({
+        !variables.old && variables.new: found(row.set, {}),
+        variables.old && !variables.new: found(row.cleared, {}),
+      })
+  modifierHolds:
+    description: "Whether a toggle row's modifier holds: its fact is true (a `native` one too)."
+    params: ['d', 'row']
+    body: 'row.?native.orValue(false) ? holds(d, row.fact) : is(d, row.fact)'
+  changedFacts:
+    description: >-
+      The contract facts whose values differ, by name; ecosystem-specific ones as
+      `native.<name>`.
+    params: ['before', 'after']
+    variables:
+      - name: old
+        expression: 'before.?native.orValue({})'
+      - name: new
+        expression: 'after.?native.orValue({})'
+    body: |-
+      ids.sort((maps.keys(before) + maps.keys(after)).distinct()
+          .filter(name, name != 'native' && before[?name].orValue(null) != after[?name].orValue(null))
+        + (maps.keys(variables.old) + maps.keys(variables.new)).distinct()
+          .filter(name, variables.old[?name].orValue(null) != variables.new[?name].orValue(null))
+          .map(name, 'native.' + name))
+  modified:
+    description: >-
+      Findings for a modified declaration: the ecosystem's, or a verdict from whether the
+      contract changed.
+    params: ['ecosystem', 'before', 'after']
+    variables:
+      - name: found
+        expression: changed(ecosystem, before, after)
+    body: |-
+      cond({
+        size(variables.found) > 0: variables.found,
+        ecosystem == null: [unknown('unclassified',
+          "The declaration changed, and no ecosystem's rules apply to classify the change")],
+        !hasContract(before) || !hasContract(after): [unknown('unclassified',
+          'The declaration changed, and it has no contract facts to classify the change')],
+        size(changedFacts(facts(before), facts(after))) == 0: [presentation(ecosystem)],
+      }, [unknown('unclassified', template("Its contract changed ({facts}) in a way the rules don't classify",
+        {'facts': codes(changedFacts(facts(before), facts(after)))}))])
+  findings:
+    description: The findings for one entity change; an added or removed one has one side.
+    params: ['ecosystem', 'change', 'olds', 'news']
+    body: |-
+      cond({
+        change.status == 'added': added(ecosystem, news[0]),
+        change.status == 'removed': removed(ecosystem, olds[0]),
+      }, collect({
+        change.correspondence != 'exact': renamed(ecosystem, change.correspondence, olds, news),
+      }) + (size(olds) == 1 && size(news) == 1 && change.status == 'modified'
+        ? modified(ecosystem, olds[0], news[0]) : []))
+  breaks:
+    description: |-
+      How a removal or rename breaks: .NET distinguishes binary breaks.
+    params: ['ecosystem', 'f']
+    body: "ecosystem == 'dotnet' ? source(binary(f)) : f"
+  removed:
+    params: ['ecosystem', 'before']
+    body: |-
+      ecosystem == 'rust' ? rustRemoved(before) : [breaks(ecosystem, sharedRemoved(before))]
+  changed:
+    params: [{name: ecosystem, values: [dotnet, typescript, rust, go]}, 'before', 'after']
+    body: |-
+      match(ecosystem, {
+        'dotnet': dotnetChanged(before, after),
+        'typescript': typescriptChanged(before, after),
+        'rust': rustChanged(before, after),
+        'go': goChanged(before, after),
+      }, [])
+  presentation:
+    description: |-
+      The finding when the contract is unchanged but the signature isn't.
+    params: ['ecosystem']
+    body: |-
+      ecosystem == 'dotnet' ? compatible('annotations', 'Only nullable annotations or formatting changed')
+      : compatible('presentation', 'Only the presentation of the signature changed')
+  rulesName:
+    params: [{name: ecosystem, values: [dotnet, typescript, rust, go]}]
+    body: |-
+      match(ecosystem, {
+        'dotnet': 'ApiCompat (default mode), reproduced',
+        'typescript': "TypeScript assignability over the checker's types",
+        'rust': 'Cargo SemVer reference, reproduced',
+        'go': 'apidiff, reproduced',
+      }, 'Shared rules')
+  declared:
+    params: ['extraction']
+    variables:
+      - name: value
+        expression: 'extraction.?metadata.?ecosystem.orValue(null)'
+    body: 'type(variables.value) == string ? variables.value : null'
+  isType:
+    description: 'Whether the declaration is a type.'
+    params: ['d']
+    body: "kind(d) in ['class', 'struct', 'union', 'enum', 'interface', 'alias', 'type']"
+  # .NET: ApiCompat's rules (CPxxxx), reproduced.
+  dotnetAdded:
+    description: >-
+      What adding a member to an existing type obliges: implementers of an interface must
+      implement an abstract member (`implement`); subclasses of a type that can be inherited,
+      an abstract one (`inherit`).
+    params: ['after', 'parent', 'existing']
+    body: |-
+      cond({
+        !isType(parent): 'added',
+        kind(existing) == 'interface' && is(after, 'abstract') && !isType(after): 'implement',
+        kind(existing) != 'interface' && is(after, 'abstract') && !is(existing, 'sealed'): 'inherit',
+      }, 'added')
+  dotnetChanged:
+    params: ['before', 'after']
+    body: |-
+      visibilityChanged('dotnet', 'Visibility', fact(before, 'visibility'), fact(after, 'visibility'))
+      + toggles('dotnet', before, after, ['static'])
+      + (isType(before) ? dotnetTypeRules(before, after) : dotnetMemberRules(before, after))
+      + dotnetAttributes('Attribute', listed(before, 'attributes'), listed(after, 'attributes'))
+      + dotnetAttributes('Return attribute', signatureList(before, 'returnAttributes'), signatureList(after, 'returnAttributes'))
+      + dotnetParameterAttributes(orElse(parameters(before), []), orElse(parameters(after), []))
+  dotnetParameterAttributes:
+    description: 'Attribute changes per parameter position: `[old, new]` parameters, either null.'
+    params: ['olds', 'news']
+    body: |-
+      lists.zipLongest(olds, news).map(pair, dotnetAttributes(
+        pair[0] == null ? 'Parameter attribute' : 'Attribute of parameter ' + prose.code(pair[0].name),
+        pair[0] == null ? [] : pair[0].?attributes.orValue([]),
+        pair[1] == null ? [] : pair[1].?attributes.orValue([]))).flatten()
+  dotnetClass:
+    description: "An attribute's class: its text before the arguments."
+    params: ['attribute']
+    body: "attribute.split('(')[0]"
+  dotnetAttributes:
+    description: >-
+      CP0014 (removed), CP0015 (arguments changed) and CP0016 (added, reported only in strict
+      mode).
+    params: ['what', 'before', 'after']
+    body: |-
+      missing(before, after).map(a, after.exists(b, dotnetClass(b) == dotnetClass(a))
+        ? breaking('CP0015', what + ' ' + prose.code(dotnetClass(a)) + ' changed its arguments')
+        : breaking('CP0014', what + ' ' + prose.code(dotnetClass(a)) + ' was removed'))
+      + after.filter(a, !before.exists(b, dotnetClass(b) == dotnetClass(a)))
+        .map(a, compatible('CP0016', what + ' ' + prose.code(dotnetClass(a)) + ' was added'))
+  dotnetTypeRules:
+    params: ['before', 'after']
+    body: |-
+      term(before) != term(after) ? kindChanged('dotnet', before, after) : collect({
+        kind(after) != 'interface' && !is(before, 'sealed') && is(after, 'sealed'):
+          breaks('dotnet', breaking('CP0009', holds(after, 'sealed')
+            ? 'Became `sealed`; it can no longer be inherited'
+            : 'It can no longer be inherited: it has no accessible constructor')),
+        term(after) == 'class' && !is(before, 'abstract') && is(after, 'abstract'):
+          breaks('dotnet', breaking('abstract-added', 'Became `abstract`; it can no longer be instantiated')),
+      })
+      + supertypeChanges('dotnet', before, after)
+      + collect({
+        changedText(fact(before, 'underlying'), fact(after, 'underlying')):
+          breaks('dotnet', breaking('CP0010', template('Its underlying type changed from {old} to {new}',
+            {'old': prose.code(facts(before).underlying), 'new': prose.code(facts(after).underlying)}))),
+      })
+      + dotnetConstraints(before, after, holds(before, 'sealed'))
+  dotnetMemberRules:
+    description: "A member's rules; CP0002 compares a method's return type, or the member's own type."
+    params: ['before', 'after']
+    variables:
+      - name: parent
+        expression: parentOf(before)
+      - name: callable
+        expression: "kind(before) in ['method', 'constructor']"
+      - name: old
+        expression: 'variables.callable ? returnText(before) : typeText(before)'
+      - name: new
+        expression: "kind(after) in ['method', 'constructor'] ? returnText(after) : typeText(after)"
+    body: |-
+      collect({
+        changedText(variables.old, variables.new): retyped('dotnet', variables.callable ? 'returns' : 'type', false,
+          {'old': prose.code(variables.old), 'new': prose.code(variables.new)}),
+      })
+      + dotnetParameters(parameters(before), parameters(after))
+      + (kindOf(variables.parent) == 'interface'
+        ? dotnetInterfaceMember(before, after)
+        : dotnetClassMember(before, after, variables.parent != null && is(variables.parent, 'sealed')))
+      + toggles('dotnet', before, after, ['readonly', 'required'])
+      + dotnetAccessors(fact(before, 'access'), fact(after, 'access'))
+      + collect({
+        changedText(fact(before, 'value'), fact(after, 'value')):
+          valueChanged('dotnet', kindOf(variables.parent) == 'enum' ? 'variant' : 'constant',
+            {'old': prose.code(fact(before, 'value')), 'new': prose.code(fact(after, 'value'))}),
+      })
+      + dotnetConstraints(before, after, !holds(before, 'virtual') && !is(before, 'abstract'))
+  dotnetSealedInInterface:
+    params: ['d']
+    body: |-
+      holds(d, 'sealed') || (!holds(d, 'virtual') && !is(d, 'abstract'))
+  dotnetInterfaceMember:
+    params: ['before', 'after']
+    body: |-
+      collect({
+        !dotnetSealedInInterface(before) && dotnetSealedInInterface(after):
+          breaks('dotnet', breaking('CP0018', 'Became `sealed` in its interface')),
+      })
+      + toggles('dotnet', before, after, ['default-implementation'])
+  dotnetClassMember:
+    params: ['before', 'after', 'sealedParent']
+    body: |-
+      collect({
+        holds(before, 'virtual') && !holds(after, 'virtual'): sealedParent
+          ? compatible('CP0012', "Is no longer `virtual`; its type can't be inherited, so nothing overrode it")
+          : breaks('dotnet', breaking('CP0012', 'Is no longer `virtual`')),
+        !holds(before, 'virtual') && holds(after, 'virtual'):
+          compatible('CP0013', 'Became `virtual`'),
+        is(before, 'abstract') && !is(after, 'abstract') && !holds(after, 'virtual'):
+          breaks('dotnet', breaking('CP0012', 'Is no longer `abstract` or `virtual`')),
+        !is(before, 'abstract') && is(after, 'abstract'):
+          breaks('dotnet', breaking('abstract-added', 'Became `abstract`; derived types must now implement it')),
+        holds(before, 'override') && !holds(before, 'sealed') && holds(after, 'sealed'): sealedParent
+          ? compatible('sealed', "Became `sealed`; its type can't be inherited, so nothing overrode it")
+          : breaks('dotnet', breaking('sealed', 'Became `sealed`; derived types can no longer override it')),
+      })
+  dotnetParameters:
+    params: ['before', 'after']
+    body: |-
+      cond({
+        before == null || after == null: [],
+        size(before) != size(after): [arityChanged('dotnet', before, after)],
+      }, lists.zip(before, after).map(pair, dotnetParameter(pair[0], pair[1])).flatten())
+  dotnetParameter:
+    description: 'One parameter, by position; ApiCompat calls passing by value `none`.'
+    params: ['old', 'new']
+    variables:
+      - name: parameter
+        expression: prose.code(old.name)
+      - name: renamed
+        expression: prose.code(new.name)
+      - name: oldPassing
+        expression: "prose.code(match(old.passing, {'value': 'none'}, old.passing))"
+      - name: newPassing
+        expression: "prose.code(match(new.passing, {'value': 'none'}, new.passing))"
+      - name: oldDefault
+        expression: prose.code(old.?default.orValue('none'))
+      - name: newDefault
+        expression: prose.code(new.?default.orValue('none'))
+    body: |-
+      collect({
+        old.name != new.name: source(breaking('CP0017',
+          template('Parameter {parameter} was renamed to {renamed}, breaking named arguments'))),
+        old.type != new.type: retyped('dotnet', 'parameter', false,
+          {'name': variables.parameter, 'old': prose.code(old.type.text), 'new': prose.code(new.type.text)}),
+        old.passing != new.passing: source(breaking('ref-kind',
+          template('Parameter {parameter} changed from {oldPassing} to {newPassing}'))),
+        old.optional && !new.optional: source(breaking('parameter-default',
+          template('Parameter {parameter} no longer has a default value; callers must pass it'))),
+        !old.optional && new.optional: additive('parameter-default',
+          template('Parameter {parameter} gained a default value')),
+        old.optional && new.optional && old.?default.orValue(null) != new.?default.orValue(null):
+          compatible('parameter-default', template(
+            "Parameter {parameter}'s default changed from {oldDefault} to {newDefault}; callers compiled earlier keep {oldDefault}")),
+        old.variadic && !new.variadic: source(breaking('parameter-default',
+          template('Parameter {parameter} is no longer `params`'))),
+        !old.variadic && new.variadic: additive('parameter-default',
+          template('Parameter {parameter} became `params`')),
+      })
+  dotnetAccessorName:
+    params: ['accessor']
+    body: |-
+      match(accessor, {'read': 'getter', 'write': 'setter'}, '`init` accessor')
+  dotnetAccessors:
+    params: ['old', 'new']
+    body: |-
+      old == null || new == null ? [] : ['read', 'write', 'init'].map(a, dotnetAccessor(old, new, a)).flatten()
+  dotnetAccessor:
+    params: ['old', 'new', 'a']
+    body: |-
+      cond({
+        a in old && a in new: visibilityChanged('dotnet', 'Its ' + dotnetAccessorName(a) + "'s visibility", old[a], new[a]),
+        a in old: [dotnetAccessorLost(new, a)],
+        a in new: collect({
+          !(a == 'init' && 'write' in old) && !(a == 'write' && 'init' in old):
+            additive('accessor', (a == 'init' ? 'Gained an ' : 'Gained a ') + dotnetAccessorName(a)),
+        }),
+      }, [])
+  dotnetAccessorLost:
+    description: An accessor gone; trading a setter for an `init` accessor breaks less.
+    params: ['new', 'a']
+    body: |-
+      cond({
+        a == 'write' && 'init' in new: breaks('dotnet', breaking('accessor', 'Its setter became `init`-only')),
+        a == 'init' && 'write' in new: binary(breaking('accessor', 'Its `init` accessor became a setter')),
+      }, breaks('dotnet', breaking('accessor', 'Lost its ' + dotnetAccessorName(a))))
+  dotnetConstraints:
+    description: |-
+      CP0021: constraints may only be removed where no code can observe it.
+    params: ['before', 'after', 'removalPermitted']
+    body: |-
+      lists.zip(generics(before), generics(after))
+        .map(pair, dotnetConstraint(pair[0], pair[1], removalPermitted)).flatten()
+  dotnetConstraint:
+    params: ['old', 'new', 'removalPermitted']
+    variables:
+      - name: parameter
+        expression: prose.code(new.name)
+    body: |-
+      missing(new.constraints, old.constraints).map(c, breaks('dotnet', breaking('CP0021',
+        template('Type parameter {parameter} gained the constraint {c}', {'parameter': variables.parameter, 'c': prose.code(c)}))))
+      + missing(old.constraints, new.constraints).map(c, removalPermitted
+        ? compatible('CP0021', template('Type parameter {parameter} lost the constraint {c}; code that compiled against it still does',
+          {'parameter': variables.parameter, 'c': prose.code(c)}))
+        : breaks('dotnet', breaking('CP0021',
+          template('Type parameter {parameter} lost the constraint {c}', {'parameter': variables.parameter, 'c': prose.code(c)}))))
+  # Go: apidiff's rules, reproduced.
+  goAdded:
+    description: >-
+      What adding a method to an existing interface obliges: other packages' implementations
+      must implement it, unless only embedding can implement the interface.
+    params: ['after', 'existing']
+    body: |-
+      cond({
+        kind(existing) != 'interface' || !is(after, 'abstract'): 'added',
+        is(existing, 'sealed'): 'implement-sealed',
+      }, 'implement')
+  goValueRules:
+    params: ['before', 'after']
+    body: |-
+      collect({
+        changedText(typeText(before), typeText(after)): retyped('go', 'type', false,
+          {'old': prose.code(typeText(before)), 'new': prose.code(typeText(after))}),
+        fact(before, 'value') != fact(after, 'value'):
+          valueChanged('go', 'constant', {'old': codeOr(fact(before, 'value')), 'new': codeOr(fact(after, 'value'))}),
+        nativeText(before, 'receiver') == 'value' && nativeText(after, 'receiver') == 'pointer':
+          breaking('method-set', 'Moved to the pointer method set; values no longer have it'),
+        nativeText(before, 'receiver') == 'pointer' && nativeText(after, 'receiver') == 'value':
+          additive('method-set', 'Moved to the value method set; values now have it too'),
+      })
+  goChanged:
+    params: ['before', 'after']
+    body: |-
+      cond({
+        term(before) != term(after): goKindChange(before, after),
+        term(after) in ['const', 'var', 'func', 'field', 'method']: goValueRules(before, after),
+        term(after) == 'type': goTypeRules(before, after),
+      }, [])
+  goKindChange:
+    description: 'A change of kind, except a function that became a variable of its type.'
+    params: ['before', 'after']
+    body: |-
+      term(before) == 'func' && term(after) == 'var' && fact(before, 'type') == fact(after, 'type')
+      ? [compatible('kind', 'Became a variable of the same function type')]
+      : kindChanged('go', before, after)
+  goKind:
+    description: >-
+      What a type is defined as: `struct`, `interface`, a basic type's name, or `pointer`, `slice`,
+      `array`, `map`, `chan`, `func` or `other`; null for an alias.
+    params: ['d']
+    body: |-
+      kind(d) in ['struct', 'interface'] ? kind(d) : nativeText(d, 'underlying')
+  goBits:
+    description: "A numeric type's size in bytes on a 32- or 64-bit platform (`bits`), or 0 when the fact lacks it."
+    params: ['numeric', 'bits']
+    variables:
+      - name: value
+        expression: field(numeric, bits)
+    body: 'type(variables.value) == int ? variables.value : 0'
+  goWidens:
+    description: 'The same numeric family, at least as wide in every size.'
+    params: ['old', 'new']
+    body: |-
+      field(old, 'family') == field(new, 'family')
+      && goBits(new, 'size32') >= goBits(old, 'size32') && goBits(new, 'size64') >= goBits(old, 'size64')
+  goNumeric:
+    params: ['before', 'after']
+    variables:
+      - name: old
+        expression: codeOr(goKind(before))
+      - name: new
+        expression: codeOr(goKind(after))
+    body: |-
+      goKind(before) == goKind(after) ? []
+      : [goWidens(nativeFact(before, 'numeric'), nativeFact(after, 'numeric'))
+        ? compatible('numeric', template('Grew from {old} to {new}'))
+        : breaking('numeric', template("Changed from {old} to {new}, which can't hold every value"))]
+  goChannel:
+    params: ['old', 'new']
+    body: |-
+      cond({
+        field(old, 'elem') != field(new, 'elem'): [breaking('channel', template('Its element type changed from {old} to {new}',
+          {'old': codeOr(field(old, 'elem')), 'new': codeOr(field(new, 'elem'))}))],
+        field(old, 'dir') != field(new, 'dir'): [field(new, 'dir') == 'both'
+          ? compatible('channel', 'Lost its direction; both sends and receives compile')
+          : breaking('channel', 'Its direction changed')],
+      }, [])
+  goUnderlying:
+    params: ['before', 'after']
+    body: |-
+      cond({
+        type(nativeFact(before, 'numeric')) == map && type(nativeFact(after, 'numeric')) == map: goNumeric(before, after),
+        goKind(before) == 'chan' && goKind(after) == 'chan':
+          goChannel(nativeFact(before, 'channel'), nativeFact(after, 'channel')),
+        goKind(before) != goKind(after): [breaking('underlying', template('Changed from a {old} to a {new}',
+          {'old': codeOr(goKind(before)), 'new': codeOr(goKind(after))}))],
+        fact(before, 'underlying') != fact(after, 'underlying'):
+          [breaking('underlying', template('Its underlying type changed from {old} to {new}',
+            {'old': codeOr(fact(before, 'underlying')), 'new': codeOr(fact(after, 'underlying'))}))],
+      }, [])
+  goTypeRules:
+    params: ['before', 'after']
+    variables:
+      - name: old
+        expression: "typeParametersText('go', listed(before, 'typeParameters'))"
+      - name: new
+        expression: "typeParametersText('go', listed(after, 'typeParameters'))"
+    body: |-
+      (kind(before) == 'alias') != (kind(after) == 'alias') ? [breaking('underlying', kind(after) == 'alias'
+        ? template('Became an alias of {new}; it is no longer a distinct type', {'new': codeOr(typeText(after))})
+        : template('Is no longer an alias of {old}, but a distinct type', {'old': codeOr(typeText(before))}))]
+      : kind(before) == 'alias' ? collect({
+        typeText(before) != typeText(after): breaking('underlying', template('Now names {new} instead of {old}',
+          {'new': codeOr(typeText(after)), 'old': codeOr(typeText(before))})),
+      }) : collect({
+        variables.old != variables.new: breaking('type-params', template(
+          'Its type parameters changed from {old} to {new}', {'old': shown(variables.old), 'new': shown(variables.new)})),
+      })
+      + goUnderlying(before, after)
+      + collect({
+        holds(before, 'comparable') && !holds(after, 'comparable') && goKind(before) == 'struct':
+          breaking('comparable', 'Is no longer comparable; `==` and map keys of it fail'),
+      })
+      + toggles('go', before, after, ['sealed'])
+      + supertypeChanges('go', before, after)
+  # Rust: the Cargo SemVer reference, reproduced.
+  rustAdded:
+    description: >-
+      What adding an item to an existing one obliges: a variant breaks exhaustive matches; a
+      field, the literals and patterns of an exhaustive variant or an all-public struct; a trait
+      item without a default, every implementation unless the trait is sealed.
+    params: ['after', 'existing']
+    body: |-
+      cond({
+        term(after) == 'variant' && !is(existing, 'nonExhaustive'): 'variant',
+        term(after) == 'field' && term(existing) == 'variant' && !is(existing, 'nonExhaustive'): 'variant-field',
+        term(after) == 'field' && term(existing) == 'struct' && !is(existing, 'nonExhaustive')
+          && !is(existing, 'hiddenMembers'): 'struct-field',
+        term(after) == 'field': 'field',
+        term(after) in ['trait-method', 'associated-type', 'associated-const']: cond({
+          !is(after, 'abstract'): 'default-item',
+          is(existing, 'sealed'): 'implement-sealed',
+        }, 'implement'),
+      }, 'added')
+  rustRemoved:
+    params: ['before']
+    body: |-
+      [breaking('item-remove', term(before) == 'impl'
+        ? template('{type} no longer implements {trait}', {
+          'type': parentOf(before) != null ? labelCode(parentOf(before)) : 'The type',
+          'trait': prose.code(supertypes(before, 'implements')[?0].orValue(before.item.label))})
+        : sharedRemoved(before).reason)]
+  rustChanged:
+    params: ['before', 'after']
+    body: |-
+      term(before) != term(after) ? kindChanged('rust', before, after)
+      : rustSameItem(before, after, orElse(term(after), ''))
+  rustSameItem:
+    params: ['before', 'after', 'item']
+    body: |-
+      toggles('rust', before, after, item in ['struct', 'variant'] ? ['non-exhaustive', 'hidden-members'] : ['non-exhaustive'])
+      + collect({
+        nativeFact(before, 'shape') != nativeFact(after, 'shape') && nativeFact(after, 'shape') != null:
+          breaking('struct-tuple-normal-with-private', template('Changed from a {old} to a {new} shape',
+            {'old': codeOr(nativeText(before, 'shape')), 'new': codeOr(nativeText(after, 'shape'))})),
+        nativeFact(before, 'repr') != nativeFact(after, 'repr'): breaking('repr', 'Its `#[repr]` changed'),
+        item == 'variant' && fact(before, 'value') != fact(after, 'value'): valueChanged('rust', 'variant', {
+          'old': rustDiscriminant(before), 'new': rustDiscriminant(after)}),
+      })
+      + rustItemRules(before, after, item)
+      + toggles('rust', before, after, item in ['trait-method', 'associated-type', 'associated-const'] ? ['default'] : [])
+      + (item in ['function', 'method', 'trait-method'] ? [] : rustGenerics(before, after, false))
+  rustDiscriminant:
+    description: "A variant's discriminant as an inline code span, or `implicit`."
+    params: ['d']
+    body: "fact(d, 'value') == null ? 'implicit' : prose.code(fact(d, 'value'))"
+  rustItemRules:
+    params: ['before', 'after', 'item']
+    body: |-
+      cond({
+        item in ['function', 'method', 'trait-method']: rustFunction(before, after),
+        item in ['field', 'constant', 'static', 'type-alias', 'associated-const']: rustValueRules(before, after, item),
+        item == 'trait': rustTraitRules(before, after),
+        item == 'associated-type': collect({
+          fact(before, 'constraints') != fact(after, 'constraints'):
+            unknown('generic-bounds-tighten', 'Its bounds changed'),
+        }),
+        item == 're-export': collect({
+          fact(before, 'source') != fact(after, 'source'):
+            breaking('re-export', template('Now re-exports {new} instead of {old}',
+              {'new': shown(fact(after, 'source')), 'old': shown(fact(before, 'source'))})),
+        }),
+      }, [])
+  rustValueRules:
+    params: ['before', 'after', 'item']
+    body: |-
+      collect({
+        changedText(typeText(before), typeText(after)): retyped('rust', 'type', isGeneric(before) || isGeneric(after),
+          {'old': prose.code(typeText(before)), 'new': prose.code(typeText(after))}),
+        item == 'constant' && fact(before, 'value') != fact(after, 'value'):
+          valueChanged('rust', 'constant', {'old': codeOr(fact(before, 'value')), 'new': codeOr(fact(after, 'value'))}),
+        item == 'static' && is(before, 'readonly') != is(after, 'readonly'):
+          breaking('static-mut', 'Its mutability changed'),
+      })
+  rustTraitRules:
+    params: ['before', 'after']
+    variables:
+      - name: old
+        expression: "bounds('rust', supertypes(before, 'extends'))"
+      - name: new
+        expression: "bounds('rust', supertypes(after, 'extends'))"
+    body: |-
+      toggles('rust', before, after, ['unsafe-trait', 'dyn-compatible', 'sealed'])
+      + collect({
+        variables.old != variables.new: unknown('generic-bounds-tighten', template(
+          'Its supertraits changed from {old} to {new}', {'old': shown(variables.old), 'new': shown(variables.new)})),
+      })
+  rustFunction:
+    description: |-
+      A function's parameters, return type, modifiers and generics. Rust has no named arguments, so a
+      parameter rename alone is compatible.
+    params: ['before', 'after']
+    variables:
+      - name: olds
+        expression: orElse(parameters(before), [])
+      - name: news
+        expression: orElse(parameters(after), [])
+      - name: generic
+        expression: isGeneric(before) || isGeneric(after)
+    body: |-
+      (size(variables.olds) != size(variables.news) ? [arityChanged('rust', variables.olds, variables.news)]
+        : lists.zip(variables.olds, variables.news).filter(pair, pair[0].type != pair[1].type)
+          .map(pair, retyped('rust', 'parameter', variables.generic, {'name': prose.code(pair[1].name),
+            'old': prose.code(pair[0].type.text), 'new': prose.code(pair[1].type.text)}))
+          + lists.zip(variables.olds, variables.news).filter(pair, pair[0].name != pair[1].name)
+            .map(pair, compatible('parameter-renamed', template(
+              'Parameter {old} was renamed to {new}; arguments are passed by position',
+              {'old': prose.code(pair[0].name), 'new': prose.code(pair[1].name)}))))
+      + collect({
+        returnsOf(before) != returnsOf(after): retyped('rust', 'returns', variables.generic,
+          {'old': codeOr(returnText(before)), 'new': codeOr(returnText(after))}),
+      })
+      + toggles('rust', before, after, ['const', 'unsafe-fn', 'async'])
+      + collect({nativeFact(before, 'abi') != nativeFact(after, 'abi'): breaking('fn-abi', 'Its ABI changed')})
+      + rustGenerics(before, after, true)
+  rustNamed:
+    description: |-
+      The generic parameters named `name` (Rust's `find` takes the first).
+    params: ['params', 'name']
+    body: 'params.filter(p, p.name == name)'
+  rustBoundsChanged:
+    params: ['previous', 'p']
+    variables:
+      - name: old
+        expression: "typeParameterText('rust', previous)"
+      - name: new
+        expression: "typeParameterText('rust', p)"
+    body: |-
+      collect({
+        variables.old != variables.new: unknown('generic-bounds-tighten', template(
+          'Generic parameter bounds changed from {old} to {new}',
+          {'old': prose.code(variables.old), 'new': prose.code(variables.new)})),
+      })
+  rustGenericAdded:
+    description: >-
+      A generic parameter of the new revision: its bounds changed, or it was added with a default
+      (compatible), to a function (possibly breaking: calls naming every type argument fail) or
+      otherwise without a default (breaking).
+    params: ['old', 'p', 'callable']
+    variables:
+      - name: previous
+        expression: rustNamed(old, p.name)[?0].orValue(null)
+    body: |-
+      cond({
+        variables.previous != null: rustBoundsChanged(variables.previous, p),
+        has(p.default): [compatible('generic-new-default',
+          'Generic parameter ' + prose.code(p.name) + ' was added with a default')],
+        callable: [unknown('fn-generic-new', 'Generic parameter ' + prose.code(p.name)
+          + ' was added; calls that name the type arguments fail')],
+      }, [breaking('generic-new-no-default', 'Generic parameter ' + prose.code(p.name) + ' was added without a default')])
+  rustGenericsOf:
+    params: ['old', 'new', 'callable']
+    body: |-
+      new.map(p, rustGenericAdded(old, p, callable)).flatten()
+      + old.filter(p, size(rustNamed(new, p.name)) == 0)
+        .map(p, breaking('generic-removed', 'Generic parameter ' + prose.code(p.name) + ' was removed'))
+  rustGenerics:
+    description: >-
+      Generic parameters (a function's when `callable`): added with a default is compatible; to a
+      function, possibly breaking; otherwise without one, or removed, it breaks; changed bounds are
+      undecided.
+    params: ['before', 'after', 'callable']
+    body: |-
+      rustGenericsOf(generics(before), generics(after), callable)
+      + collect({
+        nativeFact(before, 'where') != nativeFact(after, 'where'):
+          unknown('generic-bounds-tighten', 'Its where clauses changed'),
+      })
+  # TypeScript: assignability over the checker's types.
+  typescriptConstituents:
+    description: >-
+      `{t: text, p: primitive or null}` per union constituent; a type without constituents is
+      one opaque constituent.
+    params: ['t']
+    body: |-
+      t != null && size(t.?union.orValue([])) > 0 ? t.union.map(item, {'t': item.text, 'p': item.?primitive.orValue(null)})
+      : [{'t': textOf(t), 'p': null}]
+  typescriptAccepts:
+    description: >-
+      Whether a target constituent accepts the source constituent: the same text, a literal
+      widening to its primitive, or `undefined` to `void`.
+    params: ['targets', 'c']
+    body: |-
+      targets.exists(t, t.t == c.t || (c.p != null && t.p == t.t
+          && c.p == t.t) || (c.t == 'undefined' && t.t == 'void'))
+  typescriptRejected:
+    description: >-
+      The verdict from the source constituents no target accepts: only closed sets of
+      primitives and literals can be proven disjoint.
+    params: ['rejected', 'targets']
+    body: |-
+      cond({
+        size(rejected) == 0: 'yes',
+        rejected.exists(c, c.p != null) && targets.all(t, t.p != null): 'no',
+      }, 'undecided')
+  typescriptVerdict:
+    params: ['sourceText', 'sources', 'targets']
+    body: |-
+      targets.exists(t, t.t == 'any' || t.t == 'unknown') || sourceText == 'never'
+      || sourceText == 'any' ? 'yes' : typescriptRejected(sources.filter(c, !typescriptAccepts(targets, c)), targets)
+  typescriptAssignable:
+    description: >-
+      `source ⊑ target` as far as union constituents tell: 'yes', 'no' or 'undecided'.
+    params: ['source', 'target']
+    body: |-
+      cond({
+        source == null || target == null: 'undecided',
+        textOf(source) == textOf(target): 'yes',
+      }, typescriptVerdict(textOf(source), typescriptConstituents(source), typescriptConstituents(target)))
+  typescriptAdded:
+    description: >-
+      What adding a member to an existing type obliges: implementations and object literals of
+      an interface must provide a required member (`implement`; an index signature or a call or
+      construct signature has its own wording); subclasses, an abstract one (`inherit`).
+    params: ['after', 'parent']
+    body: |-
+      cond({
+        kind(parent) == 'interface' && !is(after, 'optional'):
+          match(kind(after), {'index': 'implement-index', 'call': 'implement-call', 'construct': 'implement-call'}, 'implement'),
+        kind(parent) == 'class' && is(after, 'abstract'): 'inherit',
+      }, 'added')
+  typescriptChanged:
+    params: ['before', 'after']
+    variables:
+      - name: owner
+        expression: kindOf(parentOf(before))
+    body: |-
+      term(before) != term(after) ? kindChanged('typescript', before, after)
+      : toggles('typescript', before, after, ['static'])
+        + visibilityChanged('typescript', 'Visibility', orElse(fact(before, 'visibility'), 'public'),
+          orElse(fact(after, 'visibility'), 'public'))
+        + toggles('typescript', before, after, [kind(before) == 'class' ? 'abstract-class' : 'abstract', 'readonly',
+          variables.owner == 'interface' ? 'optional-interface' : 'optional'])
+        + typescriptByDeclaration(before, after, kind(after), variables.owner)
+        + toggles('typescript', before, after, kind(after) == 'class' ? ['nominal'] : [])
+  typescriptByDeclaration:
+    params: ['before', 'after', 'declaration', 'owner']
+    body: |-
+      cond({
+        declaration in ['function', 'method', 'constructor', 'call', 'construct']:
+          typescriptSignatures(fact(before, 'signatures'), fact(after, 'signatures')),
+        declaration == 'variable': typescriptVariable(fact(before, 'type'), fact(after, 'type')),
+        declaration == 'alias': typescriptAlias(fact(before, 'type'), fact(after, 'type')),
+        declaration in ['property', 'index']: typescriptProperty(before, after, owner),
+        declaration in ['class', 'interface']: supertypeChanges('typescript', before, after),
+      }, [])
+  typescriptIsRequired:
+    params: ['parameter']
+    body: '!parameter.optional && !parameter.variadic'
+  typescriptRequired:
+    params: ['parameters']
+    body: 'size(parameters.filter(p, typescriptIsRequired(p)))'
+  typescriptMaximum:
+    description: |-
+      How many arguments a call may pass: unbounded with a rest parameter.
+    params: ['parameters']
+    body: |-
+      parameters.exists(p, p.variadic) ? 9223372036854775807 : size(parameters)
+  typescriptSkip:
+    params: ['items', 'n']
+    description: 'The items from position `n` on (`n` is at most their count).'
+    body: 'items.slice(n, size(items))'
+  typescriptAt:
+    description: |-
+      A reason, prefixed with its overload when the declaration has several.
+    params: ['overload', 'reason']
+    body: |-
+      overload >= 0 ? template('Overload {number}: {reason}', {'number': string(overload + 1), 'reason': reason}) : reason
+  typescriptSignatures:
+    params: ['before', 'after']
+    body: |-
+      before != null && after != null ? typescriptOverloads(before, after) : []
+  typescriptOverloads:
+    params: ['olds', 'news']
+    body: |-
+      cond({
+        size(olds) == size(news): lists.enumerate(lists.zip(olds, news))
+          .map(entry, typescriptOverload(entry[0], entry[1], size(olds) > 1)).flatten(),
+        olds.all(s, s in news): [additive('overloads', 'Gained an overload')],
+        news.all(s, s in olds): [breaking('overloads', 'Lost an overload; calls that resolved to it may fail')],
+      }, [unknown('overloads', template('Its overloads changed from {old} to {new}',
+        {'old': string(size(olds)), 'new': string(size(news))}))])
+  typescriptOverload:
+    description: |-
+      One overload, by position, as `[old, new]`; numbered when there are several.
+    params: ['index', 'pair', 'several']
+    body: |-
+      pair[0] == pair[1] ? [] : typescriptSignature(pair[0], pair[1], several ? index : -1)
+  typescriptSignature:
+    description: |-
+      One call signature compared for callers; overload is its index, or -1.
+    params: ['oldSignature', 'newSignature', 'overload']
+    variables:
+      - name: olds
+        expression: oldSignature.parameters
+      - name: news
+        expression: newSignature.parameters
+      - name: pairs
+        expression: lists.zip(variables.olds, variables.news)
+      - name: optionalized
+        expression: >-
+          variables.pairs.filter(pair, typescriptIsRequired(pair[0]) && pair[1].optional)
+          .map(pair, pair[1].name)
+      - name: renames
+        expression: variables.pairs.filter(pair, pair[0].name != pair[1].name)
+    body: |-
+      collect({
+        oldSignature.?typeParameters.orValue(null) != newSignature.?typeParameters.orValue(null):
+          unknown('type-parameters', typescriptAt(overload, 'Its type parameters changed')),
+        typescriptRequired(variables.news) > typescriptRequired(variables.olds): breaking('required-parameter-added', typescriptAt(overload,
+          'Parameter ' + codes(typescriptSkip(variables.news, typescriptRequired(variables.olds))
+            .filter(p, typescriptIsRequired(p)).map(p, p.name)) + ' is now required')),
+        typescriptMaximum(variables.news) < typescriptMaximum(variables.olds): breaking('parameter-removed', typescriptAt(overload,
+          size(variables.news) < size(variables.olds)
+            ? 'Parameter ' + codes(typescriptSkip(variables.olds, size(variables.news)).map(p, p.name)) + ' was removed; calls passing it fail'
+            : 'Rest parameter ' + codes(variables.olds.filter(p, p.variadic).map(p, p.name))
+              + ' was removed; calls passing more arguments fail')),
+      })
+      + variables.pairs
+        .map(pair, typescriptParameter(pair[0].type, pair[1].type, pair[1].name, overload)).flatten()
+      + collect({
+        size(variables.news) > size(variables.olds) && typescriptRequired(variables.news) <= typescriptRequired(variables.olds):
+          additive('parameter-added', typescriptAt(overload,
+            'Optional parameter ' + codes(typescriptSkip(variables.news, size(variables.olds)).map(p, p.name)) + ' was added')),
+        size(variables.optionalized) > 0: additive('parameter-optional', typescriptAt(overload,
+          'Parameter ' + codes(variables.optionalized) + ' is now optional; calls may omit it')),
+      })
+      + variables.renames.map(pair, compatible('parameter-renamed', typescriptAt(overload,
+        template('Parameter {old} was renamed to {new}; arguments are passed by position',
+          {'old': prose.code(pair[0].name), 'new': prose.code(pair[1].name)}))))
+      + typescriptReturn(oldSignature.returns, newSignature.returns, overload)
+  typescriptParameter:
+    params: ['oldType', 'newType', 'label', 'overload']
+    body: |-
+      oldType == newType ? [] : typescriptParameterVerdict(typescriptAssignable(oldType, newType), oldType, newType, label, overload)
+  typescriptParameterVerdict:
+    params: ['verdict', 'oldType', 'newType', 'label', 'overload']
+    variables:
+      - name: parameter
+        expression: prose.code(label)
+      - name: old
+        expression: typeCode(oldType)
+      - name: new
+        expression: typeCode(newType)
+    body: |-
+      match(verdict, {
+        'no': [breaking('parameter-narrowed',
+          typescriptAt(overload, template('Parameter {parameter} no longer accepts {old} (now {new})')))],
+        'undecided': [unknown('parameter-type',
+          typescriptAt(overload, template('Parameter {parameter} changed from {old} to {new}')))],
+      }, [typescriptAssignable(newType, oldType) == 'yes'
+        ? compatible('parameter-type', typescriptAt(overload,
+          template('Parameter {parameter} changed from {old} to {new}, which are mutually assignable')))
+        : additive('parameter-widened', typescriptAt(overload, template('Parameter {parameter} now also accepts {new}')))])
+  typescriptReturn:
+    params: ['oldReturn', 'newReturn', 'overload']
+    body: |-
+      collect({
+        oldReturn != newReturn && textOf(oldReturn) != 'void':
+          typescriptReturnVerdict(typescriptAssignable(newReturn, oldReturn), oldReturn, newReturn, overload),
+      })
+  typescriptReturnVerdict:
+    params: ['verdict', 'oldReturn', 'newReturn', 'overload']
+    variables:
+      - name: old
+        expression: typeCode(oldReturn)
+      - name: new
+        expression: typeCode(newReturn)
+    body: |-
+      match(verdict, {
+        'no': breaking('return-widened', typescriptAt(overload, template('Returns {new} instead of {old}'))),
+        'undecided': unknown('return-type', typescriptAt(overload, template('Return type changed from {old} to {new}'))),
+      }, typescriptNarrowed('return-narrowed', oldReturn, newReturn, typescriptAt(overload, template('Returns the equivalent {new}')),
+        typescriptAt(overload, template('Returns the narrower {new}'))))
+  typescriptNarrowed:
+    description: >-
+      The finding for a type whose values the old type accepts: `equivalent` when the old type's
+      values are the new type's too, else `narrowed`.
+    params: ['rule', 'oldType', 'newType', 'equivalent', 'narrowed']
+    body: "compatible(rule, typescriptAssignable(oldType, newType) == 'yes' ? equivalent : narrowed)"
+  typescriptChange:
+    params: ['oldType', 'newType']
+    variables:
+      - name: old
+        expression: typeCode(oldType)
+      - name: new
+        expression: typeCode(newType)
+    body: "template('Its type changed from {old} to {new}')"
+  typescriptVariable:
+    description: >-
+      An exported binding is read-only to importers: only reads must still type-check.
+    params: ['oldType', 'newType']
+    body: |-
+      oldType == newType ? [] : [typescriptVariableVerdict(typescriptAssignable(newType, oldType), oldType, newType)]
+  typescriptVariableVerdict:
+    params: ['verdict', 'oldType', 'newType']
+    body: |-
+      match(verdict, {
+        'no': breaking('type', typescriptChange(oldType, newType)),
+        'undecided': unknown('type', typescriptChange(oldType, newType)),
+      }, typescriptNarrowed('type', oldType, newType, 'Its type is equivalent', 'Its type narrowed to ' + typeCode(newType)))
+  typescriptAlias:
+    description: A type alias is both accepted and produced by consumers.
+    params: ['oldType', 'newType']
+    body: |-
+      oldType == newType ? [] : [typescriptAliasVerdict(typescriptAssignable(oldType, newType), oldType, newType)]
+  typescriptAliasVerdict:
+    params: ['widened', 'oldType', 'newType']
+    body: |-
+      match(widened, {
+        'yes': typescriptAssignable(newType, oldType) == 'yes' ? compatible('alias', 'Its type is equivalent')
+          : additive('alias-widened', template('Now also allows values outside {old}; exhaustive checks over it may fail',
+            {'old': typeCode(oldType)})),
+        'no': breaking('alias-narrowed', 'No longer allows every value of ' + typeCode(oldType)),
+      }, unknown('alias', typescriptChange(oldType, newType)))
+  typescriptDefined:
+    description: "A type's constituent texts other than `undefined`."
+    params: ['t']
+    body: |-
+      typescriptConstituents(t).filter(c, c.t != 'undefined').map(c, c.t)
+  typescriptProperty:
+    description: >-
+      A class's readonly property only needs to stay readable; anything written, or
+      implemented by consumers, must be identical. A change of optionality alone is the
+      optionality rule's.
+    params: ['before', 'after', 'owner']
+    variables:
+      - name: old
+        expression: fact(before, 'type')
+      - name: new
+        expression: fact(after, 'type')
+    body: |-
+      variables.old == variables.new || (is(before, 'optional') != is(after, 'optional')
+        && typescriptDefined(variables.old) == typescriptDefined(variables.new))
+      ? [] : [typescriptPropertyVerdict(variables.old, variables.new,
+        owner == 'class' && is(before, 'readonly') && is(after, 'readonly'),
+        typescriptAssignable(variables.new, variables.old), typescriptAssignable(variables.old, variables.new))]
+  typescriptPropertyVerdict:
+    description: >-
+      A covariant (readonly) property may narrow; any other must stay equivalent.
+    params: ['oldType', 'newType', 'covariant', 'narrowed', 'widened']
+    body: |-
+      covariant ? match(narrowed, {
+        'yes': typescriptNarrowed('property-type', oldType, newType, 'Its type is equivalent', 'Its type narrowed to ' + typeCode(newType)),
+        'no': breaking('property-type', typescriptChange(oldType, newType)),
+      }, unknown('property-type', typescriptChange(oldType, newType)))
+      : cond({
+        narrowed == 'yes' && widened == 'yes': compatible('property-type', 'Its type is equivalent'),
+        narrowed == 'no' || widened == 'no': breaking('property-type',
+          typescriptChange(oldType, newType) + '; it is both read and written, so it must stay the same'),
+      }, unknown('property-type', typescriptChange(oldType, newType)))
+classify:
+  where: "change.collection == 'entities'"
+  variables:
+    - name: olds
+      expression: "befores.map(item, decl(item, 'before'))"
+    - name: news
+      expression: "afters.map(item, decl(item, 'after'))"
+    - name: result
+      expression: 'classification(findings(variables.ecosystem, change, variables.olds, variables.news))'
+  summary: 'sentence(variables.result)'
+  annotation: variables.result
+metadata:
+  variables:
+    - name: uncontracted
+      expression: |-
+        changes.filter(c, c.collection == 'entities' && (c.before.exists(id, !hasContract(decl(lookup.before.entities[id], 'before')))
+            || c.after.exists(id, !hasContract(decl(lookup.after.entities[id], 'after'))))).size()
+    - name: all
+      expression: |-
+        variables.notices + collect({
+          variables.uncontracted > 0 && variables.ecosystem != null: template(
+            '{count} changed {declarations} no contract facts (`data.contract`); their changes are classified by the rules every ecosystem shares.',
+            {'count': string(variables.uncontracted),
+             'declarations': variables.uncontracted == 1 ? 'declaration has' : 'declarations have'}),
+        })
+  values:
+    compatibility: |-
+      {'version': 0, 'rules': rulesName(variables.ecosystem), 'counts': {'breaking': annotations.filter(id, annotations[id].level == 'breaking').size(), 'additive': annotations.filter(id, annotations[id].level == 'additive').size(), 'compatible': annotations.filter(id, annotations[id].level == 'compatible').size(), 'unknown': annotations.filter(id, annotations[id].level == 'unknown').size()}, 'changes': annotations, 'notices': variables.all.slice(0, math.least(20, size(variables.all))), ?'ecosystem': variables.ecosystem != null
+        ? optional.of(variables.ecosystem) : optional.none()}

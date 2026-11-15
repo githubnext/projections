@@ -1,0 +1,194 @@
+{
+  "version": 0,
+  "cases": [
+    {
+      "id": "empty-graph",
+      "request": {"version": 0, "operation": "canonicalize", "extraction": {
+        "protocolVersion": 0, "schema": "graph/v0", "entities": [], "relationships": []
+      }},
+      "expectedCanonical": "{\"entities\":[],\"protocolVersion\":0,\"relationships\":[],\"schema\":\"graph/v0\"}"
+    },
+    {
+      "id": "canonical-content",
+      "request": {"version": 0, "operation": "canonicalize", "extraction": {
+        "protocolVersion": 0, "schema": "database/v0", "metadata": {"run": 1},
+        "entities": [
+          {"id": "table:b", "kind": "table", "label": "B", "evidence": [{"kind": "source", "source": "b.sql"}]},
+          {"id": "column:b.id", "kind": "column", "label": "id", "data": {"type": "integer", "nullable": false}, "previousIds": ["column:b.key"]}
+        ],
+        "relationships": [{"id": "has:b.id", "kind": "column", "from": "table:b", "to": "column:b.id", "confidence": "authoritative"}]
+      }},
+      "expectedCanonical": "{\"entities\":[{\"data\":{\"nullable\":false,\"type\":\"integer\"},\"id\":\"column:b.id\",\"kind\":\"column\",\"label\":\"id\"},{\"data\":{},\"id\":\"table:b\",\"kind\":\"table\",\"label\":\"B\"}],\"protocolVersion\":0,\"relationships\":[{\"confidence\":\"authoritative\",\"data\":{},\"from\":\"table:b\",\"id\":\"has:b.id\",\"kind\":\"column\",\"to\":\"column:b.id\"}],\"schema\":\"database/v0\"}"
+    },
+    {
+      "id": "duplicate-identity",
+      "request": {"version": 0, "operation": "normalize", "extraction": {
+        "protocolVersion": 0, "schema": "graph/v0", "entities": [
+          {"id": "same", "kind": "service", "label": "One"},
+          {"id": "same", "kind": "service", "label": "Two"}
+        ], "relationships": []
+      }},
+      "expectError": "duplicate-id"
+    },
+    {
+      "id": "missing-endpoint",
+      "request": {"version": 0, "operation": "normalize", "extraction": {
+        "protocolVersion": 0, "schema": "graph/v0", "entities": [],
+        "relationships": [{"id": "edge", "kind": "uses", "from": "absent", "to": "absent"}]
+      }},
+      "expectError": "missing-endpoint"
+    },
+    {
+      "id": "version-1-rejected",
+      "request": {"version": 0, "operation": "normalize", "extraction": {
+        "protocolVersion": 1, "schema": "graph/v0", "nodes": [], "edges": []
+      }},
+      "expectError": "unknown-field"
+    },
+    {
+      "id": "schema-v1-renamed",
+      "request": {"version": 0, "operation": "normalize", "extraction": {
+        "protocolVersion": 0, "schema": "schema/v0", "entities": [], "relationships": []
+      }},
+      "expectError": "unsupported-schema"
+    },
+    {
+      "id": "duplicate-json-key",
+      "request": {"version": 0, "operation": "decode",
+        "json": "{\"protocolVersion\":0,\"schema\":\"graph/v0\",\"entities\":[],\"entities\":[],\"relationships\":[]}"
+      },
+      "expectError": "duplicate-key"
+    },
+    {
+      "id": "unsafe-integer",
+      "request": {"version": 0, "operation": "decode",
+        "json": "{\"protocolVersion\":0,\"schema\":\"metrics/v0\",\"entities\":[{\"id\":\"m\",\"kind\":\"metric\",\"label\":\"Value\",\"data\":{\"value\":9007199254740993}}],\"relationships\":[]}"
+      },
+      "expectError": "unsafe-integer"
+    },
+    {
+      "id": "valid-declared-rename",
+      "request": {"version": 0, "operation": "validate-comparison",
+        "before": {"protocolVersion": 0, "schema": "graph/v0", "entities": [{"id": "service:old", "kind": "service", "label": "Service"}], "relationships": []},
+        "after": {"protocolVersion": 0, "schema": "graph/v0", "entities": [{"id": "service:new", "kind": "service", "label": "Service"}], "relationships": []},
+        "comparison": {"protocolVersion": 0,
+          "changes": [{"id": "service:new", "collection": "entities", "before": ["service:old"], "after": ["service:new"], "status": "unchanged", "correspondence": "declared", "summary": "Renamed"}],
+          "steps": [{"changes": ["service:new"], "summary": "Rename the service"}]}
+      }
+    },
+    {
+      "id": "hidden-change",
+      "request": {"version": 0, "operation": "validate-comparison",
+        "before": {"protocolVersion": 0, "schema": "graph/v0", "entities": [{"id": "a", "kind": "service", "label": "A"}], "relationships": []},
+        "after": {"protocolVersion": 0, "schema": "graph/v0", "entities": [{"id": "a", "kind": "service", "label": "Changed"}], "relationships": []},
+        "comparison": {"protocolVersion": 0, "changes": [], "steps": []}
+      },
+      "expectError": "hidden-change"
+    },
+    {
+      "id": "inconsistent-status",
+      "request": {"version": 0, "operation": "validate-comparison",
+        "before": {"protocolVersion": 0, "schema": "graph/v0", "entities": [{"id": "a", "kind": "service", "label": "A"}], "relationships": []},
+        "after": {"protocolVersion": 0, "schema": "graph/v0", "entities": [{"id": "a", "kind": "service", "label": "Changed"}], "relationships": []},
+        "comparison": {"protocolVersion": 0,
+          "changes": [{"id": "a", "collection": "entities", "before": ["a"], "after": ["a"], "status": "unchanged", "correspondence": "exact"}],
+          "steps": [{"changes": ["a"]}]}
+      },
+      "expectError": "inconsistent-status"
+    },
+    {
+      "id": "step-coverage",
+      "request": {"version": 0, "operation": "validate-comparison",
+        "before": {"protocolVersion": 0, "schema": "graph/v0", "entities": [], "relationships": []},
+        "after": {"protocolVersion": 0, "schema": "graph/v0", "entities": [{"id": "a", "kind": "service", "label": "A"}], "relationships": []},
+        "comparison": {"protocolVersion": 0,
+          "changes": [{"id": "a", "collection": "entities", "before": [], "after": ["a"], "status": "added", "correspondence": "none"}],
+          "steps": []}
+      },
+      "expectError": "step-coverage"
+    },
+    {"id": "volatile-canonical", "request": {"version": 0, "operation": "canonicalize", "extraction": {"protocolVersion": 0, "schema": "graph/v0", "entities": [{"id": "test:a", "kind": "test", "label": "A", "data": {"durationMs": 100}}], "relationships": [], "volatile": [{"path": "/data/durationMs", "kinds": ["test"], "tolerance": {"absolute": 50}}, {"path": "/data/samples/*/count", "collection": "relationships"}]}}, "expectedCanonical": "{\"entities\":[{\"data\":{\"durationMs\":100},\"id\":\"test:a\",\"kind\":\"test\",\"label\":\"A\"}],\"protocolVersion\":0,\"relationships\":[],\"schema\":\"graph/v0\",\"volatile\":[{\"collection\":\"entities\",\"kinds\":[\"test\"],\"path\":\"/data/durationMs\",\"tolerance\":{\"absolute\":50}},{\"collection\":\"relationships\",\"path\":\"/data/samples/*/count\"}]}"},
+    {"id": "volatile-outside-data", "request": {"version": 0, "operation": "normalize", "extraction": {"protocolVersion": 0, "schema": "graph/v0", "entities": [], "relationships": [], "volatile": [{"path": "/label"}]}}, "expectError": "invalid-volatile-path", "expectedErrorPath": "/extraction/volatile/0/path"},
+    {"id": "variation-in-step", "request": {"version": 0, "operation": "validate-comparison", "before": {"protocolVersion": 0, "schema": "graph/v0", "entities": [{"id": "test:a", "kind": "test", "label": "test:a", "data": {"durationMs": 100, "status": "passed"}}, {"id": "test:b", "kind": "test", "label": "test:b", "data": {"durationMs": 100, "status": "passed"}}, {"id": "test:c", "kind": "test", "label": "test:c", "data": {"durationMs": 100, "status": "passed"}}], "relationships": [], "volatile": [{"kinds": ["test"], "path": "/data/durationMs", "tolerance": {"absolute": 50, "relative": 0.2}}]}, "after": {"protocolVersion": 0, "schema": "graph/v0", "entities": [{"id": "test:a", "kind": "test", "label": "test:a", "data": {"durationMs": 130, "status": "passed"}}, {"id": "test:b", "kind": "test", "label": "test:b", "data": {"durationMs": 100, "status": "passed"}}, {"id": "test:c", "kind": "test", "label": "test:c", "data": {"durationMs": 100, "status": "passed"}}], "relationships": [], "volatile": [{"kinds": ["test"], "path": "/data/durationMs", "tolerance": {"absolute": 50, "relative": 0.2}}]}, "comparison": {"protocolVersion": 0, "changes": [{"id": "test:a", "collection": "entities", "before": ["test:a"], "after": ["test:a"], "status": "unchanged", "correspondence": "exact", "varied": [{"path": "/data/durationMs", "within": true}]}], "steps": [{"changes": ["test:a"]}], "variation": {"within": 1, "beyond": 0}}}, "expectError": "variation-in-step"},
+    {"id": "vary-within-tolerance", "request": {"version": 0, "operation": "vary", "before": {"protocolVersion": 0, "schema": "graph/v0", "entities": [{"id": "test:a", "kind": "test", "label": "test:a", "data": {"durationMs": 100, "status": "passed"}}, {"id": "test:b", "kind": "test", "label": "test:b", "data": {"durationMs": 100, "status": "passed"}}, {"id": "test:c", "kind": "test", "label": "test:c", "data": {"durationMs": 100, "status": "passed"}}], "relationships": [], "volatile": [{"kinds": ["test"], "path": "/data/durationMs", "tolerance": {"absolute": 50, "relative": 0.2}}]}, "after": {"protocolVersion": 0, "schema": "graph/v0", "entities": [{"id": "test:a", "kind": "test", "label": "test:a", "data": {"durationMs": 130, "status": "passed"}}, {"id": "test:b", "kind": "test", "label": "test:b", "data": {"durationMs": 100, "status": "passed"}}, {"id": "test:c", "kind": "test", "label": "test:c", "data": {"durationMs": 100, "status": "passed"}}], "relationships": [], "volatile": [{"kinds": ["test"], "path": "/data/durationMs", "tolerance": {"absolute": 50, "relative": 0.2}}]}}, "expectedResult": {"equal": false, "within": [{"collection": "entities", "id": "test:a", "path": "/data/durationMs"}], "beyond": []}}
+  ],
+  "comparisons": [
+    {
+      "id": "declared-rename",
+      "before": {"protocolVersion": 0, "schema": "graph/v0", "entities": [
+        {"id": "service:old", "kind": "service", "label": "Service"}
+      ], "relationships": []},
+      "after": {"protocolVersion": 0, "schema": "graph/v0", "entities": [
+        {"id": "service:new", "kind": "service", "label": "Service", "previousIds": ["service:old"]}
+      ], "relationships": []},
+      "expected": {"protocolVersion": 0,
+        "changes": [{"id": "service:new", "collection": "entities", "before": ["service:old"], "after": ["service:new"], "status": "unchanged", "correspondence": "declared"}],
+        "steps": [{"changes": ["service:new"], "kind": "restructure"}],
+        "order": {"reverse": "mirror"}}
+    },
+    {
+      "id": "leaves-leave-first-roots-arrive-first",
+      "before": {"protocolVersion": 0, "schema": "graph/v0", "entities": [
+        {"id": "root", "kind": "package", "label": "root"},
+        {"id": "mid", "kind": "package", "label": "mid"},
+        {"id": "shallow", "kind": "package", "label": "shallow"},
+        {"id": "deep", "kind": "package", "label": "deep"}
+      ], "relationships": [
+        {"id": "edge:mid", "kind": "dependency", "from": "root", "to": "mid"},
+        {"id": "edge:shallow", "kind": "dependency", "from": "root", "to": "shallow"},
+        {"id": "edge:deep", "kind": "dependency", "from": "mid", "to": "deep"}
+      ]},
+      "after": {"protocolVersion": 0, "schema": "graph/v0", "entities": [
+        {"id": "root", "kind": "package", "label": "root"},
+        {"id": "mid", "kind": "package", "label": "mid"}
+      ], "relationships": [
+        {"id": "edge:mid", "kind": "dependency", "from": "root", "to": "mid"}
+      ]},
+      "expected": {"protocolVersion": 0,
+        "changes": [
+          {"id": "deep", "collection": "entities", "before": ["deep"], "after": [], "status": "removed", "correspondence": "none"},
+          {"id": "shallow", "collection": "entities", "before": ["shallow"], "after": [], "status": "removed", "correspondence": "none"},
+          {"id": "edge:deep", "collection": "relationships", "before": ["edge:deep"], "after": [], "status": "removed", "correspondence": "none"},
+          {"id": "edge:shallow", "collection": "relationships", "before": ["edge:shallow"], "after": [], "status": "removed", "correspondence": "none"}
+        ],
+        "steps": [
+          {"changes": ["deep", "edge:deep"], "kind": "remove"},
+          {"changes": ["shallow", "edge:shallow"], "kind": "remove"}
+        ],
+        "order": {"reverse": "mirror"}}
+    },
+    {
+      "id": "explicit-split",
+      "before": {"protocolVersion": 0, "schema": "architecture/v0", "entities": [
+        {"id": "billing", "kind": "service", "label": "Billing"}
+      ], "relationships": []},
+      "after": {"protocolVersion": 0, "schema": "architecture/v0", "entities": [
+        {"id": "invoicing", "kind": "service", "label": "Invoicing", "previousIds": ["billing"]},
+        {"id": "payments", "kind": "service", "label": "Payments", "previousIds": ["billing"]}
+      ], "relationships": []},
+      "expected": {"protocolVersion": 0,
+        "changes": [{"id": "invoicing", "collection": "entities", "before": ["billing"], "after": ["invoicing", "payments"], "status": "modified", "correspondence": "split"}],
+        "steps": [{"changes": ["invoicing"], "kind": "restructure"}],
+        "order": {"reverse": "mirror"}}
+    },
+    {
+      "id": "ambiguous-correspondence",
+      "before": {"protocolVersion": 0, "schema": "graph/v0", "entities": [
+        {"id": "a", "kind": "service", "label": "A"},
+        {"id": "b", "kind": "service", "label": "B"}
+      ], "relationships": []},
+      "after": {"protocolVersion": 0, "schema": "graph/v0", "entities": [
+        {"id": "x", "kind": "service", "label": "X", "previousIds": ["a", "b"]},
+        {"id": "y", "kind": "service", "label": "Y", "previousIds": ["b"]}
+      ], "relationships": []},
+      "expectError": "ambiguous-correspondence"
+    },
+    {
+      "id": "schema-mismatch",
+      "before": {"protocolVersion": 0, "schema": "graph/v0", "entities": [], "relationships": []},
+      "after": {"protocolVersion": 0, "schema": "dag/v0", "entities": [], "relationships": []},
+      "expectError": "schema-mismatch"
+    },
+    {"id": "volatile-test-results", "before": {"protocolVersion": 0, "schema": "graph/v0", "entities": [{"id": "test:a", "kind": "test", "label": "test:a", "data": {"durationMs": 100, "status": "passed"}}, {"id": "test:b", "kind": "test", "label": "test:b", "data": {"durationMs": 100, "status": "passed"}}, {"id": "test:c", "kind": "test", "label": "test:c", "data": {"durationMs": 100, "status": "passed"}}], "relationships": [], "volatile": [{"kinds": ["test"], "path": "/data/durationMs", "tolerance": {"absolute": 50, "relative": 0.2}}]}, "after": {"protocolVersion": 0, "schema": "graph/v0", "entities": [{"id": "test:a", "kind": "test", "label": "test:a", "data": {"durationMs": 130, "status": "passed"}}, {"id": "test:b", "kind": "test", "label": "test:b", "data": {"durationMs": 400, "status": "passed"}}, {"id": "test:c", "kind": "test", "label": "test:c", "data": {"durationMs": 100, "status": "failed"}}], "relationships": [], "volatile": [{"kinds": ["test"], "path": "/data/durationMs", "tolerance": {"absolute": 50, "relative": 0.2}}]}, "expected": {"protocolVersion": 0, "changes": [{"id": "test:a", "collection": "entities", "before": ["test:a"], "after": ["test:a"], "status": "unchanged", "correspondence": "exact", "varied": [{"path": "/data/durationMs", "within": true}]}, {"id": "test:b", "collection": "entities", "before": ["test:b"], "after": ["test:b"], "status": "modified", "correspondence": "exact", "varied": [{"path": "/data/durationMs", "within": false}]}, {"id": "test:c", "collection": "entities", "before": ["test:c"], "after": ["test:c"], "status": "modified", "correspondence": "exact"}], "steps": [{"changes": ["test:b", "test:c"], "kind": "restructure"}], "order": {"reverse": "mirror"}, "variation": {"within": 1, "beyond": 1}}}
+  ]
+}

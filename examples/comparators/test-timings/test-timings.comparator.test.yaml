@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=../../../packages/schemas/schemas/comparator-tests/v0.json
+#
+# What test-timings.comparator.yaml makes of test results with volatile
+# durations: `projections check -p <id>` runs these cases.
+format: projections.comparator-tests
+version: 0
+
+cases:
+  - name: jitter within tolerance is unchanged noise; beyond it, a regression
+    before:
+      extraction:
+        protocolVersion: 0
+        schema: graph/v0
+        volatile:
+          - {kinds: [test], path: /data/durationMs, tolerance: {absolute: 50, relative: 0.2}}
+        entities:
+          - {id: test:parse, kind: test, label: parse, data: {durationMs: 100, status: passed}}
+          - {id: test:load, kind: test, label: load, data: {durationMs: 100, status: passed}}
+          - {id: test:save, kind: test, label: save, data: {durationMs: 100, status: passed}}
+        relationships: []
+    after:
+      extraction:
+        protocolVersion: 0
+        schema: graph/v0
+        volatile:
+          - {kinds: [test], path: /data/durationMs, tolerance: {absolute: 50, relative: 0.2}}
+        entities:
+          - {id: test:parse, kind: test, label: parse, data: {durationMs: 130, status: passed}}
+          - {id: test:load, kind: test, label: load, data: {durationMs: 400, status: passed}}
+          - {id: test:save, kind: test, label: save, data: {durationMs: 110, status: failed}}
+        relationships: []
+    expect:
+      changes:
+        # Within tolerance: listed, unchanged, without a summary.
+        - {item: test:parse, status: unchanged, correspondence: exact, summary: null}
+        - {item: test:load, status: modified, summary: Test `load` got slower beyond tolerance}
+        # A status change is modified; its duration jitter is not the story.
+        - {item: test:save, status: modified, summary: null}
+      steps:
+        - {kind: restructure, changes: [test:load, test:save]}
+      count: {changes: 3, steps: 1}
+      metadata:
+        noise: [test:parse]
+
+  - name: without volatile declarations every duration change is a change
+    before:
+      extraction:
+        protocolVersion: 0
+        schema: graph/v0
+        entities:
+          - {id: test:parse, kind: test, label: parse, data: {durationMs: 100, status: passed}}
+        relationships: []
+    after:
+      extraction:
+        protocolVersion: 0
+        schema: graph/v0
+        entities:
+          - {id: test:parse, kind: test, label: parse, data: {durationMs: 101, status: passed}}
+        relationships: []
+    expect:
+      changes:
+        - {item: test:parse, status: modified, summary: null}
+      count: {changes: 1, steps: 1}
+      metadata:
+        noise: []

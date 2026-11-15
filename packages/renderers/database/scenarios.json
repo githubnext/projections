@@ -1,0 +1,628 @@
+{
+  "format": "projections.scenarios",
+  "version": 0,
+  "title": "Database",
+  "renderer": "database",
+  "scenarios": [
+    {
+      "id": "prisma-shop",
+      "title": "Prisma: addresses and order states",
+      "description": "A Prisma storefront schema read by prisma-schema: an Address table arrives with a foreign key to Customer, orders gain a shipping-address foreign key and a customer/status index, product titles become VARCHAR(200) and prices BigInt, the unique constraint on customer phone numbers is dropped, and the OrderStatus enum gains CANCELLED and REFUNDED.",
+      "before": "fixtures/prisma-shop-before.json",
+      "after": "fixtures/prisma-shop-after.json"
+    },
+    {
+      "id": "django-library",
+      "title": "Django: publishers and loans",
+      "description": "A Django library app read by django-schema from its model registry: a Publisher table arrives and books gain a nullable foreign key to it, author names widen to 200 characters, page counts become a PositiveIntegerField and the check constraint it replaces is dropped, and loans gain a member/due-date index.",
+      "before": "fixtures/django-library-before.json",
+      "after": "fixtures/django-library-after.json"
+    },
+    {
+      "id": "organizations",
+      "title": "Organizations arrive",
+      "description": "A new Organizations table that four tables reference: each foreign-key column arrives in its own step and moves into the key group once its principal table exists.",
+      "before": "fixtures/invoicing-before.json",
+      "after": "fixtures/invoicing-after.json"
+    },
+    {
+      "id": "cleanup",
+      "title": "Users table removed, types tightened",
+      "description": "A table and its links leave before the layout closes the gap; a column widens, a nullable column becomes required, and an index is renamed.",
+      "before": {
+        "protocolVersion": 0,
+        "schema": "database/v0",
+        "entities": [
+          {
+            "id": "table:Customers",
+            "kind": "table",
+            "label": "Customers",
+            "evidence": [{"kind": "migration", "source": "Migrations/Customers.cs", "location": {"line": 12}}]
+          },
+          {"id": "column:Customers.Id", "kind": "column", "label": "Id", "data": {"type": "uuid", "nullable": false}},
+          {"id": "column:Customers.Name", "kind": "column", "label": "Name", "data": {"type": "character varying(200)", "nullable": false}},
+          {
+            "id": "column:Customers.BillingEmail",
+            "kind": "column",
+            "label": "BillingEmail",
+            "data": {"type": "character varying(320)", "nullable": true}
+          },
+          {
+            "id": "column:Customers.OrganizationId",
+            "kind": "column",
+            "label": "OrganizationId",
+            "data": {"type": "uuid", "nullable": false}
+          },
+          {"id": "key:PK_Customers", "kind": "primary-key", "label": "PK_Customers", "data": {"columns": ["Id"]}},
+          {
+            "id": "index:IX_Customers_OrganizationId",
+            "kind": "index",
+            "label": "IX_Customers_OrganizationId",
+            "data": {"columns": ["OrganizationId"]}
+          },
+          {
+            "id": "table:Invoices",
+            "kind": "table",
+            "label": "Invoices",
+            "evidence": [{"kind": "migration", "source": "Migrations/Invoices.cs", "location": {"line": 12}}]
+          },
+          {"id": "column:Invoices.Id", "kind": "column", "label": "Id", "data": {"type": "uuid", "nullable": false}},
+          {
+            "id": "column:Invoices.Number",
+            "kind": "column",
+            "label": "Number",
+            "data": {"type": "character varying(64)", "nullable": false}
+          },
+          {"id": "column:Invoices.CustomerId", "kind": "column", "label": "CustomerId", "data": {"type": "uuid", "nullable": false}},
+          {"id": "column:Invoices.IssuedOn", "kind": "column", "label": "IssuedOn", "data": {"type": "date", "nullable": false}},
+          {"id": "column:Invoices.DueOn", "kind": "column", "label": "DueOn", "data": {"type": "date", "nullable": false}},
+          {
+            "id": "column:Invoices.Status",
+            "kind": "column",
+            "label": "Status",
+            "data": {"type": "character varying(16)", "nullable": false}
+          },
+          {
+            "id": "column:Invoices.OrganizationId",
+            "kind": "column",
+            "label": "OrganizationId",
+            "data": {"type": "uuid", "nullable": false}
+          },
+          {"id": "key:PK_Invoices", "kind": "primary-key", "label": "PK_Invoices", "data": {"columns": ["Id"]}},
+          {"id": "index:IX_Invoices_CustomerId", "kind": "index", "label": "IX_Invoices_CustomerId", "data": {"columns": ["CustomerId"]}},
+          {"id": "index:IX_Invoices_Number", "kind": "index", "label": "IX_Invoices_Number", "data": {"columns": ["Number"]}},
+          {
+            "id": "index:IX_Invoices_OrganizationId",
+            "kind": "index",
+            "label": "IX_Invoices_OrganizationId",
+            "data": {"columns": ["OrganizationId"]}
+          },
+          {
+            "id": "table:InvoiceLines",
+            "kind": "table",
+            "label": "InvoiceLines",
+            "evidence": [{"kind": "migration", "source": "Migrations/InvoiceLines.cs", "location": {"line": 12}}]
+          },
+          {"id": "column:InvoiceLines.Id", "kind": "column", "label": "Id", "data": {"type": "uuid", "nullable": false}},
+          {"id": "column:InvoiceLines.InvoiceId", "kind": "column", "label": "InvoiceId", "data": {"type": "uuid", "nullable": false}},
+          {
+            "id": "column:InvoiceLines.Description",
+            "kind": "column",
+            "label": "Description",
+            "data": {"type": "character varying(500)", "nullable": false}
+          },
+          {"id": "column:InvoiceLines.Quantity", "kind": "column", "label": "Quantity", "data": {"type": "integer", "nullable": false}},
+          {
+            "id": "column:InvoiceLines.UnitPrice",
+            "kind": "column",
+            "label": "UnitPrice",
+            "data": {"type": "numeric(12,2)", "nullable": false}
+          },
+          {"id": "key:PK_InvoiceLines", "kind": "primary-key", "label": "PK_InvoiceLines", "data": {"columns": ["Id"]}},
+          {
+            "id": "index:IX_InvoiceLines_InvoiceId",
+            "kind": "index",
+            "label": "IX_InvoiceLines_InvoiceId",
+            "data": {"columns": ["InvoiceId"]}
+          },
+          {
+            "id": "table:Users",
+            "kind": "table",
+            "label": "Users",
+            "evidence": [{"kind": "migration", "source": "Migrations/Users.cs", "location": {"line": 12}}]
+          },
+          {"id": "column:Users.Id", "kind": "column", "label": "Id", "data": {"type": "uuid", "nullable": false}},
+          {"id": "column:Users.Email", "kind": "column", "label": "Email", "data": {"type": "character varying(320)", "nullable": false}},
+          {
+            "id": "column:Users.DisplayName",
+            "kind": "column",
+            "label": "DisplayName",
+            "data": {"type": "character varying(120)", "nullable": false}
+          },
+          {
+            "id": "column:Users.CreatedAt",
+            "kind": "column",
+            "label": "CreatedAt",
+            "data": {"type": "timestamp with time zone", "nullable": false}
+          },
+          {"id": "column:Users.OrganizationId", "kind": "column", "label": "OrganizationId", "data": {"type": "uuid", "nullable": false}},
+          {"id": "key:PK_Users", "kind": "primary-key", "label": "PK_Users", "data": {"columns": ["Id"]}},
+          {"id": "index:IX_Users_Email", "kind": "index", "label": "IX_Users_Email", "data": {"columns": ["Email"]}},
+          {
+            "id": "index:IX_Users_OrganizationId",
+            "kind": "index",
+            "label": "IX_Users_OrganizationId",
+            "data": {"columns": ["OrganizationId"]}
+          },
+          {
+            "id": "table:Organizations",
+            "kind": "table",
+            "label": "Organizations",
+            "evidence": [{"kind": "migration", "source": "Migrations/Organizations.cs", "location": {"line": 12}}]
+          },
+          {"id": "column:Organizations.Id", "kind": "column", "label": "Id", "data": {"type": "uuid", "nullable": false}},
+          {
+            "id": "column:Organizations.Name",
+            "kind": "column",
+            "label": "Name",
+            "data": {"type": "character varying(200)", "nullable": false}
+          },
+          {
+            "id": "column:Organizations.Slug",
+            "kind": "column",
+            "label": "Slug",
+            "data": {"type": "character varying(64)", "nullable": false}
+          },
+          {
+            "id": "column:Organizations.CreatedAt",
+            "kind": "column",
+            "label": "CreatedAt",
+            "data": {"type": "timestamp with time zone", "nullable": false}
+          },
+          {"id": "key:PK_Organizations", "kind": "primary-key", "label": "PK_Organizations", "data": {"columns": ["Id"]}},
+          {"id": "index:IX_Organizations_Slug", "kind": "index", "label": "IX_Organizations_Slug", "data": {"columns": ["Slug"]}}
+        ],
+        "relationships": [
+          {"id": "contains:Customers.Id", "kind": "contains", "from": "table:Customers", "to": "column:Customers.Id"},
+          {"id": "contains:Customers.Name", "kind": "contains", "from": "table:Customers", "to": "column:Customers.Name"},
+          {"id": "contains:Customers.BillingEmail", "kind": "contains", "from": "table:Customers", "to": "column:Customers.BillingEmail"},
+          {
+            "id": "contains:Customers.OrganizationId",
+            "kind": "contains",
+            "from": "table:Customers",
+            "to": "column:Customers.OrganizationId"
+          },
+          {"id": "constraint:PK_Customers", "kind": "constraint", "from": "table:Customers", "to": "key:PK_Customers"},
+          {"id": "key-column:PK_Customers.Id", "kind": "key-column", "from": "key:PK_Customers", "to": "column:Customers.Id"},
+          {
+            "id": "index:index:IX_Customers_OrganizationId",
+            "kind": "index",
+            "from": "table:Customers",
+            "to": "index:IX_Customers_OrganizationId"
+          },
+          {
+            "id": "index-column:index:IX_Customers_OrganizationId",
+            "kind": "index-column",
+            "from": "index:IX_Customers_OrganizationId",
+            "to": "column:Customers.OrganizationId"
+          },
+          {
+            "id": "relation:FK_Customers_Organizations_OrganizationId",
+            "kind": "relation",
+            "from": "table:Customers",
+            "to": "table:Organizations",
+            "data": {"columns": ["OrganizationId"], "principalColumns": ["Id"], "name": "FK_Customers_Organizations_OrganizationId"}
+          },
+          {"id": "contains:Invoices.Id", "kind": "contains", "from": "table:Invoices", "to": "column:Invoices.Id"},
+          {"id": "contains:Invoices.Number", "kind": "contains", "from": "table:Invoices", "to": "column:Invoices.Number"},
+          {"id": "contains:Invoices.CustomerId", "kind": "contains", "from": "table:Invoices", "to": "column:Invoices.CustomerId"},
+          {"id": "contains:Invoices.IssuedOn", "kind": "contains", "from": "table:Invoices", "to": "column:Invoices.IssuedOn"},
+          {"id": "contains:Invoices.DueOn", "kind": "contains", "from": "table:Invoices", "to": "column:Invoices.DueOn"},
+          {"id": "contains:Invoices.Status", "kind": "contains", "from": "table:Invoices", "to": "column:Invoices.Status"},
+          {"id": "contains:Invoices.OrganizationId", "kind": "contains", "from": "table:Invoices", "to": "column:Invoices.OrganizationId"},
+          {"id": "constraint:PK_Invoices", "kind": "constraint", "from": "table:Invoices", "to": "key:PK_Invoices"},
+          {"id": "key-column:PK_Invoices.Id", "kind": "key-column", "from": "key:PK_Invoices", "to": "column:Invoices.Id"},
+          {"id": "index:index:IX_Invoices_CustomerId", "kind": "index", "from": "table:Invoices", "to": "index:IX_Invoices_CustomerId"},
+          {
+            "id": "index-column:index:IX_Invoices_CustomerId",
+            "kind": "index-column",
+            "from": "index:IX_Invoices_CustomerId",
+            "to": "column:Invoices.CustomerId"
+          },
+          {"id": "index:index:IX_Invoices_Number", "kind": "index", "from": "table:Invoices", "to": "index:IX_Invoices_Number"},
+          {
+            "id": "index-column:index:IX_Invoices_Number",
+            "kind": "index-column",
+            "from": "index:IX_Invoices_Number",
+            "to": "column:Invoices.Number"
+          },
+          {
+            "id": "index:index:IX_Invoices_OrganizationId",
+            "kind": "index",
+            "from": "table:Invoices",
+            "to": "index:IX_Invoices_OrganizationId"
+          },
+          {
+            "id": "index-column:index:IX_Invoices_OrganizationId",
+            "kind": "index-column",
+            "from": "index:IX_Invoices_OrganizationId",
+            "to": "column:Invoices.OrganizationId"
+          },
+          {
+            "id": "relation:FK_Invoices_Customers_CustomerId",
+            "kind": "relation",
+            "from": "table:Invoices",
+            "to": "table:Customers",
+            "data": {"columns": ["CustomerId"], "principalColumns": ["Id"], "name": "FK_Invoices_Customers_CustomerId"}
+          },
+          {
+            "id": "relation:FK_Invoices_Organizations_OrganizationId",
+            "kind": "relation",
+            "from": "table:Invoices",
+            "to": "table:Organizations",
+            "data": {"columns": ["OrganizationId"], "principalColumns": ["Id"], "name": "FK_Invoices_Organizations_OrganizationId"}
+          },
+          {"id": "contains:InvoiceLines.Id", "kind": "contains", "from": "table:InvoiceLines", "to": "column:InvoiceLines.Id"},
+          {
+            "id": "contains:InvoiceLines.InvoiceId",
+            "kind": "contains",
+            "from": "table:InvoiceLines",
+            "to": "column:InvoiceLines.InvoiceId"
+          },
+          {
+            "id": "contains:InvoiceLines.Description",
+            "kind": "contains",
+            "from": "table:InvoiceLines",
+            "to": "column:InvoiceLines.Description"
+          },
+          {"id": "contains:InvoiceLines.Quantity", "kind": "contains", "from": "table:InvoiceLines", "to": "column:InvoiceLines.Quantity"},
+          {
+            "id": "contains:InvoiceLines.UnitPrice",
+            "kind": "contains",
+            "from": "table:InvoiceLines",
+            "to": "column:InvoiceLines.UnitPrice"
+          },
+          {"id": "constraint:PK_InvoiceLines", "kind": "constraint", "from": "table:InvoiceLines", "to": "key:PK_InvoiceLines"},
+          {"id": "key-column:PK_InvoiceLines.Id", "kind": "key-column", "from": "key:PK_InvoiceLines", "to": "column:InvoiceLines.Id"},
+          {
+            "id": "index:index:IX_InvoiceLines_InvoiceId",
+            "kind": "index",
+            "from": "table:InvoiceLines",
+            "to": "index:IX_InvoiceLines_InvoiceId"
+          },
+          {
+            "id": "index-column:index:IX_InvoiceLines_InvoiceId",
+            "kind": "index-column",
+            "from": "index:IX_InvoiceLines_InvoiceId",
+            "to": "column:InvoiceLines.InvoiceId"
+          },
+          {
+            "id": "relation:FK_InvoiceLines_Invoices_InvoiceId",
+            "kind": "relation",
+            "from": "table:InvoiceLines",
+            "to": "table:Invoices",
+            "data": {"columns": ["InvoiceId"], "principalColumns": ["Id"], "name": "FK_InvoiceLines_Invoices_InvoiceId"}
+          },
+          {"id": "contains:Users.Id", "kind": "contains", "from": "table:Users", "to": "column:Users.Id"},
+          {"id": "contains:Users.Email", "kind": "contains", "from": "table:Users", "to": "column:Users.Email"},
+          {"id": "contains:Users.DisplayName", "kind": "contains", "from": "table:Users", "to": "column:Users.DisplayName"},
+          {"id": "contains:Users.CreatedAt", "kind": "contains", "from": "table:Users", "to": "column:Users.CreatedAt"},
+          {"id": "contains:Users.OrganizationId", "kind": "contains", "from": "table:Users", "to": "column:Users.OrganizationId"},
+          {"id": "constraint:PK_Users", "kind": "constraint", "from": "table:Users", "to": "key:PK_Users"},
+          {"id": "key-column:PK_Users.Id", "kind": "key-column", "from": "key:PK_Users", "to": "column:Users.Id"},
+          {"id": "index:index:IX_Users_Email", "kind": "index", "from": "table:Users", "to": "index:IX_Users_Email"},
+          {"id": "index-column:index:IX_Users_Email", "kind": "index-column", "from": "index:IX_Users_Email", "to": "column:Users.Email"},
+          {"id": "index:index:IX_Users_OrganizationId", "kind": "index", "from": "table:Users", "to": "index:IX_Users_OrganizationId"},
+          {
+            "id": "index-column:index:IX_Users_OrganizationId",
+            "kind": "index-column",
+            "from": "index:IX_Users_OrganizationId",
+            "to": "column:Users.OrganizationId"
+          },
+          {
+            "id": "relation:FK_Users_Organizations_OrganizationId",
+            "kind": "relation",
+            "from": "table:Users",
+            "to": "table:Organizations",
+            "data": {"columns": ["OrganizationId"], "principalColumns": ["Id"], "name": "FK_Users_Organizations_OrganizationId"}
+          },
+          {"id": "contains:Organizations.Id", "kind": "contains", "from": "table:Organizations", "to": "column:Organizations.Id"},
+          {"id": "contains:Organizations.Name", "kind": "contains", "from": "table:Organizations", "to": "column:Organizations.Name"},
+          {"id": "contains:Organizations.Slug", "kind": "contains", "from": "table:Organizations", "to": "column:Organizations.Slug"},
+          {
+            "id": "contains:Organizations.CreatedAt",
+            "kind": "contains",
+            "from": "table:Organizations",
+            "to": "column:Organizations.CreatedAt"
+          },
+          {"id": "constraint:PK_Organizations", "kind": "constraint", "from": "table:Organizations", "to": "key:PK_Organizations"},
+          {"id": "key-column:PK_Organizations.Id", "kind": "key-column", "from": "key:PK_Organizations", "to": "column:Organizations.Id"},
+          {"id": "index:index:IX_Organizations_Slug", "kind": "index", "from": "table:Organizations", "to": "index:IX_Organizations_Slug"},
+          {
+            "id": "index-column:index:IX_Organizations_Slug",
+            "kind": "index-column",
+            "from": "index:IX_Organizations_Slug",
+            "to": "column:Organizations.Slug"
+          }
+        ]
+      },
+      "after": {
+        "protocolVersion": 0,
+        "schema": "database/v0",
+        "entities": [
+          {
+            "id": "table:Customers",
+            "kind": "table",
+            "label": "Customers",
+            "evidence": [{"kind": "migration", "source": "Migrations/Customers.cs", "location": {"line": 12}}]
+          },
+          {"id": "column:Customers.Id", "kind": "column", "label": "Id", "data": {"type": "uuid", "nullable": false}},
+          {"id": "column:Customers.Name", "kind": "column", "label": "Name", "data": {"type": "character varying(200)", "nullable": false}},
+          {
+            "id": "column:Customers.BillingEmail",
+            "kind": "column",
+            "label": "BillingEmail",
+            "data": {"type": "character varying(320)", "nullable": false}
+          },
+          {
+            "id": "column:Customers.OrganizationId",
+            "kind": "column",
+            "label": "OrganizationId",
+            "data": {"type": "uuid", "nullable": false}
+          },
+          {"id": "key:PK_Customers", "kind": "primary-key", "label": "PK_Customers", "data": {"columns": ["Id"]}},
+          {
+            "id": "index:IX_Customers_OrganizationId",
+            "kind": "index",
+            "label": "IX_Customers_OrganizationId",
+            "data": {"columns": ["OrganizationId"]}
+          },
+          {
+            "id": "table:Invoices",
+            "kind": "table",
+            "label": "Invoices",
+            "evidence": [{"kind": "migration", "source": "Migrations/Invoices.cs", "location": {"line": 12}}]
+          },
+          {"id": "column:Invoices.Id", "kind": "column", "label": "Id", "data": {"type": "uuid", "nullable": false}},
+          {
+            "id": "column:Invoices.Number",
+            "kind": "column",
+            "label": "Number",
+            "data": {"type": "character varying(128)", "nullable": false}
+          },
+          {"id": "column:Invoices.CustomerId", "kind": "column", "label": "CustomerId", "data": {"type": "uuid", "nullable": false}},
+          {"id": "column:Invoices.IssuedOn", "kind": "column", "label": "IssuedOn", "data": {"type": "date", "nullable": false}},
+          {"id": "column:Invoices.DueOn", "kind": "column", "label": "DueOn", "data": {"type": "date", "nullable": false}},
+          {
+            "id": "column:Invoices.Status",
+            "kind": "column",
+            "label": "Status",
+            "data": {"type": "character varying(16)", "nullable": false}
+          },
+          {
+            "id": "column:Invoices.OrganizationId",
+            "kind": "column",
+            "label": "OrganizationId",
+            "data": {"type": "uuid", "nullable": false}
+          },
+          {"id": "key:PK_Invoices", "kind": "primary-key", "label": "PK_Invoices", "data": {"columns": ["Id"]}},
+          {"id": "index:IX_Invoices_CustomerId", "kind": "index", "label": "IX_Invoices_CustomerId", "data": {"columns": ["CustomerId"]}},
+          {
+            "id": "index:UX_Invoices_Number",
+            "kind": "index",
+            "label": "UX_Invoices_Number",
+            "data": {"columns": ["Number"]},
+            "previousIds": ["index:IX_Invoices_Number"]
+          },
+          {
+            "id": "index:IX_Invoices_OrganizationId",
+            "kind": "index",
+            "label": "IX_Invoices_OrganizationId",
+            "data": {"columns": ["OrganizationId"]}
+          },
+          {
+            "id": "table:InvoiceLines",
+            "kind": "table",
+            "label": "InvoiceLines",
+            "evidence": [{"kind": "migration", "source": "Migrations/InvoiceLines.cs", "location": {"line": 12}}]
+          },
+          {"id": "column:InvoiceLines.Id", "kind": "column", "label": "Id", "data": {"type": "uuid", "nullable": false}},
+          {"id": "column:InvoiceLines.InvoiceId", "kind": "column", "label": "InvoiceId", "data": {"type": "uuid", "nullable": false}},
+          {
+            "id": "column:InvoiceLines.Description",
+            "kind": "column",
+            "label": "Description",
+            "data": {"type": "character varying(500)", "nullable": false}
+          },
+          {"id": "column:InvoiceLines.Quantity", "kind": "column", "label": "Quantity", "data": {"type": "integer", "nullable": false}},
+          {
+            "id": "column:InvoiceLines.UnitPrice",
+            "kind": "column",
+            "label": "UnitPrice",
+            "data": {"type": "numeric(12,2)", "nullable": false}
+          },
+          {"id": "key:PK_InvoiceLines", "kind": "primary-key", "label": "PK_InvoiceLines", "data": {"columns": ["Id"]}},
+          {
+            "id": "index:IX_InvoiceLines_InvoiceId",
+            "kind": "index",
+            "label": "IX_InvoiceLines_InvoiceId",
+            "data": {"columns": ["InvoiceId"]}
+          },
+          {
+            "id": "table:Organizations",
+            "kind": "table",
+            "label": "Organizations",
+            "evidence": [{"kind": "migration", "source": "Migrations/Organizations.cs", "location": {"line": 12}}]
+          },
+          {"id": "column:Organizations.Id", "kind": "column", "label": "Id", "data": {"type": "uuid", "nullable": false}},
+          {
+            "id": "column:Organizations.Name",
+            "kind": "column",
+            "label": "Name",
+            "data": {"type": "character varying(200)", "nullable": false}
+          },
+          {
+            "id": "column:Organizations.Slug",
+            "kind": "column",
+            "label": "Slug",
+            "data": {"type": "character varying(64)", "nullable": false}
+          },
+          {
+            "id": "column:Organizations.CreatedAt",
+            "kind": "column",
+            "label": "CreatedAt",
+            "data": {"type": "timestamp with time zone", "nullable": false}
+          },
+          {"id": "key:PK_Organizations", "kind": "primary-key", "label": "PK_Organizations", "data": {"columns": ["Id"]}},
+          {"id": "index:IX_Organizations_Slug", "kind": "index", "label": "IX_Organizations_Slug", "data": {"columns": ["Slug"]}}
+        ],
+        "relationships": [
+          {"id": "contains:Customers.Id", "kind": "contains", "from": "table:Customers", "to": "column:Customers.Id"},
+          {"id": "contains:Customers.Name", "kind": "contains", "from": "table:Customers", "to": "column:Customers.Name"},
+          {"id": "contains:Customers.BillingEmail", "kind": "contains", "from": "table:Customers", "to": "column:Customers.BillingEmail"},
+          {
+            "id": "contains:Customers.OrganizationId",
+            "kind": "contains",
+            "from": "table:Customers",
+            "to": "column:Customers.OrganizationId"
+          },
+          {"id": "constraint:PK_Customers", "kind": "constraint", "from": "table:Customers", "to": "key:PK_Customers"},
+          {"id": "key-column:PK_Customers.Id", "kind": "key-column", "from": "key:PK_Customers", "to": "column:Customers.Id"},
+          {
+            "id": "index:index:IX_Customers_OrganizationId",
+            "kind": "index",
+            "from": "table:Customers",
+            "to": "index:IX_Customers_OrganizationId"
+          },
+          {
+            "id": "index-column:index:IX_Customers_OrganizationId",
+            "kind": "index-column",
+            "from": "index:IX_Customers_OrganizationId",
+            "to": "column:Customers.OrganizationId"
+          },
+          {
+            "id": "relation:FK_Customers_Organizations_OrganizationId",
+            "kind": "relation",
+            "from": "table:Customers",
+            "to": "table:Organizations",
+            "data": {"columns": ["OrganizationId"], "principalColumns": ["Id"], "name": "FK_Customers_Organizations_OrganizationId"}
+          },
+          {"id": "contains:Invoices.Id", "kind": "contains", "from": "table:Invoices", "to": "column:Invoices.Id"},
+          {"id": "contains:Invoices.Number", "kind": "contains", "from": "table:Invoices", "to": "column:Invoices.Number"},
+          {"id": "contains:Invoices.CustomerId", "kind": "contains", "from": "table:Invoices", "to": "column:Invoices.CustomerId"},
+          {"id": "contains:Invoices.IssuedOn", "kind": "contains", "from": "table:Invoices", "to": "column:Invoices.IssuedOn"},
+          {"id": "contains:Invoices.DueOn", "kind": "contains", "from": "table:Invoices", "to": "column:Invoices.DueOn"},
+          {"id": "contains:Invoices.Status", "kind": "contains", "from": "table:Invoices", "to": "column:Invoices.Status"},
+          {"id": "contains:Invoices.OrganizationId", "kind": "contains", "from": "table:Invoices", "to": "column:Invoices.OrganizationId"},
+          {"id": "constraint:PK_Invoices", "kind": "constraint", "from": "table:Invoices", "to": "key:PK_Invoices"},
+          {"id": "key-column:PK_Invoices.Id", "kind": "key-column", "from": "key:PK_Invoices", "to": "column:Invoices.Id"},
+          {"id": "index:index:IX_Invoices_CustomerId", "kind": "index", "from": "table:Invoices", "to": "index:IX_Invoices_CustomerId"},
+          {
+            "id": "index-column:index:IX_Invoices_CustomerId",
+            "kind": "index-column",
+            "from": "index:IX_Invoices_CustomerId",
+            "to": "column:Invoices.CustomerId"
+          },
+          {"id": "index:index:IX_Invoices_Number", "kind": "index", "from": "table:Invoices", "to": "index:UX_Invoices_Number"},
+          {
+            "id": "index-column:index:UX_Invoices_Number",
+            "kind": "index-column",
+            "from": "index:UX_Invoices_Number",
+            "to": "column:Invoices.Number"
+          },
+          {
+            "id": "index:index:IX_Invoices_OrganizationId",
+            "kind": "index",
+            "from": "table:Invoices",
+            "to": "index:IX_Invoices_OrganizationId"
+          },
+          {
+            "id": "index-column:index:IX_Invoices_OrganizationId",
+            "kind": "index-column",
+            "from": "index:IX_Invoices_OrganizationId",
+            "to": "column:Invoices.OrganizationId"
+          },
+          {
+            "id": "relation:FK_Invoices_Customers_CustomerId",
+            "kind": "relation",
+            "from": "table:Invoices",
+            "to": "table:Customers",
+            "data": {"columns": ["CustomerId"], "principalColumns": ["Id"], "name": "FK_Invoices_Customers_CustomerId"}
+          },
+          {
+            "id": "relation:FK_Invoices_Organizations_OrganizationId",
+            "kind": "relation",
+            "from": "table:Invoices",
+            "to": "table:Organizations",
+            "data": {"columns": ["OrganizationId"], "principalColumns": ["Id"], "name": "FK_Invoices_Organizations_OrganizationId"}
+          },
+          {"id": "contains:InvoiceLines.Id", "kind": "contains", "from": "table:InvoiceLines", "to": "column:InvoiceLines.Id"},
+          {
+            "id": "contains:InvoiceLines.InvoiceId",
+            "kind": "contains",
+            "from": "table:InvoiceLines",
+            "to": "column:InvoiceLines.InvoiceId"
+          },
+          {
+            "id": "contains:InvoiceLines.Description",
+            "kind": "contains",
+            "from": "table:InvoiceLines",
+            "to": "column:InvoiceLines.Description"
+          },
+          {"id": "contains:InvoiceLines.Quantity", "kind": "contains", "from": "table:InvoiceLines", "to": "column:InvoiceLines.Quantity"},
+          {
+            "id": "contains:InvoiceLines.UnitPrice",
+            "kind": "contains",
+            "from": "table:InvoiceLines",
+            "to": "column:InvoiceLines.UnitPrice"
+          },
+          {"id": "constraint:PK_InvoiceLines", "kind": "constraint", "from": "table:InvoiceLines", "to": "key:PK_InvoiceLines"},
+          {"id": "key-column:PK_InvoiceLines.Id", "kind": "key-column", "from": "key:PK_InvoiceLines", "to": "column:InvoiceLines.Id"},
+          {
+            "id": "index:index:IX_InvoiceLines_InvoiceId",
+            "kind": "index",
+            "from": "table:InvoiceLines",
+            "to": "index:IX_InvoiceLines_InvoiceId"
+          },
+          {
+            "id": "index-column:index:IX_InvoiceLines_InvoiceId",
+            "kind": "index-column",
+            "from": "index:IX_InvoiceLines_InvoiceId",
+            "to": "column:InvoiceLines.InvoiceId"
+          },
+          {
+            "id": "relation:FK_InvoiceLines_Invoices_InvoiceId",
+            "kind": "relation",
+            "from": "table:InvoiceLines",
+            "to": "table:Invoices",
+            "data": {"columns": ["InvoiceId"], "principalColumns": ["Id"], "name": "FK_InvoiceLines_Invoices_InvoiceId"}
+          },
+          {"id": "contains:Organizations.Id", "kind": "contains", "from": "table:Organizations", "to": "column:Organizations.Id"},
+          {"id": "contains:Organizations.Name", "kind": "contains", "from": "table:Organizations", "to": "column:Organizations.Name"},
+          {"id": "contains:Organizations.Slug", "kind": "contains", "from": "table:Organizations", "to": "column:Organizations.Slug"},
+          {
+            "id": "contains:Organizations.CreatedAt",
+            "kind": "contains",
+            "from": "table:Organizations",
+            "to": "column:Organizations.CreatedAt"
+          },
+          {"id": "constraint:PK_Organizations", "kind": "constraint", "from": "table:Organizations", "to": "key:PK_Organizations"},
+          {"id": "key-column:PK_Organizations.Id", "kind": "key-column", "from": "key:PK_Organizations", "to": "column:Organizations.Id"},
+          {"id": "index:index:IX_Organizations_Slug", "kind": "index", "from": "table:Organizations", "to": "index:IX_Organizations_Slug"},
+          {
+            "id": "index-column:index:IX_Organizations_Slug",
+            "kind": "index-column",
+            "from": "index:IX_Organizations_Slug",
+            "to": "column:Organizations.Slug"
+          }
+        ]
+      }
+    },
+    {
+      "id": "invoicing",
+      "title": "Invoicing schema",
+      "description": "One revision: ranked cards from principal to dependent tables, foreign keys between key rows, and keys and indexes as tags.",
+      "extraction": "fixtures/invoicing-after.json"
+    }
+  ]
+}

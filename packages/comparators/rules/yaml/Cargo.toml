@@ -1,0 +1,17 @@
+[package]
+name = "projections-rules-yaml"
+description = "The YAML subset rules files and their tests are written in, and the comparator rules test format"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version = "1.85"
+publish = false
+
+[dependencies]
+projections-engine = { path = "../../../engine", default-features = false }
+serde_json = { version = "1.0", features = ["float_roundtrip"] }
+yaml-rust2 = { version = "0.13.0", default-features = false }
+
+[features]
+# The test format in WebAssembly builds (native builds always have it).
+suite = []

@@ -1,0 +1,143 @@
+/* Labels and badges follow the host's label metrics. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: var(--projections-label-height);
+  padding: 0 var(--projections-label-padding-x);
+  font-size: var(--projections-label-font-size);
+  font-weight: var(--projections-label-font-weight);
+  line-height: 1;
+  border: var(--projections-border-width) solid currentColor;
+  border-radius: var(--projections-label-radius);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.badge + .badge {
+  margin-left: var(--projections-space-1);
+}
+.badge.added {
+  color: var(--green);
+}
+.badge.removed {
+  color: var(--red);
+}
+.badge.modified {
+  color: var(--amber);
+}
+.badge.renamed {
+  color: var(--violet);
+}
+.badge.unchanged {
+  color: var(--muted);
+}
+.pk-truncate {
+  display: inline-block;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+/*
+ * Change status as text (glyph and word), in reserved space: a footer strip
+ * under an item, or a fixed-width status cell in a row. The space is always
+ * there, so status appearing or fading never shifts layout.
+ */
+.pk {
+  --pk-footer-height: calc(var(--projections-font-size-xs) * 1.5);
+  --pk-status-width: 11ch;
+}
+.pk-change-footer {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: var(--pk-footer-height);
+  overflow: hidden;
+  font-size: var(--projections-font-size-xs);
+  line-height: 1;
+  white-space: nowrap;
+}
+.pk-change-status {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  width: var(--pk-status-width);
+  min-height: var(--pk-footer-height);
+  font-size: var(--projections-font-size-xs);
+  line-height: 1;
+  white-space: nowrap;
+}
+.pk-status-text {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--projections-space-2);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pk-status-part {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+  font-weight: var(--projections-font-weight-semibold);
+}
+/* Status icons sit on the text's centre line at its size, in its color (see the SDK's icons.css). */
+.pk-icon {
+  align-self: center;
+}
+.pk-svg-icon {
+  pointer-events: none;
+}
+/*
+ * An SVG status line is laid out from its words' advances measured at their CSS size (`SvgChangeStatus`). Geometric
+ * text keeps them at that size at every zoom: otherwise WebKit lays scaled SVG text out in a font at its size on
+ * screen, narrower or wider than measured, and a centred line drifts off its axis.
+ */
+.pk-svg-status {
+  font-size: var(--projections-font-size-xs);
+  font-weight: var(--projections-font-weight-semibold);
+  text-rendering: geometricPrecision;
+}
+.pk-svg-status .pk-status-part.added {
+  color: var(--green);
+  fill: var(--green);
+}
+.pk-svg-status .pk-status-part.removed {
+  color: var(--red);
+  fill: var(--red);
+}
+.pk-svg-status .pk-status-part.modified {
+  color: var(--amber);
+  fill: var(--amber);
+}
+.pk-svg-status .pk-status-part.renamed {
+  color: var(--violet);
+  fill: var(--violet);
+}
+.pk-status-part.added {
+  color: var(--green);
+}
+.pk-status-part.removed {
+  color: var(--red);
+}
+.pk-status-part.modified {
+  color: var(--amber);
+}
+.pk-status-part.renamed {
+  color: var(--violet);
+}
+/*
+ * The volatile marker (VariedMarker): a modified change with a volatile value beyond tolerance. Neutral: the text
+ * color, never a change color (and legible on a status band's tint), beside the status it qualifies.
+ */
+.pk-varied {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text);
+  fill: var(--text);
+  font-weight: var(--projections-font-weight-normal);
+}
+.badge + .pk-varied {
+  margin-inline-start: var(--projections-space-1);
+}

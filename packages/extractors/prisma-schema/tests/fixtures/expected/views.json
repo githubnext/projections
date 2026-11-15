@@ -1,0 +1,191 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "namespace": "auth",
+        "values": [
+          "A",
+          "B"
+        ]
+      },
+      "id": "enum:auth/Kind",
+      "kind": "enum",
+      "label": "Kind"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "namespace": "auth",
+        "provider": "postgresql"
+      },
+      "id": "table:auth/accounts",
+      "kind": "table",
+      "label": "accounts"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:auth/accounts",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "id": "column:table%3Aauth%2Faccounts/id",
+      "kind": "column",
+      "label": "id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:auth/accounts",
+        "type": "String",
+        "updatedAt": false
+      },
+      "id": "column:table%3Aauth%2Faccounts/email",
+      "kind": "column",
+      "label": "email"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "namespace": "public",
+        "provider": "postgresql"
+      },
+      "id": "view:public/AccountSummary",
+      "kind": "view",
+      "label": "AccountSummary"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "view:public/AccountSummary",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "id": "column:view%3Apublic%2FAccountSummary/id",
+      "kind": "column",
+      "label": "id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "view:public/AccountSummary",
+        "type": "String",
+        "updatedAt": false
+      },
+      "id": "column:view%3Apublic%2FAccountSummary/email",
+      "kind": "column",
+      "label": "email"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseName": null,
+        "fields": [
+          {
+            "name": "id"
+          }
+        ],
+        "table": "table:auth/accounts",
+        "type": "primary-key"
+      },
+      "id": "constraint:table%3Aauth%2Faccounts/primary-key/%5B%22id%22%5D",
+      "kind": "constraint",
+      "label": "primary-key (id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseName": null,
+        "fields": [
+          {
+            "name": "id"
+          }
+        ],
+        "table": "view:public/AccountSummary",
+        "type": "unique"
+      },
+      "id": "constraint:view%3Apublic%2FAccountSummary/unique/%5B%22id%22%5D",
+      "kind": "constraint",
+      "label": "unique (id)"
+    }
+  ],
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "from": "table:auth/accounts",
+      "id": "contains:table%3Aauth%2Faccounts/column%3Atable%253Aauth%252Faccounts%2Fid/",
+      "kind": "contains",
+      "to": "column:table%3Aauth%2Faccounts/id"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "table:auth/accounts",
+      "id": "contains:table%3Aauth%2Faccounts/column%3Atable%253Aauth%252Faccounts%2Femail/",
+      "kind": "contains",
+      "to": "column:table%3Aauth%2Faccounts/email"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "view:public/AccountSummary",
+      "id": "contains:view%3Apublic%2FAccountSummary/column%3Aview%253Apublic%252FAccountSummary%2Fid/",
+      "kind": "contains",
+      "to": "column:view%3Apublic%2FAccountSummary/id"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "view:public/AccountSummary",
+      "id": "contains:view%3Apublic%2FAccountSummary/column%3Aview%253Apublic%252FAccountSummary%2Femail/",
+      "kind": "contains",
+      "to": "column:view%3Apublic%2FAccountSummary/email"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "table:auth/accounts",
+      "id": "contains:table%3Aauth%2Faccounts/constraint%3Atable%253Aauth%252Faccounts%2Fprimary-key%2F%255B%2522id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3Aauth%2Faccounts/primary-key/%5B%22id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "constraint:table%3Aauth%2Faccounts/primary-key/%5B%22id%22%5D",
+      "id": "constrains:constraint%3Atable%253Aauth%252Faccounts%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253Aauth%252Faccounts%2Fid/",
+      "kind": "constrains",
+      "to": "column:table%3Aauth%2Faccounts/id"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "view:public/AccountSummary",
+      "id": "contains:view%3Apublic%2FAccountSummary/constraint%3Aview%253Apublic%252FAccountSummary%2Funique%2F%255B%2522id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:view%3Apublic%2FAccountSummary/unique/%5B%22id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "constraint:view%3Apublic%2FAccountSummary/unique/%5B%22id%22%5D",
+      "id": "constrains:constraint%3Aview%253Apublic%252FAccountSummary%2Funique%2F%255B%2522id%2522%255D/column%3Aview%253Apublic%252FAccountSummary%2Fid/",
+      "kind": "constrains",
+      "to": "column:view%3Apublic%2FAccountSummary/id"
+    }
+  ]
+}

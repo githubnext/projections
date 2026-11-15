@@ -1,0 +1,87 @@
+name: Engine quality
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '23 5 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  # Package sources (see CONTRIBUTING.md). The committed .npmrc covers the workspaces; this also covers
+  # installs elsewhere, such as test scratch directories and --prefix installs.
+  npm_config_registry: https://packagefeedproxy.microsoft.io/npm/
+  # Vulnerabilities are gated by dependency review and Dependabot (SECURITY.md), not npm's audit endpoint.
+  npm_config_audit: 'false'
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple/
+# A newer commit on a pull request cancels the older one's run; runs on main are never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/rust-quality
+        with:
+          task: coverage
+  # Mutation testing of the pull request's diff, in 6 round-robin shards. Measured on a 674-mutant diff (one unsharded
+  # run, cancelled at its 60-minute timeout): mutants 460 and 518
+  # finished 43 and 52 minutes in, about 10 a minute with --jobs 2 and 7 in the slowest file, so the whole diff needs
+  # ~75 minutes. A shard of ~113 takes 12-17 minutes plus ~3 of setup and baseline, well inside its 60, and leaves room
+  # for diffs up to ~1,500 mutants; past that, raise the count here and in the matrix. Cost: 6 runners for ~20 minutes,
+  # ~120 runner-minutes a pull request push. Pushes and the scheduled full run are unchanged.
+  mutants-diff-shard:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: ./.github/actions/rust-quality
+        with:
+          task: mutants-diff
+          base-ref: ${{ github.base_ref }}
+          shard: ${{ matrix.shard }}/6
+          artifact: mutants-diff-${{ matrix.shard }}
+  # The one required check: fails unless every shard passed (none missed a mutant, timed out or was cancelled).
+  mutants-diff:
+    if: always() && github.event_name == 'pull_request'
+    needs: mutants-diff-shard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - env:
+          RESULT: ${{ needs.mutants-diff-shard.result }}
+        run: |
+          echo "Shards: $RESULT"
+          test "$RESULT" = success
+  mutants:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/rust-quality
+        with:
+          task: mutants
+          shard: ${{ matrix.shard }}/4
+          artifact: mutants-${{ matrix.shard }}

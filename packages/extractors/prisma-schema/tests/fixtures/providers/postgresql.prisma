@@ -1,0 +1,14 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("PROJECTIONS_MISSING_DATABASE_URL")
+  schemas  = ["analytics"]
+}
+
+model Event {
+  id      Int  @id
+  payload Json
+
+  @@index([payload(ops: JsonbPathOps)], type: Gin, map: "events_payload")
+  @@map("events")
+  @@schema("analytics")
+}

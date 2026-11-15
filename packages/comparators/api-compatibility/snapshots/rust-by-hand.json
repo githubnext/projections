@@ -1,0 +1,109 @@
+{
+  "changes": [
+    {
+      "after": [],
+      "before": [
+        "rust:kit::Lonely: Display"
+      ],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "rust:kit::Lonely: Display",
+      "status": "removed",
+      "summary": "Breaking: The type no longer implements `Display`."
+    },
+    {
+      "after": [
+        "rust:kit::Point"
+      ],
+      "before": [
+        "rust:kit::Point"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Point",
+      "status": "modified",
+      "summary": "Unknown: Its contract changed (`native.shape`) in a way the rules don't classify."
+    },
+    {
+      "after": [
+        "rust:kit::prelude::Clock"
+      ],
+      "before": [
+        "rust:kit::prelude::Clock"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::prelude::Clock",
+      "status": "modified",
+      "summary": "Breaking: Now re-exports none instead of `crate::time::Clock`."
+    }
+  ],
+  "metadata": {
+    "compatibility": {
+      "changes": {
+        "rust:kit::Lonely: Display": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "The type no longer implements `Display`",
+              "rule": "item-remove"
+            }
+          ],
+          "level": "breaking",
+          "reason": "The type no longer implements `Display`"
+        },
+        "rust:kit::Point": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Its contract changed (`native.shape`) in a way the rules don't classify",
+              "rule": "unclassified"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Its contract changed (`native.shape`) in a way the rules don't classify"
+        },
+        "rust:kit::prelude::Clock": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Now re-exports none instead of `crate::time::Clock`",
+              "rule": "re-export"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Now re-exports none instead of `crate::time::Clock`"
+        }
+      },
+      "counts": {
+        "additive": 0,
+        "breaking": 2,
+        "compatible": 0,
+        "unknown": 1
+      },
+      "ecosystem": "rust",
+      "notices": [],
+      "rules": "Cargo SemVer reference, reproduced",
+      "version": 0
+    }
+  },
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "rust:kit::Lonely: Display"
+      ],
+      "kind": "remove"
+    },
+    {
+      "changes": [
+        "rust:kit::Point",
+        "rust:kit::prelude::Clock"
+      ],
+      "kind": "restructure"
+    }
+  ]
+}

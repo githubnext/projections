@@ -1,0 +1,21 @@
+{
+  "protocolVersion": 0,
+  "schema": "api/v0",
+  "metadata": {"ecosystem":"dotnet"},
+  "entities": [
+    {"id":"T:Shape","kind":"type","label":"Shape","data":{"signature":"public struct Shape","contract":{"declaration":"struct","term":"struct","visibility":"public"}}},
+    {"id":"T:Widget","kind":"type","label":"Widget","data":{"signature":"public abstract class Widget","contract":{"declaration":"class","term":"class","visibility":"public","abstract":true}}},
+    {"id":"T:Helpers","kind":"type","label":"Helpers","data":{"signature":"public static class Helpers","contract":{"declaration":"class","term":"class","visibility":"public","static":true,"sealed":true}}},
+    {"id":"T:Tagged","kind":"type","label":"Tagged","data":{"signature":"public class Tagged","contract":{"declaration":"class","term":"class","visibility":"public","attributes":["System.ObsoleteAttribute(\"Old\")","System.SerializableAttribute"]}}},
+    {"id":"T:Box`1","kind":"type","label":"Box<T>","data":{"signature":"public sealed class Box<T>","contract":{"declaration":"class","term":"class","visibility":"public","sealed":true,"native":{"sealed":true},"typeParameters":[{"name":"T","constraints":[]}]}}},
+    {"id":"T:Bag`1","kind":"type","label":"Bag<T>","data":{"signature":"public class Bag<T>","contract":{"declaration":"class","term":"class","visibility":"public","typeParameters":[{"name":"T","constraints":[]}]}}},
+    {"id":"T:IStore","kind":"type","label":"IStore","data":{"signature":"public interface IStore","contract":{"declaration":"interface","term":"interface","visibility":"public"}}},
+    {"id":"T:IStore.Node","kind":"type","label":"Node","data":{"signature":"public abstract class IStore.Node","contract":{"declaration":"class","term":"class","visibility":"public","abstract":true}}},
+    {"id":"T:Factory","kind":"type","label":"Factory","data":{"signature":"public abstract class Factory","contract":{"declaration":"class","term":"class","visibility":"public","abstract":true,"sealed":true}}},
+    {"id":"M:Factory.Create","kind":"method","label":"Create","data":{"signature":"public abstract object Create()","contract":{"declaration":"method","term":"method","visibility":"public","abstract":true,"signatures":[{"parameters":[],"returns":{"text":"object"}}]}}}
+  ],
+  "relationships": [
+    {"id":"contains:IStore:Node","kind":"contains","from":"T:IStore","to":"T:IStore.Node"},
+    {"id":"contains:Factory:Create","kind":"contains","from":"T:Factory","to":"M:Factory.Create"}
+  ]
+}

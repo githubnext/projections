@@ -1,0 +1,1 @@
+{"name":"@acme/api","version":"1.0.0","dependencies":{"@acme/shared":"workspace:^","is-odd":"^3.0.1","number-check":"npm:is-number@^6.0.0"}}

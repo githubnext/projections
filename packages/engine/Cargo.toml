@@ -1,0 +1,35 @@
+[package]
+name = "projections-engine"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+exclude = ["js"]
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[[bin]]
+name = "projections-engine"
+path = "src/main.rs"
+
+[features]
+default = ["abi"]
+# Exports the engine Wasm ABI. Crates that link the Engine into their own Wasm
+# module, such as the default comparator, disable it.
+abi = []
+
+[dependencies]
+projections-engine-verified = { path = "verified" }
+serde = "1.0"
+serde_json = { version = "1.0", features = ["float_roundtrip"] }
+serde_jcs = "0.2"
+sha2 = "0.10"
+
+[dev-dependencies]
+proptest = { version = "1.12.0", default-features = false, features = ["std"] }
+
+# The engine ships inside the CLI and as Wasm, never as a release of its own.
+[package.metadata.dist]
+dist = false

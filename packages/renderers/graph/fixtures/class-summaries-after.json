@@ -1,0 +1,99 @@
+{
+  "protocolVersion": 0,
+  "schema": "graph/v0",
+  "volatile": [
+    {
+      "kinds": [
+        "class"
+      ],
+      "path": "/data/summary",
+      "generated": true,
+      "basis": "/data/summaryBasis"
+    }
+  ],
+  "entities": [
+    {
+      "id": "package:shop",
+      "kind": "package",
+      "label": "shop"
+    },
+    {
+      "id": "class:Cart",
+      "kind": "class",
+      "label": "Cart",
+      "data": {
+        "summary": "Cart keeps the items a customer chose, adding and removing them.",
+        "summaryBasis": {
+          "input": "sha256:a23acabe20cb53b86f90b5dee2597c942484d2ef3dda3e446f14718821f44201",
+          "prompt": "sha256:ef7386f649bd442d457ecb6b4ab392d5fb91c243751aa8d99d1dc60cdc327c0c",
+          "model": "fake-summarizer@1"
+        }
+      }
+    },
+    {
+      "id": "class:Orders",
+      "kind": "class",
+      "label": "Orders",
+      "data": {
+        "summary": "Orders places an order, records it and sends a confirmation.",
+        "summaryBasis": {
+          "input": "sha256:1eab6dc85533960ffab7f677de6dcd38860130ff588607a459d09c3533d0ef21",
+          "prompt": "sha256:ef7386f649bd442d457ecb6b4ab392d5fb91c243751aa8d99d1dc60cdc327c0c",
+          "model": "fake-summarizer@1"
+        }
+      }
+    },
+    {
+      "id": "class:Invoices",
+      "kind": "class",
+      "label": "Invoices",
+      "data": {
+        "summary": "Invoices charges a customer for an order.",
+        "summaryBasis": {
+          "input": "sha256:440c7f004d45952fa54e243d74e378adbd4383db81988e3919eab9b3c9c3e348",
+          "prompt": "sha256:ef7386f649bd442d457ecb6b4ab392d5fb91c243751aa8d99d1dc60cdc327c0c",
+          "model": "fake-summarizer@2"
+        }
+      }
+    },
+    {
+      "id": "class:Shipping",
+      "kind": "class",
+      "label": "Shipping",
+      "data": {
+        "summary": "Shipping books a courier for a parcel.",
+        "summaryBasis": {
+          "input": "sha256:89f5208faace19592ee5fbd104cae63393b06c0337b6f7c0666bbe797fd47142",
+          "prompt": "sha256:ef7386f649bd442d457ecb6b4ab392d5fb91c243751aa8d99d1dc60cdc327c0c",
+          "model": "fake-summarizer@1"
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "contains:class:Cart",
+      "kind": "contains",
+      "from": "package:shop",
+      "to": "class:Cart"
+    },
+    {
+      "id": "contains:class:Orders",
+      "kind": "contains",
+      "from": "package:shop",
+      "to": "class:Orders"
+    },
+    {
+      "id": "contains:class:Invoices",
+      "kind": "contains",
+      "from": "package:shop",
+      "to": "class:Invoices"
+    },
+    {
+      "id": "contains:class:Shipping",
+      "kind": "contains",
+      "from": "package:shop",
+      "to": "class:Shipping"
+    }
+  ]
+}

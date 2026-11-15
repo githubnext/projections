@@ -1,0 +1,254 @@
+# File standards for hand-written code (docs/maintainers/file-standards.md). `considered variance add` rewrites
+# this file without its comments; add variances by hand, or restore the comments after.
+kinds:
+  - cohesion
+  - declarative
+exclude:
+  gitignored: true
+  categories:
+    - tests
+    - vendored
+    - dependencies
+    - generated
+    - assets
+    - configuration
+  # Generated outputs (tools/cli/src/lib/generated.ts), fixture data and other data the categories don't cover. Rust test
+  # modules live in tests.rs files. packages/cli/src/fixtures and packages/host/inspector/src/fixtures are source and stay measured.
+  paths:
+    - 'examples/comparators/*/fixtures/**'
+    - 'packages/comparators/*/fixtures/**'
+    # `terraform show -json` output, the input of the README gallery's infrastructure image.
+    - 'docs/images/sources/encrypt-database/*/plan.json'
+    - 'packages/host/vscode-ui/fixtures/**'
+    - 'packages/renderers/*/fixtures/**'
+    - 'packages/renderers/harness/browser/fixtures/**'
+    - 'packages/schemas/fixtures/**'
+    - '**/snapshots/**'
+    - '**/tests.rs'
+    - '**/scenarios.json'
+    - '**/*.generated.ts'
+    - 'packages/schemas/schemas/**'
+    - 'docs/reference/**'
+    - 'docs/agents/**'
+    - 'packages/comparators/rules/language.json'
+    - '.github/workflows/release.yml'
+    - 'packages/host/vscode-ui/THIRD_PARTY_NOTICES.md'
+    - 'packages/renderers/sdk/vendor/**'
+    # Pristine shadcn/ui registry items, the base of the three-way merge in packages/host/core/scripts/shadcn/update.mjs.
+    - 'packages/host/core/src/ui/components/upstream/**'
+    # A comparator is one file by design (one file is one comparator and its digest; the format has no include), so
+    # its size follows the rules it holds rather than how the code is organised.
+    - '**/*.comparator.yaml'
+    # A design record is one decision, read end to end, so it stays one page however long the decision is.
+    - 'docs/design/**'
+    # An agent skill is a prompt, read whole by an agent; its length and line breaks follow the guidance it gives.
+    - '**/SKILL.md'
+    - '**/skills/**'
+standards:
+  filesystem.bytes:
+    max: 50000
+  # The formatters wrap at 140 (oxfmt, rustfmt; Markdown prose at 80). This is only a backstop for what they
+  # can't wrap: it catches minified, pasted or generated-looking content, not long string literals or tables.
+  filesystem.longest_line:
+    max: 400
+  scc.code_lines:
+    max: 500
+  # Branches and loops summed over the file. A file above it usually holds more than one responsibility.
+  scc.complexity:
+    max: 60
+warnings:
+  percentBelowMax: 10
+  percentAboveMin: 10
+variances:
+  packages/cli/src/tools/catalog.rs:
+    kind: declarative
+    reason: "Agent tool descriptions: each tool's description is one literal that MCP clients and the VS Code extension's language model tools receive verbatim (packages/integrations/vscode/package.json is generated from it). rustfmt can't wrap a literal."
+    metrics:
+      filesystem.longest_line:
+        max: 1014
+  packages/host/core/src/ui/components/badge.tsx:
+    kind: declarative
+    reason: "A shadcn/ui component kept as upstream (packages/host/core/src/ui/components/README.md): each element's or variant's Tailwind class list is one string, the form upstream ships and Tailwind's class sorting keeps, so diffs against upstream stay readable. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 579
+  packages/host/core/src/ui/components/button.tsx:
+    kind: declarative
+    reason: "A shadcn/ui component kept as upstream (packages/host/core/src/ui/components/README.md): each element's or variant's Tailwind class list is one string, the form upstream ships and Tailwind's class sorting keeps, so diffs against upstream stay readable. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 649
+  packages/host/core/src/ui/components/card.tsx:
+    kind: declarative
+    reason: "A shadcn/ui component kept as upstream (packages/host/core/src/ui/components/README.md): each element's or variant's Tailwind class list is one string, the form upstream ships and Tailwind's class sorting keeps, so diffs against upstream stay readable. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 410
+  packages/host/core/src/ui/components/checkbox.tsx:
+    kind: declarative
+    reason: "A shadcn/ui component kept as upstream (packages/host/core/src/ui/components/README.md): each element's or variant's Tailwind class list is one string, the form upstream ships and Tailwind's class sorting keeps, so diffs against upstream stay readable. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 984
+  packages/host/core/src/ui/components/dropdown-menu.tsx:
+    kind: declarative
+    reason: "A shadcn/ui component kept as upstream (packages/host/core/src/ui/components/README.md): each element's or variant's Tailwind class list is one string, the form upstream ships and Tailwind's class sorting keeps, so diffs against upstream stay readable. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 748
+  packages/host/core/src/ui/components/input.tsx:
+    kind: declarative
+    reason: "A shadcn/ui component kept as upstream (packages/host/core/src/ui/components/README.md): each element's or variant's Tailwind class list is one string, the form upstream ships and Tailwind's class sorting keeps, so diffs against upstream stay readable. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 739
+  packages/host/core/src/ui/components/native-select.tsx:
+    kind: declarative
+    reason: "A shadcn/ui component kept as upstream (packages/host/core/src/ui/components/README.md): each element's or variant's Tailwind class list is one string, the form upstream ships and Tailwind's class sorting keeps, so diffs against upstream stay readable. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 728
+  packages/host/core/src/ui/components/popover.tsx:
+    kind: declarative
+    reason: "A shadcn/ui component kept as upstream (packages/host/core/src/ui/components/README.md): each element's or variant's Tailwind class list is one string, the form upstream ships and Tailwind's class sorting keeps, so diffs against upstream stay readable. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 581
+  packages/host/core/src/ui/components/segmented-control.tsx:
+    kind: declarative
+    reason: "A shadcn/ui component kept as upstream (packages/host/core/src/ui/components/README.md): each element's or variant's Tailwind class list is one string, the form upstream ships and Tailwind's class sorting keeps, so diffs against upstream stay readable. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 463
+  packages/host/core/src/ui/components/select.tsx:
+    kind: declarative
+    reason: "A shadcn/ui component kept as upstream (packages/host/core/src/ui/components/README.md): each element's or variant's Tailwind class list is one string, the form upstream ships and Tailwind's class sorting keeps, so diffs against upstream stay readable. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 953
+  packages/host/core/src/ui/components/tabs.tsx:
+    kind: declarative
+    reason: "A shadcn/ui component kept as upstream (packages/host/core/src/ui/components/README.md): each element's or variant's Tailwind class list is one string, the form upstream ships and Tailwind's class sorting keeps, so diffs against upstream stay readable. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 918
+  packages/host/core/src/ui/components/toggle-group.tsx:
+    kind: declarative
+    reason: "A shadcn/ui component kept as upstream (packages/host/core/src/ui/components/README.md): each element's or variant's Tailwind class list is one string, the form upstream ships and Tailwind's class sorting keeps, so diffs against upstream stay readable. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 1031
+  packages/host/core/src/ui/components/toggle.tsx:
+    kind: declarative
+    reason: "A shadcn/ui component kept as upstream (packages/host/core/src/ui/components/README.md): each element's or variant's Tailwind class list is one string, the form upstream ships and Tailwind's class sorting keeps, so diffs against upstream stay readable. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 601
+  packages/host/core/src/ui/components/tooltip.tsx:
+    kind: declarative
+    reason: "A shadcn/ui component kept as upstream (packages/host/core/src/ui/components/README.md): each element's or variant's Tailwind class list is one string, the form upstream ships and Tailwind's class sorting keeps, so diffs against upstream stay readable. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 804
+  packages/host/core/src/ui/pickers.tsx:
+    kind: declarative
+    reason: "Tailwind class lists: each element's classes are one string, as in the shadcn components beside it (packages/host/core/src/ui/components). oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 455
+  packages/host/core/src/ui/view-controls.tsx:
+    kind: declarative
+    reason: "Tailwind class lists: each element's classes are one string, as in the shadcn components beside it (packages/host/core/src/ui/components). oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 530
+  packages/integrations/copilot-canvas/extension.mjs:
+    kind: declarative
+    reason: "The canvas's instructions to the agent are one literal, sent verbatim as the tool's description. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 541
+  packages/renderers/testing/src/checks/catalog.ts:
+    kind: declarative
+    reason: "The renderer check catalog: each check's explanation is one string, shown verbatim in check reports and the docs. A catalog reads best as one list; oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 815
+  packages/schemas/src/typebox/comparator-tests.ts:
+    kind: declarative
+    reason: "Schema descriptions: each `description` is one string, published verbatim in the JSON Schema and the generated schema reference. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 490
+  packages/schemas/src/typebox/comparator.ts:
+    kind: declarative
+    reason: "Schema descriptions: each `description` is one string, published verbatim in the JSON Schema and the generated schema reference. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 415
+  tools/scripts/reference-docs/agents.mjs:
+    kind: declarative
+    reason: "The agent prompt files' task steps: each step is one string, written verbatim as one list item of docs/agents/*.md. oxfmt can't wrap a string."
+    metrics:
+      filesystem.longest_line:
+        max: 487
+  packages/cli/templates/SKILL.md:
+    kind: declarative
+    reason: 'The agent skill template: its front-matter `description` is one YAML line, the form skill loaders document and match on. The CLI writes the template into repositories and prints it with `projections help authoring`.'
+    metrics:
+      filesystem.longest_line:
+        max: 776
+  docs/setup/quick-start.md:
+    kind: cohesion
+    reason: "The setup prompt in its ```prompt block is pasted whole into a coding agent; it stays one line so pasting it doesn't break it apart or submit it early."
+    metrics:
+      filesystem.longest_line:
+        max: 498
+  packages/engine/verified/src/components.rs:
+    kind: cohesion
+    reason: &verus-proofs 'Verus proofs: scc counts every `&&`, `||`, `==>` and `if` in a `requires`, `ensures`, invariant or spec function as a branch, though these are logical formulas Verus checks and erases, not code that runs. A proof stays beside the function it proves, as Verus requires. packages/engine/VERIFICATION.md measures proof against code.'
+    metrics:
+      scc.complexity:
+        max: 170
+  packages/engine/verified/src/content.rs:
+    kind: cohesion
+    reason: *verus-proofs
+    metrics:
+      scc.complexity:
+        max: 176
+  packages/engine/verified/src/correspondence.rs:
+    kind: cohesion
+    reason: *verus-proofs
+    metrics:
+      scc.complexity:
+        max: 87
+  packages/engine/verified/src/generated.rs:
+    kind: cohesion
+    reason: *verus-proofs
+    metrics:
+      scc.complexity:
+        max: 186
+  packages/engine/verified/src/keys.rs:
+    kind: cohesion
+    reason: *verus-proofs
+    metrics:
+      scc.complexity:
+        max: 125
+  packages/engine/verified/src/sort.rs:
+    kind: cohesion
+    reason: *verus-proofs
+    metrics:
+      scc.complexity:
+        max: 202
+  packages/engine/verified/src/tolerance.rs:
+    kind: cohesion
+    reason: *verus-proofs
+    metrics:
+      scc.complexity:
+        max: 88
+  packages/engine/verified/src/waves.rs:
+    kind: cohesion
+    reason: *verus-proofs
+    metrics:
+      scc.complexity:
+        max: 83

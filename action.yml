@@ -1,0 +1,215 @@
+name: Projections
+description: Extract or compare the repository's projections in CI, report each one's changes in the job summary and upload them as an artifact
+author: GitHub Next
+branding:
+  icon: layers
+  color: purple
+inputs:
+  trust:
+    description: >-
+      Pass --trust, allowing extractors that run repository code (custom commands and toolchain-based
+      built-ins). On pull requests this runs code from the pull request's head. Leave false unless every
+      projection you need requires it and the workflow has no secrets or write permissions.
+    default: 'false'
+  version:
+    description: >-
+      CLI release to install: a release tag such as v0.1.0, a major version such as v0 (its newest stable release), or
+      latest. Defaults to the action's own version tag (for @v0, v0's newest stable release), else latest.
+    default: ''
+  cli-repository:
+    description: Repository whose releases publish the CLI
+    default: githubnext/projections
+  reuse-base-artifact:
+    description: >-
+      On pull requests, reuse the merge base's own projections artifact (from the newest successful run for that
+      commit) instead of extracting the base again. The CLI verifies every reused extraction; without one, the base
+      is extracted here, in a workspace prepared by the repository's environment file when trust is true.
+    default: 'true'
+  build-from-source:
+    description: Build the CLI from the action's source instead of installing a release (needs Rust; for testing unreleased versions)
+    default: 'false'
+  working-directory:
+    description: The checkout to examine; it needs full history (actions/checkout with fetch-depth 0)
+    default: '.'
+  artifact-name:
+    description: Actions artifact name
+    default: projections
+  retention-days:
+    description: Days to keep the artifact (0 uses the repository default)
+    default: '0'
+  summary:
+    description: Write each projection's result, steps and changes to the job summary
+    default: 'true'
+  comment:
+    description: Also post the summary as one pull request comment, updated on each run (needs pull-requests write)
+    default: 'false'
+  hosted-url:
+    description: >-
+      Origin of a hosted view of the uploaded artifact, such as https://projections.example, to link from the
+      summary and the comment. Empty links none.
+    default: ''
+  snapshots:
+    description: >-
+      Projection IDs (separated by commas, spaces or newlines) to render as PNG snapshots, light and dark, with the
+      real renderer in the runner's installed Chrome, Chromium or Edge (GitHub-hosted runners have Chrome). On pull
+      requests both the merge base and the head are rendered. The images are uploaded as the <artifact-name>-snapshots
+      artifact. Empty renders none.
+    default: ''
+  browser:
+    description: Chrome, Chromium or Edge executable for snapshots. Empty finds one on PATH or in its usual install location.
+    default: ''
+  snapshots-commit:
+    description: >-
+      On pushes to the default branch, commit the snapshots to snapshots-path, for example to embed them in a README.
+      Skipped when they are unchanged or the branch moved on. Needs contents: write.
+    default: 'false'
+  snapshots-path:
+    description: Repository directory for committed snapshots (<id>.light.png and <id>.dark.png)
+    default: .github/projections/snapshots
+  snapshots-commit-message:
+    description: Commit message for snapshots-commit
+    default: Update Projections snapshots
+  snapshots-branch:
+    description: >-
+      On pull requests from this repository, commit the before and after snapshots to this dedicated branch (created
+      without history when missing) under pull/<number>/, so the comment can show them. Needs contents: write. Empty, or
+      a pull request from a fork, links the snapshots artifact instead.
+    default: ''
+  fail-on-error:
+    description: Fail the job when any projection fails. By default failures are reported per projection and the job succeeds.
+    default: 'false'
+  token:
+    description: Token for downloading and verifying the CLI release and for the comment
+    default: ${{ github.token }}
+outputs:
+  directory:
+    description: The artifact directory
+    value: ${{ steps.collect.outputs.directory }}
+  manifest:
+    description: Path of projections.artifact.json
+    value: ${{ steps.collect.outputs.manifest }}
+  projections:
+    description: Number of projections
+    value: ${{ steps.collect.outputs.projections }}
+  failed:
+    description: Number of projections that failed
+    value: ${{ steps.collect.outputs.failed }}
+  artifact-id:
+    description: ID of the uploaded Actions artifact
+    value: ${{ steps.upload.outputs.artifact-id }}
+  cli-version:
+    description: The CLI's --version output
+    value: ${{ steps.install.outputs.cli-version }}
+  snapshots-directory:
+    description: The snapshots directory (PNG files and snapshots.json), when snapshots is set
+    value: ${{ steps.snapshots.outputs.directory }}
+  snapshots-artifact-id:
+    description: ID of the uploaded snapshots artifact
+    value: ${{ steps.upload-snapshots.outputs.artifact-id }}
+  snapshots-commit:
+    description: The commit holding the published snapshots, when they were committed
+    value: ${{ steps.publish-snapshots.outputs.commit }}
+runs:
+  using: composite
+  steps:
+    - id: install
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_CLI_REPOSITORY: ${{ inputs.cli-repository }}
+        INPUT_BUILD_FROM_SOURCE: ${{ inputs.build-from-source }}
+        # The runner leaves GITHUB_ACTION_REF empty in a composite action's run steps; the expression has the ref.
+        ACTION_REF: ${{ github.action_ref }}
+      run: node "$GITHUB_ACTION_PATH/packages/integrations/github-action/src/install.mjs"
+    # Downloads the merge base's own artifact with the token; runs nothing from the repository.
+    - id: base
+      if: inputs.reuse-base-artifact == 'true'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        INPUT_ARTIFACT_NAME: ${{ inputs.artifact-name }}
+        INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+      run: node "$GITHUB_ACTION_PATH/packages/integrations/github-action/src/base.mjs"
+    - id: collect
+      shell: bash
+      env:
+        PROJECTIONS_CLI: ${{ steps.install.outputs.cli-path }}
+        PROJECTIONS_BASE_ARTIFACT: ${{ steps.base.outputs.directory }}
+        INPUT_TRUST: ${{ inputs.trust }}
+        INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        ACTION_REPOSITORY: ${{ github.action_repository }}
+        ACTION_REF: ${{ github.action_ref }}
+      run: node "$GITHUB_ACTION_PATH/packages/integrations/github-action/src/collect.mjs"
+    - id: upload
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ steps.collect.outputs.directory }}
+        retention-days: ${{ inputs.retention-days }}
+        if-no-files-found: error
+        include-hidden-files: false
+        overwrite: true
+    # Renders from the saved documents: no extractor runs again and no token is passed.
+    - id: snapshots
+      if: inputs.snapshots != ''
+      shell: bash
+      env:
+        PROJECTIONS_CLI: ${{ steps.install.outputs.cli-path }}
+        PROJECTIONS_MANIFEST: ${{ steps.collect.outputs.manifest }}
+        INPUT_SNAPSHOTS: ${{ inputs.snapshots }}
+        INPUT_BROWSER: ${{ inputs.browser }}
+        INPUT_TRUST: ${{ inputs.trust }}
+        INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+      run: node "$GITHUB_ACTION_PATH/packages/integrations/github-action/src/snapshot.mjs"
+    - id: upload-snapshots
+      if: steps.snapshots.outputs.count != '' && steps.snapshots.outputs.count != '0'
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: ${{ inputs.artifact-name }}-snapshots
+        path: ${{ steps.snapshots.outputs.directory }}
+        retention-days: ${{ inputs.retention-days }}
+        if-no-files-found: error
+        include-hidden-files: false
+        overwrite: true
+    - id: publish-snapshots
+      if: steps.snapshots.outputs.count != '' && steps.snapshots.outputs.count != '0' && (inputs.snapshots-commit == 'true' || inputs.snapshots-branch != '')
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        PROJECTIONS_SNAPSHOTS: ${{ steps.snapshots.outputs.directory }}
+        INPUT_SNAPSHOTS_COMMIT: ${{ inputs.snapshots-commit }}
+        INPUT_SNAPSHOTS_PATH: ${{ inputs.snapshots-path }}
+        INPUT_SNAPSHOTS_COMMIT_MESSAGE: ${{ inputs.snapshots-commit-message }}
+        INPUT_SNAPSHOTS_BRANCH: ${{ inputs.snapshots-branch }}
+      run: node "$GITHUB_ACTION_PATH/packages/integrations/github-action/src/publish.mjs"
+    # Reads the saved documents only; no token is passed.
+    - id: summary
+      if: inputs.summary == 'true'
+      shell: bash
+      env:
+        PROJECTIONS_MANIFEST: ${{ steps.collect.outputs.manifest }}
+        INPUT_HOSTED_URL: ${{ inputs.hosted-url }}
+        INPUT_ARTIFACT_NAME: ${{ inputs.artifact-name }}
+        PROJECTIONS_SNAPSHOTS: ${{ steps.snapshots.outputs.directory }}
+        PROJECTIONS_SNAPSHOT_IMAGES: ${{ steps.publish-snapshots.outputs.images }}
+        PROJECTIONS_SNAPSHOTS_ARTIFACT_URL: ${{ steps.upload-snapshots.outputs.artifact-url }}
+      run: node "$GITHUB_ACTION_PATH/packages/integrations/github-action/src/summary.mjs"
+    - if: inputs.comment == 'true' && steps.collect.outputs.pull-request != ''
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        PROJECTIONS_MANIFEST: ${{ steps.collect.outputs.manifest }}
+        INPUT_HOSTED_URL: ${{ inputs.hosted-url }}
+        INPUT_ARTIFACT_NAME: ${{ inputs.artifact-name }}
+        PROJECTIONS_SNAPSHOTS: ${{ steps.snapshots.outputs.directory }}
+        PROJECTIONS_SNAPSHOT_IMAGES: ${{ steps.publish-snapshots.outputs.images }}
+        PROJECTIONS_SNAPSHOTS_ARTIFACT_URL: ${{ steps.upload-snapshots.outputs.artifact-url }}
+      run: node "$GITHUB_ACTION_PATH/packages/integrations/github-action/src/comment.mjs"
+    - if: inputs.fail-on-error == 'true' && steps.collect.outputs.failed != '0'
+      shell: bash
+      env:
+        FAILED: ${{ steps.collect.outputs.failed }}
+      run: |
+        echo "::error::$FAILED projection(s) failed; see the annotations above"
+        exit 1

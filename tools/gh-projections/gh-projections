@@ -1,0 +1,23 @@
+#!/bin/sh
+set -eu
+
+launcher=$0
+case "$launcher" in /*) ;; *) launcher=$PWD/$launcher ;; esac
+links=0
+while [ -L "$launcher" ]; do
+  links=$((links + 1))
+  if [ "$links" -gt 40 ]; then
+    printf '%s\n' 'gh projections: too many launcher symlinks; reinstall the local extension from its source checkout.' >&2
+    exit 1
+  fi
+  directory=$(CDPATH= cd -P "$(dirname "$launcher")" && pwd -P)
+  target=$(readlink "$launcher")
+  case "$target" in /*) launcher=$target ;; *) launcher=$directory/$target ;; esac
+done
+# The launcher is tools/gh-projections/gh-projections in a source checkout.
+root=$(CDPATH= cd -P "$(dirname "$launcher")/../.." && pwd -P)
+if [ ! -x "$root/packages/cli/dist/projections" ]; then
+  printf '%s\n' 'gh projections: the built native CLI is missing. Prepare the extension source checkout explicitly:' "  cd \"$root\"" '  npm ci' '  npm run build' >&2
+  exit 1
+fi
+exec "$root/packages/cli/dist/projections" "$@"

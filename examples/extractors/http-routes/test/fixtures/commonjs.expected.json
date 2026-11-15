@@ -1,0 +1,87 @@
+{
+ "entities": [
+  {
+   "id": "http:handler:%40example%2Fapp:module.inline:get%3A%2Freal-commonjs",
+   "kind": "handler",
+   "label": "module.inline",
+   "data": {
+    "package": "@example/app"
+   },
+   "confidence": "derived"
+  },
+  {
+   "id": "http:handler:%40example%2Fapp:module.inline:get%3A%2Frouter",
+   "kind": "handler",
+   "label": "module.inline",
+   "data": {
+    "package": "@example/app"
+   },
+   "confidence": "derived"
+  },
+  {
+   "id": "http:package:%40example%2Fapp",
+   "kind": "package",
+   "label": "@example/app",
+   "data": {},
+   "confidence": "derived"
+  },
+  {
+   "id": "http:route:%40example%2Fapp:GET:%2Freal-commonjs",
+   "kind": "route",
+   "label": "GET /real-commonjs",
+   "data": {
+    "package": "@example/app",
+    "method": "GET",
+    "path": "/real-commonjs"
+   },
+   "confidence": "inferred"
+  },
+  {
+   "id": "http:route:%40example%2Fapp:GET:%2Frouter",
+   "kind": "route",
+   "label": "GET /router",
+   "data": {
+    "package": "@example/app",
+    "method": "GET",
+    "path": "/router"
+   },
+   "confidence": "inferred"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "http:handled-by:http%3Aroute%3A%2540example%252Fapp%3AGET%3A%252Freal-commonjs:http%3Ahandler%3A%2540example%252Fapp%3Amodule.inline%3Aget%253A%252Freal-commonjs",
+   "kind": "handled-by",
+   "from": "http:route:%40example%2Fapp:GET:%2Freal-commonjs",
+   "to": "http:handler:%40example%2Fapp:module.inline:get%3A%2Freal-commonjs",
+   "confidence": "derived"
+  },
+  {
+   "id": "http:handled-by:http%3Aroute%3A%2540example%252Fapp%3AGET%3A%252Frouter:http%3Ahandler%3A%2540example%252Fapp%3Amodule.inline%3Aget%253A%252Frouter",
+   "kind": "handled-by",
+   "from": "http:route:%40example%2Fapp:GET:%2Frouter",
+   "to": "http:handler:%40example%2Fapp:module.inline:get%3A%2Frouter",
+   "confidence": "derived"
+  },
+  {
+   "id": "http:owns:http%3Apackage%3A%2540example%252Fapp:http%3Aroute%3A%2540example%252Fapp%3AGET%3A%252Freal-commonjs",
+   "kind": "owns",
+   "from": "http:package:%40example%2Fapp",
+   "to": "http:route:%40example%2Fapp:GET:%2Freal-commonjs",
+   "confidence": "derived"
+  },
+  {
+   "id": "http:owns:http%3Apackage%3A%2540example%252Fapp:http%3Aroute%3A%2540example%252Fapp%3AGET%3A%252Frouter",
+   "kind": "owns",
+   "from": "http:package:%40example%2Fapp",
+   "to": "http:route:%40example%2Fapp:GET:%2Frouter",
+   "confidence": "derived"
+  }
+ ],
+ "metadata": {
+  "analysis": "Static TypeScript symbol resolution with explicit domain conventions",
+  "limitations": [
+   "Dynamic registrations and runtime control flow are not evaluated."
+  ]
+ }
+}

@@ -1,0 +1,46 @@
+/*
+ * Hover the host mirrors from any pane (`data-projections-hovered`, set by the
+ * SDK's interaction controller): the SDK rings a hovered unit; a hovered part
+ * (an entity nested in a unit) is tinted, never outlined.
+ */
+.pk [data-entity-id] [data-entity-id]:not([data-projections-unit])[data-projections-hovered]:not(svg, svg *) {
+  outline: none;
+  background-image: linear-gradient(var(--accent-soft), var(--accent-soft));
+}
+.pk[data-reduced-motion='true'] [data-projections-hovered],
+.pk[data-reduced-motion='true'] [data-projections-hovered] * {
+  transition: none !important;
+}
+.pk-waiting {
+  padding: var(--projections-space-5);
+  color: var(--muted);
+}
+
+/* Content buttons (not settings: those are host-drawn controls). */
+.pk-button,
+.graph-footer button,
+.tree-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--projections-space-2);
+  min-height: var(--projections-control-height);
+  padding: 0 var(--projections-space-3);
+  border: var(--projections-border-width) solid var(--border-strong);
+  border-radius: var(--projections-radius);
+  color: var(--text);
+  background: var(--surface);
+  cursor: pointer;
+  font: inherit;
+}
+.pk-button:hover:not(:disabled),
+.graph-footer button:hover:not(:disabled),
+.tree-toggle:hover:not(:disabled) {
+  background: var(--hover);
+}
+.pk-button:disabled,
+.graph-footer button:disabled,
+.tree-toggle:disabled {
+  color: var(--subtle);
+  cursor: not-allowed;
+}

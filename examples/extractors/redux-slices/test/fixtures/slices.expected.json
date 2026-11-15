@@ -1,0 +1,113 @@
+{
+ "entities": [
+  {
+   "id": "redux:action:%40example%2Fapp:cart:add",
+   "kind": "action",
+   "label": "add",
+   "data": {
+    "slice": "cart"
+   },
+   "confidence": "derived"
+  },
+  {
+   "id": "redux:action:%40example%2Fapp:checkout:pay",
+   "kind": "action",
+   "label": "pay",
+   "data": {
+    "slice": "checkout"
+   },
+   "confidence": "derived"
+  },
+  {
+   "id": "redux:package:%40example%2Fapp",
+   "kind": "package",
+   "label": "@example/app",
+   "data": {},
+   "confidence": "derived"
+  },
+  {
+   "id": "redux:selector:%40example%2Fapp:cart:total",
+   "kind": "selector",
+   "label": "total",
+   "data": {
+    "slice": "cart"
+   },
+   "confidence": "derived"
+  },
+  {
+   "id": "redux:slice:%40example%2Fapp:cart",
+   "kind": "slice",
+   "label": "cart",
+   "data": {
+    "package": "@example/app"
+   },
+   "confidence": "derived"
+  },
+  {
+   "id": "redux:slice:%40example%2Fapp:checkout",
+   "kind": "slice",
+   "label": "checkout",
+   "data": {
+    "package": "@example/app"
+   },
+   "confidence": "derived"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "redux:defines:redux%3Aslice%3A%2540example%252Fapp%3Acart:redux%3Aaction%3A%2540example%252Fapp%3Acart%3Aadd",
+   "kind": "defines",
+   "from": "redux:slice:%40example%2Fapp:cart",
+   "to": "redux:action:%40example%2Fapp:cart:add",
+   "confidence": "derived"
+  },
+  {
+   "id": "redux:defines:redux%3Aslice%3A%2540example%252Fapp%3Acart:redux%3Aselector%3A%2540example%252Fapp%3Acart%3Atotal",
+   "kind": "defines",
+   "from": "redux:slice:%40example%2Fapp:cart",
+   "to": "redux:selector:%40example%2Fapp:cart:total",
+   "confidence": "derived"
+  },
+  {
+   "id": "redux:defines:redux%3Aslice%3A%2540example%252Fapp%3Acheckout:redux%3Aaction%3A%2540example%252Fapp%3Acheckout%3Apay",
+   "kind": "defines",
+   "from": "redux:slice:%40example%2Fapp:checkout",
+   "to": "redux:action:%40example%2Fapp:checkout:pay",
+   "confidence": "derived"
+  },
+  {
+   "id": "redux:depends-on:redux%3Aslice%3A%2540example%252Fapp%3Acheckout:redux%3Aslice%3A%2540example%252Fapp%3Acart",
+   "kind": "depends-on",
+   "from": "redux:slice:%40example%2Fapp:checkout",
+   "to": "redux:slice:%40example%2Fapp:cart",
+   "confidence": "derived"
+  },
+  {
+   "id": "redux:imports:redux%3Apackage%3A%2540example%252Fapp:redux%3Aslice%3A%2540example%252Fapp%3Acart",
+   "kind": "imports",
+   "from": "redux:package:%40example%2Fapp",
+   "to": "redux:slice:%40example%2Fapp:cart",
+   "confidence": "derived"
+  },
+  {
+   "id": "redux:owns:redux%3Apackage%3A%2540example%252Fapp:redux%3Aslice%3A%2540example%252Fapp%3Acart",
+   "kind": "owns",
+   "from": "redux:package:%40example%2Fapp",
+   "to": "redux:slice:%40example%2Fapp:cart",
+   "confidence": "derived"
+  },
+  {
+   "id": "redux:owns:redux%3Apackage%3A%2540example%252Fapp:redux%3Aslice%3A%2540example%252Fapp%3Acheckout",
+   "kind": "owns",
+   "from": "redux:package:%40example%2Fapp",
+   "to": "redux:slice:%40example%2Fapp:checkout",
+   "confidence": "derived"
+  }
+ ],
+ "metadata": {
+  "analysis": "Static TypeScript symbol resolution with explicit domain conventions",
+  "limitations": [
+   "Dynamic registrations and runtime control flow are not evaluated."
+  ]
+ }
+}

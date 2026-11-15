@@ -1,0 +1,181 @@
+name: Projections
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 6 * * 1'
+permissions:
+  contents: read
+env:
+  # Package sources (see CONTRIBUTING.md). The committed .npmrc covers the workspaces; this also covers
+  # installs elsewhere, such as test scratch directories and --prefix installs.
+  npm_config_registry: https://packagefeedproxy.microsoft.io/npm/
+  # Vulnerabilities are gated by dependency review and Dependabot (SECURITY.md), not npm's audit endpoint.
+  npm_config_audit: 'false'
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple/
+# A newer commit on a pull request cancels the older one's run; runs on main are never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  public-product:
+    if: github.event_name != 'schedule'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/check
+        with:
+          native: ${{ runner.os == 'Linux' }}
+          reference-docs: ${{ runner.os == 'Linux' }}
+      # The repository's own CLI (tools/cli/README.md) keeps working, and every workspace and crate README
+      # keeps the front matter description it reads.
+      - name: tools doctor and README descriptions
+        shell: bash
+        run: |
+          npm run --silent tools -- doctor
+          npm run --silent tools -- --llms > /dev/null
+          npm run --silent check:readmes
+  # The vulnerability gate: a pull request may not add a dependency with a known high or critical advisory (npm, Cargo
+  # and the other manifests GitHub's dependency graph reads). It uses the dependency graph, not an npm audit endpoint;
+  # Dependabot (.github/dependabot.yml) covers what is already locked.
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+  # Known advisories in what is already locked: OSV (GitHub's advisories for npm, RustSec's for crates) against the root
+  # package-lock.json and Cargo.lock, weekly and on main. Pull requests rely on dependency review above.
+  advisories:
+    if: github.event_name != 'pull_request'
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      - run: npm run --silent check:advisories
+  # Verus proves the Engine's verified crate and the mutation check plants one bug per specification clause
+  # (packages/engine/VERIFICATION.md). It needs no npm install or build, so it runs alongside the other jobs; a required check.
+  verus:
+    if: github.event_name != 'schedule'
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/verus
+  # The browser suites: native Chromium and WebKit, desktop and mobile. Linux WebKit is several times slower than a
+  # workstation, so the large suites are sharded across jobs and `rest` runs every other browser suite. Playwright
+  # shards by test count, not time, so the renderer harness, the largest, shards each project by its measured time
+  # (about 64, 72, 40 and 70 test-minutes on two workers), keeping each job near 20 minutes of tests after about 14 of
+  # setup: four shards over every project put all of WebKit desktop in one, which ran up to 58 minutes. The Inspector
+  # takes two (in `rest`, it took 26 of the job's 60 minutes, and the VS Code UI suite after it didn't finish).
+  browser:
+    if: github.event_name != 'schedule'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [packages/host/core, tools/storybook]
+        shard: [1/3, 2/3, 3/3]
+        include:
+          - {suite: packages/renderers/harness, project: chromium-desktop, shard: 1/3}
+          - {suite: packages/renderers/harness, project: chromium-desktop, shard: 2/3}
+          - {suite: packages/renderers/harness, project: chromium-desktop, shard: 3/3}
+          - {suite: packages/renderers/harness, project: webkit-desktop, shard: 1/4}
+          - {suite: packages/renderers/harness, project: webkit-desktop, shard: 2/4}
+          - {suite: packages/renderers/harness, project: webkit-desktop, shard: 3/4}
+          - {suite: packages/renderers/harness, project: webkit-desktop, shard: 4/4}
+          - {suite: packages/renderers/harness, project: chromium-mobile, shard: 1/2}
+          - {suite: packages/renderers/harness, project: chromium-mobile, shard: 2/2}
+          - {suite: packages/renderers/harness, project: webkit-mobile, shard: 1/3}
+          - {suite: packages/renderers/harness, project: webkit-mobile, shard: 2/3}
+          - {suite: packages/renderers/harness, project: webkit-mobile, shard: 3/3}
+          - {suite: packages/host/inspector, shard: 1/2}
+          - {suite: packages/host/inspector, shard: 2/2}
+          - suite: rest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/browser
+        with:
+          suite: ${{ matrix.suite }}
+          project: ${{ matrix.project }}
+          shard: ${{ matrix.shard }}
+          sharded: packages/host/core tools/storybook packages/renderers/harness packages/host/inspector
+  # @githubnext/projections, the one npm package, as it would be published (docs/contracts/packages.md).
+  package:
+    if: github.event_name != 'schedule'
+    timeout-minutes: 45
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/package
+  # The release workflow is generated by dist; it must match dist-workspace.toml.
+  release-config:
+    if: github.event_name != 'schedule'
+    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      - name: Install the dist version dist-workspace.toml pins
+        shell: bash
+        run: |
+          version=$(sed -n 's/^cargo-dist-version = "\(.*\)"$/\1/p' dist-workspace.toml)
+          curl --proto '=https' --tlsv1.2 -LsSf "https://github.com/axodotdev/cargo-dist/releases/download/v$version/cargo-dist-installer.sh" | sh
+      - name: Check the release workflow is what dist generates
+        shell: bash
+        run: node tools/scripts/dist.mjs --check
+  # Native Windows: Job Object supervision, no-follow artifact I/O and the Rust suites
+  # that don't run POSIX shell scripts (those are ignored on Windows with their reason).
+  windows:
+    if: github.event_name != 'schedule'
+    timeout-minutes: 60
+    runs-on: windows-2025
+    steps:
+      - shell: bash
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - shell: bash
+        run: |
+          rustup toolchain install
+          # The suites read the built comparators and browser client.
+          npm ci --no-audit --no-fund
+          npm run build
+          cargo test --locked --workspace --no-fail-fast

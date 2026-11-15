@@ -1,0 +1,60 @@
+{
+  "format": "projections.scenarios",
+  "version": 0,
+  "title": "File packing",
+  "renderer": "file-packing",
+  "scenarios": [
+    {
+      "id": "opensource-tree",
+      "title": "This repository's tree",
+      "description": "The open-source Projections workspace before and after replacing the treemap renderer with file packing: the treemap package leaves, file-packing arrives, and the files that reference them change size.",
+      "before": "fixtures/opensource-before.json",
+      "after": "fixtures/opensource-after.json"
+    },
+    {
+      "id": "sample-app",
+      "title": "Sample app",
+      "description": "A small web app gains search, drops a vendored date library and grows its API client.",
+      "before": "fixtures/sample-before.json",
+      "after": "fixtures/sample-after.json"
+    },
+    {
+      "id": "sample-app-lines",
+      "title": "Sample app, sized by lines",
+      "description": "The same change with circles sized by line counts.",
+      "before": "fixtures/sample-before.json",
+      "after": "fixtures/sample-after.json",
+      "presentation": {
+        "rendererOptions": {
+          "measure": "lines"
+        }
+      }
+    },
+    {
+      "id": "settings-map",
+      "title": "Settings map",
+      "description": "A synthetic settings schema as a weighted hierarchy: one equal circle per key, nested under its owner, colored by kind, with every further flag as a dot. The definition makes secrets danger red and pre-releases warning amber, and names secret keys; the other kinds take the most distinct free colors. A provider gains a secret key, a pre-release key leaves and a key stops being hidden.",
+      "before": "fixtures/settings-before.json",
+      "after": "fixtures/settings-after.json",
+      "presentation": {
+        "kinds": {
+          "secret": {
+            "color": "danger",
+            "noun": {
+              "singular": "secret key",
+              "plural": "secret keys"
+            }
+          },
+          "pre-release": {
+            "color": "warning"
+          }
+        }
+      }
+    },
+    {
+      "id": "snapshot",
+      "title": "Single extraction",
+      "extraction": "fixtures/opensource-after.json"
+    }
+  ]
+}

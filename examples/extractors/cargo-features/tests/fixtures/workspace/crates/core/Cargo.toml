@@ -1,0 +1,11 @@
+[package]
+name = "core"
+version = "0.1.0"
+
+[dependencies]
+serde = { version = "1", optional = true }
+
+[features]
+default = ["std"]
+std = []
+serde = ["dep:serde", "std"]

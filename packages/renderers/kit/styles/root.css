@@ -1,0 +1,163 @@
+/* The page, the `.pk` root and its semantic aliases of the theme tokens, resets, focus and rings. */
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+/* The document is the stage, the host frame's own field (`color-surface-canvas`), so a renderer's edges never show a lighter page. */
+body {
+  background: var(--projections-color-surface-canvas);
+  color: var(--projections-color-fg);
+}
+
+.pk {
+  --surface: var(--projections-color-bg);
+  --canvas: var(--projections-color-bg-subtle);
+  --recessed: var(--projections-color-bg-inset);
+  --overlay: var(--projections-color-bg-overlay);
+  --text: var(--projections-color-fg);
+  --muted: var(--projections-color-fg-muted);
+  --subtle: var(--projections-color-fg-subtle);
+  --on-emphasis: var(--projections-color-fg-on-emphasis);
+  --border: var(--projections-color-border-muted);
+  --border-strong: var(--projections-color-border);
+  --border-emphasis: var(--projections-color-border-emphasis);
+  --accent: var(--projections-color-accent);
+  --focus: var(--projections-color-focus);
+  --green: var(--projections-color-added);
+  --red: var(--projections-color-removed);
+  --amber: var(--projections-color-modified);
+  --violet: var(--projections-color-moved);
+  --hover: var(--projections-color-bg-subtle);
+  --accent-soft: var(--projections-color-accent-muted);
+  --accent-border: var(--projections-color-accent);
+  --accent-strong: var(--projections-color-accent-emphasis);
+  --green-soft: var(--projections-color-added-muted);
+  --green-border: var(--projections-color-added-border);
+  --green-strong: var(--projections-color-added-emphasis);
+  --red-soft: var(--projections-color-removed-muted);
+  --red-border: var(--projections-color-removed-border);
+  --red-strong: var(--projections-color-removed-emphasis);
+  --amber-soft: var(--projections-color-modified-muted);
+  --amber-border: var(--projections-color-modified-border);
+  --amber-strong: var(--projections-color-modified-emphasis);
+  --violet-soft: var(--projections-color-moved-muted);
+  --violet-border: var(--projections-color-moved-border);
+  --violet-strong: var(--projections-color-moved-emphasis);
+  /*
+   * Stacked surfaces, in elevation order: the stage behind cards, a card, a header band in a card, and a recessed
+   * column or empty room. `--divider` separates any two at 3:1 or more; `--border` stays the quieter rule between rows.
+   */
+  --stage: var(--projections-color-surface-canvas);
+  --raised: var(--projections-color-surface-raised);
+  --band: var(--projections-color-surface-header);
+  --inset: var(--projections-color-surface-inset);
+  --divider: var(--projections-color-divider);
+  /* Room with nothing in it (a filler row, a missing cell): a quiet hatch over the inset surface, never a blank. */
+  --pk-vacant: repeating-linear-gradient(-45deg, var(--border) 0 1px, transparent 1px 6px), var(--inset);
+  /* Highlights drawn behind plain text: neutral (hover, find matches) and per change, for word-level changes. */
+  --highlight: var(--projections-color-highlight);
+  --green-highlight: var(--projections-color-added-highlight);
+  --red-highlight: var(--projections-color-removed-highlight);
+  --amber-highlight: var(--projections-color-modified-highlight);
+  --violet-highlight: var(--projections-color-moved-highlight);
+  /* Relationships: the divider, the neutral the token set keeps 3:1 or more against every surface, as a line that carries
+   * meaning needs (border-emphasis is a quiet edge, too faint for a graph's links on a dark stage). */
+  --edge: var(--projections-color-divider);
+  --graph-bg: var(--stage);
+  --dot: var(--projections-color-border);
+  /* The host's categorical palette, in order. */
+  --chart-1: var(--projections-chart-1);
+  --chart-2: var(--projections-chart-2);
+  --chart-3: var(--projections-chart-3);
+  --chart-4: var(--projections-chart-4);
+  --chart-5: var(--projections-chart-5);
+  --chart-6: var(--projections-chart-6);
+  --chart-7: var(--projections-chart-7);
+  --chart-8: var(--projections-chart-8);
+  --chart-9: var(--projections-chart-9);
+  --chart-10: var(--projections-chart-10);
+  --chart-11: var(--projections-chart-11);
+  --chart-12: var(--projections-chart-12);
+  --chart-13: var(--projections-chart-13);
+  --chart-14: var(--projections-chart-14);
+  --chart-15: var(--projections-chart-15);
+  --chart-16: var(--projections-chart-16);
+  --font-mono: var(--projections-font-family-mono);
+  /* Stroke weights for drawn shapes and lines, relative to the host's border width. */
+  --stroke: var(--projections-border-width);
+  --stroke-strong: var(--projections-border-width-thick);
+  color: var(--text);
+  /* The root is the stage that cards and panels stand on (the renderer check `stage`). */
+  background: var(--stage);
+  font-family: var(--projections-font-family);
+  font-size: var(--projections-font-size);
+  font-weight: var(--projections-font-weight-normal);
+  line-height: var(--projections-line-height);
+  min-width: 0;
+  text-align: start;
+}
+.pk *,
+.pk *::before,
+.pk *::after {
+  box-sizing: border-box;
+}
+.pk :is(h1, h2, h3, h4, p) {
+  margin: 0;
+}
+.pk h3 {
+  font-size: var(--projections-font-size);
+  font-weight: var(--projections-font-weight-semibold);
+  line-height: var(--projections-line-height-tight);
+}
+.pk :is(code, pre) {
+  font-family: var(--font-mono);
+  font-size: var(--projections-font-size-xs);
+}
+.pk :is(button, input, summary, [tabindex]) {
+  outline-offset: var(--projections-focus-ring-offset);
+}
+.pk :is(button, [tabindex]):focus-visible {
+  outline: var(--projections-focus-ring-width) solid var(--focus);
+}
+/*
+ * SVG elements never get an outline: it is drawn around their bounding box,
+ * square and outside their shape. The SDK rings an SVG item by restyling its
+ * marked edge shape (`data-projections-edge`).
+ */
+.pk svg :is(*, [tabindex]):focus {
+  outline: none;
+}
+/*
+ * Hover, focus and selection rings are the SDK's (`connectRings`, started by
+ * `connectRenderer`): styling on each unit's own element (an outline inside its
+ * border, or its marked SVG edge's stroke). Renderers draw no ring of their own. A part of a
+ * unit (an entity nested in another: a column in a table, a row in a card)
+ * takes `pk-part` and gets a quieter tint, never a second ring.
+ */
+.pk {
+  --pk-part-tint: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.pk .pk-part:is(:focus-visible, :has(:focus-visible)) {
+  outline: none;
+  background-image: linear-gradient(var(--pk-part-tint), var(--pk-part-tint));
+  box-shadow: inset var(--stroke-strong) 0 0 var(--focus);
+}
+
+/*
+ * A content-sized frame's zoomable stage pans by dragging (zoom.ts `useDragPan`), never by the host page's wheel or
+ * touch scrolling: its overflow is hidden, so the wheel and an upward or downward swipe scroll the page.
+ */
+.pk [data-pan='drag'] {
+  overflow: hidden;
+  touch-action: pan-y pinch-zoom;
+}
+.pk [data-pan='drag'][data-pannable] {
+  cursor: grab;
+  /* Content larger than the stage ends on the host's column, not in the gutter its stage inset reaches into. */
+  clip-path: inset(0 var(--projections-stage-inset, 0px));
+}
+.pk [data-pan='drag'][data-panning] {
+  cursor: grabbing;
+  user-select: none;
+}

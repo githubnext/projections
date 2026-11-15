@@ -1,0 +1,67 @@
+{
+  "name": "@githubnext/projections-storybook",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Storybook for the host's default UI and the VS Code UI: every prebuilt view and building block on real renderer scenarios, plus the browser suites' harness stories",
+  "exports": {
+    "./stories": "./src/stories.tsx",
+    "./controller": "./src/controller.tsx",
+    "./fixtures": "./src/fixtures.ts",
+    "./runtime": "./src/runtime.ts",
+    "./theme": "./src/theme.ts",
+    "./env": "./src/env.d.ts",
+    "./frame.css": "./src/frame.css",
+    "./fill.css": "./stories/vscode/fill.css",
+    "./page-styles": "./harness/page-styles.ts",
+    "./scripts/assets": {
+      "types": "./scripts/assets.d.mts",
+      "default": "./scripts/assets.mjs"
+    },
+    "./scripts/scenarios": {
+      "types": "./scripts/scenarios.d.mts",
+      "default": "./scripts/scenarios.mjs"
+    },
+    "./scripts/serve": {
+      "types": "./scripts/serve.d.mts",
+      "default": "./scripts/serve.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "devDependencies": {
+    "@githubnext/projections-comparator-runtime": "0.1.0",
+    "@githubnext/projections-engine": "0.1.0",
+    "@githubnext/projections-example-renderer-minimal": "0.0.0",
+    "@githubnext/projections-host": "0.1.0",
+    "@githubnext/projections-host-vscode": "0.1.0",
+    "@githubnext/projections-inspector": "0.1.0",
+    "@githubnext/projections-renderer-api": "0.1.0",
+    "@githubnext/projections-renderer-code-statistics": "0.1.0",
+    "@githubnext/projections-renderer-database": "0.1.0",
+    "@githubnext/projections-renderer-dependency-injection": "0.1.0",
+    "@githubnext/projections-renderer-file-packing": "0.1.0",
+    "@githubnext/projections-renderer-graph": "0.1.0",
+    "@githubnext/projections-renderer-kit": "0.1.0",
+    "@githubnext/projections-renderer-runtime-policy": "0.1.0",
+    "@githubnext/projections-renderer-sdk": "0.1.0",
+    "@githubnext/projections-renderer-text-diff": "0.1.0",
+    "@githubnext/projections-schemas": "0.1.0",
+    "@playwright/test": "^1.55.0",
+    "@storybook/react-vite": "^10.6.6",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-is": "^19.1.0",
+    "storybook": "^10.6.6",
+    "vite": "^7.1.0"
+  },
+  "scripts": {
+    "storybook": "storybook dev --host 127.0.0.1 --port 6006 --no-version-updates",
+    "build": "storybook build --quiet",
+    "typecheck": "tsc -p tsconfig.json",
+    "test:browser": "storybook build --quiet && playwright test",
+    "screenshots": "node scripts/screenshots.mjs"
+  }
+}

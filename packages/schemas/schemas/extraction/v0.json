@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/extraction/v0.json",
+  "title": "Projections extraction",
+  "description": "One aspect of the code at one revision, as produced by an extractor on stdout.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocolVersion", "schema", "entities", "relationships"],
+  "properties": {
+    "protocolVersion": {"type": "number", "const": 0},
+    "schema": {"$ref": "#/$defs/domainSchema"},
+    "vocabularies": {
+      "description": "Vocabularies the extraction follows: typed conventions over its schema, such as `dependency-injection/v0` over `architecture/v0`. The engine checks their rules too.",
+      "type": "array",
+      "items": {"$ref": "#/$defs/vocabulary"},
+      "uniqueItems": true
+    },
+    "entities": {"type": "array", "items": {"$ref": "#/$defs/entity"}, "maxItems": 10000},
+    "relationships": {"type": "array", "items": {"$ref": "#/$defs/relationship"}, "maxItems": 50000},
+    "volatile": {
+      "description": "Data that may vary between runs at the same revision, such as durations or measurements, and how much. Part of the digest.",
+      "type": "array",
+      "items": {"$ref": "#/$defs/volatile"},
+      "maxItems": 256
+    },
+    "missingInputs": {
+      "description": "Declared inputs (repository-relative files, folders or globs) that don't exist at the examined revision. The extraction describes the revision without them, so a comparison shows their contents as added or removed, with a notice. Part of the digest.",
+      "type": "array",
+      "items": {"type": "string", "minLength": 1, "pattern": "\\S", "maxLength": 1024},
+      "maxItems": 256,
+      "uniqueItems": true
+    },
+    "metadata": {"$ref": "#/$defs/data"}
+  },
+  "allOf": [
+    {
+      "if": {"required": ["schema"], "properties": {"schema": {"const": "graph/v0"}}},
+      "then": {"$ref": "https://schemas.projections.githubnext.com/graph/v0.json#/$defs/refinement"}
+    },
+    {
+      "if": {"required": ["schema"], "properties": {"schema": {"const": "dag/v0"}}},
+      "then": {"$ref": "https://schemas.projections.githubnext.com/dag/v0.json#/$defs/refinement"}
+    },
+    {
+      "if": {"required": ["schema"], "properties": {"schema": {"const": "treemap/v0"}}},
+      "then": {"$ref": "https://schemas.projections.githubnext.com/treemap/v0.json#/$defs/refinement"}
+    },
+    {
+      "if": {"required": ["schema"], "properties": {"schema": {"const": "metrics/v0"}}},
+      "then": {"$ref": "https://schemas.projections.githubnext.com/metrics/v0.json#/$defs/refinement"}
+    },
+    {
+      "if": {"required": ["schema"], "properties": {"schema": {"const": "api/v0"}}},
+      "then": {"$ref": "https://schemas.projections.githubnext.com/api/v0.json#/$defs/refinement"}
+    },
+    {
+      "if": {"required": ["schema"], "properties": {"schema": {"const": "database/v0"}}},
+      "then": {"$ref": "https://schemas.projections.githubnext.com/database/v0.json#/$defs/refinement"}
+    },
+    {
+      "if": {"required": ["schema"], "properties": {"schema": {"const": "architecture/v0"}}},
+      "then": {"$ref": "https://schemas.projections.githubnext.com/architecture/v0.json#/$defs/refinement"}
+    },
+    {
+      "if": {
+        "required": ["vocabularies"],
+        "properties": {"vocabularies": {"contains": {"const": "dependency-injection/v0"}}}
+      },
+      "then": {
+        "$ref": "https://schemas.projections.githubnext.com/vocabularies/dependency-injection/v0.json#/$defs/refinement"
+      }
+    },
+    {
+      "if": {
+        "required": ["vocabularies"],
+        "properties": {"vocabularies": {"contains": {"const": "infrastructure/v0"}}}
+      },
+      "then": {
+        "$ref": "https://schemas.projections.githubnext.com/vocabularies/infrastructure/v0.json#/$defs/refinement"
+      }
+    },
+    {
+      "if": {
+        "required": ["vocabularies"],
+        "properties": {"vocabularies": {"contains": {"const": "runtime-policy/v0"}}}
+      },
+      "then": {
+        "$ref": "https://schemas.projections.githubnext.com/vocabularies/runtime-policy/v0.json#/$defs/refinement"
+      }
+    }
+  ],
+  "$defs": {
+    "text": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "number": {"type": "number", "minimum": -9007199254740991, "maximum": 9007199254740991},
+    "json": {
+      "anyOf": [
+        {"type": "null"},
+        {"type": "boolean"},
+        {"type": "string"},
+        {"$ref": "#/$defs/number"},
+        {"type": "array", "items": {"$ref": "#/$defs/json"}},
+        {"type": "object", "additionalProperties": {"$ref": "#/$defs/json"}}
+      ]
+    },
+    "data": {"type": "object", "additionalProperties": {"$ref": "#/$defs/json"}},
+    "domainSchema": {
+      "enum": ["graph/v0", "dag/v0", "treemap/v0", "metrics/v0", "api/v0", "database/v0", "architecture/v0"]
+    },
+    "vocabulary": {"enum": ["dependency-injection/v0", "infrastructure/v0", "runtime-policy/v0"]},
+    "confidence": {"enum": ["authoritative", "derived", "inferred"]},
+    "previousIds": {"type": "array", "items": {"$ref": "#/$defs/text"}, "uniqueItems": true},
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "source"],
+      "properties": {
+        "kind": {"$ref": "#/$defs/text"},
+        "source": {"$ref": "#/$defs/text"},
+        "location": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["line"],
+          "properties": {
+            "line": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+            "column": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}
+          }
+        }
+      }
+    },
+    "entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "label"],
+      "properties": {
+        "id": {"$ref": "#/$defs/text"},
+        "kind": {"$ref": "#/$defs/text"},
+        "label": {"type": "string"},
+        "data": {"$ref": "#/$defs/data"},
+        "previousIds": {"$ref": "#/$defs/previousIds"},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}},
+        "confidence": {"$ref": "#/$defs/confidence"}
+      }
+    },
+    "relationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "from", "to"],
+      "properties": {
+        "id": {"$ref": "#/$defs/text"},
+        "kind": {"$ref": "#/$defs/text"},
+        "from": {"$ref": "#/$defs/text"},
+        "to": {"$ref": "#/$defs/text"},
+        "label": {"type": "string"},
+        "data": {"$ref": "#/$defs/data"},
+        "previousIds": {"$ref": "#/$defs/previousIds"},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}},
+        "confidence": {"$ref": "#/$defs/confidence"}
+      }
+    },
+    "tolerance": {
+      "description": "How much a numeric value may vary. Within when any declared bound holds; values that are not numbers on both sides are beyond.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "absolute": {"description": "Within when `|after − before| ≤ absolute`.", "type": "number", "minimum": 0},
+        "relative": {
+          "description": "Within when `|after − before| ≤ relative × max(|before|, |after|)`.",
+          "type": "number",
+          "minimum": 0
+        },
+        "spread": {
+          "description": "A pointer under `/data/` into the same item naming the spread the extractor recorded, such as a standard deviation. Within when `|after − before| ≤ factor × √(spread_before² + spread_after²)`; a spread missing or not a finite nonnegative number on either side can't hold. Its `*` segments take the keys the path's `*` segments matched, in order.",
+          "type": "string",
+          "pattern": "^/data/([^~]|~[01])*$",
+          "maxLength": 1024
+        },
+        "factor": {
+          "description": "Scales the spread bound; defaults to 1. Requires `spread`.",
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "anyOf": [{"required": ["absolute"]}, {"required": ["relative"]}, {"required": ["spread"]}],
+      "dependentRequired": {"factor": ["spread"]}
+    },
+    "volatile": {
+      "description": "Values that may vary between runs at one revision. Without a tolerance any difference is expected variation; with one, only numbers within it are; a generated value is judged by its basis. A pair's declarations from both sides combine, the tighter winning.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "collection": {"description": "Defaults to `entities`.", "enum": ["entities", "relationships"]},
+        "kinds": {
+          "description": "The kinds it applies to; absent for every kind.",
+          "type": "array",
+          "items": {"$ref": "#/$defs/text"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "path": {
+          "description": "A JSON pointer under `/data/`, with RFC 6901 escapes; a `*` segment matches any object key or array index, so a key that is literally `*` cannot be addressed.",
+          "type": "string",
+          "pattern": "^/data/([^~]|~[01])*$",
+          "maxLength": 1024
+        },
+        "tolerance": {"$ref": "#/$defs/tolerance"},
+        "generated": {
+          "description": "A generated value, such as a summary a language model wrote: judged by its `basis`, not its wording. Requires `basis`; has no `tolerance`.",
+          "type": "boolean",
+          "const": true
+        },
+        "basis": {
+          "description": "A pointer under `/data/` into the same item naming the generated value's basis: an object of 1 to 16 named parts (`input`, `prompt`, `model`, ...), each a nonempty string of at most 256 bytes. Equal bases make any rewording expected variation; a changed part makes a change. Its `*` segments take the keys the path's `*` segments matched, in order, and it can't be volatile itself.",
+          "type": "string",
+          "pattern": "^/data/([^~]|~[01])*$",
+          "maxLength": 1024
+        }
+      },
+      "dependentRequired": {"generated": ["basis"], "basis": ["generated"]},
+      "if": {"required": ["generated"]},
+      "then": {"not": {"required": ["tolerance"]}}
+    }
+  }
+}

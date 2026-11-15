@@ -1,0 +1,13 @@
+{
+  "name": "acme",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "tools/**",
+    "!packages/legacy"
+  ],
+  "devDependencies": {
+    "is-number": "^7.0.0"
+  },
+  "packageManager": "yarn@1.22.22"
+}

@@ -1,0 +1,30 @@
+# Runs every projection on each pull request and each push to main: each run summarizes them in its job summary
+# (and, with comment: true, a pull request comment) and uploads them as an artifact. A workflow of its own is the
+# fallback: when a job already installs and builds what the extractors need, add the step there instead
+# (docs/setup/ci.md). Copy to .github/workflows/projections.yml.
+name: Projections
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  # Only for comment: true. Pull requests from forks never get it, and then simply get no comment.
+  pull-requests: write
+jobs:
+  projections:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          # The merge base and the head must both be in the checkout.
+          fetch-depth: 0
+          # Extractors never see a token.
+          persist-credentials: false
+      - uses: githubnext/projections@v0
+        with:
+          comment: true
+          retention-days: 30
+          # trust: true would run extractors that execute repository code, including
+          # a pull request's own code. See the guide before enabling it.

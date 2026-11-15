@@ -1,0 +1,61 @@
+{
+  "format": "projections.scenarios",
+  "version": 0,
+  "title": "Code statistics",
+  "renderer": "code-statistics",
+  "scenarios": [
+    {
+      "id": "gateway",
+      "title": "Gateway: JavaScript to TypeScript",
+      "description": "A twelve-language service retires CoffeeScript, moves most of its JavaScript to TypeScript, then adds Rust and Protobuf. Switch measure, grouping and chart in the renderer.",
+      "before": "test/fixtures/gateway-before.json",
+      "after": "test/fixtures/gateway-after.json"
+    },
+    {
+      "id": "gateway-priority",
+      "title": "Gateway: Rust first (custom order)",
+      "description": "The priority-order example comparator presents the step that adds Rust and Protobuf first, then CoffeeScript leaves and the other counts resize.",
+      "before": "test/fixtures/gateway-before.json",
+      "after": "test/fixtures/gateway-after.json",
+      "comparator": {
+        "file": "../../../examples/comparators/priority-order/priority-order.comparator.yaml",
+        "options": {
+          "priority": ["language:Rust"]
+        }
+      }
+    },
+    {
+      "id": "languages",
+      "title": "Languages: arrival and departure",
+      "description": "In the default order Ruby shrinks to nothing and leaves, then TypeScript grows and CSS shrinks, then Python arrives empty and grows.",
+      "before": "test/fixtures/languages-before.json",
+      "after": "test/fixtures/languages-after.json"
+    },
+    {
+      "id": "languages-priority",
+      "title": "Languages: Python first (custom order)",
+      "description": "The priority-order example comparator presents Python’s arrival first; Ruby leaves and the other counts resize afterwards.",
+      "before": "test/fixtures/languages-before.json",
+      "after": "test/fixtures/languages-after.json",
+      "comparator": {
+        "file": "../../../examples/comparators/priority-order/priority-order.comparator.yaml",
+        "options": {
+          "priority": ["language:Python"]
+        }
+      }
+    },
+    {
+      "id": "scopes",
+      "title": "Methods per access scope",
+      "description": "Generic metrics: one bar per access scope, counting the methods that require it. Bars read each entity's data.value and data.unit when the extraction has no line counts.",
+      "before": "test/fixtures/scopes-before.json",
+      "after": "test/fixtures/scopes-after.json"
+    },
+    {
+      "id": "gateway-single",
+      "title": "Gateway: one revision",
+      "description": "Language counts for a single revision, without a comparison.",
+      "extraction": "test/fixtures/gateway-after.json"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+ffffffff81000000 T security_file_permission
+ffffffff81000010 T security_kernel_read_file
+ffffffff81000020 T __x64_sys_finit_module
+ffffffff81000030 T __x64_sys_execve
+ffffffff81000040 T security_mmap_file

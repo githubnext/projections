@@ -1,0 +1,274 @@
+/* The Inspector page. Its UI is the host's scoped shadcn/ui stylesheet (`@githubnext/projections-host/ui.css`). */
+:root {
+  color-scheme: light dark;
+  background: #fbfaf8;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    background: #101012;
+  }
+}
+body {
+  margin: 0;
+}
+#root > .pi {
+  min-height: 100vh;
+}
+
+/*
+ * The workbench is cards on a gutter, like an editor's: the title bar and status bar sit on the gutter, and the
+ * Explorer, the docked Details, the bottom panel and the view (its own chrome flat inside) float between them as cards
+ * with one radius, border and surface, one gutter apart. Resize handles lie in the gutters and show a line on hover.
+ */
+.pi-shell {
+  --pi-gutter: 8px;
+}
+.pi-shell .pi-card {
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid var(--pj-border);
+  border-radius: calc(var(--pj-radius) - 2px);
+  background-color: var(--pj-surface-canvas);
+}
+/* The title bar's three columns: each side wide enough for the wider side's content, so the centre is centred. */
+.pi-shell .pi-titlebar-grid {
+  grid-template-columns: minmax(var(--pi-side, 0px), 1fr) minmax(0, auto) minmax(var(--pi-side, 0px), 1fr);
+  column-gap: 4px;
+}
+.pi-shell .pi-splitter::after {
+  content: '';
+  position: absolute;
+  border-radius: 1px;
+  background-color: transparent;
+  transition: background-color 120ms ease;
+}
+.pi-shell .pi-splitter[aria-orientation='vertical']::after {
+  inset-block: 0;
+  left: calc(50% - 1px);
+  width: 2px;
+}
+.pi-shell .pi-splitter[aria-orientation='horizontal']::after {
+  inset-inline: 0;
+  top: calc(50% - 1px);
+  height: 2px;
+}
+.pi-shell .pi-splitter:hover::after,
+.pi-shell .pi-splitter:focus-visible::after,
+.pi-shell .pi-splitter[data-dragging]::after {
+  background-color: var(--pj-ring);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pi-shell .pi-splitter::after {
+    transition: none;
+  }
+}
+
+/*
+ * The Explorer's spacing system, on the 4px grid. Every row's fill is inset by --pi-x-inset from the card's edges and
+ * rounded like the other controls; inside it, --pi-x-pad, a 16px icon slot and --pi-x-gap put every text start (section
+ * labels, rows, sublabels) on one column, --pi-x-text. Rows are at least 32px (40px with a detail line), with the icon,
+ * title block and status centred on the row. The card's first label is 4px from its top; label → first row is 4px;
+ * row → row 0 (each fill keeps its own inset); a sublabel starts a group 8px below the last row; a section ends 12px
+ * above an inset rule, and the next section's label starts 4px below it. Labels are not bars: they sit on the card.
+ */
+.pi-explorer {
+  --pi-x-inset: 4px;
+  --pi-x-pad: 6px;
+  --pi-x-icon: 16px;
+  --pi-x-gap: 6px;
+  --pi-x-text: calc(var(--pi-x-inset) + var(--pi-x-pad) + var(--pi-x-icon) + var(--pi-x-gap));
+}
+.pi-explorer {
+  padding-block: var(--pi-x-inset);
+}
+/* On the light card a selected fill is raised (the card is the stage's recessed canvas); dark keeps the accent. */
+.pi-shell[data-color-mode='light'] .pi-explorer {
+  --pj-accent: var(--pj-surface-raised);
+}
+.pi-explorer .pi-x-header {
+  padding-inline: calc(var(--pi-x-inset) + var(--pi-x-pad)) var(--pi-x-inset);
+  gap: var(--pi-x-gap);
+}
+/* Sections are apart by their spacing and a rule inset like the rows' fills, not a full-width divider. */
+.pi-explorer .pi-explorer-section + .pi-explorer-section::before {
+  content: '';
+  display: block;
+  height: 1px;
+  margin: 0 calc(var(--pi-x-inset) + var(--pi-x-pad)) var(--pi-x-inset);
+  background-color: var(--pj-border);
+}
+.pi-explorer .pi-x-header > svg {
+  width: var(--pi-x-icon);
+  flex: none;
+}
+.pi-explorer .pi-x-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 4px var(--pi-x-inset) 12px;
+}
+.pi-explorer .pi-x-row {
+  display: flex;
+  align-items: center;
+  gap: var(--pi-x-gap);
+  min-height: 32px;
+  box-sizing: border-box;
+  padding-block: 4px;
+  padding-inline: var(--pi-x-pad);
+  border-radius: calc(var(--pj-radius, 10px) * 0.8);
+}
+.pi-explorer .pi-x-row:has(.pi-x-detail) {
+  min-height: 40px;
+}
+/* A row that labels a control under it, for example a part above its selector. */
+.pi-explorer .pi-x-row.pi-x-compact {
+  min-height: 24px;
+  padding-block: 0;
+}
+.pi-explorer .pi-x-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--pi-x-icon);
+  height: var(--pi-x-icon);
+}
+.pi-explorer .pi-x-status {
+  flex: none;
+  align-self: center;
+}
+/* A sublabel's text starts on the text column; it opens a group 8px below what precedes it. */
+.pi-explorer .pi-x-sublabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+  margin-top: 8px;
+  padding-left: calc(var(--pi-x-text) - var(--pi-x-inset));
+  padding-right: var(--pi-x-pad);
+}
+.pi-explorer .pi-x-body > .pi-x-sublabel:first-child {
+  margin-top: 0;
+}
+/* Controls (fields, selects, buttons) line up with a row's padding, not its text. */
+.pi-explorer .pi-x-block {
+  padding-inline: var(--pi-x-pad);
+}
+
+/*
+ * The docked Details panel: the host's raw details block, without a card of its own inside the dock's card. It follows
+ * the selection and the dock has its own Close, so the block's "Close details" (which clears the selection, as Escape
+ * still does) is not shown.
+ */
+.pi-shell .pi-details-dock > .ph-details {
+  align-self: stretch;
+  padding: 12px;
+  border-width: 0;
+  border-radius: 0;
+  background-color: transparent;
+  box-shadow: none;
+}
+.pi-shell .pi-details-dock .ph-details-header button[aria-label='Close details'] {
+  display: none;
+}
+.pi-shell .pi-details-dock .ph-details-header {
+  min-height: 36px;
+  margin: -12px -12px 0;
+  padding-left: 12px;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+/* The Explore view's history sweep: unchanged cells recede (and say "No change"); thumbnails keep one size. */
+.pi-sweep-cell[data-status='unchanged'] {
+  opacity: 0.55;
+}
+.pi-sweep-cell a:focus-visible {
+  outline: 2px solid var(--pj-ring, currentColor);
+  outline-offset: 2px;
+}
+.pi-sweep-thumbnail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 10rem;
+  aspect-ratio: 8 / 5;
+  overflow: hidden;
+  border: 1px solid var(--pj-divider, currentColor);
+  border-radius: 0.25rem;
+  background: var(--pj-background, transparent);
+}
+/*
+ * The spinner gives way to the image when the thumbnail arrives, which can be under a press (the click scrolled the
+ * cell into view, starting the load); a press on a removed element is no click, so the frame, which stays, takes it.
+ */
+.pi-sweep-thumbnail > * {
+  pointer-events: none;
+}
+.pi-sweep-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+}
+.pi-sweep th[scope='row'] {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--pj-background);
+}
+/* Changes where several projections moved: a neutral fill (the row also says so in words). */
+.pi-sweep tr[data-highlight] > * {
+  background: var(--pj-muted);
+}
+/* A thumbnail's larger preview on hover or focus: the image, framed (see sweep/thumbnails.tsx), without the tooltip's arrow. */
+.pi-sweep-preview > span:last-child {
+  display: none;
+}
+.pi-sweep-preview img {
+  display: block;
+  width: 30rem;
+  max-width: calc(100vw - 2rem);
+  height: auto;
+}
+
+/* A host theme's accent (`InspectorHost.theme`), set on the mount element, recolors the lens: focus, selection and playback. */
+[data-pi-accent] .pj-root {
+  --pj-lens: var(--pi-accent);
+  --pj-ring: var(--pi-accent);
+}
+
+/*
+ * The agent viewer in the GitHub Copilot app's canvas (`projections view`): viewer/theme.ts marks the root
+ * `pi-app-theme` while the app's theme tokens are there, and writes the chrome's colors as one generated rule
+ * (`hostChromeVariables`, from the same tokens the renderer frames get), so the chrome and the stage are one theme.
+ */
+.pi-app-theme .pi-viewer-header {
+  font-size: var(--text-body-medium);
+}
+
+/*
+ * The agent viewer's header text, centred by cap height: each item is trimmed to its cap height and baseline, so a
+ * capital E has the header's padding above and below. The block padding keeps descenders and ascenders
+ * inside the item's clip (it truncates with an ellipsis), and the matching negative margin keeps the row one cap high.
+ * Engines without `text-box` take a line box one cap high, which centres the cap height to within the font's ascent and
+ * descent difference.
+ */
+.pi-viewer-header .pi-viewer-text {
+  text-box: trim-both cap alphabetic;
+  padding-block: 0.35em;
+  margin-block: -0.35em;
+}
+@supports not (text-box: trim-both cap alphabetic) {
+  .pi-viewer-header .pi-viewer-text {
+    line-height: 1cap;
+  }
+}
+/*
+ * The mark leads the header in place of the title's capital E: it overhangs the row's cap height equally above and
+ * below, so the header keeps its height, and sits as far from the header's left edge as from its top and bottom.
+ */
+.pi-viewer-header .pi-viewer-mark {
+  margin-block: calc(0.5cap - 8px);
+  margin-inline-start: calc(0.5cap - 8px);
+}

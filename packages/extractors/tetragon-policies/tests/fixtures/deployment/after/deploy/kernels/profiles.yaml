@@ -1,0 +1,15 @@
+# The node pools policies load on.
+profiles:
+  - name: general
+    kernel: "6.1.0-18"
+    config:
+      CONFIG_BPF_LSM: y
+      CONFIG_BPF_KPROBE_OVERRIDE: y
+      CONFIG_DEBUG_INFO_BTF: y
+    symbols: deploy/kernels/general.kallsyms
+  - name: legacy
+    kernel: "5.4"
+    config:
+      CONFIG_BPF_LSM: n
+      CONFIG_BPF_KPROBE_OVERRIDE: y
+    errorInjection: deploy/kernels/legacy.error_injection

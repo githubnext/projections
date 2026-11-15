@@ -1,0 +1,79 @@
+/* Story frames fill the canvas in the story's theme, so dark stories have no light margins. */
+html,
+body {
+  margin: 0;
+}
+.sb-frame {
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 24px;
+}
+/* Plain page colors around the default UI, which draws its own surfaces from its scoped tokens. */
+.sb-default-frame {
+  background: #fff;
+  color: #09090b;
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+}
+.sb-default-frame[data-color-mode='dark'] {
+  background: #09090b;
+  color: #fafafa;
+  color-scheme: dark;
+}
+/* The default UI's prebuilt views fill their container: a frame holding one gets the canvas height. */
+.sb-default-frame:has(> [data-fill]) {
+  height: 100dvh;
+}
+@media (max-width: 543.98px) {
+  .sb-frame {
+    padding: 12px;
+  }
+}
+/* A labeled row of examples in building-block stories. */
+.sb-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.sb-stack {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.sb-caption {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.75;
+}
+.sb-slot {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+.sb-slot p {
+  margin: 0;
+}
+.sb-slot output {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow-wrap: anywhere;
+}
+/* A VS Code webview's page: the editor background and VS Code's type, from the theme's variables. */
+.sb-vscode-frame {
+  background: var(--vscode-editor-background);
+  color: var(--vscode-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+}
+.sb-vscode-frame.sb-frame:has([data-fill]) {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.sb-vscode-frame.sb-frame:has([data-fill]) > * {
+  flex: 1 1 0;
+  min-height: 0;
+}
+.sb-vscode-inspector {
+  min-height: 100vh;
+}

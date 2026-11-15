@@ -1,0 +1,16 @@
+{
+  "protocolVersion": 0,
+  "schema": "api/v0",
+  "metadata": {"ecosystem":"dotnet"},
+  "entities": [
+    {"id":"T:Shape","kind":"type","label":"Shape","data":{"signature":"public class Shape","contract":{"declaration":"class","term":"class","visibility":"public"}}},
+    {"id":"T:Widget","kind":"type","label":"Widget","data":{"signature":"public class Widget","contract":{"declaration":"class","term":"class","visibility":"public"}}},
+    {"id":"T:Helpers","kind":"type","label":"Helpers","data":{"signature":"public class Helpers","contract":{"declaration":"class","term":"class","visibility":"public"}}},
+    {"id":"T:Tagged","kind":"type","label":"Tagged","data":{"signature":"public class Tagged","contract":{"declaration":"class","term":"class","visibility":"public","attributes":["System.ObsoleteAttribute(\"Old\")"]}}},
+    {"id":"T:Box`1","kind":"type","label":"Box<T>","data":{"signature":"public sealed class Box<T> where T : class","contract":{"declaration":"class","term":"class","visibility":"public","sealed":true,"native":{"sealed":true},"typeParameters":[{"name":"T","constraints":["class"]}]}}},
+    {"id":"T:Bag`1","kind":"type","label":"Bag<T>","data":{"signature":"public class Bag<T> where T : class","contract":{"declaration":"class","term":"class","visibility":"public","typeParameters":[{"name":"T","constraints":["class"]}]}}},
+    {"id":"T:IStore","kind":"type","label":"IStore","data":{"signature":"public interface IStore","contract":{"declaration":"interface","term":"interface","visibility":"public"}}},
+    {"id":"T:Factory","kind":"type","label":"Factory","data":{"signature":"public abstract class Factory","contract":{"declaration":"class","term":"class","visibility":"public","abstract":true,"sealed":true}}}
+  ],
+  "relationships": []
+}

@@ -1,0 +1,30 @@
+# Denies kernel module loading outside kmod, and blocks writes to kernel config.
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: block-modules
+spec:
+  hostSelector: {}
+  lsmhooks:
+    - hook: kernel_module_request
+      selectors:
+        - label: not-kmod
+          matchBinaries:
+            - operator: NotIn
+              values: [/usr/bin/kmod]
+          matchActions:
+            - action: Override
+              argError: -1
+  kprobes:
+    - call: security_kernel_read_file
+      syscall: false
+      selectors:
+        - label: deny-read
+          matchActions:
+            - action: Override
+              argError: -1
+    - call: sys_finit_module
+      selectors:
+        - label: finit
+          matchActions:
+            - action: Sigkill

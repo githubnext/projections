@@ -1,0 +1,34 @@
+[package]
+name = "projections-comparator-rules"
+description = "Rules comparators: YAML files of identity passes and CEL expressions, interpreted over the default comparator"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+# cel 0.15 requires Rust 1.86.
+rust-version = "1.86"
+publish = false
+exclude = ["dist"]
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[dependencies]
+projections-engine = { path = "../../engine", default-features = false }
+projections-comparator-default = { path = "../default", default-features = false }
+serde_json = { version = "1.0", features = ["float_roundtrip"] }
+cel = { version = "0.15.0", default-features = false }
+projections-rules-yaml = { path = "yaml" }
+sha2 = "0.10"
+
+[features]
+# The comparator module ABI's exports in WebAssembly builds (rules.wasm). The
+# editor's module (projections-rules-editor) links the interpreter without them.
+default = ["abi"]
+abi = []
+# For projections-rules-editor: reading a file tolerantly (`Rules::read`), with
+# every CEL value, and recording the scope each expression sees
+# (`check::scopes`). Off in rules.wasm.
+editing = []
+
+[dev-dependencies]
+projections-comparator-runtime = { path = "../runtime" }

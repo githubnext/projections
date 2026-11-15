@@ -1,0 +1,108 @@
+{
+  "changes": [
+    {
+      "after": [
+        "go:example.com/units.Queue"
+      ],
+      "before": [
+        "go:example.com/units.Queue"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Queue",
+      "status": "modified",
+      "summary": "Unknown: Its contract changed (`underlying`) in a way the rules don't classify."
+    },
+    {
+      "after": [
+        "go:example.com/units.Unit"
+      ],
+      "before": [
+        "go:example.com/units.Unit"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Unit",
+      "status": "modified",
+      "summary": "Unknown: The declaration changed, and it has no contract facts to classify the change."
+    },
+    {
+      "after": [
+        "go:example.com/units.Weight"
+      ],
+      "before": [
+        "go:example.com/units.Weight"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "go:example.com/units.Weight",
+      "status": "modified",
+      "summary": "Breaking: Changed from `int32` to `int64`, which can't hold every value."
+    }
+  ],
+  "metadata": {
+    "compatibility": {
+      "changes": {
+        "go:example.com/units.Queue": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Its contract changed (`underlying`) in a way the rules don't classify",
+              "rule": "unclassified"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Its contract changed (`underlying`) in a way the rules don't classify"
+        },
+        "go:example.com/units.Unit": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "The declaration changed, and it has no contract facts to classify the change",
+              "rule": "unclassified"
+            }
+          ],
+          "level": "unknown",
+          "reason": "The declaration changed, and it has no contract facts to classify the change"
+        },
+        "go:example.com/units.Weight": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Changed from `int32` to `int64`, which can't hold every value",
+              "rule": "numeric"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Changed from `int32` to `int64`, which can't hold every value"
+        }
+      },
+      "counts": {
+        "additive": 0,
+        "breaking": 1,
+        "compatible": 0,
+        "unknown": 2
+      },
+      "ecosystem": "go",
+      "notices": [
+        "1 changed declaration has no contract facts (`data.contract`); their changes are classified by the rules every ecosystem shares."
+      ],
+      "rules": "apidiff, reproduced",
+      "version": 0
+    }
+  },
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "go:example.com/units.Queue",
+        "go:example.com/units.Unit",
+        "go:example.com/units.Weight"
+      ],
+      "kind": "restructure"
+    }
+  ]
+}

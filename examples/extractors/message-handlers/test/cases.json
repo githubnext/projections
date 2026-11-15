@@ -1,0 +1,42 @@
+[
+  {
+    "name": "handlers",
+    "inputs": {
+      "handlerApis": [
+        {
+          "module": "messages",
+          "symbol": "on"
+        }
+      ],
+      "handlerRegistries": [
+        {
+          "module": "messages",
+          "symbol": "registry"
+        }
+      ],
+      "handlerDecorators": [
+        {
+          "module": "messages",
+          "symbol": "handles"
+        }
+      ]
+    }
+  },
+  {
+    "name": "publishers",
+    "inputs": {
+      "handlerApis": [
+        {
+          "module": "messages",
+          "symbol": "on"
+        }
+      ],
+      "publishApis": [
+        {
+          "module": "messages",
+          "symbol": "emit"
+        }
+      ]
+    }
+  }
+]

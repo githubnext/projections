@@ -1,0 +1,101 @@
+{
+  "changes": [
+    {
+      "after": [
+        "component:invoicing/InvoiceService"
+      ],
+      "before": [
+        "component:billing/InvoiceService"
+      ],
+      "collection": "entities",
+      "correspondence": "declared",
+      "id": "component:invoicing/InvoiceService",
+      "status": "unchanged",
+      "summary": "`InvoiceService` moved from `component:billing/InvoiceService` to `component:invoicing/InvoiceService`."
+    },
+    {
+      "after": [],
+      "before": [
+        "contains:billing/InvoiceService"
+      ],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:billing/InvoiceService",
+      "status": "removed"
+    },
+    {
+      "after": [
+        "contains:invoicing/InvoiceService"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:invoicing/InvoiceService",
+      "status": "added"
+    },
+    {
+      "after": [
+        "uses:api/CheckoutController>invoicing/InvoiceService"
+      ],
+      "before": [
+        "uses:api/CheckoutController>billing/InvoiceService"
+      ],
+      "collection": "relationships",
+      "correspondence": "declared",
+      "id": "uses:api/CheckoutController>invoicing/InvoiceService",
+      "status": "unchanged"
+    },
+    {
+      "after": [
+        "uses:invoicing/InvoiceService>billing/TaxCalculator"
+      ],
+      "before": [
+        "uses:billing/InvoiceService>billing/TaxCalculator"
+      ],
+      "collection": "relationships",
+      "correspondence": "declared",
+      "id": "uses:invoicing/InvoiceService>billing/TaxCalculator",
+      "status": "unchanged"
+    },
+    {
+      "after": [
+        "uses:invoicing/InvoiceService>invoicing/InvoiceRenderer"
+      ],
+      "before": [
+        "uses:billing/InvoiceService>invoicing/InvoiceRenderer"
+      ],
+      "collection": "relationships",
+      "correspondence": "declared",
+      "id": "uses:invoicing/InvoiceService>invoicing/InvoiceRenderer",
+      "status": "unchanged"
+    }
+  ],
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "contains:billing/InvoiceService"
+      ],
+      "kind": "remove"
+    },
+    {
+      "changes": [
+        "component:invoicing/InvoiceService",
+        "uses:api/CheckoutController>invoicing/InvoiceService",
+        "uses:invoicing/InvoiceService>billing/TaxCalculator",
+        "uses:invoicing/InvoiceService>invoicing/InvoiceRenderer"
+      ],
+      "kind": "restructure",
+      "summary": "Move `InvoiceService`"
+    },
+    {
+      "changes": [
+        "contains:invoicing/InvoiceService"
+      ],
+      "kind": "add"
+    }
+  ]
+}

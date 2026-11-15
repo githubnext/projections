@@ -1,0 +1,24 @@
+[package]
+name = "projections-rules-editor"
+description = "The comparator rules language for editors: semantic tokens, diagnostics, hovers and completions, built as rules-editor.wasm for the VS Code extension"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version = "1.86"
+publish = false
+exclude = ["dist"]
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[dependencies]
+# Without its module ABI (this module exports only the language service), with
+# its tolerant reading and recorded scopes.
+projections-comparator-rules = { path = "..", default-features = false, features = ["editing"] }
+# The test format's reader, in WebAssembly too.
+projections-rules-yaml = { path = "../yaml", features = ["suite"] }
+projections-engine = { path = "../../../engine", default-features = false }
+serde_json = { version = "1.0", features = ["float_roundtrip"] }
+# `parser_pratt` exposes the crate's public CEL lexer, which tokens are lexed
+# with; the rules are still parsed by the interpreter's default parser.
+cel = { version = "0.15.0", default-features = false, features = ["parser_pratt"] }

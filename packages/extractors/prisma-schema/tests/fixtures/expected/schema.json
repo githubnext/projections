@@ -1,0 +1,539 @@
+{
+ "entities": [
+  {
+   "id": "enum:roles",
+   "kind": "enum",
+   "label": "roles",
+   "data": {
+    "values": [
+     "user",
+     "admin"
+    ]
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "table:/users",
+   "kind": "table",
+   "label": "users",
+   "data": {
+    "namespace": null,
+    "provider": "postgresql"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:/users",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "autoincrement",
+     "args": []
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/email_address",
+   "kind": "column",
+   "label": "email_address",
+   "data": {
+    "table": "table:/users",
+    "type": "String",
+    "nativeType": [
+     "VarChar",
+     [
+      "160"
+     ]
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/role",
+   "kind": "column",
+   "label": "role",
+   "data": {
+    "table": "table:/users",
+    "type": "enum:roles",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": "user",
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fusers/name",
+   "kind": "column",
+   "label": "name",
+   "data": {
+    "table": "table:/users",
+    "type": "String",
+    "nativeType": null,
+    "nullable": true,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "table:/posts",
+   "kind": "table",
+   "label": "posts",
+   "data": {
+    "namespace": null,
+    "provider": "postgresql"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fposts/tenantId",
+   "kind": "column",
+   "label": "tenantId",
+   "data": {
+    "table": "table:/posts",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fposts/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:/posts",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fposts/authorId",
+   "kind": "column",
+   "label": "authorId",
+   "data": {
+    "table": "table:/posts",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2Fposts/title",
+   "kind": "column",
+   "label": "title",
+   "data": {
+    "table": "table:/posts",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": "Untitled",
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "table:/Tag",
+   "kind": "table",
+   "label": "Tag",
+   "data": {
+    "namespace": null,
+    "provider": "postgresql"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FTag/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:/Tag",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2Fusers/primary-key/%5B%22id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (id)",
+   "data": {
+    "table": "table:/users",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2Fusers/unique/users_email_key",
+   "kind": "constraint",
+   "label": "users_email_key",
+   "data": {
+    "table": "table:/users",
+    "type": "unique",
+    "fields": [
+     {
+      "name": "email_address"
+     }
+    ],
+    "databaseName": "users_email_key"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2Fusers/index/users_search",
+   "kind": "constraint",
+   "label": "users_search",
+   "data": {
+    "table": "table:/users",
+    "type": "index",
+    "indexType": "normal",
+    "fields": [
+     {
+      "name": "name",
+      "sortOrder": "desc"
+     },
+     {
+      "name": "email_address"
+     }
+    ],
+    "databaseName": "users_search"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2Fposts/primary-key/posts_pk",
+   "kind": "constraint",
+   "label": "posts_pk",
+   "data": {
+    "table": "table:/posts",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "tenantId"
+     },
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": "posts_pk"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2Fposts/unique/posts_author_title",
+   "kind": "constraint",
+   "label": "posts_author_title",
+   "data": {
+    "table": "table:/posts",
+    "type": "unique",
+    "fields": [
+     {
+      "name": "authorId"
+     },
+     {
+      "name": "title"
+     }
+    ],
+    "databaseName": "posts_author_title"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FTag/primary-key/%5B%22id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (id)",
+   "data": {
+    "table": "table:/Tag",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2Fposts/foreign-key/%5B%22authorId%22%5D/table%3A%2Fusers",
+   "kind": "constraint",
+   "label": "foreign-key (authorId)",
+   "data": {
+    "table": "table:/posts",
+    "type": "foreign-key",
+    "columns": [
+     "authorId"
+    ],
+    "target": "table:/users",
+    "references": [
+     "id"
+    ],
+    "onDelete": "Cascade",
+    "onUpdate": "Restrict"
+   },
+   "confidence": "authoritative"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fid/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Femail_address/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/email_address",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Frole/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/role",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "enum-type:column%3Atable%253A%252Fusers%2Frole/enum%3Aroles/",
+   "kind": "enum-type",
+   "from": "column:table%3A%2Fusers/role",
+   "to": "enum:roles",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/column%3Atable%253A%252Fusers%2Fname/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "column:table%3A%2Fusers/name",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fposts/column%3Atable%253A%252Fposts%2FtenantId/",
+   "kind": "contains",
+   "from": "table:/posts",
+   "to": "column:table%3A%2Fposts/tenantId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fposts/column%3Atable%253A%252Fposts%2Fid/",
+   "kind": "contains",
+   "from": "table:/posts",
+   "to": "column:table%3A%2Fposts/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fposts/column%3Atable%253A%252Fposts%2FauthorId/",
+   "kind": "contains",
+   "from": "table:/posts",
+   "to": "column:table%3A%2Fposts/authorId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fposts/column%3Atable%253A%252Fposts%2Ftitle/",
+   "kind": "contains",
+   "from": "table:/posts",
+   "to": "column:table%3A%2Fposts/title",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FTag/column%3Atable%253A%252FTag%2Fid/",
+   "kind": "contains",
+   "from": "table:/Tag",
+   "to": "column:table%3A%2FTag/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/constraint%3Atable%253A%252Fusers%2Fprimary-key%2F%255B%2522id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "constraint:table%3A%2Fusers/primary-key/%5B%22id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252Fusers%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252Fusers%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2Fusers/primary-key/%5B%22id%22%5D",
+   "to": "column:table%3A%2Fusers/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/constraint%3Atable%253A%252Fusers%2Funique%2Fusers_email_key/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "constraint:table%3A%2Fusers/unique/users_email_key",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252Fusers%2Funique%2Fusers_email_key/column%3Atable%253A%252Fusers%2Femail_address/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2Fusers/unique/users_email_key",
+   "to": "column:table%3A%2Fusers/email_address",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fusers/constraint%3Atable%253A%252Fusers%2Findex%2Fusers_search/",
+   "kind": "contains",
+   "from": "table:/users",
+   "to": "constraint:table%3A%2Fusers/index/users_search",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252Fusers%2Findex%2Fusers_search/column%3Atable%253A%252Fusers%2Fname/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2Fusers/index/users_search",
+   "to": "column:table%3A%2Fusers/name",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252Fusers%2Findex%2Fusers_search/column%3Atable%253A%252Fusers%2Femail_address/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2Fusers/index/users_search",
+   "to": "column:table%3A%2Fusers/email_address",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fposts/constraint%3Atable%253A%252Fposts%2Fprimary-key%2Fposts_pk/",
+   "kind": "contains",
+   "from": "table:/posts",
+   "to": "constraint:table%3A%2Fposts/primary-key/posts_pk",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252Fposts%2Fprimary-key%2Fposts_pk/column%3Atable%253A%252Fposts%2FtenantId/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2Fposts/primary-key/posts_pk",
+   "to": "column:table%3A%2Fposts/tenantId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252Fposts%2Fprimary-key%2Fposts_pk/column%3Atable%253A%252Fposts%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2Fposts/primary-key/posts_pk",
+   "to": "column:table%3A%2Fposts/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fposts/constraint%3Atable%253A%252Fposts%2Funique%2Fposts_author_title/",
+   "kind": "contains",
+   "from": "table:/posts",
+   "to": "constraint:table%3A%2Fposts/unique/posts_author_title",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252Fposts%2Funique%2Fposts_author_title/column%3Atable%253A%252Fposts%2FauthorId/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2Fposts/unique/posts_author_title",
+   "to": "column:table%3A%2Fposts/authorId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252Fposts%2Funique%2Fposts_author_title/column%3Atable%253A%252Fposts%2Ftitle/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2Fposts/unique/posts_author_title",
+   "to": "column:table%3A%2Fposts/title",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FTag/constraint%3Atable%253A%252FTag%2Fprimary-key%2F%255B%2522id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Tag",
+   "to": "constraint:table%3A%2FTag/primary-key/%5B%22id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FTag%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FTag%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FTag/primary-key/%5B%22id%22%5D",
+   "to": "column:table%3A%2FTag/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "many-to-many:table%3A%2FTag/table%3A%2Fusers/TagToUser",
+   "kind": "many-to-many",
+   "from": "table:/Tag",
+   "to": "table:/users",
+   "data": {
+    "implicit": true
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2Fposts/constraint%3Atable%253A%252Fposts%2Fforeign-key%2F%255B%2522authorId%2522%255D%2Ftable%253A%252Fusers/",
+   "kind": "contains",
+   "from": "table:/posts",
+   "to": "constraint:table%3A%2Fposts/foreign-key/%5B%22authorId%22%5D/table%3A%2Fusers",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "references:constraint%3Atable%253A%252Fposts%2Fforeign-key%2F%255B%2522authorId%2522%255D%2Ftable%253A%252Fusers/table%3A%2Fusers/",
+   "kind": "references",
+   "from": "constraint:table%3A%2Fposts/foreign-key/%5B%22authorId%22%5D/table%3A%2Fusers",
+   "to": "table:/users",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252Fposts%2Fforeign-key%2F%255B%2522authorId%2522%255D%2Ftable%253A%252Fusers/column%3Atable%253A%252Fposts%2FauthorId/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2Fposts/foreign-key/%5B%22authorId%22%5D/table%3A%2Fusers",
+   "to": "column:table%3A%2Fposts/authorId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "foreign-key:column%3Atable%253A%252Fposts%2FauthorId/column%3Atable%253A%252Fusers%2Fid/constraint%3Atable%253A%252Fposts%2Fforeign-key%2F%255B%2522authorId%2522%255D%2Ftable%253A%252Fusers",
+   "kind": "foreign-key",
+   "from": "column:table%3A%2Fposts/authorId",
+   "to": "column:table%3A%2Fusers/id",
+   "confidence": "authoritative"
+  }
+ ]
+}

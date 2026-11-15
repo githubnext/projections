@@ -1,0 +1,21 @@
+node_modules/
+dist/
+target/
+pkg/
+.data/
+.env
+.env.*
+!.env.example
+playwright-report/
+test-results/
+.venv/
+__pycache__/
+.vscode-test/
+.DS_Store
+*.vsix
+# Skills or MCP config an agent installs locally (npm run tools -- skills add --no-global), but not this repository's
+# own contributor skills (docs/setup/agent-skills.md)
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/design-projection-animation/

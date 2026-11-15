@@ -1,0 +1,19 @@
+[package]
+name = "projections-example-cargo-features"
+description = "Example Projections extractor, written with the extractor SDK, that maps the Cargo features of a workspace"
+# Examples are never released (docs/maintainers/releasing.md).
+version = "0.0.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[[bin]]
+name = "cargo-features"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+projections-extractor-sdk = { path = "../../../packages/extractors/sdk" }
+serde_json = "1"
+toml = "0.9"

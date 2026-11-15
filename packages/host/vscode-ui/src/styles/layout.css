@@ -1,0 +1,299 @@
+/* Full screen and the view's regions. */
+.phv-root:fullscreen,
+.phv-fullscreen-fallback {
+  box-sizing: border-box;
+  overflow: auto;
+  padding: 16px;
+  background: var(--phv-surface-canvas);
+}
+.phv-root[data-fill]:is(:fullscreen, .phv-fullscreen-fallback) {
+  padding: 0;
+}
+.phv-fullscreen-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+/* The renderer box around the stage. It is the detail card's containing block, so the card overlays it. */
+.phv-workspace {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.phv-main {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  align-content: start;
+}
+.phv-box {
+  min-width: 0;
+  overflow: clip;
+  border: 1px solid var(--phv-divider);
+  background: var(--phv-surface-canvas);
+}
+.phv-box[hidden] {
+  display: none;
+}
+.phv-root[data-fill] .phv-box {
+  position: relative;
+}
+.phv-box-body {
+  min-width: 0;
+}
+.phv-box-body:is([data-comparison-mode='side-by-side'], [data-comparison-mode='swipe']) {
+  padding: 8px;
+}
+@media (max-width: 543.98px) {
+  .phv-box-body:is([data-comparison-mode='side-by-side'], [data-comparison-mode='swipe']) {
+    padding: 4px;
+  }
+}
+
+/* The legend: the box's footer band, like VS Code's panel footer. */
+.phv-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  border: 1px solid var(--phv-divider);
+  background: var(--phv-surface-inset);
+  color: var(--phv-muted);
+  font-family: var(--phv-font);
+  font-size: 12px;
+}
+.phv-legend-title {
+  color: var(--phv-fg);
+  font-weight: 600;
+}
+.phv-legend-items {
+  display: contents;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.phv-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.phv-legend-item[data-shape='label'] {
+  padding: 0 6px;
+  border: 1px solid var(--phv-border);
+  border-radius: 3px;
+}
+.phv-legend-swatch {
+  flex: none;
+  box-sizing: border-box;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+.phv-legend-item[data-shape='circle'] > .phv-legend-swatch {
+  border-radius: 50%;
+}
+.phv-legend-item:is([data-shape='line'], [data-shape='dashed'], [data-shape='dotted']) > .phv-legend-swatch {
+  width: 16px;
+  height: 0;
+  border-top: 2px solid;
+  border-radius: 0;
+}
+.phv-legend-item[data-shape='dashed'] > .phv-legend-swatch {
+  border-top-style: dashed;
+}
+.phv-legend-item[data-shape='dotted'] > .phv-legend-swatch {
+  border-top-style: dotted;
+}
+.phv-legend-item:is([data-shape='square'], [data-shape='circle']) > .phv-legend-swatch[data-change] {
+  box-shadow: inset 0 0 0 1px var(--phv-change-border);
+}
+.phv-legend-footer {
+  flex: none;
+  padding: 4px 12px;
+  border-width: 1px 0 0;
+}
+
+/* fill (the default): the view takes its container's height and the renderer box takes what the toolbar and notices
+   leave. Without a definite container height, the view keeps a usable minimum. */
+.phv-root[data-fill] {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: 100%;
+  min-height: min(28rem, 75dvh);
+  background: var(--phv-surface-canvas);
+}
+.phv-explorer[data-fill] {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: 100%;
+  min-height: min(28rem, 75dvh);
+}
+.phv-root[data-fill] .phv-box {
+  border: 0;
+}
+.phv-root[data-fill] > .phv-toolbar-wrap {
+  margin-bottom: 0;
+}
+/*
+ * Side by side and swipe in an editor tab: the panes fill the stage edge to edge, with no inset, no gap and no card
+ * around them, and one 1px divider between them in VS Code's editor group border (as split editors are divided). Each
+ * pane's header spans its half, its hairline meeting the divider. The host stage lays its panes out inline (`paneCard`,
+ * `paneGeometry`), so these rules override it; a pane with a connector between the panes keeps the host's gutter.
+ */
+.phv-root[data-fill] {
+  --phv-pane-divider: var(--vscode-editorGroup-border, var(--vscode-panel-border, var(--phv-divider)));
+}
+.phv-root[data-fill] .phv-box-body:is([data-comparison-mode='side-by-side'], [data-comparison-mode='swipe']) {
+  padding: 0;
+}
+.phv-root[data-fill] .ph-panes[data-connector='none'] {
+  gap: 0 !important;
+  padding-left: 0 !important;
+}
+.phv-root[data-fill] .ph-panes[data-connector='none'] > .ph-pane,
+.phv-root[data-fill] .ph-swipe > .ph-swipe-layer {
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+.phv-root[data-fill] .ph-panes[data-connector='none']:not([data-stacked]) > .ph-pane[data-side='after'] {
+  border-left: 1px solid var(--phv-pane-divider) !important;
+}
+.phv-root[data-fill] .ph-panes[data-connector='none'][data-stacked] > .ph-pane[data-side='after'] {
+  border-top: 1px solid var(--phv-pane-divider) !important;
+}
+.phv-root[data-fill] .ph-panes [data-pane-band] {
+  border-bottom-color: var(--phv-pane-divider) !important;
+}
+/*
+ * Swipe's divider is a control, not a pane edge: its 1px line takes the thumb's outline color (the accent, VS Code's link
+ * foreground), so the line and the grip read as one, and both change together: VS Code's sash hover color while
+ * pointed at or dragged, its focus border under keyboard focus. Side by side keeps the neutral editor group border.
+ */
+.phv-root .ph-swipe-handle {
+  --ph-swipe-edge: var(--projections-color-accent, var(--vscode-textLink-foreground, #4daafc));
+}
+.phv-root .ph-swipe-handle:is([data-dragging], :has(.ph-swipe-grab:hover)) {
+  --ph-swipe-edge: var(--vscode-sash-hoverBorder, var(--vscode-focusBorder, #0078d4));
+  --ph-swipe-fill: color-mix(in srgb, var(--ph-swipe-edge) 16%, var(--projections-color-bg));
+}
+.phv-root .ph-swipe-handle[data-focus-visible] {
+  --ph-swipe-edge: var(--vscode-focusBorder, #0078d4);
+}
+
+/* Filling an editor tab edge to edge, the stage has no card around it: no edge, no rounded corners. */
+.phv-root[data-fill] .ph-single {
+  border-width: 0;
+  border-radius: 0;
+}
+.phv-root[data-fill] :is(.phv-notice-region, .phv-notices) {
+  padding: 0 8px 8px;
+}
+/* A host's panel under the toolbar (a revision that didn't extract): in the view's flow, never squeezed by the stage. */
+.phv-banner {
+  flex-shrink: 0;
+  padding-bottom: 8px;
+}
+.phv-explorer[data-fill] > .phv-failure {
+  padding: 8px;
+}
+.phv-explorer[data-fill] > * {
+  flex: none;
+}
+.phv-explorer[data-fill] > .phv-loading {
+  flex: 1 1 auto;
+}
+.phv-explorer[data-fill] > .phv-root {
+  flex: 1 1 0;
+  min-height: 0;
+}
+.phv-root[data-fill] > * {
+  flex: none;
+}
+.phv-root[data-fill] > .phv-workspace {
+  display: grid;
+  flex: 1 1 0;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr);
+}
+.phv-root[data-fill] .phv-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.phv-root[data-fill] .phv-main > * {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+}
+.phv-root[data-fill] .phv-box:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  overflow: clip;
+}
+.phv-root[data-fill] .phv-box-body {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.phv-pane-status {
+  padding: 12px;
+}
+/* `LoadingStatus`: centered in the box the loading content will occupy. */
+.phv-loading {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 0;
+  padding: 16px;
+  color: var(--phv-muted);
+  font-family: var(--phv-font);
+  font-size: var(--phv-size);
+  text-align: center;
+}
+.phv-loading[data-fill] {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+}
+.phv-loading:not([data-fill]) {
+  min-height: 480px;
+}
+.phv-loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 40ch;
+}
+.phv-loading-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.phv-loading-label > .codicon {
+  font-size: 16px;
+}
+.phv-loading[data-motion='reduced'] .codicon-modifier-spin {
+  animation: none;
+}
+.phv-loading .ph-loading-indicator {
+  flex: none;
+}
+.phv-root[data-fill] .phv-main > :is(.phv-table-view, .phv-text-view) {
+  box-sizing: border-box;
+  align-content: start;
+  padding: 0 16px 16px;
+}
+@media (max-width: 543.98px) {
+  .phv-root[data-fill] .phv-main > :is(.phv-table-view, .phv-text-view) {
+    padding: 0 8px 8px;
+  }
+}

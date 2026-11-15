@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/api/v0.json",
+  "title": "Projections domain schema api/v0",
+  "description": "Public API declarations: declaration entities carry `data.signature`, and optionally `data.contract`, their compatibility facts in terms every ecosystem shares.",
+  "allOf": [{"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"}, {"$ref": "#/$defs/refinement"}],
+  "$defs": {
+    "constituent": {
+      "description": "One member of a union type.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {
+        "text": {
+          "description": "The constituent as the language writes it, such as `\"low\"`.",
+          "type": "string"
+        },
+        "primitive": {
+          "description": "The primitive it is, or a literal of it widens to, such as `string` or `undefined`; absent for other types.",
+          "type": "string"
+        }
+      }
+    },
+    "typeRef": {
+      "description": "A type where values flow: its text as the language writes it, and, when the extractor resolves it, its union constituents.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {
+        "text": {
+          "description": "The type as the language writes it, such as `System.Int32` or `number | undefined`.",
+          "type": "string"
+        },
+        "union": {
+          "description": "Each constituent of the type, a single one when it is no union; absent when the extractor resolves no unions.",
+          "type": "array",
+          "items": {"$ref": "#/$defs/constituent"}
+        }
+      }
+    },
+    "access": {
+      "description": "A property's accessors, each with who can use it; an accessor that is absent doesn't exist.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "read": {"description": "The getter.", "enum": ["public", "protected"]},
+        "write": {"description": "The setter.", "enum": ["public", "protected"]},
+        "init": {
+          "description": "An accessor that sets it only while an instance is created: .NET `init`.",
+          "enum": ["public", "protected"]
+        }
+      }
+    },
+    "parameter": {
+      "description": "A parameter, in position order.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "optional", "variadic", "passing"],
+      "properties": {
+        "name": {"description": "The parameter's name.", "type": "string"},
+        "type": {"$ref": "#/$defs/typeRef", "description": "The parameter's type."},
+        "optional": {"description": "Callers may omit it.", "type": "boolean"},
+        "variadic": {
+          "description": "It takes any number of arguments: a TypeScript rest parameter, a .NET `params` array.",
+          "type": "boolean"
+        },
+        "default": {
+          "description": "The value an omitted argument takes, as the language writes it.",
+          "type": "string"
+        },
+        "passing": {
+          "description": "How the argument is passed: by `value`, or by reference as .NET `ref`, `out`, `in` and `ref readonly`.",
+          "enum": ["value", "ref", "out", "in", "ref readonly"]
+        },
+        "attributes": {
+          "description": "The parameter's attributes, as the language writes them.",
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "typeParameter": {
+      "description": "A generic parameter.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "constraints"],
+      "properties": {
+        "name": {"description": "The parameter's name, such as `T` or Rust's lifetime `'a`.", "type": "string"},
+        "constraints": {
+          "description": "What an argument must satisfy, each as the language writes it: bounds, constraints or a single constraint type.",
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "default": {"description": "The argument used when none is given.", "type": "string"},
+        "type": {
+          "description": "A value parameter's type, such as a Rust `const` generic's `usize`.",
+          "type": "string"
+        }
+      }
+    },
+    "signature": {
+      "description": "One way to call or construct a declaration.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["parameters", "returns"],
+      "properties": {
+        "parameters": {
+          "description": "Its parameters, in order.",
+          "type": "array",
+          "items": {"$ref": "#/$defs/parameter"}
+        },
+        "returns": {
+          "$ref": "#/$defs/typeRef",
+          "description": "What a call returns; a constructor its instance, or the language's void."
+        },
+        "returnAttributes": {
+          "description": "Attributes of what it returns, as the language writes them.",
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "typeParameters": {
+          "description": "Its generic parameters.",
+          "type": "array",
+          "items": {"$ref": "#/$defs/typeParameter"}
+        }
+      }
+    },
+    "supertype": {
+      "description": "A type a declaration derives from or implements.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["relation", "type"],
+      "properties": {
+        "relation": {
+          "description": "Whether it derives from the type (a base class, a supertrait, an interface an interface extends) or implements it.",
+          "enum": ["extends", "implements"]
+        },
+        "type": {"description": "The type, as the language writes it.", "type": "string"}
+      }
+    },
+    "contract": {
+      "description": "The language-neutral facts compatibility rules read about one declaration. Booleans that are absent are false. Facts only one ecosystem's rules read are in `native`.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["declaration", "term", "visibility"],
+      "properties": {
+        "declaration": {
+          "description": "What kind of declaration it is.",
+          "enum": [
+            "package",
+            "module",
+            "class",
+            "struct",
+            "union",
+            "enum",
+            "interface",
+            "alias",
+            "type",
+            "function",
+            "method",
+            "constructor",
+            "property",
+            "field",
+            "variant",
+            "constant",
+            "variable",
+            "event",
+            "index",
+            "call",
+            "construct",
+            "associated-type",
+            "implementation",
+            "re-export",
+            "macro"
+          ]
+        },
+        "term": {
+          "$ref": "https://schemas.projections.githubnext.com/extraction/v0.json#/$defs/text",
+          "description": "The ecosystem's own word for the kind of declaration, such as Rust's `trait-method`, Go's `func` or .NET's `record class`; a change of `term` is a change of kind."
+        },
+        "visibility": {"description": "Who can use it.", "enum": ["public", "protected"]},
+        "static": {"description": "It belongs to its type rather than to instances.", "type": "boolean"},
+        "abstract": {
+          "description": "It has no implementation: implementers or subclasses must provide it (.NET `abstract` members and interface members without a default body, TypeScript's `abstract`, Rust trait items without a default, Go interface methods); a class that is abstract can't be instantiated.",
+          "type": "boolean"
+        },
+        "sealed": {
+          "description": "Consumers can't inherit or implement it: a .NET type that is sealed, static or has no accessible constructor; a Rust trait with a supertrait outside the public API; a Go interface with unexported methods.",
+          "type": "boolean"
+        },
+        "readonly": {
+          "description": "Consumers can read it but not assign it: .NET `readonly` fields, TypeScript `readonly` properties, Rust statics that aren't `mut`.",
+          "type": "boolean"
+        },
+        "required": {
+          "description": "Code creating an instance must set it: .NET `required` members.",
+          "type": "boolean"
+        },
+        "optional": {"description": "It may be absent: a TypeScript optional (`?`) member.", "type": "boolean"},
+        "nonExhaustive": {
+          "description": "It may gain members without a breaking change, so consumers may not match every variant or name every field in literals and patterns: Rust `#[non_exhaustive]`.",
+          "type": "boolean"
+        },
+        "hiddenMembers": {
+          "description": "It has fields or variants consumers can't see, so they can't construct it from its fields or destructure it exhaustively: Rust private fields and hidden variants.",
+          "type": "boolean"
+        },
+        "type": {
+          "$ref": "#/$defs/typeRef",
+          "description": "Its type: a field's, property's, variable's, constant's or event's; the type an alias names; the type an implementation is for; a Go function's or method's type."
+        },
+        "value": {
+          "description": "A constant's or enum member's value, as the language writes it.",
+          "type": "string"
+        },
+        "underlying": {
+          "description": "The type an enum or a defined type is represented by: a .NET enum's, a Go defined type's.",
+          "type": "string"
+        },
+        "source": {"description": "What a re-export re-exports, as a path.", "type": "string"},
+        "access": {"$ref": "#/$defs/access", "description": "A property's accessors."},
+        "attributes": {
+          "description": "Its attributes or annotations, each as the language writes it, such as .NET `System.ObsoleteAttribute(\"Use Run\")`.",
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "signatures": {
+          "description": "How it is called or constructed: one signature, or each overload in order. An indexer has one, whose parameters are its keys.",
+          "type": "array",
+          "items": {"$ref": "#/$defs/signature"}
+        },
+        "typeParameters": {
+          "description": "Its generic parameters; a callable's are its signatures'.",
+          "type": "array",
+          "items": {"$ref": "#/$defs/typeParameter"}
+        },
+        "supertypes": {
+          "description": "What it derives from or implements, as its ecosystem lists them: .NET base types and every implemented interface, TypeScript heritage clauses, Rust supertraits and the trait an implementation implements, the Go interfaces of the package a type implements.",
+          "type": "array",
+          "items": {"$ref": "#/$defs/supertype"}
+        },
+        "constraints": {
+          "description": "What an associated type must satisfy, each as the language writes it.",
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "native": {
+          "description": "Ecosystem-specific facts, read only by that ecosystem's compatibility rules. Each public API extractor documents its own.",
+          "type": "object"
+        }
+      }
+    },
+    "refinement": {
+      "description": "What `api/v0` adds to the extraction envelope.",
+      "type": "object",
+      "properties": {
+        "schema": {"const": "api/v0"},
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "allOf": [
+              {
+                "if": {
+                  "type": "object",
+                  "required": ["kind"],
+                  "properties": {
+                    "kind": {
+                      "enum": ["export", "type", "member", "function", "class", "interface", "method", "property", "enum"]
+                    }
+                  }
+                },
+                "then": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": ["signature"],
+                      "properties": {
+                        "signature": {
+                          "description": "The declaration as source shows it, such as `(a: string) => void`.",
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "contract": {
+                        "$ref": "#/$defs/contract",
+                        "description": "The facts compatibility rules read about the declaration, in terms every ecosystem shares."
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "include": ["*.inc", "*.ts", "checks/**", "vendor/**"],
+  "defaultExcludes": false,
+  "languages": {".inc": "PHP"},
+  "tests": ["checks/**"]
+}

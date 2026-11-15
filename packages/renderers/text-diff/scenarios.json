@@ -1,0 +1,81 @@
+{
+  "format": "projections.scenarios",
+  "version": 0,
+  "title": "Text diff",
+  "renderer": "text-diff",
+  "scenarios": [
+    {
+      "id": "cli-output-release",
+      "title": "CLI output across a release",
+      "description": "Captured command output: a deprecated command disappears, the report and help text change line by line, a new --late-only command appears and the version output stays the same.",
+      "before": "fixtures/parcel-cli-before.json",
+      "after": "fixtures/parcel-cli-after.json"
+    },
+    {
+      "id": "release-notes-unified",
+      "title": "Release notes, one column",
+      "description": "Wrapping prose paragraphs rewritten between two drafts, shown as a unified diff.",
+      "before": {
+        "protocolVersion": 0,
+        "schema": "graph/v0",
+        "entities": [
+          {
+            "id": "summary",
+            "kind": "output",
+            "label": "Release notes: summary",
+            "data": {
+              "text": "This release improves delivery tracking for regional carriers.\n\nShipments are now grouped by city. Late shipments include the reason reported by the carrier.\n\nThe legacy status endpoint is still available but will be removed in a future release.",
+              "presentation": "prose"
+            }
+          },
+          {
+            "id": "upgrade",
+            "kind": "output",
+            "label": "Release notes: upgrading",
+            "data": {
+              "text": "No configuration changes are required.\n\nIf you call the legacy status endpoint, plan to migrate to the report command.",
+              "presentation": "prose"
+            }
+          }
+        ],
+        "relationships": []
+      },
+      "after": {
+        "protocolVersion": 0,
+        "schema": "graph/v0",
+        "entities": [
+          {
+            "id": "summary",
+            "kind": "output",
+            "label": "Release notes: summary",
+            "data": {
+              "text": "This release improves delivery tracking for regional and national carriers.\n\nShipments are now grouped by city. Late shipments include the reason reported by the carrier, and the time it was reported.\n\nA new --late-only option shows only shipments that need attention.",
+              "presentation": "prose"
+            }
+          },
+          {
+            "id": "upgrade",
+            "kind": "output",
+            "label": "Release notes: upgrading",
+            "data": {
+              "text": "The legacy status endpoint has been removed. Use `parcel report` instead.\n\nReports in CSV format are available with --format csv.",
+              "presentation": "prose"
+            }
+          }
+        ],
+        "relationships": []
+      },
+      "presentation": {
+        "rendererOptions": {
+          "textDiffLayout": "unified"
+        }
+      }
+    },
+    {
+      "id": "cli-output-snapshot",
+      "title": "CLI output snapshot",
+      "description": "The captured output of each command at one revision.",
+      "extraction": "fixtures/parcel-cli-after.json"
+    }
+  ]
+}

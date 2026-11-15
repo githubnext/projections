@@ -1,0 +1,728 @@
+{
+ "entities": [
+  {
+   "id": "table:/Edge",
+   "kind": "table",
+   "label": "Edge",
+   "data": {
+    "namespace": null,
+    "provider": "postgresql"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:/Edge",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/neg",
+   "kind": "column",
+   "label": "neg",
+   "data": {
+    "table": "table:/Edge",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": -1,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/negf",
+   "kind": "column",
+   "label": "negf",
+   "data": {
+    "table": "table:/Edge",
+    "type": "Float",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": -2.5,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/f1",
+   "kind": "column",
+   "label": "f1",
+   "data": {
+    "table": "table:/Edge",
+    "type": "Float",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": 1,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/dec",
+   "kind": "column",
+   "label": "dec",
+   "data": {
+    "table": "table:/Edge",
+    "type": "Decimal",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": 1,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/decs",
+   "kind": "column",
+   "label": "decs",
+   "data": {
+    "table": "table:/Edge",
+    "type": "Decimal",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": 1.25,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/big2",
+   "kind": "column",
+   "label": "big2",
+   "data": {
+    "table": "table:/Edge",
+    "type": "BigInt",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": "-9007199254740993",
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/when",
+   "kind": "column",
+   "label": "when",
+   "data": {
+    "table": "table:/Edge",
+    "type": "DateTime",
+    "nativeType": [
+     "Timestamptz",
+     [
+      "3"
+     ]
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": "2020-01-01T00:00:00+00:00",
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/s1",
+   "kind": "column",
+   "label": "s1",
+   "data": {
+    "table": "table:/Edge",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": "line\nbreak A \\ tab\t",
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/s2",
+   "kind": "column",
+   "label": "s2",
+   "data": {
+    "table": "table:/Edge",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": "",
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/nano",
+   "kind": "column",
+   "label": "nano",
+   "data": {
+    "table": "table:/Edge",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "nanoid",
+     "args": []
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/dbg",
+   "kind": "column",
+   "label": "dbg",
+   "data": {
+    "table": "table:/Edge",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "dbgenerated",
+     "args": []
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/bytes",
+   "kind": "column",
+   "label": "bytes",
+   "data": {
+    "table": "table:/Edge",
+    "type": "Bytes",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": "AQID",
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/js",
+   "kind": "column",
+   "label": "js",
+   "data": {
+    "table": "table:/Edge",
+    "type": "Json",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": "[1, 2]",
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/ints",
+   "kind": "column",
+   "label": "ints",
+   "data": {
+    "table": "table:/Edge",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": true,
+    "hasDefault": true,
+    "default": [
+     1,
+     2
+    ],
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/e",
+   "kind": "column",
+   "label": "e",
+   "data": {
+    "table": "table:/Edge",
+    "type": "String",
+    "nativeType": [
+     "VarChar",
+     [
+      "20"
+     ]
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/g",
+   "kind": "column",
+   "label": "g",
+   "data": {
+    "table": "table:/Edge",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/h",
+   "kind": "column",
+   "label": "h",
+   "data": {
+    "table": "table:/Edge",
+    "type": "String",
+    "nativeType": [
+     "VarChar",
+     [
+      "200"
+     ]
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/i",
+   "kind": "column",
+   "label": "i",
+   "data": {
+    "table": "table:/Edge",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FEdge/quoted",
+   "kind": "column",
+   "label": "quoted",
+   "data": {
+    "table": "table:/Edge",
+    "type": "String",
+    "nativeType": null,
+    "nullable": true,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FEdge/primary-key/edge_pk",
+   "kind": "constraint",
+   "label": "edge_pk",
+   "data": {
+    "table": "table:/Edge",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": "edge_pk"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FEdge/unique/edge_e_key",
+   "kind": "constraint",
+   "label": "edge_e_key",
+   "data": {
+    "table": "table:/Edge",
+    "type": "unique",
+    "fields": [
+     {
+      "name": "e",
+      "sortOrder": "asc"
+     }
+    ],
+    "databaseName": "edge_e_key"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FEdge/unique/g_key",
+   "kind": "constraint",
+   "label": "g_key",
+   "data": {
+    "table": "table:/Edge",
+    "type": "unique",
+    "fields": [
+     {
+      "name": "g"
+     }
+    ],
+    "databaseName": "g_key"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FEdge/index/%5B%22i%22%5D",
+   "kind": "constraint",
+   "label": "index (i)",
+   "data": {
+    "table": "table:/Edge",
+    "type": "index",
+    "algorithm": "Gin",
+    "indexType": "normal",
+    "fields": [
+     {
+      "name": "i",
+      "operatorClass": "gin_trgm_ops"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FEdge/index/%5B%22h%22%5D",
+   "kind": "constraint",
+   "label": "index (h)",
+   "data": {
+    "table": "table:/Edge",
+    "type": "index",
+    "algorithm": "BTree",
+    "indexType": "normal",
+    "fields": [
+     {
+      "name": "h"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FEdge/index/i_idx",
+   "kind": "constraint",
+   "label": "i_idx",
+   "data": {
+    "table": "table:/Edge",
+    "type": "index",
+    "indexType": "normal",
+    "fields": [
+     {
+      "name": "i",
+      "sortOrder": "desc"
+     }
+    ],
+    "databaseName": "i_idx"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FEdge/unique/hi",
+   "kind": "constraint",
+   "label": "hi",
+   "data": {
+    "table": "table:/Edge",
+    "type": "unique",
+    "fields": [
+     {
+      "name": "h"
+     },
+     {
+      "name": "i"
+     }
+    ],
+    "databaseName": "hi"
+   },
+   "confidence": "authoritative"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fid/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fneg/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/neg",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fnegf/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/negf",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Ff1/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/f1",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fdec/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/dec",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fdecs/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/decs",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fbig2/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/big2",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fwhen/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/when",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fs1/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/s1",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fs2/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/s2",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fnano/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/nano",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fdbg/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/dbg",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fbytes/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/bytes",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fjs/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/js",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fints/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/ints",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fe/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/e",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fg/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/g",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fh/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/h",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fi/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/i",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/column%3Atable%253A%252FEdge%2Fquoted/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "column:table%3A%2FEdge/quoted",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/constraint%3Atable%253A%252FEdge%2Fprimary-key%2Fedge_pk/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "constraint:table%3A%2FEdge/primary-key/edge_pk",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FEdge%2Fprimary-key%2Fedge_pk/column%3Atable%253A%252FEdge%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FEdge/primary-key/edge_pk",
+   "to": "column:table%3A%2FEdge/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/constraint%3Atable%253A%252FEdge%2Funique%2Fedge_e_key/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "constraint:table%3A%2FEdge/unique/edge_e_key",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FEdge%2Funique%2Fedge_e_key/column%3Atable%253A%252FEdge%2Fe/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FEdge/unique/edge_e_key",
+   "to": "column:table%3A%2FEdge/e",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/constraint%3Atable%253A%252FEdge%2Funique%2Fg_key/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "constraint:table%3A%2FEdge/unique/g_key",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FEdge%2Funique%2Fg_key/column%3Atable%253A%252FEdge%2Fg/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FEdge/unique/g_key",
+   "to": "column:table%3A%2FEdge/g",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/constraint%3Atable%253A%252FEdge%2Findex%2F%255B%2522i%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "constraint:table%3A%2FEdge/index/%5B%22i%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FEdge%2Findex%2F%255B%2522i%2522%255D/column%3Atable%253A%252FEdge%2Fi/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FEdge/index/%5B%22i%22%5D",
+   "to": "column:table%3A%2FEdge/i",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/constraint%3Atable%253A%252FEdge%2Findex%2F%255B%2522h%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "constraint:table%3A%2FEdge/index/%5B%22h%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FEdge%2Findex%2F%255B%2522h%2522%255D/column%3Atable%253A%252FEdge%2Fh/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FEdge/index/%5B%22h%22%5D",
+   "to": "column:table%3A%2FEdge/h",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/constraint%3Atable%253A%252FEdge%2Findex%2Fi_idx/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "constraint:table%3A%2FEdge/index/i_idx",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FEdge%2Findex%2Fi_idx/column%3Atable%253A%252FEdge%2Fi/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FEdge/index/i_idx",
+   "to": "column:table%3A%2FEdge/i",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FEdge/constraint%3Atable%253A%252FEdge%2Funique%2Fhi/",
+   "kind": "contains",
+   "from": "table:/Edge",
+   "to": "constraint:table%3A%2FEdge/unique/hi",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FEdge%2Funique%2Fhi/column%3Atable%253A%252FEdge%2Fh/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FEdge/unique/hi",
+   "to": "column:table%3A%2FEdge/h",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FEdge%2Funique%2Fhi/column%3Atable%253A%252FEdge%2Fi/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FEdge/unique/hi",
+   "to": "column:table%3A%2FEdge/i",
+   "confidence": "authoritative"
+  }
+ ]
+}

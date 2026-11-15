@@ -1,0 +1,17 @@
+{
+  "protocolVersion": 0,
+  "schema": "api/v0",
+  "entities": [
+    {"id": "createClient", "kind": "function", "label": "createClient", "data": {"signature": "export function createClient(options: ClientOptions): Client"}},
+    {"id": "Client", "kind": "class", "label": "Client", "data": {"signature": "export class Client"}},
+    {"id": "Client.request", "kind": "method", "label": "Client.request", "data": {"signature": "request<T>(path: string, init?: RequestInit): Promise<T>"}},
+    {"id": "Client.get", "kind": "method", "label": "Client.get", "data": {"signature": "get<T>(path: string): Promise<T>"}},
+    {"id": "Client.setToken", "kind": "method", "label": "Client.setToken", "data": {"signature": "setToken(token: string): void"}},
+    {"id": "ClientOptions", "kind": "interface", "label": "ClientOptions", "data": {"signature": "export interface ClientOptions { baseUrl: string; token?: string; timeout?: number }"}},
+    {"id": "ClientOptions.retries", "kind": "property", "label": "ClientOptions.retries", "data": {"signature": "retries?: number"}},
+    {"id": "fetchJson", "kind": "function", "label": "fetchJson", "data": {"signature": "export function fetchJson<T>(url: string): Promise<T>"}},
+    {"id": "HttpError", "kind": "class", "label": "HttpError", "data": {"signature": "export class HttpError extends Error"}},
+    {"id": "LogLevel", "kind": "enum", "label": "LogLevel", "data": {"signature": "export enum LogLevel { Silent, Error, Debug }"}}
+  ],
+  "relationships": []
+}

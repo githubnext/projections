@@ -1,0 +1,10 @@
+{
+  "name": "@acme/cli",
+  "version": "0.1.0",
+  "devDependencies": {
+    "@acme/api": "workspace:*"
+  },
+  "optionalDependencies": {
+    "is-even": "1.0.0"
+  }
+}

@@ -1,0 +1,16 @@
+datasource db {
+  provider = "postgres"
+  url = "postgres://x"
+}
+model T {
+  id Int @id
+  children T[] @relation("Tree")
+  parentId Int?
+  parent T? @relation("Tree", fields: [parentId], references: [id])
+  a Int @unique
+  b B? @relation(name: "TB", fields: [a], references: [x], onDelete: NoAction, onUpdate: SetDefault)
+}
+model B {
+  x Int @id
+  t T[] @relation("TB")
+}

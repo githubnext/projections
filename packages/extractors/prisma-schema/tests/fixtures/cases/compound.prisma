@@ -1,0 +1,22 @@
+datasource db {
+  provider     = "sqlite"
+  url          = "file:dev.db"
+  relationMode = "prisma"
+}
+
+model A {
+  x Int
+  y Int
+  z String @default("q\"uote")
+  bs B[]
+  @@id([x, y], name: "pair")
+  @@unique(fields: [z], name: "zz")
+}
+
+model B {
+  id Int @id
+  ax Int
+  ay Int
+  a  A   @relation(fields: [ax, ay], references: [x, y], onDelete: Restrict, onUpdate: Cascade)
+  @@index(fields: [ax, ay])
+}

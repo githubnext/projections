@@ -1,0 +1,432 @@
+# yaml-language-server: $schema=../../schemas/schemas/comparator-tests/v0.json
+#
+# Each ecosystem's compatibility verdicts, as cases over the API renderer's
+# fixtures. Run them with `projections check -p <id>` in a repository whose
+# projection uses these rules.
+format: projections.comparator-tests
+version: 0
+
+cases:
+  - name: TypeScript changes are judged by assignability
+    before: ../../renderers/api/fixtures/typescript-before.json
+    after: ../../renderers/api/fixtures/typescript-after.json
+    expect:
+      metadata:
+        compatibility:
+          ecosystem: typescript
+          rules: TypeScript assignability over the checker's types
+          counts: {breaking: 6, additive: 9, compatible: 1, unknown: 0}
+          notices: []
+      changes:
+        - id: ts-api:%40acme%2Fqueue:.:createQueue
+          summary: 'Breaking: Parameter `options` is now required.'
+        - id: ts-api:%40acme%2Fqueue:.:retry
+          summary: 'Breaking: Parameter `attempts` no longer accepts `number | string` (now `number`).'
+        - id: ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:get
+          summary: 'Compatible: Returns the narrower `Job<T>`.'
+        - id: ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:timeout
+          status: added
+          summary: 'Additive: `timeout` was added.'
+    snapshot: snapshots/typescript.json
+
+  - name: Go changes follow apidiff
+    before: ../../renderers/api/fixtures/go-before.json
+    after: ../../renderers/api/fixtures/go-after.json
+    expect:
+      metadata:
+        compatibility:
+          ecosystem: go
+          rules: apidiff, reproduced
+          counts: {breaking: 8, additive: 3, compatible: 1, unknown: 0}
+      changes:
+        - id: go:example.com/ledger.Entry
+          summary: 'Breaking: Is no longer comparable; `==` and map keys of it fail.'
+        - id: go:example.com/ledger.Ledger.Len
+          summary: 'Breaking: Moved to the pointer method set; values no longer have it.'
+
+  - name: Rust changes follow the Cargo SemVer reference
+    before: ../../renderers/api/fixtures/rust-before.json
+    after: ../../renderers/api/fixtures/rust-after.json
+    expect:
+      metadata:
+        compatibility:
+          ecosystem: rust
+          rules: Cargo SemVer reference, reproduced
+          counts: {breaking: 8, additive: 13, compatible: 0, unknown: 1}
+      changes:
+        - id: rust:throttle::Decision::Throttle
+          summary: 'Breaking: Variant `Throttle` was added to exhaustive enum `Decision`; exhaustive matches fail.'
+        - id: rust:throttle::DEFAULT_BURST
+          summary: >-
+            Unknown: Its value changed from `10u32` to `20u32`; code using it in a type, such as an array
+            length, may fail.
+
+  - name: .NET changes follow ApiCompat, binary and source
+    before: ../../renderers/api/fixtures/dotnet-before.json
+    after: ../../renderers/api/fixtures/dotnet-after.json
+    expect:
+      metadata:
+        compatibility:
+          ecosystem: dotnet
+          rules: ApiCompat (default mode), reproduced
+          counts: {breaking: 8, additive: 8, compatible: 1, unknown: 0}
+      changes:
+        - id: api:Payments:F:Payments.Limits.MaxRetries
+          summary: 'Breaking (binary): Value changed from `3` to `5`; code compiled earlier keeps `3`.'
+        - id: api:Payments:M:Payments.Client.Pay(System.Decimal,System.String)
+          summary: 'Breaking (source): Parameter `currency` was renamed to `currencyCode`, breaking named arguments.'
+
+  - name: without an ecosystem, only the shared rules apply
+    before: ../../renderers/api/fixtures/http-client-v1.json
+    after: ../../renderers/api/fixtures/http-client-v2.json
+    expect:
+      metadata:
+        compatibility:
+          ecosystem: null
+          rules: Shared rules
+          counts: {breaking: 3, additive: 3, compatible: 0, unknown: 5}
+          notices:
+            - The extractions don't declare `metadata.ecosystem`; only the rules every ecosystem shares apply.
+      changes:
+        - {id: Client.setToken, status: removed, summary: 'Breaking: `Client.setToken` was removed.'}
+        - id: Client.request
+          summary: "Unknown: The declaration changed, and no ecosystem's rules apply to classify the change."
+
+  - name: TypeScript parameter names and optionality
+    # Arguments are positional: a rename alone is compatible, and a required
+    # parameter that becomes optional only lets calls omit it.
+    before:
+      extraction:
+        protocolVersion: 0
+        schema: api/v0
+        metadata: {ecosystem: typescript}
+        entities:
+          - id: fail
+            kind: export
+            label: fail
+            data:
+              signature: 'fail(status: number): never'
+              contract:
+                declaration: function
+                term: function
+                visibility: public
+                signatures:
+                  - parameters:
+                      - {name: status, optional: false, variadic: false, passing: value, type: {text: number}}
+                    returns: {text: never}
+          - id: retry
+            kind: export
+            label: retry
+            data:
+              signature: 'retry(attempts: number): void'
+              contract:
+                declaration: function
+                term: function
+                visibility: public
+                signatures:
+                  - parameters:
+                      - {name: attempts, optional: false, variadic: false, passing: value, type: {text: number}}
+                    returns: {text: void}
+        relationships: []
+    after:
+      extraction:
+        protocolVersion: 0
+        schema: api/v0
+        metadata: {ecosystem: typescript}
+        entities:
+          - id: fail
+            kind: export
+            label: fail
+            data:
+              signature: 'fail(statusCode: number): never'
+              contract:
+                declaration: function
+                term: function
+                visibility: public
+                signatures:
+                  - parameters:
+                      - {name: statusCode, optional: false, variadic: false, passing: value, type: {text: number}}
+                    returns: {text: never}
+          - id: retry
+            kind: export
+            label: retry
+            data:
+              signature: 'retry(attempts?: number): void'
+              contract:
+                declaration: function
+                term: function
+                visibility: public
+                signatures:
+                  - parameters:
+                      - {name: attempts, optional: true, variadic: false, passing: value, type: {text: number}}
+                    returns: {text: void}
+        relationships: []
+    expect:
+      metadata:
+        compatibility:
+          counts: {breaking: 0, additive: 1, compatible: 1, unknown: 0}
+      changes:
+        - id: fail
+          summary: 'Compatible: Parameter `status` was renamed to `statusCode`; arguments are passed by position.'
+        - id: retry
+          summary: 'Additive: Parameter `attempts` is now optional; calls may omit it.'
+
+  - name: Rust parameter names
+    # Rust has no named arguments: a rename alone is compatible, as in TypeScript and Go.
+    before:
+      extraction:
+        protocolVersion: 0
+        schema: api/v0
+        metadata: {ecosystem: rust}
+        entities:
+          - id: rust:throttle::wait
+            kind: function
+            label: wait
+            data:
+              signature: 'pub fn wait(millis: u64)'
+              contract:
+                declaration: function
+                term: function
+                visibility: public
+                signatures:
+                  - parameters:
+                      - {name: millis, optional: false, variadic: false, passing: value, type: {text: u64}}
+                    returns: {text: ()}
+        relationships: []
+    after:
+      extraction:
+        protocolVersion: 0
+        schema: api/v0
+        metadata: {ecosystem: rust}
+        entities:
+          - id: rust:throttle::wait
+            kind: function
+            label: wait
+            data:
+              signature: 'pub fn wait(duration_ms: u64)'
+              contract:
+                declaration: function
+                term: function
+                visibility: public
+                signatures:
+                  - parameters:
+                      - {name: duration_ms, optional: false, variadic: false, passing: value, type: {text: u64}}
+                    returns: {text: ()}
+        relationships: []
+    expect:
+      metadata:
+        compatibility:
+          counts: {breaking: 0, additive: 0, compatible: 1, unknown: 0}
+      changes:
+        - id: rust:throttle::wait
+          summary: 'Compatible: Parameter `millis` was renamed to `duration_ms`; arguments are passed by position.'
+
+  - name: .NET type rules
+    before: fixtures/dotnet-types-before.json
+    after: fixtures/dotnet-types-after.json
+    expect:
+      metadata:
+        compatibility:
+          counts: {breaking: 4, additive: 2, compatible: 2, unknown: 0}
+      changes:
+        - id: 'T:Box`1'
+          summary: 'Compatible: Type parameter `T` lost the constraint `class`; code that compiled against it still does.'
+        - id: T:Helpers
+          summary: 'Breaking (binary, source): Became `static`; It can no longer be inherited: it has no accessible constructor.'
+        - id: T:Shape
+          summary: 'Breaking (binary, source): Changed from `class` to `struct`.'
+    snapshot: snapshots/dotnet-types.json
+  - name: .NET member rules
+    before: fixtures/dotnet-members-before.json
+    after: fixtures/dotnet-members-after.json
+    expect:
+      metadata:
+        compatibility:
+          counts: {breaking: 9, additive: 3, compatible: 6, unknown: 0}
+      changes:
+        - id: M:Base.Run
+          summary: 'Breaking (binary, source): Is no longer `abstract` or `virtual`.'
+        - id: M:Final.Fly
+          summary: "Compatible: Became `sealed`; its type can't be inherited, so nothing overrode it."
+        - id: M:Final.Go
+          summary: "Compatible: Is no longer `virtual`; its type can't be inherited, so nothing overrode it."
+        - id: 'M:IStore.Parse(System.String)'
+          summary: 'Breaking (binary, source): Became `sealed` in its interface.'
+        - id: P:Base.Id
+          summary: 'Additive: Gained an `init` accessor.'
+    snapshot: snapshots/dotnet-members.json
+  - name: Go type rules
+    before: fixtures/go-types-before.json
+    after: fixtures/go-types-after.json
+    expect:
+      metadata:
+        compatibility:
+          counts: {breaking: 14, additive: 1, compatible: 2, unknown: 0}
+      changes:
+        - id: 'go:example.com/units.Count'
+          summary: 'Breaking: Became an alias of `int`; it is no longer a distinct type.'
+        - id: 'go:example.com/units.Events'
+          summary: 'Breaking: Its element type changed from `int` to `string`.'
+        - id: 'go:example.com/units.Inbox'
+          summary: 'Compatible: Lost its direction; both sends and receives compile.'
+        - id: 'go:example.com/units.Size'
+          summary: "Breaking: Changed from `int` to `int32`, which can't hold every value."
+        - id: 'go:example.com/units.Total'
+          summary: 'Breaking: Is no longer an alias of `int`, but a distinct type.'
+    snapshot: snapshots/go-types.json
+  - name: Go native facts written by hand
+    # `contract.native` is open JSON, so the rules read it defensively: a numeric fact
+    # without its sizes counts them as 0, so the type can't be shown to grow, and a channel
+    # without its channel fact decides nothing. A declaration without contract facts has no
+    # rules to apply.
+    before: fixtures/go-by-hand-before.json
+    after: fixtures/go-by-hand-after.json
+    expect:
+      metadata:
+        compatibility:
+          counts: {breaking: 1, additive: 0, compatible: 0, unknown: 2}
+      changes:
+        - id: 'go:example.com/units.Queue'
+          summary: "Unknown: Its contract changed (`underlying`) in a way the rules don't classify."
+        - id: 'go:example.com/units.Unit'
+          summary: 'Unknown: The declaration changed, and it has no contract facts to classify the change.'
+        - id: 'go:example.com/units.Weight'
+          summary: "Breaking: Changed from `int32` to `int64`, which can't hold every value."
+    snapshot: snapshots/go-by-hand.json
+  - name: Rust item rules
+    before: fixtures/rust-items-before.json
+    after: fixtures/rust-items-after.json
+    expect:
+      metadata:
+        compatibility:
+          counts: {breaking: 16, additive: 4, compatible: 4, unknown: 7}
+      changes:
+        - id: rust:kit::Codec
+          summary: 'Additive: Became usable as `dyn Trait`.'
+        - id: rust:kit::Level::Low
+          summary: 'Breaking: Its discriminant changed from implicit to `1`.'
+        - id: rust:kit::Shape::Circle::radius
+          status: added
+          summary: 'Breaking: Field `radius` was added to variant `Circle`; patterns and constructions of it fail.'
+        - id: rust:kit::Shape::Square::side
+          status: added
+          summary: 'Additive: Field `side` was added.'
+        - id: rust:kit::parse
+          summary: "Unknown: Parameter `s`'s type changed from `&str` to `S`, with generics involved; Generic parameter `S` was added; calls that name the type arguments fail."
+    snapshot: snapshots/rust-items.json
+  - name: Rust native facts written by hand
+    # An extraction written by hand may leave out native facts, containers and optional
+    # facts: a struct whose shape is no longer stated hasn't changed shape, an implementation
+    # no type contains names no type, and a re-export may not say what it re-exports.
+    before: fixtures/rust-by-hand-before.json
+    after: fixtures/rust-by-hand-after.json
+    expect:
+      metadata:
+        compatibility:
+          counts: {breaking: 2, additive: 0, compatible: 0, unknown: 1}
+      changes:
+        - id: 'rust:kit::Lonely: Display'
+          status: removed
+          summary: 'Breaking: The type no longer implements `Display`.'
+        - id: rust:kit::Point
+          summary: "Unknown: Its contract changed (`native.shape`) in a way the rules don't classify."
+        - id: rust:kit::prelude::Clock
+          summary: 'Breaking: Now re-exports none instead of `crate::time::Clock`.'
+    snapshot: snapshots/rust-by-hand.json
+  - name: TypeScript members, variables and signatures
+    before: fixtures/typescript-members-before.json
+    after: fixtures/typescript-members-after.json
+    expect:
+      metadata:
+        compatibility:
+          counts: {breaking: 12, additive: 2, compatible: 9, unknown: 4}
+      changes:
+        - id: ts:kit:.:Handler
+          summary: 'Unknown: Its type changed from `Callback` to `Listener`.'
+        - id: ts:kit:.:Job:kind
+          summary: 'Breaking: Its type changed from `"a"` to `"a" | "b"`.'
+        - id: ts:kit:.:VERSION
+          summary: 'Breaking: Its type changed from `"1.0"` to `string`.'
+        - id: ts:kit:.:format
+          summary: 'Compatible: Parameter `value` changed from `string` to `any`, which are mutually assignable.'
+        - id: ts:kit:.:pad
+          summary: 'Compatible: Parameter `value` changed from `string | number` to `number | string`, which are mutually assignable.'
+        - id: ts:kit:.:pick
+          summary: 'Breaking: Rest parameter `rest` was removed; calls passing more arguments fail.'
+    snapshot: snapshots/typescript-members.json
+  - name: TypeScript facts written by hand
+    # An extraction written by hand may leave out optional facts: a type that is absent, or
+    # that lists no union constituents, decides nothing, and a type named the same is the same.
+    # Signatures that are absent compare as nothing.
+    before: fixtures/typescript-by-hand-before.json
+    after: fixtures/typescript-by-hand-after.json
+    expect:
+      metadata:
+        compatibility:
+          counts: {breaking: 1, additive: 0, compatible: 2, unknown: 2}
+      changes:
+        - id: ts:kit:.:Job:size
+          summary: 'Breaking: Became optional; code reading it must handle `undefined`.'
+        - id: ts:kit:.:mode
+          summary: 'Compatible: Its type is equivalent.'
+        - id: ts:kit:.:run
+          summary: "Unknown: Its contract changed (`signatures`) in a way the rules don't classify."
+        - id: ts:kit:.:started
+          summary: 'Unknown: Its type changed from `?` to `Date`.'
+        - id: ts:kit:.:stop
+          summary: 'Compatible: Parameter `code` changed from `Code` to `Code`, which are mutually assignable.'
+    snapshot: snapshots/typescript-by-hand.json
+  - name: options other than the ecosystem are refused
+    options: {ecosystem: go, strict: true}
+    before:
+      extraction: {protocolVersion: 0, schema: api/v0, metadata: {ecosystem: go}, entities: [], relationships: []}
+    after:
+      extraction: {protocolVersion: 0, schema: api/v0, metadata: {ecosystem: go}, entities: [], relationships: []}
+    expect:
+      error: 'invalid options: unknown field `strict`, expected `ecosystem`'
+
+  - name: only api/v0 extractions are compared
+    before:
+      extraction: {protocolVersion: 0, schema: graph/v0, entities: [], relationships: []}
+    after:
+      extraction: {protocolVersion: 0, schema: graph/v0, entities: [], relationships: []}
+    expect:
+      error: '`api-compatibility` compares `api/v0` extractions, not `graph/v0` ones'
+
+  - name: one revision declaring the ecosystem names it
+    before: fixtures/one-declared-before.json
+    after: fixtures/one-declared-after.json
+    expect:
+      metadata:
+        compatibility: {ecosystem: go, notices: []}
+      changes:
+        - {id: 'go:example.com/units.Limit', summary: 'Breaking: Its value changed from `10` to `20`.'}
+
+  - name: splits and merges break code using the old declarations
+    before: fixtures/splits-and-merges-before.json
+    after: fixtures/splits-and-merges-after.json
+    expect:
+      metadata:
+        compatibility:
+          counts: {breaking: 2, additive: 0, compatible: 0, unknown: 0}
+      changes:
+        - id: ts:kit:.:Reader
+          summary: 'Breaking: Split from `Client` into `Reader`, `Writer`; code using `Client` fails.'
+        - id: ts:kit:.:send
+          summary: 'Breaking: Merged `get`, `put` into `send`; code using them fails.'
+  - name: declarations without contract facts are counted
+    before: fixtures/uncontracted-before.json
+    after: fixtures/uncontracted-after.json
+    expect:
+      metadata:
+        compatibility:
+          counts: {breaking: 0, additive: 0, compatible: 0, unknown: 2}
+          notices:
+            - >-
+              2 changed declarations have no contract facts (`data.contract`); their changes are classified by the rules
+              every ecosystem shares.
+      changes:
+        - id: rust:kit::start
+          summary: 'Unknown: The declaration changed, and it has no contract facts to classify the change.'
+        - id: rust:kit::stop
+          summary: 'Unknown: The declaration changed, and it has no contract facts to classify the change.'

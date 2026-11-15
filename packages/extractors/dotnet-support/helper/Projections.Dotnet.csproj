@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Shipped prebuilt and framework-dependent: run as `dotnet Projections.Dotnet.dll`
+         with the inspected repository's own .NET installation, never restored or built
+         at extraction time. -->
+    <UseAppHost>false</UseAppHost>
+    <!-- The helper loads the selected SDK's Roslyn, which targets that SDK's runtime.
+         Run on the newest installed major runtime (8.0 or newer) so the helper can host
+         whichever SDK the repository selects. -->
+    <RollForward>LatestMajor</RollForward>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <DebugType>embedded</DebugType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Compile-time reference assemblies only: nothing from these packages ships. At
+         extraction time Roslyn is loaded from the SDK that built the project
+         ($(RoslynTargetsPath)/bincore). 4.8 is the Roslyn of the oldest supported SDK
+         (8.0.100); newer SDK compilers satisfy this reference. Dependency injection and
+         EF Core are read by reflection from the examined application's own assemblies,
+         so they are not referenced at all. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" ExcludeAssets="runtime" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.8.0" ExcludeAssets="runtime" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

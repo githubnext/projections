@@ -1,0 +1,90 @@
+# Several policies in one stream, exercising lists, macros and every hook family.
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: setuid-root
+spec:
+  lists:
+    - name: setuids
+      type: syscalls
+      values: [sys_setuid, sys_setreuid]
+  selectorsMacros:
+    root:
+      matchArgs:
+        - index: 0
+          operator: Equal
+          values: ['0']
+  kprobes:
+    - call: list:setuids
+      args:
+        - index: 0
+          type: int
+          label: uid
+      selectors:
+        - label: to-root
+          macros: [root]
+          matchActions:
+            - action: Post
+              rateLimit: 1m
+---
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: module-loading
+spec:
+  options:
+    - name: policy-mode
+      value: monitor
+  hostSelector: {}
+  nodeSelector:
+    matchLabels:
+      nodepool: general
+  tracepoints:
+    - subsystem: module
+      event: module_load
+  lsmhooks:
+    - hook: kernel_module_request
+      selectors:
+        - matchBinaries:
+            - operator: NotIn
+              values: [/usr/bin/kmod]
+          matchActions:
+            - action: Override
+              argError: -1
+  kprobes:
+    - call: do_init_module
+      syscall: false
+      futureField: true
+      selectors:
+        - matchActions:
+            - action: Sigkill
+        - matchCapabilities:
+            - operator: In
+              values: [CAP_SYS_MODULE]
+          matchActions:
+            - action: Teleport
+---
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicyNamespaced
+metadata:
+  name: shell-history
+spec:
+  containerSelector:
+    matchExpressions:
+      - key: name
+        operator: In
+        values: [web, api]
+  uprobes:
+    - path: /bin/bash
+      symbols: [readline]
+  usdts:
+    - path: /usr/lib/libssl.so
+      provider: ssl
+      name: handshake
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: not-a-policy
+data:
+  note: Not a TracingPolicy, so it is ignored.

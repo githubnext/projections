@@ -1,0 +1,196 @@
+/*
+ * Projections renderer icons. An element with `data-icon="<name>"` draws the
+ * host's icon for that name (the theme token `--projections-icon-<name>`, an
+ * SVG image) as a mask in `currentColor`, 1em square, so it takes the size and
+ * color of the text beside it. Mark it `aria-hidden="true"` and always pair it
+ * with the word it stands for. Override `--projections-icon-<name>` to change a
+ * shape, or set `--projections-icon` on one element.
+ */
+[data-icon] {
+  display: inline-block;
+  flex: none;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+  background-color: currentColor;
+  -webkit-mask: var(--projections-icon) center / contain no-repeat;
+  mask: var(--projections-icon) center / contain no-repeat;
+}
+/*
+ * The change kinds, the planned actions and `breaking` beside them (`badgeIconNames`) are badges: a solid disc with the
+ * glyph cut out. Every other icon, a note after a change's status included, is an outline glyph. The glyph token is
+ * one mask layer and the disc (`--projections-icon-badge`, a circle by default) another; excluding one from the other
+ * keeps both vectors, so the badge is as crisp as any icon. The glyphs are the SDK's (`badgeIconNames` in icons.ts): one
+ * stroke in the badge's 24-unit box, each glyph's ink box centred on the disc (`redeploy`'s ring concentric with it); a
+ * host overriding these tokens keeps to that.
+ */
+:is(
+  [data-icon='added'],
+  [data-icon='removed'],
+  [data-icon='modified'],
+  [data-icon='renamed'],
+  [data-icon='moved'],
+  [data-icon='upgraded'],
+  [data-icon='downgraded'],
+  [data-icon='changed'],
+  [data-icon='replace'],
+  [data-icon='redeploy'],
+  [data-icon='import'],
+  [data-icon='read'],
+  [data-icon='blocked'],
+  [data-icon='breaking']
+) {
+  --projections-icon-badge-default: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2211%22%2F%3E%3C%2Fsvg%3E');
+  -webkit-mask:
+    var(--projections-icon) center / contain no-repeat,
+    var(--projections-icon-badge, var(--projections-icon-badge-default)) center / contain no-repeat;
+  -webkit-mask-composite: xor;
+  mask:
+    var(--projections-icon) center / contain no-repeat,
+    var(--projections-icon-badge, var(--projections-icon-badge-default)) center / contain no-repeat;
+  mask-composite: exclude;
+}
+[data-icon='added'] {
+  --projections-icon: var(--projections-icon-added);
+}
+[data-icon='removed'] {
+  --projections-icon: var(--projections-icon-removed);
+}
+[data-icon='modified'] {
+  --projections-icon: var(--projections-icon-modified);
+}
+[data-icon='renamed'] {
+  --projections-icon: var(--projections-icon-renamed);
+}
+[data-icon='moved'] {
+  --projections-icon: var(--projections-icon-moved);
+}
+[data-icon='warning'] {
+  --projections-icon: var(--projections-icon-warning);
+}
+[data-icon='error'] {
+  --projections-icon: var(--projections-icon-error);
+}
+[data-icon='breaking'] {
+  --projections-icon: var(--projections-icon-breaking);
+}
+[data-icon='info'] {
+  --projections-icon: var(--projections-icon-info);
+}
+[data-icon='unknown'] {
+  --projections-icon: var(--projections-icon-unknown);
+}
+[data-icon='additive'] {
+  --projections-icon: var(--projections-icon-additive);
+}
+[data-icon='compatible'] {
+  --projections-icon: var(--projections-icon-compatible);
+}
+[data-icon='upgraded'] {
+  --projections-icon: var(--projections-icon-upgraded);
+}
+[data-icon='downgraded'] {
+  --projections-icon: var(--projections-icon-downgraded);
+}
+[data-icon='changed'] {
+  --projections-icon: var(--projections-icon-changed);
+}
+[data-icon='enforced'] {
+  --projections-icon: var(--projections-icon-enforced);
+}
+[data-icon='unenforced'] {
+  --projections-icon: var(--projections-icon-unenforced);
+}
+[data-icon='include'] {
+  --projections-icon: var(--projections-icon-include);
+}
+[data-icon='exclude'] {
+  --projections-icon: var(--projections-icon-exclude);
+}
+[data-icon='visible'] {
+  --projections-icon: var(--projections-icon-visible);
+}
+[data-icon='hidden'] {
+  --projections-icon: var(--projections-icon-hidden);
+}
+[data-icon='expand'] {
+  --projections-icon: var(--projections-icon-expand);
+}
+[data-icon='collapse'] {
+  --projections-icon: var(--projections-icon-collapse);
+}
+[data-icon='rescoped'] {
+  --projections-icon: var(--projections-icon-rescoped);
+}
+[data-icon='settings'] {
+  --projections-icon: var(--projections-icon-settings);
+}
+[data-icon='agent'] {
+  --projections-icon: var(--projections-icon-agent);
+}
+[data-icon='replace'] {
+  --projections-icon: var(--projections-icon-replace);
+}
+[data-icon='redeploy'] {
+  --projections-icon: var(--projections-icon-redeploy);
+}
+[data-icon='import'] {
+  --projections-icon: var(--projections-icon-import);
+}
+[data-icon='read'] {
+  --projections-icon: var(--projections-icon-read);
+}
+[data-icon='blocked'] {
+  --projections-icon: var(--projections-icon-blocked);
+}
+[data-icon='varied'] {
+  --projections-icon: var(--projections-icon-varied);
+}
+[data-icon='generated'] {
+  --projections-icon: var(--projections-icon-generated);
+}
+[data-icon='host'] {
+  --projections-icon: var(--projections-icon-host);
+}
+[data-icon='policy'] {
+  --projections-icon: var(--projections-icon-policy);
+}
+[data-icon='workload'] {
+  --projections-icon: var(--projections-icon-workload);
+}
+[data-icon='credential'] {
+  --projections-icon: var(--projections-icon-credential);
+}
+[data-icon='process'] {
+  --projections-icon: var(--projections-icon-process);
+}
+[data-icon='file'] {
+  --projections-icon: var(--projections-icon-file);
+}
+[data-icon='network'] {
+  --projections-icon: var(--projections-icon-network);
+}
+[data-icon='module'] {
+  --projections-icon: var(--projections-icon-module);
+}
+[data-icon='bytecode'] {
+  --projections-icon: var(--projections-icon-bytecode);
+}
+[data-icon='namespace'] {
+  --projections-icon: var(--projections-icon-namespace);
+}
+[data-icon='application'] {
+  --projections-icon: var(--projections-icon-application);
+}
+[data-icon='other'] {
+  --projections-icon: var(--projections-icon-other);
+}
+[data-icon='extractor'] {
+  --projections-icon: var(--projections-icon-extractor);
+}
+[data-icon='comparator'] {
+  --projections-icon: var(--projections-icon-comparator);
+}
+[data-icon='renderer'] {
+  --projections-icon: var(--projections-icon-renderer);
+}

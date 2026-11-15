@@ -1,0 +1,6 @@
+{
+  "services": [
+    {"name": "web", "language": "TypeScript", "dependencies": ["api"]},
+    {"name": "api", "language": "Python", "dependencies": []}
+  ]
+}

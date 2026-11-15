@@ -1,0 +1,6 @@
+# Check out committed bytes on every platform: release executables embed helper
+# sources from this tree, so a Windows build must not convert their line endings.
+* text=auto eol=lf
+
+# A fixture whose CRLF line endings and byte order mark are the case under test.
+packages/extractors/code-statistics/tests/fixtures/polyglot/repo/web/bom.js -text

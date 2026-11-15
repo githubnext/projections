@@ -1,0 +1,110 @@
+{
+  "protocolVersion": 0,
+  "schema": "architecture/v0",
+  "entities": [
+    {
+      "id": "product",
+      "kind": "module",
+      "label": "product",
+      "data": {
+        "icon": "package",
+        "description": "What ships"
+      }
+    },
+    {
+      "id": "cli",
+      "kind": "component",
+      "label": "cli",
+      "data": {
+        "icon": "terminal",
+        "description": "The command line"
+      }
+    },
+    {
+      "id": "engine",
+      "kind": "component",
+      "label": "engine",
+      "data": {
+        "icon": "server",
+        "description": "The shared core"
+      }
+    },
+    {
+      "id": "store",
+      "kind": "component",
+      "label": "store",
+      "data": {
+        "icon": "database",
+        "description": "Saved comparisons"
+      }
+    },
+    {
+      "id": "site",
+      "kind": "component",
+      "label": "site",
+      "data": {
+        "icon": "not-an-icon",
+        "description": "The website"
+      }
+    },
+    {
+      "id": "worker",
+      "kind": "component",
+      "label": "worker",
+      "data": {
+        "icon": "workflow",
+        "description": "Background jobs"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "product->cli",
+      "kind": "contains",
+      "from": "product",
+      "to": "cli"
+    },
+    {
+      "id": "product->engine",
+      "kind": "contains",
+      "from": "product",
+      "to": "engine"
+    },
+    {
+      "id": "product->store",
+      "kind": "contains",
+      "from": "product",
+      "to": "store"
+    },
+    {
+      "id": "depends-on:cli:engine",
+      "kind": "depends-on",
+      "from": "cli",
+      "to": "engine"
+    },
+    {
+      "id": "depends-on:engine:store",
+      "kind": "depends-on",
+      "from": "engine",
+      "to": "store"
+    },
+    {
+      "id": "depends-on:site:engine",
+      "kind": "depends-on",
+      "from": "site",
+      "to": "engine"
+    },
+    {
+      "id": "product->worker",
+      "kind": "contains",
+      "from": "product",
+      "to": "worker"
+    },
+    {
+      "id": "depends-on:worker:engine",
+      "kind": "depends-on",
+      "from": "worker",
+      "to": "engine"
+    }
+  ]
+}

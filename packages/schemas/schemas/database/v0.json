@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/database/v0.json",
+  "title": "Projections domain schema database/v0",
+  "description": "Tables, columns, keys and constraints, and the relations between them; columns carry `data.type`.",
+  "allOf": [{"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"}, {"$ref": "#/$defs/refinement"}],
+  "$defs": {
+    "refinement": {
+      "description": "What `database/v0` adds to the extraction envelope.",
+      "type": "object",
+      "properties": {
+        "schema": {"const": "database/v0"},
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "allOf": [
+              {
+                "if": {"type": "object", "required": ["kind"], "properties": {"kind": {"enum": ["column"]}}},
+                "then": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": ["type"],
+                      "properties": {
+                        "type": {
+                          "$ref": "https://schemas.projections.githubnext.com/extraction/v0.json#/$defs/text",
+                          "description": "The column's type as the framework or source declares it, such as Prisma's `String` or Django's `CharField`."
+                        },
+                        "databaseType": {
+                          "description": "The column's native database type with its arguments, such as `varchar(200)`; null or absent when unknown.",
+                          "type": ["string", "null"]
+                        },
+                        "nullable": {"description": "Whether the column accepts null.", "type": "boolean"},
+                        "primaryKey": {
+                          "description": "Whether the column is (part of) its table's primary key.",
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {"type": "object", "required": ["kind"], "properties": {"kind": {"enum": ["constraint"]}}},
+                "then": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "description": "The kind of constraint, such as `primary-key`, `unique` or `foreign-key`.",
+                          "type": "string"
+                        },
+                        "table": {
+                          "description": "The constrained table's label, when no relationship connects them.",
+                          "type": "string"
+                        },
+                        "columns": {
+                          "description": "The constrained columns, by label.",
+                          "type": "array",
+                          "items": {"type": "string"}
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {"type": "object", "required": ["kind"], "properties": {"kind": {"enum": ["primary-key"]}}},
+                "then": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "table": {
+                          "description": "The keyed table's label, when no relationship connects them.",
+                          "type": "string"
+                        },
+                        "columns": {
+                          "description": "The key columns, by label.",
+                          "type": "array",
+                          "items": {"type": "string"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "if": {
+              "type": "object",
+              "required": ["kind"],
+              "properties": {"kind": {"enum": ["foreign-key", "relation"]}}
+            },
+            "then": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "columns": {
+                      "description": "The dependent table’s columns, by label, when the relationship connects tables.",
+                      "type": "array",
+                      "items": {"type": "string"}
+                    },
+                    "principalColumns": {
+                      "description": "The referenced columns, by label, in the order of `columns`.",
+                      "type": "array",
+                      "items": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "node_modules/.cache/test",
+    "declaration": false,
+    "sourceMap": false
+  },
+  "include": [
+    "src/dependencies/**/*.ts",
+    "src/dependencies/**/*.tsx",
+    "src/architecture/collapse.ts",
+    "src/infrastructure/**/*.ts",
+    "src/nouns.ts",
+    "src/facts.ts",
+    "src/facts/*.ts"
+  ]
+}

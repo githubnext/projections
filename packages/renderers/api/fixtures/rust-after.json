@@ -1,0 +1,2054 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "package",
+          "term": "crate",
+          "visibility": "public"
+        },
+        "signature": "crate throttle"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 1
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle",
+      "kind": "crate",
+      "label": "throttle"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "interface",
+          "native": {
+            "dynCompatible": true
+          },
+          "term": "trait",
+          "visibility": "public"
+        },
+        "signature": "pub trait Clock"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 61
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Clock",
+      "kind": "trait",
+      "label": "Clock"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "self",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "&Self"
+                  },
+                  "variadic": false
+                },
+                {
+                  "name": "since",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Duration"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Duration"
+              }
+            }
+          ],
+          "term": "trait-method",
+          "visibility": "public"
+        },
+        "signature": "fn elapsed(&self, since: Duration) -> Duration { … }"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 66
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Clock::elapsed",
+      "kind": "method",
+      "label": "elapsed"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "abstract": true,
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "self",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "&Self"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Duration"
+              }
+            }
+          ],
+          "term": "trait-method",
+          "visibility": "public"
+        },
+        "signature": "fn now(&self) -> Duration;"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 62
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Clock::now",
+      "kind": "method",
+      "label": "now"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "abstract": true,
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "self",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "&mut Self"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "()"
+              }
+            }
+          ],
+          "term": "trait-method",
+          "visibility": "public"
+        },
+        "signature": "fn tick(&mut self);"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 64
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Clock::tick",
+      "kind": "method",
+      "label": "tick"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "struct",
+          "native": {
+            "shape": "plain"
+          },
+          "term": "struct",
+          "visibility": "public"
+        },
+        "signature": "pub struct Config { .. }"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 19
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Config",
+      "kind": "struct",
+      "label": "Config"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "field",
+          "term": "field",
+          "type": {
+            "text": "u32"
+          },
+          "visibility": "public"
+        },
+        "signature": "pub burst: u32"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 21
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Config.burst",
+      "kind": "field",
+      "label": "burst"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "field",
+          "term": "field",
+          "type": {
+            "text": "u32"
+          },
+          "visibility": "public"
+        },
+        "signature": "pub rate: u32"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 20
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Config.rate",
+      "kind": "field",
+      "label": "rate"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "field",
+          "term": "field",
+          "type": {
+            "text": "Duration"
+          },
+          "visibility": "public"
+        },
+        "signature": "pub window: Duration"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 22
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Config.window",
+      "kind": "field",
+      "label": "window"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Clone"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Config"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Clone for Config"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 18
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Config: Clone",
+      "kind": "impl",
+      "label": "impl Clone"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Debug"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Config"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Debug for Config"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 18
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Config: Debug",
+      "kind": "impl",
+      "label": "impl Debug"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "RefUnwindSafe"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Config"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl RefUnwindSafe for Config"
+      },
+      "id": "rust:throttle::Config: RefUnwindSafe",
+      "kind": "impl",
+      "label": "impl RefUnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Send"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Config"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Send for Config"
+      },
+      "id": "rust:throttle::Config: Send",
+      "kind": "impl",
+      "label": "impl Send"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Sync"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Config"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Sync for Config"
+      },
+      "id": "rust:throttle::Config: Sync",
+      "kind": "impl",
+      "label": "impl Sync"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Unpin"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Config"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Unpin for Config"
+      },
+      "id": "rust:throttle::Config: Unpin",
+      "kind": "impl",
+      "label": "impl Unpin"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "UnwindSafe"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Config"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl UnwindSafe for Config"
+      },
+      "id": "rust:throttle::Config: UnwindSafe",
+      "kind": "impl",
+      "label": "impl UnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "constant",
+          "term": "constant",
+          "type": {
+            "text": "u32"
+          },
+          "value": "20u32",
+          "visibility": "public"
+        },
+        "signature": "pub const DEFAULT_BURST: u32 = 20"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 7
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::DEFAULT_BURST",
+      "kind": "constant",
+      "label": "DEFAULT_BURST"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "enum",
+          "term": "enum",
+          "visibility": "public"
+        },
+        "signature": "pub enum Decision"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 11
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Decision",
+      "kind": "enum",
+      "label": "Decision"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Clone"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Decision"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Clone for Decision"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 10
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Decision: Clone",
+      "kind": "impl",
+      "label": "impl Clone"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Debug"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Decision"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Debug for Decision"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 10
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Decision: Debug",
+      "kind": "impl",
+      "label": "impl Debug"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Eq"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Decision"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Eq for Decision"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 10
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Decision: Eq",
+      "kind": "impl",
+      "label": "impl Eq"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "PartialEq"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Decision"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl PartialEq for Decision"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 10
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Decision: PartialEq",
+      "kind": "impl",
+      "label": "impl PartialEq"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "RefUnwindSafe"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Decision"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl RefUnwindSafe for Decision"
+      },
+      "id": "rust:throttle::Decision: RefUnwindSafe",
+      "kind": "impl",
+      "label": "impl RefUnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Send"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Decision"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Send for Decision"
+      },
+      "id": "rust:throttle::Decision: Send",
+      "kind": "impl",
+      "label": "impl Send"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Sync"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Decision"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Sync for Decision"
+      },
+      "id": "rust:throttle::Decision: Sync",
+      "kind": "impl",
+      "label": "impl Sync"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Unpin"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Decision"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Unpin for Decision"
+      },
+      "id": "rust:throttle::Decision: Unpin",
+      "kind": "impl",
+      "label": "impl Unpin"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "UnwindSafe"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Decision"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl UnwindSafe for Decision"
+      },
+      "id": "rust:throttle::Decision: UnwindSafe",
+      "kind": "impl",
+      "label": "impl UnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "variant",
+          "native": {
+            "shape": "unit"
+          },
+          "term": "variant",
+          "visibility": "public"
+        },
+        "signature": "Allow"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 12
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Decision::Allow",
+      "kind": "variant",
+      "label": "Allow"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "variant",
+          "native": {
+            "shape": "plain"
+          },
+          "term": "variant",
+          "visibility": "public"
+        },
+        "signature": "Deny { retry_after: Duration }"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 13
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Decision::Deny",
+      "kind": "variant",
+      "label": "Deny"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "field",
+          "term": "field",
+          "type": {
+            "text": "Duration"
+          },
+          "visibility": "public"
+        },
+        "signature": "pub retry_after: Duration"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 13
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Decision::Deny.retry_after",
+      "kind": "field",
+      "label": "retry_after"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "variant",
+          "native": {
+            "shape": "tuple"
+          },
+          "term": "variant",
+          "visibility": "public"
+        },
+        "signature": "Throttle(u32)"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 14
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Decision::Throttle",
+      "kind": "variant",
+      "label": "Throttle"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "field",
+          "term": "field",
+          "type": {
+            "text": "u32"
+          },
+          "visibility": "public"
+        },
+        "signature": "0: u32"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 14
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Decision::Throttle.0",
+      "kind": "field",
+      "label": "0"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "struct",
+          "hiddenMembers": true,
+          "native": {
+            "shape": "plain"
+          },
+          "term": "struct",
+          "visibility": "public"
+        },
+        "signature": "pub struct Limiter { .. }"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 27
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Limiter",
+      "kind": "struct",
+      "label": "Limiter"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Debug"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Limiter"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Debug for Limiter"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 26
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Limiter: Debug",
+      "kind": "impl",
+      "label": "impl Debug"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "RefUnwindSafe"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Limiter"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl RefUnwindSafe for Limiter"
+      },
+      "id": "rust:throttle::Limiter: RefUnwindSafe",
+      "kind": "impl",
+      "label": "impl RefUnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Unpin"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Limiter"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Unpin for Limiter"
+      },
+      "id": "rust:throttle::Limiter: Unpin",
+      "kind": "impl",
+      "label": "impl Unpin"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "UnwindSafe"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Limiter"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl UnwindSafe for Limiter"
+      },
+      "id": "rust:throttle::Limiter: UnwindSafe",
+      "kind": "impl",
+      "label": "impl UnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "self",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "&Self"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "u32"
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "pub fn capacity(&self) -> u32"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 51
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Limiter::capacity",
+      "kind": "method",
+      "label": "capacity"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "self",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "&mut Self"
+                  },
+                  "variadic": false
+                },
+                {
+                  "name": "cost",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "u32"
+                  },
+                  "variadic": false
+                },
+                {
+                  "name": "key",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "&str"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Decision"
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "pub fn check(&mut self, cost: u32, key: &str) -> Decision"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 39
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Limiter::check",
+      "kind": "method",
+      "label": "check"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "config",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Config"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Self"
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "pub fn new(config: Config) -> Self"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 34
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Limiter::new",
+      "kind": "method",
+      "label": "new"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "self",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "&Self"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "u32"
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "pub fn remaining(&self) -> u32"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 55
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Limiter::remaining",
+      "kind": "method",
+      "label": "remaining"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "struct",
+          "native": {
+            "shape": "plain"
+          },
+          "nonExhaustive": true,
+          "term": "struct",
+          "visibility": "public"
+        },
+        "signature": "#[non_exhaustive] pub struct Stats { .. }"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 74
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Stats",
+      "kind": "struct",
+      "label": "Stats"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "field",
+          "term": "field",
+          "type": {
+            "text": "u64"
+          },
+          "visibility": "public"
+        },
+        "signature": "pub allowed: u64"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 75
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Stats.allowed",
+      "kind": "field",
+      "label": "allowed"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "field",
+          "term": "field",
+          "type": {
+            "text": "u64"
+          },
+          "visibility": "public"
+        },
+        "signature": "pub denied: u64"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 76
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Stats.denied",
+      "kind": "field",
+      "label": "denied"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Debug"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Stats"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Debug for Stats"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 73
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Stats: Debug",
+      "kind": "impl",
+      "label": "impl Debug"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Default"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Stats"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Default for Stats"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 73
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::Stats: Default",
+      "kind": "impl",
+      "label": "impl Default"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "RefUnwindSafe"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Stats"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl RefUnwindSafe for Stats"
+      },
+      "id": "rust:throttle::Stats: RefUnwindSafe",
+      "kind": "impl",
+      "label": "impl RefUnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Send"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Stats"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Send for Stats"
+      },
+      "id": "rust:throttle::Stats: Send",
+      "kind": "impl",
+      "label": "impl Send"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Sync"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Stats"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Sync for Stats"
+      },
+      "id": "rust:throttle::Stats: Sync",
+      "kind": "impl",
+      "label": "impl Sync"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Unpin"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Stats"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl Unpin for Stats"
+      },
+      "id": "rust:throttle::Stats: Unpin",
+      "kind": "impl",
+      "label": "impl Unpin"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "implementation",
+          "native": {
+            "synthetic": true
+          },
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "UnwindSafe"
+            }
+          ],
+          "term": "impl",
+          "type": {
+            "text": "Stats"
+          },
+          "visibility": "public"
+        },
+        "signature": "impl UnwindSafe for Stats"
+      },
+      "id": "rust:throttle::Stats: UnwindSafe",
+      "kind": "impl",
+      "label": "impl UnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "function",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "rate",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "u32"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Limiter"
+              }
+            }
+          ],
+          "term": "function",
+          "visibility": "public"
+        },
+        "signature": "pub fn limiter(rate: u32) -> Limiter"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 80
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::limiter",
+      "kind": "function",
+      "label": "limiter"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "module",
+          "term": "module",
+          "visibility": "public"
+        },
+        "signature": "pub mod metrics"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 84
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::metrics",
+      "kind": "module",
+      "label": "metrics"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "function",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "limiter",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "&Limiter"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "u32"
+              }
+            }
+          ],
+          "term": "function",
+          "visibility": "public"
+        },
+        "signature": "pub fn snapshot(limiter: &Limiter) -> u32"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "line": 86
+          },
+          "source": "src/lib.rs"
+        }
+      ],
+      "id": "rust:throttle::metrics::snapshot",
+      "kind": "function",
+      "label": "snapshot"
+    }
+  ],
+  "metadata": {
+    "crate": "throttle",
+    "crateVersion": "2.0.0",
+    "ecosystem": "rust",
+    "rustdocFormat": 61
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Clock",
+      "id": "contains:rust%3Athrottle%3A%3AClock:rust%3Athrottle%3A%3AClock%3A%3Aelapsed",
+      "kind": "contains",
+      "to": "rust:throttle::Clock::elapsed"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Clock",
+      "id": "contains:rust%3Athrottle%3A%3AClock:rust%3Athrottle%3A%3AClock%3A%3Anow",
+      "kind": "contains",
+      "to": "rust:throttle::Clock::now"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Clock",
+      "id": "contains:rust%3Athrottle%3A%3AClock:rust%3Athrottle%3A%3AClock%3A%3Atick",
+      "kind": "contains",
+      "to": "rust:throttle::Clock::tick"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Config",
+      "id": "contains:rust%3Athrottle%3A%3AConfig:rust%3Athrottle%3A%3AConfig%3A%20Clone",
+      "kind": "contains",
+      "to": "rust:throttle::Config: Clone"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Config",
+      "id": "contains:rust%3Athrottle%3A%3AConfig:rust%3Athrottle%3A%3AConfig%3A%20Debug",
+      "kind": "contains",
+      "to": "rust:throttle::Config: Debug"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Config",
+      "id": "contains:rust%3Athrottle%3A%3AConfig:rust%3Athrottle%3A%3AConfig%3A%20RefUnwindSafe",
+      "kind": "contains",
+      "to": "rust:throttle::Config: RefUnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Config",
+      "id": "contains:rust%3Athrottle%3A%3AConfig:rust%3Athrottle%3A%3AConfig%3A%20Send",
+      "kind": "contains",
+      "to": "rust:throttle::Config: Send"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Config",
+      "id": "contains:rust%3Athrottle%3A%3AConfig:rust%3Athrottle%3A%3AConfig%3A%20Sync",
+      "kind": "contains",
+      "to": "rust:throttle::Config: Sync"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Config",
+      "id": "contains:rust%3Athrottle%3A%3AConfig:rust%3Athrottle%3A%3AConfig%3A%20Unpin",
+      "kind": "contains",
+      "to": "rust:throttle::Config: Unpin"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Config",
+      "id": "contains:rust%3Athrottle%3A%3AConfig:rust%3Athrottle%3A%3AConfig%3A%20UnwindSafe",
+      "kind": "contains",
+      "to": "rust:throttle::Config: UnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Config",
+      "id": "contains:rust%3Athrottle%3A%3AConfig:rust%3Athrottle%3A%3AConfig.burst",
+      "kind": "contains",
+      "to": "rust:throttle::Config.burst"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Config",
+      "id": "contains:rust%3Athrottle%3A%3AConfig:rust%3Athrottle%3A%3AConfig.rate",
+      "kind": "contains",
+      "to": "rust:throttle::Config.rate"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Config",
+      "id": "contains:rust%3Athrottle%3A%3AConfig:rust%3Athrottle%3A%3AConfig.window",
+      "kind": "contains",
+      "to": "rust:throttle::Config.window"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Decision::Deny",
+      "id": "contains:rust%3Athrottle%3A%3ADecision%3A%3ADeny:rust%3Athrottle%3A%3ADecision%3A%3ADeny.retry_after",
+      "kind": "contains",
+      "to": "rust:throttle::Decision::Deny.retry_after"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Decision::Throttle",
+      "id": "contains:rust%3Athrottle%3A%3ADecision%3A%3AThrottle:rust%3Athrottle%3A%3ADecision%3A%3AThrottle.0",
+      "kind": "contains",
+      "to": "rust:throttle::Decision::Throttle.0"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Decision",
+      "id": "contains:rust%3Athrottle%3A%3ADecision:rust%3Athrottle%3A%3ADecision%3A%20Clone",
+      "kind": "contains",
+      "to": "rust:throttle::Decision: Clone"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Decision",
+      "id": "contains:rust%3Athrottle%3A%3ADecision:rust%3Athrottle%3A%3ADecision%3A%20Debug",
+      "kind": "contains",
+      "to": "rust:throttle::Decision: Debug"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Decision",
+      "id": "contains:rust%3Athrottle%3A%3ADecision:rust%3Athrottle%3A%3ADecision%3A%20Eq",
+      "kind": "contains",
+      "to": "rust:throttle::Decision: Eq"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Decision",
+      "id": "contains:rust%3Athrottle%3A%3ADecision:rust%3Athrottle%3A%3ADecision%3A%20PartialEq",
+      "kind": "contains",
+      "to": "rust:throttle::Decision: PartialEq"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Decision",
+      "id": "contains:rust%3Athrottle%3A%3ADecision:rust%3Athrottle%3A%3ADecision%3A%20RefUnwindSafe",
+      "kind": "contains",
+      "to": "rust:throttle::Decision: RefUnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Decision",
+      "id": "contains:rust%3Athrottle%3A%3ADecision:rust%3Athrottle%3A%3ADecision%3A%20Send",
+      "kind": "contains",
+      "to": "rust:throttle::Decision: Send"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Decision",
+      "id": "contains:rust%3Athrottle%3A%3ADecision:rust%3Athrottle%3A%3ADecision%3A%20Sync",
+      "kind": "contains",
+      "to": "rust:throttle::Decision: Sync"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Decision",
+      "id": "contains:rust%3Athrottle%3A%3ADecision:rust%3Athrottle%3A%3ADecision%3A%20Unpin",
+      "kind": "contains",
+      "to": "rust:throttle::Decision: Unpin"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Decision",
+      "id": "contains:rust%3Athrottle%3A%3ADecision:rust%3Athrottle%3A%3ADecision%3A%20UnwindSafe",
+      "kind": "contains",
+      "to": "rust:throttle::Decision: UnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Decision",
+      "id": "contains:rust%3Athrottle%3A%3ADecision:rust%3Athrottle%3A%3ADecision%3A%3AAllow",
+      "kind": "contains",
+      "to": "rust:throttle::Decision::Allow"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Decision",
+      "id": "contains:rust%3Athrottle%3A%3ADecision:rust%3Athrottle%3A%3ADecision%3A%3ADeny",
+      "kind": "contains",
+      "to": "rust:throttle::Decision::Deny"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Decision",
+      "id": "contains:rust%3Athrottle%3A%3ADecision:rust%3Athrottle%3A%3ADecision%3A%3AThrottle",
+      "kind": "contains",
+      "to": "rust:throttle::Decision::Throttle"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Limiter",
+      "id": "contains:rust%3Athrottle%3A%3ALimiter:rust%3Athrottle%3A%3ALimiter%3A%20Debug",
+      "kind": "contains",
+      "to": "rust:throttle::Limiter: Debug"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Limiter",
+      "id": "contains:rust%3Athrottle%3A%3ALimiter:rust%3Athrottle%3A%3ALimiter%3A%20RefUnwindSafe",
+      "kind": "contains",
+      "to": "rust:throttle::Limiter: RefUnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Limiter",
+      "id": "contains:rust%3Athrottle%3A%3ALimiter:rust%3Athrottle%3A%3ALimiter%3A%20Unpin",
+      "kind": "contains",
+      "to": "rust:throttle::Limiter: Unpin"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Limiter",
+      "id": "contains:rust%3Athrottle%3A%3ALimiter:rust%3Athrottle%3A%3ALimiter%3A%20UnwindSafe",
+      "kind": "contains",
+      "to": "rust:throttle::Limiter: UnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Limiter",
+      "id": "contains:rust%3Athrottle%3A%3ALimiter:rust%3Athrottle%3A%3ALimiter%3A%3Acapacity",
+      "kind": "contains",
+      "to": "rust:throttle::Limiter::capacity"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Limiter",
+      "id": "contains:rust%3Athrottle%3A%3ALimiter:rust%3Athrottle%3A%3ALimiter%3A%3Acheck",
+      "kind": "contains",
+      "to": "rust:throttle::Limiter::check"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Limiter",
+      "id": "contains:rust%3Athrottle%3A%3ALimiter:rust%3Athrottle%3A%3ALimiter%3A%3Anew",
+      "kind": "contains",
+      "to": "rust:throttle::Limiter::new"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Limiter",
+      "id": "contains:rust%3Athrottle%3A%3ALimiter:rust%3Athrottle%3A%3ALimiter%3A%3Aremaining",
+      "kind": "contains",
+      "to": "rust:throttle::Limiter::remaining"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Stats",
+      "id": "contains:rust%3Athrottle%3A%3AStats:rust%3Athrottle%3A%3AStats%3A%20Debug",
+      "kind": "contains",
+      "to": "rust:throttle::Stats: Debug"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Stats",
+      "id": "contains:rust%3Athrottle%3A%3AStats:rust%3Athrottle%3A%3AStats%3A%20Default",
+      "kind": "contains",
+      "to": "rust:throttle::Stats: Default"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Stats",
+      "id": "contains:rust%3Athrottle%3A%3AStats:rust%3Athrottle%3A%3AStats%3A%20RefUnwindSafe",
+      "kind": "contains",
+      "to": "rust:throttle::Stats: RefUnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Stats",
+      "id": "contains:rust%3Athrottle%3A%3AStats:rust%3Athrottle%3A%3AStats%3A%20Send",
+      "kind": "contains",
+      "to": "rust:throttle::Stats: Send"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Stats",
+      "id": "contains:rust%3Athrottle%3A%3AStats:rust%3Athrottle%3A%3AStats%3A%20Sync",
+      "kind": "contains",
+      "to": "rust:throttle::Stats: Sync"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Stats",
+      "id": "contains:rust%3Athrottle%3A%3AStats:rust%3Athrottle%3A%3AStats%3A%20Unpin",
+      "kind": "contains",
+      "to": "rust:throttle::Stats: Unpin"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Stats",
+      "id": "contains:rust%3Athrottle%3A%3AStats:rust%3Athrottle%3A%3AStats%3A%20UnwindSafe",
+      "kind": "contains",
+      "to": "rust:throttle::Stats: UnwindSafe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Stats",
+      "id": "contains:rust%3Athrottle%3A%3AStats:rust%3Athrottle%3A%3AStats.allowed",
+      "kind": "contains",
+      "to": "rust:throttle::Stats.allowed"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::Stats",
+      "id": "contains:rust%3Athrottle%3A%3AStats:rust%3Athrottle%3A%3AStats.denied",
+      "kind": "contains",
+      "to": "rust:throttle::Stats.denied"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle::metrics",
+      "id": "contains:rust%3Athrottle%3A%3Ametrics:rust%3Athrottle%3A%3Ametrics%3A%3Asnapshot",
+      "kind": "contains",
+      "to": "rust:throttle::metrics::snapshot"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle",
+      "id": "contains:rust%3Athrottle:rust%3Athrottle%3A%3AClock",
+      "kind": "contains",
+      "to": "rust:throttle::Clock"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle",
+      "id": "contains:rust%3Athrottle:rust%3Athrottle%3A%3AConfig",
+      "kind": "contains",
+      "to": "rust:throttle::Config"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle",
+      "id": "contains:rust%3Athrottle:rust%3Athrottle%3A%3ADEFAULT_BURST",
+      "kind": "contains",
+      "to": "rust:throttle::DEFAULT_BURST"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle",
+      "id": "contains:rust%3Athrottle:rust%3Athrottle%3A%3ADecision",
+      "kind": "contains",
+      "to": "rust:throttle::Decision"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle",
+      "id": "contains:rust%3Athrottle:rust%3Athrottle%3A%3ALimiter",
+      "kind": "contains",
+      "to": "rust:throttle::Limiter"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle",
+      "id": "contains:rust%3Athrottle:rust%3Athrottle%3A%3AStats",
+      "kind": "contains",
+      "to": "rust:throttle::Stats"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle",
+      "id": "contains:rust%3Athrottle:rust%3Athrottle%3A%3Alimiter",
+      "kind": "contains",
+      "to": "rust:throttle::limiter"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "rust:throttle",
+      "id": "contains:rust%3Athrottle:rust%3Athrottle%3A%3Ametrics",
+      "kind": "contains",
+      "to": "rust:throttle::metrics"
+    }
+  ],
+  "schema": "api/v0"
+}

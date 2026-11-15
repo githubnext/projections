@@ -1,0 +1,128 @@
+# yaml-language-server: $schema=../../../packages/schemas/schemas/comparator/v0.json
+#
+# Structural rules over the system topology. Each rule is a predicate over one
+# revision's items; a change that makes an item break a rule it didn't break
+# before is "introduced", one that makes it stop is "resolved". Every change
+# keeps the default comparator's correspondence and status: the rules only
+# explain changes and count violations.
+#
+# `metadata.topologyRules` holds both answers a reviewer or CI needs:
+#   - `violations`: every item of the After revision that breaks a rule (the
+#     state, as a check would judge it), and
+#   - `introduced` / `resolved`: what this change did (as a review would).
+format: projections.comparator
+version: 0
+description: >-
+  Flags changes that break the system topology's structural rules: renderers stay pure (no filesystem,
+  process or network), and the engine keeps untyped JSON (serde_json::Value) at its boundary modules.
+
+checks:
+  - assert: "options.all(key, key in ['engineJsonBoundary', 'pureRendererCapabilities', 'rendererExemptions'])"
+    message: >-
+      'unknown option `' + options.filter(key, !(key in ['engineJsonBoundary', 'pureRendererCapabilities', 'rendererExemptions']))[0] + '`'
+
+functions:
+  boundary:
+    description: The engine's boundary modules, where untyped JSON is allowed.
+    params: []
+    returns: list<string>
+    body: "options.?engineJsonBoundary.orValue(['src/main', 'src/parse', 'src/wasm'])"
+
+  impure:
+    description: The capabilities a renderer must not use.
+    params: []
+    returns: list<string>
+    body: "options.?pureRendererCapabilities.orValue(['fs', 'network', 'process'])"
+
+  exempt:
+    description: Renderer packages that are test infrastructure, not renderers.
+    params: []
+    returns: list<string>
+    body: 'options.?rendererExemptions.orValue([])'
+
+  entityViolations:
+    description: >-
+      The rules an entity breaks, as `rule` or `rule:detail` keys, so a new detail (another file) is a
+      new violation.
+    params:
+      - {name: entity, type: dyn}
+    returns: list<string>
+    body: |-
+      (entity.kind == 'npm-package'
+        && entity.data.?path.orValue('').startsWith('packages/renderers/')
+        && !(entity.data.?path.orValue('') in exempt())
+        ? entity.data.?capabilities.orValue([]).filter(c, c in impure()).map(c, 'renderers-stay-pure:' + c)
+        : [])
+      + (entity.id == 'crate:projections-engine'
+        ? entity.data.?capabilityModules.orValue({}).?jsonValue.orValue([]).filter(f, !(f in boundary()))
+            .map(f, 'engine-json-at-the-boundary:' + f)
+        : [])
+
+  violations:
+    description: The rules an item breaks; none for a missing item. The rules are all about entities.
+    params:
+      - {name: collection, type: string}
+      - {name: item, type: dyn}
+    returns: list<string>
+    body: "item == null || collection != 'entities' ? [] : entityViolations(item)"
+
+  describe:
+    description: A violation key in words.
+    params:
+      - {name: key, type: string}
+    returns: string
+    body: |-
+      key.startsWith('renderers-stay-pure:')
+        ? 'a renderer uses ' + prose.code(key.substring(20))
+        : key.startsWith('engine-json-at-the-boundary:')
+        ? 'untyped JSON (`serde_json::Value`) in ' + prose.code(key.substring(28)) + ', outside the engine boundary'
+        : key
+
+classify:
+  where: change.collection in ['entities', 'relationships']
+  variables:
+    - name: was
+      expression: violations(change.collection, beforeItem)
+    - name: now
+      expression: violations(change.collection, afterItem)
+    - name: introduced
+      expression: variables.now.filter(v, !(v in variables.was))
+    - name: resolved
+      expression: variables.was.filter(v, !(v in variables.now))
+  summary: |-
+    size(variables.introduced) > 0
+      ? 'Breaks a structural rule: ' + variables.introduced.map(v, describe(v)).join('; ') + '.'
+      : size(variables.resolved) > 0
+      ? 'Now keeps a structural rule: no longer ' + variables.resolved.map(v, describe(v)).join('; ') + '.'
+      : null
+  annotation: |-
+    size(variables.introduced) + size(variables.resolved) == 0 ? null
+      : {'introduced': variables.introduced, 'resolved': variables.resolved}
+
+steps:
+  # Changes that break a rule are told first.
+  rank: 'annotation != null && size(annotation.introduced) > 0 ? 0 : null'
+
+metadata:
+  variables:
+    - name: entityState
+      expression: |-
+        after.entities.filter(e, size(entityViolations(e)) > 0)
+          .map(e, {'item': e.id, 'rules': entityViolations(e)})
+    - name: changed
+      expression: maps.keys(annotations)
+  values:
+    topologyRules: |-
+      {
+        'version': 0,
+        'violations': variables.entityState,
+        'introduced': variables.changed.filter(id, size(annotations[id].introduced) > 0)
+          .map(id, {'change': id, 'rules': annotations[id].introduced}),
+        'resolved': variables.changed.filter(id, size(annotations[id].resolved) > 0)
+          .map(id, {'change': id, 'rules': annotations[id].resolved}),
+        'counts': {
+          'violations': size(variables.entityState),
+          'introduced': size(variables.changed.filter(id, size(annotations[id].introduced) > 0)),
+          'resolved': size(variables.changed.filter(id, size(annotations[id].resolved) > 0))
+        }
+      }

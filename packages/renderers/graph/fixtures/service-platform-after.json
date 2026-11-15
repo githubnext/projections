@@ -1,0 +1,28 @@
+{
+  "protocolVersion": 0,
+  "schema": "graph/v0",
+  "entities": [
+    {"id": "gateway", "kind": "service", "label": "gateway"},
+    {"id": "orders", "kind": "service", "label": "orders"},
+    {"id": "inventory", "kind": "service", "label": "inventory"},
+    {"id": "catalog", "kind": "service", "label": "catalog"},
+    {"id": "notifications", "kind": "service", "label": "notifications"},
+    {"id": "postgres", "kind": "database", "label": "postgres"},
+    {"id": "payments", "kind": "service", "label": "payments"},
+    {"id": "fraud", "kind": "service", "label": "fraud"},
+    {"id": "redis", "kind": "cache", "label": "redis"}
+  ],
+  "relationships": [
+    {"id": "gateway->orders", "kind": "calls", "from": "gateway", "to": "orders"},
+    {"id": "gateway->catalog", "kind": "calls", "from": "gateway", "to": "catalog"},
+    {"id": "orders->inventory", "kind": "calls", "from": "orders", "to": "inventory"},
+    {"id": "orders->payments", "kind": "calls", "from": "orders", "to": "payments"},
+    {"id": "payments->fraud", "kind": "calls", "from": "payments", "to": "fraud"},
+    {"id": "orders->notifications", "kind": "calls", "from": "orders", "to": "notifications"},
+    {"id": "orders->postgres", "kind": "reads", "from": "orders", "to": "postgres"},
+    {"id": "inventory->postgres", "kind": "reads", "from": "inventory", "to": "postgres"},
+    {"id": "payments->postgres", "kind": "reads", "from": "payments", "to": "postgres"},
+    {"id": "catalog->redis", "kind": "reads", "from": "catalog", "to": "redis"},
+    {"id": "redis->postgres", "kind": "reads", "from": "redis", "to": "postgres"}
+  ]
+}

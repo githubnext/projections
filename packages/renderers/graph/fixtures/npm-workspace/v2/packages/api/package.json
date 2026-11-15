@@ -1,0 +1,1 @@
+{"name":"@shop/api","version":"1.5.0","dependencies":{"express":"5.1.0","zod":"3.25.76","@shop/web":"^2.0.0"}}

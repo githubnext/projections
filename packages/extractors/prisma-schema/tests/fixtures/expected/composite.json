@@ -1,0 +1,374 @@
+{
+ "entities": [
+  {
+   "id": "table:/Customer",
+   "kind": "table",
+   "label": "Customer",
+   "data": {
+    "namespace": null,
+    "provider": "mongodb"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FCustomer/_id",
+   "kind": "column",
+   "label": "_id",
+   "data": {
+    "table": "table:/Customer",
+    "type": "String",
+    "nativeType": [
+     "ObjectId",
+     []
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "auto",
+     "args": []
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FCustomer/name",
+   "kind": "column",
+   "label": "name",
+   "data": {
+    "table": "table:/Customer",
+    "type": "String",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FCustomer/orderIds",
+   "kind": "column",
+   "label": "orderIds",
+   "data": {
+    "table": "table:/Customer",
+    "type": "String",
+    "nativeType": [
+     "ObjectId",
+     []
+    ],
+    "nullable": false,
+    "list": true,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "table:/Order",
+   "kind": "table",
+   "label": "Order",
+   "data": {
+    "namespace": null,
+    "provider": "mongodb"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FOrder/_id",
+   "kind": "column",
+   "label": "_id",
+   "data": {
+    "table": "table:/Order",
+    "type": "String",
+    "nativeType": [
+     "ObjectId",
+     []
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": true,
+    "default": {
+     "name": "auto",
+     "args": []
+    },
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FOrder/customerIds",
+   "kind": "column",
+   "label": "customerIds",
+   "data": {
+    "table": "table:/Order",
+    "type": "String",
+    "nativeType": [
+     "ObjectId",
+     []
+    ],
+    "nullable": false,
+    "list": true,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FCustomer/primary-key/%5B%22_id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (_id)",
+   "data": {
+    "table": "table:/Customer",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "_id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FCustomer/unique/%5B%22name%22%5D",
+   "kind": "constraint",
+   "label": "unique (name)",
+   "data": {
+    "table": "table:/Customer",
+    "type": "unique",
+    "fields": [
+     {
+      "name": "name"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FOrder/primary-key/%5B%22_id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (_id)",
+   "data": {
+    "table": "table:/Order",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "_id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FOrder/index/%5B%22_id%22%5D",
+   "kind": "constraint",
+   "label": "index (_id)",
+   "data": {
+    "table": "table:/Order",
+    "type": "index",
+    "indexType": "normal",
+    "fields": [
+     {
+      "name": "_id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FCustomer/foreign-key/%5B%22orderIds%22%5D/table%3A%2FOrder",
+   "kind": "constraint",
+   "label": "foreign-key (orderIds)",
+   "data": {
+    "table": "table:/Customer",
+    "type": "foreign-key",
+    "columns": [
+     "orderIds"
+    ],
+    "target": "table:/Order",
+    "references": [
+     "_id"
+    ],
+    "onDelete": null,
+    "onUpdate": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FOrder/foreign-key/%5B%22customerIds%22%5D/table%3A%2FCustomer",
+   "kind": "constraint",
+   "label": "foreign-key (customerIds)",
+   "data": {
+    "table": "table:/Order",
+    "type": "foreign-key",
+    "columns": [
+     "customerIds"
+    ],
+    "target": "table:/Customer",
+    "references": [
+     "_id"
+    ],
+    "onDelete": null,
+    "onUpdate": null
+   },
+   "confidence": "authoritative"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "contains:table%3A%2FCustomer/column%3Atable%253A%252FCustomer%2F_id/",
+   "kind": "contains",
+   "from": "table:/Customer",
+   "to": "column:table%3A%2FCustomer/_id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FCustomer/column%3Atable%253A%252FCustomer%2Fname/",
+   "kind": "contains",
+   "from": "table:/Customer",
+   "to": "column:table%3A%2FCustomer/name",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FCustomer/column%3Atable%253A%252FCustomer%2ForderIds/",
+   "kind": "contains",
+   "from": "table:/Customer",
+   "to": "column:table%3A%2FCustomer/orderIds",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FOrder/column%3Atable%253A%252FOrder%2F_id/",
+   "kind": "contains",
+   "from": "table:/Order",
+   "to": "column:table%3A%2FOrder/_id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FOrder/column%3Atable%253A%252FOrder%2FcustomerIds/",
+   "kind": "contains",
+   "from": "table:/Order",
+   "to": "column:table%3A%2FOrder/customerIds",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FCustomer/constraint%3Atable%253A%252FCustomer%2Fprimary-key%2F%255B%2522_id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Customer",
+   "to": "constraint:table%3A%2FCustomer/primary-key/%5B%22_id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FCustomer%2Fprimary-key%2F%255B%2522_id%2522%255D/column%3Atable%253A%252FCustomer%2F_id/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FCustomer/primary-key/%5B%22_id%22%5D",
+   "to": "column:table%3A%2FCustomer/_id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FCustomer/constraint%3Atable%253A%252FCustomer%2Funique%2F%255B%2522name%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Customer",
+   "to": "constraint:table%3A%2FCustomer/unique/%5B%22name%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FCustomer%2Funique%2F%255B%2522name%2522%255D/column%3Atable%253A%252FCustomer%2Fname/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FCustomer/unique/%5B%22name%22%5D",
+   "to": "column:table%3A%2FCustomer/name",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FOrder/constraint%3Atable%253A%252FOrder%2Fprimary-key%2F%255B%2522_id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Order",
+   "to": "constraint:table%3A%2FOrder/primary-key/%5B%22_id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FOrder%2Fprimary-key%2F%255B%2522_id%2522%255D/column%3Atable%253A%252FOrder%2F_id/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FOrder/primary-key/%5B%22_id%22%5D",
+   "to": "column:table%3A%2FOrder/_id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FOrder/constraint%3Atable%253A%252FOrder%2Findex%2F%255B%2522_id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Order",
+   "to": "constraint:table%3A%2FOrder/index/%5B%22_id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FOrder%2Findex%2F%255B%2522_id%2522%255D/column%3Atable%253A%252FOrder%2F_id/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FOrder/index/%5B%22_id%22%5D",
+   "to": "column:table%3A%2FOrder/_id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FCustomer/constraint%3Atable%253A%252FCustomer%2Fforeign-key%2F%255B%2522orderIds%2522%255D%2Ftable%253A%252FOrder/",
+   "kind": "contains",
+   "from": "table:/Customer",
+   "to": "constraint:table%3A%2FCustomer/foreign-key/%5B%22orderIds%22%5D/table%3A%2FOrder",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "references:constraint%3Atable%253A%252FCustomer%2Fforeign-key%2F%255B%2522orderIds%2522%255D%2Ftable%253A%252FOrder/table%3A%2FOrder/",
+   "kind": "references",
+   "from": "constraint:table%3A%2FCustomer/foreign-key/%5B%22orderIds%22%5D/table%3A%2FOrder",
+   "to": "table:/Order",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FCustomer%2Fforeign-key%2F%255B%2522orderIds%2522%255D%2Ftable%253A%252FOrder/column%3Atable%253A%252FCustomer%2ForderIds/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FCustomer/foreign-key/%5B%22orderIds%22%5D/table%3A%2FOrder",
+   "to": "column:table%3A%2FCustomer/orderIds",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "foreign-key:column%3Atable%253A%252FCustomer%2ForderIds/column%3Atable%253A%252FOrder%2F_id/constraint%3Atable%253A%252FCustomer%2Fforeign-key%2F%255B%2522orderIds%2522%255D%2Ftable%253A%252FOrder",
+   "kind": "foreign-key",
+   "from": "column:table%3A%2FCustomer/orderIds",
+   "to": "column:table%3A%2FOrder/_id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FOrder/constraint%3Atable%253A%252FOrder%2Fforeign-key%2F%255B%2522customerIds%2522%255D%2Ftable%253A%252FCustomer/",
+   "kind": "contains",
+   "from": "table:/Order",
+   "to": "constraint:table%3A%2FOrder/foreign-key/%5B%22customerIds%22%5D/table%3A%2FCustomer",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "references:constraint%3Atable%253A%252FOrder%2Fforeign-key%2F%255B%2522customerIds%2522%255D%2Ftable%253A%252FCustomer/table%3A%2FCustomer/",
+   "kind": "references",
+   "from": "constraint:table%3A%2FOrder/foreign-key/%5B%22customerIds%22%5D/table%3A%2FCustomer",
+   "to": "table:/Customer",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FOrder%2Fforeign-key%2F%255B%2522customerIds%2522%255D%2Ftable%253A%252FCustomer/column%3Atable%253A%252FOrder%2FcustomerIds/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FOrder/foreign-key/%5B%22customerIds%22%5D/table%3A%2FCustomer",
+   "to": "column:table%3A%2FOrder/customerIds",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "foreign-key:column%3Atable%253A%252FOrder%2FcustomerIds/column%3Atable%253A%252FCustomer%2F_id/constraint%3Atable%253A%252FOrder%2Fforeign-key%2F%255B%2522customerIds%2522%255D%2Ftable%253A%252FCustomer",
+   "kind": "foreign-key",
+   "from": "column:table%3A%2FOrder/customerIds",
+   "to": "column:table%3A%2FCustomer/_id",
+   "confidence": "authoritative"
+  }
+ ]
+}

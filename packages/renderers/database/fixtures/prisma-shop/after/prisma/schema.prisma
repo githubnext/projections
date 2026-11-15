@@ -1,0 +1,71 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  CANCELLED
+  REFUNDED
+}
+
+model Customer {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  name      String
+  phone     String?
+  createdAt DateTime  @default(now())
+  orders    Order[]
+  addresses Address[]
+}
+
+model Address {
+  id         Int      @id @default(autoincrement())
+  customerId Int
+  line1      String
+  line2      String?
+  city       String
+  postalCode String   @db.VarChar(16)
+  country    String   @db.Char(2)
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  orders     Order[]
+
+  @@index([customerId])
+}
+
+model Product {
+  id         Int         @id @default(autoincrement())
+  sku        String      @unique
+  title      String      @db.VarChar(200)
+  priceCents BigInt
+  lines      OrderLine[]
+}
+
+model Order {
+  id                Int         @id @default(autoincrement())
+  customerId        Int
+  shippingAddressId Int?
+  status            OrderStatus @default(PENDING)
+  placedAt          DateTime    @default(now())
+  customer          Customer    @relation(fields: [customerId], references: [id])
+  shippingAddress   Address?    @relation(fields: [shippingAddressId], references: [id])
+  lines             OrderLine[]
+
+  @@index([customerId, status])
+}
+
+model OrderLine {
+  orderId   Int
+  productId Int
+  quantity  Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@id([orderId, productId])
+}

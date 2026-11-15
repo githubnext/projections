@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/comparator-tests/v0.json",
+  "title": "Projections comparator tests",
+  "description": "Tests for a custom comparator, in the file beside its comparator file (`X.comparator.test.yaml` for `X.comparator.yaml`), never part of the comparator or its digest. Each case gives two extractions and states what the comparator must make of them: partial expectations (step order, steps, changes, counts, metadata, or the error the comparator must fail with) and an optional snapshot of the whole comparison. `projections check` runs them. See docs/contracts.md, \"Comparator tests\".",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "cases"],
+  "properties": {
+    "$schema": {
+      "description": "Editors: `# yaml-language-server: $schema=<url>` at the top of the file works too.",
+      "type": "string"
+    },
+    "format": {"const": "projections.comparator-tests"},
+    "version": {"const": 0},
+    "description": {"type": "string"},
+    "options": {
+      "description": "Comparator options for every case without its own; without either, a projection's own options.",
+      "type": "object"
+    },
+    "cases": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/case"}}
+  },
+  "$defs": {
+    "id": {
+      "description": "A change ID, or an item ID naming the changes whose `before` or `after` includes it.",
+      "type": "string",
+      "minLength": 1
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "before", "after"],
+      "properties": {
+        "name": {"description": "Unique within the file: the case's ID.", "type": "string", "minLength": 1},
+        "before": {"$ref": "#/$defs/source"},
+        "after": {"$ref": "#/$defs/source"},
+        "options": {"description": "Comparator options for this case, replacing the file's.", "type": "object"},
+        "expect": {"$ref": "#/$defs/expect"},
+        "snapshot": {
+          "description": "A JSON file, relative to the test file, holding the whole comparison (sorted keys, two-space indentation). `projections check --update` writes it.",
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?![/\\\\])(?![A-Za-z]:)[^\\\\]*$"
+        }
+      },
+      "anyOf": [{"required": ["expect"]}, {"required": ["snapshot"]}]
+    },
+    "source": {
+      "description": "An extraction: a fixture file (an extraction, or a saved `projections.extraction` document) relative to the test file, written inline, or the projection extracted at a revision (`working-tree` for the working tree) with the working tree's definition.",
+      "oneOf": [
+        {
+          "description": "A path relative to the test file, inside the repository.",
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?![/\\\\])(?![A-Za-z]:)[^\\\\]*$"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["file"],
+          "properties": {
+            "file": {
+              "description": "A path relative to the test file, inside the repository.",
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?![/\\\\])(?![A-Za-z]:)[^\\\\]*$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["extraction"],
+          "properties": {"extraction": {"type": "object"}}
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["revision"],
+          "properties": {"revision": {"type": "string", "minLength": 1}}
+        }
+      ]
+    },
+    "expect": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "order": {
+          "description": "Each listed change or item is in a strictly earlier step than the next.",
+          "type": "array",
+          "items": {"$ref": "#/$defs/id"},
+          "minItems": 2
+        },
+        "steps": {
+          "description": "Every step, in order; each lists only what it checks.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {"enum": ["remove", "restructure", "add"]},
+              "summary": {"description": "Exact text; `null` expects none.", "type": ["string", "null"]},
+              "changes": {
+                "description": "Changes or items naming exactly the step's changes.",
+                "type": "array",
+                "items": {"$ref": "#/$defs/id"}
+              }
+            }
+          }
+        },
+        "changes": {
+          "description": "Each selects exactly one change, by `item` or `id`, and checks the fields it lists.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "item": {
+                "description": "Selects the change whose `before` or `after` includes this item ID.",
+                "type": "string",
+                "minLength": 1
+              },
+              "id": {"description": "Selects the change with this ID.", "type": "string", "minLength": 1},
+              "collection": {"description": "Narrows the selection.", "enum": ["entities", "relationships"]},
+              "status": {"enum": ["added", "removed", "modified", "unchanged"]},
+              "correspondence": {"enum": ["exact", "declared", "split", "merge", "none"]},
+              "summary": {"description": "Exact text; `null` expects none.", "type": ["string", "null"]},
+              "before": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+              "after": {"type": "array", "items": {"$ref": "#/$defs/id"}}
+            },
+            "oneOf": [{"required": ["item"]}, {"required": ["id"]}],
+            "anyOf": [
+              {"required": ["status"]},
+              {"required": ["correspondence"]},
+              {"required": ["summary"]},
+              {"required": ["before"]},
+              {"required": ["after"]}
+            ]
+          }
+        },
+        "count": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {"changes": {"type": "integer", "minimum": 0}, "steps": {"type": "integer", "minimum": 0}}
+        },
+        "metadata": {
+          "description": "A subset of the comparison metadata: objects match on the keys they list, arrays and scalars exactly.",
+          "type": "object"
+        },
+        "error": {
+          "description": "The comparator must fail with a message containing this text. A case expecting an error checks nothing else.",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "minProperties": 1
+    }
+  }
+}

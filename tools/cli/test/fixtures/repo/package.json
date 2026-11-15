@@ -1,0 +1,7 @@
+{
+  "name": "fixture-workspace",
+  "private": true,
+  "repository": "github:githubnext/projections",
+  "workspaces": ["app", "libs/*"],
+  "engines": {"node": ">=20"}
+}

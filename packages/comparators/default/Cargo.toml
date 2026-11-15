@@ -1,0 +1,25 @@
+[package]
+name = "projections-comparator-default"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "The default Projections comparator: matching, interpretation and default ordering"
+exclude = ["dist"]
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[features]
+default = ["abi"]
+# Exports the comparator module ABI. Crates that link the default comparator
+# into their own module, such as the rules comparator, disable it.
+abi = []
+
+[dependencies]
+projections-engine = { path = "../../engine", default-features = false }
+serde_json = { version = "1.0", features = ["float_roundtrip"] }
+
+[dev-dependencies]
+proptest = { version = "1.12.0", default-features = false, features = ["std"] }

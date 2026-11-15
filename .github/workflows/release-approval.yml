@@ -1,0 +1,87 @@
+name: Release approval
+# A dist publish job (publish-jobs in dist-workspace.toml): it runs once every artifact is built and proved, and dist
+# announces the release only when it succeeds. A person approves the `release` environment, and only then are the
+# release's assets attested, so neither a release nor its attestations exist without that approval. GitHub creates an
+# environment a job names that doesn't exist, without protection, so the check fails closed first: the environment
+# must exist, require a reviewer and let only v*.*.* tags deploy. See docs/maintainers/releasing.md.
+on:
+  workflow_call:
+    inputs:
+      plan:
+        required: true
+        type: string
+permissions: {}
+jobs:
+  check:
+    name: Check the release environment
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    # Reading an environment and its deployment policies needs actions: read.
+    permissions:
+      actions: read
+    steps:
+      - name: Require a reviewer and only v*.*.* tags on the release environment
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ENVIRONMENT: release
+          TAGS: v*.*.*
+        run: |
+          set -euo pipefail
+          settings="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/settings/environments"
+          fail() {
+            echo "::error title=The $ENVIRONMENT environment isn't protected::$1 A repository administrator must set it up in $settings as docs/maintainers/releasing.md describes. Nothing was published."
+            exit 1
+          }
+          scratch=$(mktemp -d)
+          get() {
+            curl -sS --retry 3 -o "$scratch/$2" -w '%{http_code}' \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H 'Accept: application/vnd.github+json' \
+              "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/environments/$ENVIRONMENT$1"
+          }
+
+          status=$(get '' environment.json) || status=unreachable
+          case "$status" in
+            200) ;;
+            404) fail "The $ENVIRONMENT environment doesn't exist, and GitHub would create it without required reviewers or a $TAGS tag policy." ;;
+            *) fail "Couldn't read the $ENVIRONMENT environment (HTTP $status)." ;;
+          esac
+          jq -e '[.protection_rules[]? | select(.type == "required_reviewers") | .reviewers[]?] | length > 0' \
+            "$scratch/environment.json" > /dev/null \
+            || fail "The $ENVIRONMENT environment has no required reviewers, so nobody would approve the release."
+          jq -e '.deployment_branch_policy.custom_branch_policies == true' "$scratch/environment.json" > /dev/null \
+            || fail "The $ENVIRONMENT environment doesn't limit deployments to selected tags; only $TAGS tags may deploy."
+
+          status=$(get '/deployment-branch-policies?per_page=100' policies.json) || status=unreachable
+          [ "$status" = 200 ] || fail "Couldn't read the $ENVIRONMENT environment's deployment policies (HTTP $status); only $TAGS tags may deploy."
+          jq -e --arg tags "$TAGS" \
+            '(.branch_policies | length) == .total_count and (.branch_policies | length > 0 and all(.type == "tag" and .name == $tags))' \
+            "$scratch/policies.json" > /dev/null \
+            || fail "Only $TAGS tags may deploy to the $ENVIRONMENT environment, but its deployment policies are $(jq -c '[.branch_policies[]? | {name, type}]' "$scratch/policies.json")."
+          echo "$ENVIRONMENT requires a reviewer, and only $TAGS tags may deploy to it."
+  approve:
+    name: Approve and attest
+    needs: check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # Required reviewers on this environment are the release's human approval.
+    environment: release
+    permissions:
+      attestations: write
+      id-token: write
+    steps:
+      # The files announce attaches to the release: every artifacts-* artifact but the granular manifests.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: artifacts-*
+          path: artifacts
+          merge-multiple: true
+      - name: Leave out the granular manifests
+        shell: bash
+        run: |
+          rm -f artifacts/*-dist-manifest.json
+          ls -l artifacts
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: artifacts/*

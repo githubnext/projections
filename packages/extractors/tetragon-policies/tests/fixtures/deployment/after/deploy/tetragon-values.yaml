@@ -1,0 +1,4 @@
+# Values for the Tetragon Helm chart.
+tetragon:
+  enablePolicyFilter: false
+  enableKeepSensorsOnExit: true

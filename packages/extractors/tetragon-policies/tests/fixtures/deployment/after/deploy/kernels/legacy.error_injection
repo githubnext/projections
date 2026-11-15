@@ -1,0 +1,2 @@
+security_kernel_module_request	ERRNO
+__x64_sys_finit_module	ERRNO

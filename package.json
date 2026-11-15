@@ -1,0 +1,91 @@
+{
+  "name": "@githubnext/projections-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "workspaces": [
+    "packages/schemas",
+    "packages/engine/js",
+    "packages/extractors/typescript-support",
+    "packages/renderers/*",
+    "packages/sdk",
+    "packages/host/core",
+    "packages/host/vscode-ui",
+    "tools/storybook",
+    "packages/cli",
+    "packages/host/inspector",
+    "packages/integrations/vscode",
+    "packages/integrations/mcp-apps",
+    "packages/integrations/github-action",
+    "packages/comparators/runtime/js",
+    "examples/renderers/*",
+    "examples/extractors",
+    "tools/cli"
+  ],
+  "engines": {
+    "node": ">=26.12.1"
+  },
+  "scripts": {
+    "build": "node tools/scripts/workspaces.mjs build",
+    "test": "node tools/scripts/workspaces.mjs test",
+    "test:browser": "node tools/scripts/workspaces.mjs test:browser",
+    "test:installed": "npm run test:installed --workspace @githubnext/projections-cli",
+    "test:gh": "npm run test:gh --workspace @githubnext/projections-cli",
+    "test:binary": "npm run test:binary --workspace @githubnext/projections-cli --",
+    "test:packed": "npm run test:packed --workspace @githubnext/projections-typescript-support",
+    "test:container": "npm run test:container --workspace @githubnext/projections-cli",
+    "test:rust": "cargo test --locked && npm run test:rust:rules-coverage && cargo fmt --all -- --check && cargo clippy --all-targets --locked -- -D warnings",
+    "test:rust:rules-coverage": "node tools/scripts/rules-coverage.mjs",
+    "test:rust:coverage": "cargo llvm-cov --locked -p projections-engine -p projections-comparator-default --fail-under-lines 98 --fail-under-regions 98 --show-missing-lines -- --skip module_has_zero_imports_and_the_comparator_abi_exports",
+    "test:rust:mutants": "cargo mutants",
+    "typecheck": "node tools/scripts/workspaces.mjs typecheck",
+    "lint": "eslint . --quiet",
+    "icons": "node tools/scripts/product-icons.mjs",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "check:boundaries": "node tools/scripts/check-boundaries.mjs",
+    "check:casing": "node tools/scripts/check-casing.mjs",
+    "check:lockfile": "node tools/scripts/lockfile-registry.mjs",
+    "check:advisories": "node tools/scripts/osv-scan.mjs --allow RUSTSEC-2020-0163",
+    "check:readmes": "node tools/cli/src/bin.ts check --only readmes",
+    "check:links": "node tools/cli/src/bin.ts check --only links",
+    "check:icons": "node tools/scripts/product-icons.mjs --check",
+    "check:considered": "node tools/scripts/considered.mjs check",
+    "check:tsdoc": "node tools/scripts/reference-docs.mjs --check --only tsdoc",
+    "check:notices": "node tools/scripts/notices.mjs",
+    "check:versions": "node tools/cli/src/bin.ts version",
+    "considered": "node tools/scripts/considered.mjs",
+    "check": "npm run check:boundaries && npm run check:casing && npm run check:readmes && npm run check:links && npm run check:icons && npm run check:considered && npm run check:tsdoc && npm run check:versions && npm run check:lockfile && npm run format:check && npm run build && npm run check:notices && npm run check:comparators && npm run typecheck && npm run lint && npm test",
+    "storybook": "npm run storybook --workspace @githubnext/projections-storybook",
+    "docs:generate": "node tools/scripts/reference-docs.mjs",
+    "docs:check": "node tools/scripts/reference-docs.mjs --check",
+    "check:comparators": "node packages/comparators/rules/scripts/validate.mjs",
+    "tools": "node tools/cli/src/bin.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.18.0",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.12.0",
+    "oxfmt": "^0.75.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.0",
+    "yaml": "^2.9.1"
+  },
+  "overrides": {
+    "eslint": {
+      "minimatch": "^11.0.1"
+    },
+    "@eslint/config-array": {
+      "minimatch": "^11.0.1"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    },
+    "@joshwooding/vite-plugin-react-docgen-typescript": {
+      "glob": "^14.0.2"
+    }
+  }
+}

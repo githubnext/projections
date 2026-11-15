@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=../../../packages/schemas/schemas/comparator/v0.json
+#
+# For teams that always want certain entities, such as platform packages,
+# reviewed first.
+format: projections.comparator
+version: 0
+description: >-
+  Steps that change any entity listed in options.priority come first, ordered by their most
+  important priority entity; other steps keep their baseline order.
+
+checks:
+  - assert: options.all(key, key == 'priority')
+    message: >-
+      'invalid options: unknown field `%s`, expected `priority`'.format([options.filter(key, key != 'priority').sort()[0]])
+  - assert: >-
+      !has(options.priority)
+      || (type(options.priority) == list && options.priority.all(id, type(id) == string))
+    message: "'invalid options: `priority` must be an array of entity IDs'"
+
+variables:
+  - name: priority
+    expression: 'has(options.priority) ? options.priority : []'
+
+steps:
+  # An entity change ranks at the positions of the priority entries it
+  # changes; a step ranks by its best member; unranked steps keep their order.
+  rank: |-
+    change.collection == 'entities'
+      ? lists.range(size(variables.priority)).filter(i, variables.priority[i] in change.before + change.after)
+      : null

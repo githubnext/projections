@@ -1,0 +1,1228 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "args": [
+          {
+            "index": 0,
+            "label": "uid",
+            "type": "int"
+          }
+        ],
+        "hookType": "kprobe",
+        "return": false,
+        "syscall": true,
+        "target": "sys_setuid",
+        "viaList": "setuids"
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 18
+          },
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicy:setuid-root/kprobe:sys_setuid",
+      "kind": "probe",
+      "label": "sys_setuid"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [
+          {
+            "action": "Post",
+            "display": "Observe",
+            "phase": "call",
+            "rateLimit": "1m"
+          }
+        ],
+        "binaries": [],
+        "conditions": [
+          {
+            "display": "`uid` = `0`",
+            "filter": "matchArgs",
+            "index": 0,
+            "operator": "Equal",
+            "values": [
+              "0"
+            ]
+          }
+        ],
+        "effect": "observe",
+        "enforcement": "none",
+        "label": "to-root",
+        "macros": [
+          "root"
+        ],
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 24
+          },
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicy:setuid-root/kprobe:sys_setuid/to-root",
+      "kind": "selector",
+      "label": "to-root"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "args": [
+          {
+            "index": 0,
+            "label": "uid",
+            "type": "int"
+          }
+        ],
+        "hookType": "kprobe",
+        "return": false,
+        "syscall": true,
+        "target": "sys_setreuid",
+        "viaList": "setuids"
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 18
+          },
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicy:setuid-root/kprobe:sys_setreuid",
+      "kind": "probe",
+      "label": "sys_setreuid"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [
+          {
+            "action": "Post",
+            "display": "Observe",
+            "phase": "call",
+            "rateLimit": "1m"
+          }
+        ],
+        "binaries": [],
+        "conditions": [
+          {
+            "display": "`uid` = `0`",
+            "filter": "matchArgs",
+            "index": 0,
+            "operator": "Equal",
+            "values": [
+              "0"
+            ]
+          }
+        ],
+        "effect": "observe",
+        "enforcement": "none",
+        "label": "to-root",
+        "macros": [
+          "root"
+        ],
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 24
+          },
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicy:setuid-root/kprobe:sys_setreuid/to-root",
+      "kind": "selector",
+      "label": "to-root"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "effect": "observe",
+        "enforcing": 0,
+        "engine": "tetragon",
+        "mode": "enforce",
+        "modeSource": "default",
+        "name": "setuid-root",
+        "namespace": null,
+        "nodeSelector": null,
+        "nodes": "all nodes",
+        "path": "policies/library.yaml",
+        "probes": 2,
+        "resource": "TracingPolicy",
+        "scope": "all host and pod workloads",
+        "selectors": 2
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 3
+          },
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "policy:tetragon:TracingPolicy:setuid-root",
+      "kind": "policy",
+      "label": "setuid-root"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "hookType": "kprobe",
+        "return": false,
+        "syscall": false,
+        "target": "do_init_module",
+        "unmodelled": {
+          "futureField": true
+        }
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 55
+          },
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicy:module-loading/kprobe:do_init_module",
+      "kind": "probe",
+      "label": "do_init_module"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [
+          {
+            "action": "Sigkill",
+            "display": "Kill (`Sigkill`)",
+            "phase": "call"
+          }
+        ],
+        "binaries": [],
+        "conditions": [],
+        "effect": "enforce",
+        "enforcement": "elided",
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicy:module-loading/kprobe:do_init_module/%231",
+      "kind": "selector",
+      "label": "selector 1"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [
+          {
+            "action": "Teleport",
+            "display": "`Teleport`",
+            "phase": "call"
+          }
+        ],
+        "binaries": [],
+        "conditions": [
+          {
+            "display": "Effective capabilities in `CAP_SYS_MODULE`",
+            "filter": "matchCapabilities",
+            "operator": "In",
+            "type": "Effective",
+            "values": [
+              "CAP_SYS_MODULE"
+            ]
+          }
+        ],
+        "effect": "unknown",
+        "enforcement": "none",
+        "ordinal": 2
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicy:module-loading/kprobe:do_init_module/%232",
+      "kind": "selector",
+      "label": "selector 2"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "hookType": "tracepoint",
+        "raw": false,
+        "target": "module/module_load"
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 44
+          },
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicy:module-loading/tracepoint:module%2Fmodule_load",
+      "kind": "probe",
+      "label": "module/module_load"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [],
+        "binaries": [],
+        "conditions": [],
+        "effect": "observe",
+        "enforcement": "none",
+        "implicit": true,
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicy:module-loading/tracepoint:module%2Fmodule_load/*",
+      "kind": "selector",
+      "label": "every call"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "hookType": "lsm",
+        "target": "kernel_module_request"
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 46
+          },
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicy:module-loading/lsm:kernel_module_request",
+      "kind": "probe",
+      "label": "kernel_module_request"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [
+          {
+            "action": "Override",
+            "argError": -1,
+            "display": "Deny (`Override` returns `-1`)",
+            "phase": "call"
+          }
+        ],
+        "binaries": [
+          {
+            "followChildren": false,
+            "operator": "NotIn",
+            "parent": false,
+            "values": [
+              "/usr/bin/kmod"
+            ]
+          }
+        ],
+        "conditions": [],
+        "effect": "enforce",
+        "enforcement": "elided",
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicy:module-loading/lsm:kernel_module_request/%231",
+      "kind": "selector",
+      "label": "selector 1"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "effect": "enforce",
+        "enforcing": 2,
+        "engine": "tetragon",
+        "mode": "monitor",
+        "modeSource": "spec.options",
+        "name": "module-loading",
+        "namespace": null,
+        "nodeSelector": [
+          {
+            "key": "nodepool",
+            "operator": "In",
+            "values": [
+              "general"
+            ]
+          }
+        ],
+        "nodes": "nodes where `nodepool=general`",
+        "path": "policies/library.yaml",
+        "probes": 3,
+        "resource": "TracingPolicy",
+        "scope": "host workloads",
+        "selectors": 4
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 31
+          },
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "policy:tetragon:TracingPolicy:module-loading",
+      "kind": "policy",
+      "label": "module-loading"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "binary": "/bin/bash",
+        "hookType": "uprobe",
+        "return": false,
+        "target": "/bin/bash:readline"
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 78
+          },
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicyNamespaced:security:shell-history/uprobe:%2Fbin%2Fbash%3Areadline",
+      "kind": "probe",
+      "label": "/bin/bash:readline"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [],
+        "binaries": [],
+        "conditions": [],
+        "effect": "observe",
+        "enforcement": "none",
+        "implicit": true,
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicyNamespaced:security:shell-history/uprobe:%2Fbin%2Fbash%3Areadline/*",
+      "kind": "selector",
+      "label": "every call"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "binary": "/usr/lib/libssl.so",
+        "hookType": "usdt",
+        "target": "/usr/lib/libssl.so:ssl:handshake"
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 81
+          },
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicyNamespaced:security:shell-history/usdt:%2Fusr%2Flib%2Flibssl.so%3Assl%3Ahandshake",
+      "kind": "probe",
+      "label": "ssl:handshake"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [],
+        "binaries": [],
+        "conditions": [],
+        "effect": "observe",
+        "enforcement": "none",
+        "implicit": true,
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicyNamespaced:security:shell-history/usdt:%2Fusr%2Flib%2Flibssl.so%3Assl%3Ahandshake/*",
+      "kind": "selector",
+      "label": "every call"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "effect": "observe",
+        "enforcing": 0,
+        "engine": "tetragon",
+        "mode": "enforce",
+        "modeSource": "default",
+        "name": "shell-history",
+        "namespace": "security",
+        "nodeSelector": null,
+        "nodes": "all nodes",
+        "path": "policies/library.yaml",
+        "probes": 2,
+        "resource": "TracingPolicyNamespaced",
+        "scope": "containers where `name in (api, web)` in pods in namespace `security`",
+        "selectors": 2
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 68
+          },
+          "source": "policies/library.yaml"
+        }
+      ],
+      "id": "policy:tetragon:TracingPolicyNamespaced:security:shell-history",
+      "kind": "policy",
+      "label": "shell-history"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "hookType": "kprobe",
+        "return": false,
+        "syscall": true,
+        "target": "generated:generated_syscalls",
+        "viaList": "everything"
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 16
+          },
+          "source": "policies/listed.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicy:all-syscalls/kprobe:generated%3Agenerated_syscalls",
+      "kind": "probe",
+      "label": "generated:generated_syscalls"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [
+          {
+            "action": "NoPost",
+            "display": "Suppress event (`NoPost`)",
+            "phase": "call"
+          },
+          {
+            "action": "TrackSock",
+            "argSock": 0,
+            "display": "Track socket (`TrackSock`)",
+            "phase": "call"
+          }
+        ],
+        "binaries": [],
+        "conditions": [],
+        "effect": "track",
+        "enforcement": "none",
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "source": "policies/listed.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicy:all-syscalls/kprobe:generated%3Agenerated_syscalls/%231",
+      "kind": "selector",
+      "label": "selector 1"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "effect": "none",
+        "enforcing": 0,
+        "engine": "tetragon",
+        "mode": "enforce",
+        "modeSource": "default",
+        "name": "all-syscalls",
+        "namespace": null,
+        "nodeSelector": null,
+        "nodes": "all nodes",
+        "path": "policies/listed.yaml",
+        "probes": 1,
+        "resource": "TracingPolicy",
+        "scope": "pods where `k8s:io.kubernetes.pod.namespace=kube-system`",
+        "selectors": 1,
+        "templated": true
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 2
+          },
+          "source": "policies/listed.yaml"
+        }
+      ],
+      "id": "policy:tetragon:TracingPolicy:all-syscalls",
+      "kind": "policy",
+      "label": "all-syscalls"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "args": [
+          {
+            "index": 0,
+            "type": "sock"
+          }
+        ],
+        "hookType": "fentry",
+        "return": false,
+        "syscall": false,
+        "target": "tcp_connect"
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 31
+          },
+          "source": "policies/listed.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicyNamespaced:checkout:egress/fentry:tcp_connect",
+      "kind": "probe",
+      "label": "tcp_connect"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [],
+        "binaries": [
+          {
+            "followChildren": true,
+            "operator": "Prefix",
+            "parent": true,
+            "values": [
+              "/usr/local/bin/"
+            ]
+          }
+        ],
+        "conditions": [
+          {
+            "display": "`arg0` (`sock`) destination address not in `${SERVICE_CIDR}`",
+            "filter": "matchArgs",
+            "index": 0,
+            "operator": "NotDAddr",
+            "values": [
+              "${SERVICE_CIDR}"
+            ]
+          }
+        ],
+        "effect": "observe",
+        "enforcement": "none",
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "source": "policies/listed.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicyNamespaced:checkout:egress/fentry:tcp_connect/%231",
+      "kind": "selector",
+      "label": "selector 1"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "effect": "observe",
+        "enforcing": 0,
+        "engine": "tetragon",
+        "mode": "enforce",
+        "modeSource": "default",
+        "name": "egress",
+        "namespace": "checkout",
+        "nodeSelector": null,
+        "nodes": "all nodes",
+        "path": "policies/listed.yaml",
+        "probes": 1,
+        "resource": "TracingPolicyNamespaced",
+        "scope": "pods in namespace `checkout`",
+        "selectors": 1,
+        "templated": true
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 2
+          },
+          "source": "policies/listed.yaml"
+        }
+      ],
+      "id": "policy:tetragon:TracingPolicyNamespaced:checkout:egress",
+      "kind": "policy",
+      "label": "egress"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "category": "network",
+        "hookType": "fentry",
+        "stability": "kernel-internal",
+        "target": "tcp_connect"
+      },
+      "id": "hook:fentry:tcp_connect",
+      "kind": "hook",
+      "label": "tcp_connect"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "category": "kernel-modules",
+        "hookType": "kprobe",
+        "stability": "kernel-internal",
+        "target": "do_init_module"
+      },
+      "id": "hook:kprobe:do_init_module",
+      "kind": "hook",
+      "label": "do_init_module"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "category": "other",
+        "hookType": "kprobe",
+        "stability": "generated",
+        "target": "generated:generated_syscalls"
+      },
+      "id": "hook:kprobe:generated%3Agenerated_syscalls",
+      "kind": "hook",
+      "label": "generated:generated_syscalls"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "category": "credentials",
+        "hookType": "kprobe",
+        "stability": "syscall",
+        "target": "sys_setreuid"
+      },
+      "id": "hook:kprobe:sys_setreuid",
+      "kind": "hook",
+      "label": "sys_setreuid"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "category": "credentials",
+        "hookType": "kprobe",
+        "stability": "syscall",
+        "target": "sys_setuid"
+      },
+      "id": "hook:kprobe:sys_setuid",
+      "kind": "hook",
+      "label": "sys_setuid"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "category": "kernel-modules",
+        "hookType": "lsm",
+        "stability": "stable",
+        "target": "kernel_module_request"
+      },
+      "id": "hook:lsm:kernel_module_request",
+      "kind": "hook",
+      "label": "kernel_module_request"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "category": "kernel-modules",
+        "hookType": "tracepoint",
+        "stability": "stable",
+        "target": "module/module_load"
+      },
+      "id": "hook:tracepoint:module%2Fmodule_load",
+      "kind": "hook",
+      "label": "module/module_load"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "binary": "/bin/bash",
+        "category": "user-space",
+        "hookType": "uprobe",
+        "stability": "user",
+        "target": "/bin/bash:readline"
+      },
+      "id": "hook:uprobe:%2Fbin%2Fbash%3Areadline",
+      "kind": "hook",
+      "label": "/bin/bash:readline"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "binary": "/usr/lib/libssl.so",
+        "category": "user-space",
+        "hookType": "usdt",
+        "stability": "user",
+        "target": "/usr/lib/libssl.so:ssl:handshake"
+      },
+      "id": "hook:usdt:%2Fusr%2Flib%2Flibssl.so%3Assl%3Ahandshake",
+      "kind": "hook",
+      "label": "ssl:handshake"
+    },
+    {
+      "data": {
+        "match": "exact",
+        "subjectKind": "binary"
+      },
+      "id": "subject:binary:exact:%2Fusr%2Fbin%2Fkmod",
+      "kind": "subject",
+      "label": "/usr/bin/kmod"
+    },
+    {
+      "data": {
+        "match": "prefix",
+        "subjectKind": "binary"
+      },
+      "id": "subject:binary:prefix:%2Fusr%2Flocal%2Fbin%2F",
+      "kind": "subject",
+      "label": "/usr/local/bin/"
+    },
+    {
+      "data": {
+        "all": true,
+        "containers": null,
+        "display": "all host and pod workloads",
+        "host": true,
+        "namespace": null,
+        "pods": [],
+        "subjectKind": "workloads"
+      },
+      "id": "subject:workloads:all%20host%20and%20pod%20workloads",
+      "kind": "subject",
+      "label": "all host and pod workloads"
+    },
+    {
+      "data": {
+        "all": false,
+        "containers": [
+          {
+            "key": "name",
+            "operator": "In",
+            "values": [
+              "api",
+              "web"
+            ]
+          }
+        ],
+        "display": "containers where `name in (api, web)` in pods in namespace `security`",
+        "host": false,
+        "namespace": "security",
+        "pods": [],
+        "subjectKind": "workloads"
+      },
+      "id": "subject:workloads:containers%20where%20name%20in%20(api%2C%20web)%20in%20pods%20in%20namespace%20security",
+      "kind": "subject",
+      "label": "containers where name in (api, web) in pods in namespace security"
+    },
+    {
+      "data": {
+        "all": false,
+        "containers": null,
+        "display": "host workloads",
+        "host": true,
+        "namespace": null,
+        "pods": null,
+        "subjectKind": "workloads"
+      },
+      "id": "subject:workloads:host%20workloads",
+      "kind": "subject",
+      "label": "host workloads"
+    },
+    {
+      "data": {
+        "all": false,
+        "containers": null,
+        "display": "pods in namespace `checkout`",
+        "host": false,
+        "namespace": "checkout",
+        "pods": [],
+        "subjectKind": "workloads"
+      },
+      "id": "subject:workloads:pods%20in%20namespace%20checkout",
+      "kind": "subject",
+      "label": "pods in namespace checkout"
+    },
+    {
+      "data": {
+        "all": false,
+        "containers": null,
+        "display": "pods where `k8s:io.kubernetes.pod.namespace=kube-system`",
+        "host": false,
+        "namespace": null,
+        "pods": [
+          {
+            "key": "k8s:io.kubernetes.pod.namespace",
+            "operator": "In",
+            "values": [
+              "kube-system"
+            ]
+          }
+        ],
+        "subjectKind": "workloads"
+      },
+      "id": "subject:workloads:pods%20where%20k8s%3Aio.kubernetes.pod.namespace%3Dkube-system",
+      "kind": "subject",
+      "label": "pods where k8s:io.kubernetes.pod.namespace=kube-system"
+    }
+  ],
+  "metadata": {
+    "engine": "tetragon",
+    "limitations": [
+      "`TracingPolicy all-syscalls` contains `${…}` placeholders, read as literal text.",
+      "`TracingPolicy module-loading spec.kprobes[0].futureField` is not modelled; changes to it mark the item modified without interpretation.",
+      "`TracingPolicy module-loading spec.kprobes[0].selectors[1].matchActions[0]` uses action `Teleport`, which Projections doesn't know; its effect is unknown.",
+      "`TracingPolicyNamespaced egress` contains `${…}` placeholders, read as literal text."
+    ],
+    "policies": 5,
+    "sources": [
+      "policies/library.yaml",
+      "policies/listed.yaml"
+    ]
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:setuid-root",
+      "id": "declares:probe:tetragon:TracingPolicy:setuid-root/kprobe:sys_setuid",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicy:setuid-root/kprobe:sys_setuid"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicy:setuid-root/kprobe:sys_setuid",
+      "id": "attaches:probe:tetragon:TracingPolicy:setuid-root/kprobe:sys_setuid",
+      "kind": "attaches",
+      "to": "hook:kprobe:sys_setuid"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicy:setuid-root/kprobe:sys_setuid",
+      "id": "filters:selector:tetragon:TracingPolicy:setuid-root/kprobe:sys_setuid/to-root",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicy:setuid-root/kprobe:sys_setuid/to-root"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:setuid-root",
+      "id": "declares:probe:tetragon:TracingPolicy:setuid-root/kprobe:sys_setreuid",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicy:setuid-root/kprobe:sys_setreuid"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicy:setuid-root/kprobe:sys_setreuid",
+      "id": "attaches:probe:tetragon:TracingPolicy:setuid-root/kprobe:sys_setreuid",
+      "kind": "attaches",
+      "to": "hook:kprobe:sys_setreuid"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicy:setuid-root/kprobe:sys_setreuid",
+      "id": "filters:selector:tetragon:TracingPolicy:setuid-root/kprobe:sys_setreuid/to-root",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicy:setuid-root/kprobe:sys_setreuid/to-root"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:setuid-root",
+      "id": "applies-to:policy:tetragon:TracingPolicy:setuid-root",
+      "kind": "applies-to",
+      "to": "subject:workloads:all%20host%20and%20pod%20workloads"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:module-loading",
+      "id": "declares:probe:tetragon:TracingPolicy:module-loading/kprobe:do_init_module",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicy:module-loading/kprobe:do_init_module"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicy:module-loading/kprobe:do_init_module",
+      "id": "attaches:probe:tetragon:TracingPolicy:module-loading/kprobe:do_init_module",
+      "kind": "attaches",
+      "to": "hook:kprobe:do_init_module"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicy:module-loading/kprobe:do_init_module",
+      "id": "filters:selector:tetragon:TracingPolicy:module-loading/kprobe:do_init_module/%231",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicy:module-loading/kprobe:do_init_module/%231"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 2
+      },
+      "from": "probe:tetragon:TracingPolicy:module-loading/kprobe:do_init_module",
+      "id": "filters:selector:tetragon:TracingPolicy:module-loading/kprobe:do_init_module/%232",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicy:module-loading/kprobe:do_init_module/%232"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:module-loading",
+      "id": "declares:probe:tetragon:TracingPolicy:module-loading/tracepoint:module%2Fmodule_load",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicy:module-loading/tracepoint:module%2Fmodule_load"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicy:module-loading/tracepoint:module%2Fmodule_load",
+      "id": "attaches:probe:tetragon:TracingPolicy:module-loading/tracepoint:module%2Fmodule_load",
+      "kind": "attaches",
+      "to": "hook:tracepoint:module%2Fmodule_load"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicy:module-loading/tracepoint:module%2Fmodule_load",
+      "id": "filters:selector:tetragon:TracingPolicy:module-loading/tracepoint:module%2Fmodule_load/*",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicy:module-loading/tracepoint:module%2Fmodule_load/*"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:module-loading",
+      "id": "declares:probe:tetragon:TracingPolicy:module-loading/lsm:kernel_module_request",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicy:module-loading/lsm:kernel_module_request"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicy:module-loading/lsm:kernel_module_request",
+      "id": "attaches:probe:tetragon:TracingPolicy:module-loading/lsm:kernel_module_request",
+      "kind": "attaches",
+      "to": "hook:lsm:kernel_module_request"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicy:module-loading/lsm:kernel_module_request",
+      "id": "filters:selector:tetragon:TracingPolicy:module-loading/lsm:kernel_module_request/%231",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicy:module-loading/lsm:kernel_module_request/%231"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "followChildren": false,
+        "operator": "NotIn",
+        "parent": false
+      },
+      "from": "selector:tetragon:TracingPolicy:module-loading/lsm:kernel_module_request/%231",
+      "id": "binary:tetragon:TracingPolicy:module-loading/lsm:kernel_module_request/%231/self/exact/%2Fusr%2Fbin%2Fkmod",
+      "kind": "excludes",
+      "to": "subject:binary:exact:%2Fusr%2Fbin%2Fkmod"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:module-loading",
+      "id": "applies-to:policy:tetragon:TracingPolicy:module-loading",
+      "kind": "applies-to",
+      "to": "subject:workloads:host%20workloads"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicyNamespaced:security:shell-history",
+      "id": "declares:probe:tetragon:TracingPolicyNamespaced:security:shell-history/uprobe:%2Fbin%2Fbash%3Areadline",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicyNamespaced:security:shell-history/uprobe:%2Fbin%2Fbash%3Areadline"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicyNamespaced:security:shell-history/uprobe:%2Fbin%2Fbash%3Areadline",
+      "id": "attaches:probe:tetragon:TracingPolicyNamespaced:security:shell-history/uprobe:%2Fbin%2Fbash%3Areadline",
+      "kind": "attaches",
+      "to": "hook:uprobe:%2Fbin%2Fbash%3Areadline"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicyNamespaced:security:shell-history/uprobe:%2Fbin%2Fbash%3Areadline",
+      "id": "filters:selector:tetragon:TracingPolicyNamespaced:security:shell-history/uprobe:%2Fbin%2Fbash%3Areadline/*",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicyNamespaced:security:shell-history/uprobe:%2Fbin%2Fbash%3Areadline/*"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicyNamespaced:security:shell-history",
+      "id": "declares:probe:tetragon:TracingPolicyNamespaced:security:shell-history/usdt:%2Fusr%2Flib%2Flibssl.so%3Assl%3Ahandshake",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicyNamespaced:security:shell-history/usdt:%2Fusr%2Flib%2Flibssl.so%3Assl%3Ahandshake"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicyNamespaced:security:shell-history/usdt:%2Fusr%2Flib%2Flibssl.so%3Assl%3Ahandshake",
+      "id": "attaches:probe:tetragon:TracingPolicyNamespaced:security:shell-history/usdt:%2Fusr%2Flib%2Flibssl.so%3Assl%3Ahandshake",
+      "kind": "attaches",
+      "to": "hook:usdt:%2Fusr%2Flib%2Flibssl.so%3Assl%3Ahandshake"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicyNamespaced:security:shell-history/usdt:%2Fusr%2Flib%2Flibssl.so%3Assl%3Ahandshake",
+      "id": "filters:selector:tetragon:TracingPolicyNamespaced:security:shell-history/usdt:%2Fusr%2Flib%2Flibssl.so%3Assl%3Ahandshake/*",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicyNamespaced:security:shell-history/usdt:%2Fusr%2Flib%2Flibssl.so%3Assl%3Ahandshake/*"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicyNamespaced:security:shell-history",
+      "id": "applies-to:policy:tetragon:TracingPolicyNamespaced:security:shell-history",
+      "kind": "applies-to",
+      "to": "subject:workloads:containers%20where%20name%20in%20(api%2C%20web)%20in%20pods%20in%20namespace%20security"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:all-syscalls",
+      "id": "declares:probe:tetragon:TracingPolicy:all-syscalls/kprobe:generated%3Agenerated_syscalls",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicy:all-syscalls/kprobe:generated%3Agenerated_syscalls"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicy:all-syscalls/kprobe:generated%3Agenerated_syscalls",
+      "id": "attaches:probe:tetragon:TracingPolicy:all-syscalls/kprobe:generated%3Agenerated_syscalls",
+      "kind": "attaches",
+      "to": "hook:kprobe:generated%3Agenerated_syscalls"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicy:all-syscalls/kprobe:generated%3Agenerated_syscalls",
+      "id": "filters:selector:tetragon:TracingPolicy:all-syscalls/kprobe:generated%3Agenerated_syscalls/%231",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicy:all-syscalls/kprobe:generated%3Agenerated_syscalls/%231"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "selector:tetragon:TracingPolicy:all-syscalls/kprobe:generated%3Agenerated_syscalls/%231",
+      "id": "applies-to:selector:tetragon:TracingPolicy:all-syscalls/kprobe:generated%3Agenerated_syscalls/%231",
+      "kind": "applies-to",
+      "to": "subject:workloads:host%20workloads"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:all-syscalls",
+      "id": "applies-to:policy:tetragon:TracingPolicy:all-syscalls",
+      "kind": "applies-to",
+      "to": "subject:workloads:pods%20where%20k8s%3Aio.kubernetes.pod.namespace%3Dkube-system"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicyNamespaced:checkout:egress",
+      "id": "declares:probe:tetragon:TracingPolicyNamespaced:checkout:egress/fentry:tcp_connect",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicyNamespaced:checkout:egress/fentry:tcp_connect"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicyNamespaced:checkout:egress/fentry:tcp_connect",
+      "id": "attaches:probe:tetragon:TracingPolicyNamespaced:checkout:egress/fentry:tcp_connect",
+      "kind": "attaches",
+      "to": "hook:fentry:tcp_connect"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicyNamespaced:checkout:egress/fentry:tcp_connect",
+      "id": "filters:selector:tetragon:TracingPolicyNamespaced:checkout:egress/fentry:tcp_connect/%231",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicyNamespaced:checkout:egress/fentry:tcp_connect/%231"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "followChildren": true,
+        "operator": "Prefix",
+        "parent": true
+      },
+      "from": "selector:tetragon:TracingPolicyNamespaced:checkout:egress/fentry:tcp_connect/%231",
+      "id": "binary:tetragon:TracingPolicyNamespaced:checkout:egress/fentry:tcp_connect/%231/parent/prefix/%2Fusr%2Flocal%2Fbin%2F",
+      "kind": "matches",
+      "to": "subject:binary:prefix:%2Fusr%2Flocal%2Fbin%2F"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicyNamespaced:checkout:egress",
+      "id": "applies-to:policy:tetragon:TracingPolicyNamespaced:checkout:egress",
+      "kind": "applies-to",
+      "to": "subject:workloads:pods%20in%20namespace%20checkout"
+    }
+  ],
+  "schema": "architecture/v0",
+  "vocabularies": [
+    "runtime-policy/v0"
+  ]
+}

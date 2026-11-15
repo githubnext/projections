@@ -1,0 +1,51 @@
+{
+ "entities": [
+  {
+   "id": "flags:consumer:%40example%2Fapp:enabled",
+   "kind": "consumer",
+   "label": "enabled",
+   "data": {
+    "package": "@example/app"
+   },
+   "confidence": "derived"
+  },
+  {
+   "id": "flags:flag:provider:new-ui",
+   "kind": "flag",
+   "label": "new-ui",
+   "data": {
+    "provider": "provider"
+   },
+   "confidence": "derived"
+  },
+  {
+   "id": "flags:package:%40example%2Fapp",
+   "kind": "package",
+   "label": "@example/app",
+   "data": {},
+   "confidence": "derived"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "flags:checks:flags%3Aconsumer%3A%2540example%252Fapp%3Aenabled:flags%3Aflag%3Aprovider%3Anew-ui",
+   "kind": "checks",
+   "from": "flags:consumer:%40example%2Fapp:enabled",
+   "to": "flags:flag:provider:new-ui",
+   "confidence": "derived"
+  },
+  {
+   "id": "flags:owns:flags%3Apackage%3A%2540example%252Fapp:flags%3Aconsumer%3A%2540example%252Fapp%3Aenabled",
+   "kind": "owns",
+   "from": "flags:package:%40example%2Fapp",
+   "to": "flags:consumer:%40example%2Fapp:enabled",
+   "confidence": "derived"
+  }
+ ],
+ "metadata": {
+  "analysis": "Static TypeScript symbol resolution with explicit domain conventions",
+  "limitations": [
+   "Dynamic registrations and runtime control flow are not evaluated."
+  ]
+ }
+}

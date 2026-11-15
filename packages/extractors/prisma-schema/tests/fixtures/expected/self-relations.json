@@ -1,0 +1,302 @@
+{
+ "entities": [
+  {
+   "id": "table:/T",
+   "kind": "table",
+   "label": "T",
+   "data": {
+    "namespace": null,
+    "provider": "postgresql"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FT/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:/T",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FT/parentId",
+   "kind": "column",
+   "label": "parentId",
+   "data": {
+    "table": "table:/T",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": true,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FT/a",
+   "kind": "column",
+   "label": "a",
+   "data": {
+    "table": "table:/T",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "table:/B",
+   "kind": "table",
+   "label": "B",
+   "data": {
+    "namespace": null,
+    "provider": "postgresql"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FB/x",
+   "kind": "column",
+   "label": "x",
+   "data": {
+    "table": "table:/B",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FT/primary-key/%5B%22id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (id)",
+   "data": {
+    "table": "table:/T",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FT/unique/%5B%22a%22%5D",
+   "kind": "constraint",
+   "label": "unique (a)",
+   "data": {
+    "table": "table:/T",
+    "type": "unique",
+    "fields": [
+     {
+      "name": "a"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FB/primary-key/%5B%22x%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (x)",
+   "data": {
+    "table": "table:/B",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "x"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FT/foreign-key/%5B%22parentId%22%5D/table%3A%2FT",
+   "kind": "constraint",
+   "label": "foreign-key (parentId)",
+   "data": {
+    "table": "table:/T",
+    "type": "foreign-key",
+    "columns": [
+     "parentId"
+    ],
+    "target": "table:/T",
+    "references": [
+     "id"
+    ],
+    "onDelete": null,
+    "onUpdate": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FT/foreign-key/%5B%22a%22%5D/table%3A%2FB",
+   "kind": "constraint",
+   "label": "foreign-key (a)",
+   "data": {
+    "table": "table:/T",
+    "type": "foreign-key",
+    "columns": [
+     "a"
+    ],
+    "target": "table:/B",
+    "references": [
+     "x"
+    ],
+    "onDelete": "NoAction",
+    "onUpdate": "SetDefault"
+   },
+   "confidence": "authoritative"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "contains:table%3A%2FT/column%3Atable%253A%252FT%2Fid/",
+   "kind": "contains",
+   "from": "table:/T",
+   "to": "column:table%3A%2FT/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FT/column%3Atable%253A%252FT%2FparentId/",
+   "kind": "contains",
+   "from": "table:/T",
+   "to": "column:table%3A%2FT/parentId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FT/column%3Atable%253A%252FT%2Fa/",
+   "kind": "contains",
+   "from": "table:/T",
+   "to": "column:table%3A%2FT/a",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FB/column%3Atable%253A%252FB%2Fx/",
+   "kind": "contains",
+   "from": "table:/B",
+   "to": "column:table%3A%2FB/x",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FT/constraint%3Atable%253A%252FT%2Fprimary-key%2F%255B%2522id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/T",
+   "to": "constraint:table%3A%2FT/primary-key/%5B%22id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FT%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FT%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FT/primary-key/%5B%22id%22%5D",
+   "to": "column:table%3A%2FT/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FT/constraint%3Atable%253A%252FT%2Funique%2F%255B%2522a%2522%255D/",
+   "kind": "contains",
+   "from": "table:/T",
+   "to": "constraint:table%3A%2FT/unique/%5B%22a%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FT%2Funique%2F%255B%2522a%2522%255D/column%3Atable%253A%252FT%2Fa/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FT/unique/%5B%22a%22%5D",
+   "to": "column:table%3A%2FT/a",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FB/constraint%3Atable%253A%252FB%2Fprimary-key%2F%255B%2522x%2522%255D/",
+   "kind": "contains",
+   "from": "table:/B",
+   "to": "constraint:table%3A%2FB/primary-key/%5B%22x%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FB%2Fprimary-key%2F%255B%2522x%2522%255D/column%3Atable%253A%252FB%2Fx/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FB/primary-key/%5B%22x%22%5D",
+   "to": "column:table%3A%2FB/x",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FT/constraint%3Atable%253A%252FT%2Fforeign-key%2F%255B%2522parentId%2522%255D%2Ftable%253A%252FT/",
+   "kind": "contains",
+   "from": "table:/T",
+   "to": "constraint:table%3A%2FT/foreign-key/%5B%22parentId%22%5D/table%3A%2FT",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "references:constraint%3Atable%253A%252FT%2Fforeign-key%2F%255B%2522parentId%2522%255D%2Ftable%253A%252FT/table%3A%2FT/",
+   "kind": "references",
+   "from": "constraint:table%3A%2FT/foreign-key/%5B%22parentId%22%5D/table%3A%2FT",
+   "to": "table:/T",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FT%2Fforeign-key%2F%255B%2522parentId%2522%255D%2Ftable%253A%252FT/column%3Atable%253A%252FT%2FparentId/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FT/foreign-key/%5B%22parentId%22%5D/table%3A%2FT",
+   "to": "column:table%3A%2FT/parentId",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "foreign-key:column%3Atable%253A%252FT%2FparentId/column%3Atable%253A%252FT%2Fid/constraint%3Atable%253A%252FT%2Fforeign-key%2F%255B%2522parentId%2522%255D%2Ftable%253A%252FT",
+   "kind": "foreign-key",
+   "from": "column:table%3A%2FT/parentId",
+   "to": "column:table%3A%2FT/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FT/constraint%3Atable%253A%252FT%2Fforeign-key%2F%255B%2522a%2522%255D%2Ftable%253A%252FB/",
+   "kind": "contains",
+   "from": "table:/T",
+   "to": "constraint:table%3A%2FT/foreign-key/%5B%22a%22%5D/table%3A%2FB",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "references:constraint%3Atable%253A%252FT%2Fforeign-key%2F%255B%2522a%2522%255D%2Ftable%253A%252FB/table%3A%2FB/",
+   "kind": "references",
+   "from": "constraint:table%3A%2FT/foreign-key/%5B%22a%22%5D/table%3A%2FB",
+   "to": "table:/B",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FT%2Fforeign-key%2F%255B%2522a%2522%255D%2Ftable%253A%252FB/column%3Atable%253A%252FT%2Fa/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FT/foreign-key/%5B%22a%22%5D/table%3A%2FB",
+   "to": "column:table%3A%2FT/a",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "foreign-key:column%3Atable%253A%252FT%2Fa/column%3Atable%253A%252FB%2Fx/constraint%3Atable%253A%252FT%2Fforeign-key%2F%255B%2522a%2522%255D%2Ftable%253A%252FB",
+   "kind": "foreign-key",
+   "from": "column:table%3A%2FT/a",
+   "to": "column:table%3A%2FB/x",
+   "confidence": "authoritative"
+  }
+ ]
+}

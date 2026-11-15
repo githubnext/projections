@@ -1,0 +1,1098 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "signature": "assembly Payments"
+      },
+      "evidence": [],
+      "id": "api:Payments",
+      "kind": "assembly",
+      "label": "Payments"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "constant",
+          "static": true,
+          "term": "const",
+          "type": {
+            "text": "System.Int32"
+          },
+          "value": "3",
+          "visibility": "public"
+        },
+        "signature": "public const System.Int32 Payments.Limits.MaxRetries = 3"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 22,
+            "line": 37
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:F:Payments.Limits.MaxRetries",
+      "kind": "field",
+      "label": "MaxRetries"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "variant",
+          "static": true,
+          "term": "enum member",
+          "type": {
+            "text": "Payments.Status"
+          },
+          "value": "2",
+          "visibility": "public"
+        },
+        "signature": "Payments.Status.Failed = 2"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 5,
+            "line": 32
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:F:Payments.Status.Failed",
+      "kind": "field",
+      "label": "Failed"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "variant",
+          "static": true,
+          "term": "enum member",
+          "type": {
+            "text": "Payments.Status"
+          },
+          "value": "0",
+          "visibility": "public"
+        },
+        "signature": "Payments.Status.Pending = 0"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 5,
+            "line": 30
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:F:Payments.Status.Pending",
+      "kind": "field",
+      "label": "Pending"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "variant",
+          "static": true,
+          "term": "enum member",
+          "type": {
+            "text": "Payments.Status"
+          },
+          "value": "1",
+          "visibility": "public"
+        },
+        "signature": "Payments.Status.Settled = 1"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 5,
+            "line": 31
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:F:Payments.Status.Settled",
+      "kind": "field",
+      "label": "Settled"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "constructor",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "number",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "System.String"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "System.Void"
+              }
+            }
+          ],
+          "term": "constructor",
+          "visibility": "public"
+        },
+        "signature": "public Payments.Card.Card(System.String number)"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 12,
+            "line": 17
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:M:Payments.Card.#ctor(System.String)",
+      "kind": "method",
+      "label": ".ctor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "native": {
+            "override": true
+          },
+          "signatures": [
+            {
+              "parameters": [],
+              "returns": {
+                "text": "System.Boolean"
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "public override System.Boolean Payments.Card.Validate()"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 26,
+            "line": 19
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:M:Payments.Card.Validate",
+      "kind": "method",
+      "label": "Validate"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "constructor",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "gateway",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Payments.IGateway"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "System.Void"
+              }
+            }
+          ],
+          "term": "constructor",
+          "visibility": "public"
+        },
+        "signature": "public Payments.Client.Client(Payments.IGateway gateway)"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 12,
+            "line": 42
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:M:Payments.Client.#ctor(Payments.IGateway)",
+      "kind": "method",
+      "label": ".ctor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "amount",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "System.Decimal"
+                  },
+                  "variadic": false
+                },
+                {
+                  "default": "\"USD\"",
+                  "name": "currency",
+                  "optional": true,
+                  "passing": "value",
+                  "type": {
+                    "text": "System.String"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Payments.Receipt"
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "public Payments.Receipt Payments.Client.Pay(System.Decimal amount, System.String currency = \"USD\")"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 20,
+            "line": 44
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:M:Payments.Client.Pay(System.Decimal,System.String)",
+      "kind": "method",
+      "label": "Pay"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "receiptId",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "System.String"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "System.Void"
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "public void Payments.Client.Refund(System.String receiptId)"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 17,
+            "line": 45
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:M:Payments.Client.Refund(System.String)",
+      "kind": "method",
+      "label": "Refund"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "abstract": true,
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "amount",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "System.Decimal"
+                  },
+                  "variadic": false
+                },
+                {
+                  "name": "currency",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "System.String"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Payments.Receipt"
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "Payments.Receipt Payments.IGateway.Charge(System.Decimal amount, System.String currency)"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 13,
+            "line": 5
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:M:Payments.IGateway.Charge(System.Decimal,System.String)",
+      "kind": "method",
+      "label": "Charge"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "constructor",
+          "signatures": [
+            {
+              "parameters": [],
+              "returns": {
+                "text": "System.Void"
+              }
+            }
+          ],
+          "term": "constructor",
+          "visibility": "protected"
+        },
+        "signature": "protected Payments.PaymentMethod.PaymentMethod()"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 15,
+            "line": 10
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:M:Payments.PaymentMethod.#ctor",
+      "kind": "method",
+      "label": ".ctor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "native": {
+            "virtual": true
+          },
+          "signatures": [
+            {
+              "parameters": [],
+              "returns": {
+                "text": "System.String"
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "public virtual System.String Payments.PaymentMethod.Describe()"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 27,
+            "line": 11
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:M:Payments.PaymentMethod.Describe",
+      "kind": "method",
+      "label": "Describe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "abstract": true,
+          "declaration": "method",
+          "signatures": [
+            {
+              "parameters": [],
+              "returns": {
+                "text": "System.Boolean"
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "public abstract System.Boolean Payments.PaymentMethod.Validate()"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 26,
+            "line": 12
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:M:Payments.PaymentMethod.Validate",
+      "kind": "method",
+      "label": "Validate"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "constructor",
+          "signatures": [
+            {
+              "parameters": [],
+              "returns": {
+                "text": "System.Void"
+              }
+            }
+          ],
+          "term": "constructor",
+          "visibility": "public"
+        },
+        "signature": "public Payments.Receipt.Receipt()"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 14,
+            "line": 22
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:M:Payments.Receipt.#ctor",
+      "kind": "method",
+      "label": ".ctor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "constructor",
+          "signatures": [
+            {
+              "parameters": [],
+              "returns": {
+                "text": "System.Void"
+              }
+            }
+          ],
+          "term": "constructor",
+          "visibility": "public"
+        },
+        "signature": "public Payments.Status.Status()"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 13,
+            "line": 28
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:M:Payments.Status.#ctor",
+      "kind": "method",
+      "label": ".ctor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "access": {
+            "read": "public",
+            "write": "public"
+          },
+          "declaration": "property",
+          "term": "property",
+          "type": {
+            "text": "System.String"
+          },
+          "visibility": "public"
+        },
+        "signature": "public System.String Payments.Card.Number { get; set; }"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 19,
+            "line": 18
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:P:Payments.Card.Number",
+      "kind": "property",
+      "label": "Number"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "access": {
+            "read": "protected"
+          },
+          "declaration": "property",
+          "term": "property",
+          "type": {
+            "text": "Payments.IGateway"
+          },
+          "visibility": "protected"
+        },
+        "signature": "protected Payments.IGateway Payments.Client.Gateway { get; }"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 24,
+            "line": 43
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:P:Payments.Client.Gateway",
+      "kind": "property",
+      "label": "Gateway"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "access": {
+            "init": "public",
+            "read": "public"
+          },
+          "declaration": "property",
+          "term": "property",
+          "type": {
+            "text": "System.String"
+          },
+          "visibility": "public"
+        },
+        "signature": "public System.String Payments.Receipt.Id { get; init; }"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 19,
+            "line": 24
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:P:Payments.Receipt.Id",
+      "kind": "property",
+      "label": "Id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "access": {
+            "init": "public",
+            "read": "public"
+          },
+          "declaration": "property",
+          "term": "property",
+          "type": {
+            "text": "System.Decimal"
+          },
+          "visibility": "public"
+        },
+        "signature": "public System.Decimal Payments.Receipt.Total { get; init; }"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 20,
+            "line": 25
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:P:Payments.Receipt.Total",
+      "kind": "property",
+      "label": "Total"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "class",
+          "supertypes": [
+            {
+              "relation": "extends",
+              "type": "Payments.PaymentMethod"
+            }
+          ],
+          "term": "class",
+          "visibility": "public"
+        },
+        "signature": "public class Payments.Card : Payments.PaymentMethod"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 14,
+            "line": 15
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:T:Payments.Card",
+      "kind": "type",
+      "label": "Card"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "class",
+          "term": "class",
+          "visibility": "public"
+        },
+        "signature": "public class Payments.Client"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 14,
+            "line": 40
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:T:Payments.Client",
+      "kind": "type",
+      "label": "Client"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "interface",
+          "term": "interface",
+          "visibility": "public"
+        },
+        "signature": "public interface Payments.IGateway"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 18,
+            "line": 3
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:T:Payments.IGateway",
+      "kind": "type",
+      "label": "IGateway"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "class",
+          "sealed": true,
+          "static": true,
+          "term": "class",
+          "visibility": "public"
+        },
+        "signature": "public static class Payments.Limits"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 21,
+            "line": 35
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:T:Payments.Limits",
+      "kind": "type",
+      "label": "Limits"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "abstract": true,
+          "declaration": "class",
+          "term": "class",
+          "visibility": "public"
+        },
+        "signature": "public abstract class Payments.PaymentMethod"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 23,
+            "line": 8
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:T:Payments.PaymentMethod",
+      "kind": "type",
+      "label": "PaymentMethod"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "class",
+          "term": "class",
+          "visibility": "public"
+        },
+        "signature": "public class Payments.Receipt"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 14,
+            "line": 22
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:T:Payments.Receipt",
+      "kind": "type",
+      "label": "Receipt"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "enum",
+          "native": {
+            "sealed": true
+          },
+          "sealed": true,
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "System.IComparable"
+            },
+            {
+              "relation": "implements",
+              "type": "System.IConvertible"
+            },
+            {
+              "relation": "implements",
+              "type": "System.IFormattable"
+            },
+            {
+              "relation": "implements",
+              "type": "System.ISpanFormattable"
+            }
+          ],
+          "term": "enum",
+          "underlying": "System.Int32",
+          "visibility": "public"
+        },
+        "signature": "public enum Payments.Status : System.Int32"
+      },
+      "evidence": [
+        {
+          "kind": "source",
+          "location": {
+            "column": 13,
+            "line": 28
+          },
+          "source": "Payments.cs"
+        }
+      ],
+      "id": "api:Payments:T:Payments.Status",
+      "kind": "type",
+      "label": "Status"
+    }
+  ],
+  "metadata": {
+    "ecosystem": "dotnet",
+    "project": "Payments.csproj"
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments",
+      "id": "edge:contains:[\"api:Payments\",\"api:Payments:T:Payments.Card\"]",
+      "kind": "contains",
+      "to": "api:Payments:T:Payments.Card"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments",
+      "id": "edge:contains:[\"api:Payments\",\"api:Payments:T:Payments.Client\"]",
+      "kind": "contains",
+      "to": "api:Payments:T:Payments.Client"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments",
+      "id": "edge:contains:[\"api:Payments\",\"api:Payments:T:Payments.IGateway\"]",
+      "kind": "contains",
+      "to": "api:Payments:T:Payments.IGateway"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments",
+      "id": "edge:contains:[\"api:Payments\",\"api:Payments:T:Payments.Limits\"]",
+      "kind": "contains",
+      "to": "api:Payments:T:Payments.Limits"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments",
+      "id": "edge:contains:[\"api:Payments\",\"api:Payments:T:Payments.PaymentMethod\"]",
+      "kind": "contains",
+      "to": "api:Payments:T:Payments.PaymentMethod"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments",
+      "id": "edge:contains:[\"api:Payments\",\"api:Payments:T:Payments.Receipt\"]",
+      "kind": "contains",
+      "to": "api:Payments:T:Payments.Receipt"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments",
+      "id": "edge:contains:[\"api:Payments\",\"api:Payments:T:Payments.Status\"]",
+      "kind": "contains",
+      "to": "api:Payments:T:Payments.Status"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Card",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Card\",\"api:Payments:M:Payments.Card.#ctor(System.String)\"]",
+      "kind": "contains",
+      "to": "api:Payments:M:Payments.Card.#ctor(System.String)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Card",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Card\",\"api:Payments:M:Payments.Card.Validate\"]",
+      "kind": "contains",
+      "to": "api:Payments:M:Payments.Card.Validate"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Card",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Card\",\"api:Payments:P:Payments.Card.Number\"]",
+      "kind": "contains",
+      "to": "api:Payments:P:Payments.Card.Number"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Client",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Client\",\"api:Payments:M:Payments.Client.#ctor(Payments.IGateway)\"]",
+      "kind": "contains",
+      "to": "api:Payments:M:Payments.Client.#ctor(Payments.IGateway)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Client",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Client\",\"api:Payments:M:Payments.Client.Pay(System.Decimal,System.String)\"]",
+      "kind": "contains",
+      "to": "api:Payments:M:Payments.Client.Pay(System.Decimal,System.String)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Client",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Client\",\"api:Payments:M:Payments.Client.Refund(System.String)\"]",
+      "kind": "contains",
+      "to": "api:Payments:M:Payments.Client.Refund(System.String)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Client",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Client\",\"api:Payments:P:Payments.Client.Gateway\"]",
+      "kind": "contains",
+      "to": "api:Payments:P:Payments.Client.Gateway"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.IGateway",
+      "id": "edge:contains:[\"api:Payments:T:Payments.IGateway\",\"api:Payments:M:Payments.IGateway.Charge(System.Decimal,System.String)\"]",
+      "kind": "contains",
+      "to": "api:Payments:M:Payments.IGateway.Charge(System.Decimal,System.String)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Limits",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Limits\",\"api:Payments:F:Payments.Limits.MaxRetries\"]",
+      "kind": "contains",
+      "to": "api:Payments:F:Payments.Limits.MaxRetries"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.PaymentMethod",
+      "id": "edge:contains:[\"api:Payments:T:Payments.PaymentMethod\",\"api:Payments:M:Payments.PaymentMethod.#ctor\"]",
+      "kind": "contains",
+      "to": "api:Payments:M:Payments.PaymentMethod.#ctor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.PaymentMethod",
+      "id": "edge:contains:[\"api:Payments:T:Payments.PaymentMethod\",\"api:Payments:M:Payments.PaymentMethod.Describe\"]",
+      "kind": "contains",
+      "to": "api:Payments:M:Payments.PaymentMethod.Describe"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.PaymentMethod",
+      "id": "edge:contains:[\"api:Payments:T:Payments.PaymentMethod\",\"api:Payments:M:Payments.PaymentMethod.Validate\"]",
+      "kind": "contains",
+      "to": "api:Payments:M:Payments.PaymentMethod.Validate"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Receipt",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Receipt\",\"api:Payments:M:Payments.Receipt.#ctor\"]",
+      "kind": "contains",
+      "to": "api:Payments:M:Payments.Receipt.#ctor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Receipt",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Receipt\",\"api:Payments:P:Payments.Receipt.Id\"]",
+      "kind": "contains",
+      "to": "api:Payments:P:Payments.Receipt.Id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Receipt",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Receipt\",\"api:Payments:P:Payments.Receipt.Total\"]",
+      "kind": "contains",
+      "to": "api:Payments:P:Payments.Receipt.Total"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Status",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Status\",\"api:Payments:F:Payments.Status.Failed\"]",
+      "kind": "contains",
+      "to": "api:Payments:F:Payments.Status.Failed"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Status",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Status\",\"api:Payments:F:Payments.Status.Pending\"]",
+      "kind": "contains",
+      "to": "api:Payments:F:Payments.Status.Pending"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Status",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Status\",\"api:Payments:F:Payments.Status.Settled\"]",
+      "kind": "contains",
+      "to": "api:Payments:F:Payments.Status.Settled"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "api:Payments:T:Payments.Status",
+      "id": "edge:contains:[\"api:Payments:T:Payments.Status\",\"api:Payments:M:Payments.Status.#ctor\"]",
+      "kind": "contains",
+      "to": "api:Payments:M:Payments.Status.#ctor"
+    }
+  ],
+  "schema": "api/v0"
+}

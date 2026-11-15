@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/extraction-document/v0.json",
+  "title": "Projections saved extraction",
+  "description": "An extraction with runner-added provenance and its semantic digest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "projection", "extraction", "provenance", "digest"],
+  "properties": {
+    "format": {"type": "string", "const": "projections.extraction"},
+    "version": {"type": "number", "const": 0},
+    "projection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "renderer"],
+      "properties": {
+        "id": {"$ref": "https://schemas.projections.githubnext.com/definition/v0.json#/$defs/identifier"},
+        "title": {"type": "string", "minLength": 1},
+        "renderer": {"$ref": "https://schemas.projections.githubnext.com/definition/v0.json#/$defs/renderer"}
+      }
+    },
+    "extraction": {"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revision", "extractor", "definition", "definitionDigest", "reproducibility", "limitations"],
+      "properties": {
+        "revision": {"$ref": "#/$defs/revision"},
+        "extractor": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "version"],
+          "properties": {"id": {"type": "string", "minLength": 1}, "version": {"type": "string", "minLength": 1}}
+        },
+        "definition": {"$ref": "https://schemas.projections.githubnext.com/definition/v0.json"},
+        "definitionDigest": {
+          "description": "`sha256:` digest of the canonical definition and its declared sources.",
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "reproducibility": {
+          "$ref": "https://schemas.projections.githubnext.com/definition/v0.json#/$defs/reproducibility"
+        },
+        "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "toolchain": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
+        "execution": {"$ref": "#/$defs/execution"},
+        "generated": {
+          "description": "Generated values the extraction holds, and how many the generation store supplied.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["values", "reused", "sources"],
+          "properties": {
+            "values": {
+              "description": "The concrete generated values in the extraction.",
+              "type": "integer",
+              "minimum": 0
+            },
+            "reused": {
+              "description": "How many reused a stored value: the same declared path, basis digest and value.",
+              "type": "integer",
+              "minimum": 0
+            },
+            "sources": {
+              "description": "The generation stores the reused values came from: `local`, or `ci` for values harvested from a CI artifact.",
+              "type": "array",
+              "items": {"enum": ["local", "ci"]},
+              "uniqueItems": true
+            }
+          }
+        }
+      }
+    },
+    "digest": {"$ref": "#/$defs/sha256", "description": "Lowercase SHA-256 of the canonical extraction bytes."}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref", "commit", "dirty"],
+      "properties": {
+        "kind": {"enum": ["commit", "working-tree"]},
+        "ref": {"type": "string", "minLength": 1},
+        "commit": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+        "dirty": {"type": "boolean"}
+      },
+      "if": {"properties": {"kind": {"const": "commit"}}},
+      "then": {"properties": {"dirty": {"const": false}}}
+    },
+    "execution": {
+      "description": "Where and how faithfully the runner extracted it.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "fidelity"],
+      "properties": {
+        "source": {
+          "description": "Where it was extracted: reused from a CI artifact (`ci`), in the user's checkout (`local-in-place`), read from Git objects with nothing on disk (`local-git-objects`), in a reused workspace (`local-workspace`), or in a temporary copy (`local-materialized`).",
+          "enum": ["ci", "local-in-place", "local-git-objects", "local-workspace", "local-materialized"]
+        },
+        "fidelity": {
+          "description": "`exact`; `approximate` when a toolchain extractor borrowed dependencies installed for different lockfiles; `stale` when the working tree changed while it ran.",
+          "enum": ["exact", "approximate", "stale"]
+        },
+        "tree": {
+          "description": "The examined Git tree.",
+          "type": "string",
+          "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"
+        },
+        "strategy": {
+          "description": "The workspace strategy, for a workspace or temporary copy.",
+          "enum": ["fresh", "worktree", "clone", "sparse"]
+        },
+        "prepared": {
+          "description": "The environment's prepare steps that applied, with their key hashes.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "key"],
+            "properties": {
+              "id": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$"},
+              "key": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+            }
+          },
+          "maxItems": 50
+        },
+        "scope": {
+          "description": "The enforced scope, when one applied.",
+          "type": "array",
+          "items": {
+            "description": "A repository-relative file or directory, `/`-separated, without `.` or `..` segments.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "determinism": {"$ref": "https://schemas.projections.githubnext.com/definition/v0.json#/$defs/determinism"},
+        "environment": {
+          "description": "Fingerprint of the run's environment: the Projections version, `PATH` and the granted variables' values, hashed.",
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "at": {
+          "description": "When the run happened, in UTC.",
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        },
+        "official": {
+          "description": "True for the run the team's CI published: the commit's official extraction.",
+          "type": "boolean"
+        },
+        "ci": {
+          "description": "The CI run whose artifact supplied it.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["repository", "run"],
+          "properties": {
+            "repository": {"type": "string", "minLength": 1},
+            "run": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+            "workflow": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    }
+  }
+}

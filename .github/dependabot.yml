@@ -1,0 +1,28 @@
+# Dependabot opens security updates only. Maintainers make routine upgrades by hand (CONTRIBUTING.md#dependency-updates).
+#
+# open-pull-requests-limit: 0 turns version updates off for each ecosystem; it doesn't apply to security updates, which
+# have their own fixed limit. Security updates and alerts are turned on in the repository's settings (this file alone
+# doesn't enable them); with dependency review on pull requests (.github/workflows/ci.yml) they are the vulnerability
+# gate (SECURITY.md). The groups put each ecosystem's security fixes in one pull request. Security updates have no
+# cooldown, so a fix younger than the package feed proxy's week (CONTRIBUTING.md#package-sources) may fail CI's install
+# until the proxy serves it.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      npm-security:
+        applies-to: security-updates
+        patterns: ['*']
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      cargo-security:
+        applies-to: security-updates
+        patterns: ['*']

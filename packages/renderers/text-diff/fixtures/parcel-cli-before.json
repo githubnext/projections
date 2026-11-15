@@ -1,0 +1,11 @@
+{
+  "protocolVersion": 0,
+  "schema": "graph/v0",
+  "entities": [
+    {"id": "version", "kind": "output", "label": "parcel --version", "data": {"text": "parcel 2.4.0 (darwin-arm64)\n"}},
+    {"id": "report", "kind": "output", "label": "parcel report shipments.json", "data": {"text": "$ parcel report shipments.json\nID       City        Carrier   Status\nPKG-101  Seattle     Northway  delivered\nPKG-102  Portland    Northway  in transit\nPKG-103  Sacramento  Coastal   delivered\nPKG-104  Denver      Summit    late: Weather hold at depot\nPKG-106  Boston      Harbor    in transit\nPKG-108  Chicago     Lakeside  in transit\n\nTotal: 12 shipments, 8 in transit, 2 late\n"}},
+    {"id": "help", "kind": "output", "label": "parcel help report", "data": {"text": "Usage: parcel report <file> [options]\n\nOptions:\n  --format <table|json>  Output format (default: table)\n  --carrier <name>       Only show one carrier\n  -h, --help             Show this help\n"}},
+    {"id": "legacy", "kind": "output", "label": "parcel legacy-status", "data": {"text": "legacy status endpoint: ok\ndeprecated: use `parcel report` instead\n"}}
+  ],
+  "relationships": []
+}

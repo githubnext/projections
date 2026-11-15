@@ -1,0 +1,52 @@
+{
+ "entities": [
+  {
+   "id": "flags:consumer:shop:view",
+   "kind": "consumer",
+   "label": "view",
+   "data": {
+    "package": "shop"
+   },
+   "confidence": "derived"
+  },
+  {
+   "id": "flags:flag:flags:checkout",
+   "kind": "flag",
+   "label": "checkout",
+   "data": {
+    "provider": "flags"
+   },
+   "confidence": "derived"
+  },
+  {
+   "id": "flags:package:shop",
+   "kind": "package",
+   "label": "shop",
+   "data": {},
+   "confidence": "derived"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "flags:checks:flags%3Aconsumer%3Ashop%3Aview:flags%3Aflag%3Aflags%3Acheckout",
+   "kind": "checks",
+   "from": "flags:consumer:shop:view",
+   "to": "flags:flag:flags:checkout",
+   "confidence": "derived"
+  },
+  {
+   "id": "flags:owns:flags%3Apackage%3Ashop:flags%3Aconsumer%3Ashop%3Aview",
+   "kind": "owns",
+   "from": "flags:package:shop",
+   "to": "flags:consumer:shop:view",
+   "confidence": "derived"
+  }
+ ],
+ "metadata": {
+  "analysis": "Static TypeScript symbol resolution with explicit domain conventions",
+  "limitations": [
+   "Dynamic registrations and runtime control flow are not evaluated.",
+   "A known flag API used a dynamic flag key; that call is not represented."
+  ]
+ }
+}

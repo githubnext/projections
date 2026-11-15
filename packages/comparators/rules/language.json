@@ -1,0 +1,504 @@
+{
+  "budget": 200000000,
+  "format": "projections.comparator",
+  "library": [
+    {
+      "cost": "Linear in the value's size",
+      "name": "json",
+      "params": [
+        "dyn"
+      ],
+      "returns": "string"
+    },
+    {
+      "cost": "n log n in the list's length",
+      "name": "ids.sort",
+      "params": [
+        "list<string>"
+      ],
+      "returns": "list<string>"
+    },
+    {
+      "cost": "Linear in the string's length",
+      "name": "ids.key",
+      "params": [
+        "string"
+      ],
+      "returns": "string"
+    },
+    {
+      "cost": "Linear in the shorter list",
+      "name": "lists.zip",
+      "params": [
+        "list<dyn>",
+        "list<dyn>"
+      ],
+      "returns": "list<list<dyn>>"
+    },
+    {
+      "cost": "Linear in the longer list",
+      "name": "lists.zipLongest",
+      "params": [
+        "list<dyn>",
+        "list<dyn>"
+      ],
+      "returns": "list<list<dyn>>"
+    },
+    {
+      "cost": "Linear in the list",
+      "name": "lists.enumerate",
+      "params": [
+        "list<dyn>"
+      ],
+      "returns": "list<list<dyn>>"
+    },
+    {
+      "cost": "Linear in the number of entries",
+      "name": "maps.fromEntries",
+      "params": [
+        "list<list<dyn>>"
+      ],
+      "returns": "map<string, dyn>"
+    },
+    {
+      "cost": "n log n in the map's size",
+      "name": "maps.keys",
+      "params": [
+        "map<string, dyn>"
+      ],
+      "returns": "list<string>"
+    },
+    {
+      "cost": "Linear in the result",
+      "name": "graph.parents",
+      "params": [
+        "string",
+        "string",
+        "string"
+      ],
+      "returns": "list<string>"
+    },
+    {
+      "cost": "Linear in the result",
+      "name": "graph.children",
+      "params": [
+        "string",
+        "string",
+        "string"
+      ],
+      "returns": "list<string>"
+    },
+    {
+      "cost": "Constant, plus the entity's size",
+      "name": "graph.entity",
+      "params": [
+        "string",
+        "string"
+      ],
+      "returns": "Entity"
+    },
+    {
+      "cost": "Constant, plus the relationship's size",
+      "name": "graph.relationship",
+      "params": [
+        "string",
+        "string"
+      ],
+      "returns": "Relationship"
+    },
+    {
+      "cost": "Linear in nodes and edges",
+      "name": "graph.depths",
+      "params": [
+        "list<string>",
+        "list<list<string>>"
+      ],
+      "returns": "map<string, int>"
+    },
+    {
+      "cost": "Near-linear in nodes and edges",
+      "name": "graph.components",
+      "params": [
+        "list<string>",
+        "list<list<string>>"
+      ],
+      "returns": "list<list<string>>"
+    },
+    {
+      "cost": "Linear in the findings",
+      "name": "findings.classify",
+      "params": [
+        "list<Finding>",
+        "list<string>"
+      ],
+      "returns": "Classification"
+    },
+    {
+      "cost": "Linear in the change's varied values",
+      "name": "generated.because",
+      "params": [
+        "Change"
+      ],
+      "returns": "list<string>"
+    },
+    {
+      "cost": "Linear in the change's varied values",
+      "name": "generated.only",
+      "params": [
+        "Change",
+        "list<string>"
+      ],
+      "returns": "bool"
+    },
+    {
+      "cost": "Linear in the string's length",
+      "name": "prose.code",
+      "params": [
+        "string"
+      ],
+      "returns": "string"
+    },
+    {
+      "cost": "Linear in the string's length",
+      "name": "prose.escape",
+      "params": [
+        "string"
+      ],
+      "returns": "string"
+    }
+  ],
+  "macros": [
+    "match",
+    "cond",
+    "collect",
+    "template"
+  ],
+  "revision": 3,
+  "types": [
+    {
+      "fields": [
+        [
+          "protocolVersion",
+          "int"
+        ],
+        [
+          "schema",
+          "string"
+        ],
+        [
+          "metadata",
+          "map<string, dyn>"
+        ],
+        [
+          "entities",
+          "list<Entity>"
+        ],
+        [
+          "relationships",
+          "list<Relationship>"
+        ]
+      ],
+      "name": "Extraction"
+    },
+    {
+      "fields": [
+        [
+          "id",
+          "string"
+        ],
+        [
+          "kind",
+          "string"
+        ],
+        [
+          "label",
+          "string"
+        ],
+        [
+          "data",
+          "map<string, dyn>"
+        ],
+        [
+          "previousIds",
+          "list<string>"
+        ],
+        [
+          "evidence",
+          "list<dyn>"
+        ],
+        [
+          "confidence",
+          "string"
+        ]
+      ],
+      "name": "Entity"
+    },
+    {
+      "fields": [
+        [
+          "id",
+          "string"
+        ],
+        [
+          "kind",
+          "string"
+        ],
+        [
+          "label",
+          "string"
+        ],
+        [
+          "data",
+          "map<string, dyn>"
+        ],
+        [
+          "previousIds",
+          "list<string>"
+        ],
+        [
+          "evidence",
+          "list<dyn>"
+        ],
+        [
+          "confidence",
+          "string"
+        ],
+        [
+          "from",
+          "string"
+        ],
+        [
+          "to",
+          "string"
+        ]
+      ],
+      "name": "Relationship"
+    },
+    {
+      "fields": [
+        [
+          "id",
+          "string"
+        ],
+        [
+          "kind",
+          "string"
+        ],
+        [
+          "label",
+          "string"
+        ],
+        [
+          "data",
+          "map<string, dyn>"
+        ],
+        [
+          "previousIds",
+          "list<string>"
+        ],
+        [
+          "evidence",
+          "list<dyn>"
+        ],
+        [
+          "confidence",
+          "string"
+        ],
+        [
+          "from",
+          "string"
+        ],
+        [
+          "to",
+          "string"
+        ]
+      ],
+      "name": "Item"
+    },
+    {
+      "fields": [
+        [
+          "id",
+          "string"
+        ],
+        [
+          "collection",
+          "string"
+        ],
+        [
+          "before",
+          "list<string>"
+        ],
+        [
+          "after",
+          "list<string>"
+        ],
+        [
+          "status",
+          "string"
+        ],
+        [
+          "correspondence",
+          "string"
+        ],
+        [
+          "varied",
+          "list<Varied>"
+        ],
+        [
+          "summary",
+          "string"
+        ]
+      ],
+      "name": "Change"
+    },
+    {
+      "fields": [
+        [
+          "path",
+          "string"
+        ],
+        [
+          "within",
+          "bool"
+        ],
+        [
+          "reason",
+          "string"
+        ],
+        [
+          "generated",
+          "bool"
+        ],
+        [
+          "because",
+          "list<string>"
+        ]
+      ],
+      "name": "Varied"
+    },
+    {
+      "fields": [
+        [
+          "changes",
+          "list<string>"
+        ],
+        [
+          "kind",
+          "string"
+        ],
+        [
+          "summary",
+          "string"
+        ]
+      ],
+      "name": "Step"
+    },
+    {
+      "fields": [
+        [
+          "protocolVersion",
+          "int"
+        ],
+        [
+          "changes",
+          "list<Change>"
+        ],
+        [
+          "steps",
+          "list<Step>"
+        ],
+        [
+          "order",
+          "map<string, dyn>"
+        ],
+        [
+          "metadata",
+          "map<string, dyn>"
+        ]
+      ],
+      "name": "Comparison"
+    },
+    {
+      "fields": [
+        [
+          "entities",
+          "map<string, Entity>"
+        ],
+        [
+          "relationships",
+          "map<string, Relationship>"
+        ],
+        [
+          "incoming",
+          "map<string, list<Relationship>>"
+        ],
+        [
+          "outgoing",
+          "map<string, list<Relationship>>"
+        ]
+      ],
+      "name": "Side"
+    },
+    {
+      "fields": [
+        [
+          "before",
+          "Side"
+        ],
+        [
+          "after",
+          "Side"
+        ]
+      ],
+      "name": "Lookup"
+    },
+    {
+      "fields": [
+        [
+          "level",
+          "string"
+        ],
+        [
+          "rule",
+          "string"
+        ],
+        [
+          "reason",
+          "string"
+        ],
+        [
+          "kinds",
+          "list<string>"
+        ]
+      ],
+      "name": "Finding"
+    },
+    {
+      "fields": [
+        [
+          "level",
+          "string"
+        ],
+        [
+          "reason",
+          "string"
+        ],
+        [
+          "kinds",
+          "list<string>"
+        ],
+        [
+          "findings",
+          "list<Finding>"
+        ]
+      ],
+      "name": "Classification"
+    },
+    {
+      "fields": [],
+      "name": "Pairs"
+    }
+  ],
+  "version": 0
+}

@@ -1,0 +1,243 @@
+/* Overlays: VS Code's widgets, in the view's overlay layer. */
+.phv-layer {
+  position: relative;
+  height: 0;
+}
+.phv-overlay {
+  z-index: 1000;
+  box-sizing: border-box;
+  max-width: calc(100vw - 16px);
+  overflow: auto;
+  color: var(--phv-fg);
+  font-family: var(--phv-font);
+  font-size: var(--phv-size);
+  line-height: 1.4;
+}
+.phv-overlay:focus {
+  outline: none;
+}
+/* An editor widget (Filter, About, the revisions): `--vscode-editorWidget-*` with the widget shadow. */
+.phv-widget {
+  display: grid;
+  gap: 8px;
+  width: 20rem;
+  padding: 8px;
+  border: 1px solid var(--vscode-editorWidget-border, var(--phv-border));
+  border-radius: var(--phv-radius);
+  background: var(--vscode-editorWidget-background, #202020);
+  color: var(--vscode-editorWidget-foreground, var(--phv-fg));
+  box-shadow: 0 0 8px 2px var(--vscode-widget-shadow, #0000005c);
+}
+.phv-pair-popover {
+  width: auto;
+}
+.phv-widget-title {
+  font-weight: 600;
+}
+.phv-widget-title:focus {
+  outline: none;
+}
+.phv-widget-section {
+  display: grid;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--phv-border);
+}
+.phv-popover-note {
+  font-size: 12px;
+}
+.phv-popover-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.phv-active-icon,
+.phv-comparator-icon {
+  flex: none;
+  color: var(--vscode-testing-iconPassed, var(--phv-added));
+}
+.phv-info-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+.phv-info-list li {
+  display: flex;
+  gap: 6px;
+}
+.phv-info-list [data-severity='error'] .codicon {
+  color: var(--vscode-editorError-foreground, #f14c4c);
+}
+.phv-info-list [data-severity='warning'] .codicon {
+  color: var(--vscode-editorWarning-foreground, #cca700);
+}
+.phv-filter-input {
+  width: 100%;
+}
+
+/* VS Code's context menu (`--vscode-menu-*`): 26px items with a check column, a codicon and a keybinding column. */
+.phv-menu-overlay {
+  overscroll-behavior: contain;
+  min-width: 12rem;
+  max-width: 22rem;
+  padding: 4px;
+  border: 1px solid var(--vscode-menu-border, #454545);
+  border-radius: 5px;
+  background: var(--vscode-menu-background, #1f1f1f);
+  color: var(--vscode-menu-foreground, #cccccc);
+  box-shadow: 0 2px 8px var(--vscode-widget-shadow, #0000005c);
+}
+.phv-menu:focus {
+  outline: none;
+}
+.phv-menu-heading {
+  padding: 4px 8px 2px 26px;
+  color: var(--phv-muted);
+  font-size: 11px;
+}
+.phv-menu-separator {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--vscode-menu-separatorBackground, #454545);
+}
+.phv-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 0 8px 0 4px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.phv-menu-item:is(:hover, :focus) {
+  outline: none;
+  border-color: var(--vscode-menu-selectionBorder, transparent);
+  background: var(--vscode-menu-selectionBackground, var(--vscode-list-activeSelectionBackground, #0078d4));
+  color: var(--vscode-menu-selectionForeground, var(--vscode-list-activeSelectionForeground, var(--vscode-menu-foreground, inherit)));
+}
+/* An item whose submenu is open stays marked while focus is in the submenu, as in VS Code. */
+.phv-menu-item[aria-expanded='true']:not(:focus, :hover) {
+  background: var(--vscode-menu-selectionBackground, var(--vscode-list-activeSelectionBackground, #0078d4));
+  color: var(--vscode-menu-selectionForeground, var(--vscode-list-activeSelectionForeground, var(--vscode-menu-foreground, inherit)));
+}
+.phv-menu-item:focus-visible {
+  border-color: var(--vscode-menu-selectionBorder, var(--phv-focus));
+}
+.phv-menu-item[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: default;
+}
+.phv-menu-item[aria-disabled='true']:is(:hover, :focus) {
+  background: none;
+  color: inherit;
+}
+.phv-menu-check,
+.phv-menu-icon {
+  display: inline-flex;
+  flex: none;
+  width: 16px;
+}
+span.phv-menu-icon:empty {
+  display: none;
+}
+.phv-menu-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.phv-menu-detail {
+  margin-inline-start: 16px;
+  opacity: 0.7;
+  font-size: 12px;
+}
+/* A submenu's chevron (VS Code's `submenu` codicon), at the end after its current value. */
+.phv-menu-chevron {
+  flex: none;
+  margin-inline-start: 8px;
+}
+.phv-menu-detail + .phv-menu-chevron {
+  margin-inline-start: 4px;
+}
+
+/* VS Code's quick pick (`--vscode-quickInput-*`). */
+.phv-quick-pick {
+  display: grid;
+  gap: 6px;
+  width: min(36rem, calc(100vw - 16px));
+  padding: 6px;
+  border: 1px solid var(--vscode-contrastBorder, var(--vscode-widget-border, transparent));
+  border-radius: 6px;
+  background: var(--vscode-quickInput-background, #222222);
+  color: var(--vscode-quickInput-foreground, var(--phv-fg));
+  box-shadow: 0 0 8px 2px var(--vscode-widget-shadow, #0000005c);
+}
+.phv-quick-pick-input {
+  width: 100%;
+}
+.phv-quick-pick-list {
+  display: grid;
+  max-height: 22rem;
+  overflow: auto;
+}
+.phv-quick-pick-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.phv-quick-pick-item:hover {
+  background: var(--phv-hover);
+}
+.phv-quick-pick-item:focus {
+  outline: none;
+  border-color: var(--vscode-list-focusOutline, var(--phv-focus));
+  background: var(--vscode-quickInputList-focusBackground, var(--vscode-list-activeSelectionBackground, #04395e));
+  color: var(--vscode-quickInputList-focusForeground, var(--vscode-list-activeSelectionForeground, inherit));
+}
+.phv-quick-pick-item[aria-selected='true'] .phv-quick-pick-label {
+  font-weight: 600;
+}
+.phv-quick-pick-text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.phv-quick-pick-description,
+.phv-quick-pick-detail {
+  color: var(--phv-muted);
+  font-size: 12px;
+}
+.phv-quick-pick-item:focus :is(.phv-quick-pick-description, .phv-quick-pick-detail) {
+  color: inherit;
+  opacity: 0.85;
+}
+.phv-quick-pick-empty {
+  padding: 4px 8px;
+  color: var(--phv-muted);
+}
+/* A dropdown action (the projection picker): VS Code's dropdown look, opening a quick pick. */
+.phv-dropdown-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 6px 0 8px;
+  border: 1px solid var(--vscode-dropdown-border, var(--phv-border));
+  border-radius: var(--phv-radius);
+  background: var(--vscode-dropdown-background, #313131);
+  color: var(--vscode-dropdown-foreground, var(--phv-fg));
+  font: inherit;
+  cursor: pointer;
+}
+.phv-dropdown-action:focus-visible {
+  border-color: var(--phv-focus);
+}

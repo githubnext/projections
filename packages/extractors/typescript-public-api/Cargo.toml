@@ -1,0 +1,13 @@
+[package]
+name = "projections-extractor-typescript-public-api"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow = "1"
+projections-extractor-sdk = { path = "../sdk" }
+projections-extractor-typescript-support = { path = "../typescript-support" }
+serde_json = { version = "1", features = ["float_roundtrip"] }

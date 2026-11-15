@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/comparison-document/v0.json",
+  "title": "Projections saved comparison",
+  "description": "Two saved extractions and the comparison between them, with the comparator that produced it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "before", "after", "comparison", "comparator"],
+  "properties": {
+    "format": {"type": "string", "const": "projections.comparison"},
+    "version": {"type": "number", "const": 0},
+    "before": {"$ref": "https://schemas.projections.githubnext.com/extraction-document/v0.json"},
+    "after": {"$ref": "https://schemas.projections.githubnext.com/extraction-document/v0.json"},
+    "comparison": {"$ref": "https://schemas.projections.githubnext.com/comparison/v0.json"},
+    "comparator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "digest"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      }
+    },
+    "notices": {
+      "description": "Informational: how the compared revisions define the projection differently, for example a changed definition or a projection missing at one revision. Not verified.",
+      "type": "array",
+      "items": {"type": "string", "minLength": 1, "maxLength": 4096},
+      "maxItems": 20
+    }
+  }
+}

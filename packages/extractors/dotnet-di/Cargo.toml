@@ -1,0 +1,13 @@
+[package]
+name = "projections-extractor-dotnet-di"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow = "1"
+projections-extractor-dotnet-support = { path = "../dotnet-support" }
+projections-extractor-sdk = { path = "../sdk" }
+serde_json = { version = "1", features = ["float_roundtrip"] }

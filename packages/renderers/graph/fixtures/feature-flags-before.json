@@ -1,0 +1,14 @@
+{
+  "protocolVersion": 0,
+  "schema": "graph/v0",
+  "entities": [
+    {"id": "flag:checkout-v2", "kind": "flag", "label": "checkout-v2", "data": {"default": false}},
+    {"id": "team:payments", "kind": "team", "label": "payments"},
+    {"id": "flag:dark-mode", "kind": "flag", "label": "dark-mode", "data": {"default": true}},
+    {"id": "team:design", "kind": "team", "label": "design"}
+  ],
+  "relationships": [
+    {"id": "owns:payments:checkout-v2", "kind": "owns", "from": "team:payments", "to": "flag:checkout-v2"},
+    {"id": "owns:design:dark-mode", "kind": "owns", "from": "team:design", "to": "flag:dark-mode"}
+  ]
+}

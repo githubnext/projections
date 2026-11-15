@@ -1,0 +1,5 @@
+node_modules/
+test-results/
+playwright-report/
+# dist/ is the bundle viewers load: commit it, even where the repository ignores dist/.
+!dist/

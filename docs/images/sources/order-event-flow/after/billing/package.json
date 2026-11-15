@@ -1,0 +1,4 @@
+{
+  "name": "@shop/billing",
+  "types": "./index.ts"
+}

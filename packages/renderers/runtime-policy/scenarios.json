@@ -1,0 +1,55 @@
+{
+  "format": "projections.scenarios",
+  "version": 0,
+  "title": "Runtime security policies",
+  "renderer": "runtime-policy",
+  "scenarios": [
+    {
+      "id": "token-guard",
+      "title": "Kill downloaders reading the service account token",
+      "description": "A pull request to protect-credentials: a new Sigkill rule for curl and wget reading the service account token, the policy broadened from payments to payments and checkout pods, and the security_mmap_file probe dropped. Interpreted by the runtime policy comparator.",
+      "before": "../../extractors/tetragon-policies/tests/fixtures/credentials/before.expected.json",
+      "after": "../../extractors/tetragon-policies/tests/fixtures/credentials/after.expected.json",
+      "comparator": "../../comparators/runtime-policy/runtime-policy.comparator.yaml"
+    },
+    {
+      "id": "token-guard-default",
+      "title": "The same change, default comparator",
+      "group": "Default comparator",
+      "description": "The same pull request compared by the default comparator: every change is marked, with old and new values, but without security interpretations.",
+      "before": "../../extractors/tetragon-policies/tests/fixtures/credentials/before.expected.json",
+      "after": "../../extractors/tetragon-policies/tests/fixtures/credentials/after.expected.json"
+    },
+    {
+      "id": "monitor-mode",
+      "title": "Switch a policy to monitor mode",
+      "description": "protect-credentials changes from enforce to monitor: its Sigkill rule stays declared but its enforcement is elided.",
+      "before": "../../extractors/tetragon-policies/tests/fixtures/credentials/after.expected.json",
+      "after": "../../extractors/tetragon-policies/tests/fixtures/credentials/monitor.expected.json",
+      "comparator": "../../comparators/runtime-policy/runtime-policy.comparator.yaml"
+    },
+    {
+      "id": "deployment-review",
+      "title": "Broaden a policy and turn off the policy filter",
+      "group": "With deployment facts",
+      "description": "The credentials change in a repository that also declares its CRDs, agent values, kernel profiles and workloads: the broadened policy now covers checkout-web, the agent's policy filter is turned off so namespaced and pod-scoped policies won't load, a new policy fails the repository's CRD, and two hooks can't run on the legacy kernel profile.",
+      "before": "../../extractors/tetragon-policies/tests/fixtures/deployment/before.expected.json",
+      "after": "../../extractors/tetragon-policies/tests/fixtures/deployment/after.expected.json",
+      "comparator": "../../comparators/runtime-policy/runtime-policy.comparator.yaml"
+    },
+    {
+      "id": "policy-library",
+      "title": "A policy library",
+      "group": "One revision",
+      "description": "One revision of a library covering every hook family: syscalls through a list, a tracepoint, an LSM hook, kernel functions, uprobes, a USDT and a generated list of every syscall, with monitor mode, node and workload scope.",
+      "extraction": "../../extractors/tetragon-policies/tests/fixtures/library/expected.json"
+    },
+    {
+      "id": "deployment",
+      "title": "A deployment at a glance",
+      "group": "One revision",
+      "description": "One revision with its agent configuration, kernel profiles and the workloads each policy covers.",
+      "extraction": "../../extractors/tetragon-policies/tests/fixtures/deployment/after.expected.json"
+    }
+  ]
+}

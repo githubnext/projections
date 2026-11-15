@@ -1,0 +1,202 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "path": ".",
+        "workspaceMember": true
+      },
+      "evidence": [
+        {
+          "kind": "manifest",
+          "source": "package.json"
+        }
+      ],
+      "id": "workspace:catalog-demo",
+      "kind": "package",
+      "label": "catalog-demo"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "path": "packages/app",
+        "version": "1.0.0",
+        "workspaceMember": true
+      },
+      "evidence": [
+        {
+          "kind": "manifest",
+          "source": "packages/app/package.json"
+        }
+      ],
+      "id": "workspace:@demo/app",
+      "kind": "package",
+      "label": "@demo/app"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "path": "packages/lib",
+        "version": "1.0.0",
+        "workspaceMember": true
+      },
+      "evidence": [
+        {
+          "kind": "manifest",
+          "source": "packages/lib/package.json"
+        }
+      ],
+      "id": "workspace:@demo/lib",
+      "kind": "package",
+      "label": "@demo/lib"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "version": "6.0.0"
+      },
+      "evidence": [
+        {
+          "kind": "lockfile",
+          "source": "pnpm-lock.yaml"
+        }
+      ],
+      "id": "package:is-number@6",
+      "kind": "external-package",
+      "label": "is-number"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "version": "7.0.0"
+      },
+      "evidence": [
+        {
+          "kind": "lockfile",
+          "source": "pnpm-lock.yaml"
+        }
+      ],
+      "id": "package:is-number@7",
+      "kind": "external-package",
+      "label": "is-number"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "version": "3.0.1"
+      },
+      "evidence": [
+        {
+          "kind": "lockfile",
+          "source": "pnpm-lock.yaml"
+        }
+      ],
+      "id": "package:is-odd",
+      "kind": "external-package",
+      "label": "is-odd"
+    }
+  ],
+  "metadata": {
+    "lockfile": "pnpm-lock.yaml",
+    "lockfileVersion": "9.0",
+    "packageManager": "pnpm",
+    "unresolved": []
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "resolved": "1.0.0",
+        "type": "dependencies",
+        "version": "workspace:*"
+      },
+      "evidence": [
+        {
+          "kind": "manifest",
+          "source": "packages/app/package.json"
+        }
+      ],
+      "from": "workspace:@demo/app",
+      "id": "dependency:[\"@demo/app\",\"dependencies\",\"@demo/lib\"]",
+      "kind": "dependencies",
+      "label": "workspace:*",
+      "to": "workspace:@demo/lib"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "resolved": "7.0.0",
+        "type": "dependencies",
+        "version": "catalog:"
+      },
+      "evidence": [
+        {
+          "kind": "manifest",
+          "source": "packages/app/package.json"
+        }
+      ],
+      "from": "workspace:@demo/app",
+      "id": "dependency:[\"@demo/app\",\"dependencies\",\"is-number\"]",
+      "kind": "dependencies",
+      "label": "catalog:",
+      "to": "package:is-number@7"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "resolved": "3.0.1",
+        "type": "dependencies",
+        "version": "catalog:legacy"
+      },
+      "evidence": [
+        {
+          "kind": "manifest",
+          "source": "packages/app/package.json"
+        }
+      ],
+      "from": "workspace:@demo/app",
+      "id": "dependency:[\"@demo/app\",\"dependencies\",\"is-odd\"]",
+      "kind": "dependencies",
+      "label": "catalog:legacy",
+      "to": "package:is-odd"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "resolved": "7.0.0",
+        "type": "dependencies",
+        "version": "catalog:default"
+      },
+      "evidence": [
+        {
+          "kind": "manifest",
+          "source": "packages/lib/package.json"
+        }
+      ],
+      "from": "workspace:@demo/lib",
+      "id": "dependency:[\"@demo/lib\",\"dependencies\",\"is-number\"]",
+      "kind": "dependencies",
+      "label": "catalog:default",
+      "to": "package:is-number@7"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "type": "dependencies"
+      },
+      "evidence": [
+        {
+          "kind": "lockfile",
+          "source": "pnpm-lock.yaml"
+        }
+      ],
+      "from": "package:is-odd",
+      "id": "dependency:[\"package:is-odd\",\"dependencies\",\"is-number\"]",
+      "kind": "dependencies",
+      "label": null,
+      "to": "package:is-number@6"
+    }
+  ],
+  "schema": "graph/v0"
+}

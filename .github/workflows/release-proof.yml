@@ -1,0 +1,170 @@
+name: Release proof
+# A dist global-artifacts job (global-artifacts-jobs in dist-workspace.toml). Each
+# executable dist built is extracted, proved on its own platform with Node absent
+# from PATH, and published under its gh precompiled-extension name with its own
+# .sha256. Beside it, the VS Code extension is packaged with that executable
+# inside, installed by VS Code's own CLI, and published as
+# projections-vscode-<version>-<target>.vsix (not on the Marketplace), with its
+# .sha256. The package job packs @githubnext/projections, which renderers depend
+# on by the release asset's URL until npm publishing is approved
+# (docs/contracts/packages.md), and proves it with the release's Linux executable;
+# it too is attached with its .sha256. dist hosts and announces the release only
+# after every proof passes and a person approves it (release-approval.yml, which
+# attests every asset); a dry run runs the proofs without publishing.
+on:
+  workflow_call:
+    inputs:
+      plan:
+        required: true
+        type: string
+permissions: {}
+env:
+  # Package sources (see CONTRIBUTING.md). The committed .npmrc covers the workspaces; this also covers
+  # installs elsewhere, such as test scratch directories and --prefix installs.
+  npm_config_registry: https://packagefeedproxy.microsoft.io/npm/
+  # Vulnerabilities are gated by dependency review and Dependabot (SECURITY.md), not npm's audit endpoint.
+  npm_config_audit: 'false'
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple/
+jobs:
+  prove:
+    name: prove (${{ join(matrix.targets, ', ') }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(inputs.plan).ci.github.artifacts_matrix.include }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      TARGET: ${{ join(matrix.targets, '') }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: embedded-inputs
+          # The artifact is rooted at its paths' common ancestor, packages/.
+          path: packages
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: artifacts-build-local-${{ join(matrix.targets, '_') }}
+          path: dist-archives
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: vscode-extension
+          path: packages/integrations/vscode/dist
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      # Ecosystem toolchains, so the proof runs every embedded helper.
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 8.0.x
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: 1.25.7
+          cache: false
+      - name: Extract the executable under its gh name
+        shell: bash
+        run: |
+          # The gh precompiled-extension name and the VS Code extension's vsce target.
+          case "$TARGET" in
+            aarch64-apple-darwin) id=darwin-arm64 vsce=darwin-arm64 ;;
+            x86_64-apple-darwin) id=darwin-amd64 vsce=darwin-x64 ;;
+            aarch64-unknown-linux-musl) id=linux-arm64 vsce=linux-arm64 ;;
+            x86_64-unknown-linux-musl) id=linux-amd64 vsce=linux-x64 ;;
+            aarch64-pc-windows-msvc) id=windows-arm64 vsce=win32-arm64 ;;
+            x86_64-pc-windows-msvc) id=windows-amd64 vsce=win32-x64 ;;
+            *) echo "::error::No gh asset name for $TARGET"; exit 1 ;;
+          esac
+          node packages/cli/scripts/release-asset.mjs "dist-archives" "$TARGET" "gh-projections-$id" release
+          {
+            echo "ID=$id"
+            echo "VSCE_TARGET=$vsce"
+            echo "ASSET=$(cat release/asset-name)"
+          } >> "$GITHUB_ENV"
+          rm release/asset-name
+      - name: Prove the installed binary
+        shell: bash
+        env:
+          PROJECTIONS_PROOF_REQUIRE: dotnet,go,python,typescript
+        run: |
+          # The proof's TypeScript extraction uses this checkout's compiler package.
+          npm ci --ignore-scripts --no-audit --no-fund
+          node packages/cli/test/binary.mjs --binary "release/$ASSET" --gh-extension
+      - name: Package and install the VS Code extension
+        shell: bash
+        run: |
+          # With the proved executable inside; VS Code's own CLI installs it, and the installed CLI must be the release's.
+          node packages/integrations/vscode/scripts/release-asset.mjs --target "$VSCE_TARGET" --binary "release/$ASSET" --out vsix
+          echo "VSIX=$(cat vsix/asset-name)" >> "$GITHUB_ENV"
+          rm vsix/asset-name
+          mv vsix/* release/
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: artifacts-gh-${{ env.ID }}
+          if-no-files-found: error
+          path: |
+            release/${{ env.ASSET }}
+            release/${{ env.ASSET }}.sha256
+            release/${{ env.VSIX }}
+            release/${{ env.VSIX }}.sha256
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      # The release's own Linux executable scaffolds and checks the renderer.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: artifacts-build-local-x86_64-unknown-linux-musl
+          path: dist-archives
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      - name: Check the version
+        shell: bash
+        env:
+          PLAN: ${{ inputs.plan }}
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
+          # Every shipped manifest carries the tag's version (docs/maintainers/releasing.md). A dry run has no tag.
+          tag=$(jq -r '.announcement_tag // empty' <<< "$PLAN")
+          npm run --silent tools -- version ${tag:+--tag "$tag"}
+      - name: Build and pack the package
+        shell: bash
+        run: |
+          for workspace in packages/schemas packages/renderers/sdk packages/renderers/kit packages/renderers/testing packages/sdk; do
+            npm run build --workspace "$workspace"
+          done
+          node packages/sdk/scripts/release-asset.mjs release
+          echo "ASSET=$(cat release/asset-name)" >> "$GITHUB_ENV"
+          rm release/asset-name
+      - name: Prove the tarball in a scaffolded renderer and a renderer without React
+        shell: bash
+        run: |
+          set -euo pipefail
+          node packages/cli/scripts/release-asset.mjs dist-archives x86_64-unknown-linux-musl projections cli-release
+          rm cli-release/asset-name
+          tools/scripts/install-browsers.sh chromium
+          # The tarball's contents, every entry and its types, a renderer without React that installs the tarball with
+          # Vite alone and builds on the framework-free kit with no React in its bundle, the CLI's release URL, and a
+          # renderer the CLI scaffolds installing the tarball by path, building and passing its checks.
+          PROJECTIONS_CLI="$PWD/cli-release/projections" node packages/sdk/scripts/check-pack.mjs --tarball "release/$ASSET"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: artifacts-npm-package
+          if-no-files-found: error
+          path: |
+            release/${{ env.ASSET }}
+            release/${{ env.ASSET }}.sha256

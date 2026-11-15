@@ -1,0 +1,125 @@
+{
+ "entities": [
+  {
+   "id": "table:analytics/events",
+   "kind": "table",
+   "label": "events",
+   "data": {
+    "namespace": "analytics",
+    "provider": "postgresql"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3Aanalytics%2Fevents/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:analytics/events",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3Aanalytics%2Fevents/payload",
+   "kind": "column",
+   "label": "payload",
+   "data": {
+    "table": "table:analytics/events",
+    "type": "Json",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3Aanalytics%2Fevents/primary-key/%5B%22id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (id)",
+   "data": {
+    "table": "table:analytics/events",
+    "type": "primary-key",
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3Aanalytics%2Fevents/index/events_payload",
+   "kind": "constraint",
+   "label": "events_payload",
+   "data": {
+    "table": "table:analytics/events",
+    "type": "index",
+    "algorithm": "Gin",
+    "indexType": "normal",
+    "fields": [
+     {
+      "name": "payload",
+      "operatorClass": "JsonbPathOps"
+     }
+    ],
+    "databaseName": "events_payload"
+   },
+   "confidence": "authoritative"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "contains:table%3Aanalytics%2Fevents/column%3Atable%253Aanalytics%252Fevents%2Fid/",
+   "kind": "contains",
+   "from": "table:analytics/events",
+   "to": "column:table%3Aanalytics%2Fevents/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3Aanalytics%2Fevents/column%3Atable%253Aanalytics%252Fevents%2Fpayload/",
+   "kind": "contains",
+   "from": "table:analytics/events",
+   "to": "column:table%3Aanalytics%2Fevents/payload",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3Aanalytics%2Fevents/constraint%3Atable%253Aanalytics%252Fevents%2Fprimary-key%2F%255B%2522id%2522%255D/",
+   "kind": "contains",
+   "from": "table:analytics/events",
+   "to": "constraint:table%3Aanalytics%2Fevents/primary-key/%5B%22id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253Aanalytics%252Fevents%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253Aanalytics%252Fevents%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3Aanalytics%2Fevents/primary-key/%5B%22id%22%5D",
+   "to": "column:table%3Aanalytics%2Fevents/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3Aanalytics%2Fevents/constraint%3Atable%253Aanalytics%252Fevents%2Findex%2Fevents_payload/",
+   "kind": "contains",
+   "from": "table:analytics/events",
+   "to": "constraint:table%3Aanalytics%2Fevents/index/events_payload",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253Aanalytics%252Fevents%2Findex%2Fevents_payload/column%3Atable%253Aanalytics%252Fevents%2Fpayload/",
+   "kind": "constrains",
+   "from": "constraint:table%3Aanalytics%2Fevents/index/events_payload",
+   "to": "column:table%3Aanalytics%2Fevents/payload",
+   "confidence": "authoritative"
+  }
+ ]
+}

@@ -1,0 +1,79 @@
+# yaml-language-server: $schema=../../../packages/schemas/schemas/comparator-tests/v0.json
+#
+# What moved-components.comparator.yaml is for, as cases: `projections check -p <id>`
+# runs them for a projection that uses the rules.
+format: projections.comparator-tests
+version: 0
+
+cases:
+  - name: a component moved between modules is one component, with its uses
+    before: fixtures/before.json
+    after: fixtures/after.json
+    expect:
+      changes:
+        - item: component:billing/InvoiceService
+          status: unchanged
+          correspondence: declared
+          summary: '`InvoiceService` moved from `component:billing/InvoiceService` to `component:invoicing/InvoiceService`.'
+        # Its uses carry over...
+        - {item: uses:api/CheckoutController>billing/InvoiceService, status: unchanged, correspondence: declared}
+        - {item: uses:billing/InvoiceService>billing/TaxCalculator, status: unchanged, correspondence: declared}
+        # ...its containment really did change.
+        - {item: contains:billing/InvoiceService, status: removed}
+        - {item: contains:invoicing/InvoiceService, status: added}
+      # The move is one step, between the removals and the additions.
+      steps:
+        - kind: remove
+          changes: [contains:billing/InvoiceService]
+        - kind: restructure
+          summary: Move `InvoiceService`
+          changes:
+            - component:invoicing/InvoiceService
+            - uses:api/CheckoutController>invoicing/InvoiceService
+            - uses:invoicing/InvoiceService>billing/TaxCalculator
+            - uses:invoicing/InvoiceService>invoicing/InvoiceRenderer
+        - kind: add
+          changes: [contains:invoicing/InvoiceService]
+    snapshot: snapshots/moved.json
+
+  - name: a moved component that also changed is modified
+    before:
+      extraction:
+        protocolVersion: 0
+        schema: architecture/v0
+        entities: [{id: component:billing/InvoiceService, kind: component, label: InvoiceService}]
+        relationships: []
+    after:
+      extraction:
+        protocolVersion: 0
+        schema: architecture/v0
+        entities:
+          - {id: component:invoicing/InvoiceService, kind: component, label: InvoiceService, data: {owner: invoicing}}
+        relationships: []
+    expect:
+      changes:
+        - {id: component:invoicing/InvoiceService, status: modified, correspondence: declared}
+      count: {changes: 1}
+
+  - name: without a unique match, nothing is paired
+    before:
+      extraction:
+        protocolVersion: 0
+        schema: architecture/v0
+        entities: [{id: component:billing/InvoiceService, kind: component, label: InvoiceService}]
+        relationships: []
+    after:
+      # A second InvoiceService makes the pairing ambiguous.
+      extraction:
+        protocolVersion: 0
+        schema: architecture/v0
+        entities:
+          - {id: component:invoicing/InvoiceService, kind: component, label: InvoiceService}
+          - {id: component:api/InvoiceService, kind: component, label: InvoiceService}
+        relationships: []
+    expect:
+      changes:
+        - {id: component:billing/InvoiceService, status: removed, correspondence: none, summary: null}
+        - {id: component:invoicing/InvoiceService, status: added, correspondence: none}
+        - {id: component:api/InvoiceService, status: added, correspondence: none}
+      count: {changes: 3}

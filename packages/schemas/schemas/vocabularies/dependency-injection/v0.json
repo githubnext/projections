@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/vocabularies/dependency-injection/v0.json",
+  "title": "Projections vocabulary dependency-injection/v0",
+  "description": "Dependency-injection containers: services, the registrations that bind them with a lifetime, the implementations they produce, and the services implementations depend on. Defined in docs/models/dependency-injection-model.md.",
+  "allOf": [
+    {"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"},
+    {
+      "type": "object",
+      "required": ["vocabularies"],
+      "properties": {"vocabularies": {"contains": {"const": "dependency-injection/v0"}}}
+    },
+    {"$ref": "#/$defs/refinement"}
+  ],
+  "$defs": {
+    "refinement": {
+      "description": "What `dependency-injection/v0` adds to an extraction that declares it.",
+      "type": "object",
+      "properties": {
+        "schema": {"enum": ["architecture/v0"]},
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "allOf": [
+              {
+                "if": {"type": "object", "required": ["kind"], "properties": {"kind": {"enum": ["service"]}}},
+                "then": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "description": "The contract consumers ask for; the label otherwise.",
+                          "type": "string"
+                        },
+                        "key": {"description": "A keyed service's key.", "type": "string"},
+                        "name": {"description": "The container's own name for the service.", "type": "string"},
+                        "module": {"description": "The module that provides it (NestJS).", "type": "string"}
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "type": "object",
+                  "required": ["kind"],
+                  "properties": {"kind": {"enum": ["registration"]}}
+                },
+                "then": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "lifetime": {
+                          "description": "`singleton`, `scoped` or `transient`, read case-insensitively.",
+                          "type": "string"
+                        },
+                        "scope": {
+                          "description": "The container's own name for the lifetime, such as `prototype` or `request`.",
+                          "type": "string"
+                        },
+                        "declaredLifetime": {
+                          "description": "The lifetime the registration asked for, when the container changed it.",
+                          "type": "string"
+                        },
+                        "ordinal": {
+                          "description": "Registration order; the container resolves the last registration of a service.",
+                          "type": "number"
+                        },
+                        "implementation": {
+                          "description": "The implementation type the registration names.",
+                          "type": "string"
+                        },
+                        "module": {"description": "The module that provides it (NestJS).", "type": "string"}
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "type": "object",
+                  "required": ["kind"],
+                  "properties": {"kind": {"enum": ["implementation"]}}
+                },
+                "then": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {"type": {"description": "The implementation type.", "type": "string"}}
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "if": {"type": "object", "required": ["kind"], "properties": {"kind": {"enum": ["dependsOn"]}}},
+            "then": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "parameter": {
+                      "description": "The parameter, property or field that receives the service.",
+                      "type": "string"
+                    },
+                    "optional": {"description": "Whether the dependency may be missing.", "type": "boolean"},
+                    "collection": {
+                      "description": "Whether every registration of the service is injected, as a collection.",
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

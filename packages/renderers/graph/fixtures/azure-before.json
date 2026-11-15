@@ -1,0 +1,487 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "provider": "Microsoft.Resources",
+        "type": "Microsoft.Resources/resourceGroups"
+      },
+      "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod",
+      "kind": "resource-group",
+      "label": "rg-shop-prod"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/disks/vm-api_OsDisk_1_8c3f0e2a",
+        "managed": false,
+        "provider": "Microsoft.Compute",
+        "type": "Microsoft.Compute/disks",
+        "values": {
+          "location": "westus3",
+          "properties": {
+            "diskSizeGB": 30,
+            "osType": "Linux"
+          },
+          "sku": {
+            "name": "Premium_LRS"
+          }
+        }
+      },
+      "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.compute/disks/vm-api_osdisk_1_8c3f0e2a",
+      "kind": "resource",
+      "label": "vm-api_OsDisk_1_8c3f0e2a"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/virtualMachines/vm-api",
+        "provider": "Microsoft.Compute",
+        "type": "Microsoft.Compute/virtualMachines",
+        "values": {
+          "location": "westus3",
+          "properties": {
+            "hardwareProfile": {
+              "vmSize": "Standard_D2s_v5"
+            },
+            "networkProfile": {
+              "networkInterfaces": [
+                {
+                  "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkInterfaces/nic-api"
+                }
+              ]
+            },
+            "osProfile": {
+              "adminUsername": "shop",
+              "computerName": "vm-api",
+              "linuxConfiguration": {
+                "disablePasswordAuthentication": false
+              }
+            },
+            "storageProfile": {
+              "imageReference": {
+                "offer": "ubuntu-24_04-lts",
+                "publisher": "Canonical",
+                "sku": "server",
+                "version": "latest"
+              },
+              "osDisk": {
+                "createOption": "FromImage",
+                "managedDisk": {
+                  "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/disks/vm-api_OsDisk_1_8c3f0e2a",
+                  "storageAccountType": "Premium_LRS"
+                },
+                "name": "vm-api_OsDisk_1_8c3f0e2a"
+              }
+            },
+            "vmId": "6d1c5c1e-2f4b-4d8a-9b77-0f6a1e2c3d4b"
+          }
+        }
+      },
+      "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.compute/virtualmachines/vm-api",
+      "kind": "resource",
+      "label": "vm-api"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Compute/virtualMachines/vm-api/extensions/AzureMonitorLinuxAgent",
+        "provider": "Microsoft.Compute",
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "values": {
+          "location": "westus3",
+          "properties": {
+            "autoUpgradeMinorVersion": true,
+            "publisher": "Microsoft.Azure.Monitor",
+            "type": "AzureMonitorLinuxAgent",
+            "typeHandlerVersion": "1.33"
+          }
+        }
+      },
+      "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.compute/virtualmachines/vm-api/extensions/azuremonitorlinuxagent",
+      "kind": "resource",
+      "label": "AzureMonitorLinuxAgent"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.KeyVault/vaults/kv-shop-prod",
+        "provider": "Microsoft.KeyVault",
+        "type": "Microsoft.KeyVault/vaults",
+        "values": {
+          "location": "westus3",
+          "properties": {
+            "networkAcls": {
+              "bypass": "AzureServices",
+              "defaultAction": "Deny",
+              "virtualNetworkRules": [
+                {
+                  "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/app"
+                }
+              ]
+            },
+            "publicNetworkAccess": "Enabled",
+            "sku": {
+              "family": "A",
+              "name": "standard"
+            },
+            "tenantId": "72f988bf-0000-4000-8000-2d7cd011db47",
+            "vaultUri": "https://kv-shop-prod.vault.azure.net/"
+          }
+        }
+      },
+      "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.keyvault/vaults/kv-shop-prod",
+      "kind": "resource",
+      "label": "kv-shop-prod"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkInterfaces/nic-api",
+        "provider": "Microsoft.Network",
+        "type": "Microsoft.Network/networkInterfaces",
+        "values": {
+          "location": "westus3",
+          "properties": {}
+        }
+      },
+      "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/networkinterfaces/nic-api",
+      "kind": "resource",
+      "label": "nic-api"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkSecurityGroups/nsg-app",
+        "provider": "Microsoft.Network",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "values": {
+          "location": "westus3",
+          "properties": {
+            "securityRules": []
+          }
+        }
+      },
+      "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/networksecuritygroups/nsg-app",
+      "kind": "resource",
+      "label": "nsg-app"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/publicIPAddresses/pip-api",
+        "provider": "Microsoft.Network",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "values": {
+          "location": "westus3",
+          "properties": {
+            "ipAddress": "20.168.12.40",
+            "publicIPAllocationMethod": "Static"
+          },
+          "sku": {
+            "name": "Standard",
+            "tier": "Regional"
+          }
+        }
+      },
+      "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/publicipaddresses/pip-api",
+      "kind": "resource",
+      "label": "pip-api"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop",
+        "provider": "Microsoft.Network",
+        "type": "Microsoft.Network/virtualNetworks",
+        "values": {
+          "location": "westus3",
+          "properties": {
+            "addressSpace": {
+              "addressPrefixes": [
+                "10.40.0.0/16"
+              ]
+            }
+          }
+        }
+      },
+      "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/virtualnetworks/vnet-shop",
+      "kind": "resource",
+      "label": "vnet-shop"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/app",
+        "provider": "Microsoft.Network",
+        "type": "Microsoft.Network/virtualNetworks/subnets",
+        "values": {
+          "properties": {
+            "addressPrefix": "10.40.1.0/24",
+            "networkSecurityGroup": {
+              "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/networkSecurityGroups/nsg-app"
+            }
+          }
+        }
+      },
+      "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/virtualnetworks/vnet-shop/subnets/app",
+      "kind": "resource",
+      "label": "app"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/data",
+        "provider": "Microsoft.Network",
+        "type": "Microsoft.Network/virtualNetworks/subnets",
+        "values": {
+          "properties": {
+            "addressPrefix": "10.40.2.0/24",
+            "serviceEndpoints": [
+              {
+                "locations": [
+                  "westus3"
+                ],
+                "service": "Microsoft.Storage"
+              }
+            ]
+          }
+        }
+      },
+      "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/virtualnetworks/vnet-shop/subnets/data",
+      "kind": "resource",
+      "label": "data"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "address": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Storage/storageAccounts/stshopprod",
+        "provider": "Microsoft.Storage",
+        "type": "Microsoft.Storage/storageAccounts",
+        "values": {
+          "kind": "StorageV2",
+          "location": "westus3",
+          "properties": {
+            "keyCreationTime": "(sensitive value)",
+            "networkAcls": {
+              "bypass": "AzureServices",
+              "defaultAction": "Deny",
+              "virtualNetworkRules": [
+                {
+                  "action": "Allow",
+                  "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourceGroups/rg-shop-prod/providers/Microsoft.Network/virtualNetworks/vnet-shop/subnets/data"
+                }
+              ]
+            },
+            "primaryEndpoints": {
+              "blob": "https://stshopprod.blob.core.windows.net/"
+            }
+          },
+          "sku": {
+            "name": "Standard_ZRS",
+            "tier": "Standard"
+          }
+        }
+      },
+      "id": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.storage/storageaccounts/stshopprod",
+      "kind": "resource",
+      "label": "stshopprod"
+    }
+  ],
+  "metadata": {
+    "externalReferences": 0,
+    "limitations": [
+      "References are resource IDs found in resource properties, attached to the nearest listed resource.",
+      "ARM marks no values sensitive: properties whose names say they hold secrets are replaced, other secrets cannot be detected.",
+      "Template expressions ARM cannot evaluate before deployment are shown as (known after deployment).",
+      "ARM does not predict replacement; Deploy means ARM cannot tell whether properties change."
+    ],
+    "source": "Azure Resource Manager what-if",
+    "sourceConfidence": "authoritative",
+    "unmatchedTemplateDependencies": 0
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.compute/virtualmachines/vm-api",
+      "id": "contains:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.compute%2Fvirtualmachines%2Fvm-api:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.compute%2Fvirtualmachines%2Fvm-api%2Fextensions%2Fazuremonitorlinuxagent",
+      "kind": "contains",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.compute/virtualmachines/vm-api/extensions/azuremonitorlinuxagent"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/virtualnetworks/vnet-shop",
+      "id": "contains:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fvirtualnetworks%2Fvnet-shop:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fvirtualnetworks%2Fvnet-shop%2Fsubnets%2Fapp",
+      "kind": "contains",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/virtualnetworks/vnet-shop/subnets/app"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/virtualnetworks/vnet-shop",
+      "id": "contains:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fvirtualnetworks%2Fvnet-shop:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fvirtualnetworks%2Fvnet-shop%2Fsubnets%2Fdata",
+      "kind": "contains",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/virtualnetworks/vnet-shop/subnets/data"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod",
+      "id": "contains:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.compute%2Fdisks%2Fvm-api_osdisk_1_8c3f0e2a",
+      "kind": "contains",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.compute/disks/vm-api_osdisk_1_8c3f0e2a"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod",
+      "id": "contains:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.compute%2Fvirtualmachines%2Fvm-api",
+      "kind": "contains",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.compute/virtualmachines/vm-api"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod",
+      "id": "contains:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.keyvault%2Fvaults%2Fkv-shop-prod",
+      "kind": "contains",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.keyvault/vaults/kv-shop-prod"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod",
+      "id": "contains:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fnetworkinterfaces%2Fnic-api",
+      "kind": "contains",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/networkinterfaces/nic-api"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod",
+      "id": "contains:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fnetworksecuritygroups%2Fnsg-app",
+      "kind": "contains",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/networksecuritygroups/nsg-app"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod",
+      "id": "contains:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fpublicipaddresses%2Fpip-api",
+      "kind": "contains",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/publicipaddresses/pip-api"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod",
+      "id": "contains:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fvirtualnetworks%2Fvnet-shop",
+      "kind": "contains",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/virtualnetworks/vnet-shop"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod",
+      "id": "contains:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.storage%2Fstorageaccounts%2Fstshopprod",
+      "kind": "contains",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.storage/storageaccounts/stshopprod"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "storageProfile.osDisk.managedDisk"
+        ]
+      },
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.compute/virtualmachines/vm-api",
+      "id": "references:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.compute%2Fvirtualmachines%2Fvm-api:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.compute%2Fdisks%2Fvm-api_osdisk_1_8c3f0e2a",
+      "kind": "references",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.compute/disks/vm-api_osdisk_1_8c3f0e2a"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "networkProfile.networkInterfaces"
+        ],
+        "dependsOn": true
+      },
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.compute/virtualmachines/vm-api",
+      "id": "references:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.compute%2Fvirtualmachines%2Fvm-api:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fnetworkinterfaces%2Fnic-api",
+      "kind": "references",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/networkinterfaces/nic-api"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "networkAcls.virtualNetworkRules"
+        ],
+        "dependsOn": true
+      },
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.keyvault/vaults/kv-shop-prod",
+      "id": "references:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.keyvault%2Fvaults%2Fkv-shop-prod:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fvirtualnetworks%2Fvnet-shop%2Fsubnets%2Fapp",
+      "kind": "references",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/virtualnetworks/vnet-shop/subnets/app"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "ipConfigurations.publicIPAddress"
+        ],
+        "dependsOn": true
+      },
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/networkinterfaces/nic-api",
+      "id": "references:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fnetworkinterfaces%2Fnic-api:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fpublicipaddresses%2Fpip-api",
+      "kind": "references",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/publicipaddresses/pip-api"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "ipConfigurations.subnet"
+        ],
+        "dependsOn": true
+      },
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/networkinterfaces/nic-api",
+      "id": "references:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fnetworkinterfaces%2Fnic-api:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fvirtualnetworks%2Fvnet-shop%2Fsubnets%2Fapp",
+      "kind": "references",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/virtualnetworks/vnet-shop/subnets/app"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "networkSecurityGroup"
+        ],
+        "dependsOn": true
+      },
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/virtualnetworks/vnet-shop/subnets/app",
+      "id": "references:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fvirtualnetworks%2Fvnet-shop%2Fsubnets%2Fapp:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fnetworksecuritygroups%2Fnsg-app",
+      "kind": "references",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/networksecuritygroups/nsg-app"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "dependsOn": true
+      },
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/virtualnetworks/vnet-shop/subnets/data",
+      "id": "references:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fvirtualnetworks%2Fvnet-shop%2Fsubnets%2Fdata:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fvirtualnetworks%2Fvnet-shop%2Fsubnets%2Fapp",
+      "kind": "references",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/virtualnetworks/vnet-shop/subnets/app"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "attributes": [
+          "networkAcls.virtualNetworkRules"
+        ],
+        "dependsOn": true
+      },
+      "from": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.storage/storageaccounts/stshopprod",
+      "id": "references:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.storage%2Fstorageaccounts%2Fstshopprod:%2Fsubscriptions%2F4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45%2Fresourcegroups%2Frg-shop-prod%2Fproviders%2Fmicrosoft.network%2Fvirtualnetworks%2Fvnet-shop%2Fsubnets%2Fdata",
+      "kind": "references",
+      "to": "/subscriptions/4f6c2b1e-9a3d-4c57-8e21-6b0d9f3a7c45/resourcegroups/rg-shop-prod/providers/microsoft.network/virtualnetworks/vnet-shop/subnets/data"
+    }
+  ],
+  "schema": "architecture/v0",
+  "vocabularies": [
+    "infrastructure/v0"
+  ]
+}

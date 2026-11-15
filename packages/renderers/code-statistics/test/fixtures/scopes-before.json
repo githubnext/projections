@@ -1,0 +1,14 @@
+{
+  "protocolVersion": 0,
+  "schema": "metrics/v0",
+  "entities": [
+    {"id":"scope:projects:read","kind":"scope","label":"projects:read","data":{"value":14,"unit":"methods"}},
+    {"id":"scope:projects:write","kind":"scope","label":"projects:write","data":{"value":9,"unit":"methods"}},
+    {"id":"scope:billing:write","kind":"scope","label":"billing:write","data":{"value":6,"unit":"methods"}},
+    {"id":"scope:users:read","kind":"scope","label":"users:read","data":{"value":5,"unit":"methods"}},
+    {"id":"scope:users:write","kind":"scope","label":"users:write","data":{"value":3,"unit":"methods"}},
+    {"id":"scope:admin","kind":"scope","label":"admin","data":{"value":2,"unit":"methods"}},
+    {"id":"scope:public","kind":"scope","label":"public","data":{"value":4,"unit":"methods"}}
+  ],
+  "relationships": []
+}

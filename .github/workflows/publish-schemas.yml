@@ -1,0 +1,132 @@
+name: Publish schemas
+# A dist post-announce job (post-announce-jobs in dist-workspace.toml): once a release is announced, publishes the
+# JSON Schemas to https://schemas.projections.githubnext.com/ (docs/contracts.md#versioning-and-publishing). Every
+# release writes immutable snapshots, <name>/v<major>/<release>.json; a stable release then replaces each
+# <name>/v<major>.json. Nothing is ever deleted. Run it by hand to publish a release again.
+#
+# Inert until configured: without the SCHEMAS_* repository variables (docs/maintainers/schema-publishing.md), it only says so.
+on:
+  workflow_call:
+    inputs:
+      plan:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The release tag to publish, such as v0.2.0
+        required: true
+        type: string
+permissions: {}
+env:
+  # Package sources (see CONTRIBUTING.md). The committed .npmrc covers the workspaces; this also covers
+  # installs elsewhere, such as test scratch directories and --prefix installs.
+  npm_config_registry: https://packagefeedproxy.microsoft.io/npm/
+  # Vulnerabilities are gated by dependency review and Dependabot (SECURITY.md), not npm's audit endpoint.
+  npm_config_audit: 'false'
+jobs:
+  configured:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        shell: bash
+        env:
+          ACCOUNT: ${{ vars.SCHEMAS_STORAGE_ACCOUNT }}
+          CLIENT: ${{ vars.SCHEMAS_AZURE_CLIENT_ID }}
+          TENANT: ${{ vars.SCHEMAS_AZURE_TENANT_ID }}
+          SUBSCRIPTION: ${{ vars.SCHEMAS_AZURE_SUBSCRIPTION_ID }}
+        run: |
+          if [ -n "$ACCOUNT" ] && [ -n "$CLIENT" ] && [ -n "$TENANT" ] && [ -n "$SUBSCRIPTION" ]; then
+            echo ready=true >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice title=Schemas not published::The schemas host isn't configured. Set the SCHEMAS_* repository variables in docs/maintainers/schema-publishing.md, then run Publish schemas for this release."
+          fi
+  publish:
+    needs: configured
+    if: needs.configured.outputs.ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # Azure trusts this environment's OIDC token (a federated credential on the publishing identity).
+    environment: schemas
+    concurrency:
+      group: publish-schemas
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      ACCOUNT: ${{ vars.SCHEMAS_STORAGE_ACCOUNT }}
+      CONTAINER: ${{ vars.SCHEMAS_STORAGE_CONTAINER || '$web' }}
+    steps:
+      - id: release
+        shell: bash
+        env:
+          PLAN: ${{ inputs.plan }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [ -z "$TAG" ]; then TAG=$(jq -r '.announcement_tag' <<< "$PLAN"); fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ steps.release.outputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      - name: Check and stage the release's schemas
+        shell: bash
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund --workspace @githubnext/projections-schemas --include-workspace-root
+          npm run build --workspace @githubnext/projections-schemas
+          npm test --workspace @githubnext/projections-schemas
+          node packages/schemas/scripts/publication.mjs --release "$TAG" --out "$RUNNER_TEMP/schemas"
+      - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+        with:
+          client-id: ${{ vars.SCHEMAS_AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.SCHEMAS_AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.SCHEMAS_AZURE_SUBSCRIPTION_ID }}
+      # Blob Storage has no multi-file transaction, so the order makes the set consistent: every snapshot
+      # exists before any schema at its ID changes. A snapshot is never replaced; publishing a release again
+      # only checks its snapshots are the same bytes.
+      - name: Upload the snapshots
+        shell: bash
+        working-directory: ${{ runner.temp }}/schemas/snapshots
+        run: |
+          set -euo pipefail
+          find . -type f -name '*.json' | sed 's|^\./||' | sort | while read -r name; do
+            md5=$(openssl md5 -binary "$name" | base64)
+            if [ "$(az storage blob exists --auth-mode login --account-name "$ACCOUNT" --container-name "$CONTAINER" --name "$name" --query exists -o tsv)" = true ]; then
+              published=$(az storage blob show --auth-mode login --account-name "$ACCOUNT" --container-name "$CONTAINER" --name "$name" --query properties.contentSettings.contentMd5 -o tsv)
+              if [ "$published" != "$md5" ]; then
+                echo "::error title=Snapshot differs::$name is already published with different content; snapshots are immutable."
+                exit 1
+              fi
+              echo "$name is already published"
+            else
+              az storage blob upload --auth-mode login --account-name "$ACCOUNT" --container-name "$CONTAINER" \
+                --name "$name" --file "$name" --overwrite false --content-md5 "$md5" \
+                --content-type application/schema+json \
+                --content-cache-control 'public, max-age=31536000, immutable' --only-show-errors > /dev/null
+              echo "$name"
+            fi
+          done
+      - name: Replace the schemas at their IDs
+        shell: bash
+        working-directory: ${{ runner.temp }}/schemas
+        run: |
+          set -euo pipefail
+          if [ ! -d current ]; then
+            echo "A prerelease: the schemas at their IDs are unchanged."
+            exit 0
+          fi
+          az storage blob upload-batch --auth-mode login --account-name "$ACCOUNT" --destination "$CONTAINER" \
+            --source current --overwrite true \
+            --content-type application/schema+json \
+            --content-cache-control 'public, max-age=300' --only-show-errors > /dev/null
+          (cd current && find . -type f -name '*.json' | sed 's|^\./||' | sort)

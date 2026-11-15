@@ -1,0 +1,129 @@
+{
+ "entities": [
+  {
+   "id": "table:/Account",
+   "kind": "table",
+   "label": "Account",
+   "data": {
+    "namespace": null,
+    "provider": "sqlserver"
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FAccount/id",
+   "kind": "column",
+   "label": "id",
+   "data": {
+    "table": "table:/Account",
+    "type": "Int",
+    "nativeType": null,
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "column:table%3A%2FAccount/email",
+   "kind": "column",
+   "label": "email",
+   "data": {
+    "table": "table:/Account",
+    "type": "String",
+    "nativeType": [
+     "NVarChar",
+     [
+      "160"
+     ]
+    ],
+    "nullable": false,
+    "list": false,
+    "hasDefault": false,
+    "default": null,
+    "updatedAt": false
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FAccount/primary-key/%5B%22id%22%5D",
+   "kind": "constraint",
+   "label": "primary-key (id)",
+   "data": {
+    "table": "table:/Account",
+    "type": "primary-key",
+    "clustered": false,
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constraint:table%3A%2FAccount/unique/%5B%22email%22%5D",
+   "kind": "constraint",
+   "label": "unique (email)",
+   "data": {
+    "table": "table:/Account",
+    "type": "unique",
+    "clustered": true,
+    "fields": [
+     {
+      "name": "email"
+     }
+    ],
+    "databaseName": null
+   },
+   "confidence": "authoritative"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "contains:table%3A%2FAccount/column%3Atable%253A%252FAccount%2Fid/",
+   "kind": "contains",
+   "from": "table:/Account",
+   "to": "column:table%3A%2FAccount/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FAccount/column%3Atable%253A%252FAccount%2Femail/",
+   "kind": "contains",
+   "from": "table:/Account",
+   "to": "column:table%3A%2FAccount/email",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FAccount/constraint%3Atable%253A%252FAccount%2Fprimary-key%2F%255B%2522id%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Account",
+   "to": "constraint:table%3A%2FAccount/primary-key/%5B%22id%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FAccount%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FAccount%2Fid/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FAccount/primary-key/%5B%22id%22%5D",
+   "to": "column:table%3A%2FAccount/id",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "contains:table%3A%2FAccount/constraint%3Atable%253A%252FAccount%2Funique%2F%255B%2522email%2522%255D/",
+   "kind": "contains",
+   "from": "table:/Account",
+   "to": "constraint:table%3A%2FAccount/unique/%5B%22email%22%5D",
+   "confidence": "authoritative"
+  },
+  {
+   "id": "constrains:constraint%3Atable%253A%252FAccount%2Funique%2F%255B%2522email%2522%255D/column%3Atable%253A%252FAccount%2Femail/",
+   "kind": "constrains",
+   "from": "constraint:table%3A%2FAccount/unique/%5B%22email%22%5D",
+   "to": "column:table%3A%2FAccount/email",
+   "confidence": "authoritative"
+  }
+ ]
+}

@@ -1,0 +1,51 @@
+{
+  "name": "@githubnext/projections-comparator-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Runs Projections comparator rules sandboxed: in the rules interpreter, in a dedicated Worker or a native wasmi runner",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "node": {
+        "types": "./dist/node.d.ts",
+        "default": "./dist/node.js"
+      },
+      "default": {
+        "types": "./dist/browser.d.ts",
+        "default": "./dist/browser.js"
+      }
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "import": "./dist/node.js"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "import": "./dist/testing.js"
+    },
+    "./rules.wasm": "./dist/rules.wasm"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/rules.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "test:browser": "node test/browser.mjs",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "@githubnext/projections-engine": "0.1.0",
+    "playwright": "^1.56.1"
+  },
+  "engines": {
+    "node": ">=26.12.1"
+  }
+}

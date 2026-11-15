@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=../../../packages/schemas/schemas/comparator-tests/v0.json
+#
+# What priority-order.comparator.yaml is for, as cases: `projections check -p <id>`
+# runs them for a projection that uses the rules.
+format: projections.comparator-tests
+version: 0
+options:
+  priority: [package:@acme/core, package:@acme/auth, package:@acme/ui]
+
+cases:
+  - name: steps changing priority packages come first
+    before: fixtures/before.json
+    after: fixtures/after.json
+    expect:
+      # The core and auth packages changed together, so their step leads;
+      # the other steps keep the default order.
+      steps:
+        - kind: restructure
+          changes: [package:@acme/core, package:@acme/auth, package:@acme/web]
+        - kind: remove
+          changes: [package:@acme/docs-site, dependency:@acme/docs-site->@acme/ui]
+        - kind: add
+          changes: [package:@acme/billing, dependency:@acme/billing->@acme/core, dependency:@acme/web->@acme/billing]
+      # Changes are the default comparator's.
+      changes:
+        - {item: package:@acme/core, status: modified, correspondence: exact}
+        - {item: package:@acme/docs-site, status: removed}
+      count: {changes: 8, steps: 3}
+    snapshot: snapshots/priority.json
+
+  - name: without a priority, the default order stands
+    before: fixtures/before.json
+    after: fixtures/after.json
+    options: {}
+    expect:
+      order: [package:@acme/docs-site, package:@acme/core, package:@acme/billing]
+
+  - name: the first priority entry ranks first
+    before: fixtures/before.json
+    after: fixtures/after.json
+    options: {priority: [package:@acme/billing, package:@acme/core]}
+    expect:
+      order: [package:@acme/billing, package:@acme/core, package:@acme/docs-site]
+
+  - name: rejects options it does not know
+    before: fixtures/before.json
+    after: fixtures/after.json
+    options: {priorities: []}
+    expect:
+      error: 'invalid options: unknown field `priorities`, expected `priority`'
+
+  - name: rejects a priority that is not a list of IDs
+    before: fixtures/before.json
+    after: fixtures/after.json
+    options: {priority: [1]}
+    expect:
+      error: 'invalid options: `priority` must be an array of entity IDs'

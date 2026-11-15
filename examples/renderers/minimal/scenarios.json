@@ -1,0 +1,54 @@
+{
+  "format": "projections.scenarios",
+  "version": 0,
+  "title": "Minimal outline",
+  "renderer": "minimal",
+  "scenarios": [
+    {
+      "id": "checkout-split",
+      "title": "Checkout splits out payments",
+      "description": "Two steps: legacy billing retires, then payments and fraud arrive.",
+      "before": {
+        "protocolVersion": 0,
+        "schema": "graph/v0",
+        "entities": [
+          {"id": "checkout", "kind": "service", "label": "Checkout"},
+          {"id": "billing", "kind": "service", "label": "Legacy billing"},
+          {"id": "orders", "kind": "service", "label": "Orders"}
+        ],
+        "relationships": [
+          {"id": "checkout->billing", "kind": "calls", "from": "checkout", "to": "billing"},
+          {"id": "checkout->orders", "kind": "calls", "from": "checkout", "to": "orders"}
+        ]
+      },
+      "after": {
+        "protocolVersion": 0,
+        "schema": "graph/v0",
+        "entities": [
+          {"id": "checkout", "kind": "service", "label": "Checkout"},
+          {"id": "orders", "kind": "service", "label": "Orders"},
+          {"id": "payments", "kind": "service", "label": "Payments"},
+          {"id": "fraud", "kind": "service", "label": "Fraud checks"}
+        ],
+        "relationships": [
+          {"id": "checkout->orders", "kind": "calls", "from": "checkout", "to": "orders"},
+          {"id": "checkout->payments", "kind": "calls", "from": "checkout", "to": "payments"},
+          {"id": "payments->fraud", "kind": "calls", "from": "payments", "to": "fraud"}
+        ]
+      }
+    },
+    {
+      "id": "single",
+      "title": "One revision",
+      "extraction": {
+        "protocolVersion": 0,
+        "schema": "graph/v0",
+        "entities": [
+          {"id": "checkout", "kind": "service", "label": "Checkout"},
+          {"id": "orders", "kind": "service", "label": "Orders"}
+        ],
+        "relationships": [{"id": "checkout->orders", "kind": "calls", "from": "checkout", "to": "orders"}]
+      }
+    }
+  ]
+}

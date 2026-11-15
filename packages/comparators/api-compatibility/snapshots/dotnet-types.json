@@ -1,0 +1,295 @@
+{
+  "changes": [
+    {
+      "after": [
+        "M:Factory.Create"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "M:Factory.Create",
+      "status": "added",
+      "summary": "Additive: `Create` was added."
+    },
+    {
+      "after": [
+        "T:Bag`1"
+      ],
+      "before": [
+        "T:Bag`1"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "T:Bag`1",
+      "status": "modified",
+      "summary": "Breaking (binary, source): Type parameter `T` lost the constraint `class`."
+    },
+    {
+      "after": [
+        "T:Box`1"
+      ],
+      "before": [
+        "T:Box`1"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "T:Box`1",
+      "status": "modified",
+      "summary": "Compatible: Type parameter `T` lost the constraint `class`; code that compiled against it still does."
+    },
+    {
+      "after": [
+        "T:Helpers"
+      ],
+      "before": [
+        "T:Helpers"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "T:Helpers",
+      "status": "modified",
+      "summary": "Breaking (binary, source): Became `static`; It can no longer be inherited: it has no accessible constructor."
+    },
+    {
+      "after": [
+        "T:IStore.Node"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "T:IStore.Node",
+      "status": "added",
+      "summary": "Additive: `Node` was added."
+    },
+    {
+      "after": [
+        "T:Shape"
+      ],
+      "before": [
+        "T:Shape"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "T:Shape",
+      "status": "modified",
+      "summary": "Breaking (binary, source): Changed from `class` to `struct`."
+    },
+    {
+      "after": [
+        "T:Tagged"
+      ],
+      "before": [
+        "T:Tagged"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "T:Tagged",
+      "status": "modified",
+      "summary": "Compatible: Attribute `System.SerializableAttribute` was added."
+    },
+    {
+      "after": [
+        "T:Widget"
+      ],
+      "before": [
+        "T:Widget"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "T:Widget",
+      "status": "modified",
+      "summary": "Breaking (binary, source): Became `abstract`; it can no longer be instantiated."
+    },
+    {
+      "after": [
+        "contains:Factory:Create"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:Factory:Create",
+      "status": "added"
+    },
+    {
+      "after": [
+        "contains:IStore:Node"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:IStore:Node",
+      "status": "added"
+    }
+  ],
+  "metadata": {
+    "compatibility": {
+      "changes": {
+        "M:Factory.Create": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "`Create` was added",
+              "rule": "added"
+            }
+          ],
+          "level": "additive",
+          "reason": "`Create` was added"
+        },
+        "T:Bag`1": {
+          "findings": [
+            {
+              "kinds": [
+                "binary",
+                "source"
+              ],
+              "level": "breaking",
+              "reason": "Type parameter `T` lost the constraint `class`",
+              "rule": "CP0021"
+            }
+          ],
+          "kinds": [
+            "binary",
+            "source"
+          ],
+          "level": "breaking",
+          "reason": "Type parameter `T` lost the constraint `class`"
+        },
+        "T:Box`1": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Type parameter `T` lost the constraint `class`; code that compiled against it still does",
+              "rule": "CP0021"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Type parameter `T` lost the constraint `class`; code that compiled against it still does"
+        },
+        "T:Helpers": {
+          "findings": [
+            {
+              "kinds": [
+                "binary",
+                "source"
+              ],
+              "level": "breaking",
+              "reason": "Became `static`",
+              "rule": "static"
+            },
+            {
+              "kinds": [
+                "binary",
+                "source"
+              ],
+              "level": "breaking",
+              "reason": "It can no longer be inherited: it has no accessible constructor",
+              "rule": "CP0009"
+            }
+          ],
+          "kinds": [
+            "binary",
+            "source"
+          ],
+          "level": "breaking",
+          "reason": "Became `static`; It can no longer be inherited: it has no accessible constructor"
+        },
+        "T:IStore.Node": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "`Node` was added",
+              "rule": "added"
+            }
+          ],
+          "level": "additive",
+          "reason": "`Node` was added"
+        },
+        "T:Shape": {
+          "findings": [
+            {
+              "kinds": [
+                "binary",
+                "source"
+              ],
+              "level": "breaking",
+              "reason": "Changed from `class` to `struct`",
+              "rule": "type-kind"
+            }
+          ],
+          "kinds": [
+            "binary",
+            "source"
+          ],
+          "level": "breaking",
+          "reason": "Changed from `class` to `struct`"
+        },
+        "T:Tagged": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Attribute `System.SerializableAttribute` was added",
+              "rule": "CP0016"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Attribute `System.SerializableAttribute` was added"
+        },
+        "T:Widget": {
+          "findings": [
+            {
+              "kinds": [
+                "binary",
+                "source"
+              ],
+              "level": "breaking",
+              "reason": "Became `abstract`; it can no longer be instantiated",
+              "rule": "abstract-added"
+            }
+          ],
+          "kinds": [
+            "binary",
+            "source"
+          ],
+          "level": "breaking",
+          "reason": "Became `abstract`; it can no longer be instantiated"
+        }
+      },
+      "counts": {
+        "additive": 2,
+        "breaking": 4,
+        "compatible": 2,
+        "unknown": 0
+      },
+      "ecosystem": "dotnet",
+      "notices": [],
+      "rules": "ApiCompat (default mode), reproduced",
+      "version": 0
+    }
+  },
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "T:Bag`1",
+        "T:Box`1",
+        "T:Helpers",
+        "T:Shape",
+        "T:Tagged",
+        "T:Widget"
+      ],
+      "kind": "restructure"
+    },
+    {
+      "changes": [
+        "M:Factory.Create",
+        "T:IStore.Node",
+        "contains:Factory:Create",
+        "contains:IStore:Node"
+      ],
+      "kind": "add"
+    }
+  ]
+}

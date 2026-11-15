@@ -1,0 +1,24 @@
+{
+  "protocolVersion": 0,
+  "schema": "graph/v0",
+  "entities": [
+    {"id": "gateway", "kind": "service", "label": "gateway"},
+    {"id": "orders", "kind": "service", "label": "orders"},
+    {"id": "inventory", "kind": "service", "label": "inventory"},
+    {"id": "catalog", "kind": "service", "label": "catalog"},
+    {"id": "legacy-billing", "kind": "service", "label": "legacy-billing"},
+    {"id": "notifications", "kind": "service", "label": "notifications"},
+    {"id": "postgres", "kind": "database", "label": "postgres"}
+  ],
+  "relationships": [
+    {"id": "gateway->orders", "kind": "calls", "from": "gateway", "to": "orders"},
+    {"id": "gateway->catalog", "kind": "calls", "from": "gateway", "to": "catalog"},
+    {"id": "orders->inventory", "kind": "calls", "from": "orders", "to": "inventory"},
+    {"id": "orders->legacy-billing", "kind": "calls", "from": "orders", "to": "legacy-billing"},
+    {"id": "orders->notifications", "kind": "calls", "from": "orders", "to": "notifications"},
+    {"id": "orders->postgres", "kind": "reads", "from": "orders", "to": "postgres"},
+    {"id": "inventory->postgres", "kind": "reads", "from": "inventory", "to": "postgres"},
+    {"id": "legacy-billing->postgres", "kind": "reads", "from": "legacy-billing", "to": "postgres"},
+    {"id": "catalog->postgres", "kind": "reads", "from": "catalog", "to": "postgres"}
+  ]
+}

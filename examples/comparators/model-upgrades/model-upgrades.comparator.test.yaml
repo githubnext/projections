@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=../../../packages/schemas/schemas/comparator-tests/v0.json
+#
+# What model-upgrades.comparator.yaml makes of generated summaries:
+# `projections check -p <id>` runs these cases.
+format: projections.comparator-tests
+version: 0
+
+cases:
+  - name: a model-only change goes last; an input change keeps its place; rewording is noise
+    before:
+      extraction:
+        protocolVersion: 0
+        schema: graph/v0
+        volatile:
+          - {kinds: [class], path: /data/summary, generated: true, basis: /data/summaryBasis}
+        entities:
+          - {id: class:Cart, kind: class, label: Cart, data: {summary: Holds a cart., summaryBasis: {input: 'sha256:a', model: m@1}}}
+          - {id: class:Orders, kind: class, label: Orders, data: {summary: Places orders., summaryBasis: {input: 'sha256:b', model: m@1}}}
+          - {id: class:Bills, kind: class, label: Bills, data: {summary: Bills customers., summaryBasis: {input: 'sha256:c', model: m@1}}}
+        relationships: []
+    after:
+      extraction:
+        protocolVersion: 0
+        schema: graph/v0
+        volatile:
+          - {kinds: [class], path: /data/summary, generated: true, basis: /data/summaryBasis}
+        entities:
+          - {
+              id: class:Cart,
+              kind: class,
+              label: Cart,
+              data: {summary: Holds a cart and its total., summaryBasis: {input: 'sha256:a2', model: m@1}},
+            }
+          - {id: class:Orders, kind: class, label: Orders, data: {summary: Takes orders., summaryBasis: {input: 'sha256:b', model: m@2}}}
+          - {id: class:Bills, kind: class, label: Bills, data: {summary: Charges customers., summaryBasis: {input: 'sha256:c', model: m@1}}}
+        relationships: []
+    expect:
+      changes:
+        # Regenerated from the same inputs: listed, unchanged, in no step.
+        - {item: class:Bills, status: unchanged, summary: null}
+        - {item: class:Cart, status: modified, summary: null}
+        - {item: class:Orders, status: modified, summary: '`Orders` was regenerated with a different model'}
+      steps:
+        - {kind: restructure, changes: [class:Cart]}
+        - {kind: restructure, changes: [class:Orders], summary: Regenerated with a different model}
+      count: {changes: 3, steps: 2}
+      metadata:
+        regenerated: {'class:Cart': [input], 'class:Orders': [model]}

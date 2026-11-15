@@ -1,0 +1,53 @@
+/// The standard library's parameter names, which the manifest leaves out.
+pub const PARAMS: &[(&str, &[&str])] = &[
+    ("json", &["value"]),
+    ("ids.sort", &["ids"]),
+    ("ids.key", &["id"]),
+    ("lists.zip", &["a", "b"]),
+    ("lists.zipLongest", &["a", "b"]),
+    ("lists.enumerate", &["items"]),
+    ("maps.fromEntries", &["entries"]),
+    ("maps.keys", &["map"]),
+    ("graph.parents", &["side", "id", "kind"]),
+    ("graph.children", &["side", "id", "kind"]),
+    ("graph.entity", &["side", "id"]),
+    ("graph.relationship", &["side", "id"]),
+    ("graph.depths", &["nodes", "edges"]),
+    ("graph.components", &["nodes", "edges"]),
+    ("findings.classify", &["findings", "levels"]),
+    ("generated.because", &["change"]),
+    ("generated.only", &["change", "parts"]),
+    ("prose.code", &["text"]),
+    ("prose.escape", &["text"]),
+];
+
+/// What each input is.
+pub const INPUTS: &[(&str, &str)] = &[
+    ("before", "The before extraction, normalised."),
+    ("after", "The after extraction, normalised."),
+    ("options", "The comparator's options, as the definition passes them."),
+    ("baseline", "The default comparator's comparison, with its default order."),
+    (
+        "lookup",
+        "An index built once: `lookup.before.entities[id]`, `relationships[id]`, and `incoming[id]` and `outgoing[id]`, an entity's relationships in extraction order; likewise for `after`.",
+    ),
+    (
+        "item",
+        "In an identity pass, the item being matched; in `classify`, the after item, or the before item of a removal.",
+    ),
+    ("side", "`before` or `after`: the side of the item being matched."),
+    ("pairs", "Each identity pass's one-to-one pairs, before ID to after ID."),
+    ("change", "The change being classified or placed."),
+    ("origin", "The identity pass that matched the change."),
+    ("beforeItem", "The change's before item, when it has one."),
+    ("afterItem", "The change's after item, when it has one."),
+    ("befores", "The change's before items."),
+    ("afters", "The change's after items."),
+    ("changes", "Every change."),
+    ("changeOf", "Each item's change ID, by collection and side."),
+    ("annotations", "Each change's `classify.annotation`, by change ID."),
+    ("annotation", "The change's `classify.annotation`."),
+    ("members", "The step's changes."),
+    ("step", "The step being summarized."),
+    ("lead", "The step's first best-ranked change."),
+];

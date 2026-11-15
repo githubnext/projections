@@ -1,0 +1,191 @@
+/* Notices: VS Code's input validation messages, the severity's codicon in its notification color. */
+.phv-notice {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 6px 8px;
+  border: 1px solid var(--vscode-inputValidation-infoBorder, #0078d4);
+  border-radius: var(--phv-radius);
+  background: var(--vscode-inputValidation-infoBackground, #063b49);
+  color: var(--vscode-inputValidation-infoForeground, var(--phv-fg));
+}
+.phv-notice[data-severity='warning'] {
+  border-color: var(--vscode-inputValidation-warningBorder, #b89500);
+  background: var(--vscode-inputValidation-warningBackground, #352a05);
+  color: var(--vscode-inputValidation-warningForeground, var(--phv-fg));
+}
+.phv-notice[data-severity='error'] {
+  border-color: var(--vscode-inputValidation-errorBorder, #be1100);
+  background: var(--vscode-inputValidation-errorBackground, #5a1d1d);
+  color: var(--vscode-inputValidation-errorForeground, var(--phv-fg));
+}
+.phv-notice-icon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--vscode-notificationsInfoIcon-foreground, #3794ff);
+}
+.phv-notice[data-severity='warning'] .phv-notice-icon {
+  color: var(--vscode-notificationsWarningIcon-foreground, #cca700);
+}
+.phv-notice[data-severity='error'] .phv-notice-icon {
+  color: var(--vscode-notificationsErrorIcon-foreground, #f14c4c);
+}
+.phv-notice-body {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.phv-notice-body p {
+  margin: 0;
+}
+.phv-notice-title {
+  font-weight: 600;
+}
+.phv-notice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.phv-notices {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * The stage notice (StageNotice): a pill floating over the stage's top centre, 12px in (12px below the panes' header
+ * bands in side by side and swipe, which StageNoticeSlot measures), for a state of the whole result ("Out of date · 3
+ * files changed", Refresh), not a tool. Its slot spans the stage without taking space or
+ * pointer events, so framing is unchanged and the view scrolls under it; it sits under the detail card. The fill is
+ * VS Code's warning validation background over a widget's, with a widget's shadow. Its edge and icon are the warning
+ * hue held to at least 3:1 against that fill: lightened on dark themes, darkened on light ones. High contrast themes
+ * draw the contrast border and no shadow. A capital E in its label sits centred by cap height, as in the toolbar.
+ */
+.phv-stage-notice-slot {
+  position: absolute;
+  inset: 12px 12px auto;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+  pointer-events: none;
+}
+.phv-stage-notice {
+  --phv-stage-notice-fill: var(--vscode-inputValidation-warningBackground, #352a05);
+  --phv-stage-notice-hue: var(--vscode-inputValidation-warningBorder, var(--vscode-editorWarning-foreground, #b89500));
+  --phv-stage-notice-edge: var(--phv-stage-notice-hue);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+  height: 26px;
+  padding: 0 2px 0 9px;
+  border: 1px solid var(--phv-stage-notice-edge);
+  border-radius: 13px;
+  background:
+    linear-gradient(var(--phv-stage-notice-fill), var(--phv-stage-notice-fill)),
+    var(--vscode-editorWidget-background, var(--phv-surface-canvas));
+  box-shadow: 0 2px 8px var(--vscode-widget-shadow, #0000005c);
+  color: var(--vscode-inputValidation-warningForeground, var(--vscode-editorWidget-foreground, var(--phv-fg)));
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+@supports (color: oklch(from red l c h)) {
+  /* The text holds 4.5:1 on the tint too, where a theme's foreground alone falls short of it (Solarized Dark). */
+  .phv-stage-notice {
+    --phv-stage-notice-edge: oklch(from var(--phv-stage-notice-hue) max(l, 0.78) c h);
+    color: oklch(
+      from var(--vscode-inputValidation-warningForeground, var(--vscode-editorWidget-foreground, var(--phv-fg))) max(l, 0.88) c h
+    );
+  }
+  :is(.vscode-light, [data-vscode-theme-kind='light']) .phv-stage-notice {
+    --phv-stage-notice-edge: oklch(from var(--phv-stage-notice-hue) min(l, 0.56) c h);
+    color: oklch(
+      from var(--vscode-inputValidation-warningForeground, var(--vscode-editorWidget-foreground, var(--phv-fg))) min(l, 0.4) c h
+    );
+  }
+}
+:is(.vscode-high-contrast, .vscode-high-contrast-light, [data-vscode-theme-kind^='high-contrast']) .phv-stage-notice {
+  --phv-stage-notice-edge: var(--vscode-contrastBorder, var(--phv-stage-notice-hue));
+  box-shadow: none;
+  color: var(--vscode-inputValidation-warningForeground, var(--vscode-editorWidget-foreground, var(--phv-fg)));
+}
+@media (prefers-reduced-motion: no-preference) {
+  .phv-stage-notice {
+    animation: phv-stage-notice-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+@keyframes phv-stage-notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+.phv-stage-notice-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+/* A hairline between the message and its action. */
+.phv-stage-notice-message:has(+ .phv-stage-notice-action)::after {
+  content: '';
+  flex: none;
+  width: 1px;
+  height: 14px;
+  margin-left: 2px;
+  background: currentColor;
+  opacity: 0.35;
+}
+.phv-stage-notice-icon {
+  flex: none;
+  font-size: 14px;
+  color: var(--phv-stage-notice-edge);
+}
+:is(.vscode-high-contrast, .vscode-high-contrast-light, [data-vscode-theme-kind^='high-contrast']) .phv-stage-notice-icon {
+  color: var(--vscode-editorWarning-foreground, var(--phv-stage-notice-hue));
+}
+.phv-stage-notice-label {
+  flex: none;
+  font-weight: 600;
+}
+/* Narrow, the detail truncates first. Trimmed to the cap height, it keeps room for descenders inside its clip. */
+.phv-stage-notice-detail {
+  min-width: 0;
+  /* A word space from the label, as "Out of date · 3 files changed" reads. */
+  margin: -4px 0 -4px -3px;
+  padding-block: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Refresh: a flat text button, as the toolbar's text buttons are, taking its hover background. */
+.phv-stage-notice-action {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 8px 0 6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.phv-stage-notice-action:hover {
+  background: var(--vscode-toolbar-hoverBackground, #5a5d5e50);
+}
+:is(.vscode-high-contrast, .vscode-high-contrast-light, [data-vscode-theme-kind^='high-contrast']) .phv-stage-notice-action:hover {
+  outline: 1px dashed var(--vscode-contrastActiveBorder, var(--phv-focus));
+  outline-offset: -1px;
+}
+.phv-stage-notice-action .codicon {
+  font-size: 14px;
+}

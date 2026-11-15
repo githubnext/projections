@@ -1,0 +1,9 @@
+{
+  "protocolVersion": 0,
+  "schema": "api/v0",
+  "entities": [
+    { "id": "api:Fixture", "kind": "assembly", "label": "Fixture", "data": { "signature": "assembly Fixture" } },
+    { "id": "api:Fixture:T:Fixture.PublicApi`1", "kind": "type", "label": "PublicApi`1", "data": { "signature": "public class Fixture.PublicApi<T> where T : class, new()" }, "evidence": [{ "kind": "source", "source": "Composition.cs", "location": { "line": 13 } }] }
+  ],
+  "relationships": [{ "id": "api:Fixture:contains:PublicApi", "kind": "contains", "from": "api:Fixture", "to": "api:Fixture:T:Fixture.PublicApi`1" }]
+}

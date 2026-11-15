@@ -1,0 +1,862 @@
+{
+  "changes": [
+    {
+      "after": [
+        "rust:kit::Bytes"
+      ],
+      "before": [
+        "rust:kit::Bytes"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Bytes",
+      "status": "modified",
+      "summary": "Breaking: Generic parameter `T` was added without a default."
+    },
+    {
+      "after": [
+        "rust:kit::COUNTER"
+      ],
+      "before": [
+        "rust:kit::COUNTER"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::COUNTER",
+      "status": "modified",
+      "summary": "Breaking: Its mutability changed."
+    },
+    {
+      "after": [
+        "rust:kit::Cache"
+      ],
+      "before": [
+        "rust:kit::Cache"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Cache",
+      "status": "modified",
+      "summary": "Compatible: Generic parameter `S` was added with a default."
+    },
+    {
+      "after": [
+        "rust:kit::Codec"
+      ],
+      "before": [
+        "rust:kit::Codec"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Codec",
+      "status": "modified",
+      "summary": "Additive: Became usable as `dyn Trait`."
+    },
+    {
+      "after": [
+        "rust:kit::Config::port"
+      ],
+      "before": [
+        "rust:kit::Config::port"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Config::port",
+      "status": "modified",
+      "summary": "Breaking: Its type changed from `u16` to `u32`."
+    },
+    {
+      "after": [
+        "rust:kit::Config::retries"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "rust:kit::Config::retries",
+      "status": "added",
+      "summary": "Additive: Field `retries` was added."
+    },
+    {
+      "after": [
+        "rust:kit::DEFAULT"
+      ],
+      "before": [
+        "rust:kit::DEFAULT"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::DEFAULT",
+      "status": "modified",
+      "summary": "Breaking: Its type changed from `Options` to `Settings`."
+    },
+    {
+      "after": [
+        "rust:kit::Grid"
+      ],
+      "before": [
+        "rust:kit::Grid"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Grid",
+      "status": "modified",
+      "summary": "Unknown: Generic parameter bounds changed from `const N: usize` to `const N: u32`."
+    },
+    {
+      "after": [
+        "rust:kit::LOG"
+      ],
+      "before": [
+        "rust:kit::LOG"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::LOG",
+      "status": "modified",
+      "summary": "Breaking: Its type changed from `Logger` to `Journal`."
+    },
+    {
+      "after": [
+        "rust:kit::Level::High"
+      ],
+      "before": [
+        "rust:kit::Level::High"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Level::High",
+      "status": "modified",
+      "summary": "Breaking: Its discriminant changed from `2` to `3`."
+    },
+    {
+      "after": [
+        "rust:kit::Level::Low"
+      ],
+      "before": [
+        "rust:kit::Level::Low"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Level::Low",
+      "status": "modified",
+      "summary": "Breaking: Its discriminant changed from implicit to `1`."
+    },
+    {
+      "after": [
+        "rust:kit::Locked"
+      ],
+      "before": [
+        "rust:kit::Locked"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Locked",
+      "status": "modified",
+      "summary": "Breaking: Became sealed; downstream implementations fail."
+    },
+    {
+      "after": [
+        "rust:kit::Mode::Fast"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "rust:kit::Mode::Fast",
+      "status": "added",
+      "summary": "Additive: `Fast` was added."
+    },
+    {
+      "after": [
+        "rust:kit::Packet"
+      ],
+      "before": [
+        "rust:kit::Packet"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Packet",
+      "status": "modified",
+      "summary": "Breaking: Its `#[repr]` changed."
+    },
+    {
+      "after": [
+        "rust:kit::Plugin"
+      ],
+      "before": [
+        "rust:kit::Plugin"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Plugin",
+      "status": "modified",
+      "summary": "Unknown: Its supertraits changed from none to `Send`."
+    },
+    {
+      "after": [
+        "rust:kit::Pool"
+      ],
+      "before": [
+        "rust:kit::Pool"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Pool",
+      "status": "modified",
+      "summary": "Breaking: Generic parameter `U` was removed."
+    },
+    {
+      "after": [
+        "rust:kit::Raw"
+      ],
+      "before": [
+        "rust:kit::Raw"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Raw",
+      "status": "modified",
+      "summary": "Breaking: Became `unsafe` to implement."
+    },
+    {
+      "after": [
+        "rust:kit::Result"
+      ],
+      "before": [
+        "rust:kit::Result"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Result",
+      "status": "modified",
+      "summary": "Unknown: Its type changed from `core::result::Result<T, Error>` to `core::result::Result<T, Box<Error>>`, with generics involved."
+    },
+    {
+      "after": [
+        "rust:kit::Shape::Circle::radius"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "rust:kit::Shape::Circle::radius",
+      "status": "added",
+      "summary": "Breaking: Field `radius` was added to variant `Circle`; patterns and constructions of it fail."
+    },
+    {
+      "after": [
+        "rust:kit::Shape::Square::side"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "rust:kit::Shape::Square::side",
+      "status": "added",
+      "summary": "Additive: Field `side` was added."
+    },
+    {
+      "after": [
+        "rust:kit::Store"
+      ],
+      "before": [
+        "rust:kit::Store"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Store",
+      "status": "modified",
+      "summary": "Unknown: Its supertraits changed from `Clone` to `Clone + Send`."
+    },
+    {
+      "after": [
+        "rust:kit::Store::Item"
+      ],
+      "before": [
+        "rust:kit::Store::Item"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Store::Item",
+      "status": "modified",
+      "summary": "Unknown: Its bounds changed."
+    },
+    {
+      "after": [
+        "rust:kit::Store::MAX"
+      ],
+      "before": [
+        "rust:kit::Store::MAX"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Store::MAX",
+      "status": "modified",
+      "summary": "Breaking: Its type changed from `usize` to `u64`."
+    },
+    {
+      "after": [
+        "rust:kit::Store::Out"
+      ],
+      "before": [
+        "rust:kit::Store::Out"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Store::Out",
+      "status": "modified",
+      "summary": "Compatible: Gained a default."
+    },
+    {
+      "after": [
+        "rust:kit::Store::get"
+      ],
+      "before": [
+        "rust:kit::Store::get"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Store::get",
+      "status": "modified",
+      "summary": "Compatible: Gained a default."
+    },
+    {
+      "after": [
+        "rust:kit::Visitor"
+      ],
+      "before": [
+        "rust:kit::Visitor"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::Visitor",
+      "status": "modified",
+      "summary": "Breaking: Is no longer usable as `dyn Trait`."
+    },
+    {
+      "after": [
+        "rust:kit::ffi"
+      ],
+      "before": [
+        "rust:kit::ffi"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::ffi",
+      "status": "modified",
+      "summary": "Breaking: Its ABI changed."
+    },
+    {
+      "after": [
+        "rust:kit::parse"
+      ],
+      "before": [
+        "rust:kit::parse"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::parse",
+      "status": "modified",
+      "summary": "Unknown: Parameter `s`'s type changed from `&str` to `S`, with generics involved; Generic parameter `S` was added; calls that name the type arguments fail."
+    },
+    {
+      "after": [
+        "rust:kit::prelude::Codec"
+      ],
+      "before": [
+        "rust:kit::prelude::Codec"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::prelude::Codec",
+      "status": "modified",
+      "summary": "Compatible: Only the presentation of the signature changed."
+    },
+    {
+      "after": [
+        "rust:kit::prelude::Store"
+      ],
+      "before": [
+        "rust:kit::prelude::Store"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::prelude::Store",
+      "status": "modified",
+      "summary": "Breaking: Now re-exports `crate::v2::Store` instead of `crate::store::Store`."
+    },
+    {
+      "after": [
+        "rust:kit::visit"
+      ],
+      "before": [
+        "rust:kit::visit"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "rust:kit::visit",
+      "status": "modified",
+      "summary": "Unknown: Its where clauses changed."
+    },
+    {
+      "after": [
+        "contains:rust:kit::Config>rust:kit::Config::retries"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:rust:kit::Config>rust:kit::Config::retries",
+      "status": "added"
+    },
+    {
+      "after": [
+        "contains:rust:kit::Mode>rust:kit::Mode::Fast"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:rust:kit::Mode>rust:kit::Mode::Fast",
+      "status": "added"
+    },
+    {
+      "after": [
+        "contains:rust:kit::Shape::Circle>rust:kit::Shape::Circle::radius"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:rust:kit::Shape::Circle>rust:kit::Shape::Circle::radius",
+      "status": "added"
+    },
+    {
+      "after": [
+        "contains:rust:kit::Shape::Square>rust:kit::Shape::Square::side"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:rust:kit::Shape::Square>rust:kit::Shape::Square::side",
+      "status": "added"
+    }
+  ],
+  "metadata": {
+    "compatibility": {
+      "changes": {
+        "rust:kit::Bytes": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Its type changed from `Vec<u8>` to `Vec<T>`, with generics involved",
+              "rule": "type-changed"
+            },
+            {
+              "level": "breaking",
+              "reason": "Generic parameter `T` was added without a default",
+              "rule": "generic-new-no-default"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Generic parameter `T` was added without a default"
+        },
+        "rust:kit::COUNTER": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its mutability changed",
+              "rule": "static-mut"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its mutability changed"
+        },
+        "rust:kit::Cache": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Generic parameter `S` was added with a default",
+              "rule": "generic-new-default"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Generic parameter `S` was added with a default"
+        },
+        "rust:kit::Codec": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "Became usable as `dyn Trait`",
+              "rule": "trait-object-safety"
+            }
+          ],
+          "level": "additive",
+          "reason": "Became usable as `dyn Trait`"
+        },
+        "rust:kit::Config::port": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its type changed from `u16` to `u32`",
+              "rule": "type-changed"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its type changed from `u16` to `u32`"
+        },
+        "rust:kit::Config::retries": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "Field `retries` was added",
+              "rule": "item-new"
+            }
+          ],
+          "level": "additive",
+          "reason": "Field `retries` was added"
+        },
+        "rust:kit::DEFAULT": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its type changed from `Options` to `Settings`",
+              "rule": "type-changed"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its type changed from `Options` to `Settings`"
+        },
+        "rust:kit::Grid": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Generic parameter bounds changed from `const N: usize` to `const N: u32`",
+              "rule": "generic-bounds-tighten"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Generic parameter bounds changed from `const N: usize` to `const N: u32`"
+        },
+        "rust:kit::LOG": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its type changed from `Logger` to `Journal`",
+              "rule": "type-changed"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its type changed from `Logger` to `Journal`"
+        },
+        "rust:kit::Level::High": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its discriminant changed from `2` to `3`",
+              "rule": "repr-int-enum-change"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its discriminant changed from `2` to `3`"
+        },
+        "rust:kit::Level::Low": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its discriminant changed from implicit to `1`",
+              "rule": "repr-int-enum-change"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its discriminant changed from implicit to `1`"
+        },
+        "rust:kit::Locked": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Became sealed; downstream implementations fail",
+              "rule": "trait-sealed"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Became sealed; downstream implementations fail"
+        },
+        "rust:kit::Mode::Fast": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "`Fast` was added",
+              "rule": "item-new"
+            }
+          ],
+          "level": "additive",
+          "reason": "`Fast` was added"
+        },
+        "rust:kit::Packet": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its `#[repr]` changed",
+              "rule": "repr"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its `#[repr]` changed"
+        },
+        "rust:kit::Plugin": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Its supertraits changed from none to `Send`",
+              "rule": "generic-bounds-tighten"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Its supertraits changed from none to `Send`"
+        },
+        "rust:kit::Pool": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Generic parameter `U` was removed",
+              "rule": "generic-removed"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Generic parameter `U` was removed"
+        },
+        "rust:kit::Raw": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Became `unsafe` to implement",
+              "rule": "trait-unsafe"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Became `unsafe` to implement"
+        },
+        "rust:kit::Result": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Its type changed from `core::result::Result<T, Error>` to `core::result::Result<T, Box<Error>>`, with generics involved",
+              "rule": "type-changed"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Its type changed from `core::result::Result<T, Error>` to `core::result::Result<T, Box<Error>>`, with generics involved"
+        },
+        "rust:kit::Shape::Circle::radius": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Field `radius` was added to variant `Circle`; patterns and constructions of it fail",
+              "rule": "enum-fields-new"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Field `radius` was added to variant `Circle`; patterns and constructions of it fail"
+        },
+        "rust:kit::Shape::Square::side": {
+          "findings": [
+            {
+              "level": "additive",
+              "reason": "Field `side` was added",
+              "rule": "item-new"
+            }
+          ],
+          "level": "additive",
+          "reason": "Field `side` was added"
+        },
+        "rust:kit::Store": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Its supertraits changed from `Clone` to `Clone + Send`",
+              "rule": "generic-bounds-tighten"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Its supertraits changed from `Clone` to `Clone + Send`"
+        },
+        "rust:kit::Store::Item": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Its bounds changed",
+              "rule": "generic-bounds-tighten"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Its bounds changed"
+        },
+        "rust:kit::Store::MAX": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its type changed from `usize` to `u64`",
+              "rule": "type-changed"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its type changed from `usize` to `u64`"
+        },
+        "rust:kit::Store::Out": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Gained a default",
+              "rule": "trait-new-default-item"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Gained a default"
+        },
+        "rust:kit::Store::get": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Gained a default",
+              "rule": "trait-new-default-item"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Gained a default"
+        },
+        "rust:kit::Visitor": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Is no longer usable as `dyn Trait`",
+              "rule": "trait-object-safety"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Is no longer usable as `dyn Trait`"
+        },
+        "rust:kit::ffi": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Its ABI changed",
+              "rule": "fn-abi"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Its ABI changed"
+        },
+        "rust:kit::parse": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Parameter `s`'s type changed from `&str` to `S`, with generics involved",
+              "rule": "type-changed"
+            },
+            {
+              "level": "unknown",
+              "reason": "Generic parameter `S` was added; calls that name the type arguments fail",
+              "rule": "fn-generic-new"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Parameter `s`'s type changed from `&str` to `S`, with generics involved; Generic parameter `S` was added; calls that name the type arguments fail"
+        },
+        "rust:kit::prelude::Codec": {
+          "findings": [
+            {
+              "level": "compatible",
+              "reason": "Only the presentation of the signature changed",
+              "rule": "presentation"
+            }
+          ],
+          "level": "compatible",
+          "reason": "Only the presentation of the signature changed"
+        },
+        "rust:kit::prelude::Store": {
+          "findings": [
+            {
+              "level": "breaking",
+              "reason": "Now re-exports `crate::v2::Store` instead of `crate::store::Store`",
+              "rule": "re-export"
+            }
+          ],
+          "level": "breaking",
+          "reason": "Now re-exports `crate::v2::Store` instead of `crate::store::Store`"
+        },
+        "rust:kit::visit": {
+          "findings": [
+            {
+              "level": "unknown",
+              "reason": "Its where clauses changed",
+              "rule": "generic-bounds-tighten"
+            }
+          ],
+          "level": "unknown",
+          "reason": "Its where clauses changed"
+        }
+      },
+      "counts": {
+        "additive": 4,
+        "breaking": 16,
+        "compatible": 4,
+        "unknown": 7
+      },
+      "ecosystem": "rust",
+      "notices": [],
+      "rules": "Cargo SemVer reference, reproduced",
+      "version": 0
+    }
+  },
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "rust:kit::Bytes",
+        "rust:kit::COUNTER",
+        "rust:kit::Cache",
+        "rust:kit::Codec",
+        "rust:kit::Config::port",
+        "rust:kit::DEFAULT",
+        "rust:kit::Grid",
+        "rust:kit::LOG",
+        "rust:kit::Level::High",
+        "rust:kit::Level::Low",
+        "rust:kit::Locked",
+        "rust:kit::Packet",
+        "rust:kit::Plugin",
+        "rust:kit::Pool",
+        "rust:kit::Raw",
+        "rust:kit::Result",
+        "rust:kit::Store",
+        "rust:kit::Store::Item",
+        "rust:kit::Store::MAX",
+        "rust:kit::Store::Out",
+        "rust:kit::Store::get",
+        "rust:kit::Visitor",
+        "rust:kit::ffi",
+        "rust:kit::parse",
+        "rust:kit::prelude::Codec",
+        "rust:kit::prelude::Store",
+        "rust:kit::visit"
+      ],
+      "kind": "restructure"
+    },
+    {
+      "changes": [
+        "rust:kit::Config::retries",
+        "rust:kit::Mode::Fast",
+        "contains:rust:kit::Config>rust:kit::Config::retries",
+        "contains:rust:kit::Mode>rust:kit::Mode::Fast"
+      ],
+      "kind": "add"
+    },
+    {
+      "changes": [
+        "rust:kit::Shape::Circle::radius",
+        "rust:kit::Shape::Square::side",
+        "contains:rust:kit::Shape::Circle>rust:kit::Shape::Circle::radius",
+        "contains:rust:kit::Shape::Square>rust:kit::Shape::Square::side"
+      ],
+      "kind": "add"
+    }
+  ]
+}

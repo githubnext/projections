@@ -1,0 +1,70 @@
+import {test, expect} from '@playwright/test'
+import type {Page} from '@playwright/test'
+import {explorer} from './harness.js'
+
+/**
+ * Side by side (left and right, and stacked) and swipe lie flat, like the single frame (docs/guides/host-ui.md): each
+ * pane, its label band above its frame, has no edge or corners of its own, and band and frame span the pane alike, so
+ * neither draws a side the other lacks. Left and right panes meet at one divider hairline, not a gutter: the after
+ * pane's left border.
+ */
+async function panes(page: Page) {
+  return page.locator('[data-pane-card]').evaluateAll(sections =>
+    sections.map(section => {
+      const box = (element: Element | null) => {
+        const rect = element!.getBoundingClientRect()
+        return {left: rect.left, right: rect.right}
+      }
+      const style = getComputedStyle(section)
+      const probe = section.appendChild(document.createElement('span'))
+      probe.style.color = 'var(--projections-color-divider)'
+      const divider = getComputedStyle(probe).color
+      probe.remove()
+      return {
+        divider,
+        ruleColor: style.borderLeftColor,
+        side: section.getAttribute('data-side'),
+        borders: [style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth].join(' '),
+        radius: style.borderTopLeftRadius,
+        pane: {...box(section), inner: section.getBoundingClientRect().left + parseFloat(style.borderLeftWidth)},
+        band: box(section.querySelector('[data-pane-band]')),
+        frame: box(section.querySelector('iframe.ph-frame')),
+      }
+    }),
+  )
+}
+
+const cases = [
+  {mode: 'side-by-side', width: 1440, arrangement: 'left and right'},
+  {mode: 'side-by-side', width: 390, arrangement: 'stacked'},
+  {mode: 'swipe', width: 1440, arrangement: 'swipe'},
+  {mode: 'swipe', width: 390, arrangement: 'swipe'},
+] as const
+
+for (const {mode, width, arrangement} of cases)
+  test(`${mode} at ${width}px (${arrangement}): each pane lies flat, its band and frame spanning it alike, and left and right panes meet at a hairline`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({width, height: 1000})
+    await page.goto(explorer(`before=v1&after=v3&mode=${mode}`))
+    const view = page.locator('.ph')
+    await expect(view).toHaveAttribute('data-comparison-mode', mode)
+    await expect(view).toHaveAttribute('data-renderer-status', 'ready')
+    if (arrangement === 'stacked') await expect(page.locator('.ph-panes')).toHaveAttribute('data-stacked', 'true')
+    const found = await panes(page)
+    expect(found).toHaveLength(2)
+    const columns = arrangement === 'left and right'
+    for (const {side, borders, radius, pane, band, frame, divider, ruleColor} of found) {
+      const label = `${side} pane`
+      const ruled = columns && side === 'after'
+      expect(borders, label).toBe(ruled ? '0px 0px 0px 1px' : '0px 0px 0px 0px')
+      if (ruled) expect(ruleColor, `${label}: the rule between the panes`).toBe(divider)
+      expect(radius, label).toBe('0px')
+      for (const [name, part] of Object.entries({band, frame})) {
+        expect(Math.abs(part.left - pane.inner), `${label}: ${name} left`).toBeLessThanOrEqual(0.5)
+        expect(Math.abs(part.right - pane.right), `${label}: ${name} right`).toBeLessThanOrEqual(0.5)
+      }
+    }
+    // Left and right, the panes meet: no gutter between them.
+    if (columns) expect(Math.abs(found[1]!.pane.left - found[0]!.pane.right), 'gutter').toBeLessThanOrEqual(0.5)
+  })

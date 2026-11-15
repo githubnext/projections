@@ -1,0 +1,27 @@
+{
+  "name": "@githubnext/projections-example-renderer-minimal",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Template renderer: a dependency-free outline of an extraction or comparison, built with the renderer SDK",
+  "exports": {
+    "./package.json": "./package.json",
+    "./dist/*": "./dist/*"
+  },
+  "projections": {
+    "renderer": "dist"
+  },
+  "dependencies": {
+    "@githubnext/projections": "0.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "vite": "^7.1.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.browser.json",
+    "test:browser": "playwright test"
+  }
+}

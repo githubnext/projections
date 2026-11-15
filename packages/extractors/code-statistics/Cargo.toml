@@ -1,0 +1,19 @@
+[package]
+name = "projections-extractor-code-statistics"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow = "1"
+projections-extractor-sdk = { path = "../sdk" }
+regex = "1"
+serde_json = { version = "1", features = ["float_roundtrip"] }
+# Pinned exactly: tokei's language definitions decide every count, so an
+# upgrade is a deliberate change to the measurement (update TOKEI in lib.rs).
+tokei = { version = "=15.0.0", default-features = false }
+
+[dev-dependencies]
+projections-extractor-sdk = { path = "../sdk", features = ["testing"] }

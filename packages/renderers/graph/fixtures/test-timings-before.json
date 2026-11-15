@@ -1,0 +1,110 @@
+{
+  "protocolVersion": 0,
+  "schema": "graph/v0",
+  "volatile": [
+    {
+      "kinds": [
+        "test"
+      ],
+      "path": "/data/durationMs",
+      "tolerance": {
+        "absolute": 50,
+        "relative": 0.2
+      }
+    }
+  ],
+  "entities": [
+    {
+      "id": "module:src/parser.ts",
+      "kind": "module",
+      "label": "src/parser.ts"
+    },
+    {
+      "id": "module:src/loader.ts",
+      "kind": "module",
+      "label": "src/loader.ts"
+    },
+    {
+      "id": "module:src/store.ts",
+      "kind": "module",
+      "label": "src/store.ts"
+    },
+    {
+      "id": "test:parse",
+      "kind": "test",
+      "label": "parse",
+      "data": {
+        "durationMs": 100,
+        "status": "passed"
+      }
+    },
+    {
+      "id": "test:lex",
+      "kind": "test",
+      "label": "lex",
+      "data": {
+        "durationMs": 50,
+        "status": "passed"
+      }
+    },
+    {
+      "id": "test:load",
+      "kind": "test",
+      "label": "load",
+      "data": {
+        "durationMs": 100,
+        "status": "passed"
+      }
+    },
+    {
+      "id": "test:save",
+      "kind": "test",
+      "label": "save",
+      "data": {
+        "durationMs": 100,
+        "status": "passed"
+      }
+    },
+    {
+      "id": "test:emit",
+      "kind": "test",
+      "label": "emit",
+      "data": {
+        "durationMs": 200,
+        "status": "passed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "test:parse->module:src/parser.ts",
+      "kind": "covers",
+      "from": "test:parse",
+      "to": "module:src/parser.ts"
+    },
+    {
+      "id": "test:lex->module:src/parser.ts",
+      "kind": "covers",
+      "from": "test:lex",
+      "to": "module:src/parser.ts"
+    },
+    {
+      "id": "test:load->module:src/loader.ts",
+      "kind": "covers",
+      "from": "test:load",
+      "to": "module:src/loader.ts"
+    },
+    {
+      "id": "test:save->module:src/store.ts",
+      "kind": "covers",
+      "from": "test:save",
+      "to": "module:src/store.ts"
+    },
+    {
+      "id": "test:emit->module:src/parser.ts",
+      "kind": "covers",
+      "from": "test:emit",
+      "to": "module:src/parser.ts"
+    }
+  ]
+}

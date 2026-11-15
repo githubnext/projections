@@ -1,0 +1,103 @@
+/* The action bar: VSCode Elements' toolbar buttons, 22px with a 16px codicon, as in a view's title bar (sized before the
+   element renders, so the toolbar's layout measures what will be drawn). */
+.phv-action {
+  display: inline-flex;
+  flex: none;
+  min-width: 22px;
+  min-height: 22px;
+}
+.phv-action[data-disabled] {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* The toolbar, a view title bar: one 35px row, or two planned rows with the playback group alone on row 2. Nothing
+   wraps or overlaps: `useToolbarLayout` (layout.ts) measures it and collapses controls into compact forms and the
+   "…" menu instead. Without a layout the row is a plain flex row that never wraps.
+   Its edge controls sit as far from its ends as from its top and bottom, inside its bottom hairline: a 22px action 6px
+   in (the row is 34px inside the hairline), a 26px group (the segmented mode switch, the pair pickers) 4px. */
+.phv-toolbar-wrap {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  container-type: inline-size;
+}
+.phv-toolbar {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 4px 8px;
+  min-width: 0;
+  min-height: 35px;
+  padding: 4px 6px;
+  /* Like VS Code's own editor toolbars (the integrated browser's): the active tab's surface, continuous with it, and a
+     hairline between it and the stage. */
+  border-bottom: 1px solid var(--phv-divider);
+  background: var(--vscode-tab-activeBackground, var(--vscode-editor-background, var(--phv-surface-canvas)));
+  color: var(--vscode-foreground, #cccccc);
+  white-space: nowrap;
+}
+.phv-toolbar > * {
+  flex: none;
+}
+.phv-toolbar > .phv-playback {
+  flex: 1 1 auto;
+}
+.phv-toolbar[data-rows] {
+  display: grid;
+  gap: 4px 8px;
+}
+.phv-toolbar[data-rows] > .phv-toolbar-start {
+  grid-area: start;
+}
+.phv-toolbar[data-rows] > .phv-toolbar-mode {
+  display: flex;
+  grid-area: mode;
+}
+.phv-toolbar[data-rows] > .phv-playback {
+  grid-area: playback;
+}
+.phv-toolbar[data-rows] > .phv-toolbar-end {
+  grid-area: end;
+  justify-self: end;
+}
+/* Row 1 of two keeps the one row's height (inside the padding), so its edge controls keep their insets. */
+.phv-toolbar[data-rows='2'] {
+  grid-template-rows: minmax(26px, auto) auto;
+}
+/* Row 2 is the playback group from edge to edge, under a hairline: 4px around its 22px controls, at its ends too. */
+.phv-toolbar[data-rows='2'] > .phv-playback {
+  margin-inline: -6px;
+  padding: 4px 4px 0;
+  border-top: 1px solid var(--phv-divider);
+}
+/* A start region that draws nothing (a consumer's slot with nothing to show, as a VS Code tab's for an ordinary
+   result) takes no room: what follows it takes back the gap after it. */
+.phv-toolbar > .phv-toolbar-start:not(:has(> :not(:empty))) + :not(.phv-toolbar-end) {
+  margin-inline-start: -8px;
+}
+/* A 26px group leading the row sits 4px from its start, as from its top and bottom. */
+.phv-toolbar > .phv-toolbar-start:first-child > .phv-pair-picker:first-child,
+.phv-toolbar > .phv-toolbar-mode:first-child > .phv-mode-switch,
+.phv-toolbar > .phv-toolbar-start:first-child:not(:has(> :not(:empty))) + .phv-toolbar-mode > .phv-mode-switch {
+  margin-inline-start: -2px;
+}
+.phv-toolbar-start {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.phv-toolbar-end {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-inline-start: auto;
+}
+.phv-toolbar-end > .phv-chip {
+  margin-inline: 4px;
+}
+.phv-actions {
+  display: flex;
+  gap: 8px;
+  margin-inline-start: 4px;
+}

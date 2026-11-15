@@ -1,0 +1,316 @@
+{
+  "protocolVersion": 0,
+  "schema": "graph/v0",
+  "entities": [
+    {
+      "id": "nuget-project:Api",
+      "kind": "project",
+      "label": "Api",
+      "confidence": "authoritative"
+    },
+    {
+      "id": "nuget-target:Api:net9.0",
+      "kind": "target-framework",
+      "label": "net9.0",
+      "data": {
+        "framework": ".NETCoreApp,Version=v9.0"
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "nuget-library:Api:net9.0:fluentvalidation",
+      "kind": "package",
+      "label": "FluentValidation",
+      "data": {
+        "version": "11.9.2",
+        "target": "net9.0",
+        "type": "package"
+      },
+      "confidence": "authoritative",
+      "evidence": [
+        {
+          "kind": "source",
+          "source": "src/Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "id": "nuget-library:Api:net9.0:serilog",
+      "kind": "package",
+      "label": "Serilog",
+      "data": {
+        "version": "3.1.1",
+        "target": "net9.0",
+        "type": "package"
+      },
+      "confidence": "authoritative",
+      "evidence": [
+        {
+          "kind": "source",
+          "source": "src/Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "id": "nuget-library:Api:net9.0:serilog.sinks.console",
+      "kind": "package",
+      "label": "Serilog.Sinks.Console",
+      "data": {
+        "version": "4.1.0",
+        "target": "net9.0",
+        "type": "package"
+      },
+      "confidence": "authoritative",
+      "evidence": [
+        {
+          "kind": "source",
+          "source": "src/Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "id": "nuget-library:Api:net9.0:newtonsoft.json",
+      "kind": "package",
+      "label": "Newtonsoft.Json",
+      "data": {
+        "version": "13.0.1",
+        "target": "net9.0",
+        "type": "package"
+      },
+      "confidence": "authoritative",
+      "evidence": [
+        {
+          "kind": "source",
+          "source": "src/Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "id": "nuget-library:Api:net9.0:polly",
+      "kind": "package",
+      "label": "Polly",
+      "data": {
+        "version": "8.2.0",
+        "target": "net9.0",
+        "type": "package"
+      },
+      "confidence": "authoritative",
+      "evidence": [
+        {
+          "kind": "source",
+          "source": "src/Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "id": "nuget-library:Api:net9.0:shared.contracts",
+      "kind": "package",
+      "label": "Shared.Contracts",
+      "data": {
+        "version": "8.0.0",
+        "target": "net9.0",
+        "type": "package"
+      },
+      "confidence": "authoritative",
+      "evidence": [
+        {
+          "kind": "source",
+          "source": "src/Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "id": "nuget-project:Worker",
+      "kind": "project",
+      "label": "Worker",
+      "confidence": "authoritative"
+    },
+    {
+      "id": "nuget-target:Worker:net9.0",
+      "kind": "target-framework",
+      "label": "net9.0",
+      "data": {
+        "framework": ".NETCoreApp,Version=v9.0"
+      },
+      "confidence": "authoritative"
+    },
+    {
+      "id": "nuget-library:Worker:net9.0:shared.contracts",
+      "kind": "package",
+      "label": "Shared.Contracts",
+      "data": {
+        "version": "8.0.2",
+        "target": "net9.0",
+        "type": "package"
+      },
+      "confidence": "authoritative",
+      "evidence": [
+        {
+          "kind": "source",
+          "source": "src/Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "id": "nuget-library:Worker:net9.0:azure.messaging.servicebus",
+      "kind": "package",
+      "label": "Azure.Messaging.ServiceBus",
+      "data": {
+        "version": "7.17.0",
+        "target": "net9.0",
+        "type": "package"
+      },
+      "confidence": "authoritative",
+      "evidence": [
+        {
+          "kind": "source",
+          "source": "src/Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "id": "nuget-library:Worker:net9.0:azure.core",
+      "kind": "package",
+      "label": "Azure.Core",
+      "data": {
+        "version": "1.36.0",
+        "target": "net9.0",
+        "type": "package"
+      },
+      "confidence": "authoritative",
+      "evidence": [
+        {
+          "kind": "source",
+          "source": "src/Worker/packages.lock.json"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "targets:nuget-project%3AApi:nuget-target%3AApi%3Anet9.0",
+      "kind": "targets",
+      "from": "nuget-project:Api",
+      "to": "nuget-target:Api:net9.0"
+    },
+    {
+      "id": "resolved:nuget-target%3AApi%3Anet9.0:nuget-library%3AApi%3Anet9.0%3Afluentvalidation",
+      "kind": "resolved",
+      "from": "nuget-target:Api:net9.0",
+      "to": "nuget-library:Api:net9.0:fluentvalidation"
+    },
+    {
+      "id": "direct-dependency:nuget-target%3AApi%3Anet9.0:nuget-library%3AApi%3Anet9.0%3Afluentvalidation",
+      "kind": "direct-dependency",
+      "from": "nuget-target:Api:net9.0",
+      "to": "nuget-library:Api:net9.0:fluentvalidation"
+    },
+    {
+      "id": "resolved:nuget-target%3AApi%3Anet9.0:nuget-library%3AApi%3Anet9.0%3Aserilog",
+      "kind": "resolved",
+      "from": "nuget-target:Api:net9.0",
+      "to": "nuget-library:Api:net9.0:serilog"
+    },
+    {
+      "id": "direct-dependency:nuget-target%3AApi%3Anet9.0:nuget-library%3AApi%3Anet9.0%3Aserilog",
+      "kind": "direct-dependency",
+      "from": "nuget-target:Api:net9.0",
+      "to": "nuget-library:Api:net9.0:serilog"
+    },
+    {
+      "id": "resolved:nuget-target%3AApi%3Anet9.0:nuget-library%3AApi%3Anet9.0%3Aserilog.sinks.console",
+      "kind": "resolved",
+      "from": "nuget-target:Api:net9.0",
+      "to": "nuget-library:Api:net9.0:serilog.sinks.console"
+    },
+    {
+      "id": "resolved:nuget-target%3AApi%3Anet9.0:nuget-library%3AApi%3Anet9.0%3Anewtonsoft.json",
+      "kind": "resolved",
+      "from": "nuget-target:Api:net9.0",
+      "to": "nuget-library:Api:net9.0:newtonsoft.json"
+    },
+    {
+      "id": "direct-dependency:nuget-target%3AApi%3Anet9.0:nuget-library%3AApi%3Anet9.0%3Anewtonsoft.json",
+      "kind": "direct-dependency",
+      "from": "nuget-target:Api:net9.0",
+      "to": "nuget-library:Api:net9.0:newtonsoft.json"
+    },
+    {
+      "id": "resolved:nuget-target%3AApi%3Anet9.0:nuget-library%3AApi%3Anet9.0%3Apolly",
+      "kind": "resolved",
+      "from": "nuget-target:Api:net9.0",
+      "to": "nuget-library:Api:net9.0:polly"
+    },
+    {
+      "id": "direct-dependency:nuget-target%3AApi%3Anet9.0:nuget-library%3AApi%3Anet9.0%3Apolly",
+      "kind": "direct-dependency",
+      "from": "nuget-target:Api:net9.0",
+      "to": "nuget-library:Api:net9.0:polly"
+    },
+    {
+      "id": "resolved:nuget-target%3AApi%3Anet9.0:nuget-library%3AApi%3Anet9.0%3Ashared.contracts",
+      "kind": "resolved",
+      "from": "nuget-target:Api:net9.0",
+      "to": "nuget-library:Api:net9.0:shared.contracts"
+    },
+    {
+      "id": "direct-dependency:nuget-target%3AApi%3Anet9.0:nuget-library%3AApi%3Anet9.0%3Ashared.contracts",
+      "kind": "direct-dependency",
+      "from": "nuget-target:Api:net9.0",
+      "to": "nuget-library:Api:net9.0:shared.contracts"
+    },
+    {
+      "id": "depends-on:nuget-library%3AApi%3Anet9.0%3Aserilog.sinks.console:nuget-library%3AApi%3Anet9.0%3Aserilog",
+      "kind": "depends-on",
+      "from": "nuget-library:Api:net9.0:serilog.sinks.console",
+      "to": "nuget-library:Api:net9.0:serilog"
+    },
+    {
+      "id": "targets:nuget-project%3AWorker:nuget-target%3AWorker%3Anet9.0",
+      "kind": "targets",
+      "from": "nuget-project:Worker",
+      "to": "nuget-target:Worker:net9.0"
+    },
+    {
+      "id": "resolved:nuget-target%3AWorker%3Anet9.0:nuget-library%3AWorker%3Anet9.0%3Ashared.contracts",
+      "kind": "resolved",
+      "from": "nuget-target:Worker:net9.0",
+      "to": "nuget-library:Worker:net9.0:shared.contracts"
+    },
+    {
+      "id": "direct-dependency:nuget-target%3AWorker%3Anet9.0:nuget-library%3AWorker%3Anet9.0%3Ashared.contracts",
+      "kind": "direct-dependency",
+      "from": "nuget-target:Worker:net9.0",
+      "to": "nuget-library:Worker:net9.0:shared.contracts"
+    },
+    {
+      "id": "resolved:nuget-target%3AWorker%3Anet9.0:nuget-library%3AWorker%3Anet9.0%3Aazure.messaging.servicebus",
+      "kind": "resolved",
+      "from": "nuget-target:Worker:net9.0",
+      "to": "nuget-library:Worker:net9.0:azure.messaging.servicebus"
+    },
+    {
+      "id": "direct-dependency:nuget-target%3AWorker%3Anet9.0:nuget-library%3AWorker%3Anet9.0%3Aazure.messaging.servicebus",
+      "kind": "direct-dependency",
+      "from": "nuget-target:Worker:net9.0",
+      "to": "nuget-library:Worker:net9.0:azure.messaging.servicebus"
+    },
+    {
+      "id": "resolved:nuget-target%3AWorker%3Anet9.0:nuget-library%3AWorker%3Anet9.0%3Aazure.core",
+      "kind": "resolved",
+      "from": "nuget-target:Worker:net9.0",
+      "to": "nuget-library:Worker:net9.0:azure.core"
+    },
+    {
+      "id": "depends-on:nuget-library%3AWorker%3Anet9.0%3Aazure.core:nuget-library%3AWorker%3Anet9.0%3Aazure.messaging.servicebus",
+      "kind": "depends-on",
+      "from": "nuget-library:Worker:net9.0:azure.core",
+      "to": "nuget-library:Worker:net9.0:azure.messaging.servicebus"
+    }
+  ],
+  "metadata": {
+    "limitations": [
+      "Synthetic fixture modelled on the NuGet extractor; no repository was examined."
+    ]
+  }
+}

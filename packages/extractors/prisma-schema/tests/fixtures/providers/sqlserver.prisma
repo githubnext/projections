@@ -1,0 +1,9 @@
+datasource db {
+  provider = "sqlserver"
+  url      = env("PROJECTIONS_MISSING_DATABASE_URL")
+}
+
+model Account {
+  id    Int    @id(clustered: false)
+  email String @unique(clustered: true) @db.NVarChar(160)
+}

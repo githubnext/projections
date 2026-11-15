@@ -1,0 +1,10 @@
+# actionlint (rhysd/actionlint) configuration.
+paths:
+  # dist 0.34.0 (dist-workspace.toml) calls the release's custom jobs with GitHub's self-repository syntax,
+  # `uses: $/.github/workflows/<job>.yml`: the workflow at the running commit of this repository
+  # (https://github.blog/changelog/2026-07-30-reference-same-repository-actions-with-self-repository-syntax/).
+  # actionlint 1.7.12 doesn't know it yet (rhysd/actionlint#711) and rejects only that form of the call;
+  # every other check of release.yml still applies.
+  .github/workflows/release.yml:
+    ignore:
+      - 'reusable workflow call "\$/\.github/workflows/[\w.-]+\.ya?ml" at "uses" is not following the format'

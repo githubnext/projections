@@ -1,0 +1,9 @@
+{
+  "protocolVersion": 0,
+  "schema": "architecture/v0",
+  "entities": [
+    { "id": "service:Fixture:IMessage:unkeyed", "kind": "service", "label": "IMessage", "data": { "key": "unkeyed" } },
+    { "id": "service:Fixture:IMessage:unkeyed:registration:0", "kind": "registration", "label": "IMessage [0]", "data": { "lifetime": "Singleton", "ordinal": 0, "registrationKind": "type", "implementation": "Fixture:Message" } }
+  ],
+  "relationships": [{ "id": "registration:IMessage:0", "kind": "registration", "from": "service:Fixture:IMessage:unkeyed", "to": "service:Fixture:IMessage:unkeyed:registration:0" }]
+}

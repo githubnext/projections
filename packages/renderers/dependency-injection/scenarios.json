@@ -1,0 +1,68 @@
+{
+  "format": "projections.scenarios",
+  "version": 0,
+  "title": "Dependency injection",
+  "renderer": "dependency-injection",
+  "scenarios": [
+    {
+      "id": "scoring",
+      "title": "Scoring: a normalizer joins the chain",
+      "description": "In the default order the evaluator first drops its direct model-client dependency and the result cache becomes a singleton, then the score normalizer arrives with its links.",
+      "before": "test/fixtures/scoring-before.json",
+      "after": "test/fixtures/scoring-after.json"
+    },
+    {
+      "id": "scoring-priority",
+      "title": "Scoring: normalizer first (custom order)",
+      "description": "The same change through the priority-order example comparator, which presents the step that adds the normalizer first: it arrives and wires in, and only then does the evaluator drop its direct link.",
+      "before": "test/fixtures/scoring-before.json",
+      "after": "test/fixtures/scoring-after.json",
+      "comparator": {
+        "file": "../../../examples/comparators/priority-order/priority-order.comparator.yaml",
+        "options": {
+          "priority": ["service:Scoring:IScoreNormalizer:unkeyed"]
+        }
+      }
+    },
+    {
+      "id": "orders",
+      "title": "Orders: pricing replaced, repository shared",
+      "description": "Legacy pricing leaves, the repository becomes a singleton and the controller gains a runtime clock lookup, then a price calculator and rate cache arrive. Shows keyed, stacked, collection and optional dependencies.",
+      "before": "test/fixtures/orders-before.json",
+      "after": "test/fixtures/orders-after.json"
+    },
+    {
+      "id": "orders-priority",
+      "title": "Orders: new pricing first (custom order)",
+      "description": "The priority-order example comparator moves the step that adds the price calculator and rate cache to the front, so they arrive before legacy pricing leaves.",
+      "before": "test/fixtures/orders-before.json",
+      "after": "test/fixtures/orders-after.json",
+      "comparator": {
+        "file": "../../../examples/comparators/priority-order/priority-order.comparator.yaml",
+        "options": {
+          "priority": ["service:Orders:IPriceCalculator:unkeyed"]
+        }
+      }
+    },
+    {
+      "id": "nestjs-orders",
+      "title": "NestJS: a gateway swapped, a logger shared",
+      "description": "Extracted by nestjs-di from its sample application. The payment gateway token is now satisfied by AdyenGateway, the transient audit logger becomes a singleton, and a notifications service arrives and is injected into the orders service. The controller is request-scoped because it injects a request-scoped context.",
+      "before": "test/fixtures/nestjs-orders-before.json",
+      "after": "test/fixtures/nestjs-orders-after.json"
+    },
+    {
+      "id": "spring-orders",
+      "title": "Spring Boot: a gateway swapped, an audit log shared",
+      "description": "Extracted by spring-di from its sample application. The paymentGateway @Bean method now returns an AdyenGateway, the prototype audit log becomes a singleton, and a notification service arrives and is injected into the orders service. Shows a @Bean contract over its implementation, @Primary and @Qualifier clocks, a collection of validators and a request-scoped proxy.",
+      "before": "test/fixtures/spring-orders-before.json",
+      "after": "test/fixtures/spring-orders-after.json"
+    },
+    {
+      "id": "orders-single",
+      "title": "Orders: one revision",
+      "description": "The composition of a single revision, without a comparison.",
+      "extraction": "test/fixtures/orders-after.json"
+    }
+  ]
+}

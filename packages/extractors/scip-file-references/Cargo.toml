@@ -1,0 +1,17 @@
+[package]
+name = "projections-extractor-scip-file-references"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow = "1"
+projections-extractor-sdk = { path = "../sdk" }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+protobuf = "=3.7.2"
+scip = "0.10"
+
+[dev-dependencies]
+projections-extractor-sdk = { path = "../sdk", features = ["testing"] }

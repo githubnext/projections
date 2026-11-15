@@ -1,0 +1,7 @@
+{
+  "paths": ["deploy/tetragon/*.yaml"],
+  "crdPath": "deploy/crds/tracingpolicies.yaml",
+  "agentValuesPath": "deploy/tetragon-values.yaml",
+  "kernelProfilesPath": "deploy/kernels/profiles.yaml",
+  "workloadPaths": ["deploy/apps/*.yaml"]
+}

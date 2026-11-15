@@ -1,0 +1,1008 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "hookType": "kprobe",
+        "return": false,
+        "syscall": false,
+        "target": "security_kernel_read_file"
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 19
+          },
+          "source": "deploy/tetragon/block-modules.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicy:block-modules/kprobe:security_kernel_read_file",
+      "kind": "probe",
+      "label": "security_kernel_read_file"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [
+          {
+            "action": "Override",
+            "argError": -1,
+            "display": "Deny (`Override` returns `-1`)",
+            "phase": "call"
+          }
+        ],
+        "binaries": [],
+        "conditions": [],
+        "effect": "enforce",
+        "enforcement": "active",
+        "findings": [
+          {
+            "kind": "override-unavailable",
+            "message": "`Override` can't run on `legacy`: `security_kernel_read_file` doesn't allow error injection there.",
+            "profiles": [
+              "legacy"
+            ]
+          }
+        ],
+        "label": "deny-read",
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 22
+          },
+          "source": "deploy/tetragon/block-modules.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicy:block-modules/kprobe:security_kernel_read_file/deny-read",
+      "kind": "selector",
+      "label": "deny-read"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "hookType": "kprobe",
+        "return": false,
+        "syscall": true,
+        "target": "sys_finit_module"
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 26
+          },
+          "source": "deploy/tetragon/block-modules.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicy:block-modules/kprobe:sys_finit_module",
+      "kind": "probe",
+      "label": "sys_finit_module"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [
+          {
+            "action": "Sigkill",
+            "display": "Kill (`Sigkill`)",
+            "phase": "call"
+          }
+        ],
+        "binaries": [],
+        "conditions": [],
+        "effect": "enforce",
+        "enforcement": "active",
+        "label": "finit",
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 28
+          },
+          "source": "deploy/tetragon/block-modules.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicy:block-modules/kprobe:sys_finit_module/finit",
+      "kind": "selector",
+      "label": "finit"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "hookType": "lsm",
+        "target": "kernel_module_request"
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 9
+          },
+          "source": "deploy/tetragon/block-modules.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicy:block-modules/lsm:kernel_module_request",
+      "kind": "probe",
+      "label": "kernel_module_request"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [
+          {
+            "action": "Override",
+            "argError": -1,
+            "display": "Deny (`Override` returns `-1`)",
+            "phase": "call"
+          }
+        ],
+        "binaries": [
+          {
+            "followChildren": false,
+            "operator": "NotIn",
+            "parent": false,
+            "values": [
+              "/usr/bin/kmod"
+            ]
+          }
+        ],
+        "conditions": [],
+        "effect": "enforce",
+        "enforcement": "active",
+        "label": "not-kmod",
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 11
+          },
+          "source": "deploy/tetragon/block-modules.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicy:block-modules/lsm:kernel_module_request/not-kmod",
+      "kind": "selector",
+      "label": "not-kmod"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "effect": "enforce",
+        "enforcing": 3,
+        "engine": "tetragon",
+        "mode": "enforce",
+        "modeSource": "default",
+        "name": "block-modules",
+        "namespace": null,
+        "nodeSelector": null,
+        "nodes": "all nodes",
+        "path": "deploy/tetragon/block-modules.yaml",
+        "probes": 3,
+        "resource": "TracingPolicy",
+        "scope": "host workloads",
+        "selectors": 3
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 3
+          },
+          "source": "deploy/tetragon/block-modules.yaml"
+        }
+      ],
+      "id": "policy:tetragon:TracingPolicy:block-modules",
+      "kind": "policy",
+      "label": "block-modules"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "args": [
+          {
+            "index": 0,
+            "type": "sock"
+          }
+        ],
+        "hookType": "kprobe",
+        "message": "Outbound TCP connection",
+        "return": false,
+        "syscall": false,
+        "tags": [
+          "network"
+        ],
+        "target": "tcp_connect"
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 10
+          },
+          "source": "deploy/tetragon/egress-audit.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicyNamespaced:checkout:egress-audit/kprobe:tcp_connect",
+      "kind": "probe",
+      "label": "tcp_connect"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [],
+        "binaries": [],
+        "conditions": [
+          {
+            "display": "`arg0` (`sock`) destination address not in `10.0.0.0/8` or `127.0.0.1`",
+            "filter": "matchArgs",
+            "index": 0,
+            "operator": "NotDAddr",
+            "values": [
+              "10.0.0.0/8",
+              "127.0.0.1"
+            ]
+          }
+        ],
+        "effect": "observe",
+        "enforcement": "none",
+        "label": "leaves-cluster",
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 18
+          },
+          "source": "deploy/tetragon/egress-audit.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicyNamespaced:checkout:egress-audit/kprobe:tcp_connect/leaves-cluster",
+      "kind": "selector",
+      "label": "leaves-cluster"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "effect": "observe",
+        "enforcing": 0,
+        "engine": "tetragon",
+        "mode": "enforce",
+        "modeSource": "default",
+        "name": "egress-audit",
+        "namespace": "checkout",
+        "nodeSelector": null,
+        "nodes": "all nodes",
+        "path": "deploy/tetragon/egress-audit.yaml",
+        "probes": 1,
+        "resource": "TracingPolicyNamespaced",
+        "scope": "pods in namespace `checkout`",
+        "selectors": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 4
+          },
+          "source": "deploy/tetragon/egress-audit.yaml"
+        }
+      ],
+      "id": "policy:tetragon:TracingPolicyNamespaced:checkout:egress-audit",
+      "kind": "policy",
+      "label": "egress-audit"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "args": [
+          {
+            "index": 0,
+            "type": "file"
+          },
+          {
+            "index": 1,
+            "type": "int"
+          }
+        ],
+        "hookType": "kprobe",
+        "message": "Credential file read",
+        "return": true,
+        "returnArg": {
+          "index": 0,
+          "type": "int"
+        },
+        "syscall": false,
+        "tags": [
+          "credentials",
+          "file"
+        ],
+        "target": "security_file_permission"
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 15
+          },
+          "source": "deploy/tetragon/protect-credentials.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicy:protect-credentials/kprobe:security_file_permission",
+      "kind": "probe",
+      "label": "security_file_permission"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [],
+        "binaries": [],
+        "conditions": [
+          {
+            "display": "`arg0` (`file`) starts with `/root/.ssh` or `/home`",
+            "filter": "matchArgs",
+            "index": 0,
+            "operator": "Prefix",
+            "values": [
+              "/root/.ssh",
+              "/home"
+            ]
+          },
+          {
+            "display": "`arg1` (`int`) = `4`",
+            "filter": "matchArgs",
+            "index": 1,
+            "operator": "Equal",
+            "values": [
+              "4"
+            ]
+          }
+        ],
+        "effect": "observe",
+        "enforcement": "none",
+        "label": "ssh-keys-read",
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 29
+          },
+          "source": "deploy/tetragon/protect-credentials.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicy:protect-credentials/kprobe:security_file_permission/ssh-keys-read",
+      "kind": "selector",
+      "label": "ssh-keys-read"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "args": [
+          {
+            "index": 0,
+            "type": "file"
+          },
+          {
+            "index": 1,
+            "type": "uint32"
+          }
+        ],
+        "hookType": "kprobe",
+        "message": "Credential file mapped",
+        "return": false,
+        "syscall": false,
+        "tags": [
+          "credentials",
+          "file"
+        ],
+        "target": "security_mmap_file"
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 39
+          },
+          "source": "deploy/tetragon/protect-credentials.yaml"
+        }
+      ],
+      "id": "probe:tetragon:TracingPolicy:protect-credentials/kprobe:security_mmap_file",
+      "kind": "probe",
+      "label": "security_mmap_file"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "actions": [],
+        "binaries": [],
+        "conditions": [
+          {
+            "display": "`arg0` (`file`) starts with `/var/run/secrets/kubernetes.io/serviceaccount`",
+            "filter": "matchArgs",
+            "index": 0,
+            "operator": "Prefix",
+            "values": [
+              "/var/run/secrets/kubernetes.io/serviceaccount"
+            ]
+          }
+        ],
+        "effect": "observe",
+        "enforcement": "none",
+        "label": "token-mapped",
+        "ordinal": 1
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 49
+          },
+          "source": "deploy/tetragon/protect-credentials.yaml"
+        }
+      ],
+      "id": "selector:tetragon:TracingPolicy:protect-credentials/kprobe:security_mmap_file/token-mapped",
+      "kind": "selector",
+      "label": "token-mapped"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "effect": "observe",
+        "enforcing": 0,
+        "engine": "tetragon",
+        "mode": "enforce",
+        "modeSource": "spec.options",
+        "name": "protect-credentials",
+        "namespace": null,
+        "nodeSelector": null,
+        "nodes": "all nodes",
+        "path": "deploy/tetragon/protect-credentials.yaml",
+        "probes": 2,
+        "resource": "TracingPolicy",
+        "scope": "pods where `app.kubernetes.io/part-of=payments`",
+        "selectors": 2
+      },
+      "evidence": [
+        {
+          "kind": "tetragon-tracing-policy",
+          "location": {
+            "line": 4
+          },
+          "source": "deploy/tetragon/protect-credentials.yaml"
+        }
+      ],
+      "id": "policy:tetragon:TracingPolicy:protect-credentials",
+      "kind": "policy",
+      "label": "protect-credentials"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "engine": "tetragon",
+        "path": "deploy/tetragon-values.yaml",
+        "persistentEnforcement": true,
+        "policyCrds": true,
+        "policyFilter": true
+      },
+      "evidence": [
+        {
+          "kind": "helm-values",
+          "source": "deploy/tetragon-values.yaml"
+        }
+      ],
+      "id": "agent:tetragon",
+      "kind": "agent",
+      "label": "Tetragon agent"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "config": {
+          "CONFIG_BPF_KPROBE_OVERRIDE": true,
+          "CONFIG_BPF_LSM": true,
+          "CONFIG_DEBUG_INFO_BTF": true
+        },
+        "kernel": "6.1.0-18",
+        "name": "general",
+        "symbols": {
+          "count": 5,
+          "path": "deploy/kernels/general.kallsyms"
+        }
+      },
+      "evidence": [
+        {
+          "kind": "kernel-profile",
+          "source": "deploy/kernels/profiles.yaml"
+        }
+      ],
+      "id": "kernel:general",
+      "kind": "kernel",
+      "label": "general"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "config": {
+          "CONFIG_BPF_KPROBE_OVERRIDE": true,
+          "CONFIG_BPF_LSM": false
+        },
+        "errorInjection": {
+          "count": 2,
+          "path": "deploy/kernels/legacy.error_injection"
+        },
+        "kernel": "5.4",
+        "name": "legacy"
+      },
+      "evidence": [
+        {
+          "kind": "kernel-profile",
+          "source": "deploy/kernels/profiles.yaml"
+        }
+      ],
+      "id": "kernel:legacy",
+      "kind": "kernel",
+      "label": "legacy"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "containers": [
+          {
+            "name": "web",
+            "repo": "registry.local:5000/checkout/web"
+          }
+        ],
+        "labels": {
+          "app.kubernetes.io/part-of": "checkout"
+        },
+        "name": "checkout-web",
+        "namespace": "checkout",
+        "path": "deploy/apps/checkout.yaml",
+        "resource": "StatefulSet"
+      },
+      "evidence": [
+        {
+          "kind": "kubernetes-manifest",
+          "source": "deploy/apps/checkout.yaml"
+        }
+      ],
+      "id": "workload:StatefulSet:checkout:checkout-web",
+      "kind": "workload",
+      "label": "checkout-web"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "containers": [
+          {
+            "name": "api",
+            "repo": "ghcr.io/example/payments-api"
+          },
+          {
+            "name": "proxy",
+            "repo": "envoyproxy/envoy"
+          }
+        ],
+        "labels": {
+          "app.kubernetes.io/part-of": "payments"
+        },
+        "name": "payments-api",
+        "namespace": "payments",
+        "path": "deploy/apps/payments.yaml",
+        "resource": "Deployment"
+      },
+      "evidence": [
+        {
+          "kind": "kubernetes-manifest",
+          "source": "deploy/apps/payments.yaml"
+        }
+      ],
+      "id": "workload:Deployment:payments:payments-api",
+      "kind": "workload",
+      "label": "payments-api"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "containers": [
+          {
+            "name": "settle",
+            "repo": "ghcr.io/example/settlement"
+          }
+        ],
+        "labels": {
+          "app.kubernetes.io/part-of": "payments"
+        },
+        "name": "settlement",
+        "namespace": "payments",
+        "path": "deploy/apps/payments.yaml",
+        "resource": "CronJob"
+      },
+      "evidence": [
+        {
+          "kind": "kubernetes-manifest",
+          "source": "deploy/apps/payments.yaml"
+        }
+      ],
+      "id": "workload:CronJob:payments:settlement",
+      "kind": "workload",
+      "label": "settlement"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "category": "file",
+        "hookType": "kprobe",
+        "stability": "kernel-internal",
+        "target": "security_file_permission"
+      },
+      "id": "hook:kprobe:security_file_permission",
+      "kind": "hook",
+      "label": "security_file_permission"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "category": "kernel-modules",
+        "hookType": "kprobe",
+        "stability": "kernel-internal",
+        "target": "security_kernel_read_file"
+      },
+      "id": "hook:kprobe:security_kernel_read_file",
+      "kind": "hook",
+      "label": "security_kernel_read_file"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "category": "file",
+        "hookType": "kprobe",
+        "stability": "kernel-internal",
+        "target": "security_mmap_file"
+      },
+      "id": "hook:kprobe:security_mmap_file",
+      "kind": "hook",
+      "label": "security_mmap_file"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "category": "kernel-modules",
+        "hookType": "kprobe",
+        "stability": "syscall",
+        "target": "sys_finit_module"
+      },
+      "id": "hook:kprobe:sys_finit_module",
+      "kind": "hook",
+      "label": "sys_finit_module"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "category": "network",
+        "findings": [
+          {
+            "kind": "hook-unavailable",
+            "message": "Unavailable on `general`: `tcp_connect` is not a kernel symbol there.",
+            "profiles": [
+              "general"
+            ]
+          }
+        ],
+        "hookType": "kprobe",
+        "stability": "kernel-internal",
+        "target": "tcp_connect"
+      },
+      "id": "hook:kprobe:tcp_connect",
+      "kind": "hook",
+      "label": "tcp_connect"
+    },
+    {
+      "confidence": "derived",
+      "data": {
+        "category": "kernel-modules",
+        "findings": [
+          {
+            "kind": "hook-unavailable",
+            "message": "Unavailable on `legacy`: BPF LSM is not enabled (`CONFIG_BPF_LSM`).",
+            "profiles": [
+              "legacy"
+            ]
+          }
+        ],
+        "hookType": "lsm",
+        "stability": "stable",
+        "target": "kernel_module_request"
+      },
+      "id": "hook:lsm:kernel_module_request",
+      "kind": "hook",
+      "label": "kernel_module_request"
+    },
+    {
+      "data": {
+        "match": "exact",
+        "subjectKind": "binary"
+      },
+      "id": "subject:binary:exact:%2Fusr%2Fbin%2Fkmod",
+      "kind": "subject",
+      "label": "/usr/bin/kmod"
+    },
+    {
+      "data": {
+        "all": false,
+        "containers": null,
+        "display": "host workloads",
+        "host": true,
+        "namespace": null,
+        "pods": null,
+        "subjectKind": "workloads"
+      },
+      "id": "subject:workloads:host%20workloads",
+      "kind": "subject",
+      "label": "host workloads"
+    },
+    {
+      "data": {
+        "all": false,
+        "containers": null,
+        "display": "pods in namespace `checkout`",
+        "host": false,
+        "namespace": "checkout",
+        "pods": [],
+        "subjectKind": "workloads"
+      },
+      "id": "subject:workloads:pods%20in%20namespace%20checkout",
+      "kind": "subject",
+      "label": "pods in namespace checkout"
+    },
+    {
+      "data": {
+        "all": false,
+        "containers": null,
+        "display": "pods where `app.kubernetes.io/part-of=payments`",
+        "host": false,
+        "namespace": null,
+        "pods": [
+          {
+            "key": "app.kubernetes.io/part-of",
+            "operator": "In",
+            "values": [
+              "payments"
+            ]
+          }
+        ],
+        "subjectKind": "workloads"
+      },
+      "id": "subject:workloads:pods%20where%20app.kubernetes.io%2Fpart-of%3Dpayments",
+      "kind": "subject",
+      "label": "pods where app.kubernetes.io/part-of=payments"
+    }
+  ],
+  "metadata": {
+    "engine": "tetragon",
+    "limitations": [
+      "Policies are checked against the CRDs in `deploy/crds/tracingpolicies.yaml` without their CEL rules (`x-kubernetes-validations`).",
+      "Workload coverage is derived from each policy's own scope and the workloads' pod template labels and containers; rule-level `matchWorkloads`, pods created outside these manifests and host processes aren't included."
+    ],
+    "policies": 3,
+    "sources": [
+      "deploy/tetragon/block-modules.yaml",
+      "deploy/tetragon/egress-audit.yaml",
+      "deploy/tetragon/protect-credentials.yaml"
+    ]
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:block-modules",
+      "id": "declares:probe:tetragon:TracingPolicy:block-modules/kprobe:security_kernel_read_file",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicy:block-modules/kprobe:security_kernel_read_file"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicy:block-modules/kprobe:security_kernel_read_file",
+      "id": "attaches:probe:tetragon:TracingPolicy:block-modules/kprobe:security_kernel_read_file",
+      "kind": "attaches",
+      "to": "hook:kprobe:security_kernel_read_file"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicy:block-modules/kprobe:security_kernel_read_file",
+      "id": "filters:selector:tetragon:TracingPolicy:block-modules/kprobe:security_kernel_read_file/deny-read",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicy:block-modules/kprobe:security_kernel_read_file/deny-read"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:block-modules",
+      "id": "declares:probe:tetragon:TracingPolicy:block-modules/kprobe:sys_finit_module",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicy:block-modules/kprobe:sys_finit_module"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicy:block-modules/kprobe:sys_finit_module",
+      "id": "attaches:probe:tetragon:TracingPolicy:block-modules/kprobe:sys_finit_module",
+      "kind": "attaches",
+      "to": "hook:kprobe:sys_finit_module"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicy:block-modules/kprobe:sys_finit_module",
+      "id": "filters:selector:tetragon:TracingPolicy:block-modules/kprobe:sys_finit_module/finit",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicy:block-modules/kprobe:sys_finit_module/finit"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:block-modules",
+      "id": "declares:probe:tetragon:TracingPolicy:block-modules/lsm:kernel_module_request",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicy:block-modules/lsm:kernel_module_request"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicy:block-modules/lsm:kernel_module_request",
+      "id": "attaches:probe:tetragon:TracingPolicy:block-modules/lsm:kernel_module_request",
+      "kind": "attaches",
+      "to": "hook:lsm:kernel_module_request"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicy:block-modules/lsm:kernel_module_request",
+      "id": "filters:selector:tetragon:TracingPolicy:block-modules/lsm:kernel_module_request/not-kmod",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicy:block-modules/lsm:kernel_module_request/not-kmod"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "followChildren": false,
+        "operator": "NotIn",
+        "parent": false
+      },
+      "from": "selector:tetragon:TracingPolicy:block-modules/lsm:kernel_module_request/not-kmod",
+      "id": "binary:tetragon:TracingPolicy:block-modules/lsm:kernel_module_request/not-kmod/self/exact/%2Fusr%2Fbin%2Fkmod",
+      "kind": "excludes",
+      "to": "subject:binary:exact:%2Fusr%2Fbin%2Fkmod"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:block-modules",
+      "id": "applies-to:policy:tetragon:TracingPolicy:block-modules",
+      "kind": "applies-to",
+      "to": "subject:workloads:host%20workloads"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicyNamespaced:checkout:egress-audit",
+      "id": "declares:probe:tetragon:TracingPolicyNamespaced:checkout:egress-audit/kprobe:tcp_connect",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicyNamespaced:checkout:egress-audit/kprobe:tcp_connect"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicyNamespaced:checkout:egress-audit/kprobe:tcp_connect",
+      "id": "attaches:probe:tetragon:TracingPolicyNamespaced:checkout:egress-audit/kprobe:tcp_connect",
+      "kind": "attaches",
+      "to": "hook:kprobe:tcp_connect"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicyNamespaced:checkout:egress-audit/kprobe:tcp_connect",
+      "id": "filters:selector:tetragon:TracingPolicyNamespaced:checkout:egress-audit/kprobe:tcp_connect/leaves-cluster",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicyNamespaced:checkout:egress-audit/kprobe:tcp_connect/leaves-cluster"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicyNamespaced:checkout:egress-audit",
+      "id": "applies-to:policy:tetragon:TracingPolicyNamespaced:checkout:egress-audit",
+      "kind": "applies-to",
+      "to": "subject:workloads:pods%20in%20namespace%20checkout"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:protect-credentials",
+      "id": "declares:probe:tetragon:TracingPolicy:protect-credentials/kprobe:security_file_permission",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicy:protect-credentials/kprobe:security_file_permission"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicy:protect-credentials/kprobe:security_file_permission",
+      "id": "attaches:probe:tetragon:TracingPolicy:protect-credentials/kprobe:security_file_permission",
+      "kind": "attaches",
+      "to": "hook:kprobe:security_file_permission"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicy:protect-credentials/kprobe:security_file_permission",
+      "id": "filters:selector:tetragon:TracingPolicy:protect-credentials/kprobe:security_file_permission/ssh-keys-read",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicy:protect-credentials/kprobe:security_file_permission/ssh-keys-read"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:protect-credentials",
+      "id": "declares:probe:tetragon:TracingPolicy:protect-credentials/kprobe:security_mmap_file",
+      "kind": "declares",
+      "to": "probe:tetragon:TracingPolicy:protect-credentials/kprobe:security_mmap_file"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "probe:tetragon:TracingPolicy:protect-credentials/kprobe:security_mmap_file",
+      "id": "attaches:probe:tetragon:TracingPolicy:protect-credentials/kprobe:security_mmap_file",
+      "kind": "attaches",
+      "to": "hook:kprobe:security_mmap_file"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "ordinal": 1
+      },
+      "from": "probe:tetragon:TracingPolicy:protect-credentials/kprobe:security_mmap_file",
+      "id": "filters:selector:tetragon:TracingPolicy:protect-credentials/kprobe:security_mmap_file/token-mapped",
+      "kind": "filters",
+      "to": "selector:tetragon:TracingPolicy:protect-credentials/kprobe:security_mmap_file/token-mapped"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "policy:tetragon:TracingPolicy:protect-credentials",
+      "id": "applies-to:policy:tetragon:TracingPolicy:protect-credentials",
+      "kind": "applies-to",
+      "to": "subject:workloads:pods%20where%20app.kubernetes.io%2Fpart-of%3Dpayments"
+    },
+    {
+      "confidence": "derived",
+      "from": "policy:tetragon:TracingPolicyNamespaced:checkout:egress-audit",
+      "id": "covers:policy:tetragon:TracingPolicyNamespaced:checkout:egress-audit/StatefulSet:checkout:checkout-web",
+      "kind": "covers",
+      "to": "workload:StatefulSet:checkout:checkout-web"
+    },
+    {
+      "confidence": "derived",
+      "from": "policy:tetragon:TracingPolicy:protect-credentials",
+      "id": "covers:policy:tetragon:TracingPolicy:protect-credentials/Deployment:payments:payments-api",
+      "kind": "covers",
+      "to": "workload:Deployment:payments:payments-api"
+    },
+    {
+      "confidence": "derived",
+      "from": "policy:tetragon:TracingPolicy:protect-credentials",
+      "id": "covers:policy:tetragon:TracingPolicy:protect-credentials/CronJob:payments:settlement",
+      "kind": "covers",
+      "to": "workload:CronJob:payments:settlement"
+    }
+  ],
+  "schema": "architecture/v0",
+  "vocabularies": [
+    "runtime-policy/v0"
+  ]
+}

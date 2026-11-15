@@ -1,0 +1,57 @@
+[package]
+name = "projections-cli"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+# Workspace locks use std's file locks (Rust 1.89); the comparator runtime (wasmi 2) requires 1.86.
+rust-version = "1.89"
+
+[[bin]]
+name = "projections"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+axum = "0.8"
+clap = { version = "4", features = ["derive"] }
+globset = "0.4"
+libc = "0.2"
+mime_guess = "2"
+projections-comparator-runtime = { path = "../comparators/runtime" }
+projections-engine = { path = "../engine" }
+projections-extractor-catalog = { path = "../extractors/catalog" }
+projections-extractor-sdk = { path = "../extractors/sdk" }
+projections-rules-yaml = { path = "../comparators/rules/yaml" }
+rand = "0.9"
+regex = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+sha2 = "0.10"
+subtle = "2"
+tempfile = "3"
+tokio = { version = "1", features = ["full"] }
+tower = { version = "0.5", features = ["util"] }
+uuid = { version = "1", features = ["v4"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = [
+  "Win32_Foundation",
+  "Win32_Security",
+  "Win32_Storage_FileSystem",
+  "Win32_System_Diagnostics_ToolHelp",
+  "Win32_System_JobObjects",
+  "Win32_System_Threading",
+] }
+
+[dev-dependencies]
+# Tests cross-check the embedded module against the same code built natively.
+projections-comparator-default = { path = "../comparators/default" }
+projections-extractor-go-support = { path = "../extractors/go-support" }
+wat = "1"
+png = "0.17"
+
+# Released by dist (GitHub Releases and installers) even though no crate is published to crates.io.
+[package.metadata.dist]
+dist = true

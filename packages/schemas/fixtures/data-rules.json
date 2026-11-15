@@ -1,0 +1,408 @@
+{
+  "version": 0,
+  "vocabularies": {
+    "dependency-injection/v0": ["architecture/v0"],
+    "infrastructure/v0": ["architecture/v0"],
+    "runtime-policy/v0": ["architecture/v0"]
+  },
+  "rules": [
+    {
+      "schema": "treemap/v0",
+      "vocabulary": null,
+      "collection": "entities",
+      "kinds": null,
+      "fields": [{"name":"value","type":"nonnegative","required":false}]
+    },
+    {
+      "schema": "metrics/v0",
+      "vocabulary": null,
+      "collection": "entities",
+      "kinds": null,
+      "fields": [
+        {"name":"value","type":"number","required":true},
+        {"name":"unit","type":"string","required":false}
+      ]
+    },
+    {
+      "schema": "api/v0",
+      "vocabulary": null,
+      "collection": "entities",
+      "kinds": ["export","type","member","function","class","interface","method","property","enum"],
+      "fields": [{"name":"signature","type":"string","required":true}]
+    },
+    {
+      "schema": "api/v0",
+      "vocabulary": null,
+      "collection": "entities",
+      "kinds": null,
+      "fields": [
+        {
+          "name": "contract",
+          "type": {
+            "record": "contract",
+            "fields": [
+              {
+                "name": "declaration",
+                "type": {
+                  "enum": [
+                    "package",
+                    "module",
+                    "class",
+                    "struct",
+                    "union",
+                    "enum",
+                    "interface",
+                    "alias",
+                    "type",
+                    "function",
+                    "method",
+                    "constructor",
+                    "property",
+                    "field",
+                    "variant",
+                    "constant",
+                    "variable",
+                    "event",
+                    "index",
+                    "call",
+                    "construct",
+                    "associated-type",
+                    "implementation",
+                    "re-export",
+                    "macro"
+                  ]
+                },
+                "required": true
+              },
+              {"name":"term","type":"text","required":true},
+              {"name":"visibility","type":{"enum":["public","protected"]},"required":true},
+              {"name":"static","type":"boolean","required":false},
+              {"name":"abstract","type":"boolean","required":false},
+              {"name":"sealed","type":"boolean","required":false},
+              {"name":"readonly","type":"boolean","required":false},
+              {"name":"required","type":"boolean","required":false},
+              {"name":"optional","type":"boolean","required":false},
+              {"name":"nonExhaustive","type":"boolean","required":false},
+              {"name":"hiddenMembers","type":"boolean","required":false},
+              {
+                "name": "type",
+                "type": {
+                  "record": "typeRef",
+                  "fields": [
+                    {"name":"text","type":"string","required":true},
+                    {
+                      "name": "union",
+                      "type": {
+                        "array": {
+                          "record": "constituent",
+                          "fields": [
+                            {"name":"text","type":"string","required":true},
+                            {"name":"primitive","type":"string","required":false}
+                          ]
+                        }
+                      },
+                      "required": false
+                    }
+                  ]
+                },
+                "required": false
+              },
+              {"name":"value","type":"string","required":false},
+              {"name":"underlying","type":"string","required":false},
+              {"name":"source","type":"string","required":false},
+              {
+                "name": "access",
+                "type": {
+                  "record": "access",
+                  "fields": [
+                    {"name":"read","type":{"enum":["public","protected"]},"required":false},
+                    {"name":"write","type":{"enum":["public","protected"]},"required":false},
+                    {"name":"init","type":{"enum":["public","protected"]},"required":false}
+                  ]
+                },
+                "required": false
+              },
+              {"name":"attributes","type":"strings","required":false},
+              {
+                "name": "signatures",
+                "type": {
+                  "array": {
+                    "record": "signature",
+                    "fields": [
+                      {
+                        "name": "parameters",
+                        "type": {
+                          "array": {
+                            "record": "parameter",
+                            "fields": [
+                              {"name":"name","type":"string","required":true},
+                              {
+                                "name": "type",
+                                "type": {
+                                  "record": "typeRef",
+                                  "fields": [
+                                    {"name":"text","type":"string","required":true},
+                                    {
+                                      "name": "union",
+                                      "type": {
+                                        "array": {
+                                          "record": "constituent",
+                                          "fields": [
+                                            {"name":"text","type":"string","required":true},
+                                            {"name":"primitive","type":"string","required":false}
+                                          ]
+                                        }
+                                      },
+                                      "required": false
+                                    }
+                                  ]
+                                },
+                                "required": true
+                              },
+                              {"name":"optional","type":"boolean","required":true},
+                              {"name":"variadic","type":"boolean","required":true},
+                              {"name":"default","type":"string","required":false},
+                              {
+                                "name": "passing",
+                                "type": {"enum":["value","ref","out","in","ref readonly"]},
+                                "required": true
+                              },
+                              {"name":"attributes","type":"strings","required":false}
+                            ]
+                          }
+                        },
+                        "required": true
+                      },
+                      {
+                        "name": "returns",
+                        "type": {
+                          "record": "typeRef",
+                          "fields": [
+                            {"name":"text","type":"string","required":true},
+                            {
+                              "name": "union",
+                              "type": {
+                                "array": {
+                                  "record": "constituent",
+                                  "fields": [
+                                    {"name":"text","type":"string","required":true},
+                                    {"name":"primitive","type":"string","required":false}
+                                  ]
+                                }
+                              },
+                              "required": false
+                            }
+                          ]
+                        },
+                        "required": true
+                      },
+                      {"name":"returnAttributes","type":"strings","required":false},
+                      {
+                        "name": "typeParameters",
+                        "type": {
+                          "array": {
+                            "record": "typeParameter",
+                            "fields": [
+                              {"name":"name","type":"string","required":true},
+                              {"name":"constraints","type":"strings","required":true},
+                              {"name":"default","type":"string","required":false},
+                              {"name":"type","type":"string","required":false}
+                            ]
+                          }
+                        },
+                        "required": false
+                      }
+                    ]
+                  }
+                },
+                "required": false
+              },
+              {
+                "name": "typeParameters",
+                "type": {
+                  "array": {
+                    "record": "typeParameter",
+                    "fields": [
+                      {"name":"name","type":"string","required":true},
+                      {"name":"constraints","type":"strings","required":true},
+                      {"name":"default","type":"string","required":false},
+                      {"name":"type","type":"string","required":false}
+                    ]
+                  }
+                },
+                "required": false
+              },
+              {
+                "name": "supertypes",
+                "type": {
+                  "array": {
+                    "record": "supertype",
+                    "fields": [
+                      {"name":"relation","type":{"enum":["extends","implements"]},"required":true},
+                      {"name":"type","type":"string","required":true}
+                    ]
+                  }
+                },
+                "required": false
+              },
+              {"name":"constraints","type":"strings","required":false},
+              {"name":"native","type":"object","required":false}
+            ]
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "schema": "database/v0",
+      "vocabulary": null,
+      "collection": "entities",
+      "kinds": ["column"],
+      "fields": [
+        {"name":"type","type":"text","required":true},
+        {"name":"databaseType","type":"nullable-string","required":false},
+        {"name":"nullable","type":"boolean","required":false},
+        {"name":"primaryKey","type":"boolean","required":false}
+      ]
+    },
+    {
+      "schema": "database/v0",
+      "vocabulary": null,
+      "collection": "entities",
+      "kinds": ["constraint"],
+      "fields": [
+        {"name":"type","type":"string","required":false},
+        {"name":"table","type":"string","required":false},
+        {"name":"columns","type":"strings","required":false}
+      ]
+    },
+    {
+      "schema": "database/v0",
+      "vocabulary": null,
+      "collection": "entities",
+      "kinds": ["primary-key"],
+      "fields": [
+        {"name":"table","type":"string","required":false},
+        {"name":"columns","type":"strings","required":false}
+      ]
+    },
+    {
+      "schema": "database/v0",
+      "vocabulary": null,
+      "collection": "relationships",
+      "kinds": ["foreign-key","relation"],
+      "fields": [
+        {"name":"columns","type":"strings","required":false},
+        {"name":"principalColumns","type":"strings","required":false}
+      ]
+    },
+    {
+      "schema": "architecture/v0",
+      "vocabulary": "dependency-injection/v0",
+      "collection": "entities",
+      "kinds": ["service"],
+      "fields": [
+        {"name":"type","type":"string","required":false},
+        {"name":"key","type":"string","required":false},
+        {"name":"name","type":"string","required":false},
+        {"name":"module","type":"string","required":false}
+      ]
+    },
+    {
+      "schema": "architecture/v0",
+      "vocabulary": "dependency-injection/v0",
+      "collection": "entities",
+      "kinds": ["registration"],
+      "fields": [
+        {"name":"lifetime","type":"string","required":false},
+        {"name":"scope","type":"string","required":false},
+        {"name":"declaredLifetime","type":"string","required":false},
+        {"name":"ordinal","type":"number","required":false},
+        {"name":"implementation","type":"string","required":false},
+        {"name":"module","type":"string","required":false}
+      ]
+    },
+    {
+      "schema": "architecture/v0",
+      "vocabulary": "dependency-injection/v0",
+      "collection": "entities",
+      "kinds": ["implementation"],
+      "fields": [{"name":"type","type":"string","required":false}]
+    },
+    {
+      "schema": "architecture/v0",
+      "vocabulary": "dependency-injection/v0",
+      "collection": "relationships",
+      "kinds": ["dependsOn"],
+      "fields": [
+        {"name":"parameter","type":"string","required":false},
+        {"name":"optional","type":"boolean","required":false},
+        {"name":"collection","type":"boolean","required":false}
+      ]
+    },
+    {
+      "schema": "architecture/v0",
+      "vocabulary": "infrastructure/v0",
+      "collection": "entities",
+      "kinds": null,
+      "fields": [
+        {"name":"type","type":"string","required":false},
+        {"name":"provider","type":"string","required":false},
+        {"name":"action","type":"string","required":false},
+        {"name":"replaceOrder","type":"string","required":false}
+      ]
+    },
+    {
+      "schema": "architecture/v0",
+      "vocabulary": "runtime-policy/v0",
+      "collection": "entities",
+      "kinds": ["policy"],
+      "fields": [
+        {"name":"namespace","type":"nullable-string","required":false},
+        {"name":"mode","type":"string","required":false},
+        {"name":"scope","type":"string","required":false},
+        {"name":"nodes","type":"string","required":false},
+        {"name":"effect","type":"string","required":false}
+      ]
+    },
+    {
+      "schema": "architecture/v0",
+      "vocabulary": "runtime-policy/v0",
+      "collection": "entities",
+      "kinds": ["hook"],
+      "fields": [
+        {"name":"hookType","type":"string","required":false},
+        {"name":"stability","type":"string","required":false},
+        {"name":"category","type":"string","required":false}
+      ]
+    },
+    {
+      "schema": "architecture/v0",
+      "vocabulary": "runtime-policy/v0",
+      "collection": "entities",
+      "kinds": ["selector"],
+      "fields": [
+        {"name":"effect","type":"string","required":false},
+        {"name":"enforcement","type":"string","required":false},
+        {"name":"ordinal","type":"number","required":false}
+      ]
+    },
+    {
+      "schema": "architecture/v0",
+      "vocabulary": "runtime-policy/v0",
+      "collection": "entities",
+      "kinds": ["subject"],
+      "fields": [{"name":"subjectKind","type":"string","required":false}]
+    },
+    {
+      "schema": "architecture/v0",
+      "vocabulary": "runtime-policy/v0",
+      "collection": "relationships",
+      "kinds": ["matches","excludes"],
+      "fields": [
+        {"name":"operator","type":"string","required":false},
+        {"name":"parent","type":"boolean","required":false}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+/* Deliberately hostile global styles of an embedding page. Loaded after ui.css. */
+:root {
+  --background: 300 100% 50%;
+  --primary: 120 100% 50%;
+  --radius: 40px;
+  --tw-ring-color: rgb(255, 0, 0);
+}
+html {
+  font-size: 10px;
+}
+* {
+  margin: 7px;
+  box-sizing: content-box;
+}
+*::before {
+  content: '»';
+}
+body {
+  font: 22px/2 serif;
+  color: rgb(128, 0, 128);
+  letter-spacing: 2px;
+  text-align: center;
+}
+div {
+  padding: 3px;
+}
+button {
+  background: rgb(255, 105, 180);
+  border: 4px dotted red;
+  font-family: serif;
+  padding: 20px;
+}
+table,
+td {
+  border: 3px solid blue;
+}
+td {
+  padding: 15px;
+}
+input {
+  font-size: 30px;
+}
+h2 {
+  text-transform: uppercase;
+}
+svg {
+  fill: rgb(255, 0, 0);
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* tw-animate-css's unprefixed name: the UI's own popover animation must not pick this up. */
+@keyframes enter {
+  from {
+    opacity: 0.123;
+  }
+}
+#page-spinner {
+  width: 20px;
+  height: 20px;
+  background: black;
+  animation: spin 1s linear infinite;
+}

@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/environment/v0.json",
+  "title": "Projections environment",
+  "description": "How to make a checkout usable for the repository's toolchain extractors, as its CI does: `.github/projections/environment.json` or `.projections/environment.json`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "format": {"type": "string", "const": "projections.environment"},
+    "version": {"type": "number", "const": 0},
+    "prepare": {
+      "description": "Run in order in a workspace before a toolchain extractor runs there, and in the working tree only on demand (`projections prepare`). They are repository code, so they need `--trust`.",
+      "type": "array",
+      "items": {"$ref": "#/$defs/step"},
+      "maxItems": 20
+    },
+    "toolchain": {
+      "description": "Commands whose output identifies the toolchain, such as `node --version`; part of the environment fingerprint that keys cached environmental extractions.",
+      "type": "array",
+      "items": {
+        "description": "A program and its arguments, run directly, never through a shell.",
+        "type": "array",
+        "items": {"type": "string", "pattern": "^[^\\u0000]*$"},
+        "minItems": 1,
+        "maxItems": 100
+      },
+      "maxItems": 10
+    },
+    "workspace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy"],
+      "properties": {
+        "strategy": {
+          "description": "The team's workspace strategy for this repository; a developer's `--workspace` or user configuration overrides it.",
+          "enum": ["fresh", "worktree", "clone", "sparse", "none"]
+        }
+      }
+    },
+    "devcontainer": {
+      "description": "A devcontainer configuration describing the same environment. Reported by `projections doctor`; not run.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]+$"
+    }
+  },
+  "$defs": {
+    "step": {
+      "description": "One command that makes a checkout usable, such as installing its dependencies.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "run", "key"],
+      "properties": {
+        "id": {
+          "description": "Names the step in logs, records and failures.",
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$"
+        },
+        "run": {
+          "description": "A program and its arguments, run directly, never through a shell.",
+          "type": "array",
+          "items": {"type": "string", "pattern": "^[^\\u0000]*$"},
+          "minItems": 1,
+          "maxItems": 100
+        },
+        "key": {
+          "description": "Globs (`*` within a path segment, `**` across them) of the files whose content decides whether the step must run again, typically lockfiles and manifests. The step reruns only when their paths or contents change.",
+          "type": "array",
+          "items": {"type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]+$"},
+          "minItems": 1,
+          "maxItems": 50
+        },
+        "directory": {
+          "description": "The working directory, relative to the checkout. Default `.`.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\u0000]+$"
+        },
+        "environment": {
+          "description": "Variables passed through from the invoking environment, besides the home, cache, temporary-directory and proxy variables every step receives. Steps may use the network.",
+          "type": "array",
+          "items": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+          "uniqueItems": true
+        },
+        "timeoutMs": {
+          "description": "How long the step may run. Default ten minutes, at most an hour.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        }
+      }
+    }
+  }
+}

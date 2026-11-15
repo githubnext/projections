@@ -1,0 +1,1 @@
+{"name":"@acme/shared","version":"2.1.0","dependencies":{"is-number":"^7.0.0"},"peerDependencies":{"is-odd":"*"}}

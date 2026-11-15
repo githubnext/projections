@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Hostile probe</title>
+  </head>
+  <body>
+    <main id="root">Hostile renderer probe for the host's browser tests.</main>
+    <script>
+      // A deliberately misbehaving renderer used only by the host's browser tests.
+      // It speaks the protocol by hand (no SDK) and reports what it observed through
+      // `error` messages, which the host displays.
+      ;(function () {
+        const params = new URLSearchParams(location.hash.slice(1))
+        const channel = params.get('channel')
+        const host = params.get('origin')
+        const probe = new URLSearchParams(location.search).get('probe') || 'network'
+        const post = (message, target) => parent.postMessage(Object.assign({projections: 0, channel}, message), target || host)
+        const report = text => post({type: 'error', message: text})
+        const received = []
+        addEventListener('message', event => {
+          if (event.source !== parent || !event.data || event.data.channel !== channel) return
+          received.push(event.data.type === 'progress' ? `progress:${event.data.progress}` : event.data.type)
+          if (probe === 'slow' && event.data.type === 'progress') {
+            setTimeout(() => {
+              const progress = received.filter(item => item.startsWith('progress:'))
+              post({type: 'rendered', progress: event.data.progress})
+              report(`received ${progress.length} progress messages; last ${progress.at(-1)}`)
+            }, 300)
+          }
+          // Declared comparison modes: reports the init's mode and every progress it received since.
+          else if (
+            (probe === 'diff' || probe === 'paired' || probe === 'noswipe' || probe === 'diffonly') &&
+            (event.data.type === 'init' || event.data.type === 'progress')
+          ) {
+            if (event.data.type === 'init') {
+              received.length = 0
+              received.push(`init:${event.data.comparisonMode || 'none'}`)
+            }
+            post({type: 'rendered', progress: event.data.type === 'progress' ? event.data.progress : 1})
+            const progress = received.filter(item => item.startsWith('progress:'))
+            report(
+              `${received[0]} progress=${progress.length}${progress.length ? ` last=${progress.at(-1)} highlighting=${event.data.highlighting}` : ''}`,
+            )
+          }
+          // Like any renderer, the other probes acknowledge painting each progress, so the host shows them.
+          else if (probe !== 'silent' && event.data.type === 'progress') post({type: 'rendered', progress: event.data.progress})
+        })
+        async function attempt(name, run) {
+          try {
+            await run()
+            return `${name}=allowed`
+          } catch {
+            return `${name}=blocked`
+          }
+        }
+        async function network() {
+          const target = new URL('/__probe/request', location.href).href
+          const results = await Promise.all([
+            attempt('fetch', () => fetch(target)),
+            attempt(
+              'xhr',
+              () =>
+                new Promise((resolve, reject) => {
+                  const request = new XMLHttpRequest()
+                  request.onload = resolve
+                  request.onerror = reject
+                  request.open('GET', target)
+                  request.send()
+                }),
+            ),
+            attempt(
+              'websocket',
+              () =>
+                new Promise((resolve, reject) => {
+                  const socket = new WebSocket(target.replace(/^http/, 'ws'))
+                  socket.onopen = resolve
+                  socket.onerror = reject
+                }),
+            ),
+            attempt(
+              'image',
+              () =>
+                new Promise((resolve, reject) => {
+                  const image = new Image()
+                  image.onload = resolve
+                  image.onerror = reject
+                  image.src = new URL('/__probe/image', location.href).href
+                }),
+            ),
+            attempt('parent-dom', () => parent.document.title),
+            attempt('storage', () => localStorage.length),
+            attempt('cookie', () => document.cookie),
+            attempt('top-navigation', () => {
+              top.location.href = new URL('/__probe/top', location.href).href
+            }),
+          ])
+          // Fire-and-forget channels whose success the frame can't observe; the server records any arrival.
+          try {
+            navigator.sendBeacon(new URL('/__probe/beacon', location.href).href, 'x')
+          } catch {
+            /* blocked */
+          }
+          try {
+            const link = document.createElement('link')
+            link.rel = 'prefetch'
+            link.href = new URL('/__probe/prefetch', location.href).href
+            document.head.append(link)
+          } catch {
+            /* blocked */
+          }
+          // Same-origin subresources are refused too: the policy grants no source but inline code.
+          const script = document.createElement('script')
+          script.src = new URL('/__probe/script', location.href).href
+          document.head.append(script)
+          const style = document.createElement('link')
+          style.rel = 'stylesheet'
+          style.href = new URL('/__probe/style', location.href).href
+          document.head.append(style)
+          import(new URL('/__probe/module', location.href).href).catch(() => {})
+          try {
+            const form = document.createElement('form')
+            form.method = 'post'
+            form.action = new URL('/__probe/form', location.href).href
+            form.target = '_blank'
+            document.body.append(form)
+            form.submit()
+          } catch {
+            /* blocked */
+          }
+          report(`network ${results.join(',')}`)
+        }
+        const controls = [
+          {
+            id: 'layout',
+            label: 'Layout',
+            type: 'choice',
+            default: 'vertical',
+            choices: [
+              {value: 'vertical', label: 'Vertical'},
+              {value: 'horizontal', label: 'Horizontal'},
+            ],
+          },
+          {id: 'labels', label: 'Labels', type: 'toggle', default: true},
+          {id: 'zoom', label: 'Zoom', type: 'range', min: 50, max: 200, step: 10, default: 100, unit: '%', group: 'zoom'},
+          {id: 'fit', label: 'Fit', type: 'action', icon: 'fit', group: 'zoom'},
+        ]
+        let lastAction = 'none'
+        let lastOptions = {}
+        if (probe === 'controls') {
+          addEventListener('message', event => {
+            if (event.source !== parent || !event.data || event.data.channel !== channel) return
+            if (event.data.type === 'options') {
+              lastOptions = event.data.options
+              report(`options ${['layout', 'labels', 'zoom', 'grid'].map(id => `${id}=${lastOptions[id]}`).join(' ')} action=${lastAction}`)
+            }
+            if (event.data.type === 'action') {
+              lastAction = event.data.id
+              report(`options ${['layout', 'labels', 'zoom', 'grid'].map(id => `${id}=${lastOptions[id]}`).join(' ')} action=${lastAction}`)
+              // Invalid declarations are dropped by the host; a valid one replaces the controls.
+              post({type: 'controls', controls: [...controls, controls[0]]})
+              post({type: 'controls', controls: [...controls, {id: 'grid', label: 'Grid', type: 'toggle', default: false}]})
+            }
+          })
+        }
+        // Declared out of canonical order on purpose: the host orders them.
+        const comparisonModes =
+          probe === 'diff'
+            ? ['diff', 'animated']
+            : probe === 'paired'
+              ? ['swipe', 'side-by-side']
+              : probe === 'noswipe'
+                ? ['animated', 'side-by-side']
+                : probe === 'diffonly'
+                  ? ['diff']
+                  : undefined
+        post({
+          type: 'ready',
+          capabilities: {
+            changeHighlighting: 'none',
+            ...(probe === 'controls' ? {controls} : {}),
+            ...(comparisonModes ? {comparisonModes} : {}),
+          },
+        })
+        if (probe === 'network') void network()
+        if (probe === 'forge') {
+          post({type: 'select', id: 'forged-wrong-channel'}, '*')
+          parent.postMessage({projections: 0, channel: 'x'.repeat(32), type: 'select', id: 'forged-channel'}, '*')
+          parent.postMessage({projections: 2, channel, type: 'select', id: 'forged-version'}, '*')
+          parent.postMessage({projections: 0, channel, type: 'select', id: 'forged-extra', extra: true}, '*')
+          parent.postMessage({projections: 0, channel, type: 'steal', id: 'forged-type'}, '*')
+          parent.postMessage({projections: 0, channel, type: 'select', id: 'x'.repeat(70000)}, '*')
+          post({type: 'select', id: 'payments'})
+        }
+        if (probe === 'flood') for (let index = 0; index < 5000; index++) post({type: 'height', px: 200 + (index % 10)})
+        // A layout feedback loop: the requested height alternates, as when a page scrollbar comes and goes.
+        // A legend for the host to draw once: an invalid one first (both a token and a color), which the host drops.
+        if (probe === 'legend') {
+          post({type: 'legend', items: [{label: 'Broken', token: 'color-added', color: '#fff'}]})
+          post({
+            type: 'legend',
+            title: 'Changes',
+            items: [
+              {label: 'Added', token: 'color-added', shape: 'square'},
+              {label: 'Removed', token: 'color-removed', shape: 'circle'},
+              {label: 'Calls', color: '#0969da', shape: 'line'},
+              {label: 'Inferred', token: 'color-fg-muted', shape: 'dashed'},
+              {label: 'Changed', token: 'color-modified-muted', shape: 'square'},
+            ],
+          })
+        }
+        if (probe === 'oscillate')
+          for (let index = 0; index < 20; index++) setTimeout(() => post({type: 'height', px: index % 2 ? 700 : 500}), index * 50)
+        if (probe === 'navigate')
+          setTimeout(() => {
+            location.href = new URL('index.html?probe=again', location.href).href
+          }, 200)
+        if (probe === 'open') post({type: 'open', path: 'src/checkout.ts', line: 12})
+      })()
+    </script>
+  </body>
+</html>

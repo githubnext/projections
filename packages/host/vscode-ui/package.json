@@ -1,0 +1,63 @@
+{
+  "name": "@githubnext/projections-host-vscode",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "VS Code UI for the Projections host: VS Code-native controls (VSCode Elements, codicons) and theme tokens read from VS Code's --vscode-* variables, on the headless host core",
+  "files": [
+    "dist",
+    "src/styles.css",
+    "src/styles",
+    "src/inspector.css",
+    "fixtures/themes/*.json",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./elements": {
+      "types": "./dist/register.d.ts",
+      "import": "./dist/register.js"
+    },
+    "./running": {
+      "types": "./dist/running.d.ts",
+      "import": "./dist/running.js"
+    },
+    "./styles.css": "./src/styles.css",
+    "./inspector.css": "./src/inspector.css",
+    "./codicon.css": "./dist/codicons/codicon.css",
+    "./codicons/*": "./dist/codicons/*",
+    "./themes/*": "./fixtures/themes/*.json",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@githubnext/projections-host": "0.1.0",
+    "@githubnext/projections-schemas": "0.1.0",
+    "@vscode-elements/elements": "2.5.1",
+    "@vscode/codicons": "0.0.45"
+  },
+  "peerDependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@githubnext/projections-renderer-sdk": "0.1.0",
+    "@playwright/test": "^1.55.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/codicon-css.mjs",
+    "icons": "node scripts/icons.mjs",
+    "notices": "node scripts/notices.mjs",
+    "test": "node --test test/*.test.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.browser.json",
+    "test:browser": "npm run build --workspace @githubnext/projections-storybook && playwright test"
+  }
+}

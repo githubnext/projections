@@ -1,0 +1,340 @@
+/* Code statistics. Every visual value is a host theme token: the kit's semantic palette, chart series, type, spacing and shape. */
+/* The chart is one raised panel on the stage; its recessed tracks read against the panel, not the stage. */
+.statistics-view {
+  display: flex;
+  flex-direction: column;
+  container: statistics / inline-size;
+  padding: var(--projections-space-2) var(--projections-stage-inset, var(--projections-space-3)) var(--projections-space-3);
+  background: var(--stage);
+}
+.statistics-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--raised);
+  border: var(--projections-border-width) solid var(--divider);
+  border-radius: var(--projections-radius);
+}
+.statistics-view[data-diff-highlighting='false'] {
+  --stat-value-width: 5.5rem;
+}
+.statistics-view[data-diff-highlighting='false'] .stat-row {
+  grid-template-columns: minmax(0, 1fr);
+}
+.statistics-view[data-diff-highlighting='false'] .stat-status {
+  display: none;
+}
+.statistics-bars {
+  display: flex;
+  flex-direction: column;
+  padding: var(--projections-space-3) var(--projections-space-4) var(--projections-space-4);
+}
+/* A row occupies a fractional track, so a language that leaves shrinks its own
+   slot to nothing and the rows below slide up instead of snapping into place.
+   Clipping only while collapsing keeps focus rings intact at rest. */
+.stat-slot {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+.stat-slot.collapsing {
+  overflow: hidden;
+}
+.stat-slot-inner {
+  min-height: 0;
+}
+/* The last column is the language's change status: reserved on every row, filled while its step is emphasized. */
+.stat-row {
+  display: grid;
+  grid-template-columns: 1fr var(--pk-status-width);
+  align-items: center;
+  gap: var(--projections-space-2);
+}
+.stat-hit {
+  display: grid;
+  grid-template-columns: minmax(0, var(--stat-label-columns, 150px)) minmax(0, 1fr) var(--stat-value-columns, var(--stat-value-width, 9rem));
+  align-items: center;
+  gap: var(--projections-space-3);
+  min-width: 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: var(--projections-space-1) var(--projections-space-2);
+  border-radius: var(--projections-radius);
+  font: inherit;
+  color: inherit;
+}
+button.stat-hit {
+  cursor: pointer;
+}
+button.stat-hit:hover {
+  background: var(--hover);
+}
+/* Hover, focus and selection rings are the SDK's, over the row's hit area and inside each slice's own edge. */
+.stat-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--projections-font-size-xs);
+}
+/* The bar is a little thinner than a full spacing step, so rows read as separate. */
+.stat-track {
+  position: relative;
+  height: calc(var(--projections-space-5) - var(--projections-space-1));
+  background: var(--recessed);
+  border-radius: var(--projections-radius-sm);
+  overflow: hidden;
+}
+.stat-bar {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  /* One continuous bar: only its outer ends are rounded; a gained part sits inside it. */
+  border-radius: var(--projections-radius-sm);
+  overflow: hidden;
+}
+/* While a lost part follows the bar, they join square and the ghost carries the rounded end. */
+.stat-bar.joined {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+/* Gained so far: the bar's own colour under a light hatch, inside the bar. */
+.stat-gain {
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--raised) 55%, transparent) 0 2px, transparent 2px 5px);
+}
+/* Lost so far: a neutral hatched ghost of the before count with a dashed edge, flush with the bar's end. */
+.stat-loss {
+  position: absolute;
+  inset-block: 0;
+  box-sizing: border-box;
+  background: repeating-linear-gradient(135deg, var(--border-emphasis) 0 1.5px, transparent 1.5px 5px), var(--recessed);
+  border: var(--projections-border-width) dashed var(--border-emphasis);
+  border-left: 0;
+  border-start-end-radius: var(--projections-radius-sm);
+  border-end-end-radius: var(--projections-radius-sm);
+}
+.stat-hatch-line.gain {
+  fill: color-mix(in srgb, var(--raised) 60%, transparent);
+}
+.stat-hatch-line.loss {
+  fill: color-mix(in srgb, var(--text) 45%, transparent);
+}
+/* The value column is the count, then a delta slot of fixed width (--stat-delta-width, see columns.ts), so a delta never pushes its count. */
+.stat-value {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  font-size: var(--projections-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+.stat-delta {
+  flex: none;
+  display: inline-flex;
+  justify-content: flex-end;
+  width: var(--stat-delta-width, 0px);
+}
+.stat-delta-label {
+  font-size: var(--projections-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+.stat-delta-label.added {
+  color: var(--green);
+}
+.stat-delta-label.removed {
+  color: var(--red);
+}
+
+.statistics-share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--projections-space-6);
+  padding: var(--projections-space-4);
+}
+.statistics-share svg {
+  width: 320px;
+  max-width: 100%;
+  flex: 0 0 auto;
+}
+.stat-arc.interactive {
+  cursor: pointer;
+}
+/* SVG never takes an outline (it rings the bounding box, not the slice). */
+.stat-arc:focus {
+  outline: none;
+}
+.stat-centre-value {
+  font-size: var(--projections-font-size-xl);
+  font-weight: var(--projections-font-weight-semibold);
+  fill: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.stat-centre-label {
+  font-size: var(--projections-font-size-xs);
+  fill: var(--muted);
+}
+.statistics-values {
+  flex: 0 1 380px;
+  min-width: 190px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.stat-values-row {
+  display: flex;
+  align-items: center;
+  gap: var(--projections-space-2);
+  padding-bottom: var(--projections-space-1);
+  font-size: var(--projections-font-size-xs);
+}
+.statistics-values .stat-delta {
+  margin-left: calc(-1 * var(--projections-space-2));
+}
+.statistics-values .stat-values-value {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.statistics-values .entity-link {
+  color: var(--text);
+  text-align: left;
+}
+.statistics-values .entity-link:hover {
+  text-decoration: underline;
+}
+
+/* Narrow panes cannot hold a label, a bar and a number on one line without
+   starving the bar, so the bar takes a line of its own. */
+@container statistics (max-width: 420px) {
+  .stat-row {
+    grid-template-columns: 1fr var(--pk-status-width);
+  }
+  .stat-hit {
+    grid-template-columns: 1fr auto;
+    row-gap: var(--projections-space-1);
+  }
+  .stat-track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .stat-value {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  /* Status sits on the name's line, not centred between it and the bar. */
+  .stat-row .stat-status {
+    align-self: start;
+    margin-top: var(--projections-space-1);
+  }
+}
+
+/*
+ * Diff mode: one static frame of every language from either revision, each row at its After count with the struck
+ * Before count, the signed change and its status. The kit's `pk-region` marks each changed row in its change's hue
+ * (fill and same-hue edge, scaled by --emphasis); inside the bar the lines gained are edged in the added hue and the
+ * lines lost are a dashed ghost in the removed hue, so a row says both what changed and by how much.
+ */
+.statistics-view .stat-diff-delta.added {
+  color: color-mix(in srgb, var(--green) calc(var(--emphasis, 1) * 100%), var(--text));
+}
+.statistics-view .stat-diff-delta.removed {
+  color: color-mix(in srgb, var(--red) calc(var(--emphasis, 1) * 100%), var(--text));
+}
+.stat-diff-value {
+  display: grid;
+  grid-template-columns: var(--stat-was-width, 0px) var(--stat-now-width, auto) var(--stat-delta-width, 0px);
+  justify-content: end;
+  justify-items: end;
+  align-items: baseline;
+}
+.stat-diff-value .stat-was {
+  grid-column: 1;
+  padding-right: var(--projections-space-2);
+  color: var(--muted);
+}
+.stat-diff-value .stat-now {
+  grid-column: 2;
+}
+.stat-diff-value .stat-delta {
+  grid-column: 3;
+  width: auto;
+}
+.stat-was-label {
+  margin-right: 0.4em;
+  color: var(--muted);
+}
+.statistics-bars:has(.pk-region) {
+  gap: 2px;
+}
+.stat-row.pk-region {
+  border-radius: var(--projections-radius);
+}
+/* A selected changed row keeps its change edge: the SDK's selection ring draws over it. */
+/* Gained lines: the bar's own colour and hatch, edged in the added hue. */
+.stat-gain.diff {
+  box-shadow: inset 0 0 0 var(--stroke-strong) var(--green);
+}
+/* Lost lines: a hatched ghost in the removed hue with a dashed edge, where the Before bar ended. */
+.stat-loss.diff {
+  background: repeating-linear-gradient(135deg, var(--red-border) 0 1.5px, transparent 1.5px 5px), var(--red-soft);
+  border-color: var(--red);
+}
+
+.statistics-share.diff .stat-rings {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--projections-space-2);
+  margin: 0;
+  width: 320px;
+  max-width: 100%;
+}
+.stat-rings-caption {
+  font-size: var(--projections-font-size-xs);
+  color: var(--muted);
+}
+.stat-centre-was {
+  text-decoration: line-through;
+}
+.stat-ring-slice {
+  stroke: var(--raised);
+  stroke-width: var(--stroke);
+}
+/* The paired rings already show a resize; only a language that arrives or leaves is edged, in its change's hue. */
+.pk .statistics-share.diff .stat-arc:is([data-change='added'], [data-change='removed']) > .stat-ring-slice {
+  stroke: color-mix(in srgb, var(--pk-change-ink) calc(var(--emphasis, 1) * 100%), var(--raised));
+  stroke-width: var(--stroke-strong);
+}
+.pk .statistics-share.diff .stat-arc[data-change='removed'] > .stat-ring-slice {
+  stroke-dasharray: 4 3;
+}
+/* Hover, focus and selection of a diff slice: the SDK's ring, inside the slice's own edge. */
+.statistics-share.diff .statistics-values {
+  flex-basis: 440px;
+  gap: 2px;
+}
+.statistics-share.diff .stat-values-row {
+  padding: var(--projections-space-1) var(--projections-space-2);
+  border-radius: var(--projections-radius);
+}
+.statistics-share.diff .stat-diff-value {
+  margin-left: auto;
+}
+.statistics-share.diff .stat-diff-value .stat-delta {
+  margin-left: 0;
+}
+/* Phones: the diff value column holds three counts, so its gaps tighten to leave the language's name room. */
+@container statistics (max-width: 420px) {
+  .statistics-view:has(.stat-diff-value) .stat-hit {
+    column-gap: var(--projections-space-2);
+  }
+  .stat-diff-value .stat-was {
+    padding-right: var(--projections-space-1);
+  }
+}

@@ -1,0 +1,48 @@
+name: Bug report
+description: Something in the CLI, the VS Code extension, the GitHub Action or a renderer doesn't work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Don't include credentials, private repository data or exploit details. Report security issues by email, as [SECURITY.md](../blob/main/SECURITY.md) describes, not here.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - CLI
+        - VS Code extension
+        - GitHub Action
+        - Extractor
+        - Comparator
+        - Renderer
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version and platform
+      description: '`projections --version`, the extension or Action version, and your operating system'
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: A minimal, synthetic reproduction, such as a small repository or the commands you ran.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Relevant, sanitized output (for example `projections doctor`).
+      render: text

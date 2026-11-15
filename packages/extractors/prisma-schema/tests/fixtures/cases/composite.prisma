@@ -1,0 +1,32 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+type Address {
+  street String
+  city   String
+  geo    Geo?
+}
+
+type Geo {
+  lat Float
+  lng Float
+}
+
+model Customer {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  address   Address?
+  addresses Address[]
+  orderIds  String[]  @db.ObjectId
+  orders    Order[]   @relation(fields: [orderIds], references: [id])
+  @@unique([name])
+}
+
+model Order {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  customerIds String[]   @db.ObjectId
+  customers   Customer[] @relation(fields: [customerIds], references: [id])
+  @@index([id])
+}

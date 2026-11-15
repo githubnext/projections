@@ -1,0 +1,5 @@
+{
+  "name": "catalog-demo",
+  "private": true,
+  "devEngines": {"packageManager": {"name": "pnpm", "version": "12.3.4"}}
+}

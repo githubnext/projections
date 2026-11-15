@@ -1,0 +1,5 @@
+model Post {
+  id     Int  @id @default(sequence())
+  userId BigInt
+  user   User @relation(fields: [userId], references: [id])
+}

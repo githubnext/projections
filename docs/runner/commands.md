@@ -332,22 +332,26 @@ frames, `000.png`, `001.png` and so on, and `frames.json`, which lists each
 frame's `file`, `progress`, `direction` and `durationMs`. A hold is one frame
 with its whole duration, and the list starts where the hold at the base starts,
 so playing the frames in order, looped, matches the viewer. Both ends show no
-change highlighting. GIF has only on-or-off transparency, so the card's
-anti-aliased corners would fringe. Draw GIF frames with `--matte` set to the
-background the GIF will sit on, for example GitHub's README background
-(`#ffffff` in light, `#0d1117` in dark), and keep the theme and matte paired.
-Then assemble the frames with their durations, for example with ffmpeg:
+change highlighting. Assemble the frames with their durations, for example into
+an animated PNG with ffmpeg. APNG keeps full colour and transparency, so the
+card's rounded corners sit cleanly on any background, and a `.png` file plays as
+an animation in browsers and on GitHub:
 
 ```sh
 projections compare main..HEAD -p files --output change.json
-projections show --from change.json --theme dark --matte '#0d1117' --scale 2 --frames frames --fps 12.5
+projections show --from change.json --theme dark --scale 2 --frames frames --fps 12.5
 # Each frame with its duration; ffmpeg's concat format needs the last file listed again to keep its duration.
 node -e 'const {frames} = require("./frames/frames.json")
 for (const f of frames) console.log(`file frames/${f.file}\nduration ${f.durationMs / 1000}`)
 console.log(`file frames/${frames.at(-1).file}`)' > list.txt
-ffmpeg -f concat -i list.txt \
-  -vf 'split[a][b];[a]palettegen=reserve_transparent=0[p];[b][p]paletteuse=dither=none' -loop 0 change-dark.gif
+ffmpeg -f concat -i list.txt -vf format=rgba -fps_mode vfr -plays 0 -f apng change-dark.png
 ```
+
+GIF has only on-or-off transparency, so its corners would fringe. For a GIF,
+draw the frames with `--matte` set to the background the GIF will sit on (for
+example `#ffffff`, or `#0d1117` for GitHub's default dark theme), keep the theme
+and matte paired, and encode with a palette:
+`-vf 'split[a][b];[a]palettegen=reserve_transparent=0[p];[b][p]paletteuse=dither=none' -loop 0 change-dark.gif`.
 
 `--scale` applies to the renderer's frame too, so a `--scale 2` image has text
 as sharp as the display it is drawn for.

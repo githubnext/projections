@@ -7,7 +7,7 @@
 //   node tools/scripts/readme-images.mjs [--only NAME,...] [--cache DIR]
 //
 // It needs `npm run build` and Cargo (or PROJECTIONS_BIN, a built CLI), Git and the network for the first clones (kept
-// in --cache, default ~/.cache/projections-readme-images), Chrome, Chromium or Edge, ffmpeg (for GIFs) and the .NET 8
+// in --cache, default ~/.cache/projections-readme-images), Chrome, Chromium or Edge, ffmpeg (for animations) and the .NET 8
 // SDK (the hero's extractor builds its example). Images marked `trust` use extractors that run tools or repository
 // code, so they extract with --trust. The images are committed; like the comparator examples, they aren't checked in
 // CI, because drawing them needs a browser.
@@ -32,8 +32,8 @@ const repositories = {
  * `before` and `after`) and how. An example's `comparator` is a comparator file in this repository, `tools` are
  * directories copied beside the app (a sample extractor), and `typescript` installs this repository's TypeScript
  * in the scratch checkout for extractors that use the project's own. `image` holds the `--png` options in CSS
- * pixels, sized so the card hugs the drawing; `side` draws one revision of the comparison alone; `gif` also draws the
- * animated comparison as a GIF that loops back and forth as the viewer plays it.
+ * pixels, sized so the card hugs the drawing; `side` draws one revision of the comparison alone; `animated` also draws the
+ * animated comparison as an animated PNG that loops back and forth as the viewer plays it.
  */
 const images = [
   {
@@ -48,7 +48,7 @@ const images = [
     },
     trust: true,
     image: {width: 980, height: 560, scale: 2},
-    gif: true,
+    animated: true,
   },
   {
     name: 'database',
@@ -249,10 +249,7 @@ function draw(document, file, theme, image, extra = []) {
   run(binary, [...imageOptions(document, theme, image), '--png', file, ...extra])
 }
 
-/** GitHub's README background in each theme, the matte behind a GIF's card (GIF has no partial transparency). */
-const matte = {light: '#ffffff', dark: '#0d1117'}
-
-/** A GIF's frame rate: 12.5 frames a second is a whole 8 cs a frame, the unit GIF delays are counted in. */
+/** An animation's frame rate: 12.5 frames a second, whole centiseconds a frame like the holds. */
 const fps = 12.5
 
 function ffmpeg(...args) {
@@ -260,22 +257,20 @@ function ffmpeg(...args) {
 }
 
 /**
- * A GIF of the animated comparison as the viewer plays it at 1× speed, looping back and forth: `--frames` records it
+ * An animated PNG of the comparison as the viewer plays it at 1× speed, looping back and forth: `--frames` records it
  * from the host's own playback timeline (the renderer's steps in each direction, its pace and the holds), each hold one
- * frame with its duration.
+ * frame with its duration. APNG rather than GIF: it keeps full colour and alpha, so the card's rounded corners stay
+ * transparent on every GitHub theme (GIF can only matte them onto one theme's background).
  */
-async function gif(document, file, theme, item, scratch) {
+async function animate(document, file, theme, item, scratch) {
   const frames = join(scratch, `${item.name}-${theme}-frames`)
-  run(binary, [...imageOptions(document, theme, item.image), '--frames', frames, '--fps', `${fps}`, '--matte', matte[theme]])
+  run(binary, [...imageOptions(document, theme, item.image), '--frames', frames, '--fps', `${fps}`])
   const recorded = JSON.parse(await readFile(join(frames, 'frames.json'), 'utf8')).frames
   const list = recorded.flatMap(frame => [`file '${join(frames, frame.file)}'`, `duration ${frame.durationMs / 1000}`])
   // The concat demuxer ignores the last entry's duration unless the file is listed again.
   list.push(`file '${join(frames, recorded.at(-1).file)}'`)
   await writeFile(join(frames, 'list.txt'), `${list.join('\n')}\n`)
   const width = Math.round(item.image.width * item.image.scale)
-  // One palette for the whole loop (per-frame palettes are ten times the size), all 256 colours (text on tinted fills
-  // keeps its anti-aliasing: about 60 dB against the frames) and no dither, which would speckle the flat fills.
-  const palette = 'split[a][b];[a]palettegen=max_colors=256:stats_mode=full:reserve_transparent=0[p];[b][p]paletteuse=dither=none'
   ffmpeg(
     '-f',
     'concat',
@@ -284,9 +279,14 @@ async function gif(document, file, theme, item, scratch) {
     '-i',
     join(frames, 'list.txt'),
     '-vf',
-    `scale=${width}:-1:flags=lanczos,${palette}`,
-    '-loop',
+    `scale=${width}:-1:flags=lanczos,format=rgba`,
+    // Each frame keeps its own duration, so the holds stay single frames.
+    '-fps_mode',
+    'vfr',
+    '-plays',
     '0',
+    '-f',
+    'apng',
     file,
   )
 }
@@ -325,10 +325,11 @@ try {
       await rm(file, {force: true})
       draw(document, file, theme, item.image, item.side ? ['--side', item.side] : [])
       console.log(`Wrote docs/images/readme/${item.name}-${theme}.png`)
-      if (item.gif) {
-        const animation = join(out, `${item.name}-${theme}.gif`)
-        await gif(document, animation, theme, item, scratch)
-        console.log(`Wrote docs/images/readme/${item.name}-${theme}.gif`)
+      if (item.animated) {
+        // `.png`, which GitHub serves as an image and browsers play as APNG.
+        const animation = join(out, `${item.name}-animated-${theme}.png`)
+        await animate(document, animation, theme, item, scratch)
+        console.log(`Wrote docs/images/readme/${item.name}-animated-${theme}.png`)
       }
     }
   }

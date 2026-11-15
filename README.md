@@ -27,8 +27,8 @@ Feel free to open a Discussion or chat with us on
 [X](https://x.com/GitHubNext)!_
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme/di-split-dark.gif">
-  <img alt="An animated dependency graph of a simple shop application: OrderService, which both controllers inject and which depends on the repository, payments, inventory, email and the clock, turns red and leaves; CheckoutService, OrderQueries and OrderNotifications arrive" src="docs/images/readme/di-split-light.gif">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme/di-split-animated-dark.png">
+  <img alt="An animated dependency graph of a simple shop application: OrderService, which both controllers inject and which depends on the repository, payments, inventory, email and the clock, turns red and leaves; CheckoutService, OrderQueries and OrderNotifications arrive" src="docs/images/readme/di-split-animated-light.png">
 </picture>
 
 ## The Mechanics

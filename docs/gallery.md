@@ -14,8 +14,8 @@ renderer draws a container's registrations as a graph: each service, its
 lifetime and what it injects.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="images/readme/di-split-dark.gif">
-  <img width="880" alt="An animated dependency graph: OrderService, which both controllers inject, turns red and leaves; CheckoutService, OrderQueries and OrderNotifications arrive, each depending on only what it needs" src="images/readme/di-split-light.gif">
+  <source media="(prefers-color-scheme: dark)" srcset="images/readme/di-split-animated-dark.png">
+  <img width="880" alt="An animated dependency graph: OrderService, which both controllers inject, turns red and leaves; CheckoutService, OrderQueries and OrderNotifications arrive, each depending on only what it needs" src="images/readme/di-split-animated-light.png">
 </picture>
 
 `OrderService` split into three focused services, animated

@@ -57,12 +57,13 @@ them as `--projections-<name>` after `applyEnvironment`.
   every host.
 - Optional layout tokens (`optionalThemeTokenNames`), which have no default: a renderer reads one with its own
   value as the fallback, `var(--projections-stage-inset, 12px)`, so hosts that don't send it see no change.
-  `stage-inset` is the inline space between the frame's start and end edges and the content a renderer lays out
-  along them (its cards, tables or fitted canvas): a host that lines that content up with its page's own column
+  `stage-inset` is the space between the frame's edges and the content a renderer lays out on its stage (its cards,
+  tables or fitted canvas), the same on all four sides, so a card or table sits evenly in the frame; the renderer
+  kit's stage padding (`pk-stage`) is it, else 12px. A host that lines that content up with its page's own column
   sends it, and extends the frame past the column by the same amount so rings at the edges still show.
-  `stage-inset-top` is the space between the frame's top edge and the content, in place of the renderer's own top
-  padding: a host that overlays something on the frame's top (such as a pane's label chip) sends it, so the content
-  starts below that while the renderer's background still reaches under it.
+  `stage-inset-top` is the space between the frame's top edge and the content that the host overlays (such as a
+  pane's label chip): a host that does sends it, so the content starts at least that far down while the renderer's
+  background still reaches under it; the kit's stage padding is at its top the larger of the two.
   `stage-max-height` (`px`, or `vh` of the host's window) caps a content-sized stage that pans and zooms: a host
   that lays frames in its scrolling page sends it, and such a stage then pans by dragging, leaving the wheel to the page.
 

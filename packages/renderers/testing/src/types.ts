@@ -134,6 +134,8 @@ export type ProbeCall =
   | 'ringFocus'
   | 'styles'
   | 'stageSurface'
+  | 'stageInsets'
+  | 'viewport'
 
 /** An entity element as painted: its box, effective opacity, paint and visible text. */
 export interface EntitySample {
@@ -173,6 +175,8 @@ export interface EntityText {
 export interface ContentTop {
   top: number
   element: string
+  /** How far below the frame top content may start: the stage padding, the host's `stage-inset` or else 12px. */
+  allowance: number
 }
 
 /**
@@ -278,6 +282,20 @@ export interface StageSurfaceMeasurement {
   samples: StageSurfaceSample[]
 }
 
+/**
+ * How evenly the cards, panels and tables on the stage sit in the frame (probe call `stageInsets`): how many outermost
+ * ones there are, the first, and the space between their union and the frame's top, sides and the content's end, CSS
+ * px, and the host's `stage-inset-top` when it sends one. `fitted` names the zoomable canvas or filling root of a renderer that centres a fitted drawing instead.
+ */
+export interface StageInsetsMeasurement {
+  cards: number
+  first?: string
+  /** The host's `stage-inset-top`, CSS px: the top the host overlays, which the top inset must at least clear. */
+  overlaid?: number
+  insets?: {top: number; right: number; bottom: number; left: number}
+  fitted?: string
+}
+
 /** Whether the renderer document scrolls sideways (probe call `overflow`): its widths in CSS px and what sticks out. */
 export interface OverflowMeasurement {
   scrollWidth: number
@@ -309,6 +327,7 @@ export type CheckId =
   | 'relationships'
   | 'palette'
   | 'stage-surface'
+  | 'stage-insets'
   | 'type-scale'
   | 'spacing'
 

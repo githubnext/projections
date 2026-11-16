@@ -1303,7 +1303,7 @@
               "type": "string"
             },
             "height": {
-              "description": "Viewport height in CSS pixels; default the current view's, else 800",
+              "description": "Viewport height in CSS pixels, the most the image is: it is as tall as its card, which hugs the content; default the current view's, else 800",
               "maximum": 1600,
               "minimum": 240,
               "type": "integer"

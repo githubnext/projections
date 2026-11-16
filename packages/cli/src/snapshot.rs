@@ -32,6 +32,7 @@ use crate::headless::{self, Host};
 use crate::runtime::{DefinitionSource, Runner};
 use crate::service::InspectorOptions;
 
+mod hugging;
 mod recording;
 mod settings;
 
@@ -188,12 +189,15 @@ fn query(name: &str, value: &str) -> String {
     format!("&{name}={encoded}")
 }
 
-/// Renders the document and returns the PNG.
+/// Renders the document and returns the PNG. A card frame hugs the renderer's content: the image is as tall as the
+/// card, at most the viewport.
 pub async fn render(request: Request) -> Result<Snapshot> {
+    let hug = request.frame == Frame::Card;
     let mut prepared = prepare(request).await?;
     let host = prepared.capture.host.clone();
     let mut notices = std::mem::take(&mut prepared.notices);
-    let options = prepared.capture;
+    let mut options = prepared.capture;
+    hugging::hug(&mut options, hug);
     let captured = tokio::task::spawn_blocking(move || {
         let (mut browser, session) = open(&options)?;
         let shot = shoot(&mut browser, &session, &options.url, &options);
@@ -291,6 +295,7 @@ async fn prepare(request: Request) -> Result<Prepared> {
         width: request.width,
         height: request.height,
         scale: request.scale,
+        hug: false,
         timeout: request.timeout,
         cancel: request.cancel,
     };
@@ -309,6 +314,8 @@ struct Capture {
     width: u32,
     height: u32,
     scale: f64,
+    /// Crops the capture to the card frame's height (the page's `hug`); `--frames` keeps every frame the viewport's size.
+    hug: bool,
     timeout: Duration,
     cancel: Arc<AtomicBool>,
 }
@@ -419,7 +426,7 @@ fn shoot(browser: &mut Browser, session: &str, url: &str, options: &Capture) -> 
     let deadline = Instant::now() + options.timeout;
     navigate(browser, session, url, deadline)?;
     wait_ready(browser, session, options, deadline)?;
-    stable_capture(browser, session, &options.cancel, deadline)
+    stable_capture(browser, session, options, deadline)
 }
 
 /// A string-valued expression evaluated in the page.
@@ -462,7 +469,8 @@ fn wait_ready(browser: &mut Browser, session: &str, options: &Capture, deadline:
 /// Same input, same image: waits for fonts and two frames, then takes
 /// captures until two consecutive ones match. Returns the PNG and whether
 /// they matched.
-fn stable_capture(browser: &mut Browser, session: &str, cancel: &AtomicBool, deadline: Instant) -> Result<(Vec<u8>, bool)> {
+fn stable_capture(browser: &mut Browser, session: &str, options: &Capture, deadline: Instant) -> Result<(Vec<u8>, bool)> {
+    let cancel = &options.cancel;
     let mut previous: Option<Vec<u8>> = None;
     for _ in 0..10 {
         browser.call(
@@ -479,12 +487,8 @@ fn stable_capture(browser: &mut Browser, session: &str, cancel: &AtomicBool, dea
         if state == "failed" {
             bail!("{message}");
         }
-        let shot = browser.call(
-            "Page.captureScreenshot",
-            json!({"format": "png", "fromSurface": true, "captureBeyondViewport": false}),
-            Some(session),
-            deadline,
-        )?;
+        let parameters = hugging::capture_parameters(browser, session, options, deadline)?;
+        let shot = browser.call("Page.captureScreenshot", parameters, Some(session), deadline)?;
         let png = browser::base64_decode(shot["data"].as_str().context("No screenshot data")?)?;
         ensure!(png.starts_with(b"\x89PNG\r\n\x1a\n"), "The browser returned no PNG");
         if previous.as_ref() == Some(&png) {

@@ -1,14 +1,12 @@
 /*
- * Every visual value is a host theme token. Surfaces stack in the kit's elevation order: the stage, each command's
- * group (kit `Group`: raised, edged with the divider, its command or title in a header band with the status cell at
- * its end), the Before and After strip, and the line-number gutter inset; room with no line in it is hatched.
+ * Every visual value is a host theme token. Surfaces stack in the kit's elevation order: the stage (`pk-stage`, set in
+ * from the frame's edges by the kit's stage padding on all four sides), each command's group (kit `Group`: raised,
+ * edged with the divider, its command or title in a header band with the status cell at its end), the Before and After
+ * strip, and the line-number gutter inset; room with no line in it is hatched.
  */
 .text-diff-view {
   display: grid;
-  background: var(--stage);
   gap: var(--projections-space-3);
-  padding: var(--projections-stage-inset-top, var(--projections-space-2)) var(--projections-stage-inset, var(--projections-space-3))
-    var(--projections-space-3);
   min-width: 0;
 }
 /* Hover, focus and selection rings are the SDK's, over the command's own edge. */

@@ -233,10 +233,10 @@ projections show [OPTIONS] [REVISION]
 | `--frames <DIR>` | Comparisons: also draw the animated playback as the viewer loops it back and forth at 1× speed, from the start of its hold at the before end, as PNG frames in the new directory DIR with frames.json, which lists each frame's file, progress, direction and duration; a hold is one frame. |
 | `--fps <FPS>` | Frames a second that --frames samples playback at. Default: `12`. |
 | `--theme <THEME>` | One of `light`, `dark`. Default: `light`. |
-| `--frame <FRAME>` | How the image frames the renderer's content. One of: `card` — One rounded card with a hairline border holding the renderer's content, its legend and the summary bar, transparent outside its corners; `none` — The renderer's content alone, edge to edge, without the legend or the summary bar. Default: `card`. |
+| `--frame <FRAME>` | How the image frames the renderer's content. One of: `card` — One rounded card with a hairline border holding the renderer's content, its legend and the summary bar, transparent outside its corners; the image is as tall as the card, which hugs the content up to --height; `none` — The renderer's content alone, edge to edge, without the legend or the summary bar. Default: `card`. |
 | `--matte <COLOR>` | Fill outside the card's rounded corners with this #rgb or #rrggbb COLOR instead of transparency, for formats without alpha such as GIF. |
 | `--width <WIDTH>` | Viewport width in CSS pixels. Default: `1280`. |
-| `--height <HEIGHT>` | Viewport height in CSS pixels. Default: `800`. |
+| `--height <HEIGHT>` | Viewport height in CSS pixels; with --frame card, the most the image is: --png crops it to the card, which hugs the renderer's content. Default: `800`. |
 | `--scale <SCALE>` | Device pixels per CSS pixel; 2 for high-density displays. Default: `1`. |
 | `--progress <0..1>` | Comparisons: the transition's progress, 0 (before) to 1 (after, the default). |
 | `--mode <MODE>` | Comparisons: how to present them. Default: the renderer's default, its diff when it has one; animated with --progress. One of: `animated` — One frame at a transition progress (--progress); `side-by-side` — The before and after revisions in two panes; `diff` — One frame with the renderer's own static comparison. |
@@ -378,7 +378,7 @@ projections view screenshot [OPTIONS] --out <FILE>
 | `--progress <0..1>` | Animated mode: the transition's progress, 0 to 1. Default: the viewer's playback position. |
 | `--theme <THEME>` | . Default: the page's. One of `light`, `dark`. |
 | `--width <WIDTH>` | Viewport width in CSS pixels. Default: the page's, else 1280. |
-| `--height <HEIGHT>` | Viewport height in CSS pixels. Default: the page's, else 800. |
+| `--height <HEIGHT>` | Viewport height in CSS pixels, the most the image is: it is as tall as its card, which hugs the content. Default: the page's, else 800. |
 | `--focus <WHAT>` | Open the image on a comparison's changes or on everything. Default: the renderer's choice. One of: `changes` — A comparison's changed items and the relationships between them; `all` — Everything. |
 | `--entity <ID>` | Open the image on one item, by its ID, centred with what it connects to. |
 | `--fit` | Fit what the image opens on whole, even when its text is drawn smaller than the renderer would open at. |
@@ -465,10 +465,10 @@ projections compare [OPTIONS] <BASE>[..<HEAD>]
 | `--frames <DIR>` | Comparisons: also draw the animated playback as the viewer loops it back and forth at 1× speed, from the start of its hold at the before end, as PNG frames in the new directory DIR with frames.json, which lists each frame's file, progress, direction and duration; a hold is one frame. |
 | `--fps <FPS>` | Frames a second that --frames samples playback at. Default: `12`. |
 | `--theme <THEME>` | One of `light`, `dark`. Default: `light`. |
-| `--frame <FRAME>` | How the image frames the renderer's content. One of: `card` — One rounded card with a hairline border holding the renderer's content, its legend and the summary bar, transparent outside its corners; `none` — The renderer's content alone, edge to edge, without the legend or the summary bar. Default: `card`. |
+| `--frame <FRAME>` | How the image frames the renderer's content. One of: `card` — One rounded card with a hairline border holding the renderer's content, its legend and the summary bar, transparent outside its corners; the image is as tall as the card, which hugs the content up to --height; `none` — The renderer's content alone, edge to edge, without the legend or the summary bar. Default: `card`. |
 | `--matte <COLOR>` | Fill outside the card's rounded corners with this #rgb or #rrggbb COLOR instead of transparency, for formats without alpha such as GIF. |
 | `--width <WIDTH>` | Viewport width in CSS pixels. Default: `1280`. |
-| `--height <HEIGHT>` | Viewport height in CSS pixels. Default: `800`. |
+| `--height <HEIGHT>` | Viewport height in CSS pixels; with --frame card, the most the image is: --png crops it to the card, which hugs the renderer's content. Default: `800`. |
 | `--scale <SCALE>` | Device pixels per CSS pixel; 2 for high-density displays. Default: `1`. |
 | `--progress <0..1>` | Comparisons: the transition's progress, 0 (before) to 1 (after, the default). |
 | `--mode <MODE>` | Comparisons: how to present them. Default: the renderer's default, its diff when it has one; animated with --progress. One of: `animated` — One frame at a transition progress (--progress); `side-by-side` — The before and after revisions in two panes; `diff` — One frame with the renderer's own static comparison. |

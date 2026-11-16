@@ -77,7 +77,7 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
   const linkName = linkNamer(frame)
   return (
     <div
-      className="database-view"
+      className="database-view pk-stage"
       ref={view}
       data-projections-scroll="database"
       data-layout={frame.mode}

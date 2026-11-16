@@ -2,10 +2,13 @@
  * Layout components (layout-components.tsx). Every value is a theme token, so renderers composed from them meet the
  * renderer checks without CSS of their own.
  */
-/* The content root is the stage that groups and cards stand on. */
-.pk .pk-content-view {
-  padding: var(--projections-stage-inset-top, var(--projections-space-2)) var(--projections-stage-inset, var(--projections-space-2))
-    var(--projections-space-2);
+/*
+ * The content root is the stage that groups, cards and tables stand on, set in from the frame's edges by
+ * `--pk-stage-padding` on all four sides, and at its top by more where the host overlays the frame's top
+ * (`--pk-stage-padding-top`). `ContentView` is one; a renderer with its own root gives it `pk-stage`.
+ */
+.pk :is(.pk-content-view, .pk-stage) {
+  padding: var(--pk-stage-padding-top) var(--pk-stage-padding) var(--pk-stage-padding);
   background: var(--stage);
 }
 /*

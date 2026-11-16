@@ -22,7 +22,9 @@ const join = (...names: (string | false | undefined)[]) => names.filter(Boolean)
 
 /**
  * The renderer's content root: scrolls as the host's main view (`data-projections-scroll`) and starts at the top of
- * the frame (`data-projections-content`), with the theme's inset, on the stage that groups and cards stand on.
+ * the frame (`data-projections-content`), on the stage that groups and cards stand on, set in from the frame's edges
+ * by the same stage padding on all four sides: the host's `stage-inset`, else 12px. A renderer with a root of its own
+ * gets the same by giving it the class `pk-stage`.
  */
 export function ContentView({children, scroll = 'view'}: {children: ReactNode; scroll?: string}) {
   return (

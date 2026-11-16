@@ -32,8 +32,9 @@ const repositories = {
  * `before` and `after`) and how. An example's `comparator` is a comparator file in this repository, `tools` are
  * directories copied beside the app (a sample extractor), and `typescript` installs this repository's TypeScript
  * in the scratch checkout for extractors that use the project's own. `image` holds the `--png` options in CSS
- * pixels, sized so the card hugs the drawing; `side` draws one revision of the comparison alone; `animated` also draws the
- * animated comparison as an animated PNG that loops back and forth as the viewer plays it.
+ * pixels: the card hugs the renderer's content (a drawing fitted to the stage asks for its own height), so `height` is
+ * the most it may be, and every frame of an animation is that tall; `side` draws one revision of the comparison alone;
+ * `animated` also draws the animated comparison as an animated PNG that loops back and forth as the viewer plays it.
  */
 const images = [
   {
@@ -147,7 +148,7 @@ const images = [
       inputs: {commands: [{id: 'help', label: 'ship --help', command: ['node', 'app/cli.mjs']}]},
     },
     trust: true,
-    image: {width: 640, height: 420, scale: 2},
+    image: {width: 640, height: 900, scale: 2},
   },
   {
     // fish shell's port from C++ to Rust, 3.7.0 to 4.0.0, in lines of code.
@@ -177,7 +178,7 @@ const images = [
     comparator: 'packages/comparators/runtime-policy/runtime-policy.comparator.yaml',
     definition: {extractor: 'tetragon-policies', renderer: 'runtime-policy', inputs: {paths: ['app/*.yaml']}},
     trust: true,
-    image: {width: 820, height: 812, scale: 2},
+    image: {width: 820, height: 1400, scale: 2},
   },
 ]
 

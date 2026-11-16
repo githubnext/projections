@@ -23,7 +23,8 @@ const hairline = '1px solid var(--projections-color-border)'
  * The snapshot page in its frame: `card`, one rounded card with a hairline edge on no background (or the matte),
  * the stage on top, then the legend and the summary bar, each ruled off by a hairline and drawn flat inside it;
  * `none`, the stage alone, edge to edge; `page`, the Inspector's look: the stage edge to edge, then the legend and the
- * summary bar as bands below it.
+ * summary bar as bands below it. A hugging card (`hug`) with one frame gives its stage the height the renderer asks
+ * for, at most the page's, so the card ends where the content's stage padding does.
  */
 export function SnapshotFrame({projection, settings, comparing, failure, labels}: SnapshotFrameProps) {
   const {frame} = settings
@@ -80,6 +81,8 @@ export function SnapshotFrame({projection, settings, comparing, failure, labels}
 
   // Two panes keep their own cards, set in from the card's edge.
   const inset = comparing && twoPaneMode(projection.mode) ? 12 : 0
+  const hugged = settings.hug && !inset ? projection.panes.main.height : undefined
+  const grow = hugged === undefined ? 1 : '0 1 auto'
   return (
     <ScopedRoot colorMode={settings.theme} className="pi pi-snapshot" style={{background: 'transparent'}}>
       {/* A pixel of room, so the card's anti-aliased edge is never cut by the image's. */}
@@ -87,7 +90,7 @@ export function SnapshotFrame({projection, settings, comparing, failure, labels}
         <div
           className="pi-snapshot-card"
           style={{
-            flex: 1,
+            flex: grow,
             minHeight: 0,
             display: 'flex',
             flexDirection: 'column',
@@ -100,9 +103,14 @@ export function SnapshotFrame({projection, settings, comparing, failure, labels}
         >
           {alert || (
             <>
-              <div style={{flex: 1, minHeight: 0, padding: inset}}>{stage(false)}</div>
-              <ProjectionLegend projection={projection} style={{padding: '8px 10px', borderTop: hairline, background: 'transparent'}} />
-              <div style={{borderTop: hairline, padding: '2px 4px'}}>
+              <div style={{flex: grow, minHeight: 0, padding: inset, ...(hugged === undefined ? {} : {height: hugged})}}>
+                {stage(false)}
+              </div>
+              <ProjectionLegend
+                projection={projection}
+                style={{flexShrink: 0, padding: '8px 10px', borderTop: hairline, background: 'transparent'}}
+              />
+              <div style={{flexShrink: 0, borderTop: hairline, padding: '2px 4px'}}>
                 <SummaryBar
                   projection={projection}
                   className="pj:h-6 pj:border-0 pj:bg-transparent pj:[--pj-summary-surface:var(--pj-surface-raised)] pj:px-0.5"

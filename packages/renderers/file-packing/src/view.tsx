@@ -140,7 +140,7 @@ export function FilePackingRenderer(props: RendererProps<typeof accepts>) {
   return (
     <div className="fp-view">
       {shown !== undefined && <Notice shown={shown} total={all.length} noun="circles" />}
-      <div className="fp-stage" ref={stage} data-projections-scroll="file-packing">
+      <div className="fp-stage pk-stage" ref={stage} data-projections-scroll="file-packing">
         {!all.length ? (
           <EmptyDomain>There is nothing with a positive size to pack at this point.</EmptyDomain>
         ) : (

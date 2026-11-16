@@ -203,8 +203,11 @@ scales, never lengths or colors. The custom renderer
 stylesheet.
 
 - `ContentView`: The content root: the host's main scroll container, starting at
-  the top of the frame, with the theme's inset, on the stage that groups and
-  cards stand on.
+  the top of the frame, on the stage that groups and cards stand on, set in from
+  the frame's edges by the same stage padding on all four sides (the host's
+  `stage-inset`, else 12 px), so a card or table sits evenly in the frame. A
+  renderer with a root of its own gets the same by giving it the class
+  `pk-stage`; give the outer cards no margins.
 - `Group`: A titled panel, the one pattern for a titled table, list or set of
   cards: raised and edged, its title in a header band inside its edge, then its
   body, which reaches its sides (a card grid keeps the band's inset).

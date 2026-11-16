@@ -24,6 +24,7 @@ import {
   ringFocusFailures,
   ringNeutral,
   settle,
+  stageInsets,
   stageSurface,
   styleSystem,
   visibleEntities,
@@ -52,6 +53,8 @@ const calls: Record<ProbeCall, (args: unknown) => unknown> = {
   ringFocus: args => ringFocusFailures(String(args)),
   styles: () => styleSystem(),
   stageSurface: () => stageSurface(),
+  stageInsets: () => stageInsets(),
+  viewport: () => ({width: innerWidth, height: innerHeight}),
 }
 
 addEventListener('message', event => {

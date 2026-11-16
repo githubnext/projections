@@ -3175,7 +3175,9 @@ ContentView(__0: { "children": Iterable<ReactNode, any, any> | Promise<Iterable<
 ```
 
 The renderer's content root: scrolls as the host's main view (`data-projections-scroll`) and starts at the top of
-the frame (`data-projections-content`), with the theme's inset, on the stage that groups and cards stand on.
+the frame (`data-projections-content`), on the stage that groups and cards stand on, set in from the frame's edges
+by the same stage padding on all four sides: the host's `stage-inset`, else 12px. A renderer with a root of its own
+gets the same by giving it the class `pk-stage`.
 
 ### `EdgeArrowMarker`
 
@@ -3906,9 +3908,10 @@ that sends it lays the frame in its scrolling page: such a stage also pans by dr
 useStageInset(): number | undefined
 ```
 
-The host's `stage-inset` theme token in CSS px (the inline space between the frame's edges and the content laid out
-along them), or undefined when the host sends none and the renderer keeps its own. CSS reads it as
-`var(--projections-stage-inset, <own>)`; this is for layout computed in script, such as a fitted canvas's padding.
+The host's `stage-inset` theme token in CSS px (the space between the frame's edges and the content on the stage,
+on every side), or undefined when the host sends none and the renderer keeps its own. CSS reads it through the kit's
+stage padding (`pk-stage`, `--pk-stage-padding`); this is for layout computed in script, such as a fitted canvas's
+padding.
 
 ### `useStageInsetTop`
 
@@ -3918,8 +3921,9 @@ useStageInsetTop(): number | undefined
 
 The host's `stage-inset-top` theme token in CSS px (the space between the frame's top edge and the content, where
 the host overlays the frame's top, for example with a pane's label chip), or undefined when the host sends none and
-the renderer keeps its own top padding. CSS reads it as `var(--projections-stage-inset-top, <own>)`; this is for
-layout computed in script, such as a fitted canvas's padding.
+the renderer keeps its own top padding. CSS reads it through the kit's stage padding (`pk-stage`,
+`--pk-stage-padding-top`, the larger of it and `stage-inset`); this is for layout computed in script, such as a
+fitted canvas's padding.
 
 ### `useStageZoom`
 

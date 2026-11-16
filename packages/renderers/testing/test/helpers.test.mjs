@@ -25,7 +25,7 @@ test('connectInspector builds page URLs on the workbench origin', () => {
 })
 
 test('check failures are flattened with their titles; samples round trip', () => {
-  assert.equal(allChecks.length, 23)
+  assert.equal(allChecks.length, 24)
   const failures = checkFailures([
     {id: 'legend', title: checkTitles.legend, status: 'fail', details: ['two legends'], durationMs: 1},
     {id: 'selection', title: checkTitles.selection, status: 'pass', details: [], durationMs: 1},
@@ -408,6 +408,38 @@ test('stage-surface passes a field on the stage or transparent and names whateve
     /In diff mode \(light\), the field at its left side \(2, 2\) is #fbfaf8, painted by div\.fp-stage, not the stage \(#efeee9\)/,
   )
   assert.match(failing.details[1], /In diff mode \(dark\), .* is #101012/)
+})
+
+test('stage-insets passes equal insets, names uneven ones and skips fitted drawings and stages without cards', async () => {
+  const insetDriver = measured => ({
+    load: async () => ({status: 'ready', capabilities: {changeHighlighting: 'supported', comparisonModes: ['diff']}}),
+    measure: async (call, _args) => (call === 'stageInsets' ? measured : undefined),
+    sleep: async () => {},
+  })
+  const even = {cards: 1, first: 'div.panel', insets: {top: 12, right: 12, bottom: 12.4, left: 12}}
+  const [passing] = await runChecks(insetDriver(even), subject, {checks: ['stage-insets']})
+  assert.equal(passing.status, 'pass')
+  const uneven = {cards: 2, first: 'section.group', insets: {top: 8, right: 12, bottom: 60, left: 12}}
+  const [failing] = await runChecks(insetDriver(uneven), subject, {checks: ['stage-insets']})
+  assert.equal(failing.status, 'fail')
+  assert.equal(failing.details.length, 2)
+  assert.match(
+    failing.details[0],
+    /^At full width, the cards on the stage \(section\.group and 1 more\) are 8px from the frame's top, 12px from its right, 60px from the content's end and 12px from its left/,
+  )
+  assert.match(failing.details[1], /^At 390px/)
+  const [fitted] = await runChecks(insetDriver({cards: 0, fitted: 'div.canvas'}), subject, {checks: ['stage-insets']})
+  assert.equal(fitted.status, 'skip')
+  assert.match(fitted.details[0], /centres a fitted drawing \(div\.canvas\)/)
+  const overlaid = {cards: 1, first: 'div.panel', overlaid: 30, insets: {top: 30, right: 8, bottom: 8, left: 8}}
+  const [clear] = await runChecks(insetDriver(overlaid), subject, {checks: ['stage-insets']})
+  assert.equal(clear.status, 'pass')
+  const under = {...overlaid, insets: {top: 8, right: 8, bottom: 8, left: 8}}
+  const [covered] = await runChecks(insetDriver(under), subject, {checks: ['stage-insets']})
+  assert.equal(covered.status, 'fail')
+  assert.match(covered.details[0], /the host overlays the top 30px: stage-inset-top/)
+  const [bare] = await runChecks(insetDriver({cards: 0}), subject, {checks: ['stage-insets']})
+  assert.equal(bare.status, 'skip')
 })
 
 test('an exempted subtree passes the styling checks and is listed with its reason', async () => {

@@ -126,7 +126,7 @@ export function CodeStatisticsRenderer(props: RendererProps<typeof accepts>) {
   const columns = statisticsColumns({shown, tracked, labels, count: p.count, number, diff, highlighting})
 
   return (
-    <div className="statistics-view" style={columns} data-diff-highlighting={comparing}>
+    <div className="statistics-view pk-stage" style={columns} data-diff-highlighting={comparing}>
       <div className="statistics-panel" data-projections-content="">
         {/* The host's summary bar states the total, its change and the languages; the chart starts at the top. */}
         {!shown.length ? (

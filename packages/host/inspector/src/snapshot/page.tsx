@@ -88,6 +88,8 @@ export function SnapshotPage({document: snapshot, settings, renderers, customRen
     projection.mode,
     projection.availableModes,
     panes.map(pane => [pane.status, pane.rendered, Boolean(pane.capabilities), pane.rendererErrors.at(-1) ?? '', pane.message ?? '']),
+    // A hugging card takes the height the renderer asks for, so a new one lays the page out again.
+    settings.hug ? panes.map(pane => pane.height ?? null) : null,
     // A legend the renderer sends after it first paints changes the page too.
     projection.legend ?? null,
     // So does the summary the renderer words the bar with.

@@ -342,7 +342,7 @@ export function TextDiffView(props: RendererProps<typeof accepts>) {
     ...(comparing ? {'--pk-status-width': parts > 1 ? '21ch' : '11ch'} : {}),
   }
   return (
-    <div className="text-diff-view" ref={ref} data-layout={layout} style={style}>
+    <div className="text-diff-view pk-stage" ref={ref} data-layout={layout} style={style}>
       {!rows.length ? (
         <EmptyDomain title="No output">
           {comparing ? 'No output was captured in either revision.' : 'No output was captured for this revision.'}

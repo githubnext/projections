@@ -41,7 +41,7 @@ pub enum ImageMode {
 
 #[derive(Clone, Copy, PartialEq, Eq, ValueEnum)]
 pub enum ImageFrame {
-    /// One rounded card with a hairline border holding the renderer's content, its legend and the summary bar, transparent outside its corners
+    /// One rounded card with a hairline border holding the renderer's content, its legend and the summary bar, transparent outside its corners; the image is as tall as the card, which hugs the content up to --height
     Card,
     /// The renderer's content alone, edge to edge, without the legend or the summary bar
     None,
@@ -92,7 +92,7 @@ pub struct Png {
     /// Viewport width in CSS pixels
     #[arg(long, default_value_t = 1280, requires = "image")]
     pub width: u32,
-    /// Viewport height in CSS pixels
+    /// Viewport height in CSS pixels; with --frame card, the most the image is: --png crops it to the card, which hugs the renderer's content
     #[arg(long, default_value_t = 800, requires = "image")]
     pub height: u32,
     /// Device pixels per CSS pixel; 2 for high-density displays

@@ -46,12 +46,16 @@ documents), with the same facts as `structuredContent`.
   (`branch`, `uncommitted`, `last-commit`, `now`, `release`, `bookmark:<id>`) or
   a renderer `scenario`, in a `mode`, optionally selecting an entity. The agent
   opens the viewer's URL for the person (in its own browser, else the system's)
-  and gives them the link only when it can't.
+  and gives them the link only when it can't. With `projections mcp`, `viewer`
+  names one of several independent viewers, each its own page, to show
+  projections side by side.
 - `current_view`: What the view shows: its projection and definition file,
   choice and resolved revisions, mode, selection (with its generated values and
   how each differs), summary counts (including regenerated items) and changed
   items, why an extraction failed, and whether it is out of date or uses
-  uncommitted definition edits.
+  uncommitted definition edits, and whether the person chose the projection from
+  the page's title. With `projections mcp`, `viewer` reads a named viewer, and
+  the result lists the others.
 - `refresh`: Extracts what the view shows again and says what it shows then.
 - `screenshot`: A PNG of a projection drawn by its real renderer in a headless
   browser (as `--png`), returned as an image; by default what the view shows, in
@@ -117,8 +121,8 @@ as VS Code's tools do from the projection tab in front.
 ## The viewer
 
 ```sh
-projections view [--open] [--trust] [--port N] [-p ID] [--choice CHOICE | --before REV --after REV] [--mode MODE]
-projections view show|current|screenshot|refresh
+projections view [--open] [--trust] [--port N] [-p ID] [--choice CHOICE | --before REV --after REV] [--mode MODE] [--viewer NAME]
+projections view show|current|screenshot|refresh [--viewer NAME]
 ```
 
 The viewer is a page on loopback that a coding agent drives and the person
@@ -128,7 +132,16 @@ what is compared in words and a status line. It is how an agent shows the person
 its work, and what a person asking to "open it in the inspector" means. There is
 no editing, and the page names no files: errors are plain words, and the details
 reach the agent through `current_view`. Selecting an item, changing the mode or
-playing is reported to the agent, and every open page mirrors the others.
+playing is reported to the agent, and every open page mirrors the others. The
+title is also a menu of the repository's projections: the person can switch the
+page to another one, which becomes what the viewer shows for the agent too.
+
+One viewer can show several **named viewers** side by side: `--viewer NAME` on
+`projections view` and its subcommands, or `viewer` on the view tools and
+`screenshot`, names one, made when first shown. Each has its own state and page
+(`http://127.0.0.1:PORT/TOKEN/?viewer=NAME`), and its pages mirror only one
+another. Without a name, everything uses the default viewer, as before; the
+other tools' defaults (`compare`, `check`, `set_part`) come from it.
 
 `projections view` serves it until interrupted and prints its URL
 (`http://127.0.0.1:PORT/TOKEN/`); requests without the random token are refused,

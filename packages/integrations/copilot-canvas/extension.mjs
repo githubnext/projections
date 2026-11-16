@@ -4,7 +4,9 @@
 // `current_view`, `screenshot`, `refresh`), answered by the same viewer through `projections view …`. The viewer is
 // keyed by project (the repository, or a directory in it with projections of its own), not by canvas instance, so
 // opening again (or rehydrating after a reload) shows the same view. The project is the nearest one from the session's
-// working directory, as for the CLI, or the one a `project` input names.
+// working directory, as for the CLI, or the one a `project` input names. A `viewer` input names one of several
+// independent viewers, each its own page, so canvases side by side can show different projections; an instance
+// opened on a named viewer keeps it, and its actions address it unless they name another.
 //
 // Install it in a repository with `projections canvas install` (it copies this file to
 // .github/extensions/projections/extension.mjs). It needs the `projections` CLI on PATH, or PROJECTIONS_CLI naming it.
@@ -128,7 +130,7 @@ function options(input, keys) {
   }
   return flags
 }
-const showKeys = ['projection', 'choice', 'before', 'after', 'mode', 'entity', 'scenario']
+const showKeys = ['projection', 'choice', 'before', 'after', 'mode', 'entity', 'scenario', 'viewer']
 
 /** Calls one of the tools on the project's viewer, as the tool returns it: its text, and a screenshot's image. */
 async function call({cwd, root}, name, input) {
@@ -136,7 +138,7 @@ async function call({cwd, root}, name, input) {
     const directory = await mkdtemp(join(tmpdir(), 'projections-canvas-'))
     try {
       const out = join(directory, 'view.png')
-      const keys = ['projection', 'before', 'after', 'mode', 'theme', 'progress', 'width', 'height']
+      const keys = ['projection', 'before', 'after', 'mode', 'theme', 'progress', 'width', 'height', 'viewer']
       const shot = await run([...root, 'view', 'screenshot', '--out', out, ...options(input, keys)], cwd)
       if (shot.code !== 0) throw new CanvasError('projections_failed', failure(shot))
       const data = (await readFile(out)).toString('base64')
@@ -153,9 +155,9 @@ async function call({cwd, root}, name, input) {
     name === 'open_projection'
       ? ['view', 'show', ...options(input, showKeys)]
       : name === 'current_view'
-        ? ['view', 'current']
+        ? ['view', 'current', ...options(input, ['viewer'])]
         : name === 'refresh'
-          ? ['view', 'refresh']
+          ? ['view', 'refresh', ...options(input, ['viewer'])]
           : undefined
   if (!args) throw new CanvasError('unknown_action', `Projections has no ${name} action`)
   const answered = await run([...root, ...args], cwd)
@@ -180,6 +182,27 @@ async function alreadyShown(instanceId, input) {
   return false
 }
 
+/** The named viewer an instance was opened on, which its actions address unless they name another. */
+async function instanceViewer(instanceId) {
+  const file = shownFile()
+  if (!file || !instanceId) return undefined
+  const shown = await readFile(file, 'utf8').then(JSON.parse, () => ({}))
+  try {
+    const viewer = JSON.parse(shown[instanceId] ?? '{}').viewer
+    return typeof viewer === 'string' ? viewer : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** An action's input, addressing the instance's named viewer when it names none. */
+async function withViewer(ctx) {
+  const input = ctx.input ?? {}
+  if (typeof input.viewer === 'string') return input
+  const viewer = await instanceViewer(ctx.instanceId)
+  return viewer ? {...input, viewer} : input
+}
+
 const root = await repository(process.cwd())
 const tools = await catalog(root)
 const tool = name => tools.find(item => item.name === name)
@@ -196,15 +219,18 @@ const canvas = createCanvas({
     name,
     description: tool(name)?.description ?? `The Projections ${name} tool; it needs the projections CLI.`,
     ...(tool(name) ? {inputSchema: withProject(tool(name).inputSchema)} : {}),
-    handler: async ctx => call(await place(ctx.session?.workingDirectory ?? root, ctx.input), name, ctx.input ?? {}),
+    handler: async ctx => {
+      const input = await withViewer(ctx)
+      return call(await place(ctx.session?.workingDirectory ?? root, input), name, input)
+    },
   })),
-  // One viewer per repository: opening again, or rehydrating after a reload, returns the same page; the input shows
-  // that projection there first.
+  // One viewer per repository and name: opening again, or rehydrating after a reload, returns the same page; the input
+  // shows that projection there first.
   open: async ctx => {
     const input = ctx.input ?? {}
     const {cwd, root: project} = await place(ctx.session?.workingDirectory ?? root, input)
     const again = await alreadyShown(ctx.instanceId, input)
-    const shown = await run([...project, 'view', 'show', '--json', ...(again ? [] : options(input, showKeys))], cwd)
+    const shown = await run([...project, 'view', 'show', '--json', ...(again ? options(input, ['viewer']) : options(input, showKeys))], cwd)
     if (shown.code !== 0) throw new CanvasError('projections_failed', failure(shown))
     const view = JSON.parse(shown.stdout.trim().split('\n').at(-1) || '{}')
     if (typeof view.url !== 'string') throw new CanvasError('projections_failed', 'The viewer gave no URL')
@@ -221,7 +247,9 @@ session = await joinSession({
   hooks: {
     onSessionStart: async () => ({
       additionalContext:
-        'Projections can show the person a projection of this repository (its systems, and how a change reshapes them) in the "projections" canvas: open it with open_canvas, whose input is open_projection\'s (projection, and before and after or a choice such as branch, uncommitted or last-commit). Its actions are the Projections tools of the same names: open_projection, current_view (what they see and selected, and why an extraction failed), screenshot (an image of it) and refresh. They watch, play and select there; they don\'t edit.',
+        'Projections can show the person a projection of this repository (its systems, and how a change reshapes them) in the "projections" canvas: open it with open_canvas, whose input is open_projection\'s (projection, and before and after or a choice such as branch, uncommitted or last-commit). ' +
+        'Its actions are the Projections tools of the same names: open_projection, current_view (what they see and selected, and why an extraction failed), screenshot (an image of it) and refresh. ' +
+        "To show several projections side by side, open more canvases, each with its own viewer name (viewer). They watch, play and select there, and can switch a canvas to another projection from its title; they don't edit.",
     }),
   },
 })

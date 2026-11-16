@@ -14,6 +14,23 @@ pub const CHOICES: [&str; 5] = ["branch", "uncommitted", "last-commit", "now", "
 
 const WORKING_TREE: &str = "working-tree";
 
+/// Who chose the projection a viewer shows: the agent (`open_projection`), or the person, from the page's title menu.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum Chooser {
+    #[default]
+    Agent,
+    Person,
+}
+
+impl Chooser {
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Agent => "agent",
+            Self::Person => "person",
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ViewState {
     /// Bumped on every change, so pages long-poll for the next one.
@@ -37,6 +54,8 @@ pub struct ViewState {
     pub refresh: u64,
     /// The revision whose definition extracts every side (`view --definition-revision`); the working tree's when none.
     pub definition_revision: Option<String>,
+    /// Who chose the projection shown.
+    pub chosen_by: Chooser,
 }
 
 /// What `open_projection` asks the viewer to show, resolved to revisions and words.
@@ -52,6 +71,7 @@ pub struct Shown {
     pub mode: Option<String>,
     pub selection: Option<String>,
     pub scenario: Option<String>,
+    pub chosen_by: Chooser,
 }
 
 /// Each named revision in words: its commit subject in full, "Your files" for
@@ -78,6 +98,7 @@ impl ViewState {
             "scenario": self.scenario,
             "refresh": self.refresh,
             "definitionRevision": self.definition_revision,
+            "chosenBy": self.projection.as_ref().map(|_| self.chosen_by.name()),
         })
     }
 
@@ -94,6 +115,7 @@ impl ViewState {
         self.compared = shown.compared;
         self.sides = shown.sides;
         self.scenario = shown.scenario;
+        self.chosen_by = shown.chosen_by;
         let (mode, selection) = (self.mode.take(), self.selection.take());
         self.mode = shown.mode.or(if same { mode } else { None });
         self.selection = shown.selection.or(if same { selection } else { None });
@@ -294,8 +316,15 @@ mod tests {
         assert_eq!(state.mode.as_deref(), Some("animated"));
         assert_eq!(state.selection.as_deref(), Some("a"));
         state.show(shown("other"));
-        assert_eq!((state.mode, state.selection), (None, None));
+        assert_eq!((state.mode.as_deref(), state.selection.as_deref()), (None, None));
         assert_eq!(state.generation, 3);
+        assert_eq!(state.json()["chosenBy"], "agent");
+        state.show(Shown {
+            chosen_by: Chooser::Person,
+            ..shown("map")
+        });
+        assert_eq!(state.json()["chosenBy"], "person");
+        assert!(ViewState::default().json()["chosenBy"].is_null(), "nothing is shown");
     }
 
     #[test]

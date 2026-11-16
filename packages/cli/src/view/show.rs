@@ -3,19 +3,19 @@
 use serde_json::Value;
 
 use super::{
-    Shared, get,
-    state::{self, Shown, ViewState},
+    NamedView, Shared, get,
+    state::{self, Chooser, Shown, ViewState},
 };
 use crate::service::Service;
 
 /// What a shown pair is: its suggestion, before and after, how it's compared, and named revisions' names.
 type Pair = (Option<String>, Option<String>, String, String, Option<state::Sides>);
 
-/// Resolves `open_projection`'s input against the repository and shows it.
-pub(super) async fn show(shared: &Shared, input: &Value) -> Result<ViewState, String> {
+/// Resolves `open_projection`'s input against the repository and shows it in `view`, as `chooser` chose it.
+pub(super) async fn show(shared: &Shared, view: &NamedView, input: &Value, chooser: Chooser) -> Result<ViewState, String> {
     shared.touch();
     let service = &shared.service;
-    let current = shared.state.borrow().clone();
+    let current = view.state.borrow().clone();
     let definitions = get(service, "/api/definitions?ref=working-tree").await?;
     let listed: Vec<&Value> = definitions["definitions"].as_array().into_iter().flatten().collect();
     let projection = projection(input, &current, &listed)?;
@@ -39,18 +39,25 @@ pub(super) async fn show(shared: &Shared, input: &Value) -> Result<ViewState, St
         mode: input["mode"].as_str().map(str::to_owned),
         selection: input["entity"].as_str().map(str::to_owned),
         scenario: input["scenario"].as_str().map(str::to_owned),
+        chosen_by: chooser,
     };
     let previous = current.projection.filter(|id| *id != shown.projection);
     let projection = shown.projection.clone();
-    shared.state.send_modify(|state| state.show(shown));
-    // Its custom renderer builds while the viewer shows it.
+    view.state.send_modify(|state| state.show(shown));
+    shared.shown.send_modify(|version| *version += 1);
+    // Its custom renderer builds while a viewer shows it.
     if let Some(builds) = shared.service.renderer_builds() {
-        if let Some(previous) = previous {
+        if let Some(previous) = previous.filter(|previous| !shared.views.shown_elsewhere(previous, &view.name)) {
             builds.stop(&previous);
         }
         let _ = builds.event(&projection, definition, "opened");
     }
-    Ok(shared.state.borrow().clone())
+    Ok(view.state.borrow().clone())
+}
+
+/// The person chose another projection in a page's title menu: the viewer shows it, comparing what it compared.
+pub(super) async fn choose(shared: &Shared, view: &NamedView, projection: &str) -> Result<ViewState, String> {
+    show(shared, view, &serde_json::json!({"projection": projection}), Chooser::Person).await
 }
 
 /// The projection the input names, else the one shown, else the repository's only one.

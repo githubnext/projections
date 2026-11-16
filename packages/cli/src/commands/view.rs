@@ -71,6 +71,9 @@ pub enum ViewCommand {
     },
     /// What the viewer shows and what the person selected (the current_view tool)
     Current {
+        /// A named viewer [default: the default viewer]
+        #[arg(long, value_name = "NAME")]
+        viewer: Option<String>,
         /// Print the result as JSON
         #[arg(long)]
         json: bool,
@@ -113,12 +116,18 @@ pub enum ViewCommand {
         /// Fit what the image opens on whole, even when its text is drawn smaller than the renderer would open at
         #[arg(long)]
         fit: bool,
+        /// Render what a named viewer shows [default: the default viewer]
+        #[arg(long, value_name = "NAME")]
+        viewer: Option<String>,
         /// Print the result as JSON
         #[arg(long)]
         json: bool,
     },
     /// Extract what the viewer shows again (the refresh tool)
     Refresh {
+        /// A named viewer [default: the default viewer]
+        #[arg(long, value_name = "NAME")]
+        viewer: Option<String>,
         /// Print the result as JSON
         #[arg(long)]
         json: bool,
@@ -152,6 +161,10 @@ pub struct ViewShow {
     /// A scenario from the projection's renderer scenarios, shown instead of revisions
     #[arg(long, value_name = "ID")]
     pub scenario: Option<String>,
+    /// Show it in a named viewer, its own page and URL beside the others, to show several projections side by side
+    /// [default: the default viewer]
+    #[arg(long, value_name = "NAME")]
+    pub viewer: Option<String>,
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -173,6 +186,7 @@ impl ViewShow {
             ("after", &self.after),
             ("entity", &self.entity),
             ("scenario", &self.scenario),
+            ("viewer", &self.viewer),
         ] {
             if let Some(value) = value {
                 input[key] = json!(value);
@@ -187,6 +201,14 @@ impl ViewShow {
             });
         }
         input
+    }
+}
+
+/// A tool's input naming `viewer`, when one is named.
+fn named(viewer: &Option<String>) -> Value {
+    match viewer {
+        Some(viewer) => json!({"viewer": viewer}),
+        None => json!({}),
     }
 }
 
@@ -226,8 +248,8 @@ async fn view_tool(root: &Path, command: ViewCommand) -> Result<()> {
     }
     let (name, input, json_output, start) = match &command {
         ViewCommand::Show { show, json, trust, .. } => ("open_projection", show.input(), *json, Some(*trust)),
-        ViewCommand::Current { json } => ("current_view", json!({}), *json, None),
-        ViewCommand::Refresh { json } => ("refresh", json!({}), *json, None),
+        ViewCommand::Current { viewer, json } => ("current_view", named(viewer), *json, None),
+        ViewCommand::Refresh { viewer, json } => ("refresh", named(viewer), *json, None),
         ViewCommand::Stop => unreachable!("answered above"),
         ViewCommand::Screenshot {
             out,
@@ -242,6 +264,7 @@ async fn view_tool(root: &Path, command: ViewCommand) -> Result<()> {
             focus,
             entity,
             fit,
+            viewer,
             json,
         } => {
             ensure!(
@@ -249,7 +272,7 @@ async fn view_tool(root: &Path, command: ViewCommand) -> Result<()> {
                 "{} already exists; images never overwrite files",
                 out.display()
             );
-            let mut input = json!({});
+            let mut input = named(viewer);
             for (key, value) in [("projection", projection), ("before", before), ("after", after), ("entity", entity)] {
                 if let Some(value) = value {
                     input[key] = json!(value);
@@ -320,7 +343,8 @@ async fn view_tool(root: &Path, command: ViewCommand) -> Result<()> {
     if let ViewCommand::Show { open: true, .. } = &command
         && !outcome.error
     {
-        open_browser(&url)?;
+        // The page of the viewer it showed, a named one's included.
+        open_browser(outcome.structured["url"].as_str().unwrap_or(&url))?;
     }
     ensure!(!outcome.error, "{name} failed");
     Ok(())
@@ -406,19 +430,22 @@ pub async fn view(directory: &Path, args: View) -> Result<()> {
             reused = record.address().filter(|_| args.port == 0);
         }
         Some(record) => {
+            let mut url = record.url.clone();
             if asked {
                 let response = client::request(&record.url, "POST", "control/show", Some(&input), Duration::from_secs(120)).await?;
+                let answer = response.json()?;
                 ensure!(
                     response.status == 200,
                     "{}",
-                    response.json()?["diagnostics"][0]["message"]
-                        .as_str()
-                        .unwrap_or("The viewer refused")
+                    answer["diagnostics"][0]["message"].as_str().unwrap_or("The viewer refused")
                 );
+                if let Some(shown) = answer["url"].as_str() {
+                    url = shown.to_owned();
+                }
             }
-            println!("A viewer is already running for this repository: {}", record.url);
+            println!("A viewer is already running for this repository: {url}");
             if args.open {
-                open_browser(&record.url)?;
+                open_browser(&url)?;
             }
             return Ok(());
         }
@@ -457,10 +484,15 @@ pub async fn view(directory: &Path, args: View) -> Result<()> {
             trust: args.trust,
         },
     )?;
-    println!("{url}");
+    // A named viewer's page is the server's URL with its name.
+    let page = match crate::view::viewer_name(args.show.viewer.as_deref()) {
+        Ok(name) if name != crate::view::DEFAULT_VIEWER => format!("{url}?viewer={name}"),
+        _ => url.clone(),
+    };
+    println!("{page}");
     eprintln!("Serving the Projections viewer for {}; press Ctrl+C to stop.", root.display());
     if args.open
-        && let Err(error) = open_browser(&url)
+        && let Err(error) = open_browser(&page)
     {
         eprintln!("projections: {error:#}");
     }

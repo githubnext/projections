@@ -153,7 +153,11 @@ export function ProjectionSwitcher({
   )
 }
 
-function SwitcherPopup({
+/**
+ * The switcher's popup, under its trigger (centred, or from its start), a sheet on phones: a search over the list of
+ * projections, the current one checked. The agent viewer's title opens it too (viewer/title.tsx).
+ */
+export function SwitcherPopup({
   id,
   items,
   current,
@@ -161,6 +165,7 @@ function SwitcherPopup({
   colorMode,
   onClose,
   onChoose,
+  align = 'center',
 }: {
   id: string
   items: readonly SwitcherItem[]
@@ -169,6 +174,7 @@ function SwitcherPopup({
   colorMode: 'light' | 'dark'
   onClose: () => void
   onChoose: (id: string) => void
+  align?: 'center' | 'start'
 }) {
   const [query, setQuery] = useState('')
   const shown = useMemo(() => items.filter(item => matches(item, query)), [items, query])
@@ -180,11 +186,11 @@ function SwitcherPopup({
   )
   const input = useRef<HTMLInputElement>(null)
   const [sheet] = useState(() => typeof matchMedia === 'function' && matchMedia(sheetQuery).matches)
-  const [anchor, setAnchor] = useState<{top: number; center: number} | undefined>()
+  const [anchor, setAnchor] = useState<{top: number; center: number; start: number} | undefined>()
 
   useLayoutEffect(() => {
     const box = trigger.current?.getBoundingClientRect()
-    if (box) setAnchor({top: box.bottom + 4, center: box.left + box.width / 2})
+    if (box) setAnchor({top: box.bottom + 4, center: box.left + box.width / 2, start: box.left})
   }, [trigger])
   useEffect(() => {
     const returnFocus = document.activeElement as HTMLElement | null
@@ -212,7 +218,9 @@ function SwitcherPopup({
   }, [id, index])
 
   const width = 384
-  const left = anchor ? Math.max(8, Math.min(innerWidth - width - 8, anchor.center - width / 2)) : undefined
+  const left = anchor
+    ? Math.max(8, Math.min(innerWidth - width - 8, align === 'start' ? anchor.start : anchor.center - width / 2))
+    : undefined
   return (
     <ScopedRoot colorMode={colorMode} className="pi-switcher-layer">
       <div

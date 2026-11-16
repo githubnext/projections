@@ -21,6 +21,11 @@ thin adapter: the viewer, its page and its tools are the CLI's.
   shows the same view; an instance's input is applied once (recorded in the
   session's workspace), so a rehydrated canvas never undoes what the agent
   showed since.
+- **Side by side:** `viewer` names one of several independent viewers, each its
+  own page and state, so canvases side by side show different projections. An
+  instance opened on a named viewer keeps it: its actions address it unless they
+  name another. The person can switch a canvas to another projection from its
+  title, and `current_view` says so.
 - **Project:** as in a terminal, the CLI uses the nearest project from the
   session's working directory: a directory with its own `.github/projections`,
   else the repository's root. `project` (a directory relative to the

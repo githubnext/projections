@@ -2,7 +2,8 @@
 // with the host, which shows this page in a sandboxed frame. The view initializes (`ui/initialize`, then
 // `ui/notifications/initialized`), calls its server's tools through the host (`tools/call`), asks for a display mode
 // (`ui/request-display-mode`), reports its size (`ui/notifications/size-changed`), and follows the host's context
-// (`ui/notifications/host-context-changed`): its theme, style variables, display mode and container size.
+// (`ui/notifications/host-context-changed`): its theme, style variables, display mode and container size. It hears the
+// arguments of the tool call it shows (`ui/notifications/tool-input`), such as `open_projection`'s named viewer.
 
 /** The protocol version the view speaks. */
 export const protocolVersion = '2026-01-26'
@@ -54,6 +55,8 @@ export interface Host {
   onContext(listener: (context: HostContext) => void): () => void
   /** Hears the host's notice that it is about to tear the view down. */
   onTeardown(listener: () => void): () => void
+  /** Hears the arguments of the tool call the view shows, the last ones at once if they came already. */
+  onToolInput(listener: (args: Record<string, unknown>) => void): () => void
   request<T = unknown>(method: string, params?: unknown, options?: RequestOptions): Promise<T>
   notify(method: string, params?: unknown): void
   callTool(name: string, args: Record<string, unknown>, options?: RequestOptions): Promise<ToolResult>
@@ -77,8 +80,9 @@ interface Pending {
 function channel(target: Window) {
   let nextId = 1
   const pending = new Map<number, Pending>()
-  const state = {context: {} as HostContext}
+  const state = {context: {} as HostContext, toolInput: undefined as Record<string, unknown> | undefined}
   const contextListeners = new Set<(context: HostContext) => void>()
+  const toolInputListeners = new Set<(args: Record<string, unknown>) => void>()
   const teardownListeners = new Set<() => void>()
   const post = (message: object) => target.postMessage({jsonrpc: '2.0', ...message}, '*')
 
@@ -98,6 +102,10 @@ function channel(target: Window) {
       else if (message.method === 'ui/notifications/host-context-changed' && typeof message.params === 'object' && message.params) {
         state.context = {...state.context, ...(message.params as HostContext)}
         for (const listener of [...contextListeners]) listener(state.context)
+      } else if (message.method === 'ui/notifications/tool-input') {
+        const args = (message.params as {arguments?: unknown} | undefined)?.arguments
+        state.toolInput = typeof args === 'object' && args !== null ? (args as Record<string, unknown>) : {}
+        for (const listener of [...toolInputListeners]) listener(state.toolInput)
       }
       return
     }
@@ -146,7 +154,7 @@ function channel(target: Window) {
     })
   }
 
-  return {state, contextListeners, teardownListeners, post, request}
+  return {state, contextListeners, toolInputListeners, teardownListeners, post, request}
 }
 
 /**
@@ -158,7 +166,7 @@ export async function connect(
   appCapabilities: Record<string, unknown>,
   {target = window.parent, timeoutMs = 30_000}: {target?: Window; timeoutMs?: number} = {},
 ): Promise<Host> {
-  const {state, contextListeners, teardownListeners, post, request} = channel(target)
+  const {state, contextListeners, toolInputListeners, teardownListeners, post, request} = channel(target)
   const initialized = await request<{hostInfo?: Host['info']; hostCapabilities?: Record<string, unknown>; hostContext?: HostContext}>(
     'ui/initialize',
     {protocolVersion, appInfo, appCapabilities},
@@ -177,6 +185,11 @@ export async function connect(
     onTeardown(listener) {
       teardownListeners.add(listener)
       return () => teardownListeners.delete(listener)
+    },
+    onToolInput(listener) {
+      toolInputListeners.add(listener)
+      if (state.toolInput) listener(state.toolInput)
+      return () => toolInputListeners.delete(listener)
     },
     request,
     notify: (method, params) => post({method, ...(params === undefined ? {} : {params})}),

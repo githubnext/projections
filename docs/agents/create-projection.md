@@ -93,7 +93,14 @@ separate inspector to start.
   projection", "this view" or "this one's wrong" rather than asking which one
   they mean. `screenshot` (`projections view screenshot --out FILE`) returns
   what they see as an image, and `refresh` (`projections view refresh`)
-  extracts it again when it says it is out of date.
+  extracts it again when it says it is out of date. They can switch the page
+  to another projection from its title; `current_view` then says so, and shows
+  their choice.
+- **Side by side**: to show several projections at once, give each its own
+  named viewer (`viewer`, or `--viewer <name>` on `projections view show`,
+  `current`, `screenshot` and `refresh`): each is its own page and URL, with
+  its own state, so open each page for them. Without a name, the calls use
+  the default viewer.
 
 In VS Code's agent, `open_projection` shows a projection in a projection tab
 instead. People who work in VS Code can also use the Projections extension

@@ -2,7 +2,8 @@
 // MCP Apps host in its conversation, side panel or full screen. `projections mcp` serves this page as
 // `ui://projections/viewer` and links `open_projection` to it; the page relays its requests to the viewer through
 // the server (relay.ts), takes its assets from itself (assets.ts) and the host's theme (theme.ts). The agent drives
-// the view; the person watches, plays, zooms and selects, and every view of the same viewer mirrors the others.
+// the view; the person watches, plays, zooms and selects, and every view of the same viewer mirrors the others. A view
+// shows the viewer its `open_projection` call named (`viewer`), else the default one.
 import {relayRendererFrames} from '@githubnext/projections-inspector/mount'
 import type {InspectorHost} from '@githubnext/projections-inspector/mount'
 import {mountViewer} from '@githubnext/projections-inspector/viewer'
@@ -46,6 +47,7 @@ async function main() {
   const assets = await inlineAssets(readInlineAssets())
   const root = document.getElementById('root')!
   let viewer: MountedViewer | undefined
+  let named: string | undefined
   const mount = () => {
     viewer?.unmount()
     root.replaceChildren()
@@ -53,12 +55,20 @@ async function main() {
       transport,
       assets,
       host: inspectorHost,
+      ...(named ? {viewer: named} : {}),
       headerEnd: expandButton(host),
       // Another viewer answers now (one started with --trust replaced the last): the view starts again on it.
       onReplaced: () => mount(),
     })
   }
   mount()
+  // The call this view shows may name a viewer, heard once the host sends its arguments: the view starts again on it.
+  host.onToolInput(args => {
+    const next = typeof args.viewer === 'string' && args.viewer !== 'default' ? args.viewer : undefined
+    if (next === named) return
+    named = next
+    mount()
+  })
   host.onTeardown(() => viewer?.unmount())
 }
 

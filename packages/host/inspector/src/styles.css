@@ -265,6 +265,60 @@ body {
   }
 }
 /*
+ * The title as the trigger of the projection menu (viewer/title.tsx): it reads as the title, not a button. At rest it
+ * has no fill, border or padding of its own, only a small muted chevron after the text. Hover and the open menu lay a
+ * faint wash behind it, and the keyboard's focus a ring. The wash is 24px tall and overhangs the text by 6px at each
+ * end through negative margins, so the row keeps its height, and the title its place and its cap-height centring.
+ */
+.pi-viewer-header .pi-viewer-title-menu {
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: calc(100% + 12px);
+  height: 24px;
+  margin-block: calc(0.5cap - 12px);
+  margin-inline: -6px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+}
+.pi-viewer-header .pi-viewer-title-menu:hover,
+.pi-viewer-header .pi-viewer-title-menu[data-state='open'] {
+  background: color-mix(in oklab, var(--pj-foreground) 7%, transparent);
+}
+.pi-viewer-header .pi-viewer-title-menu:focus-visible {
+  box-shadow: 0 0 0 2px var(--pj-ring);
+}
+.pi-viewer-header .pi-viewer-chevron {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  color: var(--pj-muted-foreground);
+  transition:
+    color 120ms,
+    transform 120ms;
+}
+.pi-viewer-header .pi-viewer-title-menu:hover .pi-viewer-chevron,
+.pi-viewer-header .pi-viewer-title-menu:focus-visible .pi-viewer-chevron,
+.pi-viewer-header .pi-viewer-title-menu[data-state='open'] .pi-viewer-chevron {
+  color: var(--pj-foreground);
+}
+.pi-viewer-header .pi-viewer-title-menu[data-state='open'] .pi-viewer-chevron {
+  transform: rotate(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pi-viewer-header .pi-viewer-chevron {
+    transition: none;
+  }
+}
+/*
  * The mark leads the header in place of the title's capital E: it overhangs the row's cap height equally above and
  * below, so the header keeps its height, and sits as far from the header's left edge as from its top and bottom.
  */

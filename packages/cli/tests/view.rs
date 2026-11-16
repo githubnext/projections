@@ -250,6 +250,92 @@ async fn show_resolves_choices_and_pages_follow_and_report() {
 }
 
 #[tokio::test]
+async fn named_viewers_show_projections_side_by_side_and_the_person_chooses() {
+    let fixture = Fixture::with(false, |repo| {
+        fs::write(
+            repo.join(".github/projections/versions.json"),
+            r#"{"id": "versions", "title": "Versions", "extractor": "workspace-dependencies", "renderer": "dependencies"}"#,
+        )
+        .unwrap();
+    })
+    .await;
+    let server = &fixture;
+    let show = |input: Value| async move { server.request("POST", "control/show", Some(&input)).await };
+    let default = show(json!({"projection": "packages", "choice": "last-commit"}))
+        .await
+        .json()
+        .unwrap();
+    assert_eq!(default["url"].as_str().unwrap(), fixture.viewer.url());
+    let named = show(json!({"projection": "versions", "choice": "now", "viewer": "side"}))
+        .await
+        .json()
+        .unwrap();
+    assert_eq!(named["url"].as_str().unwrap(), format!("{}?viewer=side", fixture.viewer.url()));
+    assert_eq!(named["state"]["generation"], 1, "a named viewer has its own state");
+    assert_eq!(named["state"]["chosenBy"], "agent");
+
+    // Each viewer's pages poll and report its own state.
+    let side = fixture.request("GET", "view/state?page=s1&viewer=side", None).await.json().unwrap();
+    assert_eq!(
+        (side["projection"].as_str(), side["viewer"].as_str()),
+        (Some("versions"), Some("side"))
+    );
+    let main = fixture.request("GET", "view/state?page=d1", None).await.json().unwrap();
+    assert_eq!(
+        (main["projection"].as_str(), main["viewer"].as_str()),
+        (Some("packages"), Some("default"))
+    );
+    let report = json!({"page": "s1", "viewer": "side", "generation": 1, "selection": "workspace:a"});
+    fixture.request("POST", "view/report", Some(&report)).await;
+    let main = fixture.request("GET", "control/state", None).await.json().unwrap();
+    assert!(main["state"]["selection"].is_null(), "another viewer's report doesn't reach it");
+    let names: Vec<&str> = main["viewers"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|view| view["name"].as_str().unwrap())
+        .collect();
+    assert_eq!(names, ["default", "side"]);
+
+    // The person picks another projection from a page's title: that viewer shows it, comparing what it compared.
+    let chosen = fixture
+        .request("POST", "view/choose", Some(&json!({"viewer": "side", "projection": "packages"})))
+        .await;
+    assert_eq!(chosen.status, 200);
+    let state = &chosen.json().unwrap()["state"];
+    assert_eq!(
+        (state["projection"].as_str(), state["compared"].as_str()),
+        (Some("packages"), Some("Current state"))
+    );
+    assert_eq!(state["chosenBy"], "person");
+    assert!(state["selection"].is_null(), "another projection's selection is cleared");
+    let read = fixture
+        .request("POST", "control/tool/current_view", Some(&json!({"viewer": "side"})))
+        .await
+        .json()
+        .unwrap();
+    let text = read["content"][0]["text"].as_str().unwrap();
+    assert!(text.starts_with("The viewer side shows \"Package map\""), "{text}");
+    assert!(text.contains("The person chose this projection themselves"), "{text}");
+    assert!(
+        text.contains("Other viewers (current_view with viewer reads one): default shows packages (Last commit)"),
+        "{text}"
+    );
+    let main = fixture.request("GET", "control/state", None).await.json().unwrap();
+    assert_eq!(main["state"]["chosenBy"], "agent", "the default viewer is unchanged");
+
+    for (path, body, status) in [
+        ("view/choose", json!({"projection": "nope"}), 400),
+        ("view/choose", json!({}), 400),
+        ("control/show", json!({"viewer": "Not A Name"}), 400),
+    ] {
+        assert_eq!(fixture.request("POST", path, Some(&body)).await.status, status, "{path} {body}");
+    }
+    assert_eq!(fixture.request("GET", "view/state?viewer=..%2F", None).await.status, 400);
+    fixture.close().await;
+}
+
+#[tokio::test]
 async fn the_shown_projections_renderer_builds_and_rebuilds_on_save() {
     let fixture = Fixture::with(true, |repo| {
         let package = repo.join("cards");

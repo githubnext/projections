@@ -314,6 +314,7 @@ projections view [OPTIONS]
 | `--mode <MODE>` | The comparison mode. One of `side-by-side`, `animated`, `swipe`, `diff`. |
 | `--entity <ID>` | An entity, relationship or change to select, by ID. |
 | `--scenario <ID>` | A scenario from the projection's renderer scenarios, shown instead of revisions. |
+| `--viewer <NAME>` | Show it in a named viewer, its own page and URL beside the others, to show several projections side by side. Default: the default viewer. |
 | `--port <PORT>` | The port to listen on. Default: any free port. Default: `0`. |
 | `--open` | Also open the page in the default browser. |
 | `--trust` | Let it run repository code (custom extractors and renderers). Review the projections' code first. A viewer already running without trust is replaced, at the same URL. |
@@ -344,6 +345,7 @@ projections view show [OPTIONS]
 | `--mode <MODE>` | The comparison mode. One of `side-by-side`, `animated`, `swipe`, `diff`. |
 | `--entity <ID>` | An entity, relationship or change to select, by ID. |
 | `--scenario <ID>` | A scenario from the projection's renderer scenarios, shown instead of revisions. |
+| `--viewer <NAME>` | Show it in a named viewer, its own page and URL beside the others, to show several projections side by side. Default: the default viewer. |
 | `--open` | Also open the page in the default browser. |
 | `--trust` | Let the viewer run repository code: one is started with trust, or replaces one running without it. |
 | `--json` | Print the result as JSON. |
@@ -358,6 +360,7 @@ projections view current [OPTIONS]
 
 | Argument | Description |
 |---|---|
+| `--viewer <NAME>` | A named viewer. Default: the default viewer. |
 | `--json` | Print the result as JSON. |
 
 ## `projections view screenshot`
@@ -382,6 +385,7 @@ projections view screenshot [OPTIONS] --out <FILE>
 | `--focus <WHAT>` | Open the image on a comparison's changes or on everything. Default: the renderer's choice. One of: `changes` — A comparison's changed items and the relationships between them; `all` — Everything. |
 | `--entity <ID>` | Open the image on one item, by its ID, centred with what it connects to. |
 | `--fit` | Fit what the image opens on whole, even when its text is drawn smaller than the renderer would open at. |
+| `--viewer <NAME>` | Render what a named viewer shows. Default: the default viewer. |
 | `--json` | Print the result as JSON. |
 
 ## `projections view refresh`
@@ -394,6 +398,7 @@ projections view refresh [OPTIONS]
 
 | Argument | Description |
 |---|---|
+| `--viewer <NAME>` | A named viewer. Default: the default viewer. |
 | `--json` | Print the result as JSON. |
 
 ## `projections view stop`

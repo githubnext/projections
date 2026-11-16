@@ -274,7 +274,7 @@ pub async fn call_with_views(
     // Omitted projections and revisions come from what the viewer shows, and the result says so.
     let (input, note) = match views {
         Some(views) if VIEW_DEFAULTED.contains(&name) => {
-            let shown = views.defaults().await;
+            let shown = views.defaults(input["viewer"].as_str()).await;
             match with_view_defaults(name, input, shown.as_ref()) {
                 Ok(defaulted) => defaulted,
                 Err(message) => return Ok(Outcome::failure(message)),

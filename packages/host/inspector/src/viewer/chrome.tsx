@@ -5,18 +5,28 @@ import {ProjectionsMark, cn} from '@githubnext/projections-host/ui/components'
 import {InspectorHostProvider} from '../host.js'
 import type {InspectorHost} from '../host.js'
 import {StartupShell} from '../mount.js'
+import type {SwitcherItem} from '../shell/switcher.js'
 import type {ViewerState} from './state.js'
+import {ViewerTitle} from './title.js'
 
 interface Snapshot {
   state: ViewerState | undefined
   status: string
   /** The page lost its server: the controls are disabled until it answers again. */
   stopped: boolean
+  /** The repository's projections, for the title's menu, as the Inspector lists them. */
+  projections: readonly SwitcherItem[]
+  /** The page's color mode, for the title's menu. */
+  colorMode: 'light' | 'dark'
+  /** The projection the person just chose, shown in the title until the viewer's state says it. */
+  choosing?: string | undefined
+  /** Why the person's choice didn't take, said in the status line until the state changes. */
+  failed?: string | undefined
 }
 
 /** A tiny store the header reads. */
 export function createStore() {
-  let snapshot: Snapshot = {state: undefined, status: 'Connecting…', stopped: false}
+  let snapshot: Snapshot = {state: undefined, status: 'Connecting…', stopped: false, projections: [], colorMode: 'light'}
   const listeners = new Set<() => void>()
   return {
     get: () => snapshot,
@@ -38,30 +48,39 @@ export type Store = ReturnType<typeof createStore>
  * compared. The mark takes no more height than the text's cap (styles.css), so the header keeps its height. What is
  * compared keeps its words up to about half the row, each named revision a chip that shortens with an ellipsis and
  * says its name in full on hover; the title takes the rest, and shortens first. Its text is centred by cap height
- * (styles.css). A host's own control (`end`) closes the row.
+ * (styles.css). The title is also the menu of the repository's projections (`onChoose`, title.tsx). A host's own
+ * control (`end`) closes the row.
  */
-export function ViewerHeader({store, end}: {store: Store; end?: ReactNode}) {
-  const {state, status, stopped} = useSyncExternalStore(store.subscribe, store.get, store.get)
-  const title = state?.projection ? (state.title ?? state.projection) : 'Projections'
+export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactNode; onChoose?: (projection: string) => void}) {
+  const {state, status, stopped, projections, colorMode, choosing, failed} = useSyncExternalStore(store.subscribe, store.get, store.get)
+  const shown = choosing ?? state?.projection ?? undefined
+  const title = shown
+    ? choosing
+      ? (projections.find(item => item.id === choosing)?.title ?? choosing)
+      : (state?.title ?? shown)
+    : 'Projections'
+  const line = failed ?? status
   return (
     <header className="pi-viewer-header pj:relative pj:z-20 pj:flex pj:min-w-0 pj:shrink-0 pj:items-center pj:gap-3 pj:border-b pj:border-divider pj:bg-surface-header pj:p-3 pj:text-[13px]">
       <ProjectionsMark tone="two-tone" className="pi-viewer-mark pj:text-foreground" />
-      <h1 className="pj:m-0 pj:flex pj:min-w-0 pj:flex-1 pj:items-center pj:text-[13px] pj:font-normal">
-        <span className="pi-viewer-title pi-viewer-text pj:min-w-0 pj:truncate pj:font-semibold" title={title}>
-          {title}
-        </span>
-      </h1>
-      {status && (
+      <ViewerTitle
+        title={title}
+        current={shown}
+        projections={projections}
+        colorMode={colorMode}
+        onChoose={stopped ? undefined : onChoose}
+      />
+      {line && (
         <span
           role="status"
           aria-live="polite"
-          title={status}
+          title={line}
           className={cn(
             'pi-viewer-status pi-viewer-text pj:min-w-0 pj:max-w-[40%] pj:truncate pj:text-xs',
-            stopped ? 'pj:font-medium pj:text-foreground' : 'pj:text-muted-foreground',
+            stopped || failed ? 'pj:font-medium pj:text-foreground' : 'pj:text-muted-foreground',
           )}
         >
-          {status}
+          {line}
         </span>
       )}
       {state?.projection && <Compared state={state} />}

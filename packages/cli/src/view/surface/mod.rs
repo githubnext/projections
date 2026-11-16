@@ -13,7 +13,10 @@ use std::{fmt::Write as _, sync::Arc, time::Duration};
 
 use serde_json::{Value, json};
 
-use super::{Shared, Viewer, ViewerOptions, client, control_state, registry, show, state::ViewState};
+use super::{
+    NamedView, Shared, Viewer, ViewerOptions, client, control_state, registry, show,
+    state::{Chooser, ViewState},
+};
 use crate::service::Service;
 use crate::tools::{Outcome, ViewDefaults};
 use current::current;
@@ -122,14 +125,18 @@ impl Views {
         }
     }
 
-    /// What the viewer shows, for the other tools' defaults; none when nothing is shown.
-    pub async fn defaults(&self) -> Option<ViewDefaults> {
+    /// What a viewer shows (the default one, or the one `viewer` names), for the other tools' defaults; none when
+    /// nothing is shown.
+    pub async fn defaults(&self, viewer: Option<&str>) -> Option<ViewDefaults> {
+        let name = super::viewer_name(viewer).ok()?;
         match self.target(false).await.ok()?? {
-            Target::Local(shared) => defaults(&shared).await,
+            Target::Local(shared) => {
+                let view = shared.views.get(Some(name.as_str())).ok()?;
+                defaults(&shared, &view).await
+            }
             Target::Remote(url) => {
-                let response = client::request(&url, "GET", "control/defaults", None, Duration::from_secs(10))
-                    .await
-                    .ok()?;
+                let path = format!("control/defaults?viewer={name}");
+                let response = client::request(&url, "GET", &path, None, Duration::from_secs(10)).await.ok()?;
                 parse_defaults(&response.json().ok()?)
             }
         }
@@ -201,8 +208,8 @@ async fn definition(shared: &Shared, projection: &str) -> Value {
         .unwrap_or(Value::Null)
 }
 
-pub(super) async fn defaults(shared: &Shared) -> Option<ViewDefaults> {
-    let control = control_state(shared);
+pub(super) async fn defaults(shared: &Shared, view: &NamedView) -> Option<ViewDefaults> {
+    let control = control_state(shared, view);
     let state = &control["state"];
     let projection = state["projection"].as_str()?.to_owned();
     let definition = definition(shared, &projection).await;
@@ -227,11 +234,11 @@ pub(super) async fn defaults(shared: &Shared) -> Option<ViewDefaults> {
     })
 }
 
-/// Waits, while a page is open, until one shows the current generation, up to `limit`.
-async fn settled(shared: &Shared, limit: Duration) -> bool {
+/// Waits, while a page of `view` is open, until one shows the current generation, up to `limit`.
+async fn settled(shared: &Shared, view: &NamedView, limit: Duration) -> bool {
     let deadline = tokio::time::Instant::now() + limit;
     loop {
-        let control = control_state(shared);
+        let control = control_state(shared, view);
         if control["pages"] == 0 {
             return false;
         }
@@ -252,25 +259,39 @@ async fn settled(shared: &Shared, limit: Duration) -> bool {
 /// Answers a view tool for the viewer this process runs.
 pub(super) async fn answer(shared: &Arc<Shared>, name: &str, input: &Value) -> Outcome {
     shared.touch();
+    let view = match shared.view(input) {
+        Ok(view) => view,
+        Err(message) => return Outcome::failure(message),
+    };
     match name {
-        "open_projection" => match show(shared, input).await {
+        "open_projection" => match show(shared, &view, input, Chooser::Agent).await {
             Err(message) => Outcome::failure(message),
-            Ok(state) => opened(shared, input, &state).await,
+            Ok(state) => opened(shared, &view, input, &state).await,
         },
-        "refresh" => refresh(shared).await,
-        _ => current(shared).await,
+        "refresh" => refresh(shared, &view).await,
+        _ => current(shared, &view).await,
+    }
+}
+
+/// How a viewer is named in words: "the viewer", or "the viewer api".
+pub(super) fn viewer_words(view: &NamedView) -> String {
+    if view.is_default() {
+        "the viewer".to_owned()
+    } else {
+        format!("the viewer {}", view.name)
     }
 }
 
 /// `open_projection`, once shown: what the person's page shows.
-async fn opened(shared: &Shared, input: &Value, state: &ViewState) -> Outcome {
-    settled(shared, Duration::from_secs(30)).await;
-    let mut outcome = current(shared).await;
-    let url = super::url(shared);
-    let pages = control_state(shared)["pages"].as_u64().unwrap_or(0);
+async fn opened(shared: &Shared, view: &NamedView, input: &Value, state: &ViewState) -> Outcome {
+    settled(shared, view, Duration::from_secs(30)).await;
+    let mut outcome = current(shared, view).await;
+    let url = super::view_url(shared, view);
+    let pages = control_state(shared, view)["pages"].as_u64().unwrap_or(0);
     let mut lead = format!(
-        "Showing {} in the viewer: {url}\n{}\n",
+        "Showing {} in {}: {url}\n{}\n",
         state.title.as_deref().unwrap_or_default(),
+        viewer_words(view),
         if pages == 0 { NO_PAGE } else { "The person's page shows it." }
     );
     if let Some(entity) = input["entity"].as_str() {
@@ -292,13 +313,13 @@ async fn opened(shared: &Shared, input: &Value, state: &ViewState) -> Outcome {
 }
 
 /// `refresh`: extracts again, and says what the page shows then.
-async fn refresh(shared: &Shared) -> Outcome {
-    if control_state(shared)["state"]["projection"].is_null() {
-        return Outcome::new(NOTHING_SHOWN.to_owned(), json!({"shown": false}));
+async fn refresh(shared: &Shared, view: &NamedView) -> Outcome {
+    if view.projection().is_none() {
+        return current(shared, view).await;
     }
-    shared.state.send_modify(ViewState::refresh);
-    let pages = settled(shared, Duration::from_secs(120)).await;
-    let mut outcome = current(shared).await;
+    view.state.send_modify(ViewState::refresh);
+    let pages = settled(shared, view, Duration::from_secs(120)).await;
+    let mut outcome = current(shared, view).await;
     outcome.text = format!(
         "{}\n\n{}",
         if pages {

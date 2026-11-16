@@ -135,6 +135,7 @@ export type ProbeCall =
   | 'styles'
   | 'stageSurface'
   | 'stageInsets'
+  | 'viewport'
 
 /** An entity element as painted: its box, effective opacity, paint and visible text. */
 export interface EntitySample {

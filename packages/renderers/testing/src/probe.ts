@@ -54,6 +54,7 @@ const calls: Record<ProbeCall, (args: unknown) => unknown> = {
   styles: () => styleSystem(),
   stageSurface: () => stageSurface(),
   stageInsets: () => stageInsets(),
+  viewport: () => ({width: innerWidth, height: innerHeight}),
 }
 
 addEventListener('message', event => {

@@ -13,6 +13,9 @@ import {recordEvent} from './stage-events.js'
 import {StageProbe} from './stage-probe.js'
 import {blank, frameEnvironment, presentation, sizeContainer, stageHighlighting, type PresentedEnvironment} from './stage-presentation.js'
 
+/** How long a measurement waits for the renderer's frame to arrive at its height, ms (see `Stage.arrived`). */
+const arrivalTimeoutMs = 5000
+
 /**
  * One renderer bundle in the real host frame (`RendererFrame`: sandboxed,
  * opaque origin, renderer policy, flow-controlled progress), driven exactly
@@ -33,6 +36,8 @@ export class Stage {
   /** The open frame's bundle URL, and whether it was loaded with `reuse`. */
   private url: string | undefined
   private reusable = false
+  /** The open frame fills a fixed height (`StageLoad.height`) rather than taking the height its renderer asks for. */
+  private filling = false
   private readonly probe = new StageProbe(() => (this.current.status === 'ready' ? this.frame?.iframe.contentWindow : undefined))
 
   constructor(
@@ -141,7 +146,8 @@ export class Stage {
       // The frame lays out at its new width before the renderer presents the new documents.
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
       const first = this.rendered(this.current.progress)
-      open.setFill(Boolean(request.height))
+      this.filling = Boolean(request.height)
+      open.setFill(this.filling)
       open.setOptions(request.options ?? {})
       open.select(this.current.selection)
       open.hover(null)
@@ -152,6 +158,7 @@ export class Stage {
     this.reset()
     const {init, progress} = this.present(request, bundle)
     this.reusable = Boolean(request.reuse)
+    this.filling = Boolean(request.height)
     this.url = bundle.url
     const ready = new Promise<void>((resolve, reject) => {
       this.readiness = {resolve, reject}
@@ -246,8 +253,53 @@ export class Stage {
     await this.measure('settle')
   }
 
-  /** Runs a check-probe measurement inside the renderer document. */
-  measure<T = unknown>(call: ProbeCall, args?: unknown): Promise<T> {
+  /**
+   * Runs a check-probe measurement inside the renderer document. `settle` first waits for the frame to arrive at its
+   * height (see `arrived`), so what the checks measure is never a paint placed for the height before.
+   */
+  async measure<T = unknown>(call: ProbeCall, args?: unknown): Promise<T> {
+    if (call === 'settle') await this.arrived()
     return this.probe.measure<T>(call, args)
+  }
+
+  /**
+   * Waits, at most `arrivalTimeoutMs`, until the renderer's document is as tall as the frame the host gave it: the
+   * height the renderer asked for, or the fixed height it fills. The frame is a sandboxed, out-of-process document, so
+   * a resize reaches it only some time after the host applies it; a renderer that acknowledged its paint before then
+   * (it waits only so long, as a host may never resize it) painted for the old height, with its view placed for that.
+   * When the height arrives late, the renderer's paint at it is waited for too.
+   */
+  private async arrived(): Promise<void> {
+    const frame = this.frame
+    if (!frame || this.current.status !== 'ready') return
+    const target = () => (this.filling ? frame.iframe.clientHeight : this.current.height)
+    const deadline = performance.now() + arrivalTimeoutMs
+    let late = false
+    for (;;) {
+      const height = target()
+      if (height === undefined) return
+      const {height: inner} = await this.probe.measure<{width: number; height: number}>('viewport')
+      if (Math.abs(inner - height) <= 1) break
+      if (performance.now() > deadline) return
+      late = true
+      await new Promise(resolve => setTimeout(resolve, 50))
+    }
+    if (!late) return
+    // The renderer lays out again at its new height and acknowledges that paint, if it held one for it.
+    await this.nextPaint(1000)
+  }
+
+  /** The renderer's next paint acknowledgement of the current progress, or `timeoutMs`, whichever comes first. */
+  private nextPaint(timeoutMs: number): Promise<void> {
+    return new Promise(resolve => {
+      const done = () => {
+        clearTimeout(timer)
+        this.waiters = this.waiters.filter(entry => entry !== waiter)
+        resolve()
+      }
+      const waiter = {progress: this.current.progress, resolve: done, reject: done}
+      const timer = setTimeout(done, timeoutMs)
+      this.waiters.push(waiter)
+    })
   }
 }

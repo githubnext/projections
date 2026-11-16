@@ -106,9 +106,9 @@ for (const mode of ['side-by-side', 'swipe'] as const)
         ).toBeVisible()
         await expect(iframe.contentFrame().locator('.node-surface').first()).toBeVisible()
         // The frame starts at its pane's top: no strip is kept for the chip, which overlays the frame's top corner.
-        const [pane, frame, box] = (await Promise.all([section.boundingBox(), iframe.boundingBox(), chip.boundingBox()])).map(
-          value => value!,
-        )
+        const pane = (await section.boundingBox())!,
+          frame = (await iframe.boundingBox())!,
+          box = (await chip.boundingBox())!
         expect(Math.abs(frame.y - pane.y), `${side}: the frame starts at its pane's top`).toBeLessThanOrEqual(1)
         expect(box.y, `${side}: the chip is over the frame`).toBeGreaterThan(frame.y)
         expect(box.y + box.height).toBeLessThan(frame.y + chipClearance)

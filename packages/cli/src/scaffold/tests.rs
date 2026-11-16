@@ -35,6 +35,21 @@ fn file_specifiers_are_relative_beside_the_checkout_and_absolute_otherwise() {
     );
 }
 
+#[cfg(windows)]
+#[test]
+fn file_specifiers_hold_drive_paths_whichever_way_windows_spelled_them() {
+    // A canonical path is verbatim (\\?\C:\...); the renderer package's directory usually isn't.
+    let tarball = Path::new(r"\\?\C:\work\projections\dist\dogfood\githubnext-projections.tgz");
+    assert_eq!(
+        file_specifier(Path::new(r"C:\work\site\renderer"), tarball),
+        "file:../../projections/dist/dogfood/githubnext-projections.tgz"
+    );
+    assert_eq!(
+        file_specifier(Path::new(r"D:\site\renderer"), tarball),
+        "file:C:/work/projections/dist/dogfood/githubnext-projections.tgz"
+    );
+}
+
 #[test]
 fn a_development_build_scaffolds_a_renderer_on_the_checkout_tarball() {
     let repository = tempfile::tempdir().unwrap();

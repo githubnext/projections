@@ -1,7 +1,7 @@
 import {useLayoutEffect, useRef, useState} from 'react'
 import type {RefObject} from 'react'
 import {rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
-import {fitPadding, fitScale} from '../fit.js'
+import {fitPadding, fitPaddingDown, fitScale} from '../fit.js'
 import type {Fit, FitOptions} from '../fit.js'
 import {openingZoom} from '../zoom.js'
 import {useContentAspect, useFrameFill, useFrameSizing, usePaintHold, useStageHeightCap} from './shell/frame.js'
@@ -26,6 +26,7 @@ export function useFitScale(
 ): Fit {
   const {padding = 16, maxScale = 1, minHeight = 200, floor = 0, aspect} = options
   const pad = fitPadding(padding)
+  const down = fitPaddingDown(padding).total
   type Measured = {width: number; height: number; chrome: number | undefined}
   const [measured, setMeasured] = useState<Measured>()
   const hold = usePaintHold()
@@ -86,7 +87,7 @@ export function useFitScale(
           ? fitScale(size, {width: measured.width, height: rendererLimits.maxHeight}, {padding, maxScale})
           : // A stage with no height yet (an offscreen frame laid out before its pane, whose resize arrives only once
             // it is shown) fits the width, never collapsing the content to nothing.
-            measured.height <= 2 * pad.y
+            measured.height <= down
             ? (({widthFirst}) => ({scale: widthFirst, widthFirst}))(fitScale(size, measured, {padding, maxScale}))
             : fitScale(size, measured, {padding, maxScale})
   // Content scaled down to the width already spans the stage, so it gets exactly its height, never a margin above it.
@@ -94,7 +95,7 @@ export function useFitScale(
   // A view that opens at the text floor rather than the width's fit takes the content's height at that floor.
   const opening = fit ? fit.widthFirst * openingZoom(fit.widthFirst, floor) : 0
   const natural =
-    fit && measured?.chrome !== undefined && size ? measured.chrome + Math.max(least, size.height * opening + 2 * pad.y) : undefined
+    fit && measured?.chrome !== undefined && size ? measured.chrome + Math.max(least, size.height * opening + down) : undefined
   // A content-sized frame lies in the host's page: a stage taller than most of its window is capped, and the content
   // fitted to the capped stage (both dimensions) rather than to the width alone.
   const preferred =
@@ -106,7 +107,7 @@ export function useFitScale(
   const reported = preferred === undefined ? undefined : Math.round(preferred)
   useFrameFill(reported)
   useArrivedHeight(stage, sizing === 'content' ? reported : undefined, hold)
-  useContentAspect(aspect ?? (size && size.width > 0 && size.height > 0 ? (size.width + 2 * pad.x) / (size.height + 2 * pad.y) : undefined))
+  useContentAspect(aspect ?? (size && size.width > 0 && size.height > 0 ? (size.width + 2 * pad.x) / (size.height + down) : undefined))
   return {scale: fit?.scale ?? 0, width: measured?.width ?? 0, height: measured?.height ?? 0}
 }
 

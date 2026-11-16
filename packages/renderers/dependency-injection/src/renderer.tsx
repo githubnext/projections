@@ -27,7 +27,7 @@ import {
   diLegend,
   activate,
   advance,
-  diPadding,
+  useDiPadding,
   diUnitLimit,
   halfWidth,
   headerHeight,
@@ -407,7 +407,8 @@ function TransitionView({
   // its text below the kit's opening floor: then it opens at the floor, on its root, and scrolls. Zoom enlarges it,
   // keeping the middle (the spine) in view. Both endpoints share the framing and the floor.
   const floor = useOpeningFloor(scroller, transition)
-  const fit = useFitScale(scroller, bounds, {padding: diPadding, floor})
+  const padding = useDiPadding()
+  const fit = useFitScale(scroller, bounds, {padding, floor})
   // The composition hangs from its root, centred at the top: a view that opens at the text floor opens there, on the
   // cards drawn when it is placed, with no card cut at its left edge (see `contentStart`).
   const drawn = useRef(units)
@@ -422,11 +423,11 @@ function TransitionView({
           height: transition.height,
         })),
         bounds,
-        diPadding,
+        padding,
         12,
         'centre',
       )(view),
-    [bounds, transition],
+    [bounds, transition, padding],
   )
   const {zoom, scale} = useStageZoom(scroller, onAction, fit.scale, {floor, start})
 

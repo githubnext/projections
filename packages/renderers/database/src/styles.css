@@ -4,7 +4,8 @@
  */
 .database-view {
   /* Content starts at the top of the frame: the host owns the header. */
-  padding: var(--projections-space-2) var(--projections-stage-inset, var(--projections-space-5));
+  padding: var(--projections-stage-inset-top, var(--projections-space-2)) var(--projections-stage-inset, var(--projections-space-5))
+    var(--projections-space-2);
   overflow: auto;
   display: flex;
   flex-direction: column;

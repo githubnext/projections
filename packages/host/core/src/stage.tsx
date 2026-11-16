@@ -12,10 +12,11 @@ export interface ProjectionStageProps {
   /** Visible labels for the before and after panes, for example revision names. Accessible names always say "Before revision" and "After revision". */
   labels?: {before?: ReactNode; after?: ReactNode}
   /**
-   * How side by side and swipe show each pane's label: as a header band above it (default `visible`), or as a chip in a
-   * slim strip above it (`chips`), on the stage's background, with no band surface or rule. In side by side each pane
-   * has its chip at its start; in swipe the before chip is at the left and the after chip at the right, each revealed
-   * with its side. `hidden` leaves the panes to the renderer, for a host that names the revisions elsewhere. Single-frame
+   * How side by side and swipe show each pane's label: as a header band above it (default `visible`), or as a quiet chip
+   * overlaid on its frame (`chips`), on the renderer's own stage, taking no height. In side by side each pane has its
+   * chip at its top start; in swipe the before chip is at the top left and the after chip at the top right, each
+   * revealed with its side. Frames under chips get the `stage-inset-top` theme token, so renderers that honour it
+   * start their content below the chip. `hidden` leaves the panes to the renderer, for a host that names the revisions elsewhere. Single-frame
    * modes show no pane label (the playback slider names the revisions). Either way the labels name the panes for
    * assistive technology.
    */

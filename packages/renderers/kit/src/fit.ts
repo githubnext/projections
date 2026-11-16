@@ -25,11 +25,19 @@ export interface FitPadding {
   x: number
   /** Space above the content and below it, CSS px. */
   y: number
+  /** Space above the content, CSS px, when it differs from `y` (a host's `stage-inset-top`); `y` stays below it. */
+  top?: number
 }
 
 /** `padding` across and down. */
 export function fitPadding(padding: number | FitPadding = 16): FitPadding {
   return typeof padding === 'number' ? {x: padding, y: padding} : padding
+}
+
+/** The space `padding` keeps above the content and the space it keeps above and below together, CSS px. */
+export function fitPaddingDown(padding: number | FitPadding = 16): {top: number; total: number} {
+  const {y, top = y} = fitPadding(padding)
+  return {top, total: top + y}
 }
 
 /** The fit `useFitScale` measured: the content's scale and the stage's inner size. */
@@ -52,9 +60,9 @@ export function fitScale(
   stage: {width: number; height: number},
   {padding = 16, maxScale = 1}: Pick<FitOptions, 'padding' | 'maxScale'> = {},
 ): {scale: number; widthFirst: number} {
-  const {x, y} = fitPadding(padding)
+  const {x} = fitPadding(padding)
   const across = Math.max(0, stage.width - 2 * x) / size.width
-  const down = Math.max(0, stage.height - 2 * y) / size.height
+  const down = Math.max(0, stage.height - fitPaddingDown(padding).total) / size.height
   return {scale: Math.min(maxScale, across, down), widthFirst: Math.min(maxScale, across)}
 }
 

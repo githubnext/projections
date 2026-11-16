@@ -1,3 +1,4 @@
+import {useMemo} from 'react'
 import type {CSSProperties, KeyboardEvent} from 'react'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import {
@@ -11,7 +12,7 @@ import {
   edgeMarkerId,
   edgePaint,
 } from '@githubnext/projections-renderer-kit'
-import {EdgeArrowMarker} from '@githubnext/projections-renderer-kit/react'
+import {EdgeArrowMarker, useStageInsetTop} from '@githubnext/projections-renderer-kit/react'
 import type {Point, RendererLegend} from '@githubnext/projections-renderer-kit'
 import {lifetimeNames} from './facets.js'
 import type {DiUnit, Lifetime} from './model.js'
@@ -38,6 +39,15 @@ export {
  */
 /** Space between the frame and a fitted composition, CSS px. */
 export const diPadding = 16
+
+/**
+ * The space around a fitted composition, CSS px: `diPadding`, and above it the host's `stage-inset-top` where it sends
+ * one (`styles.css` pads the canvas the same), so the composition opens below what the host overlays on the frame.
+ */
+export function useDiPadding(): {x: number; y: number; top: number} {
+  const top = useStageInsetTop() ?? diPadding
+  return useMemo(() => ({x: diPadding, y: diPadding, top}), [top])
+}
 
 /** Units drawn at once; the host's table presents the complete model. */
 export const diUnitLimit = 400

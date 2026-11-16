@@ -8,7 +8,7 @@ import {
   rendererProtocolVersion,
 } from './protocol.js'
 import {documentRings} from './rings.js'
-import {resolveThemeTokens} from './tokens.js'
+import {optionalThemeTokenNames, resolveThemeTokens} from './tokens.js'
 import {dispatch, replayed, resumeSession, type RendererHandlers} from './client/host-messages.js'
 import type {
   AnchorRect,
@@ -296,9 +296,12 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
  */
 export function applyEnvironment(environment: RendererEnvironment, element: HTMLElement = document.documentElement): void {
   // Every token of the current set is defined, using defaults for any the host omitted.
-  for (const [name, value] of Object.entries(resolveThemeTokens(environment.theme))) {
+  const tokens = resolveThemeTokens(environment.theme)
+  for (const [name, value] of Object.entries(tokens)) {
     if (/^[a-z0-9-]{1,64}$/.test(name)) element.style.setProperty(`--projections-${name}`, value)
   }
+  // An optional layout token the host no longer sends (a pane chip gone with its mode) falls back to the renderer's own.
+  for (const name of optionalThemeTokenNames) if (!(name in tokens)) element.style.removeProperty(`--projections-${name}`)
   // The document root keeps `color-scheme: light dark`, like the host's frame element, so browsers never paint an
   // opaque backdrop for a scheme mismatch; the body and everything in it use the host's mode.
   const scheme = element === element.ownerDocument.documentElement ? (element.ownerDocument.body ?? element) : element

@@ -6,7 +6,7 @@ import type {GraphTransition} from '../../graph-transition.js'
 import {contentStart, openingZoom} from '../../zoom.js'
 import {useBorderWidths} from '../border.js'
 import {useFitScale} from '../fit.js'
-import {useFrameSizing, useStageInset} from '../shell/frame.js'
+import {useFrameSizing, useStageInset, useStageInsetTop} from '../shell/frame.js'
 import {useOpeningFloor, useStageZoom} from '../zoom.js'
 import type {ContentBox, ScrollStart} from '../../zoom.js'
 import type {LaidOutGraphProps} from './drawing.js'
@@ -20,11 +20,20 @@ const strokeRoom = 12
 /**
  * The space around a fitted graph, CSS px: `graphPadding`, or across the host's `stage-inset` (`styles/graph.css`
  * pads the drawing the same), where the drawing's sides then reach exactly to the outermost cards and routes (see
- * `useFraming`), so they line up with the host's column.
+ * `useFraming`), so they line up with the host's column; and above it the host's `stage-inset-top`, where it sends
+ * one, so the graph opens below what the host overlays on the frame's top.
  */
-export function useGraphPadding(): {x: number; y: number} {
+export function useGraphPadding(): GraphPadding {
   const x = useStageInset() ?? graphPadding
-  return useMemo(() => ({x, y: graphPadding}), [x])
+  const top = useStageInsetTop() ?? graphPadding
+  return useMemo(() => ({x, y: graphPadding, top}), [x, top])
+}
+
+/** The space around a fitted graph, CSS px: across, below, and above it (`useGraphPadding`). */
+export interface GraphPadding {
+  x: number
+  y: number
+  top: number
 }
 
 export interface Bounds {
@@ -101,7 +110,7 @@ export function useGraphZoom(
   const fit = useFitScale(scroller, bounds, {
     padding,
     floor,
-    ...(area && request ? {aspect: (area.box.width + 2 * padding.x) / (area.box.height + 2 * padding.y)} : {}),
+    ...(area && request ? {aspect: (area.box.width + 2 * padding.x) / (area.box.height + padding.top + padding.y)} : {}),
   })
   // Arrowheads stop on the outer edge of their target's border; a change border is inset so it never reaches further.
   const borders = useBorderWidths(scroller)
@@ -162,14 +171,17 @@ function focusOpening({
   sized: boolean
   orientation: 'vertical' | 'horizontal'
   /** The space around the fitted graph (`useGraphPadding`). */
-  padding: {x: number; y: number}
+  padding: GraphPadding
 }): {zoom: number; start: ScrollStart} | undefined {
   if (!fit) return undefined
   if (!area) return request?.fit ? {zoom: 1, start: {x: 0, y: 0}} : undefined
   // Diff mode's own focus: only when everything doesn't fit at the floor.
   if (!request && openingZoom(fit, floor) <= 1) return undefined
   const {box} = area
-  const room = Math.min(Math.max(0, view.width - 2 * padding.x) / box.width, Math.max(0, view.height - 2 * padding.y) / box.height)
+  const room = Math.min(
+    Math.max(0, view.width - 2 * padding.x) / box.width,
+    Math.max(0, view.height - padding.top - padding.y) / box.height,
+  )
   const fitted = Math.min(1, room)
   // Asked for, the area is fitted (at most at full size, and not below the floor unless `fit`). Diff mode's own focus
   // fits its changes too where that keeps text at the floor, else stays at the floor; in a content-sized frame, which
@@ -178,7 +190,7 @@ function focusOpening({
   const fits = fitted >= scale * (1 - 1e-6)
   const centred: ScrollStart = ({scale, width, height}) => ({
     left: (box.x + box.width / 2 - content.x) * scale + padding.x - width / 2,
-    top: (box.y + box.height / 2 - content.y) * scale + padding.y - height / 2,
+    top: (box.y + box.height / 2 - content.y) * scale + padding.top - height / 2,
   })
   // Asked for: centred where the area fits, else its reading start, as the whole graph opens.
   if (request) return {zoom: scale / fit, start: fits ? centred : contentStart(area.cards, content, padding)}
@@ -188,7 +200,7 @@ function focusOpening({
     const corner = busiestWindow(area.cards, {width: view.width / view.scale, height: view.height / view.scale}, orientation)
     return {
       left: (corner.x - content.x) * view.scale + padding.x,
-      top: (corner.y - content.y) * view.scale + padding.y,
+      top: (corner.y - content.y) * view.scale + padding.top,
     }
   }
   return {zoom: scale / fit, start: uncutStart(fits ? centred : reading, area, content, fits, padding)}
@@ -228,21 +240,22 @@ const edgeMargin = 8
  * then one at the edge reading starts from (the left or top). Where the area fits (`fits`) it stays wholly in view;
  * otherwise it moves at most a quarter of the view.
  */
-function uncutStart(start: ScrollStart, area: FocusArea, content: ContentBox, fits: boolean, padding: {x: number; y: number}): ScrollStart {
+function uncutStart(start: ScrollStart, area: FocusArea, content: ContentBox, fits: boolean, padding: GraphPadding): ScrollStart {
   return view => {
     const at = typeof start === 'function' ? start(view) : {left: 0, top: 0}
     const {scale} = view
     if (!scale) return at
-    type Axis = {position: 'x' | 'y'; size: 'width' | 'height'; extent: number; padding: number}
-    const horizontal: Axis = {position: 'x', size: 'width', extent: view.width, padding: padding.x},
-      vertical: Axis = {position: 'y', size: 'height', extent: view.height, padding: padding.y}
-    const origin = (axis: Axis) => content[axis.position] - axis.padding / scale
+    // An axis's padding before the content and its padding before and after it together.
+    type Axis = {position: 'x' | 'y'; size: 'width' | 'height'; extent: number; before: number; padding: number}
+    const horizontal: Axis = {position: 'x', size: 'width', extent: view.width, before: padding.x, padding: 2 * padding.x},
+      vertical: Axis = {position: 'y', size: 'height', extent: view.height, before: padding.top, padding: padding.top + padding.y}
+    const origin = (axis: Axis) => content[axis.position] - axis.before / scale
     // The view's span on an axis, in content units, from a scroll offset.
     const span = (axis: Axis, offset: number) => [origin(axis) + offset / scale, origin(axis) + (offset + axis.extent) / scale] as const
     const place = (axis: Axis, offset: number, other: Axis, otherOffset: number) => {
       const [from, to] = span(axis, offset)
       const width = to - from
-      const range = [origin(axis), origin(axis) + content[axis.size] + (2 * axis.padding) / scale - width] as const
+      const range = [origin(axis), origin(axis) + content[axis.size] + axis.padding / scale - width] as const
       if (range[1] <= range[0]) return offset
       const [low, high] = span(other, otherOffset)
       const changed = new Set(area.cards.map(card => `${card.x},${card.y}`))

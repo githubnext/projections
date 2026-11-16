@@ -9,8 +9,13 @@ import type {RendererEntry, ViewSubject} from '@githubnext/projections-host'
 import {demonstration, laterRevision} from './fixtures.js'
 
 const params = new URLSearchParams(location.search)
-// `?fill` puts the stage in a fixed-height container it fills; `?mode=animated|swipe` picks another mode.
+// `?fill` puts the stage in a fixed-height container it fills; `?mode=animated|swipe` picks another mode;
+// `?paneLabels=chips|hidden` labels the panes another way.
 const fill = params.has('fill')
+const paneLabels =
+  params.get('paneLabels') === 'chips' || params.get('paneLabels') === 'hidden'
+    ? (params.get('paneLabels') as 'chips' | 'hidden')
+    : 'visible'
 const mode =
   params.get('mode') === 'animated' || params.get('mode') === 'swipe' ? (params.get('mode') as 'animated' | 'swipe') : 'side-by-side'
 
@@ -43,10 +48,10 @@ function Review({subject, renderer}: {subject: ViewSubject; renderer: RendererEn
       </p>
       {fill ? (
         <div className="core-fill" style={{height: 520, border: '1px solid #d1d9e0'}}>
-          <ProjectionStage projection={projection} labels={{before: 'Base', after: 'Head'}} fill />
+          <ProjectionStage projection={projection} labels={{before: 'Base', after: 'Head'}} paneLabels={paneLabels} fill />
         </div>
       ) : (
-        <ProjectionStage projection={projection} labels={{before: 'Base', after: 'Head'}} />
+        <ProjectionStage projection={projection} labels={{before: 'Base', after: 'Head'}} paneLabels={paneLabels} />
       )}
     </main>
   )

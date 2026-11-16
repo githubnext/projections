@@ -4,7 +4,8 @@
   display: flex;
   flex-direction: column;
   container: statistics / inline-size;
-  padding: var(--projections-space-2) var(--projections-stage-inset, var(--projections-space-3)) var(--projections-space-3);
+  padding: var(--projections-stage-inset-top, var(--projections-space-2)) var(--projections-stage-inset, var(--projections-space-3))
+    var(--projections-space-3);
   background: var(--stage);
 }
 .statistics-panel {

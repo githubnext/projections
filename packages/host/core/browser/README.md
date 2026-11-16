@@ -60,5 +60,7 @@ The browser suite runs on Chromium and WebKit, desktop and mobile. It checks:
   every control 32px tall, a gap below the toolbar, every control reachable),
   the one/two-row hysteresis, and mode icons distinct from the playback icons.
 - Renderer controls, host settings and definition defaults.
-- Core-only usage (`core.spec.ts`) and no style leakage in either direction for
-  an embedded default UI (`embed.spec.ts`).
+- Core-only usage (`core.spec.ts`; the core-only story takes `fill`, `mode`
+  (`animated` or `swipe`) and `paneLabels` (`chips` or `hidden`)), pane bands
+  and chips (`pane-labels.spec.ts`), and no style leakage in either direction
+  for an embedded default UI (`embed.spec.ts`).

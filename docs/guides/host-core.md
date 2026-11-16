@@ -123,18 +123,21 @@ stacking into two rows on narrow widths. Frames fill their pane instead of
 growing to the renderer's requested height, so renderers scroll inside.
 
 It is styled inline from the theme tokens, so the core needs no stylesheet. Pane
-labels come from the consumer. `paneLabels: 'chips'` shows each label as a chip
-in a slim strip above its pane instead of a header band: in side by side at each
-pane's start, in swipe the before chip at the left and the after chip at the
-right, each revealed with its side; single-frame modes show none. The chip lines
-up with where the renderer's content starts, and a host can restyle it with
-`--ph-pane-chip-bg`, `--ph-pane-chip-fg`, `--ph-pane-chip-border` and
-`--ph-pane-chip-weight`, for example to tag panes as its own UI tags a branch.
-`paneLabels: 'hidden'` drops the bands of side by side and swipe for a host that
-names the revisions elsewhere. Either way the labels name each pane for
-assistive technology. `renderStatus` renders a pane's loading or failure state;
-pass `null` to show `rendererStatus` and `rendererErrors` yourself. While a pane
-loads, its status covers the frame's area and is centered in it.
+labels come from the consumer. `paneLabels: 'chips'` shows each label as a quiet
+chip overlaid on its frame instead of a header band, on the renderer's own stage
+and taking no height: in side by side at each pane's top start, in swipe the
+before chip at the top left and the after chip at the top right, each revealed
+with its side; single-frame modes show none. The chip lines up with where the
+renderer's content starts, and the stage sends each frame under a chip the
+`stage-inset-top` theme token, so renderers that honour it start their content
+below the chip. By default it is small, muted text on the stage's surface behind
+a hairline; a host can restyle it with `--ph-pane-chip-bg`, `--ph-pane-chip-fg`,
+`--ph-pane-chip-border` and `--ph-pane-chip-weight`. `paneLabels: 'hidden'`
+drops the bands of side by side and swipe for a host that names the revisions
+elsewhere. Either way the labels name each pane for assistive technology.
+`renderStatus` renders a pane's loading or failure state; pass `null` to show
+`rendererStatus` and `rendererErrors` yourself. While a pane loads, its status
+covers the frame's area and is centered in it.
 
 `LoadingStatus({label, description?, reducedMotion?, fill?})` is the loading
 state every UI shows (renderer frames, the explorer's comparison, engine

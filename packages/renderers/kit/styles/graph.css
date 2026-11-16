@@ -67,8 +67,8 @@
   flex: none;
   margin: auto;
   box-sizing: content-box;
-  /* `graphPadding` (framing.ts), or across the host's stage inset (`useGraphPadding`). */
-  padding: 16px var(--projections-stage-inset, 16px);
+  /* `graphPadding` (framing.ts), or across the host's stage inset and above it its top inset (`useGraphPadding`). */
+  padding: var(--projections-stage-inset-top, 16px) var(--projections-stage-inset, 16px) 16px;
 }
 /* Cards are controls: clicking one (twice, too) activates it rather than selecting its text. */
 .graph-node {

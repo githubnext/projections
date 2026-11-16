@@ -49,7 +49,7 @@ export function RuntimePolicyView(props: RendererProps<typeof accepts>) {
     workloadRuns = runsOf(view.workloads)
   // The content root starts at the top of the frame: the host's summary bar, not a line here, summarizes the policies.
   return (
-    <div className="rp-view" data-side={side} data-comparing={comparing ? '' : undefined} data-projections-content="">
+    <div className="rp-view pk-stage" data-side={side} data-comparing={comparing ? '' : undefined} data-projections-content="">
       {view.deployment.length > 0 && (
         <Group title="Agent and kernels" icon="host" className="rp-panel">
           <ul className="rp-table rp-list" data-projections-unit="">

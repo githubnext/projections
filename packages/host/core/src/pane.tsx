@@ -43,6 +43,11 @@ export interface PaneState {
   summary?: SummaryItem[]
   /** The shape (width / height) of the content the renderer fits to its stage, if it reports one. */
   aspect?: number
+  /**
+   * The height, CSS px, the renderer last asked its frame for: its content's height, or while it fills its frame the
+   * height it prefers. A host that sizes the frame itself can use it to fit its own box to the content.
+   */
+  height?: number
 }
 
 export const loadingPane: PaneState = {status: 'loading', steps: [], rendererErrors: [], rejected: 0, controls: []}
@@ -191,6 +196,7 @@ export function RendererPane(props: RendererPaneProps) {
           current.onOpen(event.path, event.line)
           break
         case 'height':
+          setState(previous => (previous.height === event.px ? previous : {...previous, height: event.px}))
           break
       }
     }

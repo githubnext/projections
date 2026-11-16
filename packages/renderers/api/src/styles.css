@@ -1,10 +1,10 @@
-/* Every visual value is a host theme token. The declarations are one raised panel on the stage, as a table is a card. */
+/*
+ * Every visual value is a host theme token. The declarations are one raised panel on the stage, as a table is a card,
+ * set in from the frame by the kit's stage padding on all four sides (`pk-stage`).
+ */
 .api-view {
   min-width: 0;
   container-type: inline-size;
-  padding: var(--projections-stage-inset-top, var(--projections-space-2)) var(--projections-stage-inset, var(--projections-space-3))
-    var(--projections-space-3);
-  background: var(--stage);
 }
 .api-panel {
   min-width: 0;

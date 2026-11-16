@@ -1,6 +1,7 @@
 /* Runtime security policies.
  *
- * Each section is a kit `Group` on the stage: a raised panel, edged with the
+ * Each section is a kit `Group` on the stage (`pk-stage`, the kit's equal inset
+ * from the frame on all four sides): a raised panel, edged with the
  * divider, whose header band names it in the UI font. It holds one table that
  * reaches its sides and is clipped to its corners: a quiet column-header strip
  * (as text diff's Before and After strip), then rows sharing the table's
@@ -25,8 +26,6 @@
   display: grid;
   gap: var(--projections-space-3);
   min-width: 0;
-  padding: var(--projections-stage-inset-top, 0) var(--projections-stage-inset, var(--projections-space-3)) var(--projections-space-3);
-  background: var(--stage);
   font-size: var(--projections-font-size-sm);
   color: var(--text);
 }
@@ -35,10 +34,6 @@
 }
 .rp-view[data-comparing] {
   --rp-status: 13rem;
-}
-/* Without a summary line above it, the first panel keeps the stage's inset at the top, as text diff's commands do. */
-.rp-view > .rp-panel:first-child {
-  margin-top: var(--projections-space-2);
 }
 /* The band's inset is the cells', so its icon leads the column at every width. */
 .rp-view > .rp-panel > .pk-group-header {
@@ -437,7 +432,6 @@
   }
   .rp-view {
     --rp-pad-x: var(--projections-space-2);
-    padding-inline: var(--projections-space-2);
   }
   .rp-table {
     grid-template-columns: [sign] var(--rp-sign) [main effect side status] minmax(0, 1fr) [end];

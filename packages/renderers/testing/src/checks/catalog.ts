@@ -74,6 +74,7 @@ export const checkTitles: Record<CheckId, string> = {
   'status-text': 'Change status as text',
   'quiet-endpoints': 'No status text at the endpoints',
   'content-top': 'Content starts at the top of the frame',
+  'stage-insets': 'Cards inset equally on all four sides',
   'opens-fitted': 'Opens fitted, or at the readable text floor',
   relationships: 'Relationships drawn',
   palette: 'Colors from the theme',
@@ -112,7 +113,9 @@ export const checkDescriptions: Record<CheckId, string> = {
     'While a change is emphasized, its entity states its status as text (Added, Removed, Modified, Renamed or Moved), visibly or for assistive technology, never by color alone.',
   'quiet-endpoints': "At both endpoints, with the host's default highlighting, no entity shows status text.",
   'content-top':
-    'The renderer draws no header of its own (the host shows the title, schema and counts): its first entity, canvas or marked content region (data-projections-content) starts within 8 px of the frame top, at full and phone width. A zoomable canvas (a scroll container marked data-zoom) counts as a whole, since it opens fitted (or at the text floor) and centres what it draws.',
+    "The renderer draws no header of its own (the host shows the title, schema and counts): its first entity, canvas or marked content region (data-projections-content) starts within the stage padding of the frame top (the host's stage-inset, else 12 px, or its stage-inset-top where that is more), at full and phone width. A zoomable canvas (a scroll container marked data-zoom) counts as a whole, since it opens fitted (or at the text floor) and centres what it draws.",
+  'stage-insets':
+    "The cards, panels and tables a renderer stands on its stage sit evenly in the frame: the space between their union and the frame's top, left and right, and the end of the content (where a host that sizes the frame to the content ends it), is the same, within 1 px, at full and phone width, except that where the host overlays the frame's top (stage-inset-top) the top is the larger of that and the other sides' inset. Pad the content root by the stage padding on all four sides (the kit's ContentView or class pk-stage: the host's stage-inset, else 12 px) and give the outer cards no margins. Skipped for a renderer that centres a fitted drawing (a zoomable canvas, data-zoom, or a kit renderer that fills its frame) and for one that stands no cards on its stage.",
   'opens-fitted':
     `A renderer whose canvas zooms (a scroll container marked data-zoom) opens fitted in a frame of fixed size, as a tab or pane shows it: at full and phone width, in the diff and a progress mode when it declares them and for one revision, every entity it draws lies inside the visible canvas at zoom 1, so nothing needs scrolling to be seen. When fitting would draw its smallest text below ${openingFloorPx}px, it opens at that floor instead: zoomed until the smallest text is ${openingFloorPx}px, never further, with the start of its content (the top row's leftmost entity) in view and no entity cut off at the visible canvas's left or top edge. ` +
     `A diff may open on its changes (marked data-change) instead: one at least in view, zoomed past the floor only when every change is wholly in view. Opening text below ${openingFloorPx}px fails unless all of the content fits; the smallest text is reported. Document-style renderers (lists, tables, text), with no zoomable canvas, scroll naturally and are skipped.`,

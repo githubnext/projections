@@ -1,11 +1,9 @@
 /*
- * Fills the frame (the kit's `useFrameFill`) and centres the schema, fitted to the stage; a zoomed schema scrolls.
- * `.database-zoom` takes the schema's drawn (scaled) size and `.database-content` is the schema at its own size.
+ * Fills the frame (the kit's `useFrameFill`) and centres the schema, fitted to the stage inside the kit's stage padding
+ * (`pk-stage`, the same on all four sides); a zoomed schema scrolls. `.database-zoom` takes the schema's drawn (scaled)
+ * size and `.database-content` is the schema at its own size.
  */
 .database-view {
-  /* Content starts at the top of the frame: the host owns the header. */
-  padding: var(--projections-stage-inset-top, var(--projections-space-2)) var(--projections-stage-inset, var(--projections-space-5))
-    var(--projections-space-2);
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -53,9 +51,6 @@
   outline: none;
 }
 /* A table is a raised card on the stage, edged with the divider; its name is a header band. */
-.database-view {
-  background: var(--stage);
-}
 /*
  * The card's edge is its own outline, inside its box; the SDK's ring restyles that outline. The card is a stacking
  * context and its positioned rows sit at z-index -1 in it, above its background and under its outline: browsers paint

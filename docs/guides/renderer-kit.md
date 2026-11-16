@@ -407,17 +407,23 @@ Spatial renderers use the whole frame either way:
   `fitScale(size, stage, options)` is the pure calculation.
 - `useStageInset()`: the host's `stage-inset` theme token in CSS px, or
   undefined when it sends none. A host that lines renderer content up with its
-  page's column sends it; CSS reads it with the renderer's own inset as the
-  fallback (`var(--projections-stage-inset, <own>)`). The graph canvas pads its
-  fitted drawing by it across, reaching exactly to its outermost cards, and
+  page's column sends it. It is the space between the frame's edges and the
+  content on the stage, on all four sides: the kit's stage padding
+  (`--pk-stage-padding`, which `ContentView` and the class `pk-stage` pad by) is
+  it, else 12 px, so cards and tables sit evenly in every host. CSS outside the
+  kit reads it as `var(--projections-stage-inset, 12px)`. The graph canvas pads
+  its fitted drawing by it across, reaching exactly to its outermost cards, and
   opens with its leftmost card that far from the edge (`contentStart`'s
   `clear`).
 - `useStageInsetTop()`: the host's `stage-inset-top` theme token in CSS px, or
   undefined when it sends none. A host that overlays the frame's top (a pane's
-  label chip) sends it; CSS reads it in place of the renderer's own top padding
-  (`var(--projections-stage-inset-top, <own>)`), so content starts below the
-  overlay while the stage's background reaches under it. The graph canvas keeps
-  it above its fitted drawing (`padding`'s `top`, beside `x` and `y`).
+  label chip) sends it. The kit's stage padding takes it at its top when it is
+  the larger (`--pk-stage-padding-top`, the max of the two), so content starts
+  below the overlay while the stage's background reaches under it; CSS outside
+  the kit reads it as
+  `max(var(--projections-stage-inset, 12px), var(--projections-stage-inset-top, 0px))`.
+  The graph canvas keeps it above its fitted drawing (`padding`'s `top`, beside
+  `x` and `y`).
 - `useStageZoom(scroller, onAction, fit, {floor, start})` → `{zoom, scale}`:
   zoom for content fitted at `fit`, as a multiple of it (`zoomLimits`): 1 is
   fitted and the minimum, so zooming out always reaches "everything in view" and
@@ -532,3 +538,14 @@ lines and icons, names, identifiers, empty and error states, notices, legends,
 content buttons (`.pk-button`) and `[data-projections-hovered]` hover marks;
 `react.css` adds generated fields, the graph canvas, diff mode's marks and the
 layout components.
+
+Cards, panels and tables stand on the stage the same distance from the frame's
+edges on all four sides, in every host: the stage padding, `--pk-stage-padding`,
+which is the host's `stage-inset` theme token, else 12 px. `ContentView` pads by
+it; a renderer with a content root of its own gives that root the class
+`pk-stage` (which also paints it with `--stage`) instead of padding it, and
+gives its outer cards no margins. Where the host overlays the frame's top (a
+pane's label chip, `stage-inset-top`), the top is the larger of the two
+(`--pk-stage-padding-top`). A renderer that fits a drawing to its frame reads
+the same insets in script with `useStageInset()` and `useStageInsetTop()`. The
+`stage-insets` check holds document-style renderers to it.

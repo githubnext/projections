@@ -95,7 +95,21 @@ Build the bundle before the tests. The checks:
 - `content-top`: The renderer draws no header of its own (the host owns title,
   schema and counts): its first entity, outermost SVG canvas or region marked
   `data-projections-content` (content that isn't an entity: an axis, a table
-  head, a summary) starts within 8 px of the frame top, at full and phone width.
+  head, a summary) starts within the stage padding of the frame top (the host's
+  `stage-inset`, else 12 px, or its `stage-inset-top` where that is more), at
+  full and phone width.
+- `stage-insets`: The cards, panels and tables a renderer stands on its stage
+  (outermost elements with a border on all four sides or a filled surface that
+  isn't the stage) sit evenly in the frame: the space between their union and
+  the frame's top, left and right, and the end of the content, is the same
+  within 1 px, at full and phone width; where the host overlays the frame's top
+  (`stage-inset-top`), the top is the larger of that and the other sides' inset.
+  Pad the content root by the stage padding on all four sides (the kit's
+  `ContentView` or class `pk-stage`, else
+  `var(--projections-stage-inset, 12px)`) and give the outer cards no margins.
+  Skipped for a renderer that centres a fitted drawing (a zoomable canvas,
+  `data-zoom`, or a kit renderer that fills its frame) and for one that stands
+  no cards on its stage.
 - `opens-fitted`: A renderer whose canvas zooms (a scroll container marked
   `data-zoom`) opens fitted in a frame of fixed size (full width by 650 px, and
   390 by 700 px, as a tab or a phone shows it): in the diff and its first

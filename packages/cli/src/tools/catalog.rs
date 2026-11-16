@@ -216,7 +216,7 @@ pub fn catalog() -> Vec<Tool> {
                     "progress": {"type": "number", "minimum": 0, "maximum": 1, "description": "Animated mode: the transition's progress, 0 (before) to 1 (after); default the current view's playback position"},
                     "theme": {"type": "string", "enum": ["light", "dark"], "description": "Default the current view's, else light"},
                     "width": {"type": "integer", "minimum": 320, "maximum": 2560, "description": "Viewport width in CSS pixels; default the current view's, else 1280"},
-                    "height": {"type": "integer", "minimum": 240, "maximum": 1600, "description": "Viewport height in CSS pixels; default the current view's, else 800"},
+                    "height": {"type": "integer", "minimum": 240, "maximum": 1600, "description": "Viewport height in CSS pixels, the most the image is: it is as tall as its card, which hugs the content; default the current view's, else 800"},
                     "definitionRevision": revision("The revision whose definition extracts every side; default the current view's, else working-tree"),
                     "focus": {"type": "string", "enum": ["changes", "all"], "description": "Open the image on a comparison's changes or on everything; default the renderer's choice (a diff opens on its changes when they don't all fit)"},
                     "entity": {"type": "string", "description": "Open the image on one item, by its ID, centred with what it connects to"},

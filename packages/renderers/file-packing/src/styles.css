@@ -3,12 +3,11 @@
   display: flex;
   flex-direction: column;
 }
+/* Set in from the frame by the kit's stage padding on all four sides (`pk-stage`). */
 .fp-stage {
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
-  padding: var(--projections-stage-inset-top, var(--projections-space-2)) var(--projections-space-2) var(--projections-space-2);
-  background: var(--stage);
 }
 .fp-canvas {
   position: relative;

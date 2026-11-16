@@ -96,9 +96,9 @@ export const contentChecks: Pick<Checks, 'legend' | 'phone-overflow' | 'relation
       await driver.load(subject, {progress: 1, ...primaryMode(subject, modes), ...(width ? {width} : {})})
       await driver.measure('settle')
       const top = await driver.measure<ContentTop>('contentTop')
-      if (Number.isFinite(top.top) && top.top > 8.5) {
+      if (Number.isFinite(top.top) && top.top > top.allowance + 0.5) {
         failures.push(
-          `${width ? `At ${width}px` : 'At full width'}, the content starts ${top.top}px below the frame top (${top.element}); keep it within 8px.`,
+          `${width ? `At ${width}px` : 'At full width'}, the content starts ${top.top}px below the frame top (${top.element}); keep it within the stage padding, ${top.allowance}px.`,
         )
       }
     }

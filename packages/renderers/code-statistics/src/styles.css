@@ -1,12 +1,12 @@
 /* Code statistics. Every visual value is a host theme token: the kit's semantic palette, chart series, type, spacing and shape. */
-/* The chart is one raised panel on the stage; its recessed tracks read against the panel, not the stage. */
+/*
+ * The chart is one raised panel on the stage, set in from the frame by the kit's stage padding on all four sides
+ * (`pk-stage`); its recessed tracks read against the panel, not the stage.
+ */
 .statistics-view {
   display: flex;
   flex-direction: column;
   container: statistics / inline-size;
-  padding: var(--projections-stage-inset-top, var(--projections-space-2)) var(--projections-stage-inset, var(--projections-space-3))
-    var(--projections-space-3);
-  background: var(--stage);
 }
 .statistics-panel {
   display: flex;

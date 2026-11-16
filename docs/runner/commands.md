@@ -309,9 +309,9 @@ draw one image per theme and pick between them with `<picture>` and
 | `--frames DIR` | | Comparisons only, instead of `--png`: the animated playback as the viewer loops it back and forth at 1× speed, as PNG frames in the new directory `DIR` (see animations below). |
 | `--fps N` | `12` | With `--frames`: how often playback is sampled, 1–60 frames a second. |
 | `--theme light\|dark` | `light` | The host theme the renderer receives. |
-| `--frame card\|none` | `card` | `card`: one rounded card holding the renderer's content, its legend and the summary bar, transparent outside its corners. `none`: the renderer's content alone, edge to edge and opaque, for embedding in a frame of your own. |
+| `--frame card\|none` | `card` | `card`: one rounded card holding the renderer's content, its legend and the summary bar, transparent outside its corners; the card hugs the content, so the image is as tall as the card, at most `--height` (`--frames` keeps every frame the viewport's size). `none`: the renderer's content alone, edge to edge and opaque, for embedding in a frame of your own. |
 | `--matte COLOR` | | Card frame only: fill outside the rounded corners with `#rgb` or `#rrggbb` instead of transparency, for formats without alpha (see animations below). |
-| `--width N`, `--height N` | `1280`, `800` | The viewport in CSS pixels (64–4096). The stage fills it; renderers scroll inside, so content beyond it is clipped. |
+| `--width N`, `--height N` | `1280`, `800` | The viewport in CSS pixels (64–4096). The stage fills it, up to the content's height in a card; renderers scroll inside, so content beyond it is clipped. |
 | `--scale N` | `1` | Device pixels per CSS pixel (0.5–4); `2` for high-density displays. |
 | `--mode animated\|side-by-side\|diff` | the renderer's default | Comparisons only. Without `--mode`, the image shows the mode the Inspector opens in: the renderer's diff when it has one, else side by side. A mode the renderer doesn't offer is an error that lists the ones it does. |
 | `--progress 0..1` | `1` | Animated comparisons only (it implies `--mode animated`): the transition's progress, 0 showing the base and 1 the head. |

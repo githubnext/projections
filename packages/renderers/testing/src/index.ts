@@ -14,6 +14,7 @@ export {
   legends,
   selectedEntities,
   settle,
+  stageInsets,
   stageSurface,
   styleSystem,
   styleTokens,

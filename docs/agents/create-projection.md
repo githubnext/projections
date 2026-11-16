@@ -433,7 +433,9 @@ is its framework-free half, `/kit/react` its React components and hooks, and
 kit already meets the checks the host holds every renderer to. The starter has
 no stylesheet: compose views from the kit's components (`ContentView`, `Group`,
 `CardGrid`, `EntityCard`, `Fields`, `Stack`, `Inline`, `Text`) and their props,
-and for an inline style they don't cover use `token` (`token.space(2)`). The
+and for an inline style they don't cover use `token` (`token.space(2)`).
+`ContentView` sets its cards and tables in from the frame by the same stage
+padding on all four sides, as every host expects; don't pad or margin around it. The
 checks fail on any color, font size, spacing or radius that isn't a theme
 token, and name the token to use. `/renderer` is the host protocol client
 underneath it (`/renderer/react` its React hooks), `/vite` the build,

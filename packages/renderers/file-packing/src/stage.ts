@@ -2,31 +2,40 @@ import {useLayoutEffect, useState} from 'react'
 import type {RefObject} from 'react'
 import {useFrameFill} from '@githubnext/projections-renderer-kit/react'
 
-/** Space between the frame and the packing, and the smallest area packed, CSS px. */
-const padding = 8,
-  minimum = {width: 300, height: 220}
+/** The smallest area packed, CSS px. */
+const minimum = {width: 300, height: 220}
 /** Height a content-sized host gets, as a share of the width (square on narrow screens). */
 const preferredAspect = 0.62
 
 /**
- * The stage's inner size, measured before paint and on resize; the packing fills it. A stage smaller than the
- * smallest area packed gets that area scaled down to fit (`fit` below 1), so the whole packing is always in view.
+ * The stage's inner size, inside its padding (the kit's stage padding, `pk-stage`), measured before paint and on
+ * resize; the packing fills it. A stage smaller than the smallest area packed gets that area scaled down to fit (`fit`
+ * below 1), so the whole packing is always in view.
  */
 export function useStageSize(stage: RefObject<HTMLDivElement | null>) {
-  const [size, setSize] = useState<{width: number; height: number; chrome: number; fit: number}>()
+  const [size, setSize] = useState<{width: number; height: number; chrome: number; fit: number; padding: number}>()
   useLayoutEffect(() => {
     const element = stage.current
     if (!element) return
     const measure = () => {
-      const room = {width: element.clientWidth - 2 * padding, height: element.clientHeight - 2 * padding}
+      const style = getComputedStyle(element)
+      const padding = {
+        inline: parseFloat(style.paddingLeft) + parseFloat(style.paddingRight),
+        block: parseFloat(style.paddingTop) + parseFloat(style.paddingBottom),
+      }
+      const room = {width: element.clientWidth - padding.inline, height: element.clientHeight - padding.block}
       const width = Math.max(minimum.width, room.width)
       const height = Math.max(minimum.height, room.height)
       const fit = Math.max(0.05, Math.min(1, room.width / width, room.height / height))
       const chrome = element.ownerDocument.documentElement.clientHeight - element.clientHeight
       setSize(previous =>
-        previous?.width === width && previous.height === height && previous.chrome === chrome && previous.fit === fit
+        previous?.width === width &&
+        previous.height === height &&
+        previous.chrome === chrome &&
+        previous.fit === fit &&
+        previous.padding === padding.block
           ? previous
-          : {width, height, chrome, fit},
+          : {width, height, chrome, fit, padding: padding.block},
       )
     }
     measure()
@@ -36,7 +45,7 @@ export function useStageSize(stage: RefObject<HTMLDivElement | null>) {
     return () => observer.disconnect()
   }, [stage])
   useFrameFill(
-    size && Math.round(size.chrome + Math.max(minimum.height, size.width * (size.width < 600 ? 1 : preferredAspect)) + 2 * padding),
+    size && Math.round(size.chrome + Math.max(minimum.height, size.width * (size.width < 600 ? 1 : preferredAspect)) + size.padding),
   )
   return size
 }

@@ -322,8 +322,9 @@ isn't a token doesn't compile: `token.color('fg-muted')`, `token.space(2)`,
 `token.fontSize('sm')`, `token.fontWeight('semibold')`, `token.radius('sm')`,
 `token.chart(index)`, or `tokenVar(name)` for any token. The renderer checks
 `palette`, `type-scale` and `spacing` hold every painted value to these tokens,
-and `stage-surface` holds the field behind a renderer's content to
-`color-surface-canvas` (see
+`stage-surface` holds the field behind a renderer's content to
+`color-surface-canvas`, and `stage-insets` holds the cards, panels and tables on
+it to one inset from the frame on all four sides (see
 [renderer testing](../../packages/renderers/testing/README.md)).
 
 Hosts may send at most 256 tokens. Names are lowercase kebab-case and values are

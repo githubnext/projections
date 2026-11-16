@@ -134,13 +134,14 @@ height (for example `height: 100dvh`). Without one they keep a usable minimum.
 content-sized view flat on its page's column can line renderer content up with
 that column: `ProjectionStage`'s `bleed` extends the frames that far past the
 stage's outer edges, into the page's gutter, and the host sends the same length
-as the `stage-inset` theme token, where renderers start their content (rings at
-the edges then still show). A host that also sends `stage-max-height` (for
-example `100vh`) caps stages that pan and zoom at that height; they then pan by
-dragging, so the wheel scrolls the page. `features` turns off blocks and views
-(`playback`, `modes`, `highlighting`, `changesOnly`, `search`, `rendererChoice`,
-`speed`, `rendererControls`, `zoom`, `table`, `text`, `info`, `fullscreen`,
-`title`, `annotations`, `summary`); `actions` adds host content to the row.
+as the `stage-inset` theme token, the space renderers keep between the frame's
+edges and their content on all four sides (rings at the edges then still show).
+A host that also sends `stage-max-height` (for example `100vh`) caps stages that
+pan and zoom at that height; they then pan by dragging, so the wheel scrolls the
+page. `features` turns off blocks and views (`playback`, `modes`,
+`highlighting`, `changesOnly`, `search`, `rendererChoice`, `speed`,
+`rendererControls`, `zoom`, `table`, `text`, `info`, `fullscreen`, `title`,
+`annotations`, `summary`); `actions` adds host content to the row.
 
 ### The summary bar
 

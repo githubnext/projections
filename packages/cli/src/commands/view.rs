@@ -101,7 +101,7 @@ pub enum ViewCommand {
         /// Viewport width in CSS pixels [default: the page's, else 1280]
         #[arg(long)]
         width: Option<u32>,
-        /// Viewport height in CSS pixels [default: the page's, else 800]
+        /// Viewport height in CSS pixels, the most the image is: it is as tall as its card, which hugs the content [default: the page's, else 800]
         #[arg(long)]
         height: Option<u32>,
         /// Open the image on a comparison's changes or on everything [default: the renderer's choice]

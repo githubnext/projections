@@ -36,11 +36,14 @@ body {
   font-size: var(--projections-font-size, 14px);
   line-height: 1.5;
 }
-/* The content starts at the top of the frame: the host draws the header. */
+/*
+ * The content starts at the top of the frame (the host draws the header), set in from the frame's edges by the same
+ * stage padding on all four sides: the host's stage-inset, else 12px.
+ */
 main,
 .waiting,
 .error {
-  padding: var(--projections-space-2, 8px) var(--projections-space-3, 12px);
+  padding: var(--projections-stage-inset, var(--projections-space-3, 12px));
 }
 .waiting {
   color: var(--muted);

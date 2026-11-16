@@ -56,6 +56,9 @@ export function identifierFonts(root: Element = document.body): IdentifierMeasur
   return {count, proportional}
 }
 
+/** The renderer kit's stage padding when the host sends no `stage-inset`, CSS px: the space content may start below the top. */
+const stagePadding = 12
+
 /**
  * Where the renderer's content starts: the top of its first visible entity
  * (`data-entity-id`), outermost SVG canvas, or region it marks as content
@@ -63,17 +66,21 @@ export function identifierFonts(root: Element = document.body): IdentifierMeasur
  * axis, a table head or a plan's summary). A zoomable canvas (`data-zoom`)
  * counts as a whole: it opens fitted (or at the text floor) and centres its drawing, so what it draws
  * may start below its top. Anything a renderer draws above that, such as a
- * title, schema or counts header, pushes it down.
+ * title, schema or counts header, pushes it down. It may start the stage padding below the top, or the host's `stage-inset-top` where that is more (`allowance`).
  */
 export function contentTop(root: Element = document.body): ContentTop {
-  let best: ContentTop = {top: Infinity, element: 'nothing'}
+  const tokens = getComputedStyle(document.documentElement)
+  const inset = parseFloat(tokens.getPropertyValue('--projections-stage-inset'))
+  const overlaid = parseFloat(tokens.getPropertyValue('--projections-stage-inset-top'))
+  const allowance = Math.max(Number.isFinite(inset) && inset >= 0 ? inset : stagePadding, Number.isFinite(overlaid) ? overlaid : 0)
+  let best: ContentTop = {top: Infinity, element: 'nothing', allowance}
   for (const element of root.querySelectorAll('[data-entity-id], svg, [data-projections-content], [data-zoom]')) {
     if (element instanceof SVGSVGElement && element.parentElement?.closest('svg')) continue
     if (!element.matches('[data-zoom]') && element.parentElement?.closest('[data-zoom]')) continue
     if (!visible(element) || visuallyHidden(element, getComputedStyle(element))) continue
     const box = element.getBoundingClientRect()
     if (box.height < 1 || box.width < 1) continue
-    if (box.top < best.top) best = {top: Math.round(box.top * 10) / 10, element: describe(element)}
+    if (box.top < best.top) best = {top: Math.round(box.top * 10) / 10, element: describe(element), allowance}
   }
   return best
 }

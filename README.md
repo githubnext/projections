@@ -16,7 +16,7 @@ by default, but can contain generative aspects when useful.
 To get started, you can give your agent this prompt:
 
 ```txt
-Set up https://github.com/githubnext/projections, configure/implement a few projections specifically for my codebase, and show them to me in the viewer.
+Set up Projections by following https://github.com/githubnext/projections/blob/main/SETUP.md, configure/implement a few projections specifically for my codebase, and show them to me in the viewer.
 ```
 
 Alternatively, head to the [quick start guide](docs/setup/quick-start.md) and

@@ -153,7 +153,14 @@ for (const fallback of [false, true])
     if (fallback) expect(await withoutTextBox(page)).toBeGreaterThan(0)
     await page.mouse.move(0, 0)
     const total = bar(page).locator('.ph-summary-figures [data-summary-total]').first()
-    expectCentred(await capGaps(page, bar(page), total), 'bar')
+    // The figures sit centred in the bar, so only the E's top and bottom gaps meet; its left gap is the centring's.
+    expectCentred(await capGaps(page, bar(page), total), 'bar', true)
+    const centres = await bar(page).evaluate(element => {
+      const box = element.getBoundingClientRect()
+      const figures = element.querySelector('.ph-summary-figures')!.getBoundingClientRect()
+      return {bar: box.left + box.width / 2, figures: figures.left + figures.width / 2}
+    })
+    expect(Math.abs(centres.bar - centres.figures), JSON.stringify(centres)).toBeLessThanOrEqual(1)
     // The pill is drawn on hover.
     await total.hover()
     expectCentred(await capGaps(page, total, total), 'pill')

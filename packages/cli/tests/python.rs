@@ -57,14 +57,16 @@ fn succeed(output: Output) -> String {
 }
 
 #[test]
-#[cfg_attr(windows, ignore = "Runs python3, which Windows runners name python")]
 fn the_modules_own_tests_pass() {
-    let output = Command::new("python3")
+    // The Python 3 a definition's python3 runs, which Windows names python or py -3.
+    let python = projections_cli::python::find("python3").expect("Python 3 is on PATH");
+    let output = Command::new(&python[0])
+        .args(&python[1..])
         .args(["-m", "unittest", "discover", "-s", "python/tests"])
         .current_dir(env!("CARGO_MANIFEST_DIR"))
         .env("PYTHONDONTWRITEBYTECODE", "1")
         .output()
-        .expect("python3 runs the Python module's tests");
+        .expect("Python runs the module's tests");
     assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
 }
 
@@ -82,7 +84,6 @@ result(
 "#;
 
 #[test]
-#[cfg_attr(windows, ignore = "Runs python3, which Windows runners name python")]
 fn a_python_extractor_imports_the_module_with_nothing_installed() {
     let definition = json!({"id": "teams", "renderer": "graph", "extractor": {"command": ["python3", "extract.py"], "sources": ["extract.py"]},
         "execution": {"environment": ["PYTHONPATH"]}});
@@ -124,7 +125,6 @@ fn a_python_extractor_imports_the_module_with_nothing_installed() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore = "Runs python3, which Windows runners name python")]
 fn the_python_starter_runs_as_is() {
     let repo = repository(&[
         ("pyproject.toml", "[project]\nname = \"shop\"\n"),

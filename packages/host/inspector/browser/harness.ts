@@ -22,7 +22,9 @@ export interface Harness {
 
 const client = fileURLToPath(new URL('../dist/client', import.meta.url))
 /** This checkout's CLI, unless `PROJECTIONS_CLI` names another. */
-export const cli = () => process.env.PROJECTIONS_CLI ?? fileURLToPath(new URL('../../../cli/dist/projections', import.meta.url))
+export const cli = () =>
+  process.env.PROJECTIONS_CLI ??
+  fileURLToPath(new URL(`../../../cli/dist/projections${process.platform === 'win32' ? '.exe' : ''}`, import.meta.url))
 const policy =
   "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; frame-src 'self' http://localhost:* http://127.0.0.1:*; frame-ancestors 'none'; base-uri 'none'"
 /** The renderer content security policy (`RENDERER_CSP` in packages/cli/src/service/assets/mod.rs), which stdio results don't carry. */

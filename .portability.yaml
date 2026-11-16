@@ -1,0 +1,19 @@
+# Operating-system assumptions in shipped code that are intended (tools/scripts/check-portability.mjs, run by npm run
+# check:portability; docs/maintainers/runner-coverage.md#platform-coverage). Each entry excuses every match of one rule
+# in one file and says why the code is right on Linux, macOS and Windows. An entry that no longer matches fails.
+allow:
+  - path: packages/extractors/typescript-support/src/nestjs.ts
+    rule: posix-path-module
+    reason: The module and entry inputs are repository paths, '/'-separated on every platform; startDirectory resolves the result natively.
+  - path: packages/extractors/typescript-support/src/nestjs/root.ts
+    rule: posix-path-module
+    reason: Joins a repository path with an import specifier and looks the result up in context.files, which are repository paths.
+  - path: packages/extractors/typescript-support/src/typescript.ts
+    rule: posix-path-module
+    reason: The tsconfig input is a repository path, '/'-separated on every platform; startDirectory resolves the result natively.
+  - path: packages/integrations/vscode/scripts/docs.mjs
+    rule: posix-path-module
+    reason: Resolves Markdown link targets between documentation pages, which are URLs with '/' on every platform.
+  - path: packages/integrations/vscode/scripts/schemas.mjs
+    rule: posix-path-module
+    reason: Rewrites JSON Schema $ref URLs, which are '/'-separated on every platform.

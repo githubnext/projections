@@ -1,0 +1,34 @@
+name: Projections Action end to end
+description: >-
+  Run this checkout's GitHub Action (the CLI built from source) on a pull request in a small repository with a Python
+  and a Node extractor, with snapshots, and check what it produced (packages/integrations/github-action/test/e2e/).
+  Expects the workspace built (npm run build), so the source build reuses its target directory.
+runs:
+  using: composite
+  steps:
+    - id: fixture
+      shell: bash
+      run: node packages/integrations/github-action/test/e2e/fixture.mjs "$RUNNER_TEMP/projections-e2e"
+    - id: action
+      uses: ./
+      env:
+        # In place of this workflow's own event: the fixture's pull request.
+        PROJECTIONS_TEST_EVENT_PATH: ${{ steps.fixture.outputs.event }}
+        PROJECTIONS_TEST_EVENT_NAME: pull_request
+        PROJECTIONS_TEST_REF: refs/pull/1/merge
+        # As npm run build builds the CLI, so the source build reuses it rather than building it again.
+        PROJECTIONS_EMBED_HELPERS: '1'
+      with:
+        build-from-source: 'true'
+        trust: 'true'
+        working-directory: ${{ steps.fixture.outputs.repository }}
+        reuse-base-artifact: 'false'
+        artifact-name: projections-e2e-${{ runner.os }}
+        retention-days: '1'
+        snapshots: teams
+        fail-on-error: 'true'
+    - shell: bash
+      env:
+        MANIFEST: ${{ steps.action.outputs.manifest }}
+        SNAPSHOTS: ${{ steps.action.outputs.snapshots-directory }}
+      run: node packages/integrations/github-action/test/e2e/verify.mjs "$MANIFEST" "$SNAPSHOTS"

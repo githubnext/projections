@@ -117,10 +117,22 @@ code. CI uses the same public composite action on Linux and macOS; local macOS
 results do not imply those remote matrix jobs have passed. The browser suites
 run on Linux in their own jobs, the large ones sharded. Linux also enables all
 optional native extractor suites and the real Docker policy/digest-parity check
-described in [runner coverage](docs/maintainers/runner-coverage.md). A Windows
-job runs the Rust suites natively, including Job Object supervision of extractor
-process trees; tests that run POSIX shell scripts are ignored there with their
-reason. The release workflow runs `npm run test:binary` on every platform.
+described in [runner coverage](docs/maintainers/runner-coverage.md). Windows has
+three jobs: `windows` runs the Rust suites natively, including Job Object
+supervision of extractor process trees; `windows-node` runs every Node suite,
+the installed-package proof and the checks that read the file system; and
+`windows-integration` runs the CLI's browser suite, a renderer smoke test, the
+VS Code extension in VS Code and the GitHub Action end to end. macOS also runs
+the renderers in WebKit. Tests that can't run on a platform are skipped or
+ignored there with their reason. The release workflow runs `npm run test:binary`
+on every platform. Which suite runs where is in
+[platform coverage](docs/maintainers/runner-coverage.md#platform-coverage).
+
+Shipped code must not assume an operating system: `npm run check:portability`
+fails on POSIX shells and paths, command strings run through a shell, launchers
+named as only one platform names them (`npm` without its `.cmd` shim,
+`python3`), native paths handled as POSIX ones and file text split as if it had
+no CRLF. An intended exception goes in `.portability.yaml` with its reason.
 
 ## Repository layout
 

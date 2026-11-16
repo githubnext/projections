@@ -1,6 +1,7 @@
 //! `projections doctor`: what this checkout needs to run its projections,
-//! without running any of them. It reads definitions and looks up programs,
-//! and never executes repository code, installs anything or changes files.
+//! without running any of them. It reads definitions and looks up programs
+//! (asking a Python launcher only for its version), and never executes
+//! repository code, installs anything or changes files.
 
 use crate::{browser, collectors, dev_server, runtime::Runner, scaffold, workspace};
 use serde_json::{Value, json};
@@ -108,7 +109,18 @@ fn command_extractor(root: &Path, command: &[Value]) -> Value {
         })
         .collect();
     let missing: Vec<&&str> = files.iter().filter(|file| !root.join(file).is_file()).collect();
-    match (find_program(root, program), missing.is_empty()) {
+    // A bare python3 or python runs whichever Python 3 the machine has (crate::python::launch).
+    let found = if crate::python::launches_python(program) {
+        crate::python::find(program).map(|prefix| PathBuf::from(prefix.join(" ")))
+    } else {
+        find_program(root, program)
+    };
+    match (found, missing.is_empty()) {
+        (None, _) if crate::python::launches_python(program) => item(
+            "fail",
+            "Extractor",
+            format!("{program} needs Python 3, but none of python3, python or py -3 on PATH runs it; Projections never installs it"),
+        ),
         (None, _) => item(
             "fail",
             "Extractor",

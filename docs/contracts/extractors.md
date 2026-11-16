@@ -139,6 +139,15 @@ installing anything: `from projections import request, result`, then
 Built-in extractors don't get it. The protocol itself stays JSON on stdin and
 stdout, which an extractor in any language can write directly.
 
+A command whose program is the bare name `python3` or `python` runs this
+machine's Python 3, whatever its launcher is called: the runner tries the name
+as written, then the other name, then the Windows `py -3` launcher, and runs the
+first that reports Python 3. So `["python3", "extract.py"]` runs as written on
+macOS and Linux and on a Windows machine with only `python` or `py`, and a
+`python` that is Python 2 is passed over. Any other program, including a path
+such as `.venv/bin/python`, runs as written; inside a container
+(`--isolation container`) the command runs as written too.
+
 An extractor may run tools, such as the ecosystem's compiler, as its own child
 processes. They stay in the extractor's supervision: one process group on Unix
 and one Job Object on Windows, which the runner stops as a whole when the

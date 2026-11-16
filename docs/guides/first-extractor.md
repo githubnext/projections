@@ -70,7 +70,9 @@ another, with optional `metadata`, `volatile` and `missing_inputs`. It sorts
 them by ID, checks each has what it needs and fails with a clear message when
 one doesn't. To run the extractor by hand, put the module on `PYTHONPATH` and
 pipe a request in:
-`PYTHONPATH="$(projections __python-path)" python3 tools/extract-flags.py < request.json`.
+`PYTHONPATH="$(projections __python-path)" python3 tools/extract-flags.py < request.json`
+(in PowerShell,
+`$env:PYTHONPATH = projections __python-path; Get-Content request.json | python tools/extract-flags.py`).
 
 Underneath, the request and the extraction are JSON on stdin and stdout
 ([the extractor contract](../contracts/extractors.md)), so an extractor in any
@@ -89,6 +91,10 @@ language can write them directly. In JavaScript, `result()` from
   "execution": { "scope": ["flags.yaml", "tools/extract-flags.py"] }
 }
 ```
+
+`python3` works on every platform: Projections runs a bare `python3` or `python`
+with whichever Python 3 the machine has, including `python` or the `py -3`
+launcher on Windows ([process](../contracts/extractors.md#process)).
 
 `execution.scope` lists what the extractor reads. It is optional, but declare
 it: `--workspace sparse` then checks out only those files for a revision that

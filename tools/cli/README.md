@@ -62,7 +62,7 @@ launcher's absolute path.
 | `docs search <words>`, `docs read <path or title>` | Local Markdown search and reading, by section |
 | `doctor` | Toolchains, the npm registry, installed dependencies, stale builds, Playwright browsers, memory |
 | `affected` | Changed workspaces and crates, their dependants, generated files to regenerate |
-| `check [--affected] [--only …]` | boundaries, casing, icons, considered, lockfile, readmes, links, versions, format, lint, cargo-fmt, build, comparators, typecheck, docs (and clippy) |
+| `check [--affected] [--only …]` | boundaries, casing, portability, icons, considered, lockfile, readmes, links, versions, format, lint, cargo-fmt, build, comparators, typecheck, docs (and clippy) |
 | `test [target] [--affected] [--rust] [--browser <project>]` | Unit and Rust tests; one browser project at a time, at most 2 workers |
 | `generated [check]` | The generated files, their generators, and whether they are current |
 | `fix` | Formatters and offline regenerators, then what changed |

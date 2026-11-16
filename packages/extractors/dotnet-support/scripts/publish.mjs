@@ -115,7 +115,7 @@ export function verifyHelper(directory = publishDirectory) {
   return directory
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   try {
     publishHelper({strict: true})
   } catch (error) {

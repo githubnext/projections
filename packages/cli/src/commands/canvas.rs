@@ -27,7 +27,7 @@ const CANVAS_EXTENSION: &str = include_str!("../../../integrations/copilot-canva
 pub fn canvas(directory: &Path, command: Canvas) -> Result<()> {
     let Canvas::Install { force } = command;
     let root = Runner::at_checkout(directory.to_path_buf(), false).repository_root()?;
-    let folder = root.join(".github/extensions/projections");
+    let folder = root.join(".github").join("extensions").join("projections");
     let file = folder.join("extension.mjs");
     if let Ok(existing) = std::fs::read_to_string(&file) {
         if existing == CANVAS_EXTENSION {

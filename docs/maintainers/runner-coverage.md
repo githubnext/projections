@@ -78,6 +78,67 @@ replacement of an altered cached helper.
 mandatory. `--gh-extension` installs the binary as an isolated, offline local
 GitHub CLI extension and runs it through `gh`.
 
+## Platform coverage
+
+Projections ships for Linux, macOS and Windows, so CI runs each kind of suite on
+the platforms where its result can differ. A suite that reads only text (format,
+lint, types, file standards, generated documentation) gives the same result
+everywhere and runs on Linux and macOS.
+
+| What                                                       | Linux                                  | macOS                      | Windows                                             |
+| ---------------------------------------------------------- | -------------------------------------- | -------------------------- | --------------------------------------------------- |
+| Rust suites (`cargo test --workspace`)                     | `public-product`                       | `public-product`           | `windows`                                           |
+| Node suites (`npm test`)                                   | `public-product`                       | `public-product`           | `windows-node`                                      |
+| Installed-package proof (`test:installed`)                 | `public-product`                       | `public-product`           | `windows-node`                                      |
+| `gh` extension proof (`test:gh`)                           | `public-product`                       | `public-product`           | release proof (`test:binary --gh-extension`)        |
+| Release executable without Node (`test:binary`)            | release proof                          | release proof              | release proof                                       |
+| Portability, boundaries, casing, links and READMEs         | `public-product`                       | `public-product`           | `windows-node`                                      |
+| Format, lint, types, file standards, TSDoc and notices     | `public-product`                       | `public-product`           | —                                                   |
+| Generated reference documentation                          | `public-product`                       | —                          | —                                                   |
+| Native tool suites (.NET, Django, Spring, SCIP) and Docker | `public-product`                       | —                          | —                                                   |
+| Browser suites, Chromium                                   | `browser`, every suite                 | —                          | `windows-integration`: the CLI's and one renderer's |
+| Browser suites, WebKit                                     | `browser`, every suite                 | `browser-macos`: renderers | —                                                   |
+| VS Code extension                                          | unit suites; release proof installs it | the same                   | unit suites; smoke test in VS Code (`test:vscode`)  |
+| GitHub Action end to end (`.github/actions/action-e2e`)    | `public-product`                       | `public-product`           | `windows-integration`                               |
+
+The browser suites run in full on Linux, sharded. On Windows the CLI's own
+browser suite runs in full, since it exercises the CLI's server and processes,
+and one renderer's suite runs as a smoke test: a renderer draws the same on
+every operating system, so the rest would cost Windows build time without new
+coverage. A test that can't run on a platform says why in its skip or `ignore`
+reason; for example, the Rust suites that run `/bin/sh` extractors or stand-ins
+for `gh` and Git are ignored on Windows, and `tests/windows.rs` covers what they
+cover there (Job Object supervision, output bounds, export and validation).
+
+### The portability check
+
+`npm run check:portability` (part of `npm run check`) reads shipped code, which
+is everything in `packages/` except tests, fixtures and snapshots (the CLI's
+templates included), and the GitHub Action, for operating-system assumptions:
+
+| Rule                 | Flags                                                                                              |
+| -------------------- | -------------------------------------------------------------------------------------------------- |
+| `posix-shell`        | `/bin/sh`, `/usr/bin/...` and `Command::new("sh")`                                                 |
+| `shell-string`       | `shell: true`, and `exec` of a command string                                                      |
+| `bare-launcher`      | Spawning `npm`, `npx`, `pnpm`, `yarn` (or their `.cmd` shims) or `python3` by name                 |
+| `rust-bare-launcher` | `Command::new("npm")` and kin, and `Command::new("python3")`, which bypasses the Python resolution |
+| `posix-path-module`  | `path.posix` on what may be a native path                                                          |
+| `native-path-slash`  | A native path split on `'/'`                                                                       |
+| `file-text-lf`       | File text split on `'\n'` alone, which leaves CR in a CRLF checkout                                |
+| `path-equality`      | Resolved paths compared with `===`, which ignores case-insensitive file systems                    |
+| `rust-path-slash`    | `Path::join("a/b")`, which mixes separators on Windows                                             |
+| `npm-script-posix`   | npm scripts that `cmd.exe` can't run: `rm`, `cp`, `VAR=value`, single quotes, `$VAR`               |
+
+A match that is right on every platform, such as `path.posix` on a repository
+path or a URL, goes in `.portability.yaml` with the file, the rule and the
+reason; an entry that no longer matches fails the check, so the list stays true.
+The rules' own tests are `tools/scripts/check-portability.test.mjs`.
+
+A bare `python3` or `python` in an extractor or prepare command runs whichever
+Python 3 the machine has (`python3`, `python`, then the Windows `py -3`
+launcher), so definitions stay portable
+([process](../contracts/extractors.md#process)).
+
 ## Preserved adapter capabilities
 
 All 21 adapters retain independent descriptors, executable worker registrations

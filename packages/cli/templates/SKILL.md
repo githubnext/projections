@@ -384,7 +384,10 @@ package; otherwise, and in other languages, write the JSON above.
 
 To debug it directly, pipe a request in:
 `echo '{"protocolVersion":0,"projection":{"id":"x","definition":{}},"repository":{"root":"."},"capabilities":{"trusted":true,"network":false}}' | node .github/projections/<id>/extract.mjs`
-(for Python, `PYTHONPATH="$(projections __python-path)" python3 .github/projections/<id>/extract.py`).
+(for Python, `PYTHONPATH="$(projections __python-path)" python3 .github/projections/<id>/extract.py`; in PowerShell,
+set `$env:PYTHONPATH = projections __python-path` and run `python`). In a
+definition, write `python3`: the runner runs a bare `python3` or `python` with
+the machine's Python 3, including `python` or `py -3` on Windows.
 
 ## Built-in renderers
 

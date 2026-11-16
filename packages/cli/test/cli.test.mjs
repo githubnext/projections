@@ -7,7 +7,7 @@ import test from 'node:test'
 import {executionEnvironment, pullRequestTools, runBounded, startBackend} from './process.mjs'
 import {commit, fixture, legacyDefinition} from './repository.mjs'
 
-const executable = fileURLToPath(new URL('../dist/projections', import.meta.url))
+const executable = fileURLToPath(new URL(`../dist/projections${process.platform === 'win32' ? '.exe' : ''}`, import.meta.url))
 async function cli(cwd, args, env = executionEnvironment(process.env)) {
   return runBounded(executable, args, {label: 'Projections CLI', cwd, env, timeoutMs: 60_000})
 }

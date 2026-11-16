@@ -153,7 +153,11 @@ impl Runner {
                     .iter()
                     .map(|step| step.run[0].clone())
                     .chain(environment.toolchain.iter().map(|command| command[0].clone()))
-                    .filter(|program| !program.contains('/') && which(program).is_none())
+                    .filter(|program| {
+                        !program.contains('/')
+                            && which(program).is_none()
+                            && !(crate::python::launches_python(program) && crate::python::find(program).is_some())
+                    })
                     .collect::<BTreeSet<_>>()
                     .into_iter()
                     .collect();

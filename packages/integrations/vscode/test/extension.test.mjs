@@ -21,7 +21,7 @@ import {parseWrite, refusal} from '../src/writes.ts'
 import {addToCiPrompt, isAddToCiChoice} from '../src/projections/ci.ts'
 import {rendererPackage, sourceArguments} from '../src/sources.ts'
 
-const cli = fileURLToPath(new URL('../../../cli/dist/projections', import.meta.url))
+const cli = fileURLToPath(new URL(`../../../cli/dist/projections${process.platform === 'win32' ? '.exe' : ''}`, import.meta.url))
 
 /** A fake backend: answers like `serve --stdio` would, from a table of paths. */
 function fakeRunner(answers) {

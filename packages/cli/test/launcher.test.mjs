@@ -26,7 +26,11 @@ const run = (launcher, args = [], options = {}) =>
     ...options,
   })
 
-test('source launcher requires a built native executable, not Node', async t => {
+// gh runs a source checkout's extension through this /bin/sh launcher; on Windows, gh installs the precompiled
+// executable instead (release-proof installs it on every platform).
+const posixOnly = {skip: process.platform === 'win32' && 'The source launcher is a /bin/sh script'}
+
+test('source launcher requires a built native executable, not Node', posixOnly, async t => {
   const {root, launcher} = await fixture(t)
   const tools = path.join(root, 'path-tools')
   await mkdir(tools)
@@ -41,7 +45,7 @@ test('source launcher requires a built native executable, not Node', async t => 
   assert.match(unbuilt.stderr, /npm ci\n {2}npm run build/)
 })
 
-test('source launcher resolves relative symlinks and execs the selected CLI with caller cwd/argv/exit intact', async t => {
+test('source launcher resolves relative symlinks and execs the selected CLI with caller cwd/argv/exit intact', posixOnly, async t => {
   const {root, launcher} = await fixture(t)
   const dist = path.join(root, 'packages/cli/dist')
   const cwd = path.join(root, 'caller')

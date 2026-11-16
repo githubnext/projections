@@ -23,7 +23,7 @@ concurrency:
 jobs:
   public-product:
     if: github.event_name != 'schedule'
-    timeout-minutes: 60
+    timeout-minutes: 70
     strategy:
       fail-fast: false
       matrix:
@@ -37,6 +37,8 @@ jobs:
         with:
           native: ${{ runner.os == 'Linux' }}
           reference-docs: ${{ runner.os == 'Linux' }}
+      # The GitHub Action itself, with the CLI the check built: a pull request in a small repository.
+      - uses: ./.github/actions/action-e2e
       # The repository's own CLI (tools/cli/README.md) keeps working, and every workspace and crate README
       # keeps the front matter description it reads.
       - name: tools doctor and README descriptions
@@ -178,4 +180,105 @@ jobs:
           # The suites read the built comparators and browser client.
           npm ci --no-audit --no-fund
           npm run build
+          # Which Python launchers this runner has: the Python suites run python3 through the CLI's resolution
+          # (packages/cli/src/python.rs), which finds python or py -3 where python3 is missing.
+          for launcher in python3 python py; do echo "$launcher: $(command -v "$launcher" || echo none)"; done
           cargo test --locked --workspace --no-fail-fast
+  # Native Windows, Node: every workspace's Node suites, the CLI's own (its Rust suites run in `windows`), the installed
+  # CLI proof, and the checks whose result can depend on the platform (paths, file names, line endings, processes). The
+  # checks that read only text (format, lint, types, considered, generated docs) give the same result everywhere and run
+  # on Linux and macOS in public-product.
+  windows-node:
+    if: github.event_name != 'schedule'
+    timeout-minutes: 60
+    runs-on: windows-2025
+    steps:
+      - shell: bash
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - shell: bash
+        run: |
+          rustup toolchain install
+          npm ci --no-audit --no-fund
+          npm run build
+      - name: Checks that read the file system
+        shell: bash
+        run: |
+          npm run --silent check:portability
+          npm run --silent check:boundaries
+          npm run --silent check:casing
+          npm run --silent check:readmes
+          npm run --silent check:links
+          npm run --silent check:versions
+          npm run --silent check:comparators
+      - name: Node suites
+        shell: bash
+        run: |
+          npm test -- --except packages/cli
+          node --test packages/cli/test/*.test.mjs
+          node --test tools/scripts/check-portability.test.mjs
+          npm run test:installed
+  # Native Windows, end to end: the CLI's browser suite (its view server, starter renderer and Inspector in Chromium)
+  # and one renderer's browser suite as a smoke test of the renderers on Windows (they run in full on Linux in
+  # `browser`), the VS Code extension's smoke test in a downloaded VS Code, then the GitHub Action itself
+  # (.github/actions/action-e2e), as public-product runs it on Linux and macOS.
+  windows-integration:
+    if: github.event_name != 'schedule'
+    timeout-minutes: 60
+    runs-on: windows-2025
+    steps:
+      - shell: bash
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - shell: bash
+        run: |
+          rustup toolchain install
+          npm ci --no-audit --no-fund
+          npm run build
+      - name: Browser smoke test
+        shell: bash
+        run: |
+          tools/scripts/install-browsers.sh chromium
+          npm run test:browser --workspace @githubnext/projections-cli
+          npm run test:browser --workspace @githubnext/projections-renderer-harness -- --project=chromium-desktop code-statistics/
+      - name: VS Code extension smoke test
+        shell: bash
+        run: npm run test:vscode --workspace projections-vscode
+      - uses: ./.github/actions/action-e2e
+      - if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: public-browser-failure-Windows-integration
+          path: |
+            packages/cli/test-results/
+            packages/renderers/harness/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+  # WebKit on macOS, the platform Safari runs on: the renderer harness's desktop WebKit project, which runs on Linux
+  # WebKit in `browser`. One job: macOS WebKit is several times faster than Linux WebKit, which needs four.
+  browser-macos:
+    if: github.event_name != 'schedule'
+    timeout-minutes: 45
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/browser
+        with:
+          suite: packages/renderers/harness
+          project: webkit-desktop

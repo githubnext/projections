@@ -72,6 +72,11 @@ export const gates: Gate[] = [
     plan: () => ({commands: [npm('run', '--silent', 'check:casing')]}),
   },
   {
+    name: 'portability',
+    description: 'Shipped code makes no operating-system assumptions beyond .portability.yaml (npm run check:portability)',
+    plan: () => ({commands: [npm('run', '--silent', 'check:portability')]}),
+  },
+  {
     name: 'icons',
     description: 'The product icons and their generated outputs are current (npm run check:icons)',
     plan: () => ({commands: [npm('run', '--silent', 'check:icons')]}),

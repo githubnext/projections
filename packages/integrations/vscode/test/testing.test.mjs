@@ -14,7 +14,7 @@ import {listPath, repositoryPath, runPath} from '../src/comparator-tests/wire.ts
 import {parseListing, parseResults, refusalMessage} from '../src/comparator-tests/parse.ts'
 import {startRunner} from '../src/runner.ts'
 
-const cli = fileURLToPath(new URL('../../../cli/dist/projections', import.meta.url))
+const cli = fileURLToPath(new URL(`../../../cli/dist/projections${process.platform === 'win32' ? '.exe' : ''}`, import.meta.url))
 const at = (line, column = 11) => ({path: 'tools/order.comparator.test.yaml', line, column})
 
 test('a listing maps to files and located cases, dropping what is malformed', () => {

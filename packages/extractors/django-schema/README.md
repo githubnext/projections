@@ -33,8 +33,10 @@ reproducibility; the requirements range alone is not a lockfile.
 }
 ```
 
-- `python`: interpreter executable or path, default `python3`. Choose the
-  interpreter/environment matching the project and its Python version.
+- `python`: interpreter executable or path, default `python3` (a bare `python3`
+  or `python` runs the machine's Python 3, found as `python` or `py -3` on
+  Windows). Choose the interpreter/environment matching the project and its
+  Python version.
 - `settings`: dotted Django settings module. Explicitly overrides an environment
   variable forwarded using `execution.environment`.
 - Environment values come only from the per-invocation source through the

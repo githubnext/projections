@@ -8,7 +8,9 @@ import {fileURLToPath} from 'node:url'
 import {createDemoRepository} from './demo-repo.mjs'
 
 const extension = fileURLToPath(new URL('../../', import.meta.url))
-const cli = process.env.PROJECTIONS_CLI ?? fileURLToPath(new URL('../../../../cli/dist/projections', import.meta.url))
+const cli =
+  process.env.PROJECTIONS_CLI ??
+  fileURLToPath(new URL(`../../../../cli/dist/projections${process.platform === 'win32' ? '.exe' : ''}`, import.meta.url))
 const repository = await createDemoRepository(cli)
 // A definition that uses the removed module comparator, uncommitted beside the valid one: it must fail alone.
 await writeFile(

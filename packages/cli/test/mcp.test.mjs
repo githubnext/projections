@@ -11,7 +11,7 @@ import test from 'node:test'
 import {executionEnvironment} from './process.mjs'
 import {commit, fixture} from './repository.mjs'
 
-const executable = fileURLToPath(new URL('../dist/projections', import.meta.url))
+const executable = fileURLToPath(new URL(`../dist/projections${process.platform === 'win32' ? '.exe' : ''}`, import.meta.url))
 
 /** Starts the CLI with a JSON-RPC client. Every stdout line must be a JSON-RPC 2.0 message. */
 function start(t, root, args, extra = {}) {

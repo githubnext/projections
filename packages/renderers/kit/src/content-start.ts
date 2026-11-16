@@ -14,7 +14,7 @@ export interface ContentBox {
 
 /**
  * The reading start of content whose bounds are `bounds` (content units), drawn after `inset` CSS px of padding (or
- * `{x, y}`, across and down):
+ * `{x, y}`, across and down, with `top` above the content when it differs from `y`):
  * the scroll offsets that put the content's top row of boxes (those whose top is within the smallest box's height
  * of the topmost) at the viewport's top left, from its leftmost box, `margin` units clear of it. So content whose
  * bounds start with empty room (a wide layout whose top row is at the right) opens on cards, never on empty
@@ -39,13 +39,14 @@ export interface ContentBox {
 export function contentStart(
   boxes: readonly ContentBox[],
   bounds: ContentBox,
-  inset: number | {x: number; y: number} = 0,
+  inset: number | {x: number; y: number; top?: number} = 0,
   margin = 12,
   align: 'left' | 'centre' = 'left',
   clear = 0,
 ): (view: {scale: number; width?: number; height?: number}) => {left: number; top: number} {
   if (!boxes.length) return () => ({left: 0, top: 0})
   const pad = typeof inset === 'number' ? {x: inset, y: inset} : inset
+  const above = typeof inset === 'number' ? inset : (inset.top ?? inset.y)
   const top = Math.min(...boxes.map(box => box.y))
   const band = Math.min(...boxes.map(box => box.height))
   const row = boxes.filter(box => box.y <= top + band)
@@ -82,6 +83,6 @@ export function contentStart(
     const span = width ? width / scale : Infinity,
       most = Math.max(start, first.x - across)
     const left = nearest(first.x + first.width - span, most) ?? nearest(first.x - span + 1, most) ?? least
-    return {left: (left - bounds.x) * scale + pad.x, top: (y - bounds.y) * scale + pad.y}
+    return {left: (left - bounds.x) * scale + pad.x, top: (y - bounds.y) * scale + above}
   }
 }

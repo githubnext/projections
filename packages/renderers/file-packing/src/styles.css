@@ -7,7 +7,7 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
-  padding: var(--projections-space-2);
+  padding: var(--projections-stage-inset-top, var(--projections-space-2)) var(--projections-space-2) var(--projections-space-2);
   background: var(--stage);
 }
 .fp-canvas {

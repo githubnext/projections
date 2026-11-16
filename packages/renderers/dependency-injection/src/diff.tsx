@@ -36,7 +36,7 @@ import {
   LinkView,
   activate,
   diLegend,
-  diPadding,
+  useDiPadding,
   diUnitLimit,
   halfHeight,
   halfWidth,
@@ -388,8 +388,9 @@ export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, o
   // Opens fitted, everything in view, unless that would draw its text below the kit's opening floor: then it opens at
   // the floor on its top row's leftmost card (from the layout alone, never the frame's momentary size) and scrolls.
   const floor = useOpeningFloor(scroller, diff)
-  const fit = useFitScale(scroller, bounds, {padding: diPadding, floor})
-  const start = useMemo(() => contentStart([...boxes.values()].slice(0, diUnitLimit), bounds, diPadding), [boxes, bounds])
+  const padding = useDiPadding()
+  const fit = useFitScale(scroller, bounds, {padding, floor})
+  const start = useMemo(() => contentStart([...boxes.values()].slice(0, diUnitLimit), bounds, padding), [boxes, bounds, padding])
   const {zoom, scale} = useStageZoom(scroller, onAction, fit.scale, {floor, start})
 
   return (

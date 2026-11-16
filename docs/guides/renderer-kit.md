@@ -399,11 +399,12 @@ Spatial renderers use the whole frame either way:
   its window, from its `viewport`): the stage then asks for at most that
   (`useStageHeightCap()`, `contentHeightCap`), and content taller than that is
   fitted to the capped stage in both dimensions, or opens at the floor and pans.
-  `padding` may be `{x, y}`, across and down. It also reports the content's
-  shape to the host (`aspect`, via `useContentAspect`, which renderers that fit
-  content another way call themselves), so side by side can stack wide content
-  (`aspect` reports another shape, such as that of a focused area the view opens
-  on). `fitScale(size, stage, options)` is the pure calculation.
+  `padding` may be `{x, y}`, across and down, with `top` above the content when
+  it differs from `y`. It also reports the content's shape to the host
+  (`aspect`, via `useContentAspect`, which renderers that fit content another
+  way call themselves), so side by side can stack wide content (`aspect` reports
+  another shape, such as that of a focused area the view opens on).
+  `fitScale(size, stage, options)` is the pure calculation.
 - `useStageInset()`: the host's `stage-inset` theme token in CSS px, or
   undefined when it sends none. A host that lines renderer content up with its
   page's column sends it; CSS reads it with the renderer's own inset as the
@@ -411,6 +412,12 @@ Spatial renderers use the whole frame either way:
   fitted drawing by it across, reaching exactly to its outermost cards, and
   opens with its leftmost card that far from the edge (`contentStart`'s
   `clear`).
+- `useStageInsetTop()`: the host's `stage-inset-top` theme token in CSS px, or
+  undefined when it sends none. A host that overlays the frame's top (a pane's
+  label chip) sends it; CSS reads it in place of the renderer's own top padding
+  (`var(--projections-stage-inset-top, <own>)`), so content starts below the
+  overlay while the stage's background reaches under it. The graph canvas keeps
+  it above its fitted drawing (`padding`'s `top`, beside `x` and `y`).
 - `useStageZoom(scroller, onAction, fit, {floor, start})` → `{zoom, scale}`:
   zoom for content fitted at `fit`, as a multiple of it (`zoomLimits`): 1 is
   fitted and the minimum, so zooming out always reaches "everything in view" and

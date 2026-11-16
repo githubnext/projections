@@ -57,6 +57,9 @@ const same = (value: string): Pair => [value, value]
  *   `stage-inset` is the inline space between the frame's start and end edges and the content a renderer lays out
  *   along them (its cards, tables or fitted canvas): a host that lines that content up with its page's own column
  *   sends it, and extends the frame past the column by the same amount so rings at the edges still show.
+ *   `stage-inset-top` is the space between the frame's top edge and the content, in place of the renderer's own top
+ *   padding: a host that overlays something on the frame's top (such as a pane's label chip) sends it, so the content
+ *   starts below that while the renderer's background still reaches under it.
  *   `stage-max-height` (`px`, or `vh` of the host's window) caps a content-sized stage that pans and zooms: a host
  *   that lays frames in its scrolling page sends it, and such a stage then pans by dragging, leaving the wheel to the page.
  */
@@ -173,9 +176,10 @@ export const themeTokenNames = [...Object.keys(definitions), ...iconNames.map(ic
 /**
  * Layout tokens a host may send that have no default (`resolveThemeTokens` leaves them undefined), so a renderer reads
  * each with its own value as the fallback: `stage-inset`, the inline space between the frame's edges and its content,
- * and `stage-max-height`, the most a content-sized stage that pans and zooms asks for (`px`, or `vh` of the host's window).
+ * `stage-inset-top`, the space above the content where the host overlays the frame's top, and `stage-max-height`, the
+ * most a content-sized stage that pans and zooms asks for (`px`, or `vh` of the host's window).
  */
-export const optionalThemeTokenNames = ['stage-inset', 'stage-max-height'] as const
+export const optionalThemeTokenNames = ['stage-inset', 'stage-inset-top', 'stage-max-height'] as const
 
 /** The default value of every token for a color mode. */
 export function defaultThemeTokens(colorMode: ColorMode): Record<ThemeTokenName, string> {

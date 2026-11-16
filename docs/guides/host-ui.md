@@ -268,7 +268,7 @@ renders inside a `ScopedRoot`:
 | `InfoButton` | `projection`, `comparator?`, `diagnostics?` | About this projection. |
 | `FullscreenButton`, `useViewFullscreen` | `target`, `fullscreen?` | Full screen for an element, with a fixed-overlay fallback; share one `useViewFullscreen` state between buttons (say, one in More). |
 | `MoreMenu`, `MoreSection` | `children`, `label` | The "More" overflow dialog and its labeled sections. |
-| `PaneLabel` | `side`, `children`, `corner?` | A revision's label as a chip over a pane, for custom stages (from the core); `ProjectionStage` draws header bands, or chips in a strip above each pane with `paneLabels: 'chips'`. |
+| `PaneLabel` | `side`, `children`, `corner?` | A revision's label as a chip over a pane, for custom stages (from the core); `ProjectionStage` draws header bands, or chips overlaid on each pane's frame with `paneLabels: 'chips'`. |
 | `LoadingStatus` | `label`, `description?`, `reducedMotion?`, `fill?` | A loading state centered in the box it stands in for (from the core). |
 | `DetailCard` | `projection`, `container`, `view?`, `onOpen?`, `evidenceLink?`, `beforeLabel?`, `renderDetails?`, `annotations?`, `sheetBelow?` | The selection's detail card over `container` (a positioned element around the stage), with the consumer slot (`.ph-details-slot`). |
 | `VariedList` | `varied` | A change's volatile values (`RowDetails.varied`), neutrally: path, old → new, within or beyond tolerance. |

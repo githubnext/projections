@@ -7,7 +7,8 @@
   display: grid;
   background: var(--stage);
   gap: var(--projections-space-3);
-  padding: var(--projections-space-2) var(--projections-stage-inset, var(--projections-space-3)) var(--projections-space-3);
+  padding: var(--projections-stage-inset-top, var(--projections-space-2)) var(--projections-stage-inset, var(--projections-space-3))
+    var(--projections-space-3);
   min-width: 0;
 }
 /* Hover, focus and selection rings are the SDK's, over the command's own edge. */

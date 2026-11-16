@@ -6,6 +6,7 @@ import {RendererBoundary} from '../components.js'
 import {LegendContext} from '../legend-context.js'
 import {useDocumentModel, useTimeline} from './document.js'
 import {ContentAspect, FrameFill, FrameSizing, FrameViewport, PaintGate, StageInset, StageMaxHeight, stageInsetOf} from './frame.js'
+import {StageInsetTop} from './frame.js'
 import type {MountOptions, RendererProps} from './props.js'
 import {
   useAspectReport,
@@ -63,6 +64,7 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
   const sizing = renderer.environment ? renderer.environment.sizing : init?.sizing
   const tokens = (renderer.environment ?? init)?.theme.tokens
   const stageInset = stageInsetOf(tokens)
+  const stageInsetTop = stageInsetOf(tokens, 'stage-inset-top')
   const stageMaxHeight = tokens?.['stage-max-height']
   const automatic = (options.steps ?? 'schedule') === 'schedule'
   const {comparing, diff, position, schedule, highlighting, emphasis} = useTimeline(
@@ -154,7 +156,7 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
       data-reduced-motion={renderer.environment?.reducedMotion ? 'true' : undefined}
       onKeyDown={onKeyDown}
     >
-      {content()}
+      <StageInsetTop.Provider value={stageInsetTop}>{content()}</StageInsetTop.Provider>
     </div>
   )
 }

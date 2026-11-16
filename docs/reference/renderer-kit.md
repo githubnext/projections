@@ -613,11 +613,11 @@ The least a content-sized stage that pans and zooms is capped at, CSS px, howeve
 ### `contentStart`
 
 ```ts
-contentStart(boxes: Array<ContentBox>, bounds: ContentBox, inset?: number | { "x": number; "y": number }, margin?: number, align?: "centre" | "left", clear?: number): { (view: { "height"?: number; "scale": number; "width"?: number }): { "left": number; "top": number } }
+contentStart(boxes: Array<ContentBox>, bounds: ContentBox, inset?: number | { "top"?: number; "x": number; "y": number }, margin?: number, align?: "centre" | "left", clear?: number): { (view: { "height"?: number; "scale": number; "width"?: number }): { "left": number; "top": number } }
 ```
 
 The reading start of content whose bounds are `bounds` (content units), drawn after `inset` CSS px of padding (or
-`{x, y}`, across and down):
+`{x, y}`, across and down, with `top` above the content when it differs from `y`):
 the scroll offsets that put the content's top row of boxes (those whose top is within the smallest box's height
 of the topmost) at the viewport's top left, from its leftmost box, `margin` units clear of it. So content whose
 bounds start with empty room (a wide layout whose top row is at the right) opens on cards, never on empty
@@ -1273,8 +1273,17 @@ Space around fitted content, CSS px: across (each side, left and right) and down
 
 | Member | Signature | Description |
 |---|---|---|
+| `top` | `"top"?: number` | Space above the content, CSS px, when it differs from `y` (a host's `stage-inset-top`); `y` stays below it. |
 | `x` | `"x": number` | Space at the content's left and at its right, CSS px. |
 | `y` | `"y": number` | Space above the content and below it, CSS px. |
+
+### `fitPaddingDown`
+
+```ts
+fitPaddingDown(padding?: FitPadding | number): { "top": number; "total": number }
+```
+
+The space `padding` keeps above the content and the space it keeps above and below together, CSS px.
 
 ### `fitScale`
 
@@ -3900,6 +3909,17 @@ useStageInset(): number | undefined
 The host's `stage-inset` theme token in CSS px (the inline space between the frame's edges and the content laid out
 along them), or undefined when the host sends none and the renderer keeps its own. CSS reads it as
 `var(--projections-stage-inset, <own>)`; this is for layout computed in script, such as a fitted canvas's padding.
+
+### `useStageInsetTop`
+
+```ts
+useStageInsetTop(): number | undefined
+```
+
+The host's `stage-inset-top` theme token in CSS px (the space between the frame's top edge and the content, where
+the host overlays the frame's top, for example with a pane's label chip), or undefined when the host sends none and
+the renderer keeps its own top padding. CSS reads it as `var(--projections-stage-inset-top, <own>)`; this is for
+layout computed in script, such as a fitted canvas's padding.
 
 ### `useStageZoom`
 

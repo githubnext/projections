@@ -7,7 +7,7 @@ import type {PaneState} from '../pane.js'
 import type {ProjectionController} from '../projection.js'
 import {paneArrangement, paneGeometry, useSize} from './arrangement.js'
 import type {PaneArrangement} from './arrangement.js'
-import {PaneBand, PaneChip} from './labels.js'
+import {PaneBand, PaneChip, paneChipClearance} from './labels.js'
 import {accent, columnGapOf, paneBleed, stageLayout} from './layout.js'
 import type {PaneEdge, PaneLabels} from './layout.js'
 import {DefaultStatus} from './status.js'
@@ -59,7 +59,8 @@ export function StageBody({
     stackBelow,
     current: arranged.current.arrangement,
     columnGap: columnGapOf(paneEdge),
-    band: paneLabels === 'hidden' ? 0 : paneGeometry.band,
+    // Chips overlay their frames, so only header bands take height from the panes.
+    band: paneLabels === 'visible' ? paneGeometry.band : 0,
   })
   // Kept only once it was chosen from the content's shape, so the first real choice isn't held back by a default.
   if (mode === 'side-by-side' && fill && aspect && height > 0 && Number.isFinite(width)) arranged.current.arrangement = arrangement
@@ -95,11 +96,17 @@ export function StageBody({
     )
   }, [stage.anchors, stage.frames, selectedId, layout, stacked, mode, projection.connector])
 
-  // A held pane of side by side or swipe says so, so the renderer leaves out narration of the transition.
-  const paneEnvironment = useMemo(
-    () => ({before: {...stage.environment, pane: 'before' as const}, after: {...stage.environment, pane: 'after' as const}}),
-    [stage.environment],
-  )
+  // A held pane of side by side or swipe says so, so the renderer leaves out narration of the transition. A pane its
+  // chip overlays is told how much of its top the chip takes (`stage-inset-top`), so its content starts below it.
+  const chips = paneLabels === 'chips'
+  const paneEnvironment = useMemo(() => {
+    const {theme} = stage.environment
+    const held = chips ? {...theme, tokens: {...theme.tokens, 'stage-inset-top': `${paneChipClearance}px`}} : theme
+    return {
+      before: {...stage.environment, theme: held, pane: 'before' as const},
+      after: {...stage.environment, theme: held, pane: 'after' as const},
+    }
+  }, [stage.environment, chips])
   const status = (pane: PaneState, side: Side | 'main') =>
     renderStatus === null ? null : renderStatus ? (
       renderStatus(pane, side)
@@ -135,9 +142,9 @@ export function StageBody({
       status={status}
     />
   )
-  // Each pane's label is a header band (or a chip in a slim strip) above it, inside its section, so it never covers the
-  // renderer's content. In swipe each label lives in its own clipped layer (the before label at the left, the after
-  // label at the right), so the divider reveals and hides it exactly with the area it names.
+  // Each pane's label is a header band above it, inside its section, or a chip overlaid on its frame's top corner. In
+  // swipe each label lives in its own clipped layer (the before label at the left, the after label at the right), so
+  // the divider reveals and hides it exactly with the area it names.
   const label = (side: Side) => {
     const align = mode === 'swipe' && side === 'after' ? 'right' : 'left'
     const common = {
@@ -147,7 +154,7 @@ export function StageBody({
       className: mode === 'swipe' ? 'ph-swipe-label' : 'ph-pane-label',
       align,
     } as const
-    if (paneLabels === 'chips') {
+    if (chips) {
       // The chip starts where the renderer's content does: the stage inset the frame is given, less how far it bleeds.
       const edge = paneBleed(mode, stacked, side, bleed)[align === 'left' ? 'start' : 'end']
       return (

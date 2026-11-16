@@ -9,6 +9,7 @@ export {
   useFrameSizing,
   useFrameViewport,
   useStageInset,
+  useStageInsetTop,
   useStageHeightCap,
   useContentAspect,
   usePaintGate,

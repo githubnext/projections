@@ -4,7 +4,7 @@ import {paneGeometry} from './arrangement.js'
 
 /**
  * How side by side and swipe label their panes (`ProjectionStageProps.paneLabels`): a header band above each pane, a
- * chip in a slim strip above it, or only for assistive technology.
+ * chip overlaid on its frame's top corner, or only for assistive technology.
  */
 export type PaneLabels = 'visible' | 'chips' | 'hidden'
 

@@ -62,6 +62,18 @@ export function useStageInset(): number | undefined {
   return useContext(StageInset)
 }
 
+export const StageInsetTop = createContext<number | undefined>(undefined)
+
+/**
+ * The host's `stage-inset-top` theme token in CSS px (the space between the frame's top edge and the content, where
+ * the host overlays the frame's top, for example with a pane's label chip), or undefined when the host sends none and
+ * the renderer keeps its own top padding. CSS reads it as `var(--projections-stage-inset-top, <own>)`; this is for
+ * layout computed in script, such as a fitted canvas's padding.
+ */
+export function useStageInsetTop(): number | undefined {
+  return useContext(StageInsetTop)
+}
+
 export const StageMaxHeight = createContext<string | undefined>(undefined)
 
 /**
@@ -73,9 +85,12 @@ export function useStageHeightCap(): number | undefined {
   return contentHeightCap(useContext(StageMaxHeight), useContext(FrameViewport))
 }
 
-/** The `stage-inset` token's value in CSS px, if it is one. */
-export function stageInsetOf(tokens: {[name: string]: string} | undefined): number | undefined {
-  const match = /^\s*(\d+(?:\.\d+)?)(px)?\s*$/.exec(tokens?.['stage-inset'] ?? '')
+/** The `stage-inset` token's value (or `name`'s, another length token) in CSS px, if it is one. */
+export function stageInsetOf(
+  tokens: {[name: string]: string} | undefined,
+  name: 'stage-inset' | 'stage-inset-top' = 'stage-inset',
+): number | undefined {
+  const match = /^\s*(\d+(?:\.\d+)?)(px)?\s*$/.exec(tokens?.[name] ?? '')
   return match ? Number(match[1]) : undefined
 }
 

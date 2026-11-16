@@ -54,7 +54,7 @@ export function paneArrangement({
   stackBelow: number
   current?: PaneArrangement | undefined
   columnGap?: number
-  /** The height of each pane's label band: `paneGeometry.band`, or 0 when the labels are hidden. */
+  /** The height of each pane's label band: `paneGeometry.band`, or 0 when it has none (chips or hidden labels). */
   band?: number
 }): PaneArrangement {
   if (width < stackBelow) return 'stacked'

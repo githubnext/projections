@@ -41,6 +41,7 @@ export function ProjectionLegend({
         display: 'flex',
         flexWrap: 'wrap',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: '4px 14px',
         padding: '6px 10px',
         borderTop: `1px solid var(--pj-legend-border-color, ${tokens['color-divider']})`,

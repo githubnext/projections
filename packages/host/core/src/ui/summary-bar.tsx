@@ -182,8 +182,8 @@ function Figure({
 /**
  * The summary bar along the bottom of every projection view, like an editor's status bar: a band of the header's
  * surface, edge to edge, 28px under the hairline that rules it off above (so its 20px figures sit on whole pixels),
- * whose text starts as far from its edge as a capital E's cap height is from its top and bottom (its padding is that
- * space less the figure's own 4px and the E's left side bearing, about 0.1em). It shows a figure per kind in the renderer's words (`12 workspaces · 18
+ * whose figures sit centred, at least as far from its edges as a capital E's cap height is from its top and bottom (its
+ * padding is that space less the figure's own 4px and the E's left side bearing, about 0.1em). It shows a figure per kind in the renderer's words (`12 workspaces · 18
  * dependencies`), and in a comparison the changes of each in their change colors (`+1 −1`). Every figure filters to
  * its items, as "Changes only" does; pressed again, every item returns. The count of items that varied within
  * tolerance sits at its end as the same kind of toggle, and so does the count of items whose generated values were
@@ -222,6 +222,8 @@ export function SummaryBar({projection: p, className}: {projection: ProjectionCo
           <li data-summary-more="" className="pj:inline-flex pj:size-5 pj:shrink-0" />
         </ul>
       </div>
+      {/* With the trailing spacer, centres the figures in the bar (the toggles stay at its end). */}
+      <span aria-hidden="true" className="ph-summary-lead pj:flex-1" />
       <ul className="ph-summary-figures pj:flex pj:min-w-0 pj:items-center" aria-label={sentence}>
         {figures.slice(0, shown).map((figure, index) => (
           <Figure key={figure.key} projection={p} figure={figure} first={index === 0} />

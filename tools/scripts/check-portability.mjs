@@ -51,8 +51,8 @@ export const rules = [
   {
     name: 'native-path-slash',
     files: path => script.test(path),
-    pattern: /\b(?:relative|resolve|dirname|join)\([^()]*\)\.split\(\s*['"`]\/['"`]\s*\)/,
-    advice: "A native path has '\\' separators on Windows: split it with path.sep, or convert it to a repository path first",
+    pattern: /\b(?:relative|resolve|dirname|join)\([^()]*\)(?:\.split\(\s*['"`]\/['"`]\s*\)|\s*\+\s*['"`]\/)/,
+    advice: "A native path has '\\' separators on Windows: split or extend it with path.sep (or path.join), or convert it to a repository path first",
   },
   {
     name: 'file-text-lf',

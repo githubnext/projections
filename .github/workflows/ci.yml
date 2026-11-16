@@ -221,10 +221,13 @@ jobs:
       - name: Node suites
         shell: bash
         run: |
-          npm test -- --except packages/cli
-          node --test packages/cli/test/*.test.mjs
-          node --test tools/scripts/check-portability.test.mjs
-          npm run test:installed
+          # Every suite runs, so one job reports each failure. packages/cli's test script also runs its Rust suites,
+          # which run in `windows`; its Node suites run on their own here.
+          status=0
+          npm test -- --except packages/cli --keep-going || status=1
+          node --test packages/cli/test/*.test.mjs || status=1
+          npm run test:installed || status=1
+          exit $status
   # Native Windows, end to end: the CLI's browser suite (its view server, starter renderer and Inspector in Chromium)
   # and one renderer's browser suite as a smoke test of the renderers on Windows (they run in full on Linux in
   # `browser`), the VS Code extension's smoke test in a downloaded VS Code, then the GitHub Action itself

@@ -24,6 +24,11 @@ const cases = {
   'posix-path-module': [['packages/x/src/a.ts', 'const file = path.posix.join(root, name)', 'const file = path.join(root, name)']],
   'native-path-slash': [
     ['packages/x/src/a.ts', "const parts = relative(root, file).split('/')", 'const parts = relative(root, file).split(sep)'],
+    [
+      'packages/x/src/a.ts',
+      "const inside = file.startsWith(join(root, 'src') + '/')",
+      "const inside = file.startsWith(join(root, 'src') + sep)",
+    ],
   ],
   'file-text-lf': [
     [

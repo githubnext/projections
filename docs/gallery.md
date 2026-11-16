@@ -15,16 +15,16 @@ lifetime and what it injects.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="images/readme/di-split-animated-dark.png">
-  <img width="880" alt="An animated dependency graph: OrderService, which both controllers inject, turns red and leaves; CheckoutService, OrderQueries and OrderNotifications arrive, each depending on only what it needs" src="images/readme/di-split-animated-light.png">
+  <img width="880" alt="An animated dependency graph: OrderService, which both controllers inject, turns red and leaves; CheckoutService and OrderQueries arrive, each depending on only what it needs" src="images/readme/di-split-animated-light.png">
 </picture>
 
-`OrderService` split into three focused services, animated
+`OrderService` split into two focused services, animated
 ([`docs/images/sources/order-service-split`](images/sources/order-service-split/README.md),
 `dotnet-di`).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="images/readme/di-split-dark.png">
-  <img width="880" alt="The same change as one diff: OrderService removed in red, three new services added in green, and each controller listing the dependency it lost and the ones it gained" src="images/readme/di-split-light.png">
+  <img width="880" alt="The same change as one diff: OrderService removed in red, two new services added in green, and each controller listing the dependency it lost and the one it gained" src="images/readme/di-split-light.png">
 </picture>
 
 The same change as one diff: each controller lists what it now injects instead.

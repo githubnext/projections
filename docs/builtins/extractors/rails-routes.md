@@ -133,10 +133,7 @@ account dashboard, and an account area, sessions, registration, recovery,
 purchase webhooks and a claim action for the licenses API arrive
 ([`docs/images/sources/account-recovery`](../../images/sources/account-recovery/README.md)).
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../../images/readme/rails-routes-dark.png">
-  <img width="760" alt="The api renderer comparing two Rails route tables: GET / modified from pages#home to dashboards#show, and the account routes added, each with its controller action and route name" src="../../images/readme/rails-routes-light.png">
-</picture>
+![The api renderer comparing two Rails route tables: GET / modified from pages#home to dashboards#show, and the account routes added, each with its controller action and route name](../../images/readme/rails-routes-light.png)
 
 ## Limitations
 

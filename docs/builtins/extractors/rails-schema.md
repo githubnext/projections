@@ -131,10 +131,7 @@ A migration that adds user accounts to a license server: `users` and
 makes `email` optional
 ([`docs/images/sources/account-recovery`](../../images/sources/account-recovery/README.md)).
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../../images/readme/rails-schema-dark.png">
-  <img width="760" alt="The database renderer comparing two Rails schemas: the users and license_purchases tables added in green, licenses with a new user_id column and an email column made optional, and foreign keys from licenses and license_purchases to users" src="../../images/readme/rails-schema-light.png">
-</picture>
+![The database renderer comparing two Rails schemas: the users and license_purchases tables added in green, licenses with a new user_id column and an email column made optional, and foreign keys from licenses and license_purchases to users](../../images/readme/rails-schema-light.png)
 
 ## Limitations
 

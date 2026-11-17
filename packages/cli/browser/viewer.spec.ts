@@ -223,10 +223,26 @@ test('at a canvas width, the header text is whole and centred', async ({page}) =
         left: box(title).left - frame.left,
       },
       revision: (() => {
-        const chip = header.querySelectorAll('.pi-viewer-revision')[1]!
-        return {truncated: chip.scrollWidth > chip.clientWidth, width: box(chip).width}
+        const pill = header.querySelectorAll('.pi-viewer-revision')[1]!
+        const text = pill.querySelector('.pi-viewer-text')!
+        return {truncated: text.scrollWidth > text.clientWidth, width: box(pill).width}
       })(),
       overflow: document.scrollingElement!.scrollWidth - innerWidth,
+      pills: [...header.querySelectorAll('.pi-viewer-pill')].map(pill => {
+        const style = getComputedStyle(pill)
+        const text = pill.querySelector('.pi-viewer-text')!
+        const textStyle = getComputedStyle(text)
+        // The text's cap: its box less the padding that keeps its glyphs.
+        const cap = {top: box(text).top + parseFloat(textStyle.paddingTop), bottom: box(text).bottom - parseFloat(textStyle.paddingBottom)}
+        return {
+          height: box(pill).height,
+          border: style.borderTopWidth,
+          background: style.backgroundColor,
+          radius: parseFloat(style.borderTopLeftRadius),
+          above: cap.top - box(pill).top,
+          below: box(pill).bottom - cap.bottom,
+        }
+      }),
     }
   })
   for (const text of measured.texts) {
@@ -242,6 +258,12 @@ test('at a canvas width, the header text is whole and centred', async ({page}) =
   expect(Math.abs(measured.mark.above - measured.mark.below)).toBeLessThanOrEqual(1)
   expect(Math.abs(measured.mark.above - measured.mark.left)).toBeLessThanOrEqual(1.5)
   expect(measured.overflow).toBeLessThanOrEqual(0)
+  // What is compared is outline pills: a whole 20px, a 1px border, fully rounded, no fill, the cap centred.
+  for (const pill of measured.pills) {
+    expect(pill).toMatchObject({height: 20, border: '1px', background: 'rgba(0, 0, 0, 0)'})
+    expect(pill.radius).toBeGreaterThanOrEqual(10)
+    expect(Math.abs(pill.above - pill.below)).toBeLessThanOrEqual(0.5)
+  }
 })
 
 test('the toolbar, stage and summary bar lie flat, edge to edge, under the header', async ({page}) => {

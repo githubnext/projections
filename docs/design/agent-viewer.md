@@ -122,20 +122,21 @@ and its notices. Above it:
 - a **one-line header**: the Projections mark and the projection's title, and at
   the row's end, muted, what is compared, in words: "Branch changes",
   "Uncommitted changes", "Last commit", "Current state", a bookmark's title, or
-  the two revisions' commit subjects. Never file paths or raw refs. What is
-  compared keeps its words up to about half the row, two revisions as chips,
-  each shortened with an ellipsis and whole in its tooltip; a long title
-  shortens first. Its text is centred by cap height: a capital E has the
-  header's padding above and below, and the mark before the title as much space
-  above, below and to its left. The **title is the projection menu**: with two
-  or more projections, it opens the Inspector's own projection switcher (a
-  search by title or ID over the list, IDs in mono, the current one checked)
-  from its start. It reads as the title, not a button: no fill, border or
-  padding at rest, only a small muted chevron after the text; hover and the open
-  menu lay a faint wash behind it (24px tall, overhanging the text by 6px at
-  each end, so nothing moves), and keyboard focus draws the focus ring. Enter,
-  Space or Arrow Down open it; it is a button with a dialog popup to assistive
-  technology, named "TITLE, switch projection";
+  the two revisions' commit subjects, an arrow between them. Never file paths or
+  raw refs. It is an outline pill (two revisions are a pill each): a 1px border,
+  fully rounded, no fill, 20px tall, the cap centred in it. What is compared
+  keeps its words up to about half the row, each pill shortened with an ellipsis
+  and whole in its tooltip; a long title shortens first. Its text is centred by
+  cap height: a capital E has the header's padding above and below, and the mark
+  before the title as much space above, below and to its left. The **title is
+  the projection menu**: with two or more projections, it opens the Inspector's
+  own projection switcher (a search by title or ID over the list, IDs in mono,
+  the current one checked) from its start. It reads as the title, not a button:
+  no fill, border or padding at rest, only a small muted chevron after the text;
+  hover and the open menu lay a faint wash behind it (24px tall, overhanging the
+  text by 6px at each end, so nothing moves), and keyboard focus draws the focus
+  ring. Enter, Space or Arrow Down open it; it is a button with a dialog popup
+  to assistive technology, named "TITLE, switch projection";
 - a quiet **status line**, before what is compared: "Extracting…", "Building
   renderer…", "Waiting for the agent…", "Out of date".
 

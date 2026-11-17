@@ -321,6 +321,22 @@ body {
   }
 }
 /*
+ * What is compared, at the header's end (viewer/chrome.tsx): outline pills, a 1px border, fully rounded, with no fill.
+ * Each is a whole 20px tall with 8px of padding at its ends, and its text, trimmed to its cap height, is centred in it,
+ * so a capital E has as much space above as below. The negative block margin keeps the pill from setting the row's
+ * height, which stays the title's cap plus the header's padding.
+ */
+.pi-viewer-header .pi-viewer-pill {
+  display: inline-flex;
+  box-sizing: border-box;
+  align-items: center;
+  height: 20px;
+  margin-block: calc(0.5cap - 10px);
+  padding: 0 8px;
+  border-radius: 9999px;
+  background: transparent;
+}
+/*
  * The mark leads the header in place of the title's capital E: it overhangs the row's cap height equally above and
  * below, so the header keeps its height, and sits as far from the header's left edge as from its top and bottom.
  */

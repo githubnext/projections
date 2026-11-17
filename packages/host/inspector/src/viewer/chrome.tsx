@@ -46,8 +46,8 @@ export type Store = ReturnType<typeof createStore>
 /**
  * The one-line header: the Projections mark and the projection's title, then at its end the status line and what is
  * compared. The mark takes no more height than the text's cap (styles.css), so the header keeps its height. What is
- * compared keeps its words up to about half the row, each named revision a chip that shortens with an ellipsis and
- * says its name in full on hover; the title takes the rest, and shortens first. Its text is centred by cap height
+ * compared, an outline pill (two for named revisions), keeps its words up to about half the row, each pill shortening
+ * with an ellipsis and saying its name in full on hover; the title takes the rest, and shortens first. Its text is centred by cap height
  * (styles.css). The title is also the menu of the repository's projections (`onChoose`, title.tsx). A host's own
  * control (`end`) closes the row.
  */
@@ -114,38 +114,47 @@ function Stopped({className}: {className: string}) {
   )
 }
 
-/** What is compared, at the header's end: two named revisions as chips, short and in full on hover, or the choice in words. */
+/**
+ * An outline pill at the header's end: a 1px border, fully rounded, no fill, its muted text cut short with an ellipsis
+ * and whole in its tooltip. Its box is a whole 20px, the text centred in it by cap height (styles.css).
+ */
+function Pill({className, title, children, ...rest}: {className: string; title: string; children: ReactNode; 'data-side'?: string}) {
+  return (
+    <span
+      title={title}
+      className={cn('pi-viewer-pill pj:min-w-0 pj:border pj:border-divider pj:text-xs pj:text-muted-foreground', className)}
+      {...rest}
+    >
+      <span className="pi-viewer-text pj:min-w-0 pj:truncate">{children}</span>
+    </span>
+  )
+}
+
+/** What is compared, at the header's end: two named revisions as pills, short and in full on hover, or the choice in words. */
 function Compared({state}: {state: ViewerState}) {
   const sides = state.sides
   if (!sides)
     return state.compared ? (
-      <span
-        className="pi-viewer-compared pi-viewer-text pj:max-w-[55%] pj:shrink-0 pj:truncate pj:text-muted-foreground"
-        title={state.compared}
-      >
+      <Pill className="pi-viewer-compared pj:max-w-[55%] pj:shrink-0" title={state.compared}>
         {state.compared}
-      </span>
+      </Pill>
     ) : null
-  const chip = (name: string, side: 'before' | 'after') => (
-    <span
-      data-side={side}
-      title={name}
-      className="pi-viewer-revision pi-viewer-text pj:min-w-0 pj:max-w-[32ch] pj:truncate pj:rounded-md pj:bg-muted pj:px-1.5 pj:text-xs pj:text-muted-foreground"
-    >
+  const pill = (name: string, side: 'before' | 'after') => (
+    <Pill className="pi-viewer-revision pj:max-w-[32ch]" title={name} data-side={side}>
       {name}
-    </span>
+    </Pill>
   )
   return (
     <span className="pi-viewer-compared pj:flex pj:max-w-[55%] pj:shrink-0 pj:items-center pj:gap-1.5" aria-label={state.compared}>
       {sides.before != null && (
         <>
-          {chip(sides.before, 'before')}
+          {pill(sides.before, 'before')}
           <span aria-hidden="true" className="pi-viewer-text pj:shrink-0 pj:text-xs pj:text-muted-foreground">
             →
           </span>
         </>
       )}
-      {chip(sides.after, 'after')}
+      {pill(sides.after, 'after')}
     </span>
   )
 }

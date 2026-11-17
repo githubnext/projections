@@ -59,7 +59,16 @@ module.exports = async function inspector({folder}) {
   if ((await elements('button[aria-label="Show details panel"]')).length)
     await control({op: 'click', selector: 'button[aria-label="Show details panel"]'})
   const evidence = '.ph-evidence button, .phv-evidence-link'
-  await until('the evidence', async () => (await elements(evidence)).length > 0)
+  await until(
+    'the evidence',
+    async () => (await elements(evidence)).length > 0,
+    undefined,
+    async () => ({
+      item,
+      evidence: await elements('.ph-detail-evidence li, .ph-detail-evidence'),
+      details: await elements('button[aria-label$="details panel"]', 'aria-label'),
+    }),
+  )
   await control({op: 'click', selector: evidence})
   const editor = await until('the evidence file', async () =>
     vscode.window.visibleTextEditors.find(

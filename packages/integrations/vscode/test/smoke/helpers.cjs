@@ -7,7 +7,8 @@ const {execFileSync} = require('node:child_process')
 const extensionId = 'githubnext.projections-vscode'
 
 const control = (message, target) => vscode.commands.executeCommand('projections.inspectorControl', message, target)
-async function until(what, check, timeoutMs = 60_000) {
+/** Polls `check` until it returns something; on timeout, the error adds what `describe` reports, to diagnose it. */
+async function until(what, check, timeoutMs = 60_000, describe) {
   const deadline = Date.now() + timeoutMs
   let last
   while (Date.now() < deadline) {
@@ -20,7 +21,10 @@ async function until(what, check, timeoutMs = 60_000) {
     if (last) return last
     await new Promise(resolve => setTimeout(resolve, 250))
   }
-  throw new Error(`Timed out waiting for ${what}`)
+  const state = describe ? await describe().catch(error => `(describing it failed: ${error.message})`) : undefined
+  throw new Error(
+    `Timed out waiting for ${what}${state === undefined ? '' : `: ${typeof state === 'string' ? state : JSON.stringify(state)}`}`,
+  )
 }
 const elements = (selector, attribute, target) => control({op: 'elements', selector, ...(attribute ? {attribute} : {})}, target)
 

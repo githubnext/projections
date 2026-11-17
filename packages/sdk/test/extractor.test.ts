@@ -3,7 +3,6 @@ import {execFileSync} from 'node:child_process'
 import {mkdtemp, rm, writeFile} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
-import {fileURLToPath} from 'node:url'
 import {test} from 'node:test'
 import {basis, basisDigest, canonicalJson, extraction, generations} from '../src/extractor.ts'
 
@@ -124,7 +123,8 @@ test('an extraction explains what is wrong with its items', () => {
   for (const [call, message] of cases) assert.throws(call, message)
 })
 
-const sdk = fileURLToPath(new URL('../src/extractor.ts', import.meta.url))
+// A module specifier: a file URL, which a Windows path (D:\...) is not.
+const sdk = new URL('../src/extractor.ts', import.meta.url).href
 const run = (script: string) =>
   execFileSync(process.execPath, ['--input-type=module', '-e', `import {result} from ${JSON.stringify(sdk)}\n${script}`], {
     encoding: 'utf8',

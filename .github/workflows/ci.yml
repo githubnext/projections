@@ -225,8 +225,10 @@ jobs:
           # which run in `windows`; its Node suites run on their own here.
           status=0
           npm test -- --except packages/cli --keep-going || status=1
-          # A test that hangs fails by name, rather than the job running out of time.
-          node --test --test-timeout=600000 packages/cli/test/*.test.mjs || status=1
+          # One file at a time, each failure reported where it happens (TAP), and a test that hangs fails by name; the
+          # run ends when the tests do, whatever handles a failed test left open.
+          node --test --test-concurrency=1 --test-timeout=300000 --test-force-exit --test-reporter=tap \
+            packages/cli/test/*.test.mjs || status=1
           npm run test:installed || status=1
           exit $status
   # Native Windows, end to end: the CLI's browser suite (its view server, starter renderer and Inspector in Chromium)
@@ -260,16 +262,20 @@ jobs:
           npm run test:browser --workspace @githubnext/projections-cli
           npm run test:browser --workspace @githubnext/projections-renderer-harness -- --project=chromium-desktop code-statistics/
       - name: VS Code extension smoke test
+        # Each step reports on its own: one failing doesn't hide the others' results.
+        if: ${{ !cancelled() }}
         shell: bash
         run: npm run test:vscode --workspace projections-vscode
       # A python.org install on Windows has python and py, not python3, which the runner image adds: without it, the
       # fixture's ["python3", ...] extractor runs through the CLI's resolution, as on a typical Windows machine.
       - name: Remove python3, as a standard Windows install has none
+        if: ${{ !cancelled() }}
         shell: bash
         run: |
           rm "$(dirname "$(command -v python)")/python3.exe"
           if command -v python3; then exit 1; fi
-      - uses: ./.github/actions/action-e2e
+      - if: ${{ !cancelled() }}
+        uses: ./.github/actions/action-e2e
       - if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

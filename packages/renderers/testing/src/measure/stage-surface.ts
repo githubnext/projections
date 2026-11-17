@@ -5,11 +5,16 @@ import {colorAlpha, describe, normalizeColors} from './paint.js'
 /** How far inside the frame's edges the field is sampled, in CSS px: inside any content, which starts on the stage's inset. */
 const inset = 2
 
-/** The color painted at a point: the topmost background or SVG fill there, or `transparent` when nothing paints it. */
+/**
+ * The color painted at a point: the topmost background or SVG fill there beneath any drawn entity, or `transparent`
+ * when nothing paints it.
+ */
 function paintedAt(x: number, y: number): Omit<StageSurfaceSample, 'where'> {
   const at = `${Math.round(x)}, ${Math.round(y)}`
   for (const element of document.elementsFromPoint(x, y)) {
     if (element.closest('[data-projections-host-overlay]')) continue
+    // What is drawn there is content, not the field behind it: a canvas opened zoomed reaches the frame's edges.
+    if (element.closest('[data-entity-id], [data-graph-synthetic]')) continue
     const exempt = element.closest('[data-projections-off-system]')
     if (exempt) return {at, color: 'exempt', element: describe(exempt)}
     const style = getComputedStyle(element)

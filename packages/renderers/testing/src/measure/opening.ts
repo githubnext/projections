@@ -24,6 +24,7 @@ export function opening(root: Element = document.body, relationships: readonly s
       const drawn = [...element.querySelectorAll('[data-entity-id], [data-graph-synthetic]')].filter(
         entity => visible(entity) && !visuallyHidden(entity, getComputedStyle(entity)),
       )
+      const lines = new Set(relationships)
       let content: OpeningCanvas['content'] = null
       const outside: string[] = []
       const changes = {count: 0, inView: 0, whole: 0}
@@ -45,8 +46,8 @@ export function opening(root: Element = document.body, relationships: readonly s
       return {
         element: describe(element),
         zoom: Number(element.dataset.zoom ?? NaN),
-        start: contentStart(drawn, area),
-        cut: cutAtStart(drawn, area, new Set(relationships)),
+        start: contentStart(drawn, area, lines),
+        cut: cutAtStart(drawn, area, lines),
         entities: drawn.length,
         area,
         content: content ? (content.map(round) as OpeningCanvas['content']) : null,
@@ -60,16 +61,17 @@ export function opening(root: Element = document.body, relationships: readonly s
 }
 
 /**
- * Where drawn content starts: of the outermost entities (nested ones, like a table's columns, belong to theirs), the
+ * Where drawn content starts: of the outermost entities that are cards (nested ones, like a table's columns, belong to
+ * theirs; lines, see `isLine`, are read from the cards they join, so a line leaving the top row's cards never starts it), the
  * top row (those whose top is within the smallest entity's height of the topmost) and its leftmost entity. In view at
  * its `top-left` when that entity's top-left corner lies inside the visible `area`, at its `top-centre` (a centred
  * layout's opening) when the row's top and the middle of its extent do, or at the `drawing-top-left` when the row's top
  * and the leftmost entity's left side do (a layout whose top row can't be in view without cutting a card at the left
  * edge opens there); a pixel of slack; null without entities.
  */
-function contentStart(drawn: Element[], area: OpeningCanvas['area']): OpeningCanvas['start'] {
+function contentStart(drawn: Element[], area: OpeningCanvas['area'], relationships: ReadonlySet<string>): OpeningCanvas['start'] {
   const outer = drawn
-    .filter(entity => !entity.parentElement?.closest('[data-entity-id], [data-graph-synthetic]'))
+    .filter(entity => !entity.parentElement?.closest('[data-entity-id], [data-graph-synthetic]') && !isLine(entity, relationships))
     .map(entity => ({entity, rect: entity.getBoundingClientRect()}))
     .filter(({rect}) => rect.width > 0 && rect.height > 0)
   if (!outer.length) return null
@@ -99,16 +101,11 @@ function contentStart(drawn: Element[], area: OpeningCanvas['area']): OpeningCan
  * The cards the visible `area`'s left or top edge cuts through, described with their boxes (at most a few): part in
  * view and part beyond that edge (a pixel of slack), where reading starts. A card is a drawn entity that holds no
  * other, so a group's frame around its cards, or a table around its columns, may cross the edge while what it holds
- * is whole. Lines don't count: a relationship (its ID in `relationships`) or a presentation-only one
- * (`data-graph-synthetic` without `data-projections-ring-item`, which marks a presentation-only card).
+ * is whole. Lines (see `isLine`) don't count.
  */
 function cutAtStart(drawn: Element[], area: OpeningCanvas['area'], relationships: ReadonlySet<string>): string[] {
   const cards = drawn
-    .filter(entity =>
-      entity.hasAttribute('data-entity-id')
-        ? !relationships.has(entity.getAttribute('data-entity-id')!)
-        : entity.hasAttribute('data-projections-ring-item'),
-    )
+    .filter(entity => !isLine(entity, relationships))
     .map(entity => ({entity, rect: entity.getBoundingClientRect()}))
     .filter(({rect}) => rect.width > 0 && rect.height > 0)
   const holds = (outer: DOMRect, inner: DOMRect) =>
@@ -128,6 +125,16 @@ function cutAtStart(drawn: Element[], area: OpeningCanvas['area'], relationships
     })
     .slice(0, 5)
     .map(({entity, rect}) => `${describe(entity)} at [${[rect.left, rect.top, rect.right, rect.bottom].map(Math.round).join(', ')}]`)
+}
+
+/**
+ * Whether a drawn entity is a line rather than a card: a relationship (its ID in `relationships`) or a presentation-only
+ * one (`data-graph-synthetic` without `data-projections-ring-item`, which marks a presentation-only card).
+ */
+function isLine(entity: Element, relationships: ReadonlySet<string>): boolean {
+  return entity.hasAttribute('data-entity-id')
+    ? relationships.has(entity.getAttribute('data-entity-id')!)
+    : !entity.hasAttribute('data-projections-ring-item')
 }
 
 /** The smallest text drawn in `root`, in CSS px: its font size times the scale it is drawn at; null without any. */

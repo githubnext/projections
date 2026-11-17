@@ -1,24 +1,11 @@
 /*
  * The Changes scope (`data-scope="changes"` on the root, see `RendererProps.scope`). A list folds each run of items it
- * doesn't show into a `Fold` row; a canvas keeps its layout and recedes them, strongly while both revisions hold still
- * (diff, side by side, swipe) and only faintly while it animates, so they still orient the eye as items move.
+ * doesn't show into a `Fold` row; a canvas lays out only what it shows. Nothing is faded: whatever is drawn is at full
+ * strength, so an item the host's filter leaves out that a renderer still draws (an unchanged relationship between
+ * shown items) doesn't recede either.
  */
-/* A graph's summary cards and their links (`data-graph-synthetic`) stand for unchanged items: they recede too. */
-.pk[data-scope='changes'] [data-graph-synthetic] {
-  --pk-recede: 0.25;
-}
-.pk[data-scope='changes'] [data-graph-synthetic]:not(svg *) {
-  filter: opacity(var(--pk-recede));
-}
-.pk[data-scope='changes'] svg [data-graph-synthetic] {
-  opacity: var(--pk-recede);
-}
-.pk[data-scope='changes'][data-scope-recede='strong'] :is([data-projections-filtered], [data-graph-synthetic]) {
-  --pk-recede: 0.12;
-}
-/* Unchanged parts of a shown item (a context table's other columns) stay legible: they place the change in it. */
-.pk[data-scope='changes'][data-scope-recede='strong'] [data-entity-id]:not([data-projections-filtered]) [data-projections-filtered] {
-  --pk-recede: 0.4;
+.pk[data-scope='changes'] [data-projections-filtered] {
+  --pk-recede: 1;
 }
 
 /* A fold: a quiet band across its list, its count in muted text beside the expand icon, the whole band a button. */

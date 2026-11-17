@@ -20,6 +20,7 @@ import {viewOptions} from './view/options.js'
 import {RendererPaneStatus} from './view/pane-status.js'
 import type {ProjectionViewProps} from './view/props.js'
 import {ViewToolbar} from './view/toolbar.js'
+import {ScopeNotice} from './scope-notice.js'
 
 /** A notice under the toolbar: a band of the raised surface, edge to edge, ruled off below by a hairline. */
 const band = 'pj:shrink-0 pj:rounded-none pj:border-0 pj:border-b pj:border-divider pj:bg-surface-raised pj:py-2'
@@ -216,6 +217,7 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
             </div>
           )}
         </div>
+        {on('changesOnly') && <ScopeNotice projection={p} />}
         {props.details !== 'none' && (
           <DetailCard
             projection={p}

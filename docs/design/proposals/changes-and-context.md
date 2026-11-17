@@ -30,16 +30,24 @@ parameter belongs to, the table a changed column is in, the two services a new
 dependency connects. It is semantic, like `steps`, never positions or colors.
 The renderer's form realises it:
 
-|              | All                        | Changes                                                                                                                                                                     |
-| ------------ | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Diff         | the whole union, marked    | changes and context; runs of other items fold into "N unchanged" rows that expand in place                                                                                  |
-| Side by side | both revisions             | the same folds in both panes, computed on the union so they line up                                                                                                         |
-| Swipe        | both, stacked              | the same union folds                                                                                                                                                        |
-| Animated     | the whole projection plays | lists: items arrive and leave between context rows, folds stay. Canvases: nothing hidden; the view frames the changes and context, and far items stay faded for orientation |
+|              | All                        | Changes                                                                                                                                                       |
+| ------------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Diff         | the whole union, marked    | changes and context; runs of other items fold into "N unchanged" rows that expand in place                                                                    |
+| Side by side | both revisions             | the same folds in both panes, computed on the union so they line up                                                                                           |
+| Swipe        | both, stacked              | the same union folds                                                                                                                                          |
+| Animated     | the whole projection plays | lists: items arrive and leave between context rows, folds stay. Canvases: the changes and context, laid out on their own, play through the comparison's steps |
 
-In Diff, Side by side and Swipe, canvases (graphs, packings) keep the union's
-layout, so nothing moves, draw changes and context at full strength, recede the
-rest strongly, and fit the view to the changes and context.
+In every mode, canvases (graphs, schemas, packings) **lay out only the changes
+and their context**: the rest takes no room, so a schema of hundreds of tables
+with a few changes reads at a legible size. Nothing is faded: what is shown is
+drawn at full strength, and context is told apart from the changes by the
+absence of change marks, not by opacity. A shown item's other parts fold (a
+context table's unchanged columns become one "12 unchanged columns" row that
+opens in place). One affordance over the stage says what is hidden ("Hiding 45
+unchanged tables and 380 columns · Show all"). Switching between Changes and All
+moves items from their old places to their new ones (skipped under reduced
+motion). No relationship is ever drawn to an item the scope leaves out: a
+changed relationship always brings both its ends.
 
 ## Decisions
 
@@ -47,7 +55,9 @@ rest strongly, and fit the view to the changes and context.
 2. Context only for now. "Impact" (dependents) is a possible second kind later.
 3. No generic significance levels yet; renderer controls (the api renderer's
    "Breaking only") remain the finer layer.
-4. Animated Changes on canvases keeps far items faded, not hidden.
+4. Changes removes what it leaves out from view in every mode, Animated included
+   (revised after testing: fading left a large schema tiny and its faded items
+   below accessible contrast).
 5. Defaults per surface: a pull request (the Playground PR tab, the VS Code pull
    request choice, `projections pr`) opens Changes in Diff; bookmarks and
    compare in the viewer open Changes; one revision has no scope. A definition
@@ -73,20 +83,25 @@ in scope and their context.
   shared by hosts and the kit): a changed relationship's endpoints, and the
   items containing a changed or context entity with the containment
   relationships between them, in either revision. Containment is `contains` in
-  every schema, plus a database table's `constraint` and `index` and a
-  dependency-injection service's `registration` and a registration's
-  `implements` (`containmentKinds`).
-- **Host core**: `scope`, `setScope` and `scopeCounts` on the controller;
-  `changesOnly` (now on by default for a comparison), `variedOnly` and
-  `regeneratedOnly` remain the controllable state underneath, so embedders and
-  the VS Code extension keep working. The summary filter and find no longer turn
-  the scope off. A comparison without changes says so and offers "Show all".
+  every schema, plus a database table's `constraint` and `index`, and a
+  dependency-injection service's registrations and a registration's
+  implementation, by their entity kinds (`isContainment`).
+- **Host core**: `scope`, `setScope`, `scopeCounts` and `scopeHidden` on the
+  controller; `changesOnly` (now on by default for a comparison), `variedOnly`
+  and `regeneratedOnly` remain the controllable state underneath, so embedders
+  and the VS Code extension keep working. The summary filter and find no longer
+  turn the scope off. A comparison without changes says so and offers "Show
+  all".
 - **Kit**: `RendererProps.scope` (`changesScope`: the host's ids, or the same
   derivation past the filter's ID limit), `foldList`, `useFolds` and `Fold`, and
-  `data-scope` on the root, under which canvases recede what is outside the
-  scope strongly in still modes and faintly while animating.
-- **Renderers**: the api renderer folds declarations; canvases frame the changes
-  and their context.
+  `MountOptions.scope`: a canvas declares `subset` (with its parts left out,
+  kept whole or folded) and receives a `model` of only what is shown
+  (`scopedModel`), with `scope.all` and `scope.expand` to open folds.
+- **Renderers**: the api renderer folds declarations and text-diff its unchanged
+  outputs; graph, database, dependency-injection, file-packing and
+  runtime-policy lay out only the changes and their context. The database folds
+  a shown table's other columns into one row; graph canvases and the database
+  move between the two layouts when the scope changes.
 - **Hosts**: the scope switch in the default view's toolbar (the Inspector,
   `projections view` and the Copilot canvas), the VS Code UI and the
   Playground's pull request tab, which opens Changes in Diff.
@@ -125,10 +140,15 @@ Recorded as implementation chose within the decisions above.
 - Side by side panes fold from the union's scope, but each pane merges adjacent
   runs around items it doesn't have (an added row is absent from Before), so
   Before can show one fold where After shows two with the addition between.
-- The database renderer keeps its measured layout in milestone 1: a context
-  table's unchanged columns stay in place, receded to 40%, rather than folding;
-  tables outside the scope recede. Folding columns inside table cards needs its
-  layout to measure folds, and follows.
+- Containment for dependency injection is the vocabulary's entity kinds (service
+  → registration → implementation), whatever the relationships' own kinds: the
+  extractors name those relationships differently, and the renderer reads them
+  by their ends. `isContainment` replaces a list of kinds.
+- When the Changes scope would hide nothing (every item is a change or gives one
+  context), the switch is replaced by "Changes 2 · nothing hidden", so it never
+  offers a choice that changes nothing.
+- Dependency-injection and file-packing layouts change at once when the scope
+  changes; graph canvases and the database move between them.
 - A comparison without any change shows every item under the "No changes"
   notice, rather than receding everything.
 - Text diffs fold their unchanged lines in every scope, as a diff's hunks do:
@@ -137,6 +157,5 @@ Recorded as implementation chose within the decisions above.
   choice (over a definition's `presentation.mode`, as a surface default). A
   `projections pr` document opens in the Changes scope but in its definition's
   mode: the Inspector's document view doesn't know it holds a pull request yet.
-- Recession is a CSS `filter: opacity()` on HTML boxes (it composes with the
-  opacity renderers animate inline, which hid the filter on database tables) and
-  the opacity inside SVG.
+- Text diffs keep three unchanged lines around each change, as `git diff` does,
+  so a run of up to seven lines between two changes stays open.

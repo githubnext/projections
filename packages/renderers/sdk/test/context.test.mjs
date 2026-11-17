@@ -1,6 +1,6 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {changeContext, containmentKinds, presentComparison, scopeRows} from '../dist/presentation.js'
+import {changeContext, isContainment, presentComparison, scopeRows} from '../dist/presentation.js'
 
 const entity = (id, kind = 'function') => ({id, kind, label: id})
 const contains = (from, to) => ({id: `${from}>${to}`, kind: 'contains', from, to})
@@ -88,12 +88,24 @@ test('containment follows each revision, through every level, with the relations
   assert.deepEqual([...scope.context].sort(), ['a', 'a/b', 'a/b>a/b/c', 'a>a/b'])
 })
 
-test('containment kinds follow the domain schema and vocabularies', () => {
-  assert.deepEqual([...containmentKinds({schema: 'graph/v0'})], ['contains'])
-  assert.deepEqual([...containmentKinds({schema: 'database/v0'})].sort(), ['constraint', 'contains', 'index'])
-  assert.deepEqual([...containmentKinds({schema: 'architecture/v0', vocabularies: ['dependency-injection/v0']})].sort(), [
-    'contains',
-    'implements',
-    'registration',
-  ])
+test('containment follows the domain schema, and a vocabulary that names its structure by entity kinds', () => {
+  const rel = (kind, from, to) => ({id: `${from}>${to}`, kind, from, to})
+  const graph = isContainment({schema: 'graph/v0', entities: [], relationships: []})
+  assert.equal(graph(rel('contains', 'a', 'b')), true)
+  assert.equal(graph(rel('index', 'a', 'b')), false)
+  assert.equal(isContainment({schema: 'database/v0', entities: [], relationships: []})(rel('index', 't', 'i')), true)
+  // Dependency injection: service → registration → implementation, whatever the relationships' own kinds.
+  const di = isContainment({
+    schema: 'architecture/v0',
+    vocabularies: ['dependency-injection/v0'],
+    entities: [
+      {id: 's', kind: 'service'},
+      {id: 'r', kind: 'registration'},
+      {id: 'i', kind: 'implementation'},
+    ],
+    relationships: [],
+  })
+  assert.equal(di(rel('registration', 's', 'r')), true)
+  assert.equal(di(rel('implementation', 'r', 'i')), true)
+  assert.equal(di(rel('dependsOn', 'i', 's')), false)
 })

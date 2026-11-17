@@ -1,8 +1,9 @@
 import {useMemo} from 'react'
 import {changeContext, isScopeChange, regenerated, variedWithinTolerance} from '@githubnext/projections-renderer-sdk/presentation'
 import type {ViewScope} from '@githubnext/projections-renderer-sdk/presentation'
+import {humanizeKind} from '@githubnext/projections-renderer-sdk/presentation'
 import {rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
-import type {FilterPayload} from '@githubnext/projections-renderer-sdk/protocol'
+import type {FilterPayload, SummaryNoun} from '@githubnext/projections-renderer-sdk/protocol'
 import type {Row, ViewSubject} from '../model.js'
 import {rowInSummary} from '../summary.js'
 import type {SummaryFigure} from '../summary.js'
@@ -29,11 +30,21 @@ export function filterState(comparing: boolean, value: ValueOf) {
 
 export type FilterState = ReturnType<typeof filterState>
 
-/** How many items each scope holds: the changes (without their context), every item, and the noise. */
+/**
+ * How many items each scope holds: the changes (without their context), every item, and the noise; and how many items
+ * the Changes scope leaves out (`hidden`), none when every item is a change or gives one context.
+ */
 export interface ScopeCounts {
   changes: number
   all: number
   noise: number
+  hidden: number
+}
+
+/** Items the Changes scope leaves out, by the summary bar's noun for them (`12 tables`). */
+export interface ScopeHidden {
+  noun: SummaryNoun
+  count: number
 }
 
 /** Whether a row is in the scope, before the summary filter and find narrow it. */
@@ -77,14 +88,38 @@ export function useRowFilter(rows: readonly Row[], subject: ViewSubject, state: 
       ids: active && visibleRows.length <= rendererLimits.filterIds ? visibleRows.map(row => row.id) : null,
     }
   }, [query, search, scope, summaryFilter, visibleRows])
+  // What the Changes scope leaves out, whatever the scope shown now: the scope switch and the view say so.
+  const hiddenRows = useMemo(() => {
+    if (subject.mode !== 'comparison' || unchanged) return []
+    const {shown} = changeContext(rows, subject)
+    return rows.filter(row => !shown.has(row.id))
+  }, [rows, subject, unchanged])
+  const hidden = useMemo(() => scopeHidden(hiddenRows, summary), [hiddenRows, summary])
   const counts = useMemo<ScopeCounts>(() => {
     const noise = rows.filter(row => variedWithinTolerance(row) || regenerated(row)).length
+    const left = hidden.reduce((total, item) => total + item.count, 0)
     const figures = summary.filter(figure => figure.type === 'count')
-    if (!figures.length) return {changes: rows.filter(isScopeChange).length, all: rows.length, noise}
+    if (!figures.length) return {changes: rows.filter(isScopeChange).length, all: rows.length, noise, hidden: left}
     const sum = (count: (figure: SummaryFigure) => number) => figures.reduce((total, figure) => total + count(figure), 0)
-    return {changes: sum(figure => figure.added + figure.removed + figure.modified), all: sum(figure => figure.count), noise}
-  }, [rows, summary])
-  return {visibleRows, filter, counts}
+    return {changes: sum(figure => figure.added + figure.removed + figure.modified), all: sum(figure => figure.count), noise, hidden: left}
+  }, [rows, summary, hidden])
+  return {visibleRows, filter, counts, hidden}
+}
+
+/**
+ * What the Changes scope leaves out, by the summary bar's count figures (their nouns, in their order: kinds the renderer
+ * doesn't name, such as a table's structural relationships, aren't counted), else by kind.
+ */
+function scopeHidden(rows: readonly Row[], summary: readonly SummaryFigure[]): ScopeHidden[] {
+  if (!rows.length) return []
+  const figures = summary.filter(figure => figure.type === 'count')
+  if (figures.length)
+    return figures
+      .map(figure => ({noun: figure.noun, count: rows.filter(row => rowInSummary(row, {kinds: figure.kinds})).length}))
+      .filter(item => item.count > 0)
+  const kinds = new Map<string, number>()
+  for (const row of rows) kinds.set(row.kind, (kinds.get(row.kind) ?? 0) + 1)
+  return [...kinds].map(([kind, count]) => ({noun: humanizeKind(kind), count}))
 }
 
 type FilterActions = Pick<

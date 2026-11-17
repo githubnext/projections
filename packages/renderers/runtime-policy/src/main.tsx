@@ -7,6 +7,8 @@ import {accepts} from './accepts.js'
 
 mountRenderer(RuntimePolicyView, {
   name: 'runtime-policy',
+  // The Changes scope lays out only the changed policies and their context, each whole.
+  scope: {layout: 'subset', parts: 'whole'},
   accepts,
   // Which workloads a policy applies to is shown as chips inside the policy, not as drawn relationships.
   capabilities: {changeHighlighting: 'supported', comparisonModes: ['side-by-side', 'diff'], drawsRelationships: false},

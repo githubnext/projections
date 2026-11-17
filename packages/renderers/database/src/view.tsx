@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef} from 'react'
+import {useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react'
 import {fitScale} from '@githubnext/projections-renderer-kit'
 import {
   EmptyDomain,
@@ -20,6 +20,28 @@ import {Link, LinkHead} from './links-view.js'
 import {linkNamer} from './link-names.js'
 import {Table} from './table.js'
 import {useNaturalHeight, useViewSize} from './view-size.js'
+
+/** How long tables and rows move between layouts when the scope changes (Changes and All). */
+const scopeMoveMs = 320
+
+/**
+ * Whether the schema is moving to a new scope's layout: from the render that lays it out again until the move ends, so
+ * cards and rows glide to their new places rather than jump. Never under reduced motion.
+ */
+function useScopeMove(scopeKey: string, reducedMotion: boolean): boolean {
+  const [moving, setMoving] = useState(false)
+  const [shown, setShown] = useState(scopeKey)
+  if (shown !== scopeKey) {
+    setShown(scopeKey)
+    if (!reducedMotion) setMoving(true)
+  }
+  useLayoutEffect(() => {
+    if (!moving) return
+    const timer = setTimeout(() => setMoving(false), scopeMoveMs)
+    return () => clearTimeout(timer)
+  }, [moving, scopeKey])
+  return moving
+}
 
 export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
   const {model, schedule, progress} = props
@@ -73,6 +95,7 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
       ?.querySelector(`[data-entity-id="${CSS.escape(props.selectedId)}"]`)
       ?.scrollIntoView?.({block: 'nearest', inline: 'nearest'})
   }, [props.selectedId])
+  const moving = useScopeMove(props.scope ? `changes:${props.scope.shown.size}` : 'all', props.reducedMotion)
   const empty = !model.entities.length
   const linkName = linkNamer(frame)
   return (
@@ -83,6 +106,7 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
       data-layout={frame.mode}
       data-zoom={zoom}
       data-diff={diff ? '' : undefined}
+      data-scope-moving={moving ? '' : undefined}
     >
       {text.probe}
       <div className="database-zoom" style={{width: width * scale, height: natural === undefined ? undefined : natural * scale}}>

@@ -23,7 +23,7 @@ import type {Row, Variation, ViewSubject} from '../model.js'
 import type {Holds} from '../playback.js'
 import type {ProjectionSelection, ProjectionTarget, TargetAnnotation, TargetResolution} from '../targets/target.js'
 import type {SummaryFigure, SummaryFilter} from '../summary.js'
-import type {ScopeCounts} from './filtering.js'
+import type {ScopeCounts, ScopeHidden} from './filtering.js'
 
 /**
  * Change highlighting: `animated` fades emphasis in and out with progress
@@ -279,6 +279,11 @@ export interface ProjectionController {
    * (without their context) and totals, else every row's.
    */
   scopeCounts: ScopeCounts
+  /**
+   * What the Changes scope leaves out, by the summary bar's nouns (`45 tables`, `380 columns`), whatever the scope
+   * shown now; empty when every item is a change or gives one context, so Changes and All show the same.
+   */
+  scopeHidden: readonly ScopeHidden[]
   /** Whether the scope is `changes`. */
   changesOnly: boolean
   /** Whether only the items that varied within tolerance are shown (see `variation`). */

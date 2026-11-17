@@ -40,7 +40,18 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
   const {framing, bounds, flush} = useFraming(transition, diff)
   const scroller = useRef<HTMLDivElement>(null)
   const drawnScale = useRef(0)
-  const {frame, hold, overflow, change} = useViewChange(scroller, props.anchor, transition, target, bounds, drawnScale, props.reducedMotion)
+  // The scope the layout shows: changing it (Changes and All) moves the cards between the two layouts.
+  const scopeKey = props.scope ? `changes:${props.scope.shown.size}` : 'all'
+  const {frame, hold, overflow, change} = useViewChange(
+    scroller,
+    props.anchor,
+    transition,
+    target,
+    bounds,
+    drawnScale,
+    props.reducedMotion,
+    scopeKey,
+  )
   const nodes = frame.nodes
   const nodeById = new Map(nodes.map(node => [node.id, node]))
   // A relationship's endpoints are named from the revision it comes from.
@@ -150,8 +161,10 @@ function useViewChange(
   bounds: Bounds,
   scale: RefObject<number>,
   reducedMotion: boolean,
+  scopeKey: string,
 ) {
   const shown = useRef<Shown>(undefined)
+  const scoped = useRef(scopeKey)
   const used = useRef<GraphAnchor>(undefined)
   const held = useRef<{key: unknown; scale: number}>(undefined)
   const change = useRef<ViewChange>({pending: undefined}).current
@@ -181,6 +194,12 @@ function useViewChange(
       setMorph(reducedMotion ? undefined : {from: start, to: transition, mix: 0})
     }
   }
+  // A new scope lays the document out again: the cards move from the old layout to the new one, those it adds or leaves
+  // out fading in or out, rather than jumping.
+  if (previous && previous.transition !== transition && scoped.current !== scopeKey) {
+    scoped.current = scopeKey
+    if (!reducedMotion) setMorph({from: previous.frame, to: transition, mix: 0})
+  } else if (scoped.current !== scopeKey) scoped.current = scopeKey
   const moving = morph !== undefined && morph.to === transition && morph.mix < 1
   const frame = moving ? morphFrames(morph.from, target, morph.mix) : target
   const moved = morph?.from

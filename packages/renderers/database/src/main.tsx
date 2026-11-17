@@ -9,6 +9,8 @@ import {accepts} from './accepts.js'
 
 mountRenderer(DatabaseRenderer, {
   name: 'database',
+  // The Changes scope lays out only the changed tables and their context; a shown table's other columns fold into one row.
+  scope: {layout: 'subset', parts: 'fold'},
   accepts,
   capabilities: {changeHighlighting: 'supported', comparisonModes: ['side-by-side', 'animated', 'swipe', 'diff']},
   // The schema's own words, cards first; the relationships that only attach columns, keys and enums to a table, or a

@@ -20,7 +20,7 @@ import type {SummaryNouns} from '@githubnext/projections-renderer-sdk/presentati
 import type {SummaryFacts} from '../../summary.js'
 import type {EmphasisOf} from '../../emphasis.js'
 import type {ComparisonModel} from '../../model.js'
-import type {ChangesScope} from '../../scope.js'
+import type {ScopedParts, ScopeView} from '../../scope.js'
 import type {ScheduledStep} from '../../timeline.js'
 
 /**
@@ -65,10 +65,11 @@ export interface RendererProps<T extends DomainSchema | readonly RendererAccepts
   focusRequest: RendererFocus | undefined
   /**
    * The Changes scope, while the host shows a comparison's changes and their context (`changesScope`): its `shown`
-   * items at full strength, the rest folded (lists: `useFolds`, `Fold`) or receded (canvases, which keep their layout
-   * and frame what is shown). Undefined while every item is shown. The shell already marks items outside it filtered.
+   * items, with the parts the person opened (`expand`). A list folds the rest (`useFolds`, `Fold`); a canvas that
+   * declares `MountOptions.scope` `subset` receives a `model` of only what is shown and lays that out. Nothing is
+   * faded: what is shown is drawn at full strength, and what isn't takes no room. Undefined while every item is shown.
    */
-  scope: ChangesScope | undefined
+  scope: ScopeView | undefined
   /** 0 (before) to 1 (after); always 1 for an extraction. */
   progress: number
   /**
@@ -193,6 +194,13 @@ export interface MountOptions {
    * own: what it would count goes here.
    */
   facts?: SummaryFacts
+  /**
+   * How the Changes scope reaches the renderer. `fold` (the default): `model` holds every item and the renderer folds
+   * what `scope` leaves out, as a list does. `subset`: `model` holds only what the scope shows (`scopedModel`), with the
+   * shown entities' `parts` left out, kept whole or folded, so a canvas lays out only that; `scope.all` holds every
+   * item.
+   */
+  scope?: {layout: 'fold'} | {layout: 'subset'; parts?: ScopedParts}
   /**
    * Hover, anchors, scroll mirroring, the host's filter and annotation badges through `connectInteractions` over
    * elements carrying `data-entity-id` (default on). `false` opts out and

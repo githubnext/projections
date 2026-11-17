@@ -4,6 +4,7 @@ import {useFullscreen, useProjection} from '@githubnext/projections-host'
 import type {ProjectionController, ProjectionSelection} from '@githubnext/projections-host'
 import {OverlayLayer} from './overlay/overlay.js'
 import {StageNoticeSlot} from './stage-notice.js'
+import {ScopeNotice} from './scope-switch.js'
 import {fullscreenFallbackClass, offeredModes} from './blocks.js'
 import type {ViewKind} from './blocks.js'
 import {VscodeTableView} from './views/table.js'
@@ -147,6 +148,7 @@ function VscodeView({
           </div>
           {/* Over the stage, not in its scrolling content: the workspace doesn't scroll, the view inside it does. */}
           {props.stageNotice && <StageNoticeSlot>{props.stageNotice}</StageNoticeSlot>}
+          {on('changesOnly') && <ScopeNotice projection={p} />}
           {props.details !== 'none' && (
             <DetailCard
               projection={p}

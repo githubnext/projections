@@ -2,7 +2,7 @@ import type {CSSProperties, MouseEvent, ReactNode} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {changeMark, classifyChange, describeChange, isChanged} from '@githubnext/projections-renderer-kit'
+import {changeMark, classifyChange, describeChange, isChanged, isFold} from '@githubnext/projections-renderer-kit'
 import {ChangeStatus, ValueChange} from '@githubnext/projections-renderer-kit/react'
 import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
 import {Breakable} from './measure.js'
@@ -170,6 +170,43 @@ function Marker({card, marker, tint, emphasis}: {card: Card; marker: FrameColumn
   )
 }
 
+/**
+ * The columns the Changes scope leaves out of a shown table, folded into one row: a button that opens them in place (the
+ * table grows to hold them, and the schema lays out again around it).
+ */
+function FoldRow({card, row}: {card: Card; row: FrameColumn}) {
+  const {change: fold, entity: version, top, height, opacity} = row
+  const label = version.label
+  return (
+    <div className="database-row database-fold" style={{top, height, opacity}} data-fold="">
+      <button
+        type="button"
+        className="database-fold-button"
+        onClick={event => {
+          event.stopPropagation()
+          // After the click is handled: opening the fold replaces this button, and the shell would read a click on a
+          // detached element as one on the table.
+          setTimeout(() => card.props.scope?.expand([fold.id]))
+        }}
+        aria-label={`Show ${label}`}
+        title={`Show ${label}`}
+      >
+        <svg className="database-fold-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path
+            d="M5 6l3-3 3 3M5 10l3 3 3-3"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span>{label}</span>
+      </button>
+    </div>
+  )
+}
+
 /** A column: its key marker, then its name and type whole, on one line when the card has room. */
 function ColumnRow({card, row}: {card: Card; row: FrameColumn}) {
   const {props, rowBadges, wrap, text} = card
@@ -298,7 +335,9 @@ export function Table({table, props, diff, wrap}: {table: SchemaFrame['tables'][
       {/* The name is data, shown whole: the card is sized for it, and where the frame is too narrow it wraps, with the kind and status under it. */}
       <CardHeader card={card} entity={entity} header={header} status={status} />
       {columns.map(row =>
-        row.kind === 'value' ? (
+        isFold(row.change.id) ? (
+          <FoldRow key={row.change.id} card={card} row={row} />
+        ) : row.kind === 'value' ? (
           <ValueRow key={row.change.id} card={card} row={row} />
         ) : row.kind === 'key' && row.key ? (
           <KeyRow key={row.change.id} card={card} row={row} keyRow={row.key} />

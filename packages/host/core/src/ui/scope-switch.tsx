@@ -1,5 +1,6 @@
 import type {ViewScope} from '@githubnext/projections-renderer-sdk/presentation'
 import type {ProjectionController} from '../projection.js'
+import {nothingHiddenTitle} from '../scope.js'
 import {SegmentedControl, SegmentedControlItem} from './components/segmented-control.js'
 
 const scopeNames: Record<ViewScope, {label: string; title: string}> = {
@@ -10,10 +11,25 @@ const scopeNames: Record<ViewScope, {label: string; title: string}> = {
 
 /**
  * The "Scope" radio group (arrow keys select): Changes and All, each with its count ("Changes 4", "All 82"), and
- * Noise while it is the scope (chosen from Settings or the summary bar). Hidden unless comparing.
+ * Noise while it is the scope (chosen from Settings or the summary bar). When the Changes scope hides nothing, a note
+ * says so instead ("Changes 2 · nothing hidden"). Hidden unless comparing.
  */
 export function ScopeSwitch({projection: p}: {projection: ProjectionController}) {
   if (!p.comparing) return null
+  // Every item is a change or gives one context: Changes and All show the same, so there is nothing to switch.
+  if (!p.scopeCounts.hidden && p.scope !== 'noise')
+    return (
+      <span
+        className="ph-scope ph-scope-note pj:inline-flex pj:h-8 pj:shrink-0 pj:items-center pj:gap-1.5 pj:px-2 pj:text-sm pj:text-muted-foreground"
+        title={nothingHiddenTitle}
+        data-scope="none"
+      >
+        <span className="pj:font-medium pj:text-foreground">Changes</span>
+        <span className="pj:text-xs pj:tabular-nums">{p.scopeCounts.changes.toLocaleString()}</span>
+        <span aria-hidden="true">·</span>
+        <span>nothing hidden</span>
+      </span>
+    )
   const scopes: ViewScope[] = p.scope === 'noise' ? ['changes', 'all', 'noise'] : ['changes', 'all']
   return (
     <SegmentedControl

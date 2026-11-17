@@ -1,6 +1,6 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {changesScope, comparisonModel, extractionModel, foldList} from '../dist/index.js'
+import {changesScope, comparisonModel, extractionModel, foldList, isFold, scopedModel} from '../dist/index.js'
 
 const ids = items => items.map(entry => (entry.type === 'fold' ? `[${entry.items.join(' ')}]` : entry.item))
 
@@ -40,4 +40,70 @@ test('past the filter ID limit the kit derives the same scope, and there is none
   assert.deepEqual([...scope.shown].sort(), ['c', 'tool', 'tool/viewer'])
   assert.equal(changesScope(model, {query: '', changesOnly: false, ids: null}), undefined)
   assert.equal(changesScope(extractionModel(after), {query: '', changesOnly: true, ids: null}), undefined)
+})
+
+// A schema: two tables with columns; `orders` gains a column and a key to `customers`; `audit` is unrelated.
+const db = (entities, relationships) => ({protocolVersion: 0, schema: 'database/v0', entities, relationships})
+const table = id => ({id, kind: 'table', label: id})
+const column = id => ({id, kind: 'column', label: id.split('.')[1], data: {type: 'int'}})
+const has = (from, to) => ({id: `${from}>${to}`, kind: 'contains', from, to})
+const tables = ['orders', 'customers', 'audit'].map(table)
+const columns = ['orders.id', 'orders.total', 'customers.id', 'customers.name', 'audit.id'].map(column)
+const schemaBefore = db(
+  [...tables, ...columns],
+  columns.map(item => has(item.id.split('.')[0], item.id)),
+)
+const schemaAfter = db(
+  [...tables, ...columns, column('orders.customer')],
+  [
+    ...columns.map(item => has(item.id.split('.')[0], item.id)),
+    has('orders', 'orders.customer'),
+    {id: 'fk', kind: 'relation', from: 'orders', to: 'customers'},
+    {id: 'audit-link', kind: 'relation', from: 'audit', to: 'orders'},
+  ],
+)
+const added = (id, collection) => ({id, collection, before: [], after: [id], status: 'added', correspondence: 'none'})
+const schemaModel = comparisonModel(schemaBefore, schemaAfter, {
+  protocolVersion: 0,
+  changes: [
+    added('orders.customer', 'entities'),
+    added('orders>orders.customer', 'relationships'),
+    added('fk', 'relationships'),
+    added('audit-link', 'relationships'),
+  ],
+  steps: [{changes: ['orders.customer', 'orders>orders.customer', 'fk']}, {changes: ['audit-link']}],
+})
+
+test('a scoped model holds only what the scope shows, and never a relationship to an item it leaves out', () => {
+  // The audit link is a change, but narrowed away (as a find would): its ends aren't shown, so it isn't kept.
+  const shown = new Set(['orders.customer', 'orders>orders.customer', 'fk', 'orders', 'customers'])
+  const {model} = scopedModel(schemaModel, shown)
+  assert.deepEqual(model.entities.map(row => row.id).sort(), ['customers', 'orders', 'orders.customer'])
+  const ids = new Set(model.entities.map(row => row.id))
+  for (const row of model.relationships) {
+    const item = row.after ?? row.before
+    assert.ok(ids.has(item.from) && ids.has(item.to), `${row.id} has both ends shown`)
+  }
+  assert.deepEqual(model.relationships.map(row => row.id).sort(), ['fk', 'orders>orders.customer'])
+  assert.deepEqual(model.after.entities.map(item => item.id).sort(), ['customers', 'orders', 'orders.customer'])
+  // Steps keep their kept rows; one left with none is dropped.
+  assert.deepEqual(
+    model.steps.map(step => step.entities.length + step.relationships.length),
+    [3],
+  )
+})
+
+test('folded parts stand as one unchanged part of their entity, and opening a fold lists the parts it holds', () => {
+  const shown = new Set(['orders.customer', 'orders>orders.customer', 'fk', 'orders', 'customers'])
+  const {model, folds} = scopedModel(schemaModel, shown, 'fold')
+  const fold = model.entities.find(row => row.id === 'pk-fold:orders')
+  assert.ok(fold && isFold(fold.id))
+  assert.equal(fold.after.label, '2 unchanged columns')
+  assert.equal(fold.after.kind, 'column')
+  assert.deepEqual([...folds.get('pk-fold:orders')].sort(), ['orders.id', 'orders.total'])
+  assert.ok(model.after.relationships.some(item => item.from === 'orders' && item.to === 'pk-fold:orders'))
+  // Whole parts keep every column of a shown table instead.
+  const whole = scopedModel(schemaModel, shown, 'whole').model
+  assert.ok(whole.entities.some(row => row.id === 'customers.name'))
+  assert.ok(!whole.entities.some(row => row.id === 'audit'))
 })

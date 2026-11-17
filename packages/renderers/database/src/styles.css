@@ -123,6 +123,50 @@
   gap: var(--projections-space-2);
   border-top: var(--projections-border-width) solid var(--border);
 }
+/*
+ * A fold of the columns the Changes scope leaves out of a shown table: a row like the others, on the inset surface, its
+ * count in muted text beside the chevrons; the whole row is the button that opens them.
+ */
+.database-fold {
+  --key-width: calc(var(--projections-font-size-xs) * 1.75);
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  display: flex;
+  border-top: var(--projections-border-width) solid var(--border);
+  background: var(--inset);
+  cursor: default;
+}
+.database-fold-button {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--projections-space-2);
+  margin: 0;
+  padding: 0 var(--projections-space-3) 0 var(--projections-space-2);
+  border: 0;
+  color: var(--muted);
+  background: none;
+  font: inherit;
+  font-size: var(--projections-font-size-xs);
+  line-height: 16px;
+  text-align: start;
+  cursor: pointer;
+}
+.database-fold-button:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+.database-fold-button:focus-visible {
+  outline: var(--projections-focus-ring-width) solid var(--focus);
+  outline-offset: -2px;
+}
+.database-fold-icon {
+  flex: 0 0 var(--key-width);
+  width: var(--key-width);
+  height: 16px;
+}
 .database-key {
   flex: 0 0 var(--key-width);
   font-family: var(--font-mono);
@@ -485,4 +529,26 @@
 }
 .pk header .database-change-values.pk-value-change {
   justify-content: flex-start;
+}
+
+/*
+ * Changing the scope lays the schema out again (Changes holds only the changed tables and their context): while it moves
+ * (`data-scope-moving`), cards and rows glide to their new places and the links, which would otherwise jump, fade back
+ * in once they have arrived. Never under reduced motion, which skips the move.
+ */
+.database-view[data-scope-moving] :is(.database-table, .database-row, .database-canvas, .database-zoom) {
+  transition-property: top, left, width, height;
+  transition-duration: 320ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+.database-view[data-scope-moving] .database-links {
+  opacity: 0;
+}
+.database-view .database-links {
+  transition: opacity 160ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .database-view .database-links {
+    transition: none;
+  }
 }

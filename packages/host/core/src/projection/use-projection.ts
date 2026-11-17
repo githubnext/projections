@@ -81,7 +81,7 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
   const summaryItems = twoPaneMode(mode) ? (panes.after.summary ?? panes.before.summary) : panes.main.summary
   const summaryKey = JSON.stringify(summaryItems ?? null)
   const summary = useMemo(() => summaryFigures(subject, JSON.parse(summaryKey) ?? undefined), [subject, summaryKey])
-  const {visibleRows, filter, counts: scopeCounts} = useRowFilter(rows, subject, filters, summary)
+  const {visibleRows, filter, counts: scopeCounts, hidden: scopeHidden} = useRowFilter(rows, subject, filters, summary)
   const payloads = useRendererPayloads({options, renderer, mode, progress, direction, highlighting, theme, reducedMotion})
   const controls = useRendererControls({latest, internal, setInternal, options, renderer, panes, paneKeys})
   const status = rendererState(renderer, panes, paneKeys)
@@ -166,6 +166,7 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
     highlighting,
     scope: filters.scope,
     scopeCounts,
+    scopeHidden,
     changesOnly: filters.changesOnly,
     variedOnly: filters.variedOnly,
     regeneratedOnly: filters.regeneratedOnly,

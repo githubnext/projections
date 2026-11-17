@@ -110,6 +110,8 @@ function graphFacts({model, rendererName, controls}: SummaryFactContext) {
 
 mountRenderer(GraphRenderer, {
   name: 'graph',
+  // The Changes scope lays out only the changes and their context: the rest takes no room.
+  scope: {layout: 'subset'},
   accepts,
   capabilities: {changeHighlighting: 'supported', pace: graphCanvasPace, comparisonModes: ['side-by-side', 'animated', 'swipe', 'diff']},
   controls: graphCanvasControls,

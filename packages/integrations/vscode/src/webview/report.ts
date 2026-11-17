@@ -6,7 +6,8 @@ import type {TabView} from '../protocol.js'
 import {post} from './host.js'
 import {shownAs} from './page-view.js'
 import type {View} from './page-view.js'
-import {appliedSwitch, keep, tabState} from './tab-state.js'
+import {appliedSwitch, keep, saved, tabState} from './tab-state.js'
+import {shownChoice} from './tab-pair.js'
 import {reducedMotion} from './theme.js'
 
 type Summary = ReturnType<InspectorHandle['summary']>
@@ -72,6 +73,7 @@ export function reportTab(current: () => InspectorHandle | null) {
       results,
     })
   }
+  let openedPull: string | undefined
   setInterval(() => {
     const handle = current()
     if (!handle) return
@@ -80,7 +82,14 @@ export function reportTab(current: () => InspectorHandle | null) {
       restored = true
       restoreView(view)
     }
-    if (view) keep({mode: view.mode, changesOnly: view.changesOnly || undefined, selection: view.selectedId ?? undefined})
+    // A pull request opens on its diff, as Files changed does (in the Changes scope, the view's default), unless the tab
+    // came back with a mode of its own.
+    const choice = shownChoice()
+    if (view?.comparing && view.modesKnown && choice?.startsWith('pr:') && !saved.mode && openedPull !== choice) {
+      openedPull = choice
+      if (view.availableModes.includes('diff')) view.setMode('diff')
+    }
+    if (view) keep({mode: view.mode, changesOnly: view.comparing ? view.changesOnly : undefined, selection: view.selectedId ?? undefined})
     const summary = handle.summary()
     const text = summaryText(summary, view)
     if (text === reported) return

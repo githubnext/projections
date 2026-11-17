@@ -133,6 +133,10 @@ Recorded as implementation chose within the decisions above.
   notice, rather than receding everything.
 - Text diffs fold unchanged lines only in the Changes scope; All shows every
   line, as it shows every item elsewhere.
+- Pull requests open in Diff on the Playground's tab and VS Code's pull request
+  choice (over a definition's `presentation.mode`, as a surface default). A
+  `projections pr` document opens in the Changes scope but in its definition's
+  mode: the Inspector's document view doesn't know it holds a pull request yet.
 - Recession is a CSS `filter: opacity()` on HTML boxes (it composes with the
   opacity renderers animate inline, which hid the filter on database tables) and
   the opacity inside SVG.

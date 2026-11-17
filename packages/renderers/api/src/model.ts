@@ -16,6 +16,15 @@ export function comparisonRows(model: ComparisonModel): EntityChange<Entity>[] {
   return [...model.entities].sort((a, b) => compareIds(a.id, b.id))
 }
 
+/**
+ * A diff's rows with its changes first when they don't all fit under `limit`, each group in its own order, so the
+ * limit cuts unchanged declarations rather than changed ones. Rows that fit keep their order.
+ */
+export function changesFirst<T extends {status: string}>(rows: readonly T[], limit: number): T[] {
+  if (rows.length <= limit) return [...rows]
+  return [...rows.filter(row => row.status !== 'unchanged'), ...rows.filter(row => row.status === 'unchanged')]
+}
+
 /** An ID as people read it: extractors percent-encode the IDs nested in it (`ts-api%3A(root)` is `ts-api:(root)`). */
 export function readableId(id: string): string {
   let text = id

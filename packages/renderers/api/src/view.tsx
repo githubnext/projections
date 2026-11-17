@@ -7,7 +7,7 @@ import type {RendererControl} from '@githubnext/projections-renderer-sdk/protoco
 import {changeMark, presentedEmphasis, statusParts} from '@githubnext/projections-renderer-kit'
 import {ChangeFooter, EmptyDomain, Identifier, Notice, Prose} from '@githubnext/projections-renderer-kit/react'
 import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
-import {comparisonRows, declarationLimit, qualifiedNames, revisionRows} from './model.js'
+import {changesFirst, comparisonRows, declarationLimit, qualifiedNames, revisionRows} from './model.js'
 import {breakingFirst, compatibilityOf, reasonText} from './compatibility.js'
 import type {Compatibility} from './compatibility.js'
 import type {Side} from './signature.js'
@@ -134,8 +134,9 @@ function Declaration({
 
 /**
  * Exported declarations, one row each. In `diff` mode every declaration of
- * both revisions is listed once, in ID order, with its signature diff and its
- * change status in the row's footer; otherwise (an extraction, or a
+ * both revisions is listed once, in ID order (changes first when they don't
+ * all fit), with its signature diff and its change status in the row's
+ * footer; otherwise (an extraction, or a
  * side-by-side pane at progress 0 or 1) one revision's declarations are
  * listed, and with highlighting each pane marks its side of the changes. In a
  * comparison every row reserves its footer, so status never moves a row.
@@ -159,7 +160,7 @@ export function ApiView(props: RendererProps<typeof accepts>) {
   useEffect(() => declareControls(compatibility ? apiControls : []), [compatibility, declareControls])
   const breakingOnly = Boolean(compatibility && controls.breakingOnly === true)
   const all = useMemo(() => {
-    const listed = diff ? breakingFirst(comparisonRows(model), compatibility) : revisionRows(model, side)
+    const listed = diff ? changesFirst(breakingFirst(comparisonRows(model), compatibility), declarationLimit) : revisionRows(model, side)
     return breakingOnly ? listed.filter(row => compatibility?.changes.get(row.id)?.level === 'breaking') : listed
   }, [model, diff, side, compatibility, breakingOnly])
   const rows = all.slice(0, declarationLimit)

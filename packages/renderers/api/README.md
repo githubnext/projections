@@ -14,8 +14,9 @@ definition renderer name.
 `api/v0` entities, one per declaration. Declaration kinds (`function`, `class`,
 `interface`, `method`, …) carry a string `data.signature`; any other entity
 shows its kind instead. Relationships are ignored. Rows are listed in ID order;
-at most 500 rows are shown, with a notice. A declaration's ID is shown under its
-label only when it differs from the label.
+at most 500 rows are shown, with a notice, and a diff with more lists its
+changes first. A declaration's ID is shown under its label only when it differs
+from the label.
 
 Labels, IDs and signatures are code identifiers, drawn in the theme's monospace
 font; status words stay in the text font. A long or renamed label ends in an

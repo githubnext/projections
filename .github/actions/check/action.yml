@@ -118,6 +118,9 @@ runs:
       run: |
         node --test .github/projections/self-topology/
         packages/cli/dist/projections check -p self-topology --trust
+        # The authoring surface: its files, rules language and CLI (self-authoring-api), and its TypeScript SDK.
+        node --test .github/projections/self-authoring-api/
+        packages/cli/dist/projections check -p self-authoring-api -p self-authoring-sdk --trust
     - if: inputs.reference-docs == 'true'
       shell: bash
       working-directory: ${{ inputs.workspace }}

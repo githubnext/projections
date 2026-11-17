@@ -51,7 +51,8 @@ under them in a narrow frame. An entity without a signature shows its kind
 instead. Labels, names and signatures are code, in the monospace font; a long
 label ends in an ellipsis only when its column can't fit it, with the whole
 label as its tooltip. Relationships (containment) aren't drawn. At most 500
-declarations are listed, with a notice.
+declarations are listed, with a notice; when a Diff has more, its changed
+declarations are listed first, so the limit leaves out unchanged ones.
 
 ## Options
 
@@ -145,8 +146,8 @@ place.
 - Without the `api-compatibility` comparator file (or another that writes
   `metadata.compatibility`), every change is just added, removed or modified: it
   can't tell a breaking change from a harmless one.
-- It lists at most 500 declarations; **Breaking only** narrows a classified
-  comparison, and the host's table lists everything.
+- It lists at most 500 declarations (in Diff, changes first); **Breaking only**
+  narrows a classified comparison, and the host's table lists everything.
 - Very long signatures are compared as wholes (one removed line and one added
   line) rather than run by run.
 

@@ -6,7 +6,7 @@ import {renderToStaticMarkup} from 'react-dom/server'
 import {createNativeEngine} from '@githubnext/projections-engine/native'
 import {comparisonModel, extractionModel, stepEmphasis} from '@githubnext/projections-renderer-kit'
 import {compatibilityOf} from '../node_modules/.cache/test/compatibility.js'
-import {comparisonRows, qualifiedNames, readableId, revisionRows} from '../node_modules/.cache/test/model.js'
+import {changesFirst, comparisonRows, qualifiedNames, readableId, revisionRows} from '../node_modules/.cache/test/model.js'
 import {signatureLayout, signatureSegments, signatureTokens} from '../node_modules/.cache/test/signature.js'
 import {ApiView} from '../node_modules/.cache/test/view.js'
 
@@ -371,4 +371,21 @@ test('a classification that is missing or malformed is ignored', () => {
   })
   assert.deepEqual([...parsed.changes], [['b', {level: 'breaking', kinds: ['source'], reason: 'y'}]])
   assert.equal(parsed.counts.breaking, 1)
+})
+
+test('a diff with more rows than fit lists its changes first, each group in its order', () => {
+  const rows = [
+    {id: 'a', status: 'unchanged'},
+    {id: 'b', status: 'modified'},
+    {id: 'c', status: 'unchanged'},
+    {id: 'd', status: 'added'},
+  ]
+  assert.deepEqual(
+    changesFirst(rows, 3).map(row => row.id),
+    ['b', 'd', 'a', 'c'],
+  )
+  assert.deepEqual(
+    changesFirst(rows, 4).map(row => row.id),
+    ['a', 'b', 'c', 'd'],
+  )
 })

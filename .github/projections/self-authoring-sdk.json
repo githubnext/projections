@@ -1,0 +1,22 @@
+{
+  "id": "self-authoring-sdk",
+  "title": "Authoring SDK",
+  "description": "The public TypeScript API of @githubnext/projections, the package renderer and extractor authors import: the renderer SDK and its React hooks, the renderer kit, the Vite build, the document types and the extractor helpers, by entry point. Changes are classified by TypeScript's compatibility rules.",
+  "extractor": "typescript-public-api",
+  "comparator": "packages/comparators/api-compatibility/api-compatibility.comparator.yaml",
+  "renderer": "api",
+  "presentation": {"mode": "diff"},
+  "inputs": {
+    "tsconfig": ".github/projections/self-authoring-sdk/tsconfig.json",
+    "entrypoints": {
+      "./renderer": "packages/sdk/src/renderer.ts",
+      "./renderer/react": "packages/sdk/src/renderer-react.ts",
+      "./kit": "packages/sdk/src/kit.ts",
+      "./kit/react": "packages/sdk/src/kit-react.ts",
+      "./vite": "packages/sdk/src/vite.ts",
+      "./schemas": "packages/sdk/src/schemas.ts",
+      "./extractor": "packages/sdk/src/extractor.ts"
+    }
+  },
+  "execution": {"timeoutMs": 120000}
+}

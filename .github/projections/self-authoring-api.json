@@ -1,0 +1,70 @@
+{
+  "id": "self-authoring-api",
+  "title": "Authoring API",
+  "description": "What projection authors write and run: the definition, comparator file and tests, extractor request and extraction, renderer scenarios and environment file (their schemas' fields), the comparator rules language and the CLI's commands and arguments. The TypeScript SDK is self-authoring-sdk.",
+  "extractor": {
+    "command": ["node", ".github/projections/self-authoring-api/extract.mjs"],
+    "sources": [".github/projections/self-authoring-api"]
+  },
+  "renderer": "api",
+  "presentation": {
+    "mode": "diff",
+    "kinds": {
+      "document": {"noun": {"singular": "document", "plural": "documents"}},
+      "field": {"noun": {"singular": "field", "plural": "fields"}},
+      "command": {"noun": {"singular": "command", "plural": "commands"}},
+      "option": {"noun": {"singular": "option", "plural": "options"}}
+    }
+  },
+  "inputs": {
+    "documents": [
+      {
+        "id": "definition",
+        "label": "Definition",
+        "file": ".github/projections/<id>.json",
+        "schema": "packages/schemas/schemas/definition/v0.json"
+      },
+      {
+        "id": "comparator",
+        "label": "ComparatorFile",
+        "file": "<name>.comparator.yaml",
+        "schema": "packages/schemas/schemas/comparator/v0.json"
+      },
+      {
+        "id": "comparator-tests",
+        "label": "ComparatorTests",
+        "file": "<name>.comparator.test.yaml",
+        "schema": "packages/schemas/schemas/comparator-tests/v0.json"
+      },
+      {
+        "id": "extractor-request",
+        "label": "ExtractorRequest",
+        "file": "extractor stdin",
+        "schema": "packages/schemas/schemas/extractor-request/v0.json"
+      },
+      {"id": "extraction", "label": "Extraction", "file": "extractor stdout", "schema": "packages/schemas/schemas/extraction/v0.json"},
+      {
+        "id": "scenarios",
+        "label": "Scenarios",
+        "file": "<renderer>/scenarios.json",
+        "schema": "packages/schemas/schemas/scenarios/v0.json"
+      },
+      {
+        "id": "environment",
+        "label": "Environment",
+        "file": ".github/projections/environment.json",
+        "schema": "packages/schemas/schemas/environment/v0.json"
+      }
+    ],
+    "rules": "packages/comparators/rules/language.json",
+    "cli": {
+      "reference": "docs/reference/cli.md",
+      "exclude": ["serve", "mcp", "view", "canvas", "pr", "licenses"]
+    }
+  },
+  "execution": {
+    "timeoutMs": 30000,
+    "network": false,
+    "determinism": "pure"
+  }
+}

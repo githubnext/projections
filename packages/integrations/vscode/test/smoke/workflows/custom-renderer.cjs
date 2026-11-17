@@ -4,8 +4,7 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs/promises')
 const path = require('node:path')
 const vscode = require('vscode')
-const {execFileSync} = require('node:child_process')
-const {until} = require('../helpers.cjs')
+const {until, git: run} = require('../helpers.cjs')
 
 module.exports = async function customRenderer({folder, tests, api}) {
   // A committed projection with a custom renderer bundle (the template's). A normal tab applies the committed
@@ -21,9 +20,9 @@ module.exports = async function customRenderer({folder, tests, api}) {
     renderer: {bundle: '.github/projections/cards/dist'},
   }
   await fs.writeFile(`${cards}.json`, `${JSON.stringify(cardsDefinition, null, 2)}\n`)
-  const git = (...args) => execFileSync('git', args, {cwd: folder.fsPath, stdio: 'pipe'})
-  git('add', '.github/projections/cards.json', '.github/projections/cards')
-  git('-c', 'commit.gpgsign=false', 'commit', '--quiet', '-m', 'Package cards')
+  const git = (...args) => run(folder.fsPath, ...args)
+  await git('add', '.github/projections/cards.json', '.github/projections/cards')
+  await git('-c', 'commit.gpgsign=false', 'commit', '--quiet', '-m', 'Package cards')
   await until('the cards row', async () => api.rows()[0].projections.some(row => row.id === 'cards'))
   await vscode.commands.executeCommand('projections.openProjection', folder, 'cards', {preview: false})
   await until(

@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
+import {builtinRendererDocuments} from '@githubnext/projections-host'
 import {allChecks, checkTitles} from '@githubnext/projections-renderer-testing'
 import type {CheckResult} from '@githubnext/projections-renderer-testing'
 import type {FixtureCatalog, FixtureScenario} from '../../types.js'
@@ -32,10 +33,13 @@ export function useChecks({
   const stage = useRef<Stage | undefined>(undefined)
   const queue = useRef<Promise<unknown>>(Promise.resolve())
 
-  const stageRef = useCallback((element: HTMLDivElement | null) => {
-    stage.current?.dispose()
-    stage.current = element ? new Stage(element) : undefined
-  }, [])
+  const stageRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      stage.current?.dispose()
+      stage.current = element ? new Stage(element, undefined, builtinRendererDocuments(context.builtins)) : undefined
+    },
+    [context],
+  )
 
   const run = useCallback(
     (target: FixtureScenario) => {

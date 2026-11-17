@@ -11,7 +11,7 @@ scenarios did this change add, remove or redraw?"
 
 - ID: `renderer-scenarios`
 - Extraction schema: [`graph/v0`](../../reference/schemas/graph.md)
-- Drawn by default with: `gallery`
+- Drawn by default with: [`gallery`](../renderers/gallery.md)
 - Needs `--trust`: No (`none`)
 - Suggested when the repository has: `**/scenarios.json`
 

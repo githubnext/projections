@@ -10,6 +10,7 @@ const builtInRenderers = [
   'packages/renderers/database',
   'packages/renderers/dependency-injection',
   'packages/renderers/file-packing',
+  'packages/renderers/gallery',
   'packages/renderers/graph',
   'packages/renderers/runtime-policy',
   'packages/renderers/agentic-workflows',

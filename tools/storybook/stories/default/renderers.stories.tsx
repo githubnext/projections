@@ -24,6 +24,7 @@ export const Database: Story = {name: 'Database', ...rendererStory('database')}
 export const Dependencies: Story = {name: 'Dependencies', ...rendererStory('graph', 'dependencies')}
 export const DependencyInjection: Story = {name: 'Dependency injection', ...rendererStory('dependency-injection')}
 export const FilePacking: Story = {name: 'File packing', ...rendererStory('file-packing')}
+export const Gallery: Story = {name: 'Gallery', ...rendererStory('gallery')}
 export const Graph: Story = {name: 'Graph', ...rendererStory('graph')}
 export const Infrastructure: Story = {name: 'Infrastructure', ...rendererStory('graph', 'infrastructure')}
 export const Minimal: Story = {name: 'Minimal outline (example)', ...rendererStory('minimal')}

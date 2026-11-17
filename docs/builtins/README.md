@@ -35,7 +35,7 @@ extension opens these pages when you select a built-in part.
 | [`prisma-schema`](extractors/prisma-schema.md) | Prisma data model: tables, columns, keys, indexes, relations and enums. | `database/v0` | [`database`](renderers/database.md) |
 | [`rails-schema`](extractors/rails-schema.md) | Rails db/schema.rb: tables, columns, keys, indexes, foreign keys and enums. | `database/v0` | [`database`](renderers/database.md) |
 | [`rails-routes`](extractors/rails-routes.md) | Rails config/routes.rb: each route's verb, path, controller action and name. | `api/v0` | [`api`](renderers/api.md) |
-| [`renderer-scenarios`](extractors/renderer-scenarios.md) | Renderer fixture scenarios (projections.scenarios documents) with their synthetic extractions and comparisons. | `graph/v0` | `gallery` |
+| [`renderer-scenarios`](extractors/renderer-scenarios.md) | Renderer fixture scenarios (projections.scenarios documents) with their synthetic extractions and comparisons. | `graph/v0` | [`gallery`](renderers/gallery.md) |
 | [`scip-file-references`](extractors/scip-file-references.md) | Cross-file definition references from a SCIP index produced by the project's own indexer. | `graph/v0` | [`graph`](renderers/graph.md) |
 | [`command-output`](extractors/command-output.md) | Captured stdout from named CLI commands. | `graph/v0` | [`text-diff`](renderers/text-diff.md) |
 
@@ -59,6 +59,7 @@ comparator file layers your own rules over it.
 | [Database](renderers/database.md) | Relationship-aware ERD cards with staged schema transitions. | `schema` |
 | [Dependency injection](renderers/dependency-injection.md) | Composed registrations with their lifetime marks, staged by the comparison's steps. | — |
 | [File packing](renderers/file-packing.md) | Files as circles sized by their bytes, packed inside their folders. | `treemap` |
+| [Gallery](renderers/gallery.md) | Renderer scenarios, each drawn by its own built-in renderer, nested. | — |
 | [Graph](renderers/graph.md) | Staged, identity-stable graph transitions (graph, graph-horizontal, dag, architecture, infrastructure and dependencies). | `graph-horizontal`, `dag`, `architecture`, `infrastructure`, `dependencies` |
 | [Runtime security policies](renderers/runtime-policy.md) | Hooks, the rules that act there, their effect and who they apply to. | — |
 | [Text diff](renderers/text-diff.md) | Captured text outputs compared line by line. | — |

@@ -1,0 +1,115 @@
+/*
+ * The gallery: wide cards, each with a stage its scenario's renderer fills, nested. Every color, size and space is a
+ * theme token, so it follows the host's theme in light and dark.
+ */
+.pk .gallery-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--projections-space-4);
+}
+/* Drawings need room: fewer, wider columns than a list of entity cards. */
+.pk .gallery-view .pk-card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: var(--projections-space-3);
+}
+.pk .gl-run > .pk-card-grid {
+  padding: var(--projections-space-3);
+}
+.pk .gl-run-title + .pk-card-grid {
+  padding-top: var(--projections-space-2);
+}
+.pk .gl-run + .gl-run {
+  border-top: var(--projections-border-width) solid var(--border);
+}
+.pk .gl-run-title {
+  margin: 0;
+  padding: var(--projections-space-3) var(--projections-space-3) 0;
+  color: var(--muted);
+  font-size: var(--projections-font-size-sm);
+  font-weight: var(--projections-font-weight-semibold);
+  line-height: var(--projections-line-height-tight);
+}
+.pk .gl-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--projections-space-2);
+  padding: var(--projections-space-2) var(--projections-space-3) var(--projections-space-3);
+}
+/* The stage its renderer draws on: a fixed height, so cards line up and the grid never reflows while frames load. */
+.pk .gl-stage {
+  position: relative;
+  height: 320px;
+  overflow: hidden;
+  border: var(--projections-border-width) solid var(--border);
+  border-radius: var(--projections-radius-sm);
+  background: var(--stage);
+}
+.pk .gl-stage-frame {
+  position: absolute;
+  inset: 0;
+}
+.pk .gl-stage-note {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: var(--projections-space-4);
+  color: var(--muted);
+  font-size: var(--projections-font-size-sm);
+  line-height: var(--projections-line-height);
+  text-align: center;
+  background: var(--inset);
+}
+/* Descriptions run long: three lines keep the cards level; the full text is the title. */
+.pk .gl-description {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--projections-font-size-sm);
+  line-height: var(--projections-line-height);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+.pk .gl-comparator {
+  min-width: 0;
+  max-width: 100%;
+  color: var(--muted);
+}
+.pk .gl-revisions {
+  display: flex;
+  gap: var(--projections-space-1);
+}
+.pk .gl-revision {
+  height: var(--projections-control-height-sm);
+  padding: 0 var(--projections-space-2);
+  border: var(--projections-border-width) solid var(--border);
+  border-radius: var(--projections-radius-sm);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--projections-font-size-xs);
+  line-height: 1;
+  cursor: pointer;
+}
+.pk .gl-revision:hover {
+  color: var(--text);
+}
+.pk .gl-revision[aria-pressed='true'] {
+  border-color: var(--border-strong);
+  background: var(--raised);
+  color: var(--text);
+}
+.pk .gl-revision:focus-visible {
+  outline: var(--projections-focus-ring-width) solid var(--focus);
+  outline-offset: var(--projections-focus-ring-offset);
+}
+@media (max-width: 480px) {
+  .pk .gl-stage {
+    height: 240px;
+  }
+}

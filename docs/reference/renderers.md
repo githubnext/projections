@@ -14,6 +14,7 @@ custom renderer is. Comparison modes are the ways it presents a comparison, in t
 | [Database](#database) | `database`, `schema` | `diff`, `side-by-side`, `animated`, `swipe` |
 | [Dependency injection](#dependency-injection) | `dependency-injection` | `diff`, `side-by-side`, `animated`, `swipe` |
 | [File packing](#file-packing) | `file-packing`, `treemap` | `diff`, `side-by-side`, `animated`, `swipe` |
+| [Gallery](#gallery) | `gallery` | `diff`, `side-by-side`, `animated` |
 | [Graph](#graph) | `graph`, `graph-horizontal`, `dag`, `architecture`, `infrastructure`, `dependencies` | `diff`, `side-by-side`, `animated`, `swipe` |
 | [Runtime security policies](#runtime-policy) | `runtime-policy` | `diff`, `side-by-side` |
 | [Text diff](#text-diff) | `text-diff` | `diff` |
@@ -71,6 +72,15 @@ Built-in Projections file-packing renderer: files as circles sized by their byte
 - Comparison modes: `diff`, `side-by-side`, `animated`, `swipe`
 - Package: `@githubnext/projections-renderer-file-packing`
 - Example scenarios ([`scenarios.json`](../../packages/renderers/file-packing/scenarios.json)): This repository's tree; Sample app; Sample app, sized by lines; Settings map; Single extraction
+
+## `gallery`
+
+Built-in Projections gallery renderer: renderer scenarios, each drawn by its own built-in renderer, nested. See [its page](../builtins/renderers/gallery.md).
+
+- Handles: `gallery`
+- Comparison modes: `diff`, `side-by-side`, `animated`
+- Package: `@githubnext/projections-renderer-gallery`
+- Example scenarios ([`scenarios.json`](../../packages/renderers/gallery/scenarios.json)): Three renderers' scenarios; A change to the scenarios
 
 ## `graph`
 

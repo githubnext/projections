@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import {randomUUID} from 'node:crypto'
 import {cp, mkdir, rm, symlink, writeFile} from 'node:fs/promises'
 import path from 'node:path'
-import {fileURLToPath} from 'node:url'
+import {fileURLToPath, pathToFileURL} from 'node:url'
 import {test, type TestContext} from 'node:test'
 import {installToolchain, runHelper, toolchain} from './support.mjs'
 

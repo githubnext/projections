@@ -2,11 +2,13 @@ import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import {join} from 'node:path'
 import test from 'node:test'
+import {pathToFileURL} from 'node:url'
 import {workspaceRoot} from '../src/lib/repo.ts'
 
 // The proofs themselves need Verus (`tools verify`, and the verus CI job); these check what can go stale without it.
 const verified = join(workspaceRoot, 'packages/engine/verified')
-const script = (name: string) => import(join(verified, 'scripts', name)) as Promise<Record<string, (...args: unknown[]) => unknown>>
+const script = (name: string) =>
+  import(pathToFileURL(join(verified, 'scripts', name)).href) as Promise<Record<string, (...args: unknown[]) => unknown>>
 
 test('Cargo.toml uses the verus_builtin_macros version verus.toml pins', async () => {
   const {consistent, pins} = await script('verify.mjs')

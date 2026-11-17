@@ -35,7 +35,6 @@ for (const render of renders) {
     const args = ['-C', repo, 'show', '--from', document, '--png', path.join(directory, name), '--theme', theme]
     // One side of the comparison, drawn by the renderer of the definition that explained it (the base's, as collected).
     if (render.part) args.push('--side', render.part)
-    if (environment.INPUT_TRUST === 'true') args.push('--trust')
     console.log(`projections ${args.join(' ')}`)
     const result = spawnSync(cli, args, {
       cwd: repo,

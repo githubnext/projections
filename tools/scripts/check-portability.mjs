@@ -31,9 +31,9 @@ export const rules = [
   {
     name: 'bare-launcher',
     files: path => script.test(path),
-    pattern: /\b(?:spawn|spawnSync|execFile|execFileSync)\(\s*['"`](?:(?:npm|npx|pnpm|yarn|corepack)(?:\.cmd)?|python3?)['"`]/,
+    pattern: /\b(?:spawn|spawnSync|execFile|execFileSync)\(\s*['"`](?:(?:npm|npx|pnpm|yarn|corepack)(?:\.cmd)?|python3?|tar)['"`]/,
     advice:
-      'npm, npx, pnpm and yarn are .cmd shims on Windows, which Node refuses to spawn without a shell (EINVAL), and Windows names Python python or py: run npm as node with npm_execpath, or resolve the launcher per platform',
+      'npm, npx, pnpm and yarn are .cmd shims on Windows, which Node refuses to spawn without a shell (EINVAL), Windows names Python python or py, and on Windows the GNU tar of Git Bash comes first on PATH and reads C: as a remote host: run npm as node with npm_execpath, use %SystemRoot%\\System32\\tar.exe, or resolve the launcher per platform',
   },
   {
     name: 'rust-bare-launcher',

@@ -777,6 +777,12 @@ test('the snapshot script renders both sides of a pull request and a push, light
       env: {
         PATH: process.env.PATH,
         HOME: process.env.HOME,
+        // Where the CLI looks for Chrome or Edge on Windows, as the Action's own environment has them.
+        ...Object.fromEntries(
+          ['SystemRoot', 'ProgramFiles', 'ProgramFiles(x86)', 'LOCALAPPDATA'].flatMap(name =>
+            process.env[name] ? [[name, process.env[name]]] : [],
+          ),
+        ),
         RUNNER_TEMP: directory,
         PROJECTIONS_CLI: cli,
         PROJECTIONS_MANIFEST: outputs.manifest,
@@ -821,7 +827,8 @@ test('the snapshot script renders both sides of a pull request and a push, light
   assert.deepEqual(readdirSync(pull.outputs.directory).sort(), ['projections', artifactManifest])
 
   const push = collect(directory, repo, 'push', {after: head}, 'refs/heads/feature')
-  const pushed = run(push.outputs, {INPUT_SNAPSHOTS: 'files'})
+  // Snapshots render saved documents, which run no repository code: trust changes nothing (show --from refuses it).
+  const pushed = run(push.outputs, {INPUT_SNAPSHOTS: 'files', INPUT_TRUST: 'true'})
   assert.deepEqual(
     pushed.index.snapshots.map(file => file.path),
     ['files.light.png', 'files.dark.png'],

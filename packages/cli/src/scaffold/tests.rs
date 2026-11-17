@@ -3,7 +3,8 @@ use super::*;
 #[test]
 fn a_development_build_runs_inside_the_checkout_it_was_built_from() {
     let root = tempfile::tempdir().unwrap();
-    let root = root.path().canonicalize().unwrap();
+    // As checkout_for reports it: canonical, without Windows' \\?\ prefix.
+    let root = projections_extractor_sdk::canonical(root.path()).unwrap();
     let cli = root.join("packages").join("cli");
     fs::create_dir_all(cli.join("dist")).unwrap();
     fs::create_dir_all(root.join("packages").join("sdk")).unwrap();

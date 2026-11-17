@@ -114,7 +114,8 @@ test('link: dry run, write, idempotent, relink another checkout, and never a for
   const linked = linkReport(first, {binDir, dryRun: false}, on)
   assert.equal(linked.status, 'linked')
   assert.deepEqual(linked.warnings, [])
-  assert.equal(statSync(path).mode & 0o111, 0o111, 'executable')
+  // The host is Linux; a Windows file system has no execute bits to check.
+  if (process.platform !== 'win32') assert.equal(statSync(path).mode & 0o111, 0o111, 'executable')
   assert.deepEqual(readLauncher(readFileSync(path, 'utf8')), {kind: 'launcher', checkout: first, node: '/opt/node/bin/node'})
   assert.equal(linkReport(first, {binDir, dryRun: false}, on).status, 'unchanged')
 

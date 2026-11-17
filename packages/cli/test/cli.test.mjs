@@ -247,46 +247,51 @@ test('batch CLI preserves successful items, explicit unknown IDs and saved worki
   assert.equal(JSON.parse((await cli(root, ['compare', `${before}..${before}`, '--all', '--trust', '--json'])).stdout).results.length, 2)
 })
 
-test('native PR review stays untrusted and saves verifiable comparisons', async t => {
-  const {root} = await fixture(t)
-  await cli(root, ['init', 'files', '--extractor', 'repository-map'])
-  const base = commit(root)
-  await writeFile(path.join(root, 'new.txt'), 'changed')
-  const head = commit(root)
-  const tools = path.join(root, '..', `pr-tools-${path.basename(root)}`)
-  await mkdir(tools)
-  t.after(() => rm(tools, {recursive: true, force: true}))
-  await pullRequestTools(tools, {
-    gitPath: await realpath(execFileSync('which', ['git'], {encoding: 'utf8'}).trim()),
-    repository: root,
-    base,
-    head,
-    metadata: {
-      html_url: 'https://github.com/example/tiny/pull/42',
-      base: {sha: base, repo: {id: 1, full_name: 'example/tiny'}},
-      head: {sha: head, repo: {id: 2, full_name: 'example/fork'}},
-    },
-  })
-  const env = {...executionEnvironment(process.env), PATH: `${tools}${path.delimiter}${process.env.PATH}`}
-  const cache = path.join(tools, 'cache')
-  await mkdir(cache)
-  const review = JSON.parse(
-    await failed(
-      cli(root, ['pr', '42', '-R', 'example/tiny', '--cache', cache, '--id', 'files', '--id', 'services-node', '--json'], env),
-      /1 of the pull request's comparisons failed/,
-    ),
-  )
-  assert.equal(review.execution, 'untrusted')
-  assert.equal(review.fork, true)
-  assert.equal(review.site, undefined)
-  assert.deepEqual(
-    review.comparisons.results.map(item => item.status),
-    ['changed', 'error'],
-  )
-  assert.equal(review.comparisons.results[1].diagnostics[0].code, 'TRUST_REQUIRED')
-  await failed(cli(root, ['pr', '42', '-R', 'example/tiny', '--cache', cache, '--trust'], env), /unexpected argument/)
-  const comparison = path.join(root, 'review.json')
-  await writeFile(comparison, JSON.stringify(review.comparisons.results[0].comparison))
-  assert.equal(JSON.parse((await cli(root, ['validate', comparison, '--json'])).stdout).format, 'projections.comparison')
-  await failed(cli(root, ['site', '--document', `good=${comparison}`, '--directory', path.join(root, 'site')]), /unrecognized subcommand/)
-})
+test(
+  'native PR review stays untrusted and saves verifiable comparisons',
+  // On Windows the CLI runs gh.exe and git.exe, which /bin/sh stand-ins can't replace; the Rust suites' PR tests too.
+  {skip: process.platform === 'win32' && 'Stands in for gh and git with /bin/sh scripts'},
+  async t => {
+    const {root} = await fixture(t)
+    await cli(root, ['init', 'files', '--extractor', 'repository-map'])
+    const base = commit(root)
+    await writeFile(path.join(root, 'new.txt'), 'changed')
+    const head = commit(root)
+    const tools = path.join(root, '..', `pr-tools-${path.basename(root)}`)
+    await mkdir(tools)
+    t.after(() => rm(tools, {recursive: true, force: true}))
+    await pullRequestTools(tools, {
+      gitPath: await realpath(execFileSync('which', ['git'], {encoding: 'utf8'}).trim()),
+      repository: root,
+      base,
+      head,
+      metadata: {
+        html_url: 'https://github.com/example/tiny/pull/42',
+        base: {sha: base, repo: {id: 1, full_name: 'example/tiny'}},
+        head: {sha: head, repo: {id: 2, full_name: 'example/fork'}},
+      },
+    })
+    const env = {...executionEnvironment(process.env), PATH: `${tools}${path.delimiter}${process.env.PATH}`}
+    const cache = path.join(tools, 'cache')
+    await mkdir(cache)
+    const review = JSON.parse(
+      await failed(
+        cli(root, ['pr', '42', '-R', 'example/tiny', '--cache', cache, '--id', 'files', '--id', 'services-node', '--json'], env),
+        /1 of the pull request's comparisons failed/,
+      ),
+    )
+    assert.equal(review.execution, 'untrusted')
+    assert.equal(review.fork, true)
+    assert.equal(review.site, undefined)
+    assert.deepEqual(
+      review.comparisons.results.map(item => item.status),
+      ['changed', 'error'],
+    )
+    assert.equal(review.comparisons.results[1].diagnostics[0].code, 'TRUST_REQUIRED')
+    await failed(cli(root, ['pr', '42', '-R', 'example/tiny', '--cache', cache, '--trust'], env), /unexpected argument/)
+    const comparison = path.join(root, 'review.json')
+    await writeFile(comparison, JSON.stringify(review.comparisons.results[0].comparison))
+    assert.equal(JSON.parse((await cli(root, ['validate', comparison, '--json'])).stdout).format, 'projections.comparison')
+    await failed(cli(root, ['site', '--document', `good=${comparison}`, '--directory', path.join(root, 'site')]), /unrecognized subcommand/)
+  },
+)

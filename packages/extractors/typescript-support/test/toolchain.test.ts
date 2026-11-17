@@ -192,7 +192,7 @@ test('the helper requires Node.js 20 or newer and says so', async t => {
     "Object.defineProperty(process, 'versions', {value: {...process.versions, node: '18.20.8'}}); Object.defineProperty(process, 'version', {value: 'v18.20.8'});\n",
   )
   const result = await runHelper('typescript-public-api', request('typescript-public-api', root), await toolchain(), {
-    args: ['--import', preload],
+    args: ['--import', pathToFileURL(preload).href],
   })
   assert.equal(result.status, 1)
   assert.equal(result.stdout, '')

@@ -18,6 +18,7 @@ const cases = {
   'bare-launcher': [
     ['packages/x/scripts/a.mjs', "execFileSync('npm', ['run', 'build'])", "execFileSync(process.execPath, [npm, 'run', 'build'])"],
     ['packages/x/src/a.ts', "spawn('python3', [file])", "spawn('node', [file])"],
+    ['packages/x/scripts/a.mjs', "execFileSync('tar', ['-xzf', file])", "execFileSync(tar, ['-xzf', file])"],
     ['packages/x/src/a.ts', "execFileSync('npm.cmd', ['ci'])", "execFileSync(process.execPath, [process.env.npm_execpath, 'ci'])"],
   ],
   'rust-bare-launcher': [['packages/x/src/a.rs', 'Command::new("npm")', 'Command::new(if cfg!(windows) { "npm.cmd" } else { "npm" })']],

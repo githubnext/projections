@@ -58,6 +58,7 @@ fn cases(root: &Path) -> Vec<(&'static str, Value)> {
     let fixtures = |id: &str| extractors().join(id).join("tests/fixtures");
     copy(&fixtures("workspace-dependencies").join("npm"), &root.join("npm"));
     copy(&fixtures("cargo-dependencies"), &root.join("cargo"));
+    copy(&fixtures("swift-package-dependencies").join("harbor"), &root.join("swift"));
     copy(&fixtures("nuget-dependencies"), &root.join("nuget"));
     copy(
         &fixtures("terraform-infrastructure").join("aws/base.plan.json"),
@@ -94,6 +95,7 @@ fn cases(root: &Path) -> Vec<(&'static str, Value)> {
         ("repository-map", json!({})),
         ("code-statistics", json!({})),
         ("cargo-dependencies", json!({"metadataPath": "cargo/cargo-metadata.json"})),
+        ("swift-package-dependencies", json!({"root": "swift"})),
         ("nuget-dependencies", json!({"assetsPaths": ["nuget/nuget/project.assets.json"]})),
         ("terraform-infrastructure", json!({"planJsonPath": "terraform/plan.json"})),
         (

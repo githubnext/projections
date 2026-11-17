@@ -1507,6 +1507,7 @@ dependencies = [
  "projections-extractor-scip-file-references",
  "projections-extractor-sdk",
  "projections-extractor-spring-di",
+ "projections-extractor-swift-package-dependencies",
  "projections-extractor-terraform-infrastructure",
  "projections-extractor-tetragon-policies",
  "projections-extractor-typescript-public-api",
@@ -1731,6 +1732,25 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-spring-di"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "projections-extractor-sdk",
+ "serde_json",
+]
+
+[[package]]
+name = "projections-extractor-swift-package-dependencies"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "projections-extractor-sdk",
+ "projections-extractor-swift-support",
+ "serde_json",
+]
+
+[[package]]
+name = "projections-extractor-swift-support"
 version = "0.1.0"
 dependencies = [
  "anyhow",

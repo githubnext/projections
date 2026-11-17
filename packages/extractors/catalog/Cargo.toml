@@ -28,6 +28,7 @@ projections-extractor-rails-schema = { path = "../rails-schema" }
 projections-extractor-repository-map = { path = "../repository-map" }
 projections-extractor-rust-public-api = { path = "../rust-public-api" }
 projections-extractor-sdk = { path = "../sdk" }
+projections-extractor-swift-package-dependencies = { path = "../swift-package-dependencies" }
 projections-extractor-terraform-infrastructure = { path = "../terraform-infrastructure" }
 projections-extractor-tetragon-policies = { path = "../tetragon-policies" }
 projections-extractor-command-output = { path = "../command-output" }

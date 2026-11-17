@@ -1493,6 +1493,8 @@ test('the docked Details panel: toggled and resized like the Explorer, remembere
     await expect(dock).toHaveCount(0)
     return
   }
+  // Checkout is unchanged: every item lists it.
+  await page.getByRole('radiogroup', {name: 'Scope'}).getByRole('radio', {name: /^All/}).click()
   await page.getByRole('button', {name: 'Checkout', exact: true}).click()
   await expect(raw).toContainText('checkout')
   // The worker's details are gone (its layer; the revisions' commit subjects mention the worker too).

@@ -78,7 +78,8 @@ export function ViewToolbar(toolbarProps: ViewToolbarProps) {
         {modeRegion && (
           <div className="phv-toolbar-mode">
             {showModeSwitch && <ModeSwitch projection={p} modes={modes} variant={layout.modes} />}
-            {showScope && <ScopeSwitch projection={p} compact={layout.modes === 'menu'} />}
+            {/* A row short enough to fold the mode into a menu leaves the scope to Settings' "Show". */}
+            {showScope && layout.modes !== 'menu' && <ScopeSwitch projection={p} />}
           </div>
         )}
         {showPlayback && (

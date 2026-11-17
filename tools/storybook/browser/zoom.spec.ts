@@ -156,12 +156,12 @@ for (const story of stories)
         await page.setViewportSize(size)
         await page.goto(
           new URL(
-            `iframe.html?id=${story.id}&viewMode=story&globals=theme:${theme}&args=initialMode:${mode === 'Animated' ? 'animated' : 'side-by-side'}`,
+            `iframe.html?id=${story.id}&viewMode=story&globals=theme:${theme}&args=initialMode:${mode === 'Animated' ? 'animated' : 'side-by-side'};changesOnly:!false`,
             process.env.PROJECTIONS_STORYBOOK_URL,
           ).href,
         )
         await expect(page.locator('.ph[data-renderer-status="ready"]').first()).toBeVisible({timeout: 30_000})
-        // Opened in the mode under test (renderers that offer diff open in it by default); the switch confirms it.
+        // Every item (the Changes scope frames the changes); opened in the mode under test (renderers that offer diff open in it by default); the switch confirms it.
         await expect(page.locator('.ph').first()).toHaveAttribute('data-comparison-mode', mode === 'Animated' ? 'animated' : 'side-by-side')
         const panes = mode === 'Side by side' ? 2 : 1
         // Opens at the fit, everything in view, or at the 8 px text floor where the fit draws smaller text.

@@ -19,6 +19,8 @@ export interface ScenarioArgs {
   renderer?: string
   initialMode?: ComparisonMode
   initialView?: ViewKind
+  /** The scope: Changes (the default) or, with `false`, every item. */
+  changesOnly?: boolean
   /** Mark a few presented items as an embedder would, for example with comment counts. */
   annotations?: boolean
   /** Render a consumer's content in the detail card (`renderDetails`). */

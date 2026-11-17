@@ -137,8 +137,7 @@ test('progress is acknowledged by the renderer after painting and flow-controlle
 test('table and text views present the same changes and entities', async ({page}) => {
   await open(page, 'before=v1&after=v3&view=table')
   await expect(page.locator('[data-active-view]')).toHaveText('Built-in table view')
-  // The text view lists changes; the table lists them too once unchanged items are filtered out.
-  await chooseSetting(page, 'Changes only')
+  // Both list the Changes scope's rows: the changes and the items that give them context.
   const tableIds = await page
     .locator('.ph-table-view tbody tr[data-row-id]')
     .evaluateAll(rows => rows.map(row => row.getAttribute('data-row-id')).sort())
@@ -490,7 +489,7 @@ test('renderers declare controls that the host draws and delivers as options and
 test('definition presentation defaults seed host and renderer settings, with notices for unknown options', async ({page}) => {
   const defaults = {
     highlighting: 'on',
-    changesOnly: true,
+    changesOnly: false,
     rendererOptions: {layout: 'horizontal', zoom: 150, labels: 'sometimes', shading: true},
   }
   await open(page, `renderer=hostile&probe=controls&defaults=${encodeURIComponent(JSON.stringify(defaults))}`)
@@ -498,7 +497,8 @@ test('definition presentation defaults seed host and renderer settings, with not
   await expect(report).toContainText('options layout=horizontal labels=true zoom=150')
   const settings = await openSettings(page)
   await expect(submenuItem(settings, 'Highlight changes')).toContainText('Always')
-  await expect(menuItem(settings, 'Changes only')).toBeChecked()
+  // The definition opts out of the Changes scope.
+  await expect(submenuItem(settings, 'Show')).toContainText('Everything')
   await closeMenus(page)
   const notices = page.getByRole('list', {name: 'Notices'})
   await expect(notices).toContainText(

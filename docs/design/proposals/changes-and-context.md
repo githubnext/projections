@@ -131,8 +131,8 @@ Recorded as implementation chose within the decisions above.
   layout to measure folds, and follows.
 - A comparison without any change shows every item under the "No changes"
   notice, rather than receding everything.
-- Text diffs fold unchanged lines only in the Changes scope; All shows every
-  line, as it shows every item elsewhere.
+- Text diffs fold their unchanged lines in every scope, as a diff's hunks do:
+  lines aren't items. The Changes scope folds the unchanged outputs.
 - Pull requests open in Diff on the Playground's tab and VS Code's pull request
   choice (over a definition's `presentation.mode`, as a surface default). A
   `projections pr` document opens in the Changes scope but in its definition's

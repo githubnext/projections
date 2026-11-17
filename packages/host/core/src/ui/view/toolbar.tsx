@@ -145,7 +145,8 @@ export function ViewToolbar({
         {(showModes || showScope) && (
           <div data-toolbar-region="mode" className="ph-toolbar-mode pj:flex pj:shrink-0 pj:items-center pj:gap-1.5 pj:empty:hidden">
             {showModes && <ModeSwitch projection={p} modes={modes} form={plan.mode} />}
-            {showScope && <ScopeSwitch projection={p} compact={plan.mode === 'menu'} />}
+            {/* A row short enough to fold the mode into a menu leaves the scope to Settings' "Show". */}
+            {showScope && plan.mode !== 'menu' && <ScopeSwitch projection={p} />}
           </div>
         )}
         {showPlayback && plan.rows === 1 ? playback : <span aria-hidden="true" data-fit-min="0" className="pj:flex-1" />}

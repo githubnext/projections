@@ -10,10 +10,9 @@ const scopeNames: Record<ViewScope, {label: string; title: string}> = {
 
 /**
  * The scope, beside the mode switch and like it a radio group (arrows move and choose, the checked one is in the tab
- * order): Changes and All with their counts ("Changes 4", "All 82"), and Noise while it is the scope. `compact` drops
- * the counts, which stay in each choice's tooltip and accessible name. Hidden unless comparing.
+ * order): Changes and All with their counts ("Changes 4", "All 82"), and Noise while it is the scope. Hidden unless comparing.
  */
-export function ScopeSwitch({projection: p, compact = false}: {projection: ProjectionController; compact?: boolean}) {
+export function ScopeSwitch({projection: p}: {projection: ProjectionController}) {
   const group = useRef<HTMLDivElement>(null)
   if (!p.comparing) return null
   const scopes: ViewScope[] = p.scope === 'noise' ? ['changes', 'all', 'noise'] : ['changes', 'all']
@@ -55,11 +54,9 @@ export function ScopeSwitch({projection: p, compact = false}: {projection: Proje
             onClick={() => p.setScope(scope)}
           >
             {label}
-            {!compact && (
-              <span aria-hidden="true" className="phv-scope-count">
-                {count}
-              </span>
-            )}
+            <span aria-hidden="true" className="phv-scope-count">
+              {count}
+            </span>
           </button>
         )
       })}

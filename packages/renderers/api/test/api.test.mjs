@@ -6,7 +6,7 @@ import {renderToStaticMarkup} from 'react-dom/server'
 import {createNativeEngine} from '@githubnext/projections-engine/native'
 import {comparisonModel, extractionModel, stepEmphasis} from '@githubnext/projections-renderer-kit'
 import {compatibilityOf} from '../node_modules/.cache/test/compatibility.js'
-import {changesFirst, comparisonRows, qualifiedNames, readableId, revisionRows} from '../node_modules/.cache/test/model.js'
+import {changesFirst, comparisonRows, limitScope, qualifiedNames, readableId, revisionRows} from '../node_modules/.cache/test/model.js'
 import {signatureLayout, signatureSegments, signatureTokens} from '../node_modules/.cache/test/signature.js'
 import {ApiView} from '../node_modules/.cache/test/view.js'
 import {plain} from '../../kit/test/markup.mjs'
@@ -388,4 +388,14 @@ test('a diff with more rows than fit lists its changes first, each group in its 
     changesFirst(rows, 4).map(row => row.id),
     ['a', 'b', 'c', 'd'],
   )
+})
+
+test('under the Changes scope the limit counts the declarations drawn, changes before their context', () => {
+  const rows = ['a', 'b', 'c', 'd', 'e'].map(id => ({id}))
+  const scope = {changes: new Set(['d', 'e']), context: new Set(['a', 'c']), shown: new Set(['a', 'c', 'd', 'e'])}
+  assert.equal(limitScope(scope, rows, 4), scope)
+  const limited = limitScope(scope, rows, 3)
+  assert.deepEqual([...limited.shown].sort(), ['a', 'd', 'e'])
+  assert.deepEqual([...limited.changes].sort(), ['d', 'e'])
+  assert.deepEqual([...limited.context], ['a'])
 })

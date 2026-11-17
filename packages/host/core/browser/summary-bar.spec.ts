@@ -1,6 +1,6 @@
 import {test, expect} from '@playwright/test'
 import type {Page} from '@playwright/test'
-import {story} from './harness.js'
+import {showEverything, story} from './harness.js'
 
 /**
  * The summary bar (docs/guides/host-ui.md "The summary bar") along the bottom of the Default UI's view, on the dependency
@@ -125,6 +125,7 @@ test('figures are apart by a small round dot on the x-height centre, clear of ea
 
 test('a figure filters the renderer to its items, and pressed again shows every item', async ({page}) => {
   await open(page, 'summary-bar')
+  await showEverything(page)
   const workspaces = figures(page).filter({hasText: 'workspace'}).locator('[data-summary-total]')
   await workspaces.click()
   await expect(workspaces).toHaveAttribute('aria-pressed', 'true')
@@ -144,6 +145,7 @@ test('a figure filters the renderer to its items, and pressed again shows every 
 test('a fact filters the renderer to the items it names; its icon and words are muted', async ({page}) => {
   await page.setViewportSize({width: 1600, height: 800})
   await open(page, 'summary-bar')
+  await showEverything(page)
   const major = bar(page).locator('.ph-summary-figures [data-summary-fact]').filter({hasText: 'major upgrades'}).locator('button')
   await expect(major).toHaveText('18 major upgrades')
   await expect(major.locator('[data-icon="upgraded"]')).toBeAttached()

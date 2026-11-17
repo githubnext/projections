@@ -7,7 +7,7 @@ import type {RendererControl} from '@githubnext/projections-renderer-sdk/protoco
 import {changeMark, presentedEmphasis, statusParts} from '@githubnext/projections-renderer-kit'
 import {ChangeFooter, EmptyDomain, Fold, Identifier, Notice, Prose, useFolds} from '@githubnext/projections-renderer-kit/react'
 import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
-import {changesFirst, comparisonRows, declarationLimit, qualifiedNames, revisionRows} from './model.js'
+import {changesFirst, comparisonRows, declarationLimit, limitScope, qualifiedNames, revisionRows} from './model.js'
 import {breakingFirst, compatibilityOf, reasonText} from './compatibility.js'
 import type {Compatibility} from './compatibility.js'
 import type {Side} from './signature.js'
@@ -161,12 +161,18 @@ export function ApiView(props: RendererProps<typeof accepts>) {
   useEffect(() => declareControls(compatibility ? apiControls : []), [compatibility, declareControls])
   const breakingOnly = Boolean(compatibility && controls.breakingOnly === true)
   const all = useMemo(() => {
-    const listed = diff ? changesFirst(breakingFirst(comparisonRows(model), compatibility), declarationLimit) : revisionRows(model, side)
+    const ordered = diff ? breakingFirst(comparisonRows(model), compatibility) : revisionRows(model, side)
+    // Every row stays in order under the Changes scope, which folds what it doesn't show; otherwise a diff too long to
+    // list puts its changes first, so the limit cuts unchanged declarations.
+    const listed = diff && !scope ? changesFirst(ordered, declarationLimit) : ordered
     return breakingOnly ? listed.filter(row => compatibility?.changes.get(row.id)?.level === 'breaking') : listed
-  }, [model, diff, side, compatibility, breakingOnly])
-  const rows = all.slice(0, declarationLimit)
-  // The Changes scope folds each run of declarations it doesn't show; both panes fold alike, from the union's IDs.
-  const {entries, expand} = useFolds(rows, row => row.id, scope)
+  }, [model, diff, side, compatibility, breakingOnly, scope])
+  // The Changes scope folds each run of declarations it doesn't show (both panes alike, from the union's IDs), and the
+  // limit counts only the declarations it draws: changes first, then their context.
+  const shownScope = useMemo(() => scope && limitScope(scope, all, declarationLimit), [scope, all])
+  const rows = shownScope ? all.filter(row => shownScope.shown.has(row.id)) : all.slice(0, declarationLimit)
+  const scopeTotal = scope ? all.filter(row => scope.shown.has(row.id)).length : all.length
+  const {entries, expand} = useFolds(shownScope ? all : rows, row => row.id, shownScope)
   const names = useMemo(() => ({before: qualifiedNames(model.before), after: qualifiedNames(model.after)}), [model])
   // One status cell width for every row, from the longest change status this comparison can show.
   const parts = Math.max(1, ...rows.map(row => statusParts(row).length))
@@ -175,7 +181,7 @@ export function ApiView(props: RendererProps<typeof accepts>) {
     <div className="api-view pk-stage" data-highlighting={highlighting > 0 ? 'on' : 'off'} style={style}>
       <div className="api-panel" data-projections-content="">
         {compatibility && <CompatibilityNotices compatibility={compatibility} />}
-        <Notice shown={rows.length} total={all.length} noun="declarations" />
+        <Notice shown={rows.length} total={scopeTotal} noun="declarations" />
         {!rows.length ? (
           breakingOnly ? (
             <EmptyDomain title="No breaking changes">No declaration in this comparison breaks its consumers.</EmptyDomain>

@@ -1,6 +1,6 @@
 import type {Entity, Extraction} from '@githubnext/projections-schemas'
 import {compareIds} from '@githubnext/projections-renderer-kit'
-import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
+import type {ChangesScope, ComparisonModel} from '@githubnext/projections-renderer-kit'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import type {Side} from './signature.js'
 
@@ -23,6 +23,19 @@ export function comparisonRows(model: ComparisonModel): EntityChange<Entity>[] {
 export function changesFirst<T extends {status: string}>(rows: readonly T[], limit: number): T[] {
   if (rows.length <= limit) return [...rows]
   return [...rows.filter(row => row.status !== 'unchanged'), ...rows.filter(row => row.status === 'unchanged')]
+}
+
+/**
+ * The Changes scope with at most `limit` of `rows` shown: its changes first, then their context, each in list order, so
+ * the limit folds context rather than changes. Within the limit, the scope as it is.
+ */
+export function limitScope(scope: ChangesScope, rows: readonly {id: string}[], limit: number): ChangesScope {
+  const listed = rows.filter(row => scope.shown.has(row.id))
+  if (listed.length <= limit) return scope
+  const kept = [...listed.filter(row => scope.changes.has(row.id)), ...listed.filter(row => !scope.changes.has(row.id))].slice(0, limit)
+  const shown = new Set(kept.map(row => row.id))
+  const within = (ids: ReadonlySet<string>) => new Set([...ids].filter(id => shown.has(id)))
+  return {changes: within(scope.changes), context: within(scope.context), shown}
 }
 
 /** An ID as people read it: extractors percent-encode the IDs nested in it (`ts-api%3A(root)` is `ts-api:(root)`). */

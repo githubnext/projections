@@ -1,0 +1,20 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "@githubnext/projections-renderer-sdk": ["../../../packages/renderers/sdk/src/index.ts"],
+      "@githubnext/projections-renderer-sdk/*": ["../../../packages/renderers/sdk/src/*.ts"],
+      "@githubnext/projections-renderer-kit": ["../../../packages/renderers/kit/src/index.ts"],
+      "@githubnext/projections-renderer-kit/*": ["../../../packages/renderers/kit/src/*.ts"],
+      "@githubnext/projections-renderer-testing/playwright": ["../../../packages/renderers/testing/playwright/index.ts"],
+      "@githubnext/projections-schemas": ["../../../packages/schemas/src/index.ts"],
+      "#layout-engine": ["../../../packages/renderers/kit/src/engine/node.ts"]
+    }
+  },
+  "include": []
+}

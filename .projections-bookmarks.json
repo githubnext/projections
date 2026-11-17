@@ -15,6 +15,13 @@
       "projectionId": "agent-tools",
       "before": "ed7e6fe065bd4c1dffb8327e59eb5ac1e39045ca",
       "after": "c5b1250a2e71ef9e50b30c0ae0e3cbb25f3ef9f7"
+    },
+    {
+      "id": "authoring-definition-revision",
+      "title": "#7: bookmark run gains --definition-revision",
+      "projectionId": "self-authoring-api",
+      "before": "1dfa0ddedfe74051ad6c1982912f68b420573379",
+      "after": "30a330232051e02a2b6dbd053ade9e6cc43ddb74"
     }
   ]
 }

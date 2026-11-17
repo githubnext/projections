@@ -23,6 +23,26 @@ Remove both once the way out lands.
   release without it
   ([XAMPPRocky/tokei#1347](https://github.com/XAMPPRocky/tokei/pull/1347)
   replaces it with `terminal_size`). Don't fork tokei for this.
+- [RUSTSEC-2026-0543](https://rustsec.org/advisories/RUSTSEC-2026-0543),
+  [RUSTSEC-2026-0555](https://rustsec.org/advisories/RUSTSEC-2026-0555) and
+  [RUSTSEC-2026-0559](https://rustsec.org/advisories/RUSTSEC-2026-0559):
+  `chrono`, `chrono-tz` and `chrono-tz-build` are unmaintained (not
+  vulnerabilities). They come only from `tera` 1, a build dependency of `tokei`
+  15.0.0: tokei's build script renders its language table with tera, whose
+  default `builtins` feature pulls in the date filters. Nothing built into the
+  CLI links them (`cargo tree -i chrono -e normal --target all` prints nothing),
+  and Cargo can't turn off a build dependency's default features from here. Way
+  out: a tokei release whose build script uses tera without default features, or
+  no tera. Don't fork tokei for this.
+- [GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf):
+  ReDoS in `picomatch` through 4.0.7 for single-branch repeated extglobs such as
+  `+(*)`. 4.0.7 is the latest release, so no version or override fixes it yet.
+  Only build tooling uses it (`vite`, `tsdown`, `tinyglobby`, `fdir` and
+  `@rollup/pluginutils`, all development dependencies), and they match globs
+  written in this repository's own configuration, never user input; no published
+  package depends on it. Way out: the first picomatch release after 4.0.7 that
+  fixes it, picked up with `npm update picomatch` (add an override scoped to a
+  dependant only if its range doesn't allow that release).
 
 ## Overrides
 

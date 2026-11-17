@@ -48,7 +48,7 @@
     "check:casing": "node tools/scripts/check-casing.mjs",
     "check:portability": "node --test tools/scripts/check-portability.test.mjs && node tools/scripts/check-portability.mjs",
     "check:lockfile": "node tools/scripts/lockfile-registry.mjs",
-    "check:advisories": "node tools/scripts/osv-scan.mjs --allow RUSTSEC-2020-0163",
+    "check:advisories": "node tools/scripts/osv-scan.mjs --allow RUSTSEC-2020-0163 --allow RUSTSEC-2026-0543 --allow RUSTSEC-2026-0555 --allow RUSTSEC-2026-0559 --allow GHSA-fc5q-39xc-vjpf",
     "check:readmes": "node tools/cli/src/bin.ts check --only readmes",
     "check:links": "node tools/cli/src/bin.ts check --only links",
     "check:icons": "node tools/scripts/product-icons.mjs --check",

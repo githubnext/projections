@@ -10,6 +10,7 @@ export function tabDefaults(facts: TabFacts): TabDefaults {
     choice: facts.choice.name,
     pinned: facts.pinned,
     ...(facts.after ? {pair: {...(facts.before ? {before: resolved(facts.before)} : {}), after: resolved(facts.after)}} : {}),
+    ...(facts.definitionRevision ? {definitionRevision: facts.definitionRevision} : {}),
     ...(facts.parts ? {parts: facts.parts} : {}),
     ...(facts.page
       ? {

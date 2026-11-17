@@ -19,7 +19,7 @@ mod process;
 mod revision;
 mod upstream;
 
-pub use batch::batch_document;
+pub use batch::{DefinitionChoice, batch_document};
 pub use compare::{Compared, DefinitionSource, Sides, parse_range, short};
 pub use definitions::invalid_summary;
 pub use diagnostics::{TrustRequired, code, diagnostic, diagnostic_code};

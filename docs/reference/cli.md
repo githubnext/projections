@@ -522,7 +522,8 @@ projections bookmark run [OPTIONS] [IDS]...
 | Argument | Description |
 |---|---|
 | `<IDS>...` | Bookmark IDs. Default: all. |
-| `--definition <DEFINITION>` | Which revision's projection definition and component code to apply to both revisions. One of: `base` — The first (base) revision's definition; `head` — The second (head) revision's definition. Default: `base`. |
+| `--definition <DEFINITION>` | Which revision's projection definition and component code to apply to both revisions. Default: base, or the working tree's when neither revision defines the projection. One of: `base` — The first (base) revision's definition; `head` — The second (head) revision's definition. |
+| `--definition-revision <REVISION>` | Apply this revision's definition and component code to both instead, for example working-tree to try uncommitted projection code on the saved comparisons. |
 | `--json` | Print the JSON document instead of text. |
 | `--output <FILE>` | Write the JSON document to a new FILE instead of printing it. |
 | `--trust` | Run repository code: the projection's extractor, on every selected revision. Review it first. |

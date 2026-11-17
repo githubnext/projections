@@ -176,7 +176,11 @@ projections validate /tmp/services.extraction.json
   and write outside an explore session.
 - `bookmark list`, `bookmark run [ID]...`: Saved comparisons in
   `.projections-bookmarks.json`: list them, or compare them (all by default) as
-  a batch.
+  a batch. Each applies its base revision's definition; when neither of its
+  revisions defines the projection (a bookmark saved before the projection was
+  written), the working tree's applies, with a notice saying so.
+  `--definition base|head` insists on one side's; `--definition-revision REV`
+  applies another revision's to every bookmark.
 - `pr NUMBER|URL`: Untrusted review of an existing GitHub pull request; see
   [Untrusted pull request review](pull-requests.md).
 - `extractor list`, `extractor view ID`: Built-in extractors: their inputs,

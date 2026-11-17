@@ -28,6 +28,15 @@ function partNote(args: Record<string, unknown>, tab: TabDefaults & {parts: NonN
 }
 
 /**
+ * compare of the tab's pair applies the definition the tab applies (to another projection, the working tree's), so it
+ * is the comparison on the person's screen, unless the input chooses one.
+ */
+function definitionAsShown(args: Record<string, unknown>, tab: TabDefaults | undefined): void {
+  if (args.definition !== undefined || args.definitionRevision !== undefined) return
+  args.definitionRevision = (args.projection === tab?.projection && tab?.definitionRevision) || 'working-tree'
+}
+
+/**
  * A tool's input with what it omitted taken from the tab, and a note saying where its projection and revisions came
  * from: compare without revisions compares the tab's pair (only the suggested one when the tab shows one revision or
  * none is open), and says so; given revisions are said to be the tab's or not. Throws when a projection is needed and
@@ -44,7 +53,11 @@ export function withTabDefaults(
   if (tab) notes.push(projectionNote(tool, args, tab, named))
   if (!tab && (tool === 'compare' || tool === 'set_part' || tool === 'screenshot') && typeof args.projection !== 'string')
     throw new Error('Name a projection: no projection tab is open to take it from (list_projections lists them)')
-  if (tool === 'compare' || tool === 'screenshot') notes.push(revisionNote(tool, args, tab, named))
+  if (tool === 'compare' || tool === 'screenshot') {
+    const given = typeof args.before === 'string' || typeof args.after === 'string'
+    notes.push(revisionNote(tool, args, tab, named))
+    if (tool === 'compare' && !given && typeof args.before === 'string') definitionAsShown(args, tab)
+  }
   if (tool === 'screenshot' && tab?.view && args.projection === tab.projection) presentAsShown(args, tab.view)
   if (tool === 'describe_part' && tab?.parts && typeof args.id !== 'string' && typeof args.part === 'string')
     notes.push(partNote(args, {...tab, parts: tab.parts}, named))

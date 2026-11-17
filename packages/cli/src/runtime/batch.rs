@@ -5,8 +5,20 @@ use std::collections::BTreeSet;
 use anyhow::{Context, Result, bail, ensure};
 use serde_json::{Value, json};
 
-use super::{DefinitionSource, Runner, diagnostic, revision::Revision};
+use super::{DefinitionSource, Runner, compare::definition_name, diagnostic, revision::Revision};
 use crate::artifact;
+
+/// Which definition a bookmark run applies to both of a bookmark's revisions.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum DefinitionChoice {
+    /// The base revision's, or, when neither revision defines the projection,
+    /// the definition at the revision the bookmarks file was read from.
+    Default,
+    /// The base or the head revision's.
+    Side(DefinitionSource),
+    /// This revision's, for example `working-tree`.
+    Revision(String),
+}
 
 impl Runner {
     fn batch_ids(&self, revisions: &[&Revision], selected: &[String]) -> Result<Vec<String>> {
@@ -144,8 +156,8 @@ impl Runner {
         Ok(value)
     }
 
-    /// Compares root-authored bookmarks, retaining failures.
-    pub fn compare_bookmarks(&self, reference: &str, selected: &[String], source: DefinitionSource) -> Result<Value> {
+    /// Compares root-authored bookmarks, read from `reference`, retaining failures.
+    pub fn compare_bookmarks(&self, reference: &str, selected: &[String], choice: &DefinitionChoice) -> Result<Value> {
         let document = self.bookmarks(reference)?;
         let bookmarks = document["bookmarks"].as_array().context("Invalid bookmarks")?;
         let ids = if selected.is_empty() {
@@ -169,10 +181,40 @@ impl Runner {
                 let projection = bookmark["projectionId"].as_str().unwrap();
                 let before = self.capture(bookmark["before"].as_str().unwrap())?;
                 let after = self.capture(bookmark["after"].as_str().unwrap_or("working-tree"))?;
-                definition = self
-                    .definition(if source == DefinitionSource::Base { &before } else { &after }, projection)
-                    .ok();
-                let compared = self.compare_from(projection, &before, &after, source)?;
+                // A bookmark saved before its projection was written has
+                // revisions that define neither: the definition beside the
+                // bookmarks file explains them.
+                let fallback = *choice == DefinitionChoice::Default
+                    && !self.has_definition(&before, projection)
+                    && !self.has_definition(&after, projection);
+                let using = match choice {
+                    DefinitionChoice::Revision(revision) => Some((revision.as_str(), None)),
+                    _ if fallback => Some((
+                        reference,
+                        Some(format!(
+                            "Neither revision of bookmark {id} defines projection {projection}, so both were extracted with the {} definition, where the bookmarks file is.",
+                            definition_name(reference)
+                        )),
+                    )),
+                    _ => None,
+                };
+                let compared = match using {
+                    Some((revision, reason)) => {
+                        let program = self.capture(revision)?;
+                        definition = self.definition(&program, projection).ok();
+                        self.compare_using_from(projection, &before, &after, &program, revision, reason)?
+                    }
+                    None => {
+                        let source = match choice {
+                            DefinitionChoice::Side(source) => *source,
+                            _ => DefinitionSource::Base,
+                        };
+                        definition = self
+                            .definition(if source == DefinitionSource::Base { &before } else { &after }, projection)
+                            .ok();
+                        self.compare_from(projection, &before, &after, source)?
+                    }
+                };
                 let mut item = compared.batch_item(&id);
                 item["projectionId"] = json!(projection);
                 Ok(item)

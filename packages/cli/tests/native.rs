@@ -1,6 +1,6 @@
 use projections_cli::{
     artifact,
-    runtime::{DefinitionSource, Runner},
+    runtime::{DefinitionChoice, Runner},
 };
 use serde_json::{Value, json};
 use std::{
@@ -327,8 +327,75 @@ fn bookmarks_normalize_defaults_and_batches_retain_unknown_ids() {
             .iter()
             .any(|item| item["status"] == "extracted")
     );
-    let bookmark = runner.compare_bookmarks("working-tree", &[], DefinitionSource::Base).unwrap();
+    let bookmark = runner.compare_bookmarks("working-tree", &[], &DefinitionChoice::Default).unwrap();
     assert_eq!(bookmark["failed"], 0);
+}
+
+#[test]
+fn bookmarks_saved_before_their_projection_was_written_compare_with_the_working_tree_definition() {
+    let root = fixture();
+    let path = no_node_path();
+    let repo = root.path();
+    let a = git(repo, &["rev-parse", "HEAD"]);
+    fs::write(repo.join("more.txt"), "second").unwrap();
+    let b = commit(repo);
+    // A projection authored after both of the bookmark's revisions, not yet committed.
+    fs::create_dir_all(repo.join(".projections")).unwrap();
+    fs::write(
+        repo.join(".projections/late.json"),
+        serde_json::to_vec(&json!({"id":"late","extractor":"repository-map","renderer":"file-packing"})).unwrap(),
+    )
+    .unwrap();
+    fs::write(
+        repo.join(".projections-bookmarks.json"),
+        serde_json::to_vec(&json!({"format":"projections.bookmarks","version":0,"bookmarks":[
+            {"id":"earlier","title":"Earlier","projectionId":"late","before":a,"after":b}
+        ]}))
+        .unwrap(),
+    )
+    .unwrap();
+
+    let (ok, stdout, stderr) = run(repo, path.path(), &["bookmark", "run", "--json"]);
+    assert!(ok, "{stdout}\n{stderr}");
+    let batch: Value = serde_json::from_str(&stdout).unwrap();
+    let result = &batch["results"][0];
+    assert_eq!(result["status"], "changed", "{result}");
+    assert!(
+        result["notices"][0].as_str().unwrap().contains(
+            "Neither revision of bookmark earlier defines projection late, so both were extracted with the working tree's definition"
+        ),
+        "{result}"
+    );
+    let (ok, stdout, stderr) = run(
+        repo,
+        path.path(),
+        &["bookmark", "run", "--definition-revision", "working-tree", "--json"],
+    );
+    assert!(ok, "{stdout}\n{stderr}");
+
+    // Naming a side that doesn't define it fails, suggesting what would work.
+    let (ok, stdout, _) = run(repo, path.path(), &["bookmark", "run", "--definition", "base", "--json"]);
+    assert!(!ok);
+    let message = first_document(&stdout)["results"][0]["diagnostics"][0]["message"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    assert!(message.contains("--definition-revision working-tree"), "{message}");
+    assert!(!message.contains("--definition head"), "{message}");
+    let range = format!("{a}..{b}");
+    let (ok, _, stderr) = run(repo, path.path(), &["compare", &range, "-p", "late"]);
+    assert!(
+        !ok && stderr.contains("not defined at the base or the head revision")
+            && stderr.contains("--definition-revision working-tree")
+            && !stderr.contains("--definition head"),
+        "{stderr}"
+    );
+    let (ok, _, stderr) = run(
+        repo,
+        path.path(),
+        &["compare", &range, "-p", "late", "--definition-revision", "working-tree", "--json"],
+    );
+    assert!(ok, "{stderr}");
 }
 
 #[test]

@@ -12,7 +12,7 @@ use clap::{Args, Subcommand};
 use super::{Definition, Execution, Format, batch_failed, install_cancellation, install_cancellation_for, output, present, reported};
 use crate::{
     help_text, pull_request, render,
-    runtime::{DefinitionSource, Runner},
+    runtime::{DefinitionChoice, DefinitionSource, Runner},
 };
 
 #[derive(Subcommand)]
@@ -30,9 +30,12 @@ pub enum Bookmark {
     Run {
         /// Bookmark IDs [default: all]
         ids: Vec<String>,
-        /// Which revision's projection definition and component code to apply to both revisions
-        #[arg(long, value_enum, default_value = "base")]
-        definition: Definition,
+        /// Which revision's projection definition and component code to apply to both revisions [default: base, or the working tree's when neither revision defines the projection]
+        #[arg(long, value_enum)]
+        definition: Option<Definition>,
+        /// Apply this revision's definition and component code to both instead, for example working-tree to try uncommitted projection code on the saved comparisons
+        #[arg(long, value_name = "REVISION", conflicts_with = "definition")]
+        definition_revision: Option<String>,
         #[command(flatten)]
         format: Format,
         #[command(flatten)]
@@ -173,12 +176,18 @@ pub fn bookmark(directory: &Path, command: Bookmark) -> Result<()> {
         Bookmark::Run {
             ids,
             definition,
+            definition_revision,
             format,
             execution,
         } => {
             let runner = execution.runner(directory)?;
             install_cancellation(&runner)?;
-            let value = runner.compare_bookmarks("working-tree", &ids, DefinitionSource::from(definition))?;
+            let choice = match (definition_revision, definition) {
+                (Some(revision), _) => DefinitionChoice::Revision(revision),
+                (None, Some(definition)) => DefinitionChoice::Side(DefinitionSource::from(definition)),
+                (None, None) => DefinitionChoice::Default,
+            };
+            let value = runner.compare_bookmarks("working-tree", &ids, &choice)?;
             present(&value, &format, || render::batch(&value), &[])?;
             batch_failed(&value)
         }

@@ -120,15 +120,19 @@ component code, to both revisions. By default it is the base (first) revision's
 definition, for one consistent rule with pull request review: an author can't
 reshape how their own change is explained. `--definition head` uses the head
 revision's instead. A projection missing at the definition revision is an
-explicit error naming the other option. The extractor program comes from the
-definition's revision: relative `extractor.command` paths and the process
-working directory resolve in the definition's project there, while
-`request.repository.root` names the directory holding the examined revision, so
-extractors must read repository files through it (the project's at
-`request.repository.project` in it). A toolchain on a copy borrows the project's
-installed dependencies from the user's checkout (`request.repository.checkout`);
-no hidden fixture inputs or automatic dependency repair exists. Any
-installed-language executable argv extractor works with no SDK.
+explicit error naming an option that works: `--definition` with the other
+revision when it defines the projection, else `--definition-revision` with the
+working tree (or `HEAD`). `bookmark run` falls back to the working tree's
+definition itself when neither of a bookmark's revisions defines the projection.
+The extractor program comes from the definition's revision: relative
+`extractor.command` paths and the process working directory resolve in the
+definition's project there, while `request.repository.root` names the directory
+holding the examined revision, so extractors must read repository files through
+it (the project's at `request.repository.project` in it). A toolchain on a copy
+borrows the project's installed dependencies from the user's checkout
+(`request.repository.checkout`); no hidden fixture inputs or automatic
+dependency repair exists. Any installed-language executable argv extractor works
+with no SDK.
 
 So **a file read relative to the working directory, or to the extractor's own
 location, comes from the definition's revision on every side**, whichever

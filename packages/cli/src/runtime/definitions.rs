@@ -148,6 +148,15 @@ impl Runner {
             .with_context(|| format!("Projection {id} is not defined in {}", revision.repository["ref"]))
     }
 
+    /// Whether a revision defines projection `id`, validly or not; a built-in
+    /// default always counts.
+    pub(super) fn has_definition(&self, revision: &Revision, id: &str) -> bool {
+        self.definition(revision, id).is_ok()
+            || self
+                .scan(revision)
+                .is_ok_and(|(_, invalid)| invalid.iter().any(|failure| failure["id"] == id))
+    }
+
     /// `sha256:` digest of the canonical definition, its project when it isn't
     /// the repository's root (its paths are relative to it, so a definition
     /// means something else in another project), and, in sorted order, the

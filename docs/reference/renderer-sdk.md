@@ -56,6 +56,57 @@ renderer's capabilities. Messages that do not come from the parent window,
 carry another channel or fail validation are ignored. When a document connects again on the same channel (a
 development server's hot update), the host's current state is replayed to the new handlers.
 
+### `EmbeddedRenderer`
+
+```ts
+interface EmbeddedRenderer
+```
+
+A nested renderer frame, from `embedRenderer`: what to send it, and how to stop it.
+
+| Member | Signature | Description |
+|---|---|---|
+| `dispose` | `"dispose"(): void` | Stops listening and removes the frame. |
+| `hover` | `"hover"(id: null \| string): void` | Sent only when the nested renderer declares `hover`. |
+| `iframe` | `readonly "iframe": HTMLIFrameElement` | The sandboxed frame, transparent until the nested renderer has painted. |
+| `ready` | `readonly "ready": Promise<RendererCapabilities>` | Resolves with the nested renderer's capabilities once it is ready; rejects when it fails. |
+| `select` | `"select"(id: null \| string): void` | Selects an item, by the nested renderer's own selection ID, or clears the selection (`null`). |
+| `setEnvironment` | `"setEnvironment"(environment: RendererEnvironment): void` | Sends a new theme, motion preference, locale or pane; `sizing` stays `fill` unless it says otherwise. |
+| `setInit` | `"setInit"(init: RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" }, progress?: ProgressPayload \| undefined): void` | Replaces what it presents (a new `init`), and optionally the position. |
+| `setOptions` | `"setOptions"(options: RendererOptions): void` | Replaces its settings. |
+| `setProgress` | `"setProgress"(progress: ProgressPayload): void` | Sends a new position to draw. |
+
+### `EmbedOptions`
+
+```ts
+interface EmbedOptions
+```
+
+What `embedRenderer` runs and how it reports back.
+
+| Member | Signature | Description |
+|---|---|---|
+| `colorMode` | `"colorMode"?: "dark" \| "light"` | The color mode its document paints before `init`, so its first paint matches; default `init`'s, else light. |
+| `init` | `"init": RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } \| { (capabilities: RendererCapabilities): RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } }` | What the nested renderer presents, and its environment; `sizing` defaults to `fill`, the frame's own size. A function is called with the renderer's capabilities once it is ready, to choose for them (diff or animated). |
+| `onFailure` | `"onFailure"?: { (message: string): void }` | Called once when the frame can't run: the host refused its document, or it never became ready. |
+| `onMessage` | `"onMessage"?: { (message: { "capabilities": RendererCapabilities; "type": "ready" } \| { "controls": Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false \| true; "type": "toggle" } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" \| "download" \| "expand" \| "filter" \| "fit" \| "next" \| "previous" \| "reset" \| "search" \| "settings" \| "zoom-in" \| "zoom-out"; "type": "action" }>; "type": "controls" } \| { "ends": Array<number>; "slots"?: number; "type": "steps" } \| { "id": null \| string; "path"?: string; "type": "select" } \| { "id": null \| string; "type": "hover" } \| { "id": string; "rect": AnchorRect \| null; "type": "anchor" } \| { "id": string; "type": "annotation" } \| { "line"?: number; "path": string; "type": "open" } \| { "message": string; "type": "error" } \| { "progress": number; "type": "rendered" } \| { "px": number; "type": "height" } \| { "ratio": number; "type": "aspect" } \| { "renderer": string; "type": "document-request" } \| { "type": "legend" } & RendererLegend \| { "type": "summary" } & RendererSummary \| { "type": "viewport" } & ScrollPosition): void }` | Each valid message the nested renderer sends, after `embedRenderer` has handled it (`ready`, `rendered`, `height` and nested `document-request`s are handled; a host can follow `select`, `hover`, `error` and the rest). |
+| `options` | `"options"?: RendererOptions` | Its settings, as `options` would carry them. |
+| `progress` | `"progress"?: ProgressPayload \| { (capabilities: RendererCapabilities): ProgressPayload \| undefined }` | The position to draw, or a function of the capabilities; omitted, its opening state (an extraction, or a diff). |
+| `renderer` | `"renderer": string` | The built-in renderer to run, by name, for example `graph`. |
+| `title` | `"title": string` | The frame's accessible name, for example `Service platform, drawn by the graph renderer`. |
+
+### `embedRenderer`
+
+```ts
+embedRenderer(client: Pick<RendererClient, "requestDocument">, container: HTMLElement, options: EmbedOptions): EmbeddedRenderer
+```
+
+Runs the built-in renderer `options.renderer` in a sandboxed frame appended to `container`, acting as its host. The
+document comes from this renderer's host (`client.requestDocument`), which supplies only built-in renderers; the
+frame is `<iframe sandbox="allow-scripts" srcdoc>`, so it inherits this document's content security policy and gets
+an opaque origin of its own. Messages are accepted only from that frame, on its own channel, and only if they
+validate strictly. The frame fills `container` and stays transparent until its renderer has painted.
+
 ### `RendererClient`
 
 ```ts
@@ -2644,6 +2695,18 @@ What `useRenderer` declares and how it behaves.
 | `applyTheme` | `"applyTheme"?: false \| true` | Apply the host theme and reduced-motion preference to the document element (default true). |
 | `capabilities` | `"capabilities": RendererCapabilities` | What the renderer supports, posted in `ready`. Read once on mount: later changes are ignored. |
 | `onAction` | `"onAction"?: { (id: string): void }` | Called when the person activates one of the declared `action` controls. |
+
+## Renderer (`@githubnext/projections/renderer`)
+
+### `withFragment`
+
+```ts
+withFragment(html: string, fragment: string): string
+```
+
+The document with its URL fragment set first thing, before its own scripts: a `srcdoc` frame has no URL of its own
+to carry the channel, so it sets the fragment from inside, as a host's frame URL would have it. A host whose policy
+admits scripts by nonce (an editor webview) supplies documents whose scripts carry it, and this one carries it too.
 
 ## Rings (`@githubnext/projections/renderer`)
 

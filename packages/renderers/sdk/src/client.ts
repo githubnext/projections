@@ -24,6 +24,8 @@ import type {
 } from './protocol.js'
 
 export type {RendererHandlers} from './client/host-messages.js'
+export {embedRenderer} from './embed.js'
+export type {EmbedOptions, EmbeddedRenderer} from './embed.js'
 
 /** What `connectRenderer` declares, and where it connects. */
 export interface ConnectOptions {

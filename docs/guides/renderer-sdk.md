@@ -255,6 +255,37 @@ types are dropped), stay under 64 KiB and 240 per second. A renderer that isn't
 ready within 10 s, navigates its frame or floods the host is stopped; the host's
 table and text views stay available.
 
+### Nesting a built-in renderer
+
+A renderer can show another renderer's view inside its own: the `gallery`
+renderer draws each fixture scenario with the renderer it names. `embedRenderer`
+asks the host for a built-in renderer's document by name
+(`client.requestDocument`), runs it in a sandboxed `srcdoc` frame in `container`
+and hosts it there: it sends `init`, `options`, `select` and `progress`, answers
+its own `document-request`s through yours, and hands you every message it sends.
+
+```ts
+import {connectRenderer, embedRenderer} from '@githubnext/projections/renderer'
+
+const client = connectRenderer(handlers, {capabilities: {changeHighlighting: 'supported'}})
+const nested = embedRenderer(client, card, {
+  renderer: 'graph',
+  title: 'Service platform, drawn by the graph renderer',
+  init: {mode: 'extraction', extraction, projection: {id: 'platform', title: 'Service platform', renderer: 'graph'}, ...environment},
+  onMessage: message => message.type === 'select' && client.select(message.id),
+  onFailure: reason => showReason(card, reason),
+})
+nested.setEnvironment(environment) // follow the host's theme
+nested.dispose()
+```
+
+Hosts supply only built-in renderers, by name from their own registry: a custom
+renderer's or an unknown name is refused with the reason, which `onFailure`
+receives, as does a host that supplies no documents. The nested frame inherits
+your document's content security policy and gets an opaque origin of its own, so
+it can do nothing your renderer can't; it fills `container` (`sizing: 'fill'`)
+and stays transparent until it has painted.
+
 ## Theme tokens
 
 `init.theme` and `environment.theme` carry `{colorMode, version, tokens}`.

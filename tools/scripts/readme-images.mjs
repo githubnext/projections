@@ -38,7 +38,7 @@ const repositories = {
  */
 const images = [
   {
-    // The hero: one OrderService split into three focused services, in a small ASP.NET Core-style app.
+    // The hero: one OrderService split into two focused services, in a small ASP.NET Core-style app.
     name: 'di-split',
     example: 'docs/images/sources/order-service-split',
     definition: {

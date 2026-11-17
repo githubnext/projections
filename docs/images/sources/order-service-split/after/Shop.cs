@@ -13,12 +13,10 @@ public static class Composition
         services.AddTransient<CheckoutController>();
         services.AddScoped<ICheckoutService, CheckoutService>();
         services.AddScoped<IOrderQueries, OrderQueries>();
-        services.AddScoped<IOrderNotifications, OrderNotifications>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<ShopDbContext>();
         services.AddSingleton<IPaymentGateway, StripePaymentGateway>();
-        services.AddSingleton<IInventoryClient, InventoryClient>();
-        services.AddSingleton<IEmailSender, SmtpEmailSender>();
+        services.AddSingleton<IOrderSearch, OrderSearchIndex>();
         services.AddSingleton<IClock, SystemClock>();
         return services;
     }
@@ -26,22 +24,15 @@ public static class Composition
 
 public sealed class OrdersController(IOrderQueries orders);
 
-public sealed class CheckoutController(ICheckoutService checkout, IOrderNotifications notifications);
+public sealed class CheckoutController(ICheckoutService checkout);
 
 public interface ICheckoutService;
 
-public sealed class CheckoutService(
-    IOrderRepository orders,
-    IPaymentGateway payments,
-    IInventoryClient inventory) : ICheckoutService;
+public sealed class CheckoutService(IOrderRepository orders, IPaymentGateway payments) : ICheckoutService;
 
 public interface IOrderQueries;
 
-public sealed class OrderQueries(IOrderRepository orders) : IOrderQueries;
-
-public interface IOrderNotifications;
-
-public sealed class OrderNotifications(IEmailSender email, IClock clock) : IOrderNotifications;
+public sealed class OrderQueries(IOrderSearch search) : IOrderQueries;
 
 public interface IOrderRepository;
 
@@ -53,13 +44,9 @@ public interface IPaymentGateway;
 
 public sealed class StripePaymentGateway(IClock clock) : IPaymentGateway;
 
-public interface IInventoryClient;
+public interface IOrderSearch;
 
-public sealed class InventoryClient : IInventoryClient;
-
-public interface IEmailSender;
-
-public sealed class SmtpEmailSender : IEmailSender;
+public sealed class OrderSearchIndex : IOrderSearch;
 
 public interface IClock;
 

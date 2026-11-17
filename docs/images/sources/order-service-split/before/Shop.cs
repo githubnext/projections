@@ -15,8 +15,7 @@ public static class Composition
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<ShopDbContext>();
         services.AddSingleton<IPaymentGateway, StripePaymentGateway>();
-        services.AddSingleton<IInventoryClient, InventoryClient>();
-        services.AddSingleton<IEmailSender, SmtpEmailSender>();
+        services.AddSingleton<IOrderSearch, OrderSearchIndex>();
         services.AddSingleton<IClock, SystemClock>();
         return services;
     }
@@ -26,15 +25,13 @@ public sealed class OrdersController(IOrderService orders);
 
 public sealed class CheckoutController(IOrderService orders);
 
-/// <summary>Everything about an order, in one service: checkout, lookups and notifications.</summary>
+/// <summary>Everything about an order, in one service: checkout and lookups.</summary>
 public interface IOrderService;
 
 public sealed class OrderService(
     IOrderRepository orders,
     IPaymentGateway payments,
-    IInventoryClient inventory,
-    IEmailSender email,
-    IClock clock) : IOrderService;
+    IOrderSearch search) : IOrderService;
 
 public interface IOrderRepository;
 
@@ -46,13 +43,9 @@ public interface IPaymentGateway;
 
 public sealed class StripePaymentGateway(IClock clock) : IPaymentGateway;
 
-public interface IInventoryClient;
+public interface IOrderSearch;
 
-public sealed class InventoryClient : IInventoryClient;
-
-public interface IEmailSender;
-
-public sealed class SmtpEmailSender : IEmailSender;
+public sealed class OrderSearchIndex : IOrderSearch;
 
 public interface IClock;
 

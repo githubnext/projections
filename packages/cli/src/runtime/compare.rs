@@ -10,6 +10,8 @@ use super::{
 };
 use crate::artifact;
 
+const WORKING_TREE: &str = "working-tree";
+
 /// A comparison notice naming the submodules and special entries neither
 /// extraction saw, when there are any the definition's scope covers.
 fn skipped_notice<'a>(revisions: impl IntoIterator<Item = &'a Revision>, definition: &Value) -> Option<String> {
@@ -54,23 +56,36 @@ impl Runner {
         let before = self.capture(before)?;
         let after = self.capture(after)?;
         let program = self.capture(definition_reference)?;
+        self.compare_using_from(id, &before, &after, &program, definition_reference, None)
+    }
+
+    /// Compares two captured revisions with the definition and component code
+    /// of `program`, captured from `definition_reference`; `reason` replaces
+    /// the notice saying which definition applied.
+    pub(super) fn compare_using_from(
+        &self,
+        id: &str,
+        before: &Revision,
+        after: &Revision,
+        program: &Revision,
+        definition_reference: &str,
+        reason: Option<String>,
+    ) -> Result<Compared> {
         let definition = self
-            .definition(&program, id)
+            .definition(program, id)
             .with_context(|| format!("Projection {id} is not defined at {definition_reference}"))?;
         self.require_trust(&definition)?;
-        let rules = self.comparator_bytes(&definition, &program)?;
-        let mut notices = vec![format!(
-            "Both revisions were extracted with the {} definition of {id}.",
-            if definition_reference == "working-tree" {
-                "working tree's".to_owned()
-            } else {
-                definition_reference.to_owned()
-            }
-        )];
-        notices.extend(skipped_notice([&before, &after], &definition));
+        let rules = self.comparator_bytes(&definition, program)?;
+        let mut notices = vec![reason.unwrap_or_else(|| {
+            format!(
+                "Both revisions were extracted with the {} definition of {id}.",
+                definition_name(definition_reference)
+            )
+        })];
+        notices.extend(skipped_notice([before, after], &definition));
         let mut document = artifact::compare_extractions_with(
-            &self.extract(&before, &definition, &program)?,
-            &self.extract(&after, &definition, &program)?,
+            &self.extract(before, &definition, program)?,
+            &self.extract(after, &definition, program)?,
             rules.as_deref(),
         )?;
         notices.extend(artifact::notices(&document));
@@ -102,13 +117,9 @@ impl Runner {
             DefinitionSource::Head => (after, before),
         };
         let sides = source.sides();
-        let definition = self.definition(program, id).with_context(|| {
-            format!(
-                "Projection {id} is not defined at the {side} revision; compare with --definition {other_side} to use the {other_side} revision's definition",
-                side = sides.definition,
-                other_side = sides.other
-            )
-        })?;
+        let definition = self
+            .definition(program, id)
+            .map_err(|error| error.context(self.undefined_advice(id, other, sides)))?;
         self.require_trust(&definition)?;
         let digest = self.definition_digest(&definition, program)?;
         let mut notices: Vec<String> = self.definition_notice(id, &definition, &digest, other, sides).into_iter().collect();
@@ -122,6 +133,32 @@ impl Runner {
         notices.extend(artifact::notices(&document));
         artifact::set_notices(&mut document, &notices);
         Ok(Compared { document, notices })
+    }
+
+    /// Why a comparison can't use the `sides.definition` revision's definition,
+    /// and an option that would work: the other revision's definition when it
+    /// has one, else the working tree's or `HEAD`'s.
+    fn undefined_advice(&self, id: &str, other: &Revision, sides: Sides<'_>) -> String {
+        let Sides {
+            definition: side,
+            other: other_side,
+        } = sides;
+        if self.definition(other, id).is_ok() {
+            return format!(
+                "Projection {id} is not defined at the {side} revision; compare with --definition {other_side} to use the {other_side} revision's definition"
+            );
+        }
+        let defines = |reference: &str| {
+            self.discover(reference)
+                .is_ok_and(|definitions| definitions.iter().any(|definition| definition["id"] == id))
+        };
+        match [WORKING_TREE, "HEAD"].into_iter().find(|reference| defines(reference)) {
+            Some(reference) => format!(
+                "Projection {id} is not defined at the base or the head revision; compare with --definition-revision {reference} to apply the {} definition to both",
+                definition_name(reference)
+            ),
+            None => format!("Projection {id} is not defined at the base or the head revision, the working tree or HEAD"),
+        }
     }
 
     /// Explains how `other` defines the projection differently, if it does.
@@ -169,6 +206,15 @@ pub struct Compared {
 impl Compared {
     pub(super) fn batch_item(&self, id: &str) -> Value {
         json!({"id":id,"status":changed(&self.document),"comparison":self.document,"notices":self.notices})
+    }
+}
+
+/// A definition revision in words: "working tree's", else "<reference>".
+pub(super) fn definition_name(reference: &str) -> String {
+    if reference == WORKING_TREE {
+        "working tree's".to_owned()
+    } else {
+        reference.to_owned()
     }
 }
 

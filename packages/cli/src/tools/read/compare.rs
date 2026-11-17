@@ -22,8 +22,15 @@ pub(in crate::tools) async fn compare(service: &Service, input: &Value) -> Answe
         (None, None) => suggested_pair(service, projection).await?,
     };
     let mut body = json!({"projectionId": projection, "before": before, "after": after});
-    if let Some(definition) = input["definition"].as_str() {
-        body["definition"] = json!(definition);
+    match (input["definition"].as_str(), input["definitionRevision"].as_str()) {
+        (Some(_), Some(_)) => return Err(Failure::from("Give definition or definitionRevision, not both")),
+        (Some(definition), None) => body["definition"] = json!(definition),
+        (None, Some(revision)) => body["definitionRevision"] = json!(revision),
+        // The suggested pair (a bookmark, say) is what the viewer would show,
+        // and the viewer applies the working tree's definition: one saved
+        // before its projection was written still compares.
+        (None, None) if label.is_some() => body["definitionRevision"] = json!("working-tree"),
+        (None, None) => {}
     }
     let job = run_job(service, &body).await?;
     let notices: Vec<String> = job["notices"]

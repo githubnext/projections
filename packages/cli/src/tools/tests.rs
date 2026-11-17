@@ -273,10 +273,28 @@ fn omitted_projections_and_revisions_come_from_the_viewer_and_say_so() {
         ),
         "{note}"
     );
-    let (_, note) = with_view_defaults("compare", json!({"before": "HEAD"}), Some(&view)).unwrap();
+    // The viewer's pair compares with the definition the viewer applies.
+    assert_eq!(input["definitionRevision"], "working-tree");
+    let committed = ViewDefaults {
+        definition_revision: Some("HEAD".into()),
+        ..shown()
+    };
+    let (input, _) = with_view_defaults("compare", json!({}), Some(&committed)).unwrap();
+    assert_eq!(input["definitionRevision"], "HEAD");
+    let (input, _) = with_view_defaults("compare", json!({"definition": "head"}), Some(&committed)).unwrap();
+    assert!(input.get("definitionRevision").is_none(), "a chosen definition stands");
+    let (input, note) = with_view_defaults("compare", json!({"before": "HEAD"}), Some(&view)).unwrap();
     assert!(note.unwrap().contains("Not the comparison the viewer shows"));
-    let (input, _) = with_view_defaults("compare", json!({"projection": "other"}), Some(&view)).unwrap();
+    assert!(
+        input.get("definitionRevision").is_none(),
+        "given revisions use their own definition"
+    );
+    let (input, _) = with_view_defaults("compare", json!({"projection": "other"}), Some(&committed)).unwrap();
     assert_eq!(input["after"], "working-tree", "revisions apply to any projection");
+    assert_eq!(
+        input["definitionRevision"], "working-tree",
+        "the view's definition is its projection's"
+    );
     let (input, _) = with_view_defaults("screenshot", json!({"projection": "other"}), Some(&view)).unwrap();
     assert!(input.get("theme").is_none(), "the view's theme and size are its projection's");
     let (input, note) = with_view_defaults("check", json!({}), Some(&view)).unwrap();

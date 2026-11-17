@@ -103,14 +103,27 @@ test("compare without revisions compares the tab's, and says so; given ones say 
   const tab = tabDefaults(ci)
   assert.deepEqual(tab.pair, {before, after})
   const omitted = withTabDefaults('compare', {}, tab)
-  assert.deepEqual(omitted.input, {projection: 'ci-jobs', before, after})
+  // The tab's pair compares with the definition the tab applies, as on screen.
+  assert.deepEqual(omitted.input, {projection: 'ci-jobs', before, after, definitionRevision: 'HEAD'})
   assert.match(omitted.note, /^Projection: ci-jobs, the one the "CI pipeline" tab shows\./)
   assert.match(
     omitted.note,
     /Revisions: caf6ab7e → d698c162, the ones the "CI pipeline" tab shows \(Branch changes\)\. This is the comparison on the person's screen\./,
   )
-  // Another projection on the tab's revisions.
-  assert.deepEqual(withTabDefaults('compare', {projection: 'deps'}, tab).input, {projection: 'deps', before, after})
+  // Another projection on the tab's revisions, with the working tree's definition, as a tab would apply it.
+  assert.deepEqual(withTabDefaults('compare', {projection: 'deps'}, tab).input, {
+    projection: 'deps',
+    before,
+    after,
+    definitionRevision: 'working-tree',
+  })
+  // A chosen definition stands.
+  assert.deepEqual(withTabDefaults('compare', {definition: 'head'}, tab).input, {
+    projection: 'ci-jobs',
+    before,
+    after,
+    definition: 'head',
+  })
   const same = withTabDefaults('compare', {projection: 'ci-jobs', before: 'caf6ab7e', after}, tab)
   assert.match(same.note, /^Revisions: caf6ab7e → d698c162, the ones the "CI pipeline" tab shows\.$/)
   const other = withTabDefaults('compare', {projection: 'ci-jobs', before: 'HEAD~1', after: 'HEAD'}, tab)

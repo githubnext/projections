@@ -49,7 +49,10 @@ Omitted `after` means `working-tree`; explicit refs resolve through Git at run
 time and artifacts record immutable commits/actual dirty state.
 `bookmark list --json` prints the strict versioned document;
 `bookmark run [ID]...` executes selected scenarios (from the working tree's
-file) with per-item failures and `--definition`. At most 100 items are
+file) with per-item failures. Each applies its base revision's definition, or
+the working tree's (beside the bookmarks file) when neither of its revisions
+defines the projection, with a notice; `--definition base|head` and
+`--definition-revision REV` choose one explicitly. At most 100 items are
 supported. Missing bookmarks is an empty set; malformed, duplicated or symlinked
 configuration fails explicitly.
 

@@ -869,11 +869,17 @@
               "type": "string"
             },
             "definition": {
-              "description": "Which revision's definition explains the comparison: base (default) or head",
+              "description": "Which revision's definition explains the comparison: base (default for given revisions) or head",
               "enum": [
                 "base",
                 "head"
               ],
+              "type": "string"
+            },
+            "definitionRevision": {
+              "description": "Apply this revision's definition to both revisions instead, for example working-tree to try uncommitted projection code; default for the current view's revisions the definition the view applies, and for a suggested pair working-tree, as the viewer does",
+              "maxLength": 1024,
+              "minLength": 1,
               "type": "string"
             },
             "maxChanges": {

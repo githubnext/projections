@@ -45,7 +45,20 @@ pub fn with_view_defaults(tool: &str, mut input: Value, shown: Option<&ViewDefau
     // Its revisions apply to any projection; its view and theme to the one it shows.
     let same = shown.filter(|view| input["projection"].as_str() == Some(view.projection.as_str()));
     if tool == "compare" || tool == "screenshot" {
+        let given = input["before"].is_string() || input["after"].is_string();
         default_revisions(tool, &mut input, shown, &mut notes);
+        // The viewer's pair compares with the definition the viewer applies
+        // (to another projection, the working tree's, as it would), so it is
+        // the comparison on the person's screen.
+        if tool == "compare"
+            && !given
+            && input["before"].is_string()
+            && input.get("definition").is_none()
+            && input.get("definitionRevision").is_none()
+        {
+            let definition = same.and_then(|view| view.definition_revision.as_deref()).unwrap_or("working-tree");
+            input["definitionRevision"] = json!(definition);
+        }
     }
     if tool == "screenshot"
         && input.get("definitionRevision").is_none()

@@ -237,6 +237,48 @@ async fn read_only_tools_answer_from_the_repository() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn a_bookmark_saved_before_its_projection_compares_as_the_viewer_shows_it() {
+    let (_directory, root) = directory();
+    repository(&root);
+    // Written after both of the bookmark's revisions, and not committed.
+    fs::write(
+        root.join(".projections/late.json"),
+        r#"{"id": "late", "extractor": "repository-map", "renderer": "graph"}"#,
+    )
+    .unwrap();
+    fs::write(
+        root.join(".projections-bookmarks.json"),
+        serde_json::to_vec(&json!({"format": "projections.bookmarks", "version": 0, "bookmarks": [
+            {"id": "added-b", "title": "Add b", "projectionId": "late", "before": "HEAD~1", "after": "HEAD"}
+        ]}))
+        .unwrap(),
+    )
+    .unwrap();
+    let service = service(&root, false, false).await;
+
+    let suggested = call(&service, "compare", json!({"projection": "late"})).await;
+    assert!(!suggested.error, "{}", suggested.text);
+    assert!(suggested.text.contains("working tree's definition of late"), "{}", suggested.text);
+    assert!(suggested.text.contains("b.txt"), "{}", suggested.text);
+    let given = call(
+        &service,
+        "compare",
+        json!({"projection": "late", "before": "HEAD~1", "after": "HEAD"}),
+    )
+    .await;
+    assert!(given.error, "{}", given.text);
+    assert!(given.text.contains("--definition-revision working-tree"), "{}", given.text);
+    assert!(!given.text.contains("--definition head"), "{}", given.text);
+    let chosen = call(
+        &service,
+        "compare",
+        json!({"projection": "late", "before": "HEAD~1", "after": "HEAD", "definitionRevision": "working-tree"}),
+    )
+    .await;
+    assert!(!chosen.error, "{}", chosen.text);
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn writes_preview_then_confirm_and_refuse_a_stale_preview() {
     let (_directory, root) = directory();
     repository(&root);

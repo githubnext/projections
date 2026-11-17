@@ -104,6 +104,8 @@ export interface TabDefaults {
   pinned: boolean
   /** The resolved pair; only `after` when it shows one revision. */
   pair?: {before?: string; after: string}
+  /** The revision whose definition the tab applies to its projection (`working-tree` or `HEAD`). */
+  definitionRevision?: string
   parts?: TabFacts['parts']
   /** How the page presents it, for a screenshot of what the person sees. */
   view?: {mode?: string; progress?: number; theme?: 'light' | 'dark'; width?: number; height?: number}

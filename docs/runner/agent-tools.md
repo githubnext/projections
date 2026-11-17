@@ -21,7 +21,11 @@ documents), with the same facts as `structuredContent`.
   classification, such as API compatibility levels, and generated values (how
   many changed, by the basis parts that moved, and how many were only
   regenerated from the same inputs), named as generated rather than extracted
-  facts. `maxChanges` bounds the changes described.
+  facts. `maxChanges` bounds the changes described. Given revisions apply the
+  base revision's definition (`definition: head` the head's); the suggested or
+  shown pair applies the definition the viewer (or tab) applies, the working
+  tree's unless it shows the committed one, so a bookmark saved before its
+  projection was written still compares. `definitionRevision` chooses another.
 - `explore`: The built-in projections that apply here, each with the files that
   suggested it, whether it is adopted and whether it runs repository code.
 - `sweep`: Projections on the last changes: per projection, changed in N of M,

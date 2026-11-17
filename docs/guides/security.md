@@ -155,6 +155,7 @@ operate the workflows and hosts that run them:
 | Renderer sandbox | If you [embed Projections in your app](embedding.md#embedding-projections-in-your-own-app), serve renderer bundles with [the renderer response headers](host.md#serving-renderer-bundles) and never relax the frame's sandbox or content security policy. Load custom renderers only from reviewed revisions. |
 | Artifact digests | Don't add files to or change a `projections` artifact after the Action uploads it: a file the manifest doesn't list rejects it, and a changed document fails verification. A viewer you build should verify documents with the Engine's loader. |
 | Hosted views | Give a hosted view access only to repositories whose projections the people who can read them should see. Artifacts expire with your repository's retention settings. |
+| Agent viewer link | The viewer answers only on loopback, behind a token in its URL that survives restarts ([agent viewer](../design/agent-viewer.md)). Treat the URL as a secret: anyone on this computer who has it can watch the repository's projections. Rotate it with `projections view stop --rotate` once it has been shared. |
 
 ## Component overview
 

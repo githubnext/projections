@@ -11,6 +11,8 @@ mod review;
 mod serve;
 mod show;
 mod view;
+mod view_page;
+mod view_process;
 
 pub use authoring::{Check, Extractor, Init, Language, Validate, check, extractor, init, validate};
 pub use canvas::{Canvas, canvas};

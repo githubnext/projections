@@ -110,3 +110,12 @@ test('public entrypoints and Wasm exports use the primary Engine names', async (
     ['function:projections_alloc', 'function:projections_compare', 'memory:memory'],
   )
 })
+
+test('the JavaScript SHA-256 for contexts without Web Crypto matches it at every padding boundary', async () => {
+  const {createHash} = await import('node:crypto')
+  const {sha256Bytes} = await import('../dist/transport.js')
+  for (const length of [0, 1, 3, 55, 56, 63, 64, 65, 119, 120, 1000, 100_000]) {
+    const bytes = Uint8Array.from({length}, (_, index) => (index * 31 + length) & 0xff)
+    assert.equal(Buffer.from(sha256Bytes(bytes)).toString('hex'), createHash('sha256').update(bytes).digest('hex'), `${length} bytes`)
+  }
+})

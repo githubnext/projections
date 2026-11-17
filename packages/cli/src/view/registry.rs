@@ -54,14 +54,18 @@ impl Record {
 /// The record's file for the project `project` (its directory relative to the repository, empty for the root) of the
 /// repository at `root`, under `base`. A viewer serves one project's definitions, so each project has its own.
 pub fn path_in(base: &Path, root: &Path, project: &str) -> PathBuf {
+    base.join("views").join(format!("{}.json", key(root, project)))
+}
+
+/// The name a project's files have in the cache's `views` directory: a digest of its repository and directory.
+pub(super) fn key(root: &Path, project: &str) -> String {
     let key = if project.is_empty() {
         root.to_string_lossy().into_owned()
     } else {
         format!("{}\n{project}", root.to_string_lossy())
     };
     let digest = Sha256::digest(key.as_bytes());
-    let name: String = digest[..16].iter().map(|byte| format!("{byte:02x}")).collect();
-    base.join("views").join(format!("{name}.json"))
+    digest[..16].iter().map(|byte| format!("{byte:02x}")).collect()
 }
 
 fn path(root: &Path) -> Result<PathBuf> {
@@ -76,14 +80,20 @@ pub fn read(root: &Path) -> Option<Record> {
 
 /// Records the viewer for `root`, replacing any earlier record.
 pub fn write(root: &Path, record: &Record) -> Result<()> {
-    let file = path(root)?;
-    let directory = file.parent().context("The viewer record has no directory")?;
+    write_private(&path(root)?, &record.json()).context("Cannot record the viewer")
+}
+
+/// Writes `value` to `file` in the cache, owner-only, replacing it whole: its directories are created owner-only and
+/// must be, and the file is written beside it and renamed over it.
+pub(super) fn write_private(file: &Path, value: &Value) -> Result<()> {
+    let directory = file.parent().context("The viewer's file has no directory")?;
     crate::cache::private_directory(directory.parent().unwrap_or(directory))?;
     crate::cache::private_directory(directory)?;
-    let temporary = directory.join(format!(".{}.tmp", std::process::id()));
+    let name = file.file_name().unwrap_or_default().to_string_lossy();
+    let temporary = directory.join(format!(".{name}.{}.tmp", std::process::id()));
     let _ = std::fs::remove_file(&temporary);
-    crate::create_file(&temporary, &serde_json::to_vec(&record.json())?)?;
-    std::fs::rename(&temporary, &file).with_context(|| format!("Cannot record the viewer in {}", file.display()))
+    crate::create_file(&temporary, &serde_json::to_vec(value)?)?;
+    std::fs::rename(&temporary, file).with_context(|| format!("Cannot write {}", file.display()))
 }
 
 /// Removes the record for `root` when it is still `url`'s, as a viewer does when it stops.

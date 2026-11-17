@@ -12,12 +12,13 @@ use clap::{Args, Subcommand, ValueEnum};
 use serde_json::{Value, json};
 
 use super::serve::repository_options;
+use super::view_process::{open_browser, running_viewer, same_port, start_viewer, stop_viewer};
 use super::{FocusOn, ImageMode, Sources, Theme};
 use crate::{
     assets, help_text,
     runtime::Runner,
     service,
-    view::{Viewer, ViewerOptions, client, registry},
+    view::{Port, address, client, registry},
 };
 
 #[derive(Args)]
@@ -31,9 +32,9 @@ pub struct View {
     pub command: Option<ViewCommand>,
     #[command(flatten)]
     pub show: ViewShow,
-    /// The port to listen on [default: any free port]
-    #[arg(long, default_value_t = 0)]
-    pub port: u16,
+    /// The port to listen on; 0 for any free one [default: the port this project's viewer last listened on, else any free one]
+    #[arg(long)]
+    pub port: Option<u16>,
     /// Also open the page in the default browser
     #[arg(long)]
     pub open: bool,
@@ -65,6 +66,10 @@ pub enum ViewCommand {
         /// Let the viewer run repository code: one is started with trust, or replaces one running without it
         #[arg(long)]
         trust: bool,
+        /// The port a viewer this starts listens on; 0 for any free one. Refused when a viewer already runs on another
+        /// [default: the port this project's viewer last listened on, else any free one]
+        #[arg(long)]
+        port: Option<u16>,
         /// Print the result as JSON
         #[arg(long)]
         json: bool,
@@ -119,6 +124,10 @@ pub enum ViewCommand {
         /// Render what a named viewer shows [default: the default viewer]
         #[arg(long, value_name = "NAME")]
         viewer: Option<String>,
+        /// Capture the viewer's page itself, its header, toolbar and summary bar around the projection, as a page opened
+        /// now shows it: the viewer's projection, pair, mode and selection, not the person's playback position or zoom
+        #[arg(long, conflicts_with_all = ["projection", "before", "after", "mode", "progress", "focus", "entity", "fit"])]
+        page: bool,
         /// Print the result as JSON
         #[arg(long)]
         json: bool,
@@ -133,7 +142,11 @@ pub enum ViewCommand {
         json: bool,
     },
     /// Stop the viewer running for this repository; its open pages say so, and reconnect if one starts at its URL
-    Stop,
+    Stop {
+        /// Also forget its link: the next viewer has a new token (and port), and every earlier link stops working
+        #[arg(long)]
+        rotate: bool,
+    },
 }
 
 /// What a viewer shows, as `open_projection` takes it.
@@ -212,31 +225,9 @@ fn named(viewer: &Option<String>) -> Value {
     }
 }
 
-/// The viewer running for the repository at `root`, if one answers; a stale record is removed.
-async fn running_viewer(root: &Path) -> Option<registry::Record> {
-    registry::live(root, Duration::from_secs(5)).await
-}
-
-/// Stops the viewer `record` names and waits until its URL no longer answers, so its port is free.
-async fn stop_viewer(root: &Path, record: &registry::Record) -> Result<()> {
-    let response = client::request(&record.url, "POST", "control/stop", None, Duration::from_secs(10)).await?;
-    ensure!(response.status == 200, "The viewer refused to stop ({})", response.status);
-    for _ in 0..100 {
-        if client::request(&record.url, "GET", "control/state", None, Duration::from_secs(1))
-            .await
-            .is_err()
-        {
-            registry::remove(root, &record.url);
-            return Ok(());
-        }
-        tokio::time::sleep(Duration::from_millis(100)).await;
-    }
-    bail!("The viewer at {} didn't stop", record.url)
-}
-
 /// `view show|current|screenshot|refresh`: calls the tool on the running viewer and prints its result.
 async fn view_tool(root: &Path, command: ViewCommand) -> Result<()> {
-    if let ViewCommand::Stop = command {
+    if let ViewCommand::Stop { rotate } = command {
         match running_viewer(root).await {
             Some(record) => {
                 stop_viewer(root, &record).await?;
@@ -244,13 +235,18 @@ async fn view_tool(root: &Path, command: ViewCommand) -> Result<()> {
             }
             None => println!("No viewer is running for this repository."),
         }
+        if rotate && address::forget(root) {
+            println!("Forgot its link: the next viewer has a new one, and earlier links no longer work.");
+        }
         return Ok(());
     }
     let (name, input, json_output, start) = match &command {
-        ViewCommand::Show { show, json, trust, .. } => ("open_projection", show.input(), *json, Some(*trust)),
+        ViewCommand::Show {
+            show, json, trust, port, ..
+        } => ("open_projection", show.input(), *json, Some((*trust, *port))),
         ViewCommand::Current { viewer, json } => ("current_view", named(viewer), *json, None),
         ViewCommand::Refresh { viewer, json } => ("refresh", named(viewer), *json, None),
-        ViewCommand::Stop => unreachable!("answered above"),
+        ViewCommand::Stop { .. } => unreachable!("answered above"),
         ViewCommand::Screenshot {
             out,
             projection,
@@ -265,6 +261,7 @@ async fn view_tool(root: &Path, command: ViewCommand) -> Result<()> {
             entity,
             fit,
             viewer,
+            page,
             json,
         } => {
             ensure!(
@@ -272,6 +269,9 @@ async fn view_tool(root: &Path, command: ViewCommand) -> Result<()> {
                 "{} already exists; images never overwrite files",
                 out.display()
             );
+            if *page {
+                return super::view_page::screenshot(root, out, viewer.as_deref(), (*theme, *width, *height), *json).await;
+            }
             let mut input = named(viewer);
             for (key, value) in [("projection", projection), ("before", before), ("after", after), ("entity", entity)] {
                 if let Some(value) = value {
@@ -312,11 +312,15 @@ async fn view_tool(root: &Path, command: ViewCommand) -> Result<()> {
             ("screenshot", input, *json, None)
         }
     };
-    let url = match (running_viewer(root).await, start) {
-        // Asked for trust, a viewer running without it is replaced at its URL.
-        (Some(record), Some(true)) if !record.trust => start_viewer(root, true).await?,
+    let running = running_viewer(root).await;
+    if let (Some(record), Some((_, port))) = (&running, start) {
+        same_port(record, port)?;
+    }
+    let url = match (running, start) {
+        // Asked for trust, a viewer running without it is replaced at its URL (its port, which `same_port` checked).
+        (Some(record), Some((true, _))) if !record.trust => start_viewer(root, true, None).await?,
         (Some(record), _) => record.url,
-        (None, Some(trust)) => start_viewer(root, trust).await?,
+        (None, Some((trust, port))) => start_viewer(root, trust, port).await?,
         (None, None) => bail!(
             "No viewer is running for this repository: start one with projections view, or show a projection with projections view show"
         ),
@@ -350,68 +354,6 @@ async fn view_tool(root: &Path, command: ViewCommand) -> Result<()> {
     Ok(())
 }
 
-/// Starts `projections view` in the background for this project of `root`,
-/// stopping itself when idle, and returns its URL once it is recorded and
-/// answers. With `trust`, it replaces a viewer running without trust.
-async fn start_viewer(root: &Path, trust: bool) -> Result<String> {
-    let mut command = std::process::Command::new(std::env::current_exe()?);
-    // The same project as this command's, which a viewer started at the repository's root wouldn't find again.
-    let project = crate::project::prefix();
-    command.arg("-C").arg(root);
-    if !project.is_empty() {
-        command.arg("--root").arg(project);
-    }
-    command
-        .args(["view", "--idle-exit", "15"])
-        .stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null());
-    if trust {
-        command.arg("--trust");
-    }
-    #[cfg(unix)]
-    {
-        use std::os::unix::process::CommandExt;
-        // Its own process group, so the terminal's Ctrl+C for this command doesn't stop it.
-        command.process_group(0);
-    }
-    #[cfg(windows)]
-    keep_standard_handles();
-    let mut child = command.spawn().context("Cannot start the viewer")?;
-    for _ in 0..300 {
-        if let Some(record) = running_viewer(root).await
-            && record.pid == child.id()
-        {
-            eprintln!("Started the Projections viewer: {}", record.url);
-            return Ok(record.url);
-        }
-        if let Some(status) = child.try_wait()? {
-            bail!("The viewer stopped as it started ({status})");
-        }
-        tokio::time::sleep(Duration::from_millis(100)).await;
-    }
-    bail!("The viewer didn't start in 30 seconds")
-}
-
-/// Makes this process's standard handles uninheritable. Windows gives a child every inheritable handle, so the viewer
-/// would hold this command's output pipes open for its lifetime, and whoever reads them (`execFile` in the Copilot
-/// canvas, a test) would wait until the viewer exits rather than for this command.
-#[cfg(windows)]
-fn keep_standard_handles() {
-    use std::os::windows::io::AsRawHandle;
-    use windows_sys::Win32::Foundation::{HANDLE_FLAG_INHERIT, SetHandleInformation};
-    for handle in [
-        std::io::stdin().as_raw_handle(),
-        std::io::stdout().as_raw_handle(),
-        std::io::stderr().as_raw_handle(),
-    ] {
-        if !handle.is_null() {
-            // A handle that isn't one (no console) refuses, which changes nothing.
-            unsafe { SetHandleInformation(handle, HANDLE_FLAG_INHERIT, 0) };
-        }
-    }
-}
-
 /// `view`: serves the viewer page until interrupted, or reuses the one running for this repository.
 pub async fn view(directory: &Path, args: View) -> Result<()> {
     let root = Runner::at_checkout(directory.to_path_buf(), false).repository_root()?;
@@ -422,12 +364,16 @@ pub async fn view(directory: &Path, args: View) -> Result<()> {
     let asked = input.as_object().is_some_and(|input| !input.is_empty());
     // Asked for trust, a viewer running without it is replaced, at its URL when that is free, so its open pages
     // (a browser tab, the Copilot app's canvas) reconnect to the new one.
-    let mut reused = None;
-    match running_viewer(&root).await {
+    let mut replacing = None;
+    let running = running_viewer(&root).await;
+    if let Some(record) = &running {
+        same_port(record, args.port)?;
+    }
+    match running {
         Some(record) if args.trust && !record.trust => {
             stop_viewer(&root, &record).await?;
             eprintln!("Replacing the viewer running without trust.");
-            reused = record.address().filter(|_| args.port == 0);
+            replacing = record.address();
         }
         Some(record) => {
             let mut url = record.url.clone();
@@ -454,20 +400,17 @@ pub async fn view(directory: &Path, args: View) -> Result<()> {
     let signals = crate::signals::Shutdown::new().context("Failed to register shutdown signals")?;
     let client_assets = assets::inspector_assets()?;
     let service = Arc::new(service::Service::new(repository_options(directory, args.trust, &client_assets.path, &args.sources)?).await?);
-    let options = |address: Option<(u16, String)>| {
-        let (port, token) = address.map_or((args.port, None), |(port, token)| (port, Some(token)));
-        ViewerOptions {
-            port,
+    // At the project's kept address, so a restarted viewer has the URL the last one had.
+    let mut viewer = crate::view::start_kept(
+        service.clone(),
+        &root,
+        crate::view::Start {
+            port: args.port.map_or(Port::Kept, Port::Exactly),
+            replacing,
             idle: args.idle_exit.map(|minutes| Duration::from_secs(minutes.max(1) * 60)),
             definition_revision: args.definition_revision.clone(),
-            token,
-        }
-    };
-    // The replaced viewer's port may have been taken meanwhile: then the new viewer has a new URL.
-    let mut viewer = match Viewer::start(service.clone(), options(reused.clone())) {
-        Err(_) if reused.is_some() => Viewer::start(service.clone(), options(None))?,
-        started => started?,
-    };
+        },
+    )?;
     let url = viewer.url().to_owned();
     // What to show first: as asked, else the suggested pair when the repository defines one projection. Recorded only
     // then, so what another process shows through it (`view show --choice now` starting it) is never undone by this.
@@ -503,26 +446,5 @@ pub async fn view(directory: &Path, args: View) -> Result<()> {
     registry::remove(&root, &url);
     viewer.close().await;
     service.close().await;
-    Ok(())
-}
-
-/// Opens `url` in the default browser.
-fn open_browser(url: &str) -> Result<()> {
-    let mut command = if cfg!(target_os = "macos") {
-        std::process::Command::new("open")
-    } else if cfg!(windows) {
-        let mut command = std::process::Command::new("rundll32");
-        command.arg("url.dll,FileProtocolHandler");
-        command
-    } else {
-        std::process::Command::new("xdg-open")
-    };
-    command
-        .arg(url)
-        .stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null())
-        .spawn()
-        .context("Cannot open the default browser")?;
     Ok(())
 }

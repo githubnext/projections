@@ -17,15 +17,49 @@ inside the GitHub Copilot app's canvas.
 
 ### 1. `projections view` serves one page on loopback
 
-`projections view` serves a single page on `127.0.0.1`, on port 0 (any free
-port) unless `--port` is given. It prints the URL; `--open` also opens the
-default browser. The URL's path starts with a random 256-bit session token,
-`http://127.0.0.1:PORT/TOKEN/`, so every relative URL the page loads (its
-script, the shared engine, renderer frames, the API) carries it. The server
-refuses any request whose path doesn't start with the token, with 404 and no
-body that would tell anyone the token. Nothing is served to other hosts: the
-listener binds loopback only, and requests whose `Host` isn't a loopback name
-are refused, so DNS rebinding can't reach it.
+`projections view` serves a single page on `127.0.0.1`. It prints the URL;
+`--open` also opens the default browser. The URL's path starts with a random
+256-bit session token, `http://127.0.0.1:PORT/TOKEN/`, so every relative URL the
+page loads (its script, the shared engine, renderer frames, the API) carries it.
+Nothing is served to other hosts: the listener binds loopback only, and requests
+whose `Host` isn't a loopback name (`127.0.0.1`, `localhost`, `[::1]`, with this
+port) are refused with 403, so DNS rebinding can't reach it.
+
+**The URL is stable.** A person bookmarks it, an app's pane keeps it, a browser
+tab reconnects to it; a viewer restarted after its idle exit, `view stop` or a
+reboot should answer there. So the token and port are kept per project in the
+per-user cache, beside the record (`views/<key>.address.json`, `0600` in a
+`0700` directory, read only when it is a regular file owned by the user and
+unreadable by others), never in the repository. A viewer that starts uses the
+kept token, and the kept port unless that is taken (then any free one, which is
+kept from then on). `--port N` (on `projections view` and
+`projections view show`, the commands that start one) asks for a port: a viewer
+starts there or says the port is taken, never silently elsewhere, and keeps it
+with its token. While a viewer runs, `--port` naming another port is refused,
+saying to stop it first: one project has one viewer, and its URL is the one its
+pages know. `projections view stop --rotate` forgets the address, so the next
+viewer has a new token (and port) and every earlier link stops working: rotate
+after sharing a screenshot or log that shows the link, or whenever in doubt.
+Deleting the file does the same.
+
+Keeping the token for longer than one process changes no boundary. It was
+already in the owner-only record while a viewer ran; the token guards against
+other local users and against web pages that can reach loopback but can't read
+its answers (no CORS, the `Host` check), and both are as far from a kept token
+as from a fresh one. What changes is how long a leaked link stays good, which
+`--rotate` bounds.
+
+**The bare port says what it is, and nothing more.** A request whose path
+doesn't start with the token (the bare port, a typo, a link from before a
+rotation) is answered 404 with a short page, under a policy that runs no script
+and loads nothing: it is the Projections viewer, it needs its full link, which
+only the person and their agent have, and `projections view current` (or the
+agent) gives it. It never carries the token, and the bare port never redirects
+to the tokened URL. A redirect would make the port itself the secret: any
+process or page on the machine that can reach loopback (another local user, a
+page in a browser that permits it) would be handed the token. The `Host` check
+runs first, so a rebinding page doesn't even get that page. Other methods get a
+bare 404.
 
 The server is a thin listener in front of the existing CLI service
 (`inspector::Service`), the same one `serve --stdio` and `projections mcp` use.
@@ -71,6 +105,37 @@ state changes rarely, the reports are small, and it needs no new dependency.
 
 Several open pages mirror one another: a report that changes the selection or
 mode becomes the state, and every page receives it. The newest report wins.
+
+**Which pages count as open.** A page counts while it asks for its viewer's
+state: each page makes a random ID (with `crypto.getRandomValues`, not
+`crypto.randomUUID`, which only a secure context has: a page framed by an app
+whose own document is plain http or a custom scheme isn't one, though its
+loopback origin is) and sends it with every long poll and report. Such a page
+also lacks `crypto.subtle`, so the engine hashes the default comparator in
+JavaScript there, and the page renders as anywhere else. A page that hasn't
+asked for 45 seconds is gone. Nothing else is checked: no `Origin`, no
+visibility, no connection type. A long poll returns every 20 seconds at most, so
+a page counts within that of loading; a hidden or suspended page (a background
+tab, a minimized window, a collapsed preview pane) that stops asking stops
+counting, and counts again when it asks. Pages count per named viewer: a page of
+`?viewer=api` isn't a page of the default viewer, and `current_view` lists each
+viewer's pages.
+
+When no page of a viewer counts, `current_view` says what the viewer saw
+instead, from the last 10 minutes: a page that loaded but never loaded its
+script (the embedding app blocks scripts), or loaded it but never asked (the
+script failed in that web view, or its requests go elsewhere); a page that
+stopped asking; requests refused for a non-loopback `Host` (a pane or proxy that
+rewrites the address, which can't be allowed without allowing DNS rebinding);
+and requests without the token. It says these as counts and ages only: nothing a
+request sent, its `Host` or its path, reaches the agent, so a web page can't
+write into its tools' answers. With nothing seen, it says that nothing has
+loaded the page. A page an embedding app shows through a proxy at another host
+name, or that it never lets run its script, can't count; the agent learns which
+it is. Chrome itself refuses to load loopback in a frame of a page that isn't a
+secure context (its Local Network Access checks), so a pane whose document is
+plain http on another host never loads the page at all: the viewer sees nothing,
+and says so.
 
 **Named viewers.** One server holds several independent views, so an agent can
 show the person several projections side by side. Each **named viewer** has its
@@ -245,10 +310,23 @@ approve a write itself). No tool is left out of either surface.
 `projections view screenshot --out FILE` and `projections view refresh`, each
 taking `--viewer NAME`. They call the running server's token-protected control
 endpoints (`TOKEN/control/tool/NAME`), which answer with exactly the tool's
-result, so the text and JSON match the tools'. `view show` starts a server in
-the background when none is running, which stops itself after it has had no page
-and no call for 15 minutes; `projections view stop` stops one sooner (decision
-1).
+result, so the text and JSON match the tools'.
+
+`projections view screenshot --page` is the one exception: it captures the
+viewer's own page, its header, toolbar and summary bar around the stage, rather
+than the projection alone. The CLI opens the running viewer's URL in its
+headless browser as a **capture** (`?capture`), which polls the state without a
+page ID and reports nothing, so it never counts as the person's page or changes
+what the agent reads. The page marks its root `data-projections-viewer="ready"`
+once it shows the state settled (its extraction done or failed, its renderer
+built), and the capture waits for that, then for two identical frames. It shows
+what a page opened now shows (the viewer's projection, pair, mode and selection,
+at the person's page's size and color mode), not the person's playback position
+or zoom. It stays a subcommand, not an input of the `screenshot` tool: the
+catalog is the same in every surface, and VS Code can't capture its own
+webview's chrome. `view show` starts a server in the background when none is
+running, which stops itself after it has had no page and no call for 15 minutes;
+`projections view stop` stops one sooner (decision 1).
 
 ### 5. Renderer builds move into the CLI service
 
@@ -405,7 +483,9 @@ a second, lesser view of the same thing next to it.
 ## Security
 
 - Loopback only, a token in every path and a `Host` check. The token is compared
-  in constant time.
+  in constant time. It is kept per project, owner-only, so the URL survives a
+  restart, and rotated with `projections view stop --rotate`. The bare port says
+  how to get the link and never gives or redirects to it.
 - Read-only: the server forwards no write route, and the page offers no editing.
   The one thing a page asks of the server beyond its reports is to show another
   projection the working tree defines (`view/choose`), which grants nothing the

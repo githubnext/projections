@@ -48,3 +48,23 @@ export function settle(page: ViewerPage, view: View | null) {
   const selectionShown = !applied.found || (view?.selectedRow?.id ?? null) === (state.selection ?? null)
   applied.settled = modeShown && selectionShown
 }
+
+/**
+ * The page's random ID, which its viewer counts open pages by. Not `crypto.randomUUID`, which only a secure context
+ * has: a page framed by an app whose own document isn't one (a custom scheme, plain http) is not, though its own
+ * loopback origin is. `getRandomValues` works in every context.
+ */
+export function pageId(): string {
+  return Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join('')
+}
+
+/**
+ * Marks the document `data-projections-viewer="ready"` once the page shows the state settled (`projections view
+ * screenshot --page` waits for it), `busy` until then.
+ */
+export function markReady(viewer: ViewerPage, handle: InspectorHandle, build: string | undefined) {
+  const status = handle.summary().status
+  const ready = viewer.applied.settled && build !== 'building' && (status === 'ok' || status === 'failed' || status === 'trust')
+  const mark = ready ? 'ready' : 'busy'
+  if (document.documentElement.dataset.projectionsViewer !== mark) document.documentElement.dataset.projectionsViewer = mark
+}

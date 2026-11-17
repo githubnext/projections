@@ -3,11 +3,11 @@
 // canvas's width its header text is whole and its chrome lies flat, edge to edge, every control works, and a page that
 // loses its server says so and takes no input. A named viewer is a page of its own, and the person switches a page's
 // projection from its title.
-import {test, expect} from '@playwright/test'
+import {test, expect, chromium} from '@playwright/test'
 import type {Page} from '@playwright/test'
 import {execFileSync, spawn} from 'node:child_process'
 import type {ChildProcess} from 'node:child_process'
-import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs'
+import {mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {createInterface} from 'node:readline'
@@ -90,11 +90,58 @@ async function pathsIn(page: Page) {
   return text.match(/(^|[\s("'`])(\/|~\/|\.{1,2}\/)\S*|[\w.-]+\/[\w.-]+\/\S*|\b[\w-]+\.(json|mjs|js|ts|yaml|yml)\b|[A-Za-z]:\\\S*/g) ?? []
 }
 
-test('requests without the token are refused', async () => {
+test('requests without the token are refused, and the bare port says how to get the link', async ({page}) => {
   const origin = new URL(url).origin
-  expect((await fetch(`${origin}/`)).status).toBe(404)
+  const bare = await fetch(`${origin}/`)
+  expect(bare.status).toBe(404)
+  const token = new URL(url).pathname.split('/')[1]!
+  expect(await bare.text()).not.toContain(token)
   expect((await fetch(`${origin}/mount.js`)).status).toBe(404)
   expect((await fetch(url)).status).toBe(200)
+  await page.goto(`${origin}/`)
+  await expect(page.getByRole('heading', {name: 'Projections viewer'})).toBeVisible()
+  await expect(page.locator('body')).toContainText('projections view current')
+  expect(page.url()).toBe(`${origin}/`)
+})
+
+test('a page framed by a document that is not a secure context still counts as open', async () => {
+  // An app's preview pane whose own document is plain http (or a custom scheme) isn't a secure context, and neither is
+  // the viewer framed in it, though its loopback origin would be: `crypto.randomUUID` is missing there. Chrome itself
+  // refuses such a frame to loopback (its Local Network Access checks), so this is a browser without those checks, as
+  // some apps' web views are.
+  const browser = await chromium.launch({args: ['--disable-features=LocalNetworkAccessChecks']})
+  try {
+    expect((await control('control/show', {viewer: 'framed', projection: 'packages', choice: 'last-commit'})).status).toBe(200)
+    const page = await browser.newPage()
+    await page.route('http://preview.invalid/', route =>
+      route.fulfill({contentType: 'text/html', body: `<iframe src="${url}?viewer=framed" style="width:900px;height:600px"></iframe>`}),
+    )
+    await page.goto('http://preview.invalid/')
+    await expect(page.frameLocator('iframe').locator('.pi-viewer-header')).toContainText('Package map', {timeout: 30_000})
+    expect(await page.frames()[1]!.evaluate(() => isSecureContext)).toBe(false)
+    await expect.poll(async () => (await control('control/state?viewer=framed')).body.pages, {timeout: 15_000}).toBe(1)
+  } finally {
+    await browser.close()
+  }
+})
+
+test('screenshot --page captures the viewer page, its chrome and all, without counting as a page', async () => {
+  expect((await control('control/show', {projection: 'packages', choice: 'last-commit', mode: 'side-by-side'})).status).toBe(200)
+  const out = join(mkdtempSync(join(tmpdir(), 'projections-viewer-shot-')), 'page.png')
+  const said = execFileSync(cli, ['view', 'screenshot', '--page', '--width', '900', '--height', '600', '--out', out, '--json'], {
+    cwd: repository,
+    env: {...process.env, PROJECTIONS_CACHE_DIR: cache, PROJECTIONS_BROWSER: chromium.executablePath()},
+    stdio: ['ignore', 'pipe', 'pipe'],
+    timeout: 150_000,
+  })
+  const result = JSON.parse(said.toString())
+  expect(result).toMatchObject({page: true, projection: 'packages', width: 900, height: 600})
+  const png = readFileSync(out)
+  expect(png.subarray(1, 4).toString()).toBe('PNG')
+  expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([900, 600])
+  rmSync(join(out, '..'), {recursive: true, force: true})
+  // The capture watched without counting or reporting: no page of the default viewer was opened by it.
+  expect((await state()).views.length).toBe(0)
 })
 
 test('the page reflects what the agent shows, reports the selection and mirrors it in two pages', async ({context}) => {

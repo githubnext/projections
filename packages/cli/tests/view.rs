@@ -122,6 +122,12 @@ impl Fixture {
 
 /// A raw request to the viewer's port, without its token or with another `Host`.
 async fn raw(url: &str, path: &str, host: Option<&str>) -> u16 {
+    let answer = raw_answer(url, path, host).await;
+    answer.split(' ').nth(1).unwrap().parse().unwrap()
+}
+
+/// [`raw`]'s whole answer: its status line, headers and body.
+async fn raw_answer(url: &str, path: &str, host: Option<&str>) -> String {
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
     let address = url.trim_start_matches("http://").split('/').next().unwrap().to_owned();
     let mut stream = tokio::net::TcpStream::connect(&address).await.unwrap();
@@ -132,7 +138,7 @@ async fn raw(url: &str, path: &str, host: Option<&str>) -> u16 {
         .unwrap();
     let mut answer = String::new();
     stream.read_to_string(&mut answer).await.unwrap();
-    answer.split(' ').nth(1).unwrap().parse().unwrap()
+    answer
 }
 
 #[tokio::test]
@@ -151,6 +157,77 @@ async fn requests_need_the_token_and_a_loopback_host() {
     assert!(page.content_type.starts_with("text/html"));
     assert!(String::from_utf8_lossy(&page.body).contains("./viewer.js"));
     assert_eq!(fixture.request("GET", "mount.js", None).await.status, 200);
+    fixture.close().await;
+}
+
+#[tokio::test]
+async fn the_bare_port_says_how_to_get_the_link_without_giving_it() {
+    let fixture = Fixture::new().await;
+    let url = fixture.viewer.url().to_owned();
+    let token = url.trim_end_matches('/').rsplit('/').next().unwrap().to_owned();
+    for path in ["/", "/favicon.ico", &format!("/{}/", "0".repeat(64))] {
+        let answer = raw_answer(&url, path, None).await;
+        assert!(answer.starts_with("HTTP/1.1 404"), "{answer}");
+        assert!(answer.contains("This viewer needs its full link"), "{answer}");
+        assert!(answer.contains("projections view current"), "{answer}");
+        assert!(!answer.contains(&token), "the page never gives the token");
+        assert!(!answer.to_ascii_lowercase().contains("location:"), "no redirect");
+        assert!(answer.contains("default-src 'none'"), "no script runs: {answer}");
+    }
+    // Another host still learns nothing, not even that.
+    let refused = raw_answer(&url, "/", Some("attacker.example")).await;
+    assert!(refused.starts_with("HTTP/1.1 403") && !refused.contains("full link"), "{refused}");
+    fixture.close().await;
+}
+
+#[tokio::test]
+async fn current_view_says_what_it_saw_when_no_page_counts() {
+    let fixture = Fixture::new().await;
+    let url = fixture.viewer.url().to_owned();
+    fixture
+        .request("POST", "control/show", Some(&json!({"choice": "last-commit"})))
+        .await;
+    let current = || async {
+        let read = fixture
+            .request("POST", "control/tool/current_view", Some(&json!({})))
+            .await
+            .json()
+            .unwrap();
+        (
+            read["content"][0]["text"].as_str().unwrap().to_owned(),
+            read["structuredContent"].clone(),
+        )
+    };
+    let (text, _) = current().await;
+    assert!(
+        text.contains("no page is open.\nNothing has loaded its page in the last 10 minutes"),
+        "{text}"
+    );
+    // A page loaded but never ran its script, then ran it but never asked: each said as it is.
+    assert_eq!(fixture.request("GET", "", None).await.status, 200);
+    let (text, _) = current().await;
+    assert!(text.contains("A page was loaded just now but never loaded its script"), "{text}");
+    assert_eq!(fixture.request("GET", "viewer.js", None).await.status, 200);
+    let (text, _) = current().await;
+    assert!(text.contains("loaded its script, but never asked for the view"), "{text}");
+    // Requests it refused: counted, never quoted.
+    raw(&url, "/", Some("preview.proxy.example:1234")).await;
+    raw(&url, "/", None).await;
+    let (text, structured) = current().await;
+    assert!(
+        text.contains("One request was refused for naming a host other than 127.0.0.1"),
+        "{text}"
+    );
+    assert!(text.contains("One request came without the viewer's token"), "{text}");
+    assert!(!text.contains("preview.proxy.example"), "{text}");
+    assert_eq!(structured["seen"]["foreignHost"]["count"], 1);
+    // A capture's poll (no page ID) isn't the person's page; a page's poll is.
+    fixture.request("GET", "view/state", None).await;
+    assert_eq!(fixture.request("GET", "control/state", None).await.json().unwrap()["pages"], 0);
+    fixture.request("GET", "view/state?page=p1", None).await;
+    let (text, structured) = current().await;
+    assert_eq!(structured["pages"], 1);
+    assert!(text.contains("one page is open.") && !text.contains("never asked"), "{text}");
     fixture.close().await;
 }
 
@@ -523,6 +600,117 @@ fn a_stale_record_is_replaced_and_a_viewer_stops_or_is_replaced_with_trust() {
     assert!(record().is_none(), "a stopped viewer's record is removed");
     let none = projections(&["view", "stop"]).output().unwrap();
     assert!(String::from_utf8_lossy(&none.stdout).contains("No viewer is running"));
+    let _ = fs::remove_dir_all(&root);
+}
+
+#[test]
+fn a_restarted_viewer_keeps_its_url_until_rotated_and_ports_are_never_silently_ignored() {
+    let root = std::env::current_dir()
+        .unwrap()
+        .join("target")
+        .join(format!("view-address-test-{}", Uuid::new_v4()));
+    let repo = root.join("repo");
+    assets(&root.join("assets"));
+    fs::create_dir_all(repo.join(".github/projections")).unwrap();
+    fs::write(repo.join("package.json"), r#"{"name": "root", "private": true}"#).unwrap();
+    fs::write(
+        repo.join(".github/projections/packages.json"),
+        r#"{"id": "packages", "title": "Package map", "extractor": "workspace-dependencies", "renderer": "dependencies"}"#,
+    )
+    .unwrap();
+    git(&repo, &["init", "--quiet", "--initial-branch=main"]);
+    git(&repo, &["add", "."]);
+    git(&repo, &["commit", "--quiet", "-m", "Start"]);
+    let top = projections_extractor_sdk::canonical(&repo).unwrap();
+    let cache = root.join("cache");
+    let projections = |arguments: &[&str]| {
+        Command::new(env!("CARGO_BIN_EXE_projections"))
+            .arg("-C")
+            .arg(&repo)
+            .args(arguments)
+            .env("PROJECTIONS_CACHE_DIR", &cache)
+            .env("PROJECTIONS_INSPECTOR_ASSETS", root.join("assets"))
+            .stdin(std::process::Stdio::null())
+            .output()
+            .unwrap()
+    };
+    let show = |extra: &[&str]| {
+        let output = projections(&[&["view", "show", "--json"], extra].concat());
+        assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
+        let result: Value = serde_json::from_slice(&output.stdout).unwrap();
+        result["url"].as_str().unwrap().to_owned()
+    };
+    let port_of = |url: &str| {
+        registry::Record {
+            url: url.to_owned(),
+            pid: 0,
+            trust: false,
+        }
+        .address()
+        .unwrap()
+    };
+    let free_port = || std::net::TcpListener::bind("127.0.0.1:0").unwrap().local_addr().unwrap().port();
+
+    let first = show(&[]);
+    let kept = projections_cli::view::address::path_in(&cache, &top, "");
+    assert!(kept.exists(), "the project's address is kept in the cache");
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        assert_eq!(fs::metadata(&kept).unwrap().permissions().mode() & 0o777, 0o600);
+    }
+    // Asked for another port while it runs on its own: refused, saying what to do.
+    let other = free_port();
+    let refused = projections(&["view", "show", "--port", &other.to_string()]);
+    assert!(!refused.status.success());
+    let said = String::from_utf8_lossy(&refused.stderr);
+    assert!(
+        said.contains(&format!("already running for this repository on port {}", port_of(&first).0)),
+        "{said}"
+    );
+    assert!(said.contains("projections view stop"), "{said}");
+    let refused = projections(&["view", "--port", &other.to_string()]);
+    assert!(
+        String::from_utf8_lossy(&refused.stderr).contains("already running"),
+        "the server's own --port too"
+    );
+    // Its own port is no conflict, nor is replacing it with a trusted viewer there.
+    assert_eq!(show(&["--port", &port_of(&first).0.to_string()]), first);
+    assert_eq!(show(&["--trust", "--port", &port_of(&first).0.to_string()]), first);
+
+    // Stopped and started again, it serves the same URL: the same port and token.
+    assert!(projections(&["view", "stop"]).status.success());
+    assert_eq!(show(&[]), first);
+
+    // Rotated, the next viewer has a new token.
+    let rotated = projections(&["view", "stop", "--rotate"]);
+    assert!(
+        String::from_utf8_lossy(&rotated.stdout).contains("Forgot its link"),
+        "{}",
+        String::from_utf8_lossy(&rotated.stdout)
+    );
+    assert!(!kept.exists());
+    let second = show(&[]);
+    assert_ne!(port_of(&second).1, port_of(&first).1);
+
+    // A port another program holds is refused, not swapped for another.
+    assert!(projections(&["view", "stop"]).status.success());
+    let holder = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let taken = holder.local_addr().unwrap().port();
+    let refused = projections(&["view", "show", "--port", &taken.to_string()]);
+    assert!(!refused.status.success());
+    assert!(
+        String::from_utf8_lossy(&refused.stderr).contains(&format!("Port {taken} is taken")),
+        "{}",
+        String::from_utf8_lossy(&refused.stderr)
+    );
+    // Asked for a free one, it listens there, keeping its token, and keeps that port for the next start.
+    let moved = show(&["--port", &other.to_string()]);
+    assert_eq!(port_of(&moved), (other, port_of(&second).1));
+    assert!(projections(&["view", "stop"]).status.success());
+    assert_eq!(show(&[]), moved);
+    assert!(projections(&["view", "stop"]).status.success());
+    drop(holder);
     let _ = fs::remove_dir_all(&root);
 }
 

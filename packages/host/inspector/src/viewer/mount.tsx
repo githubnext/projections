@@ -15,7 +15,7 @@ import type {InspectorHost} from '../host.js'
 import {InspectorRequestError, requestErrorMessage} from '../transport.js'
 import type {InspectorTransport} from '../transport.js'
 import {apply} from './apply.js'
-import {pairKey, settle, unapplied} from './page.js'
+import {markReady, pageId, pairKey, settle, unapplied} from './page.js'
 import type {ViewerPage} from './page.js'
 import {ViewerHeader, ViewerShown, createStore, mountWaiting} from './chrome.js'
 import {pageView} from './page-view.js'
@@ -67,7 +67,9 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
   const at = (path: string) => new URL(path.replace(/^\//, ''), base)
   const transport = options.transport ?? fetchTransport(base, at)
   const host: InspectorHost = {...options.host, theme: options.host?.theme ?? pageTheme()}
-  const page = crypto.randomUUID()
+  const page = pageId()
+  // A capture (`projections view screenshot --page`) watches without being counted or reporting: it isn't the person's.
+  const capture = options.capture ?? new URLSearchParams(location.search).has('capture')
   // The viewer this page shows: the one the options or the page's URL name, else the default one.
   const name = options.viewer ?? new URLSearchParams(location.search).get('viewer') ?? undefined
   const named = name && name !== 'default' ? {viewer: name} : {}
@@ -83,9 +85,10 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
     if (!handle || !state || store.get().stopped) return
     settle(viewer, handle.view())
     store.set({status: statusText(state, handle.summary(), buildPhase())})
+    markReady(viewer, handle, buildPhase())
     const body = reportBody(page, named, viewer, handle, state)
     const text = JSON.stringify(body)
-    if (text === reported) return
+    if (capture || text === reported) return
     reported = text
     if (body.generation >= 0)
       viewer.reported = {generation: body.generation, selection: body.selection, ...(body.mode ? {mode: body.mode} : {})}
@@ -113,7 +116,7 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
       try {
         // One long poll per page: the state, and the build phase with it (browsers allow few connections per host).
         const query = new URLSearchParams({
-          page,
+          ...(capture ? {} : {page}),
           ...named,
           ...(since === undefined ? {} : {since: String(since)}),
           ...(build ? {build: String(build.version)} : {}),

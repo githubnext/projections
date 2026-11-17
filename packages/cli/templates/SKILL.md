@@ -72,7 +72,12 @@ separate inspector to start.
   `projections view show` (over MCP, run `projections view show --open` with
   the same options in the repository: it finds the MCP server's viewer). Give
   them the bare link only when you can open neither. Later calls change what
-  the open page shows, so don't open it again.
+  the open page shows, so don't open it again. The link (with its secret
+  token) stays the same when the viewer restarts; `--port N` on
+  `projections view show` picks its port when it starts one. If
+  `current_view` says no page is open although the person has one, it says
+  what it saw instead (a page that never connected, a rewritten address, a
+  link without its token); give them the URL exactly as printed.
 - **In the GitHub Copilot app**, show it in the Projections canvas rather than
   a browser tab: run `projections canvas install` once in the repository (it
   writes `.github/extensions/projections/extension.mjs`), then open the
@@ -85,7 +90,8 @@ separate inspector to start.
   extraction failed) and what they selected: call it when they ask about "this
   projection", "this view" or "this one's wrong" rather than asking which one
   they mean. `screenshot` (`projections view screenshot --out FILE`) returns
-  what they see as an image, and `refresh` (`projections view refresh`)
+  what they see as an image (`--page` captures the viewer's page with its
+  header, toolbar and summary bar), and `refresh` (`projections view refresh`)
   extracts it again when it says it is out of date. They can switch the page
   to another projection from its title; `current_view` then says so, and shows
   their choice.

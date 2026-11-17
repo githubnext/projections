@@ -8,8 +8,8 @@ use crate::renderer_builds::{BuildState, Phase};
 use crate::tools::Outcome;
 use crate::view::{NamedView, Shared, control_state};
 
-/// Answers `current_view` for a viewer this process runs.
-pub(super) async fn current(shared: &Shared, view_of: &NamedView) -> Outcome {
+/// Answers `current_view` for a viewer this process runs; with `why`, says why no page counts as open when none does.
+pub(super) async fn current(shared: &Shared, view_of: &NamedView, why: bool) -> Outcome {
     let control = control_state(shared, view_of);
     let state = &control["state"];
     let others = others_line(&control);
@@ -40,6 +40,9 @@ pub(super) async fn current(shared: &Shared, view_of: &NamedView) -> Outcome {
     let view = &page["view"];
     let summary = &page["summary"];
     let mut lines = vec![heading(shared, view_of, &control, title, projection, pages)];
+    if pages == 0 && why {
+        lines.extend(crate::view::seen::explain(&control["seen"]));
+    }
     if state["chosenBy"] == "person" {
         lines.push(
             "The person chose this projection themselves, from the page's title menu; it replaces the one you showed there.".to_owned(),
@@ -91,6 +94,7 @@ pub(super) async fn current(shared: &Shared, view_of: &NamedView) -> Outcome {
             "chosenBy": state["chosenBy"],
             "viewers": control["viewers"],
             "pages": pages,
+            "seen": control["seen"],
             "projection": projection,
             "title": title,
             "choice": state["choice"],
@@ -121,7 +125,12 @@ fn others_line(control: &Value) -> Option<String> {
                 Some(projection) => format!("{projection} ({})", other["compared"].as_str().unwrap_or_default()),
                 None => "nothing".to_owned(),
             };
-            format!("{name} shows {shows} at {}", other["url"].as_str().unwrap_or_default())
+            let pages = match other["pages"].as_u64().unwrap_or(0) {
+                0 => "no page open".to_owned(),
+                1 => "one page open".to_owned(),
+                count => format!("{count} pages open"),
+            };
+            format!("{name} shows {shows} at {}, {pages}", other["url"].as_str().unwrap_or_default())
         })
         .collect();
     (!others.is_empty()).then(|| format!("Other viewers (current_view with viewer reads one): {}.", others.join("; ")))

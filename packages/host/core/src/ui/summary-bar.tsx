@@ -8,6 +8,7 @@ import type {ProjectionController} from '../projection.js'
 import {figuresSentence, sameSummaryFilter, summaryFilterable, summaryFilterOf, useSummaryFit} from '../summary.js'
 import type {SummaryFigure} from '../summary.js'
 import {Popover, PopoverContent, PopoverTrigger} from './components/popover.js'
+import {scopeHiddenShort, scopeHiddenText} from '../scope.js'
 import {cn} from './lib/utils.js'
 
 const deltaTone: Record<SummaryDelta, string> = {
@@ -189,13 +190,36 @@ function Figure({
  * tolerance sits at its end as the same kind of toggle, and so does the count of items whose generated values were
  * regenerated from the same inputs ("N regenerated"). Figures that don't fit move into a "…" popover.
  */
+/**
+ * What the Changes scope leaves out, at the bar's end: "57 unchanged tables hidden" (every kind in its tooltip) and Show
+ * all, which shows every item. Nothing while another scope shows, or when Changes hides nothing.
+ */
+function ScopeHiddenFigure({projection: p}: {projection: ProjectionController}) {
+  const short = p.comparing && p.scope === 'changes' ? scopeHiddenShort(p.scopeHidden) : undefined
+  if (!short) return null
+  return (
+    <span data-summary-fixed="" data-scope-hidden="" className="pj:flex pj:shrink-0 pj:items-center pj:gap-1">
+      <span className="ph-cap" title={scopeHiddenText(p.scopeHidden)}>
+        {short}
+      </span>
+      <button type="button" className={cn(figureButton, 'ph-scope-show-all pj:text-foreground')} onClick={() => p.setScope('all')}>
+        <span className="ph-cap">Show all</span>
+      </button>
+    </span>
+  )
+}
+
 export function SummaryBar({projection: p, className}: {projection: ProjectionController; className?: string}) {
   const bar = useRef<HTMLDivElement>(null)
   const figures = p.summary
   const within = p.comparing ? (p.variation?.within ?? 0) : 0
   const regenerated = p.comparing ? (p.variation?.regenerated ?? 0) : 0
   const sentence = figuresSentence(figures, p.comparing)
-  const shown = useSummaryFit(bar, figures.length, `${sentence}|${within}|${regenerated}|${p.comparing}`)
+  const shown = useSummaryFit(
+    bar,
+    figures.length,
+    `${sentence}|${within}|${regenerated}|${p.comparing}|${p.scope === 'changes' ? (scopeHiddenShort(p.scopeHidden) ?? '') : ''}`,
+  )
   const hidden = figures.slice(shown)
   return (
     <div
@@ -257,6 +281,7 @@ export function SummaryBar({projection: p, className}: {projection: ProjectionCo
         </Popover>
       )}
       <span aria-hidden="true" className="pj:flex-1" />
+      <ScopeHiddenFigure projection={p} />
       {regenerated > 0 && (
         <span data-summary-fixed="" className="pj:flex pj:shrink-0">
           <button

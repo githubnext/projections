@@ -523,6 +523,13 @@
   display: flex;
   flex: none;
 }
+.phv-summary-hidden {
+  align-items: center;
+  gap: 4px;
+}
+.phv-summary-show-all {
+  color: var(--vscode-textLink-foreground);
+}
 /* A running job's slot at the bar's end: kept while none runs, so the spinner never moves the figures. */
 .phv-summary-running {
   display: inline-flex;

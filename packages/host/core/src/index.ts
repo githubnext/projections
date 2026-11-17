@@ -43,7 +43,7 @@ export type {
   StageBinding,
 } from './projection.js'
 export {ProjectionStage} from './stage.js'
-export {nothingHiddenTitle, scopeHiddenText} from './scope.js'
+export {nothingHiddenTitle, scopeHiddenShort, scopeHiddenText} from './scope.js'
 export {arrangementHysteresis, paneArrangement, paneGeometry} from './stage/arrangement.js'
 export {PaneLabel} from './stage/labels.js'
 export {ProjectionLegend} from './stage/legend.js'

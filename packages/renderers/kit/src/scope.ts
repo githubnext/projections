@@ -115,19 +115,24 @@ function partsOf(model: ComparisonModel): Map<string, Set<string>> {
   return parts
 }
 
-/** A fold's label: how many parts of each kind it stands for, `12 unchanged columns, 2 unchanged indexes`. */
+/**
+ * A fold's label: `7 unchanged columns` for parts of one kind, else `Unchanged: 6 columns, 1 primary key and 2 indexes`,
+ * the most numerous kind first.
+ */
 function foldLabel(rows: readonly {before?: {kind: string}; after?: {kind: string}}[]): string {
   const counts = new Map<string, number>()
   for (const row of rows) {
     const kind = (row.after ?? row.before)!.kind
     counts.set(kind, (counts.get(kind) ?? 0) + 1)
   }
-  return [...counts]
+  const words = [...counts]
+    .sort((a, b) => b[1] - a[1])
     .map(([kind, count]) => {
       const noun = humanizeKind(kind)
-      return `${count.toLocaleString('en-US')} unchanged ${count === 1 ? noun.singular : noun.plural}`
+      return `${count.toLocaleString('en-US')} ${count === 1 ? noun.singular : noun.plural}`
     })
-    .join(', ')
+  if (words.length === 1) return words[0]!.replace(/^(\S+) /, '$1 unchanged ')
+  return `Unchanged: ${words.slice(0, -1).join(', ')} and ${words.at(-1)!}`
 }
 
 /**

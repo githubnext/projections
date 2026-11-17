@@ -148,7 +148,8 @@ function VscodeView({
           </div>
           {/* Over the stage, not in its scrolling content: the workspace doesn't scroll, the view inside it does. */}
           {props.stageNotice && <StageNoticeSlot>{props.stageNotice}</StageNoticeSlot>}
-          {on('changesOnly') && <ScopeNotice projection={p} />}
+          {/* Without the summary bar, which says what the scope hides, a pill over the stage says it. */}
+          {on('changesOnly') && !on('summary') && <ScopeNotice projection={p} />}
           {props.details !== 'none' && (
             <DetailCard
               projection={p}

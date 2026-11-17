@@ -665,3 +665,26 @@ test('links meeting one row on one side spread evenly over a band centred on its
     }
   assert.ok(spread > 0, 'some row has several links')
 })
+
+test('tables that reference each other still take ranks of their own, so no link joins two cards of one rank', async () => {
+  const {layerDepths} = await import('../node_modules/.cache/test/schema-model.js')
+  // users ⇄ licenses and users ⇄ stores reference each other; purchases reference all three.
+  const depth = layerDepths(
+    ['licenses', 'purchases', 'stores', 'users'],
+    [
+      {from: 'users', to: 'licenses'},
+      {from: 'licenses', to: 'users'},
+      {from: 'users', to: 'stores'},
+      {from: 'stores', to: 'users'},
+      {from: 'users', to: 'purchases'},
+      {from: 'stores', to: 'purchases'},
+      {from: 'licenses', to: 'purchases'},
+    ],
+  )
+  for (const [from, to] of [
+    ['users', 'licenses'],
+    ['users', 'stores'],
+  ])
+    assert.notEqual(depth.get(from), depth.get(to), `${from} and ${to} share a rank`)
+  assert.ok(depth.get('purchases') > Math.max(depth.get('users'), depth.get('stores'), depth.get('licenses')))
+})

@@ -5,27 +5,55 @@ import type {SchemaKeyRow, SchemaModel, SchemaRowKind, SchemaState} from './sche
 import {enumValueId, enumValues, isCard, isColumn, isEnum, isTable, keyOrder, keyType} from './vocabulary.js'
 import {keyRowsOf, keysOf, primaryColumns} from './schema-keys.js'
 import {columnMarkers, linksOf} from './schema-links.js'
-/** Longest-path depth from the roots; cycles keep the depth they reached. */
+/**
+ * Longest-path depth from the roots. Where edges close a cycle (tables that reference each other), the edge a
+ * depth-first walk in `nodes` order closes it with counts reversed, so every edge joins nodes of different depths: no
+ * relationship ever links two cards of one rank, which would have to run behind the cards between them.
+ */
 export function layerDepths(nodes: readonly string[], edges: readonly {from: string; to: string}[]): Map<string, number> {
-  const incoming = new Map(nodes.map(id => [id, 0]))
-  const outgoing = new Map(nodes.map(id => [id, new Set<string>()]))
-  for (const edge of edges) {
-    if (edge.from === edge.to || !outgoing.has(edge.from) || !incoming.has(edge.to) || outgoing.get(edge.from)!.has(edge.to)) continue
-    outgoing.get(edge.from)!.add(edge.to)
-    incoming.set(edge.to, incoming.get(edge.to)! + 1)
+  const outgoing = new Map(nodes.map(id => [id, [] as string[]]))
+  for (const edge of edges)
+    if (edge.from !== edge.to && outgoing.has(edge.to) && !outgoing.get(edge.from)?.includes(edge.to))
+      outgoing.get(edge.from)?.push(edge.to)
+  const acyclic = new Map(nodes.map(id => [id, new Set<string>()]))
+  const walked = new Map<string, 'open' | 'done'>()
+  for (const root of nodes) {
+    if (walked.has(root)) continue
+    walked.set(root, 'open')
+    const path = [{id: root, next: 0}]
+    while (path.length) {
+      const top = path.at(-1)!
+      const children = outgoing.get(top.id)!
+      if (top.next === children.length) {
+        walked.set(top.id, 'done')
+        path.pop()
+        continue
+      }
+      const child = children[top.next++]!
+      // An edge back into the walk's own path closes a cycle: it counts the other way.
+      if (walked.get(child) === 'open') acyclic.get(child)!.add(top.id)
+      else {
+        acyclic.get(top.id)!.add(child)
+        if (!walked.has(child)) {
+          walked.set(child, 'open')
+          path.push({id: child, next: 0})
+        }
+      }
+    }
   }
+  const incoming = new Map(nodes.map(id => [id, 0]))
+  for (const children of acyclic.values()) for (const child of children) incoming.set(child, incoming.get(child)! + 1)
   const depth = new Map<string, number>()
   const queue = nodes.filter(id => incoming.get(id) === 0)
   for (const id of queue) depth.set(id, 0)
   for (let index = 0; index < queue.length; index++) {
     const id = queue[index]!
-    for (const child of outgoing.get(id) ?? []) {
-      depth.set(child, Math.max(depth.get(child) ?? 0, (depth.get(id) ?? 0) + 1))
+    for (const child of acyclic.get(id)!) {
+      depth.set(child, Math.max(depth.get(child) ?? 0, depth.get(id)! + 1))
       incoming.set(child, incoming.get(child)! - 1)
       if (incoming.get(child) === 0) queue.push(child)
     }
   }
-  for (const id of nodes) if (!depth.has(id)) depth.set(id, 0)
   return depth
 }
 

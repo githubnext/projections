@@ -1,0 +1,374 @@
+# yaml-language-server: $schema=../../../packages/schemas/schemas/comparator/v0.json
+#
+# How a change to the agent tools reads for the agents that call them. Agents pass arguments by name, and every surface
+# checks them against the tool's input schema (`additionalProperties: false`), so a parameter removed, made required
+# or narrowed rejects calls that worked, and a tool removed from a surface fails every call there.
+#
+# Two answers, each in comparison metadata:
+#   - `compatibility`: each changed row's level (breaking, unknown, additive, compatible) and reason, in the shape the
+#     api renderer reads (`metadata.compatibility`), so its summary bar counts them and Breaking only filters to them;
+#   - `surfaceParity`: drift between surfaces. Every tool agents call should be on each of `options.everyTool`, and
+#     each of its parameters on every surface the tool is on, unless that surface leaves it out by design
+#     (`options.dropped`: VS Code asks the person instead of taking `confirm`). A change that introduces drift says so
+#     in its summary and in the api renderer's notices.
+format: projections.comparator
+version: 0
+description: >-
+  Classifies each change to an agent tool, parameter or surface as breaking, additive, compatible or unknown for the
+  agents that call it, and flags drift between the surfaces that expose the tools (a tool or parameter on one but not
+  another, or a parameter whose schema differs between them).
+
+defaults:
+  everyTool: [mcp, mcp-apps, vscode]
+  dropped: {vscode: [confirm]}
+
+checks:
+  - assert: "options.all(key, key in ['everyTool', 'dropped'])"
+    message: "'unknown option `' + options.filter(key, !(key in ['everyTool', 'dropped']))[0] + '`'"
+  - assert: "before.schema == 'api/v0'"
+    message: "'agent-tools compares `api/v0` extractions, not `' + before.schema + '` ones'"
+
+functions:
+  finding:
+    params: [{name: level, type: string}, {name: rule, type: string}, {name: reason, type: string}]
+    returns: Finding
+    body: "{'level': level, 'rule': rule, 'reason': reason}"
+  breaking:
+    params: [{name: rule, type: string}, {name: reason, type: string}]
+    returns: Finding
+    body: "finding('breaking', rule, reason)"
+  behavioral:
+    description: A change to what a call does rather than to the arguments it takes.
+    params: [{name: rule, type: string}, {name: reason, type: string}]
+    returns: Finding
+    body: "{'level': 'breaking', 'rule': rule, 'reason': reason, 'kinds': ['behavioral']}"
+  additive:
+    params: [{name: rule, type: string}, {name: reason, type: string}]
+    returns: Finding
+    body: "finding('additive', rule, reason)"
+  compatible:
+    params: [{name: rule, type: string}, {name: reason, type: string}]
+    returns: Finding
+    body: "finding('compatible', rule, reason)"
+  unknown:
+    params: [{name: rule, type: string}, {name: reason, type: string}]
+    returns: Finding
+    body: "finding('unknown', rule, reason)"
+
+  names:
+    description: Names as code, joined with commas.
+    params: [{name: values, type: list<string>}]
+    returns: string
+    body: "values.map(v, prose.code(v)).join(', ')"
+  minus:
+    description: The values of `a` that aren't in `b`, in `a`'s order.
+    params: [{name: a, type: list<string>}, {name: b, type: list<string>}]
+    returns: list<string>
+    body: 'a.filter(x, !(x in b))'
+  rowKind:
+    description: 'What a row is, from its ID: `surface:<id>`, `tool:<name>` or `tool:<name>/<parameter>`.'
+    params: [{name: id, type: string}]
+    returns: string
+    body: "id.startsWith('surface:') ? 'surface' : id.contains('/') ? 'parameter' : 'tool'"
+  qualified:
+    description: A parameter as agents' docs name it, `tool.parameter`.
+    params: [{name: item, type: dyn}]
+    returns: string
+    body: "prose.code(item.data.tool + '.' + item.label)"
+
+  # Surfaces.
+  surfaceFindings:
+    params: [{name: old, type: dyn}, {name: new, type: dyn}]
+    returns: list<Finding>
+    body: |-
+      cond({
+        old == null: [additive('surface-added', template('The tools are now exposed on {surface}', {'surface': prose.code(new.label)}))],
+        new == null: [breaking('surface-removed', template('{surface} no longer exposes the tools', {'surface': prose.code(old.label)}))],
+      }, surfaceChange(old, new))
+  surfaceChange:
+    params: [{name: old, type: dyn}, {name: new, type: dyn}]
+    returns: list<Finding>
+    variables:
+      - name: surface
+        expression: prose.code(new.label)
+      - name: found
+        expression: |-
+          collect({
+            size(minus(new.data.added, old.data.added)) > 0: additive('surface-adds', template(
+              '{surface} now adds {names} to every tool', {'surface': variables.surface, 'names': names(minus(new.data.added, old.data.added))})),
+            size(minus(old.data.added, new.data.added)) > 0: breaking('surface-adds', template(
+              '{surface} no longer adds {names} to every tool', {'surface': variables.surface, 'names': names(minus(old.data.added, new.data.added))})),
+            size(minus(new.data.removed, old.data.removed)) > 0: breaking('surface-drops', template(
+              '{surface} now leaves out {names}', {'surface': variables.surface, 'names': names(minus(new.data.removed, old.data.removed))})),
+            size(minus(old.data.removed, new.data.removed)) > 0: additive('surface-drops', template(
+              '{surface} now takes {names}', {'surface': variables.surface, 'names': names(minus(old.data.removed, new.data.removed))})),
+          })
+    body: |-
+      size(variables.found) > 0 ? variables.found
+        : [unknown('surface-changed', template('How {surface} exposes the tools changed', {'surface': variables.surface}))]
+
+  # Tools.
+  effect:
+    description: 'What calling a tool does: 0 read-only, 1 writes, 2 destructive.'
+    params: [{name: item, type: dyn}]
+    returns: int
+    body: 'item.data.?readOnly.orValue(true) ? 0 : item.data.?destructive.orValue(false) ? 2 : 1'
+  effectChange:
+    description: How what calling a tool does changed, in words.
+    params: [{name: tool, type: string}, {name: was, type: int}, {name: now, type: int}]
+    returns: string
+    body: |-
+      cond({
+        now == 2: template('{tool} is now destructive', {'tool': tool}),
+        was == 2 && now == 1: template('{tool} is no longer destructive', {'tool': tool}),
+        now == 0: template('{tool} is now read-only', {'tool': tool}),
+      }, template('{tool} is no longer read-only', {'tool': tool}))
+  trustRank:
+    description: How much trust a tool needs, least first.
+    params: [{name: item, type: dyn}]
+    returns: int
+    body: "match(item.data.?trust.orValue('none'), {'none': 0, 'extract': 1, 'onboarding': 2}, 3)"
+  trustWord:
+    params: [{name: item, type: dyn}]
+    returns: string
+    body: |-
+      match(item.data.?trust.orValue('none'), {
+        'none': 'no trust',
+        'extract': 'trust to run repository code',
+        'onboarding': 'trust to write outside an explore session',
+      }, 'trust to write')
+  toolFindings:
+    params: [{name: old, type: dyn}, {name: new, type: dyn}]
+    returns: list<Finding>
+    body: |-
+      cond({
+        old == null: [additive('tool-added', template('{tool} is a new tool on {surfaces}',
+          {'tool': prose.code(new.label), 'surfaces': names(new.data.surfaces)}))],
+        new == null: [breaking('tool-removed', template('{tool} was removed from {surfaces}; agents that call it fail',
+          {'tool': prose.code(old.label), 'surfaces': names(old.data.surfaces)}))],
+      }, toolChange(old, new))
+  toolChange:
+    params: [{name: old, type: dyn}, {name: new, type: dyn}]
+    returns: list<Finding>
+    variables:
+      - name: tool
+        expression: prose.code(new.label)
+      - name: lost
+        expression: minus(old.data.surfaces, new.data.surfaces)
+      - name: gained
+        expression: minus(new.data.surfaces, old.data.surfaces)
+      - name: found
+        expression: |-
+          collect({
+            size(variables.lost) > 0: breaking('tool-surface-removed', template(
+              '{tool} is no longer on {surfaces}; agents there that call it fail', {'tool': variables.tool, 'surfaces': names(variables.lost)})),
+            size(variables.gained) > 0: additive('tool-surface-added', template(
+              '{tool} is now also on {surfaces}', {'tool': variables.tool, 'surfaces': names(variables.gained)})),
+            effect(new) > effect(old): behavioral('tool-effect', effectChange(variables.tool, effect(old), effect(new))),
+            effect(new) < effect(old): compatible('tool-effect', effectChange(variables.tool, effect(old), effect(new))),
+            trustRank(new) > trustRank(old): behavioral('tool-trust', template(
+              '{tool} now needs {now} (was {was}); calls without it fail', {'tool': variables.tool, 'now': trustWord(new), 'was': trustWord(old)})),
+            trustRank(new) < trustRank(old): compatible('tool-trust', template(
+              '{tool} now needs {now} (was {was})', {'tool': variables.tool, 'now': trustWord(new), 'was': trustWord(old)})),
+            old.data.?showsView.orValue(false) && !new.data.?showsView.orValue(false): breaking('tool-view', template(
+              'MCP Apps hosts no longer show the viewer for {tool}', {'tool': variables.tool})),
+            !old.data.?showsView.orValue(false) && new.data.?showsView.orValue(false): additive('tool-view', template(
+              'MCP Apps hosts now show the viewer for {tool}', {'tool': variables.tool})),
+          })
+    body: |-
+      size(variables.found) > 0 ? variables.found
+        : [unknown('tool-changed', template('How {tool} is exposed changed', {'tool': variables.tool}))]
+
+  # Parameters.
+  newTool:
+    description: Whether a parameter's tool is new in this change.
+    params: [{name: item, type: dyn}]
+    returns: bool
+    body: "!(('tool:' + item.data.tool) in lookup.before.entities)"
+  parameterFindings:
+    params: [{name: old, type: dyn}, {name: new, type: dyn}]
+    returns: list<Finding>
+    body: |-
+      cond({
+        old == null: [parameterAdded(new)],
+        new == null: [breaking('parameter-removed', template('{parameter} was removed; calls that pass it are rejected',
+          {'parameter': qualified(old)}))],
+      }, parameterChange(old, new))
+  parameterAdded:
+    params: [{name: new, type: dyn}]
+    returns: Finding
+    body: |-
+      cond({
+        newTool(new): additive('parameter-added', template('{parameter} comes with its new tool', {'parameter': qualified(new)})),
+        new.data.required: breaking('parameter-added', template('{parameter} is a new required parameter; calls without it are rejected',
+          {'parameter': qualified(new)})),
+      }, additive('parameter-added', template('{parameter} is a new optional parameter', {'parameter': qualified(new)})))
+  narrowed:
+    description: Whether a range excludes values the other allowed.
+    params: [{name: was, type: dyn}, {name: now, type: dyn}]
+    returns: bool
+    body: |-
+      (has(now.min) && (!has(was.min) || now.min > was.min)) || (has(now.max) && (!has(was.max) || now.max < was.max))
+  parameterChange:
+    params: [{name: old, type: dyn}, {name: new, type: dyn}]
+    returns: list<Finding>
+    variables:
+      - name: parameter
+        expression: qualified(new)
+      - name: lost
+        expression: minus(old.data.surfaces, new.data.surfaces)
+      - name: gained
+        expression: minus(new.data.surfaces, old.data.surfaces)
+      - name: was
+        expression: old.data.?values.orValue([])
+      - name: now
+        expression: new.data.?values.orValue([])
+      - name: found
+        expression: |-
+          collect({
+            !old.data.required && new.data.required: breaking('parameter-required', template(
+              '{parameter} is now required; calls without it are rejected', {'parameter': variables.parameter})),
+            old.data.required && !new.data.required: additive('parameter-optional', template(
+              '{parameter} is now optional; calls may omit it', {'parameter': variables.parameter})),
+            size(variables.lost) > 0: breaking('parameter-surface-removed', template(
+              '{parameter} is no longer taken on {surfaces}; calls there that pass it are rejected',
+              {'parameter': variables.parameter, 'surfaces': names(variables.lost)})),
+            size(variables.gained) > 0: additive('parameter-surface-added', template(
+              '{parameter} is now also taken on {surfaces}', {'parameter': variables.parameter, 'surfaces': names(variables.gained)})),
+            size(minus(old.data.types, new.data.types)) > 0: breaking('parameter-type', template(
+              '{parameter} no longer accepts {types}', {'parameter': variables.parameter, 'types': names(minus(old.data.types, new.data.types))})),
+            size(minus(new.data.types, old.data.types)) > 0: additive('parameter-type', template(
+              '{parameter} now also accepts {types}', {'parameter': variables.parameter, 'types': names(minus(new.data.types, old.data.types))})),
+            size(variables.now) > 0 && size(variables.was) == 0: breaking('parameter-values', template(
+              '{parameter} now accepts only {values}', {'parameter': variables.parameter, 'values': names(variables.now)})),
+            size(variables.was) > 0 && size(variables.now) == 0: additive('parameter-values', template(
+              '{parameter} no longer limits its values', {'parameter': variables.parameter})),
+            size(variables.now) > 0 && size(minus(variables.was, variables.now)) > 0: breaking('parameter-values', template(
+              '{parameter} no longer accepts {values}', {'parameter': variables.parameter, 'values': names(minus(variables.was, variables.now))})),
+            size(variables.was) > 0 && size(minus(variables.now, variables.was)) > 0: additive('parameter-values', template(
+              '{parameter} now also accepts {values}', {'parameter': variables.parameter, 'values': names(minus(variables.now, variables.was))})),
+            narrowed(old.data.limits, new.data.limits): breaking('parameter-range', template(
+              '{parameter} now accepts {now} (was {was})', {'parameter': variables.parameter, 'now': new.data.range, 'was': old.data.range})),
+            narrowed(new.data.limits, old.data.limits): additive('parameter-range', template(
+              '{parameter} now accepts {now} (was {was})', {'parameter': variables.parameter, 'now': new.data.range, 'was': old.data.range})),
+          })
+    body: |-
+      cond({
+        size(variables.found) > 0: variables.found,
+        json(old.data.schema) != json(new.data.schema): [unknown('parameter-schema', template(
+          "{parameter}'s schema changed in a way these rules don't classify", {'parameter': variables.parameter}))],
+      }, [compatible('parameter-same', template('{parameter} takes the same values', {'parameter': variables.parameter}))])
+
+  # Drift between surfaces.
+  drift:
+    description: >-
+      The surface rules an item breaks on one side, as `rule:surface` keys: a tool missing from a surface every tool
+      should be on, or not in the catalog at all; a parameter missing from a surface its tool is on, or whose schema
+      differs there.
+    params: [{name: side, type: string}, {name: item, type: dyn}]
+    returns: list<string>
+    body: |-
+      item == null ? [] : match(rowKind(item.id), {
+        'tool': toolDrift(item),
+        'parameter': parameterDrift(side, item),
+      }, [])
+  toolDrift:
+    params: [{name: item, type: dyn}]
+    returns: list<string>
+    body: |-
+      cond({
+        item.data.?appOnly.orValue(false): [],
+        !('mcp' in item.data.surfaces): ['not-in-catalog'],
+      }, minus(options.everyTool, item.data.surfaces).map(s, 'missing:' + s))
+  parameterDrift:
+    params: [{name: side, type: string}, {name: item, type: dyn}]
+    returns: list<string>
+    body: |-
+      item.data.?differsOn.orValue([]).map(s, 'differs:' + s)
+        + minus(graph.entity(side, 'tool:' + item.data.tool).data.surfaces, item.data.surfaces)
+          .filter(s, !(s in options.dropped && item.label in options.dropped[s]))
+          .map(s, 'missing:' + s)
+  describe:
+    description: A drift key in words, with how to fix VS Code's generated manifest.
+    params: [{name: key, type: string}, {name: item, type: dyn}]
+    returns: string
+    variables:
+      - name: surface
+        expression: "key.split(':')[size(key.split(':')) - 1]"
+      - name: name
+        expression: "rowKind(item.id) == 'parameter' ? qualified(item) : prose.code(item.label)"
+      - name: fix
+        expression: "variables.surface == 'vscode' ? ' (regenerate its manifest: `node scripts/tools.mjs`)' : ''"
+    body: |-
+      match(key.split(':')[0], {
+        'missing': template('{name} is not on {surface}{fix}', {'name': variables.name, 'surface': prose.code(variables.surface), 'fix': variables.fix}),
+        'differs': template('{name} has a different schema on {surface}{fix}', {'name': variables.name, 'surface': prose.code(variables.surface), 'fix': variables.fix}),
+      }, template("{name} is on {surfaces} but not in the CLI's catalog", {'name': variables.name, 'surfaces': names(item.data.surfaces)}))
+  sentence:
+    params: [{name: c, type: Classification}]
+    returns: string
+    body: |-
+      template('{level}{kinds}: {reason}.', {
+        'level': {'compatible': 'Compatible', 'additive': 'Additive', 'unknown': 'Unknown', 'breaking': 'Breaking'}[c.level],
+        'kinds': has(c.kinds) ? template(' ({kinds})', {'kinds': c.kinds.join(', ')}) : '',
+        'reason': c.reason})
+
+classify:
+  where: "change.collection == 'entities'"
+  variables:
+    - name: found
+      expression: |-
+        match(rowKind(change.id), {
+          'surface': surfaceFindings(beforeItem, afterItem),
+          'tool': toolFindings(beforeItem, afterItem),
+        }, parameterFindings(beforeItem, afterItem))
+    - name: result
+      expression: "findings.classify(variables.found, ['compatible', 'additive', 'unknown', 'breaking'])"
+    - name: was
+      expression: "drift('before', beforeItem)"
+    - name: now
+      expression: "drift('after', afterItem)"
+    - name: introduced
+      expression: 'minus(variables.now, variables.was).map(key, describe(key, afterItem))'
+    - name: resolved
+      expression: 'minus(variables.was, variables.now).map(key, describe(key, beforeItem))'
+  summary: |-
+    sentence(variables.result) + collect({
+      size(variables.introduced) > 0: template(' Surface drift: {drift}.', {'drift': variables.introduced.join('; ')}),
+      size(variables.resolved) > 0: template(' Resolves surface drift: {drift}.', {'drift': variables.resolved.join('; ')}),
+    }).join('')
+  annotation: |-
+    {'level': variables.result.level, 'reason': variables.result.reason, 'findings': variables.result.findings,
+     ?'kinds': has(variables.result.kinds) ? optional.of(variables.result.kinds) : optional.none(),
+     'drift': {'introduced': variables.introduced, 'resolved': variables.resolved}}
+
+steps:
+  # Changes that introduce drift are told first, then breaking ones.
+  rank: |-
+    annotation == null || (size(annotation.drift.introduced) == 0 && annotation.level != 'breaking') ? null
+      : size(annotation.drift.introduced) > 0 ? 0 : 1
+
+metadata:
+  variables:
+    - name: ids
+      expression: maps.keys(annotations)
+    - name: introduced
+      expression: "variables.ids.map(id, annotations[id].drift.introduced).filter(texts, size(texts) > 0).map(texts, texts.join('; '))"
+    - name: state
+      expression: "after.entities.filter(e, size(drift('after', e)) > 0).map(e, {'item': e.id, 'rules': drift('after', e)})"
+  values:
+    compatibility: |-
+      {'version': 0, 'rules': "Agent tool calls: named arguments checked against each tool's input schema",
+       'counts': {
+         'breaking': variables.ids.filter(id, annotations[id].level == 'breaking').size(),
+         'additive': variables.ids.filter(id, annotations[id].level == 'additive').size(),
+         'compatible': variables.ids.filter(id, annotations[id].level == 'compatible').size(),
+         'unknown': variables.ids.filter(id, annotations[id].level == 'unknown').size()},
+       'changes': annotations,
+       'notices': variables.introduced.map(text, 'Surface drift: ' + text + '.').slice(0, math.least(20, size(variables.introduced)))}
+    surfaceParity: |-
+      {'version': 0, 'violations': variables.state,
+       'introduced': variables.ids.filter(id, size(annotations[id].drift.introduced) > 0)
+         .map(id, {'change': id, 'drift': annotations[id].drift.introduced}),
+       'resolved': variables.ids.filter(id, size(annotations[id].drift.resolved) > 0)
+         .map(id, {'change': id, 'drift': annotations[id].drift.resolved})}

@@ -1,0 +1,101 @@
+# yaml-language-server: $schema=../../../packages/schemas/schemas/comparator-tests/v0.json
+#
+# What agent-tools.comparator.yaml is for, as cases: `projections check -p agent-tools` runs them. The fixtures are one
+# small catalog before and after a change that touches every rule, with rows shaped as extract.mjs writes them.
+format: projections.comparator-tests
+version: 0
+
+cases:
+  - name: a parameter removed, made required or narrowed breaks agents' calls
+    before: fixtures/before.json
+    after: fixtures/after.json
+    expect:
+      changes:
+        - {
+            item: 'tool:compare/before',
+            status: removed,
+            summary: 'Breaking: `compare.before` was removed; calls that pass it are rejected.',
+          }
+        - {item: 'tool:compare/after', summary: 'Breaking: `compare.after` is now required; calls without it are rejected.'}
+        - {item: 'tool:describe_part/kind', summary: 'Breaking: `describe_part.kind` no longer accepts `null`.'}
+        - {item: 'tool:screenshot/theme', summary: 'Breaking: `screenshot.theme` no longer accepts `dark`.'}
+        - {item: 'tool:screenshot/width', summary: 'Breaking: `screenshot.width` now accepts 320–1920 (was 320–2560).'}
+
+  - name: a parameter added, made optional or widened is additive
+    before: fixtures/before.json
+    after: fixtures/after.json
+    expect:
+      changes:
+        - {item: 'tool:describe_part/part', summary: 'Additive: `describe_part.part` is now optional; calls may omit it.'}
+        - {item: 'tool:describe_part/id', summary: 'Additive: `describe_part.id` now also accepts `object`.'}
+        - {item: 'tool:screenshot/mode', summary: 'Additive: `screenshot.mode` now also accepts `animated`.'}
+        - {item: 'tool:screenshot/height', summary: 'Additive: `screenshot.height` now accepts ≥ 1 (was 240–1600).'}
+        - {item: 'tool:rename', status: added, summary: 'Additive: `rename` is a new tool on `mcp`, `mcp-apps`, `vscode`.'}
+        # A required parameter of a new tool breaks no call that worked.
+        - {item: 'tool:rename/to', status: added, summary: 'Additive: `rename.to` comes with its new tool.'}
+        - {item: 'tool:describe_part/ids', summary: "Unknown: `describe_part.ids`'s schema changed in a way these rules don't classify."}
+
+  - name: what a tool does, and the surfaces that expose it
+    before: fixtures/before.json
+    after: fixtures/after.json
+    expect:
+      changes:
+        - item: 'tool:explore'
+          summary: >-
+            Breaking (behavioral): `explore` is no longer read-only; `explore` now needs trust to run repository code
+            (was no trust); calls without it fail.
+        - {item: 'tool:open_projection', summary: 'Additive: MCP Apps hosts now show the viewer for `open_projection`.'}
+        - {item: 'surface:copilot-canvas', summary: 'Additive: `copilot-canvas` now adds `project` to every tool.'}
+        - {item: 'surface:mcp-apps', status: added, summary: 'Additive: The tools are now exposed on `mcp-apps`.'}
+      metadata:
+        compatibility:
+          version: 0
+          counts: {breaking: 9, additive: 10, compatible: 1, unknown: 1}
+
+  - name: drift between surfaces is flagged where a change introduces it, and resolving it says so
+    before: fixtures/before.json
+    after: fixtures/after.json
+    expect:
+      changes:
+        - item: 'tool:sweep'
+          summary: >-
+            Breaking: `sweep` is no longer on `vscode`; agents there that call it fail. Surface drift: `sweep` is not
+            on `vscode` (regenerate its manifest: `node scripts/tools.mjs`).
+        - item: 'tool:refresh/viewer'
+          summary: >-
+            Additive: `refresh.viewer` is a new optional parameter. Surface drift: `refresh.viewer` is not on `vscode`
+            (regenerate its manifest: `node scripts/tools.mjs`).
+        - item: 'tool:describe_part/verbose'
+          summary: >-
+            Breaking: `describe_part.verbose` is no longer taken on `vscode`; calls there that pass it are rejected.
+            Surface drift: `describe_part.verbose` is not on `vscode` (regenerate its manifest: `node scripts/tools.mjs`).
+        - item: 'tool:current_view'
+          summary: >-
+            Breaking: `current_view` is no longer on `mcp`, `mcp-apps`, `vscode`; agents there that call it fail.
+            Surface drift: `current_view` is on `copilot-canvas` but not in the CLI's catalog.
+        - item: 'tool:adopt/bookmarks'
+          summary: >-
+            Compatible: `adopt.bookmarks` takes the same values. Resolves surface drift: `adopt.bookmarks` has a
+            different schema on `vscode` (regenerate its manifest: `node scripts/tools.mjs`).
+      # VS Code leaving out `confirm` is by design (options.dropped), and `viewer_request` is for the view alone.
+      metadata:
+        surfaceParity:
+          violations:
+            - {item: 'tool:current_view', rules: [not-in-catalog]}
+            - {item: 'tool:describe_part/verbose', rules: ['missing:vscode']}
+            - {item: 'tool:refresh/viewer', rules: ['missing:vscode']}
+            - {item: 'tool:sweep', rules: ['missing:vscode']}
+        compatibility:
+          notices:
+            - "Surface drift: `current_view` is on `copilot-canvas` but not in the CLI's catalog."
+            - 'Surface drift: `describe_part.verbose` is not on `vscode` (regenerate its manifest: `node scripts/tools.mjs`).'
+            - 'Surface drift: `refresh.viewer` is not on `vscode` (regenerate its manifest: `node scripts/tools.mjs`).'
+            - 'Surface drift: `sweep` is not on `vscode` (regenerate its manifest: `node scripts/tools.mjs`).'
+
+  - name: drift counts only the surfaces a definition says every tool should be on
+    options: {everyTool: [mcp, mcp-apps]}
+    before: fixtures/before.json
+    after: fixtures/after.json
+    expect:
+      changes:
+        - {item: 'tool:sweep', summary: 'Breaking: `sweep` is no longer on `vscode`; agents there that call it fail.'}

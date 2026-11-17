@@ -18,9 +18,13 @@ export function turnOf(ctx: RoutingContext, segment: Segment): Turn | null | und
   return sTurn(segment.start, segment.end!, ctx.axis, {lead: segment.lead, band: segment.band!, track: segment.track ?? 0})
 }
 
-/** Where a direct segment's run crosses its gap, along the axis. */
+/**
+ * Where a direct segment's run crosses its gap, along the axis; NaN when it has no S to run on (its ends are in line, or
+ * the gap is too short to turn in), so it matches no other run and never moves.
+ */
 export function runAt(ctx: RoutingContext, segment: Segment): number {
-  return ctx.along(segment.start) + turnOf(ctx, segment)!.middle
+  const turn = turnOf(ctx, segment)
+  return turn ? ctx.along(segment.start) + turn.middle : NaN
 }
 
 /** Moves a route's run to `position` (along the axis) if it can turn there clear of cards; otherwise leaves it. */

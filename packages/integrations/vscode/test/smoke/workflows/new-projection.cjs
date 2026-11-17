@@ -58,7 +58,10 @@ module.exports = async function newProjection({folder, api}) {
     await until('the package-map tab', async () => api.tabs('package-map').length > 0 || undefined)
     assert.ok(
       vscode.window.tabGroups.all.some(group =>
-        group.tabs.some(tab => tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === file),
+        group.tabs.some(
+          // As URIs: VS Code spells a Windows drive letter in lowercase, a joined path doesn't.
+          tab => tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === vscode.Uri.file(file).toString(),
+        ),
       ),
       'the definition is open',
     )

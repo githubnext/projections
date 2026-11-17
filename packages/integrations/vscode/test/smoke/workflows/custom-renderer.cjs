@@ -100,7 +100,8 @@ module.exports = async function customRenderer({folder, tests, api}) {
     const problem = await until('the error in Problems', async () =>
       vscode.languages.getDiagnostics().find(([, items]) => items.some(item => /The source says FAIL/.test(item.message))),
     )
-    assert.match(problem[0].fsPath, /cards\/src\/main\.tsx$/)
+    // The URI's path, '/'-separated on every platform.
+    assert.match(problem[0].path, /cards\/src\/main\.tsx$/)
     await saveSource('export const cards = 3\n')
     await until('built again', async () => (cardsBuild()?.state.phase === 'built' ? true : undefined))
   } else {

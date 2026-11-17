@@ -164,9 +164,16 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
   {
     await api.control('packages', {op: 'view', action: 'setMode', value: 'animated'})
     const play = async () => (await api.control('packages', {op: 'elements', selector: '.phv-play', attribute: 'data-icon'}))[0]?.value
-    assert.equal(await until('the play button', play), 'play')
     const position = async () =>
       Number((await api.control('packages', {op: 'elements', selector: '.phv-root', attribute: 'data-position'}))[0]?.value)
+    // The mode change settles before the button offers to play from the start (on a slow runner it can show the
+    // end's play-backward first).
+    await until(
+      'the play button',
+      async () => ((await play()) === 'play' ? true : undefined),
+      10_000,
+      async () => ({icon: await play(), position: await position()}),
+    )
     await api.control('packages', {op: 'view', action: 'togglePlayback'})
     await until('playback', async () => (await play()) === 'pause', 10_000)
     // One forward turn, until looping (the default) turns back at the end.

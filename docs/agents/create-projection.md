@@ -80,6 +80,11 @@ separate inspector to start.
   the same options in the repository: it finds the MCP server's viewer). Give
   them the bare link only when you can open neither. Later calls change what
   the open page shows, so don't open it again.
+- **In the GitHub Copilot app**, show it in the Projections canvas rather than
+  a browser tab: run `projections canvas install` once in the repository (it
+  writes `.github/extensions/projections/extension.mjs`), then open the
+  `projections` canvas, whose input is `open_projection`'s. It shows the same
+  viewer in the app's theme, which a page in a browser tab doesn't get.
 - **Talk it through**: say what they're looking at and what it shows (what
   changed, in what steps, what looks wrong), and show the next projection or
   pair on the same page. `current_view` (`projections view current`) says what

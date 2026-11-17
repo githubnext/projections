@@ -297,14 +297,15 @@ pub(super) async fn sweep_thumbnail(state: &Arc<ServiceState>, query: Option<&st
     // session is driven on its own thread, off the server's workers, and keeps
     // its thumbnail even if this request times out, for the client to ask again.
     let cache = state.clone();
+    let browsers = state.browsers.clone();
     let rendered = tokio::task::spawn_blocking(move || {
         let _rendering = rendering;
         let runtime = tokio::runtime::Builder::new_current_thread().enable_all().build()?;
         let rendered = runtime.block_on(async {
-            match crate::snapshot::render(request(Some(crate::snapshot::Mode::Diff))).await {
+            match crate::snapshot::render_with(request(Some(crate::snapshot::Mode::Diff)), &browsers).await {
                 Ok(rendered) => Ok(rendered),
                 Err(error) if stopped.load(Ordering::SeqCst) => Err(error),
-                Err(_) => crate::snapshot::render(request(None)).await,
+                Err(_) => crate::snapshot::render_with(request(None), &browsers).await,
             }
         })?;
         let bytes = Arc::new(rendered.png);

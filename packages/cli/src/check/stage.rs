@@ -21,6 +21,7 @@ pub(super) async fn renderer_checks(
     bundle: Option<PathBuf>,
     keys: &[String],
     executable: &Path,
+    browsers: &browser::Pool,
     timeout: Duration,
     cancel: Arc<AtomicBool>,
 ) -> Result<Vec<(String, Value)>> {
@@ -44,13 +45,14 @@ pub(super) async fn renderer_checks(
         .await?,
     );
     let url = format!("{}/?view=stage", headless::ORIGIN);
-    let (page, handle) = (host.clone(), tokio::runtime::Handle::current());
+    let (served, handle) = (host.clone(), tokio::runtime::Handle::current());
     let executable = executable.to_path_buf();
     let keys = keys.to_vec();
+    let browsers = browsers.clone();
     let results = tokio::task::spawn_blocking(move || -> Result<Vec<(String, Value)>> {
         // Starting the browser and the stage has its own budget; each scenario then gets the whole timeout.
         let deadline = Instant::now() + timeout;
-        let mut browser = browser::Browser::launch(browser::LaunchOptions {
+        let mut browser = browsers.take(browser::LaunchOptions {
             executable: &executable,
             transport: browser::Transport::default(),
             width: 1280,
@@ -58,40 +60,12 @@ pub(super) async fn renderer_checks(
             scale: 1.0,
             cancel,
         })?;
-        let session = open_session(&mut browser, deadline)?;
-        page.attach(&mut browser, &session, handle, deadline)?;
-        let navigated = browser.call("Page.navigate", json!({"url": url}), Some(&session), deadline)?;
-        if let Some(error) = navigated["errorText"].as_str() {
-            bail!("The browser could not open the Inspector: {error}");
-        }
-        wait_for_stage(&mut browser, &session, deadline)?;
-        let mut results = Vec::new();
-        for key in keys {
-            let deadline = Instant::now() + timeout;
-            let value = evaluate(
-                &mut browser,
-                &session,
-                deadline,
-                &format!(
-                    "window.projectionsStage.runChecks({}, {{}}).then(results => JSON.stringify(results))",
-                    serde_json::to_string(&key)?
-                ),
-            )
-            .map_err(|error| {
-                if Instant::now() >= deadline {
-                    anyhow::anyhow!(
-                        "The renderer checks on scenario {key} did not finish within {} s (--timeout); raise --timeout, or check a smaller extraction with --from",
-                        timeout.as_secs()
-                    )
-                } else {
-                    error
-                }
-            })?;
-            let checks: Value = serde_json::from_str(value.as_str().unwrap_or("[]"))?;
-            results.push((key, checks));
-        }
-        browser.close()?;
-        Ok(results)
+        let page = browser.open_page(deadline)?;
+        let results = served
+            .attach(&mut browser, &page.session, handle, deadline)
+            .and_then(|()| run_stage(&mut browser, &page.session, &url, keys, timeout, deadline));
+        browsers.give(browser, page)?;
+        results
     })
     .await;
     host.close().await;
@@ -99,20 +73,46 @@ pub(super) async fn renderer_checks(
     Ok(results)
 }
 
-/// A blank page's flattened session.
-fn open_session(browser: &mut browser::Browser, deadline: Instant) -> Result<String> {
-    let target = browser.call("Target.createTarget", json!({"url": "about:blank"}), None, deadline)?;
-    let target = target["targetId"].as_str().context("The browser created no page")?.to_owned();
-    let attached = browser.call(
-        "Target.attachToTarget",
-        json!({"targetId": target, "flatten": true}),
-        None,
-        deadline,
-    )?;
-    Ok(attached["sessionId"]
-        .as_str()
-        .context("The browser attached no session")?
-        .to_owned())
+/// Opens the stage at `url` on `session` and runs the checks of every scenario in `keys`.
+fn run_stage(
+    browser: &mut browser::Browser,
+    session: &str,
+    url: &str,
+    keys: Vec<String>,
+    timeout: Duration,
+    deadline: Instant,
+) -> Result<Vec<(String, Value)>> {
+    let navigated = browser.call("Page.navigate", json!({"url": url}), Some(session), deadline)?;
+    if let Some(error) = navigated["errorText"].as_str() {
+        bail!("The browser could not open the Inspector: {error}");
+    }
+    wait_for_stage(browser, session, deadline)?;
+    let mut results = Vec::new();
+    for key in keys {
+        let deadline = Instant::now() + timeout;
+        let value = evaluate(
+            browser,
+            session,
+            deadline,
+            &format!(
+                "window.projectionsStage.runChecks({}, {{}}).then(results => JSON.stringify(results))",
+                serde_json::to_string(&key)?
+            ),
+        )
+        .map_err(|error| {
+            if Instant::now() >= deadline {
+                anyhow::anyhow!(
+                    "The renderer checks on scenario {key} did not finish within {} s (--timeout); raise --timeout, or check a smaller extraction with --from",
+                    timeout.as_secs()
+                )
+            } else {
+                error
+            }
+        })?;
+        let checks: Value = serde_json::from_str(value.as_str().unwrap_or("[]"))?;
+        results.push((key, checks));
+    }
+    Ok(results)
 }
 
 fn evaluate(browser: &mut browser::Browser, session: &str, deadline: Instant, expression: &str) -> Result<Value> {

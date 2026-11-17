@@ -68,35 +68,38 @@ pub(super) async fn screenshot(service: &Service, input: &Value) -> Answer {
     let cancel = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let stop = cancel.clone();
     let mut cancelled = OnDrop(Some(move || stop.store(true, std::sync::atomic::Ordering::SeqCst)));
-    let rendered = crate::snapshot::render(crate::snapshot::Request {
-        document,
-        definition_revision: Some(definition.clone()),
-        repo: service.repository().to_path_buf(),
-        trust: service.trusted(),
-        definition: if before.is_some() {
-            crate::runtime::DefinitionSource::Head
-        } else {
-            crate::runtime::DefinitionSource::Base
+    let rendered = crate::snapshot::render_with(
+        crate::snapshot::Request {
+            document,
+            definition_revision: Some(definition.clone()),
+            repo: service.repository().to_path_buf(),
+            trust: service.trusted(),
+            definition: if before.is_some() {
+                crate::runtime::DefinitionSource::Head
+            } else {
+                crate::runtime::DefinitionSource::Base
+            },
+            assets: assets.path.clone(),
+            mode: if before.is_some() { mode } else { None },
+            progress,
+            focus: crate::snapshot::Focus {
+                // Changes need a comparison; one revision opens on everything.
+                on: focus.on.filter(|_| before.is_some()),
+                ..focus
+            },
+            theme,
+            frame: crate::snapshot::Frame::Card,
+            matte: None,
+            width,
+            height,
+            scale: 1.0,
+            browser: crate::browser::find(None)?,
+            transport: Default::default(),
+            timeout: Duration::from_secs(60),
+            cancel,
         },
-        assets: assets.path.clone(),
-        mode: if before.is_some() { mode } else { None },
-        progress,
-        focus: crate::snapshot::Focus {
-            // Changes need a comparison; one revision opens on everything.
-            on: focus.on.filter(|_| before.is_some()),
-            ..focus
-        },
-        theme,
-        frame: crate::snapshot::Frame::Card,
-        matte: None,
-        width,
-        height,
-        scale: 1.0,
-        browser: crate::browser::find(None)?,
-        transport: Default::default(),
-        timeout: Duration::from_secs(60),
-        cancel,
-    })
+        service.browsers(),
+    )
     .await?;
     cancelled.disarm();
     let pair = match &before {

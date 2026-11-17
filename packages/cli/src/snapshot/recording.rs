@@ -49,9 +49,10 @@ pub async fn record(request: Request, frame_ms: f64) -> Result<Recording> {
     let mut notices = std::mem::take(&mut prepared.notices);
     let options = prepared.capture;
     let recorded = tokio::task::spawn_blocking(move || {
-        let (mut browser, session) = open(&options)?;
-        let frames = record_frames(&mut browser, &session, &options, frame_ms);
-        browser.close()?;
+        let browsers = crate::browser::Pool::single_use();
+        let (mut browser, page) = open(&options, &browsers)?;
+        let frames = record_frames(&mut browser, &page.session, &options, frame_ms);
+        browsers.give(browser, page)?;
         frames
     })
     .await;

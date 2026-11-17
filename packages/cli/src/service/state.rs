@@ -91,6 +91,8 @@ pub(super) struct ServiceState {
     pub(super) rendering: Arc<tokio::sync::Mutex<()>>,
     /// Set at shutdown, so a thumbnail's browser stops rather than delaying it.
     pub(super) rendering_cancel: Arc<AtomicBool>,
+    /// The browser thumbnails and screenshots are rendered in, kept between renders while they keep coming.
+    pub(super) browsers: crate::browser::Pool,
     /// Custom renderer builds, in repository mode (`GET` and `POST /api/renderer-builds`).
     pub(super) renderer_builds: Option<Arc<crate::renderer_builds::RendererBuilds>>,
 }
@@ -166,6 +168,8 @@ pub(super) async fn shutdown(state: Arc<ServiceState>) {
     if let Some(builds) = &state.renderer_builds {
         builds.stop_all();
     }
+    let browsers = state.browsers.clone();
+    let _ = tokio::task::spawn_blocking(move || browsers.close()).await;
     for job in jobs {
         job.wait().await;
     }
@@ -262,6 +266,7 @@ pub(super) async fn build(options: InspectorOptions) -> Result<(Router, Arc<Serv
         thumbnails: Mutex::new(VecDeque::new()),
         rendering: Arc::new(tokio::sync::Mutex::new(())),
         rendering_cancel: Arc::new(AtomicBool::new(false)),
+        browsers: crate::browser::Pool::expiring(std::time::Duration::from_secs(30)),
         renderer_builds,
     });
     if let Some(fingerprint) = fingerprint {

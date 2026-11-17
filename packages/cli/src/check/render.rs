@@ -37,6 +37,7 @@ impl Checker<'_> {
             target.bundle,
             &keys,
             executable,
+            &self.browsers,
             self.options.timeout,
             self.options.cancel.clone(),
         )
@@ -62,27 +63,30 @@ impl Checker<'_> {
             ));
             return Ok(());
         }
-        let rendered = snapshot::render(snapshot::Request {
-            document: document.clone(),
-            definition_revision: Some("working-tree".into()),
-            repo: self.root.clone(),
-            trust: self.runner.trust,
-            definition: DefinitionSource::Base,
-            assets: assets::inspector_assets()?.path.clone(),
-            mode: None,
-            progress: None,
-            focus: snapshot::Focus::default(),
-            theme: snapshot::Theme::Light,
-            frame: snapshot::Frame::Card,
-            matte: None,
-            width: 1280,
-            height: 800,
-            scale: 1.0,
-            browser: executable.to_path_buf(),
-            transport: browser::Transport::default(),
-            timeout: self.options.timeout,
-            cancel: self.options.cancel.clone(),
-        })
+        let rendered = snapshot::render_with(
+            snapshot::Request {
+                document: document.clone(),
+                definition_revision: Some("working-tree".into()),
+                repo: self.root.clone(),
+                trust: self.runner.trust,
+                definition: DefinitionSource::Base,
+                assets: assets::inspector_assets()?.path.clone(),
+                mode: None,
+                progress: None,
+                focus: snapshot::Focus::default(),
+                theme: snapshot::Theme::Light,
+                frame: snapshot::Frame::Card,
+                matte: None,
+                width: 1280,
+                height: 800,
+                scale: 1.0,
+                browser: executable.to_path_buf(),
+                transport: browser::Transport::default(),
+                timeout: self.options.timeout,
+                cancel: self.options.cancel.clone(),
+            },
+            &self.browsers,
+        )
         .await;
         match rendered.and_then(|rendered| crate::create_file(png, &rendered.png)) {
             Ok(()) => steps.push(step("png", "Image", "pass", format!("Wrote {}", png.display()))),

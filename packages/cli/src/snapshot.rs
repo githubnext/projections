@@ -27,7 +27,7 @@ use std::{
 use anyhow::{Context, Result, bail, ensure};
 use serde_json::{Value, json};
 
-use crate::browser::{self, Browser, LaunchOptions, Transport};
+use crate::browser::{self, Browser, LaunchOptions, Page, Transport};
 use crate::headless::{self, Host};
 use crate::runtime::{DefinitionSource, Runner};
 use crate::service::InspectorOptions;
@@ -194,16 +194,22 @@ fn query(name: &str, value: &str) -> String {
 /// Renders the document and returns the PNG. A card frame hugs the renderer's content: the image is as tall as the
 /// card, at most the viewport.
 pub async fn render(request: Request) -> Result<Snapshot> {
+    render_with(request, &browser::Pool::single_use()).await
+}
+
+/// Renders as [`render`] does, in a browser from `browsers`, which keeps it for the next render.
+pub async fn render_with(request: Request, browsers: &browser::Pool) -> Result<Snapshot> {
     let hug = request.frame == Frame::Card;
     let mut prepared = prepare(request).await?;
     let host = prepared.host;
     let mut notices = std::mem::take(&mut prepared.notices);
     let mut options = prepared.capture;
     hugging::hug(&mut options, hug);
+    let browsers = browsers.clone();
     let captured = tokio::task::spawn_blocking(move || {
-        let (mut browser, session) = open(&options)?;
-        let shot = shoot(&mut browser, &session, &options.url, &options);
-        browser.close()?;
+        let (mut browser, page) = open(&options, &browsers)?;
+        let shot = shoot(&mut browser, &page.session, &options.url, &options);
+        browsers.give(browser, page)?;
         shot
     })
     .await;
@@ -358,10 +364,10 @@ fn page_state(browser: &mut Browser, session: &str, deadline: Instant) -> Result
     ))
 }
 
-/// Launches the browser and opens a page set up for capture: its size, density, theme and the served host.
-fn open(options: &Capture) -> Result<(Browser, String)> {
+/// Takes a browser from `browsers` and opens a page set up for capture: its size, density, theme and the served host.
+fn open(options: &Capture, browsers: &browser::Pool) -> Result<(Browser, Page)> {
     let deadline = Instant::now() + options.timeout;
-    let mut browser = Browser::launch(LaunchOptions {
+    let mut browser = browsers.take(LaunchOptions {
         executable: &options.browser,
         transport: options.transport,
         width: options.width,
@@ -369,19 +375,8 @@ fn open(options: &Capture) -> Result<(Browser, String)> {
         scale: options.scale,
         cancel: options.cancel.clone(),
     })?;
-    let target = browser.call("Target.createTarget", json!({"url": "about:blank"}), None, deadline)?;
-    let target = target["targetId"].as_str().context("The browser created no page")?.to_owned();
-    let attached = browser.call(
-        "Target.attachToTarget",
-        json!({"targetId": target, "flatten": true}),
-        None,
-        deadline,
-    )?;
-    let session = attached["sessionId"]
-        .as_str()
-        .context("The browser attached no session")?
-        .to_owned();
-    let session = session.as_str();
+    let page = browser.open_page(deadline)?;
+    let session = page.session.as_str();
     browser.call(
         "Emulation.setDeviceMetricsOverride",
         json!({
@@ -420,8 +415,7 @@ fn open(options: &Capture) -> Result<(Browser, String)> {
     if let Some(host) = &options.host {
         host.attach(&mut browser, session, options.handle.clone(), deadline)?;
     }
-    let session = session.to_owned();
-    Ok((browser, session))
+    Ok((browser, page))
 }
 
 fn navigate(browser: &mut Browser, session: &str, url: &str, deadline: Instant) -> Result<()> {

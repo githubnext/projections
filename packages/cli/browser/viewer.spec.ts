@@ -448,8 +448,12 @@ test('a named viewer is its own page, and the person switches its projection fro
 
   // That viewer shows it, and the agent reads that the person chose it; the default viewer is unchanged.
   await expect(header.locator('.pi-viewer-title')).toHaveText('Package map')
-  const side = (await control('control/state?viewer=side')).body.state
-  expect([side.projection, side.chosenBy]).toEqual(['packages', 'person'])
+  await expect
+    .poll(async () => {
+      const side = (await control('control/state?viewer=side')).body.state
+      return [side.projection, side.chosenBy]
+    })
+    .toEqual(['packages', 'person'])
   const current = (await control('control/tool/current_view', {viewer: 'side'})).body
   expect(current.content[0].text).toContain('The person chose this projection themselves')
   const main = (await state()).state

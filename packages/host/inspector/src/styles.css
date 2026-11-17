@@ -267,8 +267,9 @@ body {
 /*
  * The title as the trigger of the projection menu (viewer/title.tsx): it reads as the title, not a button. At rest it
  * has no fill, border or padding of its own, only a small muted chevron after the text. Hover and the open menu lay a
- * faint wash behind it, and the keyboard's focus a ring. The wash is 24px tall and overhangs the text by 6px at each
- * end through negative margins, so the row keeps its height, and the title its place and its cap-height centring.
+ * faint wash behind it, and keyboard focus draws the page's ring on the wash's edge. The wash is 24px tall and
+ * overhangs the text by 6px at each end through negative margins, so the row keeps its height, and the title its place
+ * and its cap-height centring.
  */
 .pi-viewer-header .pi-viewer-title-menu {
   display: flex;
@@ -287,14 +288,15 @@ body {
   color: inherit;
   font: inherit;
   cursor: pointer;
-  outline: none;
 }
 .pi-viewer-header .pi-viewer-title-menu:hover,
 .pi-viewer-header .pi-viewer-title-menu[data-state='open'] {
-  background: color-mix(in oklab, var(--pj-foreground) 7%, transparent);
+  background: color-mix(in oklab, var(--pj-foreground) 5%, transparent);
 }
-.pi-viewer-header .pi-viewer-title-menu:focus-visible {
-  box-shadow: 0 0 0 2px var(--pj-ring);
+/* The page's own focus ring, on the wash's edge rather than 2px outside it, so it stays inside the header. */
+.pi-viewer-header .pi-viewer-title-menu.pi-viewer-title-menu:focus-visible {
+  outline: 2px solid var(--pj-ring);
+  outline-offset: 0;
 }
 .pi-viewer-header .pi-viewer-chevron {
   flex-shrink: 0;

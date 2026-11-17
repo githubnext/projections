@@ -96,6 +96,40 @@ function stubRenderer(files) {
   return root
 }
 
+test('the development server serves an edit written straight after another, as an undo is', async () => {
+  const root = stubRenderer({'src/view.js': 'export const label = "Payments"\n'})
+  const view = join(root, 'src/view.js')
+  const server = await createServer({
+    ...rendererConfig({name: 'flags', title: 'Flags', view: 'src/view.js', kit: join(root, 'kit').replace(/\\/g, '/')}),
+    root,
+    configFile: false,
+    logLevel: 'silent',
+  })
+  try {
+    await server.listen(0)
+    const served = async () => (await fetch(`${server.resolvedUrls.local[0]}src/view.js`)).text()
+    assert.match(await served(), /"Payments"/)
+    while (!server.watcher.getWatched()[dirname(view)]?.includes('view.js')) await new Promise(resolve => setTimeout(resolve, 10))
+    const changed = () =>
+      new Promise((resolve, reject) => {
+        const missed = setTimeout(() => reject(new Error('The development server missed a write to the view')), 5_000)
+        server.watcher.once('change', () => resolve(clearTimeout(missed)))
+      })
+    let change = changed()
+    writeFileSync(view, 'export const label = "PAYMENTS"\n')
+    await change
+    assert.match(await served(), /"PAYMENTS"/)
+    // Within the 50 ms after a change in which Vite's watcher reports no other change to the file by default.
+    change = changed()
+    writeFileSync(view, 'export const label = "Payments"\n')
+    await change
+    assert.match(await served(), /"Payments"/)
+  } finally {
+    await server.close()
+    rmSync(root, {recursive: true, force: true})
+  }
+})
+
 test('a view builds into the bundle with renderer.json from the same config', async () => {
   const root = stubRenderer({
     'src/view.js': 'export const options = {nouns: {a: false}}\nexport default function View() { return "view" }\n',

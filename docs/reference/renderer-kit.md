@@ -194,6 +194,18 @@ boundaryKinds(compound: Array<string> | false | true | undefined): Array<string>
 
 The entity kinds a `compound` option lets become boundaries.
 
+### `boundaryNouns`
+
+```ts
+boundaryNouns(model: Pick<ComparisonModel<Extraction>, "after" | "before">, compound: Array<string> | false | true): { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined } | { readonly [key: string]: SummaryNoun | false }
+```
+
+Nouns that leave grouping boundaries out of the summary: each of the boundary kinds `compound` names (see
+`boundaryKinds`) whose every entity, in each revision, is drawn as a boundary round others (see `moduleGroups`), maps
+to `false`. Such a box only groups the cards it holds, which the summary counts, so it is no figure beside them; a
+kind some of whose entities are drawn as cards (a module others depend on) is counted whole, as the protocol counts
+kinds. Spread it into a renderer's nouns: `{contains: false, ...boundaryNouns(model, true)}`.
+
 ### `boundedLegend`
 
 ```ts

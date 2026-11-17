@@ -10,6 +10,7 @@ import type {
   SummaryFactItem,
 } from '@githubnext/projections-renderer-sdk/protocol'
 import type {ComparisonModel} from './model.js'
+import {boundaryKinds, moduleGroups} from './layout/groups.js'
 
 /** What a renderer's summary facts are computed from (`MountOptions.facts`): the document and its control values. */
 export interface SummaryFactContext {
@@ -79,6 +80,25 @@ export function rendererSummary(init: InitPayload, nouns?: SummaryNouns, facts: 
   const counts = withDefinitionNouns(summaryItems(init, nouns), init.projection?.kinds)
   const stated = boundedFacts(facts, JSON.stringify(counts).length)
   return {items: [...counts.slice(0, Math.max(0, rendererLimits.summaryItems - stated.length)), ...stated]}
+}
+
+/**
+ * Nouns that leave grouping boundaries out of the summary: each of the boundary kinds `compound` names (see
+ * `boundaryKinds`) whose every entity, in each revision, is drawn as a boundary round others (see `moduleGroups`), maps
+ * to `false`. Such a box only groups the cards it holds, which the summary counts, so it is no figure beside them; a
+ * kind some of whose entities are drawn as cards (a module others depend on) is counted whole, as the protocol counts
+ * kinds. Spread it into a renderer's nouns: `{contains: false, ...boundaryNouns(model, true)}`.
+ */
+export function boundaryNouns(model: Pick<ComparisonModel, 'before' | 'after'>, compound: boolean | readonly string[]): SummaryNouns {
+  const kinds = boundaryKinds(compound)
+  const grouping = (extraction: ComparisonModel['before']) => {
+    const groups = moduleGroups(extraction.entities, extraction.relationships, kinds)
+    return (kind: string) => extraction.entities.every(entity => entity.kind !== kind || groups.has(entity.id))
+  }
+  const revisions = model.before === model.after ? [model.after] : [model.before, model.after]
+  const tests = revisions.map(grouping)
+  const present = new Set(revisions.flatMap(extraction => extraction.entities.map(entity => entity.kind)))
+  return Object.fromEntries(kinds.filter(kind => present.has(kind) && tests.every(test => test(kind))).map(kind => [kind, false]))
 }
 
 /**

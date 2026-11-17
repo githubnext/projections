@@ -932,6 +932,50 @@
       "renderer": "dependencies",
       "before": "fixtures/nuget-before.json",
       "after": "fixtures/nuget-after.json"
+    },
+    {
+      "id": "module-graph-layered",
+      "title": "A layered module graph",
+      "description": "36 modules in five layers: apps over features over kits over core and third-party packages, the size of a mid-sized app. A feature module arrives with its imports and another leaves.",
+      "renderer": "graph",
+      "before": "fixtures/module-graph-layered-before.json",
+      "after": "fixtures/module-graph-layered-after.json"
+    },
+    {
+      "id": "module-graph-layered-now",
+      "title": "A layered module graph (one revision)",
+      "description": "36 modules in five layers: apps over features over kits over core and third-party packages, the size of a mid-sized app. Too large to fit at a readable size, it opens at the text floor on its top row.",
+      "renderer": "graph",
+      "extraction": "fixtures/module-graph-layered-before.json"
+    },
+    {
+      "id": "module-graph-wide",
+      "title": "A wide module graph",
+      "description": "48 modules, most of them independent features over a handful of foundations: a wide, shallow graph. A feature module arrives with its imports and another leaves.",
+      "renderer": "graph",
+      "before": "fixtures/module-graph-wide-before.json",
+      "after": "fixtures/module-graph-wide-after.json"
+    },
+    {
+      "id": "module-graph-wide-now",
+      "title": "A wide module graph (one revision)",
+      "description": "48 modules, most of them independent features over a handful of foundations: a wide, shallow graph. Too large to fit at a readable size, it opens at the text floor on its top row.",
+      "renderer": "graph",
+      "extraction": "fixtures/module-graph-wide-before.json"
+    },
+    {
+      "id": "module-graph-hub-heavy-now",
+      "title": "A hub-heavy module graph (one revision)",
+      "description": "33 modules, each importing the same two shared ones besides its own, so long edges fan into two hubs. Too large to fit at a readable size, it opens at the text floor on its top row.",
+      "renderer": "graph",
+      "extraction": "fixtures/module-graph-hub-heavy.json"
+    },
+    {
+      "id": "module-architecture-now",
+      "title": "An architecture of 42 components (one revision)",
+      "description": "Four modules of a monorepo as one revision, past the 40 components above which a comparison collapses unchanged boundaries: every boundary is drawn open, and the canvas opens at the readable text floor on its top row.",
+      "renderer": "architecture",
+      "extraction": "fixtures/module-architecture.json"
     }
   ]
 }

@@ -107,21 +107,25 @@ Components grouped by module: a `module` whose only relationships are the
 `contains` relationships to its children (each with no other parent) becomes a
 dashed boundary around them, named on its top edge, instead of a card with an
 arrow to each. Other relationships stay arrows, across boundaries. Containment
-drawn as boundaries isn't counted in the summary bar.
+drawn as boundaries isn't counted in the summary bar, nor are modules when every
+one is drawn as a boundary: they only group the components it counts.
 
-An architecture of more than 40 components collapses each unchanged boundary
-into one summary card, named for the boundary and counting its components
-(`extractors`, `Module · 31 components`), with the boundary's own `data` (so a
-module the extractor describes and sizes keeps its subtitle, size and color);
-relationships into and out of it join the card, one arrow per pair of cards. A
-boundary stays open when anything in it changed, when a changed relationship
-touches it, or when it holds the item a host focused. A summary card shows an
-expand icon in its corner: clicking it (or double-clicking, or pressing Enter or
-Space on it), or an arrow joined to one, opens it, and a card in its place, with
-a collapse icon, collapses it again. Cards are controls, so clicking them never
-selects their text; selecting a hidden component elsewhere (the host's table,
-the other pane) opens the boundary that holds it. The **Every component**
-control shows every boundary open.
+One revision of up to 100 components draws every one: a large one opens at the
+readable text floor on its top row and scrolls, with nothing to click open. A
+comparison of more than 40 components (or one revision of more than 100, which
+would take too long to lay out whole) collapses each unchanged boundary into one
+summary card, named for the boundary and counting its components (`extractors`,
+`Module · 31 components`), with the boundary's own `data` (so a module the
+extractor describes and sizes keeps its subtitle, size and color); relationships
+into and out of it join the card, one arrow per pair of cards. A boundary stays
+open when anything in it changed, when a changed relationship touches it, or
+when it holds the item a host focused. A summary card shows an expand icon in
+its corner: clicking it (or double-clicking, or pressing Enter or Space on it),
+or an arrow joined to one, opens it, and a card in its place, with a collapse
+icon, collapses it again. Cards are controls, so clicking them never selects
+their text; selecting a hidden component elsewhere (the host's table, the other
+pane) opens the boundary that holds it. The **Every component** control shows
+every boundary open.
 
 ### `infrastructure`
 
@@ -318,12 +322,15 @@ off draw the graph plain.
 The **summary bar** counts each kind, with its changes, in the presentation's
 words; kinds it doesn't name take the host's
 (`5 components +1 −1 · 3 modules · 4 uses +3 −3`). Every figure filters to its
-items. Then the presentation's facts:
+items. A kind drawn only as boundaries round other cards (`architecture`'s
+modules, `infrastructure`'s modules and resource groups) is no figure: its boxes
+group cards the bar already counts. Then the presentation's facts:
 
 - `graph`, `graph-horizontal`, `dag` and `architecture`: the counts alone;
   `precedes` relationships count as dependencies (`6 dependencies`).
-- `infrastructure`: resources, data sources, modules and resource groups, then
-  the plan in Terraform's order and words, each action with its icon and count
+- `infrastructure`: resources, data sources, and modules and resource groups
+  drawn as cards, then the plan in Terraform's order and words, each action with
+  its icon and count
   (`2 to add · 3 to change · 1 to replace · 1 to destroy · 1 to move`, and
   `to import`, `to redeploy`, `to read` and `to forget`). In one revision it
   counts each resource's pending action, as a plan does. Modules and resource

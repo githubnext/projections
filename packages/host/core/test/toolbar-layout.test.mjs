@@ -3,10 +3,27 @@ import assert from 'node:assert/strict'
 import {actionCollapseOrder, toolbarPlans} from '../dist/ui/toolbar-layout.js'
 
 const all = {pair: true, modes: true, playback: true, actions: ['filter', 'fullscreen', 'info', 'zoom']}
-const show = plan => `${plan.rows}:${plan.pair}:${plan.mode}:${plan.playback}:${plan.more.join('+') || '-'}`
+const show = plan =>
+  `${plan.cluster === 'centre' ? 'centre ' : ''}${plan.rows}:${plan.pair}:${plan.mode}:${plan.playback}:${plan.more.join('+') || '-'}`
+/** The plans after the leading ones in the fullest forms (`centre` and its two rows after the pickers). */
+const ladder = content => toolbarPlans(content).map(show).slice(6)
 
-test('one row is preferred: it collapses in priority order, actions into More one at a time, before a second row', () => {
-  const plans = toolbarPlans(all).map(show)
+test('the mode region is first centred in its fullest forms, playback on row 2, then follows the pickers in them', () => {
+  assert.deepEqual(toolbarPlans(all).map(show).slice(0, 6), [
+    'centre 2:full:icons:full:-',
+    'centre 2:full:icons:compact:-',
+    'centre 2:full:icons:minimal:-',
+    '2:full:icons:full:-',
+    '2:full:icons:compact:-',
+    '2:full:icons:minimal:-',
+  ])
+  // No other plan centres it, and without a mode region none does.
+  assert.equal(toolbarPlans(all).filter(plan => plan.cluster === 'centre').length, 3)
+  assert.equal(toolbarPlans({...all, modes: false}).filter(plan => plan.cluster === 'centre').length, 0)
+})
+
+test('then one row is preferred: it collapses in priority order, actions into More one at a time, before a second row', () => {
+  const plans = ladder(all)
   const firstTwoRow = plans.findIndex(plan => plan.startsWith('2:'))
   assert.deepEqual(plans.slice(0, firstTwoRow), [
     '1:full:icons:full:-',
@@ -23,7 +40,7 @@ test('one row is preferred: it collapses in priority order, actions into More on
 })
 
 test('the varied count is the first action into More, before zoom', () => {
-  const plans = toolbarPlans({...all, actions: [...all.actions, 'varied']}).map(show)
+  const plans = ladder({...all, actions: [...all.actions, 'varied']})
   const firstTwoRow = plans.findIndex(plan => plan.startsWith('2:'))
   assert.deepEqual(plans.slice(3, firstTwoRow), [
     '1:short:menu:compact:-',
@@ -74,6 +91,7 @@ test('with two rows, row 1 starts again from its most spacious forms, and row 2 
 test('without playback, one row collapses in the same order and ends with the merged pickers', () => {
   const plans = toolbarPlans({...all, playback: false, actions: ['filter', 'info']}).map(show)
   assert.deepEqual(plans, [
+    'centre 1:full:icons:full:-',
     '1:full:icons:full:-',
     '1:short:icons:full:-',
     '1:short:menu:full:-',

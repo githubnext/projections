@@ -28,6 +28,8 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
     )
   const scopes: ViewScope[] = p.scope === 'noise' ? ['changes', 'all', 'noise'] : ['changes', 'all']
   const index = Math.max(0, scopes.indexOf(p.scope))
+  // Every count takes the widest one's digits, so the switch (centred in the toolbar) keeps its width as counts change.
+  const digits = Math.max(...scopes.map(scope => p.scopeCounts[scope].toLocaleString().length))
   const choose = (next: number) => {
     const scope = scopes[(next + scopes.length) % scopes.length]!
     flushSync(() => p.setScope(scope))
@@ -65,7 +67,7 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
             onClick={() => p.setScope(scope)}
           >
             {label}
-            <span aria-hidden="true" className="phv-scope-count">
+            <span aria-hidden="true" className="phv-scope-count" style={{minWidth: `${digits}ch`}}>
               {count}
             </span>
           </button>

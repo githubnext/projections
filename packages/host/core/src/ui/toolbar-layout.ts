@@ -17,6 +17,11 @@ export const actionCollapseOrder: readonly ToolbarAction[] = ['varied', 'zoom', 
  */
 export interface ToolbarPlan {
   rows: 1 | 2
+  /**
+   * Where the mode region (the mode and scope switches) sits: centred on the whole row, with the start region at the
+   * row's start and the actions at its end; or after the start region, the row's free space between it and the actions.
+   */
+  cluster: 'centre' | 'start'
   /** The pair picker: two selects, two compact triggers, or one compare button. */
   pair: PairForm
   /** The mode switch: icons and labels, icons only, or one dropdown button. */
@@ -60,10 +65,13 @@ const forms: readonly (readonly [PairForm, ModeForm])[] = [
   ['short', 'menu'],
 ]
 
-const signature = (plan: ToolbarPlan) => `${plan.rows}:${plan.pair}:${plan.mode}:${plan.playback}:${plan.more.join(',')}`
+const signature = (plan: ToolbarPlan) => `${plan.rows}:${plan.cluster}:${plan.pair}:${plan.mode}:${plan.playback}:${plan.more.join(',')}`
 
 /**
- * The plans the toolbar tries, most spacious first. One row is preferred and collapses in priority order while it
+ * The plans the toolbar tries, most spacious first. With a mode region, the first plans centre it on the row in its
+ * fullest forms, with every action inline: one row, or (with playback) two, playback alone on row 2, so choosing
+ * Animated doesn't move the mode switch under the pointer. Then the mode region follows the start region, and one row
+ * is preferred and collapses in priority order while it
  * still fits at the minimums: the pickers become compact triggers, the mode switch (icons only) becomes
  * a dropdown, (with playback) the steps and percent move into the playback group's overflow, the actions move into
  * More one at a time (`actionCollapseOrder`), and finally the steps and percent join them there. Only when one row
@@ -84,21 +92,30 @@ export function toolbarPlans(content: ToolbarContent): ToolbarPlan[] {
     {pair: 'merged', mode: 'menu', more: moved(actions.length)},
   ]
   const plans: ToolbarPlan[] = []
+  const playbacks = ['full', 'compact', 'minimal'] as const
+  const cluster = 'start' as const
+  if (content.modes) {
+    const centred = {cluster: 'centre', pair: 'full', mode: 'icons', more: []} as const
+    // With playback, the same two rows with the mode region after the start region follow, before anything collapses.
+    if (content.playback)
+      for (const placement of ['centre', 'start'] as const)
+        plans.push(...playbacks.map(playback => ({rows: 2 as const, ...centred, cluster: placement, playback})))
+    else plans.push({rows: 1, ...centred, playback: 'full'})
+  }
   if (content.playback) {
-    for (const [pair, mode] of forms) plans.push({rows: 1, pair, mode, playback: 'full', more: []})
+    for (const [pair, mode] of forms) plans.push({rows: 1, cluster, pair, mode, playback: 'full', more: []})
     for (let count = 0; count <= actions.length; count++)
-      plans.push({rows: 1, pair: 'short', mode: 'menu', playback: 'compact', more: moved(count)})
-    plans.push({rows: 1, pair: 'short', mode: 'menu', playback: 'minimal', more: moved(actions.length)})
-    const two = (config: (typeof row)[number]) =>
-      (['full', 'compact', 'minimal'] as const).map(playback => ({rows: 2 as const, ...config, playback}))
+      plans.push({rows: 1, cluster, pair: 'short', mode: 'menu', playback: 'compact', more: moved(count)})
+    plans.push({rows: 1, cluster, pair: 'short', mode: 'menu', playback: 'minimal', more: moved(actions.length)})
+    const two = (config: (typeof row)[number]) => playbacks.map(playback => ({rows: 2 as const, cluster, ...config, playback}))
     // Two rows while row 1 stays full enough (`firstRowFill`, see `rowCeiling`); then one row with the pickers merged;
     // and two rows with them merged last.
     plans.push(...row.filter(config => config.pair !== 'merged').flatMap(two))
     for (const playback of ['compact', 'minimal'] as const)
-      plans.push({rows: 1, pair: 'merged', mode: 'menu', playback, more: moved(actions.length)})
+      plans.push({rows: 1, cluster, pair: 'merged', mode: 'menu', playback, more: moved(actions.length)})
     plans.push(...row.filter(config => config.pair === 'merged').flatMap(two))
   } else {
-    for (const config of row) plans.push({rows: 1, ...config, playback: 'full'})
+    for (const config of row) plans.push({rows: 1, cluster, ...config, playback: 'full'})
   }
   const seen = new Set<string>()
   return plans
@@ -115,10 +132,15 @@ export function toolbarPlans(content: ToolbarContent): ToolbarPlan[] {
     })
 }
 
-/** The plan in `plans` nearest to `plan`: the same one, else the same region forms in another row count. */
+/**
+ * The plan in `plans` nearest to `plan`: the same one, else the same region forms and placement in another row count
+ * (a centred mode region stays centred as playback comes and goes), else the same forms.
+ */
 function locate(plans: readonly ToolbarPlan[], plan: ToolbarPlan): number {
   const matches = [
     (item: ToolbarPlan) => signature(item) === signature(plan),
+    (item: ToolbarPlan) =>
+      item.cluster === plan.cluster && item.pair === plan.pair && item.mode === plan.mode && item.more.join() === plan.more.join(),
     (item: ToolbarPlan) => item.pair === plan.pair && item.mode === plan.mode && item.more.join() === plan.more.join(),
     (item: ToolbarPlan) => item.pair === plan.pair && item.mode === plan.mode,
   ]
@@ -161,10 +183,13 @@ function lockOf(toolbar: HTMLElement, plan: ToolbarPlan): ((candidate: ToolbarPl
 
 /**
  * The widest toolbar a two-row plan suits: one whose row 1, at its minimums, still fills `firstRowFill` of the row
- * (the toolbar's padding and border take 10px). Plans that merge the pickers are the last resort and have no limit.
+ * (the toolbar's padding and border take 10px). Plans that merge the pickers are the last resort and have no limit,
+ * and neither has a row 1 in its fullest forms (the mode region centred, or after the start region), which is the row
+ * the other modes show at the same width.
  */
 function rowCeiling(toolbar: HTMLElement, plan: ToolbarPlan): number {
-  if (plan.rows !== 2 || plan.pair === 'merged') return Infinity
+  const fullest = plan.pair === 'full' && plan.mode === 'icons' && plan.more.length === 0
+  if (plan.rows !== 2 || plan.pair === 'merged' || fullest) return Infinity
   const row = toolbar.querySelector(':scope > .ph-toolbar-row')
   return row ? fitWidth(row) / firstRowFill + 10 : Infinity
 }

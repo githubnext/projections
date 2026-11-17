@@ -9,7 +9,8 @@ const px = (value: string) => parseFloat(value) || 0
 /**
  * The width an element needs at its minimums. `data-fit-min` elements (the slider, spacers) need that many pixels;
  * `data-fit="row"` containers need their padding, border, gaps and their in-flow children's needs; `column`
- * containers the widest child's; anything else (blocks that never shrink) its current width.
+ * containers the widest child's; `centre` containers (three children, the middle one centred) the middle child's and
+ * twice the wider side's, so the middle one stays centred; anything else (blocks that never shrink) its current width.
  */
 export function fitWidth(element: Element): number {
   const min = element.getAttribute('data-fit-min')
@@ -25,6 +26,10 @@ export function fitWidth(element: Element): number {
   })
   const widths = items.map(fitWidth)
   if (fit === 'column') return frame + Math.max(0, ...widths)
+  if (fit === 'centre' && widths.length === 3) {
+    const [start, middle, end] = widths as [number, number, number]
+    return frame + middle + 2 * Math.max(start, end) + 2 * px(style.columnGap)
+  }
   return frame + widths.reduce((sum, width) => sum + width, 0) + px(style.columnGap) * Math.max(0, items.length - 1)
 }
 

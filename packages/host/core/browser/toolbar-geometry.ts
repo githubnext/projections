@@ -10,6 +10,18 @@ export interface ToolbarRowGeometry {
   fill: number
   /** The row holds the playback group and nothing else. */
   playbackOnly: boolean
+  /** The row centres its mode region (`ToolbarRow`'s `centred`). */
+  centred: boolean
+}
+
+/**
+ * Where row 1's mode region (the mode and scope switches) sits: its drawn controls' centre less the row's, and the
+ * room between those controls and the nearest control of the regions beside them.
+ */
+export interface ClusterGeometry {
+  offset: number
+  clearance: number
+  left: number
 }
 
 /** The toolbar's rows, its interactive elements' boxes, overlaps between them and anything outside the toolbar. */
@@ -50,8 +62,30 @@ export const toolbarGeometry = (page: Page) =>
             ),
           ),
           playbackOnly: items.length === 1 && Boolean(items[0]!.querySelector('[role="group"][aria-label="Comparison playback"]')),
+          centred: row.hasAttribute('data-centred'),
         }
       })
+      // The span of a region's drawn controls, not its box (a centred mode region pads itself).
+      const span = (region: Element | null | undefined) => {
+        const boxes = [...(region?.querySelectorAll('button, select, input, [role="radiogroup"]') ?? [])].filter(shown).map(box)
+        return boxes.length
+          ? {left: Math.min(...boxes.map(item => item.left)), right: Math.max(...boxes.map(item => item.right))}
+          : undefined
+      }
+      const first = toolbar.querySelector(':scope > .ph-toolbar-row')
+      const region = (name: string) => first?.querySelector(`:scope > [data-toolbar-region="${name}"]`)
+      const mode = span(region('mode'))
+      const cluster: ClusterGeometry | undefined =
+        mode && first
+          ? {
+              offset: (mode.left + mode.right) / 2 - (box(first).left + box(first).width / 2),
+              clearance: Math.min(
+                mode.left - (span(region('start'))?.right ?? -Infinity),
+                (span(region('end'))?.left ?? Infinity) - mode.right,
+              ),
+              left: mode.left,
+            }
+          : undefined
       const controls = [...toolbar.querySelectorAll('button, select, input, output')].filter(shown).map(element => {
         const rect = box(element)
         return {name: nameOf(element), left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width}
@@ -89,6 +123,7 @@ export const toolbarGeometry = (page: Page) =>
       while (next && box(next).height <= 2) next = next.nextElementSibling
       const below = next ? box(next).top - bar.bottom : undefined
       return {
+        cluster,
         thumb,
         heights,
         below,

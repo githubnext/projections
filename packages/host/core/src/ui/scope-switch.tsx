@@ -31,6 +31,8 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
       </span>
     )
   const scopes: ViewScope[] = p.scope === 'noise' ? ['changes', 'all', 'noise'] : ['changes', 'all']
+  // Every count takes the widest one's digits, so the switch (centred in the toolbar) keeps its width as counts change.
+  const digits = Math.max(...scopes.map(scope => p.scopeCounts[scope].toLocaleString().length))
   return (
     <SegmentedControl
       aria-label="Scope"
@@ -51,7 +53,11 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
             className="pj:gap-1.5 pj:px-2"
           >
             <span className="ph-scope-label">{label}</span>
-            <span aria-hidden="true" className="ph-scope-count pj:text-xs pj:tabular-nums pj:text-muted-foreground">
+            <span
+              aria-hidden="true"
+              style={{minWidth: `${digits}ch`}}
+              className="ph-scope-count pj:text-start pj:text-xs pj:tabular-nums pj:text-muted-foreground"
+            >
               {count}
             </span>
           </SegmentedControlItem>

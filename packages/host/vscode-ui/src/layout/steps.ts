@@ -13,6 +13,11 @@ export const actionCollapseOrder: readonly ToolbarAction[] = ['varied', 'zoom', 
 export interface ToolbarLayout {
   /** One row, or two: row 2 is the playback group across the whole width (animated mode only). */
   rows: 1 | 2
+  /**
+   * Where the mode region (the mode and scope switches) sits: centred on the whole row, the picker at its start and
+   * the actions at its end; or after the picker, the row's free space between it and the actions.
+   */
+  cluster: 'centre' | 'start'
   /** Revision names at the slider's ends. */
   sliderEnds: boolean
   /** The pair picker: two selects, two compact triggers with short names, or one compare button with both. */
@@ -50,6 +55,7 @@ export const playbackRowShare = 0.8
 
 const step = (layout: Partial<ToolbarLayout>): ToolbarLayout => ({
   rows: 1,
+  cluster: 'start',
   sliderEnds: false,
   pickers: 'full',
   modes: 'segmented',
@@ -77,7 +83,10 @@ const rowForms: readonly Partial<ToolbarLayout>[] = [
 ]
 
 /**
- * The priority collapse, least collapsed first. One row is preferred: the slider's revision names go, the pickers
+ * The priority collapse, least collapsed first. A toolbar with a mode region first centres it on the row, in its
+ * fullest forms with every action inline, with playback (animated mode) alone on row 2, so choosing Animated doesn't
+ * move the mode switch under the pointer; then (animated) the same two rows with the mode region after the picker.
+ * Then the mode region follows the picker, and one row is preferred: the slider's revision names go, the pickers
  * become compact triggers, the mode switch a menu, the steps and percentage move into the playback group's overflow,
  * then the actions move into More one at a time (the varied count, zoom, About, full screen, Filter). Only when one row can't fit even
  * then does animated mode plan two rows (the playback group alone on row 2, at full width): row 1 has the width to
@@ -96,12 +105,23 @@ const animatedSteps: readonly ToolbarLayout[] = [
   ...rowForms.flatMap(form => [step({...form, rows: 2}), step({...form, rows: 2, playbackOverflow: true})]),
 ]
 const stillSteps: readonly ToolbarLayout[] = rowForms.map(step)
+/** The steps before those, for a toolbar with a mode region. */
+const centredSteps = {
+  animated: [
+    step({cluster: 'centre', rows: 2}),
+    step({cluster: 'centre', rows: 2, playbackOverflow: true}),
+    step({rows: 2}),
+    step({rows: 2, playbackOverflow: true}),
+  ],
+  still: [step({cluster: 'centre'})],
+} as const
 
 /** The collapse order for a toolbar's content, without steps that change nothing it holds. */
 export function toolbarSteps(content: ToolbarContent): readonly ToolbarLayout[] {
   const actions = content.actions === true ? actionCollapseOrder : content.actions || []
   const seen = new Set<string>()
-  return (content.playback ? animatedSteps : stillSteps)
+  const centred = content.modes ? centredSteps[content.playback ? 'animated' : 'still'] : []
+  return [...centred, ...(content.playback ? animatedSteps : stillSteps)]
     .map(layout => {
       const moreActions = layout.moreActions.filter(action => actions.includes(action))
       return {

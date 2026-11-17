@@ -87,12 +87,13 @@ The same names and props as the default UI's blocks: `Toolbar`, `PairPicker`,
 `FullscreenButton`, `MoreMenu`, `ProjectionPicker`, `ViewSwitch`,
 `ComparatorLine`, `RawDetails`, `VariedList`, and the toolbar's
 priority-collapse layout (`useToolbarLayout`, `toolbarGrid`, `toolbarSteps`),
-which collapses in the same order as the default UI's: the slider's revision
-names, compact pickers, the mode menu, playback's steps into its "…" menu, then
-the varied count, zoom, About, full screen and Filter into the toolbar's "…"
-(More Actions), one at a time, then two rows. The toolbar's `data-rows`,
-`data-pickers`, `data-modes`, `data-step` and `data-more-actions` say which
-layout applies.
+which collapses in the same order as the default UI's: first the mode region
+(the mode and scope switches) centred on the row, playback on a second row, then
+after the pickers; the slider's revision names, compact pickers, the mode menu,
+playback's steps into its "…" menu, then the varied count, zoom, About, full
+screen and Filter into the toolbar's "…" (More Actions), one at a time, then two
+rows. The toolbar's `data-rows`, `data-cluster`, `data-pickers`, `data-modes`,
+`data-step` and `data-more-actions` say which layout applies.
 
 - Toolbar actions: A view title bar's action bar: icon-only codicon buttons with
   VS Code's hover, active and focus states. The toolbar's edge controls sit as

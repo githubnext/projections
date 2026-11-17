@@ -71,8 +71,20 @@ viewport, since a view is embedded at any width; `useToolbarLayout` in
 control at its minimum size: the slider at 160px (120px on a toolbar under
 480px), the pickers at their compact width, and every control (buttons, pickers,
 the chip and the round play button) 32px tall. It shows the most spacious plan
-that fits. **One row is preferred**: as the toolbar narrows, it collapses in
-priority order while one row still fits at those minimums:
+that fits.
+
+**The mode region is centred first.** While the row has room, the mode switch
+and the scope switch (Changes · All) sit together at the centre of the
+toolbar's whole width, the pickers at its start and the actions at its end, all
+in their fullest forms (`ToolbarRow`'s `centred` grid: the regions beside it get
+equal halves of what it leaves). It keeps 24px from them; with less room it
+moves to follow the pickers, still in its fullest forms. Animated playback then
+takes a second row of its own, so choosing Animated (or leaving it) never moves
+the mode switch under the pointer; the scope's counts keep the widest count's
+digits, so the region keeps its width as they change.
+
+Narrower still, **one row is preferred**: as the toolbar narrows, it collapses
+in priority order while one row still fits at those minimums:
 
 1. the Before/After selects become compact triggers with the short revision
    names ("v1"), truncated, the full names as their titles;

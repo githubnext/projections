@@ -63,6 +63,17 @@
   grid-area: end;
   justify-self: end;
 }
+/* A centred mode region (`toolbarGrid`): the picker at the row's start, truncated within its half, and the actions at
+   its end; the mode region keeps its place, whatever the regions beside it draw. */
+.phv-toolbar[data-cluster='centre'] > .phv-toolbar-start {
+  justify-self: start;
+  max-width: 100%;
+}
+.phv-toolbar[data-cluster='centre'] > .phv-toolbar-mode {
+  justify-self: center;
+  /* It keeps 24px (with the row's gap) from the regions beside it: the layout changes before they come closer. */
+  padding-inline: 16px;
+}
 /* Row 1 of two keeps the one row's height (inside the padding), so its edge controls keep their insets. */
 .phv-toolbar[data-rows='2'] {
   grid-template-rows: minmax(26px, auto) auto;
@@ -75,13 +86,16 @@
 }
 /* A start region that draws nothing (a consumer's slot with nothing to show, as a VS Code tab's for an ordinary
    result) takes no room: what follows it takes back the gap after it. */
-.phv-toolbar > .phv-toolbar-start:not(:has(> :not(:empty))) + :not(.phv-toolbar-end) {
+.phv-toolbar:not([data-cluster='centre']) > .phv-toolbar-start:not(:has(> :not(:empty))) + :not(.phv-toolbar-end) {
   margin-inline-start: -8px;
 }
 /* A 26px group leading the row sits 4px from its start, as from its top and bottom. */
 .phv-toolbar > .phv-toolbar-start:first-child > .phv-pair-picker:first-child,
-.phv-toolbar > .phv-toolbar-mode:first-child > .phv-mode-switch,
-.phv-toolbar > .phv-toolbar-start:first-child:not(:has(> :not(:empty))) + .phv-toolbar-mode > .phv-mode-switch {
+.phv-toolbar:not([data-cluster='centre']) > .phv-toolbar-mode:first-child > .phv-mode-switch,
+.phv-toolbar:not([data-cluster='centre'])
+  > .phv-toolbar-start:first-child:not(:has(> :not(:empty)))
+  + .phv-toolbar-mode
+  > .phv-mode-switch {
   margin-inline-start: -2px;
 }
 .phv-toolbar-start {

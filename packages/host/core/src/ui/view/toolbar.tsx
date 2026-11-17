@@ -25,20 +25,7 @@ import {useToolbarLayout, type ToolbarAction} from '../toolbar-layout.js'
 import {cn} from '../lib/utils.js'
 import type {ProjectionViewProps} from './props.js'
 import {ToolbarMore} from './toolbar-more.js'
-
-/** The expanded filter field's width (`pj:w-56`) and the button it replaces. */
-const filterFieldWidth = 224
-const filterButtonWidth = 32
-
-/** The room a centred row's end half has beyond the actions in it: the half's width less theirs. */
-function endRoom(toolbar: HTMLElement): number {
-  const mode = toolbar.querySelector('[data-toolbar-region="mode"]')
-  const end = toolbar.querySelector('[data-toolbar-region="end"]')
-  if (!mode || !end?.parentElement) return 0
-  const gap = parseFloat(getComputedStyle(end.parentElement).columnGap) || 0
-  const actions = end.getBoundingClientRect()
-  return actions.right - mode.getBoundingClientRect().right - gap - actions.width
-}
+import {filterFitsRow} from './toolbar-room.js'
 
 export interface ViewToolbarProps {
   projection: ProjectionController
@@ -103,16 +90,7 @@ export function ViewToolbar({
     `${comparing}-${mode}-${view}-${views.join()}-${showPlayback}-${showZoom}-${p.controls.length}-${p.stepEnds.length > 0}-${Boolean(props.actions)}-${p.availableModes.join()}-${p.variation?.within ?? 0}-${p.variation?.regenerated ?? 0}-${showScope && p.scope}`,
   )
   const centred = plan.cluster === 'centre'
-  // The filter expands in the row only when the row's flexible room (the spacer and the slider beyond its minimum) can
-  // take the field, so opening it never makes the row re-plan and move the Filter block while it is in use.
-  // In a centred row, the room is what the end half holds beyond the actions, so the mode region stays centred.
-  const filterFits = () => {
-    const element = row.current
-    if (!element || (plan.rows !== 1 && !centred)) return false
-    const width = (selector: string) => element.querySelector(selector)?.getBoundingClientRect().width ?? 0
-    const spare = centred ? endRoom(element) : width('[data-fit-min="0"]') + Math.max(0, width('.ph-progress') - sliderMin)
-    return spare >= filterFieldWidth - filterButtonWidth
-  }
+  const filterFits = () => Boolean(row.current && filterFitsRow(row.current, {centred, rows: plan.rows, sliderMin}))
   const inMore = (action: ToolbarAction) => plan.more.includes(action)
   const hasMore = plan.more.length > 0 || (showPlayback && plan.playback === 'minimal')
   const start = typeof props.toolbarStart === 'function' ? props.toolbarStart(plan.pair !== 'full', plan.pair) : props.toolbarStart

@@ -36,6 +36,7 @@ it was removed) isn't an error: the extractor describes that revision without it
 | [`prisma-schema`](#prisma-schema) | `database/v0` | `database` | No (`none`) |
 | [`rails-schema`](#rails-schema) | `database/v0` | `database` | No (`none`) |
 | [`rails-routes`](#rails-routes) | `api/v0` | `api` | No (`none`) |
+| [`renderer-scenarios`](#renderer-scenarios) | `graph/v0` | `gallery` | No (`none`) |
 | [`scip-file-references`](#scip-file-references) | `graph/v0` | `graph` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`command-output`](#command-output) | `graph/v0` | `text-diff` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 
@@ -656,6 +657,30 @@ A definition to start from:
   "id": "rails-routes",
   "renderer": "api",
   "title": "Rails routes"
+}
+```
+
+## `renderer-scenarios`
+
+**Renderer scenarios.** Renderer fixture scenarios (projections.scenarios documents) with their synthetic extractions and comparisons. See [its page](../builtins/extractors/renderer-scenarios.md).
+
+- Schema: `graph/v0`
+- Default renderer: `gallery`
+- Needs `--trust`: No (`none`)
+
+| Input | Meaning |
+|---|---|
+| `exclude` | Globs of documents to leave out. |
+| `include` | Globs of projections.scenarios documents to read; default **/scenarios.json. |
+
+A definition to start from:
+
+```json
+{
+  "extractor": "renderer-scenarios",
+  "id": "renderer-scenarios",
+  "renderer": "gallery",
+  "title": "Renderer scenarios"
 }
 ```
 

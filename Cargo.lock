@@ -1502,6 +1502,7 @@ dependencies = [
  "projections-extractor-prisma-schema",
  "projections-extractor-rails-routes",
  "projections-extractor-rails-schema",
+ "projections-extractor-renderer-scenarios",
  "projections-extractor-repository-map",
  "projections-extractor-rust-public-api",
  "projections-extractor-scip-file-references",
@@ -1677,6 +1678,17 @@ dependencies = [
  "projections-extractor-sdk",
  "serde_json",
  "tempfile",
+]
+
+[[package]]
+name = "projections-extractor-renderer-scenarios"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "projections-engine",
+ "projections-extractor-sdk",
+ "regex",
+ "serde_json",
 ]
 
 [[package]]

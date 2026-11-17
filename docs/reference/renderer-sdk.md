@@ -1545,7 +1545,7 @@ One run of a word diff: text both passages share, or text only one has.
 ### `AcceptedExtraction`
 
 ```ts
-type AcceptedExtraction<A extends Array<RendererAccepts>> = { [I in keyof A]: A[I] extends { schema: infer S extends "graph/v0" | "dag/v0" | "treemap/v0" | "metrics/v0" | "api/v0" | "database/v0" | "architecture/v0"; vocabulary: infer V extends "dependency-injection/v0" | "infrastructure/v0" | "runtime-policy/v0" | "agentic-workflows/v0"; } ? ExtractionOf<S, V> : A[I] extends { schema: infer S extends "graph/v0" | "dag/v0" | "treemap/v0" | "metrics/v0" | "api/v0" | "database/v0" | "architecture/v0"; } ? ExtractionOf<S, never> : never; }[number]
+type AcceptedExtraction<A extends Array<RendererAccepts>> = { [I in keyof A]: A[I] extends { schema: infer S extends "graph/v0" | "dag/v0" | "treemap/v0" | "metrics/v0" | "api/v0" | "database/v0" | "architecture/v0"; vocabulary: infer V extends "dependency-injection/v0" | "infrastructure/v0" | "runtime-policy/v0" | "agentic-workflows/v0" | "scenarios/v0"; } ? ExtractionOf<S, V> : A[I] extends { schema: infer S extends "graph/v0" | "dag/v0" | "treemap/v0" | "metrics/v0" | "api/v0" | "database/v0" | "architecture/v0"; } ? ExtractionOf<S, never> : never; }[number]
 ```
 
 The typed extraction a renderer that accepts `A` receives: the union of what each entry guarantees.
@@ -2114,7 +2114,7 @@ vocabulary. Without `vocabulary`, any extraction in the schema matches, whatever
 | Member | Signature | Description |
 |---|---|---|
 | `schema` | `"schema": "api/v0" \| "architecture/v0" \| "dag/v0" \| "database/v0" \| "graph/v0" \| "metrics/v0" \| "treemap/v0"` | The domain schema the extraction is in, for example `architecture/v0`. |
-| `vocabulary` | `"vocabulary"?: "agentic-workflows/v0" \| "dependency-injection/v0" \| "infrastructure/v0" \| "runtime-policy/v0"` | A vocabulary the extraction must declare, for example `dependency-injection/v0`. |
+| `vocabulary` | `"vocabulary"?: "agentic-workflows/v0" \| "dependency-injection/v0" \| "infrastructure/v0" \| "runtime-policy/v0" \| "scenarios/v0"` | A vocabulary the extraction must declare, for example `dependency-injection/v0`. |
 
 ### `RendererCapabilities`
 

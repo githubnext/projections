@@ -35,6 +35,7 @@ extension opens these pages when you select a built-in part.
 | [`prisma-schema`](extractors/prisma-schema.md) | Prisma data model: tables, columns, keys, indexes, relations and enums. | `database/v0` | [`database`](renderers/database.md) |
 | [`rails-schema`](extractors/rails-schema.md) | Rails db/schema.rb: tables, columns, keys, indexes, foreign keys and enums. | `database/v0` | [`database`](renderers/database.md) |
 | [`rails-routes`](extractors/rails-routes.md) | Rails config/routes.rb: each route's verb, path, controller action and name. | `api/v0` | [`api`](renderers/api.md) |
+| [`renderer-scenarios`](extractors/renderer-scenarios.md) | Renderer fixture scenarios (projections.scenarios documents) with their synthetic extractions and comparisons. | `graph/v0` | `gallery` |
 | [`scip-file-references`](extractors/scip-file-references.md) | Cross-file definition references from a SCIP index produced by the project's own indexer. | `graph/v0` | [`graph`](renderers/graph.md) |
 | [`command-output`](extractors/command-output.md) | Captured stdout from named CLI commands. | `graph/v0` | [`text-diff`](renderers/text-diff.md) |
 

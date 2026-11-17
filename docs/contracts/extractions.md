@@ -16,13 +16,13 @@ into comparison notices; they are part of the canonical bytes.
 
 An extraction may also declare `vocabularies`: typed conventions over its schema
 that it follows, such as `dependency-injection/v0`, `infrastructure/v0` and
-`runtime-policy/v0` over `architecture/v0`. The engine rejects an unknown
-vocabulary, one that doesn't apply to the extraction's schema
-(`unsupported-vocabulary`) or one declared twice (`duplicate-vocabulary`),
-checks each declared vocabulary's typed `data` like the schema's, and sorts them
-in the normalized extraction. An extraction without vocabularies stays valid and
-its `data` open. Domain schemas and vocabularies type only the `data` fields
-built-in renderers and comparators read; the
+`runtime-policy/v0` over `architecture/v0`, and `scenarios/v0` over `graph/v0`.
+The engine rejects an unknown vocabulary, one that doesn't apply to the
+extraction's schema (`unsupported-vocabulary`) or one declared twice
+(`duplicate-vocabulary`), checks each declared vocabulary's typed `data` like
+the schema's, and sorts them in the normalized extraction. An extraction without
+vocabularies stays valid and its `data` open. Domain schemas and vocabularies
+type only the `data` fields built-in renderers and comparators read; the
 [schema reference](../reference/schemas/README.md) lists them.
 
 An entity has `id`, `kind`, `label` and optional `data`, `previousIds`,
@@ -79,6 +79,11 @@ which the `tetragon-policies` extractor writes.
 Agentic workflows use the `workflow` and `group` vocabulary described in
 [one model for agentic workflows](../models/agentic-workflow-model.md), which
 the `github-agentic-workflows` extractor writes.
+
+Renderer fixture scenarios use the `scenarios` and `scenario` vocabulary
+described in [one model for renderer scenarios](../models/scenarios-model.md),
+which the `renderer-scenarios` extractor writes and the `gallery` renderer
+reads.
 
 Reject invalid Unicode, duplicate JSON object keys, nonfinite numbers, and
 integer values outside the JavaScript safe-integer range. Do not normalize

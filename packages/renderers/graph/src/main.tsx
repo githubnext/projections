@@ -1,6 +1,7 @@
 import '@githubnext/projections-renderer-kit/react.css'
 import {useEffect, useMemo} from 'react'
 import {GraphCanvas, graphCanvasControls, graphCanvasPace, mountRenderer, useSummaryNouns} from '@githubnext/projections-renderer-kit/react'
+import {boundaryNouns} from '@githubnext/projections-renderer-kit'
 import type {SummaryFactContext, SummaryNouns} from '@githubnext/projections-renderer-kit'
 import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
 import type {Entity} from '@githubnext/projections-schemas'
@@ -16,7 +17,10 @@ import {graphNouns} from './nouns.js'
 import {FactGraph} from './fact-graph.js'
 import {unknownIconFacts} from './facts.js'
 
-/** Resources, data sources and their boundaries, in the infrastructure's words; containment is drawn as boundaries. */
+/**
+ * Resources, data sources and their boundaries, in the infrastructure's words; containment is drawn as boundaries, and a
+ * kind drawn only as boundaries round others is no figure either (see `boundaryNouns`).
+ */
 const infrastructureNouns: SummaryNouns = {
   resource: {singular: 'resource', plural: 'resources'},
   'data-source': {singular: 'data source', plural: 'data sources'},
@@ -57,7 +61,10 @@ function InfrastructureRenderer(props: RendererProps) {
     [comparing],
   )
   // The host's summary bar counts the resources and states the plan: how many each planned action touches.
-  useSummaryNouns(props.declareNouns, infrastructureNouns)
+  useSummaryNouns(
+    props.declareNouns,
+    useMemo(() => ({...infrastructureNouns, ...boundaryNouns(model, boundaryKinds)}), [model]),
+  )
   const focus = useMemo(() => {
     if (props.controls.dependents === false || !selectedId) return undefined
     const row = model.entities.find(entity => entity.id === selectedId)

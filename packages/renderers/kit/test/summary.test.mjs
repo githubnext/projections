@@ -129,3 +129,26 @@ test("the definition's nouns (presentation.kinds) word its kinds over the render
   assert.deepEqual(nouns(worded, 'calls'), {singular: 'request', plural: 'requests'})
   assert.deepEqual(nouns(worded, 'service'), {singular: 'app', plural: 'apps'})
 })
+
+test('modules drawn only as boundaries round others are no summary figure; a kind with a card among them still is', async () => {
+  const {boundaryNouns} = await import('../dist/index.js')
+  const grouped = extraction(
+    [
+      {id: 'core', kind: 'module'},
+      {id: 'a', kind: 'service'},
+      {id: 'b', kind: 'service'},
+    ],
+    [
+      {id: 'core-a', kind: 'contains', from: 'core', to: 'a'},
+      {id: 'core-b', kind: 'contains', from: 'core', to: 'b'},
+      {id: 'ab', kind: 'calls', from: 'a', to: 'b'},
+    ],
+  )
+  assert.deepEqual(boundaryNouns({before: grouped, after: grouped}, true), {module: false})
+  // A module something depends on is drawn as a card, so modules are counted whole.
+  const linked = {...grouped, entities: [...grouped.entities, {id: 'shared', kind: 'module'}]}
+  linked.relationships = [...grouped.relationships, {id: 'a-shared', kind: 'imports', from: 'a', to: 'shared'}]
+  assert.deepEqual(boundaryNouns({before: grouped, after: linked}, true), {})
+  // Only the kinds the canvas may draw as boundaries.
+  assert.deepEqual(boundaryNouns({before: grouped, after: grouped}, ['resource-group']), {})
+})

@@ -2,6 +2,7 @@ import {execFileSync} from 'node:child_process'
 import {cp, mkdtemp, rm} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import path from 'node:path'
+import {after} from 'node:test'
 import {fileURLToPath} from 'node:url'
 
 const examples = fileURLToPath(new URL('../../../examples/polyglot/', import.meta.url))
@@ -16,10 +17,15 @@ export const commit = root => {
   return git(root, 'rev-parse', 'HEAD').trim()
 }
 
-/** A temporary Git repository holding the polyglot example, removed after the test: `{root, before}`. */
-export async function fixture(t) {
+// Removed once the file's tests are done rather than after each test: a test's own after hooks, which stop the
+// processes it started, run after the fixture's, and Windows refuses to remove a running process's directory.
+const roots = []
+after(() => Promise.all(roots.map(root => rm(root, {recursive: true, force: true, maxRetries: 10, retryDelay: 200}))))
+
+/** A temporary Git repository holding the polyglot example, removed after the file's tests: `{root, before}`. */
+export async function fixture() {
   const root = await mkdtemp(path.join(tmpdir(), 'projections-cli-'))
-  t.after(() => rm(root, {recursive: true, force: true}))
+  roots.push(root)
   await cp(examples, root, {recursive: true})
   git(root, 'init', '-q')
   git(root, 'config', 'user.name', 'CLI test')

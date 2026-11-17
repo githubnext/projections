@@ -69,6 +69,8 @@ impl Runner {
             !argv.is_empty() && !argv[0].is_empty() && argv.iter().all(|part| !part.contains('\0')),
             "Invalid executable argv"
         );
+        // A bare `python3` or `python` runs this machine's Python 3, whatever its launcher is called.
+        let argv = &crate::python::launch(argv, environment)?;
         let mut group = Group::new()?;
         let mut command = Command::new(&argv[0]);
         command
@@ -169,6 +171,8 @@ impl Runner {
             "Invalid argv"
         );
         let file = Arc::new(Mutex::new((fs::File::create(log)?, 0u64)));
+        // A bare `python3` or `python` runs this machine's Python 3, whatever its launcher is called.
+        let argv = &crate::python::launch(argv, environment)?;
         let mut group = Group::new()?;
         let mut command = Command::new(&argv[0]);
         command
@@ -271,8 +275,12 @@ impl Runner {
 
 /// The executable `program` resolves to on `PATH`, if any.
 pub fn which(program: &str) -> Option<PathBuf> {
-    let path = std::env::var_os("PATH")?;
-    std::env::split_paths(&path).find_map(|directory| {
+    which_in(program, &std::env::var_os("PATH")?)
+}
+
+/// The executable `program` resolves to on the search path `path`, if any.
+pub fn which_in(program: &str, path: &std::ffi::OsStr) -> Option<PathBuf> {
+    std::env::split_paths(path).find_map(|directory| {
         let candidate = directory.join(program);
         if candidate.is_file() {
             return Some(candidate);

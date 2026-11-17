@@ -7,7 +7,7 @@ import {randomUUID} from 'node:crypto'
 import {cp, mkdir, readFile, rm, writeFile} from 'node:fs/promises'
 import {builtinModules} from 'node:module'
 import path from 'node:path'
-import {fileURLToPath} from 'node:url'
+import {fileURLToPath, pathToFileURL} from 'node:url'
 import {installToolchain} from './support.mjs'
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url))
@@ -56,7 +56,7 @@ registerHooks({resolve(specifier, context, nextResolve) {
 `,
   )
   const collect = (id, inputs = {}, toolchain = checkout) =>
-    spawnSync(process.execPath, ['--import', isolation, helper, id, toolchain], {
+    spawnSync(process.execPath, ['--import', pathToFileURL(isolation).href, helper, id, toolchain], {
       cwd: root,
       encoding: 'utf8',
       timeout: 60000,

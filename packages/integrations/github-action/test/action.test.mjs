@@ -31,7 +31,7 @@ import {
 } from '../src/lib.mjs'
 
 const root = fileURLToPath(new URL('../../../../', import.meta.url))
-const cli = path.join(root, 'packages/cli/dist/projections')
+const cli = path.join(root, `packages/cli/dist/projections${process.platform === 'win32' ? '.exe' : ''}`)
 // The built CLI's version: the release version every shipped manifest carries.
 const {version: cliVersion} = JSON.parse(readFileSync(path.join(root, 'packages/cli/package.json'), 'utf8'))
 const schema = JSON.parse(readFileSync(path.join(root, 'packages/schemas/schemas/artifact/v0.json'), 'utf8'))
@@ -425,7 +425,10 @@ test('the collect script shows every projection of a pushed commit', () => {
   assert.equal(extraction.provenance.revision.commit, head)
 })
 
-test("the base side reuses the merge base's own CI artifact, which the base step downloads", () => {
+// gh stand-ins are /bin/sh scripts; on Windows a process finds only gh.exe, which a script can't stand in for.
+const ghStandIn = {skip: process.platform === 'win32' && 'Stands in for gh with a /bin/sh script'}
+
+test("the base side reuses the merge base's own CI artifact, which the base step downloads", ghStandIn, () => {
   const {directory, repo, base, head} = repository()
   // The merge base's push run published its extractions.
   git(repo, 'checkout', '-q', base)
@@ -495,7 +498,17 @@ test('without a base artifact, the base side runs in a workspace the environment
     JSON.stringify({
       format: 'projections.environment',
       version: 0,
-      prepare: [{id: 'install', run: ['/bin/sh', '-c', 'mkdir -p deps && cp deps.lock deps/installed'], key: ['deps.lock']}],
+      prepare: [
+        {
+          id: 'install',
+          run: [
+            'node',
+            '-e',
+            "const fs = require('node:fs'); fs.mkdirSync('deps', {recursive: true}); fs.copyFileSync('deps.lock', 'deps/installed')",
+          ],
+          key: ['deps.lock'],
+        },
+      ],
     }),
   )
   writeFileSync(
@@ -548,7 +561,7 @@ test('without a base artifact, the base side runs in a workspace the environment
   assert.notEqual(base, prepared)
 })
 
-test('install verifies the release checksum before the attestation and refuses a mismatch', () => {
+test('install verifies the release checksum before the attestation and refuses a mismatch', ghStandIn, () => {
   const directory = mkdtempSync(path.join(tmpdir(), 'projections-install-'))
   const bin = path.join(directory, 'bin')
   mkdirSync(bin)
@@ -764,6 +777,12 @@ test('the snapshot script renders both sides of a pull request and a push, light
       env: {
         PATH: process.env.PATH,
         HOME: process.env.HOME,
+        // Where the CLI looks for Chrome or Edge on Windows, as the Action's own environment has them.
+        ...Object.fromEntries(
+          ['SystemRoot', 'ProgramFiles', 'ProgramFiles(x86)', 'LOCALAPPDATA'].flatMap(name =>
+            process.env[name] ? [[name, process.env[name]]] : [],
+          ),
+        ),
         RUNNER_TEMP: directory,
         PROJECTIONS_CLI: cli,
         PROJECTIONS_MANIFEST: outputs.manifest,
@@ -808,7 +827,8 @@ test('the snapshot script renders both sides of a pull request and a push, light
   assert.deepEqual(readdirSync(pull.outputs.directory).sort(), ['projections', artifactManifest])
 
   const push = collect(directory, repo, 'push', {after: head}, 'refs/heads/feature')
-  const pushed = run(push.outputs, {INPUT_SNAPSHOTS: 'files'})
+  // Snapshots render saved documents, which run no repository code: trust changes nothing (show --from refuses it).
+  const pushed = run(push.outputs, {INPUT_SNAPSHOTS: 'files', INPUT_TRUST: 'true'})
   assert.deepEqual(
     pushed.index.snapshots.map(file => file.path),
     ['files.light.png', 'files.dark.png'],

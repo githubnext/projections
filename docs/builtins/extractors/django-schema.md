@@ -35,14 +35,15 @@ connect, or detect drift between the two. For EF Core use
 ## What it reads
 
 It runs a small Python helper with **your** interpreter (`python`, by default
-`python3`), so the project's own Django (4.2 or 5) and its database backend must
-be installed there, ideally the project's locked virtual environment. The helper
-imports the settings module (`settings`, or a granted `DJANGO_SETTINGS_MODULE`),
-calls `django.setup()` and reads every model's `_meta`. That imports and runs
-the project's code (settings, apps and their `AppConfig.ready()`), which is why
-it needs `--trust`. Database connections and cursors are blocked before setup,
-so startup code that queries the database fails the extraction rather than
-reaching a database; other side effects aren't blocked.
+`python3`, which on Windows also finds `python` or `py -3`), so the project's
+own Django (4.2 or 5) and its database backend must be installed there, ideally
+the project's locked virtual environment. The helper imports the settings module
+(`settings`, or a granted `DJANGO_SETTINGS_MODULE`), calls `django.setup()` and
+reads every model's `_meta`. That imports and runs the project's code (settings,
+apps and their `AppConfig.ready()`), which is why it needs `--trust`. Database
+connections and cursors are blocked before setup, so startup code that queries
+the database fails the extraction rather than reaching a database; other side
+effects aren't blocked.
 
 The `database` input names the alias whose backend decides the database types
 (default `default`). It only selects type metadata; it never connects.

@@ -22,7 +22,7 @@ pub fn node_helper(cx: &Context) -> Result<Value> {
 /// whose declared inputs leave out what the revision lacks ([`present_inputs`]).
 pub fn node_helper_with(cx: &Context, request: &Value) -> Result<Value> {
     let id = cx.extractor().to_owned();
-    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("dist/extractor.mjs");
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("dist").join("extractor.mjs");
     let helper = cx.helper("helpers/node/extractor.mjs", source)?;
     ensure!(
         helper.is_file(),

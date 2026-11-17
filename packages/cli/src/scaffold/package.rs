@@ -32,12 +32,13 @@ pub const CHECKOUT_TARBALL: &str = "dist/dogfood/githubnext-projections.tgz";
 /// such as `~/.local/bin/projections`) and it still holds the package. Released
 /// executables, built elsewhere and installed outside any checkout, have none.
 pub fn source_checkout() -> Option<PathBuf> {
-    let executable = std::env::current_exe().ok()?.canonicalize().ok()?;
+    let executable = projections_extractor_sdk::canonical(&std::env::current_exe().ok()?).ok()?;
     checkout_for(&executable, Path::new(env!("CARGO_MANIFEST_DIR")))
 }
 
 pub(super) fn checkout_for(executable: &Path, cli_directory: &Path) -> Option<PathBuf> {
-    let root = cli_directory.parent()?.parent()?.canonicalize().ok()?;
+    // Without Windows' \\?\ prefix, which a file: specifier can't hold.
+    let root = projections_extractor_sdk::canonical(cli_directory.parent()?.parent()?).ok()?;
     if !executable.starts_with(root.join("packages").join("cli").join("dist")) && !executable.starts_with(root.join("target")) {
         return None;
     }
@@ -50,6 +51,7 @@ pub(super) fn checkout_for(executable: &Path, cli_directory: &Path) -> Option<Pa
 /// checkout), else absolute. Always `/`-separated.
 pub fn file_specifier(from: &Path, to: &Path) -> String {
     use std::path::Component;
+    let (from, to) = (without_verbatim_prefix(from), without_verbatim_prefix(to));
     let from: Vec<Component> = from.components().collect();
     let to: Vec<Component> = to.components().collect();
     let roots = from.iter().take_while(|part| !matches!(part, Component::Normal(_))).count();
@@ -63,6 +65,15 @@ pub fn file_specifier(from: &Path, to: &Path) -> String {
         let root: String = to[..roots.min(to.len())].iter().map(name).collect();
         let rest: Vec<String> = to[roots.min(to.len())..].iter().map(name).collect();
         format!("file:{root}{}", rest.join("/"))
+    }
+}
+
+/// `path` without the `\\?\` prefix Windows' canonical paths have before a drive letter, so a
+/// path spelled either way compares and prints as the drive path a `file:` specifier holds.
+fn without_verbatim_prefix(path: &Path) -> PathBuf {
+    match path.to_str().and_then(|text| text.strip_prefix(r"\\?\")) {
+        Some(rest) if rest.as_bytes().get(1) == Some(&b':') => PathBuf::from(rest),
+        _ => path.to_path_buf(),
     }
 }
 
@@ -107,8 +118,7 @@ pub(super) fn renderer_manifest(template: &str, checkout: Option<&Path>, package
         report.renderer_package = PackageSource::Checkout { tarball, specifier };
         return crate::json_text::render(&manifest, Some(template), &[]);
     };
-    let directory = PathBuf::from(directory)
-        .canonicalize()
+    let directory = projections_extractor_sdk::canonical(Path::new(&directory))
         .with_context(|| format!("{RENDERER_PACKAGES_VARIABLE} must name a directory holding an npm pack tarball"))?;
     let mut manifest: Value = serde_json::from_str(template)?;
     let file = tarball_name(VERSION);
@@ -118,7 +128,7 @@ pub(super) fn renderer_manifest(template: &str, checkout: Option<&Path>, package
         "{} has no {file}; create it with npm pack --workspace packages/sdk",
         directory.display()
     );
-    let source = json!(format!("file:{}", tarball.display()));
+    let source = json!(format!("file:{}", tarball.to_string_lossy().replace('\\', "/")));
     manifest["dependencies"][RENDERER_PACKAGE] = source.clone();
     let mut overrides = Map::new();
     overrides.insert(RENDERER_PACKAGE.to_owned(), source);

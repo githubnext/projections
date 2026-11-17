@@ -35,7 +35,7 @@ pub fn base() -> Result<PathBuf> {
     let base = if cfg!(windows) {
         absolute("LOCALAPPDATA")
     } else if cfg!(target_os = "macos") {
-        absolute("HOME").map(|home| home.join("Library/Caches"))
+        absolute("HOME").map(|home| home.join("Library").join("Caches"))
     } else {
         absolute("XDG_CACHE_HOME").or_else(|| absolute("HOME").map(|home| home.join(".cache")))
     };

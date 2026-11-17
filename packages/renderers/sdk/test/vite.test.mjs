@@ -81,8 +81,9 @@ test('the generated entry mounts the view with the capabilities the config decla
 
 /** A renderer package whose kit is a stub that records how it was mounted. */
 function stubRenderer(files) {
-  // Vite serves modules under a root reached through a symbolic link (macOS's /var) untransformed.
-  const root = realpathSync(mkdtempSync(join(tmpdir(), 'projections-vite-')))
+  // Vite serves modules under a root reached through a symbolic link (macOS's /var) untransformed, and refuses a
+  // Windows 8.3 short name (RUNNER~1 in a runner's temporary directory): the native realpath is the long one.
+  const root = realpathSync.native(mkdtempSync(join(tmpdir(), 'projections-vite-')))
   const write = (path, text) => {
     mkdirSync(dirname(join(root, path)), {recursive: true})
     writeFileSync(join(root, path), text)

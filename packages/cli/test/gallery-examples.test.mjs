@@ -14,7 +14,7 @@ import {executionEnvironment, runBounded} from './process.mjs'
 // without drawing, so an example or its definition can't go stale unnoticed.
 
 const root = fileURLToPath(new URL('../../../', import.meta.url))
-const executable = fileURLToPath(new URL('../dist/projections', import.meta.url))
+const executable = fileURLToPath(new URL(`../dist/projections${process.platform === 'win32' ? '.exe' : ''}`, import.meta.url))
 // Built-in extractors that run Node keep their helpers in a cache.
 const cache = await mkdtemp(path.join(tmpdir(), 'projections-gallery-cache-'))
 test.after(() => rm(cache, {recursive: true, force: true}))

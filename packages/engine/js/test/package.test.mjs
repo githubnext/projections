@@ -8,8 +8,10 @@ import {test} from 'node:test'
 
 test('packed protocol+engine install and execute without workspace links or Rust toolchain', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'projections-engine-package-'))
-  const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
-  const run = (args, cwd = directory) => execFileSync(npm, args, {cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']})
+  // The npm running this test, as node and its script: npm is a .cmd shim on Windows, which can't run without a shell.
+  const npm = process.env.npm_execpath ? [process.execPath, process.env.npm_execpath] : ['npm']
+  const run = (args, cwd = directory) =>
+    execFileSync(npm[0], [...npm.slice(1), ...args], {cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']})
   try {
     const pack = relative => {
       const cwd = fileURLToPath(new URL(relative, import.meta.url))

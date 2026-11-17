@@ -1,7 +1,7 @@
 // Shared by the starter renderer specs: one scaffolded, installed and built
 // renderer per worker, and its development server.
 import {execFileSync, spawn} from 'node:child_process'
-import {existsSync, mkdtempSync, readFileSync, writeFileSync} from 'node:fs'
+import {existsSync, mkdtempSync, readFileSync, realpathSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join, resolve} from 'node:path'
 
@@ -23,7 +23,9 @@ const npm = (args: string[], cwd: string, env = process.env) =>
 // npm_config_registry) rather than npm's default.
 const registry = {...process.env, npm_config_registry: npm(['config', 'get', 'registry'], workspace).toString().trim()}
 npm(['pack', '--workspace', 'packages/sdk', '--pack-destination', packages], workspace)
-export const repository = mkdtempSync(join(tmpdir(), 'projections-starter-'))
+// The long path: Vite's development server refuses a Windows 8.3 short name (RUNNER~1 in a runner's temporary
+// directory).
+export const repository = realpathSync.native(mkdtempSync(join(tmpdir(), 'projections-starter-')))
 execFileSync('git', ['init', '-q'], {cwd: repository})
 execFileSync(cli, ['init', 'service-map', '--language', 'node', '--renderer', 'custom'], {
   cwd: repository,

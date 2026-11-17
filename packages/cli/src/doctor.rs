@@ -1,6 +1,7 @@
 //! `projections doctor`: what this checkout needs to run its projections,
-//! without running any of them. It reads definitions and looks up programs,
-//! and never executes repository code, installs anything or changes files.
+//! without running any of them. It reads definitions and looks up programs
+//! (asking a Python launcher only for its version), and never executes
+//! repository code, installs anything or changes files.
 
 use crate::{browser, collectors, dev_server, runtime::Runner, scaffold, workspace};
 use serde_json::{Value, json};
@@ -108,13 +109,9 @@ fn command_extractor(root: &Path, command: &[Value]) -> Value {
         })
         .collect();
     let missing: Vec<&&str> = files.iter().filter(|file| !root.join(file).is_file()).collect();
-    match (find_program(root, program), missing.is_empty()) {
-        (None, _) => item(
-            "fail",
-            "Extractor",
-            format!("{program} is not on PATH; the extractor runs with this project's own toolchain, which Projections never installs"),
-        ),
-        (Some(_), false) => item(
+    match (extractor_program(root, program), missing.is_empty()) {
+        (Err(message), _) => item("fail", "Extractor", message),
+        (Ok(_), false) => item(
             "fail",
             "Extractor",
             format!(
@@ -122,12 +119,27 @@ fn command_extractor(root: &Path, command: &[Value]) -> Value {
                 missing.iter().map(|file| **file).collect::<Vec<_>>().join(", ")
             ),
         ),
-        (Some(path), true) => item(
+        (Ok(path), true) => item(
             "pass",
             "Extractor",
             format!("{} (runs repository code, so it needs --trust)", path.display()),
         ),
     }
+}
+
+/// What an extractor command's `program` runs, or why it can't run. A bare
+/// python3 or python runs whichever Python 3 the machine has (crate::python::launch).
+fn extractor_program(root: &Path, program: &str) -> Result<PathBuf, String> {
+    if crate::python::launches_python(program) {
+        return crate::python::find(program)
+            .map(|prefix| PathBuf::from(prefix.join(" ")))
+            .ok_or_else(|| {
+                format!("{program} needs Python 3, but none of python3, python or py -3 on PATH runs it; Projections never installs it")
+            });
+    }
+    find_program(root, program).ok_or_else(|| {
+        format!("{program} is not on PATH; the extractor runs with this project's own toolchain, which Projections never installs")
+    })
 }
 
 /// Whether the custom renderer is built or its development server runs.

@@ -3,7 +3,7 @@ import {execFileSync, spawn} from 'node:child_process'
 import {existsSync} from 'node:fs'
 import {mkdtemp, readFile, realpath, rm, symlink} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
-import {extname, join} from 'node:path'
+import {dirname, extname, join} from 'node:path'
 import {createInterface} from 'node:readline'
 import {fileURLToPath} from 'node:url'
 
@@ -22,7 +22,9 @@ export interface Harness {
 
 const client = fileURLToPath(new URL('../dist/client', import.meta.url))
 /** This checkout's CLI, unless `PROJECTIONS_CLI` names another. */
-export const cli = () => process.env.PROJECTIONS_CLI ?? fileURLToPath(new URL('../../../cli/dist/projections', import.meta.url))
+export const cli = () =>
+  process.env.PROJECTIONS_CLI ??
+  fileURLToPath(new URL(`../../../cli/dist/projections${process.platform === 'win32' ? '.exe' : ''}`, import.meta.url))
 const policy =
   "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; frame-src 'self' http://localhost:* http://127.0.0.1:*; frame-ancestors 'none'; base-uri 'none'"
 /** The renderer content security policy (`RENDERER_CSP` in packages/cli/src/service/assets/mod.rs), which stdio results don't carry. */
@@ -64,11 +66,24 @@ let instances = 0
 export async function startHarness(context: BrowserContext, args: string[]): Promise<Harness> {
   if (!existsSync(join(client, 'mount.js')))
     throw new Error('Build the Inspector first: npm run build -w @githubnext/projections-inspector')
-  const tools = await mkdtemp(join(tmpdir(), 'projections-browser-tools-'))
-  await symlink(await realpath(execFileSync('which', ['git'], {encoding: 'utf8'}).trim()), join(tools, 'git'))
+  // Git alone on PATH. Git for Windows finds its installation from its own path, so there PATH is the directory of its
+  // git.exe launcher (cmd), which has no Node, rather than a link to it.
+  const windows = process.platform === 'win32'
+  const git = await realpath(
+    execFileSync(windows ? 'where' : 'which', ['git'], {encoding: 'utf8'})
+      .split(/\r?\n/)[0]!
+      .trim(),
+  )
+  const tools = windows ? dirname(git) : await mkdtemp(join(tmpdir(), 'projections-browser-tools-'))
+  if (!windows) await symlink(git, join(tools, 'git'))
   const child = spawn(cli(), ['serve', '--stdio', ...args], {
     // The backend serves this build's renderer bundles (with the fixtures probe), not the ones it embeds.
-    env: {PATH: tools, LANG: 'C.UTF-8', PROJECTIONS_INSPECTOR_ASSETS: client},
+    env: {
+      PATH: tools,
+      LANG: 'C.UTF-8',
+      PROJECTIONS_INSPECTOR_ASSETS: client,
+      ...(process.env.SystemRoot ? {SystemRoot: process.env.SystemRoot} : {}),
+    },
     stdio: ['pipe', 'pipe', 'pipe'],
   })
   let diagnostics = ''
@@ -150,7 +165,8 @@ export async function startHarness(context: BrowserContext, args: string[]): Pro
       await exited
       clearTimeout(timer)
       lines.close()
-      await rm(tools, {recursive: true, force: true})
+      // On Windows, tools is Git's own directory.
+      if (!windows) await rm(tools, {recursive: true, force: true})
     },
   }
 }

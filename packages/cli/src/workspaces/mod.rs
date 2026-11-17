@@ -85,7 +85,7 @@ pub fn config_directory() -> Option<PathBuf> {
     let base = if cfg!(windows) {
         absolute("APPDATA")
     } else if cfg!(target_os = "macos") {
-        absolute("HOME").map(|home| home.join("Library/Application Support"))
+        absolute("HOME").map(|home| home.join("Library").join("Application Support"))
     } else {
         absolute("XDG_CONFIG_HOME").or_else(|| absolute("HOME").map(|home| home.join(".config")))
     };

@@ -7,10 +7,13 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const [task, ...options] = process.argv.slice(2)
 if (!['build', 'test', 'test:browser', 'typecheck'].includes(task)) throw new Error('Expected build, test, test:browser or typecheck')
 // `--except <directories>` (comma- or space-separated, relative to the root) leaves out workspaces that run elsewhere,
-// such as the browser suites CI shards across jobs. Dependency order is unchanged.
-if (options.length && (options.length !== 2 || options[0] !== '--except')) throw new Error('Expected only --except <directories>')
+// such as the browser suites CI shards across jobs. Dependency order is unchanged. `--keep-going` runs every
+// workspace's task after one fails and then fails naming each that did, as a CI job that reports every failure needs.
+const keepGoing = options.includes('--keep-going')
+const rest = options.filter(option => option !== '--keep-going')
+if (rest.length && (rest.length !== 2 || rest[0] !== '--except')) throw new Error('Expected only --except <directories> and --keep-going')
 const except = new Set(
-  (options[1] ?? '')
+  (rest[1] ?? '')
     .split(/[\s,]+/)
     .filter(Boolean)
     .map(directory => resolve(root, directory)),
@@ -38,6 +41,7 @@ for (const directory of directories) {
   packages.set(manifest.name, {...manifest, directory})
 }
 const done = new Set()
+const failed = []
 const visiting = new Set()
 function run(name) {
   if (done.has(name)) return
@@ -48,9 +52,15 @@ function run(name) {
     if (packages.has(dependency)) run(dependency)
   }
   if (manifest.scripts?.[task] && !except.has(manifest.directory)) {
-    execFileSync(process.execPath, [npm, 'run', task, '--workspace', name], {cwd: root, stdio: 'inherit'})
+    try {
+      execFileSync(process.execPath, [npm, 'run', task, '--workspace', name], {cwd: root, stdio: 'inherit'})
+    } catch (error) {
+      if (!keepGoing) throw error
+      failed.push(name)
+    }
   }
   visiting.delete(name)
   done.add(name)
 }
 for (const name of [...packages.keys()].sort()) run(name)
+if (failed.length) throw new Error(`${task} failed in ${failed.join(', ')}`)

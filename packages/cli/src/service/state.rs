@@ -187,9 +187,8 @@ pub(super) async fn build(options: InspectorOptions) -> Result<(Router, Arc<Serv
             std::env::current_dir()?.join(options.repo)
         }
     } else {
-        tokio::fs::canonicalize(&options.repo)
-            .await
-            .context("Inspector repository is unavailable")?
+        // Without Windows' \\?\ prefix: clients compare it with the folders they have open.
+        projections_extractor_sdk::canonical(&options.repo).context("Inspector repository is unavailable")?
     };
     let mut capability_bytes = [0u8; 32];
     rand::rng().fill_bytes(&mut capability_bytes);

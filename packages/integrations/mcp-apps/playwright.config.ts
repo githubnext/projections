@@ -3,7 +3,7 @@ import {defineConfig, devices} from '@playwright/test'
 
 // The checks host this checkout's build of the page in a minimal MCP Apps host, with this checkout's CLI
 // (npm run build) unless PROJECTIONS_CLI names another.
-process.env.PROJECTIONS_CLI ??= resolve(import.meta.dirname, '../../cli/dist/projections')
+process.env.PROJECTIONS_CLI ??= resolve(import.meta.dirname, `../../cli/dist/projections${process.platform === 'win32' ? '.exe' : ''}`)
 
 export default defineConfig({
   testDir: './browser',

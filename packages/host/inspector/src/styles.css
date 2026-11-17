@@ -256,8 +256,10 @@ body {
  */
 .pi-viewer-header .pi-viewer-text {
   text-box: trim-both cap alphabetic;
-  padding-block: 0.35em;
-  margin-block: -0.35em;
+  /* Room for ascenders and accents above the trimmed cap height, which the margin takes back: Segoe UI's ascent
+     rises 0.38em above its caps. */
+  padding-block: 0.4em;
+  margin-block: -0.4em;
 }
 @supports not (text-box: trim-both cap alphabetic) {
   .pi-viewer-header .pi-viewer-text {

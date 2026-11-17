@@ -167,7 +167,11 @@ test("the mark and the part icons are glyphs of the packaged icon font, and the 
 
 test(
   'packaging stages the built extension and one platform executable of the matching version',
-  {skip: process.platform === 'win32'},
+  {
+    skip:
+      process.platform === 'win32' &&
+      'The stand-in executable is a /bin/sh script, and execute bits are POSIX; release-proof packages and installs every target',
+  },
   async t => {
     const root = await temporary(t, 'projections-vscode-package-')
     for (const [file, text] of [

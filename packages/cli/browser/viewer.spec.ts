@@ -66,9 +66,13 @@ test.beforeAll(async () => {
 })
 
 test.afterAll(async () => {
-  viewer?.kill()
-  rmSync(repository, {recursive: true, force: true})
-  rmSync(cache, {recursive: true, force: true})
+  // Windows keeps a running process's directory in use: wait for the viewer to exit, and retry while it lets go.
+  if (viewer && viewer.exitCode === null && viewer.signalCode === null) {
+    const exited = new Promise(resolve => viewer.once('exit', resolve))
+    viewer.kill()
+    await exited
+  }
+  for (const directory of [repository, cache]) rmSync(directory, {recursive: true, force: true, maxRetries: 10, retryDelay: 200})
 })
 
 async function control(path: string, body?: unknown) {
@@ -179,6 +183,17 @@ async function openCanvas(page: Page) {
   await page.goto(url)
   await expect(page.locator('.ph')).toHaveAttribute('data-renderer-status', 'ready', {timeout: 60_000})
   await expect(page.locator('.ph')).toHaveAttribute('data-comparison-mode', /.+/)
+  // The page has applied what the agent shows, including a mode an earlier test left: until then, a mode it applies
+  // replaces one clicked before it (on a slow machine, the comparison is still extracting at this point).
+  await expect
+    .poll(
+      async () => {
+        const {page, state: shown} = await state()
+        return page?.view?.status === 'ok' && (!shown.mode || page.mode === shown.mode)
+      },
+      {timeout: 30_000},
+    )
+    .toBe(true)
 }
 
 test('at a canvas width, the header text is whole and centred', async ({page}) => {

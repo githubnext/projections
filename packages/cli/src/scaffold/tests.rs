@@ -3,7 +3,8 @@ use super::*;
 #[test]
 fn a_development_build_runs_inside_the_checkout_it_was_built_from() {
     let root = tempfile::tempdir().unwrap();
-    let root = root.path().canonicalize().unwrap();
+    // As checkout_for reports it: canonical, without Windows' \\?\ prefix.
+    let root = projections_extractor_sdk::canonical(root.path()).unwrap();
     let cli = root.join("packages").join("cli");
     fs::create_dir_all(cli.join("dist")).unwrap();
     fs::create_dir_all(root.join("packages").join("sdk")).unwrap();
@@ -32,6 +33,21 @@ fn file_specifiers_are_relative_beside_the_checkout_and_absolute_otherwise() {
     assert_eq!(
         file_specifier(Path::new("/tmp/site/renderer"), tarball),
         "file:/work/projections/dist/dogfood/githubnext-projections.tgz"
+    );
+}
+
+#[cfg(windows)]
+#[test]
+fn file_specifiers_hold_drive_paths_whichever_way_windows_spelled_them() {
+    // A canonical path is verbatim (\\?\C:\...); the renderer package's directory usually isn't.
+    let tarball = Path::new(r"\\?\C:\work\projections\dist\dogfood\githubnext-projections.tgz");
+    assert_eq!(
+        file_specifier(Path::new(r"C:\work\site\renderer"), tarball),
+        "file:../../projections/dist/dogfood/githubnext-projections.tgz"
+    );
+    assert_eq!(
+        file_specifier(Path::new(r"D:\site\renderer"), tarball),
+        "file:C:/work/projections/dist/dogfood/githubnext-projections.tgz"
     );
 }
 

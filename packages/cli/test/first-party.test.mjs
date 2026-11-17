@@ -11,7 +11,7 @@ import {executionEnvironment, runBounded} from './process.mjs'
 // First-party components get no privileges: the CLI runs the default comparator
 // as the same comparator module browsers run, so both explain a change identically.
 
-const executable = fileURLToPath(new URL('../dist/projections', import.meta.url))
+const executable = fileURLToPath(new URL(`../dist/projections${process.platform === 'win32' ? '.exe' : ''}`, import.meta.url))
 const workspace = fileURLToPath(new URL('../../extractors/workspace-dependencies/tests/fixtures/npm/', import.meta.url))
 const git = (root, ...args) => execFileSync('git', ['-c', 'core.hooksPath=/dev/null', ...args], {cwd: root, encoding: 'utf8'})
 const commit = root => {

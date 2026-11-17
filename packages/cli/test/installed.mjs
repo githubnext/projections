@@ -9,17 +9,48 @@ import {finishedJob, pullRequestTools, startBackend} from './process.mjs'
 import {helperFiles} from '../../extractors/dotnet-support/scripts/publish.mjs'
 
 const source = fileURLToPath(new URL('../../../', import.meta.url))
+const windows = process.platform === 'win32'
+const exe = windows ? '.exe' : ''
 const ghExtension = process.argv[2] === '--gh-extension'
 if (process.argv.length > 3 || (process.argv[2] && !ghExtension)) throw new Error('Supported installed-proof option: --gh-extension')
 const license = await readFile(path.join(source, 'LICENSE'), 'utf8')
 const root = await mkdtemp(path.join(tmpdir(), 'projections-installed-proof-'))
-// The CLI unpacks its embedded extractor helpers into this isolated per-user cache.
+// The CLI unpacks its embedded extractor helpers into this isolated per-user cache: under HOME, or LOCALAPPDATA on
+// Windows, which also needs SystemRoot to start any process.
 const home = path.join(root, 'home')
-const isolated = {HOME: home, XDG_CACHE_HOME: path.join(home, '.cache')}
+const localAppData = path.join(home, 'AppData', 'Local')
+const isolated = {
+  HOME: home,
+  XDG_CACHE_HOME: path.join(home, '.cache'),
+  ...(windows ? {USERPROFILE: home, LOCALAPPDATA: localAppData, APPDATA: path.join(home, 'AppData', 'Roaming')} : {}),
+  ...(process.env.SystemRoot ? {SystemRoot: process.env.SystemRoot} : {}),
+}
+// npm is a .cmd shim on Windows, which can't run without a shell: run the npm running this proof, as node and its script.
+const npm = (args, options) =>
+  process.env.npm_execpath
+    ? execFileSync(process.execPath, [process.env.npm_execpath, ...args], options)
+    : execFileSync('npm', args, {...options, shell: windows})
 // Installs outside the workspace use its registry (the committed .npmrc, or CI's npm_config_registry), not npm's default.
-const registry = execFileSync('npm', ['config', 'get', 'registry'], {cwd: source, encoding: 'utf8'}).trim()
-const environment = {PATH: process.env.PATH, LANG: 'C.UTF-8', GIT_CONFIG_GLOBAL: '/dev/null', npm_config_registry: registry, ...isolated}
-const invoke = (command, args, cwd) => execFileSync(command, args, {cwd, encoding: 'utf8', env: environment, maxBuffer: 8 * 1024 * 1024})
+const registry = npm(['config', 'get', 'registry'], {cwd: source, encoding: 'utf8'}).trim()
+const environment = {
+  PATH: process.env.PATH,
+  LANG: 'C.UTF-8',
+  GIT_CONFIG_GLOBAL: '/dev/null',
+  npm_config_registry: registry,
+  ...(windows ? {TEMP: process.env.TEMP, TMP: process.env.TMP} : {}),
+  ...isolated,
+}
+const invoke = (command, args, cwd) => {
+  const options = {cwd, encoding: 'utf8', env: environment, maxBuffer: 8 * 1024 * 1024}
+  return command === 'npm' ? npm(args, options) : execFileSync(command, args, options)
+}
+/** The first executable named `name` on PATH. */
+function find(name) {
+  for (const directory of (process.env.PATH ?? '').split(path.delimiter).filter(Boolean))
+    for (const suffix of windows ? ['.exe', '.cmd', ''] : [''])
+      if (existsSync(path.join(directory, name + suffix))) return path.join(directory, name + suffix)
+  throw new Error(`${name} is not on PATH`)
+}
 try {
   const packs = path.join(root, 'packs')
   const install = path.join(root, ghExtension ? 'gh-projections' : 'install')
@@ -29,8 +60,8 @@ try {
   // The CLI is one self-contained executable, never an npm package: copy it alone.
   const bin = path.join(root, 'bin')
   await mkdir(bin)
-  const binary = path.join(bin, 'projections')
-  await cp(path.join(source, 'packages/cli/dist/projections'), binary)
+  const binary = path.join(bin, `projections${exe}`)
+  await cp(path.join(source, 'packages/cli/dist', `projections${exe}`), binary)
   const names = ['schemas', 'engine', 'comparator-runtime', 'renderer-sdk', 'renderer-testing', 'host', 'inspector']
   const packed = JSON.parse(
     invoke(
@@ -121,10 +152,16 @@ try {
   )
   cli('init', 'files', '--extractor', 'repository-map')
   const prBase = commit()
-  const noNode = path.join(root, 'no-node-tools')
-  await mkdir(noNode)
-  const gitPath = await realpath(invoke('which', ['git'], repo).trim())
-  await symlink(gitPath, path.join(noNode, 'git'))
+  // Git alone on PATH. Git for Windows finds its installation from its own path, so there PATH is the directory of its
+  // git.exe launcher (cmd), which has no Node, rather than a link to it.
+  const gitPath = await realpath(find('git'))
+  let noNode = path.dirname(gitPath)
+  if (!windows) {
+    noNode = path.join(root, 'no-node-tools')
+    await mkdir(noNode)
+    await symlink(gitPath, path.join(noNode, 'git'))
+  }
+  for (const name of ['node', 'node.exe']) assert.ok(!existsSync(path.join(noNode, name)), `${noNode} must not contain Node`)
   const noNodeCli = (...args) =>
     execFileSync(binary, args, {cwd: repo, encoding: 'utf8', env: {PATH: noNode, ...isolated}, maxBuffer: 8 * 1024 * 1024})
   assert.match(noNodeCli('--help'), /how a change reshapes them/)
@@ -134,43 +171,52 @@ try {
   )
   await writeFile(path.join(repo, 'pr-change.txt'), 'actual exact PR object')
   const prHead = commit()
-  const prTools = path.join(root, 'pr-tools')
-  await mkdir(prTools)
-  await pullRequestTools(prTools, {
-    gitPath,
-    repository: repo,
-    base: prBase,
-    head: prHead,
-    metadata: {
-      html_url: 'https://github.com/example/tiny/pull/11',
-      base: {sha: prBase, repo: {id: 1, full_name: 'example/tiny'}},
-      head: {sha: prHead, repo: {id: 2, full_name: 'example/fork'}},
-    },
-  })
-  const prCache = path.join(root, 'pr-cache')
-  await mkdir(prCache)
-  const pr = spawnSync(binary, ['pr', '11', '-R', 'example/tiny', '--cache', prCache, '--id', 'files', '--id', 'services-node', '--json'], {
-    cwd: repo,
-    encoding: 'utf8',
-    maxBuffer: 8 * 1024 * 1024,
-    env: {
-      PATH: `${prTools}${path.delimiter}${process.env.PATH}`,
-      LANG: 'C.UTF-8',
-      GIT_CONFIG_GLOBAL: '/dev/null',
-      GITHUB_TOKEN: 'must-not-be-forwarded',
-      ...isolated,
-    },
-  })
-  assert.equal(pr.status, 1, pr.stderr)
-  assert.match(pr.stderr, /1 of the pull request's comparisons failed/)
-  const prReview = JSON.parse(pr.stdout)
-  assert.equal(prReview.mergeBase, prBase)
-  assert.equal(prReview.execution, 'untrusted')
-  assert.deepEqual(
-    prReview.comparisons.results.map(item => item.status),
-    ['changed', 'error'],
-  )
-  assert.equal(prReview.site, undefined)
+  // A pull request from a fork, with stand-ins for gh and git, which are /bin/sh scripts: the CLI runs gh.exe and git.exe
+  // on Windows, which a script can't stand in for. The Rust suites' pull request tests have the same limit.
+  const controlledPr = !windows
+  if (controlledPr) {
+    const prTools = path.join(root, 'pr-tools')
+    await mkdir(prTools)
+    await pullRequestTools(prTools, {
+      gitPath,
+      repository: repo,
+      base: prBase,
+      head: prHead,
+      metadata: {
+        html_url: 'https://github.com/example/tiny/pull/11',
+        base: {sha: prBase, repo: {id: 1, full_name: 'example/tiny'}},
+        head: {sha: prHead, repo: {id: 2, full_name: 'example/fork'}},
+      },
+    })
+    const prCache = path.join(root, 'pr-cache')
+    await mkdir(prCache)
+    const pr = spawnSync(
+      binary,
+      ['pr', '11', '-R', 'example/tiny', '--cache', prCache, '--id', 'files', '--id', 'services-node', '--json'],
+      {
+        cwd: repo,
+        encoding: 'utf8',
+        maxBuffer: 8 * 1024 * 1024,
+        env: {
+          PATH: `${prTools}${path.delimiter}${process.env.PATH}`,
+          LANG: 'C.UTF-8',
+          GIT_CONFIG_GLOBAL: '/dev/null',
+          GITHUB_TOKEN: 'must-not-be-forwarded',
+          ...isolated,
+        },
+      },
+    )
+    assert.equal(pr.status, 1, pr.stderr)
+    assert.match(pr.stderr, /1 of the pull request's comparisons failed/)
+    const prReview = JSON.parse(pr.stdout)
+    assert.equal(prReview.mergeBase, prBase)
+    assert.equal(prReview.execution, 'untrusted')
+    assert.deepEqual(
+      prReview.comparisons.results.map(item => item.status),
+      ['changed', 'error'],
+    )
+    assert.equal(prReview.site, undefined)
+  }
   cli('init', 'native-ts', '--extractor', 'typescript-public-api')
   const typescriptDefinition = path.join(repo, '.github/projections/native-ts.json')
   const authored = JSON.parse(await readFile(typescriptDefinition, 'utf8'))
@@ -195,7 +241,9 @@ try {
   )
   // The slim .NET helper: first-party code only, embedded in the executable and run with
   // the repository's own SDK, whose Roslyn compiles the project's public API.
-  const helperSets = path.join(home, process.platform === 'darwin' ? 'Library/Caches' : '.cache', 'projections/helpers')
+  const helperSets = windows
+    ? path.join(localAppData, 'projections', 'helpers')
+    : path.join(home, process.platform === 'darwin' ? 'Library/Caches' : '.cache', 'projections/helpers')
   // The Python module unpacks beside the helper set, in an order readdir doesn't fix.
   const dotnetHelper = (await readdir(helperSets))
     .filter(name => !name.startsWith('.'))
@@ -203,11 +251,17 @@ try {
     .find(existsSync)
   const dotnetPackaged = dotnetHelper !== undefined
   if (process.env.PROJECTIONS_REQUIRE_HELPERS === '1') assert.ok(dotnetPackaged, 'The executable must embed the .NET helper')
+  // On Windows, dotnet fails in the extractor's environment (PATH, SystemRoot and its own variables): "An issue was
+  // encountered verifying workloads". Open: whether extractors should get Windows' machine locations (ProgramData,
+  // ProgramFiles). The helper's embedding and size are still checked.
+  const dotnetRuns = dotnetPackaged && !windows
   if (dotnetPackaged) {
     assert.deepEqual((await readdir(dotnetHelper)).sort(), helperFiles)
     let bytes = 0
     for (const file of helperFiles) bytes += (await stat(path.join(dotnetHelper, file))).size
     assert.ok(bytes < 512 * 1024, `The .NET helper ships ${bytes} bytes; it must borrow Roslyn, DI and EF Core rather than bundle them`)
+  }
+  if (dotnetRuns) {
     const sdk = invoke('dotnet', ['--version'], repo).trim()
     await mkdir(path.join(repo, 'dotnet'))
     await writeFile(
@@ -302,12 +356,12 @@ try {
       noNodeNativeCli: true,
       noNodeNativeInspector: true,
       repositoryTypeScript: true,
-      repositoryDotnet: dotnetPackaged,
+      repositoryDotnet: dotnetRuns,
       nodeAndPython: true,
       nativeComparison: true,
       batches: true,
       workingTreeBookmarks: true,
-      controlledUntrustedPr: true,
+      controlledUntrustedPr: controlledPr,
       savedDocuments: true,
       installedInspectorAssetsAndJobs: true,
       offlineReview: true,

@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import {existsSync, readFileSync, readdirSync} from 'node:fs'
 import {registerHooks} from 'node:module'
-import {dirname, join, relative, resolve} from 'node:path'
+import {dirname, join, relative, resolve, sep} from 'node:path'
 import test from 'node:test'
 import {fileURLToPath} from 'node:url'
 
@@ -22,7 +22,7 @@ const sources = (directory, files = []) => {
 
 test('only src/react.ts and src/react/ import React, and nothing else imports them', () => {
   const src = join(root, 'src')
-  const reactSide = path => path === join(src, 'react.ts') || path.startsWith(join(src, 'react') + '/')
+  const reactSide = path => path === join(src, 'react.ts') || path.startsWith(join(src, 'react') + sep)
   const problems = []
   for (const file of sources(src)) {
     if (reactSide(file)) continue

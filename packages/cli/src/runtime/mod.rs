@@ -24,7 +24,7 @@ pub use compare::{Compared, DefinitionSource, Sides, parse_range, short};
 pub use definitions::invalid_summary;
 pub use diagnostics::{TrustRequired, code, diagnostic, diagnostic_code};
 pub use extract::{definition_scope, determinism, effective_scope};
-pub use process::{ProcessFailure, which};
+pub use process::{ProcessFailure, which, which_in};
 pub use revision::read_regular;
 
 use std::{

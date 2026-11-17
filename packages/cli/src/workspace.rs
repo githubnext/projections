@@ -167,7 +167,7 @@ pub fn state(runner: &Runner, root: &Path) -> State {
             16 * 1024 * 1024,
         )
         .unwrap_or_default();
-    let mut changed = vec![root.join(".git/HEAD"), root.join(".git/index")];
+    let mut changed = vec![root.join(".git").join("HEAD"), root.join(".git").join("index")];
     for entry in status.split(|byte| *byte == 0) {
         if let Some(path) = entry.get(3..).and_then(|path| std::str::from_utf8(path).ok()) {
             changed.push(root.join(path));

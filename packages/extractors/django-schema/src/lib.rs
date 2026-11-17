@@ -57,7 +57,7 @@ pub fn collect(cx: &Context) -> Result<Value> {
     );
     let helper = cx.helper(
         "helpers/python/django_schema.py",
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("helper/django_schema.py"),
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("helper").join("django_schema.py"),
     )?;
     ensure!(helper.is_file(), "Django collection requires the installed Python helper assets");
     let request = serde_json::to_string(&cx.request())?;

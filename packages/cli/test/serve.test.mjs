@@ -10,7 +10,7 @@ import test from 'node:test'
 import {executionEnvironment, runBounded} from './process.mjs'
 import {commit, fixture, legacyDefinition} from './repository.mjs'
 
-const executable = fileURLToPath(new URL('../dist/projections', import.meta.url))
+const executable = fileURLToPath(new URL(`../dist/projections${process.platform === 'win32' ? '.exe' : ''}`, import.meta.url))
 
 /** Starts `serve --stdio` in `root` with a JSON-RPC client. Every stdout line must be a JSON-RPC 2.0 message. */
 function serve(t, root, args = []) {
@@ -272,7 +272,7 @@ test('serve --stdio stops on shutdown and exit, honors --trust, and requires --s
 
 test(
   'without --trust or an explore session, writes and repository code are refused; SIGTERM stops it',
-  {skip: process.platform === 'win32'},
+  {skip: process.platform === 'win32' && 'Windows has no SIGTERM: Node ends the process outright, so a graceful stop cannot be observed'},
   async t => {
     const {root} = await fixture(t)
     const backend = serve(t, root)

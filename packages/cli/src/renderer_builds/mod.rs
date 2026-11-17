@@ -159,7 +159,7 @@ impl RendererBuilds {
                     return Ok(());
                 }
                 // Built while no view showed it: only when its sources are newer than its bundle.
-                let bundle = std::fs::metadata(self.root.join(&package).join("dist/index.html"))
+                let bundle = std::fs::metadata(self.root.join(&package).join("dist").join("index.html"))
                     .and_then(|metadata| metadata.modified())
                     .ok();
                 let (newest, _) = fingerprint(&self.root, &sources);

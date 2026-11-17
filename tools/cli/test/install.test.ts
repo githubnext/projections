@@ -22,7 +22,7 @@ test("vsceTarget: Node's names to vsce's, and none for unsupported platforms", (
 
 test(
   'tarballSpec: relative when the project and checkout share a directory, absolute otherwise',
-  {skip: process.platform === 'win32'},
+  {skip: process.platform === 'win32' && 'The cases are POSIX paths'},
   () => {
     assert.equal(tarballSpec('/work/site/renderer', '/work/projections/dist/dogfood/p.tgz'), 'file:../../projections/dist/dogfood/p.tgz')
     assert.equal(tarballSpec('/tmp/scratch/renderer', '/work/projections/dist/dogfood/p.tgz'), 'file:/work/projections/dist/dogfood/p.tgz')

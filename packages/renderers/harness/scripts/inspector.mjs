@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url'
 
 const renderers = fileURLToPath(new URL('../../', import.meta.url))
 /** The native CLI of this workspace. */
-export const cli = resolve(renderers, '../cli/dist/projections')
+export const cli = resolve(renderers, `../cli/dist/projections${process.platform === 'win32' ? '.exe' : ''}`)
 
 export function inspectorArguments() {
   const fixtures = [],

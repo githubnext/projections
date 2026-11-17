@@ -7,7 +7,6 @@
 //
 //   node scripts/manifest.mjs strip    rewrite package.json and README.md as published
 import {readFileSync, writeFileSync} from 'node:fs'
-import {resolve} from 'node:path'
 import {fileURLToPath} from 'node:url'
 
 export const manifestPath = fileURLToPath(new URL('../package.json', import.meta.url))
@@ -44,7 +43,7 @@ export function publishedReadme(text) {
 }
 
 // Run as a script, not imported.
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (import.meta.main) {
   const [action] = process.argv.slice(2)
   if (action !== 'strip') throw new Error('Expected strip')
   writeFileSync(manifestPath, published(readFileSync(manifestPath, 'utf8')))

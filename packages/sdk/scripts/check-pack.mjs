@@ -38,6 +38,8 @@ while (args.length) {
 }
 const root = fileURLToPath(new URL('../', import.meta.url))
 const workspace = resolve(root, '../..')
+// Windows' own tar (bsdtar): Git Bash's GNU tar, first on PATH there, reads a drive letter as a remote host.
+const tar = process.platform === 'win32' ? join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'tar.exe') : 'tar'
 const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
 const npmCli = process.env.npm_execpath
 // Scratch installs use the registry this workspace uses, wherever they are.
@@ -61,7 +63,7 @@ try {
     step(`The tarball ${given}`)
     tarball = join(scratch, basename(given))
     copyFileSync(given, tarball)
-    const listed = execFileSync('tar', ['-tzf', tarball], {encoding: 'utf8'}).split('\n').filter(Boolean)
+    const listed = execFileSync(tar, ['-tzf', tarball], {encoding: 'utf8'}).split(/\r?\n/).filter(Boolean)
     files = listed
       .filter(file => !file.endsWith('/'))
       .map(file => file.replace(/^package\//, ''))
@@ -102,7 +104,7 @@ try {
   for (const target of targets) if (!files.includes(target.replace(/^\.\//, ''))) fail(`${target} is exported but not in the tarball`)
   const unpacked = join(scratch, 'unpacked')
   mkdirSync(unpacked)
-  execFileSync('tar', ['-xzf', tarball, '-C', unpacked])
+  execFileSync(tar, ['-xzf', tarball, '-C', unpacked])
   const internal = /@githubnext\/projections-[a-z]/
   const machine = [workspace, resolve(workspace, '..'), process.env.HOME].filter(path => path && path.length > 1)
   for (const file of files) {

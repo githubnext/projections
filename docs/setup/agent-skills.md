@@ -15,9 +15,10 @@ The skill is `<skills directory>/projections/SKILL.md`, at the repository root.
 2. The directory that already holds the skill (`.agents/skills`,
    `.github/skills`, then `.claude/skills`), so a second copy never appears
    beside it.
-3. An existing `.agents/skills`, `.claude/skills` or `.github/skills`, in that
-   order: the one the most agents read. When several exist, `init` says which it
-   chose.
+3. An existing `.agents/skills`, `.claude/skills` or `.github/skills`: the one
+   holding the most of the repository's own skills, so the skill follows the
+   repository's convention, and of those that tie, the one the most agents read
+   (in that order). When several exist, `init` says which it chose and why.
 4. Otherwise `.agents/skills`.
 
 It prints where the skill is and which agents read it there:
@@ -27,7 +28,12 @@ Agent skill:
   .agents/skills/projections/SKILL.md (created)
     read by GitHub Copilot, OpenAI Codex, Cursor and Gemini CLI
   Claude Code reads only .claude/skills: projections init --claude links the skill there
+  Agents load it to build projections. --skills-dir DIR writes it elsewhere; --no-skill doesn't write it
 ```
+
+`projections init <id> --no-skill` scaffolds the projection without writing,
+updating or moving the skill; agents then follow the guide
+`projections help authoring` prints.
 
 Every run updates the skill to the running CLI's version. The skill records that
 version in its front matter, as `metadata.projections-version`, and

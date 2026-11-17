@@ -318,6 +318,25 @@ fn init_puts_the_skill_where_asked_and_where_claude_code_reads_it() {
 }
 
 #[test]
+fn init_no_skill_writes_the_projection_alone() {
+    let repo = repository(None);
+    let root = repo.path();
+    let report = succeed(cli(root, &["init", "x", "--language", "go", "--no-skill"]));
+    assert!(report.contains("Agent skill: not written (--no-skill)\n"), "{report}");
+    assert!(report.contains("follow the guide `projections help authoring` prints"), "{report}");
+    assert!(root.join(".github/projections/x.json").is_file());
+    for directory in [".agents", ".claude", ".github/skills"] {
+        assert!(!root.join(directory).exists(), "{directory}");
+    }
+    let error = fail(cli(root, &["init", "--no-skill"]));
+    assert!(error.contains("<ID>"), "{error}");
+    // Without it, init says what it wrote and how to skip it.
+    let report = succeed(cli(root, &["init", "y", "--language", "go"]));
+    assert!(report.contains(".agents/skills/projections/SKILL.md (created)"), "{report}");
+    assert!(report.contains("--no-skill doesn't write it"), "{report}");
+}
+
+#[test]
 fn init_uses_built_in_components_when_asked() {
     let repo = repository(Some("package.json"));
     let root = repo.path();

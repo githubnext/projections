@@ -55,35 +55,44 @@ projections validate /tmp/services.extraction.json
   first-parent commits, else on its first-parent commits (a repository that
   squashes or rebases), extracting every revision with the working tree's
   definition, at most `--concurrency N` (default 2) extractors at once, and
-  prints how much each changed on each; `-p ID` limits it, `--json` prints the
-  `projections.sweep` document. Projections that run repository code are skipped
-  without `--trust`.
+  prints how much each changed on each, best signal first: a projection that
+  changed on at most a quarter of the changes (likely the structural ones)
+  before one that changed on more, one that changed on four in five or more
+  (likely noise: it doesn't single out the changes that matter) and one that
+  never changed, then which are worth a look. Fewer than four changes aren't
+  judged. `-p ID` limits it, `--json` prints the `projections.sweep` document,
+  each ready projection with its `signal` (`rare`, `steady`, `unknown`, `noisy`
+  or `quiet`). Projections that run repository code are skipped without
+  `--trust`.
 - `adopt ID...`: Write each explored candidate's definition
   (`.github/projections/ID.json`, or `.projections/` when the repository uses
   it; never over a file) and add the `--bookmarks N` (default 3) changes it
   changed most on in a sweep of the last `--last N` to
   `.projections-bookmarks.json`. `--dry-run` prints the files instead.
 - `init [ID]`: Scaffold a projection, or add parts to an existing one, and write
-  or update the agent skill (`.agents/skills/projections/SKILL.md`, or the
-  skills directory that already holds it or `--skills-dir DIR`; `--claude` adds
-  it to `.claude/skills` for Claude Code; see
-  [agent skills](../setup/agent-skills.md)). A new projection gets a starter
-  extractor in the project's toolchain (Node when the root has `package.json`;
-  Python for `pyproject.toml`, `requirements.txt`, `setup.py` or `Pipfile`; Go
-  for `go.mod`; otherwise `--language node|python|go` is required) and the
-  built-in `graph` renderer. `--extractor ID` and `--command ARGV_JSON` use a
-  built-in extractor or an existing program instead; `--renderer NAME` picks a
-  built-in renderer, and `--renderer custom` scaffolds a renderer package
-  (TypeScript, Vite, React, the renderer SDK and kit) in `ID/renderer/`;
-  `--comparator custom` scaffolds a starter comparator file,
-  `ID/ID.comparator.yaml`, and its tests. For an existing projection, only the
-  named parts are added and only their definition fields change. Without `ID`,
-  writes only the skill. Never overwrites a projection file and runs nothing. A
-  custom renderer depends on `@githubnext/projections`, which isn't on npm yet,
-  by the URL of the tarball attached to this CLI's GitHub release;
-  `PROJECTIONS_RENDERER_PACKAGES=DIR` instead installs it from an `npm pack`
-  tarball in `DIR` (such as one built from a Git submodule), and a development
-  build from a clone (`npm run tools -- install`) from the clone's packed
+  or update the agent skill (`projections/SKILL.md` in the skills directory that
+  already holds it, else the one of `.agents/skills`, `.claude/skills` and
+  `.github/skills` holding the repository's own skills, else `.agents/skills`;
+  `--skills-dir DIR` chooses, `--no-skill` writes none, and `--claude` adds it
+  to `.claude/skills` for Claude Code; see
+  [agent skills](../setup/agent-skills.md)), printing where it went. A new
+  projection gets a starter extractor in the project's toolchain (Node when the
+  root has `package.json`; Python for `pyproject.toml`, `requirements.txt`,
+  `setup.py` or `Pipfile`; Go for `go.mod`; otherwise
+  `--language node|python|go` is required) and the built-in `graph` renderer.
+  `--extractor ID` and `--command ARGV_JSON` use a built-in extractor or an
+  existing program instead; `--renderer NAME` picks a built-in renderer, and
+  `--renderer custom` scaffolds a renderer package (TypeScript, Vite, React, the
+  renderer SDK and kit) in `ID/renderer/`; `--comparator custom` scaffolds a
+  starter comparator file, `ID/ID.comparator.yaml`, and its tests. For an
+  existing projection, only the named parts are added and only their definition
+  fields change. Without `ID`, writes only the skill. Never overwrites a
+  projection file and runs nothing. A custom renderer depends on
+  `@githubnext/projections`, which isn't on npm yet, by the URL of the tarball
+  attached to this CLI's GitHub release; `PROJECTIONS_RENDERER_PACKAGES=DIR`
+  instead installs it from an `npm pack` tarball in `DIR` (such as one built
+  from a Git submodule), and a development build from a clone
+  (`npm run tools -- install`) from the clone's packed
   `dist/dogfood/githubnext-projections.tgz` with a `file:` reference.
 - `check [-p ID]...`: Verify projections end to end (every one the working tree
   defines, by default): the definition is valid, the working tree extracts, a
@@ -99,23 +108,27 @@ projections validate /tmp/services.extraction.json
   same extraction (otherwise it warns: the extractor reads files beside it,
   which a comparison takes from the definition's revision on both sides; see
   [Definitions and execution](execution.md#exact-source-and-explicit-execution)),
-  `HEAD` compares with it (the working tree's definition applied to both), a
-  custom comparator passes the tests beside its comparator file
-  (`*.comparator.test.yaml`; `--update` writes their snapshots and `--coverage`
-  reports which of the comparator file's functions, expressions and branches
-  they run, see [Comparator tests](stdio-backend.md#comparator-tests)), a custom
-  renderer's bundle is built and newer than its sources, and, in a headless
-  browser, the renderer passes the checks every renderer is held to, on the
-  working tree and the comparison (each presented as the definition's
-  `presentation` says) and a custom renderer package's own `scenarios.json`.
-  Each check is `pass`, `fail`, `warn` or `skip`, in words; the exit status is
-  nonzero when any fails. `--png FILE` also draws the (one) projection's working
-  tree (an existing file fails that step only); `--from FILE` checks raw
-  extractor output for the one projection instead of extracting, skipping the
-  comparison; `--no-render` skips the browser; `--parity REV` also compares a
-  local extraction of a commit with CI's (see
-  [CI artifacts](caches.md#ci-artifacts-as-a-source)); `--json` prints the
-  `projections.check` document.
+  a custom extractor's `data` holds no fields that change when something other
+  than their item does (it warns about counts and lists of things elsewhere,
+  such as `fileCount` or `importers`, and line numbers, unless the definition
+  reads the field or declares it volatile: each makes its item modified on
+  changes that didn't touch it), `HEAD` compares with it (the working tree's
+  definition applied to both), a custom comparator passes the tests beside its
+  comparator file (`*.comparator.test.yaml`; `--update` writes their snapshots
+  and `--coverage` reports which of the comparator file's functions, expressions
+  and branches they run, see
+  [Comparator tests](stdio-backend.md#comparator-tests)), a custom renderer's
+  bundle is built and newer than its sources, and, in a headless browser, the
+  renderer passes the checks every renderer is held to, on the working tree and
+  the comparison (each presented as the definition's `presentation` says) and a
+  custom renderer package's own `scenarios.json`. Each check is `pass`, `fail`,
+  `warn` or `skip`, in words; the exit status is nonzero when any fails.
+  `--png FILE` also draws the (one) projection's working tree (an existing file
+  fails that step only); `--from FILE` checks raw extractor output for the one
+  projection instead of extracting, skipping the comparison; `--no-render` skips
+  the browser; `--parity REV` also compares a local extraction of a commit with
+  CI's (see [CI artifacts](caches.md#ci-artifacts-as-a-source)); `--json` prints
+  the `projections.check` document.
 - `doctor [-p ID]...`: What this checkout needs to run its projections: the Git
   checkout and its commits, valid definitions, the environment (what is
   declared, what the working tree has prepared, stale steps, missing tools) and

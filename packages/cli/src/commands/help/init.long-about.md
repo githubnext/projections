@@ -26,14 +26,16 @@ Files, for ID service-map:
   .agents/skills/projections/SKILL.md              the agent skill
 ```
 
-The skill goes in .agents/skills, which GitHub Copilot, OpenAI Codex, Cursor and
-Gemini CLI read, unless the repository already has the skill elsewhere or has
-only .claude/skills (Claude Code, GitHub Copilot, Cursor) or .github/skills
-(GitHub Copilot); --skills-dir chooses. Claude Code reads only .claude/skills:
---claude links the skill there (a relative symlink; a copy on Windows, or with
---claude copy). Every run updates the skill, and a copy for Claude Code, to this
-CLI's version, unless its front matter has no metadata.projections-version (so
-remove that line to keep your edits); other skills are never touched.
+The skill goes where the repository keeps its skills: the skills directory that
+already holds it, else whichever of .agents/skills (GitHub Copilot, OpenAI
+Codex, Cursor, Gemini CLI), .claude/skills (Claude Code, GitHub Copilot, Cursor)
+and .github/skills (GitHub Copilot) holds the most of the repository's own
+skills, else .agents/skills. init says where it went; --skills-dir chooses, and
+--no-skill writes none. Claude Code reads only .claude/skills: --claude links
+the skill there (a relative symlink; a copy on Windows, or with --claude copy).
+Every run updates the skill, and a copy for Claude Code, to this CLI's version,
+unless its front matter has no metadata.projections-version (so remove that line
+to keep your edits); other skills are never touched.
 
 Run again with --renderer custom, --comparator custom or an extractor option to
 add that part to an existing projection; only those fields of its definition

@@ -79,6 +79,7 @@ fn evidence(value: &Value, path: &str) -> Result<Vec<Evidence>, Failure> {
     let mut result = Vec::new();
     for (index, item) in array(value, path)?.iter().enumerate() {
         let path = pointer(path, &index.to_string());
+        misplaced_evidence(item, &path)?;
         fields(item, &["kind", "source", "location"], &path)?;
         result.push(Evidence {
             kind: name(&item["kind"], &pointer(&path, "kind"))?,
@@ -87,6 +88,27 @@ fn evidence(value: &Value, path: &str) -> Result<Vec<Evidence>, Failure> {
         });
     }
     Ok(result)
+}
+
+/// Evidence fields people reach for that belong elsewhere: a position goes in
+/// `location`, a file in `source`.
+fn misplaced_evidence(item: &Value, path: &str) -> Result<(), Failure> {
+    const IGNORED: &str = "The default comparator ignores evidence, so moved code doesn't show as a change";
+    let Some(item) = item.as_object() else {
+        return Ok(());
+    };
+    for key in item.keys() {
+        let message = match key.as_str() {
+            "line" => format!("Unknown field; a line goes in location: {{\"location\": {{\"line\": 12}}}}. {IGNORED}"),
+            "column" | "startLine" | "endLine" | "lineNumber" | "start" | "end" | "range" | "position" => {
+                format!("Unknown field; a position goes in location: {{\"location\": {{\"line\": 12, \"column\": 5}}}}. {IGNORED}")
+            }
+            "file" | "path" | "uri" => format!("Unknown field; the {key} goes in source: {{\"source\": \"src/app.ts\"}}"),
+            _ => continue,
+        };
+        return Err(fail("unknown-field", &pointer(path, key), &message));
+    }
+    Ok(())
 }
 
 fn location(value: &Value, path: &str) -> Result<Location, Failure> {

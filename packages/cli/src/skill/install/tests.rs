@@ -22,6 +22,7 @@ fn options(directory: Option<&str>, claude: Option<Claude>) -> Options {
     Options {
         directory: directory.map(str::to_owned),
         claude,
+        ..Options::default()
     }
 }
 
@@ -85,15 +86,42 @@ fn among_several_directories_it_prefers_the_most_widely_read_and_says_so() {
         installed.notes.iter().any(|note| note.contains("chose .claude/skills")),
         "{installed:?}"
     );
+    // An empty directory the repository doesn't use loses to the ones holding its skills.
     fs::create_dir_all(root.join(".agents/skills")).unwrap();
     fs::remove_dir_all(root.join(".claude/skills/projections")).unwrap();
+    let installed = install(root, &Options::default()).unwrap();
+    assert_eq!(installed.directory, ".claude/skills");
+    assert!(
+        installed.notes.iter().any(|note| note.contains(
+            "(.agents/skills, .claude/skills, .github/skills); chose .claude/skills, which holds as many of this repository's skills as any"
+        )),
+        "{installed:?}"
+    );
+    // The one holding the most of them wins, however widely read.
+    fs::remove_dir_all(root.join(".claude/skills/projections")).unwrap();
+    write(root, ".github/skills/another/SKILL.md", OTHERS);
+    let installed = install(root, &Options::default()).unwrap();
+    assert_eq!(installed.directory, ".github/skills");
+    assert!(
+        installed
+            .notes
+            .iter()
+            .any(|note| note.contains("chose .github/skills, which holds the most of this repository's skills")),
+        "{installed:?}"
+    );
+    // With none of the repository's skills anywhere, the most widely read.
+    let repo = repository();
+    let root = repo.path();
+    for directory in [".github/skills", ".agents/skills"] {
+        fs::create_dir_all(root.join(directory)).unwrap();
+    }
     let installed = install(root, &Options::default()).unwrap();
     assert_eq!(installed.directory, DEFAULT);
     assert!(
         installed
             .notes
             .iter()
-            .any(|note| note.contains("(.agents/skills, .claude/skills, .github/skills); chose .agents/skills")),
+            .any(|note| note.contains("chose .agents/skills, which the most agents read")),
         "{installed:?}"
     );
 }

@@ -105,8 +105,9 @@ projections init [OPTIONS] [ID]
 | `--renderer <NAME\|custom>` | A built-in renderer name (for example graph, dag, database; projections help authoring lists them), or `custom` to scaffold one. |
 | `--comparator <custom>` | Scaffold a custom comparator: a starter comparator file (<ID>.comparator.yaml) and its tests. One of `custom`. |
 | `--definition-directory <DEFINITION_DIRECTORY>` | Where the definition goes. One of `.github/projections`, `.projections`. Default: `.github/projections`. |
-| `--skills-dir <DIR>` | The skills directory the agent skill goes in, relative to the repository root. Default: the one holding it, else an existing .agents/skills, .claude/skills or .github/skills, else .agents/skills. |
+| `--skills-dir <DIR>` | The skills directory the agent skill goes in, relative to the repository root. Default: the one holding it, else whichever of .agents/skills, .claude/skills and .github/skills holds the repository's own skills, else .agents/skills. |
 | `--claude <HOW>` | Also put the skill where Claude Code reads it, .claude/skills: a symlink, or a copy on Windows (or with copy). One of: `auto` — A relative symlink to the skill, or a copy on Windows; `link` — A relative symlink to the skill; `copy` — A copy, which later runs of init keep in sync (for checkouts without symlinks). |
+| `--no-skill` | Don't write, update or move the agent skill; projections help authoring prints its guide. |
 
 ## `projections check`
 

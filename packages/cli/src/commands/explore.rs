@@ -201,6 +201,18 @@ fn explore_sweep(root: &Path, args: Explore, candidates: Vec<Value>) -> Result<(
     }
     let (rows, cells) = (rows.into_inner().unwrap(), cells.into_inner().unwrap());
     if args.json {
+        // Rows best signal first, each ready one with its signal.
+        let rows: Vec<Value> = sweep::signal::ranked(&rows, &cells.iter().collect::<Vec<_>>())
+            .into_iter()
+            .map(|(row, tally)| {
+                let mut row = row.clone();
+                if let Some(tally) = tally {
+                    row["signal"] = json!(tally.signal.name());
+                    row["changed"] = json!(tally.changed);
+                }
+                row
+            })
+            .collect();
         return output(
             &json!({"format": "projections.sweep", "version": 0,
                 "changes": changes.iter().map(sweep::Change::json).collect::<Vec<_>>(),

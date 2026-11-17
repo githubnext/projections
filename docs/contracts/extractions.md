@@ -28,12 +28,15 @@ built-in renderers and comparators read; the
 An entity has `id`, `kind`, `label` and optional `data`, `previousIds`,
 `evidence` and `confidence` (`authoritative`, `derived` or `inferred`). A
 relationship has `id`, `kind`, `from`, `to` and optional `label`, `data`,
-`previousIds`, `evidence` and `confidence`. IDs are nonempty Unicode strings and
-globally unique across entities and relationships. Relationship endpoints must
-name existing entities. `previousIds` declares identity continuity; it never
-authorizes fuzzy or label-based matching. Several items of one collection may
-claim the same previous ID, which declares a split. A claim may not name a
-current ID or be shared across collections.
+`previousIds`, `evidence` and `confidence`. Each evidence entry has a `kind`, a
+`source` (the file, say) and an optional `location` (`line` and `column`, from
+1); the default comparator ignores evidence, so a line number belongs there
+rather than in `data`, where moving code would make the item modified. IDs are
+nonempty Unicode strings and globally unique across entities and relationships.
+Relationship endpoints must name existing entities. `previousIds` declares
+identity continuity; it never authorizes fuzzy or label-based matching. Several
+items of one collection may claim the same previous ID, which declares a split.
+A claim may not name a current ID or be shared across collections.
 
 Trees and treemaps are acyclic forests with at most one incoming parent per
 entity. DAGs are acyclic. Treemap leaves require nonnegative `data.value`; an

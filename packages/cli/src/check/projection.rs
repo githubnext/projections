@@ -1,7 +1,9 @@
 //! One projection's check: its steps, in report order.
 
 use super::{
-    Options, failed,
+    Options,
+    churn::churn_step,
+    failed,
     renderer::{diff_step, renderer_package_step, renderer_step},
     reproducibility::{determinism_step, own_files_step, parity_step, scope_step},
     step,
@@ -45,6 +47,9 @@ impl Checker<'_> {
             if let Some(step) = own_files_step(self.runner, &id, document) {
                 steps.push(step);
             }
+        }
+        if let Some(step) = extraction.as_ref().and_then(|document| churn_step(definition, document)) {
+            steps.push(step);
         }
         let comparison = if extraction.is_some() {
             self.compare(&id, &mut steps)

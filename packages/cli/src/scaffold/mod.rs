@@ -128,7 +128,7 @@ pub struct Report {
     /// The custom renderer package directory, when one was created.
     pub renderer: Option<String>,
     pub renderer_package: PackageSource,
-    /// Where the agent skill was written, linked or kept.
+    /// Where the agent skill was written, linked or kept; `None` with `--no-skill`.
     pub skill: Option<crate::skill::install::Installed>,
 }
 
@@ -232,6 +232,9 @@ fn exists(root: &Path, relative: &str) -> bool {
 
 /// Writes or updates the agent skill. Agents load it by its description.
 fn skill(root: &Path, options: &crate::skill::install::Options, report: &mut Report) -> Result<()> {
+    if options.skip {
+        return Ok(());
+    }
     report.skill = Some(crate::skill::install::install(root, options)?);
     Ok(())
 }

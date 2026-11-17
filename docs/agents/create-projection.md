@@ -99,8 +99,9 @@ separate inspector to start.
 - **Side by side**: to show several projections at once, give each its own
   named viewer (`viewer`, or `--viewer <name>` on `projections view show`,
   `current`, `screenshot` and `refresh`): each is its own page and URL, with
-  its own state, so open each page for them. Without a name, the calls use
-  the default viewer.
+  its own state, so open each page for them (in the Copilot app, one
+  `projections` canvas per name). Without a name, the calls use the default
+  viewer.
 
 In VS Code's agent, `open_projection` shows a projection in a projection tab
 instead. People who work in VS Code can also use the Projections extension

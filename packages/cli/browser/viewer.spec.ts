@@ -5,7 +5,7 @@
 // projection from its title.
 import {test, expect, chromium} from '@playwright/test'
 import type {Page} from '@playwright/test'
-import {execFileSync, spawn} from 'node:child_process'
+import {execFileSync, spawn, spawnSync} from 'node:child_process'
 import type {ChildProcess} from 'node:child_process'
 import {mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
@@ -128,13 +128,17 @@ test('a page framed by a document that is not a secure context still counts as o
 test('screenshot --page captures the viewer page, its chrome and all, without counting as a page', async () => {
   expect((await control('control/show', {projection: 'packages', choice: 'last-commit', mode: 'side-by-side'})).status).toBe(200)
   const out = join(mkdtempSync(join(tmpdir(), 'projections-viewer-shot-')), 'page.png')
-  const said = execFileSync(cli, ['view', 'screenshot', '--page', '--width', '900', '--height', '600', '--out', out, '--json'], {
+  // The CLI finds its browser as its other captures do (PROJECTIONS_BROWSER, else PATH, else the usual install
+  // locations): on CI that is the runner's Chrome, whose sandbox works there. Without one it is skipped, except on CI.
+  const shot = spawnSync(cli, ['view', 'screenshot', '--page', '--width', '900', '--height', '600', '--out', out, '--json'], {
     cwd: repository,
-    env: {...process.env, PROJECTIONS_CACHE_DIR: cache, PROJECTIONS_BROWSER: chromium.executablePath()},
-    stdio: ['ignore', 'pipe', 'pipe'],
+    env: {...process.env, PROJECTIONS_CACHE_DIR: cache},
     timeout: 150_000,
   })
-  const result = JSON.parse(said.toString())
+  const noBrowser = String(shot.stderr).includes('No Chrome, Chromium or Microsoft Edge was found')
+  test.skip(noBrowser && !process.env.CI, 'no Chrome, Chromium or Edge is installed')
+  expect(shot.status, String(shot.stderr)).toBe(0)
+  const result = JSON.parse(String(shot.stdout))
   expect(result).toMatchObject({page: true, projection: 'packages', width: 900, height: 600})
   const png = readFileSync(out)
   expect(png.subarray(1, 4).toString()).toBe('PNG')

@@ -157,6 +157,7 @@ runs:
       env:
         PROJECTIONS_CLI: ${{ steps.install.outputs.cli-path }}
         PROJECTIONS_MANIFEST: ${{ steps.collect.outputs.manifest }}
+        INPUT_TRUST: ${{ inputs.trust }}
         INPUT_SNAPSHOTS: ${{ inputs.snapshots }}
         INPUT_BROWSER: ${{ inputs.browser }}
         INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}

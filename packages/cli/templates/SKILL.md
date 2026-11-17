@@ -64,7 +64,7 @@ separate inspector to start.
   `last-commit`, `now`, `release`, `bookmark:<id>`), in a mode, with an
   entity selected: `open_projection`, or without the tools `projections view
   show -p <id> --choice branch` (`--before`, `--after`, `--mode`, `--entity`;
-  `--trust` when its extractor is repository code). Either starts the viewer
+  `--trust` when its extractor or custom renderer is repository code). Either starts the viewer
   when none runs and gives its URL.
 - **Open the page for them** yourself the first time (the result says when no
   page is open yet): in your own browser if you have one (Codex's built-in
@@ -246,7 +246,8 @@ compared and what you couldn't verify.
    use a new name each time). To see data the repository doesn't produce yet,
    write the extraction by hand and draw or check it without the extractor:
    `projections show --from made.json -p <id> --png /tmp/made.png`,
-   `projections check -p <id> --from made.json`.
+   `projections check -p <id> --from made.json` (add `--trust` for a custom
+   renderer: it is repository code too).
    Show the person what you see once it draws: the viewer extracts the working
    tree with your uncommitted projection code and replays on a save
    (`refresh` when it says it is out of date). In VS

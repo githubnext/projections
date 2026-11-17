@@ -168,15 +168,20 @@ only a comparison's head supplies needs explicit trust.**
   only read files never require it.
 - A **comparator** never requires trust: comparator files are data run by a
   sandboxed interpreter.
-- A **custom renderer** from the base revision, or from the definition revision
-  chosen for single-revision views, runs without trust. When the effective
-  definition is a comparison's head and its renderer bundle (`index.html` and
-  `renderer.json` bytes) differs from the bundle the base revision declares for
-  the projection, or the base declares none, the renderer requires the same
-  explicit trust as a head extractor. Where nothing names a base, as in the
-  Inspector and `list`, the checkout is the base: the working tree and `HEAD`'s
-  history; another revision's base is its merge base with `HEAD`
-  (`rendererRequiresTrust`).
+- A **custom renderer** bundle is repository code, so it requires trust
+  (`rendererRequiresTrust`), whichever revision supplies it: the working tree,
+  `HEAD`, a base or a head. The one exception is a bundle whose `index.html` and
+  `renderer.json` bytes are identical to the bundle the same projection declares
+  at the revision's merge base with the repository's default branch
+  (`refs/remotes/origin/HEAD`; for the working tree, `HEAD`'s merge base): that
+  renderer is the one the repository's maintainers merged, and everything it is
+  given is derived from the same repository. A checkout with no
+  `refs/remotes/origin/HEAD` (`git remote set-head origin --auto` sets it) has
+  no exception. Checking out a pull request doesn't change its default branch,
+  so a renderer the pull request adds or changes still needs trust. Every host
+  applies the rule: the Inspector and viewer, VS Code (a trusted workspace
+  passes `--trust`), `show`/`compare --png` and the `screenshot` tool, and
+  `check`'s renderer checks.
 
 Renderer frames use `sandbox="allow-scripts"` and a content security policy that
 grants no origin (not even the host's) and `connect-src 'none'`, so a renderer

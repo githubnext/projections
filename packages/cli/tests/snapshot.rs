@@ -529,9 +529,10 @@ fn the_card_frame_is_transparent_outside_its_corners_unless_matted() {
 }
 
 /// A definition's custom renderer is served from its definition revision, under
-/// the same trust rule as `inspect`.
+/// the same trust rule as `inspect`: one that differs from the default branch's
+/// needs --trust, even when it is checked out.
 #[test]
-fn custom_renderers_run_from_their_revision_and_outside_ones_need_trust() {
+fn custom_renderers_run_from_their_revision_and_others_need_trust() {
     let Some(browser) = prerequisites("snapshot custom renderers") else {
         return;
     };
@@ -561,7 +562,9 @@ fn custom_renderers_run_from_their_revision_and_outside_ones_need_trust() {
     git(path, &["add", "--all"]);
     git(path, &["commit", "--quiet", "-m", "custom renderer"]);
     let custom = git(path, &["rev-parse", "HEAD"]);
-    // A revision outside HEAD's history whose renderer differs from its merge base's.
+    git(path, &["update-ref", "refs/remotes/origin/main", &custom]);
+    git(path, &["symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/main"]);
+    // A pull request's head whose renderer differs from the default branch's.
     git(path, &["checkout", "--quiet", "-b", "side"]);
     bundle("#0000d0");
     git(path, &["add", "--all"]);
@@ -586,6 +589,24 @@ fn custom_renderers_run_from_their_revision_and_outside_ones_need_trust() {
     assert_ne!(own, withheld, "the custom renderer did not run");
     assert_ne!(trusted, withheld, "the trusted renderer did not run");
     assert_ne!(trusted, own);
+    // Checked out, the pull request's head is HEAD and the working tree; its renderer still needs trust.
+    git(path, &["checkout", "--quiet", &side]);
+    let (_, notes) = run("checked-out.png", &["show", "-p", "files"]);
+    assert!(notes.contains("needs --trust"), "{notes}");
+    // A saved document draws with the custom renderer only with --trust.
+    let saved = output.path().join("saved.json");
+    let extraction = cli(path, &browser, &["show", "-p", "files", "--json"]);
+    succeeded(&extraction);
+    fs::write(&saved, &extraction.stdout).unwrap();
+    let saved = saved.to_string_lossy().into_owned();
+    let (saved_withheld, notes) = run("saved.png", &["show", "--from", &saved]);
+    assert!(notes.contains("needs --trust"), "{notes}");
+    let (saved_trusted, notes) = run("saved-trusted.png", &["show", "--from", &saved, "--trust"]);
+    assert!(!notes.contains("note:"), "{notes}");
+    assert_ne!(
+        saved_trusted, saved_withheld,
+        "the trusted renderer did not draw the saved document"
+    );
 }
 
 /// The WebSocket transport Windows uses also works on Unix, and both give the same image.

@@ -405,9 +405,10 @@ the shared Engine and presents it through the host's stage, legend included,
 with the Inspector's policies: built-in renderers come from the executable, and
 run in `sandbox="allow-scripts"` frames under the renderer content security
 policy (no network). A definition's custom renderer is served from its
-definition revision with the same trust rule as the Inspector's: one from
-outside the checkout's history that differs from its merge base's needs
-`--trust`; without it the built-in renderer for the schema is used, with a note
+definition revision with the same [trust rule](../contracts.md#trust) as the
+Inspector's: one that differs from the default branch's needs `--trust` (also
+accepted with `--from` and `--before-extraction`, where it allows only the
+renderer); without it the built-in renderer for the schema is used, with a note
 on stderr. A comparison made by a custom comparator is presented as the CLI
 computed it, after both extractions are verified.
 

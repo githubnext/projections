@@ -117,8 +117,10 @@ for why and how.
   Explorer's context menu on `.json` files.
 - **Projections: Open Renderer Scenarios…**: The renderer and comparator
   workbench on a directory's `scenarios.json` (a renderer package, with its
-  built bundle when it has one): every scenario through the real host view, its
-  comparator (rules included) and the renderer checks
+  built bundle when it has one and the workspace is trusted; in Restricted Mode
+  the bundle, which is repository code, doesn't run and the scenarios use the
+  built-in renderer for their schema): every scenario through the real host
+  view, its comparator (rules included) and the renderer checks
   (`serve --stdio --fixtures`); also in the Explorer's context menu on folders,
   and the Definition view's Renderer → Scenarios. The bundle reloads when it is
   rebuilt (by the extension while a tab of its projection is open, see

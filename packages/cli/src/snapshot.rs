@@ -48,7 +48,7 @@ pub struct Request {
     pub document: Value,
     /// The repository a custom renderer bundle is read from.
     pub repo: PathBuf,
-    /// Whether custom renderers from outside the checkout's history may run.
+    /// Whether custom renderers that differ from the default branch's may run.
     pub trust: bool,
     /// Which revision's definition explains a comparison; it supplies the custom renderer.
     pub definition: DefinitionSource,
@@ -269,7 +269,7 @@ async fn prepare(request: Request) -> Result<Prepared> {
         if withheld {
             parameters += "&withheld=1";
             notices.push(format!(
-                "The custom renderer {bundle} comes from outside this checkout's history and differs from its merge base's, so it needs --trust; the snapshot uses the built-in renderer for its schema instead"
+                "The custom renderer {bundle} is repository code that differs from the default branch's, so it needs --trust; the snapshot uses the built-in renderer for its schema instead"
             ));
         }
     }

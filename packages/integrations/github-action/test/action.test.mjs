@@ -827,8 +827,10 @@ test('the snapshot script renders both sides of a pull request and a push, light
   assert.deepEqual(readdirSync(pull.outputs.directory).sort(), ['projections', artifactManifest])
 
   const push = collect(directory, repo, 'push', {after: head}, 'refs/heads/feature')
-  // Snapshots render saved documents, which run no repository code: trust changes nothing (show --from refuses it).
+  // Snapshots render saved documents, so no extractor runs; trust lets a custom renderer, repository code, draw them.
+  assert.doesNotMatch(first.result.stdout, /--trust/)
   const pushed = run(push.outputs, {INPUT_SNAPSHOTS: 'files', INPUT_TRUST: 'true'})
+  assert.match(pushed.result.stdout, /^projections .* show --from .* --trust$/m)
   assert.deepEqual(
     pushed.index.snapshots.map(file => file.path),
     ['files.light.png', 'files.dark.png'],

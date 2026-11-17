@@ -1,7 +1,9 @@
 // Renders the projections the `snapshots` input lists as PNGs, light and dark,
 // from the documents collect.mjs saved: both sides of a pull request's
 // comparison, or a push's extraction. No extractor runs again, and no token is
-// available to this step; renderers run sandboxed in the runner's own Chrome.
+// available to this step; renderers run sandboxed in the runner's own Chrome. A
+// custom renderer is repository code, so it draws only with `trust: true`;
+// otherwise the CLI uses the built-in renderer for its schema, with a note.
 import {spawnSync} from 'node:child_process'
 import {appendFileSync, mkdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs'
 import path from 'node:path'
@@ -35,6 +37,7 @@ for (const render of renders) {
     const args = ['-C', repo, 'show', '--from', document, '--png', path.join(directory, name), '--theme', theme]
     // One side of the comparison, drawn by the renderer of the definition that explained it (the base's, as collected).
     if (render.part) args.push('--side', render.part)
+    if (environment.INPUT_TRUST === 'true') args.push('--trust')
     console.log(`projections ${args.join(' ')}`)
     const result = spawnSync(cli, args, {
       cwd: repo,

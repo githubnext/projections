@@ -162,8 +162,9 @@ fn clap_commands_and_native_collection_do_not_require_node() {
         ))["comparison"]["changes"],
         json!([])
     );
+    // Saved extractions run no extractor; --trust only lets a custom renderer draw them.
     assert!(
-        !cli(
+        cli(
             repo.path(),
             path.path(),
             &[
@@ -953,7 +954,7 @@ fn renderer_trust_and_comparison_notices() {
     tampered["notices"] = json!("note");
     assert!(artifact::validate_comparison(&tampered).is_err());
 
-    // Renderers outside the checkout's history need trust, unless they match the merge base's.
+    // Custom renderers need trust unless they match the default branch's at the revision's merge base with it.
     git(repo, &["checkout", "--quiet", "-b", "side", &a]);
     renderer(repo, "<!doctype html><p>side</p>");
     let side = commit(repo);
@@ -979,12 +980,42 @@ fn renderer_trust_and_comparison_notices() {
             })
             .collect()
     };
+    // Without a default branch, even the checkout's own renderer needs trust.
+    assert_eq!(policies(&a), vec![("ui".into(), false, true)]);
+    git(repo, &["update-ref", "refs/remotes/origin/main", &a]);
+    git(repo, &["symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/main"]);
     assert_eq!(policies(&a), vec![("ui".into(), false, false)]);
-    assert_eq!(policies("working-tree")[1], ("ui".into(), false, false));
+    // HEAD (b) changed the renderer since the default branch, so its working tree and commit need trust.
+    assert_eq!(policies("working-tree")[1], ("ui".into(), false, true));
+    assert_eq!(policies(&b)[1], ("ui".into(), false, true));
     assert_eq!(policies(&side), vec![("ui".into(), false, true)]);
     assert_eq!(policies(&same), vec![("ui".into(), false, false)]);
     let (ok, text, _) = run(repo, path.path(), &["list", "--revision", &side]);
     assert!(ok && text.contains("requires --trust"), "{text}");
+
+    // `check` runs the working tree's renderer checks only with --trust; the browser is never started without it.
+    let missing = repo.join("no-browser");
+    let check = |trust: bool| -> Value {
+        let mut args = vec!["check", "-p", "ui", "--json", "--browser", missing.to_str().unwrap()];
+        if trust {
+            args.push("--trust");
+        }
+        let (_, stdout, stderr) = run(repo, path.path(), &args);
+        let report: Value = serde_json::from_str(&stdout).unwrap_or_else(|_| panic!("{stdout}{stderr}"));
+        report["projections"][0]["steps"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|step| step["id"] == "render")
+            .cloned()
+            .unwrap()
+    };
+    let untrusted = check(false);
+    assert_eq!(untrusted["status"], "fail", "{untrusted}");
+    assert!(untrusted["message"].as_str().unwrap().contains("--trust"), "{untrusted}");
+    let trusted = check(true);
+    assert_eq!(trusted["status"], "skip", "{trusted}");
+    assert!(trusted["message"].as_str().unwrap().contains("no-browser"), "{trusted}");
 }
 
 #[test]

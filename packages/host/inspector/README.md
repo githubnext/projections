@@ -160,11 +160,11 @@ never mixed. Extractions run one at a time; queued ones wait, and **Cancel**
 stops the running one. Execution authorization is fixed by the runner at
 startup: started with `--trust` (in VS Code, a trusted workspace), the Inspector
 runs the repository's projection code (and an override's) without asking again.
-Without it, a projection whose extractor (or custom renderer from outside the
-checkout's history) runs repository code shows the trust step as the main view:
-what would run (the extractor's command, in mono) and how to trust it; saved
-artifacts and built-in extractors work without it. Browser payloads cannot grant
-trust.
+Without it, a projection whose extractor runs repository code shows the trust
+step as the main view (a custom renderer that differs from the default branch's
+is withheld too; the built-in renderer for its schema draws instead): what would
+run (the extractor's command, in mono) and how to trust it; saved artifacts and
+built-in extractors work without it. Browser payloads cannot grant trust.
 
 ### Keyboard
 

@@ -12,8 +12,8 @@ import type {RendererManifest} from '@githubnext/projections-host'
 /**
  * What using a definition requires, as `projections list` reports it:
  * `requiresTrust` when its extractor runs repository code, and
- * `rendererRequiresTrust` when its custom renderer comes from outside the
- * checkout's history and differs from its merge base's.
+ * `rendererRequiresTrust` when its custom renderer is repository code that
+ * differs from the bundle at the revision's merge base with the default branch.
  */
 export interface InspectorPolicy {
   id: string

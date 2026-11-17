@@ -13,6 +13,16 @@ export function rendererPackage(directory: string): boolean {
   }
 }
 
+/**
+ * Whether a scenarios directory's own renderer bundle runs (`--renderer`): it is repository code, so only in a trusted
+ * workspace. `withheld` when the directory is a renderer package but the workspace isn't trusted; its scenarios then
+ * use the built-in renderer for their schema.
+ */
+export function scenarioRenderer(directory: string, trusted: boolean): {renderer: boolean; withheld: boolean} {
+  const own = rendererPackage(directory)
+  return {renderer: own && trusted, withheld: own && !trusted}
+}
+
 /** `serve --stdio`'s arguments for a source, besides `--trust`. */
 export function sourceArguments(source: {kind: 'repository' | 'document' | 'fixtures'; path?: string; renderer?: boolean}): string[] {
   if (source.kind === 'document') return ['--document', source.path!]

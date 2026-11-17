@@ -108,7 +108,7 @@ export function useComparison({
       const source = chosen?.startsWith('custom:') ? chosen.slice('custom:'.length) : document.projection.id
       if (definitionPolicy(lists[ref], source).rendererRequiresTrust && !(authorized && trusted)) {
         return {
-          withheld: `The custom renderer ${document.projection.renderer.bundle} comes from a revision outside this checkout's history and differs from the renderer at its merge base, so it needs trust like a pull request's extractor. ${
+          withheld: `The custom renderer ${document.projection.renderer.bundle} is repository code that differs from the default branch's, so it runs only with trust, like an extractor that runs repository code. ${
             authorized ? '' : "Trust the workspace (the runner's --trust) to run it."
           }`,
         }

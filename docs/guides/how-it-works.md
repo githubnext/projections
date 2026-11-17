@@ -176,28 +176,32 @@ supplies needs explicit trust.**
 | Built-in extractor that only reads files | Projections' own code | Never |
 | Custom extractor, or a built-in one that runs your toolchain | Repository code, with access to your files | Always: `--trust` covers both revisions |
 | Custom comparators (comparator files) | Data, interpreted in a sandbox with no files, network, clock or randomness | Never |
-| Custom renderer from the base (or the chosen definition revision) | A sandboxed frame | No |
-| Custom renderer that only the head supplies, or that differs from the base's | A sandboxed frame | Yes, like a head extractor |
+| Custom renderer identical to the default branch's | A sandboxed frame | No |
+| Any other custom renderer, including the working tree's and a checked-out pull request's | A sandboxed frame | Yes, like a custom extractor |
 
 Why renderers at all? A renderer runs in a sandboxed frame
 (`sandbox="allow-scripts"`, and a content security policy that grants no origin
 and `connect-src 'none'`), so it can't read your files, call an API or fetch
 anything. But it does receive the extraction, which can describe private code,
 and browsers can't stop a sandboxed frame from navigating itself: a malicious
-renderer could encode the extraction into a URL and navigate to it. A renderer
-from the base revision has been reviewed like the rest of your repository. One
-that only a pull request supplies is code its author controls, so it needs the
-same explicit trust as their extractor.
+renderer could encode the extraction into a URL and navigate to it. So a custom
+renderer is repository code like a custom extractor, and runs only with trust.
+The exception is a bundle byte-identical to the one on the repository's default
+branch (at the revision's merge base with `origin/HEAD`): the repository's
+maintainers merged it, and it only sees what is derived from the same
+repository. A pull request that adds or changes a renderer needs trust even
+after you check it out.
 
 Without trust, Projections shows the built-in renderer for the extraction's
 schema, or its table and text views, and says why. Concretely:
 
 - `projections list --json` reports, per projection, whether its custom renderer
   needs trust (`rendererRequiresTrust`).
-- The Inspector (in VS Code) treats your checkout as the base: renderers in the
-  working tree and `HEAD`'s history run; one from another revision, such as a
-  fetched pull request head, runs only in a trusted workspace (its backend gets
-  `--trust`) and when you trust the repository's projection code.
+- The Inspector, the viewer, `show`/`compare --png` and `check`'s renderer
+  checks run a custom renderer that differs from the default branch's only with
+  `--trust`; in VS Code, only in a trusted workspace (its backend gets
+  `--trust`). Your own uncommitted renderer changes count too, so authoring a
+  renderer needs trust.
 - Hosted views never load custom renderers from artifacts.
 
 ### Determinism

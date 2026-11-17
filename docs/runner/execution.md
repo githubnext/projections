@@ -229,9 +229,9 @@ the code it runs on **both revisions**, and their subprocesses. Without it,
 custom argv and tool-executing adapter paths fail before execution, with the
 diagnostic code `TRUST_REQUIRED` in batch and Inspector results (other runner
 failures use `RUNNER_ERROR`). Parser-only built-ins can read data without
-granting repository execution. `--trust` also grants a custom renderer that only
-the head revision supplies; see [Trust](../contracts.md#trust) for the policy
-and the self-navigation threat it addresses. Declarations such as
+granting repository execution. `--trust` also grants a custom renderer that
+differs from the default branch's; see [Trust](../contracts.md#trust) for the
+policy and the self-navigation threat it addresses. Declarations such as
 `network: false` or `hermetic` are not sandboxes. Normal local provenance
 honestly reports `local`, not a claimed hermetic environment.
 

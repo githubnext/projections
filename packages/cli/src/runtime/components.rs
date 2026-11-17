@@ -149,27 +149,43 @@ impl Runner {
     }
 
     /// Whether the custom renderer `definition` declares at `reference` needs
-    /// explicit trust when nothing else names a base revision, as in the
-    /// Inspector. The checkout is the base: renderers in the working tree and
-    /// `HEAD`'s history run without it. A revision outside that history, such
-    /// as a fetched pull request head, is treated as a head revision whose
-    /// base is its merge base with `HEAD`.
+    /// explicit trust. A custom renderer bundle is repository code, so, like an
+    /// extractor that runs repository code, it runs only with `--trust`. The one
+    /// exception is a bundle byte-identical to the one the same projection
+    /// declares at the merge base of the revision (`HEAD` for the working tree)
+    /// with the repository's default branch, `refs/remotes/origin/HEAD`: that
+    /// renderer is what the repository's maintainers merged, and what it is
+    /// given is derived from that same repository. Without a default branch to
+    /// compare with, every custom renderer needs trust.
     pub fn renderer_requires_trust(&self, definition: &Value, reference: &str) -> Result<bool> {
-        if definition["renderer"]["bundle"].as_str().is_none() || reference == "working-tree" {
+        if definition["renderer"]["bundle"].as_str().is_none() {
             return Ok(false);
         }
         let id = definition["id"].as_str().context("Missing projection ID")?;
         let root = self.repository_root()?;
-        let commit = self.resolve(&root, reference)?;
-        let head = self.resolve(&root, "HEAD")?;
-        let Ok(base) = self.git_text(&root, &["merge-base", &commit, &head]) else {
+        let Some(base) = self.default_branch_merge_base(&root, reference) else {
             return Ok(true);
         };
-        if base == commit {
-            return Ok(false);
-        }
-        let bundle = self.renderer_bundle_at(id, &commit).ok().flatten();
-        Ok(bundle.is_none() || self.renderer_bundle_at(id, &base).ok().flatten() != bundle)
+        let bundle = if reference == "working-tree" {
+            self.renderer_bundle_at(id, "working-tree")
+        } else {
+            self.resolve(&root, reference)
+                .and_then(|commit| self.renderer_bundle_at(id, &commit))
+        };
+        let Some(bundle) = bundle.ok().flatten() else {
+            return Ok(true);
+        };
+        Ok(self.renderer_bundle_at(id, &base).ok().flatten() != Some(bundle))
+    }
+
+    /// The merge base of `reference` (`HEAD` for the working tree) with the
+    /// default branch `refs/remotes/origin/HEAD` names, when both exist.
+    fn default_branch_merge_base(&self, root: &std::path::Path, reference: &str) -> Option<String> {
+        let default = self.resolve(root, "refs/remotes/origin/HEAD").ok()?;
+        let commit = self
+            .resolve(root, if reference == "working-tree" { "HEAD" } else { reference })
+            .ok()?;
+        self.git_text(root, &["merge-base", &commit, &default]).ok()
     }
 
     /// One file of a projection's custom renderer bundle, from the definition

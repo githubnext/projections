@@ -81,6 +81,12 @@ impl Checker<'_> {
             (Some(_), _) if renderer_failed => {
                 steps.push(skipped("The renderer bundle isn't available".into()));
             }
+            (Some(_), _) if bundle.is_some() && self.renderer_withheld(definition) => steps.push(step(
+                "render",
+                "Renderer checks",
+                "fail",
+                "The custom renderer is repository code that differs from the default branch's, so it runs only with --trust: pass --trust (in VS Code, trust the workspace), or --no-render to skip its checks",
+            )),
             (Some(_), Some(Err(error))) => steps.push(skipped(format!("{error:#}. Pass --browser, or --no-render to skip them"))),
             (Some(document), Some(Ok(executable))) => {
                 let target = Rendered {
@@ -97,6 +103,12 @@ impl Checker<'_> {
         Ok(json!({
             "id": id, "title": definition["title"].as_str().unwrap_or(&id), "ok": ok, "steps": steps,
         }))
+    }
+
+    /// Whether the working tree's custom renderer needs trust that wasn't granted;
+    /// one whose policy can't be read is withheld too.
+    fn renderer_withheld(&self, definition: &Value) -> bool {
+        !self.runner.trust && self.runner.renderer_requires_trust(definition, "working-tree").unwrap_or(true)
     }
 
     /// The extraction step: the working tree's extraction, or the supplied one.

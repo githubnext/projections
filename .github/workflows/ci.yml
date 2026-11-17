@@ -261,6 +261,11 @@ jobs:
           tools/scripts/install-browsers.sh chromium
           npm run test:browser --workspace @githubnext/projections-cli
           npm run test:browser --workspace @githubnext/projections-renderer-harness -- --project=chromium-desktop code-statistics/
+      # The smoke test drives the Inspector at a desktop size: at the runner's 1024×768 display, VS Code's editor is
+      # narrower than the Inspector's two-panel layout (1012 px), which moves the Details panel into a menu.
+      - name: A desktop-sized display
+        shell: pwsh
+        run: Set-DisplayResolution -Width 1920 -Height 1080 -Force
       - name: VS Code extension smoke test
         # Each step reports on its own: one failing doesn't hide the others' results.
         if: ${{ !cancelled() }}
@@ -273,7 +278,8 @@ jobs:
         shell: bash
         run: |
           rm "$(dirname "$(command -v python)")/python3.exe"
-          if command -v python3; then exit 1; fi
+          # What remains is at most the Microsoft Store's python3 alias, which runs no Python.
+          if python3 --version 2>/dev/null | grep -q '^Python 3'; then exit 1; fi
       - if: ${{ !cancelled() }}
         uses: ./.github/actions/action-e2e
       - if: failure()

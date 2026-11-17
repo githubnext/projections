@@ -15,7 +15,9 @@ const executable = fileURLToPath(new URL(`../dist/projections${process.platform 
 
 /** Starts the CLI with a JSON-RPC client. Every stdout line must be a JSON-RPC 2.0 message. */
 function start(t, root, args, extra = {}) {
-  const env = {...executionEnvironment(process.env, ['PROJECTIONS_BROWSER']), ...extra}
+  // With where the CLI looks for Chrome or Edge on Windows, as a host's environment has them.
+  const browser = ['PROJECTIONS_BROWSER', 'ProgramFiles', 'ProgramFiles(x86)', 'LOCALAPPDATA']
+  const env = {...executionEnvironment(process.env, browser), ...extra}
   const child = spawn(executable, args, {cwd: root, env, stdio: ['pipe', 'pipe', 'pipe']})
   let stderr = ''
   child.stderr.on('data', bytes => (stderr += String(bytes)))

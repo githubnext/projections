@@ -110,6 +110,12 @@ reason; for example, the Rust suites that run `/bin/sh` extractors or stand-ins
 for `gh` and Git are ignored on Windows, and `tests/windows.rs` covers what they
 cover there (Job Object supervision, output bounds, export and validation).
 
+Known gap: on Windows, the .NET extractors' `dotnet` fails in the environment
+extractors get (`PATH`, `SystemRoot` and its own variables) with "An issue was
+encountered verifying workloads", so the installed proof runs the .NET helper
+only on Linux and macOS. Whether extractors should get Windows' machine
+locations (`ProgramData`, `ProgramFiles`) is open.
+
 ### The portability check
 
 `npm run check:portability` (part of `npm run check`) reads shipped code, which

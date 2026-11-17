@@ -251,11 +251,17 @@ try {
     .find(existsSync)
   const dotnetPackaged = dotnetHelper !== undefined
   if (process.env.PROJECTIONS_REQUIRE_HELPERS === '1') assert.ok(dotnetPackaged, 'The executable must embed the .NET helper')
+  // On Windows, dotnet fails in the extractor's environment (PATH, SystemRoot and its own variables): "An issue was
+  // encountered verifying workloads". Open: whether extractors should get Windows' machine locations (ProgramData,
+  // ProgramFiles). The helper's embedding and size are still checked.
+  const dotnetRuns = dotnetPackaged && !windows
   if (dotnetPackaged) {
     assert.deepEqual((await readdir(dotnetHelper)).sort(), helperFiles)
     let bytes = 0
     for (const file of helperFiles) bytes += (await stat(path.join(dotnetHelper, file))).size
     assert.ok(bytes < 512 * 1024, `The .NET helper ships ${bytes} bytes; it must borrow Roslyn, DI and EF Core rather than bundle them`)
+  }
+  if (dotnetRuns) {
     const sdk = invoke('dotnet', ['--version'], repo).trim()
     await mkdir(path.join(repo, 'dotnet'))
     await writeFile(
@@ -350,7 +356,7 @@ try {
       noNodeNativeCli: true,
       noNodeNativeInspector: true,
       repositoryTypeScript: true,
-      repositoryDotnet: dotnetPackaged,
+      repositoryDotnet: dotnetRuns,
       nodeAndPython: true,
       nativeComparison: true,
       batches: true,

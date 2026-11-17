@@ -286,8 +286,17 @@ export function rendererDevServerPlugin(options: Omit<RendererBuildOptions, 'out
   return {
     name: 'projections-renderer-dev-server',
     apply: 'serve',
-    config: () => ({
-      server: {cors: {origin: [loopback, 'null']}},
+    config: user => ({
+      server: {
+        cors: {origin: [loopback, 'null']},
+        // Vite's watcher (chokidar 3) drops a change to a file within 50 ms of the last change it reported, so a
+        // quick second write (an edit and its undo, a formatter after a save, an agent's consecutive edits) never
+        // reached the page, which kept the earlier source. Waiting for writes to settle reports every change, with
+        // the file's latest content, about 10 ms later. An author's own setting, or no watching, is kept.
+        ...(user?.server?.watch === null || user?.server?.watch?.awaitWriteFinish !== undefined
+          ? {}
+          : {watch: {awaitWriteFinish: {stabilityThreshold: 10, pollInterval: 10}}}),
+      },
       optimizeDeps: {
         // Find dependencies from the entry at startup: optimizing one found later
         // makes Vite reload the page, which a host treats as a renderer navigating its frame.

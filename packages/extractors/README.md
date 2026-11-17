@@ -17,6 +17,7 @@ with its code, README, fixtures and any ecosystem helper together:
 | `dotnet-support/` | The shared .NET helper and build orchestration for `dotnet-public-api`, `dotnet-di` and `efcore-schema` ([.NET support](dotnet-support/README.md)) |
 | `typescript-support/` | Builds the self-contained Node helper for `typescript-public-api` and `nestjs-di`, and the Rust code that runs it ([TypeScript support](typescript-support/README.md)) |
 | `go-support/` | The shared Go helper and toolchain runner for Go extractors ([Go support](go-support/README.md)) |
+| `ruby-support/` | The reader for declarative Ruby and ActiveSupport's inflections that `rails-schema` and `rails-routes` share ([Ruby support](ruby-support/README.md)) |
 
 Built-in extractors are deterministic: the same revision produces the same
 extraction, in a stable order, from declared or resolved structure rather than
@@ -72,7 +73,11 @@ with an explicit error, never a fallback.
 
 `prisma-schema` parses Prisma schemas itself instead of using the project's
 `prisma` installation, a deliberate exception: Prisma has no stable public API
-for its schema ([Prisma](prisma-schema/README.md)).
+for its schema ([Prisma](prisma-schema/README.md)). `rails-schema` and
+`rails-routes` read `db/schema.rb` and `config/routes.rb` themselves instead of
+booting the application, so every revision can be extracted without its gems
+([Rails schema](rails-schema/README.md),
+[Rails routes](rails-routes/README.md)).
 
 The examined project's installed Node packages are resolved from the repository
 checkout, because materialized revisions omit ignored files such as

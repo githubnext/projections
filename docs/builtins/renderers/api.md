@@ -20,7 +20,8 @@ consumers?"
 Use it to review a library's public surface: a removed export, a parameter
 gained, a return type widened. It lists declarations rather than drawing them,
 so it stays readable for hundreds of changes. It draws what the extractor
-reports for TypeScript, Rust, Go and .NET alike; pair it with the
+reports for TypeScript, Rust, Go and .NET alike, and lists a Rails application's
+routes ([`rails-routes`](../extractors/rails-routes.md)); pair it with the
 [`api-compatibility`](../../../packages/comparators/api-compatibility/README.md)
 comparator file to classify each change by that ecosystem's own compatibility
 rules.
@@ -38,6 +39,7 @@ Built-in extractors that draw with it by default:
 | [`rust-public-api`](../extractors/rust-public-api.md)             | `api`                  |
 | [`go-public-api`](../extractors/go-public-api.md)                 | `api`                  |
 | [`dotnet-public-api`](../extractors/dotnet-public-api.md)         | `api`                  |
+| [`rails-routes`](../extractors/rails-routes.md)                   | `api`                  |
 
 <!-- end generated: extractors -->
 

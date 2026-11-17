@@ -53,6 +53,8 @@ registry!(
     projections_extractor_django_schema,
     projections_extractor_code_statistics,
     projections_extractor_prisma_schema,
+    projections_extractor_rails_schema,
+    projections_extractor_rails_routes,
     projections_extractor_scip_file_references,
     projections_extractor_command_output,
 );

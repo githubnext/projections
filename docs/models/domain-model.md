@@ -317,10 +317,12 @@ repository.
 How the built-in extractors meet this:
 
 - Repository map, workspace dependencies, code statistics, an existing SCIP
-  index, GitHub Actions jobs, Prisma schemas, pre-exported
-  Cargo/NuGet/Terraform/schema data: The Projections executable only.
-  Projections parses Prisma Schema Language itself, a deliberate exception
-  because Prisma has no stable public schema API.
+  index, GitHub Actions jobs, Prisma schemas, Rails schemas and routes,
+  pre-exported Cargo/NuGet/Terraform/schema data: The Projections executable
+  only. Projections parses Prisma Schema Language itself, a deliberate exception
+  because Prisma has no stable public schema API, and reads Rails'
+  `db/schema.rb` and routing DSL statically, so history needs no revision's
+  gems.
 - TypeScript public API: Node and the repository's own `typescript`
   installation, through one self-contained helper script shipped with the
   executable.

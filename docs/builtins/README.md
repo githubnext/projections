@@ -32,6 +32,8 @@ extension opens these pages when you select a built-in part.
 | [`django-schema`](extractors/django-schema.md) | Initialized Django application model registry. | `database/v0` | [`database`](renderers/database.md) |
 | [`code-statistics`](extractors/code-statistics.md) | Counted files, code, comment and blank lines by language, split into test and other files. | `metrics/v0` | [`code-statistics`](renderers/code-statistics.md) |
 | [`prisma-schema`](extractors/prisma-schema.md) | Prisma data model: tables, columns, keys, indexes, relations and enums. | `database/v0` | [`database`](renderers/database.md) |
+| [`rails-schema`](extractors/rails-schema.md) | Rails db/schema.rb: tables, columns, keys, indexes, foreign keys and enums. | `database/v0` | [`database`](renderers/database.md) |
+| [`rails-routes`](extractors/rails-routes.md) | Rails config/routes.rb: each route's verb, path, controller action and name. | `api/v0` | [`api`](renderers/api.md) |
 | [`scip-file-references`](extractors/scip-file-references.md) | Cross-file definition references from a SCIP index produced by the project's own indexer. | `graph/v0` | [`graph`](renderers/graph.md) |
 | [`command-output`](extractors/command-output.md) | Captured stdout from named CLI commands. | `graph/v0` | [`text-diff`](renderers/text-diff.md) |
 

@@ -33,6 +33,8 @@ it was removed) isn't an error: the extractor describes that revision without it
 | [`django-schema`](#django-schema) | `database/v0` | `database` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`code-statistics`](#code-statistics) | `metrics/v0` | `code-statistics` | No (`none`) |
 | [`prisma-schema`](#prisma-schema) | `database/v0` | `database` | No (`none`) |
+| [`rails-schema`](#rails-schema) | `database/v0` | `database` | No (`none`) |
+| [`rails-routes`](#rails-routes) | `api/v0` | `api` | No (`none`) |
 | [`scip-file-references`](#scip-file-references) | `graph/v0` | `graph` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`command-output`](#command-output) | `graph/v0` | `text-diff` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 
@@ -577,6 +579,56 @@ A definition to start from:
   "id": "prisma-schema",
   "renderer": "database",
   "title": "Prisma schema"
+}
+```
+
+## `rails-schema`
+
+**Rails schema.** Rails db/schema.rb: tables, columns, keys, indexes, foreign keys and enums. See [its page](../builtins/extractors/rails-schema.md).
+
+- Schema: `database/v0`
+- Default renderer: `database`
+- Needs `--trust`: No (`none`)
+
+| Input | Meaning |
+|---|---|
+| `inflections` | Inflections initializer; default config/initializers/inflections.rb beside db/. |
+| `schema` | Schema file (db/schema.rb or db/<database>_schema.rb); otherwise discovers the application's schema files. |
+| `schemas` | Multiple schema files. |
+| `snapshot` | Pre-exported effective schema. |
+
+A definition to start from:
+
+```json
+{
+  "extractor": "rails-schema",
+  "id": "rails-schema",
+  "renderer": "database",
+  "title": "Rails schema"
+}
+```
+
+## `rails-routes`
+
+**Rails routes.** Rails config/routes.rb: each route's verb, path, controller action and name. See [its page](../builtins/extractors/rails-routes.md).
+
+- Schema: `api/v0`
+- Default renderer: `api`
+- Needs `--trust`: No (`none`)
+
+| Input | Meaning |
+|---|---|
+| `inflections` | Inflections initializer; default config/initializers/inflections.rb beside config/routes.rb. |
+| `routes` | Routes file or files; otherwise discovers each application's config/routes.rb. |
+
+A definition to start from:
+
+```json
+{
+  "extractor": "rails-routes",
+  "id": "rails-routes",
+  "renderer": "api",
+  "title": "Rails routes"
 }
 ```
 

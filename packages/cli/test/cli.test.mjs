@@ -159,6 +159,8 @@ test('extractor list/init work without execution; invalid flags, duplicate outpu
       'django-schema',
       'code-statistics',
       'prisma-schema',
+      'rails-schema',
+      'rails-routes',
       'scip-file-references',
       'command-output',
     ],

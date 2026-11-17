@@ -1,0 +1,384 @@
+{
+  "protocolVersion": 0,
+  "schema": "api/v0",
+  "entities": [
+    {
+      "id": "surface:copilot-canvas",
+      "kind": "module",
+      "label": "copilot-canvas",
+      "data": {
+        "signature": "copilot-canvas",
+        "surface": "copilot-canvas",
+        "added": [],
+        "removed": []
+      }
+    },
+    {
+      "id": "surface:vscode",
+      "kind": "module",
+      "label": "vscode",
+      "data": {
+        "signature": "vscode",
+        "surface": "vscode",
+        "added": ["folder"],
+        "removed": ["confirm"]
+      }
+    },
+    {
+      "id": "tool:adopt",
+      "kind": "function",
+      "label": "adopt",
+      "data": {
+        "signature": "adopt",
+        "surfaces": ["mcp", "mcp-apps", "vscode"],
+        "readOnly": false,
+        "destructive": false,
+        "trust": "onboarding"
+      }
+    },
+    {
+      "id": "tool:adopt/bookmarks",
+      "kind": "property",
+      "label": "bookmarks",
+      "data": {
+        "signature": "bookmarks",
+        "tool": "adopt",
+        "required": false,
+        "types": ["integer"],
+        "limits": {},
+        "range": "no limit",
+        "schema": {
+          "type": "integer"
+        },
+        "surfaces": ["mcp", "mcp-apps", "vscode"],
+        "differsOn": ["vscode"]
+      }
+    },
+    {
+      "id": "tool:adopt/confirm",
+      "kind": "property",
+      "label": "confirm",
+      "data": {
+        "signature": "confirm",
+        "tool": "adopt",
+        "required": false,
+        "types": ["string"],
+        "limits": {},
+        "range": "no limit",
+        "schema": {
+          "type": "string"
+        },
+        "surfaces": ["mcp", "mcp-apps"]
+      }
+    },
+    {
+      "id": "tool:compare",
+      "kind": "function",
+      "label": "compare",
+      "data": {
+        "signature": "compare",
+        "surfaces": ["mcp", "mcp-apps", "vscode"],
+        "readOnly": true,
+        "destructive": false,
+        "trust": "none"
+      }
+    },
+    {
+      "id": "tool:compare/after",
+      "kind": "property",
+      "label": "after",
+      "data": {
+        "signature": "after",
+        "tool": "compare",
+        "required": false,
+        "types": ["string"],
+        "limits": {},
+        "range": "no limit",
+        "schema": {
+          "type": "string"
+        },
+        "surfaces": ["mcp", "mcp-apps", "vscode"]
+      }
+    },
+    {
+      "id": "tool:compare/before",
+      "kind": "property",
+      "label": "before",
+      "data": {
+        "signature": "before",
+        "tool": "compare",
+        "required": false,
+        "types": ["string"],
+        "limits": {},
+        "range": "no limit",
+        "schema": {
+          "type": "string"
+        },
+        "surfaces": ["mcp", "mcp-apps", "vscode"]
+      }
+    },
+    {
+      "id": "tool:current_view",
+      "kind": "function",
+      "label": "current_view",
+      "data": {
+        "signature": "current_view",
+        "surfaces": ["mcp", "mcp-apps", "vscode", "copilot-canvas"],
+        "readOnly": true,
+        "destructive": false,
+        "trust": "none"
+      }
+    },
+    {
+      "id": "tool:describe_part",
+      "kind": "function",
+      "label": "describe_part",
+      "data": {
+        "signature": "describe_part",
+        "surfaces": ["mcp", "mcp-apps", "vscode"],
+        "readOnly": true,
+        "destructive": false,
+        "trust": "none"
+      }
+    },
+    {
+      "id": "tool:describe_part/id",
+      "kind": "property",
+      "label": "id",
+      "data": {
+        "signature": "id",
+        "tool": "describe_part",
+        "required": false,
+        "types": ["string"],
+        "limits": {},
+        "range": "no limit",
+        "schema": {
+          "type": "string"
+        },
+        "surfaces": ["mcp", "mcp-apps", "vscode"]
+      }
+    },
+    {
+      "id": "tool:describe_part/ids",
+      "kind": "property",
+      "label": "ids",
+      "data": {
+        "signature": "ids",
+        "tool": "describe_part",
+        "required": false,
+        "types": ["array"],
+        "limits": {},
+        "range": "no limit",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "surfaces": ["mcp", "mcp-apps", "vscode"]
+      }
+    },
+    {
+      "id": "tool:describe_part/kind",
+      "kind": "property",
+      "label": "kind",
+      "data": {
+        "signature": "kind",
+        "tool": "describe_part",
+        "required": false,
+        "types": ["string", "null"],
+        "limits": {},
+        "range": "no limit",
+        "schema": {
+          "type": ["string", "null"]
+        },
+        "surfaces": ["mcp", "mcp-apps", "vscode"]
+      }
+    },
+    {
+      "id": "tool:describe_part/part",
+      "kind": "property",
+      "label": "part",
+      "data": {
+        "signature": "part",
+        "tool": "describe_part",
+        "required": true,
+        "types": ["string"],
+        "limits": {},
+        "range": "no limit",
+        "schema": {
+          "type": "string"
+        },
+        "surfaces": ["mcp", "mcp-apps", "vscode"]
+      }
+    },
+    {
+      "id": "tool:describe_part/verbose",
+      "kind": "property",
+      "label": "verbose",
+      "data": {
+        "signature": "verbose",
+        "tool": "describe_part",
+        "required": false,
+        "types": ["boolean"],
+        "limits": {},
+        "range": "no limit",
+        "schema": {
+          "type": "boolean"
+        },
+        "surfaces": ["mcp", "mcp-apps", "vscode"]
+      }
+    },
+    {
+      "id": "tool:explore",
+      "kind": "function",
+      "label": "explore",
+      "data": {
+        "signature": "explore",
+        "surfaces": ["mcp", "mcp-apps", "vscode"],
+        "readOnly": true,
+        "destructive": false,
+        "trust": "none"
+      }
+    },
+    {
+      "id": "tool:open_projection",
+      "kind": "function",
+      "label": "open_projection",
+      "data": {
+        "signature": "open_projection",
+        "surfaces": ["mcp", "mcp-apps", "vscode"],
+        "readOnly": true,
+        "destructive": false,
+        "trust": "none",
+        "view": true
+      }
+    },
+    {
+      "id": "tool:refresh",
+      "kind": "function",
+      "label": "refresh",
+      "data": {
+        "signature": "refresh",
+        "surfaces": ["mcp", "mcp-apps", "vscode"],
+        "readOnly": true,
+        "destructive": false,
+        "trust": "extract"
+      }
+    },
+    {
+      "id": "tool:screenshot",
+      "kind": "function",
+      "label": "screenshot",
+      "data": {
+        "signature": "screenshot",
+        "surfaces": ["mcp", "mcp-apps", "vscode"],
+        "readOnly": true,
+        "destructive": false,
+        "trust": "extract"
+      }
+    },
+    {
+      "id": "tool:screenshot/height",
+      "kind": "property",
+      "label": "height",
+      "data": {
+        "signature": "height",
+        "tool": "screenshot",
+        "required": false,
+        "types": ["integer"],
+        "limits": {
+          "min": 240,
+          "max": 1600
+        },
+        "range": "240–1600",
+        "schema": {
+          "type": "string"
+        },
+        "surfaces": ["mcp", "mcp-apps", "vscode"]
+      }
+    },
+    {
+      "id": "tool:screenshot/mode",
+      "kind": "property",
+      "label": "mode",
+      "data": {
+        "signature": "mode",
+        "tool": "screenshot",
+        "required": false,
+        "types": ["string"],
+        "limits": {},
+        "range": "no limit",
+        "schema": {
+          "type": "string"
+        },
+        "surfaces": ["mcp", "mcp-apps", "vscode"],
+        "values": ["side-by-side", "diff"]
+      }
+    },
+    {
+      "id": "tool:screenshot/theme",
+      "kind": "property",
+      "label": "theme",
+      "data": {
+        "signature": "theme",
+        "tool": "screenshot",
+        "required": false,
+        "types": ["string"],
+        "limits": {},
+        "range": "no limit",
+        "schema": {
+          "type": "string"
+        },
+        "surfaces": ["mcp", "mcp-apps", "vscode"],
+        "values": ["light", "dark"]
+      }
+    },
+    {
+      "id": "tool:screenshot/width",
+      "kind": "property",
+      "label": "width",
+      "data": {
+        "signature": "width",
+        "tool": "screenshot",
+        "required": false,
+        "types": ["integer"],
+        "limits": {
+          "min": 320,
+          "max": 2560
+        },
+        "range": "320–2560",
+        "schema": {
+          "type": "string"
+        },
+        "surfaces": ["mcp", "mcp-apps", "vscode"]
+      }
+    },
+    {
+      "id": "tool:sweep",
+      "kind": "function",
+      "label": "sweep",
+      "data": {
+        "signature": "sweep",
+        "surfaces": ["mcp", "mcp-apps", "vscode"],
+        "readOnly": true,
+        "destructive": false,
+        "trust": "extract"
+      }
+    },
+    {
+      "id": "tool:viewer_request",
+      "kind": "function",
+      "label": "viewer_request",
+      "data": {
+        "signature": "viewer_request",
+        "surfaces": ["mcp-apps"],
+        "readOnly": true,
+        "destructive": false,
+        "trust": "none",
+        "appOnly": true
+      }
+    }
+  ],
+  "relationships": []
+}

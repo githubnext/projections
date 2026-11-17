@@ -118,6 +118,15 @@ get the same tools. The view actions (`open_projection`, `current_view`,
 `set_part` and `screenshot` take what they omit from what it shows, saying so,
 as VS Code's tools do from the projection tab in front.
 
+**Reviewing a change to the tools.** This repository's `agent-tools` projection
+(`.github/projections/agent-tools.json`) lists every tool, its parameters and
+the surfaces that expose it (`projections mcp`, MCP Apps hosts, VS Code's
+`languageModelTools` and the Copilot app canvas), read from source at each
+revision. Its comparator classifies each change as the agents calling the tools
+meet it (a parameter removed, made required or narrowed is breaking) and flags
+drift between surfaces, such as a stale VS Code manifest:
+`projections compare main.. -p agent-tools --trust`.
+
 ## The viewer
 
 ```sh

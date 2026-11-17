@@ -24,6 +24,17 @@ export interface ViewItem {
   label: string
   kind: string
   status?: string
+  /** A change's context: the items a person needs to read it, which the Changes scope shows beside it. */
+  context?: ViewContext
+}
+
+/** A change's context: its first items, how many it has, and the comparator rules that added any. */
+export interface ViewContext {
+  items: {id: string; label: string; kind: string}[]
+  total: number
+  rules?: string[]
+  /** Derived from the structure, as the comparison was saved without context. */
+  derived?: boolean
 }
 
 /** A summary bar figure: its count of a noun and, in a comparison, the changes of it. */

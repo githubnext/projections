@@ -1,7 +1,7 @@
 import type {Static} from 'typebox'
 import type {DomainSchema, Json, Vocabulary} from './constants.js'
 import type {DataOf, TypedKind} from './domains.js'
-import type {ChangeSchema, ComparisonSchema, StepSchema, VariedSchema} from './typebox/comparison.js'
+import type {ChangeSchema, ComparisonSchema, ContextSchema, StepSchema, VariedSchema} from './typebox/comparison.js'
 import type {
   DefaultComparatorSchema,
   DefaultComparatorOptionsSchema,
@@ -198,10 +198,16 @@ export type Correspondence = 'exact' | 'declared' | 'split' | 'merge' | 'none'
 export type Collection = 'entities' | 'relationships'
 /**
  * One item's change: its `collection`, `before` and `after` IDs, `status` and `correspondence`, whose shapes must
- * agree (an addition has no before ID and one after ID, for example), with any volatile values that `varied` and an
- * optional prose `summary`. Its `id` is unique within the comparison.
+ * agree (an addition has no before ID and one after ID, for example), with any volatile values that `varied`, an
+ * optional prose `summary` and its `context`. Its `id` is unique within the comparison.
  */
 export interface Change extends Static<typeof ChangeSchema> {}
+/**
+ * A change's `context`: the other items, by ID in each revision, that a person needs to read it (the core's, a changed
+ * relationship's endpoints and the items containing what changed, and what comparator `context` rules add, named in
+ * `rules`).
+ */
+export interface ChangeContext extends Static<typeof ContextSchema> {}
 /** A volatile value that differs between a matched pair, and whether within tolerance. */
 export interface Varied extends Static<typeof VariedSchema> {}
 /**

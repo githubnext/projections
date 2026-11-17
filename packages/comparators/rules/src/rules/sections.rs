@@ -1,4 +1,4 @@
-use super::model::{Check, Classify, Function, Match, Metadata, NewStep, Pass, Rules, Steps};
+use super::model::{Check, Classify, ContextRule, Function, Match, Metadata, NewStep, Pass, Rules, Steps};
 use super::reader::Reader;
 use super::walk::names;
 use super::{COLLECTIONS, DEFAULT_PASSES, FORMAT, identifier};
@@ -15,6 +15,7 @@ impl Reader<'_> {
             variables: Vec::new(),
             identity: Vec::new(),
             classify: None,
+            context: Vec::new(),
             steps: None,
             metadata: None,
             defaults: serde_json::Map::new(),
@@ -36,6 +37,7 @@ impl Reader<'_> {
                 "functions",
                 "identity",
                 "classify",
+                "context",
                 "steps",
                 "metadata",
             ],
@@ -63,6 +65,7 @@ impl Reader<'_> {
         if let Some(section) = value.get("classify") {
             rules.classify = self.read_classify(section, &taken);
         }
+        rules.context = self.read_context(value, &taken);
         rules.steps = value.get("steps").and_then(|section| self.read_steps(section, &taken));
         if let Some(section) = value.get("metadata") {
             rules.metadata = self.read_metadata(section, &taken);
@@ -216,6 +219,60 @@ impl Reader<'_> {
             variables: self.variables(section.get("variables"), "/classify/variables", &mut taken),
             summary: self.optional(section, "summary", "/classify"),
             annotation: self.optional(section, "annotation", "/classify"),
+        })
+    }
+
+    /// `context`: named rules, each adding context to the changes it selects.
+    fn read_context(&mut self, value: &Value, taken: &BTreeSet<String>) -> Vec<ContextRule> {
+        let mut rules = Vec::new();
+        let mut names = BTreeSet::new();
+        match value.get("context") {
+            None => {}
+            Some(Value::Array(list)) => {
+                for (index, rule) in list.iter().enumerate() {
+                    if let Some(rule) = self.read_context_rule(rule, &pointer("/context", &index.to_string()), &mut names, taken) {
+                        rules.push(rule);
+                    }
+                }
+            }
+            Some(_) => self.error("/context", "Expected a list"),
+        }
+        rules
+    }
+
+    /// One `context` rule, its name recorded in `names`.
+    fn read_context_rule(
+        &mut self,
+        rule: &Value,
+        path: &str,
+        names: &mut BTreeSet<String>,
+        taken: &BTreeSet<String>,
+    ) -> Option<ContextRule> {
+        if !self.only(rule, &["name", "description", "where", "variables", "before", "after"], path) {
+            return None;
+        }
+        let Some(name) = rule["name"].as_str().filter(|name| identifier(name)) else {
+            self.error(&pointer(path, "name"), "Expected an identifier");
+            return None;
+        };
+        if !names.insert(name.to_owned()) {
+            self.error(&pointer(path, "name"), &format!("Context rule `{name}` is already defined"));
+            return None;
+        }
+        if rule.get("description").is_some_and(|description| !description.is_string()) {
+            self.error(&pointer(path, "description"), "Expected a string");
+        }
+        if rule.get("before").is_none() && rule.get("after").is_none() {
+            self.error(path, "Expected `before`, `after` or both");
+            return None;
+        }
+        let mut taken = taken.clone();
+        Some(ContextRule {
+            name: name.to_owned(),
+            when: self.optional(rule, "where", path),
+            variables: self.variables(rule.get("variables"), &pointer(path, "variables"), &mut taken),
+            before: self.optional(rule, "before", path),
+            after: self.optional(rule, "after", path),
         })
     }
 

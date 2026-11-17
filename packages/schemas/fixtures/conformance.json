@@ -148,8 +148,8 @@
         "changes": [
           {"id": "deep", "collection": "entities", "before": ["deep"], "after": [], "status": "removed", "correspondence": "none"},
           {"id": "shallow", "collection": "entities", "before": ["shallow"], "after": [], "status": "removed", "correspondence": "none"},
-          {"id": "edge:deep", "collection": "relationships", "before": ["edge:deep"], "after": [], "status": "removed", "correspondence": "none"},
-          {"id": "edge:shallow", "collection": "relationships", "before": ["edge:shallow"], "after": [], "status": "removed", "correspondence": "none"}
+          {"id": "edge:deep", "collection": "relationships", "before": ["edge:deep"], "after": [], "status": "removed", "correspondence": "none", "context": {"before": ["deep", "mid"], "after": []}},
+          {"id": "edge:shallow", "collection": "relationships", "before": ["edge:shallow"], "after": [], "status": "removed", "correspondence": "none", "context": {"before": ["root", "shallow"], "after": []}}
         ],
         "steps": [
           {"changes": ["deep", "edge:deep"], "kind": "remove"},

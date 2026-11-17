@@ -11,8 +11,8 @@ mod sections;
 mod walk;
 
 pub use model::{
-    Check, Classify, Expression, Function, Location, Match, Metadata, NewStep, Param, Pass, Place, Rules, Source, Steps, Variable,
-    diagnostic,
+    Check, Classify, ContextRule, Expression, Function, Location, Match, Metadata, NewStep, Param, Pass, Place, Rules, Source, Steps,
+    Variable, diagnostic,
 };
 pub use walk::{calls, names};
 

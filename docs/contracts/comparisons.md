@@ -8,7 +8,9 @@ A comparator is a pure function of two extractions of one projection definition.
   "changes": [
     {"id": "package:auth", "collection": "entities", "before": ["package:auth"],
      "after": ["package:auth"], "status": "modified", "correspondence": "exact",
-     "summary": "optional human-readable text"},
+     "summary": "optional human-readable text",
+     "context": {"before": ["contains:app:auth", "workspace:app"],
+                 "after": ["contains:app:auth", "workspace:app"]}},
     {"id": "test:parse", "collection": "entities", "before": ["test:parse"],
      "after": ["test:parse"], "status": "unchanged", "correspondence": "exact",
      "varied": [{"path": "/data/durationMs", "within": true}]}
@@ -47,6 +49,29 @@ the comparison has `variation`: `within` counts the `unchanged` changes with
 `varied`, `beyond` the `modified` changes with at least one `within: false`
 entry; it is absent otherwise.
 
+A change whose status or identity changed may have `context`: the other items a
+person needs to read it, by ID in each revision (`before` and `after`, each in
+UTF-16 order, at most 1,000; a removal's context is in `before`), and `rules`,
+the comparator `context` rules that added to it. The Engine's **core context**
+is structural: a changed relationship's endpoints, and the items containing a
+changed or context entity, with the containment relationships that place them,
+in that revision. Containment (`from` contains `to`) is a `contains`
+relationship in every domain schema, plus a database table's `constraint` and
+`index` and, in the dependency-injection vocabulary, any relationship from a
+`service` to a `registration` or from a `registration` to an `implementation`,
+by the kinds of the entities at its ends. The core's context is bounded: taking
+the changes in order, each keeps its nearest items first (endpoints, then
+containers level by level), at most 1,000 per revision, from a budget of 250,000
+for the comparison, so it always fits the limits below and a change past the
+budget has none. Every comparator gives each change the core's context, and a
+comparator file's [`context` rules](#comparator-files) add to it; context is
+only ever added, and context never hides a change. A viewer's Changes scope
+shows the changes and their context, folding the rest; its `current_view` lists
+each change's context. `context` is absent when it would name nothing, on
+expected variation and on unchanged changes, and in comparisons saved before
+comparisons had context, for which presentation derives the same structural
+context (`changeContext` in the renderer SDK).
+
 `steps` groups change IDs in presentation order, with an optional `kind`
 (`remove`, `restructure` or `add`). Steps hold changes that matter: an `exact`
 change that is `unchanged` with `varied` is expected variation and appears in no
@@ -68,8 +93,13 @@ relationship endpoints compared through one-to-one entity correspondence;
 `variation` is present exactly when a change has `varied` and holds its counts
 (`missing-variation`, `unexpected-variation`, `inconsistent-variation`); and
 every item that differs, even only within tolerance, or is added or removed is
-covered by a change. A comparator cannot hide a change. Comparisons across
-different domain schemas are rejected.
+covered by a change; and a change's `context` names other items of that revision
+(`unknown-reference`, or `invalid-context` for the change's own items, unsorted
+or duplicate IDs, or an empty context), only on a change whose status or
+identity changed (`unexpected-context`), holds at least the core's context
+(`missing-context`), and stays within 1,000 IDs per change and revision and
+250,000 across the comparison (`context-limit`). A comparator cannot hide a
+change. Comparisons across different domain schemas are rejected.
 
 ## The default comparator
 
@@ -91,7 +121,7 @@ the default order and steps without values go last. One-to-one pairs are judged
 through the extractions' volatile declarations: a pair that varied only within
 tolerance is listed as `unchanged` with `varied` in no step, one beyond
 tolerance is `modified` with `varied`, and the comparison counts its
-`variation`.
+`variation`. Each change has the core's `context`.
 
 ## Comparator files
 
@@ -104,9 +134,9 @@ against
 parsed (`format: projections.comparator`, `version: 0`). It layers over the
 default comparator: its matching runs first, then the file's `identity` passes
 over what it left unmatched; `classify` adds a summary and an annotation per
-change; `steps` reorders or adds steps from the default order; `metadata` adds
-values. Expressions are [CEL](https://github.com/google/cel-spec) with the
-standard library listed in
+change; `context` rules add to each change's context; `steps` reorders or adds
+steps from the default order; `metadata` adds values. Expressions are
+[CEL](https://github.com/google/cel-spec) with the standard library listed in
 [Custom comparators](../design/declarative-comparators.md#the-standard-library),
 checked against declared types when the file loads; a file with any problem is
 rejected with every diagnostic (`{code, path, message}`, the message carrying
@@ -167,10 +197,14 @@ An empty object expects nothing; assert emptiness with `count`.
 |---|---|
 | `order: [a, b, ...]` | Each entry names changes (a change ID, or an item ID in a change's `before` or `after`), and every step holding the earlier entry's changes comes before every step holding the next one's |
 | `steps: [{kind?, summary?, changes?}]` | The comparison has exactly this many steps, and each matches the fields listed; `changes` (change or item IDs) names exactly the step's changes |
-| `changes: [{item \| id, collection?, status?, correspondence?, summary?, before?, after?}]` | `item` (the changes whose `before` or `after` include it) or `id` selects exactly one change, narrowed by `collection`, and the listed fields match |
+| `changes: [{item \| id, collection?, status?, correspondence?, summary?, before?, after?, context?}]` | `item` (the changes whose `before` or `after` include it) or `id` selects exactly one change, narrowed by `collection`, and the listed fields match |
 | `count: {changes?, steps?}` | The comparison has that many |
 | `metadata: {...}` | The comparison's metadata contains it |
 | `error: text` | The comparator fails, with `text` in its message. Such a case lists no other expectation or snapshot |
+
+A change's `context: {before?, after?, rules?}` matches its context field by
+field, each list exactly (IDs in UTF-16 order, rules in the file's order);
+`context: null` expects none.
 
 A failure records the expectation's JSON pointer in the test file (for example
 `/cases/0/expect/steps/1/changes`), a one-line message, its line and column, and
@@ -298,6 +332,12 @@ informational, never verified or used for comparison, and viewers display them.
 
 A custom comparator's `id` is its comparator file's path (as the definition
 names it), and its `digest` is the comparator digest defined above.
+
+A comparison whose changes have `context` is a valid `comparison/v0` document,
+as the schema only gained an optional field, but CLIs and viewers from before
+context reject it: their comparisons are closed objects that don't know the
+field. Viewers rerun the comparator anyway, and saved comparisons without
+`context` stay valid; presentation derives their context from the structure.
 
 Extractions are compared only when their `definitionDigest` values match;
 otherwise the mismatch is reported, explaining whether the definition or its

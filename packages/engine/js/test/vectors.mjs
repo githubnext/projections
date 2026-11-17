@@ -138,7 +138,15 @@ export const comparatorCases = [
     ),
     expectedChanges: [
       {id: 'b', collection: 'entities', before: ['a'], after: ['b'], status: 'modified', correspondence: 'declared'},
-      {id: 'f', collection: 'relationships', before: ['e'], after: ['f'], status: 'unchanged', correspondence: 'declared'},
+      {
+        id: 'f',
+        collection: 'relationships',
+        before: ['e'],
+        after: ['f'],
+        status: 'unchanged',
+        correspondence: 'declared',
+        context: {before: ['a', 'stable'], after: ['b', 'stable']},
+      },
     ],
   },
   {

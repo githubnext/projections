@@ -176,6 +176,17 @@ pub fn normal_text(text: &str) -> String {
     parts.join("; ")
 }
 
+/// A comparison without its changes' `context`.
+pub fn without_context(comparison: &Value) -> Value {
+    let mut comparison = comparison.clone();
+    for change in comparison["changes"].as_array_mut().into_iter().flatten() {
+        if let Some(fields) = change.as_object_mut() {
+            fields.remove("context");
+        }
+    }
+    comparison
+}
+
 /// A comparison in its semantic normal form: what equivalence compares.
 /// Correspondences, statuses, steps and their order, classifications and
 /// counts must agree; text agrees after [`normal_text`], and findings and
@@ -582,7 +593,8 @@ impl Golden {
         self.checked += 1;
         let code = |error: &str| error.split(':').next().unwrap().to_owned();
         let agree = match (self.expected(golden), &actual) {
-            (Ok(expected), Ok(actual)) => semantic(&expected) == semantic(actual),
+            // The originals predate context, the core's structural context every comparison now has.
+            (Ok(expected), Ok(actual)) => semantic(&expected) == semantic(&without_context(actual)),
             (Err(expected), Err(actual)) => expected == code(actual),
             _ => false,
         };

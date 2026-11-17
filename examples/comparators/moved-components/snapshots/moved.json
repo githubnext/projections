@@ -8,6 +8,16 @@
         "component:billing/InvoiceService"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:invoicing/InvoiceService",
+          "module:invoicing"
+        ],
+        "before": [
+          "contains:billing/InvoiceService",
+          "module:billing"
+        ]
+      },
       "correspondence": "declared",
       "id": "component:invoicing/InvoiceService",
       "status": "unchanged",
@@ -19,6 +29,13 @@
         "contains:billing/InvoiceService"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [],
+        "before": [
+          "component:billing/InvoiceService",
+          "module:billing"
+        ]
+      },
       "correspondence": "none",
       "id": "contains:billing/InvoiceService",
       "status": "removed"
@@ -29,6 +46,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "component:invoicing/InvoiceService",
+          "module:invoicing"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:invoicing/InvoiceService",
       "status": "added"
@@ -41,6 +65,24 @@
         "uses:api/CheckoutController>billing/InvoiceService"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "component:api/CheckoutController",
+          "component:invoicing/InvoiceService",
+          "contains:api/CheckoutController",
+          "contains:invoicing/InvoiceService",
+          "module:api",
+          "module:invoicing"
+        ],
+        "before": [
+          "component:api/CheckoutController",
+          "component:billing/InvoiceService",
+          "contains:api/CheckoutController",
+          "contains:billing/InvoiceService",
+          "module:api",
+          "module:billing"
+        ]
+      },
       "correspondence": "declared",
       "id": "uses:api/CheckoutController>invoicing/InvoiceService",
       "status": "unchanged"
@@ -53,6 +95,23 @@
         "uses:billing/InvoiceService>billing/TaxCalculator"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "component:billing/TaxCalculator",
+          "component:invoicing/InvoiceService",
+          "contains:billing/TaxCalculator",
+          "contains:invoicing/InvoiceService",
+          "module:billing",
+          "module:invoicing"
+        ],
+        "before": [
+          "component:billing/InvoiceService",
+          "component:billing/TaxCalculator",
+          "contains:billing/InvoiceService",
+          "contains:billing/TaxCalculator",
+          "module:billing"
+        ]
+      },
       "correspondence": "declared",
       "id": "uses:invoicing/InvoiceService>billing/TaxCalculator",
       "status": "unchanged"
@@ -65,6 +124,23 @@
         "uses:billing/InvoiceService>invoicing/InvoiceRenderer"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "component:invoicing/InvoiceRenderer",
+          "component:invoicing/InvoiceService",
+          "contains:invoicing/InvoiceRenderer",
+          "contains:invoicing/InvoiceService",
+          "module:invoicing"
+        ],
+        "before": [
+          "component:billing/InvoiceService",
+          "component:invoicing/InvoiceRenderer",
+          "contains:billing/InvoiceService",
+          "contains:invoicing/InvoiceRenderer",
+          "module:billing",
+          "module:invoicing"
+        ]
+      },
       "correspondence": "declared",
       "id": "uses:invoicing/InvoiceService>invoicing/InvoiceRenderer",
       "status": "unchanged"

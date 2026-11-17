@@ -56,6 +56,7 @@ impl Integrity<'_> {
         if change.is_variation() {
             self.variation.insert(change.id.clone());
         }
+        self.spend_core(&change);
         self.claimed.push((change, path));
         Ok(())
     }

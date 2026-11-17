@@ -33,8 +33,11 @@ export interface InspectorSummary {
   executionAuthorized: boolean
   /** The comparison of the shown pair, by change status, once it is compared. */
   comparison?: {compared: boolean; rows: number; changes: {[status: string]: number}}
-  /** The presented rows (entities, relationships, changes), changed ones first, at most 100: IDs for `selectEntity`. */
-  items?: {id: string; label: string; kind: string; status?: string}[]
+  /**
+   * The presented rows (entities, relationships, changes), changed ones first, at most 100: IDs for `selectEntity`. A
+   * change lists its context: the items a person needs to read it, which the Changes scope shows beside it.
+   */
+  items?: {id: string; label: string; kind: string; status?: string; context?: ContextItems}[]
   selection?: {id: string; label: string; kind: string; status?: string}
   error?: string
   /** The notices the view shows, for example that a declared input doesn't exist at one revision. */
@@ -69,7 +72,7 @@ export interface InspectorResultIdentity {
   execution?: {source?: string; fidelity?: string; tree?: string; strategy?: string; scope?: unknown}
 }
 
-import type {ProjectionController} from '@githubnext/projections-host'
+import type {ContextItems, ProjectionController} from '@githubnext/projections-host'
 
 /**
  * Drives a mounted Inspector from its embedding host (`MountedInspector.handle`): choose the projection and pair,

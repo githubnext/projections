@@ -142,12 +142,13 @@ fn changed_items(lines: &mut Vec<String>, view: &Value) {
         .as_array()
         .into_iter()
         .flatten()
-        .filter(|item| item["status"].as_str().is_some_and(|status| status != "unchanged"))
+        // Identity changes (a rename, split or merge) are `unchanged` but carry context.
+        .filter(|item| item["status"].as_str().is_some_and(|status| status != "unchanged") || item["context"].is_object())
         .collect();
     if changed.is_empty() {
         return;
     }
-    lines.push("Changed items (status, kind, label [ID]):".to_owned());
+    lines.push("Changed items (status, kind, label [ID]), each with its context: the items the Changes scope shows to read it:".to_owned());
     for item in changed {
         lines.push(format!(
             "- {} {} {} [{}]",
@@ -156,7 +157,46 @@ fn changed_items(lines: &mut Vec<String>, view: &Value) {
             item["label"].as_str().unwrap_or_default(),
             item["id"].as_str().unwrap_or_default()
         ));
+        if item["context"].is_object() {
+            lines.push(format!("  {}", context_text(&item["context"])));
+        }
     }
+}
+
+/// `context: module tools [m], … and 2 more (added by rule callers)`: a
+/// change's context, as the page listed it.
+fn context_text(context: &Value) -> String {
+    let field = |item: &Value, name: &str| item[name].as_str().unwrap_or_default().to_owned();
+    let items: Vec<String> = context["items"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|item| format!("{} {} [{}]", field(item, "kind"), field(item, "label"), field(item, "id")))
+        .collect();
+    let total = context["total"].as_u64().unwrap_or(items.len() as u64);
+    let more = total.saturating_sub(items.len() as u64);
+    let rules: Vec<String> = context["rules"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .map(|rule| format!("`{rule}`"))
+        .collect();
+    format!(
+        "context: {}{}{}{}",
+        items.join(", "),
+        if more > 0 { format!(" and {more} more") } else { String::new() },
+        match rules.len() {
+            0 => String::new(),
+            1 => format!(" (added by rule {})", rules[0]),
+            _ => format!(" (added by rules {})", rules.join(", ")),
+        },
+        if context["derived"] == true {
+            " (derived: the comparison was saved without context)"
+        } else {
+            ""
+        }
+    )
 }
 
 fn generated_line(generated: &[Value]) -> String {
@@ -195,3 +235,6 @@ fn selection_line(view: &Value) -> String {
         field("status").map(|status| format!(", {status}")).unwrap_or_default()
     )
 }
+
+#[cfg(test)]
+mod tests;

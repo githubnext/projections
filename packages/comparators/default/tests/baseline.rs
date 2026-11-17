@@ -51,7 +51,10 @@ fn the_baseline_plan_is_the_baseline_before_it_is_written() {
     assert_eq!(matched.pairs["claims"]["b"], "x");
     assert_eq!(matched.before_identity["c"], "c");
     assert_eq!(matched.after_identity["d"], "d");
-    assert_eq!(to_comparison(&matched.changes, steps), baseline(&before, &after).unwrap());
+    assert_eq!(
+        to_comparison(&before, &after, &matched.changes, steps),
+        baseline(&before, &after).unwrap()
+    );
 }
 
 #[test]

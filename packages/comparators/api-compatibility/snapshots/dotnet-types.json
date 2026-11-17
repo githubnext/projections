@@ -6,6 +6,13 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Factory",
+          "contains:Factory:Create"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "M:Factory.Create",
       "status": "added",
@@ -56,6 +63,13 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:IStore",
+          "contains:IStore:Node"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "T:IStore.Node",
       "status": "added",
@@ -106,6 +120,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "M:Factory.Create",
+          "T:Factory"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:Factory:Create",
       "status": "added"
@@ -116,6 +137,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "T:IStore",
+          "T:IStore.Node"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:IStore:Node",
       "status": "added"

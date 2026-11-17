@@ -1,6 +1,6 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {changeContext, isContainment, presentComparison, scopeRows} from '../dist/presentation.js'
+import {changeContext, isContainment, presentComparison, rowContexts, scopeRows} from '../dist/presentation.js'
 
 const entity = (id, kind = 'function') => ({id, kind, label: id})
 const contains = (from, to) => ({id: `${from}>${to}`, kind: 'contains', from, to})
@@ -108,4 +108,67 @@ test('containment follows the domain schema, and a vocabulary that names its str
   assert.equal(di(rel('registration', 's', 'r')), true)
   assert.equal(di(rel('implementation', 'r', 'i')), true)
   assert.equal(di(rel('dependsOn', 'i', 's')), false)
+})
+
+test("a comparison's own context is used, with the rules that added to it, and derivation fills only saved comparisons", () => {
+  const withContext = {
+    ...comparison,
+    changes: comparison.changes.map(change =>
+      change.id === 'tool:view/viewer'
+        ? {...change, context: {before: [], after: ['tool:check', 'tool:view'], rules: ['siblings']}}
+        : change,
+    ),
+  }
+  const presented = presentComparison(before, after, withContext)
+  assert.deepEqual(presented.entities.find(row => row.id === 'tool:view/viewer').context.rules, ['siblings'])
+  const contextRows = scopeRows(presented)
+  assert.deepEqual([...changeContext(contextRows, {before, after}).context].sort(), ['tool:check', 'tool:view'])
+  const contextOf = rowContexts(contextRows, {before, after})
+  assert.deepEqual(contextOf(contextRows.find(row => row.id === 'tool:view/viewer')), {
+    rows: ['tool:check', 'tool:view'],
+    rules: ['siblings'],
+    derived: false,
+  })
+  // A change the comparison gives no context has none to derive, as the core gave it none.
+  assert.deepEqual(contextOf(contextRows.find(row => row.id === 'tool:listen')), {rows: [], rules: [], derived: false})
+  // Nor does one whose structure has context (the core's budget was spent): the comparison's context is the truth.
+  assert.deepEqual(contextOf(contextRows.find(row => row.id === 'tool:view>tool:view/viewer')), {rows: [], rules: [], derived: false})
+  // A saved comparison without context derives the core's: the container, and the relationship that places it there.
+  assert.deepEqual(rowContexts(rows, {before, after})(rows.find(row => row.id === 'tool:view/viewer')), {
+    rows: ['tool:view>tool:view/viewer', 'tool:view'],
+    rules: [],
+    derived: true,
+  })
+})
+
+test("every part of a split carries the change's context", () => {
+  const service = id => ({id, kind: 'service', label: id})
+  const graph = entities => ({protocolVersion: 0, schema: 'graph/v0', entities, relationships: []})
+  const context = {before: ['gateway'], after: ['gateway'], rules: ['callers']}
+  const presented = presentComparison(
+    graph([service('billing'), service('gateway')]),
+    graph([service('invoicing'), service('payments'), service('gateway')]),
+    {
+      protocolVersion: 0,
+      steps: [{changes: ['invoicing']}],
+      changes: [
+        {
+          id: 'invoicing',
+          collection: 'entities',
+          before: ['billing'],
+          after: ['invoicing', 'payments'],
+          status: 'modified',
+          correspondence: 'split',
+          context,
+        },
+      ],
+    },
+  )
+  assert.deepEqual(
+    presented.entities.filter(row => row.correspondence === 'split').map(row => [row.id, row.context]),
+    [
+      ['invoicing', context],
+      ['payments', context],
+    ],
+  )
 })

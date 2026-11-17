@@ -1,7 +1,7 @@
 # Proposal: changes, scope and context
 
-Status: **Accepted; milestone 1 (interactive, no contract change) implemented,
-milestone 2 (the contract) in progress.**
+Status: **Accepted; milestone 1 (interactive, no contract change) and milestone
+2 (the contract) implemented.**
 
 On a pull request a person wants the changes, as GitHub's Files changed shows
 them, not the whole projection. On a README they want the whole picture. Until
@@ -130,6 +130,21 @@ in scope and their context.
 - The SDK exposes a change's context, falling back to the structural derivation
   when absent; `current_view` lists it.
 
+As built: `Change.context` is `{before, after, rules?}` in `comparison/v0`
+(validation codes `unknown-reference`, `invalid-context`, `unexpected-context`,
+`missing-context` and `context-limit`, 1,000 IDs per change and revision and
+250,000 per comparison); the Engine's `context` module computes the core's
+context, which the default comparator and the rules interpreter both apply
+(native and `rules.wasm` share the code), and which validation requires of any
+change with `context`; comparator files gain `context` rules and comparator
+tests `changes: [{id, context}]`; renderers declare the `context` capability,
+which kit renderers do, and `RendererFrame` strips `context` from the `init` of
+renderers that don't; `presentComparison`, `scopeRows` and host rows carry it,
+`changeContext` and the new `rowContexts` use it, and the host's Changes scope
+and filter IDs follow; the Inspector's summary items carry each change's context
+(`changeContextItems`), which `current_view` lists in the CLI viewer and VS
+Code. The rules language's revision is 4.
+
 ## Deviations
 
 Recorded as implementation chose within the decisions above.
@@ -182,3 +197,35 @@ Recorded as implementation chose within the decisions above.
   mode: the Inspector's document view doesn't know it holds a pull request yet.
 - Text diffs keep three unchanged lines around each change, as `git diff` does,
   so a run of up to seven lines between two changes stays open.
+- A change's context may name items of other changes, such as the modified table
+  a changed column is in, not only unchanged items: narrowing the Changes scope
+  to one change (with find or a summary figure) still shows what contains it.
+  Only the change's own items are excluded.
+- Context is only on changes whose status or identity changed (the Changes
+  scope's changes), never on expected variation, and omitted when it would name
+  nothing, like `varied`. The renderer SDK derives context per change where a
+  comparison omits it; in a comparison made with context that derivation is
+  empty too, so only saved comparisons without context are reported as derived.
+- Validation requires a change's `context`, when present, to hold the core's
+  (`missing-context`): that makes "rules only add" a property of every
+  comparison, not only of the interpreter. Comparisons without `context` stay
+  valid, so saved documents keep working.
+- `rules` names the comparator rules that added an ID to a change's context, per
+  change rather than per ID; the core's context is unnamed (it is always
+  structural).
+- Context rules run after `classify` and see its `annotation`; a rule's ID that
+  isn't an item of its revision fails the comparison (`invalid-context`) rather
+  than being dropped, while the change's own items are dropped silently.
+- CEL doesn't see a change's context (`change` has no `context` field) yet:
+  steps and later rules can't read it. Nothing needed it, and adding it changes
+  the declared `Change` type.
+- `current_view` lists at most 20 context items per change, with the total, and
+  lists identity changes (renames, splits, merges), which are `unchanged`,
+  because they carry context.
+- The core context is bounded where it is built, not only checked afterwards: in
+  change order, each change keeps its nearest items first, at most 1,000 per
+  revision, from the comparison's budget of 250,000, so a deep containment chain
+  or a very large change set can't exhaust memory or make the default comparison
+  fail its own limits. Validation spends the same budget in the same order. The
+  renderer SDK's derivation for saved comparisons isn't bounded; it only runs in
+  presentation.

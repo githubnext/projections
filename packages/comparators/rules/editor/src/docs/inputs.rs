@@ -33,11 +33,11 @@ pub const INPUTS: &[(&str, &str)] = &[
     ),
     (
         "item",
-        "In an identity pass, the item being matched; in `classify`, the after item, or the before item of a removal.",
+        "In an identity pass, the item being matched; in `classify` and `context`, the after item, or the before item of a removal.",
     ),
     ("side", "`before` or `after`: the side of the item being matched."),
     ("pairs", "Each identity pass's one-to-one pairs, before ID to after ID."),
-    ("change", "The change being classified or placed."),
+    ("change", "The change being classified, given context or placed."),
     ("origin", "The identity pass that matched the change."),
     ("beforeItem", "The change's before item, when it has one."),
     ("afterItem", "The change's after item, when it has one."),

@@ -129,6 +129,7 @@ The sections, in the order they are evaluated:
 | `functions` | Typed, named, parameterised expressions with their own `variables` | when called |
 | `identity` | Ordered passes over what the default matching left unmatched: `key` (items whose key is unique on both sides correspond) or `claims` (IDs an item claims on the other side; each connected group is one change), with an optional `when` | per unmatched item |
 | `classify` | Per change: `where`, `variables`, `summary` (a string) and `annotation` (any JSON value, readable afterwards as `annotations[id]`) | per selected change |
+| `context` | Named rules: `name`, `description`, `where`, `variables`, and `before` and `after`, each a `list<string>` of item IDs added to the change's [context](#context-rules) | per selected change, after `classify` |
 | `steps` | Declarative [step operations](#step-operations) with `variables`, or `value`, one CEL expression for the whole list | once |
 | `metadata` | `values`, comparison metadata keys merged over the baseline's, with `variables` | once |
 
@@ -176,6 +177,44 @@ whether a change differs only in generated values whose bases moved only in
 them to classify and order, never to change a status: a model upgrade stays
 `modified` (see
 [`model-upgrades`](../../examples/comparators/model-upgrades/model-upgrades.comparator.yaml)).
+
+## Context rules
+
+A change's **context** is what a person needs to read it: the declaration a
+changed parameter belongs to, the table a changed column is in, the two services
+a new dependency connects. A viewer's Changes scope shows the changes and their
+context, and folds the rest. The core gives every change whose status or
+identity changed its structural context: a changed relationship's endpoints, and
+the items containing a changed or context entity, with the containment
+relationships that place them, in each revision
+([Comparisons](../contracts/comparisons.md)). `context` rules add to it, never
+remove from it, and nothing they say hides a change:
+
+```yaml
+context:
+  - name: callers
+    description: The tools that call a changed function, so a reviewer sees who is affected.
+    where: change.collection == 'entities' && item.kind == 'function'
+    after: |-
+      change.after.size() == 1 && change.after[0] in lookup.after.incoming
+        ? lookup.after.incoming[change.after[0]].filter(r, r.kind == 'calls').map(r, r.from)
+        : []
+```
+
+Each rule runs, in order, on every change whose status or identity changed (not
+on expected variation), after `classify`, and sees what `classify` sees
+(`change`, `origin`, `item`, `beforeItem`, `afterItem`, `befores`, `afters`,
+`changes`, `pairs`, `changeOf`), `annotations` and the change's `annotation`.
+`where` selects the changes; `variables` are evaluated per change; `before` and
+`after` each return a `list<string>` of IDs of that revision's entities or
+relationships (a removal's context is in `before`), at least one of them given.
+An ID that isn't an item of that revision fails the comparison
+(`invalid-context`, with the rule's line); the change's own items are left out.
+The comparison records each change's context in UTF-16 order, with the names of
+the rules that added an ID (`context.rules`), so viewers and agents can say why
+an item is shown. A change has at most 1,000 context IDs per revision
+(`context-limit`). Comparator tests assert a change's context with
+`changes: [{id, context: {before?, after?, rules?}}]`.
 
 ## Variables
 

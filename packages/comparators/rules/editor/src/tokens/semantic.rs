@@ -129,6 +129,9 @@ pub(super) fn declarations(analysis: &Analysis, out: &mut Vec<(usize, usize, usi
     for section in ["classify", "steps", "metadata"] {
         lists.push(format!("/{section}/variables"));
     }
+    for index in 0..value["context"].as_array().map_or(0, Vec::len) {
+        lists.push(format!("/context/{index}/variables"));
+    }
     if let Some(functions) = value["functions"].as_object() {
         for (function, body) in functions {
             let base = projections_engine::pointer("/functions", function);

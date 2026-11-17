@@ -455,8 +455,8 @@ changesScope(model: ComparisonModel<Extraction> | undefined, filter: FilterPaylo
 
 The Changes scope a renderer presents, or undefined when the host shows every item (or this is one extraction). The
 host's filter `ids` are what it shows, its changes and their context, each change with every row presenting it (a
-split's parts); past the filter's ID limit, or before the host says, the kit derives the same from the comparison's
-structure (`changeContext`).
+split's parts); past the filter's ID limit, or before the host says, the kit reads the same from the comparison's
+change context, or derives it from the structure for a comparison saved without context (`changeContext`).
 
 ### `ChangesScope`
 
@@ -3018,6 +3018,7 @@ faint to see, or with an endpoint the frame has no card for, is left out of the 
 | `after` | `"after"?: Relationship` | The item in the `after` extraction; absent for a removal and a further merged part. |
 | `before` | `"before"?: Relationship` | The item in the `before` extraction; absent for an addition and a further split part. |
 | `containment` | `"containment": false \| true` | A `contains` relationship from a compound boundary: drawn by the boundary enclosing its member, so it has no route (`points` is empty) and the canvas draws no link for it. |
+| `context` | `"context"?: ChangeContext` | The comparison's `change.context`: the other items, by ID in each revision, a person needs to read the change. Absent for unchanged items and in a comparison saved without it; `changeContext` derives it from the structure then. |
 | `correspondence` | `"correspondence"?: "declared" \| "exact" \| "merge" \| "none" \| "split"` | How the comparison matched `before` to `after`; absent in a snapshot (`snapshotChanges`). |
 | `fromId` | `"fromId": string` | Entity row ID of the source, as used by `TransitionNode.id`. |
 | `id` | `"id": string` | The row's stable ID: the comparison change's ID, or the item's own ID for an item the comparison doesn't mention and for the further parts of a split or merge (suffixed `~1`, `~2`… only if that collides). |
@@ -3046,6 +3047,7 @@ how present it is. A row too faint to see at this progress is left out of the fr
 |---|---|---|
 | `after` | `"after"?: Entity` | The item in the `after` extraction; absent for a removal and a further merged part. |
 | `before` | `"before"?: Entity` | The item in the `before` extraction; absent for an addition and a further split part. |
+| `context` | `"context"?: ChangeContext` | The comparison's `change.context`: the other items, by ID in each revision, a person needs to read the change. Absent for unchanged items and in a comparison saved without it; `changeContext` derives it from the structure then. |
 | `correspondence` | `"correspondence"?: "declared" \| "exact" \| "merge" \| "none" \| "split"` | How the comparison matched `before` to `after`; absent in a snapshot (`snapshotChanges`). |
 | `group` | `"group": false \| true` | A compound module boundary rather than a card. |
 | `height` | `"height": number` | The card's height, interpolated between the layouts the frame moves between. |

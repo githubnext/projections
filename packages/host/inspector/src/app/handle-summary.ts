@@ -1,3 +1,4 @@
+import {changeContextItems} from '@githubnext/projections-host'
 import type {ProjectionController} from '@githubnext/projections-host'
 import type {InspectorKeptResult, InspectorRunning, InspectorSummary} from '../control.js'
 import type {ProjectionStatus} from '../shell/switcher.js'
@@ -94,14 +95,7 @@ export function inspectorSummary(
     ...(controller && !state.switching
       ? {comparison: {compared: state.outcome === 'compared', rows: controller.rows.length, changes}}
       : {}),
-    ...(controller && !state.switching
-      ? {
-          items: [...controller.rows]
-            .sort((a, b) => Number(!a.status || a.status === 'unchanged') - Number(!b.status || b.status === 'unchanged'))
-            .slice(0, 100)
-            .map(row => ({id: row.id, label: row.label, kind: row.kind, ...(row.status ? {status: row.status} : {})})),
-        }
-      : {}),
+    ...(controller && !state.switching ? {items: summaryItems(controller)} : {}),
     ...(selected
       ? {
           selection: {
@@ -121,4 +115,16 @@ export function inspectorSummary(
     ...(state.scenario ? {scenario: state.scenario} : {}),
     ...(failures.length ? {failures} : {}),
   }
+}
+
+/** The presented rows, changed ones first, at most 100, each change with its context. */
+function summaryItems(controller: ProjectionController): NonNullable<InspectorSummary['items']> {
+  const contextOf = changeContextItems(controller.rows, controller.subject)
+  return [...controller.rows]
+    .sort((a, b) => Number(!a.status || a.status === 'unchanged') - Number(!b.status || b.status === 'unchanged'))
+    .slice(0, 100)
+    .map(row => {
+      const context = contextOf(row)
+      return {id: row.id, label: row.label, kind: row.kind, ...(row.status ? {status: row.status} : {}), ...(context ? {context} : {})}
+    })
 }

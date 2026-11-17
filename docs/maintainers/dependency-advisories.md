@@ -39,10 +39,10 @@ Remove both once the way out lands.
   `+(*)`. 4.0.7 is the latest release, so no version or override fixes it yet.
   Only build tooling uses it (`vite`, `tsdown`, `tinyglobby`, `fdir` and
   `@rollup/pluginutils`, all development dependencies), and they match globs
-  written in this repository's own configuration, never user input; no
-  published package depends on it. Way out: the first picomatch release after
-  4.0.7 that fixes it, picked up with `npm update picomatch` (add an override
-  scoped to a dependant only if its range doesn't allow that release).
+  written in this repository's own configuration, never user input; no published
+  package depends on it. Way out: the first picomatch release after 4.0.7 that
+  fixes it, picked up with `npm update picomatch` (add an override scoped to a
+  dependant only if its range doesn't allow that release).
 
 ## Overrides
 

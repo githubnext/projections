@@ -88,7 +88,7 @@ export function ComparisonExplorer(props: ComparisonExplorerProps) {
   const [mode, setMode] = useState<ComparisonMode | undefined>(props.initialMode ?? pair.presentation?.mode)
   const [swipe, setSwipe] = useState(0.5)
   const [highlighting, setHighlighting] = useState<Highlighting>(pair.presentation?.highlighting ?? 'animated')
-  const [changesOnly, setChangesOnly] = useState(pair.presentation?.changesOnly ?? false)
+  const [changesOnly, setChangesOnly] = useState(pair.presentation?.changesOnly ?? true)
   const [search, setSearch] = useState('')
   const settings = {
     highlighting: props.highlighting ?? highlighting,

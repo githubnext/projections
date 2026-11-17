@@ -53,7 +53,8 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
     else onSelect(edge.id)
   }
   const request = props.focusRequest
-  const area = useMemo(() => focusArea(transition, diff, props.model, request), [transition, diff, props.model, request])
+  const shown = props.scope?.shown
+  const area = useMemo(() => focusArea(transition, diff, props.model, request, shown), [transition, diff, props.model, request, shown])
   const drawn = nodes.map(node => ({x: node.x - node.width / 2, y: node.y - node.height / 2, width: node.width, height: node.height}))
   const {zoom, scale, borders, keep} = useGraphZoom(scroller, framing, bounds, props.onAction, {area, request}, orientation, drawn, hold)
   drawnScale.current = scale

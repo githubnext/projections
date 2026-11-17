@@ -17,6 +17,7 @@ export {
   zoomGroup,
 } from './view-controls.js'
 export {FilterButton} from './filter-button.js'
+export {ScopeSwitch} from './scope-switch.js'
 export type {ModeForm, ShowAsOptions} from './view-controls.js'
 export {Playback, PlaybackExtras, playbackIcons, PlayButton, playLabel, spaceTogglesPlayback, StepButtons} from './playback.js'
 export {hasSettings, SettingsMenu} from './settings-menu.js'

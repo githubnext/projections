@@ -3,7 +3,7 @@ import type {CSSProperties, ReactNode} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {statusParts} from '@githubnext/projections-renderer-kit'
-import {EmptyDomain, Group} from '@githubnext/projections-renderer-kit/react'
+import {EmptyDomain, Fold, Group, useFolds} from '@githubnext/projections-renderer-kit/react'
 import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
 import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
 import type {RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
@@ -129,16 +129,23 @@ interface DiffProps {
   presentation: TextPresentation
   expanded: ReadonlySet<number>
   expand: (start: number) => void
+  /** Whether unchanged runs fold (the Changes scope); otherwise every line shows. */
+  fold: boolean
 }
 
+/** Every row as one run, for the All scope. */
+const unfolded = (count: number): Segment[] => [{kind: 'rows', start: 0, end: count}]
+
 /** One column: removed lines then added lines in each change, with old and new line numbers. */
-function UnifiedDiff({diff, presentation, expanded, expand}: DiffProps) {
+function UnifiedDiff({diff, presentation, expanded, expand, fold}: DiffProps) {
   const rows = diff.unified.slice(0, lineLimit)
-  const parts = segments(
-    rows.map(row => row.kind !== 'equal'),
-    undefined,
-    expanded,
-  )
+  const parts = fold
+    ? segments(
+        rows.map(row => row.kind !== 'equal'),
+        undefined,
+        expanded,
+      )
+    : unfolded(rows.length)
   const style = {'--digits-old': digits(diff.before.length), '--digits-new': digits(diff.after.length)} as Style
   return (
     <div className="td-body" data-layout="unified" data-presentation={presentation}>
@@ -206,13 +213,15 @@ function SplitCell({
  * filler, so unchanged lines stay aligned. Lines wrap within their column and
  * both cells of a row share its height.
  */
-function SplitDiff({diff, presentation, expanded, expand}: DiffProps) {
+function SplitDiff({diff, presentation, expanded, expand, fold}: DiffProps) {
   const rows = diff.split.slice(0, lineLimit)
-  const parts = segments(
-    rows.map(row => row.left?.kind !== 'equal' || row.right?.kind !== 'equal'),
-    undefined,
-    expanded,
-  )
+  const parts = fold
+    ? segments(
+        rows.map(row => row.left?.kind !== 'equal' || row.right?.kind !== 'equal'),
+        undefined,
+        expanded,
+      )
+    : unfolded(rows.length)
   const style = {'--digits-old': digits(diff.before.length), '--digits-new': digits(diff.after.length)} as Style
   return (
     <div className="td-body" data-layout="split" data-presentation={presentation}>
@@ -262,7 +271,7 @@ function OutputSection({
   } else {
     let diff = diffs.get(row.id)
     if (!diff) diffs.set(row.id, (diff = outputDiff(before?.text ?? '', after?.text ?? '')))
-    const shared: DiffProps = {diff, presentation: output.presentation, expanded, expand}
+    const shared: DiffProps = {diff, presentation: output.presentation, expanded, expand, fold: Boolean(props.scope)}
     body = (
       <>
         {!diff.minimal && (
@@ -335,6 +344,8 @@ export function TextDiffView(props: RendererProps<typeof accepts>) {
   const chosen: TextDiffLayout = isLayout(controls.textDiffLayout) ? controls.textDiffLayout : 'split'
   const [ref, narrow] = useNarrow()
   const layout = narrow ? 'unified' : chosen
+  // The Changes scope folds the outputs it doesn't show, as it folds their unchanged lines.
+  const {entries, expand} = useFolds(rows, row => row.id, props.scope)
   // One status width for every header, from the longest status this comparison can show.
   const parts = Math.max(1, ...rows.map(row => statusParts(row).length))
   const style: Style = {
@@ -348,7 +359,13 @@ export function TextDiffView(props: RendererProps<typeof accepts>) {
           {comparing ? 'No output was captured in either revision.' : 'No output was captured for this revision.'}
         </EmptyDomain>
       ) : (
-        rows.map(row => <OutputSection key={row.id} row={row} props={props} layout={layout} diffs={diffs} />)
+        entries.map(entry =>
+          entry.type === 'fold' ? (
+            <Fold key={`fold:${entry.key}`} count={entry.items.length} noun="outputs" onExpand={() => expand(entry.key)} />
+          ) : (
+            <OutputSection key={entry.item.id} row={entry.item} props={props} layout={layout} diffs={diffs} />
+          ),
+        )
       )}
     </div>
   )

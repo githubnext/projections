@@ -11,6 +11,7 @@ import {DetailCard} from './detail-card.js'
 import {ComparatorLine, featureOn, offeredModes, rendererLabel, spaceTogglesPlayback, zoomGroup} from './blocks.js'
 import type {ProjectionFeatures, ViewKind} from './blocks.js'
 import {Alert, AlertDescription} from './components/alert.js'
+import {Button} from './components/button.js'
 import {ScopedRoot} from './components/scoped-root.js'
 import {useColorMode} from './lib/color-mode.js'
 import {shadcnRendererTokens} from './lib/tokens.js'
@@ -137,6 +138,17 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
                 </li>
               ))}
             </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+      {comparing && p.scope === 'changes' && p.scopeCounts.changes === 0 && on('changesOnly') && (
+        <Alert role="status" className={cn('ph-no-changes', band)}>
+          <Info className="pj:h-4 pj:w-4" />
+          <AlertDescription className="pj:flex pj:flex-wrap pj:items-center pj:gap-x-3 pj:gap-y-1">
+            <span>No changes: both revisions present the same items.</span>
+            <Button type="button" variant="outline" size="sm" className="pj:h-7" onClick={() => p.setScope('all')}>
+              Show all
+            </Button>
           </AlertDescription>
         </Alert>
       )}

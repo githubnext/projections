@@ -96,7 +96,7 @@ function settingsItems(entries: readonly (SettingsEntry | SettingsSubmenu)[], gr
 
 /**
  * The settings as VS Code's menu (`menuitemradio` and `menuitemcheckbox` items in named groups, and submenus): "Show
- * as" (given `view`, `views` and `onViewChange` with two views or more) and "Changes only" at the top; then
+ * as" (given `view`, `views` and `onViewChange` with two views or more) at the top; then "Show" (the scope),
  * "Highlight changes", "Renderer", "Playback" (animated: loop, holds and speed) and the renderer's declared option
  * groups as submenus (see `settingsModel`). A declared range, which a menu can't hold, opens from its item ("Depth…")
  * in a widget.

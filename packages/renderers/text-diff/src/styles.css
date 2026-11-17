@@ -9,6 +9,11 @@
   gap: var(--projections-space-3);
   min-width: 0;
 }
+/* A fold of outputs (the Changes scope) stands between the cards as a dashed card of its own. */
+.text-diff-view > .pk-fold > .pk-fold-button {
+  border: var(--projections-border-width) dashed var(--divider);
+  border-radius: var(--projections-radius);
+}
 /* Hover, focus and selection rings are the SDK's, over the command's own edge. */
 
 /*

@@ -257,7 +257,7 @@ export const regeneratedLabel = (regenerated: number) => `${regenerated.toLocale
 
 /**
  * The count of items that varied within tolerance ("3 varied within tolerance", from `variation.within`), as a toggle
- * that shows only those items, as "Changes only" shows only changes; pressed again, every item returns. Neutral (VS
+ * that shows only those items (the Noise scope); pressed again, every item returns. Neutral (VS
  * Code's description foreground and toggle colors), never a change color: these items are unchanged. Renders nothing
  * when nothing varied within tolerance.
  */

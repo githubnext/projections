@@ -13,6 +13,7 @@ import {
   Toolbar,
   ToolbarRow,
   RegeneratedToggle,
+  ScopeSwitch,
   VariedToggle,
   ZoomControls,
   featureOn,
@@ -72,12 +73,14 @@ export function ViewToolbar({
   const {comparing, renderer, mode} = p
   const features = props.features
   const on = (name: Exclude<keyof ProjectionFeatures, 'modes'>) => featureOn(features, name)
+  // The scope beside the mode: which part of the comparison, as the mode is how its revisions relate.
+  const showScope = comparing && on('changesOnly')
   const row = useRef<HTMLDivElement>(null)
   const {plan, sliderMin, sliderFitMin} = useToolbarLayout(
     row,
     {
       pair: typeof props.toolbarStart === 'function',
-      modes: showModes && comparing && p.availableModes.filter(value => modes.includes(value)).length > 1,
+      modes: (showModes && comparing && p.availableModes.filter(value => modes.includes(value)).length > 1) || showScope,
       playback: Boolean(showPlayback),
       actions: [
         ...(showVaried ? (['varied'] as const) : []),
@@ -87,7 +90,7 @@ export function ViewToolbar({
         ...(on('search') ? (['filter'] as const) : []),
       ],
     },
-    `${comparing}-${mode}-${view}-${views.join()}-${showPlayback}-${showZoom}-${p.controls.length}-${p.stepEnds.length > 0}-${Boolean(props.actions)}-${p.availableModes.join()}-${p.variation?.within ?? 0}-${p.variation?.regenerated ?? 0}`,
+    `${comparing}-${mode}-${view}-${views.join()}-${showPlayback}-${showZoom}-${p.controls.length}-${p.stepEnds.length > 0}-${Boolean(props.actions)}-${p.availableModes.join()}-${p.variation?.within ?? 0}-${p.variation?.regenerated ?? 0}-${showScope && p.scope}`,
   )
   // The filter expands in the row only when the row's flexible room (the spacer and the slider beyond its minimum) can
   // take the field, so opening it never makes the row re-plan and move the Filter block while it is in use.
@@ -139,9 +142,10 @@ export function ViewToolbar({
             {start}
           </div>
         )}
-        {showModes && (
-          <div data-toolbar-region="mode" className="ph-toolbar-mode pj:flex pj:shrink-0 pj:empty:hidden">
-            <ModeSwitch projection={p} modes={modes} form={plan.mode} />
+        {(showModes || showScope) && (
+          <div data-toolbar-region="mode" className="ph-toolbar-mode pj:flex pj:shrink-0 pj:items-center pj:gap-1.5 pj:empty:hidden">
+            {showModes && <ModeSwitch projection={p} modes={modes} form={plan.mode} />}
+            {showScope && <ScopeSwitch projection={p} compact={plan.mode === 'menu'} />}
           </div>
         )}
         {showPlayback && plan.rows === 1 ? playback : <span aria-hidden="true" data-fit-min="0" className="pj:flex-1" />}

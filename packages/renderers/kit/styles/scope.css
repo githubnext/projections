@@ -1,0 +1,61 @@
+/*
+ * The Changes scope (`data-scope="changes"` on the root, see `RendererProps.scope`). A list folds each run of items it
+ * doesn't show into a `Fold` row; a canvas keeps its layout and recedes them, strongly while both revisions hold still
+ * (diff, side by side, swipe) and only faintly while it animates, so they still orient the eye as items move.
+ */
+/* A graph's summary cards and their links (`data-graph-synthetic`) stand for unchanged items: they recede too. */
+.pk[data-scope='changes'] [data-graph-synthetic] {
+  --pk-recede: 0.25;
+}
+.pk[data-scope='changes'] [data-graph-synthetic]:not(svg *) {
+  filter: opacity(var(--pk-recede));
+}
+.pk[data-scope='changes'] svg [data-graph-synthetic] {
+  opacity: var(--pk-recede);
+}
+.pk[data-scope='changes'][data-scope-recede='strong'] :is([data-projections-filtered], [data-graph-synthetic]) {
+  --pk-recede: 0.12;
+}
+/* Unchanged parts of a shown item (a context table's other columns) stay legible: they place the change in it. */
+.pk[data-scope='changes'][data-scope-recede='strong'] [data-entity-id]:not([data-projections-filtered]) [data-projections-filtered] {
+  --pk-recede: 0.4;
+}
+
+/* A fold: a quiet band across its list, its count in muted text beside the expand icon, the whole band a button. */
+.pk-fold {
+  display: block;
+}
+.pk-fold > td {
+  padding: 0;
+}
+.pk-fold-button {
+  display: flex;
+  align-items: center;
+  gap: var(--projections-space-2);
+  width: 100%;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 var(--projections-space-3);
+  border: 0;
+  border-block: var(--projections-border-width) dashed var(--border);
+  color: var(--muted);
+  background: var(--inset);
+  font: inherit;
+  font-size: var(--projections-font-size-xs);
+  line-height: 1;
+  text-align: start;
+  cursor: pointer;
+}
+.pk-fold-button:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+.pk-fold-button:focus-visible {
+  outline: var(--projections-focus-ring-width) solid var(--focus);
+  outline-offset: -2px;
+}
+.pk-fold-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}

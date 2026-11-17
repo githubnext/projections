@@ -447,6 +447,30 @@ nothing for an unchanged one. The kit's styles draw a marked HTML
 dashed and their `pk-diff-text` struck through. Spread it on the element
 that carries `data-entity-id`.
 
+### `changesScope`
+
+```ts
+changesScope(model: ComparisonModel<Extraction> | undefined, filter: FilterPayload | undefined): ChangesScope | undefined
+```
+
+The Changes scope a renderer presents, or undefined when the host shows every item (or this is one extraction). The
+host's filter `ids` are what it shows, its changes and their context; past the filter's ID limit, or before the host
+says, the kit derives the same from the comparison's structure (`changeContext`).
+
+### `ChangesScope`
+
+```ts
+interface ChangesScope
+```
+
+What a Changes scope shows: the changes it is about and the unchanged items that give them context.
+
+| Member | Signature | Description |
+|---|---|---|
+| `changes` | `"changes": ReadonlySet<string>` | The change rows in scope, by row ID. |
+| `context` | `"context": ReadonlySet<string>` | The unchanged rows shown to read them: their relationships' endpoints and the items that contain them. |
+| `shown` | `"shown": ReadonlySet<string>` | Both: every row the scope shows. |
+
 ### `clampZoom`
 
 ```ts
@@ -1303,6 +1327,24 @@ focusedIds(model: ComparisonModel<Extraction> | undefined, focus: RendererFocus 
 
 The selection IDs a focus request names, in a model: its item, or every changed entity and relationship. Undefined
 when it names none (`all`, or no request); in diff mode without a request, the changes.
+
+### `Folded`
+
+```ts
+type Folded<T> = { "item": T; "type": "item" } | { "items": Array<T>; "key": string; "type": "fold" }
+```
+
+One entry of a folded list: an item it shows, or a fold standing for a run of items it doesn't.
+
+### `foldList`
+
+```ts
+foldList<T>(items: Array<T>, idOf: { (item: T): string }, shown: ReadonlySet<string> | undefined, expanded?: ReadonlySet<string>): Array<{ "item": T; "type": "item" } | { "items": Array<T>; "key": string; "type": "fold" }>
+```
+
+A list with every run of items `shown` leaves out folded into one entry, keyed by its first item, unless `expanded`
+names it; a run of one item stays, as its fold would take as much room. Every item is shown when `shown` is
+undefined. Fold the union of a comparison (or each pane's list in the union's order) so both revisions fold alike.
 
 ### `followEndpoints`
 
@@ -3255,6 +3297,15 @@ Fields(__0: { "children": Iterable<ReactNode, any, any> | Promise<Iterable<React
 
 Name and value rows, such as an entity's data.
 
+### `Fold`
+
+```ts
+Fold(__0: { "as"?: "a" | "abbr" | "address" | "animate" | "animateMotion" | "animateTransform" | "area" | "article" | "aside" | "audio" | "b" | "base" | "bdi" | "bdo" | "big" | "blockquote" | "body" | "br" | "button" | "canvas" | "caption" | "center" | "circle" | "cite" | "clipPath" | "code" | "col" | "colgroup" | "data" | "datalist" | "dd" | "defs" | "del" | "desc" | "details" | "dfn" | "dialog" | "div" | "dl" | "dt" | "ellipse" | "em" | "embed" | "feBlend" | "feColorMatrix" | "feComponentTransfer" | "feComposite" | "feConvolveMatrix" | "feDiffuseLighting" | "feDisplacementMap" | "feDistantLight" | "feDropShadow" | "feFlood" | "feFuncA" | "feFuncB" | "feFuncG" | "feFuncR" | "feGaussianBlur" | "feImage" | "feMerge" | "feMergeNode" | "feMorphology" | "feOffset" | "fePointLight" | "feSpecularLighting" | "feSpotLight" | "feTile" | "feTurbulence" | "fieldset" | "figcaption" | "figure" | "filter" | "footer" | "foreignObject" | "form" | "g" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "head" | "header" | "hgroup" | "hr" | "html" | "i" | "iframe" | "image" | "img" | "input" | "ins" | "kbd" | "keygen" | "label" | "legend" | "li" | "line" | "linearGradient" | "link" | "main" | "map" | "mark" | "marker" | "mask" | "menu" | "menuitem" | "meta" | "metadata" | "meter" | "mpath" | "nav" | "noindex" | "noscript" | "object" | "ol" | "optgroup" | "option" | "output" | "p" | "param" | "path" | "pattern" | "picture" | "polygon" | "polyline" | "pre" | "progress" | "q" | "radialGradient" | "rect" | "rp" | "rt" | "ruby" | "s" | "samp" | "script" | "search" | "section" | "select" | "set" | "slot" | "small" | "source" | "span" | "stop" | "strong" | "style" | "sub" | "summary" | "sup" | "svg" | "switch" | "symbol" | "table" | "tbody" | "td" | "template" | "text" | "textPath" | "textarea" | "tfoot" | "th" | "thead" | "time" | "title" | "tr" | "track" | "tspan" | "u" | "ul" | "use" | "var" | "video" | "view" | "wbr" | "webview" | ComponentClass<any, any> | FunctionComponent<any>; "className"?: string; "columns"?: number; "count": number; "noun": string; "onExpand": { (): void } }): Element
+```
+
+A fold: "12 unchanged declarations", a button that expands the run in place. `as` sets its element (`div` by
+default, `tr` or `li` in tables and lists; a `tr` puts the button in one cell spanning `columns`).
+
 ### `GeneratedMark`
 
 ```ts
@@ -3384,6 +3435,7 @@ Everything but the renderer props is optional; the defaults draw every entity as
 | `reportSteps` | `"reportSteps": { (ends: Array<number>, slots?: number \| undefined): void }` | Report step boundaries where a host may hold, for renderers with their own timing, and optionally how many step slots the presentation spans (`timelineSlots`). |
 | `requestDocument` | `"requestDocument": { (name: string): Promise<string> }` | Asks the host for a built-in renderer's document, to run nested (`embedRenderer`); rejects with the host's reason when it supplies none (see `RendererClient.requestDocument`). |
 | `schedule` | `"schedule": Array<ScheduledStep>` | The comparison's steps on the progress axis for the direction this transition presents (see `DirectionLatch`). Empty for extractions. |
+| `scope` | `"scope": ChangesScope \| undefined` | The Changes scope, while the host shows a comparison's changes and their context (`changesScope`): its `shown` items at full strength, the rest folded (lists: `useFolds`, `Fold`) or receded (canvases, which keep their layout and frame what is shown). Undefined while every item is shown. The shell already marks items outside it filtered. |
 | `selectedId` | `"selectedId": null \| string` | The selected item's ID (an entity row ID, or a part's `data-entity-id`), or `null` when nothing is selected. |
 | `source` | `"source"?: unknown` | What `model` is a view of, when a renderer derives it (for example with groups expanded or collapsed): while a new model of the same document is laid out, the current layout stays on screen, and keyboard focus with it, instead of the loading state. |
 | `subtitle` | `"subtitle"?: undefined \| { (entity: Entity): string \| undefined }` | A few words under a card's label, such as what the entity is for: human text in sans, wrapped to the card on at most `subtitleMetrics.lines` lines and ending in an ellipsis when longer (the tooltip has it whole). The card grows a line for each line either revision needs; a changed one crossfades with the card's own step. Pass a stable function: a new one lays out again. |
@@ -3673,6 +3725,7 @@ Everything a kit renderer component receives for one host state.
 | `reportSteps` | `"reportSteps": { (ends: Array<number>, slots?: number \| undefined): void }` | Report step boundaries where a host may hold, for renderers with their own timing, and optionally how many step slots the presentation spans (`timelineSlots`). |
 | `requestDocument` | `"requestDocument": { (name: string): Promise<string> }` | Asks the host for a built-in renderer's document, to run nested (`embedRenderer`); rejects with the host's reason when it supplies none (see `RendererClient.requestDocument`). |
 | `schedule` | `"schedule": Array<ScheduledStep>` | The comparison's steps on the progress axis for the direction this transition presents (see `DirectionLatch`). Empty for extractions. |
+| `scope` | `"scope": ChangesScope \| undefined` | The Changes scope, while the host shows a comparison's changes and their context (`changesScope`): its `shown` items at full strength, the rest folded (lists: `useFolds`, `Fold`) or receded (canvases, which keep their layout and frame what is shown). Undefined while every item is shown. The shell already marks items outside it filtered. |
 | `selectedId` | `"selectedId": null \| string` | The selected item's ID (an entity row ID, or a part's `data-entity-id`), or `null` when nothing is selected. |
 | `viewport` | `"viewport": undefined \| { "height": number; "width": number }` | The frame's width and the host window's height, CSS px, as the host last reported them; undefined until then. |
 
@@ -3814,6 +3867,15 @@ one: content taller than that is fitted to the capped stage instead (or opens at
 a new measurement holds the host's paint acknowledgement until the content
 is drawn at its scale, so a host never measures a scale about to change
 (such as the one before the renderer fills its frame).
+
+### `useFolds`
+
+```ts
+useFolds<T>(items: Array<T>, idOf: { (item: T): string }, scope: ChangesScope | undefined): { "entries": Array<{ "item": T; "type": "item" } | { "items": Array<T>; "key": string; "type": "fold" }>; "expand": { (key: string): void } }
+```
+
+Folds a list for the Changes scope (`foldList`) and keeps which folds the person expanded, until the scope's shown
+items change. Without a scope every item is listed.
 
 ### `useFrameFill`
 

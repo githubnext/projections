@@ -42,7 +42,8 @@ function initialInternal(options: ProjectionOptions) {
     mode: options.initialMode ?? (presentation?.mode as ComparisonMode | undefined),
     swipePosition: unit(options.initialSwipePosition ?? 0.5),
     highlighting: options.initialHighlighting ?? presentation?.highlighting ?? ('animated' as Highlighting),
-    changesOnly: options.initialChangesOnly ?? presentation?.changesOnly ?? false,
+    // A comparison opens on its changes and their context unless the definition opts out.
+    changesOnly: options.initialChangesOnly ?? presentation?.changesOnly ?? true,
     variedOnly: options.initialVariedOnly ?? false,
     regeneratedOnly: options.initialRegeneratedOnly ?? false,
     summaryFilter: options.initialSummaryFilter ?? (null as SummaryFilter | null),

@@ -20,6 +20,7 @@ import type {SummaryNouns} from '@githubnext/projections-renderer-sdk/presentati
 import type {SummaryFacts} from '../../summary.js'
 import type {EmphasisOf} from '../../emphasis.js'
 import type {ComparisonModel} from '../../model.js'
+import type {ChangesScope} from '../../scope.js'
 import type {ScheduledStep} from '../../timeline.js'
 
 /**
@@ -62,6 +63,12 @@ export interface RendererProps<T extends DomainSchema | readonly RendererAccepts
    * view itself; a renderer that places its own view (`useStageZoom`) frames what it names.
    */
   focusRequest: RendererFocus | undefined
+  /**
+   * The Changes scope, while the host shows a comparison's changes and their context (`changesScope`): its `shown`
+   * items at full strength, the rest folded (lists: `useFolds`, `Fold`) or receded (canvases, which keep their layout
+   * and frame what is shown). Undefined while every item is shown. The shell already marks items outside it filtered.
+   */
+  scope: ChangesScope | undefined
   /** 0 (before) to 1 (after); always 1 for an extraction. */
   progress: number
   /**

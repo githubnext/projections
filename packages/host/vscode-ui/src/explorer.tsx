@@ -84,7 +84,7 @@ export function VscodeComparisonExplorer(props: VscodeComparisonExplorerProps) {
   })
   const [swipe, setSwipe] = useState(0.5)
   const [highlighting, setHighlighting] = useState<Highlighting>(pair.presentation?.highlighting ?? 'animated')
-  const [changesOnly, setChangesOnly] = useState(pair.presentation?.changesOnly ?? false)
+  const [changesOnly, setChangesOnly] = useState(pair.presentation?.changesOnly ?? true)
   const [search, setSearch] = useState('')
   const [connector, setConnector] = useState(props.initialConnector ?? false)
   const changeConnector = useCallback((value: boolean) => {

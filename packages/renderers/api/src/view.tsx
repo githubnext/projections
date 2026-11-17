@@ -5,7 +5,7 @@ import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import type {RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
 import {changeMark, presentedEmphasis, statusParts} from '@githubnext/projections-renderer-kit'
-import {ChangeFooter, EmptyDomain, Identifier, Notice, Prose} from '@githubnext/projections-renderer-kit/react'
+import {ChangeFooter, EmptyDomain, Fold, Identifier, Notice, Prose, useFolds} from '@githubnext/projections-renderer-kit/react'
 import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
 import {changesFirst, comparisonRows, declarationLimit, qualifiedNames, revisionRows} from './model.js'
 import {breakingFirst, compatibilityOf, reasonText} from './compatibility.js'
@@ -154,6 +154,7 @@ export function ApiView(props: RendererProps<typeof accepts>) {
     emphasis: emphasisOf,
     controls,
     declareControls,
+    scope,
   } = props
   const side: Side = comparing && progress < 0.5 ? 'before' : 'after'
   const compatibility = useMemo(() => (init.mode === 'comparison' ? compatibilityOf(init.comparison.metadata) : undefined), [init])
@@ -164,6 +165,8 @@ export function ApiView(props: RendererProps<typeof accepts>) {
     return breakingOnly ? listed.filter(row => compatibility?.changes.get(row.id)?.level === 'breaking') : listed
   }, [model, diff, side, compatibility, breakingOnly])
   const rows = all.slice(0, declarationLimit)
+  // The Changes scope folds each run of declarations it doesn't show; both panes fold alike, from the union's IDs.
+  const {entries, expand} = useFolds(rows, row => row.id, scope)
   const names = useMemo(() => ({before: qualifiedNames(model.before), after: qualifiedNames(model.after)}), [model])
   // One status cell width for every row, from the longest change status this comparison can show.
   const parts = Math.max(1, ...rows.map(row => statusParts(row).length))
@@ -183,7 +186,10 @@ export function ApiView(props: RendererProps<typeof accepts>) {
           )
         ) : (
           <div className="api-declarations">
-            {rows.map(row => {
+            {entries.map(entry => {
+              if (entry.type === 'fold')
+                return <Fold key={`fold:${entry.key}`} count={entry.items.length} noun="declarations" onExpand={() => expand(entry.key)} />
+              const row = entry.item
               const common = {row, comparing, selected: selectedId === row.id, onSelect, compatibility, diff, names}
               if (diff) {
                 return (

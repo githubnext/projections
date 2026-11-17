@@ -47,6 +47,47 @@
   border-radius: 5px;
 }
 
+/* The scope switch: text choices in the mode switch's frame, checked as VS Code's input option. */
+.phv-scope-switch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px;
+  border: 1px solid var(--vscode-input-border, var(--phv-border));
+  border-radius: 5px;
+}
+.phv-scope {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--vscode-foreground);
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+.phv-scope:hover {
+  background: var(--vscode-toolbar-hoverBackground);
+}
+.phv-scope[aria-checked='true'] {
+  border-color: var(--vscode-inputOption-activeBorder, transparent);
+  color: var(--vscode-inputOption-activeForeground, var(--vscode-foreground));
+  background: var(--vscode-inputOption-activeBackground);
+}
+.phv-scope:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+.phv-scope-count {
+  color: var(--phv-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Playback, like the debug toolbar: play in the continue color, pause in the pause color, steps in the step color. */
 .phv-playback {
   display: flex;

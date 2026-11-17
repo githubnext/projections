@@ -418,6 +418,31 @@ type BasisValue = Readonly<Record<string, string>>
 
 A basis value as the extraction records it: named parts.
 
+### `changeContext`
+
+```ts
+changeContext(rows: Array<ScopeRow>, revisions: { "after": Pick<Extraction, "relationships" | "schema" | "vocabularies">; "before": Pick<Extraction, "relationships" | "schema" | "vocabularies"> }, changes?: Iterable<string, any, any> | undefined): ChangesScope
+```
+
+The context of a comparison's changes, from its structure alone: a changed relationship's endpoints, and the items
+containing a changed or context entity (`containmentKinds`), with the containment relationships between them, in
+whichever revision has them. Context is only ever added, and never hides a change. `changes` narrows the changes to
+those row IDs (for example a find or summary filter's); by default every change (`isScopeChange`) is in scope.
+
+### `ChangesScope`
+
+```ts
+interface ChangesScope
+```
+
+What a Changes scope shows: the changes it is about and the unchanged items that give them context.
+
+| Member | Signature | Description |
+|---|---|---|
+| `changes` | `"changes": ReadonlySet<string>` | The change rows in scope, by row ID. |
+| `context` | `"context": ReadonlySet<string>` | The unchanged rows shown to read them: their relationships' endpoints and the items that contain them. |
+| `shown` | `"shown": ReadonlySet<string>` | Both: every row the scope shows. |
+
 ### `CodeStatisticsMeasure`
 
 ```ts
@@ -480,6 +505,16 @@ accepts gets a reading lead of `readingShare` slots before its motion, and
 one `tail` accepts a reading tail as long after it. Positions depend only
 on the sequence and are centred on the midpoint, so reversing a sequence
 mirrors its timeline exactly.
+
+### `containmentKinds`
+
+```ts
+containmentKinds(extraction: Pick<Extraction, "schema" | "vocabularies">): ReadonlySet<string>
+```
+
+The relationship kinds that mean containment in an extraction (`from` contains `to`): `contains` in every schema,
+and the containment its domain schema and vocabularies define (a database table's `constraint` and `index`, a
+dependency-injection service's `registration` and a registration's `implements`).
 
 ### `createFrame`
 
@@ -755,6 +790,14 @@ isCodeStatisticsScope(value: unknown): value is "all" | "other" | "tests"
 ```
 
 Whether `value` is a `CodeStatisticsScope`, for validating a saved or declared option.
+
+### `isScopeChange`
+
+```ts
+isScopeChange(row: Pick<ScopeRow, "correspondence" | "status">): false | true
+```
+
+Whether a row is one of a comparison's changes: its status, or its identity (a rename, split or merge), changed.
 
 ### `kindWords`
 
@@ -1123,6 +1166,31 @@ endpoints, where every step has either not started or finished. A step that
 removes something gets a reading lead; travelling backward through explicit
 reverse steps, one that adds something gets a reading tail, the part that
 backward travel enters first. Use a `DirectionLatch` to choose `direction`.
+
+### `ScopeRow`
+
+```ts
+interface ScopeRow
+```
+
+A row as `changeContext` reads it: a host row, or a presented change (`scopeRows`).
+
+| Member | Signature | Description |
+|---|---|---|
+| `after` | `"after": Array<string>` | The row's item IDs in the after extraction. |
+| `before` | `"before": Array<string>` | The row's item IDs in the before extraction. |
+| `collection` | `"collection": "entities" \| "relationships"` | Whether the row is an entity or a relationship. |
+| `correspondence` | `"correspondence"?: "declared" \| "exact" \| "merge" \| "none" \| "split" \| undefined` | How the comparison matched the row's items; anything but `exact` is an identity change. |
+| `id` | `"id": string` | The row's ID: the change's ID, or the item's own for an unchanged one. |
+| `status` | `"status"?: "added" \| "modified" \| "removed" \| "unchanged" \| undefined` | The comparison's status for the row; `unchanged` (or absent) for an item it doesn't mention. |
+
+### `scopeRows`
+
+```ts
+scopeRows(presented: Pick<PresentedChanges, "entities" | "relationships">): Array<ScopeRow>
+```
+
+A presented comparison's rows (`presentComparison`) as `changeContext` reads them.
 
 ### `sentenceCase`
 
@@ -1508,6 +1576,22 @@ chosen view, local playback, selection, collapsed groups and code-statistics opt
 | `selectedId` | `"selectedId": null \| string` | The selected item's ID, or `null`. |
 | `statistics` | `"statistics": CodeStatisticsOptions` | How code statistics are measured and charted. |
 | `status` | `"status": "added" \| "all" \| "modified" \| "removed" \| "unchanged"` | The change status to show, or `all`. |
+
+### `ViewScope`
+
+```ts
+type ViewScope = "all" | "changes" | "noise"
+```
+
+The scopes of a comparison view: every item, the changes and their context, or the noise (items that only varied).
+
+### `viewScopes`
+
+```ts
+viewScopes: Array<"all" | "changes" | "noise">
+```
+
+Every `ViewScope`, in the order a host offers them.
 
 ### `visibleHierarchy`
 

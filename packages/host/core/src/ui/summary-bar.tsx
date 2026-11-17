@@ -185,7 +185,7 @@ function Figure({
  * whose figures sit centred, at least as far from its edges as a capital E's cap height is from its top and bottom (its
  * padding is that space less the figure's own 4px and the E's left side bearing, about 0.1em). It shows a figure per kind in the renderer's words (`12 workspaces · 18
  * dependencies`), and in a comparison the changes of each in their change colors (`+1 −1`). Every figure filters to
- * its items, as "Changes only" does; pressed again, every item returns. The count of items that varied within
+ * its items, within the scope; pressed again, every item returns. The count of items that varied within
  * tolerance sits at its end as the same kind of toggle, and so does the count of items whose generated values were
  * regenerated from the same inputs ("N regenerated"). Figures that don't fit move into a "…" popover.
  */

@@ -17,6 +17,7 @@ import {
   useStepsReport,
 } from './reports.js'
 import {focusedIds, focusRequest} from '../../focus.js'
+import {changesScope} from '../../scope.js'
 import {useHostFilter, useOpeningReveal} from './focus.js'
 import {useSelection} from './selection.js'
 import {useSummaryReport} from './summary.js'
@@ -90,6 +91,7 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
   const filter = useHostFilter(client)
   const focus = useMemo(() => focusRequest(init, filter), [init, filter])
   const resolved = model && !(model.model instanceof Error) ? model.model : undefined
+  const scope = useMemo(() => changesScope(resolved, filter), [resolved, filter])
   const focused = useMemo(() => focusedIds(resolved, focus, diff), [resolved, focus, diff])
   useOpeningReveal(root, focused, resolved)
 
@@ -120,6 +122,7 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
                           comparisonMode={init.mode === 'comparison' ? init.comparisonMode : undefined}
                           pane={pane}
                           focusRequest={focus}
+                          scope={scope}
                           progress={position.progress}
                           highlighting={highlighting}
                           emphasis={emphasis}
@@ -165,6 +168,8 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
       data-comparison-mode={diff ? 'diff' : undefined}
       data-progress={init ? position.progress : undefined}
       data-highlighting={init ? position.highlighting : undefined}
+      data-scope={scope ? 'changes' : undefined}
+      data-scope-recede={scope ? (diff || pane ? 'strong' : 'faint') : undefined}
       data-reduced-motion={renderer.environment?.reducedMotion ? 'true' : undefined}
       onKeyDown={onKeyDown}
     >

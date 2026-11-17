@@ -142,7 +142,7 @@ function SettingsGroups({
 
 /**
  * A Settings button opening a menu (`menuitemradio` and `menuitemcheckbox` items, and submenus): "Show as" (with
- * `showAs`: the renderer, Table or Text) and "Changes only" at the top; then "Highlight changes", "Renderer",
+ * `showAs`: the renderer, Table or Text) at the top; then "Show" (the scope), "Highlight changes", "Renderer",
  * "Playback" (animated: loop, holds and speed) and the renderer's declared option groups as submenus (see
  * `settingsModel`; not while the table or text view is shown). It is never taller than the room beside its button and
  * scrolls inside. A declared range opens from its item ("Depth…") in a popover. Renders nothing when there is

@@ -5,18 +5,28 @@ import {ProjectionsMark, cn} from '@githubnext/projections-host/ui/components'
 import {InspectorHostProvider} from '../host.js'
 import type {InspectorHost} from '../host.js'
 import {StartupShell} from '../mount.js'
+import type {SwitcherItem} from '../shell/switcher.js'
 import type {ViewerState} from './state.js'
+import {ViewerTitle} from './title.js'
 
 interface Snapshot {
   state: ViewerState | undefined
   status: string
   /** The page lost its server: the controls are disabled until it answers again. */
   stopped: boolean
+  /** The repository's projections, for the title's menu, as the Inspector lists them. */
+  projections: readonly SwitcherItem[]
+  /** The page's color mode, for the title's menu. */
+  colorMode: 'light' | 'dark'
+  /** The projection the person just chose, shown in the title until the viewer's state says it. */
+  choosing?: string | undefined
+  /** Why the person's choice didn't take, said in the status line until the state changes. */
+  failed?: string | undefined
 }
 
 /** A tiny store the header reads. */
 export function createStore() {
-  let snapshot: Snapshot = {state: undefined, status: 'Connecting…', stopped: false}
+  let snapshot: Snapshot = {state: undefined, status: 'Connecting…', stopped: false, projections: [], colorMode: 'light'}
   const listeners = new Set<() => void>()
   return {
     get: () => snapshot,
@@ -36,32 +46,41 @@ export type Store = ReturnType<typeof createStore>
 /**
  * The one-line header: the Projections mark and the projection's title, then at its end the status line and what is
  * compared. The mark takes no more height than the text's cap (styles.css), so the header keeps its height. What is
- * compared keeps its words up to about half the row, each named revision a chip that shortens with an ellipsis and
- * says its name in full on hover; the title takes the rest, and shortens first. Its text is centred by cap height
- * (styles.css). A host's own control (`end`) closes the row.
+ * compared, an outline pill (two for named revisions), keeps its words up to about half the row, each pill shortening
+ * with an ellipsis and saying its name in full on hover; the title takes the rest, and shortens first. Its text is centred by cap height
+ * (styles.css). The title is also the menu of the repository's projections (`onChoose`, title.tsx). A host's own
+ * control (`end`) closes the row.
  */
-export function ViewerHeader({store, end}: {store: Store; end?: ReactNode}) {
-  const {state, status, stopped} = useSyncExternalStore(store.subscribe, store.get, store.get)
-  const title = state?.projection ? (state.title ?? state.projection) : 'Projections'
+export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactNode; onChoose?: (projection: string) => void}) {
+  const {state, status, stopped, projections, colorMode, choosing, failed} = useSyncExternalStore(store.subscribe, store.get, store.get)
+  const shown = choosing ?? state?.projection ?? undefined
+  const title = shown
+    ? choosing
+      ? (projections.find(item => item.id === choosing)?.title ?? choosing)
+      : (state?.title ?? shown)
+    : 'Projections'
+  const line = failed ?? status
   return (
     <header className="pi-viewer-header pj:relative pj:z-20 pj:flex pj:min-w-0 pj:shrink-0 pj:items-center pj:gap-3 pj:border-b pj:border-divider pj:bg-surface-header pj:p-3 pj:text-[13px]">
       <ProjectionsMark tone="two-tone" className="pi-viewer-mark pj:text-foreground" />
-      <h1 className="pj:m-0 pj:flex pj:min-w-0 pj:flex-1 pj:items-center pj:text-[13px] pj:font-normal">
-        <span className="pi-viewer-title pi-viewer-text pj:min-w-0 pj:truncate pj:font-semibold" title={title}>
-          {title}
-        </span>
-      </h1>
-      {status && (
+      <ViewerTitle
+        title={title}
+        current={shown}
+        projections={projections}
+        colorMode={colorMode}
+        onChoose={stopped ? undefined : onChoose}
+      />
+      {line && (
         <span
           role="status"
           aria-live="polite"
-          title={status}
+          title={line}
           className={cn(
             'pi-viewer-status pi-viewer-text pj:min-w-0 pj:max-w-[40%] pj:truncate pj:text-xs',
-            stopped ? 'pj:font-medium pj:text-foreground' : 'pj:text-muted-foreground',
+            stopped || failed ? 'pj:font-medium pj:text-foreground' : 'pj:text-muted-foreground',
           )}
         >
-          {status}
+          {line}
         </span>
       )}
       {state?.projection && <Compared state={state} />}
@@ -95,38 +114,47 @@ function Stopped({className}: {className: string}) {
   )
 }
 
-/** What is compared, at the header's end: two named revisions as chips, short and in full on hover, or the choice in words. */
+/**
+ * An outline pill at the header's end: a 1px border, fully rounded, no fill, its muted text cut short with an ellipsis
+ * and whole in its tooltip. Its box is a whole 20px, the text centred in it by cap height (styles.css).
+ */
+function Pill({className, title, children, ...rest}: {className: string; title: string; children: ReactNode; 'data-side'?: string}) {
+  return (
+    <span
+      title={title}
+      className={cn('pi-viewer-pill pj:min-w-0 pj:border pj:border-divider pj:text-xs pj:text-muted-foreground', className)}
+      {...rest}
+    >
+      <span className="pi-viewer-text pj:min-w-0 pj:truncate">{children}</span>
+    </span>
+  )
+}
+
+/** What is compared, at the header's end: two named revisions as pills, short and in full on hover, or the choice in words. */
 function Compared({state}: {state: ViewerState}) {
   const sides = state.sides
   if (!sides)
     return state.compared ? (
-      <span
-        className="pi-viewer-compared pi-viewer-text pj:max-w-[55%] pj:shrink-0 pj:truncate pj:text-muted-foreground"
-        title={state.compared}
-      >
+      <Pill className="pi-viewer-compared pj:max-w-[55%] pj:shrink-0" title={state.compared}>
         {state.compared}
-      </span>
+      </Pill>
     ) : null
-  const chip = (name: string, side: 'before' | 'after') => (
-    <span
-      data-side={side}
-      title={name}
-      className="pi-viewer-revision pi-viewer-text pj:min-w-0 pj:max-w-[32ch] pj:truncate pj:rounded-md pj:bg-muted pj:px-1.5 pj:text-xs pj:text-muted-foreground"
-    >
+  const pill = (name: string, side: 'before' | 'after') => (
+    <Pill className="pi-viewer-revision pj:max-w-[32ch]" title={name} data-side={side}>
       {name}
-    </span>
+    </Pill>
   )
   return (
     <span className="pi-viewer-compared pj:flex pj:max-w-[55%] pj:shrink-0 pj:items-center pj:gap-1.5" aria-label={state.compared}>
       {sides.before != null && (
         <>
-          {chip(sides.before, 'before')}
+          {pill(sides.before, 'before')}
           <span aria-hidden="true" className="pi-viewer-text pj:shrink-0 pj:text-xs pj:text-muted-foreground">
             →
           </span>
         </>
       )}
-      {chip(sides.after, 'after')}
+      {pill(sides.after, 'after')}
     </span>
   )
 }

@@ -1,7 +1,8 @@
 // The agent viewer (`projections view`): the page reflects what the agent shows, reports the person's selection and
 // mode, mirrors them across open pages, refuses requests without its token, and names no files, even on errors. At a
 // canvas's width its header text is whole and its chrome lies flat, edge to edge, every control works, and a page that
-// loses its server says so and takes no input.
+// loses its server says so and takes no input. A named viewer is a page of its own, and the person switches a page's
+// projection from its title.
 import {test, expect} from '@playwright/test'
 import type {Page} from '@playwright/test'
 import {execFileSync, spawn} from 'node:child_process'
@@ -222,10 +223,26 @@ test('at a canvas width, the header text is whole and centred', async ({page}) =
         left: box(title).left - frame.left,
       },
       revision: (() => {
-        const chip = header.querySelectorAll('.pi-viewer-revision')[1]!
-        return {truncated: chip.scrollWidth > chip.clientWidth, width: box(chip).width}
+        const pill = header.querySelectorAll('.pi-viewer-revision')[1]!
+        const text = pill.querySelector('.pi-viewer-text')!
+        return {truncated: text.scrollWidth > text.clientWidth, width: box(pill).width}
       })(),
       overflow: document.scrollingElement!.scrollWidth - innerWidth,
+      pills: [...header.querySelectorAll('.pi-viewer-pill')].map(pill => {
+        const style = getComputedStyle(pill)
+        const text = pill.querySelector('.pi-viewer-text')!
+        const textStyle = getComputedStyle(text)
+        // The text's cap: its box less the padding that keeps its glyphs.
+        const cap = {top: box(text).top + parseFloat(textStyle.paddingTop), bottom: box(text).bottom - parseFloat(textStyle.paddingBottom)}
+        return {
+          height: box(pill).height,
+          border: style.borderTopWidth,
+          background: style.backgroundColor,
+          radius: parseFloat(style.borderTopLeftRadius),
+          above: cap.top - box(pill).top,
+          below: box(pill).bottom - cap.bottom,
+        }
+      }),
     }
   })
   for (const text of measured.texts) {
@@ -241,6 +258,12 @@ test('at a canvas width, the header text is whole and centred', async ({page}) =
   expect(Math.abs(measured.mark.above - measured.mark.below)).toBeLessThanOrEqual(1)
   expect(Math.abs(measured.mark.above - measured.mark.left)).toBeLessThanOrEqual(1.5)
   expect(measured.overflow).toBeLessThanOrEqual(0)
+  // What is compared is outline pills: a whole 20px, a 1px border, fully rounded, no fill, the cap centred.
+  for (const pill of measured.pills) {
+    expect(pill).toMatchObject({height: 20, border: '1px', background: 'rgba(0, 0, 0, 0)'})
+    expect(pill.radius).toBeGreaterThanOrEqual(10)
+    expect(Math.abs(pill.above - pill.below)).toBeLessThanOrEqual(0.5)
+  }
 })
 
 test('the toolbar, stage and summary bar lie flat, edge to edge, under the header', async ({page}) => {
@@ -414,6 +437,50 @@ test('at a canvas width, every mode and toolbar control works', async ({page}) =
   await expect(toolbar.getByRole('button', {name: 'Exit full screen', exact: true})).toBeVisible()
   await toolbar.getByRole('button', {name: 'Exit full screen', exact: true}).click()
   await expect(toolbar.getByRole('button', {name: 'Enter full screen', exact: true})).toBeVisible()
+})
+
+test('a named viewer is its own page, and the person switches its projection from the title', async ({page}) => {
+  expect((await control('control/show', {viewer: 'side', projection: 'broken', choice: 'now'})).status).toBe(200)
+  const before = (await state()).state
+  await page.goto(`${url}?viewer=side`)
+  const header = page.locator('.pi-viewer-header')
+  await expect(header.locator('.pi-viewer-title')).toHaveText('Broken map')
+  const trigger = header.getByRole('button', {name: 'Broken map, switch projection'})
+  await expect(trigger).toBeVisible({timeout: 30_000})
+  // It reads as the title, not a button: no fill, border or padding of its own at rest.
+  const rest = await trigger.evaluate(element => {
+    const style = getComputedStyle(element)
+    return {background: style.backgroundColor, border: style.borderTopWidth, height: element.getBoundingClientRect().height}
+  })
+  expect(rest).toEqual({background: 'rgba(0, 0, 0, 0)', border: '0px', height: 24})
+  await trigger.hover()
+  expect(await trigger.evaluate(element => getComputedStyle(element).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)')
+
+  // The keyboard opens it: a search over the repository's projections, the current one checked.
+  await trigger.focus()
+  await page.keyboard.press('ArrowDown')
+  const dialog = page.getByRole('dialog', {name: 'Switch projection'})
+  await expect(dialog).toBeVisible()
+  await expect(dialog.getByRole('option')).toHaveCount(2)
+  await page.keyboard.press('Escape')
+  await expect(dialog).toHaveCount(0)
+  await expect(trigger).toBeFocused()
+  await trigger.click()
+  await dialog.getByRole('option', {name: /^Package map, packages/}).click()
+
+  // That viewer shows it, and the agent reads that the person chose it; the default viewer is unchanged.
+  await expect(header.locator('.pi-viewer-title')).toHaveText('Package map')
+  await expect
+    .poll(async () => {
+      const side = (await control('control/state?viewer=side')).body.state
+      return [side.projection, side.chosenBy]
+    })
+    .toEqual(['packages', 'person'])
+  const current = (await control('control/tool/current_view', {viewer: 'side'})).body
+  expect(current.content[0].text).toContain('The person chose this projection themselves')
+  const main = (await state()).state
+  expect([main.projection, main.chosenBy]).toEqual([before.projection, 'agent'])
+  expect(await pathsIn(page)).toEqual([])
 })
 
 test('a page that loses its server says so, takes no input, and reconnects when it answers again', async ({page}) => {

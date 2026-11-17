@@ -14,9 +14,9 @@ use subtle::ConstantTimeEq;
 
 use super::{
     MAX_RESPONSE_BYTES, Shared, VIEWER_CSP, Views,
-    pages::{control_state, page_state, report},
-    show::show,
-    state::ViewState,
+    pages::{control_state, page_state, query_map, report},
+    show::{choose, show},
+    state::{Chooser, ViewState},
     stop, surface, url,
 };
 
@@ -145,25 +145,43 @@ async fn endpoint(shared: &Arc<Shared>, request: Request, method: &Method, path:
         }
         (Method::GET, "/viewer.js") => bytes_response(SCRIPT.as_bytes().to_vec(), "text/javascript; charset=utf-8", None),
         (Method::GET, "/view/state") => {
-            let query = request.uri().query().unwrap_or_default().to_owned();
-            page_state(shared, &query).await
+            let query = query_map(request.uri().query().unwrap_or_default());
+            let view = shared.views.get(query.get("viewer").map(String::as_str)).map_err(refused)?;
+            page_state(shared, &view, &query).await
         }
         (Method::POST, "/view/report") => {
-            report(shared, body(request).await?);
+            let body = body(request).await?;
+            let view = shared.view(&body).map_err(refused)?;
+            report(shared, &view, body);
             json_response(StatusCode::OK, &json!({"ok": true}))
+        }
+        (Method::POST, "/view/choose") => {
+            let input = body(request).await?;
+            let view = shared.view(&input).map_err(refused)?;
+            let projection = input["projection"]
+                .as_str()
+                .ok_or_else(|| refused("Name the projection to show".to_owned()))?;
+            let state = choose(shared, &view, projection).await.map_err(refused)?;
+            json_response(StatusCode::OK, &json!({"state": state.json()}))
         }
         (Method::POST, "/control/show") => {
             let input = body(request).await?;
-            let state = show(shared, &input).await.map_err(|message| (StatusCode::BAD_REQUEST, message))?;
-            json_response(StatusCode::OK, &json!({"state": state.json(), "url": url(shared)}))
+            let view = shared.view(&input).map_err(refused)?;
+            let state = show(shared, &view, &input, Chooser::Agent).await.map_err(refused)?;
+            json_response(
+                StatusCode::OK,
+                &json!({"state": state.json(), "url": super::view_url(shared, &view)}),
+            )
         }
         (Method::GET, "/control/defaults") => {
-            let defaults = surface::defaults(shared).await;
+            let view = query_view(shared, &request)?;
+            let defaults = surface::defaults(shared, &view).await;
             json_response(StatusCode::OK, &defaults.as_ref().map_or(Value::Null, surface::defaults_json))
         }
         (Method::GET, "/control/state") => {
             shared.touch();
-            json_response(StatusCode::OK, &control_state(shared))
+            let view = query_view(shared, &request)?;
+            json_response(StatusCode::OK, &control_state(shared, &view))
         }
         (Method::POST, "/control/stop") => {
             stop(shared);
@@ -171,11 +189,23 @@ async fn endpoint(shared: &Arc<Shared>, request: Request, method: &Method, path:
         }
         (Method::POST, "/control/refresh") => {
             shared.touch();
-            shared.state.send_modify(ViewState::refresh);
-            json_response(StatusCode::OK, &control_state(shared))
+            let view = shared.view(&body(request).await?).map_err(refused)?;
+            view.state.send_modify(ViewState::refresh);
+            json_response(StatusCode::OK, &control_state(shared, &view))
         }
         _ => return Ok(Err(request)),
     }))
+}
+
+/// A request that names no viewer, or one that can't be.
+fn refused(message: String) -> Failure {
+    (StatusCode::BAD_REQUEST, message)
+}
+
+/// The viewer a request's `?viewer=` names, the default one without it.
+fn query_view(shared: &Shared, request: &Request) -> Result<Arc<super::NamedView>, Failure> {
+    let query = query_map(request.uri().query().unwrap_or_default());
+    shared.views.get(query.get("viewer").map(String::as_str)).map_err(refused)
 }
 
 /// `POST control/tool/NAME`: answers a tool as `projections mcp` does, with this viewer.

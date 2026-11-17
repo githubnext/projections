@@ -60,17 +60,43 @@ pages, including the Copilot app's canvas, reconnect to the trusted viewer.
 ### 2. The server owns the view state
 
 The **view state** is
-`{projection, choice or before/after, mode, selection, scenario, generation}`.
-The server holds it; pages render it. Pages long-poll it
-(`GET TOKEN/view/state?since=N`), as the Inspector long-polls working-tree
-changes, and report the person's interactions with `POST TOKEN/view/report`: the
-selection, mode, playback position and what the page presents (the same
-`PageView` shape VS Code's projection tabs report). A long poll plus POST is
-simpler than Server-Sent Events or a WebSocket here: the state changes rarely,
-the reports are small, and it needs no new dependency.
+`{projection, choice or before/after, mode, selection, scenario, chosenBy, generation}`,
+one for each named viewer (below). The server holds it; pages render it. Pages
+long-poll it (`GET TOKEN/view/state?since=N`), as the Inspector long-polls
+working-tree changes, and report the person's interactions with
+`POST TOKEN/view/report`: the selection, mode, playback position and what the
+page presents (the same `PageView` shape VS Code's projection tabs report). A
+long poll plus POST is simpler than Server-Sent Events or a WebSocket here: the
+state changes rarely, the reports are small, and it needs no new dependency.
 
 Several open pages mirror one another: a report that changes the selection or
 mode becomes the state, and every page receives it. The newest report wins.
+
+**Named viewers.** One server holds several independent views, so an agent can
+show the person several projections side by side. Each **named viewer** has its
+own view state, pages and URL, `TOKEN/?viewer=NAME` (lowercase letters, digits
+and hyphens, at most 40; at most 32 per server); the default viewer is the
+unnamed one, `TOKEN/`, and everything that names no viewer uses it, as before. A
+viewer is made when first shown or asked for, and lives as long as the server.
+Its pages long-poll and report with its name (`view/state?viewer=NAME`, `viewer`
+in the report), and mirror only one another. The agent names one with `viewer`
+on the view tools and `screenshot`, or `--viewer NAME` on `projections view` and
+its subcommands; `current_view` lists the other viewers and what each shows. The
+other tools' defaults (`compare`, `check`, `set_part`) come from the default
+viewer. One server, rather than one per name, keeps one token, one trust
+decision, one record and one extraction cache for the repository;
+`projections view --trust` replaces them all at once, and their pages reconnect.
+
+**The person picks the projection.** The header's title is also a menu of the
+repository's projections (decision 3). Choosing one asks the page's viewer to
+show it (`POST TOKEN/view/choose`, `{viewer, projection}`), as `open_projection`
+with only that projection would: the same pair, now for that projection, with
+its mode and selection cleared. It becomes that viewer's state, so its other
+pages follow, and the agent reads it: the state says who chose it (`chosenBy`,
+`agent` or `person`), and `current_view` says the person chose it. Nothing else
+the page sends changes what is shown; the server shows only a projection the
+working tree defines, and a renderer builds for it under the same trust rules as
+when the agent shows it.
 
 **Live updates.** The page shows the pair with the working-tree definition, so
 editing a definition, an extractor's input or a renderer re-extracts and
@@ -96,12 +122,21 @@ and its notices. Above it:
 - a **one-line header**: the Projections mark and the projection's title, and at
   the row's end, muted, what is compared, in words: "Branch changes",
   "Uncommitted changes", "Last commit", "Current state", a bookmark's title, or
-  the two revisions' commit subjects. Never file paths or raw refs. What is
-  compared keeps its words up to about half the row, two revisions as chips,
-  each shortened with an ellipsis and whole in its tooltip; a long title
-  shortens first. Its text is centred by cap height: a capital E has the
-  header's padding above and below, and the mark before the title as much space
-  above, below and to its left;
+  the two revisions' commit subjects, an arrow between them. Never file paths or
+  raw refs. It is an outline pill (two revisions are a pill each): a 1px border,
+  fully rounded, no fill, 20px tall, the cap centred in it. What is compared
+  keeps its words up to about half the row, each pill shortened with an ellipsis
+  and whole in its tooltip; a long title shortens first. Its text is centred by
+  cap height: a capital E has the header's padding above and below, and the mark
+  before the title as much space above, below and to its left. The **title is
+  the projection menu**: with two or more projections, it opens the Inspector's
+  own projection switcher (a search by title or ID over the list, IDs in mono,
+  the current one checked) from its start. It reads as the title, not a button:
+  no fill, border or padding at rest, only a small muted chevron after the text;
+  hover and the open menu lay a faint wash behind it (24px tall, overhanging the
+  text by 6px at each end, so nothing moves), and keyboard focus draws the focus
+  ring. Enter, Space or Arrow Down open it; it is a button with a dialog popup
+  to assistive technology, named "TITLE, switch projection";
 - a quiet **status line**, before what is compared: "Extracting…", "Building
   renderer…", "Waiting for the agent…", "Out of date".
 
@@ -136,9 +171,10 @@ projection's code and restart the viewer with trust, and the page reconnects.
 `current_view` tells the agent how (`projections view --trust`, which replaces
 the viewer at its URL). The agent decides; the page grants nothing.
 
-The person can switch mode, play and scrub, zoom, use the settings menu and
-select cards and items. Selecting is reported, so the agent can read it ("this
-one's wrong").
+The person can switch mode, play and scrub, zoom, use the settings menu, select
+cards and items, and switch the page to another projection from its title.
+Selecting and switching are reported, so the agent can read them ("this one's
+wrong").
 
 **Theme.** The default light and dark themes follow `prefers-color-scheme`.
 Inside the Copilot app, a small adapter maps the canvas's tokens onto ours when
@@ -168,17 +204,20 @@ names and schemas. Only the surface that answers the view tools differs.
   its own process or, through the per-repository record, a viewer another
   process runs.
 - `open_projection` keeps its inputs (projection, before and after, entity, pin)
-  and gains `choice` (`branch`, `uncommitted`, `last-commit`, `now`, `release`
-  or `bookmark:<id>`, the ids VS Code's choices use), `mode` and `scenario` (a
-  scenario from the projection's `scenarios.json`). `pin` only applies in VS
-  Code, where several tabs exist; the viewer has one view and ignores it.
+  and gains `viewer` (a named viewer, decision 2), `choice` (`branch`,
+  `uncommitted`, `last-commit`, `now`, `release` or `bookmark:<id>`, the ids VS
+  Code's choices use), `mode` and `scenario` (a scenario from the projection's
+  `scenarios.json`). `pin` only applies in VS Code, where several tabs exist;
+  the viewer has one view and ignores it.
 - `current_view` has one result shape (the model in
   `packages/integrations/vscode/src/current-view/types.ts`, which the viewer's
   Rust twin follows): the projection and definition file, the choice and
   resolved revisions, the mode, the selection, the summary bar's figures, the
   changed items, why an extraction failed, whether it is out of date and whether
   it uses uncommitted definition edits. The viewer's first line names the viewer
-  and its URL instead of a tab.
+  and its URL instead of a tab, and it says when the person chose the
+  projection, and which other named viewers show what. Its `viewer` input reads
+  a named viewer; so does `refresh`'s.
 - `screenshot` is not a view action: it is an ordinary tool that renders
   server-side with the CLI's headless renderer (`--png`), so it works when the
   agent can't see the person's browser and when no page is open. Its omitted
@@ -203,12 +242,13 @@ approve a write itself). No tool is left out of either surface.
 
 **The same as CLI subcommands**, for agents without MCP:
 `projections view show …`, `projections view current [--json]`,
-`projections view screenshot --out FILE` and `projections view refresh`. They
-call the running server's token-protected control endpoints
-(`TOKEN/control/tool/NAME`), which answer with exactly the tool's result, so the
-text and JSON match the tools'. `view show` starts a server in the background
-when none is running, which stops itself after it has had no page and no call
-for 15 minutes; `projections view stop` stops one sooner (decision 1).
+`projections view screenshot --out FILE` and `projections view refresh`, each
+taking `--viewer NAME`. They call the running server's token-protected control
+endpoints (`TOKEN/control/tool/NAME`), which answer with exactly the tool's
+result, so the text and JSON match the tools'. `view show` starts a server in
+the background when none is running, which stops itself after it has had no page
+and no call for 15 minutes; `projections view stop` stops one sooner (decision
+1).
 
 ### 5. Renderer builds move into the CLI service
 
@@ -235,7 +275,10 @@ an ES module with no `package.json`, which never writes to standard output)
 ships in this repository. `projections canvas install` writes it to
 `.github/extensions/projections/`. Its `open()` runs `projections view show`,
 which starts or reuses the viewer, and returns its URL, keyed by the repository
-rather than the canvas instance, so it is idempotent and rehydrates. An
+(and the named viewer, when the input names one) rather than the canvas
+instance, so it is idempotent and rehydrates. Canvases side by side show
+different projections by naming different viewers; an instance opened on a named
+viewer keeps it, and its actions address it unless they name another. An
 instance's open input is applied once (a small record in the session's
 workspace), so the app rehydrating a canvas after a reload never undoes what the
 agent showed since. Its actions, `open_projection`, `current_view`, `screenshot`
@@ -326,19 +369,21 @@ renderers inline, which it starts from Blob URLs, as the VS Code webview does.
 Its requests reach the viewer through the server: `viewer_request`, a tool hosts
 offer only to views (`visibility: ["app"]`), relays the page's requests to the
 viewer's URL as a browser's would go (the state's long poll and reports, the
-service's reads and extraction jobs, renderer bundles), never its control
-endpoints, and keeps its token from the view. Long answers come in parts. The
-viewer stays the one source of the view state: the view is one more of its
-pages, mirrored by and mirroring the others, and `current_view` and `screenshot`
-read what it shows.
+person's choice of projection, the service's reads and extraction jobs, renderer
+bundles), never its control endpoints, and keeps its token from the view. Long
+answers come in parts. The viewer stays the one source of the view state: the
+view is one more of its pages, mirrored by and mirroring the others, and
+`current_view` and `screenshot` read what it shows.
 
 `open_projection` is linked to the view (`_meta.ui.resourceUri`), so each call
-shows it; the view asks to open beside the conversation (Claude's
-`preferredDisplayMode`) and its header offers the host's larger mode. It follows
-the host's theme: its light or dark mode, and its standardized style variables
-mapped onto the renderer tokens and the chrome as the Copilot app's are
-(`mcpAppThemeTokens`). All of it is offered only to a host whose `initialize`
-declares the extension; other clients' tools are unchanged.
+shows it, on the named viewer the call's arguments name
+(`ui/notifications/tool-input`), else the default one; the view asks to open
+beside the conversation (Claude's `preferredDisplayMode`) and its header offers
+the host's larger mode. It follows the host's theme: its light or dark mode, and
+its standardized style variables mapped onto the renderer tokens and the chrome
+as the Copilot app's are (`mcpAppThemeTokens`). All of it is offered only to a
+host whose `initialize` declares the extension; other clients' tools are
+unchanged.
 
 ## Not VS Code's
 
@@ -362,6 +407,9 @@ a second, lesser view of the same thing next to it.
 - Loopback only, a token in every path and a `Host` check. The token is compared
   in constant time.
 - Read-only: the server forwards no write route, and the page offers no editing.
+  The one thing a page asks of the server beyond its reports is to show another
+  projection the working tree defines (`view/choose`), which grants nothing the
+  agent's `open_projection` doesn't.
 - Repository code runs only with `--trust`, as everywhere else. A viewer started
   by an agent's `open_projection` in `projections mcp` inherits that server's
   trust; `projections view show` starts one with `--trust` only when given.

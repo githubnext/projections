@@ -2,8 +2,10 @@
  * The agent viewer's page (`projections view`): the Inspector's bare stage with a one-line header and a quiet status
  * line, driven by the view state its server owns. The page long-polls the state (`view/state`), applies it through the
  * Inspector's handle, and reports what it presents and the person's selection and mode (`view/report`), so several
- * open pages mirror one another and the agent can read what is on screen. It names no files: errors are said in plain
- * words, and the agent reads the details through its tools.
+ * open pages mirror one another and the agent can read what is on screen. The person can show another of the
+ * repository's projections from the title (`view/choose`), which becomes the state the agent reads. A page shows one
+ * viewer: the default one, or one an agent named (`?viewer=NAME`), each with its own state. It names no files: errors
+ * are said in plain words, and the agent reads the details through its tools.
  */
 
 import type {InspectorHandle} from '../control.js'
@@ -41,11 +43,12 @@ function fetchTransport(base: URL, at: (path: string) => URL): InspectorTranspor
 }
 
 /** What the page reports: what it presents, and the person's selection and mode once the state has been applied. */
-function reportBody(page: string, viewer: ViewerPage, handle: InspectorHandle, state: ViewerState) {
+function reportBody(page: string, named: {viewer?: string}, viewer: ViewerPage, handle: InspectorHandle, state: ViewerState) {
   const summary = handle.summary()
   const view = handle.view()
   return {
     page,
+    ...named,
     generation: viewer.applied.settled ? state.generation : -1,
     selection: view?.selectedRow?.id ?? null,
     ...(view?.comparing ? {mode: view.mode} : {}),
@@ -65,6 +68,9 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
   const transport = options.transport ?? fetchTransport(base, at)
   const host: InspectorHost = {...options.host, theme: options.host?.theme ?? pageTheme()}
   const page = crypto.randomUUID()
+  // The viewer this page shows: the one the options or the page's URL name, else the default one.
+  const name = options.viewer ?? new URLSearchParams(location.search).get('viewer') ?? undefined
+  const named = name && name !== 'default' ? {viewer: name} : {}
   const store = createStore()
   const abort = new AbortController()
   let mounted: MountedInspector | undefined
@@ -77,7 +83,7 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
     if (!handle || !state || store.get().stopped) return
     settle(viewer, handle.view())
     store.set({status: statusText(state, handle.summary(), buildPhase())})
-    const body = reportBody(page, viewer, handle, state)
+    const body = reportBody(page, named, viewer, handle, state)
     const text = JSON.stringify(body)
     if (text === reported) return
     reported = text
@@ -94,7 +100,7 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
     }
     if (next.generation === viewer.state?.generation) return
     viewer.state = next
-    store.set({state: next, status: statusText(next, viewer.handle?.summary(), buildPhase())})
+    store.set({state: next, status: statusText(next, viewer.handle?.summary(), buildPhase()), choosing: undefined, failed: undefined})
     if (next.title) document.title = `${next.title} · Projections`
     if (!mounted && next.projection) start(next)
     apply(viewer)
@@ -108,6 +114,7 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
         // One long poll per page: the state, and the build phase with it (browsers allow few connections per host).
         const query = new URLSearchParams({
           page,
+          ...named,
           ...(since === undefined ? {} : {since: String(since)}),
           ...(build ? {build: String(build.version)} : {}),
         })
@@ -155,6 +162,31 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
     for (const body of element.querySelectorAll<HTMLElement>('.pi-viewer-body')) if (body.inert !== stopped) body.inert = stopped
   }
 
+  /** Shows the projection the person chose from the title: the viewer's state follows, for every page and the agent. */
+  async function choose(projection: string) {
+    const title = store.get().projections.find(item => item.id === projection)?.title ?? projection
+    store.set({choosing: projection, failed: undefined})
+    try {
+      await transport.request({method: 'POST', path: '/view/choose', body: {...named, projection}, signal: abort.signal})
+    } catch {
+      if (abort.signal.aborted) return
+      if (store.get().choosing === projection) store.set({choosing: undefined, failed: `Couldn't show ${title}`})
+    }
+  }
+
+  /** The repository's projections and the page's color mode, for the title's menu, when they change. */
+  let listed = ''
+  function list(handle: InspectorHandle) {
+    const projections = handle.summary().projections
+    const key = JSON.stringify(projections)
+    if (key !== listed) {
+      listed = key
+      store.set({projections})
+    }
+    const colorMode = handle.view()?.colorMode
+    if (colorMode) store.set({colorMode})
+  }
+
   /** The shown projection's custom renderer build phase, as the server sends it with the state. */
   let build: {version: number; phase: string | null} | undefined
   const buildPhase = () => build?.phase ?? undefined
@@ -167,7 +199,7 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
       view: 'inspect',
       chrome: 'viewer',
       ...(options.assets ? {assets: options.assets} : {}),
-      banner: <ViewerHeader store={store} end={options.headerEnd} />,
+      banner: <ViewerHeader store={store} end={options.headerEnd} onChoose={projection => void choose(projection)} />,
       toolbarStart: <ViewerShown store={store} />,
       ...(first.definitionRevision ? {definitionRevision: first.definitionRevision} : {}),
       ...(first.projection && !first.scenario
@@ -192,6 +224,7 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
   const timer = setInterval(() => {
     if (!mounted) return
     disable()
+    if (viewer.handle) list(viewer.handle)
     apply(viewer)
     void report()
     markStatusBar()

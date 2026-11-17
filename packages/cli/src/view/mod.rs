@@ -5,12 +5,16 @@
 //! ([`crate::service::Service`]): every path starts with a random session
 //! token, requests whose `Host` isn't loopback are refused, and only the
 //! service's read routes and extraction jobs are forwarded. The server owns the
-//! view state ([`state::ViewState`]); pages long-poll it (`TOKEN/view/state`)
-//! and report the person's selection, mode and what they present
-//! (`TOKEN/view/report`). Agents drive it through `TOKEN/control/…`, which
-//! answer as the view tools do.
+//! view state ([`state::ViewState`]) of each of its viewers: the default one
+//! and those an agent names ([`named`]), each its own page
+//! (`TOKEN/?viewer=NAME`). Pages long-poll their viewer's state
+//! (`TOKEN/view/state`), report the person's selection, mode and what they
+//! present (`TOKEN/view/report`), and switch it to the projection the person
+//! picks from the title (`TOKEN/view/choose`). Agents drive it through
+//! `TOKEN/control/…`, which answer as the view tools do.
 
 pub mod client;
+mod named;
 mod pages;
 pub mod registry;
 mod routes;
@@ -19,10 +23,10 @@ pub mod state;
 pub mod surface;
 mod tasks;
 
+pub use named::{DEFAULT_VIEWER, viewer_name};
 pub use surface::Views;
 
 use std::{
-    collections::HashMap,
     net::{Ipv4Addr, SocketAddr},
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -36,16 +40,15 @@ use serde_json::Value;
 use tokio::sync::watch;
 
 use crate::service::Service;
+use named::{NamedView, NamedViews};
 use pages::control_state;
 use show::show;
-use state::ViewState;
+use state::{Chooser, ViewState};
 
 /// The page's policy: the Inspector's, except that it may be framed (the
 /// Copilot app shows it in a canvas). Framing grants nothing: the page has no
 /// writes, and a framer must already know the token.
 pub const VIEWER_CSP: &str = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; frame-src 'self' http://localhost:* http://127.0.0.1:*; base-uri 'self'";
-/// A page that hasn't asked for the state for this long is gone.
-const PAGE_GONE: Duration = Duration::from_secs(45);
 const MAX_RESPONSE_BYTES: usize = 64 * 1024 * 1024;
 /// How long a stopping viewer lets its open requests finish: a page's event streams never do on their own.
 const SHUTDOWN_GRACE: Duration = Duration::from_secs(2);
@@ -68,16 +71,12 @@ struct Shared {
     /// This server's own random name: a page that reconnects to another server at the same URL (one started with
     /// --trust replacing it) loads afresh, rather than keep what it learned from the last one.
     instance: String,
-    state: watch::Sender<ViewState>,
-    /// Each open page's last request, and what it last reported: its generation, selection and mode.
-    pages: Mutex<HashMap<String, (Instant, Value)>>,
-    /// The latest report from any page: what the person sees.
-    shown: Mutex<Option<(Instant, Value)>>,
+    /// Its viewers, by name: the default one, and those an agent named.
+    views: NamedViews,
     activity: Mutex<Instant>,
     closing: watch::Sender<bool>,
-    /// The shown projection's custom renderer build phase, and a version bumped when it changes: the page's status
-    /// line, sent with the state so a page holds one long poll, not one per subject.
-    build: watch::Sender<(u64, Option<&'static str>)>,
+    /// Bumped whenever a viewer shows another projection, so the renderer build tracker follows every viewer's.
+    shown: watch::Sender<u64>,
 }
 
 impl Shared {
@@ -85,10 +84,14 @@ impl Shared {
         *self.activity.lock().unwrap_or_else(|e| e.into_inner()) = Instant::now();
     }
 
+    /// The open pages of every viewer.
     fn pages(&self) -> usize {
-        let mut pages = self.pages.lock().unwrap_or_else(|e| e.into_inner());
-        pages.retain(|_, (seen, _)| seen.elapsed() < PAGE_GONE);
-        pages.len()
+        self.views.all().iter().map(|view| view.pages()).sum()
+    }
+
+    /// The viewer an input's `viewer` names, the default one without it.
+    fn view(&self, input: &Value) -> Result<Arc<NamedView>, String> {
+        self.views.get(input["viewer"].as_str())
     }
 }
 
@@ -119,15 +122,10 @@ impl Viewer {
             token: token.clone(),
             port,
             instance: instance.iter().map(|byte| format!("{byte:02x}")).collect(),
-            state: watch::Sender::new(ViewState {
-                definition_revision: options.definition_revision.clone(),
-                ..ViewState::default()
-            }),
-            pages: Mutex::new(HashMap::new()),
-            shown: Mutex::new(None),
+            views: NamedViews::new(options.definition_revision.clone()),
             activity: Mutex::new(Instant::now()),
             closing: watch::Sender::new(false),
-            build: watch::Sender::new((0, None)),
+            shown: watch::Sender::new(0),
         });
         let router = Router::new().fallback(routes::route).with_state(shared.clone());
         let mut closing = shared.closing.subscribe();
@@ -160,13 +158,15 @@ impl Viewer {
         self.shared.service.repository().to_path_buf()
     }
 
+    /// The default viewer's state.
     pub fn state(&self) -> ViewState {
-        self.shared.state.borrow().clone()
+        self.shared.views.default_view().state.borrow().clone()
     }
 
-    /// Shows a projection, as `open_projection` asks; returns the new state.
+    /// Shows a projection in the viewer the input names, as `open_projection` asks; returns the new state.
     pub async fn show(&self, input: &Value) -> Result<ViewState, String> {
-        show(&self.shared, input).await
+        let view = self.shared.view(input)?;
+        show(&self.shared, &view, input, Chooser::Agent).await
     }
 
     /// Waits until it is asked to stop (when idle, by `control/stop`, or on [`Viewer::close`]) or its server ends.
@@ -192,8 +192,10 @@ impl Viewer {
     /// Stops it: open requests get a moment to finish, then the server ends, so the port is free when this returns.
     pub async fn close(mut self) {
         stop(&self.shared);
-        if let (Some(builds), Some(projection)) = (self.shared.service.renderer_builds(), self.shared.state.borrow().projection.clone()) {
-            builds.stop(&projection);
+        if let Some(builds) = self.shared.service.renderer_builds() {
+            for projection in shown_projections(&self.shared) {
+                builds.stop(&projection);
+            }
         }
         if let Some(mut server) = self.server.take()
             && tokio::time::timeout(SHUTDOWN_GRACE, &mut server).await.is_err()
@@ -204,9 +206,26 @@ impl Viewer {
     }
 }
 
-/// The page's URL, with its token.
+/// The server's URL, with its token: the default viewer's page.
 fn url(shared: &Shared) -> String {
     format!("http://127.0.0.1:{}/{}/", shared.port, shared.token)
+}
+
+/// A viewer's page: the server's URL, and the viewer's name unless it is the default one.
+fn view_url(shared: &Shared, view: &NamedView) -> String {
+    if view.is_default() {
+        url(shared)
+    } else {
+        format!("{}?viewer={}", url(shared), view.name)
+    }
+}
+
+/// The projections the viewers show, each once.
+fn shown_projections(shared: &Shared) -> Vec<String> {
+    let mut projections: Vec<String> = shared.views.all().iter().filter_map(|view| view.projection()).collect();
+    projections.sort();
+    projections.dedup();
+    projections
 }
 
 /// Stops the server, whether or not its shutdown is being awaited yet.

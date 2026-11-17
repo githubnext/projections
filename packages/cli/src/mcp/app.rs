@@ -111,7 +111,8 @@ pub fn read(params: &Value, page: &str) -> Result<Value, (i64, String)> {
     }]}))
 }
 
-/// The viewer's paths the view may ask for: its state's long poll and its reports, and what the viewer forwards
+/// The viewer's paths the view may ask for: its state's long poll, its reports and the person's choice of
+/// projection (`view/choose`), and what the viewer forwards
 /// to the service (which answers only reads and extraction jobs) and its renderer bundles. Not its control
 /// endpoints, the page or its assets.
 pub(super) fn relayed(method: &str, path: &str) -> bool {
@@ -123,7 +124,7 @@ pub(super) fn relayed(method: &str, path: &str) -> bool {
                     .iter()
                     .any(|prefix| route.starts_with(prefix))
         }
-        "POST" => route == "/view/report" || route.starts_with("/api/"),
+        "POST" => route == "/view/report" || route == "/view/choose" || route.starts_with("/api/"),
         _ => false,
     };
     allowed

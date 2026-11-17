@@ -2,16 +2,16 @@
 
 use std::{sync::Arc, time::Duration};
 
-use super::{Shared, get, stop};
+use super::{Shared, get, shown_projections, stop};
 
-/// Tracks the shown projection's build phase, for the pages' status line.
+/// Tracks each viewer's shown projection's build phase, for its pages' status line.
 pub(super) fn track_builds(shared: &Arc<Shared>) {
     let Some(builds) = shared.service.renderer_builds() else {
         return;
     };
     let weak = Arc::downgrade(shared);
     let mut changes = builds.subscribe();
-    let mut shown = shared.state.subscribe();
+    let mut shown = shared.shown.subscribe();
     tokio::spawn(async move {
         loop {
             tokio::select! {
@@ -19,23 +19,25 @@ pub(super) fn track_builds(shared: &Arc<Shared>) {
                 changed = shown.changed() => if changed.is_err() { return },
             }
             let Some(shared) = weak.upgrade() else { return };
-            let projection = shared.state.borrow().projection.clone();
-            let phase = projection
-                .and_then(|projection| builds.state(&projection))
-                .map(|state| state.phase.name());
-            shared.build.send_if_modified(|(version, current)| {
-                if *current == phase {
-                    return false;
-                }
-                *version += 1;
-                *current = phase;
-                true
-            });
+            for view in shared.views.all() {
+                let phase = view
+                    .projection()
+                    .and_then(|projection| builds.state(&projection))
+                    .map(|state| state.phase.name());
+                view.build.send_if_modified(|(version, current)| {
+                    if *current == phase {
+                        return false;
+                    }
+                    *version += 1;
+                    *current = phase;
+                    true
+                });
+            }
         }
     });
 }
 
-/// Rebuilds the shown projection's custom renderer when a renderer source is saved.
+/// Rebuilds the shown projections' custom renderers when a renderer source is saved.
 pub(super) fn rebuild_on_save(shared: &Arc<Shared>) {
     let Some(mut changes) = shared.service.changes() else {
         return;
@@ -44,22 +46,25 @@ pub(super) fn rebuild_on_save(shared: &Arc<Shared>) {
     tokio::spawn(async move {
         while changes.next().await.is_some() {
             let Some(shared) = weak.upgrade() else { return };
-            let Some(projection) = shared.state.borrow().projection.clone() else {
+            let projections = shown_projections(&shared);
+            if projections.is_empty() {
                 continue;
-            };
+            }
             let (Some(builds), Ok(list)) = (
                 shared.service.renderer_builds(),
                 get(&shared.service, "/api/definitions?ref=working-tree").await,
             ) else {
                 continue;
             };
-            if let Some(definition) = list["definitions"]
+            for definition in list["definitions"]
                 .as_array()
                 .into_iter()
                 .flatten()
-                .find(|item| item["id"] == projection.as_str())
+                .filter(|item| projections.iter().any(|projection| item["id"] == projection.as_str()))
             {
-                let _ = builds.event(&projection, definition, "changed");
+                if let Some(projection) = definition["id"].as_str() {
+                    let _ = builds.event(projection, definition, "changed");
+                }
             }
         }
     });

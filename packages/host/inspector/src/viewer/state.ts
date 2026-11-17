@@ -24,6 +24,10 @@ export interface ViewerState {
   instance?: string
   /** The revision whose definition extracts every side (`projections view --definition-revision`); the working tree's when absent. */
   definitionRevision?: string | null
+  /** Who chose the projection shown: the agent, or the person from the title's menu. */
+  chosenBy?: 'agent' | 'person' | null
+  /** The viewer's name, in the long poll's answers: `default`, or the one an agent named. */
+  viewer?: string
 }
 
 /** The options of `mountViewer`: where the viewer is and how to reach it, and what the embedding host offers. */
@@ -47,6 +51,11 @@ export interface MountViewerOptions {
   onReplaced?: () => void
   /** A host's own control at the header's end, such as an MCP Apps host's full-screen button. */
   headerEnd?: ReactNode
+  /**
+   * The named viewer the page shows (`projections view show --viewer NAME`), each its own view of its own state; by
+   * default the page URL's `?viewer=`, else the default viewer.
+   */
+  viewer?: string
 }
 
 /** A mounted viewer page: `unmount` stops its requests and removes it. */

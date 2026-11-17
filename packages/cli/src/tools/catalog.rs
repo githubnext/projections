@@ -26,6 +26,12 @@ pub(super) fn confirm() -> Value {
         "description": "The confirm token the preview returned. Omit it to preview; with it, writes exactly what that preview showed, or previews again if anything changed since."})
 }
 
+/// A named viewer, for showing several projections side by side.
+fn viewer() -> Value {
+    json!({"type": "string", "minLength": 1, "maxLength": 40,
+        "description": "With projections mcp, a named viewer: its own page and URL, independent of the others, so several projections can be shown side by side (lowercase letters, digits and hyphens); default the default viewer. VS Code ignores it"})
+}
+
 pub(super) fn part(description: &str) -> Value {
     json!({"type": ["string", "object", "null"], "description": description})
 }
@@ -175,7 +181,8 @@ pub fn catalog() -> Vec<Tool> {
                     "mode": {"type": "string", "enum": ["side-by-side", "animated", "swipe", "diff"], "description": "The comparison mode, when the renderer offers it"},
                     "scenario": {"type": "string", "minLength": 1, "maxLength": 200, "description": "A scenario from the projection's renderer scenarios (scenarios.json) to show instead of revisions"},
                     "entity": {"type": "string", "minLength": 1, "maxLength": 1024, "description": "An entity ID to select (compare lists each change's entities)"},
-                    "pin": {"type": "boolean", "description": "In VS Code, pin the pair to this tab instead of setting the folder's pair (default false); the viewer has one view, so it ignores pin"},
+                    "pin": {"type": "boolean", "description": "In VS Code, pin the pair to this tab instead of setting the folder's pair (default false); the viewer ignores pin"},
+                    "viewer": viewer(),
                 }),
                 &[],
             ),
@@ -187,8 +194,8 @@ pub fn catalog() -> Vec<Tool> {
         Tool {
             name: "current_view",
             title: "Current projection view",
-            description: "What the person is looking at: in VS Code, their projection tab (the one in front, else the one shown last); with projections mcp, the viewer. Says the projection's ID, title and definition file, the choice it shows (Current state, Branch changes, a pull request, a bookmark…) with its resolved Before → After revisions, the comparison mode, the selected item, the summary bar's counts, the changed items with their status (added, removed, modified…), why an extraction failed, and whether the result is out of date or uses the person's uncommitted definition edits. Call it first whenever the person says \"this projection\", \"this view\", \"this tab\", \"what am I looking at\", \"what changed\", \"this one's wrong\" or \"what was removed\", or otherwise asks about what's on screen, rather than asking them which projection they mean. Says so when nothing is shown.",
-            input_schema: object(json!({}), &[]),
+            description: "What the person is looking at: in VS Code, their projection tab (the one in front, else the one shown last); with projections mcp, the viewer. Says the projection's ID, title and definition file, the choice it shows (Current state, Branch changes, a pull request, a bookmark…) with its resolved Before → After revisions, the comparison mode, the selected item, the summary bar's counts, the changed items with their status (added, removed, modified…), why an extraction failed, and whether the result is out of date or uses the person's uncommitted definition edits. Call it first whenever the person says \"this projection\", \"this view\", \"this tab\", \"what am I looking at\", \"what changed\", \"this one's wrong\" or \"what was removed\", or otherwise asks about what's on screen, rather than asking them which projection they mean. Says so when nothing is shown. With projections mcp, viewer reads a named viewer.",
+            input_schema: object(json!({"viewer": viewer()}), &[]),
             read_only: true,
             destructive: false,
             trust: Trust::None,
@@ -198,7 +205,7 @@ pub fn catalog() -> Vec<Tool> {
             name: "refresh",
             title: "Refresh the view",
             description: "Extract what the current view shows again and compare it, as the person's Refresh does: after changing a projection's code, its inputs or its renderer, when the view says it is out of date. Returns what it shows then, as current_view does.",
-            input_schema: object(json!({}), &[]),
+            input_schema: object(json!({"viewer": viewer()}), &[]),
             read_only: true,
             destructive: false,
             trust: Trust::Extract,
@@ -222,6 +229,7 @@ pub fn catalog() -> Vec<Tool> {
                     "focus": {"type": "string", "enum": ["changes", "all"], "description": "Open the image on a comparison's changes or on everything; default the renderer's choice (a diff opens on its changes when they don't all fit)"},
                     "entity": {"type": "string", "description": "Open the image on one item, by its ID, centred with what it connects to"},
                     "fit": {"type": "boolean", "description": "Fit what the image opens on whole, even when its text is drawn smaller than the renderer would open at"},
+                    "viewer": viewer(),
                 }),
                 &[],
             ),

@@ -3,22 +3,34 @@
 
 use serde_json::{Value, json};
 
-use super::{definition, page};
+use super::{definition, page, viewer_words};
 use crate::renderer_builds::{BuildState, Phase};
 use crate::tools::Outcome;
-use crate::view::{Shared, control_state};
+use crate::view::{NamedView, Shared, control_state};
 
-/// Answers `current_view` for the viewer this process runs.
-pub(super) async fn current(shared: &Shared) -> Outcome {
-    let control = control_state(shared);
+/// Answers `current_view` for a viewer this process runs.
+pub(super) async fn current(shared: &Shared, view_of: &NamedView) -> Outcome {
+    let control = control_state(shared, view_of);
     let state = &control["state"];
+    let others = others_line(&control);
     let Some(projection) = state["projection"].as_str() else {
+        let mut text = format!(
+            "{} is running ({}) but shows nothing yet. Show the person a projection with open_projection{}.\n",
+            capitalized(&viewer_words(view_of)),
+            control["url"].as_str().unwrap_or_default(),
+            if view_of.is_default() {
+                String::new()
+            } else {
+                format!(" and viewer {}", view_of.name)
+            },
+        );
+        if let Some(others) = &others {
+            text.push_str(others);
+            text.push('\n');
+        }
         return Outcome::new(
-            format!(
-                "The viewer is running ({}) but shows nothing yet. Show the person a projection with open_projection.\n",
-                control["url"].as_str().unwrap_or_default()
-            ),
-            json!({"shown": false, "url": control["url"]}),
+            text,
+            json!({"shown": false, "viewer": control["viewer"], "url": control["url"], "viewers": control["viewers"]}),
         );
     };
     let definition = definition(shared, projection).await;
@@ -27,7 +39,12 @@ pub(super) async fn current(shared: &Shared) -> Outcome {
     let page = &control["page"];
     let view = &page["view"];
     let summary = &page["summary"];
-    let mut lines = vec![heading(shared, &control, title, projection, pages)];
+    let mut lines = vec![heading(shared, view_of, &control, title, projection, pages)];
+    if state["chosenBy"] == "person" {
+        lines.push(
+            "The person chose this projection themselves, from the page's title menu; it replaces the one you showed there.".to_owned(),
+        );
+    }
     if let Some(description) = definition["description"].as_str() {
         lines.push(format!("What it shows: {description}"));
     }
@@ -55,16 +72,24 @@ pub(super) async fn current(shared: &Shared) -> Outcome {
     if let Some(build) = &build {
         lines.push(build_line(build));
     }
-    lines.push(
+    lines.push(if view_of.is_default() {
         "compare, check, screenshot and set_part default to this projection, and compare without before and after compares exactly these revisions."
-            .to_owned(),
-    );
+            .to_owned()
+    } else {
+        format!("screenshot with viewer {} renders this view; compare, check and set_part default to the default viewer's projection.", view_of.name)
+    });
+    if let Some(others) = others {
+        lines.push(others);
+    }
     Outcome::new(
         format!("{}\n", lines.join("\n")),
         json!({
             "shown": true,
             "surface": "viewer",
+            "viewer": control["viewer"],
             "url": control["url"],
+            "chosenBy": state["chosenBy"],
+            "viewers": control["viewers"],
             "pages": pages,
             "projection": projection,
             "title": title,
@@ -82,8 +107,36 @@ pub(super) async fn current(shared: &Shared) -> Outcome {
     )
 }
 
+/// The other viewers the server has, and what each shows; none when it has only this one.
+fn others_line(control: &Value) -> Option<String> {
+    let others: Vec<String> = control["viewers"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter(|other| other["name"] != control["viewer"])
+        .filter(|other| other["name"] != crate::view::DEFAULT_VIEWER || !other["projection"].is_null())
+        .map(|other| {
+            let name = other["name"].as_str().unwrap_or_default();
+            let shows = match other["projection"].as_str() {
+                Some(projection) => format!("{projection} ({})", other["compared"].as_str().unwrap_or_default()),
+                None => "nothing".to_owned(),
+            };
+            format!("{name} shows {shows} at {}", other["url"].as_str().unwrap_or_default())
+        })
+        .collect();
+    (!others.is_empty()).then(|| format!("Other viewers (current_view with viewer reads one): {}.", others.join("; ")))
+}
+
+fn capitalized(words: &str) -> String {
+    let mut characters = words.chars();
+    characters
+        .next()
+        .map(|first| first.to_uppercase().chain(characters).collect())
+        .unwrap_or_default()
+}
+
 /// Where the viewer shows what, and how many pages are open.
-fn heading(shared: &Shared, control: &Value, title: &str, projection: &str, pages: u64) -> String {
+fn heading(shared: &Shared, view_of: &NamedView, control: &Value, title: &str, projection: &str, pages: u64) -> String {
     let folder = shared
         .service
         .repository()
@@ -91,7 +144,8 @@ fn heading(shared: &Shared, control: &Value, title: &str, projection: &str, page
         .map(|name| name.to_string_lossy().into_owned())
         .unwrap_or_default();
     format!(
-        "The viewer shows \"{title}\" (projection {projection}) in {folder}, at {}; {}.",
+        "{} shows \"{title}\" (projection {projection}) in {folder}, at {}; {}.",
+        capitalized(&viewer_words(view_of)),
         control["url"].as_str().unwrap_or_default(),
         match pages {
             0 => "no page is open".to_owned(),

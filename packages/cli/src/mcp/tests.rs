@@ -113,6 +113,8 @@ fn the_view_reads_and_reports_but_never_controls() {
     for (method, path) in [
         ("GET", "/view/state?page=a&since=3"),
         ("POST", "/view/report"),
+        ("POST", "/view/choose"),
+        ("GET", "/view/state?page=a&viewer=api"),
         ("GET", "/api/definitions?ref=working-tree"),
         ("POST", "/api/jobs"),
         ("GET", "/renderers/graph/index.html"),
@@ -127,6 +129,7 @@ fn the_view_reads_and_reports_but_never_controls() {
         ("GET", "/"),
         ("GET", "/mount.js"),
         ("GET", "/view/report"),
+        ("GET", "/view/choose"),
         ("POST", "/view/state"),
         ("GET", "/api/../control/state"),
         ("GET", "/api/x#y"),

@@ -123,12 +123,19 @@ adopt.
    `after`), each projection's row (`status` `ready`, or `trust` when it runs
    repository code and needs `--trust`: ask before passing it), and a cell
    per projection and change (`status` `changed`, `unchanged` or `failed`,
-   with `changes`, `steps` and `counts` by kind). `-p ID` limits it.
+   with `changes`, `steps` and `counts` by kind). Ready rows come best first,
+   each with its `signal`: `rare` (changed on a quarter of the changes or
+   fewer, likely the structural ones), `steady`, `noisy` (on four in five or
+   more), `quiet` (never) or `unknown` (fewer than four changes swept).
+   `-p ID` limits it.
 3. **Report.** Tell the person, per projection, on which pull requests it
-   changed and how (`#12: 3 added, 1 removed`). Call out projections that
-   change on nearly every change (likely noise, such as the file map on
-   routine commits) and ones that change only on structural work, and the
-   pull requests where several projections changed: the best ones to look at.
+   changed and how (`#12: 3 added, 1 removed`). Recommend the `rare` and
+   `steady` ones; say that `noisy` ones are likely noise (such as the file map
+   on routine commits: it doesn't single out the changes that matter) and
+   that `quiet` ones showed nothing here, rather than recommending them; and
+   name the pull requests where several projections changed: the best ones to
+   look at. When nothing is `rare` or `steady`, say so and offer to build a
+   projection of what the repository is about ([Scaffold](#scaffold)).
 4. **Ask** which to keep. Never adopt or change CI on your own; a request to
    set projections up for them ("configure a few projections for my codebase")
    is their go-ahead to adopt the few the sweep shows are worth having, so you
@@ -242,8 +249,11 @@ compared and what you couldn't verify.
    revision's committed definition, which doesn't have your edits yet. Check
    that each change appears as the right kind (added, removed, modified,
    renamed) in a sensible order, and that a pair that only made the edits
-   that must not count shows no changes. Save useful pairs in
-   `.projections-bookmarks.json` (`{"format": "projections.bookmarks",
+   that must not count shows no changes. Then sweep it across recent changes
+   (`projections explore --sweep -p <id> --trust`): a projection that changes
+   on nearly every one (`noisy`) holds data that changes for unrelated
+   reasons. Save useful pairs in `.projections-bookmarks.json`
+   (`{"format": "projections.bookmarks",
    "version": 0, "bookmarks": [{"id": "v1-v2", "title": "v1 → v2",
    "projectionId": "<id>", "before": "v1", "after": "v2"}]}`), which
    `projections bookmark run` compares. Show the person a pair in the viewer
@@ -360,6 +370,20 @@ package; otherwise, and in other languages, write the JSON above.
 - **IDs must be stable**: the comparator matches items across revisions by
   ID. Use names (`route:GET /orders`), never positions or hashes of content;
   keep changing values in `data`. Declare a rename with `previousIds`.
+- **Keep only facts about the item in `data`.** The comparator marks an item
+  modified whenever its `data` changes, so data that changes when something
+  else does makes it modified on changes that never touched it. Counts and
+  lists of things elsewhere ("files importing this module" on an edge, a
+  module's line count, its callers) change whenever a file is added anywhere;
+  line numbers change whenever code above moves. Leave counts out, or draw
+  what they count as relationships. Say where a fact came from in `evidence`
+  instead: a file in `source`, a position in
+  `"location": {"line": 12, "column": 5}` (not a top-level `line`). The
+  default comparator ignores evidence, so moved code isn't a change.
+  `projections check` warns about count-, list- and line-like fields a custom
+  extractor puts in `data`, unless the definition reads the field (`sizeBy`)
+  or declares it `volatile`; a sweep that marks the projection `noisy` is the
+  other sign.
 - **Deterministic**: the same revision must give the same extraction. Sort
   output (`result()` does); never read the clock, the network, random numbers or the
   environment. `projections check` reruns it and warns, naming what varied.

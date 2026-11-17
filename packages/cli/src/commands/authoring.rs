@@ -66,12 +66,15 @@ pub struct Init {
     /// Where the definition goes
     #[arg(long, default_value = ".github/projections", value_parser = [".github/projections", ".projections"])]
     pub definition_directory: String,
-    /// The skills directory the agent skill goes in, relative to the repository root [default: the one holding it, else an existing .agents/skills, .claude/skills or .github/skills, else .agents/skills]
+    /// The skills directory the agent skill goes in, relative to the repository root [default: the one holding it, else whichever of .agents/skills, .claude/skills and .github/skills holds the repository's own skills, else .agents/skills]
     #[arg(long, value_name = "DIR")]
     pub skills_dir: Option<String>,
     /// Also put the skill where Claude Code reads it, .claude/skills: a symlink, or a copy on Windows (or with copy)
     #[arg(long, value_enum, value_name = "HOW", num_args = 0..=1, default_missing_value = "auto")]
     pub claude: Option<Claude>,
+    /// Don't write, update or move the agent skill; projections help authoring prints its guide
+    #[arg(long, requires = "id", conflicts_with_all = ["skills_dir", "claude"])]
+    pub no_skill: bool,
 }
 
 #[derive(Args)]
@@ -185,6 +188,7 @@ pub fn init(directory: &Path, args: Init) -> Result<()> {
         definition_directory: crate::project::path(&args.definition_directory),
         checkout: scaffold::source_checkout(),
         skills: crate::skill::install::Options {
+            skip: args.no_skill,
             directory: args.skills_dir,
             claude: args.claude.map(|claude| match claude {
                 Claude::Auto => crate::skill::install::Claude::Auto,
@@ -205,9 +209,7 @@ pub fn init(directory: &Path, args: Init) -> Result<()> {
     section(&mut text, "Created:", &report.created);
     section(&mut text, "Updated:", &report.updated);
     section(&mut text, "Kept existing:", &report.kept);
-    if let Some(skill) = &report.skill {
-        text.push_str(&skill_section(skill));
-    }
+    text.push_str(&crate::skill::install::text(report.skill.as_ref()));
     if let Some(id) = &id {
         let trust = report.definition.as_ref().is_some_and(crate::collectors::requires_trust);
         let trust = if trust { " --trust" } else { "" };
@@ -300,35 +302,25 @@ pub fn init(directory: &Path, args: Init) -> Result<()> {
             scaffold::project_prompt(id.as_deref(), scaffold.as_deref(), &definition)
         }
     };
+    // Without the skill, the agent reads the guide from the CLI.
+    let prompt = if report.skill.is_none() {
+        prompt
+            .replace(
+                "follow the projections skill",
+                "follow the guide `projections help authoring` prints",
+            )
+            .replace(
+                "Follow the projections skill",
+                "Follow the guide `projections help authoring` prints",
+            )
+    } else {
+        prompt
+    };
     text.push_str(&format!(
         "\nAsk your coding agent:\n  {prompt}\n\nprojections help authoring prints the guide the agent follows.\n"
     ));
     io::stdout().lock().write_all(text.as_bytes())?;
     Ok(())
-}
-
-/// Where the agent skill is, what init did there and which agents read it.
-fn skill_section(installed: &crate::skill::install::Installed) -> String {
-    use crate::skill::install::Action;
-    let mut text = String::from("Agent skill:\n");
-    for placement in &installed.placements {
-        let action = match &placement.action {
-            Action::Created => "created".to_owned(),
-            Action::Updated => "updated".to_owned(),
-            Action::Unchanged => "up to date".to_owned(),
-            Action::Kept(why) => format!("kept: {why}"),
-            Action::Linked(_) => "linked".to_owned(),
-            Action::Removed => "removed, so agents see one copy".to_owned(),
-        };
-        text.push_str(&format!("  {} ({action})\n", placement.path));
-        if !placement.agents.is_empty() {
-            text.push_str(&format!("    read by {}\n", crate::skill::install::and_list(&placement.agents)));
-        }
-    }
-    for note in &installed.notes {
-        text.push_str(&format!("  {note}\n"));
-    }
-    text
 }
 
 /// `--input NAME=VALUE` options as inputs: each value JSON, else a string.

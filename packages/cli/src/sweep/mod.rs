@@ -22,6 +22,7 @@ use std::{
 };
 
 mod run;
+pub mod signal;
 
 pub use run::run;
 
@@ -199,68 +200,75 @@ pub struct Cell {
     pub comparison: Option<Arc<Value>>,
 }
 
-/// A sweep's results as text: per projection, the changes it showed something on.
+/// A sweep's results as text: per projection, best signal first, the changes
+/// it showed something on and what its signal means; then which are worth a
+/// look, which are likely noise and which never changed.
 pub fn text(changes: &[Change], rows: &[Value], cells: &[Value]) -> String {
     let mut text = format!(
         "Swept {} recent change{}:\n",
         changes.len(),
         if changes.len() == 1 { "" } else { "s" }
     );
-    for row in rows {
+    let ranked = signal::ranked(rows, &cells.iter().collect::<Vec<_>>());
+    for (row, tally) in &ranked {
         let id = row["projection"].as_str().unwrap_or_default();
-        if row["status"] != "ready" {
+        let Some(tally) = tally else {
             text.push_str(&format!("  {id}: skipped. {}\n", row["error"].as_str().unwrap_or_default()));
             continue;
-        }
-        let mine: Vec<&Value> = cells.iter().filter(|cell| cell["projection"] == id).collect();
-        let changed: Vec<String> = changes
-            .iter()
-            .filter_map(|change| {
-                let cell = mine.iter().find(|cell| cell["after"] == change.after.as_str())?;
-                (cell["status"] == "changed").then(|| {
-                    format!(
-                        "{} ({} change{}, {} step{})",
-                        change.label(),
-                        cell["changes"],
-                        if cell["changes"] == 1 { "" } else { "s" },
-                        cell["steps"],
-                        if cell["steps"] == 1 { "" } else { "s" }
-                    )
-                })
-            })
-            .collect();
-        let failed = mine.iter().filter(|cell| cell["status"] == "failed").count();
-        text.push_str(&format!(
-            "  {id}: changed in {} of {}{}{}\n",
-            changed.len(),
-            changes.len(),
-            if changed.is_empty() {
-                String::new()
-            } else {
-                format!(": {}", changed.join(", "))
-            },
-            if failed > 0 {
-                format!("; failed on {failed}")
-            } else {
-                String::new()
-            },
-        ));
-        if let Some(error) = mine
-            .iter()
-            .find(|cell| cell["status"] == "failed")
-            .and_then(|cell| cell["error"].as_str())
-        {
-            text.push_str(&format!("    first failure: {error}\n"));
-            let stderr = mine
-                .iter()
-                .find(|cell| cell["status"] == "failed")
-                .and_then(|cell| cell["stderr"].as_str());
-            for line in stderr.into_iter().flat_map(|stderr| last_lines(stderr, 5)) {
-                text.push_str(&format!("      {line}\n"));
-            }
-        }
+        };
+        row_text(&mut text, id, tally, changes, cells);
+    }
+    let advice = signal::advice(&ranked);
+    if !advice.is_empty() {
+        text.push('\n');
+        text.push_str(&advice);
     }
     text
+}
+
+/// A ready projection's lines: the changes it changed on, its signal and its first failure.
+fn row_text(text: &mut String, id: &str, tally: &signal::Tally, changes: &[Change], cells: &[Value]) {
+    let mine: Vec<&Value> = cells.iter().filter(|cell| cell["projection"] == id).collect();
+    let changed: Vec<String> = changes
+        .iter()
+        .filter_map(|change| {
+            let cell = mine.iter().find(|cell| cell["after"] == change.after.as_str())?;
+            (cell["status"] == "changed").then(|| {
+                format!(
+                    "{} ({} change{}, {} step{})",
+                    change.label(),
+                    cell["changes"],
+                    if cell["changes"] == 1 { "" } else { "s" },
+                    cell["steps"],
+                    if cell["steps"] == 1 { "" } else { "s" }
+                )
+            })
+        })
+        .collect();
+    text.push_str(&format!(
+        "  {id}: changed in {} of {}{}{}\n",
+        changed.len(),
+        changes.len(),
+        if changed.is_empty() {
+            String::new()
+        } else {
+            format!(": {}", changed.join(", "))
+        },
+        if tally.failed > 0 {
+            format!("; failed on {}", tally.failed)
+        } else {
+            String::new()
+        },
+    ));
+    if let Some(note) = signal::note(tally) {
+        text.push_str(&format!("    {note}\n"));
+    }
+    if let Some(failed) = mine.iter().find(|cell| cell["status"] == "failed") {
+        text.push_str(&format!("    first failure: {}\n", failed["error"].as_str().unwrap_or_default()));
+        for line in failed["stderr"].as_str().into_iter().flat_map(|stderr| last_lines(stderr, 5)) {
+            text.push_str(&format!("      {line}\n"));
+        }
+    }
 }
 
 /// The last `count` lines of `text`.

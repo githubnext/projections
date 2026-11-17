@@ -73,3 +73,68 @@ fn failed_cells_keep_the_end_of_the_extractors_stderr() {
     assert!(text.contains("      TypeError: x is undefined\n"), "{text}");
     assert!(!text.contains("      two\n"), "only the last lines: {text}");
 }
+
+#[test]
+fn sweeps_rank_projections_by_signal_and_say_which_are_noise() {
+    let changes: Vec<super::Change> = (0..5)
+        .map(|index| super::Change {
+            before: format!("b{index}"),
+            after: format!("a{index}"),
+            title: String::new(),
+            number: Some(index + 1),
+            kind: "commit",
+            date: String::new(),
+        })
+        .collect();
+    let rows: Vec<_> = ["map", "ci", "schema", "flags"]
+        .iter()
+        .map(|id| match *id {
+            "flags" => json!({"projection": id, "status": "trust", "error": "It runs repository code"}),
+            _ => json!({"projection": id, "status": "ready"}),
+        })
+        .collect();
+    let mut cells = Vec::new();
+    for (index, change) in changes.iter().enumerate() {
+        for (id, changed) in [("map", true), ("ci", false), ("schema", index == 2)] {
+            cells.push(json!({"projection": id, "before": change.before, "after": change.after,
+                "status": if changed { "changed" } else { "unchanged" }, "changes": usize::from(changed), "steps": usize::from(changed)}));
+        }
+    }
+    let text = super::text(&changes, &rows, &cells);
+    let order: Vec<usize> = ["  schema:", "  map:", "  ci:", "  flags:"]
+        .iter()
+        .map(|line| text.find(line).unwrap_or_else(|| panic!("{line} in {text}")))
+        .collect();
+    assert!(
+        order.windows(2).all(|pair| pair[0] < pair[1]),
+        "rare, noisy, quiet, skipped: {text}"
+    );
+    assert!(text.contains("    likely noise: it changed on 5 of 5 changes"), "{text}");
+    assert!(text.contains("    never changed on these 5 changes"), "{text}");
+    assert!(
+        text.contains("Worth a look: schema.\nLikely noise (changed on nearly every change): map.\nNever changed here: ci.\n"),
+        "{text}"
+    );
+    // Without anything in between, the sweep says so.
+    let rows = vec![
+        json!({"projection": "map", "status": "ready"}),
+        json!({"projection": "ci", "status": "ready"}),
+    ];
+    let cells: Vec<_> = cells.into_iter().filter(|cell| cell["projection"] != "schema").collect();
+    assert!(super::text(&changes, &rows, &cells).contains("None of these singles out particular changes"));
+}
+
+#[test]
+fn a_few_changes_are_too_few_to_judge() {
+    let cells: Vec<_> = (0..3)
+        .map(|_| json!({"projection": "map", "status": "changed"}))
+        .chain([json!({"projection": "map", "status": "failed"})])
+        .collect();
+    let tally = super::signal::tally("map", &cells);
+    assert_eq!((tally.changed, tally.judged, tally.failed), (3, 3, 1));
+    assert_eq!(tally.signal, super::signal::Signal::Unknown);
+    let cells: Vec<_> = (0..5)
+        .map(|index| json!({"projection": "map", "status": if index < 4 { "changed" } else { "unchanged" }}))
+        .collect();
+    assert_eq!(super::signal::tally("map", &cells).signal, super::signal::Signal::Noisy, "4 of 5");
+}

@@ -265,6 +265,28 @@ fn evidence_is_a_list_of_sourced_locations() {
         "unknown-field",
         "/x/entities/0/evidence/0/location/offset",
     );
+    // A position or file beside the evidence says where it goes.
+    let message = rejects(
+        &evidence(json!({"kind": "source", "source": "a.rs", "line": 4})),
+        "unknown-field",
+        "/x/entities/0/evidence/0/line",
+    );
+    assert!(
+        message.contains(r#"{"location": {"line": 12}}"#) && message.contains("ignores evidence"),
+        "{message}"
+    );
+    for key in ["column", "startLine"] {
+        let mut item = json!({"kind": "source", "source": "a.rs"});
+        item[key] = json!(4);
+        let message = rejects(&evidence(item), "unknown-field", &format!("/x/entities/0/evidence/0/{key}"));
+        assert!(message.contains("a position goes in location"), "{message}");
+    }
+    let message = rejects(
+        &evidence(json!({"kind": "source", "file": "a.rs"})),
+        "unknown-field",
+        "/x/entities/0/evidence/0/file",
+    );
+    assert!(message.contains("the file goes in source"), "{message}");
     for (location, key) in [
         (json!({}), "line"),
         (json!({"column": 1}), "line"),

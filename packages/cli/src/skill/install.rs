@@ -2,8 +2,9 @@
 //! Code reads.
 //!
 //! The skill goes in one skills directory: `--skills-dir`, else the one that
-//! already holds it, else an existing skills directory (the most widely read
-//! first), else `.agents/skills`. Agents that read several directories would
+//! already holds it, else an existing skills directory (the one holding the
+//! most of the repository's own skills, the most widely read of those that
+//! tie), else `.agents/skills`; `--no-skill` writes none. Agents that read several directories would
 //! see two copies, so `init` never writes one beside another: it removes a copy
 //! it wrote elsewhere and reports one it didn't. Claude Code reads only
 //! `.claude/skills`, so `--claude` links (or, on Windows, copies) the skill
@@ -41,6 +42,8 @@ pub enum Claude {
 
 #[derive(Clone, Debug, Default)]
 pub struct Options {
+    /// `--no-skill`: write, update or remove nothing.
+    pub skip: bool,
     /// `--skills-dir`, relative to the repository root.
     pub directory: Option<String>,
     pub claude: Option<Claude>,
@@ -147,29 +150,6 @@ fn normalize(directory: &str) -> Result<String> {
     Ok(directory.to_owned())
 }
 
-/// The skills directory to use without `--skills-dir`.
-fn choose(root: &Path, notes: &mut Vec<String>) -> String {
-    if let Some(directory) = existing_skill(root) {
-        return directory.to_owned();
-    }
-    let existing: Vec<&str> = DIRECTORIES
-        .iter()
-        .map(|(directory, _)| *directory)
-        .filter(|directory| real_directory(root, directory))
-        .collect();
-    match existing.as_slice() {
-        [] => DEFAULT.to_owned(),
-        [only] => (*only).to_owned(),
-        [first, ..] => {
-            notes.push(format!(
-                "Several skills directories exist ({}); chose {first}, which the most agents read",
-                existing.join(", ")
-            ));
-            (*first).to_owned()
-        }
-    }
-}
-
 /// The known skills directory that already holds the skill. A `.claude/skills`
 /// copy beside another is Claude Code's mirror, so it comes last.
 pub(super) fn existing_skill(root: &Path) -> Option<&'static str> {
@@ -268,6 +248,11 @@ pub(super) fn only_the_skill_file(directory: &Path) -> bool {
     fs::read_dir(directory).is_ok_and(|mut entries| entries.all(|entry| entry.is_ok_and(|entry| entry.file_name() == FILE)))
 }
 
+mod choose;
 mod claude;
+mod text;
+
+use choose::choose;
+pub use text::text;
 #[cfg(test)]
 mod tests;

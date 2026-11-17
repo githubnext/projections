@@ -5,7 +5,7 @@ use std::fmt::Write as _;
 use serde_json::{Value, json};
 
 use super::super::{Answer, Failure, OnDrop, Outcome, POLL, get, plural, post, text};
-use crate::service::Service;
+use crate::{service::Service, sweep::signal};
 
 /// A swept change in words: `#12 Add posts`, else its short commit and title.
 fn change_label(change: &Value) -> String {
@@ -89,17 +89,20 @@ pub(in crate::tools) fn summarize_sweep(sweep: &Value) -> Outcome {
         }
     );
     let mut projections = Vec::new();
-    for row in &rows {
+    let ranked = signal::ranked(rows.iter().copied(), &cells);
+    for (row, tally) in &ranked {
         let id = text(&row["projection"]);
-        if row["status"] != "ready" {
+        let Some(tally) = tally else {
             let _ = writeln!(out, "- {id}: skipped. {}", text(&row["error"]));
             projections.push(json!({"projection": id, "status": row["status"], "error": row["error"]}));
             continue;
-        }
-        let (line, projection) = summarize_projection(id, &changes, &cells);
+        };
+        let (line, projection) = summarize_projection(id, tally, &changes, &cells);
         let _ = writeln!(out, "{line}");
         projections.push(projection);
     }
+    let advice = signal::advice(&ranked);
+    out.push_str(&advice);
     let busiest = busiest(&changes, &cells);
     if !busiest.is_empty() {
         let names: Vec<String> = busiest
@@ -120,7 +123,7 @@ pub(in crate::tools) fn summarize_sweep(sweep: &Value) -> Outcome {
 
 /// A ready projection's line and structured summary: how many of the swept
 /// changes it changed on, their median size and the ones it changed most on.
-fn summarize_projection(id: &str, changes: &[&Value], cells: &[&Value]) -> (String, Value) {
+fn summarize_projection(id: &str, tally: &signal::Tally, changes: &[&Value], cells: &[&Value]) -> (String, Value) {
     let total = changes.len();
     let mine: Vec<&&Value> = cells.iter().filter(|cell| cell["projection"] == id).collect();
     let mut changed: Vec<&&Value> = mine.iter().copied().filter(|cell| cell["status"] == "changed").collect();
@@ -148,10 +151,8 @@ fn summarize_projection(id: &str, changes: &[&Value], cells: &[&Value]) -> (Stri
             .collect();
         let _ = write!(line, "; most on {}", most.join(", "));
     }
-    if total >= 3 && changed.len() == total {
-        line.push_str("; changes on every change, so likely noise");
-    } else if changed.is_empty() && failed.is_empty() && total > 0 {
-        line.push_str("; showed nothing on these changes");
+    if let Some(note) = signal::note(tally) {
+        let _ = write!(line, "; {note}");
     }
     if !failed.is_empty() {
         let _ = write!(line, "; failed on {} (first: {}", failed.len(), text(&failed[0]["error"]));
@@ -161,7 +162,7 @@ fn summarize_projection(id: &str, changes: &[&Value], cells: &[&Value]) -> (Stri
         line.push(')');
     }
     let mut projection = json!({"projection": id, "status": "ready", "changed": changed.len(), "of": total,
-        "failed": failed.len(), "median": median, "top": top});
+        "failed": failed.len(), "median": median, "top": top, "signal": tally.signal.name()});
     if let Some(stderr) = failed.first().map(|cell| &cell["stderr"]).filter(|stderr| stderr.is_string()) {
         projection["firstFailure"] = json!({"error": failed[0]["error"], "stderr": stderr});
     }

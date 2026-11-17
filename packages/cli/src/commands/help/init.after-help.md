@@ -9,6 +9,7 @@ Examples:
   projections init                                             only the agent skill
   projections init --claude                                    the skill, linked for Claude Code too
   projections init --skills-dir .github/skills                 the skill in another skills directory
+  projections init service-map --no-skill                      the projection without the skill
 ```
 
 Then: projections check -p ID --trust, and projections help authoring.

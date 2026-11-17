@@ -177,6 +177,23 @@ bump as one modified package. When something is genuinely renamed, list its old
 ID in `previousIds` so the comparison shows a rename rather than a removal and
 an addition.
 
+Keep in `data` only facts about the item itself. The default comparator marks an
+item modified whenever its `data` changes, so a value that changes when
+something else does makes the item modified on changes that never touched it.
+Counts and lists of things elsewhere are the usual trap: "files importing this
+module" on a relationship changes whenever any importing file is added, and a
+module's line count on every edit. Line numbers are another: they change
+whenever code above them moves. Leave counts out, or draw what they count as
+relationships. Say where a fact came from in `evidence` instead, the file in
+`source` and a position in `location`
+(`{"kind": "file", "source": "flags.yaml", "location": {"line": 12}}`; a
+top-level `line` is rejected): the default comparator ignores evidence, so
+moving code isn't a change. `projections check` warns about count-, list- and
+line-like `data` fields in a custom extractor's output, unless the definition
+reads the field or declares it `volatile`, and
+`projections explore --sweep -p <id> --trust` marks a projection that changes on
+nearly every recent change as likely noise.
+
 ## 5. Make it correct in place
 
 Projections extracts the working tree in place, in your own checkout, the way

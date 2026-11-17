@@ -6,6 +6,7 @@
 //! current, and the renderer passes the checks every renderer is held to, in
 //! the real host frame of a headless browser.
 
+mod churn;
 mod projection;
 mod render;
 mod renderer;

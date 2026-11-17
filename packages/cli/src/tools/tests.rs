@@ -217,8 +217,19 @@ fn a_sweep_is_summarized_per_projection() {
         text.contains("Changes where several projections changed: #4 Change 4 (2 projections)"),
         "{text}"
     );
-    assert_eq!(outcome.structured["projections"][0]["changed"], 4);
-    assert_eq!(outcome.structured["projections"][1]["median"], 2);
+    assert!(
+        text.contains("Worth a look: deps.\nLikely noise (changed on nearly every change): map."),
+        "{text}"
+    );
+    // The structural one first, then the noisy one, then the skipped one.
+    let projections = &outcome.structured["projections"];
+    assert_eq!(projections[0]["projection"], "deps");
+    assert_eq!(projections[0]["signal"], "rare");
+    assert_eq!(projections[0]["median"], 2);
+    assert_eq!(projections[1]["projection"], "map");
+    assert_eq!(projections[1]["signal"], "noisy");
+    assert_eq!(projections[1]["changed"], 4);
+    assert_eq!(projections[2]["projection"], "flags");
 }
 
 #[test]

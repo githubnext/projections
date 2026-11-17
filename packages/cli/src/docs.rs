@@ -63,7 +63,7 @@ pub fn agent_prompt_list() -> String {
         text.push_str(&format!("  {id:width$}  {summary}\n"));
     }
     text.push_str(
-        "\nThe skill `projections init` writes (.agents/skills/projections/SKILL.md, which GitHub Copilot, OpenAI Codex, Cursor and Gemini CLI read; `--claude` adds it to .claude/skills for Claude Code, and `--skills-dir` chooses another directory) holds `projections help authoring`.\n",
+        "\nThe skill `projections init` writes (projections/SKILL.md in the skills directory the repository uses, else .agents/skills, which GitHub Copilot, OpenAI Codex, Cursor and Gemini CLI read; `--claude` adds it to .claude/skills for Claude Code, `--skills-dir` chooses another directory and `--no-skill` writes none) holds `projections help authoring`.\n",
     );
     text
 }

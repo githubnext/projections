@@ -15,8 +15,8 @@ export interface ToolbarRowGeometry {
 }
 
 /**
- * Where row 1's mode region (the mode and scope switches) sits: its drawn controls' centre less the row's, and the
- * room between those controls and the nearest control of the regions beside them.
+ * Where row 1's mode region (the mode and scope switches) sits: its content box's centre less the row's, and the room
+ * between that box and the nearest control of the regions beside it.
  */
 export interface ClusterGeometry {
   offset: number
@@ -74,7 +74,14 @@ export const toolbarGeometry = (page: Page) =>
       }
       const first = toolbar.querySelector(':scope > .ph-toolbar-row')
       const region = (name: string) => first?.querySelector(`:scope > [data-toolbar-region="${name}"]`)
-      const mode = span(region('mode'))
+      // The mode region's content box: its controls and the room it keeps for the scope's other form.
+      const content = (element: Element | null | undefined) => {
+        if (!element) return undefined
+        const rect = box(element)
+        const style = getComputedStyle(element)
+        return {left: rect.left + parseFloat(style.paddingLeft), right: rect.right - parseFloat(style.paddingRight)}
+      }
+      const mode = content(region('mode'))
       const cluster: ClusterGeometry | undefined =
         mode && first
           ? {

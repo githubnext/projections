@@ -88,7 +88,7 @@ test('on desktop row 1 holds, in order, the picker, mode, scope, zoom actions, f
   const order = [
     row.getByLabel('Compare from'),
     row.getByRole('radiogroup', {name: 'Comparison mode'}),
-    row.getByRole('radiogroup', {name: 'Scope'}),
+    row.locator('.ph-scope-slot'),
     row.getByRole('group', {name: 'Zoom'}),
     row.getByRole('button', {name: 'Filter', exact: true}),
     row.getByRole('button', {name: 'Settings'}),

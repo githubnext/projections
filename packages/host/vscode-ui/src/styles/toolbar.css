@@ -117,3 +117,19 @@
   gap: 8px;
   margin-inline-start: 4px;
 }
+
+/* The scope's two forms (the switch, and the note when the Changes scope hides nothing) share one cell, the other one
+   invisible, so the mode region keeps its width when the form changes. Each starts at the slot's start, beside the mode
+   switch. */
+.phv-scope-slot {
+  display: inline-grid;
+  flex: none;
+  align-items: center;
+  justify-items: start;
+}
+.phv-scope-slot > * {
+  grid-area: 1 / 1;
+}
+.phv-scope-slot > [data-inactive] {
+  visibility: hidden;
+}

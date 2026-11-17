@@ -172,7 +172,11 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
       'the play button',
       async () => ((await play()) === 'play' ? true : undefined),
       10_000,
-      async () => ({icon: await play(), position: await position()}),
+      async () => ({
+        icon: await play(),
+        position: await position(),
+        motion: (await api.control('packages', {op: 'elements', selector: '[data-motion]', attribute: 'data-motion'}))[0]?.value,
+      }),
     )
     await api.control('packages', {op: 'view', action: 'togglePlayback'})
     await until('playback', async () => (await play()) === 'pause', 10_000)

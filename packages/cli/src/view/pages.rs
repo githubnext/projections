@@ -6,7 +6,7 @@ use std::{collections::HashMap, sync::Arc, time::Duration, time::Instant};
 use axum::{http::StatusCode, response::Response};
 use serde_json::{Value, json};
 
-use super::{NamedView, Shared, routes::json_response, view_url};
+use super::{NamedView, Shared, named::PAGE_GONE, routes::json_response, view_url};
 
 /// How long a page's state request waits for a change.
 const LONG_POLL: Duration = Duration::from_secs(20);
@@ -91,7 +91,7 @@ pub(super) fn control_state(shared: &Shared, view: &NamedView) -> Value {
         .lock()
         .unwrap_or_else(|e| e.into_inner())
         .values()
-        .filter(|(_, brief)| !brief.is_null())
+        .filter(|(seen, brief)| !brief.is_null() && seen.elapsed() < PAGE_GONE)
         .map(|(_, brief)| brief.clone())
         .collect();
     views.sort_by(|a, b| a["page"].as_str().cmp(&b["page"].as_str()));
@@ -113,5 +113,6 @@ pub(super) fn control_state(shared: &Shared, view: &NamedView) -> Value {
         "views": views,
         "page": shown,
         "viewers": viewers,
+        "seen": shared.seen.json(&view.name, view.last_asked()),
     })
 }

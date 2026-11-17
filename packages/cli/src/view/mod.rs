@@ -13,11 +13,13 @@
 //! picks from the title (`TOKEN/view/choose`). Agents drive it through
 //! `TOKEN/control/…`, which answer as the view tools do.
 
+pub mod address;
 pub mod client;
 mod named;
 mod pages;
 pub mod registry;
 mod routes;
+mod seen;
 mod show;
 pub mod state;
 pub mod surface;
@@ -28,7 +30,7 @@ pub use surface::Views;
 
 use std::{
     net::{Ipv4Addr, SocketAddr},
-    path::PathBuf,
+    path::{Path, PathBuf},
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
@@ -37,6 +39,8 @@ use anyhow::{Context as _, Result};
 use axum::{Router, body::to_bytes, http::Method};
 use rand::RngCore;
 use serde_json::Value;
+
+use address::Address;
 use tokio::sync::watch;
 
 use crate::service::Service;
@@ -60,8 +64,76 @@ pub struct ViewerOptions {
     pub idle: Option<Duration>,
     /// The revision whose definition extracts every side; the working tree's by default.
     pub definition_revision: Option<String>,
-    /// The session token, to keep a replaced viewer's URL (see `Record::address`); a new random one by default.
+    /// The session token, to keep the project's URL (see [`address`]); a new random one by default.
     pub token: Option<String>,
+}
+
+/// Where a viewer that starts listens.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Port {
+    /// The port the person asked for (`--port`), refused when it is taken; 0 for any free one.
+    Exactly(u16),
+    /// The project's kept port (see [`address`]), else any free one.
+    Kept,
+}
+
+/// How [`start_kept`] starts a viewer.
+pub struct Start {
+    pub port: Port,
+    /// The address of a viewer this one replaces (one started with --trust replacing one without), tried first.
+    pub replacing: Option<(u16, String)>,
+    pub idle: Option<Duration>,
+    pub definition_revision: Option<String>,
+}
+
+/// Starts a viewer for the project of the repository at `root` at its kept address, so a restarted viewer serves the
+/// URL the last one did: its token, and its port unless that is taken (or another is asked for). Keeps the address it
+/// started at.
+pub fn start_kept(service: Arc<Service>, root: &Path, start: Start) -> Result<Viewer> {
+    let kept = address::read(root);
+    let token = start
+        .replacing
+        .as_ref()
+        .map(|(_, token)| token.clone())
+        .or_else(|| kept.as_ref().map(|address| address.token.clone()))
+        .unwrap_or_else(address::new_token);
+    let options = |port: u16| ViewerOptions {
+        port,
+        idle: start.idle,
+        definition_revision: start.definition_revision.clone(),
+        token: Some(token.clone()),
+    };
+    let viewer = match start.port {
+        Port::Exactly(port) if port != 0 => Viewer::start(service, options(port))
+            .with_context(|| format!("Port {port} is taken: stop what uses it, or pass another --port (or none, for any free one)"))?,
+        Port::Exactly(_) => Viewer::start(service, options(0))?,
+        Port::Kept => {
+            let mut ports: Vec<u16> = start
+                .replacing
+                .iter()
+                .map(|(port, _)| *port)
+                .chain(kept.iter().map(|kept| kept.port))
+                .collect();
+            ports.retain(|port| *port != 0);
+            ports.dedup();
+            // The kept port may have been taken meanwhile: then the viewer has a new one, and keeps that.
+            let started = ports
+                .into_iter()
+                .find_map(|port| Viewer::start(service.clone(), options(port)).ok());
+            match started {
+                Some(viewer) => viewer,
+                None => Viewer::start(service, options(0))?,
+            }
+        }
+    };
+    let address = Address {
+        port: viewer.port(),
+        token,
+    };
+    if let Err(error) = address::write(root, &address) {
+        eprintln!("projections: the viewer's address isn't kept, so it changes when it restarts: {error:#}");
+    }
+    Ok(viewer)
 }
 
 struct Shared {
@@ -77,6 +149,8 @@ struct Shared {
     closing: watch::Sender<bool>,
     /// Bumped whenever a viewer shows another projection, so the renderer build tracker follows every viewer's.
     shown: watch::Sender<u64>,
+    /// What it saw of pages that never counted as open.
+    seen: seen::Seen,
 }
 
 impl Shared {
@@ -110,11 +184,7 @@ impl Viewer {
         listener.set_nonblocking(true)?;
         let listener = tokio::net::TcpListener::from_std(listener)?;
         let port = listener.local_addr()?.port();
-        let token = options.token.clone().unwrap_or_else(|| {
-            let mut bytes = [0u8; 32];
-            rand::rng().fill_bytes(&mut bytes);
-            bytes.iter().map(|byte| format!("{byte:02x}")).collect()
-        });
+        let token = options.token.clone().unwrap_or_else(address::new_token);
         let mut instance = [0u8; 8];
         rand::rng().fill_bytes(&mut instance);
         let shared = Arc::new(Shared {
@@ -126,6 +196,7 @@ impl Viewer {
             activity: Mutex::new(Instant::now()),
             closing: watch::Sender::new(false),
             shown: watch::Sender::new(0),
+            seen: seen::Seen::default(),
         });
         let router = Router::new().fallback(routes::route).with_state(shared.clone());
         let mut closing = shared.closing.subscribe();
@@ -151,6 +222,11 @@ impl Viewer {
     /// The page's URL, with its token.
     pub fn url(&self) -> &str {
         &self.url
+    }
+
+    /// The port it listens on.
+    pub fn port(&self) -> u16 {
+        self.shared.port
     }
 
     /// The repository it shows.

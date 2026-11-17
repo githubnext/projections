@@ -22,6 +22,12 @@ use super::{
 
 const PAGE: &str = "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"referrer\" content=\"no-referrer\"><title>Projections</title><link rel=\"stylesheet\" href=\"./mount.css\"></head><body><div id=\"root\"></div><script type=\"module\" src=\"./viewer.js\"></script></body></html>";
 const SCRIPT: &str = "import {mountViewer} from './mount.js'\nmountViewer(document.getElementById('root'))\n";
+/// What any request without the token gets, the bare port's included: what the viewer is and how to get its link,
+/// never the link itself. Only the person's own agent or terminal has the token; a page that redirected the bare port
+/// to it would hand it to anything on the machine that can reach the port.
+const NEEDS_LINK: &str = include_str!("needs-link.html");
+/// The policy of the page above: no script, no requests.
+const NEEDS_LINK_CSP: &str = "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'";
 const MAX_BODY_BYTES: usize = 256 * 1024;
 /// The service's routes a viewer page reads: never a write.
 const READS: &[&str] = &[
@@ -86,12 +92,19 @@ pub(super) fn loopback_host(request: &Request, port: u16) -> bool {
 
 pub(super) async fn route(State(shared): State<Arc<Shared>>, request: Request) -> Response {
     if !loopback_host(&request, shared.port) {
+        shared.seen.foreign_host();
         return text(StatusCode::FORBIDDEN, "Forbidden");
     }
     let path = request.uri().path().to_owned();
     let rest = path.strip_prefix('/').unwrap_or_default();
     let (token, rest) = rest.split_once('/').unwrap_or((rest, ""));
     if !bool::from(token.as_bytes().ct_eq(shared.token.as_bytes())) {
+        shared.seen.without_token();
+        if request.method() == Method::GET {
+            let mut response = bytes_response(NEEDS_LINK.as_bytes().to_vec(), "text/html; charset=utf-8", Some(NEEDS_LINK_CSP));
+            *response.status_mut() = StatusCode::NOT_FOUND;
+            return response;
+        }
         return text(StatusCode::NOT_FOUND, "Not found");
     }
     let rest = format!("/{rest}");
@@ -141,9 +154,16 @@ async fn endpoint(shared: &Arc<Shared>, request: Request, method: &Method, path:
     Ok(Ok(match (method.clone(), path) {
         (Method::GET, "/") => {
             shared.touch();
+            let query = query_map(request.uri().query().unwrap_or_default());
+            if let Ok(name) = super::viewer_name(query.get("viewer").map(String::as_str)) {
+                shared.seen.loaded(&name);
+            }
             bytes_response(PAGE.as_bytes().to_vec(), "text/html; charset=utf-8", Some(VIEWER_CSP))
         }
-        (Method::GET, "/viewer.js") => bytes_response(SCRIPT.as_bytes().to_vec(), "text/javascript; charset=utf-8", None),
+        (Method::GET, "/viewer.js") => {
+            shared.seen.script();
+            bytes_response(SCRIPT.as_bytes().to_vec(), "text/javascript; charset=utf-8", None)
+        }
         (Method::GET, "/view/state") => {
             let query = query_map(request.uri().query().unwrap_or_default());
             let view = shared.views.get(query.get("viewer").map(String::as_str)).map_err(refused)?;

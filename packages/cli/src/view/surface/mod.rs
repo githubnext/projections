@@ -14,7 +14,7 @@ use std::{fmt::Write as _, sync::Arc, time::Duration};
 use serde_json::{Value, json};
 
 use super::{
-    NamedView, Shared, Viewer, ViewerOptions, client, control_state, registry, show,
+    NamedView, Shared, Viewer, client, control_state, registry, show,
     state::{Chooser, ViewState},
 };
 use crate::service::Service;
@@ -80,13 +80,14 @@ impl Views {
         if !start {
             return Ok(None);
         }
-        let viewer = Viewer::start(
+        let viewer = super::start_kept(
             self.service.clone(),
-            ViewerOptions {
-                port: 0,
+            &root,
+            super::Start {
+                port: super::Port::Kept,
+                replacing: None,
                 idle: None,
                 definition_revision: None,
-                token: None,
             },
         )
         .map_err(|error| format!("The viewer didn't start: {error:#}"))?;
@@ -269,7 +270,7 @@ pub(super) async fn answer(shared: &Arc<Shared>, name: &str, input: &Value) -> O
             Ok(state) => opened(shared, &view, input, &state).await,
         },
         "refresh" => refresh(shared, &view).await,
-        _ => current(shared, &view).await,
+        _ => current(shared, &view, true).await,
     }
 }
 
@@ -285,7 +286,8 @@ pub(super) fn viewer_words(view: &NamedView) -> String {
 /// `open_projection`, once shown: what the person's page shows.
 async fn opened(shared: &Shared, view: &NamedView, input: &Value, state: &ViewState) -> Outcome {
     settled(shared, view, Duration::from_secs(30)).await;
-    let mut outcome = current(shared, view).await;
+    // Just shown, no page may have had time to open it: the lead says what to do instead.
+    let mut outcome = current(shared, view, false).await;
     let url = super::view_url(shared, view);
     let pages = control_state(shared, view)["pages"].as_u64().unwrap_or(0);
     let mut lead = format!(
@@ -315,11 +317,11 @@ async fn opened(shared: &Shared, view: &NamedView, input: &Value, state: &ViewSt
 /// `refresh`: extracts again, and says what the page shows then.
 async fn refresh(shared: &Shared, view: &NamedView) -> Outcome {
     if view.projection().is_none() {
-        return current(shared, view).await;
+        return current(shared, view, true).await;
     }
     view.state.send_modify(ViewState::refresh);
     let pages = settled(shared, view, Duration::from_secs(120)).await;
-    let mut outcome = current(shared, view).await;
+    let mut outcome = current(shared, view, true).await;
     outcome.text = format!(
         "{}\n\n{}",
         if pages {

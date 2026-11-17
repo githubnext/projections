@@ -45,7 +45,7 @@ pub async fn record(request: Request, frame_ms: f64) -> Result<Recording> {
         ..request
     })
     .await?;
-    let host = prepared.capture.host.clone();
+    let host = prepared.host;
     let mut notices = std::mem::take(&mut prepared.notices);
     let options = prepared.capture;
     let recorded = tokio::task::spawn_blocking(move || {

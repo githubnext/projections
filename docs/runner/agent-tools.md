@@ -132,6 +132,7 @@ drift between surfaces, such as a stale VS Code manifest:
 ```sh
 projections view [--open] [--trust] [--port N] [-p ID] [--choice CHOICE | --before REV --after REV] [--mode MODE] [--viewer NAME]
 projections view show|current|screenshot|refresh [--viewer NAME]
+projections view stop [--rotate]
 ```
 
 The viewer is a page on loopback that a coding agent drives and the person
@@ -154,17 +155,30 @@ other tools' defaults (`compare`, `check`, `set_part`) come from it.
 
 `projections view` serves it until interrupted and prints its URL
 (`http://127.0.0.1:PORT/TOKEN/`); requests without the random token are refused,
-and so are requests whose `Host` isn't loopback. `open_projection` in
-`projections mcp` starts one in the MCP server's process when none runs. A
+and so are requests whose `Host` isn't loopback. The bare port (or a link
+without the right token) answers with a short page saying the viewer needs its
+full link and how to get it (`projections view current`), never the link itself.
+The token and port are kept per project in the user cache, so a viewer that
+restarts serves the same URL; `--port N` (on `projections view` or
+`projections view show`) picks the port when it starts one, and is refused while
+a viewer runs on another. `projections view stop --rotate` forgets the link: the
+next viewer has a new token, and earlier links stop working. `open_projection`
+in `projections mcp` starts one in the MCP server's process when none runs. A
 per-repository record in the user cache lets the subcommands and other MCP
 servers find the running one: `projections view show` (starting one in the
 background, which stops after 15 idle minutes, when none runs),
 `current [--json]`, `screenshot --out FILE` and `refresh` call the same tools
-and print their results. An agent opens the page for the person itself: in its
-own browser when it has one, else in the system browser
-(`projections view show --open`, which opens a running viewer's page too); the
-bare link is the fallback. The page follows the working tree with the working
-tree's definition: a save extracts and replays again.
+and print their results. `screenshot --page` captures the viewer's own page in a
+headless browser instead, with its header, toolbar and summary bar, as a page
+opened now shows it. A page counts as open while it asks the viewer for the view
+(every 20 seconds at most); when none does, `current_view` says what the viewer
+saw instead: a page that loaded but never ran its script or never asked, one
+that stopped asking (closed, hidden or suspended), requests refused for a
+non-loopback host, or requests without the token. An agent opens the page for
+the person itself: in its own browser when it has one, else in the system
+browser (`projections view show --open`, which opens a running viewer's page
+too); the bare link is the fallback. The page follows the working tree with the
+working tree's definition: a save extracts and replays again.
 
 In the GitHub Copilot app, `projections canvas install` adds the viewer as a
 canvas (`.github/extensions/projections/extension.mjs`): opening it starts or

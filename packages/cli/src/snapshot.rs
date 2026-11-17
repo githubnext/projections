@@ -33,9 +33,11 @@ use crate::runtime::{DefinitionSource, Runner};
 use crate::service::InspectorOptions;
 
 mod hugging;
+mod page;
 mod recording;
 mod settings;
 
+pub use page::{PageRequest, page};
 pub use recording::{PlaybackFrame, Recording, record};
 
 pub use settings::{Focus, FocusOn, Frame, MAX_PIXELS, Mode, Theme, matte, validate_settings};
@@ -194,7 +196,7 @@ fn query(name: &str, value: &str) -> String {
 pub async fn render(request: Request) -> Result<Snapshot> {
     let hug = request.frame == Frame::Card;
     let mut prepared = prepare(request).await?;
-    let host = prepared.capture.host.clone();
+    let host = prepared.host;
     let mut notices = std::mem::take(&mut prepared.notices);
     let mut options = prepared.capture;
     hugging::hug(&mut options, hug);
@@ -217,6 +219,8 @@ const UNSETTLED: &str = "The renderer kept changing after it acknowledged painti
 
 struct Prepared {
     capture: Capture,
+    /// The service the capture's page reads, closed once it is captured.
+    host: Arc<Host>,
     notices: Vec<String>,
 }
 
@@ -286,7 +290,7 @@ async fn prepare(request: Request) -> Result<Prepared> {
     );
     let options = Capture {
         url: format!("{}/{parameters}", headless::ORIGIN),
-        host: host.clone(),
+        host: Some(host.clone()),
         handle: tokio::runtime::Handle::current(),
         browser: request.browser,
         transport: request.transport,
@@ -299,12 +303,17 @@ async fn prepare(request: Request) -> Result<Prepared> {
         timeout: request.timeout,
         cancel: request.cancel,
     };
-    Ok(Prepared { capture: options, notices })
+    Ok(Prepared {
+        capture: options,
+        host,
+        notices,
+    })
 }
 
 struct Capture {
     url: String,
-    host: Arc<Host>,
+    /// The in-process host that answers the page's requests; none for a page a server serves (the viewer's).
+    host: Option<Arc<Host>>,
     handle: tokio::runtime::Handle,
     browser: PathBuf,
     transport: Transport,
@@ -408,7 +417,9 @@ fn open(options: &Capture) -> Result<(Browser, String)> {
             )
             .context("The browser cannot capture a transparent background; pass --matte COLOR")?;
     }
-    options.host.attach(&mut browser, session, options.handle.clone(), deadline)?;
+    if let Some(host) = &options.host {
+        host.attach(&mut browser, session, options.handle.clone(), deadline)?;
+    }
     let session = session.to_owned();
     Ok((browser, session))
 }

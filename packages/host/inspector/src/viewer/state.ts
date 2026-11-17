@@ -56,6 +56,11 @@ export interface MountViewerOptions {
    * default the page URL's `?viewer=`, else the default viewer.
    */
   viewer?: string
+  /**
+   * The page is a capture (`projections view screenshot --page`), not the person's: its viewer doesn't count it as open
+   * and it reports nothing. By default the page URL's `?capture`.
+   */
+  capture?: boolean
 }
 
 /** A mounted viewer page: `unmount` stops its requests and removes it. */

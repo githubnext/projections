@@ -48,11 +48,22 @@ impl NamedView {
         }
     }
 
-    /// Its open pages, forgetting those gone.
+    /// Its open pages: those that asked within [`PAGE_GONE`]. Those gone are kept a while, so `current_view` can say
+    /// when one stopped asking.
     pub fn pages(&self) -> usize {
         let mut pages = self.pages.lock().unwrap_or_else(|e| e.into_inner());
-        pages.retain(|_, (seen, _)| seen.elapsed() < PAGE_GONE);
-        pages.len()
+        pages.retain(|_, (seen, _)| seen.elapsed() < super::seen::RECENT);
+        pages.values().filter(|(seen, _)| seen.elapsed() < PAGE_GONE).count()
+    }
+
+    /// When a page of it last asked for its state or reported, open or gone.
+    pub fn last_asked(&self) -> Option<Instant> {
+        self.pages
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .values()
+            .map(|(seen, _)| *seen)
+            .max()
     }
 
     /// The projection it shows.

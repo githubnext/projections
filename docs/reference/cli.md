@@ -315,7 +315,7 @@ projections view [OPTIONS]
 | `--entity <ID>` | An entity, relationship or change to select, by ID. |
 | `--scenario <ID>` | A scenario from the projection's renderer scenarios, shown instead of revisions. |
 | `--viewer <NAME>` | Show it in a named viewer, its own page and URL beside the others, to show several projections side by side. Default: the default viewer. |
-| `--port <PORT>` | The port to listen on. Default: any free port. Default: `0`. |
+| `--port <PORT>` | The port to listen on; 0 for any free one. Default: the port this project's viewer last listened on, else any free one. |
 | `--open` | Also open the page in the default browser. |
 | `--trust` | Let it run repository code (custom extractors and renderers). Review the projections' code first. A viewer already running without trust is replaced, at the same URL. |
 | `--definition-revision <REVISION>` | The revision whose definition and projection code extract both sides, as compare --definition-revision. Default: working-tree. |
@@ -348,6 +348,7 @@ projections view show [OPTIONS]
 | `--viewer <NAME>` | Show it in a named viewer, its own page and URL beside the others, to show several projections side by side. Default: the default viewer. |
 | `--open` | Also open the page in the default browser. |
 | `--trust` | Let the viewer run repository code: one is started with trust, or replaces one running without it. |
+| `--port <PORT>` | The port a viewer this starts listens on; 0 for any free one. Refused when a viewer already runs on another. Default: the port this project's viewer last listened on, else any free one. |
 | `--json` | Print the result as JSON. |
 
 ## `projections view current`
@@ -386,6 +387,7 @@ projections view screenshot [OPTIONS] --out <FILE>
 | `--entity <ID>` | Open the image on one item, by its ID, centred with what it connects to. |
 | `--fit` | Fit what the image opens on whole, even when its text is drawn smaller than the renderer would open at. |
 | `--viewer <NAME>` | Render what a named viewer shows. Default: the default viewer. |
+| `--page` | Capture the viewer's page itself, its header, toolbar and summary bar around the projection, as a page opened now shows it: the viewer's projection, pair, mode and selection, not the person's playback position or zoom. |
 | `--json` | Print the result as JSON. |
 
 ## `projections view refresh`
@@ -408,6 +410,10 @@ Stop the viewer running for this repository; its open pages say so, and reconnec
 ```sh
 projections view stop [OPTIONS]
 ```
+
+| Argument | Description |
+|---|---|
+| `--rotate` | Also forget its link: the next viewer has a new token (and port), and every earlier link stops working. |
 
 ## `projections canvas`
 

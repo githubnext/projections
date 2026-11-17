@@ -1013,9 +1013,9 @@ fn renderer_trust_and_comparison_notices() {
     let untrusted = check(false);
     assert_eq!(untrusted["status"], "fail", "{untrusted}");
     assert!(untrusted["message"].as_str().unwrap().contains("--trust"), "{untrusted}");
-    let trusted = check(true);
-    assert_eq!(trusted["status"], "skip", "{trusted}");
-    assert!(trusted["message"].as_str().unwrap().contains("no-browser"), "{trusted}");
+    let granted = check(true);
+    assert_eq!(granted["status"], "skip", "{granted}");
+    assert!(granted["message"].as_str().unwrap().contains("no-browser"), "{granted}");
 }
 
 #[test]

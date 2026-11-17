@@ -1,0 +1,50 @@
+name: Copilot setup steps
+# Prepares the environment GitHub Copilot cloud agent works in when it runs on GitHub Actions: the toolchains this
+# repository pins, its dependencies, a build and Chromium, so the agent can build, test and render from its first
+# step. It runs on its own when it changes, so a pull request shows whether it still works.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+permissions:
+  contents: read
+env:
+  # Package sources (see CONTRIBUTING.md), as in ci.yml.
+  npm_config_registry: https://packagefeedproxy.microsoft.io/npm/
+  npm_config_audit: 'false'
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple/
+
+jobs:
+  # Copilot runs only a job of this name.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 59
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      # As in the check action: no incremental caches, line tables only, and the preinstalled toolchains nothing here
+      # uses removed, so builds and test suites fit the runner's disk.
+      - run: |
+          echo CARGO_INCREMENTAL=0 >> "$GITHUB_ENV"
+          echo CARGO_PROFILE_DEV_DEBUG=line-tables-only >> "$GITHUB_ENV"
+          sudo rm -rf /usr/local/lib/android /usr/local/.ghcup /opt/ghc /usr/share/swift \
+            /usr/local/julia* /opt/hostedtoolcache/PyPy /opt/hostedtoolcache/CodeQL
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: package-lock.json
+      # Installs the toolchain rust-toolchain.toml pins, then the workspace, its build (the native engine and CLI
+      # included) and Chromium for the renderer checks and screenshots.
+      - run: |
+          rustup toolchain install
+          npm ci --no-audit --no-fund
+          npm run build
+          tools/scripts/install-browsers.sh chromium

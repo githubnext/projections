@@ -46,6 +46,10 @@ for agents and people: `npm run tools -- context` is a one-screen briefing, and
 the gates and tests for what a change touches (`npm run tools -- --help` lists
 the rest). Report friction with it, or with these docs, with
 `npm run tools -- feedback "<summary>"`, which drafts an issue.
+GitHub Copilot cloud agent starts from
+[`copilot-setup-steps.yml`](.github/workflows/copilot-setup-steps.yml), which
+installs the pinned toolchains and dependencies, builds the workspace and
+installs Chromium before the agent's first step.
 `npm run tools -- install` builds your checkout and installs it as you would use
 it: the CLI on `PATH`, the VS Code extension and the packed npm package (see
 [Early access (from source)](docs/setup/early-access.md)). Optionally,

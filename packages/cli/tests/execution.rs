@@ -344,6 +344,9 @@ fn a_verified_ci_artifact_supplies_a_commit_without_running_anything() {
     assert_eq!(reused["digest"], extracted["digest"]);
     let execution = &reused["provenance"]["execution"];
     assert_eq!(execution["source"], "ci");
+    // Nothing authenticates an imported directory's manifest: it names a run,
+    // but the extraction is labelled imported, not official.
+    assert_eq!(execution["official"], false);
     assert_eq!(execution["ci"], json!({"repository": "acme/demo", "run": 4242}));
     // Another commit, or another definition, isn't supplied by it.
     runner.show("probe", "HEAD~0", None).unwrap();
@@ -379,8 +382,32 @@ fn a_verified_ci_artifact_supplies_a_commit_without_running_anything() {
     assert_ne!(document["provenance"]["execution"]["source"], "ci");
 }
 
-#[test]
-fn ci_artifacts_are_downloaded_from_the_repository_runs_for_the_commit() {
+/// A stand-in for gh answering `responses` (a shell `case` pattern over its
+/// arguments → its output), logging every call; anything else fails.
+fn fake_gh(directory: &Path, responses: &[(&str, &str)]) -> std::path::PathBuf {
+    use std::os::unix::fs::PermissionsExt;
+    let log = directory.join("calls.log");
+    let mut script = format!("#!/bin/sh\necho \"$@\" >> '{}'\ncase \"$*\" in\n", log.display());
+    for (pattern, output) in responses {
+        script.push_str(&format!("  {pattern}) {output} ;;\n"));
+    }
+    script.push_str("  *) echo \"unexpected gh $*\" >&2; exit 1 ;;\nesac\n");
+    let gh = directory.join("gh");
+    fs::write(&gh, script).unwrap();
+    fs::set_permissions(&gh, fs::Permissions::from_mode(0o755)).unwrap();
+    gh
+}
+
+/// A workflow run from GitHub's API: `id`, its event and head repository.
+fn workflow_run(id: u64, event: &str, head: &str) -> String {
+    json!({"id": id, "event": event, "conclusion": "success", "path": ".github/workflows/ci.yml",
+        "repository": {"full_name": "acme/demo"}, "head_repository": {"full_name": head}})
+    .to_string()
+}
+
+/// A CI test repository: its first commit's extraction, published in an
+/// artifact, with `origin` at github.com/acme/demo.
+fn published() -> (Repository, String, Value, tempfile::TempDir) {
     let repository = Repository::new("");
     let first = git(repository.path(), &["rev-parse", "HEAD"]);
     git(repository.path(), &["remote", "add", "origin", "https://github.com/acme/demo.git"]);
@@ -390,45 +417,57 @@ fn ci_artifacts_are_downloaded_from_the_repository_runs_for_the_commit() {
     assert!(repository.probe_ran());
     let published = tempfile::tempdir().unwrap();
     artifact(published.path(), &[("probe", &extracted)]);
-    // A stand-in for gh: the runs for the commit, its artifacts, and the download.
+    (repository, first, extracted, published)
+}
+
+fn with_gh(repository: &Repository, gh: &Path) -> Runner {
+    repository.runner().with_variables(BTreeMap::from([
+        (
+            "PROBE".to_owned(),
+            repository.requests.path().join("request.json").to_string_lossy().into_owned(),
+        ),
+        ("PROJECTIONS_GH".to_owned(), gh.to_string_lossy().into_owned()),
+    ]))
+}
+
+const USES_ACTION: &str = "printf 'jobs:\\n  build:\\n    steps:\\n      - uses: githubnext/projections@v0\\n'";
+
+#[test]
+fn ci_artifacts_are_downloaded_from_the_repository_runs_for_the_commit() {
+    let (repository, first, _, published) = published();
     let bin = tempfile::tempdir().unwrap();
     let log = bin.path().join("calls.log");
-    let gh = bin.path().join("gh");
-    fs::write(
-        &gh,
-        format!(
-            r#"#!/bin/sh
-echo "$@" >> '{log}'
-case "$*" in
-  *"actions/runs?head_sha={first}"*) printf '%s' '{{"workflow_runs":[{{"id":4242}}]}}' ;;
-  *"actions/runs/4242/artifacts"*) printf '%s' '{{"artifacts":[{{"name":"projections","expired":false}}]}}' ;;
-  "run download 4242"*) shift 8; cp -R '{published}/.' "$1" ;;
-  *) printf '%s' '{{"workflow_runs":[]}}' ;;
-esac
-"#,
-            log = log.display(),
-            published = published.path().display(),
-        ),
-    )
-    .unwrap();
-    use std::os::unix::fs::PermissionsExt;
-    fs::set_permissions(&gh, fs::Permissions::from_mode(0o755)).unwrap();
-    let cache = tempfile::tempdir().unwrap();
-    let runner = repository
-        .runner()
-        .with_variables(BTreeMap::from([
+    let runs = format!("{{\"workflow_runs\":[{}]}}", workflow_run(4242, "push", "acme/demo"));
+    let gh = fake_gh(
+        bin.path(),
+        &[
+            (&format!("*\"actions/runs?head_sha={first}\"*"), &format!("printf '%s' '{runs}'")),
+            ("*\"contents/.github/workflows/ci.yml\"*", USES_ACTION),
             (
-                "PROBE".to_owned(),
-                repository.requests.path().join("request.json").to_string_lossy().into_owned(),
+                "*\"actions/runs/4242/artifacts\"*",
+                r#"printf '%s' '{"artifacts":[{"name":"projections","expired":false}]}'"#,
             ),
-            ("PROJECTIONS_GH".to_owned(), gh.to_string_lossy().into_owned()),
-        ]))
+            (
+                "\"run download 4242\"*",
+                &format!("shift 8; cp -R '{}/.' \"$1\"", published.path().display()),
+            ),
+            ("*", r#"printf '%s' '{"workflow_runs":[]}'"#),
+        ],
+    );
+    let cache = tempfile::tempdir().unwrap();
+    let runner = with_gh(&repository, &gh)
         .with_cache_in(cache.path())
         .unwrap()
         .with_artifacts(Vec::new(), true);
     let reused = runner.show("probe", &first, None).unwrap();
     assert!(!repository.probe_ran(), "{}", fs::read_to_string(&log).unwrap());
-    assert_eq!(reused["provenance"]["execution"]["source"], "ci");
+    let execution = &reused["provenance"]["execution"];
+    assert_eq!(execution["source"], "ci");
+    assert_eq!(execution["official"], true);
+    assert_eq!(
+        execution["ci"],
+        json!({"repository": "acme/demo", "run": 4242, "workflow": ".github/workflows/ci.yml", "authentication": "download"})
+    );
     let calls = fs::read_to_string(&log).unwrap();
     assert!(calls.contains("run download 4242 --repo github.com/acme/demo --name projections"));
     // The download is kept in the cache and reused without gh.
@@ -440,9 +479,142 @@ esac
         .unwrap()
         .with_artifacts(Vec::new(), true);
     let reused = runner.show("probe", &first, None).unwrap();
-    assert_eq!(reused["provenance"]["execution"]["source"], "ci");
+    assert_eq!(reused["provenance"]["execution"]["official"], true);
     assert!(!log.exists());
     assert!(!repository.probe_ran());
+
+    // A download an earlier version kept, without the record of its run, isn't
+    // used unless GitHub's API identifies its run again.
+    let downloads = fs::read_dir(cache.path().join("artifacts"))
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap()
+        .path();
+    fs::remove_file(downloads.join("4242.json")).unwrap();
+    fs::remove_dir_all(cache.path().join("extractions")).unwrap();
+    let none = fake_gh(bin.path(), &[("*", r#"printf '%s' '{"workflow_runs":[]}'"#)]);
+    let document = with_gh(&repository, &none)
+        .with_cache_in(cache.path())
+        .unwrap()
+        .with_artifacts(Vec::new(), true)
+        .show("probe", &first, None)
+        .unwrap();
+    assert!(repository.probe_ran());
+    assert_ne!(document["provenance"]["execution"]["source"], "ci");
+}
+
+#[test]
+fn a_fork_pull_request_run_is_never_the_repository_ci() {
+    let (repository, first, _, published) = published();
+    let bin = tempfile::tempdir().unwrap();
+    let log = bin.path().join("calls.log");
+    // A fork's pull request run for the commit, and a run of a workflow that
+    // doesn't use the Action on the default branch, both with artifacts.
+    let mut other = serde_json::from_str::<Value>(&workflow_run(4243, "push", "acme/demo")).unwrap();
+    other["path"] = json!(".github/workflows/other.yml");
+    let runs = format!(
+        "{{\"workflow_runs\":[{},{other}]}}",
+        workflow_run(666, "pull_request", "mallory/demo")
+    );
+    let gh = fake_gh(
+        bin.path(),
+        &[
+            (&format!("*\"actions/runs?head_sha={first}\"*"), &format!("printf '%s' '{runs}'")),
+            ("*\"contents/.github/workflows/ci.yml\"*", USES_ACTION),
+            ("*\"contents/.github/workflows/other.yml\"*", "printf 'jobs: {}\\n'"),
+            (
+                "*\"/artifacts?name=projections\"",
+                r#"printf '%s' '{"artifacts":[{"name":"projections","expired":false}]}'"#,
+            ),
+            (
+                "\"run download \"*",
+                &format!("shift 8; cp -R '{}/.' \"$1\"", published.path().display()),
+            ),
+        ],
+    );
+    let cache = tempfile::tempdir().unwrap();
+    let document = with_gh(&repository, &gh)
+        .with_cache_in(cache.path())
+        .unwrap()
+        .with_artifacts(Vec::new(), true)
+        .show("probe", &first, None)
+        .unwrap();
+    assert!(repository.probe_ran());
+    assert_ne!(document["provenance"]["execution"]["source"], "ci");
+    let calls = fs::read_to_string(&log).unwrap();
+    assert!(!calls.contains("run download"), "{calls}");
+    // Configuring the other workflow accepts its run, never the fork's.
+    let document = with_gh(&repository, &gh)
+        .with_cache_in(tempfile::tempdir().unwrap().path())
+        .unwrap()
+        .with_ci_artifacts(Vec::new(), true, vec!["other.yml".into()])
+        .show("probe", &first, None)
+        .unwrap();
+    assert!(!repository.probe_ran(), "{}", fs::read_to_string(&log).unwrap());
+    assert_eq!(document["provenance"]["execution"]["ci"]["run"], 4243);
+    assert_eq!(document["provenance"]["execution"]["official"], true);
+    assert!(!fs::read_to_string(&log).unwrap().contains("run download 666"));
+}
+
+#[test]
+fn an_imported_artifact_is_official_only_when_its_attestation_verifies() {
+    let (repository, first, _, published) = published();
+    let certificate = json!([{"verificationResult": {"signature": {"certificate": {
+        "sourceRepositoryURI": "https://github.com/acme/demo",
+        "githubWorkflowTrigger": "push",
+        "runInvocationURI": "https://github.com/acme/demo/actions/runs/4242/attempts/1",
+        "buildConfigURI": "https://github.com/acme/demo/.github/workflows/ci.yml@refs/heads/main"}}}}]);
+    let attested = |run: String| {
+        let bin = tempfile::tempdir().unwrap();
+        let gh = fake_gh(
+            bin.path(),
+            &[
+                (
+                    &format!(
+                        "\"attestation verify {}/projections.artifact.json --repo acme/demo\"*",
+                        published.path().display()
+                    ),
+                    &format!("printf '%s' '{certificate}'"),
+                ),
+                ("*\"actions/runs/4242\"", &format!("printf '%s' '{run}'")),
+                ("*\"contents/.github/workflows/ci.yml\"*", USES_ACTION),
+                ("*\"actions/runs?head_sha=\"*", r#"printf '%s' '{"workflow_runs":[]}'"#),
+            ],
+        );
+        let document = with_gh(&repository, &gh)
+            .with_cache_base(tempfile::tempdir().unwrap().path())
+            .with_artifacts(vec![published.path().into()], true)
+            .show("probe", &first, None)
+            .unwrap();
+        assert!(!repository.probe_ran());
+        (document["provenance"]["execution"].clone(), bin)
+    };
+    let (execution, _bin) = attested(workflow_run(4242, "push", "acme/demo"));
+    assert_eq!(execution["official"], true);
+    assert_eq!(execution["ci"]["authentication"], "attestation");
+    assert_eq!(execution["ci"]["workflow"], ".github/workflows/ci.yml");
+    // A fork's run can't authenticate an artifact, even with an attestation.
+    let (execution, _bin) = attested(workflow_run(4242, "pull_request", "mallory/demo"));
+    assert_eq!(execution["official"], false);
+    assert!(execution["ci"].get("authentication").is_none());
+
+    // Without an attestation it is reused, labelled imported.
+    let bin = tempfile::tempdir().unwrap();
+    let gh = fake_gh(
+        bin.path(),
+        &[
+            ("\"attestation verify \"*", "echo 'no attestations found' >&2; exit 1"),
+            ("*\"actions/runs?head_sha=\"*", r#"printf '%s' '{"workflow_runs":[]}'"#),
+        ],
+    );
+    let document = with_gh(&repository, &gh)
+        .with_cache_base(tempfile::tempdir().unwrap().path())
+        .with_artifacts(vec![published.path().into()], true)
+        .show("probe", &first, None)
+        .unwrap();
+    assert!(!repository.probe_ran());
+    assert_eq!(document["provenance"]["execution"]["official"], false);
 }
 
 #[test]

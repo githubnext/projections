@@ -74,7 +74,13 @@ function addStyle() {
   document.head.append(element)
 }
 
-const provenanceIcons: {[label: string]: string} = {'From CI': 'github-action', Approximate: 'info', Stale: 'history', Observed: 'pulse'}
+const provenanceIcons: {[label: string]: string} = {
+  'From CI': 'github-action',
+  Imported: 'package',
+  Approximate: 'info',
+  Stale: 'history',
+  Observed: 'pulse',
+}
 
 const post = (action: Extract<HostMessage, {op: 'pairAction'}>['action'], postMessage: (message: HostMessage) => void) =>
   postMessage({tag: hostTag, op: 'pairAction', action})
@@ -96,7 +102,7 @@ export function TabPairPicker({form, postMessage}: {form: PairForm; postMessage:
     // The definition's uncommitted edits apply ("Your edits", quiet), with one action: Show committed; or, after it, the
     // committed version with Use my edits.
     pair.edits ? h(EditsIndicator, {edits: pair.edits, postMessage}) : null,
-    // Who observed the result, only when it is unusual (From CI, Approximate, Stale or Observed): quiet, a codicon and
+    // Who observed the result, only when it is unusual (From CI, Imported, Approximate, Stale or Observed): quiet, a codicon and
     // muted text. An ordinary local result shows none; the Configuration view's Provenance names it.
     pair.provenance
       ? h(

@@ -48,7 +48,7 @@ test("a tab's kept results become sides, and their diagnostics messages named by
 test('the tab shows a provenance badge only when the result is unusual', () => {
   assert.equal(unusualProvenance('Local'), false)
   assert.equal(unusualProvenance(undefined), false)
-  for (const label of ['From CI', 'Approximate', 'Stale', 'Observed']) assert.equal(unusualProvenance(label), true)
+  for (const label of ['From CI', 'Imported', 'Approximate', 'Stale', 'Observed']) assert.equal(unusualProvenance(label), true)
 })
 
 test('Go to Source… lists the files behind a projection, grouped, in order', () => {

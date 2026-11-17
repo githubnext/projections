@@ -25,8 +25,10 @@ Usage, inputs, permissions, trust and retention are in the
   (`cargo build --release -p projections-cli`) instead.
 - `src/base.mjs`: On pull requests (unless `reuse-base-artifact: false`),
   downloads the merge base's own `projections` artifact from the newest
-  successful run for that commit with `gh run download`, holding the token and
-  running nothing from the repository. A failure is a warning.
+  successful run of this workflow file for that commit, for a push or a pull
+  request whose head is this repository (never a fork's), with
+  `gh run download`, holding the token and running nothing from the repository.
+  A failure is a warning.
 - `src/collect.mjs`: Reads the `pull_request` or `push` event, computes the
   merge base with Git, runs
   `compare --all <merge-base>..<head> --definition base --json` or
@@ -35,8 +37,8 @@ Usage, inputs, permissions, trust and retention are in the
   passes `--in-place` (CI's checkout is the revision, so a checked-out head is
   extracted in place, with the dependencies the workflow installed) and
   `--artifact` with the base step's download, whose verified extractions the CLI
-  reuses as the base's official ones; projections it lacks are extracted, in a
-  workspace prepared by the repository's environment file when `trust: true`.
+  reuses for the base, labelled imported; projections it lacks are extracted, in
+  a workspace prepared by the repository's environment file when `trust: true`.
   Failed projections become annotations and manifest entries with diagnostics.
 - `src/snapshot.mjs`: With `snapshots`, renders each listed projection from the
   collected documents with `projections snapshot --from` (no extractor runs
@@ -62,6 +64,10 @@ Usage, inputs, permissions, trust and retention are in the
   and after thumbnails (`<picture>` switching with the reader's theme) when
   `publish.mjs` committed them, else a link to the snapshots artifact. A
   read-only token (pull requests from forks) produces a warning, not a failure.
+
+With `attest: true`, `actions/attest` attests the manifest (on pushes and pull
+requests from this repository), so `projections --ci --artifact DIR` can
+authenticate a downloaded copy.
 
 `actions/upload-artifact` uploads the directory as the `projections` artifact,
 and the snapshots as a separate `<artifact-name>-snapshots` artifact, so the

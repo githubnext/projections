@@ -1,11 +1,13 @@
-// On a pull request, downloads the merge base's own projections artifact (from the newest successful run for
-// that commit), so the CLI reuses CI's official extractions of the base instead of extracting it again. This
-// step holds the token and runs nothing from the repository; the CLI verifies every reused extraction. Anything
-// that goes wrong is a warning: the base is then extracted (and prepared) as usual.
+// On a pull request, downloads the merge base's own projections artifact (from the newest successful run of this
+// workflow file for that commit, for a push or a pull request from this repository, never a fork's), so the CLI
+// reuses CI's extractions of the base instead of extracting it again. This step holds the token and runs nothing
+// from the repository; the CLI verifies every reused extraction and labels it imported, since it can't
+// authenticate the artifact itself. Anything that goes wrong is a warning: the base is then extracted (and
+// prepared) as usual.
 import {spawnSync} from 'node:child_process'
 import {appendFileSync, existsSync, mkdirSync, readFileSync, rmSync} from 'node:fs'
 import path from 'node:path'
-import {artifactManifest, artifactRuns, eventSubject} from './lib.mjs'
+import {artifactManifest, artifactRuns, eventSubject, workflowPath} from './lib.mjs'
 
 const environment = process.env
 const output = (name, value) => {
@@ -37,9 +39,12 @@ try {
   for (const commit of [subject.base, subject.head])
     if (spawnSync('git', ['cat-file', '-e', `${commit}^{commit}`], {cwd: repo}).status !== 0)
       spawnSync('git', ['fetch', '--no-tags', '--quiet', 'origin', commit], {cwd: repo})
+  const workflow = workflowPath(environment.GITHUB_WORKFLOW_REF, repository)
+  if (!workflow) throw new Error(`Unexpected workflow ${environment.GITHUB_WORKFLOW_REF}`)
   const mergeBase = run('git', ['merge-base', subject.base, subject.head]).trim()
   const runs = artifactRuns(
     JSON.parse(run('gh', ['api', `repos/${repository}/actions/runs?head_sha=${mergeBase}&status=success&per_page=20`])),
+    {repository, workflow},
   )
   for (const id of runs) {
     const listed = JSON.parse(run('gh', ['api', `repos/${repository}/actions/runs/${id}/artifacts?name=${encodeURIComponent(name)}`]))
@@ -53,7 +58,9 @@ try {
     output('directory', directory)
     process.exit(0)
   }
-  console.log(`No successful run published a ${name} artifact for the merge base ${mergeBase.slice(0, 7)}; it is extracted here`)
+  console.log(
+    `No successful run of ${workflow} published a ${name} artifact for the merge base ${mergeBase.slice(0, 7)}; it is extracted here`,
+  )
 } catch (error) {
   console.log(`::warning title=Projections::The merge base's CI artifact couldn't be reused (${error.message}); it is extracted here`)
 }

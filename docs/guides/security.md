@@ -126,7 +126,17 @@ the manifest or archive rejects the whole artifact. A document that fails its
 own checks isn't shown, and only its projection is marked as failing
 verification; the others are verified independently.
 
-Learn more: [CI artifacts](../contracts/saved-documents.md#ci-artifacts).
+On your machine, the CLI reuses CI's extractions only after the same digest,
+commit and definition checks, and calls one official only when it is
+authenticated as the repository's own CI output. `--ci` downloads only from a
+successful run of this repository's Projections workflow for a push or a pull
+request from this repository: a fork's pull request runs the fork's own workflow
+files and could upload anything, so its artifacts are never downloaded. An
+artifact directory you import (`--artifact DIR`) is official only when its
+attestation verifies and names such a run; otherwise it is labelled imported.
+
+Learn more: [CI artifacts](../contracts/saved-documents.md#ci-artifacts) and
+[CI artifacts as a source](../runner/caches.md#ci-artifacts-as-a-source).
 
 ## Layer 6: Nothing from your repository runs in a hosted view
 

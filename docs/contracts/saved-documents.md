@@ -32,17 +32,25 @@ lockfiles; `stale` when the working tree changed while it ran), its
 `determinism` class, the `environment` fingerprint (a hash of the Projections
 version, `PATH` and the granted variables' values), when it ran (`at`, UTC), the
 examined Git `tree`, the workspace `strategy`, the `prepared` environment steps
-and the enforced `scope`. An extraction from a CI artifact has `official: true`
-and `ci: {repository, run, workflow?}`: like a test result, the run the team's
-CI published is the commit's official extraction, even though a rerun might
-differ. Hosts show it as _From CI_, _Local_, _Approximate_ or _Stale_, and the
-official run for a commit by default. A working-tree extraction records its base
-commit with `ref: "working-tree"`. An extraction with
-[generated values](extractions.md#generated-values) records `generated`: how
-many concrete generated values it holds (`values`), how many carried a key and
-value the generation store already held (`reused`), and which stores those came
-from (`sources`: `local`, or `ci` for values harvested from a CI artifact). Do
-not persist temporary root paths, credentials or forwarded environment values.
+and the enforced `scope`. An extraction from a CI artifact has
+`ci: {repository, run, workflow?, authentication?}`: like a test result, the run
+the repository's own CI published is the commit's official extraction, even
+though a rerun might differ. It is `official: true` only when the run was
+authenticated (`authentication`: `download` when `--ci` downloaded it from a run
+GitHub's API identified as the repository's own Projections workflow, never a
+fork's; `attestation` when an imported artifact's attestation named such a run;
+see [CI artifacts as a source](../runner/caches.md#ci-artifacts-as-a-source)).
+An imported artifact nothing authenticated is `official: false`. Hosts show it
+as _From CI_, _Imported_, _Local_, _Approximate_ or _Stale_, and the official
+run for a commit by default. These fields describe how the CLI that wrote the
+document obtained it; a saved document's own claim proves nothing to its reader.
+A working-tree extraction records its base commit with `ref: "working-tree"`. An
+extraction with [generated values](extractions.md#generated-values) records
+`generated`: how many concrete generated values it holds (`values`), how many
+carried a key and value the generation store already held (`reused`), and which
+stores those came from (`sources`: `local`, or `ci` for values harvested from a
+CI artifact). Do not persist temporary root paths, credentials or forwarded
+environment values.
 
 Saved documents' claims never grant trust. CI publishes them in one format, the
 [CI artifact](#ci-artifacts).

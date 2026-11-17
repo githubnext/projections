@@ -134,8 +134,9 @@ projections check [OPTIONS]
 | `--container-image <IMAGE>` | Run extractors in this locally prepared container image@sha256; never pulled. |
 | `--container-engine <CONTAINER_ENGINE>` | One of `docker`, `podman`. |
 | `--no-cache` | Don't read or write the persistent extraction cache. |
-| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh. |
-| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json); repeatable. Repeatable. |
+| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh: push and same-repository pull request runs of the Projections workflow, never a fork's. |
+| `--ci-workflow <FILE>` | A workflow file (path or file name) whose runs are the Projections workflow for --ci; repeatable. Default: the configuration's ciWorkflows, else the workflows using githubnext/projections on the default branch. Repeatable. |
+| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json), labelled imported unless --ci verifies its attestation; repeatable. Repeatable. |
 | `--in-place` | Extract a commit that is this checkout's HEAD in place even when untracked files (such as CI's build output) are present; tracked files must be unmodified. |
 | `--workspace <STRATEGY>` | Where a toolchain extractor examines a commit that isn't checked out. Default: the user configuration, the environment file's, else automatic. One of: `fresh` — A temporary full copy per run; `worktree` — A persistent linked Git worktree Projections owns, reused and kept prepared; `clone` — A worktree seeded with a copy-on-write clone of the checkout; `sparse` — A worktree holding only the definition's scope; `none` — No copies: only the cache, CI artifacts and in-place extraction. |
 | `--regenerate` | Generate generated values (such as model-written summaries) again instead of reusing the generation store's text for an equal basis. |
@@ -171,8 +172,9 @@ projections prepare [OPTIONS]
 | `--container-image <IMAGE>` | Run extractors in this locally prepared container image@sha256; never pulled. |
 | `--container-engine <CONTAINER_ENGINE>` | One of `docker`, `podman`. |
 | `--no-cache` | Don't read or write the persistent extraction cache. |
-| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh. |
-| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json); repeatable. Repeatable. |
+| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh: push and same-repository pull request runs of the Projections workflow, never a fork's. |
+| `--ci-workflow <FILE>` | A workflow file (path or file name) whose runs are the Projections workflow for --ci; repeatable. Default: the configuration's ciWorkflows, else the workflows using githubnext/projections on the default branch. Repeatable. |
+| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json), labelled imported unless --ci verifies its attestation; repeatable. Repeatable. |
 | `--in-place` | Extract a commit that is this checkout's HEAD in place even when untracked files (such as CI's build output) are present; tracked files must be unmodified. |
 | `--workspace <STRATEGY>` | Where a toolchain extractor examines a commit that isn't checked out. Default: the user configuration, the environment file's, else automatic. One of: `fresh` — A temporary full copy per run; `worktree` — A persistent linked Git worktree Projections owns, reused and kept prepared; `clone` — A worktree seeded with a copy-on-write clone of the checkout; `sparse` — A worktree holding only the definition's scope; `none` — No copies: only the cache, CI artifacts and in-place extraction. |
 | `--regenerate` | Generate generated values (such as model-written summaries) again instead of reusing the generation store's text for an equal basis. |
@@ -251,8 +253,9 @@ projections show [OPTIONS] [REVISION]
 | `--container-image <IMAGE>` | Run extractors in this locally prepared container image@sha256; never pulled. |
 | `--container-engine <CONTAINER_ENGINE>` | One of `docker`, `podman`. |
 | `--no-cache` | Don't read or write the persistent extraction cache. |
-| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh. |
-| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json); repeatable. Repeatable. |
+| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh: push and same-repository pull request runs of the Projections workflow, never a fork's. |
+| `--ci-workflow <FILE>` | A workflow file (path or file name) whose runs are the Projections workflow for --ci; repeatable. Default: the configuration's ciWorkflows, else the workflows using githubnext/projections on the default branch. Repeatable. |
+| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json), labelled imported unless --ci verifies its attestation; repeatable. Repeatable. |
 | `--in-place` | Extract a commit that is this checkout's HEAD in place even when untracked files (such as CI's build output) are present; tracked files must be unmodified. |
 | `--workspace <STRATEGY>` | Where a toolchain extractor examines a commit that isn't checked out. Default: the user configuration, the environment file's, else automatic. One of: `fresh` — A temporary full copy per run; `worktree` — A persistent linked Git worktree Projections owns, reused and kept prepared; `clone` — A worktree seeded with a copy-on-write clone of the checkout; `sparse` — A worktree holding only the definition's scope; `none` — No copies: only the cache, CI artifacts and in-place extraction. |
 | `--regenerate` | Generate generated values (such as model-written summaries) again instead of reusing the generation store's text for an equal basis. |
@@ -273,8 +276,9 @@ projections serve [OPTIONS]
 | `--fixtures <PATH>` | Serve projections.scenarios documents (or directories holding scenarios.json) for developing a renderer or comparator, instead of a repository; runs no extractors. Repeatable. |
 | `--renderer <DIR>` | With --fixtures, renderer bundle directories (index.html and renderer.json), or packages whose package.json names one in projections.renderer. Repeatable. |
 | `--no-cache` | Don't read or write the persistent extraction cache. |
-| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh. |
-| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json); repeatable. Repeatable. |
+| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh: push and same-repository pull request runs of the Projections workflow, never a fork's. |
+| `--ci-workflow <FILE>` | A workflow file (path or file name) whose runs are the Projections workflow for --ci; repeatable. Default: the configuration's ciWorkflows, else the workflows using githubnext/projections on the default branch. Repeatable. |
+| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json), labelled imported unless --ci verifies its attestation; repeatable. Repeatable. |
 | `--in-place` | Extract a commit that is this checkout's HEAD in place even when untracked files (such as CI's build output) are present; tracked files must be unmodified. |
 | `--workspace <STRATEGY>` | Where a toolchain extractor examines a commit that isn't checked out. Default: the user configuration, the environment file's, else automatic. One of: `fresh` — A temporary full copy per run; `worktree` — A persistent linked Git worktree Projections owns, reused and kept prepared; `clone` — A worktree seeded with a copy-on-write clone of the checkout; `sparse` — A worktree holding only the definition's scope; `none` — No copies: only the cache, CI artifacts and in-place extraction. |
 | `--regenerate` | Generate generated values (such as model-written summaries) again instead of reusing the generation store's text for an equal basis. |
@@ -291,8 +295,9 @@ projections mcp [OPTIONS]
 |---|---|
 | `--trust` | Let the tools run repository code (custom extractors) and write repository files outside an explore session. Review the projections' code first. |
 | `--no-cache` | Don't read or write the persistent extraction cache. |
-| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh. |
-| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json); repeatable. Repeatable. |
+| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh: push and same-repository pull request runs of the Projections workflow, never a fork's. |
+| `--ci-workflow <FILE>` | A workflow file (path or file name) whose runs are the Projections workflow for --ci; repeatable. Default: the configuration's ciWorkflows, else the workflows using githubnext/projections on the default branch. Repeatable. |
+| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json), labelled imported unless --ci verifies its attestation; repeatable. Repeatable. |
 | `--in-place` | Extract a commit that is this checkout's HEAD in place even when untracked files (such as CI's build output) are present; tracked files must be unmodified. |
 | `--workspace <STRATEGY>` | Where a toolchain extractor examines a commit that isn't checked out. Default: the user configuration, the environment file's, else automatic. One of: `fresh` — A temporary full copy per run; `worktree` — A persistent linked Git worktree Projections owns, reused and kept prepared; `clone` — A worktree seeded with a copy-on-write clone of the checkout; `sparse` — A worktree holding only the definition's scope; `none` — No copies: only the cache, CI artifacts and in-place extraction. |
 | `--regenerate` | Generate generated values (such as model-written summaries) again instead of reusing the generation store's text for an equal basis. |
@@ -321,8 +326,9 @@ projections view [OPTIONS]
 | `--trust` | Let it run repository code (custom extractors and renderers). Review the projections' code first. A viewer already running without trust is replaced, at the same URL. |
 | `--definition-revision <REVISION>` | The revision whose definition and projection code extract both sides, as compare --definition-revision. Default: working-tree. |
 | `--no-cache` | Don't read or write the persistent extraction cache. |
-| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh. |
-| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json); repeatable. Repeatable. |
+| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh: push and same-repository pull request runs of the Projections workflow, never a fork's. |
+| `--ci-workflow <FILE>` | A workflow file (path or file name) whose runs are the Projections workflow for --ci; repeatable. Default: the configuration's ciWorkflows, else the workflows using githubnext/projections on the default branch. Repeatable. |
+| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json), labelled imported unless --ci verifies its attestation; repeatable. Repeatable. |
 | `--in-place` | Extract a commit that is this checkout's HEAD in place even when untracked files (such as CI's build output) are present; tracked files must be unmodified. |
 | `--workspace <STRATEGY>` | Where a toolchain extractor examines a commit that isn't checked out. Default: the user configuration, the environment file's, else automatic. One of: `fresh` — A temporary full copy per run; `worktree` — A persistent linked Git worktree Projections owns, reused and kept prepared; `clone` — A worktree seeded with a copy-on-write clone of the checkout; `sparse` — A worktree holding only the definition's scope; `none` — No copies: only the cache, CI artifacts and in-place extraction. |
 | `--regenerate` | Generate generated values (such as model-written summaries) again instead of reusing the generation store's text for an equal basis. |
@@ -494,8 +500,9 @@ projections compare [OPTIONS] <BASE>[..<HEAD>]
 | `--container-image <IMAGE>` | Run extractors in this locally prepared container image@sha256; never pulled. |
 | `--container-engine <CONTAINER_ENGINE>` | One of `docker`, `podman`. |
 | `--no-cache` | Don't read or write the persistent extraction cache. |
-| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh. |
-| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json); repeatable. Repeatable. |
+| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh: push and same-repository pull request runs of the Projections workflow, never a fork's. |
+| `--ci-workflow <FILE>` | A workflow file (path or file name) whose runs are the Projections workflow for --ci; repeatable. Default: the configuration's ciWorkflows, else the workflows using githubnext/projections on the default branch. Repeatable. |
+| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json), labelled imported unless --ci verifies its attestation; repeatable. Repeatable. |
 | `--in-place` | Extract a commit that is this checkout's HEAD in place even when untracked files (such as CI's build output) are present; tracked files must be unmodified. |
 | `--workspace <STRATEGY>` | Where a toolchain extractor examines a commit that isn't checked out. Default: the user configuration, the environment file's, else automatic. One of: `fresh` — A temporary full copy per run; `worktree` — A persistent linked Git worktree Projections owns, reused and kept prepared; `clone` — A worktree seeded with a copy-on-write clone of the checkout; `sparse` — A worktree holding only the definition's scope; `none` — No copies: only the cache, CI artifacts and in-place extraction. |
 | `--regenerate` | Generate generated values (such as model-written summaries) again instead of reusing the generation store's text for an equal basis. |
@@ -542,8 +549,9 @@ projections bookmark run [OPTIONS] [IDS]...
 | `--container-image <IMAGE>` | Run extractors in this locally prepared container image@sha256; never pulled. |
 | `--container-engine <CONTAINER_ENGINE>` | One of `docker`, `podman`. |
 | `--no-cache` | Don't read or write the persistent extraction cache. |
-| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh. |
-| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json); repeatable. Repeatable. |
+| `--ci` | Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh: push and same-repository pull request runs of the Projections workflow, never a fork's. |
+| `--ci-workflow <FILE>` | A workflow file (path or file name) whose runs are the Projections workflow for --ci; repeatable. Default: the configuration's ciWorkflows, else the workflows using githubnext/projections on the default branch. Repeatable. |
+| `--artifact <DIR>` | Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json), labelled imported unless --ci verifies its attestation; repeatable. Repeatable. |
 | `--in-place` | Extract a commit that is this checkout's HEAD in place even when untracked files (such as CI's build output) are present; tracked files must be unmodified. |
 | `--workspace <STRATEGY>` | Where a toolchain extractor examines a commit that isn't checked out. Default: the user configuration, the environment file's, else automatic. One of: `fresh` — A temporary full copy per run; `worktree` — A persistent linked Git worktree Projections owns, reused and kept prepared; `clone` — A worktree seeded with a copy-on-write clone of the checkout; `sparse` — A worktree holding only the definition's scope; `none` — No copies: only the cache, CI artifacts and in-place extraction. |
 | `--regenerate` | Generate generated values (such as model-written summaries) again instead of reusing the generation store's text for an equal basis. |

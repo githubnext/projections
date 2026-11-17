@@ -71,13 +71,24 @@ export const ExecutionSchema = define(
       at: Type.Optional(
         Type.String({pattern: '^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$', description: 'When the run happened, in UTC.'}),
       ),
-      official: Type.Optional(Type.Boolean({description: "True for the run the team's CI published: the commit's official extraction."})),
+      official: Type.Optional(
+        Type.Boolean({
+          description:
+            "True for the run the repository's own CI published, authenticated (`ci.authentication`): the commit's official extraction. False for an imported artifact nothing authenticated.",
+        }),
+      ),
       ci: Type.Optional(
         Closed(
           {
             repository: NonEmpty,
             run: Type.Integer({minimum: 1, maximum: Number.MAX_SAFE_INTEGER}),
             workflow: Type.Optional(NonEmpty),
+            authentication: Type.Optional(
+              Type.Enum(['download', 'attestation'], {
+                description:
+                  "How the run was established: `download` when the CLI downloaded the artifact from a run GitHub's API identified as the repository's own Projections workflow, `attestation` when an imported artifact's attestation verified and named such a run. Absent for an unauthenticated import, whose manifest alone names the run.",
+              }),
+            ),
           },
           {description: 'The CI run whose artifact supplied it.'},
         ),

@@ -268,11 +268,12 @@ Every extraction records `provenance.execution`:
 | `tree` | The examined Git tree hash |
 | `prepared` | The prepare steps that applied (ID and key hash) |
 
-Hosts show it as **From CI**, **Local**, **Approximate** or **Stale**. A
-**parity check** (`projections check --parity REV`) extracts a commit locally
-and compares it with CI's artifact for the same commit and definition. It
-measures stability rather than raising an error: "varies between this
-environment and CI run 4242 on 12% of items", naming the first items and fields.
+Hosts show it as **From CI**, **Imported**, **Local**, **Approximate** or
+**Stale**. A **parity check** (`projections check --parity REV`) extracts a
+commit locally and compares it with CI's artifact for the same commit and
+definition. It measures stability rather than raising an error: "varies between
+this environment and CI run 4242 on 12% of items", naming the first items and
+fields.
 
 ## Determinism and authority
 
@@ -283,8 +284,11 @@ measured rather than enforced, and the run CI publishes is a commit's official
 result. Execution follows from that:
 
 - **Authority.** A CI artifact's extraction is `official: true`, with its
-  repository and run; hosts show it for a commit by default. Every run records
-  its environment fingerprint and time (`environment`, `at`).
+  repository and run, when the run is authenticated as the repository's own CI
+  (downloaded from a run GitHub's API identifies, or attested); an
+  unauthenticated import is `official: false`. Hosts show the official one for a
+  commit by default. Every run records its environment fingerprint and time
+  (`environment`, `at`).
 - **Classes decide reuse.** `pure` extractions are cached by tree and reused
   from any environment; `environmental` ones only within the same environment
   fingerprint; `observed` ones are never cached, and a reused CI observation

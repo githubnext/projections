@@ -478,14 +478,27 @@ export function snapshotSection(index, {images, artifactUrl} = {}) {
   return lines
 }
 
+/** The workflow file of a run from its `GITHUB_WORKFLOW_REF` (`owner/repo/.github/workflows/ci.yml@refs/heads/main`). */
+export function workflowPath(workflowRef, repository) {
+  const prefix = `${repository}/`
+  if (!workflowRef?.toLowerCase().startsWith(prefix.toLowerCase())) return undefined
+  const file = workflowRef.slice(prefix.length).split('@')[0]
+  return /^\.github\/workflows\/[A-Za-z0-9._-]+\.ya?ml$/.test(file) ? file : undefined
+}
+
 /**
  * The runs whose artifact may hold a commit's extractions, newest first: successful runs from the Actions API's
- * `workflow_runs` for that `head_sha`.
+ * `workflow_runs` for that `head_sha` that are the repository's own runs of `workflow` (this run's workflow file), for
+ * a push or a pull request whose head is the repository itself. A fork's pull request runs its own workflow files, so
+ * its artifact is never reused.
  */
-export function artifactRuns(response) {
+export function artifactRuns(response, {repository, workflow}) {
   const runs = Array.isArray(response?.workflow_runs) ? response.workflow_runs : []
+  const same = name => typeof name === 'string' && name.toLowerCase() === repository.toLowerCase()
   return runs
     .filter(run => Number.isSafeInteger(run?.id) && run.id > 0 && (run.conclusion === undefined || run.conclusion === 'success'))
+    .filter(run => ['push', 'pull_request'].includes(run.event) && same(run.repository?.full_name) && same(run.head_repository?.full_name))
+    .filter(run => typeof run.path === 'string' && run.path.split('@')[0] === workflow)
     .sort((a, b) => String(b.created_at ?? '').localeCompare(String(a.created_at ?? '')))
     .map(run => run.id)
 }

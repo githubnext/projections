@@ -98,6 +98,20 @@ test('launcherText and readLauncher: what a launcher records survives quoting, o
   assert.deepEqual(readLauncher(undefined), {kind: 'absent'})
 })
 
+test('the launcher says its checkout is gone, printing the path as it is', posixOnly, () => {
+  const base = scratch()
+  const gone = join(base, 'gone `$HOME` "\\n\'')
+  const path = join(base, 'projections-tools')
+  writeFileSync(path, launcherText(path, {checkout: gone, node: process.execPath}, 'linux'))
+  chmodSync(path, 0o755)
+  const run = spawnSync(path, [], {encoding: 'utf8'})
+  assert.equal(run.status, 3)
+  assert.equal(
+    run.stderr,
+    `projections-tools: the linked checkout is gone (moved or deleted); run \`npm run tools -- link\` in a checkout: ${gone}\n`,
+  )
+})
+
 test('link: dry run, write, idempotent, relink another checkout, and never a foreign file', () => {
   const base = scratch()
   const home = join(base, 'home')

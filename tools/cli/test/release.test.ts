@@ -3,7 +3,7 @@ import {mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:
 import {tmpdir} from 'node:os'
 import {dirname, join} from 'node:path'
 import test from 'node:test'
-import {tagVersion} from '../src/lib/release.ts'
+import {table, tagVersion} from '../src/lib/release.ts'
 import {setReleaseVersion} from '../src/lib/release-bump.ts'
 import {versionProblems} from '../src/lib/release-check.ts'
 
@@ -50,6 +50,14 @@ test('a release tag names its version', () => {
   assert.equal(tagVersion('v0.2.0-beta.1'), '0.2.0-beta.1')
   assert.equal(tagVersion('0.1.0'), undefined)
   assert.equal(tagVersion('v0'), undefined)
+})
+
+test('a TOML table is found by its literal name', () => {
+  const text = '[a+b]\nx = 1\n[aab]\ny = 2\n[a\\b]\nz = 3\n[a.b]\nw = 4\n'
+  assert.equal(table(text, 'a+b')?.body, '\nx = 1\n')
+  assert.equal(table(text, 'a\\b')?.body, '\nz = 3\n')
+  assert.equal(table(text, 'a.b')?.body, '\nw = 4\n')
+  assert.equal(table(text, 'a*'), undefined)
 })
 
 test('setting the version changes every shipped manifest, their dependencies and both lockfiles, and nothing else', () => {

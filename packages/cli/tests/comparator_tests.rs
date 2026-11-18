@@ -397,8 +397,8 @@ fn revision_cases_extract_with_the_working_tree_definition_or_are_skipped() {
         fs::write(root.join(".projections/deps.json"), serde_json::to_vec(&definition).unwrap()).unwrap();
         git(root, &["add", "."]);
         git(root, &["commit", "--quiet", "-m", "Extractor"]);
-        let (trusted, _) = step(root, "deps", &["--trust"]);
-        assert_eq!(trusted["status"], "pass", "{trusted}");
-        assert_eq!(trusted["message"], "2 cases pass");
+        let (with_trust, _) = step(root, "deps", &["--trust"]);
+        assert_eq!(with_trust["status"], "pass", "{with_trust}");
+        assert_eq!(with_trust["message"], "2 cases pass");
     }
 }

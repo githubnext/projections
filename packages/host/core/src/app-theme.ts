@@ -217,7 +217,38 @@ function onEmphasis(bg: Rgba, accent: Rgba): Rgba {
 export function fontList(value: string | undefined): string | undefined {
   const text = value?.trim().replace(/\s+/g, ' ')
   if (!text || text.length > rendererLimits.tokenLength) return undefined
-  return /^(?:"[^"\\;{}<>]+"|'[^'\\;{}<>]+'|[\w -]+)(?:\s*,\s*(?:"[^"\\;{}<>]+"|'[^'\\;{}<>]+'|[\w -]+))*$/.test(text) ? text : undefined
+  return isFontList(text) ? text : undefined
+}
+
+const quotedName = /^[^\\;{}<>]+$/
+const plainNameCharacter = /[\w -]/
+
+/**
+ * Whether the text (spaces collapsed) is names separated by commas: each `"quoted"`, `'quoted'` (no backslashes,
+ * semicolons, braces or angle brackets inside) or plain word characters, spaces and hyphens. One pass, so a long run
+ * of spaces and commas can't make it backtrack.
+ */
+function isFontList(text: string): boolean {
+  let index = 0
+  for (;;) {
+    let next = index
+    while (text[next] === ' ') next++
+    const quote = text[next]
+    if (quote === '"' || quote === "'") {
+      const close = text.indexOf(quote, next + 1)
+      if (close < 0 || !quotedName.test(text.slice(next + 1, close))) return false
+      index = close + 1
+      while (text[index] === ' ') index++
+    } else {
+      // A plain name takes the spaces around it, and may be only spaces: `a, ,b` is three names.
+      const start = index
+      while (index < text.length && plainNameCharacter.test(text[index]!)) index++
+      if (index === start) return false
+    }
+    if (index === text.length) return true
+    if (text[index] !== ',') return false
+    index++
+  }
 }
 
 const known = new Set<string>(themeTokenNames)

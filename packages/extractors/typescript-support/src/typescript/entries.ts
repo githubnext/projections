@@ -31,17 +31,29 @@ function mappings(manifest: Record<string, unknown>): [string, unknown][] {
   return []
 }
 
-/** Every program source a wildcard export target matches, as its own subpath. */
+/**
+ * Every program source a wildcard export target matches, as its own subpath. As in Node's subpath patterns, the
+ * subpath has one `*`, and every `*` in the target stands for the same text, which takes the subpath's `*`'s place.
+ */
 function addWildcard(project: Project, add: Add, pkg: Package, subpath: string, target: string, relative: string): void {
-  const pattern = glob(slash(path.resolve(project.root, relative)))
-  const matches = project.sources.filter(item => pattern.test(slash(item.source.fileName)))
-  if (!matches.length) throw new Error(`Package export wildcard ${code(target)} matched no program sources; set \`inputs.entrypoints\``)
-  for (const {source} of matches) {
-    const prefix = path.resolve(project.root, relative).split('*')[0]!
-    const suffix = target.split('*')[1] ?? ''
-    const replacement = native(source.fileName).slice(prefix.length, suffix ? -suffix.length : undefined)
-    add(pkg, subpath.replace('*', slash(replacement)), slash(path.relative(project.root, source.fileName)))
+  const [head, tail, ...more] = subpath.split('*')
+  if (tail === undefined || more.length)
+    throw new Error(
+      `Package export ${code(pkg.name)} ${code(subpath)} maps to wildcard ${code(target)} without exactly one \`*\` of its own; set \`inputs.entrypoints\``,
+    )
+  const resolved = path.resolve(project.root, relative)
+  const pattern = glob(slash(resolved))
+  const pieces = resolved.split('*')
+  const fixed = pieces.join('').length
+  let matched = false
+  for (const {source} of project.sources.filter(item => pattern.test(slash(item.source.fileName)))) {
+    const file = native(source.fileName)
+    const replacement = file.slice(pieces[0]!.length, pieces[0]!.length + (file.length - fixed) / (pieces.length - 1))
+    if (pieces.join(replacement) !== file) continue
+    matched = true
+    add(pkg, `${head}${slash(replacement)}${tail}`, slash(path.relative(project.root, source.fileName)))
   }
+  if (!matched) throw new Error(`Package export wildcard ${code(target)} matched no program sources; set \`inputs.entrypoints\``)
 }
 
 function addPackage(project: Project, add: Add, pkg: Package): void {

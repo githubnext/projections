@@ -1,6 +1,6 @@
 {
   "name": "@githubnext/projections-comparator-runtime",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -42,7 +42,7 @@
     "prepack": "npm run build"
   },
   "devDependencies": {
-    "@githubnext/projections-engine": "0.1.0",
+    "@githubnext/projections-engine": "0.2.0",
     "playwright": "^1.56.1"
   },
   "engines": {

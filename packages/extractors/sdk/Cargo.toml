@@ -14,7 +14,7 @@ categories = ["development-tools"]
 [dependencies]
 anyhow = "1"
 # The Engine's strict JSON parser, which rejects duplicate keys and unsafe numbers.
-projections-engine = { path = "../../engine", version = "0.1.0", default-features = false }
+projections-engine = { path = "../../engine", version = "0.2.0", default-features = false }
 regex = "1"
 serde_json = { version = "1", features = ["float_roundtrip"] }
 yaml-rust2 = { version = "0.13.0", default-features = false }

@@ -17,11 +17,18 @@ export const fillStyle = (fill: boolean, height: string) => ({
   minHeight: fill ? '0' : '',
 })
 
+/** A renderer bundle's URL for a frame: its fragment carries the channel, the host's origin and the color mode. */
+export function frameUrl(options: RendererFrameOptions, view: Window, channel: string): URL {
+  const url = new URL(options.url, view.location.href)
+  url.hash = rendererFragment(channel, view.location.origin, options.init.theme.colorMode)
+  return url
+}
+
 /**
- * The sandboxed frame for a renderer bundle, transparent until revealed, its URL fragment carrying the channel. Not
- * yet attached.
+ * The sandboxed frame for a renderer bundle, transparent until revealed, loading `url` (with its fragment carrying the
+ * channel) unless the frame's document is opened later. Not yet attached.
  */
-export function frameElement(options: RendererFrameOptions, view: Window, channel: string, fill: boolean): HTMLIFrameElement {
+export function frameElement(options: RendererFrameOptions, url: URL | undefined, fill: boolean): HTMLIFrameElement {
   const iframe = options.container.ownerDocument.createElement('iframe')
   iframe.setAttribute('sandbox', rendererSandbox)
   iframe.setAttribute('allow', '')
@@ -43,9 +50,7 @@ export function frameElement(options: RendererFrameOptions, view: Window, channe
     opacity: '0',
   })
   iframe.dataset.revealed = 'false'
-  const url = new URL(options.url, view.location.href)
-  url.hash = rendererFragment(channel, view.location.origin, options.init.theme.colorMode)
-  iframe.src = url.href
+  if (url) iframe.src = url.href
   return iframe
 }
 

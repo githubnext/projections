@@ -19,10 +19,45 @@ const VALUE_LENGTH: usize = 512;
 /// The longest seed, as JSON text (`themeSeedMaxLength`).
 const SEED_LENGTH: usize = 4096;
 
-/// A theme seed from `--theme`: inline JSON (starting with `{`), else a JSON
-/// file's path. Returns its compact JSON, the value of the page's `?theme=`.
+/// Claude Code's Preview pane, from the Claude app's own design tokens (its
+/// `gray` and `blue` ramps): in dark mode the pane's backdrop, which shows as a
+/// thin inset either side of the page, so the page meets it seamlessly, and in
+/// light mode its white surface; the app's text, secondary text, rules (its
+/// rule color at the opacity it draws them) and link blue; and the system
+/// families its own fonts fall back to, since a seed loads none.
+const CLAUDE: &str = r##"{
+  "light": {
+    "background": "#ffffff",
+    "text": "#131313",
+    "muted": "#797979",
+    "border": "rgba(30, 30, 30, 0.12)",
+    "accent": "#1757ac",
+    "sans": "ui-sans-serif, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+    "mono": "\"SF Mono\", ui-monospace, Menlo, Consolas, monospace"
+  },
+  "dark": {
+    "background": "#131313",
+    "text": "#f9f9f9",
+    "muted": "#959595",
+    "border": "rgba(224, 224, 224, 0.15)",
+    "accent": "#9dc8f7",
+    "sans": "ui-sans-serif, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+    "mono": "\"SF Mono\", ui-monospace, Menlo, Consolas, monospace"
+  }
+}"##;
+
+/// The built-in seeds, by name: apps that show the viewer but can't give it
+/// their colors.
+pub const PRESETS: &[(&str, &str)] = &[("claude", CLAUDE)];
+
+/// A theme seed from `--theme`: a built-in seed's name (`claude`), inline JSON
+/// (starting with `{`), else a JSON file's path (a file named like a built-in
+/// seed is `./claude`). Returns its compact JSON, the value of the page's
+/// `?theme=`.
 pub fn read(argument: &str) -> Result<String> {
-    let text = if argument.trim_start().starts_with('{') {
+    let text = if let Some((_, seed)) = PRESETS.iter().find(|(name, _)| *name == argument.trim()) {
+        (*seed).to_owned()
+    } else if argument.trim_start().starts_with('{') {
         argument.to_owned()
     } else {
         let path = Path::new(argument);
@@ -201,6 +236,20 @@ mod tests {
             format!(
                 "Showing A in the viewer: http://h/T/?{theme}\nIt shows A at http://h/T/?{theme}; side shows B at http://h/T/?viewer=side. See http://h/T/?{theme}."
             )
+        );
+    }
+
+    #[test]
+    fn a_built_in_seed_is_named() {
+        let seed: Value = serde_json::from_str(&read("claude").unwrap()).unwrap();
+        assert_eq!(seed["dark"]["background"], "#131313");
+        assert_eq!(seed["light"]["background"], "#ffffff");
+        // A file named like a built-in seed is read by its path.
+        let directory = tempfile::tempdir().unwrap();
+        std::fs::write(directory.path().join("claude"), r##"{"light":{"background":"#fff"}}"##).unwrap();
+        assert_eq!(
+            read(directory.path().join("claude").to_str().unwrap()).unwrap(),
+            r##"{"light":{"background":"#fff"}}"##
         );
     }
 

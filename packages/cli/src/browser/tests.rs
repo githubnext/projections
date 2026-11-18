@@ -51,14 +51,44 @@ fn launches_wait_for_a_free_slot() {
     let waited = gate::acquire_in(directory.path(), &cancel, Duration::from_millis(200)).unwrap();
     assert!(!waited.held());
     assert!(started.elapsed() >= Duration::from_millis(200));
-    // A released slot is taken by the next launch.
+    // A released slot is taken by the next launch, once it is free: a child another thread forks holds a copy of the
+    // slot's descriptor, and so its lock, until it execs (the descriptor closes on exec).
+    #[cfg(unix)]
+    let forking = forking_child(Duration::from_millis(300));
     drop(held);
-    assert!(gate::acquire_in(directory.path(), &cancel, Duration::ZERO).unwrap().held());
-    let _held: Vec<_> = (0..2)
-        .map(|_| gate::acquire_in(directory.path(), &cancel, Duration::ZERO).unwrap())
+    assert!(gate::acquire_in(directory.path(), &cancel, Duration::from_secs(10)).unwrap().held());
+    #[cfg(unix)]
+    forking.join().unwrap();
+    let taken: Vec<_> = (0..2)
+        .map(|_| gate::acquire_in(directory.path(), &cancel, Duration::from_secs(10)).unwrap())
         .collect();
+    assert!(taken.iter().all(|slot| slot.held()));
     cancel.store(true, Ordering::SeqCst);
     assert!(gate::acquire_in(directory.path(), &cancel, Duration::from_secs(60)).is_err());
+}
+
+/// Spawns `true` on another thread with a pause of `pause` between fork and exec, as a test thread's spawn can take,
+/// and returns once the child is forked: until it execs, it holds a copy of every descriptor this process has open.
+#[cfg(unix)]
+fn forking_child(pause: Duration) -> std::thread::JoinHandle<()> {
+    use std::os::unix::process::CommandExt;
+    let (forked, wait) = std::sync::mpsc::channel();
+    let thread = std::thread::spawn(move || {
+        let mut command = std::process::Command::new("true");
+        // SAFETY: the pause only sleeps, which is async-signal-safe.
+        unsafe {
+            command.pre_exec(move || {
+                std::thread::sleep(pause);
+                Ok(())
+            });
+        }
+        forked.send(()).unwrap();
+        command.status().unwrap();
+    });
+    wait.recv().unwrap();
+    // The send comes just before the spawn; give the fork a moment to happen.
+    std::thread::sleep(Duration::from_millis(50));
+    thread
 }
 
 /// A stand-in browser that records each start in `starts`, then runs `body`.

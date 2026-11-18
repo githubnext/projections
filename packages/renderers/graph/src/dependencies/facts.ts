@@ -103,6 +103,8 @@ export function dependencyNouns(model: ComparisonModel): {[kind: string]: {singu
   for (const [kind, members] of kinds) if (members) nouns[kind] = noun('workspace', 'workspaces')
   if (kinds.has('project')) nouns['project'] = noun('project', 'projects')
   if (kinds.has('target-framework')) nouns['target-framework'] = noun('target framework', 'target frameworks')
+  if (kinds.has('target')) nouns['target'] = noun('target', 'targets')
+  if (kinds.has('product')) nouns['product'] = noun('product', 'products')
   for (const kind of ['package', 'external-package']) if (kinds.has(kind) && !nouns[kind]) nouns[kind] = noun('package', 'packages')
   const dependencyKinds: {[kind: string]: string} = {
     dependencies: 'dependency',
@@ -113,6 +115,8 @@ export function dependencyNouns(model: ComparisonModel): {[kind: string]: {singu
     optionalDependencies: 'optional dependency',
   }
   for (const [kind, singular] of Object.entries(dependencyKinds)) nouns[kind] = noun(singular, `${singular.slice(0, -1)}ies`)
+  // A Swift product's targets.
+  nouns['includes'] = noun('product target', 'product targets')
   for (const kind of membershipKinds) nouns[kind] = false
   return nouns
 }

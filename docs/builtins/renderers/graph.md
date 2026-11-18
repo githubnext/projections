@@ -37,15 +37,16 @@ Built-in extractors that draw with it by default:
 
 <!-- generated: extractors -->
 
-| Built-in extractor                                                      | Its default `renderer` |
-| ----------------------------------------------------------------------- | ---------------------- |
-| [`workspace-dependencies`](../extractors/workspace-dependencies.md)     | `dependencies`         |
-| [`cargo-dependencies`](../extractors/cargo-dependencies.md)             | `dependencies`         |
-| [`nuget-dependencies`](../extractors/nuget-dependencies.md)             | `dependencies`         |
-| [`terraform-infrastructure`](../extractors/terraform-infrastructure.md) | `infrastructure`       |
-| [`azure-what-if`](../extractors/azure-what-if.md)                       | `infrastructure`       |
-| [`github-actions-jobs`](../extractors/github-actions-jobs.md)           | `dag`                  |
-| [`scip-file-references`](../extractors/scip-file-references.md)         | `graph`                |
+| Built-in extractor                                                          | Its default `renderer` |
+| --------------------------------------------------------------------------- | ---------------------- |
+| [`workspace-dependencies`](../extractors/workspace-dependencies.md)         | `dependencies`         |
+| [`cargo-dependencies`](../extractors/cargo-dependencies.md)                 | `dependencies`         |
+| [`swift-package-dependencies`](../extractors/swift-package-dependencies.md) | `dependencies`         |
+| [`nuget-dependencies`](../extractors/nuget-dependencies.md)                 | `dependencies`         |
+| [`terraform-infrastructure`](../extractors/terraform-infrastructure.md)     | `infrastructure`       |
+| [`azure-what-if`](../extractors/azure-what-if.md)                           | `infrastructure`       |
+| [`github-actions-jobs`](../extractors/github-actions-jobs.md)               | `dag`                  |
+| [`scip-file-references`](../extractors/scip-file-references.md)             | `graph`                |
 
 <!-- end generated: extractors -->
 
@@ -146,10 +147,10 @@ path of `references` to it and recedes the rest, and the footer says how many
 ### `dependencies`
 
 A package dependency graph, left to right from the workspace members
-(`data.workspaceMember`) or NuGet projects and target frameworks: what each
-pulls in, directly and transitively. A card names its kind (Workspace, Package,
-or the extractor's own, such as Project), with the package name and its version
-as code.
+(`data.workspaceMember`), NuGet projects and target frameworks, or Swift targets
+and products: what each pulls in, directly and transitively. A card names its
+kind (Workspace, Package, or the extractor's own, such as Project), with the
+package name and its version as code.
 
 Lockfiles resolve hundreds of packages, so it shows what explains a change and
 summarizes the rest:

@@ -134,6 +134,30 @@ test('NuGet projects and target frameworks are roots; membership relationships a
   )
 })
 
+test('Swift package targets and products are roots; the packages they use are direct dependencies', () => {
+  const entity = (id, kind) => ({id, kind, label: id, data: {}})
+  const edge = (kind, from, to) => ({id: `${kind}:${from}:${to}`, kind, from, to})
+  const extraction = {
+    protocolVersion: 0,
+    schema: 'graph/v0',
+    entities: [
+      entity('product:Harbor', 'product'),
+      entity('target:Harbor', 'target'),
+      entity('target:HarborCore', 'target'),
+      entity('package:swift-log', 'external-package'),
+      entity('package:swift-atomics', 'external-package'),
+    ],
+    relationships: [
+      edge('includes', 'product:Harbor', 'target:Harbor'),
+      edge('depends-on', 'target:Harbor', 'target:HarborCore'),
+      edge('depends-on', 'target:HarborCore', 'package:swift-log'),
+    ],
+  }
+  const view = dependencyView(extractionModel(extraction), [], new Set())
+  assert.deepEqual([...view.roots].sort(), ['product:Harbor', 'target:Harbor', 'target:HarborCore'])
+  assert.ok(view.direct.has('package:swift-log'))
+})
+
 test('version changes read as upgrades and downgrades in icon and word', () => {
   assert.equal(compareVersions('19.1.0', '19.2.0'), 'upgraded')
   assert.equal(compareVersions('^18.3.0', '^17.0.2'), 'downgraded')

@@ -168,7 +168,8 @@ export function hostChromeVariables(
     '--pj-accent-foreground': t('color-fg'),
     '--pj-border': t('color-border'),
     '--pj-input': t('color-border-emphasis'),
-    '--pj-control-border': t('color-divider'),
+    // Controls (inputs, selects, checkboxes, slider tracks) keep a 3:1 boundary even where rules are an app's quiet ones.
+    '--pj-control-border': (tokens as Record<string, string | undefined>)['color-connector'] ?? t('color-divider'),
     '--pj-ring': t('color-focus'),
     '--pj-lens': t('color-accent'),
     '--pj-lens-foreground': t('color-fg-on-emphasis'),

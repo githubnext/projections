@@ -1,6 +1,6 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {appThemeTokens, formatThemeSeed, parseThemeSeed, parseThemeSeedText, themeSeedTokens} from '../dist/index.js'
+import {appThemeTokens, hostChromeVariables, formatThemeSeed, parseThemeSeed, parseThemeSeedText, themeSeedTokens} from '../dist/index.js'
 
 /** A warm off-white harness and its dark twin. */
 const harness = {
@@ -24,6 +24,10 @@ test("a seed's rules and card edges are its border as given, and lines that carr
   assert.equal(tokens['color-divider'], '#303030')
   assert.equal(appThemeTokens({background: '#191919', border: '#303030'}, 'dark')['color-divider'], tokens['color-connector'])
   assert.equal(appThemeTokens({background: '#191919', border: '#303030'}, 'dark')['color-connector'], undefined)
+  // The chrome's rules are the seed's; its controls keep their 3:1 boundary.
+  const chrome = hostChromeVariables(tokens, 'dark')
+  assert.equal(chrome['--pj-divider'], '#303030')
+  assert.equal(chrome['--pj-control-border'], tokens['color-connector'])
   // Without a border, a seed's divider keeps the 3:1 edge, and there is no separate connector.
   const plain = themeSeedTokens(parseThemeSeed({dark: {background: '#191919'}}).seed, 'dark')
   assert.equal(plain['color-connector'], undefined)

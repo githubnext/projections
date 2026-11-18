@@ -260,7 +260,11 @@ and the CLI checks the same. The seed lives only in its link, never in the
 viewer's state or on the machine, so a page opened elsewhere (the Copilot canvas
 on the same viewer) keeps its own theme. Per page, a seed wins over the app's
 theme, which wins over the default; a mode the seed leaves out keeps the page's
-own. The format and how an agent finds its app's colors are in
+own. One seed is built in, by name: `--theme claude`, Claude Code's Preview
+pane, from the Claude app's design tokens, in both modes. Its dark background is
+the pane's own backdrop, which the pane shows as a 6 px inset either side of the
+page, so the page meets it seamlessly. The format and how an agent finds its
+app's colors are in
 [the agent tools](../runner/agent-tools.md#a-theme-seed-for-another-apps-browser-pane).
 
 ### 4. One tool catalog, answered by whichever surface shows the view
@@ -486,6 +490,45 @@ a second, lesser view of the same thing next to it.
   by an agent's `open_projection` in `projections mcp` inherits that server's
   trust; `projections view show` starts one with `--trust` only when given.
 - Renderers run in the Inspector's sandboxed frames with their own policy
-  (`RENDERER_CSP`), as in VS Code.
+  (`RENDERER_CSP`), as in VS Code. Where a browser won't load their URL, the
+  page opens their documents itself, in the same frames, under the same policy
+  (below).
+
+### Renderer frames a browser won't load
+
+Claude Code's Preview pane guards loopback servers: it classifies each request
+by the origin of the frame that makes it, counts an opaque origin (`null`) as
+external, and cancels an external request to a loopback address as a client
+block (`ERR_BLOCKED_BY_CLIENT`). A renderer frame is sandboxed into an opaque
+origin, so its navigation to the viewer's `renderers/…/index.html` is cancelled,
+although the page's own requests to the same server go through. The frame shows
+the browser's error page and its renderer never starts.
+
+A renderer says it is ready as its script starts, before its document finishes
+loading. So when a frame's document loads and its renderer hasn't answered
+within 1.5 seconds (or the ready timeout passes first), the frame opens the
+renderer's document itself, once: the page fetches it from its own origin,
+stamps its scripts with the page's nonce, and loads it into the same frame as a
+Blob document with the same fragment (the channel). Once one frame needed this,
+later frames on the page start that way. VS Code's webview opens every renderer
+document so.
+
+Isolation is the same. The frame keeps `sandbox="allow-scripts"`, so the
+document is in an opaque origin, and the host still accepts messages only from
+an opaque origin on the frame's channel. A Blob document has no response
+headers, so the page puts the renderer policy first in its head as a `<meta>`
+element (every directive but `sandbox`, which the frame's attribute supplies)
+before anything of the bundle's, whatever metadata the bundle has: policies only
+narrow, so nothing after it can loosen it. The document also inherits the page's
+policy on top. So the viewer's page policy, sent with each page response, admits
+exactly what the renderer policy grants and nothing a document can use to escape
+it: scripts carrying that response's random nonce (only the page's code reads
+it, and it stamps it only on renderer documents), `blob:` frames, `data:` fonts
+and media, and `blob:` workers and media. The renderer policy still refuses
+every request and frame, and the Blob URL is revoked once its renderer is ready.
+What starts this is only the absence of a renderer's `ready`, never a message or
+request of the renderer's: a renderer can't ask for it, and the document it gets
+is its own bundle under the same policy.
+
 - The page shows no paths, commands or raw errors; diagnostics go only to the
   agent.

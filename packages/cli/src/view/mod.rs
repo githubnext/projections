@@ -51,9 +51,31 @@ use show::show;
 use state::{Chooser, ViewState};
 
 /// The page's policy: the Inspector's, except that it may be framed (the
-/// Copilot app shows it in a canvas). Framing grants nothing: the page has no
-/// writes, and a framer must already know the token.
-pub const VIEWER_CSP: &str = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; frame-src 'self' http://localhost:* http://127.0.0.1:*; base-uri 'self'";
+/// Copilot app shows it in a canvas), and that it admits renderer documents
+/// the page opens itself. Framing grants nothing: the page has no writes, and a
+/// framer must already know the token.
+///
+/// A browser that won't load a renderer's URL into its sandboxed frame (Claude
+/// Code's Preview pane refuses loopback requests from opaque origins) gets the
+/// renderer's document from the page as a Blob document in the same frame. A
+/// Blob document inherits this policy on top of its own, so this policy allows
+/// what the renderer policy does: `blob:` frames, scripts by this response's
+/// `nonce` (the page stamps it on a renderer document's scripts, and on its
+/// own script, where its code reads it), `data:` fonts and media, and `blob:`
+/// workers and media. The renderer's own policy, from its document, still
+/// forbids requests and frames.
+pub fn viewer_csp(nonce: &str) -> String {
+    format!(
+        "default-src 'self'; script-src 'self' 'nonce-{nonce}' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self'; frame-src 'self' blob: http://localhost:* http://127.0.0.1:*; base-uri 'self'"
+    )
+}
+
+/// A fresh script nonce for one page response: 128 random bits, as hex.
+pub(crate) fn script_nonce() -> String {
+    let mut bytes = [0u8; 16];
+    rand::rng().fill_bytes(&mut bytes);
+    bytes.iter().map(|byte| format!("{byte:02x}")).collect()
+}
 const MAX_RESPONSE_BYTES: usize = 64 * 1024 * 1024;
 /// How long a stopping viewer lets its open requests finish: a page's event streams never do on their own.
 const SHUTDOWN_GRACE: Duration = Duration::from_secs(2);

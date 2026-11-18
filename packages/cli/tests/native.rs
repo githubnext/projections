@@ -11,6 +11,10 @@ use std::{
     time::{Duration, Instant},
 };
 
+#[cfg(unix)]
+#[path = "../src/test_support.rs"]
+mod test_support;
+
 fn git(root: &Path, args: &[&str]) -> String {
     let output = Command::new("git")
         .args(["-c", "core.hooksPath=/dev/null", "-c", "commit.gpgsign=false"])
@@ -521,14 +525,21 @@ fn native_pr_acquires_actual_immutable_git_objects_and_never_grants_trust() {
     let receipt = tools.path().join("fetch-argv");
     let gh = tools.path().join("gh");
     let git = tools.path().join("git");
-    fs::write(&gh, format!("#!/bin/sh\n[ \"$1\" = api ] || exit 2\nprintf '%s' '{}'\n", metadata)).unwrap();
-    fs::write(&git,format!("#!/bin/sh\nfor argument in \"$@\"; do\nif [ \"$argument\" = fetch ]; then\nprintf '%s\\0' \"$@\" > '{}'\nexec '{}' --git-dir \"$PWD\" -c protocol.file.allow=always fetch --quiet --no-auto-maintenance '{}' '{}:refs/projections/base' '{}:refs/projections/head'\nfi\ndone\nexec '{}' \"$@\"\n",receipt.display(),actual_git.display(),root.path().display(),before,after,actual_git.display())).unwrap();
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        for file in [&git, &gh] {
-            fs::set_permissions(file, fs::Permissions::from_mode(0o755)).unwrap();
-        }
+    let gh_script = format!("#!/bin/sh\n[ \"$1\" = api ] || exit 2\nprintf '%s' '{}'\n", metadata);
+    let git_script = format!(
+        "#!/bin/sh\nfor argument in \"$@\"; do\nif [ \"$argument\" = fetch ]; then\nprintf '%s\\0' \"$@\" > '{}'\nexec '{}' --git-dir \"$PWD\" -c protocol.file.allow=always fetch --quiet --no-auto-maintenance '{}' '{}:refs/projections/base' '{}:refs/projections/head'\nfi\ndone\nexec '{}' \"$@\"\n",
+        receipt.display(),
+        actual_git.display(),
+        root.path().display(),
+        before,
+        after,
+        actual_git.display()
+    );
+    for (file, script) in [(&gh, &gh_script), (&git, &git_script)] {
+        #[cfg(unix)]
+        test_support::write_executable(file, script);
+        #[cfg(not(unix))]
+        fs::write(file, script).unwrap();
     }
     let output = Command::new(env!("CARGO_BIN_EXE_projections"))
         .args(["pr", "11", "-R", "example/tiny", "--json", "--id", "files", "--id", "custom"])

@@ -40,6 +40,8 @@ pub mod snapshot;
 pub mod stdio;
 pub(crate) mod supervision;
 pub mod sweep;
+#[cfg(test)]
+mod test_support;
 pub mod tools;
 pub mod view;
 pub mod workspace;

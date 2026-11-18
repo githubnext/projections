@@ -639,6 +639,9 @@ test('action.yml passes inputs through the environment, pins its actions and kee
     if (step.run) assert.equal(step.run.includes('${{'), false, 'Expressions must enter through env, not shell text')
     if (step.uses) assert.match(step.uses, /^actions\/(?:upload-artifact|attest)@[a-f0-9]{40}$/)
   }
+  // The workflow dependency lockfile locks them for CI's `uses: ./` of this action through a never-run composite action.
+  const uses = file => new Set(parse(readFileSync(path.join(root, file), 'utf8')).runs.steps.flatMap(step => step.uses ?? []))
+  assert.deepEqual(uses('.github/actions/action-dependencies/action.yml'), uses('action.yml'))
   // Attesting is opt-in (it needs id-token and attestations write), covers the manifest, and skips forks' pull requests.
   const attest = action.runs.steps.find(step => step.id === 'attest')
   assert.equal(action.inputs.attest.default, 'false')

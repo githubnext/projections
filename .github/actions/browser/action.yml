@@ -33,7 +33,7 @@ runs:
         sudo rm -rf /usr/local/lib/android /usr/local/.ghcup /opt/ghc /usr/share/swift \
           /usr/local/julia* /opt/hostedtoolcache/PyPy /opt/hostedtoolcache/CodeQL
         df -h /
-    - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+    - uses: actions/setup-node@v6.5.0
       with:
         node-version-file: ${{ inputs.workspace }}/.node-version
         cache: npm
@@ -61,7 +61,7 @@ runs:
           npm run test:browser --workspace "$SUITE" -- ${PROJECT:+"--project=$PROJECT"} ${SHARD:+"--shard=$SHARD"}
         fi
     - if: failure()
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      uses: actions/upload-artifact@v7.0.2
       with:
         name: ${{ steps.run.outputs.artifact }}
         path: |

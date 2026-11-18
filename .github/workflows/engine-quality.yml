@@ -25,10 +25,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@v6.1.0
         with:
           persist-credentials: false
-      - uses: ./.github/actions/rust-quality
+      - uses: $/.github/actions/rust-quality
         with:
           task: coverage
   # Mutation testing of the pull request's diff, in 6 round-robin shards. Measured on a 674-mutant diff (one unsharded
@@ -46,11 +46,11 @@ jobs:
       matrix:
         shard: [0, 1, 2, 3, 4, 5]
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@v6.1.0
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: ./.github/actions/rust-quality
+      - uses: $/.github/actions/rust-quality
         with:
           task: mutants-diff
           base-ref: ${{ github.base_ref }}
@@ -77,10 +77,10 @@ jobs:
       matrix:
         shard: [0, 1, 2, 3]
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@v6.1.0
         with:
           persist-credentials: false
-      - uses: ./.github/actions/rust-quality
+      - uses: $/.github/actions/rust-quality
         with:
           task: mutants
           shard: ${{ matrix.shard }}/4

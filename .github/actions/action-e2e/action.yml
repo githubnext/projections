@@ -10,6 +10,8 @@ runs:
       shell: bash
       run: node packages/integrations/github-action/test/e2e/fixture.mjs "$RUNNER_TEMP/projections-e2e"
     - id: action
+      # The checkout's action, from the workspace that npm run build built, not `$/`, a fresh copy at the commit. Its
+      # actions are locked for the workflow by .github/actions/action-dependencies.
       uses: ./
       env:
         # In place of this workflow's own event: the fixture's pull request.

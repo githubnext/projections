@@ -10,7 +10,14 @@ import {assetName, vsce} from '../../integrations/vscode/scripts/release-asset.m
 
 const read = file => readFile(new URL(`../../../${file}`, import.meta.url), 'utf8')
 const workflow = async file => YAML.parse(await read(`.github/workflows/${file}`))
-const pinned = /^[\w.-]+\/[\w./-]+@[a-f0-9]{40}$/
+const lockfile = YAML.parse(await read('.github/workflows/actions.lock'))
+/** Asserts a workflow runs an action at an exact release tag that the workflow dependency lockfile locks for it. */
+function assertLocked(file, uses, message = uses) {
+  assert.match(uses, /^[\w.-]+\/[\w./-]+@v\d+\.\d+\.\d+$/, message)
+  const [action, ref] = uses.split('@')
+  const key = `${action.split('/').slice(0, 2).join('/')}@${ref}`
+  assert.ok(lockfile.workflows[`.github/workflows/${file}`]?.includes(key), `${message} is locked for ${file}`)
+}
 const assets = {
   'aarch64-apple-darwin': 'darwin-arm64',
   'x86_64-apple-darwin': 'darwin-amd64',
@@ -61,7 +68,7 @@ test('dist releases every target natively with attestations, no source tarball a
   for (const target of [...targets, 'global'])
     assert.match(runners, new RegExp(`^${target} = "[\\w.-]+"$`, 'm'), `${target} needs a runner`)
   const commits = toml.split('[dist.github-action-commits]')[1].split(/^\[/m)[0]
-  for (const line of commits.trim().split('\n')) assert.match(line, /^"[\w/-]+" = "[a-f0-9]{40}"/, line)
+  for (const line of commits.trim().split('\n')) assert.match(line, /^"[\w/-]+" = "v\d+\.\d+\.\d+"$/, line)
   assert.equal(setting(toml, 'plan-jobs'), '["./release-inputs"]')
   assert.equal(setting(toml, 'global-artifacts-jobs'), '["./release-proof"]')
   assert.equal(setting(toml, 'publish-jobs'), '["./release-approval"]')
@@ -79,7 +86,7 @@ test('the generated workflow pins every action and announces only after every pr
         /^\$\/\.github\/workflows\/(release-inputs|release-proof|release-approval|publish-schemas|publish-npm|move-major-tag)\.yml$/,
         name,
       )
-    for (const step of job.steps ?? []) if (step.uses) assert.match(step.uses, pinned, `${name}: ${step.uses}`)
+    for (const step of job.steps ?? []) if (step.uses) assertLocked('release.yml', step.uses, `${name}: ${step.uses}`)
   }
   assert.ok(release.jobs.host.needs.includes('custom-release-proof'))
   assert.match(release.jobs.host.if, /needs\.custom-release-proof\.result == 'success'/)
@@ -116,7 +123,7 @@ test('custom release jobs pin actions, use least privilege and name each executa
         .sort()
       assert.deepEqual(write, [], `${file} ${name}`)
       for (const step of job.steps) {
-        if (step.uses) assert.match(step.uses, pinned, `${file}: ${step.uses}`)
+        if (step.uses) assertLocked(file, step.uses, `${file}: ${step.uses}`)
         assert.equal(step.uses?.startsWith('actions/attest@') ?? false, false, 'attested only once the release is approved')
         if (step.run) assert.equal(step.run.includes('${{'), false, 'Expressions must enter through environment, not shell text')
         if (step.uses?.startsWith('actions/checkout@')) assert.equal(step.with['persist-credentials'], false)
@@ -177,7 +184,7 @@ test("only a stable release that is its major version's newest moves the major v
   assert.match(move.run, /push -q --force "\$remote" "\$commit:refs\/tags\/\$major"/)
   assert.match(move.run, /remote="git@github\.com:\$REPOSITORY\.git"/)
   assert.match(move.run, /StrictHostKeyChecking=yes/)
-  for (const step of job.steps) if (step.uses) assert.match(step.uses, pinned, step.uses)
+  for (const step of job.steps) if (step.uses) assertLocked('move-major-tag.yml', step.uses)
 })
 
 test('every release attaches the package tarball, proved with the release CLI in a scaffolded renderer and without React', async () => {
@@ -248,7 +255,7 @@ test('a release waits for a person to approve the release environment, which mus
   assert.equal(approve.environment, 'release')
   assert.deepEqual(approve.permissions, {attestations: 'write', 'id-token': 'write'})
   for (const step of [...check.steps, ...approve.steps]) {
-    if (step.uses) assert.match(step.uses, pinned, step.uses)
+    if (step.uses) assertLocked('release-approval.yml', step.uses)
     if (step.run) assert.equal(step.run.includes('${{'), false, 'Expressions must enter through environment, not shell text')
   }
   // Every file announce attaches: every artifacts-* artifact but the granular manifests.

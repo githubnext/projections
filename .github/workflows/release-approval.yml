@@ -72,7 +72,7 @@ jobs:
       id-token: write
     steps:
       # The files announce attaches to the release: every artifacts-* artifact but the granular manifests.
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      - uses: actions/download-artifact@v8.0.2
         with:
           pattern: artifacts-*
           path: artifacts
@@ -82,6 +82,6 @@ jobs:
         run: |
           rm -f artifacts/*-dist-manifest.json
           ls -l artifacts
-      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+      - uses: actions/attest@v4.2.2
         with:
           subject-path: artifacts/*

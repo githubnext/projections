@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/vocabularies/scenarios/v0.json",
+  "title": "Projections vocabulary scenarios/v0",
+  "description": "Renderer fixture scenarios (`projections.scenarios` documents) as data: each scenario with the renderer that draws it and its synthetic extraction, or before, after and their comparison. Defined in docs/models/scenarios-model.md.",
+  "allOf": [
+    {"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"},
+    {
+      "type": "object",
+      "required": ["vocabularies"],
+      "properties": {"vocabularies": {"contains": {"const": "scenarios/v0"}}}
+    },
+    {"$ref": "#/$defs/refinement"}
+  ],
+  "$defs": {
+    "refinement": {
+      "description": "What `scenarios/v0` adds to an extraction that declares it.",
+      "type": "object",
+      "properties": {
+        "schema": {"enum": ["graph/v0"]},
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "allOf": [
+              {
+                "if": {"type": "object", "required": ["kind"], "properties": {"kind": {"enum": ["scenarios"]}}},
+                "then": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": ["path"],
+                      "properties": {
+                        "path": {
+                          "$ref": "https://schemas.projections.githubnext.com/extraction/v0.json#/$defs/text",
+                          "description": "The `projections.scenarios` document, repository-relative."
+                        },
+                        "renderer": {
+                          "description": "The document's default renderer name, when it names one.",
+                          "type": "string"
+                        },
+                        "scenarios": {
+                          "description": "Its scenarios' entity IDs, in the document's order.",
+                          "type": "array",
+                          "items": {"type": "string"}
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {"type": "object", "required": ["kind"], "properties": {"kind": {"enum": ["scenario"]}}},
+                "then": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": ["renderer", "mode"],
+                      "properties": {
+                        "renderer": {
+                          "$ref": "https://schemas.projections.githubnext.com/extraction/v0.json#/$defs/text",
+                          "description": "The renderer that draws it: a built-in renderer's name, or a custom bundle's manifest name (see `bundle`)."
+                        },
+                        "bundle": {
+                          "description": "A custom renderer bundle's directory, repository-relative; absent for a built-in renderer.",
+                          "type": "string"
+                        },
+                        "mode": {
+                          "description": "One revision, or a comparison.",
+                          "enum": ["extraction", "comparison"]
+                        },
+                        "extraction": {
+                          "description": "The extraction it presents, normalized (`extraction` mode).",
+                          "type": "object"
+                        },
+                        "before": {
+                          "description": "The before extraction, normalized (`comparison` mode).",
+                          "type": "object"
+                        },
+                        "after": {
+                          "description": "The after extraction, normalized (`comparison` mode).",
+                          "type": "object"
+                        },
+                        "comparison": {
+                          "description": "Their comparison, as its comparator computed it (`comparison` mode).",
+                          "type": "object"
+                        },
+                        "comparator": {
+                          "description": "`default`, or the comparator file that compared it, repository-relative.",
+                          "type": "string"
+                        },
+                        "group": {"description": "The group it is shown under.", "type": "string"},
+                        "description": {"description": "What it shows.", "type": "string"},
+                        "presentation": {
+                          "description": "Its definition `presentation`: the renderer's settings and the host's.",
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

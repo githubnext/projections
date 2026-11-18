@@ -184,6 +184,16 @@ fn main() -> std::process::ExitCode {
 }
 ```
 
+### `normalize_extraction`
+
+```rust
+pub fn normalize_extraction(value: &Value) -> Result<Value>
+```
+
+An extraction as the Engine normalizes it (validated, with its items in
+canonical order), for an extractor whose data holds other extractions, such
+as fixtures. Fails with the Engine's diagnostics when it isn't valid.
+
 ### `object`
 
 ```rust
@@ -399,6 +409,22 @@ short verbatim string such as a model ID.
 | `new` | `pub fn new() -> Self` |  |
 | `to_value` | `pub fn to_value(&self) -> Value` | The basis as the extraction records it. |
 
+### `ComparisonRequest`
+
+```rust
+pub struct ComparisonRequest<'a> { .. }
+```
+
+Two extractions to compare, and the comparator to compare them with: what
+`Context::compare` hands to the comparison service.
+
+| Member | Signature | Description |
+|---|---|---|
+| `after` | `pub after: &'a Value` |  |
+| `before` | `pub before: &'a Value` |  |
+| `file` | `pub file: Option<(&'a str, &'a [u8])>` | A comparator file (`*.comparator.yaml`): the path diagnostics name and its bytes, read from the examined revision. `None` for the default comparator. |
+| `options` | `pub options: &'a Value` | The comparator's options; `{}` for none. |
+
 ### `Context`
 
 ```rust
@@ -412,6 +438,7 @@ same whoever starts it.
 | Member | Signature | Description |
 |---|---|---|
 | `checkout` | `pub fn checkout(&self) -> Result<PathBuf>` | Where the project's dependencies (such as `node_modules`) are installed for this run: the project's directory in the root itself in place or in a prepared workspace, or in the user's working checkout when a materialized revision borrows them. |
+| `compare` | `pub fn compare(&self, request: &ComparisonRequest<'_>) -> Result<Value>` | The comparison of two extractions (normalized, of one domain schema) by the default comparator or a comparator file, validated against them: for an extractor whose data includes comparisons, such as fixture scenarios. The runner computes it in the same sandbox as any comparison, so it runs no repository code and needs no trust. Only runners that provide the service (the `projections` CLI, for its built-in extractors) can; others fail with an error saying so. |
 | `definition` | `pub fn definition(&self) -> &Value` | The projection definition. |
 | `diagnose` | `pub fn diagnose(&self, text: &str)` | Adds text to the diagnostics written to stderr when the extractor finishes. |
 | `diagnostics` | `pub fn diagnostics(&self) -> String` | The diagnostics recorded so far, bounded. |
@@ -447,6 +474,7 @@ same whoever starts it.
 | `scope` | `pub fn scope(&self) -> Option<&[String]>` | The declared scope, when the runner enforces one: repository-relative files and directories. Files outside it aren't listed and can't be read. |
 | `trusted` | `pub fn trusted(&self) -> bool` | Whether the invocation explicitly trusts repository code and ecosystem tools. |
 | `upstream` | `pub fn upstream(&self, name: &str) -> Option<&Value>` | The extraction of the upstream built-in the definition's `extractor.upstream` names `name`, normalized, of the same revision. |
+| `with_comparisons` | `pub fn with_comparisons(self, comparisons: impl Fn(&ComparisonRequest<'_>) -> Result<Value> + Send + Sync + 'static) -> Self` | Compares extractions with `comparisons`, the runner's comparator sandbox, for `Context::compare`. Without it, `compare` fails. |
 | `with_environment` | `pub fn with_environment(self, environment: BTreeMap<String, String>) -> Self` | Replaces the environment variables this extractor reads. |
 | `with_files` | `pub fn with_files(self, files: Vec<String>) -> Self` | Uses `files` (repository-relative) as the revision's files instead of walking the root. |
 | `with_helpers` | `pub fn with_helpers(self, resolve: impl Fn() -> Result<Option<PathBuf>> + Send + Sync + 'static) -> Self` | Locates the extractor's own helper files: `resolve` returns their directory, or `None` when they are in their source locations. It runs on each `Context::helper` lookup, so it can verify the files every time. |

@@ -142,6 +142,7 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
     reducedMotion,
     renderer,
     renderers,
+    rendererDocuments: options.rendererDocuments,
     rendererStatus: status.status,
     panes,
     renderedProgress: panes.main.rendered,

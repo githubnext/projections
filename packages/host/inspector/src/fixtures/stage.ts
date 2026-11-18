@@ -1,5 +1,12 @@
 import {RendererFrame} from '@githubnext/projections-host'
-import type {InitPayload, ProgressPayload, RendererEntry, RendererFrameEvent, RendererOptions} from '@githubnext/projections-host'
+import type {
+  InitPayload,
+  ProgressPayload,
+  RendererDocuments,
+  RendererEntry,
+  RendererFrameEvent,
+  RendererOptions,
+} from '@githubnext/projections-host'
 import type {
   ProbeCall,
   StageEnvironment,
@@ -47,6 +54,8 @@ export class Stage {
   constructor(
     private readonly container: HTMLElement,
     private readonly onChange: (state: StageState) => void = () => {},
+    /** Built-in renderer documents for a renderer that nests them, from the fixtures' catalog. */
+    private readonly documents?: RendererDocuments,
   ) {}
 
   state(): StageState {
@@ -178,6 +187,7 @@ export class Stage {
       options: request.options ?? {},
       onEvent: this.onEvent,
       ...(request.height ? {fill: true} : {}),
+      ...(this.documents ? {builtinDocuments: this.documents} : {}),
     })
     await ready
     return first

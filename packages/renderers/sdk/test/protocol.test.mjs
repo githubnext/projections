@@ -413,9 +413,17 @@ function fakeWindow(hash = rendererFragment(channel, hostOrigin)) {
   const posted = []
   const listeners = new Set()
   const parent = {postMessage: (data, target) => posted.push({data, target})}
+  const timers = new Map()
+  let nextTimer = 1
   const view = {
     location: {hash},
     parent,
+    setTimeout: callback => {
+      const id = nextTimer++
+      timers.set(id, callback)
+      return id
+    },
+    clearTimeout: id => timers.delete(id),
     addEventListener: (type, listener) => {
       if (type === 'message') listeners.add(listener)
     },
@@ -426,7 +434,13 @@ function fakeWindow(hash = rendererFragment(channel, hostOrigin)) {
   const deliver = (data, {source = parent, origin = hostOrigin} = {}) => {
     for (const listener of listeners) listener({data, source, origin})
   }
-  return {view, parent, posted, listeners, deliver}
+  const expire = () => {
+    for (const [id, callback] of [...timers]) {
+      timers.delete(id)
+      callback()
+    }
+  }
+  return {view, parent, posted, listeners, deliver, expire}
 }
 
 test('connectRenderer posts ready to the host origin with the channel envelope', () => {
@@ -916,4 +930,57 @@ test('a summary fact may carry its changes and a description', () => {
   assert.ok(summary([{...measure, description: 'x'.repeat(rendererLimits.summaryDescription)}]))
   // A count item has no description.
   assert.equal(summary([{kind: 'route', noun, count: 1, description: 'Routes'}]), undefined)
+})
+
+test('document-request and document validate strictly', () => {
+  assert.deepEqual(parseRendererMessage(envelope({type: 'document-request', renderer: 'graph'}), channel), {
+    type: 'document-request',
+    renderer: 'graph',
+  })
+  for (const renderer of ['', 'Graph', '../graph', 'https://example.com/index.html', 'a'.repeat(65), 7])
+    assert.equal(parseRendererMessage(envelope({type: 'document-request', renderer}), channel), undefined, String(renderer))
+  assert.equal(parseRendererMessage(envelope({type: 'document-request', renderer: 'graph', url: 'x'}), channel), undefined)
+  assert.deepEqual(parseHostMessage(envelope({type: 'document', renderer: 'graph', html: '<p>'}), channel), {
+    type: 'document',
+    renderer: 'graph',
+    html: '<p>',
+  })
+  assert.deepEqual(parseHostMessage(envelope({type: 'document', renderer: 'graph', error: 'No'}), channel), {
+    type: 'document',
+    renderer: 'graph',
+    error: 'No',
+  })
+  for (const message of [
+    {type: 'document', renderer: 'graph'},
+    {type: 'document', renderer: 'graph', html: '<p>', error: 'No'},
+    {type: 'document', renderer: 'Graph', html: '<p>'},
+    {type: 'document', renderer: 'graph', html: 1},
+    {type: 'document', renderer: 'graph', html: '<p>', url: 'x'},
+  ])
+    assert.equal(parseHostMessage(envelope(message), channel), undefined, JSON.stringify(message))
+})
+
+test('requestDocument asks the host once per name and settles with its answer', async () => {
+  const fake = fakeWindow()
+  const client = connectRenderer({}, {capabilities: {changeHighlighting: 'none'}, window: fake.view})
+  const graph = client.requestDocument('graph')
+  assert.equal(client.requestDocument('graph'), graph, 'one request per name')
+  const custom = client.requestDocument('minimal')
+  const requests = fake.posted.slice(1).map(({data}) => parseRendererMessage(data, channel))
+  assert.deepEqual(requests, [
+    {type: 'document-request', renderer: 'graph'},
+    {type: 'document-request', renderer: 'minimal'},
+  ])
+  fake.deliver(envelope({type: 'document', renderer: 'graph', html: '<!doctype html>'}), {source: {}})
+  fake.deliver(envelope({type: 'document', renderer: 'graph', html: '<!doctype html>'}))
+  fake.deliver(envelope({type: 'document', renderer: 'minimal', error: 'minimal is not a built-in renderer'}))
+  assert.equal(await graph, '<!doctype html>')
+  await assert.rejects(custom, {name: 'RendererConnectionError', message: 'minimal is not a built-in renderer'})
+  await assert.rejects(client.requestDocument('../graph'), /Invalid renderer name/)
+  // A refused name may be asked again; one the host never answers times out.
+  const again = client.requestDocument('minimal')
+  assert.equal(fake.posted.length, 4)
+  fake.expire()
+  await assert.rejects(again, /did not supply the minimal renderer/)
+  client.dispose()
 })

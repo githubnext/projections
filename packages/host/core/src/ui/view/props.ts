@@ -5,7 +5,7 @@ import type {AnnotationActivation, Highlighting, PresentationDefaults, Projectio
 import type {Holds} from '../../playback.js'
 import type {ProjectionSelection, TargetAnnotation} from '../../targets/target.js'
 import type {ComparisonMode} from '../../modes.js'
-import type {RendererEntry} from '../../registry.js'
+import type {RendererDocuments, RendererEntry} from '../../registry.js'
 import type {ViewSubject} from '../../model.js'
 import type {EvidenceLink} from '../../details/evidence.js'
 import type {PairForm, ProjectionFeatures, ViewKind} from '../blocks.js'
@@ -22,6 +22,11 @@ export interface ProjectionViewProps {
   renderer?: RendererEntry | undefined
   /** Other bundles that can present this projection; the person may switch to them. */
   renderers?: readonly RendererEntry[]
+  /**
+   * Built-in renderer documents for renderers that nest them (`document-request`), usually `builtinRendererDocuments`
+   * of the host's whole catalog. Omitted, such requests are refused.
+   */
+  rendererDocuments?: RendererDocuments | undefined
   /** Shown whenever the requested renderer is unavailable or was substituted. */
   rendererNotice?: string | undefined
   /** Informational notices, for example how the compared revisions define the projection differently. */

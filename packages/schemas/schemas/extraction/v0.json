@@ -96,6 +96,15 @@
       "then": {
         "$ref": "https://schemas.projections.githubnext.com/vocabularies/agentic-workflows/v0.json#/$defs/refinement"
       }
+    },
+    {
+      "if": {
+        "required": ["vocabularies"],
+        "properties": {"vocabularies": {"contains": {"const": "scenarios/v0"}}}
+      },
+      "then": {
+        "$ref": "https://schemas.projections.githubnext.com/vocabularies/scenarios/v0.json#/$defs/refinement"
+      }
     }
   ],
   "$defs": {
@@ -116,7 +125,7 @@
       "enum": ["graph/v0", "dag/v0", "treemap/v0", "metrics/v0", "api/v0", "database/v0", "architecture/v0"]
     },
     "vocabulary": {
-      "enum": ["dependency-injection/v0", "infrastructure/v0", "runtime-policy/v0", "agentic-workflows/v0"]
+      "enum": ["dependency-injection/v0", "infrastructure/v0", "runtime-policy/v0", "agentic-workflows/v0", "scenarios/v0"]
     },
     "confidence": {"enum": ["authoritative", "derived", "inferred"]},
     "previousIds": {"type": "array", "items": {"$ref": "#/$defs/text"}, "uniqueItems": true},

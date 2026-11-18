@@ -9,6 +9,7 @@ import type {
   PresentationDefaults,
   ProjectionController,
   ProjectionSelection,
+  RendererDocuments,
   RendererEntry,
   TargetAnnotation,
   ViewSubject,
@@ -30,6 +31,8 @@ export interface VscodeProjectionViewProps {
   renderer?: RendererEntry | undefined
   /** Other bundles that can present this projection; the person may switch to them. */
   renderers?: readonly RendererEntry[]
+  /** See `ProjectionViewProps.rendererDocuments`. */
+  rendererDocuments?: RendererDocuments | undefined
   /** Shown whenever the requested renderer is unavailable or was substituted. */
   rendererNotice?: string | undefined
   /** Informational notices, for example how the compared revisions define the projection differently. */

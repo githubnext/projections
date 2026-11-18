@@ -3,6 +3,7 @@
 
 import {useEffect, useMemo, useState} from 'react'
 import {
+  builtinRendererDocuments,
   compatibleRenderers,
   customRenderer,
   endpointHoldMs,
@@ -58,6 +59,7 @@ export function SnapshotPage({document: snapshot, settings, renderers, customRen
     () => resolveRenderer(requested, renderers, custom, shown.extraction),
     [requested, renderers, custom, shown.extraction],
   )
+  const rendererDocuments = useMemo(() => builtinRendererDocuments(renderers), [renderers])
   const available = useMemo(() => compatibleRenderers(shown, renderers, resolution.renderer), [shown, renderers, resolution.renderer])
   const presentation = shown.provenance.definition.presentation
   const projection = useProjection({
@@ -68,6 +70,7 @@ export function SnapshotPage({document: snapshot, settings, renderers, customRen
       renderer: typeof requested === 'string' ? requested : requested.bundle,
     },
     renderers: resolution.renderer ? available : [],
+    rendererDocuments,
     rendererNotice: resolution.notice,
     presentation,
     ...(settings.focus ? {focus: settings.focus} : {}),

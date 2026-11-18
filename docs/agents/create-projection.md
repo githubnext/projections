@@ -402,7 +402,8 @@ In JavaScript, `result({entities, relationships})` from
 `@githubnext/projections/extractor` does the same, when the project has that
 package; otherwise, and in other languages, write the JSON above.
 
-- `graph/v0`: entities and directed relationships between them; the general choice. Built-in extractors present it with `dependencies`, `file-packing`, `graph`, `text-diff`.
+- `graph/v0`: entities and directed relationships between them; the general choice. Built-in extractors present it with `dependencies`, `file-packing`, `gallery`, `graph`, `text-diff`.
+  - With `"vocabularies": ["scenarios/v0"]`: renderer fixture scenarios: `scenarios` documents that `contains` `scenario` entities, each with its renderer and synthetic extraction or comparison; the engine checks its typed `data`.
 - `dag/v0`: like `graph/v0`, with no cycles: steps, stages, job or build order. Built-in extractors present it with `dag`.
 - `treemap/v0`: a containment forest (at most one parent each, no cycles) whose leaves carry a nonnegative numeric `data.value`.
 - `metrics/v0`: measurements: every entity carries a numeric `data.value` and optionally a string `data.unit`. Built-in extractors present it with `code-statistics`.
@@ -492,6 +493,7 @@ NAME`) to one of the renderers this CLI includes:
 - `runtime-policy`: Runtime security policies
 - `agentic-workflows`: Agentic workflows
 - `text-diff`: Text diff
+- `gallery`: Gallery
 
 Each presents the schemas the extractors above pair it with;
 `projections extractor list` shows every built-in extractor's schema and

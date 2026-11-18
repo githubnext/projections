@@ -59,6 +59,8 @@ export const rendererLimits = {
   maxCoordinate: 1_000_000,
   /** Time the host waits for `ready` after the frame loads, in milliseconds. */
   readyTimeoutMs: 10_000,
+  /** Time a renderer waits for the host's `document` after a `document-request`, in milliseconds. */
+  documentTimeoutMs: 10_000,
 } as const
 
 /**

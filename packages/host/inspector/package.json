@@ -47,6 +47,7 @@
     "@githubnext/projections-renderer-database": "0.1.0",
     "@githubnext/projections-renderer-dependency-injection": "0.1.0",
     "@githubnext/projections-renderer-file-packing": "0.1.0",
+    "@githubnext/projections-renderer-gallery": "0.1.0",
     "@githubnext/projections-renderer-graph": "0.1.0",
     "@githubnext/projections-renderer-runtime-policy": "0.1.0",
     "@githubnext/projections-renderer-agentic-workflows": "0.1.0",

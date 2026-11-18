@@ -17,6 +17,7 @@ function allowedMode(mode: ComparisonMode | undefined, features: VscodeProjectio
 /** The view's props that `useProjection` takes as they are, when given. */
 const passedThrough = [
   'notices',
+  'rendererDocuments',
   'durationMs',
   'initialProgress',
   'onOpen',

@@ -6,7 +6,7 @@ import {createWasmEngine} from '@githubnext/projections-engine/browser'
 import {createRulesRuntime} from '@githubnext/projections-comparator-runtime/browser'
 import engineWasm from '@githubnext/projections-engine/engine.wasm?url'
 import defaultComparatorWasm from '@githubnext/projections-engine/default-comparator.wasm?url'
-import {customRenderer, loadRendererCatalog} from '@githubnext/projections-host'
+import {builtinRendererDocuments, customRenderer, loadRendererCatalog} from '@githubnext/projections-host'
 import {ComparisonExplorer, LoadingStatus, ScopedRoot, useColorMode} from '@githubnext/projections-host/ui'
 import type {ComparatorSource, ProjectionController, ProjectionSelection, RendererEntry} from '@githubnext/projections-host'
 import '@githubnext/projections-host/ui.css'
@@ -91,6 +91,11 @@ export function HostHarness() {
     [rendererChoice],
   )
   const renderers = useMemo(() => (rendererChoice === 'hostile' ? [] : (catalog ?? [])), [catalog, rendererChoice])
+  // The hostile probe is offered alone, but may still ask for the catalog's documents; asking for itself is refused.
+  const rendererDocuments = useMemo(() => {
+    const hostile = custom()
+    return builtinRendererDocuments([...(catalog ?? []), ...(hostile ? [hostile] : [])])
+  }, [catalog, custom])
   return (
     <div className="demo" style={toolbarWidth ? {maxWidth: 'none'} : undefined}>
       <header className="demo-header" id="top">
@@ -172,6 +177,7 @@ export function HostHarness() {
             loadComparator={loadComparator}
             rules={rules}
             renderers={renderers}
+            rendererDocuments={rendererDocuments}
             customRenderer={custom}
             colorMode={colorMode}
             {...explorerOptions()}

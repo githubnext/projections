@@ -16,6 +16,10 @@ fn repeated_runs() {
         ("default-order", "packages/renderers/graph/fixtures/azure"),
         ("moved-components", "packages/renderers/graph/fixtures/service-platform"),
         ("runtime-policy", "packages/extractors/tetragon-policies/tests/fixtures/deployment/"),
+        (
+            "agentic-workflows",
+            "packages/extractors/github-agentic-workflows/tests/fixtures/docs-bot/",
+        ),
         ("api-compatibility", "packages/renderers/api/fixtures/dotnet"),
         ("api-compatibility", "packages/renderers/api/fixtures/typescript"),
         ("priority-order", "packages/renderers/graph/fixtures/nuget"),

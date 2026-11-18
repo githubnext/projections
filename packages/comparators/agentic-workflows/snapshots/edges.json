@@ -1,0 +1,1311 @@
+{
+  "changes": [
+    {
+      "after": [],
+      "before": [
+        "group:gone"
+      ],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "group:gone",
+      "status": "removed",
+      "summary": "Group `gone` changes: `removed` leaves."
+    },
+    {
+      "after": [
+        "group:lab"
+      ],
+      "before": [
+        "group:lab"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "group:lab",
+      "status": "modified",
+      "summary": "Group `lab` changes: `bash-more` leaves, `bash-fewer` joins."
+    },
+    {
+      "after": [
+        "group:new"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "group:new",
+      "status": "added",
+      "summary": "Group `new` changes: `added` joins."
+    },
+    {
+      "after": [
+        "note:readme"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "note:readme",
+      "status": "added"
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/added-quietly.md"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "workflow:.github/workflows/added-quietly.md",
+      "status": "added",
+      "summary": "New agentic workflow `added-quietly`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/added.md"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "workflow:.github/workflows/added.md",
+      "status": "added",
+      "summary": "New agentic workflow `added`, which can write `create-issue`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/bash-any.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/bash-any.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/bash-any.md",
+      "status": "modified",
+      "summary": "`bash-any` can run more commands: any command."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/bash-anything.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/bash-anything.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/bash-anything.md",
+      "status": "modified",
+      "summary": "`bash-anything` can run more commands: bash for any command."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/bash-disabled.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/bash-disabled.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/bash-disabled.md",
+      "status": "modified",
+      "summary": "`bash-disabled` can run fewer commands: no bash."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/bash-enabled.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/bash-enabled.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/bash-enabled.md",
+      "status": "modified",
+      "summary": "`bash-enabled` can run more commands: bash for `git`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/bash-fewer.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/bash-fewer.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/bash-fewer.md",
+      "status": "modified",
+      "summary": "`bash-fewer` can run fewer commands: `make`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/bash-limited.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/bash-limited.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/bash-limited.md",
+      "status": "modified",
+      "summary": "`bash-limited` can run fewer commands: only `git`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/bash-more.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/bash-more.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/bash-more.md",
+      "status": "modified",
+      "summary": "`bash-more` can run more commands: `make`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/bash-still-any.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/bash-still-any.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/bash-still-any.md",
+      "status": "modified"
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/budget-down.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/budget-down.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/budget-down.md",
+      "status": "modified",
+      "summary": "`budget-down` may spend less: timeout (minutes) `30` → `20`, turns default → `5`, tool calls `20.5` → `10`, AI credits per run `unlimited` → `1000`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/budget-up.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/budget-up.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/budget-up.md",
+      "status": "modified",
+      "summary": "`budget-up` may spend more: timeout (minutes) `20` → `30`, turns `5` → default, tool calls `10` → `20.5`, AI credits per run `1000` → `unlimited`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/described.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/described.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/described.md",
+      "status": "modified"
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/engine-switched.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/engine-switched.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/engine-switched.md",
+      "status": "modified",
+      "summary": "`engine-switched` runs on another engine: `copilot` → `claude sonnet`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/gate-added.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/gate-added.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/gate-added.md",
+      "status": "modified",
+      "summary": "`gate-added` now loads `skills/check-new` (`guardrail`)."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/gate-removed.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/gate-removed.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/gate-removed.md",
+      "status": "modified",
+      "summary": "`gate-removed` no longer loads `shared/check-style.md` (`guardrail`), `skills/check-old` (`guardrail`)."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/integrity-dropped.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/integrity-dropped.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/integrity-dropped.md",
+      "status": "modified",
+      "summary": "`integrity-dropped` has more tools or looser guards: min-integrity `bogus` → default."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/invalid-fixed.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/invalid-fixed.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/invalid-fixed.md",
+      "status": "modified"
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/invalid-now.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/invalid-now.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/invalid-now.md",
+      "status": "modified"
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/loads-changed.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/loads-changed.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/loads-changed.md",
+      "status": "modified",
+      "summary": "`loads-changed` loads other imports or skills: loads `shared/b.md`, no longer loads `shared/a.md`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/lock-lost.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/lock-lost.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/lock-lost.md",
+      "status": "modified",
+      "summary": "`.github/workflows/lock-lost.lock.yml` is missing: compile `lock-lost` with `gh aw compile`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/lock-recompiled.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/lock-recompiled.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/lock-recompiled.md",
+      "status": "modified",
+      "summary": "`.github/workflows/lock-recompiled.lock.yml` is current."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/lock-staled.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/lock-staled.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/lock-staled.md",
+      "status": "modified",
+      "summary": "`.github/workflows/lock-staled.lock.yml` is stale: compile `lock-staled` with `gh aw compile`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/lock-unknown.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/lock-unknown.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/lock-unknown.md",
+      "status": "modified",
+      "summary": "`lock-unknown` is missing: compile `lock-unknown` with `gh aw compile`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/lock-unverified.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/lock-unverified.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/lock-unverified.md",
+      "status": "modified"
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/network-narrower.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/network-narrower.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/network-narrower.md",
+      "status": "modified",
+      "summary": "`network-narrower` reaches less of the network: `python`, blocks `evil.example`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/network-wider.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/network-wider.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/network-wider.md",
+      "status": "modified",
+      "summary": "`network-wider` can reach more of the network: `python`, no longer blocks `evil.example`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/outputs-added.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/outputs-added.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/outputs-added.md",
+      "status": "modified",
+      "summary": "`outputs-added` can write more: `create-issue` to `o/r`, `noop`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/outputs-expression.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/outputs-expression.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/outputs-expression.md",
+      "status": "modified"
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/outputs-loosened.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/outputs-loosened.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/outputs-loosened.md",
+      "status": "modified",
+      "summary": "`outputs-loosened` can write more: `add-labels` max `5` → `unlimited`, to `o/r`, also to `o/s`, no longer staged, no longer as drafts, also `x`, also starts `w`, job `notify`, outputs no longer staged."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/outputs-retargeted.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/outputs-retargeted.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/outputs-retargeted.md",
+      "status": "modified",
+      "summary": "`outputs-retargeted` can write less: `create-issue` back to this repository."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/outputs-scalar.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/outputs-scalar.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/outputs-scalar.md",
+      "status": "modified",
+      "summary": "`outputs-scalar` can write more: `dispatch-workflow` also starts `deploy`, `call-workflow` max `1` → `2`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/outputs-tightened.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/outputs-tightened.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/outputs-tightened.md",
+      "status": "modified",
+      "summary": "`outputs-tightened` can write less: `create-issue`, `add-labels` max `unlimited` → `5`, back to this repository, no longer to `o/s`, staged, as drafts, no longer `x`, no longer starts `w`, job `notify`, outputs staged."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/permissions-added.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/permissions-added.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/permissions-added.md",
+      "status": "modified",
+      "summary": "`permissions-added` has more permissions: `issues: write`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/permissions-granted.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/permissions-granted.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/permissions-granted.md",
+      "status": "modified",
+      "summary": "`permissions-granted` has more permissions: `contents: write`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/permissions-lowered.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/permissions-lowered.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/permissions-lowered.md",
+      "status": "modified",
+      "summary": "`permissions-lowered` has fewer permissions: `contents: read`."
+    },
+    {
+      "after": [],
+      "before": [
+        "workflow:.github/workflows/removed.md"
+      ],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "workflow:.github/workflows/removed.md",
+      "status": "removed",
+      "summary": "Agentic workflow `removed` is removed."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/repos-added.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/repos-added.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/repos-added.md",
+      "status": "modified",
+      "summary": "`repos-added` can reach more repositories: `o/b`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/repos-guarded.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/repos-guarded.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/repos-guarded.md",
+      "status": "modified",
+      "summary": "`repos-guarded` reaches fewer repositories: only `o/a`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/repos-removed.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/repos-removed.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/repos-removed.md",
+      "status": "modified",
+      "summary": "`repos-removed` reaches fewer repositories: `o/b`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/repos-unguarded.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/repos-unguarded.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/repos-unguarded.md",
+      "status": "modified",
+      "summary": "`repos-unguarded` can reach more repositories: any repository its token reaches (no `allowed-repos`)."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/secrets-added.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/secrets-added.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/secrets-added.md",
+      "status": "modified",
+      "summary": "`secrets-added` references more secrets: `DEPLOY_TOKEN`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/secrets-removed.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/secrets-removed.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/secrets-removed.md",
+      "status": "modified",
+      "summary": "`secrets-removed` references fewer secrets: `DEPLOY_TOKEN`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/strict-off.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/strict-off.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/strict-off.md",
+      "status": "modified",
+      "summary": "`strict-off` no longer runs in strict mode."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/strict-on.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/strict-on.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/strict-on.md",
+      "status": "modified",
+      "summary": "`strict-on` now runs in strict mode."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/tools-narrower.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/tools-narrower.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/tools-narrower.md",
+      "status": "modified",
+      "summary": "`tools-narrower` has fewer tools or tighter guards: tool `edit`, MCP server `docs`, toolset `issues`, min-integrity default → `merged`, read-only, lockdown on."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/tools-wider.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/tools-wider.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/tools-wider.md",
+      "status": "modified",
+      "summary": "`tools-wider` has more tools or looser guards: tool `edit`, MCP server `docs`, toolset `issues`, min-integrity `approved` → `none`, no longer read-only, lockdown off."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/triggers-fewer.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/triggers-fewer.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/triggers-fewer.md",
+      "status": "modified",
+      "summary": "`triggers-fewer` can be started in fewer ways: `issues`, role `all`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/triggers-filtered.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/triggers-filtered.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/triggers-filtered.md",
+      "status": "modified",
+      "summary": "`triggers-filtered` can be started in more ways: `pull_request` `paths-ignore` no longer `docs/**`, `pull_request` `types` also `synchronize`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/triggers-more.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/triggers-more.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/triggers-more.md",
+      "status": "modified",
+      "summary": "`triggers-more` can be started in more ways: `issues`, role `all`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/triggers-rescheduled.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/triggers-rescheduled.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/triggers-rescheduled.md",
+      "status": "modified",
+      "summary": "`triggers-rescheduled` starts on other terms: `pull_request` `draft: false` → `draft: true`, `schedule` `daily` → `hourly`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/triggers-unfiltered.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/triggers-unfiltered.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/triggers-unfiltered.md",
+      "status": "modified",
+      "summary": "`triggers-unfiltered` can be started in more ways: `push` no longer limited by `branches`, `push` no longer limited by `paths-ignore`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/unrecognized.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/unrecognized.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/unrecognized.md",
+      "status": "modified",
+      "summary": "`unrecognized` uses fields gh-aw may not know: `hologram`."
+    }
+  ],
+  "metadata": {
+    "agenticWorkflows": {
+      "interpretations": {
+        "group:gone": [
+          {
+            "items": [
+              "`removed` leaves"
+            ],
+            "level": "note",
+            "name": "group-changed"
+          }
+        ],
+        "group:lab": [
+          {
+            "items": [
+              "`bash-more` leaves",
+              "`bash-fewer` joins"
+            ],
+            "level": "note",
+            "name": "group-changed"
+          }
+        ],
+        "group:new": [
+          {
+            "items": [
+              "`added` joins"
+            ],
+            "level": "note",
+            "name": "group-changed"
+          }
+        ],
+        "workflow:.github/workflows/added-quietly.md": [
+          {
+            "items": [],
+            "level": "warning",
+            "name": "workflow-added"
+          }
+        ],
+        "workflow:.github/workflows/added.md": [
+          {
+            "items": [
+              "`create-issue`"
+            ],
+            "level": "warning",
+            "name": "workflow-added"
+          },
+          {
+            "items": [
+              "`.github/workflows/added.lock.yml` is missing"
+            ],
+            "level": "warning",
+            "name": "lock-stale"
+          },
+          {
+            "items": [
+              "`hologram`"
+            ],
+            "level": "warning",
+            "name": "unrecognized-field"
+          }
+        ],
+        "workflow:.github/workflows/bash-any.md": [
+          {
+            "items": [
+              "any command"
+            ],
+            "level": "warning",
+            "name": "bash-widened"
+          }
+        ],
+        "workflow:.github/workflows/bash-anything.md": [
+          {
+            "items": [
+              "bash for any command"
+            ],
+            "level": "warning",
+            "name": "bash-widened"
+          }
+        ],
+        "workflow:.github/workflows/bash-disabled.md": [
+          {
+            "items": [
+              "no bash"
+            ],
+            "level": "note",
+            "name": "bash-narrowed"
+          }
+        ],
+        "workflow:.github/workflows/bash-enabled.md": [
+          {
+            "items": [
+              "bash for `git`"
+            ],
+            "level": "warning",
+            "name": "bash-widened"
+          }
+        ],
+        "workflow:.github/workflows/bash-fewer.md": [
+          {
+            "items": [
+              "`make`"
+            ],
+            "level": "note",
+            "name": "bash-narrowed"
+          }
+        ],
+        "workflow:.github/workflows/bash-limited.md": [
+          {
+            "items": [
+              "only `git`"
+            ],
+            "level": "note",
+            "name": "bash-narrowed"
+          }
+        ],
+        "workflow:.github/workflows/bash-more.md": [
+          {
+            "items": [
+              "`make`"
+            ],
+            "level": "warning",
+            "name": "bash-widened"
+          }
+        ],
+        "workflow:.github/workflows/budget-down.md": [
+          {
+            "items": [
+              "timeout (minutes) `30` → `20`",
+              "turns default → `5`",
+              "tool calls `20.5` → `10`",
+              "AI credits per run `unlimited` → `1000`"
+            ],
+            "level": "note",
+            "name": "budget-lowered"
+          }
+        ],
+        "workflow:.github/workflows/budget-up.md": [
+          {
+            "items": [
+              "timeout (minutes) `20` → `30`",
+              "turns `5` → default",
+              "tool calls `10` → `20.5`",
+              "AI credits per run `1000` → `unlimited`"
+            ],
+            "level": "warning",
+            "name": "budget-raised"
+          }
+        ],
+        "workflow:.github/workflows/engine-switched.md": [
+          {
+            "items": [
+              "`copilot` → `claude sonnet`"
+            ],
+            "level": "note",
+            "name": "engine-changed"
+          }
+        ],
+        "workflow:.github/workflows/gate-added.md": [
+          {
+            "items": [
+              "`skills/check-new` (`guardrail`)"
+            ],
+            "level": "note",
+            "name": "gate-added"
+          }
+        ],
+        "workflow:.github/workflows/gate-removed.md": [
+          {
+            "items": [
+              "`shared/check-style.md` (`guardrail`)",
+              "`skills/check-old` (`guardrail`)"
+            ],
+            "level": "warning",
+            "name": "gate-removed"
+          }
+        ],
+        "workflow:.github/workflows/integrity-dropped.md": [
+          {
+            "items": [
+              "min-integrity `bogus` → default"
+            ],
+            "level": "warning",
+            "name": "tools-widened"
+          }
+        ],
+        "workflow:.github/workflows/loads-changed.md": [
+          {
+            "items": [
+              "loads `shared/b.md`",
+              "no longer loads `shared/a.md`"
+            ],
+            "level": "note",
+            "name": "loads-changed"
+          }
+        ],
+        "workflow:.github/workflows/lock-lost.md": [
+          {
+            "items": [
+              "`.github/workflows/lock-lost.lock.yml` is missing"
+            ],
+            "level": "warning",
+            "name": "lock-stale"
+          }
+        ],
+        "workflow:.github/workflows/lock-recompiled.md": [
+          {
+            "items": [
+              "`.github/workflows/lock-recompiled.lock.yml` is current"
+            ],
+            "level": "note",
+            "name": "lock-current"
+          }
+        ],
+        "workflow:.github/workflows/lock-staled.md": [
+          {
+            "items": [
+              "`.github/workflows/lock-staled.lock.yml` is stale"
+            ],
+            "level": "warning",
+            "name": "lock-stale"
+          }
+        ],
+        "workflow:.github/workflows/lock-unknown.md": [
+          {
+            "items": [
+              "`lock-unknown` is missing"
+            ],
+            "level": "warning",
+            "name": "lock-stale"
+          }
+        ],
+        "workflow:.github/workflows/network-narrower.md": [
+          {
+            "items": [
+              "`python`",
+              "blocks `evil.example`"
+            ],
+            "level": "note",
+            "name": "network-narrowed"
+          }
+        ],
+        "workflow:.github/workflows/network-wider.md": [
+          {
+            "items": [
+              "`python`",
+              "no longer blocks `evil.example`"
+            ],
+            "level": "warning",
+            "name": "network-widened"
+          }
+        ],
+        "workflow:.github/workflows/outputs-added.md": [
+          {
+            "items": [
+              "`create-issue` to `o/r`",
+              "`noop`"
+            ],
+            "level": "warning",
+            "name": "outputs-widened"
+          }
+        ],
+        "workflow:.github/workflows/outputs-loosened.md": [
+          {
+            "items": [
+              "`add-labels` max `5` → `unlimited`, to `o/r`, also to `o/s`, no longer staged, no longer as drafts, also `x`, also starts `w`",
+              "job `notify`",
+              "outputs no longer staged"
+            ],
+            "level": "warning",
+            "name": "outputs-widened"
+          }
+        ],
+        "workflow:.github/workflows/outputs-retargeted.md": [
+          {
+            "items": [
+              "`create-issue` back to this repository"
+            ],
+            "level": "note",
+            "name": "outputs-narrowed"
+          }
+        ],
+        "workflow:.github/workflows/outputs-scalar.md": [
+          {
+            "items": [
+              "`dispatch-workflow` also starts `deploy`",
+              "`call-workflow` max `1` → `2`"
+            ],
+            "level": "warning",
+            "name": "outputs-widened"
+          }
+        ],
+        "workflow:.github/workflows/outputs-tightened.md": [
+          {
+            "items": [
+              "`create-issue`",
+              "`add-labels` max `unlimited` → `5`, back to this repository, no longer to `o/s`, staged, as drafts, no longer `x`, no longer starts `w`",
+              "job `notify`",
+              "outputs staged"
+            ],
+            "level": "note",
+            "name": "outputs-narrowed"
+          }
+        ],
+        "workflow:.github/workflows/permissions-added.md": [
+          {
+            "items": [
+              "`issues: write`"
+            ],
+            "level": "warning",
+            "name": "permissions-widened"
+          }
+        ],
+        "workflow:.github/workflows/permissions-granted.md": [
+          {
+            "items": [
+              "`contents: write`"
+            ],
+            "level": "warning",
+            "name": "permissions-widened"
+          }
+        ],
+        "workflow:.github/workflows/permissions-lowered.md": [
+          {
+            "items": [
+              "`contents: read`"
+            ],
+            "level": "note",
+            "name": "permissions-narrowed"
+          }
+        ],
+        "workflow:.github/workflows/removed.md": [
+          {
+            "items": [],
+            "level": "note",
+            "name": "workflow-removed"
+          }
+        ],
+        "workflow:.github/workflows/repos-added.md": [
+          {
+            "items": [
+              "`o/b`"
+            ],
+            "level": "warning",
+            "name": "repos-widened"
+          }
+        ],
+        "workflow:.github/workflows/repos-guarded.md": [
+          {
+            "items": [
+              "only `o/a`"
+            ],
+            "level": "note",
+            "name": "repos-narrowed"
+          }
+        ],
+        "workflow:.github/workflows/repos-removed.md": [
+          {
+            "items": [
+              "`o/b`"
+            ],
+            "level": "note",
+            "name": "repos-narrowed"
+          }
+        ],
+        "workflow:.github/workflows/repos-unguarded.md": [
+          {
+            "items": [
+              "any repository its token reaches (no `allowed-repos`)"
+            ],
+            "level": "warning",
+            "name": "repos-widened"
+          }
+        ],
+        "workflow:.github/workflows/secrets-added.md": [
+          {
+            "items": [
+              "`DEPLOY_TOKEN`"
+            ],
+            "level": "warning",
+            "name": "secrets-added"
+          }
+        ],
+        "workflow:.github/workflows/secrets-removed.md": [
+          {
+            "items": [
+              "`DEPLOY_TOKEN`"
+            ],
+            "level": "note",
+            "name": "secrets-removed"
+          }
+        ],
+        "workflow:.github/workflows/strict-off.md": [
+          {
+            "items": [],
+            "level": "warning",
+            "name": "strict-disabled"
+          }
+        ],
+        "workflow:.github/workflows/strict-on.md": [
+          {
+            "items": [],
+            "level": "note",
+            "name": "strict-enabled"
+          }
+        ],
+        "workflow:.github/workflows/tools-narrower.md": [
+          {
+            "items": [
+              "tool `edit`",
+              "MCP server `docs`",
+              "toolset `issues`",
+              "min-integrity default → `merged`",
+              "read-only",
+              "lockdown on"
+            ],
+            "level": "note",
+            "name": "tools-narrowed"
+          }
+        ],
+        "workflow:.github/workflows/tools-wider.md": [
+          {
+            "items": [
+              "tool `edit`",
+              "MCP server `docs`",
+              "toolset `issues`",
+              "min-integrity `approved` → `none`",
+              "no longer read-only",
+              "lockdown off"
+            ],
+            "level": "warning",
+            "name": "tools-widened"
+          }
+        ],
+        "workflow:.github/workflows/triggers-fewer.md": [
+          {
+            "items": [
+              "`issues`",
+              "role `all`"
+            ],
+            "level": "note",
+            "name": "triggers-narrowed"
+          }
+        ],
+        "workflow:.github/workflows/triggers-filtered.md": [
+          {
+            "items": [
+              "`pull_request` `paths-ignore` no longer `docs/**`",
+              "`pull_request` `types` also `synchronize`"
+            ],
+            "level": "warning",
+            "name": "triggers-widened"
+          },
+          {
+            "items": [
+              "`pull_request` now limited by `branches-ignore` `wip/*`",
+              "`pull_request` `paths-ignore` also `tests/**`"
+            ],
+            "level": "note",
+            "name": "triggers-narrowed"
+          }
+        ],
+        "workflow:.github/workflows/triggers-more.md": [
+          {
+            "items": [
+              "`issues`",
+              "role `all`"
+            ],
+            "level": "warning",
+            "name": "triggers-widened"
+          }
+        ],
+        "workflow:.github/workflows/triggers-rescheduled.md": [
+          {
+            "items": [
+              "`pull_request` `draft: false` → `draft: true`",
+              "`schedule` `daily` → `hourly`"
+            ],
+            "level": "note",
+            "name": "triggers-changed"
+          }
+        ],
+        "workflow:.github/workflows/triggers-unfiltered.md": [
+          {
+            "items": [
+              "`push` no longer limited by `branches`",
+              "`push` no longer limited by `paths-ignore`"
+            ],
+            "level": "warning",
+            "name": "triggers-widened"
+          }
+        ],
+        "workflow:.github/workflows/unrecognized.md": [
+          {
+            "items": [
+              "`hologram`"
+            ],
+            "level": "warning",
+            "name": "unrecognized-field"
+          }
+        ]
+      },
+      "version": 0
+    }
+  },
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "group:lab",
+        "workflow:.github/workflows/bash-any.md",
+        "workflow:.github/workflows/bash-anything.md",
+        "workflow:.github/workflows/bash-disabled.md",
+        "workflow:.github/workflows/bash-enabled.md",
+        "workflow:.github/workflows/bash-fewer.md",
+        "workflow:.github/workflows/bash-limited.md",
+        "workflow:.github/workflows/bash-more.md",
+        "workflow:.github/workflows/bash-still-any.md",
+        "workflow:.github/workflows/budget-down.md",
+        "workflow:.github/workflows/budget-up.md",
+        "workflow:.github/workflows/described.md",
+        "workflow:.github/workflows/engine-switched.md",
+        "workflow:.github/workflows/gate-added.md",
+        "workflow:.github/workflows/gate-removed.md",
+        "workflow:.github/workflows/integrity-dropped.md",
+        "workflow:.github/workflows/invalid-fixed.md",
+        "workflow:.github/workflows/invalid-now.md",
+        "workflow:.github/workflows/loads-changed.md",
+        "workflow:.github/workflows/lock-lost.md",
+        "workflow:.github/workflows/lock-recompiled.md",
+        "workflow:.github/workflows/lock-staled.md",
+        "workflow:.github/workflows/lock-unknown.md",
+        "workflow:.github/workflows/lock-unverified.md",
+        "workflow:.github/workflows/network-narrower.md",
+        "workflow:.github/workflows/network-wider.md",
+        "workflow:.github/workflows/outputs-added.md",
+        "workflow:.github/workflows/outputs-expression.md",
+        "workflow:.github/workflows/outputs-loosened.md",
+        "workflow:.github/workflows/outputs-retargeted.md",
+        "workflow:.github/workflows/outputs-scalar.md",
+        "workflow:.github/workflows/outputs-tightened.md",
+        "workflow:.github/workflows/permissions-added.md",
+        "workflow:.github/workflows/permissions-granted.md",
+        "workflow:.github/workflows/permissions-lowered.md",
+        "workflow:.github/workflows/repos-added.md",
+        "workflow:.github/workflows/repos-guarded.md",
+        "workflow:.github/workflows/repos-removed.md",
+        "workflow:.github/workflows/repos-unguarded.md",
+        "workflow:.github/workflows/secrets-added.md",
+        "workflow:.github/workflows/secrets-removed.md",
+        "workflow:.github/workflows/strict-off.md",
+        "workflow:.github/workflows/strict-on.md",
+        "workflow:.github/workflows/tools-narrower.md",
+        "workflow:.github/workflows/tools-wider.md",
+        "workflow:.github/workflows/triggers-fewer.md",
+        "workflow:.github/workflows/triggers-filtered.md",
+        "workflow:.github/workflows/triggers-more.md",
+        "workflow:.github/workflows/triggers-rescheduled.md",
+        "workflow:.github/workflows/triggers-unfiltered.md",
+        "workflow:.github/workflows/unrecognized.md"
+      ],
+      "kind": "restructure",
+      "summary": "`gate-removed` no longer loads `shared/check-style.md` (`guardrail`), `skills/check-old` (`guardrail`)."
+    },
+    {
+      "changes": [
+        "group:new",
+        "note:readme",
+        "workflow:.github/workflows/added-quietly.md",
+        "workflow:.github/workflows/added.md"
+      ],
+      "kind": "add",
+      "summary": "New agentic workflow `added-quietly`."
+    },
+    {
+      "changes": [
+        "group:gone",
+        "workflow:.github/workflows/removed.md"
+      ],
+      "kind": "remove",
+      "summary": "Agentic workflow `removed` is removed."
+    }
+  ]
+}

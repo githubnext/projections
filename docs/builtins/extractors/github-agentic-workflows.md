@@ -91,6 +91,39 @@ workflows added and removed, groups that gain or lose members, and `dispatches`
 between workflows appear as they change. Warnings (a stale or missing lock file,
 an unrecognized or renamed field) describe the revision they are found in.
 
+### Interpreting changes: the agentic-workflows comparator
+
+The default comparator says _that_ a workflow changed. The
+[`agentic-workflows` comparator file](../../../packages/comparators/agentic-workflows/README.md)
+that ships with Projections says in which direction: whether the change widens
+what an unattended agent may do (a warning) or narrows it (a note). It isn't
+built in: copy
+`packages/comparators/agentic-workflows/agentic-workflows.comparator.yaml` into
+your repository and name it in the definition:
+
+```json
+"comparator": {"file": ".github/projections/agentic-workflows.comparator.yaml", "options": {"gates": ["guardrail"]}}
+```
+
+It keeps the default comparator's matching and statuses and adds:
+
+- **Interpretations** of each change, each a warning or a note with what moved:
+  `gate-removed` (a classified import or skill, such as a `check-*` guardrail,
+  is no longer loaded), `repos-widened`, `permissions-widened`, `bash-widened`,
+  `network-widened`, `outputs-widened` (a new safe output, a higher `max`,
+  another target repository), `tools-widened` (a tool, MCP server or toolset, a
+  lower `min-integrity`), `secrets-added`, `strict-disabled`,
+  `triggers-widened`, `budget-raised`, `workflow-added`, `lock-stale` and
+  `unrecognized-field`, and their narrowing counterparts as notes.
+- **One sentence per change**, from its most severe interpretation: "`docs-bot`
+  no longer loads `skills/check-links` (`guardrail`)." or "`repo-ask` can reach
+  more of the network: `*.readthedocs.io`, `python`."
+- **Order**: steps by their widest change, a dropped gate first.
+
+Rules run sandboxed and need no trust, in the CLI, VS Code and hosted views; a
+hosted view runs the comparator file from the pull request's base, so a pull
+request can't change how it is judged.
+
 ## Start from this definition
 
 <!-- generated: definition -->
@@ -128,7 +161,11 @@ an unrecognized or renamed field) describe the revision they are found in.
 - [`github-actions-jobs`](github-actions-jobs.md), the job graph of an ordinary
   Actions workflow (such as a compiled lock file).
 - [One model for agentic workflows](../../models/agentic-workflow-model.md), the
-  vocabulary it writes.
+  vocabulary it writes, and the
+  [`agentic-workflows` comparator file](../../../packages/comparators/agentic-workflows/README.md)
+  that interprets it.
+- [The default comparator](../comparators/default.md), which the comparator file
+  builds on.
 
 ## How it works
 
@@ -149,7 +186,9 @@ review:
   credits it spent, from the Actions API or gh-aw's logs.
 
 Try the lighter options first: `paths` and `exclude` choose the workflows,
-`groups` the units and `classes` the imports and skills that matter.
+`groups` the units and `classes` the imports and skills that matter. To change
+what counts as widening or how a change is worded, edit your copy of the
+comparator file rather than the extractor.
 
 **In VS Code**, choose **+ New Projection…** in the Projections view, then
 **Write a custom extractor, renderer or comparator** › **Custom extractor** (or

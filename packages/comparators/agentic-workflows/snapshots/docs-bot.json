@@ -1,0 +1,247 @@
+{
+  "changes": [
+    {
+      "after": [
+        "group:docs-bot"
+      ],
+      "before": [
+        "group:docs-bot"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "group:docs-bot",
+      "status": "modified",
+      "summary": "Group `docs-bot` changes: `docs-bot-digest` joins."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/docs-bot-digest.md"
+      ],
+      "before": [],
+      "collection": "entities",
+      "correspondence": "none",
+      "id": "workflow:.github/workflows/docs-bot-digest.md",
+      "status": "added",
+      "summary": "New agentic workflow `docs-bot-digest`, which can write `create-discussion`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/docs-bot-examples.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/docs-bot-examples.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/docs-bot-examples.md",
+      "status": "modified",
+      "summary": "`docs-bot-examples` reaches less of the network: `python`."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/docs-bot-links.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/docs-bot-links.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/docs-bot-links.md",
+      "status": "modified",
+      "summary": "`docs-bot-links` can run more commands: any command."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/docs-bot.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/docs-bot.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/docs-bot.md",
+      "status": "modified",
+      "summary": "`docs-bot` no longer loads `skills/check-links` (`guardrail`)."
+    },
+    {
+      "after": [
+        "workflow:.github/workflows/issue-triage.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/issue-triage.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/issue-triage.md",
+      "status": "modified",
+      "summary": "`issue-triage` can write more: `add-labels` also `priority`."
+    },
+    {
+      "after": [
+        "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot-digest.md"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot-digest.md",
+      "status": "added"
+    },
+    {
+      "after": [
+        "dispatches:workflow%3A.github%2Fworkflows%2Fdocs-bot.md:workflow%3A.github%2Fworkflows%2Fdocs-bot-digest.md"
+      ],
+      "before": [],
+      "collection": "relationships",
+      "correspondence": "none",
+      "id": "dispatches:workflow%3A.github%2Fworkflows%2Fdocs-bot.md:workflow%3A.github%2Fworkflows%2Fdocs-bot-digest.md",
+      "status": "added"
+    }
+  ],
+  "metadata": {
+    "agenticWorkflows": {
+      "interpretations": {
+        "group:docs-bot": [
+          {
+            "items": [
+              "`docs-bot-digest` joins"
+            ],
+            "level": "note",
+            "name": "group-changed"
+          }
+        ],
+        "workflow:.github/workflows/docs-bot-digest.md": [
+          {
+            "items": [
+              "`create-discussion`"
+            ],
+            "level": "warning",
+            "name": "workflow-added"
+          }
+        ],
+        "workflow:.github/workflows/docs-bot-examples.md": [
+          {
+            "items": [
+              "`python`"
+            ],
+            "level": "note",
+            "name": "network-narrowed"
+          },
+          {
+            "items": [
+              "timeout (minutes) `60` → `30`"
+            ],
+            "level": "note",
+            "name": "budget-lowered"
+          }
+        ],
+        "workflow:.github/workflows/docs-bot-links.md": [
+          {
+            "items": [
+              "any command"
+            ],
+            "level": "warning",
+            "name": "bash-widened"
+          },
+          {
+            "items": [
+              "`files.pythonhosted.org`",
+              "`linkcheck.example.net`"
+            ],
+            "level": "warning",
+            "name": "network-widened"
+          }
+        ],
+        "workflow:.github/workflows/docs-bot.md": [
+          {
+            "items": [
+              "`skills/check-links` (`guardrail`)"
+            ],
+            "level": "warning",
+            "name": "gate-removed"
+          },
+          {
+            "items": [
+              "`octo-org/docs-site`"
+            ],
+            "level": "warning",
+            "name": "repos-widened"
+          },
+          {
+            "items": [
+              "`pull-requests: read`"
+            ],
+            "level": "warning",
+            "name": "permissions-widened"
+          },
+          {
+            "items": [
+              "`create-pull-request` to `octo-org/docs-site`",
+              "`create-issue` max `1` → `3`",
+              "`dispatch-workflow` max `2` → `3`, also starts `docs-bot-digest`"
+            ],
+            "level": "warning",
+            "name": "outputs-widened"
+          },
+          {
+            "items": [
+              "toolset `pull_requests`",
+              "min-integrity `approved` → `unapproved`"
+            ],
+            "level": "warning",
+            "name": "tools-widened"
+          },
+          {
+            "items": [
+              "AI credits per run `2000` → `5000`"
+            ],
+            "level": "warning",
+            "name": "budget-raised"
+          }
+        ],
+        "workflow:.github/workflows/issue-triage.md": [
+          {
+            "items": [
+              "`add-labels` also `priority`"
+            ],
+            "level": "warning",
+            "name": "outputs-widened"
+          },
+          {
+            "items": [
+              "`.github/workflows/issue-triage.lock.yml` is stale"
+            ],
+            "level": "warning",
+            "name": "lock-stale"
+          }
+        ]
+      },
+      "version": 0
+    }
+  },
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "group:docs-bot",
+        "workflow:.github/workflows/docs-bot-examples.md",
+        "workflow:.github/workflows/docs-bot-links.md",
+        "workflow:.github/workflows/docs-bot.md",
+        "workflow:.github/workflows/issue-triage.md"
+      ],
+      "kind": "restructure",
+      "summary": "`docs-bot` no longer loads `skills/check-links` (`guardrail`)."
+    },
+    {
+      "changes": [
+        "workflow:.github/workflows/docs-bot-digest.md",
+        "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot-digest.md",
+        "dispatches:workflow%3A.github%2Fworkflows%2Fdocs-bot.md:workflow%3A.github%2Fworkflows%2Fdocs-bot-digest.md"
+      ],
+      "kind": "add",
+      "summary": "New agentic workflow `docs-bot-digest`, which can write `create-discussion`."
+    }
+  ]
+}

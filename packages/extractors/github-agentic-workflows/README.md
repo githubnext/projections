@@ -62,10 +62,10 @@ workflow with the workflows named after it and a dash (`docs-bot` with
 `docs-bot-links` and `docs-bot-examples`), and an object of group name to globs
 groups by path or name. Each group is a `group` entity that `contains` its
 workflows. `classes` names imports and skills by glob, such as `guardrail` for
-`skills/check-*`, and each import and skill lists its classes, so a comparison
-can tell a guardrail that is no longer loaded from any other import. A workflow
-whose `dispatch-workflow` or `call-workflow` safe output names another workflow
-`dispatches` it.
+`skills/check-*`; each import and skill lists its classes, and the
+[`agentic-workflows` comparator file](../../comparators/agentic-workflows/README.md)
+warns when a classified one is removed. A workflow whose `dispatch-workflow` or
+`call-workflow` safe output names another workflow `dispatches` it.
 
 ## gh-aw's changing front matter
 

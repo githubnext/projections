@@ -59,6 +59,7 @@ const comparison = {
   metadata: {
     compatibility: {version: 0, changes: {api: {level: 'breaking', reason: 'Owner'}, fresh: {level: 'nonsense'}}},
     runtimePolicy: {interpretations: {api: ['scope-broadened', 7, 'scope-broadened'], legacy: 'coverage-lost'}},
+    agenticWorkflows: {interpretations: {worker: [{name: 'network-widened', level: 'warning'}, {name: 3}, 'repos-widened'], fresh: {}}},
   },
 }
 const subject = {mode: 'comparison', before, after, comparison}
@@ -130,6 +131,7 @@ test('connections are an entity’s relationships, changed first, or a relations
 
 test('classification tags come from comparator metadata conventions, ignoring anything malformed', () => {
   assert.deepEqual(changeTags(subject, 'api'), ['Breaking', 'Scope broadened'])
+  assert.deepEqual(changeTags(subject, 'worker'), ['Network widened'])
   assert.deepEqual(changeTags(subject, 'fresh'), [])
   assert.deepEqual(changeTags(subject, 'legacy'), [])
   assert.deepEqual(changeTags(subject, 'toString'), [])

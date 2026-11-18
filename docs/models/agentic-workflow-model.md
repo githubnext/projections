@@ -2,9 +2,12 @@
 
 Status: **adopted** for GitHub Agentic Workflows. The
 [`github-agentic-workflows`](../../packages/extractors/github-agentic-workflows/README.md)
-extractor writes it. The vocabulary names what an agentic workflow is allowed to
-do rather than gh-aw's field names, so other agent automation (a coding agent's
-repository configuration, another workflow compiler) can write the same model.
+extractor writes it, and the
+[`agentic-workflows` comparator file](../../packages/comparators/agentic-workflows/README.md)
+interprets its changes. The vocabulary names what an agentic workflow is allowed
+to do rather than gh-aw's field names, so other agent automation (a coding
+agent's repository configuration, another workflow compiler) can write the same
+model.
 
 An agentic workflow is an AI agent that runs on its own: something starts it, it
 reaches tools, repositories and the network, it writes through declared outputs,
@@ -87,4 +90,6 @@ permission or a higher level of one, a safe output or a higher limit on one (or
 a target repository), a secret, or a higher budget; when it lowers
 `min-integrity`, turns off `read-only`, `lockdown`, `strict` or `staged`; and
 when it stops loading a classified import or skill (a guardrail). The reverse
-**narrows** it, and each is decidable from these fields alone.
+**narrows** it. The
+[comparator file](../../packages/comparators/agentic-workflows/README.md)
+decides each direction from these fields alone.

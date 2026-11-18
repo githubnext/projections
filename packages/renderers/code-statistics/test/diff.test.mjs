@@ -102,7 +102,7 @@ test('every language of either revision keeps one row with its Before count stru
       assert.equal(mark, status, `${id} is marked as the comparison changed it`)
       const struck = row.match(/<del class="stat-was"><span class="sr-only">was <\/span>([\d,]+)<\/del>/)?.[1]
       const shown = row.match(/<span class="stat-now">(?:<span class="sr-only">, now <\/span>)?([\d,]+)<\/span>/)?.[1]
-      const delta = row.match(/stat-diff-delta (?:added|removed)">([^<]+)</)?.[1]
+      const delta = row.match(/stat-diff-delta (?:added|removed)"[^>]*>([^<]+)</)?.[1]
       if (status === 'added') {
         assert.equal(struck, undefined)
         assert.equal(shown, format(now))

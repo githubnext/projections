@@ -168,12 +168,16 @@ export function Row({
 export function Changed({before, after}: {before: ReactNode; after: ReactNode}) {
   return (
     <>
-      <del className="rp-old">{before}</del>
+      <del className="rp-old" data-change="removed">
+        {before}
+      </del>
       <span className="rp-arrow" aria-hidden="true">
         {' → '}
       </span>
       <span className="sr-only"> now </span>
-      <ins className="rp-new">{after}</ins>
+      <ins className="rp-new" data-change="added">
+        {after}
+      </ins>
     </>
   )
 }

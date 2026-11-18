@@ -4,7 +4,7 @@ import {signed} from './timeline.js'
 export function DiffDelta({delta, noun, format}: {delta: number; noun: string; format: (value: number) => string}) {
   if (!delta) return null
   return (
-    <span className={`stat-delta-label stat-diff-delta ${delta > 0 ? 'added' : 'removed'}`}>
+    <span className={`stat-delta-label stat-diff-delta ${delta > 0 ? 'added' : 'removed'}`} data-change={delta > 0 ? 'added' : 'removed'}>
       {signed(delta, format)}
       <span className="sr-only"> {noun}</span>
     </span>

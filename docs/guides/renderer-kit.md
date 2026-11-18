@@ -358,7 +358,10 @@ arrives, leaves or changes is visible at once.
      limit, and never drops a character; `diffCardText` lays out a graph card's
      text that way and gives its width (what its longest line needs, or the
      graph's shared `width`) and height.
-6. Draw no summary line: the host's summary bar counts each kind and its changes
+6. Never nest change colors: only the innermost changes are colored, and an item
+   showing changes inside it stays neutral; the kit's styles do it
+   ([no nested change colors](renderer-kit-components.md#no-nested-change-colors)).
+7. Draw no summary line: the host's summary bar counts each kind and its changes
    (name your kinds with `nouns`), and states the findings the counts can't say
    (an API's compatibility, a policy's coverage, a plan's actions) as `facts`
    (see the summary bar under
@@ -368,7 +371,7 @@ arrives, leaves or changes is visible at once.
 Selection, hover, anchors, the host's filter and annotations work in diff mode
 as in every other: keep `data-entity-id` on every item, and keep the union
 responsive down to 390 px. The renderer checks' `diff-changes`, `diff-neutral`,
-`diff-clipping` and `stable-layout` cover it.
+`diff-clipping`, `stable-layout` and `nested-accents` cover it.
 
 ## Filling the frame
 

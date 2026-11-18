@@ -68,6 +68,10 @@
 .fp-emphasis.renamed {
   stroke: var(--violet);
 }
+/* A folder with changes drawn inside it: a neutral ring, so only the innermost changes are colored. */
+.fp-emphasis.pk-holds-changes {
+  stroke: var(--border-emphasis);
+}
 /* Hover, focus and selection: the SDK's ring, inside each circle's own edge. */
 /* Labels sit on a halo of the ground's color, so they read over fills and break folder outlines. */
 .fp-label {

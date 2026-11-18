@@ -49,7 +49,7 @@ pub struct Show {
     #[arg(long, value_name = "REVISION")]
     pub definition_revision: Option<String>,
     /// Present a saved extraction or comparison document instead of running extractors; with -p, an extractor's raw output, which the working tree's definition of that projection normalizes, digests and validates
-    #[arg(long, value_name = "FILE", conflicts_with_all = ["revision", "all", "definition_revision", "trust", "container_image"])]
+    #[arg(long, value_name = "FILE", conflicts_with_all = ["revision", "all", "definition_revision", "container_image"])]
     pub from: Option<PathBuf>,
     #[command(flatten)]
     pub format: Format,
@@ -83,7 +83,7 @@ pub struct Compare {
     pub definition_revision: Option<String>,
     /// Compare two saved extractions instead of running extractors. With -p ID, either may also be extractor output (or a saved extraction edited by hand), made a document with the working tree's definition of ID
     #[arg(long, value_name = "FILE", requires = "after_extraction",
-        conflicts_with_all = ["range", "all", "trust", "container_image"])]
+        conflicts_with_all = ["range", "all", "container_image"])]
     pub before_extraction: Option<PathBuf>,
     /// The saved extraction to compare with --before-extraction
     #[arg(long, value_name = "FILE", requires = "before_extraction")]
@@ -137,7 +137,8 @@ pub async fn show(directory: &Path, args: Show) -> Result<()> {
             }
         };
         present(&document, &args.format, text, &[])?;
-        let runner = Runner::at_checkout(directory.to_path_buf(), false);
+        // Nothing is extracted; --trust lets the definition's custom renderer draw the image.
+        let runner = Runner::at_checkout(directory.to_path_buf(), args.execution.trust);
         let cancel = Arc::new(AtomicBool::new(false));
         install_cancellation_for(cancel.clone())?;
         return draw(&args.png, document, &runner, DefinitionSource::Base, cancel).await;
@@ -215,7 +216,8 @@ pub async fn compare(directory: &Path, args: Compare) -> Result<()> {
 /// an extractor.
 async fn compare_saved(directory: &Path, args: &Compare, before: &Path) -> Result<()> {
     ready_to_draw(&args.png, Some(true))?;
-    let runner = Runner::at_checkout(directory.to_path_buf(), false);
+    // Nothing is extracted; --trust lets the definition's custom renderer draw the image.
+    let runner = Runner::at_checkout(directory.to_path_buf(), args.execution.trust);
     let id = args.projection.as_deref();
     let before = runner.saved_or_supplied(id, before)?;
     let after = runner.saved_or_supplied(id, args.after_extraction.as_deref().context("Missing after extraction")?)?;
@@ -281,7 +283,7 @@ pub fn list(directory: &Path, args: List) -> Result<()> {
                 ""
             },
             if projection["rendererRequiresTrust"] == true {
-                "; its custom renderer comes from outside this checkout's history and requires --trust"
+                "; its custom renderer differs from the default branch's and requires --trust"
             } else {
                 ""
             }

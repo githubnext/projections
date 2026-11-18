@@ -27,9 +27,9 @@ trigger a fallback. Single operations keep the same explicit trust rules.
 `{"format": "projections.list", "version": 0, "revision", "projections": [{"id", "title", "renderer", "requiresTrust", "rendererRequiresTrust", "definition"}]}`
 after reading only the definition directories. `requiresTrust` means the
 extractor runs repository code. `rendererRequiresTrust` means the custom
-renderer comes from a revision outside the checkout's history (not the working
-tree or an ancestor of `HEAD`) and differs from the bundle at its merge base
-with `HEAD`. The Inspector reports the same policy.
+renderer differs from the bundle at the revision's merge base with the default
+branch (`refs/remotes/origin/HEAD`), or there is no default branch to compare
+with; see [trust](../contracts.md#trust). The Inspector reports the same policy.
 
 Save scenarios in the root `.projections-bookmarks.json`, not in a definition
 directory:

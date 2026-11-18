@@ -27,7 +27,7 @@ impl Checker<'_> {
             target.comparison,
         )?;
         let sources = target.sources(&self.root, path);
-        let loaded = fixtures::load(&sources, target.bundle.as_slice(), "", true);
+        let loaded = fixtures::load(&sources, target.bundle.as_slice(), "", true, self.runner.trust);
         for error in loaded.errors() {
             steps.push(step("render", "Renderer scenarios", "fail", error));
         }
@@ -35,6 +35,7 @@ impl Checker<'_> {
         match renderer_checks(
             &sources,
             target.bundle,
+            self.runner.trust,
             &keys,
             executable,
             self.options.timeout,

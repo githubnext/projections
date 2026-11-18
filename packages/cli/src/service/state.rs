@@ -33,6 +33,8 @@ use crate::{
 pub(super) struct FixturesState {
     pub(super) sources: Vec<PathBuf>,
     pub(super) renderers: Vec<PathBuf>,
+    /// Whether bundles the scenarios name besides `renderers` are served.
+    pub(super) trust: bool,
     /// URL prefix of fixture renderer bundles.
     pub(super) base: String,
     /// The check probe script injected into renderer documents.
@@ -176,6 +178,7 @@ pub(super) async fn shutdown(state: Arc<ServiceState>) {
 pub(super) async fn build(options: InspectorOptions) -> Result<(Router, Arc<ServiceState>)> {
     let fixtures_mode = options.fixtures.is_some();
     let (assets, probe) = tokio::task::spawn_blocking(move || validate_assets(&options.assets, fixtures_mode)).await??;
+    let fixtures_trust = options.fixtures.as_ref().is_some_and(|fixtures| fixtures.trust);
     let fixture_paths = match options.fixtures {
         Some(fixtures) => Some(tokio::task::spawn_blocking(move || fixtures::resolve(&fixtures.sources, &fixtures.renderers)).await??),
         None => None,
@@ -200,7 +203,7 @@ pub(super) async fn build(options: InspectorOptions) -> Result<(Router, Arc<Serv
             let (loaded, watched) = {
                 let (sources, renderers, base) = (sources.clone(), renderers.clone(), base.clone());
                 tokio::task::spawn_blocking(move || {
-                    let loaded = fixtures::load(&sources, &renderers, &base, false);
+                    let loaded = fixtures::load(&sources, &renderers, &base, false, fixtures_trust);
                     let watched = fixtures::fingerprint(&loaded.watched);
                     (loaded, watched)
                 })
@@ -210,6 +213,7 @@ pub(super) async fn build(options: InspectorOptions) -> Result<(Router, Arc<Serv
             Some(FixturesState {
                 sources,
                 renderers,
+                trust: fixtures_trust,
                 base,
                 probe: probe.context("Inspector check probe is unavailable")?,
                 current: watch::Sender::new(Arc::new(Snapshot {

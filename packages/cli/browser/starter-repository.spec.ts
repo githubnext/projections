@@ -20,8 +20,9 @@ test('the repository Inspector presents the renderer package scenarios beside th
   test.slow()
   git('add', '-A')
   git('commit', '--quiet', '--allow-empty', '-m', 'Start')
-  // The Inspector's mountable bundle over this CLI's `serve --stdio`, as the VS Code extension hosts it.
-  const harness = await startHarness(context, ['-C', repository])
+  // The Inspector's mountable bundle over this CLI's `serve --stdio`, as the VS Code extension hosts it in a trusted
+  // workspace: the package's renderer is repository code.
+  const harness = await startHarness(context, ['-C', repository, '--trust'])
   try {
     await page.goto(harness.url)
     // The Explorer's Compare section lists them as "Renderer scenarios", beside the Before → After pair.
@@ -30,7 +31,7 @@ test('the repository Inspector presents the renderer package scenarios beside th
     await expect(scenarios.getByRole('button', {name: /^Checkout splits out payments/})).toHaveAttribute('aria-pressed', 'false')
     await scenarios.getByRole('button', {name: /^Checkout splits out payments/}).click()
     await expect(scenarios.getByRole('button', {name: /^Checkout splits out payments/})).toHaveAttribute('aria-pressed', 'true')
-    // Its pair, compared in the browser, drawn by the package's renderer; no extractor ran, so no trust was needed.
+    // Its pair, compared in the browser and drawn by the package's renderer; no extractor ran.
     await expect(page.locator('.ph[data-mode="comparison"]')).toBeVisible()
     const frame = page.frameLocator('iframe').first()
     await expect(frame.locator('[data-entity-id="service:payments"]')).toBeAttached()

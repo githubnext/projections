@@ -67,6 +67,8 @@ pub struct FixturesOptions {
     pub sources: Vec<PathBuf>,
     /// Renderer bundle directories, or package directories naming one.
     pub renderers: Vec<PathBuf>,
+    /// Serve bundles the scenarios name besides `renderers` (repository code).
+    pub trust: bool,
 }
 
 /// The Inspector's API without a listener: its router, called in memory. The

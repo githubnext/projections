@@ -25,7 +25,7 @@ pub(in crate::service) fn read(runner: &Runner, id: &str) -> anyhow::Result<Valu
         return Ok(json!({"file": null, "scenarios": []}));
     };
     let relative = file.strip_prefix(&runner.repo).unwrap_or(&file).to_path_buf();
-    let loaded = fixtures::load(std::slice::from_ref(&file), &[], "", false);
+    let loaded = fixtures::load(std::slice::from_ref(&file), &[], "", false, false);
     let entries = loaded.value["scenarios"].as_array().cloned().unwrap_or_default();
     // Every extraction, in order, with where it came from.
     let mut extractions = Vec::new();

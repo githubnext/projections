@@ -102,7 +102,7 @@ impl Loader<'_> {
         }
         fields(value, &["bundle"], label)?;
         let bundle = local_path(&value["bundle"], &format!("{label}.bundle"))?;
-        Ok(json!({"bundle": self.renderer(&directory.join(bundle), false)}))
+        Ok(json!({"bundle": self.scenario_bundle(&directory.join(bundle))}))
     }
 
     fn extraction(&mut self, value: &Value, directory: &Path, label: &str) -> Result<Value> {

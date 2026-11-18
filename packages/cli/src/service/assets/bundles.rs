@@ -66,7 +66,7 @@ pub(super) async fn custom(state: &Arc<ServiceState>, rest: &str) -> Result<Resp
     .ok_or_else(|| {
         HttpError::new(
             StatusCode::FORBIDDEN,
-            "This custom renderer comes from outside the checkout's history and differs from its merge base's; it runs only with --trust (in VS Code, a trusted workspace)",
+            "This custom renderer is repository code that differs from the default branch's, so it runs only with --trust (in VS Code, a trusted workspace)",
         )
     })?;
     Ok(static_response(bytes, path, RENDERER_CSP))

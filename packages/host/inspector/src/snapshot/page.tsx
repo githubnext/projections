@@ -46,7 +46,7 @@ export function SnapshotPage({document: snapshot, settings, renderers, customRen
     if (typeof requested === 'string') return undefined
     if (settings.withheld)
       return {
-        withheld: `The custom renderer ${requested.bundle} comes from outside this checkout's history and needs --trust.`,
+        withheld: `The custom renderer ${requested.bundle} is repository code that differs from the default branch's, so it needs --trust.`,
       }
     if (!customRendererBase || !settings.definition) return undefined
     return customRenderer(

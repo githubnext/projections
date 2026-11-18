@@ -53,6 +53,9 @@ const test = base.extend<{repository: Repository}>({
       await writeFile(join(repo, 'README.md'), '# Cards\n')
       git('add', '.')
       git('commit', '--quiet', '-m', 'Package cards')
+      // The commit is the default branch, as a clone's origin/HEAD names it: its renderer runs without --trust.
+      git('update-ref', 'refs/remotes/origin/main', 'HEAD')
+      git('symbolic-ref', 'refs/remotes/origin/HEAD', 'refs/remotes/origin/main')
       await writeFile(join(repo, 'NOTES.md'), 'Uncommitted\n')
       const server = await startHarness(context, ['-C', repo])
       try {

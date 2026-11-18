@@ -19,7 +19,7 @@ import {bundledCli, cliPath, compatibleVersion, incompatibility, resolveCli} fro
 import {createRpcClient, RpcError} from '../src/runner/rpc.ts'
 import {parseWrite, refusal} from '../src/writes.ts'
 import {addToCiPrompt, isAddToCiChoice} from '../src/projections/ci.ts'
-import {rendererPackage, sourceArguments} from '../src/sources.ts'
+import {rendererPackage, scenarioRenderer, sourceArguments} from '../src/sources.ts'
 
 const cli = fileURLToPath(new URL(`../../../cli/dist/projections${process.platform === 'win32' ? '.exe' : ''}`, import.meta.url))
 
@@ -440,4 +440,8 @@ test('documents and renderer scenarios open with serve --stdio --document or --f
   await writeFile(path.join(root, 'package.json'), JSON.stringify({projections: {renderer: 'dist'}}))
   assert.equal(rendererPackage(root), true)
   assert.equal(rendererPackage(fileURLToPath(new URL('../../../renderers/api/dist/', import.meta.url))), true)
+  // A package's own renderer is repository code: it runs only in a trusted workspace.
+  assert.deepEqual(scenarioRenderer(root, true), {renderer: true, withheld: false})
+  assert.deepEqual(scenarioRenderer(root, false), {renderer: false, withheld: true})
+  assert.deepEqual(scenarioRenderer(tmpdir(), false), {renderer: false, withheld: false})
 })

@@ -50,9 +50,9 @@ Action, `trust: true`), which covers both revisions of a comparison.
 
 A comparison explains both revisions with one definition, by default the base
 revision's, so a pull request's author can't change how their own change is
-explained. A custom renderer that only the head supplies needs the same trust as
-a head extractor. `projections pr` reviews someone else's pull request with no
-way to grant trust at all.
+explained. A custom renderer is repository code too, so it needs the same trust
+unless it is byte-identical to the default branch's (Layer 4). `projections pr`
+reviews someone else's pull request with no way to grant trust at all.
 
 When you do trust a pull request's head in CI, use the plain `pull_request`
 event (never `pull_request_target`), no secrets, read-only permissions and
@@ -102,9 +102,16 @@ security policy that grants no origin and `connect-src 'none'`. It receives one
 extraction or comparison and draws it; it can't read files, call an API or fetch
 anything. Browsers can't stop a sandboxed frame from navigating itself, which
 could carry the data it was given away, so which renderer runs is a trust
-decision: renderers from the reviewed revision run, and others need trust.
-Without it, viewers see the built-in renderer for the extraction's schema, with
-a notice.
+decision. A custom renderer bundle is repository code, so it runs only with
+`--trust` (in VS Code, a trusted workspace; in the Action, `trust: true`), like
+a custom extractor. The one exception is a bundle byte-identical to the one the
+projection declares at the revision's merge base with the repository's default
+branch (`refs/remotes/origin/HEAD`): the repository's maintainers merged it, and
+what it receives is derived from the same repository. Checking out a pull
+request leaves the default branch where it was, so a renderer the pull request
+adds or changes still needs trust. Without trust, viewers see the built-in
+renderer for the extraction's schema, with a notice; `check` reports the
+renderer checks as needing `--trust`.
 
 Learn more: [the renderer frame protocol](../contracts/renderer-frames.md).
 
@@ -152,7 +159,7 @@ operate the workflows and hosts that run them:
 | Extractor toolchain | Projections uses the toolchain on `PATH` and never installs or pins one. Pin and review it as you would for a build, declare only the environment variables an extractor needs, and use [container isolation](../runner/environments.md#optional-container-isolation) for code you haven't reviewed. |
 | Trust for head code | Grant `--trust`, or `trust: true` in the Action, only for code you've reviewed, or in a workflow on the plain `pull_request` event with no secrets, read-only permissions and `persist-credentials: false`. |
 | Comparators | Review changes to comparator files like any other pull request change: they decide how changes are classified. The comparator file always belongs to the definition's digest, and a hosted view judges a pull request by the base revision's comparator. |
-| Renderer sandbox | If you [embed Projections in your app](embedding.md#embedding-projections-in-your-own-app), serve renderer bundles with [the renderer response headers](host.md#serving-renderer-bundles) and never relax the frame's sandbox or content security policy. Load custom renderers only from reviewed revisions. |
+| Renderer sandbox | If you [embed Projections in your app](embedding.md#embedding-projections-in-your-own-app), serve renderer bundles with [the renderer response headers](host.md#serving-renderer-bundles) and never relax the frame's sandbox or content security policy. Load a repository's custom renderers only with its trust, as the CLI does. |
 | Artifact digests | Don't add files to or change a `projections` artifact after the Action uploads it: a file the manifest doesn't list rejects it, and a changed document fails verification. A viewer you build should verify documents with the Engine's loader. |
 | Hosted views | Give a hosted view access only to repositories whose projections the people who can read them should see. Artifacts expire with your repository's retention settings. |
 | Agent viewer link | The viewer answers only on loopback, behind a token in its URL that survives restarts ([agent viewer](../design/agent-viewer.md)). Treat the URL as a secret: anyone on this computer who has it can watch the repository's projections. Rotate it with `projections view stop --rotate` once it has been shared. |

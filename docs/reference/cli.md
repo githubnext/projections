@@ -130,7 +130,7 @@ projections check [OPTIONS]
 | `--parity <REVISION>` | Also extract this commit here and compare it with CI's artifact for it (with --ci or --artifact), to find environment drift. |
 | `--strict-determinism` | Fail, rather than warn, when a rerun of the working tree gives a different extraction (CI uses it for built-in extractors). |
 | `--json` | Print the projections.check document. |
-| `--trust` | Run repository code: the projection's extractor, on every selected revision. Review it first. |
+| `--trust` | Run repository code: the projection's extractor, on every selected revision, and its custom renderer. Review it first. |
 | `--container-image <IMAGE>` | Run extractors in this locally prepared container image@sha256; never pulled. |
 | `--container-engine <CONTAINER_ENGINE>` | One of `docker`, `podman`. |
 | `--no-cache` | Don't read or write the persistent extraction cache. |
@@ -167,7 +167,7 @@ projections prepare [OPTIONS]
 | `--step <ID>` | Only this step (repeatable). Repeatable. |
 | `--force` | Run the steps even when their key files are unchanged. |
 | `--json` | Print the projections.prepare document. |
-| `--trust` | Run repository code: the projection's extractor, on every selected revision. Review it first. |
+| `--trust` | Run repository code: the projection's extractor, on every selected revision, and its custom renderer. Review it first. |
 | `--container-image <IMAGE>` | Run extractors in this locally prepared container image@sha256; never pulled. |
 | `--container-engine <CONTAINER_ENGINE>` | One of `docker`, `podman`. |
 | `--no-cache` | Don't read or write the persistent extraction cache. |
@@ -247,7 +247,7 @@ projections show [OPTIONS] [REVISION]
 | `--side <SIDE>` | Comparisons: draw one side alone, with the renderer of the definition that explained the comparison. One of `before`, `after`. |
 | `--browser <PATH>` | Chrome, Chromium or Edge executable. Default: PROJECTIONS_BROWSER, else found on PATH or in its usual install location. |
 | `--timeout <SECONDS>` | Seconds the renderer may take to finish painting. Default: 60, and more for large extractions. |
-| `--trust` | Run repository code: the projection's extractor, on every selected revision. Review it first. |
+| `--trust` | Run repository code: the projection's extractor, on every selected revision, and its custom renderer. Review it first. |
 | `--container-image <IMAGE>` | Run extractors in this locally prepared container image@sha256; never pulled. |
 | `--container-engine <CONTAINER_ENGINE>` | One of `docker`, `podman`. |
 | `--no-cache` | Don't read or write the persistent extraction cache. |
@@ -268,7 +268,7 @@ projections serve [OPTIONS]
 | Argument | Description |
 |---|---|
 | `--stdio` | Speak JSON-RPC 2.0 over standard input and output, one message per line (required: the only transport). |
-| `--trust` | Let it run repository code (custom extractors and renderers) and write repository files. |
+| `--trust` | Let it run repository code (custom extractors and renderers) and write repository files; with --fixtures, the renderer bundles the scenarios name. |
 | `--document <FILE>` | Present a saved extraction, comparison or pull request review instead of the repository, running nothing. |
 | `--fixtures <PATH>` | Serve projections.scenarios documents (or directories holding scenarios.json) for developing a renderer or comparator, instead of a repository; runs no extractors. Repeatable. |
 | `--renderer <DIR>` | With --fixtures, renderer bundle directories (index.html and renderer.json), or packages whose package.json names one in projections.renderer. Repeatable. |
@@ -492,7 +492,7 @@ projections compare [OPTIONS] <BASE>[..<HEAD>]
 | `--side <SIDE>` | Comparisons: draw one side alone, with the renderer of the definition that explained the comparison. One of `before`, `after`. |
 | `--browser <PATH>` | Chrome, Chromium or Edge executable. Default: PROJECTIONS_BROWSER, else found on PATH or in its usual install location. |
 | `--timeout <SECONDS>` | Seconds the renderer may take to finish painting. Default: 60, and more for large extractions. |
-| `--trust` | Run repository code: the projection's extractor, on every selected revision. Review it first. |
+| `--trust` | Run repository code: the projection's extractor, on every selected revision, and its custom renderer. Review it first. |
 | `--container-image <IMAGE>` | Run extractors in this locally prepared container image@sha256; never pulled. |
 | `--container-engine <CONTAINER_ENGINE>` | One of `docker`, `podman`. |
 | `--no-cache` | Don't read or write the persistent extraction cache. |
@@ -540,7 +540,7 @@ projections bookmark run [OPTIONS] [IDS]...
 | `--definition-revision <REVISION>` | Apply this revision's definition and component code to both instead, for example working-tree to try uncommitted projection code on the saved comparisons. |
 | `--json` | Print the JSON document instead of text. |
 | `--output <FILE>` | Write the JSON document to a new FILE instead of printing it. |
-| `--trust` | Run repository code: the projection's extractor, on every selected revision. Review it first. |
+| `--trust` | Run repository code: the projection's extractor, on every selected revision, and its custom renderer. Review it first. |
 | `--container-image <IMAGE>` | Run extractors in this locally prepared container image@sha256; never pulled. |
 | `--container-engine <CONTAINER_ENGINE>` | One of `docker`, `podman`. |
 | `--no-cache` | Don't read or write the persistent extraction cache. |

@@ -66,7 +66,7 @@ pub enum ContainerEngine {
 #[derive(Args)]
 #[command(next_help_heading = "Execution")]
 pub struct Execution {
-    /// Run repository code: the projection's extractor, on every selected revision. Review it first
+    /// Run repository code: the projection's extractor, on every selected revision, and its custom renderer. Review it first
     #[arg(long)]
     pub trust: bool,
     /// Run extractors in this locally prepared container image@sha256; never pulled

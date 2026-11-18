@@ -17,6 +17,8 @@ use crate::artifact::{fields, identifier};
 pub(super) struct Loader<'a> {
     pub(super) base: &'a str,
     pub(super) compare: bool,
+    /// Whether bundles a scenarios document names, besides the explicit ones, may be served.
+    pub(super) trusted: bool,
     pub(super) watched: Vec<PathBuf>,
     pub(super) renderers: Vec<Value>,
     pub(super) bundles: HashMap<String, PathBuf>,
@@ -70,6 +72,25 @@ impl Loader<'_> {
             Err(failure) => entry["error"] = json!(format!("{failure:#}")),
         }
         self.renderers.push(entry);
+        key
+    }
+
+    /// Registers a bundle directory a scenarios document names and returns its
+    /// key. It is repository code, so unless it is one of the explicit bundles
+    /// (`--renderer`, registered first) it is served only when trusted;
+    /// otherwise its entry says why, and hosts use the built-in renderer.
+    pub(super) fn scenario_bundle(&mut self, directory: &Path) -> String {
+        let lexical = lexical(directory);
+        let canonical = std::fs::canonicalize(&lexical).unwrap_or(lexical);
+        if self.trusted || self.renderer_keys.contains_key(&canonical) {
+            return self.renderer(directory, false);
+        }
+        let key = short_sha256(canonical.to_string_lossy().as_bytes());
+        self.renderer_keys.insert(canonical.clone(), key.clone());
+        self.renderers.push(json!({
+            "key": key, "path": canonical.to_string_lossy(),
+            "withheld": format!("The renderer bundle {} that the scenarios name is repository code, so it runs only when named with --renderer or with --trust (in VS Code, a trusted workspace).", canonical.display()),
+        }));
         key
     }
 

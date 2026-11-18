@@ -18,8 +18,8 @@ pub struct Serve {
     /// Speak JSON-RPC 2.0 over standard input and output, one message per line (required: the only transport)
     #[arg(long)]
     pub stdio: bool,
-    /// Let it run repository code (custom extractors and renderers) and write repository files
-    #[arg(long, conflicts_with_all = ["document", "fixtures"])]
+    /// Let it run repository code (custom extractors and renderers) and write repository files; with --fixtures, the renderer bundles the scenarios name
+    #[arg(long, conflicts_with = "document")]
     pub trust: bool,
     /// Present a saved extraction, comparison or pull request review instead of the repository, running nothing
     #[arg(long, value_name = "FILE", conflicts_with = "fixtures")]
@@ -68,6 +68,7 @@ pub async fn serve(directory: &Path, args: Serve) -> Result<()> {
             fixtures: (!args.fixtures.is_empty()).then_some(service::FixturesOptions {
                 sources: args.fixtures,
                 renderers: args.renderer,
+                trust: args.trust,
             }),
             executable: None,
             explore: None,

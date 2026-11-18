@@ -77,7 +77,7 @@ function CopyButton({text, label}: {text: string; label: string}) {
 
 /**
  * The main view's empty state when trust is the one thing needed: what would run (the extractor's command, and a
- * custom renderer from outside the checkout's history), and how to allow it. The runner's `--trust` is the grant, so
+ * custom renderer that differs from the default branch's), and how to allow it. The runner's `--trust` is the grant, so
  * the page can only say how to get it; saved artifacts and built-in extractors work without it.
  */
 export function TrustPrompt({command, renderer}: {command: string | undefined; renderer: string | undefined}) {
@@ -97,7 +97,8 @@ export function TrustPrompt({command, renderer}: {command: string | undefined; r
       )}
       {renderer && (
         <p className="pj:text-muted-foreground">
-          Its custom renderer <code className="pj:font-mono">{renderer}</code> comes from outside this checkout&apos;s history.
+          Its custom renderer <code className="pj:font-mono">{renderer}</code> is repository code that differs from the default
+          branch&apos;s.
         </p>
       )}
       <p className="pj:text-muted-foreground">

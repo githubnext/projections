@@ -209,9 +209,10 @@ export function activate(context: vscode.ExtensionContext) {
         selection: new vscode.Range(line, column, line, column),
       })
     }),
-    // The repository's own code runs once the workspace is trusted: its backends restart with --trust.
+    // The repository's own code runs once the workspace is trusted: its backends, and renderer scenarios' (whose
+    // bundles are repository code), restart with --trust.
     vscode.workspace.onDidGrantWorkspaceTrust(
-      () => void backends.restart(source => source.kind === 'repository', 'The workspace is now trusted'),
+      () => void backends.restart(source => source.kind === 'repository' || source.kind === 'fixtures', 'The workspace is now trusted'),
     ),
     vscode.workspace.registerTextDocumentContentProvider(previewScheme, previews),
     vscode.commands.registerCommand('projections.adopt', onboarding(adopt)),

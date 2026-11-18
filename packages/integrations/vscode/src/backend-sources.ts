@@ -4,7 +4,7 @@ import {workspaceArguments} from './environment-model.js'
 import {startRunner} from './runner.js'
 import {ensureExecutable, incompatibility, resolveCli} from './runner/cli.js'
 import type {Runner} from './runner.js'
-import {rendererPackage, sourceArguments} from './sources.js'
+import {scenarioRenderer, sourceArguments} from './sources.js'
 
 /**
  * What a panel presents: a repository folder (the Inspector and Explore), a saved extraction, comparison or pull
@@ -31,7 +31,7 @@ export function sourceRoot(source: PanelSource): vscode.Uri {
 
 /**
  * Starts `projections serve --stdio` for a source: the configured CLI, else the bundled one (see `resolveCli`), with
- * `--trust` for a repository in a trusted workspace. A CLI this extension can't use is refused with why.
+ * `--trust` for a repository or renderer scenarios in a trusted workspace. A CLI this extension can't use is refused with why.
  */
 export async function launch(context: vscode.ExtensionContext, output: vscode.LogOutputChannel, source: PanelSource): Promise<Runner> {
   const cli = resolveCli({
@@ -41,12 +41,18 @@ export async function launch(context: vscode.ExtensionContext, output: vscode.Lo
   if (cli.source === 'bundled') ensureExecutable(cli.path)
   const version = String((context.extension.packageJSON as {version?: unknown}).version ?? '0.0.0')
   const path = source.kind === 'document' ? source.file.fsPath : source.kind === 'fixtures' ? source.directory.fsPath : undefined
+  const scenarios = source.kind === 'fixtures' && path ? scenarioRenderer(path, vscode.workspace.isTrusted) : undefined
+  if (scenarios?.withheld)
+    void vscode.window.showWarningMessage(
+      "This renderer package's own renderer is repository code, which runs only in a trusted workspace: its scenarios use the built-in renderer for their schema.",
+    )
   return startRunner({
     executable: cli.path,
     repository: sourceRoot(source).fsPath,
-    trust: source.kind === 'repository' && vscode.workspace.isTrusted,
+    // A scenarios backend's --trust serves only the renderer bundles its scenarios name.
+    trust: (source.kind === 'repository' || source.kind === 'fixtures') && vscode.workspace.isTrusted,
     args: [
-      ...sourceArguments({kind: source.kind, ...(path ? {path} : {}), renderer: path ? rendererPackage(path) : false}),
+      ...sourceArguments({kind: source.kind, ...(path ? {path} : {}), renderer: scenarios?.renderer ?? false}),
       ...(source.kind === 'repository' ? workspaceArguments(vscode.workspace.getConfiguration('projections').get('workspace')) : []),
     ],
     log: line => output.info(line),

@@ -244,7 +244,9 @@ step that renders gets no token. A push renders `<id>.light.png` and
 head). The images and a `snapshots.json` index are uploaded as a separate
 artifact, `projections-snapshots`, so the `projections` artifact holds exactly
 the files its manifest lists. A snapshot that fails is a warning, never a failed
-job.
+job. A projection's custom renderer is repository code, so it draws snapshots
+only with `trust: true`; without it the snapshot uses the built-in renderer for
+the projection's schema, with a note in the log.
 
 ```yaml
 permissions:
@@ -325,7 +327,8 @@ its view of the pull request or commit.
 The Action follows the same [trust rule](../guides/how-it-works.md#trust) as the
 CLI. Built-in extractors that only read files always run. Custom extractors, and
 built-in ones that run your toolchain, run only with `trust: true`; without it
-they appear as failed projections that explain why.
+they appear as failed projections that explain why. Custom renderers are
+repository code too: [snapshots](#snapshots) use them only with `trust: true`.
 
 On a pull request, `trust: true` runs code from the pull request's head in CI.
 Use it only when the workflow is the plain `pull_request` event (never

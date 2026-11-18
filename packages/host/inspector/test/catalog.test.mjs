@@ -55,3 +55,15 @@ test('every standard schema resolves to a dedicated built-in renderer that handl
   // A renderer name nothing handles gets the host's own table and text views.
   assert.equal(resolveRenderer('unknown-renderer', catalog).renderer, undefined)
 })
+
+test('a scenario bundle withheld for trust is drawn by the built-in renderer for its schema, with why', async () => {
+  const {scenarioRenderer} = await import('../dist/ui/fixtures/model.js')
+  const withheld = 'The renderer bundle /r/dist that the scenarios name is repository code.'
+  const scenario = {
+    renderer: {bundle: 'k'},
+    subject: {mode: 'extraction', extraction: {protocolVersion: 0, schema: 'graph/v0', entities: [], relationships: []}},
+  }
+  const resolution = scenarioRenderer(scenario, {renderers: [{key: 'k', path: '/r/dist', withheld}]}, catalog)
+  assert.equal(resolution.renderer?.name, 'graph')
+  assert.ok(resolution.notice?.startsWith(withheld), resolution.notice)
+})

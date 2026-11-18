@@ -172,7 +172,7 @@ test('two columns keep unchanged lines aligned, and a narrow frame reads as one 
   expect(await renderer.measure<string[]>('clipping')).toEqual([])
 })
 
-test('long unchanged runs fold into a gap that opens in place', async ({page}) => {
+test('long unchanged runs fold into a gap that opens in place and folds again', async ({page}) => {
   const long = Array.from({length: 30}, (_, index) => `line ${index + 1}`)
   const changed = [...long]
   changed[15] = 'line sixteen'
@@ -189,8 +189,13 @@ test('long unchanged runs fold into a gap that opens in place', async ({page}) =
   await expect(gaps).toHaveCount(2)
   await expect(gaps.first()).toHaveText(/12 unchanged lines/)
   await gaps.first().click()
-  await expect(gaps).toHaveCount(1)
   await expect(renderer.frame.locator('.td-text', {hasText: /^line 1$/})).toBeVisible()
+  // The opened gap stays above its lines, as the way to fold them again, from the keyboard too.
+  const hide = renderer.frame.getByRole('button', {name: /^Hide 12 unchanged lines$/})
+  await expect(hide).toHaveAttribute('aria-expanded', 'true')
+  await hide.press('Enter')
+  await expect(renderer.frame.locator('.td-text', {hasText: /^line 1$/})).toHaveCount(0)
+  await expect(gaps.first()).toHaveAttribute('aria-expanded', 'false')
 })
 
 test('output headers select their output and reflect the host selection', async ({page}) => {

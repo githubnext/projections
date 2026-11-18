@@ -235,6 +235,33 @@ test('conditional package exports, wildcard subpaths and types are explicit stab
     ['.', './features/one'],
   )
 })
+test('a wildcard target with several `*` matches only files where each `*` is the same text', async t => {
+  const context = await fixture(
+    t,
+    {
+      'package.json': JSON.stringify({name: 'library', exports: {'./features/*': './features/*/*.ts'}}),
+      'features/one/one.ts': 'export const one: number = 1;',
+      'features/one/two.ts': 'export const two: number = 2;',
+    },
+    'typescript-public-api',
+  )
+  const state = await collectTypeScript(context)
+  assert.deepEqual(
+    state.entities.map(node => [node.label, node.data?.subpath]),
+    [['one', './features/one']],
+  )
+})
+test('a wildcard target needs a subpath with exactly one `*`', async t => {
+  const context = await fixture(
+    t,
+    {
+      'package.json': JSON.stringify({name: 'library', exports: {'./features': './features/*.ts'}}),
+      'features/one.ts': 'export const one = 1;',
+    },
+    'typescript-public-api',
+  )
+  await assert.rejects(collectTypeScript(context), /maps to wildcard .* without exactly one/)
+})
 test('conditional exports with conflicting class members fail rather than dropping a surface', async t => {
   const context = await fixture(
     t,

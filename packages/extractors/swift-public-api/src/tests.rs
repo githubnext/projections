@@ -114,3 +114,43 @@ fn importing_symbol_graphs_needs_no_trust() {
     assert!(!requires_trust(&json!({"symbolGraphPath": "graphs"})));
     assert!(requires_trust(&json!({})));
 }
+
+#[test]
+fn imported_graphs_are_the_revisions_files_and_each_module_keeps_its_own_symbols() {
+    // A copy of the graphs with a stale one on disk that isn't one of the revision's files.
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../../target/swift-public-api-tests")
+        .join(std::process::id().to_string());
+    let folder = root.join("graphs");
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&folder).unwrap();
+    for entry in std::fs::read_dir(fixtures().join("after.symbols")).unwrap() {
+        let entry = entry.unwrap();
+        std::fs::copy(entry.path(), folder.join(entry.file_name())).unwrap();
+    }
+    std::fs::write(folder.join("Stale.symbols.json"), "not json").unwrap();
+    let files = vec!["graphs/Ledger.symbols.json".to_owned(), "graphs/LedgerCore.symbols.json".to_owned()];
+    let definition = json!({"id": "api", "extractor": ID, "inputs": {"symbolGraphPath": "graphs"}});
+    let extraction = collect(&testing::context(&root.canonicalize().unwrap(), definition).with_files(files));
+    std::fs::remove_dir_all(&root).unwrap();
+    let extraction = extraction.unwrap();
+    // Ledger re-exports Amount and adds Comparable; LedgerCore's Amount doesn't have it.
+    let supertypes = |id: &str| entity(&extraction, id)["data"]["contract"]["supertypes"].clone();
+    assert!(
+        supertypes("swift:Ledger.Amount")
+            .as_array()
+            .unwrap()
+            .contains(&json!({"relation": "implements", "type": "Swift.Comparable"}))
+    );
+    assert!(
+        !supertypes("swift:LedgerCore.Amount")
+            .as_array()
+            .unwrap()
+            .contains(&json!({"relation": "implements", "type": "Swift.Comparable"}))
+    );
+    entity(&extraction, "swift:Ledger.Amount.<(_:_:)");
+    let readonly = |id: &str| entity(&extraction, id)["data"]["contract"].get("readonly").cloned();
+    assert_eq!(readonly("swift:LedgerCore.Amount.minorUnits"), None, "a stored var");
+    assert_eq!(readonly("swift:LedgerCore.Amount.currency"), Some(json!(true)), "a let");
+    assert_eq!(readonly("swift:Ledger.Account.id"), Some(json!(true)), "{{ get }}");
+}

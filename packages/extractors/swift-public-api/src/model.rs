@@ -59,9 +59,14 @@ pub struct Sources<'a> {
     pub base: &'a str,
 }
 
+/// A symbol's key: the module whose graph declares it, and its precise
+/// identifier. Two modules' graphs can both hold a symbol (one module
+/// re-exports another), each with that module's own relationships.
+type Key<'a> = (&'a str, &'a str);
+
 pub fn api(graphs: &[Value], modules: &BTreeSet<String>, sources: &Sources) -> Result<Value> {
-    let mut symbols: BTreeMap<&str, Symbol> = BTreeMap::new();
-    let mut relationships: Vec<&Value> = Vec::new();
+    let mut symbols: BTreeMap<Key, Symbol> = BTreeMap::new();
+    let mut relationships: Vec<(&str, &Value)> = Vec::new();
     for graph in graphs {
         let module = graph["module"]["name"].as_str().unwrap_or_default();
         if !modules.contains(module) {
@@ -74,10 +79,16 @@ pub fn api(graphs: &[Value], modules: &BTreeSet<String>, sources: &Sources) -> R
         );
         for value in graph["symbols"].as_array().into_iter().flatten() {
             if let Some(usr) = value["identifier"]["precise"].as_str() {
-                symbols.insert(usr, Symbol { module, value });
+                symbols.insert((module, usr), Symbol { module, value });
             }
         }
-        relationships.extend(graph["relationships"].as_array().into_iter().flatten());
+        relationships.extend(
+            graph["relationships"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .map(|relationship| (module, relationship)),
+        );
     }
     let mut builder = Builder {
         entities: BTreeMap::new(),
@@ -95,34 +106,26 @@ pub fn api(graphs: &[Value], modules: &BTreeSet<String>, sources: &Sources) -> R
         );
     }
     let facts = facts(&symbols, &relationships);
-    let id_of = |usr: &str| -> Option<String> {
-        let symbol = symbols.get(usr)?;
-        let parent = facts.parents.get(usr).and_then(|parent| symbols.get(parent));
+    let id_of = |key: &Key| -> Option<String> {
+        let symbol = symbols.get(key)?;
+        let parent = facts.parents.get(key).and_then(|parent| symbols.get(parent));
         Some(symbol.id(parent.is_some_and(|parent| parent.kind() != "swift.extension")))
     };
-    for (usr, symbol) in &symbols {
-        if facts.defaults.contains(usr) {
+    for (key, symbol) in &symbols {
+        if facts.defaults.contains(key) {
             continue;
         }
-        let id = id_of(usr).unwrap_or_default();
+        let id = id_of(key).unwrap_or_default();
         let parent = facts
             .parents
-            .get(usr)
-            .and_then(|parent| id_of(parent))
+            .get(key)
+            .and_then(id_of)
             .unwrap_or_else(|| format!("swift:{}", symbol.module));
         builder.relationships.push(relationship("contains", &parent, &id));
-        let mut own = facts.of(usr);
-        own.inherited = facts
-            .parents
-            .get(usr)
-            .and_then(|parent| symbols.get(parent))
-            .map(|parent| generic_names(parent.value))
-            .unwrap_or_default();
-        own.owner = facts
-            .parents
-            .get(usr)
-            .and_then(|parent| symbols.get(parent))
-            .map(|parent| parent.path());
+        let mut own = facts.of(key);
+        let parent = facts.parents.get(key).and_then(|parent| symbols.get(parent));
+        own.inherited = parent.map(|parent| generic_names(parent.value)).unwrap_or_default();
+        own.owner = parent.map(|parent| parent.path());
         builder.symbol(id, symbol, &own);
     }
     let mut relationships = builder.relationships;
@@ -145,28 +148,28 @@ fn generic_names(value: &Value) -> Vec<String> {
         .collect()
 }
 
-/// What the relationships say about each symbol.
+/// What each module's relationships say about its symbols.
 struct Known<'a> {
-    parents: BTreeMap<&'a str, &'a str>,
-    requirements: BTreeMap<&'a str, bool>,
-    defaulted: BTreeSet<&'a str>,
+    parents: BTreeMap<Key<'a>, Key<'a>>,
+    requirements: BTreeMap<Key<'a>, bool>,
+    defaulted: BTreeSet<Key<'a>>,
     /// Default implementations, which aren't separate API.
-    defaults: BTreeSet<&'a str>,
-    supertypes: BTreeMap<&'a str, Vec<Value>>,
+    defaults: BTreeSet<Key<'a>>,
+    supertypes: BTreeMap<Key<'a>, Vec<Value>>,
 }
 
 impl Known<'_> {
-    fn of(&self, usr: &str) -> Facts {
+    fn of(&self, key: &Key) -> Facts {
         Facts {
-            requirement: self.requirements.get(usr).copied(),
-            defaulted: self.defaulted.contains(usr),
-            supertypes: self.supertypes.get(usr).cloned().unwrap_or_default(),
+            requirement: self.requirements.get(key).copied(),
+            defaulted: self.defaulted.contains(key),
+            supertypes: self.supertypes.get(key).cloned().unwrap_or_default(),
             ..Facts::default()
         }
     }
 }
 
-fn facts<'a>(symbols: &BTreeMap<&'a str, Symbol<'a>>, relationships: &[&'a Value]) -> Known<'a> {
+fn facts<'a>(symbols: &BTreeMap<Key<'a>, Symbol<'a>>, relationships: &[(&'a str, &'a Value)]) -> Known<'a> {
     let mut known = Known {
         parents: BTreeMap::new(),
         requirements: BTreeMap::new(),
@@ -174,10 +177,11 @@ fn facts<'a>(symbols: &BTreeMap<&'a str, Symbol<'a>>, relationships: &[&'a Value
         defaults: BTreeSet::new(),
         supertypes: BTreeMap::new(),
     };
-    for relationship in relationships {
+    for (module, relationship) in relationships {
         let (Some(source), Some(target)) = (relationship["source"].as_str(), relationship["target"].as_str()) else {
             continue;
         };
+        let (source, target) = ((*module, source), (*module, target));
         match relationship["kind"].as_str().unwrap_or_default() {
             "memberOf" => {
                 known.parents.insert(source, target);
@@ -191,14 +195,14 @@ fn facts<'a>(symbols: &BTreeMap<&'a str, Symbol<'a>>, relationships: &[&'a Value
                 known.defaults.insert(source);
             }
             kind @ ("conformsTo" | "inheritsFrom") => {
-                let name = symbols.get(target).map(|symbol| format!("{}.{}", symbol.module, symbol.path()));
+                let name = symbols.get(&target).map(|symbol| format!("{}.{}", symbol.module, symbol.path()));
                 let Some(name) = name.or_else(|| relationship["targetFallback"].as_str().map(str::to_owned)) else {
                     continue;
                 };
                 if IMPLICIT.contains(&name.as_str()) {
                     continue;
                 }
-                let protocol = symbols.get(source).is_some_and(|symbol| symbol.kind() == "swift.protocol");
+                let protocol = symbols.get(&source).is_some_and(|symbol| symbol.kind() == "swift.protocol");
                 let relation = if kind == "inheritsFrom" || protocol {
                     "extends"
                 } else {

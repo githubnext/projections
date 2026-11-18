@@ -68,38 +68,92 @@ pub(crate) struct Shown {
     pub inout: bool,
 }
 
-/// The parameters of the first parameter list after the name, in order.
+/// The parameters of the first parameter list after the name, in order. String
+/// literals in defaults are skipped whole, so their commas, parentheses and
+/// `=` don't split anything; `variadic` and `inout` come from the type alone.
 pub(crate) fn parameters(value: &Value) -> Vec<Shown> {
     let rest = after_name(value);
     let Some(open) = rest.find('(') else {
         return Vec::new();
     };
-    let mut chunks = vec![String::new()];
-    let mut depth = 0i32;
     let chars: Vec<char> = rest[open + 1..].chars().collect();
-    for (at, &c) in chars.iter().enumerate() {
+    // Each parameter's text before its top-level ` = `, and its default.
+    let mut chunks: Vec<(String, Option<String>)> = vec![(String::new(), None)];
+    let mut depth = 0i32;
+    let mut at = 0;
+    while at < chars.len() {
+        let c = chars[at];
+        let chunk = chunks.last_mut().unwrap();
+        if starts_literal(&chars[at..]) {
+            let end = literal_end(&chars, at);
+            push(chunk, &chars[at..end]);
+            at = end;
+            continue;
+        }
         match c {
             '(' | '[' | '<' => depth += 1,
             '>' if at > 0 && chars[at - 1] == '-' => {}
             ')' | ']' | '>' if depth > 0 => depth -= 1,
             ')' => break,
             ',' if depth == 0 => {
-                chunks.push(String::new());
+                chunks.push((String::new(), None));
+                at += 1;
+                continue;
+            }
+            '=' if depth == 0 && chunk.1.is_none() && at > 0 && chars[at - 1] == ' ' && chars.get(at + 1) == Some(&' ') => {
+                chunk.1 = Some(String::new());
+                at += 1;
                 continue;
             }
             _ => {}
         }
-        chunks.last_mut().unwrap().push(c);
+        push(chunk, &chars[at..=at]);
+        at += 1;
     }
     chunks
         .into_iter()
-        .filter(|chunk| !chunk.trim().is_empty())
-        .map(|chunk| Shown {
-            default: chunk.split_once(" = ").map(|(_, default)| default.trim().to_owned()),
-            variadic: chunk.contains("..."),
-            inout: chunk.contains("inout "),
+        .filter(|(typed, _)| !typed.trim().is_empty())
+        .map(|(typed, default)| {
+            let typed = typed.split_once(':').map_or("", |(_, typed)| typed).trim();
+            Shown {
+                default: default.map(|default| default.trim().to_owned()),
+                variadic: typed.ends_with("..."),
+                inout: typed.starts_with("inout "),
+            }
         })
         .collect()
+}
+
+fn push(chunk: &mut (String, Option<String>), text: &[char]) {
+    match &mut chunk.1 {
+        Some(default) => default.extend(text),
+        None => chunk.0.extend(text),
+    }
+}
+
+/// Whether a string literal starts here: `"`, or `#`s and then `"`.
+fn starts_literal(chars: &[char]) -> bool {
+    chars.iter().find(|c| **c != '#') == Some(&'"')
+}
+
+/// Just past the string literal starting at `start`: single-line, multiline
+/// or raw (`#"…"#`, whose escapes need as many `#`).
+fn literal_end(chars: &[char], start: usize) -> usize {
+    let hashes = chars[start..].iter().take_while(|c| **c == '#').count();
+    let open = start + hashes;
+    let quotes = if chars[open..].starts_with(&['"', '"', '"']) { 3 } else { 1 };
+    let mut at = open + quotes;
+    while at < chars.len() {
+        let after = chars.get(at + quotes..).unwrap_or_default();
+        let closes = chars[at..].iter().take(quotes).filter(|c| **c == '"').count() == quotes
+            && after.iter().take(hashes).filter(|c| **c == '#').count() == hashes;
+        if closes {
+            return (at + quotes + hashes).min(chars.len());
+        }
+        let escapes = chars[at] == '\\' && chars[at + 1..].iter().take(hashes).filter(|c| **c == '#').count() == hashes;
+        at += if escapes { 2 + hashes } else { 1 };
+    }
+    chars.len()
 }
 
 #[cfg(test)]
@@ -157,6 +211,30 @@ mod tests {
             ("text", "? = nil)"),
         ]);
         assert_eq!(parameters(&init)[0].default.as_deref(), Some("nil"));
+        let tricky = declaration(&[
+            ("keyword", "func"),
+            ("text", " "),
+            ("identifier", "f"),
+            ("text", "(message: "),
+            ("typeIdentifier", "String"),
+            ("text", " = \"a, (b) = ...\", raw: "),
+            ("typeIdentifier", "String"),
+            ("text", " = #\"x\\\"y\"#, count: "),
+            ("typeIdentifier", "Int"),
+            ("text", " = 0)"),
+        ]);
+        let shown = parameters(&tricky);
+        assert_eq!(shown.len(), 3);
+        assert_eq!(
+            shown[0],
+            Shown {
+                default: Some("\"a, (b) = ...\"".into()),
+                variadic: false,
+                inout: false
+            }
+        );
+        assert_eq!(shown[1].default.as_deref(), Some("#\"x\\\"y\"#"));
+        assert_eq!(shown[2].default.as_deref(), Some("0"));
         let alias = declaration(&[
             ("keyword", "typealias"),
             ("text", " "),

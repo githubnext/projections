@@ -345,7 +345,6 @@
       "data": {
         "contract": {
           "declaration": "property",
-          "readonly": true,
           "term": "property",
           "type": {
             "text": "Int64"

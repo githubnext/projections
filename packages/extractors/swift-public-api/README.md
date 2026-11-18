@@ -32,14 +32,15 @@ The user guide is
 ## Mapping
 
 `model.rs` reads every graph of the selected modules and indexes symbols by
-their precise identifier (USR). Relationships give each symbol its parent
-(`memberOf`, `requirementOf`, `optionalRequirementOf`), which is its `contains`
-parent; top-level symbols are in their module. Default implementations
-(`defaultImplementationOf`) aren't separate declarations: they make their
-requirement non-`abstract`. `conformsTo` and `inheritsFrom` become `supertypes`
-(`extends` for a superclass or a protocol's inherited protocol, `implements`
-otherwise), named by the target's module and path, or the graph's fallback name
-for types outside the selected modules. Extension block symbols
+module and precise identifier (USR): a module that re-exports another holds the
+same symbols with its own relationships. Relationships give each symbol its
+parent (`memberOf`, `requirementOf`, `optionalRequirementOf`), which is its
+`contains` parent; top-level symbols are in their module. Default
+implementations (`defaultImplementationOf`) aren't separate declarations: they
+make their requirement non-`abstract`. `conformsTo` and `inheritsFrom` become
+`supertypes` (`extends` for a superclass or a protocol's inherited protocol,
+`implements` otherwise), named by the target's module and path, or the graph's
+fallback name for types outside the selected modules. Extension block symbols
 (`swift.extension`) of types outside the graph are `extension` entities holding
 the conformances and members they add.
 

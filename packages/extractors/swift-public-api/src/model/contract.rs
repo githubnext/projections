@@ -58,8 +58,11 @@ pub(crate) fn contract(symbol: &Value, facts: &Facts) -> Option<Value> {
     flag("abstract", facts.requirement.is_some() && !facts.defaulted);
     flag("optional", facts.requirement == Some(true));
     flag("sealed", identifier == "swift.class" && !open);
-    let readonly = matches!(declaration, "property" | "variable")
-        && (fragments::has_keyword(declared, "let") || !fragments::has_keyword(declared, "set"));
+    // A stored `var` shows no accessor block and can be assigned; a computed or
+    // protocol property shows `{ get }` when it can't be.
+    let accessors = fragments::text(declared).split_once(" {").map(|(_, block)| block.to_owned());
+    let getter_only = accessors.is_some_and(|block| block.contains("get") && !block.contains("set"));
+    let readonly = matches!(declaration, "property" | "variable") && (fragments::has_keyword(declared, "let") || getter_only);
     flag("readonly", readonly);
     let typed = match declaration {
         "property" | "variable" | "associated-type" => fragments::declared_type(declared),

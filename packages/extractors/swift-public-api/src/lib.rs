@@ -80,7 +80,7 @@ pub fn collect(cx: &Context) -> Result<Value> {
         None => None,
     };
     let (graphs, modules, absolute) = if imported {
-        let graphs = graphs(&path(root, declared, false, false)?)?;
+        let graphs = revision_graphs(cx, declared)?;
         let modules = requested.unwrap_or_else(|| {
             graphs
                 .iter()
@@ -170,7 +170,29 @@ fn find(scratch: &Path) -> Option<PathBuf> {
         .find(|folder| folder.is_dir())
 }
 
-/// Every `*.symbols.json` in `folder`, in name order.
+/// The `*.symbols.json` files directly in the revision's `folder`, read through
+/// the revision's files: an ignored or untracked graph beside them is not
+/// part of the revision, so it never changes the API.
+fn revision_graphs(cx: &Context, folder: &str) -> Result<Vec<Value>> {
+    let prefix = format!("{}/", folder.trim_end_matches('/'));
+    let files: Vec<&String> = cx
+        .files()?
+        .iter()
+        .filter(|file| file.ends_with(".symbols.json") && file.strip_prefix(&prefix).is_some_and(|name| !name.contains('/')))
+        .collect();
+    if files.is_empty() {
+        bail!("{folder} holds no *.symbols.json symbol graphs in the revision");
+    }
+    files
+        .into_iter()
+        .map(|file| {
+            let text = String::from_utf8(cx.read_bytes(file, MAX_GRAPH_BYTES)?).context("A symbol graph isn't UTF-8")?;
+            parse_json(&text).with_context(|| format!("{file} isn't a symbol graph"))
+        })
+        .collect()
+}
+
+/// Every `*.symbols.json` the compiler wrote in `folder`, in name order.
 fn graphs(folder: &Path) -> Result<Vec<Value>> {
     let mut files: Vec<PathBuf> = fs::read_dir(folder)
         .with_context(|| format!("Cannot read symbol graphs in {}", folder.display()))?

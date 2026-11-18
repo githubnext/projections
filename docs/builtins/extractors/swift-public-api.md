@@ -45,11 +45,12 @@ versions it pins (`--force-resolved-versions`) and never rewrites it. A module
 that re-exports another (`@_exported import`) includes that module's
 declarations, as its clients see them.
 
-With `symbolGraphPath`, it reads `*.symbols.json` from that repository-relative
-folder instead: graphs written by `swift build -emit-symbol-graph`, `xcodebuild`
-(`-symbol-graph` builds of a framework) or `swift-symbolgraph-extract`. Nothing
-runs and no `--trust` is needed, but the folder must be part of every revision
-you compare.
+With `symbolGraphPath`, it reads the revision's `*.symbols.json` files directly
+in that repository-relative folder instead (an ignored or untracked graph there
+isn't part of the revision and is left out): graphs written by
+`swift build -emit-symbol-graph`, `xcodebuild` (`-symbol-graph` builds of a
+framework) or `swift-symbolgraph-extract`. Nothing runs and no `--trust` is
+needed, but the folder must be part of every revision you compare.
 
 ```json
 {

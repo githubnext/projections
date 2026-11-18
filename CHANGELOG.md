@@ -4,7 +4,7 @@ What changed in each release of Projections. A version's section is the body of 
 
 ## v0.2.0
 
-Projections 0.2.0 adds built-ins for Rails and GitHub Agentic Workflows, makes the agent viewer easier to drive and to show in other apps (Claude Code's Preview pane among them), and tightens what runs without `--trust`. Read [Behaviour changes](#behaviour-changes) before upgrading: some can turn a passing check red.
+Projections 0.2.0 adds built-ins for Rails, Swift packages and GitHub Agentic Workflows, makes the agent viewer easier to drive and to show in other apps (Claude Code's Preview pane among them), and tightens what runs without `--trust`. Read [Behaviour changes](#behaviour-changes) before upgrading: some can turn a passing check red.
 
 ### Security
 
@@ -36,6 +36,7 @@ Projections 0.2.0 adds built-ins for Rails and GitHub Agentic Workflows, makes t
 ### Highlights
 
 - **Rails built-ins** (#21). `rails-schema` reads `db/schema.rb` into the `database` renderer, and `rails-routes` evaluates the routing DSL into the `api` renderer. Both read files only: no Ruby, gems, Rails boot or database, no `--trust`, and every revision of a history.
+- **Swift packages** (#23). `swift-package-dependencies` draws a Swift package's products, targets and dependencies, with `Package.resolved` versions, in the `dependencies` renderer. It reads `Package.swift` without running it, so it needs no `--trust` and no Swift toolchain, and fails naming the line it can't evaluate. `manifest: "dump-package"` has SwiftPM evaluate it instead (with `--trust`), and `manifestJsonPath` imports an export.
 - **GitHub Agentic Workflows** (#29, #30, #31). A built-in extractor, comparator file and renderer for [gh-aw](https://github.com/github/gh-aw) workflows. They show what starts each workflow, what its agent can reach and write, and lock files out of date, and read each change by direction: a widened permission, network allowlist, tool, repository scope or safe output is a warning, and a narrowing is a note.
 - **Claude Code's Preview pane** (#37). The viewer works in it: a renderer frame the pane blocks is reopened once as a Blob document in the same sandboxed frame. `projections view --theme claude` colors the page as the pane, and the agent guidance says how to run the viewer from `.claude/launch.json`.
 - **Theme seeds** (#28). An app that shows the viewer in its own browser pane can color it as itself: `projections view --theme SEED` (or `view show`) takes a built-in seed's name, inline JSON or a file, and puts it in the link as `?theme=`. The seed is validated, and lives only in the link.
@@ -44,6 +45,7 @@ Projections 0.2.0 adds built-ins for Rails and GitHub Agentic Workflows, makes t
 ### New built-ins
 
 - `rails-schema` and `rails-routes` extractors (#21).
+- `swift-package-dependencies` extractor (#23).
 - `github-agentic-workflows` extractor and the `agentic-workflows/v0` vocabulary (#29), the `agentic-workflows` comparator file (#30), and the `agentic-workflows` renderer, now the extractor's default (#31).
 - `renderer-scenarios` extractor and the `scenarios/v0` vocabulary, which read a repository's renderer `scenarios.json` documents, and the `gallery` renderer, which draws each scenario with its own built-in renderer. Together they make a renderer gallery that needs no `--trust` (#24).
 

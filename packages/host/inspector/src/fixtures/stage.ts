@@ -13,8 +13,12 @@ import {recordEvent} from './stage-events.js'
 import {StageProbe} from './stage-probe.js'
 import {blank, frameEnvironment, presentation, sizeContainer, stageHighlighting, type PresentedEnvironment} from './stage-presentation.js'
 
-/** How long a measurement waits for the renderer's frame to arrive at its height, ms (see `Stage.arrived`). */
-const arrivalTimeoutMs = 5000
+/**
+ * How long a measurement waits for the renderer's frame to arrive at its height before it fails, ms (see
+ * `Stage.arrived`): far longer than a loaded machine takes to deliver a resize, as a frame measured at the height
+ * before would be measured wrong.
+ */
+const arrivalLimitMs = 60_000
 
 /**
  * One renderer bundle in the real host frame (`RendererFrame`: sandboxed,
@@ -263,24 +267,29 @@ export class Stage {
   }
 
   /**
-   * Waits, at most `arrivalTimeoutMs`, until the renderer's document is as tall as the frame the host gave it: the
-   * height the renderer asked for, or the fixed height it fills. The frame is a sandboxed, out-of-process document, so
-   * a resize reaches it only some time after the host applies it; a renderer that acknowledged its paint before then
-   * (it waits only so long, as a host may never resize it) painted for the old height, with its view placed for that.
-   * When the height arrives late, the renderer's paint at it is waited for too.
+   * Waits until the renderer's document is as tall as the frame the host gave it: the height the renderer asked for,
+   * or the fixed height it fills. The frame is a sandboxed, out-of-process document, so a resize reaches it only some
+   * time after the host applies it, and on a loaded machine seconds later; a renderer that acknowledged its paint
+   * before then (it waits only so long, as a host may never resize it) painted for the old height, with its view placed
+   * for that. A measurement of that paint would be wrong, and two of them taken at different heights would differ
+   * (cards that seem to move with change status), so this never gives up and measures anyway: it fails after
+   * `arrivalLimitMs` instead. When the height arrives late, the renderer's paint at it is waited for too.
    */
   private async arrived(): Promise<void> {
     const frame = this.frame
     if (!frame || this.current.status !== 'ready') return
     const target = () => (this.filling ? frame.iframe.clientHeight : this.current.height)
-    const deadline = performance.now() + arrivalTimeoutMs
+    const deadline = performance.now() + arrivalLimitMs
     let late = false
     for (;;) {
       const height = target()
       if (height === undefined) return
       const {height: inner} = await this.probe.measure<{width: number; height: number}>('viewport')
       if (Math.abs(inner - height) <= 1) break
-      if (performance.now() > deadline) return
+      if (performance.now() > deadline)
+        throw new Error(
+          `The renderer's frame is ${inner}px tall ${arrivalLimitMs / 1000} s after it was given ${height}px; nothing is measured at the height before.`,
+        )
       late = true
       await new Promise(resolve => setTimeout(resolve, 50))
     }

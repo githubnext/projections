@@ -216,6 +216,35 @@
             location.href = new URL('index.html?probe=again', location.href).href
           }, 200)
         if (probe === 'open') post({type: 'open', path: 'src/checkout.ts', line: 12})
+        // Nesting: asks the host for documents by name, and runs the built-in one in a frame of its own.
+        if (probe === 'documents') {
+          const answers = {}
+          const names = ['graph', 'hostile', 'no-such-renderer']
+          addEventListener('message', event => {
+            if (event.source === parent && event.data?.channel === channel && event.data.type === 'document') {
+              const {renderer, html, error} = event.data
+              answers[renderer] = html !== undefined ? (/^<!doctype html>/i.test(html) ? 'html' : 'other') : `refused (${error})`
+              if (renderer === 'graph' && html) nest(html)
+              if (Object.keys(answers).length === names.length)
+                report(`documents ${names.map(name => `${name}=${answers[name]}`).join('; ')}`)
+            }
+          })
+          // A URL or path is not a renderer name: the host drops the request.
+          post({type: 'document-request', renderer: '../renderers/graph/index.html'})
+          for (const name of names) post({type: 'document-request', renderer: name})
+        }
+        function nest(html) {
+          const nested = 'nested-channel-0123456789'
+          const frame = document.createElement('iframe')
+          frame.setAttribute('sandbox', 'allow-scripts')
+          addEventListener('message', event => {
+            if (event.source === frame.contentWindow && event.data?.channel === nested && event.data.type === 'ready')
+              report('nested graph ready')
+          })
+          const fragment = `<script>location.hash = ${JSON.stringify(`channel=${nested}&origin=null`)}<\/script>`
+          frame.srcdoc = html.replace(/<head>/i, `<head>${fragment}`)
+          document.body.append(frame)
+        }
       })()
     </script>
   </body>

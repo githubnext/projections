@@ -46,6 +46,8 @@ in range, at most 64 KiB, at most 240 per second. The renderer speaks first with
 - `annotations` *:
   `items [{id, count?, label?, tone?: "neutral" | "attention" | "done" | "subtle"}]`:
   markers to draw on items, replacing earlier ones
+- `document`: `renderer` and either `html` or `error`: the answer to a
+  `document-request` (see nested renderers, below)
 
 - `ready`:
   `capabilities {changeHighlighting: "supported" | "none", toggleableRelationships?, drawsRelationships?, ownTimeline?, hover?, anchors?, scrollSync?, filter?, annotations?, properties?, controls?}`
@@ -74,6 +76,27 @@ in range, at most 64 KiB, at most 240 per second. The renderer speaks first with
 - `anchor` *: `id` and `rect {x, y, width, height}` in the frame's viewport (CSS
   px), or `null` when it isn't visible
 - `viewport` *: `x`, `y`, optional `key`: the person scrolled a container
+- `document-request`: `renderer`, a built-in renderer's name (or a name its
+  bundle handles, such as `dag`) (`^[a-z0-9][a-z0-9-]{0,63}$`): asks for its
+  document to run nested (see nested renderers, below)
+
+**Nested renderers.** A renderer may present another renderer's view inside its
+own, as the `gallery` renderer presents each fixture scenario with the renderer
+it names. It asks the host for a **built-in** renderer's document by name with
+`document-request`, and the host answers with `document`: `html`, the bundle's
+`index.html` exactly as the host would load it into a frame of its own (an
+editor webview's script nonces included), or `error`, why it supplies none. The
+host looks the name up in its own registry of built-in renderers and never takes
+a URL or path; it refuses a custom renderer, an unknown name and, when it
+supplies no documents at all, every request, saying so. A request whose name
+isn't a renderer name is invalid and dropped. The renderer runs the document in
+`<iframe sandbox="allow-scripts" srcdoc>` and acts as its host, speaking this
+protocol with it; the SDK's `embedRenderer` does both. A `srcdoc` document
+inherits the nesting renderer's content security policy and gets an opaque
+origin of its own, so a nested renderer can reach nothing the nesting one can't;
+its URL fragment is set from inside the document, before the renderer connects.
+Built-in renderers are Projections' own code, so this adds nothing that needs
+trust: the nesting renderer only passes on data it was given.
 
 **Summary bar.** Hosts draw a thin summary bar along every projection view, for
 one revision and for a comparison: a figure per extraction kind,

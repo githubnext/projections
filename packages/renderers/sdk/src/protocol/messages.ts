@@ -174,6 +174,17 @@ export type HostMessage =
    * capability de-emphasize or hide the rest.
    */
   | ({type: 'filter'} & FilterPayload)
+  /**
+   * A built-in renderer's document, answering the renderer's `document-request` for it: `html` as this host runs it,
+   * or the `error` that says why the host won't supply it (an unknown or custom renderer, or a host that supplies none).
+   */
+  | ({type: 'document'} & RendererDocument)
+
+/**
+ * A built-in renderer's document as the host supplies it (`document`): the bundle's `index.html` text, exactly as the
+ * host would load it into its own frame, or why the host can't supply it. Exactly one of `html` and `error`.
+ */
+export type RendererDocument = {renderer: string} & ({html: string; error?: never} | {error: string; html?: never})
 
 /**
  * What a renderer supports, declared once in `ready` (`ConnectOptions.capabilities`). Hosts send the optional messages
@@ -328,6 +339,12 @@ export type RendererMessage =
    * `SummaryItem`); replaces any earlier one. Optional: without it, hosts word the bar from the kind names.
    */
   | ({type: 'summary'} & RendererSummary)
+  /**
+   * Asks the host for the document of the built-in renderer `renderer` (a name such as `graph`), to run in a frame of
+   * the renderer's own, nested in its document. The host answers with `document`. It supplies only built-in renderers,
+   * by name from its own registry: never a URL or path, and never a custom renderer.
+   */
+  | {type: 'document-request'; renderer: string}
 
 /** A host message as posted to the frame: the message with the protocol version and channel. */
 export type HostEnvelope = Envelope & HostMessage

@@ -12,6 +12,7 @@ import type {
   RendererCapabilities,
   RendererFocus,
   RendererControl,
+  RendererEnvironment,
   RendererLegend,
   RendererOptions,
 } from '@githubnext/projections-renderer-sdk/protocol'
@@ -144,6 +145,13 @@ export interface RendererProps<T extends DomainSchema | readonly RendererAccepts
   locale: string
   /** The host theme's color mode, for colors a renderer computes itself (see `categoryPalette`). */
   colorMode: ColorMode
+  /** The host's current theme, motion preference, locale and pane: `init`'s, or a later `environment`'s. */
+  environment: RendererEnvironment
+  /**
+   * Asks the host for a built-in renderer's document, to run nested (`embedRenderer`); rejects with the host's reason
+   * when it supplies none (see `RendererClient.requestDocument`).
+   */
+  requestDocument: (name: string) => Promise<string>
 }
 
 /** How `mountRenderer` connects a renderer component to its host. */

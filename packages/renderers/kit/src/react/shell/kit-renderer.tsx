@@ -53,6 +53,10 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
   const {selected, setSelection, onSelect} = useSelection(client, {selection, selectionVersion}, root, interactive)
   const onOpen = useCallback((path: string, line?: number) => client?.open(path, line), [client])
   const onError = useCallback((message: string) => client?.error(message), [client])
+  const requestDocument = useCallback(
+    (name: string) => client?.requestDocument(name) ?? Promise.reject(new Error('The renderer is not connected')),
+    [client],
+  )
   const reportLegend = useLegendReport(client)
   const reportSteps = useStepsReport(client)
   const model = useDocumentModel(init)
@@ -61,6 +65,12 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
     controls,
   })
   const pane = renderer.environment ? renderer.environment.pane : init?.pane
+  const environment = useMemo(() => {
+    const source = renderer.environment ?? init
+    if (!source) return undefined
+    const {theme, reducedMotion, locale, pane, sizing} = source
+    return {theme, reducedMotion, locale, ...(pane ? {pane} : {}), ...(sizing ? {sizing} : {})}
+  }, [renderer.environment, init])
   const sizing = renderer.environment ? renderer.environment.sizing : init?.sizing
   const tokens = (renderer.environment ?? init)?.theme.tokens
   const stageInset = stageInsetOf(tokens)
@@ -131,6 +141,8 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
                           reducedMotion={renderer.environment?.reducedMotion ?? init.reducedMotion}
                           locale={renderer.environment?.locale ?? init.locale}
                           colorMode={renderer.environment?.theme.colorMode ?? init.theme.colorMode}
+                          environment={environment!}
+                          requestDocument={requestDocument}
                         />
                       </LegendContext.Provider>
                     </RendererBoundary>

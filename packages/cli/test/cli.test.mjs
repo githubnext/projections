@@ -163,6 +163,7 @@ test('extractor list/init work without execution; invalid flags, duplicate outpu
       'prisma-schema',
       'rails-schema',
       'rails-routes',
+      'renderer-scenarios',
       'scip-file-references',
       'command-output',
     ],

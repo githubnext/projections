@@ -10,6 +10,7 @@ import type {
   RendererSummary,
   ScrollPosition,
 } from '@githubnext/projections-renderer-sdk/protocol'
+import type {RendererDocuments} from '../registry.js'
 
 /**
  * A renderer frame's lifecycle: `loading` until its renderer reports ready, then `ready`; `failed` when it reports an
@@ -69,6 +70,11 @@ export interface RendererFrameOptions {
   readyTimeoutMs?: number
   /** Time to wait for a `rendered` acknowledgement before sending a newer progress anyway. */
   acknowledgementTimeoutMs?: number
+  /**
+   * Built-in renderer documents for a renderer that nests them (`document-request`), usually
+   * `builtinRendererDocuments` of the host's catalog. Omitted, every request is refused.
+   */
+  builtinDocuments?: RendererDocuments
   /** Defaults to the container's window. */
   window?: Window
   /**

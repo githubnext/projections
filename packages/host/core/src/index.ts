@@ -104,8 +104,22 @@ export type {RendererDocumentOpener} from './frame/documents.js'
 export type {RendererFrameEvent, RendererFrameOptions, RendererFrameStatus} from './frame/types.js'
 export {ComparisonError, compareExtractions, computeComparison, explainDefinitionMismatch, sha256} from './compare.js'
 export type {ComparatorSource, ComparisonErrorCode, ComputedComparison, RulesRuntime} from './compare.js'
-export {compatibleRenderers, customRenderer, loadRendererCatalog, rendererAccepts, resolveRenderer} from './registry.js'
-export type {RendererCatalogDocument, RendererEntry, RendererResolution, RendererSubject, WithheldRenderer} from './registry.js'
+export {
+  builtinRendererDocuments,
+  compatibleRenderers,
+  customRenderer,
+  loadRendererCatalog,
+  rendererAccepts,
+  resolveRenderer,
+} from './registry.js'
+export type {
+  RendererCatalogDocument,
+  RendererDocuments,
+  RendererEntry,
+  RendererResolution,
+  RendererSubject,
+  WithheldRenderer,
+} from './registry.js'
 export {hostTheme, themeStyle} from './theme.js'
 export {composite, contrast, ensureContrast, formatColor, luminance, mix, parseColor, withAlpha} from './color.js'
 export type {Rgba} from './color.js'

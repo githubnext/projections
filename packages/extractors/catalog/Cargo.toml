@@ -25,6 +25,7 @@ projections-extractor-nuget-dependencies = { path = "../nuget-dependencies" }
 projections-extractor-prisma-schema = { path = "../prisma-schema" }
 projections-extractor-rails-routes = { path = "../rails-routes" }
 projections-extractor-rails-schema = { path = "../rails-schema" }
+projections-extractor-renderer-scenarios = { path = "../renderer-scenarios" }
 projections-extractor-repository-map = { path = "../repository-map" }
 projections-extractor-rust-public-api = { path = "../rust-public-api" }
 projections-extractor-sdk = { path = "../sdk" }

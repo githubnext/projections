@@ -37,9 +37,8 @@ export interface MountViewerOptions {
   /** Host capabilities, such as an app's theme (the Copilot canvas adapter). */
   host?: InspectorHost
   /**
-   * How the page reaches its viewer, for a host that relays its requests (an MCP Apps host, through `projections
-   * mcp`): the viewer's own paths (`/view/state?…`, `/view/report`) and the Inspector's (`/api/…`). By default, `fetch`
-   * under `base`.
+   * How the page reaches its viewer, for a host that relays its requests: the viewer's own paths (`/view/state?…`,
+   * `/view/report`) and the Inspector's (`/api/…`). By default, `fetch` under `base`.
    */
   transport?: InspectorTransport
   /** The Inspector's assets, for a host whose document can't load them beside it (see `InspectorAssets`). */
@@ -49,7 +48,7 @@ export interface MountViewerOptions {
    * the last one no longer holds. By default the page reloads.
    */
   onReplaced?: () => void
-  /** A host's own control at the header's end, such as an MCP Apps host's full-screen button. */
+  /** A host's own control at the header's end. */
   headerEnd?: ReactNode
   /**
    * The named viewer the page shows (`projections view show --viewer NAME`), each its own view of its own state; by

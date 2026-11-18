@@ -447,39 +447,17 @@ page holds two long polls (the view state, which carries the shown projection's
 build phase, and the Inspector's working-tree changes), so a few pages in one
 browser never starve the renderer frames' requests.
 
-### 7. MCP Apps hosts get the viewer as a view they show
+### 7. No MCP App
 
-Hosts that show MCP servers' interactive views (MCP Apps, SEP-1865; Claude
-Desktop among them) show a server's HTML page in a sandboxed frame, in the
-conversation, a side panel or full screen. `projections mcp` gives them the
-viewer that way, so the person needn't open a browser at all.
-
-The host's sandbox decides the design. Claude loads a view as an opaque-origin
-`srcdoc` document under a policy that allows WebAssembly, Blob Workers and Blob
-or data frames, and no network beyond its own origin: not loopback, and it
-refuses IP addresses and local origins as framed sites. So the view can't frame
-or fetch the viewer's page on loopback. Instead the view **is** the viewer's
-page, bundled (`packages/integrations/mcp-apps`): one self-contained document
-with the page's script, the shared engine and its Wasm, and the built-in
-renderers inline, which it starts from Blob URLs, as the VS Code webview does.
-Its requests reach the viewer through the server: `viewer_request`, a tool hosts
-offer only to views (`visibility: ["app"]`), relays the page's requests to the
-viewer's URL as a browser's would go (the state's long poll and reports, the
-person's choice of projection, the service's reads and extraction jobs, renderer
-bundles), never its control endpoints, and keeps its token from the view. Long
-answers come in parts. The viewer stays the one source of the view state: the
-view is one more of its pages, mirrored by and mirroring the others, and
-`current_view` and `screenshot` read what it shows.
-
-`open_projection` is linked to the view (`_meta.ui.resourceUri`), so each call
-shows it, on the named viewer the call's arguments name
-(`ui/notifications/tool-input`), else the default one; the view asks to open
-beside the conversation (Claude's `preferredDisplayMode`) and its header offers
-the host's larger mode. It follows the host's theme: its light or dark mode, and
-its standardized style variables mapped onto the renderer tokens and the chrome
-as the Copilot app's are (`mcpAppThemeTokens`). All of it is offered only to a
-host whose `initialize` declares the extension; other clients' tools are
-unchanged.
+`projections mcp` once also served the viewer as an MCP App (MCP Apps,
+SEP-1865): a self-contained bundle of the viewer's page that hosts such as
+Claude Desktop showed in the conversation, its requests relayed to the viewer
+through an app-only `viewer_request` tool. It was removed. Projections is for
+coding agents (Claude Code, Codex, Copilot), which have a shell and a browser of
+their own, so they open the viewer's URL as any page; the bundle, the relay and
+the host theme mapping cost more than the conversational hosts they served were
+worth. An MCP Apps host now gets the same tools as every other client, and
+`open_projection` gives it the viewer's URL.
 
 ## Not VS Code's
 

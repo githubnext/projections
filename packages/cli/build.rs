@@ -157,16 +157,6 @@ fn main() {
     } else {
         embedded.push_str("static RULES_COMPARATOR:Option<&[u8]>=None;\n");
     }
-    // The viewer as an MCP App: one self-contained page `projections mcp` serves to MCP Apps hosts.
-    let app = Path::new("../integrations/mcp-apps/dist/viewer.html");
-    println!("cargo:rerun-if-changed={}", app.display());
-    if app.is_file() {
-        fs::copy(app, destination.join("mcp-app.html")).expect("Stage the MCP App page");
-        embedded
-            .push_str("static MCP_APP:Option<&str>=Some(include_str!(concat!(env!(\"OUT_DIR\"),\"/inspector-assets/mcp-app.html\")));\n");
-    } else {
-        embedded.push_str("static MCP_APP:Option<&str>=None;\n");
-    }
     embedded.push_str(&helpers(&destination));
     fs::write(
         destination.parent().expect("Cargo output parent").join("inspector-assets.rs"),

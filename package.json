@@ -16,7 +16,6 @@
     "packages/cli",
     "packages/host/inspector",
     "packages/integrations/vscode",
-    "packages/integrations/mcp-apps",
     "packages/integrations/github-action",
     "packages/comparators/runtime/js",
     "examples/renderers/*",

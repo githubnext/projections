@@ -1,7 +1,6 @@
 // An embedding app's theme for renderer frames and the default UI's chrome: a few of the app's colors and families
 // (its stage, text, rules, focus and accent) mapped onto renderer theme token overrides that keep the token set's
-// contrast. The GitHub Copilot app's canvas (copilot-canvas-theme.ts) and MCP Apps hosts (mcp-app-theme.ts) name
-// their variables differently and map them onto these.
+// contrast. The GitHub Copilot app's canvas (copilot-canvas-theme.ts) maps its own variables onto these.
 
 import {defaultThemeTokens, rendererLimits, themeTokenNames} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ColorMode, ThemeTokenName} from '@githubnext/projections-renderer-sdk/protocol'
@@ -126,7 +125,7 @@ export function appThemeTokens(colors: AppThemeColors, colorMode: ColorMode): Pa
 
 /**
  * The default UI's `--pj-*` variables (theme.css) for a renderer token set, so a host that themes its stage
- * (`copilotCanvasThemeTokens`, `mcpAppThemeTokens`) gives its chrome the very same colors: the background is the
+ * (`copilotCanvasThemeTokens`) gives its chrome the very same colors: the background is the
  * stage, wells and inputs inset, cards, popovers and segmented thumbs raised, hovers and bands the header surface,
  * text, rules, focus and the lens (accent) the tokens'. Tokens the set leaves out keep the token set's defaults for
  * `colorMode`; change colors are set only where the tokens moved them (theme.css keeps its own calibrated ones

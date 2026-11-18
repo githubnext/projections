@@ -113,8 +113,6 @@ export {appThemeTokens, hostChromeVariables} from './app-theme.js'
 export type {AppThemeColors} from './app-theme.js'
 export {copilotCanvasThemeTokens, copilotCanvasVariableNames, readCopilotCanvasTheme} from './copilot-canvas-theme.js'
 export type {CopilotCanvasTheme, CopilotCanvasVariables} from './copilot-canvas-theme.js'
-export {lightDark, mcpAppThemeTokens, mcpAppVariableNames, resolveMcpAppVariables} from './mcp-app-theme.js'
-export type {McpAppVariables} from './mcp-app-theme.js'
 export {formatThemeSeed, parseThemeSeed, parseThemeSeedText, themeSeedKeys, themeSeedMaxLength, themeSeedTokens} from './theme-seed.js'
 export type {ThemeSeed, ThemeSeedColors, ThemeSeedResult} from './theme-seed.js'
 export {

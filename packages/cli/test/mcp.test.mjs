@@ -207,62 +207,6 @@ test('projections mcp shows a projection in the viewer: open_projection, current
   await assert.rejects(fetch(url))
 })
 
-test('projections mcp serves the viewer as an MCP App to a host that shows MCP App views', async t => {
-  const root = await repository(t)
-  const cache = await mkdtemp(path.join(tmpdir(), 'projections-mcp-cache-'))
-  t.after(() => rm(cache, {recursive: true, force: true}))
-  const server = start(t, root, ['mcp', '--trust'], {PROJECTIONS_CACHE_DIR: cache})
-  const initialized = await server.call('initialize', {
-    protocolVersion: '2025-06-18',
-    capabilities: {extensions: {'io.modelcontextprotocol/ui': {mimeTypes: ['text/html;profile=mcp-app']}}},
-    clientInfo: {name: 'apps', version: '1'},
-  })
-  assert.deepEqual(initialized.result.capabilities, {tools: {listChanged: false}, resources: {listChanged: false}})
-  assert.match(initialized.result.instructions, /in this conversation/)
-
-  const {tools} = (await server.call('tools/list')).result
-  const open = tools.find(tool => tool.name === 'open_projection')
-  assert.equal(open._meta.ui.resourceUri, 'ui://projections/viewer')
-  const relayTool = tools.find(tool => tool.name === 'viewer_request')
-  assert.deepEqual(relayTool._meta.ui.visibility, ['app'])
-
-  const {resources} = (await server.call('resources/list')).result
-  assert.deepEqual(
-    resources.map(resource => [resource.uri, resource.mimeType]),
-    [['ui://projections/viewer', 'text/html;profile=mcp-app']],
-  )
-  const [page] = (await server.call('resources/read', {uri: 'ui://projections/viewer'})).result.contents
-  assert.equal(page.mimeType, 'text/html;profile=mcp-app')
-  assert.match(page.text, /^<!doctype html>/)
-  assert.match(page.text, /id="projections-assets"/)
-  assert.deepEqual(page._meta.ui, {csp: {}, prefersBorder: false, preferredDisplayMode: 'fullscreen'})
-
-  // The agent shows a projection; the view, which the host shows, needs no page to be opened.
-  const shown = await server.tool('open_projection', {projection: 'services-node', choice: 'last-commit'})
-  assert.equal(shown.isError, false, shown.text)
-  assert.match(shown.text, /The person sees it in this conversation/)
-  assert.doesNotMatch(shown.text, /No page is open yet/)
-
-  // The view's requests reach the viewer through the relay: its state, the service's reads, and nothing else.
-  const relay = args => server.call('tools/call', {name: 'viewer_request', arguments: args})
-  const state = JSON.parse((await relay({method: 'GET', path: '/view/state?page=test'})).result.content[0].text)
-  assert.equal(state.status, 200)
-  assert.equal(state.body.projection, 'services-node')
-  const definitions = JSON.parse((await relay({method: 'GET', path: '/api/definitions?ref=working-tree'})).result.content[0].text)
-  assert.ok(definitions.body.definitions.some(definition => definition.id === 'services-node'))
-  for (const refused of [
-    {method: 'POST', path: '/control/show', body: {projection: 'services-node'}},
-    {method: 'POST', path: '/control/stop'},
-    {method: 'GET', path: '/'},
-  ])
-    assert.equal((await relay(refused)).error?.code, -32602, JSON.stringify(refused))
-  const write = JSON.parse((await relay({method: 'POST', path: '/api/definition', body: {}})).result.content[0].text)
-  assert.equal(write.status, 403)
-
-  server.child.stdin.end()
-  assert.deepEqual(await server.exited, {code: 0, signal: null})
-})
-
 test('serve --stdio offers the same tools, and the view actions, as tools/list and tools/call', async t => {
   const root = await repository(t)
   const backend = start(t, root, ['serve', '--stdio'])

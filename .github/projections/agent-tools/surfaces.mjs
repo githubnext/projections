@@ -2,7 +2,8 @@
 //
 //   mcp             `projections mcp`'s tools/list: the CLI's catalog (packages/cli/src/tools/catalog.rs)
 //   mcp-apps        the same list for an MCP Apps host, with open_projection linked to the viewer's view and the
-//                   tools only that view calls (packages/cli/src/mcp/app.rs)
+//                   tools only that view calls (packages/cli/src/mcp/app.rs); the MCP App was removed, so only
+//                   revisions from before its removal have it
 //   vscode          the VS Code extension's languageModelTools (packages/integrations/vscode/package.json), which
 //                   scripts/tools.mjs writes from the CLI's tools/list
 //   copilot-canvas  the Copilot app canvas's actions (packages/integrations/copilot-canvas/extension.mjs), which take

@@ -19,6 +19,7 @@ extension opens these pages when you select a built-in part.
 | [`rust-public-api`](extractors/rust-public-api.md) | rustdoc JSON public items. | `api/v0` | [`api`](renderers/api.md) |
 | [`go-public-api`](extractors/go-public-api.md) | go/types exported declarations, method sets and fields. | `api/v0` | [`api`](renderers/api.md) |
 | [`cargo-dependencies`](extractors/cargo-dependencies.md) | Resolved Cargo metadata. | `graph/v0` | [`dependencies`](renderers/graph.md) |
+| [`swift-package-dependencies`](extractors/swift-package-dependencies.md) | Swift package products, targets, target dependencies and package dependencies with Package.resolved versions. | `graph/v0` | [`dependencies`](renderers/graph.md) |
 | [`nuget-dependencies`](extractors/nuget-dependencies.md) | Resolved NuGet project.assets.json graph. | `graph/v0` | [`dependencies`](renderers/graph.md) |
 | [`terraform-infrastructure`](extractors/terraform-infrastructure.md) | Terraform resources, modules and references, with each resource's planned action. | `architecture/v0` | [`infrastructure`](renderers/graph.md) |
 | [`azure-what-if`](extractors/azure-what-if.md) | Azure resources, containment and references, with each resource's what-if change. | `architecture/v0` | [`infrastructure`](renderers/graph.md) |

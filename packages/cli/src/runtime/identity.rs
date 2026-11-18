@@ -46,7 +46,9 @@ impl Runner {
         let digest = self.definition_digest(&definition, &revision)?;
         let mut identity = json!({"tree": self.identity(&revision)?, "definitionDigest": digest});
         if let Some(scope) = effective_scope(&definition) {
-            let files_only = definition["extractor"].as_str().is_some_and(collectors::reads_files_only);
+            let files_only = definition["extractor"]
+                .as_str()
+                .is_some_and(|id| collectors::reads_files_only(id, &definition["inputs"]));
             identity["scope"] = json!(scope);
             identity["scopedTree"] = json!(self.scoped_tree(&revision, &scope)?);
             identity["scopeVerified"] = json!(files_only || self.scope_verified(&definition, &digest)?);

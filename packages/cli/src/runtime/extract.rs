@@ -44,7 +44,10 @@ impl Runner {
         // Digesting checks the definition's sources before anything runs.
         let definition_digest = self.definition_digest(definition, program)?;
         *self.current.lock().expect("revision lock") = examined.repository.clone();
-        let files_only = self.isolation.is_none() && definition["extractor"].as_str().is_some_and(collectors::reads_files_only);
+        let files_only = self.isolation.is_none()
+            && definition["extractor"]
+                .as_str()
+                .is_some_and(|id| collectors::reads_files_only(id, &definition["inputs"]));
         // A toolchain's run on the working tree also depends on ignored files
         // (installed dependencies, generated code) its identity can't see.
         // An observed extraction is never reused silently.
@@ -377,7 +380,10 @@ const MAX_TIMEOUT_MS: u64 = 300_000;
 pub fn determinism(definition: &Value) -> projections_extractor_sdk::Determinism {
     use projections_extractor_sdk::Determinism;
     let declared = definition["execution"]["determinism"].as_str().and_then(Determinism::parse);
-    match definition["extractor"].as_str().and_then(collectors::determinism) {
+    match definition["extractor"]
+        .as_str()
+        .and_then(|id| collectors::determinism(id, &definition["inputs"]))
+    {
         Some(builtin) => declared.map_or(builtin, |declared| declared.max(builtin)),
         None => declared.unwrap_or(Determinism::Environmental),
     }

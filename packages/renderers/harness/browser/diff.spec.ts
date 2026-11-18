@@ -12,7 +12,7 @@ import {scenarios} from './scenarios.js'
  * sideways overflow. Set `PROJECTIONS_DIFF_SCREENSHOTS` to a directory to save
  * a screenshot of each at 1440 and 390 pixels.
  */
-const renderers = ['graph', 'database', 'dependency-injection', 'code-statistics', 'runtime-policy', 'api']
+const renderers = ['graph', 'database', 'dependency-injection', 'code-statistics', 'runtime-policy', 'api', 'agentic-workflows']
 const shots = process.env.PROJECTIONS_DIFF_SCREENSHOTS
 /** A comparison per renderer name whose diff is worth a picture; the first of each package otherwise. */
 const pictured = new Set([
@@ -29,6 +29,7 @@ const pictured = new Set([
   'runtime-policy/token-guard',
   'runtime-policy/token-guard-default',
   'api/parser-options',
+  'agentic-workflows/docs-bot',
 ])
 
 for (const directory of renderers) {

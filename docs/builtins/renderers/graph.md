@@ -45,7 +45,6 @@ Built-in extractors that draw with it by default:
 | [`terraform-infrastructure`](../extractors/terraform-infrastructure.md) | `infrastructure`       |
 | [`azure-what-if`](../extractors/azure-what-if.md)                       | `infrastructure`       |
 | [`github-actions-jobs`](../extractors/github-actions-jobs.md)           | `dag`                  |
-| [`github-agentic-workflows`](../extractors/github-agentic-workflows.md) | `architecture`         |
 | [`scip-file-references`](../extractors/scip-file-references.md)         | `graph`                |
 
 <!-- end generated: extractors -->

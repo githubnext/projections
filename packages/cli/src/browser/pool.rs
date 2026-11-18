@@ -139,12 +139,12 @@ impl Pool {
         }
     }
 
-    #[cfg(test)]
+    #[cfg(all(test, unix))]
     pub(super) fn kept(&self) -> bool {
         self.lock().browser.is_some()
     }
 
-    #[cfg(test)]
+    #[cfg(all(test, unix))]
     pub(super) fn workers_started(&self) -> usize {
         self.lock().workers_started
     }

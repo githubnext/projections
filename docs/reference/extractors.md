@@ -20,6 +20,7 @@ it was removed) isn't an error: the extractor describes that revision without it
 | [`rust-public-api`](#rust-public-api) | `api/v0` | `api` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`go-public-api`](#go-public-api) | `api/v0` | `api` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`cargo-dependencies`](#cargo-dependencies) | `graph/v0` | `dependencies` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
+| [`swift-package-dependencies`](#swift-package-dependencies) | `graph/v0` | `dependencies` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`nuget-dependencies`](#nuget-dependencies) | `graph/v0` | `dependencies` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`terraform-infrastructure`](#terraform-infrastructure) | `architecture/v0` | `infrastructure` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`azure-what-if`](#azure-what-if) | `architecture/v0` | `infrastructure` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
@@ -194,6 +195,32 @@ A definition to start from:
   "id": "cargo-dependencies",
   "renderer": "dependencies",
   "title": "Cargo dependencies"
+}
+```
+
+## `swift-package-dependencies`
+
+**Swift package dependencies.** Swift package products, targets, target dependencies and package dependencies with Package.resolved versions. See [its page](../builtins/extractors/swift-package-dependencies.md).
+
+- Schema: `graph/v0`
+- Default renderer: `dependencies`
+- Needs `--trust`: When it runs ecosystem tools or repository code (`when-executing-tools`)
+
+| Input | Meaning |
+|---|---|
+| `manifest` | "static" reads Package.swift without running it (default); "dump-package" runs swift package dump-package. |
+| `manifestJsonPath` | Pre-exported swift package dump-package JSON for the root package. |
+| `root` | Repository-relative package directory; default ".". |
+| `swiftPath` | Swift executable for dump-package; default swift. |
+
+A definition to start from:
+
+```json
+{
+  "extractor": "swift-package-dependencies",
+  "id": "swift-package-dependencies",
+  "renderer": "dependencies",
+  "title": "Swift package dependencies"
 }
 ```
 

@@ -1,0 +1,322 @@
+{
+  "cLanguageStandard": null,
+  "cxxLanguageStandard": null,
+  "defaultLocalization": null,
+  "dependencies": [
+    {
+      "sourceControl": [
+        {
+          "identity": "swift-collections",
+          "location": {
+            "remote": [
+              {
+                "urlString": "https://github.com/apple/swift-collections.git"
+              }
+            ]
+          },
+          "productFilter": null,
+          "requirement": {
+            "range": [
+              {
+                "lowerBound": "1.1.0",
+                "upperBound": "2.0.0"
+              }
+            ]
+          },
+          "traits": [
+            {
+              "name": "default"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sourceControl": [
+        {
+          "identity": "swift-argument-parser",
+          "location": {
+            "remote": [
+              {
+                "urlString": "https://github.com/apple/swift-argument-parser"
+              }
+            ]
+          },
+          "productFilter": null,
+          "requirement": {
+            "range": [
+              {
+                "lowerBound": "1.5.0",
+                "upperBound": "1.6.0"
+              }
+            ]
+          },
+          "traits": [
+            {
+              "name": "default"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sourceControl": [
+        {
+          "identity": "swift-log",
+          "location": {
+            "remote": [
+              {
+                "urlString": "https://github.com/apple/swift-log.git"
+              }
+            ]
+          },
+          "productFilter": null,
+          "requirement": {
+            "range": [
+              {
+                "lowerBound": "1.5.0",
+                "upperBound": "2.0.0"
+              }
+            ]
+          },
+          "traits": [
+            {
+              "name": "default"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "fileSystem": [
+        {
+          "identity": "telemetry",
+          "path": "/fixtures/harbor/Packages/Telemetry",
+          "productFilter": null,
+          "traits": [
+            {
+              "name": "default"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "name": "Harbor",
+  "packageKind": {
+    "root": [
+      "/fixtures/harbor"
+    ]
+  },
+  "pkgConfig": null,
+  "platforms": [
+    {
+      "options": [],
+      "platformName": "macos",
+      "version": "13.0"
+    },
+    {
+      "options": [],
+      "platformName": "ios",
+      "version": "16.0"
+    }
+  ],
+  "products": [
+    {
+      "name": "Harbor",
+      "settings": [],
+      "targets": [
+        "Harbor"
+      ],
+      "type": {
+        "library": [
+          "automatic"
+        ]
+      }
+    },
+    {
+      "name": "HarborUI",
+      "settings": [],
+      "targets": [
+        "HarborUI"
+      ],
+      "type": {
+        "library": [
+          "dynamic"
+        ]
+      }
+    },
+    {
+      "name": "harbor",
+      "settings": [],
+      "targets": [
+        "HarborCLI"
+      ],
+      "type": {
+        "executable": null
+      }
+    }
+  ],
+  "providers": null,
+  "swiftLanguageVersions": null,
+  "targets": [
+    {
+      "dependencies": [
+        {
+          "product": [
+            "OrderedCollections",
+            "swift-collections",
+            null,
+            null
+          ]
+        },
+        {
+          "product": [
+            "Logging",
+            "swift-log",
+            null,
+            null
+          ]
+        }
+      ],
+      "exclude": [],
+      "name": "HarborCore",
+      "packageAccess": true,
+      "resources": [],
+      "settings": [
+        {
+          "kind": {
+            "enableUpcomingFeature": {
+              "_0": "StrictConcurrency"
+            }
+          },
+          "tool": "swift"
+        }
+      ],
+      "type": "regular"
+    },
+    {
+      "dependencies": [
+        {
+          "byName": [
+            "HarborCore",
+            null
+          ]
+        },
+        {
+          "product": [
+            "Telemetry",
+            "Telemetry",
+            null,
+            null
+          ]
+        }
+      ],
+      "exclude": [],
+      "name": "Harbor",
+      "packageAccess": true,
+      "resources": [],
+      "settings": [
+        {
+          "kind": {
+            "enableUpcomingFeature": {
+              "_0": "StrictConcurrency"
+            }
+          },
+          "tool": "swift"
+        }
+      ],
+      "type": "regular"
+    },
+    {
+      "dependencies": [
+        {
+          "byName": [
+            "Harbor",
+            null
+          ]
+        }
+      ],
+      "exclude": [],
+      "name": "HarborUI",
+      "packageAccess": true,
+      "path": "Sources/HarborUI",
+      "resources": [],
+      "settings": [
+        {
+          "kind": {
+            "enableUpcomingFeature": {
+              "_0": "StrictConcurrency"
+            }
+          },
+          "tool": "swift"
+        }
+      ],
+      "type": "regular"
+    },
+    {
+      "dependencies": [
+        {
+          "byName": [
+            "Harbor",
+            null
+          ]
+        },
+        {
+          "product": [
+            "ArgumentParser",
+            "swift-argument-parser",
+            null,
+            null
+          ]
+        }
+      ],
+      "exclude": [],
+      "name": "HarborCLI",
+      "packageAccess": true,
+      "resources": [],
+      "settings": [
+        {
+          "kind": {
+            "enableUpcomingFeature": {
+              "_0": "StrictConcurrency"
+            }
+          },
+          "tool": "swift"
+        }
+      ],
+      "type": "executable"
+    },
+    {
+      "dependencies": [
+        {
+          "byName": [
+            "Harbor",
+            null
+          ]
+        },
+        {
+          "target": [
+            "HarborCore",
+            {
+              "platformNames": [
+                "macos",
+                "linux"
+              ]
+            }
+          ]
+        }
+      ],
+      "exclude": [],
+      "name": "HarborTests",
+      "packageAccess": true,
+      "resources": [],
+      "settings": [],
+      "type": "test"
+    }
+  ],
+  "toolsVersion": {
+    "_version": "5.10.0"
+  },
+  "traits": []
+}

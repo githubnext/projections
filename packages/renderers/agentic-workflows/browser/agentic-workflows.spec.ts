@@ -92,7 +92,10 @@ test('the diff draws each workflow once in its group, with each section’s dire
   await expect(examples.locator('.aw-section[data-section="budgets"] .pk-value-change')).toHaveText(/60 min.*30 min/)
   await expect(section('budgets').locator('.pk-change-pill[data-change="removed"]')).toHaveText(/2,000/)
   await expect(section('budgets').locator('.pk-change-pill[data-change="added"]')).toHaveText(/5,000/)
-  await expect(renderer.frame.locator(`[data-entity-id="${triage}"] .aw-lock`)).toHaveText('Lock stale')
+  // A lock state that changes reads old → new on the card's meta line.
+  const lock = renderer.frame.locator(`[data-entity-id="${triage}"] .aw-meta .pk-value-change`)
+  await expect(lock.locator('[data-change="removed"] .aw-lock')).toHaveText('Lock current')
+  await expect(lock.locator('[data-change="added"] .aw-lock')).toHaveText('Lock stale')
   await renderer.iframe.screenshot({path: test.info().outputPath('diff.png')})
   expect(errors).toEqual([])
 })

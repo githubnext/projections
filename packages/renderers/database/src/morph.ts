@@ -89,11 +89,22 @@ export function morphSchemaFrame(from: SchemaFrame, to: SchemaFrame, mix: number
     })
     return [start, ...interior, end]
   }
-  const old = new Map(from.links.map(link => [link.key, link]))
-  const kept = new Set(to.links.map(link => link.key))
+  // Each link and the one it was: by its key, else the same relationship drawn another way (between rows in one layout
+  // and between the tables' headers in the other, as when its column folds).
+  const keys = new Set(to.links.map(link => link.key))
+  const unmatched = from.links.filter(link => !keys.has(link.key))
+  const byKey = new Map(from.links.map(link => [link.key, link]))
+  const previous = new Map<string, FrameLink>()
+  const taken = new Set<string>()
+  for (const link of to.links) {
+    const was = byKey.get(link.key) ?? unmatched.find(item => item.relationship === link.relationship && !taken.has(item.key))
+    if (!was) continue
+    previous.set(link.key, was)
+    taken.add(was.key)
+  }
   const links: FrameLink[] = [
     ...to.links.map(link => {
-      const was = old.get(link.key)
+      const was = previous.get(link.key)
       const [startTo, endTo] = ends(link, placed.to)
       if (!was) return {...link, points: carried(link, startTo!, endTo!), opacity: link.opacity * arriving(mix)}
       const [startFrom, endFrom] = ends(was, placed.from)
@@ -115,7 +126,7 @@ export function morphSchemaFrame(from: SchemaFrame, to: SchemaFrame, mix: number
       return {...link, points, tracks, opacity: lerp(was.opacity, link.opacity, mix)}
     }),
     ...from.links
-      .filter(link => !kept.has(link.key))
+      .filter(link => !taken.has(link.key))
       .map(link => {
         const [start, end] = ends(link, placed.from)
         return {...link, points: carried(link, start!, end!), opacity: link.opacity * leaving(mix)}

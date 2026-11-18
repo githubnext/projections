@@ -87,7 +87,7 @@ export function foldParts<X extends Extraction>(
     const entity = {
       id,
       kind,
-      label: opened ? `Hide ${label[0]!.toLowerCase()}${label.slice(1)}` : label,
+      label: opened ? `Hide ${label.replace(/^Unchanged: /, '')}` : label,
       data: opened ? {open: true} : {},
     } as X['entities'][number]
     foldRows.push({

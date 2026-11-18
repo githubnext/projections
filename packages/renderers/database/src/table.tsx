@@ -191,7 +191,7 @@ function FoldRow({card, row}: {card: Card; row: FrameColumn}) {
           // detached element as one on the table.
           setTimeout(() => (open ? card.props.scope?.collapse([fold.id]) : card.props.scope?.expand([fold.id])))
         }}
-        title={open ? label : `Show ${label}`}
+        title={open ? label : `Show ${label[0]!.toLowerCase()}${label.slice(1)}`}
       >
         <svg className="database-fold-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path

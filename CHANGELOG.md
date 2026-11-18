@@ -9,7 +9,7 @@ Projections 0.2.0 adds built-ins for Rails and GitHub Agentic Workflows, makes t
 ### Security
 
 - Custom renderers from a checked-out pull request ran without `--trust` (#19), and `--ci` treated artifacts from fork pull requests as official (#18). Both are fixed; see [Behaviour changes](#behaviour-changes).
-- Upgrade from 0.1.0. If you used `--ci`, delete the `artifacts/` and `extractions/` directories in the [per-user cache](https://github.com/githubnext/projections/blob/main/docs/runner/caches.md) (`~/.cache/projections` on Linux, `~/Library/Caches/projections` on macOS, `%LOCALAPPDATA%\projections` on Windows).
+- Upgrade from 0.1.0. If you used `--ci`, delete the `artifacts/`, `extractions/` and `generations/` directories in the [per-user cache](https://github.com/githubnext/projections/blob/main/docs/runner/caches.md) (`~/.cache/projections` on Linux, `~/Library/Caches/projections` on macOS, `%LOCALAPPDATA%\projections` on Windows).
 
 ### Behaviour changes
 
@@ -21,7 +21,7 @@ Projections 0.2.0 adds built-ins for Rails and GitHub Agentic Workflows, makes t
   - `show --from` and `compare --before-extraction` now accept `--trust`, which allows only the renderer, since nothing is extracted.
 - **`--ci` calls only authenticated artifacts official** (#18).
   - `--ci` downloads only from a successful run of the Projections workflow in this repository, for a `push` or a same-repository `pull_request`, never a fork's. The workflow is the one `--ci-workflow FILE` or the `ciWorkflows` setting names, else one whose file on the default branch uses `githubnext/projections`.
-  - Artifacts v0.1.0 downloaded have no record of their run, so they aren't used until a run passes these checks and they're downloaded again.
+  - Artifacts v0.1.0 downloaded have no record of their run, so they aren't used until their run passes these checks; then the cached copy is reused in place with a new record, not downloaded again. To download afresh, delete the cache as [Security](#security) says.
   - An `--artifact DIR` is labelled imported (`official: false`) unless, with `--ci`, `gh attestation verify` verifies its manifest's attestation and that names a run passing the same checks. The Action's new `attest` input (default `false`; needs `id-token: write` and `attestations: write`) attests the artifact.
   - Provenance records how the run was established (`provenance.execution.ci.authentication`: `download` or `attestation`). In the Action, a pull request comparison's reused base side is now labelled imported. VS Code's badge reads **Imported** for an unauthenticated artifact, and **From CI** only for an official one.
 - **The MCP App is removed** (#38). `projections mcp` no longer serves the viewer as an MCP App, the inline view that MCP Apps hosts such as Claude Desktop showed in the conversation (`ui://projections/viewer`, its `resources/*` methods and the app-only `viewer_request` tool). `projections mcp` and every tool remain: an MCP Apps host gets the same tools as any client, and `open_projection` gives the viewer's URL for the agent to open in its own browser.

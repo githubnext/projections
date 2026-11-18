@@ -1,6 +1,6 @@
 {
   "name": "@githubnext/projections",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Write Projections renderers: the frame protocol client, the renderer kit (framework-free, React and CSS), the Vite build, renderer checks and the document types; and helpers for extractors",
   "license": "MIT",
   "repository": {
@@ -107,10 +107,10 @@
     }
   },
   "devDependencies": {
-    "@githubnext/projections-renderer-kit": "0.1.0",
-    "@githubnext/projections-renderer-sdk": "0.1.0",
-    "@githubnext/projections-renderer-testing": "0.1.0",
-    "@githubnext/projections-schemas": "0.1.0",
+    "@githubnext/projections-renderer-kit": "0.2.0",
+    "@githubnext/projections-renderer-sdk": "0.2.0",
+    "@githubnext/projections-renderer-testing": "0.2.0",
+    "@githubnext/projections-schemas": "0.2.0",
     "@playwright/test": "^1.55.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",

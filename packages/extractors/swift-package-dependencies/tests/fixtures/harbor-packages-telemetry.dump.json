@@ -1,0 +1,83 @@
+{
+  "cLanguageStandard": null,
+  "cxxLanguageStandard": null,
+  "defaultLocalization": null,
+  "dependencies": [
+    {
+      "sourceControl": [
+        {
+          "identity": "swift-log",
+          "location": {
+            "remote": [
+              {
+                "urlString": "https://github.com/apple/swift-log.git"
+              }
+            ]
+          },
+          "productFilter": null,
+          "requirement": {
+            "range": [
+              {
+                "lowerBound": "1.5.0",
+                "upperBound": "2.0.0"
+              }
+            ]
+          },
+          "traits": [
+            {
+              "name": "default"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "name": "Telemetry",
+  "packageKind": {
+    "root": [
+      "/fixtures/harbor/Packages/Telemetry"
+    ]
+  },
+  "pkgConfig": null,
+  "platforms": [],
+  "products": [
+    {
+      "name": "Telemetry",
+      "settings": [],
+      "targets": [
+        "Telemetry"
+      ],
+      "type": {
+        "library": [
+          "automatic"
+        ]
+      }
+    }
+  ],
+  "providers": null,
+  "swiftLanguageVersions": null,
+  "targets": [
+    {
+      "dependencies": [
+        {
+          "product": [
+            "Logging",
+            "swift-log",
+            null,
+            null
+          ]
+        }
+      ],
+      "exclude": [],
+      "name": "Telemetry",
+      "packageAccess": true,
+      "resources": [],
+      "settings": [],
+      "type": "regular"
+    }
+  ],
+  "toolsVersion": {
+    "_version": "5.9.0"
+  },
+  "traits": []
+}

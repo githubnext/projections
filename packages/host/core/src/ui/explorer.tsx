@@ -207,6 +207,7 @@ export function ComparisonExplorer(props: ComparisonExplorerProps) {
           {...(props.initialConnector !== undefined ? {initialConnector: props.initialConnector} : {})}
           {...(props.onConnectorChange ? {onConnectorChange: props.onConnectorChange} : {})}
           renderers={pair.renderers}
+          rendererDocuments={pair.rendererDocuments}
           presentation={pair.presentation}
           {...settings}
           toolbarStart={picker}

@@ -1,6 +1,6 @@
 {
   "name": "@githubnext/projections-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -15,10 +15,10 @@
     "test:browser": "playwright test"
   },
   "devDependencies": {
-    "@githubnext/projections-engine": "0.1.0",
-    "@githubnext/projections-inspector": "0.1.0",
-    "@githubnext/projections-renderer-testing": "0.1.0",
-    "@githubnext/projections-typescript-support": "0.1.0",
+    "@githubnext/projections-engine": "0.2.0",
+    "@githubnext/projections-inspector": "0.2.0",
+    "@githubnext/projections-renderer-testing": "0.2.0",
+    "@githubnext/projections-typescript-support": "0.2.0",
     "@playwright/test": "^1.55.0",
     "yaml": "^2.8.0"
   }

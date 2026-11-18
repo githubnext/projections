@@ -143,6 +143,7 @@ export function PresentedView({
         renderer={pair.resolution.renderer}
         rendererNotice={rendererNotice}
         renderers={pair.renderers}
+        rendererDocuments={pair.rendererDocuments}
         presentation={pair.presentation}
         {...(subject.mode === 'comparison'
           ? {beforeLabel: pair.subjectLabels.before ?? 'A', afterLabel: pair.subjectLabels.after ?? 'B'}

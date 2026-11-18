@@ -107,6 +107,12 @@ export const vocabularies = {
     description:
       'Agentic workflows, such as GitHub Agentic Workflows: what starts each one, what its agent can reach and write, its budgets and imports, and groups of workflows that work together.',
   },
+  'scenarios/v0': {
+    schemas: ['graph/v0'],
+    document: 'docs/models/scenarios-model.md',
+    description:
+      'Renderer fixture scenarios (`projections.scenarios` documents) as data: each scenario with the renderer that draws it and its synthetic extraction, or before, after and their comparison.',
+  },
 } as const satisfies {[vocabulary in Vocabulary]: {schemas: readonly DomainSchema[]; document: string; description: string}}
 
 /**
@@ -342,6 +348,41 @@ export const dataRules = [
     collection: 'entities',
     kinds: ['group'],
     fields: {workflows: {type: 'strings', description: 'The names of the workflows it groups.'}},
+  },
+  // scenarios/v0 (docs/models/scenarios-model.md)
+  {
+    schema: 'graph/v0',
+    vocabulary: 'scenarios/v0',
+    collection: 'entities',
+    kinds: ['scenarios'],
+    fields: {
+      path: {type: 'text', required: true, description: 'The `projections.scenarios` document, repository-relative.'},
+      renderer: {type: 'string', description: "The document's default renderer name, when it names one."},
+      scenarios: {type: 'strings', description: "Its scenarios' entity IDs, in the document's order."},
+    },
+  },
+  {
+    schema: 'graph/v0',
+    vocabulary: 'scenarios/v0',
+    collection: 'entities',
+    kinds: ['scenario'],
+    fields: {
+      renderer: {
+        type: 'text',
+        required: true,
+        description: "The renderer that draws it: a built-in renderer's name, or a custom bundle's manifest name (see `bundle`).",
+      },
+      bundle: {type: 'string', description: "A custom renderer bundle's directory, repository-relative; absent for a built-in renderer."},
+      mode: {type: 'enum', values: ['extraction', 'comparison'], required: true, description: 'One revision, or a comparison.'},
+      extraction: {type: 'object', description: 'The extraction it presents, normalized (`extraction` mode).'},
+      before: {type: 'object', description: 'The before extraction, normalized (`comparison` mode).'},
+      after: {type: 'object', description: 'The after extraction, normalized (`comparison` mode).'},
+      comparison: {type: 'object', description: 'Their comparison, as its comparator computed it (`comparison` mode).'},
+      comparator: {type: 'string', description: '`default`, or the comparator file that compared it, repository-relative.'},
+      group: {type: 'string', description: 'The group it is shown under.'},
+      description: {type: 'string', description: 'What it shows.'},
+      presentation: {type: 'object', description: "Its definition `presentation`: the renderer's settings and the host's."},
+    },
   },
 ] as const satisfies readonly DataRule[]
 

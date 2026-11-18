@@ -18,6 +18,7 @@ with its code, README, fixtures and any ecosystem helper together:
 | `typescript-support/` | Builds the self-contained Node helper for `typescript-public-api` and `nestjs-di`, and the Rust code that runs it ([TypeScript support](typescript-support/README.md)) |
 | `go-support/` | The shared Go helper and toolchain runner for Go extractors ([Go support](go-support/README.md)) |
 | `ruby-support/` | The reader for declarative Ruby and ActiveSupport's inflections that `rails-schema` and `rails-routes` share ([Ruby support](ruby-support/README.md)) |
+| `swift-support/` | The Swift lexer, package manifest readers and `Package.resolved` shared by the Swift extractors ([Swift support](swift-support/README.md)) |
 
 Built-in extractors are deterministic: the same revision produces the same
 extraction, in a stable order, from declared or resolved structure rather than
@@ -66,6 +67,7 @@ with an explicit error, never a fallback.
 | `django-schema` | Python with the project's Django ([Django](django-schema/README.md)) |
 | `spring-di` | A JDK 17+ with `javac` and the project's Gradle or Maven (wrapper or on PATH); Spring Boot 3.0+ ([Spring](spring-di/README.md)) |
 | `cargo-dependencies`, `nuget-dependencies`, `terraform-infrastructure`, `azure-what-if` | The ecosystem's tool when not importing a pre-exported model |
+| `swift-package-dependencies` | Nothing; a Swift toolchain only with `manifest: "dump-package"` ([Swift package dependencies](swift-package-dependencies/README.md)) |
 | `scip-file-references` | The project's own SCIP indexer (`scip-typescript`, `rust-analyzer`, `scip-go`, `scip-python`, …) when not reading an existing index ([SCIP](scip-file-references/README.md)) |
 | `command-output` | Whatever the configured repository commands run |
 | `tetragon-policies` | Nothing, or the repository's own `helm` or `kustomize` when it renders a chart or kustomization ([Tetragon policies](tetragon-policies/README.md)) |

@@ -16,6 +16,7 @@ const rendererPackages = [
   '@githubnext/projections-renderer-runtime-policy',
   '@githubnext/projections-renderer-agentic-workflows',
   '@githubnext/projections-renderer-text-diff',
+  '@githubnext/projections-renderer-gallery',
 ]
 
 const workerDirectory = new URL('./', import.meta.resolve('@githubnext/projections-engine/worker'))

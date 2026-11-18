@@ -9,8 +9,8 @@
     "test": "node --test */test/*.test.mjs"
   },
   "devDependencies": {
-    "@githubnext/projections": "0.1.0",
-    "@githubnext/projections-engine": "0.1.0",
+    "@githubnext/projections": "0.2.0",
+    "@githubnext/projections-engine": "0.2.0",
     "typescript": "^5.9.3"
   },
   "engines": {

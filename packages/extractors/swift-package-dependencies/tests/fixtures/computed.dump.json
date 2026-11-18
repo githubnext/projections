@@ -1,0 +1,45 @@
+{
+  "cLanguageStandard": null,
+  "cxxLanguageStandard": null,
+  "defaultLocalization": null,
+  "dependencies": [],
+  "name": "Port",
+  "packageKind": {
+    "root": [
+      "/fixtures/computed"
+    ]
+  },
+  "pkgConfig": null,
+  "platforms": [],
+  "products": [
+    {
+      "name": "Port",
+      "settings": [],
+      "targets": [
+        "Port"
+      ],
+      "type": {
+        "library": [
+          "automatic"
+        ]
+      }
+    }
+  ],
+  "providers": null,
+  "swiftLanguageVersions": null,
+  "targets": [
+    {
+      "dependencies": [],
+      "exclude": [],
+      "name": "Port",
+      "packageAccess": true,
+      "resources": [],
+      "settings": [],
+      "type": "regular"
+    }
+  ],
+  "toolsVersion": {
+    "_version": "5.9.0"
+  },
+  "traits": []
+}

@@ -86,6 +86,18 @@ test('open requests go to the host, which decides', async ({page}) => {
   await expect(page.getByLabel('Open request')).toHaveText('src/checkout.ts:12')
 })
 
+test('a renderer gets built-in renderer documents by name only, and can run one in a frame of its own', async ({page}) => {
+  await open(page, 'renderer=hostile&probe=documents')
+  const alert = page.getByRole('alert')
+  // The probe reports what the host answered, then again once the built-in document runs nested, under the nesting
+  // frame's policy, and speaks the protocol to it: each report carries both, so neither can replace the other.
+  await expect(alert).toContainText(
+    /documents graph=html; hostile=refused \(hostile is a custom renderer; hosts supply only built-in renderers\); no-such-renderer=refused \(no-such-renderer is not a built-in renderer\); nested graph ready/,
+  )
+  // The request naming a path was dropped as invalid, never answered.
+  await expect(alert).not.toContainText('../renderers')
+})
+
 test('progress is acknowledged by the renderer after painting and flow-controlled', async ({page}) => {
   await open(page, '')
   await expect(view(page)).toHaveAttribute('data-renderer-status', 'ready')

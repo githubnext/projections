@@ -232,9 +232,11 @@ pub fn doctor(runner: &Runner, ids: &[String]) -> Value {
                 ));
             }
             let catalog = collectors::catalog();
-            toolchains = definitions
-                .iter()
-                .any(|definition| definition["extractor"].as_str().is_none_or(|id| !collectors::reads_files_only(id)));
+            toolchains = definitions.iter().any(|definition| {
+                definition["extractor"]
+                    .as_str()
+                    .is_none_or(|id| !collectors::reads_files_only(id, &definition["inputs"]))
+            });
             for definition in definitions
                 .iter()
                 .filter(|definition| ids.is_empty() || ids.iter().any(|id| definition["id"] == id.as_str()))

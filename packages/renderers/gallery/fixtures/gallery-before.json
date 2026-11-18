@@ -1,0 +1,630 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "after": {
+          "entities": [
+            {
+              "data": {},
+              "id": "fraud",
+              "kind": "service",
+              "label": "Fraud checks"
+            },
+            {
+              "data": {},
+              "id": "orders",
+              "kind": "service",
+              "label": "Orders"
+            },
+            {
+              "data": {},
+              "id": "payments",
+              "kind": "service",
+              "label": "Payments"
+            },
+            {
+              "data": {},
+              "id": "web",
+              "kind": "service",
+              "label": "Web"
+            }
+          ],
+          "protocolVersion": 0,
+          "relationships": [
+            {
+              "data": {},
+              "from": "orders",
+              "id": "orders->payments",
+              "kind": "calls",
+              "to": "payments"
+            },
+            {
+              "data": {},
+              "from": "payments",
+              "id": "payments->fraud",
+              "kind": "calls",
+              "to": "fraud"
+            },
+            {
+              "data": {},
+              "from": "web",
+              "id": "web->orders",
+              "kind": "calls",
+              "to": "orders"
+            }
+          ],
+          "schema": "graph/v0"
+        },
+        "before": {
+          "entities": [
+            {
+              "data": {},
+              "id": "billing",
+              "kind": "service",
+              "label": "Billing"
+            },
+            {
+              "data": {},
+              "id": "orders",
+              "kind": "service",
+              "label": "Orders"
+            },
+            {
+              "data": {},
+              "id": "web",
+              "kind": "service",
+              "label": "Web"
+            }
+          ],
+          "protocolVersion": 0,
+          "relationships": [
+            {
+              "data": {},
+              "from": "orders",
+              "id": "orders->billing",
+              "kind": "calls",
+              "to": "billing"
+            },
+            {
+              "data": {},
+              "from": "web",
+              "id": "web->orders",
+              "kind": "calls",
+              "to": "orders"
+            }
+          ],
+          "schema": "graph/v0"
+        },
+        "comparator": "default",
+        "comparison": {
+          "changes": [
+            {
+              "after": [],
+              "before": [
+                "billing"
+              ],
+              "collection": "entities",
+              "correspondence": "none",
+              "id": "billing",
+              "status": "removed"
+            },
+            {
+              "after": [
+                "fraud"
+              ],
+              "before": [],
+              "collection": "entities",
+              "correspondence": "none",
+              "id": "fraud",
+              "status": "added"
+            },
+            {
+              "after": [
+                "payments"
+              ],
+              "before": [],
+              "collection": "entities",
+              "correspondence": "none",
+              "id": "payments",
+              "status": "added"
+            },
+            {
+              "after": [],
+              "before": [
+                "orders->billing"
+              ],
+              "collection": "relationships",
+              "correspondence": "none",
+              "id": "orders->billing",
+              "status": "removed"
+            },
+            {
+              "after": [
+                "orders->payments"
+              ],
+              "before": [],
+              "collection": "relationships",
+              "correspondence": "none",
+              "id": "orders->payments",
+              "status": "added"
+            },
+            {
+              "after": [
+                "payments->fraud"
+              ],
+              "before": [],
+              "collection": "relationships",
+              "correspondence": "none",
+              "id": "payments->fraud",
+              "status": "added"
+            }
+          ],
+          "order": {
+            "reverse": "mirror"
+          },
+          "protocolVersion": 0,
+          "steps": [
+            {
+              "changes": [
+                "billing",
+                "orders->billing"
+              ],
+              "kind": "remove"
+            },
+            {
+              "changes": [
+                "payments",
+                "fraud",
+                "orders->payments",
+                "payments->fraud"
+              ],
+              "kind": "add"
+            }
+          ]
+        },
+        "description": "Billing gives way to payments and fraud checks.",
+        "group": "Graph",
+        "mode": "comparison",
+        "renderer": "graph"
+      },
+      "evidence": [
+        {
+          "kind": "projections-scenarios",
+          "source": "graph/scenarios.json"
+        }
+      ],
+      "id": "scenario:graph%2Fscenarios.json:payments-split",
+      "kind": "scenario",
+      "label": "Payments split out"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "after": {
+          "entities": [
+            {
+              "data": {},
+              "id": "job:build",
+              "kind": "job",
+              "label": "build"
+            },
+            {
+              "data": {},
+              "id": "job:deploy",
+              "kind": "job",
+              "label": "deploy"
+            },
+            {
+              "data": {},
+              "id": "job:lint",
+              "kind": "job",
+              "label": "lint"
+            },
+            {
+              "data": {},
+              "id": "job:test",
+              "kind": "job",
+              "label": "test"
+            }
+          ],
+          "protocolVersion": 0,
+          "relationships": [
+            {
+              "data": {},
+              "from": "job:build",
+              "id": "job:build->job:lint",
+              "kind": "precedes",
+              "to": "job:lint"
+            },
+            {
+              "data": {},
+              "from": "job:build",
+              "id": "job:build->job:test",
+              "kind": "precedes",
+              "to": "job:test"
+            },
+            {
+              "data": {},
+              "from": "job:lint",
+              "id": "job:lint->job:deploy",
+              "kind": "precedes",
+              "to": "job:deploy"
+            },
+            {
+              "data": {},
+              "from": "job:test",
+              "id": "job:test->job:deploy",
+              "kind": "precedes",
+              "to": "job:deploy"
+            }
+          ],
+          "schema": "dag/v0"
+        },
+        "before": {
+          "entities": [
+            {
+              "data": {},
+              "id": "job:build",
+              "kind": "job",
+              "label": "build"
+            },
+            {
+              "data": {},
+              "id": "job:deploy",
+              "kind": "job",
+              "label": "deploy"
+            },
+            {
+              "data": {},
+              "id": "job:test",
+              "kind": "job",
+              "label": "test"
+            }
+          ],
+          "protocolVersion": 0,
+          "relationships": [
+            {
+              "data": {},
+              "from": "job:build",
+              "id": "job:build->job:test",
+              "kind": "precedes",
+              "to": "job:test"
+            },
+            {
+              "data": {},
+              "from": "job:test",
+              "id": "job:test->job:deploy",
+              "kind": "precedes",
+              "to": "job:deploy"
+            }
+          ],
+          "schema": "dag/v0"
+        },
+        "comparator": "default",
+        "comparison": {
+          "changes": [
+            {
+              "after": [
+                "job:lint"
+              ],
+              "before": [],
+              "collection": "entities",
+              "correspondence": "none",
+              "id": "job:lint",
+              "status": "added"
+            },
+            {
+              "after": [
+                "job:build->job:lint"
+              ],
+              "before": [],
+              "collection": "relationships",
+              "correspondence": "none",
+              "id": "job:build->job:lint",
+              "status": "added"
+            },
+            {
+              "after": [
+                "job:lint->job:deploy"
+              ],
+              "before": [],
+              "collection": "relationships",
+              "correspondence": "none",
+              "id": "job:lint->job:deploy",
+              "status": "added"
+            }
+          ],
+          "order": {
+            "reverse": "mirror"
+          },
+          "protocolVersion": 0,
+          "steps": [
+            {
+              "changes": [
+                "job:lint",
+                "job:build->job:lint",
+                "job:lint->job:deploy"
+              ],
+              "kind": "add"
+            }
+          ]
+        },
+        "group": "Pipelines",
+        "mode": "comparison",
+        "renderer": "dag"
+      },
+      "evidence": [
+        {
+          "kind": "projections-scenarios",
+          "source": "graph/scenarios.json"
+        }
+      ],
+      "id": "scenario:graph%2Fscenarios.json:release-pipeline",
+      "kind": "scenario",
+      "label": "Release pipeline"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "description": "Three services, one call each.",
+        "extraction": {
+          "entities": [
+            {
+              "data": {},
+              "id": "billing",
+              "kind": "service",
+              "label": "Billing"
+            },
+            {
+              "data": {},
+              "id": "orders",
+              "kind": "service",
+              "label": "Orders"
+            },
+            {
+              "data": {},
+              "id": "web",
+              "kind": "service",
+              "label": "Web"
+            }
+          ],
+          "protocolVersion": 0,
+          "relationships": [
+            {
+              "data": {},
+              "from": "orders",
+              "id": "orders->billing",
+              "kind": "calls",
+              "to": "billing"
+            },
+            {
+              "data": {},
+              "from": "web",
+              "id": "web->orders",
+              "kind": "calls",
+              "to": "orders"
+            }
+          ],
+          "schema": "graph/v0"
+        },
+        "group": "Graph",
+        "mode": "extraction",
+        "renderer": "graph"
+      },
+      "evidence": [
+        {
+          "kind": "projections-scenarios",
+          "source": "graph/scenarios.json"
+        }
+      ],
+      "id": "scenario:graph%2Fscenarios.json:shop",
+      "kind": "scenario",
+      "label": "A small shop"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "extraction": {
+          "entities": [
+            {
+              "data": {
+                "text": "shipit 1.4\n"
+              },
+              "id": "out",
+              "kind": "output",
+              "label": "$ shipit status"
+            }
+          ],
+          "protocolVersion": 0,
+          "relationships": [],
+          "schema": "graph/v0"
+        },
+        "group": "Text diff",
+        "mode": "extraction",
+        "renderer": "text-diff"
+      },
+      "evidence": [
+        {
+          "kind": "projections-scenarios",
+          "source": "text-diff/scenarios.json"
+        }
+      ],
+      "id": "scenario:text-diff%2Fscenarios.json:banner",
+      "kind": "scenario",
+      "label": "One banner"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "after": {
+          "entities": [
+            {
+              "data": {
+                "text": "shipit 1.5\nall checks passed\n2 warnings\n"
+              },
+              "id": "out",
+              "kind": "output",
+              "label": "$ shipit status"
+            }
+          ],
+          "protocolVersion": 0,
+          "relationships": [],
+          "schema": "graph/v0"
+        },
+        "before": {
+          "entities": [
+            {
+              "data": {
+                "text": "shipit 1.4\nall checks passed\n"
+              },
+              "id": "out",
+              "kind": "output",
+              "label": "$ shipit status"
+            }
+          ],
+          "protocolVersion": 0,
+          "relationships": [],
+          "schema": "graph/v0"
+        },
+        "comparator": "default",
+        "comparison": {
+          "changes": [
+            {
+              "after": [
+                "out"
+              ],
+              "before": [
+                "out"
+              ],
+              "collection": "entities",
+              "correspondence": "exact",
+              "id": "out",
+              "status": "modified"
+            }
+          ],
+          "order": {
+            "reverse": "mirror"
+          },
+          "protocolVersion": 0,
+          "steps": [
+            {
+              "changes": [
+                "out"
+              ],
+              "kind": "restructure"
+            }
+          ]
+        },
+        "description": "A release adds a warning line.",
+        "group": "Text diff",
+        "mode": "comparison",
+        "renderer": "text-diff"
+      },
+      "evidence": [
+        {
+          "kind": "projections-scenarios",
+          "source": "text-diff/scenarios.json"
+        }
+      ],
+      "id": "scenario:text-diff%2Fscenarios.json:status",
+      "kind": "scenario",
+      "label": "Status output"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "path": "graph/scenarios.json",
+        "renderer": "graph",
+        "scenarios": [
+          "scenario:graph%2Fscenarios.json:shop",
+          "scenario:graph%2Fscenarios.json:payments-split",
+          "scenario:graph%2Fscenarios.json:release-pipeline"
+        ]
+      },
+      "evidence": [
+        {
+          "kind": "projections-scenarios",
+          "source": "graph/scenarios.json"
+        }
+      ],
+      "id": "scenarios:graph%2Fscenarios.json",
+      "kind": "scenarios",
+      "label": "Graph"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "path": "text-diff/scenarios.json",
+        "renderer": "text-diff",
+        "scenarios": [
+          "scenario:text-diff%2Fscenarios.json:status",
+          "scenario:text-diff%2Fscenarios.json:banner"
+        ]
+      },
+      "evidence": [
+        {
+          "kind": "projections-scenarios",
+          "source": "text-diff/scenarios.json"
+        }
+      ],
+      "id": "scenarios:text-diff%2Fscenarios.json",
+      "kind": "scenarios",
+      "label": "Text diff"
+    }
+  ],
+  "metadata": {
+    "documents": 2,
+    "limitations": [
+      "Custom renderer bundles are named, not run: only built-in renderers draw nested."
+    ],
+    "source": "projections.scenarios documents and the fixtures they name"
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "scenarios:graph%2Fscenarios.json",
+      "id": "contains:scenarios%3Agraph%252Fscenarios.json:scenario%3Agraph%252Fscenarios.json%3Apayments-split",
+      "kind": "contains",
+      "to": "scenario:graph%2Fscenarios.json:payments-split"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "scenarios:graph%2Fscenarios.json",
+      "id": "contains:scenarios%3Agraph%252Fscenarios.json:scenario%3Agraph%252Fscenarios.json%3Arelease-pipeline",
+      "kind": "contains",
+      "to": "scenario:graph%2Fscenarios.json:release-pipeline"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "scenarios:graph%2Fscenarios.json",
+      "id": "contains:scenarios%3Agraph%252Fscenarios.json:scenario%3Agraph%252Fscenarios.json%3Ashop",
+      "kind": "contains",
+      "to": "scenario:graph%2Fscenarios.json:shop"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "scenarios:text-diff%2Fscenarios.json",
+      "id": "contains:scenarios%3Atext-diff%252Fscenarios.json:scenario%3Atext-diff%252Fscenarios.json%3Abanner",
+      "kind": "contains",
+      "to": "scenario:text-diff%2Fscenarios.json:banner"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "scenarios:text-diff%2Fscenarios.json",
+      "id": "contains:scenarios%3Atext-diff%252Fscenarios.json:scenario%3Atext-diff%252Fscenarios.json%3Astatus",
+      "kind": "contains",
+      "to": "scenario:text-diff%2Fscenarios.json:status"
+    }
+  ],
+  "schema": "graph/v0",
+  "vocabularies": [
+    "scenarios/v0"
+  ]
+}

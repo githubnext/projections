@@ -117,6 +117,7 @@ export function StageBody({
     <RendererPane
       key="frame"
       renderer={renderer}
+      documents={projection.rendererDocuments}
       {...(twoPanes ? {label: `${side} revision`} : {})}
       init={stage.init}
       progress={mode === 'diff' ? stage.diffProgress : twoPanes ? stage.endpoints[side] : stage.progressPayload}

@@ -79,4 +79,20 @@ async function session() {
   }
 }
 
-module.exports = {control, until, elements, session}
+/**
+ * Runs git in `cwd` and resolves with its trimmed output, retrying while another git process holds the index lock:
+ * VS Code's own git extension refreshes the workspace in the background, and on Windows its lock can outlast a test's
+ * next command.
+ */
+async function git(cwd, ...args) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return execFileSync('git', args, {cwd, encoding: 'utf8', stdio: 'pipe'}).trim()
+    } catch (error) {
+      if (attempt >= 20 || !String(error.stderr ?? error.message).includes('index.lock')) throw error
+      await new Promise(resolve => setTimeout(resolve, 250))
+    }
+  }
+}
+
+module.exports = {control, until, elements, session, git}

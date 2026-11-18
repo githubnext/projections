@@ -20,6 +20,7 @@ it was removed) isn't an error: the extractor describes that revision without it
 | [`rust-public-api`](#rust-public-api) | `api/v0` | `api` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`go-public-api`](#go-public-api) | `api/v0` | `api` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`cargo-dependencies`](#cargo-dependencies) | `graph/v0` | `dependencies` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
+| [`swift-package-dependencies`](#swift-package-dependencies) | `graph/v0` | `dependencies` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`nuget-dependencies`](#nuget-dependencies) | `graph/v0` | `dependencies` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`terraform-infrastructure`](#terraform-infrastructure) | `architecture/v0` | `infrastructure` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`azure-what-if`](#azure-what-if) | `architecture/v0` | `infrastructure` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
@@ -36,6 +37,7 @@ it was removed) isn't an error: the extractor describes that revision without it
 | [`prisma-schema`](#prisma-schema) | `database/v0` | `database` | No (`none`) |
 | [`rails-schema`](#rails-schema) | `database/v0` | `database` | No (`none`) |
 | [`rails-routes`](#rails-routes) | `api/v0` | `api` | No (`none`) |
+| [`renderer-scenarios`](#renderer-scenarios) | `graph/v0` | `gallery` | No (`none`) |
 | [`scip-file-references`](#scip-file-references) | `graph/v0` | `graph` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`command-output`](#command-output) | `graph/v0` | `text-diff` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 
@@ -193,6 +195,32 @@ A definition to start from:
   "id": "cargo-dependencies",
   "renderer": "dependencies",
   "title": "Cargo dependencies"
+}
+```
+
+## `swift-package-dependencies`
+
+**Swift package dependencies.** Swift package products, targets, target dependencies and package dependencies with Package.resolved versions. See [its page](../builtins/extractors/swift-package-dependencies.md).
+
+- Schema: `graph/v0`
+- Default renderer: `dependencies`
+- Needs `--trust`: When it runs ecosystem tools or repository code (`when-executing-tools`)
+
+| Input | Meaning |
+|---|---|
+| `manifest` | "static" reads Package.swift without running it (default); "dump-package" runs swift package dump-package. |
+| `manifestJsonPath` | Pre-exported swift package dump-package JSON for the root package. |
+| `root` | Repository-relative package directory; default ".". |
+| `swiftPath` | Swift executable for dump-package; default swift. |
+
+A definition to start from:
+
+```json
+{
+  "extractor": "swift-package-dependencies",
+  "id": "swift-package-dependencies",
+  "renderer": "dependencies",
+  "title": "Swift package dependencies"
 }
 ```
 
@@ -656,6 +684,30 @@ A definition to start from:
   "id": "rails-routes",
   "renderer": "api",
   "title": "Rails routes"
+}
+```
+
+## `renderer-scenarios`
+
+**Renderer scenarios.** Renderer fixture scenarios (projections.scenarios documents) with their synthetic extractions and comparisons. See [its page](../builtins/extractors/renderer-scenarios.md).
+
+- Schema: `graph/v0`
+- Default renderer: `gallery`
+- Needs `--trust`: No (`none`)
+
+| Input | Meaning |
+|---|---|
+| `exclude` | Globs of documents to leave out. |
+| `include` | Globs of projections.scenarios documents to read; default **/scenarios.json. |
+
+A definition to start from:
+
+```json
+{
+  "extractor": "renderer-scenarios",
+  "id": "renderer-scenarios",
+  "renderer": "gallery",
+  "title": "Renderer scenarios"
 }
 ```
 

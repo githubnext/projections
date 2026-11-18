@@ -23,7 +23,21 @@ pub struct Invocation<'a> {
     pub environment: &'a BTreeMap<String, String>,
 }
 
+/// Two extractions to compare, and the comparator to compare them with: what
+/// [`Context::compare`] hands to the comparison service.
+pub struct ComparisonRequest<'a> {
+    pub before: &'a Value,
+    pub after: &'a Value,
+    /// The comparator's options; `{}` for none.
+    pub options: &'a Value,
+    /// A comparator file (`*.comparator.yaml`): the path diagnostics name and
+    /// its bytes, read from the examined revision. `None` for the default
+    /// comparator.
+    pub file: Option<(&'a str, &'a [u8])>,
+}
+
 type Tools = dyn Fn(&Invocation<'_>) -> Result<Output> + Send + Sync;
+type Comparisons = dyn Fn(&ComparisonRequest<'_>) -> Result<Value> + Send + Sync;
 type Helpers = dyn Fn() -> Result<Option<PathBuf>> + Send + Sync;
 
 /// One extractor invocation: the public extractor request and what this process
@@ -45,6 +59,7 @@ pub struct Context {
     files: OnceLock<Vec<String>>,
     tools: Box<Tools>,
     helpers: Box<Helpers>,
+    comparisons: Option<Box<Comparisons>>,
     diagnostics: Mutex<String>,
     missing: Mutex<BTreeSet<String>>,
 }
@@ -119,6 +134,7 @@ impl Context {
             files: OnceLock::new(),
             tools: Box::new(|invocation| spawn(invocation.argv, invocation.cwd, invocation.stdin, invocation.environment)),
             helpers: Box::new(|| Ok(None)),
+            comparisons: None,
             diagnostics: Mutex::default(),
             missing: Mutex::default(),
         })
@@ -153,6 +169,28 @@ impl Context {
     pub fn with_helpers(mut self, resolve: impl Fn() -> Result<Option<PathBuf>> + Send + Sync + 'static) -> Self {
         self.helpers = Box::new(resolve);
         self
+    }
+
+    /// Compares extractions with `comparisons`, the runner's comparator
+    /// sandbox, for [`Context::compare`]. Without it, `compare` fails.
+    pub fn with_comparisons(mut self, comparisons: impl Fn(&ComparisonRequest<'_>) -> Result<Value> + Send + Sync + 'static) -> Self {
+        self.comparisons = Some(Box::new(comparisons));
+        self
+    }
+
+    /// The comparison of two extractions (normalized, of one domain schema) by
+    /// the default comparator or a comparator file, validated against them: for
+    /// an extractor whose data includes comparisons, such as fixture scenarios.
+    /// The runner computes it in the same sandbox as any comparison, so it runs
+    /// no repository code and needs no trust. Only runners that provide the
+    /// service (the `projections` CLI, for its built-in extractors) can; others
+    /// fail with an error saying so.
+    pub fn compare(&self, request: &ComparisonRequest<'_>) -> Result<Value> {
+        let compare = self
+            .comparisons
+            .as_ref()
+            .context("Comparing extractions needs a runner that provides comparisons, such as the projections CLI")?;
+        compare(request)
     }
 
     /// Uses `files` (repository-relative) as the revision's files instead of

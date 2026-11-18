@@ -40,6 +40,7 @@ registry!(
     projections_extractor_rust_public_api,
     projections_extractor_go_public_api,
     projections_extractor_cargo_dependencies,
+    projections_extractor_swift_package_dependencies,
     projections_extractor_nuget_dependencies,
     projections_extractor_terraform_infrastructure,
     projections_extractor_azure_what_if,
@@ -56,6 +57,7 @@ registry!(
     projections_extractor_prisma_schema,
     projections_extractor_rails_schema,
     projections_extractor_rails_routes,
+    projections_extractor_renderer_scenarios,
     projections_extractor_scip_file_references,
     projections_extractor_command_output,
 );
@@ -104,16 +106,26 @@ pub fn requires_trust(definition: &Value) -> bool {
     find(id).is_some_and(|extractor| (extractor.requires_trust)(&definition["inputs"]))
 }
 
-/// Whether the built-in extractor `id` declares that it only reads files
-/// through the Context (`access: files`), so the runner may serve them from Git
-/// objects.
-pub fn reads_files_only(id: &str) -> bool {
-    find(id).is_some_and(|extractor| (extractor.descriptor)().access == projections_extractor_sdk::Access::Files)
+/// Whether the built-in extractor `id`, given `inputs`, only reads files
+/// through the Context, so the runner may serve them from Git objects: it
+/// declares `access: files`, and these inputs don't make it run a tool (as
+/// `swift-package-dependencies` does for `manifest: "dump-package"`), which
+/// needs the revision on disk.
+pub fn reads_files_only(id: &str, inputs: &Value) -> bool {
+    find(id).is_some_and(|extractor| {
+        (extractor.descriptor)().access == projections_extractor_sdk::Access::Files && !(extractor.requires_trust)(inputs)
+    })
 }
 
-/// The determinism class the built-in extractor `id` declares, if it exists.
-pub fn determinism(id: &str) -> Option<projections_extractor_sdk::Determinism> {
-    find(id).map(|extractor| (extractor.descriptor)().determinism)
+/// The determinism class of the built-in extractor `id` given `inputs`, if it
+/// exists: the one it declares, or `environmental` when a `pure` extractor's
+/// inputs make it run a tool, whose output depends on the toolchain.
+pub fn determinism(id: &str, inputs: &Value) -> Option<projections_extractor_sdk::Determinism> {
+    use projections_extractor_sdk::Determinism;
+    find(id).map(|extractor| match (extractor.descriptor)().determinism {
+        Determinism::Pure if (extractor.requires_trust)(inputs) => Determinism::Environmental,
+        declared => declared,
+    })
 }
 
 /// The scope a built-in extractor's inputs imply: the files it reads when its

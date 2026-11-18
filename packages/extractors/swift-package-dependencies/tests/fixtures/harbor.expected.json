@@ -1,0 +1,292 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "linkage": "automatic",
+        "package": "Harbor",
+        "type": "library"
+      },
+      "id": "swiftpm:.:product:Harbor",
+      "kind": "product",
+      "label": "Harbor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "linkage": "dynamic",
+        "package": "Harbor",
+        "type": "library"
+      },
+      "id": "swiftpm:.:product:HarborUI",
+      "kind": "product",
+      "label": "HarborUI"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "package": "Harbor",
+        "type": "executable"
+      },
+      "id": "swiftpm:.:product:harbor",
+      "kind": "product",
+      "label": "harbor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "package": "Harbor",
+        "type": "regular"
+      },
+      "id": "swiftpm:.:target:Harbor",
+      "kind": "target",
+      "label": "Harbor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "package": "Harbor",
+        "type": "executable"
+      },
+      "id": "swiftpm:.:target:HarborCLI",
+      "kind": "target",
+      "label": "HarborCLI"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "package": "Harbor",
+        "type": "regular"
+      },
+      "id": "swiftpm:.:target:HarborCore",
+      "kind": "target",
+      "label": "HarborCore"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "package": "Harbor",
+        "type": "test"
+      },
+      "id": "swiftpm:.:target:HarborTests",
+      "kind": "target",
+      "label": "HarborTests"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "package": "Harbor",
+        "path": "Sources/HarborUI",
+        "type": "regular"
+      },
+      "id": "swiftpm:.:target:HarborUI",
+      "kind": "target",
+      "label": "HarborUI"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "linkage": "automatic",
+        "package": "Telemetry",
+        "type": "library"
+      },
+      "id": "swiftpm:Packages%2FTelemetry:product:Telemetry",
+      "kind": "product",
+      "label": "Telemetry"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "package": "Telemetry",
+        "type": "regular"
+      },
+      "id": "swiftpm:Packages%2FTelemetry:target:Telemetry",
+      "kind": "target",
+      "label": "Telemetry"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "location": "https://github.com/apple/swift-argument-parser",
+        "requirement": "1.5.0..<1.6.0",
+        "revision": "011f0c765fb46d9cac61bca19be0527e99c98c8b",
+        "source": "repository",
+        "version": "1.5.1"
+      },
+      "id": "swiftpm:package:swift-argument-parser",
+      "kind": "external-package",
+      "label": "swift-argument-parser"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "location": "https://github.com/apple/swift-collections.git",
+        "requirement": "1.1.0..<2.0.0",
+        "revision": "88754449ab766a739610b660e117762115fabc9c",
+        "source": "repository",
+        "version": "1.7.6"
+      },
+      "id": "swiftpm:package:swift-collections",
+      "kind": "external-package",
+      "label": "swift-collections"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "location": "https://github.com/apple/swift-log.git",
+        "requirement": "1.5.0..<2.0.0",
+        "revision": "c7413d967b97aae67c46452bf7645bdb7b200e8e",
+        "source": "repository",
+        "version": "1.17.2"
+      },
+      "id": "swiftpm:package:swift-log",
+      "kind": "external-package",
+      "label": "swift-log"
+    }
+  ],
+  "metadata": {
+    "packages": [
+      {
+        "manifest": "static",
+        "name": "Harbor",
+        "path": "harbor",
+        "toolsVersion": "5.10"
+      },
+      {
+        "manifest": "static",
+        "name": "Telemetry",
+        "path": "harbor/Packages/Telemetry",
+        "toolsVersion": "5.9"
+      }
+    ],
+    "resolved": "harbor/Package.resolved",
+    "unresolved": []
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "swiftpm:.:target:Harbor",
+      "id": "depends-on:swiftpm%3A.%3Atarget%3AHarbor:swiftpm%3A.%3Atarget%3AHarborCore:HarborCore",
+      "kind": "depends-on",
+      "to": "swiftpm:.:target:HarborCore"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "product": "Telemetry"
+      },
+      "from": "swiftpm:.:target:Harbor",
+      "id": "depends-on:swiftpm%3A.%3Atarget%3AHarbor:swiftpm%3APackages%252FTelemetry%3Aproduct%3ATelemetry:Telemetry",
+      "kind": "depends-on",
+      "to": "swiftpm:Packages%2FTelemetry:product:Telemetry"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "swiftpm:.:target:HarborCLI",
+      "id": "depends-on:swiftpm%3A.%3Atarget%3AHarborCLI:swiftpm%3A.%3Atarget%3AHarbor:Harbor",
+      "kind": "depends-on",
+      "to": "swiftpm:.:target:Harbor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "product": "ArgumentParser"
+      },
+      "from": "swiftpm:.:target:HarborCLI",
+      "id": "depends-on:swiftpm%3A.%3Atarget%3AHarborCLI:swiftpm%3Apackage%3Aswift-argument-parser:ArgumentParser",
+      "kind": "depends-on",
+      "to": "swiftpm:package:swift-argument-parser"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "product": "OrderedCollections"
+      },
+      "from": "swiftpm:.:target:HarborCore",
+      "id": "depends-on:swiftpm%3A.%3Atarget%3AHarborCore:swiftpm%3Apackage%3Aswift-collections:OrderedCollections",
+      "kind": "depends-on",
+      "to": "swiftpm:package:swift-collections"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "product": "Logging"
+      },
+      "from": "swiftpm:.:target:HarborCore",
+      "id": "depends-on:swiftpm%3A.%3Atarget%3AHarborCore:swiftpm%3Apackage%3Aswift-log:Logging",
+      "kind": "depends-on",
+      "to": "swiftpm:package:swift-log"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "swiftpm:.:target:HarborTests",
+      "id": "depends-on:swiftpm%3A.%3Atarget%3AHarborTests:swiftpm%3A.%3Atarget%3AHarbor:Harbor",
+      "kind": "depends-on",
+      "to": "swiftpm:.:target:Harbor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "platforms": [
+          "macos",
+          "linux"
+        ]
+      },
+      "from": "swiftpm:.:target:HarborTests",
+      "id": "depends-on:swiftpm%3A.%3Atarget%3AHarborTests:swiftpm%3A.%3Atarget%3AHarborCore:HarborCore",
+      "kind": "depends-on",
+      "to": "swiftpm:.:target:HarborCore"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "from": "swiftpm:.:target:HarborUI",
+      "id": "depends-on:swiftpm%3A.%3Atarget%3AHarborUI:swiftpm%3A.%3Atarget%3AHarbor:Harbor",
+      "kind": "depends-on",
+      "to": "swiftpm:.:target:Harbor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "product": "Logging"
+      },
+      "from": "swiftpm:Packages%2FTelemetry:target:Telemetry",
+      "id": "depends-on:swiftpm%3APackages%252FTelemetry%3Atarget%3ATelemetry:swiftpm%3Apackage%3Aswift-log:Logging",
+      "kind": "depends-on",
+      "to": "swiftpm:package:swift-log"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swiftpm:.:product:Harbor",
+      "id": "includes:swiftpm%3A.%3Aproduct%3AHarbor:swiftpm%3A.%3Atarget%3AHarbor",
+      "kind": "includes",
+      "to": "swiftpm:.:target:Harbor"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swiftpm:.:product:HarborUI",
+      "id": "includes:swiftpm%3A.%3Aproduct%3AHarborUI:swiftpm%3A.%3Atarget%3AHarborUI",
+      "kind": "includes",
+      "to": "swiftpm:.:target:HarborUI"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swiftpm:.:product:harbor",
+      "id": "includes:swiftpm%3A.%3Aproduct%3Aharbor:swiftpm%3A.%3Atarget%3AHarborCLI",
+      "kind": "includes",
+      "to": "swiftpm:.:target:HarborCLI"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swiftpm:Packages%2FTelemetry:product:Telemetry",
+      "id": "includes:swiftpm%3APackages%252FTelemetry%3Aproduct%3ATelemetry:swiftpm%3APackages%252FTelemetry%3Atarget%3ATelemetry",
+      "kind": "includes",
+      "to": "swiftpm:Packages%2FTelemetry:target:Telemetry"
+    }
+  ],
+  "schema": "graph/v0"
+}

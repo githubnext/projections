@@ -4,6 +4,7 @@ import {rendererContentSecurityPolicy as sdkPolicy} from '@githubnext/projection
 import {rendererContentSecurityPolicy as buildPolicy, rendererResponseHeaders} from '../build/collect-renderers.mjs'
 import {
   ComparisonError,
+  builtinRendererDocuments,
   compatibleRenderers,
   computeComparison,
   describeChange,
@@ -303,4 +304,42 @@ test('the default comparator runs with the definition options; a module runs on 
     computeComparison({engine, ...docs, comparator: {kind: 'default'}}),
     error => error.code === 'comparator-unavailable',
   )
+})
+
+test('hosts supply built-in renderer documents by name from their own catalog, and refuse anything else', async () => {
+  const fetched = []
+  let failNext = true
+  const fetcher = async (url, init) => {
+    fetched.push([String(url), init.credentials, init.redirect])
+    if (failNext) {
+      failNext = false
+      return {ok: false, status: 503}
+    }
+    return {ok: true, text: async () => `<!doctype html><title>${new URL(url).pathname}</title>`}
+  }
+  const entry = (name, source, extra = {}) => ({
+    name,
+    title: name,
+    handles: name === 'graph' ? ['graph', 'dag'] : [name],
+    url: `https://host.example/renderers/${name}/index.html`,
+    source,
+    ...extra,
+  })
+  const documents = builtinRendererDocuments(
+    [entry('graph', 'builtin'), entry('database', 'builtin', {document: async () => 'rewritten'}), entry('mine', 'custom')],
+    fetcher,
+  )
+  await assert.rejects(documents('graph'), /Renderer request failed \(503\)/)
+  assert.equal(await documents('graph'), '<!doctype html><title>/renderers/graph/index.html</title>')
+  assert.equal(await documents('graph'), '<!doctype html><title>/renderers/graph/index.html</title>')
+  assert.deepEqual(fetched, [
+    ['https://host.example/renderers/graph/index.html', 'omit', 'error'],
+    ['https://host.example/renderers/graph/index.html', 'omit', 'error'],
+  ])
+  assert.equal(await documents('dag'), await documents('graph'), 'a name the bundle handles')
+  assert.equal(await documents('database'), 'rewritten', "an entry's own document wins")
+  await assert.rejects(documents('mine'), /mine is a custom renderer; hosts supply only built-in renderers/)
+  await assert.rejects(documents('missing'), /missing is not a built-in renderer/)
+  await assert.rejects(documents('../graph/index.html'), /is not a built-in renderer/)
+  assert.equal(fetched.length, 2)
 })

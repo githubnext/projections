@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useMemo, useState, useSyncExternalStore} from 'react'
+import {builtinRendererDocuments} from '@githubnext/projections-host'
 import type {ComputedComparison} from '@githubnext/projections-host'
 import {cn} from '@githubnext/projections-host/ui/components'
 import {ListChecks} from 'lucide-react'
@@ -89,6 +90,7 @@ export function FixturesWorkbench({store, context}: FixturesWorkbenchProps) {
     [scenario, comparison?.result],
   )
   const annotations = useMemo(() => (subject && params.has('annotate') ? annotationsFor(subject) : undefined), [subject])
+  const rendererDocuments = useMemo(() => builtinRendererDocuments(context.builtins), [context.builtins])
   const renderers = useMemo(
     () => (scenario && !scenario.error ? scenarioRenderers(scenario, catalog, context.builtins, resolution?.renderer) : []),
     [scenario, catalog, context.builtins, resolution?.renderer],
@@ -250,6 +252,7 @@ export function FixturesWorkbench({store, context}: FixturesWorkbenchProps) {
         subject={subject}
         resolution={resolution}
         renderers={renderers}
+        rendererDocuments={rendererDocuments}
         annotations={annotations}
         colorMode={theme.colorMode}
         viewport={viewport}

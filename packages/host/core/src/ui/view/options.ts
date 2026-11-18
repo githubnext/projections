@@ -11,6 +11,7 @@ export function viewOptions(props: ProjectionViewProps, colorMode: ColorMode, th
     projection: props.projection,
     renderers: props.renderer ? [props.renderer, ...(props.renderers ?? []).filter(entry => entry.url !== props.renderer!.url)] : [],
     rendererNotice: props.rendererNotice,
+    ...(props.rendererDocuments ? {rendererDocuments: props.rendererDocuments} : {}),
     ...(props.notices ? {notices: props.notices} : {}),
     presentation: props.presentation,
     colorMode,

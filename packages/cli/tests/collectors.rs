@@ -812,3 +812,62 @@ fn every_built_in_extracts_a_missing_declared_input_as_empty_and_names_it() {
         .unwrap_err();
     assert!(format!("{error:#}").contains("ci.yml"), "{error:#}");
 }
+
+#[test]
+fn renderer_scenarios_are_compared_in_the_comparator_sandbox_without_trust() {
+    let fixture = Fixture::new();
+    let graph = |ids: &[&str]| {
+        json!({"protocolVersion":0,"schema":"graph/v0","relationships":[],
+            "entities": ids.iter().map(|id| json!({"id":id,"kind":"service","label":id})).collect::<Vec<_>>()})
+    };
+    fixture.json("fixtures/before.json", graph(&["orders", "billing"]));
+    fixture.json("fixtures/after.json", graph(&["orders", "payments", "fraud"]));
+    let rules = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/comparators/priority-order/priority-order.comparator.yaml");
+    fixture.put("comparators/priority.comparator.yaml", &fs::read_to_string(rules).unwrap());
+    fixture.json(
+        "scenarios.json",
+        json!({"format":"projections.scenarios","version":0,"title":"Graph","renderer":"graph","scenarios":[
+            {"id":"split","title":"Payments split out","before":"fixtures/before.json","after":"fixtures/after.json"},
+            {"id":"fraud-first","title":"Fraud first","before":"fixtures/before.json","after":"fixtures/after.json",
+             "comparator":{"file":"comparators/priority.comparator.yaml","options":{"priority":["fraud"]}}}
+        ]}),
+    );
+    assert!(!collectors::requires_trust(&definition("renderer-scenarios", json!({}))));
+    let extraction = fixture.collect("renderer-scenarios", json!({})).unwrap();
+    let scenario = |id: &str| {
+        extraction["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entity| entity["id"] == format!("scenario:scenarios.json:{id}"))
+            .unwrap()["data"]
+            .clone()
+    };
+    // The default comparator's comparison, validated by the Engine against the scenario's own extractions.
+    let split = scenario("split");
+    assert_eq!(split["comparator"], "default");
+    let statuses: Vec<_> = split["comparison"]["changes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|change| (change["id"].as_str().unwrap(), change["status"].as_str().unwrap()))
+        .collect();
+    assert_eq!(statuses, [("billing", "removed"), ("fraud", "added"), ("payments", "added")]);
+    // The comparator file runs on the rules interpreter, with the scenario's options: fraud's step comes first.
+    let first = scenario("fraud-first");
+    assert_eq!(first["comparator"], "comparators/priority.comparator.yaml");
+    assert_eq!(
+        split["comparison"]["steps"][0]["changes"],
+        json!(["billing"]),
+        "by default, the removal first"
+    );
+    assert_eq!(first["comparison"]["steps"][0]["changes"], json!(["fraud", "payments"]));
+
+    // A comparator that fails is reported for its scenario, never replaced by the default.
+    fixture.put(
+        "comparators/priority.comparator.yaml",
+        "format: projections.comparator\nversion: 0\nsteps: [\n",
+    );
+    let error = format!("{:#}", fixture.collect("renderer-scenarios", json!({})).unwrap_err());
+    assert!(error.contains("scenario fraud-first"), "{error}");
+}

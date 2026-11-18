@@ -19,6 +19,7 @@ import {fillStyle, frameElement, frameUrl, nonce, observeViewport, viewportOf} f
 import {FrameLifecycle} from './frame/lifecycle.js'
 import {OpenedDocument} from './frame/opened.js'
 import type {RendererFrameEvent, RendererFrameOptions, RendererFrameStatus} from './frame/types.js'
+import type {RendererDocuments} from './registry.js'
 
 /**
  * Hosts one renderer bundle in a sandboxed frame and speaks the renderer
@@ -68,6 +69,7 @@ export class RendererFrame {
   private readonly resize: ResizeObserver | undefined
   private readonly url: URL
   private readonly opened: OpenedDocument
+  private readonly builtinDocuments: RendererDocuments | undefined
 
   constructor(options: RendererFrameOptions) {
     this.view = options.window ?? options.container.ownerDocument.defaultView ?? window
@@ -77,6 +79,7 @@ export class RendererFrame {
     this.selection = options.selection ?? null
     this.options = options.options ?? {}
     this.fill = options.fill ?? false
+    this.builtinDocuments = options.builtinDocuments
     this.heights = new HeightRequests(this.view)
     this.channel = nonce(this.view)
     this.flow = new ProgressFlow(this.view, options.acknowledgementTimeoutMs ?? 1000, progress =>
@@ -257,6 +260,9 @@ export class RendererFrame {
         this.declared = message.controls
         this.onEvent(message)
         return
+      case 'document-request':
+        this.supply(message.renderer)
+        return
       case 'error':
         this.onEvent(message)
         // A renderer that reports an error has handled the host's messages; show its state rather than a loading one.
@@ -265,6 +271,22 @@ export class RendererFrame {
       default:
         this.onEvent(message)
     }
+  }
+
+  /** Answers a `document-request`: the built-in renderer's document, or why the host won't supply it. */
+  private supply(renderer: string): void {
+    const documents = this.builtinDocuments
+    const refuse = (error: unknown) =>
+      this.send({
+        type: 'document',
+        renderer,
+        error: (error instanceof Error ? error.message : String(error)).slice(0, rendererLimits.textLength),
+      })
+    if (!documents) {
+      refuse("This host doesn't supply renderer documents")
+      return
+    }
+    documents(renderer).then(html => this.send({type: 'document', renderer, html}), refuse)
   }
 
   /** The renderer became ready: sends it the presented documents and the state set while it loaded. */

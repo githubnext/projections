@@ -97,6 +97,9 @@ fn vocabulary_summary(vocabulary: &str) -> &'static str {
         }
         "runtime-policy/v0" => "kernel runtime policies (such as Tetragon): `policy`, `hook`, `selector` and `subject` entities",
         "agentic-workflows/v0" => "agentic workflows (such as GitHub Agentic Workflows): `workflow` and `group` entities",
+        "scenarios/v0" => {
+            "renderer fixture scenarios: `scenarios` documents that `contains` `scenario` entities, each with its renderer and synthetic extraction or comparison"
+        }
         _ => "",
     }
 }

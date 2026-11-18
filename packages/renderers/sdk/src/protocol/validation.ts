@@ -31,6 +31,8 @@ export function keys(value: Record<string, unknown>, allowed: readonly string[])
 export const envelopeKeys = ['projections', 'channel', 'type']
 
 export const tokenNamePattern = /^[a-z0-9][a-z0-9-]{0,63}$/
+/** A renderer name, as `renderer.json` declares it. */
+export const rendererNamePattern = /^[a-z0-9][a-z0-9-]{0,63}$/
 export const controlIdPattern = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/
 
 export function label(value: unknown, max = 80): value is string {

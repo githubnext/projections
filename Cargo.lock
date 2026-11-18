@@ -1367,7 +1367,7 @@ dependencies = [
 
 [[package]]
 name = "projections-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "axum",
@@ -1399,7 +1399,7 @@ dependencies = [
 
 [[package]]
 name = "projections-comparator-default"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "projections-engine",
  "proptest",
@@ -1408,7 +1408,7 @@ dependencies = [
 
 [[package]]
 name = "projections-comparator-rules"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cel",
  "projections-comparator-default",
@@ -1421,7 +1421,7 @@ dependencies = [
 
 [[package]]
 name = "projections-comparator-runtime"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde_json",
  "sha2",
@@ -1432,7 +1432,7 @@ dependencies = [
 
 [[package]]
 name = "projections-engine"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "projections-engine-verified",
  "proptest",
@@ -1444,7 +1444,7 @@ dependencies = [
 
 [[package]]
 name = "projections-engine-verified"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1463,7 +1463,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-azure-what-if"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-comparator-default",
@@ -1474,7 +1474,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-cargo-dependencies"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1483,7 +1483,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-catalog"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-azure-what-if",
@@ -1502,11 +1502,13 @@ dependencies = [
  "projections-extractor-prisma-schema",
  "projections-extractor-rails-routes",
  "projections-extractor-rails-schema",
+ "projections-extractor-renderer-scenarios",
  "projections-extractor-repository-map",
  "projections-extractor-rust-public-api",
  "projections-extractor-scip-file-references",
  "projections-extractor-sdk",
  "projections-extractor-spring-di",
+ "projections-extractor-swift-package-dependencies",
  "projections-extractor-terraform-infrastructure",
  "projections-extractor-tetragon-policies",
  "projections-extractor-typescript-public-api",
@@ -1516,7 +1518,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-code-statistics"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1527,7 +1529,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-command-output"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1537,7 +1539,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-django-schema"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1546,7 +1548,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-dotnet-di"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-dotnet-support",
@@ -1556,7 +1558,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-dotnet-public-api"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-dotnet-support",
@@ -1566,7 +1568,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-dotnet-support"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1575,7 +1577,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-efcore-schema"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-dotnet-support",
@@ -1585,7 +1587,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-github-actions-jobs"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1594,7 +1596,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-github-agentic-workflows"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-engine",
@@ -1606,7 +1608,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-go-public-api"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-go-support",
@@ -1616,7 +1618,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-go-support"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1625,7 +1627,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-nestjs-di"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1635,7 +1637,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-nuget-dependencies"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-dotnet-support",
@@ -1645,7 +1647,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-prisma-schema"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-engine",
@@ -1656,7 +1658,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-rails-routes"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-engine",
@@ -1669,7 +1671,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-rails-schema"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-engine",
@@ -1680,8 +1682,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "projections-extractor-renderer-scenarios"
+version = "0.2.0"
+dependencies = [
+ "anyhow",
+ "projections-engine",
+ "projections-extractor-sdk",
+ "regex",
+ "serde_json",
+]
+
+[[package]]
 name = "projections-extractor-repository-map"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1690,7 +1703,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-ruby-support"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "regex",
@@ -1698,7 +1711,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-rust-public-api"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1707,7 +1720,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-scip-file-references"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1718,7 +1731,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-sdk"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "libc",
@@ -1731,7 +1744,26 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-spring-di"
-version = "0.1.0"
+version = "0.2.0"
+dependencies = [
+ "anyhow",
+ "projections-extractor-sdk",
+ "serde_json",
+]
+
+[[package]]
+name = "projections-extractor-swift-package-dependencies"
+version = "0.2.0"
+dependencies = [
+ "anyhow",
+ "projections-extractor-sdk",
+ "projections-extractor-swift-support",
+ "serde_json",
+]
+
+[[package]]
+name = "projections-extractor-swift-support"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1740,7 +1772,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-terraform-infrastructure"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-comparator-default",
@@ -1752,7 +1784,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-tetragon-policies"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-engine",
@@ -1763,7 +1795,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-typescript-public-api"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1773,7 +1805,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-typescript-support"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1782,7 +1814,7 @@ dependencies = [
 
 [[package]]
 name = "projections-extractor-workspace-dependencies"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
@@ -1792,7 +1824,7 @@ dependencies = [
 
 [[package]]
 name = "projections-rules-editor"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cel",
  "projections-comparator-rules",
@@ -1803,7 +1835,7 @@ dependencies = [
 
 [[package]]
 name = "projections-rules-yaml"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "projections-engine",
  "serde_json",

@@ -62,11 +62,6 @@ pub fn rules_comparator_module() -> Option<&'static [u8]> {
     RULES_COMPARATOR
 }
 
-/// The viewer's MCP App page (`ui://projections/viewer`) embedded at build time, if it was built.
-pub fn mcp_app() -> Option<&'static str> {
-    MCP_APP
-}
-
 /// Whether this build embeds the extractor helpers (a distribution build).
 pub fn embedded_helpers() -> bool {
     !HELPERS.is_empty()

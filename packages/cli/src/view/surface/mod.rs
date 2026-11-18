@@ -21,9 +21,8 @@ use crate::service::Service;
 use crate::tools::{Outcome, ViewDefaults};
 use current::current;
 
-/// What `open_projection` says when no page shows the viewer yet (`projections mcp` says otherwise to an MCP Apps host,
-/// whose conversation shows it).
-pub const NO_PAGE: &str = "No page is open yet: open the URL for the person, in your own browser if you have one, else in the system browser (projections view show --open); give them the link only when you can open neither.";
+/// What `open_projection` says when no page shows the viewer yet.
+const NO_PAGE: &str = "No page is open yet: open the URL for the person, in your own browser if you have one, else in the system browser (projections view show --open); give them the link only when you can open neither.";
 const NOTHING_SHOWN: &str = "Nothing is shown: no viewer is running for this repository. Show the person a projection with open_projection: it starts the viewer and gives its URL. Ask which projection they mean if it isn't clear (list_projections lists them).";
 
 /// Where the viewer runs.
@@ -141,20 +140,6 @@ impl Views {
                 parse_defaults(&response.json().ok()?)
             }
         }
-    }
-
-    /// Relays one request of a page the host shows itself (the viewer as an MCP App, see `crate::mcp`) to the viewer,
-    /// starting one when none runs: the viewer's answer, and its URL, whose token the page never sees.
-    pub async fn relay(&self, method: &str, path: &str, body: Option<&Value>) -> Result<(client::Response, String), String> {
-        let url = match self.target(true).await? {
-            Some(Target::Local(shared)) => super::url(&shared),
-            Some(Target::Remote(url)) => url,
-            None => return Err("The viewer didn't start".to_owned()),
-        };
-        let response = client::request(&url, method, path.trim_start_matches('/'), body, Duration::from_secs(120))
-            .await
-            .map_err(|error| format!("The viewer didn't answer: {error:#}"))?;
-        Ok((response, url))
     }
 
     /// Stops the viewer this process started.

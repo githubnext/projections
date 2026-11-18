@@ -72,6 +72,5 @@ runs:
           ${{ inputs.workspace }}/packages/host/inspector/test-results/
           ${{ inputs.workspace }}/packages/renderers/harness/test-results/
           ${{ inputs.workspace }}/packages/cli/test-results/
-          ${{ inputs.workspace }}/packages/integrations/mcp-apps/test-results/
         if-no-files-found: warn
         retention-days: 7

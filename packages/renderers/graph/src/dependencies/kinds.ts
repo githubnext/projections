@@ -5,8 +5,11 @@ import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentati
 export const transitivePrefix = 'transitive:'
 export const transitiveEdgePrefix = 'transitive-edge:'
 
-/** Entity kinds that start a dependency graph besides workspace members: NuGet projects and their target frameworks. */
-const rootKinds = new Set(['project', 'target-framework'])
+/**
+ * Entity kinds that start a dependency graph besides workspace members: NuGet projects and their target frameworks,
+ * and Swift packages' targets and products.
+ */
+const rootKinds = new Set(['project', 'target-framework', 'target', 'product'])
 /** NuGet's `resolved` relationships record target membership of every package, not a dependency. */
 export const membershipKinds = new Set(['resolved'])
 

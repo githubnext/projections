@@ -14,6 +14,7 @@ const rendererPackages = [
   '@githubnext/projections-renderer-api',
   '@githubnext/projections-renderer-database',
   '@githubnext/projections-renderer-runtime-policy',
+  '@githubnext/projections-renderer-agentic-workflows',
   '@githubnext/projections-renderer-text-diff',
 ]
 

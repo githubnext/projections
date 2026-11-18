@@ -194,6 +194,18 @@ const images = [
     trust: true,
     image: {width: 820, height: 1400, scale: 2},
   },
+  {
+    // A group of gh-aw documentation workflows widened by a pull request, and a guardrail dropped.
+    name: 'agentic-workflows',
+    example: 'docs/images/sources/docs-bot',
+    comparator: 'packages/comparators/agentic-workflows/agentic-workflows.comparator.yaml',
+    definition: {
+      extractor: 'github-agentic-workflows',
+      renderer: 'agentic-workflows',
+      inputs: {paths: ['app/.github/workflows/*.md'], groups: 'prefix', classes: {guardrail: ['skills/check-*']}},
+    },
+    image: {width: 1240, height: 1700, scale: 2},
+  },
 ]
 
 const {values: options} = parseArgs({options: {only: {type: 'string'}, cache: {type: 'string'}}})

@@ -8,6 +8,7 @@ custom renderer is. Comparison modes are the ways it presents a comparison, in t
 
 | Renderer | Handles | Comparison modes |
 |---|---|---|
+| [Agentic workflows](#agentic-workflows) | `agentic-workflows` | `diff`, `side-by-side` |
 | [API](#api) | `api` | `diff`, `side-by-side` |
 | [Code statistics](#code-statistics) | `code-statistics` | `diff`, `side-by-side`, `animated`, `swipe` |
 | [Database](#database) | `database`, `schema` | `diff`, `side-by-side`, `animated`, `swipe` |
@@ -16,6 +17,15 @@ custom renderer is. Comparison modes are the ways it presents a comparison, in t
 | [Graph](#graph) | `graph`, `graph-horizontal`, `dag`, `architecture`, `infrastructure`, `dependencies` | `diff`, `side-by-side`, `animated`, `swipe` |
 | [Runtime security policies](#runtime-policy) | `runtime-policy` | `diff`, `side-by-side` |
 | [Text diff](#text-diff) | `text-diff` | `diff` |
+
+## `agentic-workflows`
+
+Built-in Projections agentic workflows renderer: each workflow's triggers, scope, outputs and budgets, and the direction each change moves them. See [its page](../builtins/renderers/agentic-workflows.md).
+
+- Handles: `agentic-workflows`
+- Comparison modes: `diff`, `side-by-side`
+- Package: `@githubnext/projections-renderer-agentic-workflows`
+- Example scenarios ([`scenarios.json`](../../packages/renderers/agentic-workflows/scenarios.json)): Widen a documentation bot and drop a guardrail; The same change as a matrix; Widen a public workflow's network; The same change, default comparator; Public workflows at a glance
 
 ## `api`
 

@@ -13,7 +13,8 @@ agent reach more, write more or spend more, or drop a guardrail?"
 - ID: `github-agentic-workflows`
 - Extraction schema:
   [`architecture/v0`](../../reference/schemas/architecture.md)
-- Drawn by default with: [`architecture`](../renderers/graph.md)
+- Drawn by default with:
+  [`agentic-workflows`](../renderers/agentic-workflows.md)
 - Needs `--trust`: No (`none`)
 - Suggested when the repository has: `.github/workflows/*.md`
 
@@ -85,11 +86,22 @@ describes how the pin moves.
 
 ## What a comparison shows
 
-Each workflow is one item, so a workflow whose triggers, scope, outputs,
-budgets, imports or lock state change is modified, with its old and new values;
-workflows added and removed, groups that gain or lose members, and `dispatches`
-between workflows appear as they change. Warnings (a stale or missing lock file,
-an unrecognized or renamed field) describe the revision they are found in.
+The [`agentic-workflows`](../renderers/agentic-workflows.md) renderer draws a
+card per workflow, in its group, with a row per section, and shows a comparison
+as one Diff view or Side by side. Each workflow is one item, so a workflow whose
+triggers, scope, outputs, budgets, imports or lock state change is modified:
+
+- **Entries** that arrive or leave in a section (a domain, a repository, a
+  toolset, a safe output, a skill) are pills with their sign; one that changes
+  in place reads old → new (`max 1` → `max 3`).
+- **Workflows** added or removed, groups that gain or lose members, and
+  `dispatches` between workflows.
+- **Warnings** (a stale or missing lock file, an unrecognized or renamed field)
+  describe the revision they are found in.
+
+The summary bar counts workflows, groups and dispatches, then the lock files out
+of date (`1 lock file out of date`). The **Matrix** view (the renderer's `view`
+control) draws workflows against what they load, use, write and reach.
 
 ### Interpreting changes: the agentic-workflows comparator
 
@@ -132,12 +144,14 @@ request can't change how it is judged.
 {
   "extractor": "github-agentic-workflows",
   "id": "github-agentic-workflows",
-  "renderer": "architecture",
+  "renderer": "agentic-workflows",
   "title": "Agentic workflows"
 }
 ```
 
 <!-- end generated: definition -->
+
+![The agentic-workflows renderer's diff view of the docs-bot pull request with the agentic-workflows comparator: docs-bot's sections marked Widened, a removed check-links guardrail and an added octo-org/docs-site repository](../../images/comparators/agentic-workflows.png)
 
 ## Limitations
 
@@ -156,8 +170,8 @@ request can't change how it is judged.
 
 ## Related
 
-- [`graph`](../renderers/graph.md), whose `architecture` presentation draws it
-  until a dedicated renderer is chosen.
+- [`agentic-workflows`](../renderers/agentic-workflows.md), the renderer that
+  draws it.
 - [`github-actions-jobs`](github-actions-jobs.md), the job graph of an ordinary
   Actions workflow (such as a compiled lock file).
 - [One model for agentic workflows](../../models/agentic-workflow-model.md), the
@@ -198,7 +212,7 @@ agent to write it** and describe what the projection should show.
 **With the CLI**:
 
 ```sh
-projections init <id> --language node --renderer architecture
+projections init <id> --language node --renderer agentic-workflows
 ```
 
 An extractor is any program that prints an extraction; here an `architecture/v0`

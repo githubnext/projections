@@ -4,6 +4,7 @@
 // repository that defines them. Run it after changing a comparator, its fixtures or a renderer it uses:
 //
 //   node tools/scripts/comparator-examples.mjs     (needs `npm run build`, Cargo, and Chrome, Chromium or Edge)
+//   node tools/scripts/comparator-examples.mjs --only runtime-policy,api-compatibility   (just those examples)
 //
 // The images are committed. Unlike docs/reference, they aren't checked in CI: drawing them needs a browser.
 import {spawnSync} from 'node:child_process'
@@ -11,6 +12,7 @@ import {copyFile, mkdir, mkdtemp, realpath, rm, writeFile} from 'node:fs/promise
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {fileURLToPath} from 'node:url'
+import {parseArgs} from 'node:util'
 
 const root = fileURLToPath(new URL('../../', import.meta.url))
 const out = join(root, 'docs/images/comparators')
@@ -24,6 +26,14 @@ const examples = [
     after: 'packages/extractors/tetragon-policies/tests/fixtures/credentials/after.expected.json',
     comparator: 'packages/comparators/runtime-policy/runtime-policy.comparator.yaml',
     image: {mode: 'diff', width: 1100, height: 600},
+  },
+  {
+    name: 'agentic-workflows',
+    renderer: 'agentic-workflows',
+    before: 'packages/extractors/github-agentic-workflows/tests/fixtures/docs-bot/before.expected.json',
+    after: 'packages/extractors/github-agentic-workflows/tests/fixtures/docs-bot/after.expected.json',
+    comparator: 'packages/comparators/agentic-workflows/agentic-workflows.comparator.yaml',
+    image: {mode: 'diff', width: 1240, height: 1000},
   },
   {
     name: 'api-compatibility',
@@ -42,6 +52,10 @@ const examples = [
     image: {mode: 'side-by-side', width: 900, height: 600},
   },
 ]
+
+const {values: options} = parseArgs({options: {only: {type: 'string'}}})
+const only = options.only?.split(',')
+const drawn = examples.filter(example => !only || only.includes(example.name))
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, ...options})
@@ -63,7 +77,7 @@ try {
   git('init', '--quiet')
   await mkdir(join(repo, '.github/projections'), {recursive: true})
   await mkdir(join(repo, 'tools'), {recursive: true})
-  for (const example of examples) {
+  for (const example of drawn) {
     const rules = `tools/${example.name}.comparator.yaml`
     await copyFile(join(root, example.comparator), join(repo, rules))
     const definition = (id, comparator) => ({
@@ -84,7 +98,7 @@ try {
 
   await mkdir(out, {recursive: true})
   const projections = (...args) => run(binary, ['-C', repo, ...args], {cwd: repo})
-  for (const example of examples) {
+  for (const example of drawn) {
     for (const [id, comparator] of [
       [example.name, `tools/${example.name}.comparator.yaml`],
       [`${example.name}-default`, undefined],

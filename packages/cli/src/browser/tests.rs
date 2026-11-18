@@ -64,10 +64,8 @@ fn launches_wait_for_a_free_slot() {
 /// A stand-in browser that records each start in `starts`, then runs `body`.
 #[cfg(unix)]
 fn fake_browser(directory: &Path, body: &str) -> (std::path::PathBuf, std::path::PathBuf) {
-    use std::os::unix::fs::PermissionsExt;
     let (script, starts) = (directory.join("browser"), directory.join("starts"));
-    std::fs::write(&script, format!("#!/bin/sh\necho started >> '{}'\n{body}\n", starts.display())).unwrap();
-    std::fs::set_permissions(&script, std::fs::Permissions::from_mode(0o755)).unwrap();
+    crate::test_support::write_executable(&script, &format!("#!/bin/sh\necho started >> '{}'\n{body}\n", starts.display()));
     (script, starts)
 }
 

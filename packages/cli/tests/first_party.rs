@@ -12,6 +12,10 @@ use std::{
     process::Command,
 };
 
+#[cfg(unix)]
+#[path = "../src/test_support.rs"]
+mod test_support;
+
 const EXECUTABLE: &str = env!("CARGO_BIN_EXE_projections");
 
 fn extractors() -> PathBuf {
@@ -120,16 +124,13 @@ fn cases(root: &Path) -> Vec<(&'static str, Value)> {
     ];
     #[cfg(unix)]
     {
-        use std::os::unix::fs::PermissionsExt;
         // A stand-in for the Go helper's api mode: the helper protocol, without Go.
         let helper = root.join("tools/go-helper");
         fs::create_dir_all(helper.parent().unwrap()).unwrap();
-        fs::write(
+        test_support::write_executable(
             &helper,
             "#!/bin/sh\nprintf '%s' '{\"protocolVersion\":0,\"schema\":\"api/v0\",\"entities\":[{\"id\":\"go:example.Reader\",\"kind\":\"interface\",\"label\":\"Reader\",\"data\":{\"signature\":\"type Reader interface{ Read() }\"}}],\"relationships\":[],\"metadata\":{\"ecosystem\":\"go\"}}'\n",
-        )
-        .unwrap();
-        fs::set_permissions(&helper, fs::Permissions::from_mode(0o755)).unwrap();
+        );
         cases.push(("go-public-api", json!({"goHelperPath": helper, "patterns": ["./..."]})));
         cases.push((
             "command-output",

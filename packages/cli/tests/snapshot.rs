@@ -275,10 +275,12 @@ fn waiting_for_a_launch_slot_leaves_the_render_its_whole_timeout() {
     let (repo, _, head) = repository();
     let cache = tempfile::tempdir().unwrap();
     let slots = cache.path().join("browser-launches");
-    let mut directory = fs::DirBuilder::new();
     #[cfg(unix)]
-    std::os::unix::fs::DirBuilderExt::mode(&mut directory, 0o700);
-    directory.create(&slots).unwrap();
+    std::os::unix::fs::DirBuilderExt::mode(&mut fs::DirBuilder::new(), 0o700)
+        .create(&slots)
+        .unwrap();
+    #[cfg(not(unix))]
+    fs::create_dir(&slots).unwrap();
     let held: Vec<_> = (0..2)
         .map(|slot| {
             let file = fs::File::create(slots.join(format!("slot-{slot}.lock"))).unwrap();

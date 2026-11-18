@@ -64,7 +64,8 @@ const test = base.extend<{fixtures: Fixtures}>({
       )
       const scenarios = join(directory, 'cases.scenarios.json')
       await writeFile(scenarios, document())
-      server = await startHarness(context, ['--fixtures', scenarios])
+      // The scenarios name the bundle themselves, which is repository code: --trust serves it.
+      server = await startHarness(context, ['--fixtures', scenarios, '--trust'])
       await use({url: server.url, directory, scenarios, bundle})
     } finally {
       await server?.close()

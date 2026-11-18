@@ -4,6 +4,7 @@ import {changeSet, split, UsageError} from './change-set.ts'
 
 export type CheckOptions = {
   affected?: boolean | undefined
+  fast?: boolean | undefined
   since?: string | undefined
   only?: string[] | undefined
   clippy?: boolean | undefined
@@ -14,16 +15,22 @@ export async function checkReport(root: string, options: CheckOptions, progress?
   const only = split(options.only)
   const unknown = only.filter(name => !gates.some(gate => gate.name === name))
   if (unknown.length) throw new UsageError(`Unknown gate ${unknown.join(', ')}`, `Gates: ${gates.map(gate => gate.name).join(', ')}`)
-  const scoped = options.affected || options.since !== undefined
+  const fast = Boolean(options.fast)
+  const scoped = fast || options.affected || options.since !== undefined
   const set = changeSet(root, options.since)
   const context: GateContext = {
     root,
     units: set.units,
     affected: scoped ? set.affected : undefined,
     files: scoped ? set.changes.filter(change => change.status !== 'deleted').map(change => change.path) : undefined,
+    fast,
   }
   const selected = gates.filter(gate =>
-    only.length ? only.includes(gate.name) : !gate.optional || (gate.name === 'clippy' && options.clippy),
+    fast
+      ? gate.fast && (!only.length || only.includes(gate.name))
+      : only.length
+        ? only.includes(gate.name)
+        : !gate.optional || (gate.name === 'clippy' && options.clippy),
   )
   const results: GateResult[] = []
   for (const gate of selected) {
@@ -47,21 +54,29 @@ export async function checkReport(root: string, options: CheckOptions, progress?
           return [
             ...(result.fix ? [result.fix] : []),
             ...(first?.file ? [`${TOOLS} explain ${first.file}`] : []),
-            `${TOOLS} check --only ${result.gate}${scoped ? ' --affected' : ''}`,
+            `${TOOLS} check --only ${result.gate}${fast ? ' --fast' : scoped ? ' --affected' : ''}`,
           ]
         }),
       ]
-    : scoped
-      ? [`${TOOLS} test --affected${set.affected.kinds.includes('rust') ? ' --rust' : ''}`]
-      : [`${TOOLS} test`]
+    : fast
+      ? // The narrowest tests next, then the whole check of what the change touches.
+        [...set.affected.changed.slice(0, 3).map(path => `${TOOLS} test ${path}`), `${TOOLS} check --affected`]
+      : scoped
+        ? [`${TOOLS} test --affected${set.affected.kinds.includes('rust') ? ' --rust' : ''}`]
+        : [`${TOOLS} test`]
   return {
     status: failed.length ? ('fail' as const) : ('pass' as const),
-    scope: scoped ? `affected since ${set.base?.ref ?? 'HEAD'} (${set.changes.length} files)` : 'everything',
+    scope: scoped
+      ? `${fast ? 'fast: changed, ' : ''}affected since ${set.base?.ref ?? 'HEAD'} (${set.changes.length} files)`
+      : 'everything',
     gates: results.map(result => ({
       gate: result.gate,
       status: result.status,
       seconds: result.durationMs === undefined ? 0 : Math.round(result.durationMs / 100) / 10,
-      note: result.reason ?? (result.status === 'fail' ? `${(result.problems?.length ?? 0) + (result.moreProblems ?? 0)} problems` : ''),
+      note:
+        result.status === 'fail'
+          ? [`${(result.problems?.length ?? 0) + (result.moreProblems ?? 0)} problems`, result.reason].filter(Boolean).join('; ')
+          : (result.reason ?? ''),
     })),
     failures: failed.map(result => ({
       gate: result.gate,

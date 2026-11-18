@@ -10,6 +10,7 @@ import {contextReport, explainReport, mapReport} from './commands/info.ts'
 import {modulesReport} from './commands/modules.ts'
 import {shadcnReport} from './commands/update.ts'
 import {affectedReport} from './commands/work/affected.ts'
+import {buildReport} from './commands/work/build.ts'
 import {checkReport} from './commands/work/check.ts'
 import {fixReport} from './commands/work/fix.ts'
 import {generatedCheck, generatedList} from './commands/work/generated.ts'
@@ -49,7 +50,7 @@ const cli = Cli.create(cliName, {
     // The linked command's absolute path when run as projections-tools, so the registration outlives this checkout.
     command: linkedBin ? `${linkedBin} --mcp` : `node ${join(import.meta.dirname, 'bin.ts')} --mcp`,
     instructions:
-      'Start with the context tool. Use check and test with affected=true to verify a change; explain a path before editing generated files.',
+      'Start with the context tool. Verify a change cheapest first: check with fast=true, then test one target, then check and test with affected=true. Explain a path before editing generated files.',
   },
 })
 
@@ -200,16 +201,23 @@ cli.command('affected', {
 const gateNames = gates.map(gate => gate.name).join(', ')
 cli.command('check', {
   description: `Run the repository's gates and summarise each, with the first problems as {file, line, message}. Gates: ${gateNames}`,
-  hint: 'Gates run one at a time in a fixed order; build-dependent gates are skipped when build fails. clippy runs only with --clippy or --only.',
+  hint: 'Gates run one at a time in a fixed order; build-dependent gates are skipped when build fails. clippy runs only with --clippy or --only. Start with --fast: it fails in seconds on what a full check would find minutes later.',
   options: z.object({
     affected: z.boolean().default(false).describe('Only what the change touches (changed files, affected workspaces)'),
+    fast: z
+      .boolean()
+      .default(false)
+      .describe(
+        'Only the cheap gates, over what changed (implies --affected): format, lint, cargo check and typecheck of the changed crates and workspaces, and the repository rules. Builds and tests nothing',
+      ),
     since,
     only: z.array(z.string()).optional().describe(`Only these gates (repeat or comma-separate): ${gateNames}`),
     clippy: z.boolean().default(false).describe('Also run clippy'),
     limit: z.number().default(5).describe('Most problems listed per gate'),
   }),
   examples: [
-    {options: {affected: true}, description: 'Check the current change'},
+    {options: {fast: true}, description: 'First: the cheap gates over what changed'},
+    {options: {affected: true}, description: 'Then: everything the change touches'},
     {options: {only: ['format,lint']}, description: 'Two gates over everything'},
   ],
   output: z.object({
@@ -231,6 +239,43 @@ cli.command('check', {
   run: c => guard(async () => settle(await checkReport(root, c.options, progress(c.agent)))),
 })
 
+cli.command('build', {
+  description:
+    'Build a workspace and the workspaces it needs, rebuilding a dependency only when it is out of date; npm run build rebuilds all of them, the release CLI and Storybook included',
+  hint: "A dependency is rebuilt when it was never built, its src is newer than its dist, or one of its own dependencies was rebuilt or is newer. Workspaces that build Rust always run, Cargo skipping what is current; one whose outputs come out the same (`unchanged`) keeps their times, so nothing above it rebuilds. Changes outside src (a vite config, a build script) aren't seen: pass --force.",
+  args: z.object({target: z.string().optional().describe('A workspace: path or npm name')}),
+  options: z.object({
+    affected: z.boolean().default(false).describe('The changed workspaces (not their dependants), and what they need'),
+    since,
+    force: z.boolean().default(false).describe('Rebuild every dependency, current or not'),
+    dryRun: z.boolean().default(false).describe('List what would be built, and why, without building'),
+    limit: z.number().default(8).describe('Most problems listed for a failed build'),
+  }),
+  examples: [
+    {args: {target: 'packages/renderers/graph'}, description: 'A renderer and what it needs'},
+    {args: {target: 'packages/cli'}, description: 'The CLI with whatever renderer, host or Inspector change it embeds'},
+    {options: {affected: true}, description: 'What the change touches'},
+    {args: {target: 'packages/host/inspector'}, options: {dryRun: true}, description: 'What would be built'},
+  ],
+  output: z.object({
+    status: z.enum(['pass', 'fail']),
+    steps: z.array(
+      z.object({
+        workspace: z.string(),
+        status: z.enum(['built', 'unchanged', 'current', 'planned', 'failed', 'skip']),
+        reason: z.string(),
+        seconds: z.number().optional(),
+        problems: z.array(problem).optional(),
+        moreProblems: z.number().optional(),
+        tail: z.array(z.string()).optional(),
+      }),
+    ),
+    notes: z.array(z.string()),
+    next,
+  }),
+  run: c => guard(async () => settle(await buildReport(root, {...c.options, target: c.args.target}, progress(c.agent)))),
+})
+
 cli.command('test', {
   description:
     'Run workspace unit tests and Rust tests, summarising failures. Browser suites run only with --browser: one project, at most 2 workers',
@@ -240,12 +285,19 @@ cli.command('test', {
     since,
     rust: z.boolean().default(false).describe('Include Rust tests (cargo test) for the target, or the whole workspace'),
     browser: z.string().optional().describe('Run this Playwright project of the selected browser suites instead, e.g. chromium-desktop'),
+    filter: z
+      .string()
+      .optional()
+      .describe(
+        "Only tests whose name matches (node's --test-name-pattern, cargo test's filter, Playwright's --grep); needs a target or --affected",
+      ),
     limit: z.number().default(8).describe('Most failures listed per run'),
   }),
   examples: [
     {options: {affected: true}, description: 'Test the current change'},
     {args: {target: 'packages/renderers/graph'}, description: 'One workspace'},
     {args: {target: 'packages/engine'}, options: {rust: true}, description: 'One crate'},
+    {args: {target: 'packages/renderers/graph'}, options: {filter: 'layout'}, description: 'The tests whose name matches'},
     {args: {target: 'packages/host/core'}, options: {browser: 'chromium-desktop'}, description: "One browser project of the host's suite"},
   ],
   output: z.object({

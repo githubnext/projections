@@ -10,7 +10,7 @@
 // the module's `projections.interpreter` custom section.
 import {spawnSync} from 'node:child_process'
 import {createHash} from 'node:crypto'
-import {mkdirSync, readFileSync, writeFileSync} from 'node:fs'
+import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs'
 import {homedir} from 'node:os'
 import {join} from 'node:path'
 import {fileURLToPath} from 'node:url'
@@ -21,10 +21,17 @@ export const artifact = fileURLToPath(new URL('../dist/rules.wasm', import.meta.
 const maximumMemory = 256 * 1024 * 1024
 const cargoHome = process.env.CARGO_HOME ?? join(homedir(), '.cargo')
 
+// Its own target directory: Cargo keeps one build of each workspace crate per target directory, and this build's
+// flags (below) differ from the default comparator's and its features from the rules editor's, so sharing either's
+// would rebuild the Engine and the comparators in both on every build.
+const targetDirectory = 'target/rules'
+
 const cargoArgs = [
   'rustc',
   '--locked',
   '--release',
+  '--target-dir',
+  targetDirectory,
   '-p',
   'projections-comparator-rules',
   '--target',
@@ -80,7 +87,7 @@ if (result.error) throw result.error
 if (result.status !== 0) process.exit(result.status ?? 1)
 const identity = languageDigest()
 const bytes = Buffer.concat([
-  readFileSync(`${root}/target/wasm32-unknown-unknown/release/projections_comparator_rules.wasm`),
+  readFileSync(`${root}/${targetDirectory}/wasm32-unknown-unknown/release/projections_comparator_rules.wasm`),
   customSection('projections.interpreter', identity),
 ])
 const module = new WebAssembly.Module(bytes)
@@ -103,7 +110,8 @@ for (const prefix of [cargoHome, root.replace(/[\\/]$/, ''), homedir()]) {
   if (prefix && text.includes(prefix)) throw new Error(`rules.wasm names the machine-specific path ${prefix}; remap it`)
 }
 mkdirSync(new URL('../dist/', import.meta.url), {recursive: true})
-writeFileSync(artifact, bytes)
+// Written only when it changed: the CLI's build embeds the module and rebuilds whenever it is rewritten.
+if (!existsSync(artifact) || !readFileSync(artifact).equals(bytes)) writeFileSync(artifact, bytes)
 console.log(`rules.wasm: ${bytes.length} bytes, interpreter ${identity}`)
 
 // The notices cover every third-party crate the wasm32 build compiles in.

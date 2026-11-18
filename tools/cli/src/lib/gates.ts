@@ -1,5 +1,6 @@
 // The repository's gates, as `npm run check` and CI run them, and a runner that summarises each one.
 import type {Affected} from './affected.ts'
+import {buildState} from './builds.ts'
 import {TOOLS} from './invocation.ts'
 import {cliBinary, unmet} from './needs.ts'
 import {linkProblems} from './links.ts'
@@ -12,9 +13,17 @@ import {join} from 'node:path'
 
 export {TOOLS}
 
-export type GateContext = {root: string; units: readonly Unit[]; affected?: Affected | undefined; files?: readonly string[] | undefined}
+export type GateContext = {
+  root: string
+  units: readonly Unit[]
+  affected?: Affected | undefined
+  files?: readonly string[] | undefined
+  /** `check --fast`: only what changed, without building it or its dependants. */
+  fast?: boolean | undefined
+}
 
-export type Plan = {commands: Command[]} | {skip: string} | {internal: () => Problem[]}
+/** Commands to run (`note` says what they leave out), a reason to skip, or a check done in process. */
+export type Plan = {commands: Command[]; note?: string} | {skip: string} | {internal: () => Problem[]}
 
 export type Gate = {
   name: string
@@ -23,6 +32,8 @@ export type Gate = {
   after?: string[]
   /** Run only when asked for (`--only`, or a flag). */
   optional?: boolean
+  /** Cheap: part of `check --fast`, which builds and tests nothing. */
+  fast?: boolean
   plan(context: GateContext): Plan
   parse?(output: string, root: string): Problem[]
   /** The command that fixes this gate's failures, when one does. */
@@ -52,38 +63,69 @@ function workspaceCommands(context: GateContext, script: string): Plan {
 const changedFiles = (context: GateContext, pattern: RegExp) =>
   (context.files ?? []).filter(path => pattern.test(path) && existsSync(join(context.root, path)))
 
-const affectedCrates = (context: GateContext) =>
+const affectedCrates = (context: GateContext, changedOnly = false) =>
   context.units
     .filter(
       unit =>
-        unit.kinds.includes('crate') && [...(context.affected?.changed ?? []), ...(context.affected?.dependants ?? [])].includes(unit.path),
+        unit.kinds.includes('crate') &&
+        [...(context.affected?.changed ?? []), ...(changedOnly ? [] : (context.affected?.dependants ?? []))].includes(unit.path),
     )
     .map(unit => unit.names.at(-1) as string)
+
+/**
+ * `check --fast`'s typecheck: the changed workspaces only, against their dependencies' current dist. One whose
+ * dependency is unbuilt, or older than its src, would be checked against stale types, so it waits for a build.
+ */
+function fastTypecheck(context: GateContext): Plan {
+  const changed = new Set(context.affected?.changed ?? [])
+  const units = inDependencyOrder(context.units, changed)
+    .map(path => context.units.find(unit => unit.path === path) as Unit)
+    .filter(unit => unit.kinds.includes('npm') && unit.scripts.includes('typecheck'))
+  if (!units.length) return {skip: 'no changed workspace has a typecheck script'}
+  const waiting: string[] = []
+  const ready = units.filter(unit => {
+    const outdated = unit.dependsOn.filter(path => {
+      const dependency = context.units.find(entry => entry.path === path)
+      const state = dependency && buildState(context.root, dependency)
+      return state !== undefined && state !== 'current'
+    })
+    if (outdated.length) waiting.push(`${unit.path} (${outdated.join(', ')} unbuilt, unfinished or older than its src)`)
+    return !outdated.length
+  })
+  const note = waiting.length ? `not checked until ${TOOLS} build <workspace>: ${waiting.join('; ')}` : undefined
+  if (!ready.length) return {skip: note as string}
+  return {commands: ready.map(unit => npm('run', 'typecheck', '--workspace', unit.names[0] as string)), ...(note ? {note} : {})}
+}
 
 export const gates: Gate[] = [
   {
     name: 'boundaries',
+    fast: true,
     description: 'Dependency and import boundaries (npm run check:boundaries)',
     plan: () => ({commands: [npm('run', '--silent', 'check:boundaries')]}),
   },
   {
     name: 'casing',
+    fast: true,
     description: 'No style recases text: data verbatim, human text in sentence case (npm run check:casing)',
     plan: () => ({commands: [npm('run', '--silent', 'check:casing')]}),
   },
   {
     name: 'portability',
+    fast: true,
     description: 'Shipped code makes no operating-system assumptions beyond .portability.yaml (npm run check:portability)',
     plan: () => ({commands: [npm('run', '--silent', 'check:portability')]}),
   },
   {
     name: 'icons',
+    fast: true,
     description: 'The product icons and their generated outputs are current (npm run check:icons)',
     plan: () => ({commands: [npm('run', '--silent', 'check:icons')]}),
     fix: 'npm run icons',
   },
   {
     name: 'considered',
+    fast: true,
     description: 'File size, line length, code lines and complexity against .considered.yaml (npm run check:considered)',
     plan: () => ({commands: [{argv: ['node', 'tools/scripts/considered.mjs', 'check', '--json']}]}),
     parse: (output, root) => {
@@ -101,6 +143,7 @@ export const gates: Gate[] = [
   },
   {
     name: 'lockfile',
+    fast: true,
     description: 'Lockfile registry URLs (npm run check:lockfile)',
     plan: context =>
       context.affected && !context.affected.kinds.includes('manifests')
@@ -110,16 +153,19 @@ export const gates: Gate[] = [
   },
   {
     name: 'readmes',
+    fast: true,
     description: 'Every workspace and crate README has a front matter description (npm run check:readmes)',
     plan: context => ({internal: () => readmeProblems(context.units)}),
   },
   {
     name: 'links',
+    fast: true,
     description: 'Relative Markdown links and anchors resolve, and docs/ pages named in source exist (npm run check:links)',
     plan: context => ({internal: () => linkProblems(context.root)}),
   },
   {
     name: 'versions',
+    fast: true,
     description:
       'Every shipped manifest, their dependencies on each other and both lockfiles carry the release version (npm run check:versions)',
     plan: context => ({internal: () => versionProblems(context.root).map(({file, line, message}) => ({file, line, message}))}),
@@ -127,6 +173,7 @@ export const gates: Gate[] = [
   },
   {
     name: 'format',
+    fast: true,
     description: 'Formatting (oxfmt --check)',
     plan: context => {
       if (!context.affected) return {commands: [npx('oxfmt', '--check')]}
@@ -140,6 +187,7 @@ export const gates: Gate[] = [
   },
   {
     name: 'lint',
+    fast: true,
     description: 'ESLint (npm run lint)',
     plan: context => {
       if (!context.affected) return {commands: [npx('eslint', '.', '--quiet')]}
@@ -151,6 +199,7 @@ export const gates: Gate[] = [
   },
   {
     name: 'cargo-fmt',
+    fast: true,
     description: 'Rust formatting (cargo fmt --check)',
     plan: context =>
       context.affected && !context.affected.kinds.includes('rust')
@@ -187,9 +236,15 @@ export const gates: Gate[] = [
   },
   {
     name: 'typecheck',
-    description: 'Unfiltered TypeScript in every workspace (npm run typecheck)',
+    fast: true,
+    description: 'Unfiltered TypeScript in every workspace (npm run typecheck); with --fast, only the changed workspaces',
     after: ['build'],
-    plan: context => (context.affected ? workspaceCommands(context, 'typecheck') : {commands: [npm('run', 'typecheck')]}),
+    plan: context =>
+      context.fast
+        ? fastTypecheck(context)
+        : context.affected
+          ? workspaceCommands(context, 'typecheck')
+          : {commands: [npm('run', 'typecheck')]},
   },
   {
     name: 'docs',
@@ -209,6 +264,35 @@ export const gates: Gate[] = [
     },
     parse: (output, root) => [...parseStalePages(output), ...parseProblems(output, root)],
     fix: `${TOOLS} fix --only reference-docs`,
+  },
+  {
+    name: 'cargo-check',
+    fast: true,
+    description:
+      'Rust compiles, tests included (cargo check --all-targets): the changed crates with --fast, the affected ones with --affected',
+    optional: true,
+    plan: context => {
+      if (context.affected && !context.affected.kinds.includes('rust')) return {skip: 'no Rust changed'}
+      // The workspace manifest, lockfile and toolchain belong to no crate and affect every one.
+      const everything = (context.files ?? []).some(path => /^(Cargo\.(toml|lock)|rust-toolchain\.toml)$/.test(path))
+      const crates = context.affected && !everything ? affectedCrates(context, context.fast) : []
+      if (context.affected && !everything && !crates.length) return {skip: 'no crate changed'}
+      return {
+        commands: [
+          {
+            argv: [
+              'cargo',
+              'check',
+              ...(crates.length ? crates.flatMap(crate => ['-p', crate]) : ['--workspace']),
+              '--all-targets',
+              '--locked',
+              '--message-format',
+              'short',
+            ],
+          },
+        ],
+      }
+    },
   },
   {
     name: 'clippy',
@@ -299,8 +383,9 @@ export async function runGate(
         ...bound(problems, options.limit ?? 5),
         ...(problems.length ? {} : {tail: tail(ran.output)}),
         ...(gate.fix ? {fix: gate.fix} : {}),
+        ...(plan.note ? {reason: plan.note} : {}),
       }
     }
   }
-  return {gate: gate.name, status: 'pass', durationMs: Date.now() - started, commands}
+  return {gate: gate.name, status: 'pass', durationMs: Date.now() - started, commands, ...(plan.note ? {reason: plan.note} : {})}
 }

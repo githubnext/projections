@@ -9,7 +9,8 @@
 // `Projections.Dotnet.dll` with the inspected repository's own `dotnet` and never
 // restores or builds the helper.
 import {spawnSync} from 'node:child_process'
-import {existsSync, readFileSync, readdirSync, rmSync} from 'node:fs'
+import {cpSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync} from 'node:fs'
+import {tmpdir} from 'node:os'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
 
@@ -60,7 +61,31 @@ export function publishHelper({
     )
     return null
   }
-  rmSync(publishDirectory, {recursive: true, force: true})
+  // Published beside, then moved in only when it changed: the CLI's build embeds the helper and rebuilds (with
+  // whole-program optimization, for minutes) whenever its files are rewritten, even with the same bytes.
+  const staging = mkdtempSync(path.join(tmpdir(), 'projections-dotnet-helper-'))
+  try {
+    publishInto(dotnet, env, version, staging)
+    if (!sameFiles(staging, publishDirectory)) {
+      rmSync(publishDirectory, {recursive: true, force: true})
+      cpSync(staging, publishDirectory, {recursive: true})
+    }
+  } finally {
+    rmSync(staging, {recursive: true, force: true})
+  }
+  log(`Published the prebuilt .NET helper with SDK ${version} to ${publishDirectory}`)
+  return publishDirectory
+}
+
+/** Whether two directories hold the same files with the same bytes (the helper's are flat). */
+function sameFiles(left, right) {
+  if (!existsSync(right)) return false
+  const names = readdirSync(left).sort()
+  if (JSON.stringify(names) !== JSON.stringify(readdirSync(right).sort())) return false
+  return names.every(name => readFileSync(path.join(left, name)).equals(readFileSync(path.join(right, name))))
+}
+
+function publishInto(dotnet, env, version, output) {
   const result = spawnSync(
     dotnet,
     [
@@ -69,7 +94,7 @@ export function publishHelper({
       '--configuration',
       'Release',
       '--output',
-      publishDirectory,
+      output,
       '--nologo',
       '--disable-build-servers',
       '--verbosity',
@@ -83,12 +108,10 @@ export function publishHelper({
   )
   if (result.error) throw result.error
   if (result.status !== 0) throw new Error(`dotnet publish of the .NET helper failed with ${result.status} (SDK ${version})`)
-  if (!existsSync(path.join(publishDirectory, 'Projections.Dotnet.dll'))) {
+  if (!existsSync(path.join(output, 'Projections.Dotnet.dll'))) {
     throw new Error('dotnet publish did not produce Projections.Dotnet.dll')
   }
-  verifyHelper(publishDirectory)
-  log(`Published the prebuilt .NET helper with SDK ${version} to ${publishDirectory}`)
-  return publishDirectory
+  verifyHelper(output)
 }
 
 /** The only files the published helper may contain: first-party code and host metadata. */

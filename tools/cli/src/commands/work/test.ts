@@ -14,6 +14,8 @@ export type TestOptions = {
   since?: string | undefined
   rust?: boolean | undefined
   browser?: string | undefined
+  /** Only tests whose name matches: node's --test-name-pattern, cargo test's filter, Playwright's --grep. */
+  filter?: string | undefined
   limit?: number | undefined
 }
 
@@ -56,11 +58,22 @@ export function counts(output: string): {passed?: number; failed?: number} {
 
 const MAX_BROWSER_WORKERS = 2
 
+/**
+ * NODE_OPTIONS selecting the tests whose name matches. Workspaces' test scripts name their files
+ * (`node --test test/*.test.mjs`), and node reads options only before those, so an appended one is ignored.
+ */
+export function nodeTestPattern(filter: string): string {
+  return [process.env['NODE_OPTIONS'], `--test-name-pattern="${filter.replace(/[\\"]/g, '\\$&')}"`].filter(Boolean).join(' ')
+}
+
 /** The test commands for the options: workspace suites, Rust crates and, only when asked, one browser project. */
 export function testPlan(root: string, options: TestOptions): {runs: Run[]; notes: string[]} {
   const units = loadUnits(root)
   const notes: string[] = []
   const runs: Run[] = []
+  const filter = options.filter
+  if (filter !== undefined && !options.target && !options.affected && options.since === undefined)
+    throw new UsageError('--filter needs a target or --affected', `${TOOLS} test packages/renderers/graph --filter layout`)
   let targets: Unit[] | undefined
   if (options.target) {
     const unit = findUnit(units, options.target)
@@ -88,7 +101,9 @@ export function testPlan(root: string, options: TestOptions): {runs: Run[]; note
             'test:browser',
             '--workspace',
             unit.names[0] as string,
-            ...(playwright ? ['--', '--project', project, '--workers', String(MAX_BROWSER_WORKERS)] : []),
+            ...(playwright
+              ? ['--', '--project', project, '--workers', String(MAX_BROWSER_WORKERS), ...(filter === undefined ? [] : ['--grep', filter])]
+              : []),
           ],
         },
       })
@@ -109,7 +124,13 @@ export function testPlan(root: string, options: TestOptions): {runs: Run[]; note
   const crates: string[] = []
   for (const unit of targets) {
     if (unit.kinds.includes('npm') && unit.scripts.includes('test'))
-      runs.push({target: unit.path, command: {argv: ['npm', 'test', '--workspace', unit.names[0] as string]}})
+      runs.push({
+        target: unit.path,
+        command: {
+          argv: ['npm', 'test', '--workspace', unit.names[0] as string],
+          ...(filter === undefined ? {} : {env: {NODE_OPTIONS: nodeTestPattern(filter)}}),
+        },
+      })
     // A crate-only target, or any crate when Rust is asked for or affected.
     const rust = options.rust || !unit.kinds.includes('npm') || options.affected || options.since !== undefined
     if (unit.kinds.includes('crate') && rust) crates.push(unit.names.at(-1) as string)
@@ -117,7 +138,7 @@ export function testPlan(root: string, options: TestOptions): {runs: Run[]; note
   if (crates.length)
     runs.push({
       target: crates.length === 1 ? (crates[0] as string) : `${crates.length} crates`,
-      command: {argv: ['cargo', 'test', '--locked', ...crates.flatMap(crate => ['-p', crate])]},
+      command: {argv: ['cargo', 'test', '--locked', ...crates.flatMap(crate => ['-p', crate]), ...(filter === undefined ? [] : [filter])]},
     })
   if (!runs.length && targets.length) notes.push('The selected targets have no test script; pass --rust for their crates.')
   return {runs, notes}

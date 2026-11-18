@@ -11,6 +11,9 @@ import {fileURLToPath} from 'node:url'
 const root = fileURLToPath(new URL('../../../../../', import.meta.url))
 export const artifact = fileURLToPath(new URL('../dist/rules-editor.wasm', import.meta.url))
 const cargoHome = process.env.CARGO_HOME ?? join(homedir(), '.cargo')
+// Its own target directory, as the rules interpreter has (../../scripts/build.mjs): sharing that one would rebuild
+// the interpreter crate in both on every build, its features differing here.
+const targetDirectory = 'target/rules-editor'
 
 const result = spawnSync(
   'cargo',
@@ -18,6 +21,8 @@ const result = spawnSync(
     'rustc',
     '--locked',
     '--release',
+    '--target-dir',
+    targetDirectory,
     '-p',
     'projections-rules-editor',
     '--target',
@@ -43,7 +48,7 @@ const result = spawnSync(
 )
 if (result.error) throw result.error
 if (result.status !== 0) process.exit(result.status ?? 1)
-const bytes = readFileSync(`${root}/target/wasm32-unknown-unknown/release/projections_rules_editor.wasm`)
+const bytes = readFileSync(`${root}/${targetDirectory}/wasm32-unknown-unknown/release/projections_rules_editor.wasm`)
 const module = new WebAssembly.Module(bytes)
 if (WebAssembly.Module.imports(module).length) throw new Error('rules-editor.wasm must have zero imports')
 const exports = new Map(WebAssembly.Module.exports(module).map(entry => [entry.name, entry.kind]))

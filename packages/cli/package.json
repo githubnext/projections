@@ -17,7 +17,6 @@
   "devDependencies": {
     "@githubnext/projections-engine": "0.1.0",
     "@githubnext/projections-inspector": "0.1.0",
-    "@githubnext/projections-mcp-apps": "0.1.0",
     "@githubnext/projections-renderer-testing": "0.1.0",
     "@githubnext/projections-typescript-support": "0.1.0",
     "@playwright/test": "^1.55.0",

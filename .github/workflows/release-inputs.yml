@@ -64,7 +64,6 @@ jobs:
           # build setup and the release proof download it. Keep every path under packages/.
           path: |
             packages/host/inspector/dist/client/
-            packages/integrations/mcp-apps/dist/viewer.html
             packages/comparators/default/dist/default-comparator.wasm
             packages/extractors/dotnet-support/helper/publish/
             packages/extractors/typescript-support/dist/extractor.mjs

@@ -105,26 +105,24 @@ projection code.
 per line, protocol version `2025-06-18` (it also accepts `2025-03-26` and
 `2024-11-05` from a client that asks for them). It answers `initialize`
 (capabilities `{"tools": {"listChanged": false}}`, with instructions for the
-agent), `ping`, `tools/list` and `tools/call`, and to an
-[MCP Apps host](#mcp-apps-hosts) `resources/list`, `resources/templates/list`
-and `resources/read` too; `notifications/initialized` is accepted and
-`notifications/cancelled` stops a call, which then gets no reply. Tool calls run
-concurrently. Standard output carries only protocol messages; diagnostics go to
-standard error. It serves the repository at `-C DIR` (or the working directory)
-and exits when standard input closes or on a signal. It lists exactly the tools
-`serve --stdio` lists, with the same schemas, so VS Code's agent and any other
-get the same tools. The view actions (`open_projection`, `current_view`,
-`refresh`) are answered by the viewer, and `compare`, `check`, `describe_part`,
-`set_part` and `screenshot` take what they omit from what it shows, saying so,
-as VS Code's tools do from the projection tab in front.
+agent), `ping`, `tools/list` and `tools/call`; `notifications/initialized` is
+accepted and `notifications/cancelled` stops a call, which then gets no reply.
+Tool calls run concurrently. Standard output carries only protocol messages;
+diagnostics go to standard error. It serves the repository at `-C DIR` (or the
+working directory) and exits when standard input closes or on a signal. It lists
+exactly the tools `serve --stdio` lists, with the same schemas, so VS Code's
+agent and any other get the same tools. The view actions (`open_projection`,
+`current_view`, `refresh`) are answered by the viewer, and `compare`, `check`,
+`describe_part`, `set_part` and `screenshot` take what they omit from what it
+shows, saying so, as VS Code's tools do from the projection tab in front.
 
 **Reviewing a change to the tools.** This repository's `agent-tools` projection
 (`.github/projections/agent-tools.json`) lists every tool, its parameters and
-the surfaces that expose it (`projections mcp`, MCP Apps hosts, VS Code's
-`languageModelTools` and the Copilot app canvas), read from source at each
-revision. Its comparator classifies each change as the agents calling the tools
-meet it (a parameter removed, made required or narrowed is breaking) and flags
-drift between surfaces, such as a stale VS Code manifest:
+the surfaces that expose it (`projections mcp`, VS Code's `languageModelTools`
+and the Copilot app canvas), read from source at each revision. Its comparator
+classifies each change as the agents calling the tools meet it (a parameter
+removed, made required or narrowed is breaking) and flags drift between
+surfaces, such as a stale VS Code manifest:
 `projections compare main.. -p agent-tools --trust`.
 
 ## The viewer
@@ -256,51 +254,9 @@ holds the seed above), or add its `?theme=` to the URL you open.
 
 ### MCP Apps hosts
 
-In a host that shows MCP servers' interactive views
-([MCP Apps](https://github.com/modelcontextprotocol/ext-apps), such as Claude
-Desktop), the viewer appears in the conversation itself: `open_projection` shows
-it there, or beside the conversation, and there is no page to open. The person
-plays, scrubs, zooms, changes the mode and selects there, as in the viewer's
-page, and `current_view` and `screenshot` read what they see. The host shows the
-view in its sandbox, with no network, so `projections mcp` relays its requests
-to the viewer; the view never drives it, and never sees its token
-([the view](../../packages/integrations/mcp-apps/README.md)).
-
-`projections mcp` offers this only to a host whose `initialize` declares the
-extension (`io.modelcontextprotocol/ui` with `text/html;profile=mcp-app`): it
-adds the view (`ui://projections/viewer`, in `resources/list` and
-`resources/read`), links `open_projection` to it (`_meta.ui.resourceUri`) and
-lists `viewer_request`, the view's relay, which hosts offer only to views
-(`visibility: ["app"]`). Other clients see the same tools as before.
-
-**Claude Desktop.** Open **Settings ▸ Developer ▸ Edit Config** and add the
-server to `claude_desktop_config.json`. Claude Desktop starts it with neither
-your shell's `PATH` nor a working directory you choose, so give the CLI's full
-path (`command -v projections` prints it) and the repository with `-C`:
-
-```json
-{
-  "mcpServers": {
-    "projections": {
-      "command": "/absolute/path/to/projections",
-      "args": ["mcp", "-C", "/absolute/path/to/your-repository"]
-    }
-  }
-}
-```
-
-Restart Claude Desktop (or, with Developer Mode on, use **Developer ▸ Reload MCP
-Configuration**), and ask Claude to show you a projection. Claude asks before it
-first shows the view; it opens it beside the conversation where it can (the side
-panel), else in the conversation, where the view's header has a button that
-moves it beside the conversation. Add `--trust` to `args` only once you have
-reviewed the repository's projection code, as for any `projections mcp`.
-
-**Other hosts.** Configure `projections mcp` as a stdio server as the host
-documents; a host that supports MCP Apps shows the view, and one that doesn't
-uses the tools as text. The view needs a host whose sandbox lets it run
-WebAssembly and start Blob Workers and Blob frames, as Claude's does: it runs
-the shared engine and the renderers itself. In a host whose policy forbids them,
-the view says it couldn't start, and `open_projection` still says what is shown
-and gives the viewer's URL to open in a browser. A host that has no larger
-display mode shows the view in the conversation only.
+Projections no longer serves the viewer as an MCP App (the inline view that MCP
+Apps hosts such as Claude Desktop show in the conversation); it was removed
+because Projections is for coding agents, which have a shell and a browser of
+their own. A host that supports MCP Apps gets the same tools as any other
+client: `open_projection` starts the viewer and gives its URL, which the agent
+opens in its own browser, or the system browser.

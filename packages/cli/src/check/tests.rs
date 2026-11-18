@@ -24,7 +24,7 @@ fn a_custom_comparator_scenario_names_its_file_by_its_repository_path() {
         Some(&json!({"before": {"extraction": extraction}, "after": {"extraction": extraction}})),
     )
     .unwrap();
-    let loaded = fixtures::load(&[path], &[], "", true);
+    let loaded = fixtures::load(&[path], &[], "", true, false);
     assert_eq!(loaded.errors(), Vec::<String>::new());
     let head = loaded.value["scenarios"]
         .as_array()
@@ -54,7 +54,7 @@ fn scenarios_present_as_the_definition_does() {
         Some(&json!({"before": {"extraction": extraction}, "after": {"extraction": extraction}})),
     )
     .unwrap();
-    let loaded = fixtures::load(&[path], &[], "", true);
+    let loaded = fixtures::load(&[path], &[], "", true, false);
     assert_eq!(loaded.errors(), Vec::<String>::new());
     for scenario in loaded.value["scenarios"].as_array().unwrap() {
         assert_eq!(scenario["presentation"], presentation, "{}", scenario["id"]);

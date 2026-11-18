@@ -116,10 +116,13 @@ pub fn resolve(sources: &[PathBuf], renderers: &[PathBuf]) -> Result<(Vec<PathBu
 /// renderer bundle URLs (`<base><key>/index.html?v=<digest>`). With `compare`,
 /// every comparison scenario is also compared with its comparator, as
 /// `projections validate` does; the Inspector compares in the browser instead.
-pub fn load(sources: &[PathBuf], renderers: &[PathBuf], renderer_base: &str, compare: bool) -> Fixtures {
+/// Bundles a scenarios document names are served only when they are among
+/// `renderers` or with `trusted`.
+pub fn load(sources: &[PathBuf], renderers: &[PathBuf], renderer_base: &str, compare: bool, trusted: bool) -> Fixtures {
     let mut loader = Loader {
         base: renderer_base,
         compare,
+        trusted,
         watched: Vec::new(),
         renderers: Vec::new(),
         bundles: HashMap::new(),
@@ -162,7 +165,7 @@ pub fn load(sources: &[PathBuf], renderers: &[PathBuf], renderer_base: &str, com
 /// every comparison scenario. Returns the number of scenarios.
 pub fn validate(path: &Path) -> Result<usize> {
     let (sources, _) = resolve(&[path.to_path_buf()], &[])?;
-    let fixtures = load(&sources, &[], "", true);
+    let fixtures = load(&sources, &[], "", true, false);
     let errors = fixtures.errors();
     if !errors.is_empty() {
         bail!("Scenarios document is invalid:\n  {}", errors.join("\n  "));

@@ -181,7 +181,10 @@ only a comparison's head supplies needs explicit trust.**
   so a renderer the pull request adds or changes still needs trust. Every host
   applies the rule: the Inspector and viewer, VS Code (a trusted workspace
   passes `--trust`), `show`/`compare --png` and the `screenshot` tool, and
-  `check`'s renderer checks.
+  `check`'s renderer checks. A renderer development server serves the package's
+  live sources rather than the compared bundle, so the Inspector uses one only
+  with `--trust`. Bundles a scenarios document names follow
+  [the scenarios rule](contracts/scenarios.md).
 
 Renderer frames use `sandbox="allow-scripts"` and a content security policy that
 grants no origin (not even the host's) and `connect-src 'none'`, so a renderer

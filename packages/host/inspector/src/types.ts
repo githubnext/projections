@@ -296,6 +296,8 @@ export interface FixtureRenderer {
   url?: string
   development?: boolean
   error?: string
+  /** Why the bundle isn't served: a bundle the scenarios name is repository code, served only when named or trusted. */
+  withheld?: string
 }
 /** The comparator a fixture scenario compares with: the default one with its options, or a custom comparator file. */
 export type FixtureComparator =

@@ -22,6 +22,11 @@ export function scenarioRenderer(
     const bundle = scenario.renderer.bundle
     const served = catalog.renderers.find(item => item.key === bundle)
     if (served?.manifest && served.url && !served.error) return {renderer: customRenderer(served.manifest, served.url)}
+    // Withheld for trust: the built-in renderer for the extraction's schema draws it instead.
+    if (served?.withheld) {
+      const subject = scenario.subject.mode === 'extraction' ? scenario.subject.extraction : scenario.subject.after
+      return resolveRenderer(scenario.renderer, builtins, {withheld: served.withheld}, subject)
+    }
     return {
       notice: `The renderer bundle ${served?.path ?? bundle} is unavailable${served?.error ? `: ${served.error}` : ''}. Showing the built-in table view.`,
     }

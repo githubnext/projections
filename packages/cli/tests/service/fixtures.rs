@@ -184,6 +184,33 @@ async fn fixtures_mode_serves_scenarios_and_renderers_without_a_repository() {
     fixture.close().await;
 }
 
+/// A bundle the scenarios name is repository code: without --trust it is served
+/// only when named with --renderer, and otherwise withheld with why.
+#[tokio::test]
+async fn bundles_the_scenarios_name_need_trust_or_renderer() {
+    for (trust, named, served) in [(false, false, false), (false, true, true), (true, false, true)] {
+        let fixture = Fixture::fixtures_with(trust, named, |_| {}).await.unwrap();
+        let fixtures = fixture.get("/api/fixtures").await.json();
+        let custom = &fixtures["scenarios"][1];
+        let renderer = fixtures["renderers"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|renderer| renderer["key"] == custom["renderer"]["bundle"])
+            .unwrap()
+            .clone();
+        assert_eq!(renderer["url"].is_string(), served, "{trust} {named}: {renderer}");
+        if served {
+            let document = fixture.request("GET", renderer["url"].as_str().unwrap(), vec![], b"").await;
+            assert_eq!(document.status, 200);
+        } else {
+            assert!(renderer["withheld"].as_str().unwrap().contains("--trust"), "{renderer}");
+            assert!(renderer.get("manifest").is_none());
+        }
+        fixture.close().await;
+    }
+}
+
 #[tokio::test]
 async fn fixtures_mode_reloads_changed_files_and_wakes_long_polls() {
     let fixture = Fixture::fixtures(|_| {}).await.unwrap();
@@ -272,7 +299,11 @@ async fn fixtures_mode_requires_a_safe_probe_and_existing_paths() {
             document: None,
             custom_renderers: false,
             assets: viewer.clone(),
-            fixtures: Some(service::FixturesOptions { sources, renderers }),
+            fixtures: Some(service::FixturesOptions {
+                sources,
+                renderers,
+                trust: false,
+            }),
             executable: Some(env!("CARGO_BIN_EXE_projections").into()),
             explore: None,
             candidates: Vec::new(),
@@ -316,7 +347,13 @@ async fn repository_mode_has_no_fixtures_api_or_probe() {
 }
 
 impl Fixture {
+    /// Fixtures mode over the `graph` scenarios, trusted to serve the bundle they name.
     async fn fixtures(viewer_setup: impl FnOnce(&Path)) -> Result<Self> {
+        Self::fixtures_with(true, false, viewer_setup).await
+    }
+
+    /// Fixtures mode over the `graph` scenarios; `named` passes their bundle as `--renderer`.
+    async fn fixtures_with(trust: bool, named: bool, viewer_setup: impl FnOnce(&Path)) -> Result<Self> {
         let root = std::env::current_dir()
             .unwrap()
             .join("target")
@@ -333,8 +370,9 @@ impl Fixture {
             custom_renderers: false,
             assets: viewer,
             fixtures: Some(service::FixturesOptions {
+                renderers: if named { vec![graph.join("dist")] } else { Vec::new() },
                 sources: vec![graph],
-                renderers: Vec::new(),
+                trust,
             }),
             executable: Some(env!("CARGO_BIN_EXE_projections").into()),
             explore: None,

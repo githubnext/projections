@@ -111,13 +111,14 @@ pub(super) async fn definitions(state: &Arc<ServiceState>, query: Option<&str>) 
                 .map(|definition| {
                     let mut policy = runner.policy(definition, &reference)?;
                     policy["id"] = definition["id"].clone();
-                    // The working tree's custom renderer, from its
-                    // development server when one runs and it may run.
+                    // The working tree's custom renderer, from its development
+                    // server when one runs. What it serves is the package's
+                    // live sources, not the bundle the trust policy compared,
+                    // so it is offered only with --trust.
                     let package = (reference == "working-tree")
                         .then(|| crate::dev_server::package(&runner.repo, definition))
                         .flatten();
-                    let runs = runner.trust || policy["rendererRequiresTrust"] == false;
-                    if let Some((url, _)) = package.as_deref().filter(|_| runs).and_then(crate::dev_server::find) {
+                    if let Some((url, _)) = package.as_deref().filter(|_| runner.trust).and_then(crate::dev_server::find) {
                         policy["rendererDevServer"] = json!(url);
                     }
                     // Its renderer package's sample scenarios, which GET /api/scenarios presents.

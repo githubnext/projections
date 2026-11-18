@@ -215,3 +215,63 @@ async fn trusted_services_run_every_custom_renderer() {
     assert_eq!(statuses, [200, 200, 200]);
     fixture.close().await;
 }
+
+/// A renderer development server serves the package's live sources, not the
+/// bundle the trust policy compared, so the Inspector is offered one only with --trust.
+#[tokio::test]
+async fn renderer_development_servers_need_trust() {
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
+    std::thread::spawn(move || {
+        use std::io::{Read, Write};
+        let manifest = r#"{"format":"projections.renderer","version":0,"name":"flags","title":"Flags","handles":[]}"#;
+        for mut stream in listener.incoming().flatten() {
+            let mut request = [0u8; 1024];
+            let _ = stream.read(&mut request);
+            let _ = write!(
+                stream,
+                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{manifest}",
+                manifest.len()
+            );
+        }
+    });
+    for trust in [false, true] {
+        let fixture = Fixture::new(trust, false, false).await;
+        let repo = fixture.root.join("repo");
+        custom_renderer(&repo, "<!doctype html><p>built</p>");
+        // The bundle as a renderer package's build output: `ui/dist` beside its package.json.
+        fs::rename(repo.join("ui"), repo.join("dist")).unwrap();
+        fs::create_dir_all(repo.join("ui")).unwrap();
+        fs::rename(repo.join("dist"), repo.join("ui/dist")).unwrap();
+        fs::write(repo.join("ui/package.json"), r#"{"name":"flags","private":true}"#).unwrap();
+        fs::write(
+            repo.join(".projections/custom.json"),
+            serde_json::to_vec(&json!({"id": "custom", "extractor": "repository-map", "renderer": {"bundle": "ui/dist"}})).unwrap(),
+        )
+        .unwrap();
+        let commit = commit_all(&repo);
+        default_branch(&repo, &commit);
+        fs::create_dir_all(repo.join("ui/node_modules/.projections")).unwrap();
+        fs::write(
+            repo.join("ui/node_modules/.projections/renderer-dev-server.json"),
+            serde_json::to_vec(&json!({"format": "projections.renderer-dev-server", "version": 0,
+                "url": format!("http://127.0.0.1:{port}/"), "name": "flags"}))
+            .unwrap(),
+        )
+        .unwrap();
+        // The CLI gives a development server 300 ms to answer; under load a trusted read may miss it, so it is retried.
+        let mut policy = Value::Null;
+        for _ in 0..10 {
+            policy = fixture.get("/api/definitions").await.json()["policies"][0].clone();
+            if !trust || policy.get("rendererDevServer").is_some() {
+                break;
+            }
+        }
+        assert_eq!(
+            policy["rendererRequiresTrust"], false,
+            "the built bundle matches the default branch's"
+        );
+        assert_eq!(policy.get("rendererDevServer").is_some(), trust, "{trust}: {policy}");
+        fixture.close().await;
+    }
+}

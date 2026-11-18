@@ -161,6 +161,13 @@ test('renderer development servers are loopback http origins only', () => {
     /renderer URL/,
     'only development entries leave the Inspector origin',
   )
+  // A bundle withheld for trust has no manifest or URL; one with a URL isn't withheld.
+  const withheld = {key: 'k', path: '/p', withheld: 'Needs --trust.'}
+  assert.equal(parseFixtureCatalog(catalog(withheld), 'http://127.0.0.1:1234').renderers[0].withheld, 'Needs --trust.')
+  assert.throws(
+    () => parseFixtureCatalog(catalog({...withheld, manifest, url: '/custom-renderers/c/fixtures/k/index.html'}), 'http://127.0.0.1:1234'),
+    /renderer/,
+  )
 })
 
 test('saved comparisons become a preselected pair of extractions', () => {

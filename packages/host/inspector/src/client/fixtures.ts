@@ -32,9 +32,12 @@ export function parseFixtureCatalog(value: unknown, origin: string): FixtureCata
       typeof renderer.key !== 'string' ||
       typeof renderer.path !== 'string' ||
       !optionalText(renderer.error) ||
+      !optionalText(renderer.withheld) ||
       !optionalText(renderer.url)
     )
       throw invalid('renderer')
+    // Withheld for trust: never served, so it has no URL to present.
+    if (renderer.withheld !== undefined && renderer.url !== undefined) throw invalid('renderer')
     if (renderer.url !== undefined && renderer.development === true) {
       // A package's development server, on loopback.
       if (!isDevServerUrl(renderer.url)) throw invalid('renderer URL')
@@ -43,7 +46,8 @@ export function parseFixtureCatalog(value: unknown, origin: string): FixtureCata
       if (url.origin !== new URL(origin).origin || !url.pathname.startsWith('/custom-renderers/')) throw invalid('renderer URL')
       renderer.url = url.href
     }
-    if (renderer.error === undefined && (!record(renderer.manifest) || renderer.url === undefined)) throw invalid('renderer')
+    if (renderer.error === undefined && renderer.withheld === undefined && (!record(renderer.manifest) || renderer.url === undefined))
+      throw invalid('renderer')
   }
   for (const scenario of value.scenarios) {
     if (

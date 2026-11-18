@@ -268,7 +268,7 @@ projections serve [OPTIONS]
 | Argument | Description |
 |---|---|
 | `--stdio` | Speak JSON-RPC 2.0 over standard input and output, one message per line (required: the only transport). |
-| `--trust` | Let it run repository code (custom extractors and renderers) and write repository files. |
+| `--trust` | Let it run repository code (custom extractors and renderers) and write repository files; with --fixtures, the renderer bundles the scenarios name. |
 | `--document <FILE>` | Present a saved extraction, comparison or pull request review instead of the repository, running nothing. |
 | `--fixtures <PATH>` | Serve projections.scenarios documents (or directories holding scenarios.json) for developing a renderer or comparator, instead of a repository; runs no extractors. Repeatable. |
 | `--renderer <DIR>` | With --fixtures, renderer bundle directories (index.html and renderer.json), or packages whose package.json names one in projections.renderer. Repeatable. |

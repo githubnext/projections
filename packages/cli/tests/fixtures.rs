@@ -86,7 +86,7 @@ fn scenario<'a>(fixtures: &'a Value, key: &str) -> &'a Value {
 
 fn loaded(sources: &[PathBuf], renderers: &[PathBuf]) -> projections_cli::fixtures::Fixtures {
     let (sources, renderers) = resolve(sources, renderers).unwrap();
-    load(&sources, &renderers, "/base/", false)
+    load(&sources, &renderers, "/base/", false, true)
 }
 
 #[test]

@@ -35,7 +35,11 @@ runs the built-in checks on them.
   to the document of a JSON file holding an extraction or a saved
   `projections.extraction` document (its `extraction` is used).
 - `renderer` is a definition renderer name, or `{"bundle": "<directory>"}`
-  relative to the document, defaulting to the document's `renderer`.
+  relative to the document, defaulting to the document's `renderer`. A bundle is
+  repository code: hosts serve it only when it is one named explicitly
+  (`serve --fixtures … --renderer DIR`, or the projection's own bundle in
+  `check`) or with `--trust` (in VS Code, a trusted workspace). Otherwise the
+  built-in renderer for the scenario's schema draws it, with a notice.
 - `comparator` (comparisons only) is `{"options"}` for the default comparator,
   or a comparator file's path, alone or as `{"file", "options"}`, as in
   definitions (relative to the document).

@@ -19,6 +19,7 @@ use std::{
 pub(super) async fn renderer_checks(
     scenarios: &[PathBuf],
     bundle: Option<PathBuf>,
+    trust: bool,
     keys: &[String],
     executable: &Path,
     timeout: Duration,
@@ -35,6 +36,7 @@ pub(super) async fn renderer_checks(
             fixtures: Some(FixturesOptions {
                 sources: scenarios.to_vec(),
                 renderers: bundle.into_iter().collect(),
+                trust,
             }),
             executable: None,
             explore: None,

@@ -31,7 +31,7 @@ export function sourceRoot(source: PanelSource): vscode.Uri {
 
 /**
  * Starts `projections serve --stdio` for a source: the configured CLI, else the bundled one (see `resolveCli`), with
- * `--trust` for a repository in a trusted workspace. A CLI this extension can't use is refused with why.
+ * `--trust` for a repository or renderer scenarios in a trusted workspace. A CLI this extension can't use is refused with why.
  */
 export async function launch(context: vscode.ExtensionContext, output: vscode.LogOutputChannel, source: PanelSource): Promise<Runner> {
   const cli = resolveCli({
@@ -49,7 +49,8 @@ export async function launch(context: vscode.ExtensionContext, output: vscode.Lo
   return startRunner({
     executable: cli.path,
     repository: sourceRoot(source).fsPath,
-    trust: source.kind === 'repository' && vscode.workspace.isTrusted,
+    // A scenarios backend's --trust serves only the renderer bundles its scenarios name.
+    trust: (source.kind === 'repository' || source.kind === 'fixtures') && vscode.workspace.isTrusted,
     args: [
       ...sourceArguments({kind: source.kind, ...(path ? {path} : {}), renderer: scenarios?.renderer ?? false}),
       ...(source.kind === 'repository' ? workspaceArguments(vscode.workspace.getConfiguration('projections').get('workspace')) : []),

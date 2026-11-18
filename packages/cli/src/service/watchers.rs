@@ -150,9 +150,14 @@ pub(super) async fn watch_fixtures(state: Weak<ServiceState>, mut previous: fixt
         if current == previous {
             continue;
         }
-        let (sources, renderers, base) = (fixtures.sources.clone(), fixtures.renderers.clone(), fixtures.base.clone());
+        let (sources, renderers, base, trust) = (
+            fixtures.sources.clone(),
+            fixtures.renderers.clone(),
+            fixtures.base.clone(),
+            fixtures.trust,
+        );
         let Ok((loaded, fingerprint)) = tokio::task::spawn_blocking(move || {
-            let loaded = fixtures::load(&sources, &renderers, &base, false);
+            let loaded = fixtures::load(&sources, &renderers, &base, false, trust);
             // The fingerprint taken before reading, so a file written while
             // loading still differs at the next poll and is loaded again. Only
             // paths the load newly watches are fingerprinted after it.

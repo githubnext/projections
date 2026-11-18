@@ -421,11 +421,11 @@ A basis value as the extraction records it: named parts.
 ### `changeContext`
 
 ```ts
-changeContext(rows: Array<ScopeRow>, revisions: { "after": Pick<Extraction, "relationships" | "schema" | "vocabularies">; "before": Pick<Extraction, "relationships" | "schema" | "vocabularies"> }, changes?: Iterable<string, any, any> | undefined): ChangesScope
+changeContext(rows: Array<ScopeRow>, revisions: { "after": ContainmentSource; "before": ContainmentSource }, changes?: Iterable<string, any, any> | undefined): ChangesScope
 ```
 
 The context of a comparison's changes, from its structure alone: a changed relationship's endpoints, and the items
-containing a changed or context entity (`containmentKinds`), with the containment relationships between them, in
+containing a changed or context entity (`isContainment`), with the containment relationships between them, in
 whichever revision has them. Context is only ever added, and never hides a change. `changes` narrows the changes to
 those row IDs (for example a find or summary filter's); by default every change (`isScopeChange`) is in scope.
 
@@ -506,15 +506,13 @@ one `tail` accepts a reading tail as long after it. Positions depend only
 on the sequence and are centred on the midpoint, so reversing a sequence
 mirrors its timeline exactly.
 
-### `containmentKinds`
+### `ContainmentSource`
 
 ```ts
-containmentKinds(extraction: Pick<Extraction, "schema" | "vocabularies">): ReadonlySet<string>
+type ContainmentSource = { entities: Entity[]; relationships: Relationship[]; schema: "graph/v0" | "dag/v0" | "treemap/v0" | "metrics/v0" | "api/v0" | "database/v0" | "architecture/v0"; vocabularies?: ("dependency-injection/v0" | "infrastructure/v0" | "runtime-policy/v0")[]; }
 ```
 
-The relationship kinds that mean containment in an extraction (`from` contains `to`): `contains` in every schema,
-and the containment its domain schema and vocabularies define (a database table's `constraint` and `index`, a
-dependency-injection service's `registration` and a registration's `implements`).
+The parts of an extraction `isContainment` reads.
 
 ### `createFrame`
 
@@ -790,6 +788,16 @@ isCodeStatisticsScope(value: unknown): value is "all" | "other" | "tests"
 ```
 
 Whether `value` is a `CodeStatisticsScope`, for validating a saved or declared option.
+
+### `isContainment`
+
+```ts
+isContainment(extraction: ContainmentSource): { (relationship: Relationship): false | true }
+```
+
+Whether a relationship of an extraction means containment (`from` contains `to`): `contains` in every schema, and the
+containment its domain schema and vocabularies define (a database table's `constraint` and `index`; a
+dependency-injection service's registrations and a registration's implementation, by their entity kinds).
 
 ### `isScopeChange`
 

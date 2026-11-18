@@ -88,6 +88,7 @@ export const isFold = (id: string) => id.startsWith(foldPrefix)
 
 /** A model of only what a scope shows (`scopedModel`), and the parts each fold in it stands for. */
 export interface ScopedModel<X extends Extraction = Extraction> {
+  /** The model of what the scope shows, with the folds standing for left-out parts. */
   model: ComparisonModel<X>
   /** Each fold's left-out parts, by the fold's ID. */
   folds: ReadonlyMap<string, readonly string[]>

@@ -1346,6 +1346,14 @@ A list with every run of items `shown` leaves out folded into one entry, keyed b
 names it; a run of one item stays, as its fold would take as much room. Every item is shown when `shown` is
 undefined. Fold the union of a comparison (or each pane's list in the union's order) so both revisions fold alike.
 
+### `foldPrefix`
+
+```ts
+foldPrefix: "pk-fold:"
+```
+
+The ID prefix of a fold `scopedModel` adds: `pk-fold:` and the row ID of the entity whose parts it stands for.
+
 ### `followEndpoints`
 
 ```ts
@@ -1626,6 +1634,14 @@ isChanged(change: { "renamed"?: false | true | undefined; "status": "added" | "m
 ```
 
 Whether a row carries a change worth emphasizing.
+
+### `isFold`
+
+```ts
+isFold(id: string): false | true
+```
+
+Whether an item is a fold of left-out parts (`scopedModel` with `parts: 'fold'`), which opens with `ScopeView.expand`.
 
 ### `isKind`
 
@@ -2355,6 +2371,58 @@ endpoints, where every step has either not started or finished. A step that
 removes something gets a reading lead; travelling backward through explicit
 reverse steps, one that adds something gets a reading tail, the part that
 backward travel enters first. Use a `DirectionLatch` to choose `direction`.
+
+### `scopedModel`
+
+```ts
+scopedModel<X extends Extraction>(model: ComparisonModel<X>, shown: ReadonlySet<string>, parts?: "fold" | "omit" | "whole"): ScopedModel<X>
+```
+
+A model of only what a scope shows, for a canvas to lay out: the shown entities and their `parts` (left out, whole or
+folded), and the relationships between them. A relationship is kept only when both its ends are: a changed one always
+is (its ends are its context), an unchanged one between shown items stays, and none is ever drawn to an item the
+scope leaves out. Steps keep their kept rows, and a step left with none is dropped. Every other item takes no room.
+A fold is an unchanged entity of its parts' most common kind, labeled with their counts and contained by its entity
+in each revision that has it.
+
+### `ScopedModel`
+
+```ts
+interface ScopedModel<X extends Extraction = Extraction>
+```
+
+A model of only what a scope shows (`scopedModel`), and the parts each fold in it stands for.
+
+| Member | Signature | Description |
+|---|---|---|
+| `folds` | `"folds": ReadonlyMap<string, Array<string>>` | Each fold's left-out parts, by the fold's ID. |
+| `model` | `"model": ComparisonModel<X>` | The model of what the scope shows, with the folds standing for left-out parts. |
+
+### `ScopedParts`
+
+```ts
+type ScopedParts = "fold" | "omit" | "whole"
+```
+
+How `scopedModel` treats the parts of a shown entity (the items it contains): left out; kept whole, for a card that
+draws its parts as one; or folded, each entity's left-out parts standing as one more part, a fold (`foldPrefix`).
+
+### `ScopeView`
+
+```ts
+interface ScopeView extends ChangesScope
+```
+
+The Changes scope as a kit renderer receives it (`RendererProps.scope`): what it shows, every item's model, and a way
+to show more of it.
+
+| Member | Signature | Description |
+|---|---|---|
+| `all` | `"all": ComparisonModel<Extraction>` | The model of every item: what a canvas's `model` (`MountOptions.scope` `subset`) narrows. |
+| `changes` | `"changes": ReadonlySet<string>` | The change rows in scope, by row ID. |
+| `context` | `"context": ReadonlySet<string>` | The unchanged rows shown to read them: their relationships' endpoints and the items that contain them. |
+| `expand` | `"expand"(ids: Iterable<string, any, any>): void` | Shows these items too, or a fold's parts (`isFold`), as opening a fold does, until the host's scope changes. A canvas lays them out with the rest. |
+| `shown` | `"shown": ReadonlySet<string>` | Both: every row the scope shows. |
 
 ### `ScrollStart`
 
@@ -3435,7 +3503,7 @@ Everything but the renderer props is optional; the defaults draw every entity as
 | `reportSteps` | `"reportSteps": { (ends: Array<number>, slots?: number \| undefined): void }` | Report step boundaries where a host may hold, for renderers with their own timing, and optionally how many step slots the presentation spans (`timelineSlots`). |
 | `requestDocument` | `"requestDocument": { (name: string): Promise<string> }` | Asks the host for a built-in renderer's document, to run nested (`embedRenderer`); rejects with the host's reason when it supplies none (see `RendererClient.requestDocument`). |
 | `schedule` | `"schedule": Array<ScheduledStep>` | The comparison's steps on the progress axis for the direction this transition presents (see `DirectionLatch`). Empty for extractions. |
-| `scope` | `"scope": ChangesScope \| undefined` | The Changes scope, while the host shows a comparison's changes and their context (`changesScope`): its `shown` items at full strength, the rest folded (lists: `useFolds`, `Fold`) or receded (canvases, which keep their layout and frame what is shown). Undefined while every item is shown. The shell already marks items outside it filtered. |
+| `scope` | `"scope": ScopeView \| undefined` | The Changes scope, while the host shows a comparison's changes and their context (`changesScope`): its `shown` items, with the parts the person opened (`expand`). A list folds the rest (`useFolds`, `Fold`); a canvas that declares `MountOptions.scope` `subset` receives a `model` of only what is shown and lays that out. Nothing is faded: what is shown is drawn at full strength, and what isn't takes no room. Undefined while every item is shown. |
 | `selectedId` | `"selectedId": null \| string` | The selected item's ID (an entity row ID, or a part's `data-entity-id`), or `null` when nothing is selected. |
 | `source` | `"source"?: unknown` | What `model` is a view of, when a renderer derives it (for example with groups expanded or collapsed): while a new model of the same document is laid out, the current layout stays on screen, and keyboard focus with it, instead of the loading state. |
 | `subtitle` | `"subtitle"?: undefined \| { (entity: Entity): string \| undefined }` | A few words under a card's label, such as what the entity is for: human text in sans, wrapped to the card on at most `subtitleMetrics.lines` lines and ending in an ellipsis when longer (the tooltip has it whole). The card grows a line for each line either revision needs; a changed one crossfades with the card's own step. Pass a stable function: a new one lays out again. |
@@ -3565,6 +3633,7 @@ How `mountRenderer` connects a renderer component to its host.
 | `interactions` | `"interactions"?: false` | Hover, anchors, scroll mirroring, the host's filter and annotation badges through `connectInteractions` over elements carrying `data-entity-id` (default on). `false` opts out and declares none of the interaction capabilities. |
 | `name` | `"name": string` | Bundle name, used for `data-renderer` on the root element. |
 | `nouns` | `"nouns"?: { (kind: string, collection: "entities" \| "relationships"): SummaryNoun \| false \| undefined } \| { readonly [key: string]: SummaryNoun \| false }` | The renderer's words for extraction kinds in the host's summary bar (`SummaryNouns`), for every document; see `declareNouns` for words that depend on the document. |
+| `scope` | `"scope"?: { "layout": "fold" } \| { "layout": "subset"; "parts"?: "fold" \| "omit" \| "whole" }` | How the Changes scope reaches the renderer. `fold` (the default): `model` holds every item and the renderer folds what `scope` leaves out, as a list does. `subset`: `model` holds only what the scope shows (`scopedModel`), with the shown entities' `parts` left out, kept whole or folded, so a canvas lays out only that; `scope.all` holds every item. |
 | `steps` | `"steps"?: "manual" \| "schedule"` | `schedule` (default) reports the end of each scheduled step to the host; `manual` leaves it to the component through `reportSteps`. |
 
 ### `mountRenderer`
@@ -3725,7 +3794,7 @@ Everything a kit renderer component receives for one host state.
 | `reportSteps` | `"reportSteps": { (ends: Array<number>, slots?: number \| undefined): void }` | Report step boundaries where a host may hold, for renderers with their own timing, and optionally how many step slots the presentation spans (`timelineSlots`). |
 | `requestDocument` | `"requestDocument": { (name: string): Promise<string> }` | Asks the host for a built-in renderer's document, to run nested (`embedRenderer`); rejects with the host's reason when it supplies none (see `RendererClient.requestDocument`). |
 | `schedule` | `"schedule": Array<ScheduledStep>` | The comparison's steps on the progress axis for the direction this transition presents (see `DirectionLatch`). Empty for extractions. |
-| `scope` | `"scope": ChangesScope \| undefined` | The Changes scope, while the host shows a comparison's changes and their context (`changesScope`): its `shown` items at full strength, the rest folded (lists: `useFolds`, `Fold`) or receded (canvases, which keep their layout and frame what is shown). Undefined while every item is shown. The shell already marks items outside it filtered. |
+| `scope` | `"scope": ScopeView \| undefined` | The Changes scope, while the host shows a comparison's changes and their context (`changesScope`): its `shown` items, with the parts the person opened (`expand`). A list folds the rest (`useFolds`, `Fold`); a canvas that declares `MountOptions.scope` `subset` receives a `model` of only what is shown and lays that out. Nothing is faded: what is shown is drawn at full strength, and what isn't takes no room. Undefined while every item is shown. |
 | `selectedId` | `"selectedId": null \| string` | The selected item's ID (an entity row ID, or a part's `data-entity-id`), or `null` when nothing is selected. |
 | `viewport` | `"viewport": undefined \| { "height": number; "width": number }` | The frame's width and the host window's height, CSS px, as the host last reported them; undefined until then. |
 
@@ -4056,7 +4125,7 @@ other change, so an item that varied only within tolerance stays unchanged.
 ### `ViewOptions`
 
 ```ts
-type ViewOptions = { steps?: "schedule" | "manual"; controls?: readonly RendererControl[]; nouns?: SummaryNouns; facts?: SummaryFacts; interactions?: false; }
+type ViewOptions = { steps?: "schedule" | "manual"; scope?: { layout: "fold"; } | { layout: "subset"; parts?: ScopedParts; }; controls?: readonly RendererControl[]; nouns?: SummaryNouns; facts?: SummaryFacts; interactions?: false; }
 ```
 
 What a view module may export as `options` beside its `View`, for the entry `rendererConfig({view})` generates: the

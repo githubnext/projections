@@ -31,6 +31,14 @@ export function classifyChange(change: Classifiable): ChangeClassification {
   return change.renamed && change.status === 'unchanged' ? 'renamed' : change.status
 }
 
+/**
+ * Whether a row changed in two ways, renamed and changed: no one hue is right for it, so a card draws it neutral and
+ * each status word in its own hue (`pk-mixed-change`), never one change color inside another.
+ */
+export function mixedChange(change: Classifiable): boolean {
+  return Boolean(change.renamed) && change.status !== 'unchanged'
+}
+
 /** A change in words for titles and accessible names: its label, or both for a renamed and changed row. */
 export function describeChange(change: Classifiable): string {
   return change.renamed && change.status !== 'unchanged'

@@ -67,6 +67,7 @@ export function Chips({
             type="button"
             className={`rp-chip pk-part ${change}${filled ? ' filled' : ''}${selected ? ' selected' : ''}`}
             data-entity-id={chip.subject.row.id}
+            {...(filled ? {'data-change': change} : {})}
             aria-pressed={selected}
             style={emphasisStyle(change === 'unchanged' ? 0 : strength)}
             onClick={event => {

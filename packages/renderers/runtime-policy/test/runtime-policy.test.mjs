@@ -218,7 +218,7 @@ test('a modified rule and policy show old and new values in place', async () => 
   const markup = renderToStaticMarkup(createElement(RuntimePolicyView, props(comparisonModel(after, monitor, comparison), init)))
   assert.match(
     markup,
-    /mode <del class="rp-old"><code class="pk-code" data-projections-identifier="">enforce<\/code><\/del>.*<ins class="rp-new"><code class="pk-code" data-projections-identifier="">monitor<\/code><\/ins>/,
+    /mode <del class="rp-old" data-change="removed"><code class="pk-code" data-projections-identifier="">enforce<\/code><\/del>.*<ins class="rp-new" data-change="added"><code class="pk-code" data-projections-identifier="">monitor<\/code><\/ins>/,
   )
   assert.match(plain(markup), /Kill \(Sigkill\) →\s+now\s+Kill \(Sigkill\) \(elided in monitor mode\)/)
   assert.match(plain(markup), /Mode changed/)

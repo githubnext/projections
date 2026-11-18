@@ -137,7 +137,11 @@
   status band across its bottom, ruled off, with the status centred. A renderer
   that draws its own SVG cards takes the same look from it (the dependency
   injection renderer does); `fill: false` leaves the fill to a card whose parts
-  tint their own slices of it.
+  tint their own slices of it. A card that shows changes inside it (old and new
+  values, changed fields) draws them neutral, as does a card marked
+  `pk-holds-changes`: no fill, a neutral edge and band, muted status, so change
+  colors never nest. A boundary with changed cards or links inside it is drawn
+  neutral the same way (`boundariesHoldingChanges`).
 - Routes, in every graph presentation (graph, DAG, architecture, infrastructure,
   dependencies), DI's arrows and database links: each relationship is **drafted
   as one clean S** (`sBend`): a straight stub leaves its source perpendicular to

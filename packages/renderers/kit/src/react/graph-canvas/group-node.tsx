@@ -8,14 +8,15 @@ import {CardIcon} from './card-icon.js'
 import {cardIconRoom, hasIcon} from '../../card-icons.js'
 import type {Drawing} from './drawing.js'
 
-export function GroupNode({node, drawing}: {node: TransitionNode; drawing: Drawing}) {
+/** `holdsChanges`: changes are drawn inside it, so it is drawn neutral (see `boundariesHoldingChanges`). */
+export function GroupNode({node, drawing, holdsChanges = false}: {node: TransitionNode; drawing: Drawing; holdsChanges?: boolean}) {
   const {props, diff, inset, kindOf, statusOf, label, mark, select} = drawing
   const {selectedId, onSelect} = props
   const entity = displayed(node)
   const emphasis = props.emphasis(node)
   return (
     <g
-      className={`graph-node graph-group ${selectedId === node.id ? 'selected' : ''}`}
+      className={`graph-node graph-group ${selectedId === node.id ? 'selected' : ''}${holdsChanges ? ' pk-holds-changes' : ''}`}
       data-entity-id={node.id}
       {...mark(node, emphasis)}
       opacity={node.opacity}

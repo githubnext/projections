@@ -232,7 +232,10 @@ function DiffCard({
   ]
   // The fill's slices and the parts' tints, inside the change edge: the card's marked edges stay its largest shapes,
   // topmost, so its hover, focus and selection ring is never covered.
-  const slices = tone ? parts.filter(item => !(item.id && partMark(item.changeId)['data-change'])) : []
+  // A card that shows its changed values or links is drawn neutral: they carry the change colors (no nesting).
+  const holdsChanges =
+    card.text.dependencies.length > 0 || card.text.lines.some(line => line.spans.some(span => span.tone === 'was' || span.tone === 'now'))
+  const slices = tone && !holdsChanges ? parts.filter(item => !(item.id && partMark(item.changeId)['data-change'])) : []
   const slicePaths = partPaths(card, !!unit.registrationId, fillInset)
   return (
     <g
@@ -240,7 +243,7 @@ function DiffCard({
       data-unit-id={card.id}
       data-entity-id={card.id}
       data-projections-unit=""
-      className={`di-card di-diff-card ${unitParts(unit).some(selectedPart) ? 'selected' : ''}`}
+      className={`di-card di-diff-card ${unitParts(unit).some(selectedPart) ? 'selected' : ''}${holdsChanges ? ' pk-holds-changes' : ''}`}
       {...changeMark(card)}
       style={{'--emphasis': strength} as CSSProperties}
     >

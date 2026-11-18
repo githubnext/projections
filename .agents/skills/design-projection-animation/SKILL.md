@@ -33,6 +33,10 @@ guide. Read them, and the code they name in `packages/renderers/kit/src/`
 - Route at the cards' positions at the **same** progress. Check shaft,
   arrowhead, tail and emphasis together; a route between overlapping cards is
   wrong however good the router is.
+- Emphasize only the innermost changes. While a step highlights a change inside
+  a card, boundary or group, the container stays neutral (no change fill or
+  edge, its status muted); never an amber container around green and red
+  parts, in any frame (the `nested-accents` check).
 
 ## 2. One clock and a steady frame
 

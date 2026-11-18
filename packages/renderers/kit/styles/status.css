@@ -99,33 +99,34 @@
   font-weight: var(--projections-font-weight-semibold);
   text-rendering: geometricPrecision;
 }
+/* Status words take their change's hue, or `--pk-status-ink` where an item holding changes mutes its own (nesting.css). */
 .pk-svg-status .pk-status-part.added {
-  color: var(--green);
-  fill: var(--green);
+  color: var(--pk-status-ink, var(--green));
+  fill: var(--pk-status-ink, var(--green));
 }
 .pk-svg-status .pk-status-part.removed {
-  color: var(--red);
-  fill: var(--red);
+  color: var(--pk-status-ink, var(--red));
+  fill: var(--pk-status-ink, var(--red));
 }
 .pk-svg-status .pk-status-part.modified {
-  color: var(--amber);
-  fill: var(--amber);
+  color: var(--pk-status-ink, var(--amber));
+  fill: var(--pk-status-ink, var(--amber));
 }
 .pk-svg-status .pk-status-part.renamed {
-  color: var(--violet);
-  fill: var(--violet);
+  color: var(--pk-status-ink, var(--violet));
+  fill: var(--pk-status-ink, var(--violet));
 }
 .pk-status-part.added {
-  color: var(--green);
+  color: var(--pk-status-ink, var(--green));
 }
 .pk-status-part.removed {
-  color: var(--red);
+  color: var(--pk-status-ink, var(--red));
 }
 .pk-status-part.modified {
-  color: var(--amber);
+  color: var(--pk-status-ink, var(--amber));
 }
 .pk-status-part.renamed {
-  color: var(--violet);
+  color: var(--pk-status-ink, var(--violet));
 }
 /*
  * The volatile marker (VariedMarker): a modified change with a volatile value beyond tolerance. Neutral: the text

@@ -13,7 +13,7 @@ import {
 import {languageColor, languageNamed} from '@githubnext/projections-renderer-sdk/languages'
 import {defaultThemeTokens} from '@githubnext/projections-renderer-sdk/protocol'
 import {categoryOf, excluded, flagsOf, formatDelta, formatSize, legendTitle, weightOf} from '../node_modules/.cache/test/files.js'
-import {listWords, packingDocument, packingPalette} from '../node_modules/.cache/test/document.js'
+import {listWords, packingDocument, packingPalette, withHolders} from '../node_modules/.cache/test/document.js'
 import {flagDots} from '../node_modules/.cache/test/circles.js'
 import {packSnapshot} from '../node_modules/.cache/test/pack/packing.js'
 import {createPackingTransition, diffPacking} from '../node_modules/.cache/test/transition.js'
@@ -358,4 +358,23 @@ test("a folder whose top is taken by its parent's name is named along its bottom
   const named = placeLabels([long], new Map(), 7.44, 12).get('long')
   assert.ok(named.text.endsWith('…') && named.text.length >= 4, `a long name is abbreviated (${named.text})`)
   assert.equal(placeLabels([circle('tiny', 'tiny', 0, 0, 20, 1)], new Map(), 7.44, 12).get('tiny').text, undefined)
+})
+
+test('folders with an emphasized change inside them, at any depth, hold changes: their ring is drawn neutral', () => {
+  const drawn = (id, parent, changed, emphasis = 1) => ({id, circle: {parent}, changed, emphasis, holdsChanges: false})
+  const holding = items =>
+    withHolders(items)
+      .filter(item => item.holdsChanges)
+      .map(item => item.id)
+  assert.deepEqual(
+    holding([
+      drawn('src', undefined, true),
+      drawn('src/api', 'src', false),
+      drawn('src/api/a.ts', 'src/api', true),
+      drawn('docs', undefined, true),
+    ]),
+    ['src', 'src/api'],
+  )
+  // A change not emphasized yet leaves its folders plain.
+  assert.deepEqual(holding([drawn('src', undefined, true), drawn('src/a.ts', 'src', true, 0)]), [])
 })

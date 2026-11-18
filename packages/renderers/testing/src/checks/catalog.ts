@@ -81,6 +81,7 @@ export const checkTitles: Record<CheckId, string> = {
   'stage-surface': 'Content on the stage surface',
   'type-scale': 'Text on the type scale',
   spacing: 'Spacing, radii and borders on the scale',
+  'nested-accents': 'No change colors inside change colors',
 }
 
 /** Each built-in check's contract: what a renderer must do to pass it, in a sentence or two. */
@@ -131,6 +132,8 @@ export const checkDescriptions: Record<CheckId, string> = {
     "Text uses the theme's type: a font-size token (or the 11px floor, never smaller), the text or monospace font family, and a font-weight token.",
   spacing:
     'Padding, margins and gaps are on the space scale (or a 1–2px hairline); corner radii are radius tokens (or a token less a 1–2px border, or fully rounded); border widths are border-width tokens.',
+  'nested-accents':
+    "Change and accent colors never nest: an element that contains changed elements stays neutral, and only the innermost changed elements are drawn in a change color (added, removed, modified, moved) or the accent. No element whose background or border (an SVG shape's fill or outline) is one of those hues contains, or has drawn over it inside its box, another element painted in one, including text and lines. Checked in the diff and after the animation's steps, with the host's highlighting on.",
 }
 
 /** Every built-in check's ID, in the order `runChecks` runs them by default. */

@@ -25,7 +25,7 @@ test('connectInspector builds page URLs on the workbench origin', () => {
 })
 
 test('check failures are flattened with their titles; samples round trip', () => {
-  assert.equal(allChecks.length, 24)
+  assert.equal(allChecks.length, 25)
   const failures = checkFailures([
     {id: 'legend', title: checkTitles.legend, status: 'fail', details: ['two legends'], durationMs: 1},
     {id: 'selection', title: checkTitles.selection, status: 'pass', details: [], durationMs: 1},
@@ -509,4 +509,42 @@ test("one extraction's facts have no changes, and the summary is the same at eve
   const [moving] = await runChecks(scrubbed.driver, subject, {checks: ['summary']})
   assert.equal(moving.status, 'fail')
   assert.match(moving.details.join('\n'), /The summary changes while scrubbing/)
+})
+
+test('nested-accents fails a change color inside another, and lets an item keep its own emphasis', async () => {
+  const paint = (element, family, property, entity) => ({element, family, property, ...(entity ? {entity} : {})})
+  const accentDriver = nestings => ({
+    async load() {
+      return {status: 'ready', steps: [], capabilities: {changeHighlighting: 'supported', comparisonModes: ['diff']}}
+    },
+    async measure(call) {
+      return call === 'accents' ? nestings : undefined
+    },
+    sleep: async () => {},
+  })
+  const card = paint('li.card[data-entity-id="a"]', 'modified', 'background-color', 'a')
+  const own = [
+    // Its status word and icon in its own hue, and a same-hue mark of its own entity.
+    {outer: card, inner: paint('span.status', 'modified', 'color', 'a')},
+    {outer: card, inner: paint('span.icon', 'modified', 'background-color', 'a')},
+  ]
+  const [passing] = await runChecks(accentDriver(own), subject, {checks: ['nested-accents']})
+  assert.equal(passing.status, 'pass', passing.details.join('\n'))
+  const [failing] = await runChecks(
+    accentDriver([
+      ...own,
+      {outer: card, inner: paint('ins.pill', 'added', 'background-color', 'a')},
+      {outer: card, inner: paint('del.pill', 'removed', 'color')},
+      // Another entity's surface in the same hue nests too.
+      {outer: card, inner: paint('span.row[data-entity-id="b"]', 'modified', 'background-color', 'b')},
+    ]),
+    subject,
+    {checks: ['nested-accents']},
+  )
+  assert.equal(failing.status, 'fail')
+  assert.deepEqual(failing.details, [
+    'In the diff: ins.pill (added background-color) is drawn inside li.card[data-entity-id="a"] (modified background-color)',
+    'In the diff: del.pill (removed color) is drawn inside li.card[data-entity-id="a"] (modified background-color)',
+    'In the diff: span.row[data-entity-id="b"] (modified background-color) is drawn inside li.card[data-entity-id="a"] (modified background-color)',
+  ])
 })

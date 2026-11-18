@@ -157,6 +157,12 @@ Build the bundle before the tests. The checks:
   hairline; auto margins and percentages are layout, not spacing); corner radii
   are radius tokens, one less a 1–2 px border, or fully rounded; border widths
   are border-width tokens.
+- `nested-accents`: Change and accent colors never nest: an element whose
+  background or border (an SVG shape's fill or outline) is a change hue or the
+  accent contains, or has drawn over it inside its shape, no other element
+  painted in one, text and lines included. An item's own status words, icon and
+  marks in its own hue are allowed. Checked in the diff and after the
+  animation's steps (or at progress 0.5), with the host's highlighting on.
 
 The styling checks (`palette`, `type-scale`, `spacing`) measure the diff and,
 with a progress mode, progress 0.5, at full and phone width (`palette` in light

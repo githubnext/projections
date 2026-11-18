@@ -166,6 +166,10 @@
 .di-card-fill[data-change] > .di-slice {
   fill: color-mix(in srgb, var(--pk-region-fill) calc(var(--emphasis, 1) * 100%), transparent);
 }
+/* A modified part of a card that shows its values gets a neutral tint to locate it: the values carry the change. */
+.pk-holds-changes > .di-part[data-change='modified'] > .di-part-change {
+  fill: color-mix(in srgb, var(--recessed) calc(var(--emphasis, 1) * 100%), transparent);
+}
 .di-dependencies {
   font-size: var(--projections-font-size-xs);
   fill: var(--text);

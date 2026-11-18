@@ -1,0 +1,48 @@
+{
+  "format": "projections.scenarios",
+  "version": 0,
+  "title": "Agentic workflows",
+  "renderer": "agentic-workflows",
+  "scenarios": [
+    {
+      "id": "docs-bot",
+      "title": "Widen a documentation bot and drop a guardrail",
+      "description": "A pull request to a group of gh-aw workflows: docs-bot reaches another repository, gains a toolset, a lower min-integrity, a cross-repository pull request output and more AI credits, and stops loading its check-links guardrail; docs-bot-links opens bash and its network; docs-bot-examples narrows; docs-bot-digest joins the group; issue-triage changes without being recompiled, so its lock file is stale. Interpreted by the agentic-workflows comparator.",
+      "before": "../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/before.expected.json",
+      "after": "../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/after.expected.json",
+      "comparator": "../../comparators/agentic-workflows/agentic-workflows.comparator.yaml"
+    },
+    {
+      "id": "docs-bot-matrix",
+      "title": "The same change as a matrix",
+      "description": "The docs-bot pull request with the view control set to the matrix: each workflow against what it loads, the tools it uses, what it writes and the network it reaches.",
+      "before": "../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/before.expected.json",
+      "after": "../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/after.expected.json",
+      "comparator": "../../comparators/agentic-workflows/agentic-workflows.comparator.yaml",
+      "presentation": {"rendererOptions": {"view": "matrix"}}
+    },
+    {
+      "id": "repo-ask",
+      "title": "Widen a public workflow's network",
+      "description": "githubnext/agentics' repo-ask, and a pull request that lets it reach Python's package index and Read the Docs, adds the actions toolset, an issue output and a higher comment limit, and raises its timeout. Interpreted by the agentic-workflows comparator.",
+      "before": "../../extractors/github-agentic-workflows/tests/fixtures/repo-ask/before.expected.json",
+      "after": "../../extractors/github-agentic-workflows/tests/fixtures/repo-ask/after.expected.json",
+      "comparator": "../../comparators/agentic-workflows/agentic-workflows.comparator.yaml"
+    },
+    {
+      "id": "repo-ask-default",
+      "title": "The same change, default comparator",
+      "group": "Default comparator",
+      "description": "The repo-ask pull request compared by the default comparator: every entry that arrives or leaves is marked, without the comparator's directions.",
+      "before": "../../extractors/github-agentic-workflows/tests/fixtures/repo-ask/before.expected.json",
+      "after": "../../extractors/github-agentic-workflows/tests/fixtures/repo-ask/after.expected.json"
+    },
+    {
+      "id": "public",
+      "title": "Public workflows at a glance",
+      "group": "One revision",
+      "description": "One revision of real workflows from gh-aw and githubnext/agentics: a network allowlist widened through a shared import, skills, safe outputs with their default limits, and lock files compiled by gh-aw v1.3.0 and v0.93.3, all current.",
+      "extraction": "../../extractors/github-agentic-workflows/tests/fixtures/public/expected.json"
+    }
+  ]
+}

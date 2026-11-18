@@ -1,0 +1,246 @@
+/* Agentic workflows.
+ *
+ * Each group is a kit `Group` on the stage holding a kit card grid; each workflow is a kit `EntityCard` whose body is
+ * a list of sections: a quiet title (icon, words, and the comparator's direction) over the section's entries as kit
+ * change pills. Type: the row size for entries, the small size for titles and meta, one muted tone; identifiers are
+ * code. Change hues come only from the kit (pills, card edges, regions) and always beside a sign or a word. Every
+ * length is a theme step, so spacing lands on whole pixels.
+ */
+.aw-view {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--projections-space-3);
+  min-width: 0;
+  font-size: var(--projections-font-size-sm);
+  color: var(--text);
+}
+/* Workflow cards hold several sections, so they are wider than the kit's default card. */
+.aw-group > .pk-card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  align-items: start;
+}
+.aw-icon {
+  flex: none;
+  width: 1em;
+  height: 1em;
+}
+.aw-muted {
+  color: var(--muted);
+}
+/* A side-by-side pane tints the entries that differ from the other revision, without the diff's signs. */
+.aw-view:not([data-side='diff']) .pk-pill-sign {
+  display: none;
+}
+/* An entry's words and code spans wrap as one run inside its pill. */
+.aw-words {
+  display: inline;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Engine, model and lock state: one muted line under the name. */
+.aw-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--projections-space-1) var(--projections-space-2);
+  margin: var(--projections-space-1) 0 0;
+  padding: 0 var(--projections-space-3);
+  color: var(--muted);
+  font-size: var(--projections-font-size-xs);
+  line-height: var(--projections-line-height-relaxed);
+}
+.aw-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--projections-space-1);
+}
+.aw-lock:not([data-lock='current']) {
+  color: var(--text);
+  font-weight: var(--projections-font-weight-semibold);
+}
+
+/* Sections: a title line, then the entries; sections are ruled off by the divider. */
+.aw-sections {
+  display: grid;
+  margin: var(--projections-space-2) 0 0;
+  padding: 0 var(--projections-space-3);
+}
+.aw-section {
+  display: grid;
+  gap: var(--projections-space-1);
+  padding: var(--projections-space-2) 0;
+  border-top: var(--projections-border-width) solid var(--divider);
+}
+.aw-section-title {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--projections-space-1) var(--projections-space-2);
+  color: var(--muted);
+  font-size: var(--projections-font-size-xs);
+  font-weight: var(--projections-font-weight-semibold);
+  line-height: var(--projections-line-height-relaxed);
+}
+.aw-section-title > span:first-of-type {
+  margin-inline-start: calc(-1 * var(--projections-space-1));
+}
+.aw-section-body {
+  min-width: 0;
+  margin: 0;
+}
+
+/* The comparator's verdict for a section, in words: a widening reads in the text color and weight, a narrowing muted. */
+.aw-directions {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  display: inline-flex;
+  gap: var(--projections-space-2);
+}
+.aw-direction {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--projections-space-1);
+}
+.aw-direction[data-direction='widened'] {
+  color: var(--amber-strong);
+}
+.aw-direction[data-direction='narrowed'],
+.aw-direction[data-direction='changed'] {
+  font-weight: var(--projections-font-weight-normal);
+}
+
+/* The extractor's warnings close the card. */
+.aw-notes {
+  display: grid;
+  gap: var(--projections-space-1);
+  margin: 0;
+  padding: var(--projections-space-2) var(--projections-space-3);
+  border-top: var(--projections-border-width) solid var(--divider);
+  list-style: none;
+}
+.aw-note {
+  display: flex;
+  align-items: baseline;
+  gap: var(--projections-space-2);
+  overflow-wrap: anywhere;
+}
+.aw-note > .aw-icon {
+  position: relative;
+  top: 0.125em;
+}
+
+/* The matrix: a table that scrolls sideways inside its group, workflows down the side, capabilities across. */
+.aw-matrix-panel {
+  min-width: 0;
+}
+/* The scroll box contains everything in the table, visually hidden text included, and keeps rows off the panel's corners. */
+.aw-matrix-scroll {
+  position: relative;
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: var(--projections-space-2);
+}
+.aw-matrix {
+  border-collapse: collapse;
+  min-width: 100%;
+  font-size: var(--projections-font-size-xs);
+}
+.aw-matrix :is(th, td) {
+  padding: var(--projections-space-1) var(--projections-space-2);
+  border-top: var(--projections-border-width) solid var(--border);
+  text-align: center;
+  vertical-align: middle;
+}
+.aw-matrix thead th {
+  background: color-mix(in srgb, var(--band) 45%, var(--raised));
+  color: var(--muted);
+  font-weight: var(--projections-font-weight-semibold);
+}
+.aw-matrix-category {
+  border-inline-start: var(--projections-border-width) solid var(--divider);
+}
+/* Column headings read upwards, unwrapped, so each column is as narrow as its marks. */
+.aw-matrix-column {
+  vertical-align: bottom;
+}
+.aw-matrix thead .aw-matrix-column {
+  font-weight: var(--projections-font-weight-normal);
+}
+.aw-matrix thead .aw-matrix-column[data-gate] {
+  color: var(--text);
+}
+.aw-matrix-heading {
+  display: inline-block;
+  max-height: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-align: start;
+}
+.aw-matrix .aw-matrix-corner,
+.aw-matrix .aw-matrix-row,
+.aw-matrix .aw-matrix-group-title {
+  text-align: start;
+  white-space: nowrap;
+}
+.aw-matrix .aw-matrix-group-title {
+  color: var(--muted);
+  font-weight: var(--projections-font-weight-semibold);
+}
+.aw-matrix .aw-matrix-status {
+  min-width: var(--pk-status-width);
+  text-align: start;
+  white-space: nowrap;
+}
+/* Every body row is one fixed line high, whatever its status shows, so emphasis never moves a row. */
+.aw-matrix tbody tr {
+  height: 1.5rem;
+}
+.aw-matrix tbody :is(th, td) {
+  padding-block: 0;
+  line-height: var(--projections-line-height-tight);
+}
+.aw-matrix :is(.aw-matrix-status, .aw-matrix-group-line) > .pk-change-status,
+.aw-matrix-group-line {
+  display: flex;
+  align-items: center;
+  height: 1.5rem;
+  overflow: hidden;
+}
+.aw-matrix-group-line {
+  justify-content: space-between;
+  gap: var(--projections-space-3);
+}
+.aw-matrix-select {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.aw-matrix-cell {
+  font-family: var(--font-mono);
+  font-weight: var(--projections-font-weight-semibold);
+}
+.aw-matrix-cell[data-cell='present'] {
+  color: var(--muted);
+}
+/* An arriving or leaving capability: its sign, in its hue as the change is emphasized. */
+.aw-matrix-cell[data-cell='added'] {
+  background: color-mix(in srgb, var(--green-soft) calc(var(--emphasis, 0) * 100%), transparent);
+  color: color-mix(in srgb, var(--green-strong) calc(var(--emphasis, 0) * 100%), var(--text));
+}
+.aw-matrix-cell[data-cell='removed'] {
+  background: color-mix(in srgb, var(--red-soft) calc(var(--emphasis, 0) * 100%), transparent);
+  color: color-mix(in srgb, var(--red-strong) calc(var(--emphasis, 0) * 100%), var(--text));
+}
+.aw-matrix-workflow:hover {
+  background-image: linear-gradient(var(--hover), var(--hover));
+}

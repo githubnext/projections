@@ -14,7 +14,7 @@ pub mod testing;
 mod values;
 mod yaml;
 
-pub use context::{Context, Invocation, MAX_REQUEST_BYTES, MAX_UPSTREAM_BYTES, execute, execute_reporting, run};
+pub use context::{ComparisonRequest, Context, Invocation, MAX_REQUEST_BYTES, MAX_UPSTREAM_BYTES, execute, execute_reporting, run};
 pub use descriptor::{Access, Descriptor, Determinism, Trust};
 pub use entry::{main, serve};
 pub use generation::{Basis, Generations, MAX_BASIS_PART_BYTES, MAX_BASIS_PARTS, basis_digest, sha256};
@@ -25,7 +25,7 @@ pub use paths::{
 pub use process::{Failure, MAX_STDERR, MAX_STDOUT, Output, spawn};
 pub use source::{FileEntry, within};
 pub use values::{
-    array, database_extraction, exported, extraction, input, key, object, parse_json, percent, pre_exported_schema, relationship, stable,
-    strings, text, unique_relationships,
+    array, database_extraction, exported, extraction, input, key, normalize_extraction, object, parse_json, percent, pre_exported_schema,
+    relationship, stable, strings, text, unique_relationships,
 };
 pub use yaml::{parse_yaml, parse_yaml_documents};

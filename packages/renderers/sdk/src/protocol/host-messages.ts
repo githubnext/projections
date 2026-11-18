@@ -9,6 +9,7 @@ import {environment} from './environment.js'
 import type {HostMessage, RendererOptions} from './messages.js'
 import {scrollPosition} from './positions.js'
 import {controlIdPattern, envelopeKeys, finite, isEnvelope, isPropertyPath, record} from './validation.js'
+import {document} from './document-message.js'
 
 type Fields = Record<string, unknown>
 
@@ -92,6 +93,7 @@ const parsers: {[type: string]: (message: Fields) => HostMessage | undefined} = 
     return {type: 'action', id: message.id}
   },
   filter,
+  document,
   environment(message) {
     if (!environment(message)) return undefined
     return {

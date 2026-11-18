@@ -1,0 +1,21 @@
+{
+  "format": "projections.scenarios",
+  "version": 0,
+  "title": "Gallery",
+  "renderer": "gallery",
+  "scenarios": [
+    {
+      "id": "renderers",
+      "title": "Three renderers' scenarios",
+      "description": "Each scenario drawn by its own renderer, nested: graph, its dag presentation and text diff.",
+      "extraction": "fixtures/gallery-before.json"
+    },
+    {
+      "id": "fixture-change",
+      "title": "A change to the scenarios",
+      "description": "A scenario is redrawn with a new fixture, one is removed, and a custom renderer's scenario arrives, named but not drawn.",
+      "before": "fixtures/gallery-before.json",
+      "after": "fixtures/gallery-after.json"
+    }
+  ]
+}

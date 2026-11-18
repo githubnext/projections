@@ -59,6 +59,7 @@ test('every published schema is draft 2020-12 at its URL, compiles strictly and 
     'vocabularies/dependency-injection',
     'vocabularies/infrastructure',
     'vocabularies/runtime-policy',
+    'vocabularies/scenarios',
   ])
   // Unknown keywords and formats are errors; artifact verification also enforces strict types.
   const strict = new Ajv2020({strict: true, strictTuples: false, strictTypes: false, strictRequired: false})

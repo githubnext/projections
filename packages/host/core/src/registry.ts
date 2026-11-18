@@ -16,6 +16,52 @@ export interface RendererEntry {
   comparisonModes?: ComparisonMode[]
   /** The extractions the bundle presents (`RendererManifest.accepts`); omitted, any. */
   accepts?: RendererAccepts[]
+  /**
+   * The bundle's document as this host runs it, for a renderer that nests it (`document-request`). Omitted, it is
+   * fetched from `url`. A host that rewrites documents, as an editor webview adds its script nonce, supplies its own.
+   */
+  document?: () => Promise<string>
+}
+
+/**
+ * Supplies a built-in renderer's document by name, for a renderer that runs it in a frame nested in its own
+ * (`document-request`). Rejects with the reason for any other name.
+ */
+export type RendererDocuments = (name: string) => Promise<string>
+
+/**
+ * The built-in renderer documents of `catalog`, by name (a bundle's own, or one it handles, such as `dag` for the graph
+ * bundle): only entries with `source: 'builtin'`, from the host's own registry. A renderer names what it wants and never supplies a URL or path; an unknown name or a custom renderer is
+ * refused with the reason, which the host passes on. Each document is read once, with its entry's `document` or
+ * fetched from its `url`.
+ */
+export function builtinRendererDocuments(catalog: readonly RendererEntry[], fetcher: typeof fetch = globalThis.fetch): RendererDocuments {
+  const documents = new Map<string, Promise<string>>()
+  return name => {
+    const builtin = catalog.filter(candidate => candidate.source === 'builtin')
+    // A definition may name a bundle by a name it handles (`dag` for the graph bundle), as renderer resolution does.
+    const entry = builtin.find(candidate => candidate.name === name) ?? builtin.find(candidate => candidate.handles.includes(name))
+    if (!entry) {
+      const custom = catalog.some(candidate => candidate.name === name)
+      return Promise.reject(
+        new Error(custom ? `${name} is a custom renderer; hosts supply only built-in renderers` : `${name} is not a built-in renderer`),
+      )
+    }
+    let document = documents.get(entry.name)
+    if (!document) {
+      document = entry.document ? entry.document() : text(new URL(entry.url, globalThis.location?.href), fetcher)
+      documents.set(entry.name, document)
+      // A failed read is tried again on the next request.
+      document.catch(() => documents.delete(entry.name))
+    }
+    return document
+  }
+}
+
+async function text(url: URL, fetcher: typeof fetch): Promise<string> {
+  const response = await fetcher(url, {credentials: 'omit', redirect: 'error', cache: 'no-store'})
+  if (!response.ok) throw new Error(`Renderer request failed (${response.status}): ${url.pathname}`)
+  return response.text()
 }
 
 /** The extraction a renderer is chosen for: its schema, and the vocabularies it declares. */

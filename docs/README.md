@@ -77,6 +77,7 @@ ecosystems:
   plans and Azure what-if results become one resource graph.
 - [One model for runtime security policies](models/runtime-policy-model.md)
 - [One model for agentic workflows](models/agentic-workflow-model.md)
+- [One model for renderer scenarios](models/scenarios-model.md)
 - [API compatibility](models/api-compatibility.md)
 
 ## Contribute and maintain

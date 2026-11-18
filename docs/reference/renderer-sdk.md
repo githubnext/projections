@@ -56,6 +56,57 @@ renderer's capabilities. Messages that do not come from the parent window,
 carry another channel or fail validation are ignored. When a document connects again on the same channel (a
 development server's hot update), the host's current state is replayed to the new handlers.
 
+### `EmbeddedRenderer`
+
+```ts
+interface EmbeddedRenderer
+```
+
+A nested renderer frame, from `embedRenderer`: what to send it, and how to stop it.
+
+| Member | Signature | Description |
+|---|---|---|
+| `dispose` | `"dispose"(): void` | Stops listening and removes the frame. |
+| `hover` | `"hover"(id: null \| string): void` | Sent only when the nested renderer declares `hover`. |
+| `iframe` | `readonly "iframe": HTMLIFrameElement` | The sandboxed frame, transparent until the nested renderer has painted. |
+| `ready` | `readonly "ready": Promise<RendererCapabilities>` | Resolves with the nested renderer's capabilities once it is ready; rejects when it fails. |
+| `select` | `"select"(id: null \| string): void` | Selects an item, by the nested renderer's own selection ID, or clears the selection (`null`). |
+| `setEnvironment` | `"setEnvironment"(environment: RendererEnvironment): void` | Sends a new theme, motion preference, locale or pane; `sizing` stays `fill` unless it says otherwise. |
+| `setInit` | `"setInit"(init: RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" }, progress?: ProgressPayload \| undefined): void` | Replaces what it presents (a new `init`), and optionally the position. |
+| `setOptions` | `"setOptions"(options: RendererOptions): void` | Replaces its settings. |
+| `setProgress` | `"setProgress"(progress: ProgressPayload): void` | Sends a new position to draw. |
+
+### `EmbedOptions`
+
+```ts
+interface EmbedOptions
+```
+
+What `embedRenderer` runs and how it reports back.
+
+| Member | Signature | Description |
+|---|---|---|
+| `colorMode` | `"colorMode"?: "dark" \| "light"` | The color mode its document paints before `init`, so its first paint matches; default `init`'s, else light. |
+| `init` | `"init": RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } \| { (capabilities: RendererCapabilities): RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } }` | What the nested renderer presents, and its environment; `sizing` defaults to `fill`, the frame's own size. A function is called with the renderer's capabilities once it is ready, to choose for them (diff or animated). |
+| `onFailure` | `"onFailure"?: { (message: string): void }` | Called once when the frame can't run: the host refused its document, or it never became ready. |
+| `onMessage` | `"onMessage"?: { (message: { "capabilities": RendererCapabilities; "type": "ready" } \| { "controls": Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false \| true; "type": "toggle" } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" \| "download" \| "expand" \| "filter" \| "fit" \| "next" \| "previous" \| "reset" \| "search" \| "settings" \| "zoom-in" \| "zoom-out"; "type": "action" }>; "type": "controls" } \| { "ends": Array<number>; "slots"?: number; "type": "steps" } \| { "id": null \| string; "path"?: string; "type": "select" } \| { "id": null \| string; "type": "hover" } \| { "id": string; "rect": AnchorRect \| null; "type": "anchor" } \| { "id": string; "type": "annotation" } \| { "line"?: number; "path": string; "type": "open" } \| { "message": string; "type": "error" } \| { "progress": number; "type": "rendered" } \| { "px": number; "type": "height" } \| { "ratio": number; "type": "aspect" } \| { "renderer": string; "type": "document-request" } \| { "type": "legend" } & RendererLegend \| { "type": "summary" } & RendererSummary \| { "type": "viewport" } & ScrollPosition): void }` | Each valid message the nested renderer sends, after `embedRenderer` has handled it (`ready`, `rendered`, `height` and nested `document-request`s are handled; a host can follow `select`, `hover`, `error` and the rest). |
+| `options` | `"options"?: RendererOptions` | Its settings, as `options` would carry them. |
+| `progress` | `"progress"?: ProgressPayload \| { (capabilities: RendererCapabilities): ProgressPayload \| undefined }` | The position to draw, or a function of the capabilities; omitted, its opening state (an extraction, or a diff). |
+| `renderer` | `"renderer": string` | The built-in renderer to run, by name, for example `graph`. |
+| `title` | `"title": string` | The frame's accessible name, for example `Service platform, drawn by the graph renderer`. |
+
+### `embedRenderer`
+
+```ts
+embedRenderer(client: Pick<RendererClient, "requestDocument">, container: HTMLElement, options: EmbedOptions): EmbeddedRenderer
+```
+
+Runs the built-in renderer `options.renderer` in a sandboxed frame appended to `container`, acting as its host. The
+document comes from this renderer's host (`client.requestDocument`), which supplies only built-in renderers; the
+frame is `<iframe sandbox="allow-scripts" srcdoc>`, so it inherits this document's content security policy and gets
+an opaque origin of its own. Messages are accepted only from that frame, on its own channel, and only if they
+validate strictly. The frame fills `container` and stays transparent until its renderer has painted.
+
 ### `RendererClient`
 
 ```ts
@@ -81,9 +132,10 @@ are rounded to hundredths of a pixel.
 | `observeHeight` | `"observeHeight"(element: Element): { (): void }` | Requests the height of `element` whenever it resizes. Returns a function that stops observing. |
 | `open` | `"open"(path: string, line?: number \| undefined): void` | Asks the host to open a repository file; the host decides whether to navigate. |
 | `rendered` | `"rendered"(progress: number): void` | Acknowledges that the frame for `progress` has been painted. |
+| `requestDocument` | `"requestDocument"(name: string): Promise<string>` | Asks the host for the document of the built-in renderer `name` (for example `graph`), to run in a frame nested in this one (`embedRenderer` does both). Resolves with its `index.html` text, as the host runs it; rejects with the host's reason when it supplies none (an unknown or custom renderer, or a host without documents), or after `rendererLimits.documentTimeoutMs` without an answer. Repeated requests for one name share one answer. |
 | `select` | `"select"(id: null \| string, path?: string \| undefined): void` | Reports the renderer's selection, or `null` when it clears it. `path`, an RFC 6901 pointer such as `/data/owner`, selects a property of the item (capability `properties`); it is ignored with a `null` ID and throws if invalid. |
 | `steps` | `"steps"(ends: Array<number>, slots?: number \| undefined): void` | Declares progress values at which the host may hold during playback, and optionally how many step slots the presentation spans (`timelineSlots`), for the host's default pace. |
-| `subscribe` | `"subscribe"(listener: { (message: { "height": number; "type": "viewport"; "width": number } \| { "id": null \| string; "path"?: string; "type": "select" } \| { "id": null \| string; "type": "hover" } \| { "id": string; "type": "action" } \| { "items": Array<AnnotationMark>; "type": "annotations" } \| { "options": RendererOptions; "type": "options" } \| { "type": "environment" } & RendererEnvironment \| { "type": "filter" } & FilterPayload \| { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } \| { "type": "progress" } & ProgressPayload \| { "type": "scroll" } & ScrollPosition): void }): { (): void }` | Observes every valid host message after the handlers run. Returns a function that stops observing. |
+| `subscribe` | `"subscribe"(listener: { (message: { "height": number; "type": "viewport"; "width": number } \| { "id": null \| string; "path"?: string; "type": "select" } \| { "id": null \| string; "type": "hover" } \| { "id": string; "type": "action" } \| { "items": Array<AnnotationMark>; "type": "annotations" } \| { "options": RendererOptions; "type": "options" } \| { "type": "document" } & { "renderer": string } & { "error": string; "html"?: never } \| { "type": "document" } & { "renderer": string } & { "error"?: never; "html": string } \| { "type": "environment" } & RendererEnvironment \| { "type": "filter" } & FilterPayload \| { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } \| { "type": "progress" } & ProgressPayload \| { "type": "scroll" } & ScrollPosition): void }): { (): void }` | Observes every valid host message after the handlers run. Returns a function that stops observing. |
 | `summary` | `"summary"(summary: RendererSummary): void` | Gives the host the words for its summary bar: a figure per extraction kind in the renderer's vocabulary (`SummaryItem`), in display order; an empty list returns the bar to the host's own words. Throws when the summary is invalid. |
 | `viewport` | `"viewport"(position: ScrollPosition): void` | Reports that the person scrolled a container (capability `scrollSync`). |
 
@@ -1493,7 +1545,7 @@ One run of a word diff: text both passages share, or text only one has.
 ### `AcceptedExtraction`
 
 ```ts
-type AcceptedExtraction<A extends Array<RendererAccepts>> = { [I in keyof A]: A[I] extends { schema: infer S extends "graph/v0" | "dag/v0" | "treemap/v0" | "metrics/v0" | "api/v0" | "database/v0" | "architecture/v0"; vocabulary: infer V extends "dependency-injection/v0" | "infrastructure/v0" | "runtime-policy/v0" | "agentic-workflows/v0"; } ? ExtractionOf<S, V> : A[I] extends { schema: infer S extends "graph/v0" | "dag/v0" | "treemap/v0" | "metrics/v0" | "api/v0" | "database/v0" | "architecture/v0"; } ? ExtractionOf<S, never> : never; }[number]
+type AcceptedExtraction<A extends Array<RendererAccepts>> = { [I in keyof A]: A[I] extends { schema: infer S extends "graph/v0" | "dag/v0" | "treemap/v0" | "metrics/v0" | "api/v0" | "database/v0" | "architecture/v0"; vocabulary: infer V extends "dependency-injection/v0" | "infrastructure/v0" | "runtime-policy/v0" | "agentic-workflows/v0" | "scenarios/v0"; } ? ExtractionOf<S, V> : A[I] extends { schema: infer S extends "graph/v0" | "dag/v0" | "treemap/v0" | "metrics/v0" | "api/v0" | "database/v0" | "architecture/v0"; } ? ExtractionOf<S, never> : never; }[number]
 ```
 
 The typed extraction a renderer that accepts `A` receives: the union of what each entry guarantees.
@@ -1735,7 +1787,7 @@ Font weights: `normal` (400), `medium` (500), `semibold` (600) and `bold` (700).
 ### `HostEnvelope`
 
 ```ts
-type HostEnvelope = Envelope & { "height": number; "type": "viewport"; "width": number } | Envelope & { "id": null | string; "path"?: string; "type": "select" } | Envelope & { "id": null | string; "type": "hover" } | Envelope & { "id": string; "type": "action" } | Envelope & { "items": Array<AnnotationMark>; "type": "annotations" } | Envelope & { "options": RendererOptions; "type": "options" } | Envelope & { "type": "environment" } & RendererEnvironment | Envelope & { "type": "filter" } & FilterPayload | Envelope & { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" | "diff" | "side-by-side" | "swipe"; "mode": "comparison" } | Envelope & { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } | Envelope & { "type": "progress" } & ProgressPayload | Envelope & { "type": "scroll" } & ScrollPosition
+type HostEnvelope = Envelope & { "height": number; "type": "viewport"; "width": number } | Envelope & { "id": null | string; "path"?: string; "type": "select" } | Envelope & { "id": null | string; "type": "hover" } | Envelope & { "id": string; "type": "action" } | Envelope & { "items": Array<AnnotationMark>; "type": "annotations" } | Envelope & { "options": RendererOptions; "type": "options" } | Envelope & { "type": "document" } & { "renderer": string } & { "error": string; "html"?: never } | Envelope & { "type": "document" } & { "renderer": string } & { "error"?: never; "html": string } | Envelope & { "type": "environment" } & RendererEnvironment | Envelope & { "type": "filter" } & FilterPayload | Envelope & { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" | "diff" | "side-by-side" | "swipe"; "mode": "comparison" } | Envelope & { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } | Envelope & { "type": "progress" } & ProgressPayload | Envelope & { "type": "scroll" } & ScrollPosition
 ```
 
 A host message as posted to the frame: the message with the protocol version and channel.
@@ -1743,7 +1795,7 @@ A host message as posted to the frame: the message with the protocol version and
 ### `HostMessage`
 
 ```ts
-type HostMessage = { "height": number; "type": "viewport"; "width": number } | { "id": null | string; "path"?: string; "type": "select" } | { "id": null | string; "type": "hover" } | { "id": string; "type": "action" } | { "items": Array<AnnotationMark>; "type": "annotations" } | { "options": RendererOptions; "type": "options" } | { "type": "environment" } & RendererEnvironment | { "type": "filter" } & FilterPayload | { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" | "diff" | "side-by-side" | "swipe"; "mode": "comparison" } | { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } | { "type": "progress" } & ProgressPayload | { "type": "scroll" } & ScrollPosition
+type HostMessage = { "height": number; "type": "viewport"; "width": number } | { "id": null | string; "path"?: string; "type": "select" } | { "id": null | string; "type": "hover" } | { "id": string; "type": "action" } | { "items": Array<AnnotationMark>; "type": "annotations" } | { "options": RendererOptions; "type": "options" } | { "type": "document" } & { "renderer": string } & { "error": string; "html"?: never } | { "type": "document" } & { "renderer": string } & { "error"?: never; "html": string } | { "type": "environment" } & RendererEnvironment | { "type": "filter" } & FilterPayload | { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" | "diff" | "side-by-side" | "swipe"; "mode": "comparison" } | { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } | { "type": "progress" } & ProgressPayload | { "type": "scroll" } & ScrollPosition
 ```
 
 Every message a host sends a renderer, without its envelope (`HostEnvelope`), as `parseHostMessage` accepts it.
@@ -1971,7 +2023,7 @@ known types and icons, defaults that are valid values.
 ### `parseHostMessage`
 
 ```ts
-parseHostMessage(value: unknown, channel: string): undefined | { "height": number; "type": "viewport"; "width": number } | { "id": null | string; "path"?: string; "type": "select" } | { "id": null | string; "type": "hover" } | { "id": string; "type": "action" } | { "items": Array<AnnotationMark>; "type": "annotations" } | { "options": RendererOptions; "type": "options" } | { "type": "environment" } & RendererEnvironment | { "type": "filter" } & FilterPayload | { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" | "diff" | "side-by-side" | "swipe"; "mode": "comparison" } | { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } | { "type": "progress" } & ProgressPayload | { "type": "scroll" } & ScrollPosition
+parseHostMessage(value: unknown, channel: string): undefined | { "height": number; "type": "viewport"; "width": number } | { "id": null | string; "path"?: string; "type": "select" } | { "id": null | string; "type": "hover" } | { "id": string; "type": "action" } | { "items": Array<AnnotationMark>; "type": "annotations" } | { "options": RendererOptions; "type": "options" } | { "type": "document" } & { "renderer": string } & { "error": string; "html"?: never } | { "type": "document" } & { "renderer": string } & { "error"?: never; "html": string } | { "type": "environment" } & RendererEnvironment | { "type": "filter" } & FilterPayload | { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" | "diff" | "side-by-side" | "swipe"; "mode": "comparison" } | { "type": "init" } & RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" } | { "type": "progress" } & ProgressPayload | { "type": "scroll" } & ScrollPosition
 ```
 
 Validates the shape of a host-to-renderer message. Documents inside `init`
@@ -1997,7 +2049,7 @@ Validates a parsed `renderer.json` strictly and returns a normalized copy withou
 ### `parseRendererMessage`
 
 ```ts
-parseRendererMessage(value: unknown, channel: string): undefined | { "capabilities": RendererCapabilities; "type": "ready" } | { "controls": Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false | true; "type": "toggle" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" | "download" | "expand" | "filter" | "fit" | "next" | "previous" | "reset" | "search" | "settings" | "zoom-in" | "zoom-out"; "type": "action" }>; "type": "controls" } | { "ends": Array<number>; "slots"?: number; "type": "steps" } | { "id": null | string; "path"?: string; "type": "select" } | { "id": null | string; "type": "hover" } | { "id": string; "rect": AnchorRect | null; "type": "anchor" } | { "id": string; "type": "annotation" } | { "line"?: number; "path": string; "type": "open" } | { "message": string; "type": "error" } | { "progress": number; "type": "rendered" } | { "px": number; "type": "height" } | { "ratio": number; "type": "aspect" } | { "type": "legend" } & RendererLegend | { "type": "summary" } & RendererSummary | { "type": "viewport" } & ScrollPosition
+parseRendererMessage(value: unknown, channel: string): undefined | { "capabilities": RendererCapabilities; "type": "ready" } | { "controls": Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false | true; "type": "toggle" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" | "download" | "expand" | "filter" | "fit" | "next" | "previous" | "reset" | "search" | "settings" | "zoom-in" | "zoom-out"; "type": "action" }>; "type": "controls" } | { "ends": Array<number>; "slots"?: number; "type": "steps" } | { "id": null | string; "path"?: string; "type": "select" } | { "id": null | string; "type": "hover" } | { "id": string; "rect": AnchorRect | null; "type": "anchor" } | { "id": string; "type": "annotation" } | { "line"?: number; "path": string; "type": "open" } | { "message": string; "type": "error" } | { "progress": number; "type": "rendered" } | { "px": number; "type": "height" } | { "ratio": number; "type": "aspect" } | { "renderer": string; "type": "document-request" } | { "type": "legend" } & RendererLegend | { "type": "summary" } & RendererSummary | { "type": "viewport" } & ScrollPosition
 ```
 
 Validates a renderer-to-host message strictly. Returns `undefined` for
@@ -2064,7 +2116,7 @@ vocabulary. Without `vocabulary`, any extraction in the schema matches, whatever
 | Member | Signature | Description |
 |---|---|---|
 | `schema` | `"schema": "api/v0" \| "architecture/v0" \| "dag/v0" \| "database/v0" \| "graph/v0" \| "metrics/v0" \| "treemap/v0"` | The domain schema the extraction is in, for example `architecture/v0`. |
-| `vocabulary` | `"vocabulary"?: "agentic-workflows/v0" \| "dependency-injection/v0" \| "infrastructure/v0" \| "runtime-policy/v0"` | A vocabulary the extraction must declare, for example `dependency-injection/v0`. |
+| `vocabulary` | `"vocabulary"?: "agentic-workflows/v0" \| "dependency-injection/v0" \| "infrastructure/v0" \| "runtime-policy/v0" \| "scenarios/v0"` | A vocabulary the extraction must declare, for example `dependency-injection/v0`. |
 
 ### `RendererCapabilities`
 
@@ -2123,10 +2175,19 @@ A setting the host draws for the renderer. By `type`:
 
 `parseControls` validates a list strictly and `controlValues` reads the values.
 
+### `RendererDocument`
+
+```ts
+type RendererDocument = { "renderer": string } & { "error": string; "html"?: never } | { "renderer": string } & { "error"?: never; "html": string }
+```
+
+A built-in renderer's document as the host supplies it (`document`): the bundle's `index.html` text, exactly as the
+host would load it into its own frame, or why the host can't supply it. Exactly one of `html` and `error`.
+
 ### `RendererEnvelope`
 
 ```ts
-type RendererEnvelope = Envelope & { "capabilities": RendererCapabilities; "type": "ready" } | Envelope & { "controls": Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false | true; "type": "toggle" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" | "download" | "expand" | "filter" | "fit" | "next" | "previous" | "reset" | "search" | "settings" | "zoom-in" | "zoom-out"; "type": "action" }>; "type": "controls" } | Envelope & { "ends": Array<number>; "slots"?: number; "type": "steps" } | Envelope & { "id": null | string; "path"?: string; "type": "select" } | Envelope & { "id": null | string; "type": "hover" } | Envelope & { "id": string; "rect": AnchorRect | null; "type": "anchor" } | Envelope & { "id": string; "type": "annotation" } | Envelope & { "line"?: number; "path": string; "type": "open" } | Envelope & { "message": string; "type": "error" } | Envelope & { "progress": number; "type": "rendered" } | Envelope & { "px": number; "type": "height" } | Envelope & { "ratio": number; "type": "aspect" } | Envelope & { "type": "legend" } & RendererLegend | Envelope & { "type": "summary" } & RendererSummary | Envelope & { "type": "viewport" } & ScrollPosition
+type RendererEnvelope = Envelope & { "capabilities": RendererCapabilities; "type": "ready" } | Envelope & { "controls": Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false | true; "type": "toggle" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" | "download" | "expand" | "filter" | "fit" | "next" | "previous" | "reset" | "search" | "settings" | "zoom-in" | "zoom-out"; "type": "action" }>; "type": "controls" } | Envelope & { "ends": Array<number>; "slots"?: number; "type": "steps" } | Envelope & { "id": null | string; "path"?: string; "type": "select" } | Envelope & { "id": null | string; "type": "hover" } | Envelope & { "id": string; "rect": AnchorRect | null; "type": "anchor" } | Envelope & { "id": string; "type": "annotation" } | Envelope & { "line"?: number; "path": string; "type": "open" } | Envelope & { "message": string; "type": "error" } | Envelope & { "progress": number; "type": "rendered" } | Envelope & { "px": number; "type": "height" } | Envelope & { "ratio": number; "type": "aspect" } | Envelope & { "renderer": string; "type": "document-request" } | Envelope & { "type": "legend" } & RendererLegend | Envelope & { "type": "summary" } & RendererSummary | Envelope & { "type": "viewport" } & ScrollPosition
 ```
 
 A renderer message as posted to the host: the message with the protocol version and channel.
@@ -2204,7 +2265,7 @@ A renderer's legend: an optional title and its items; no items clears it.
 ### `rendererLimits`
 
 ```ts
-rendererLimits: { "annotationCount": 1000000; "annotationLabel": 64; "annotations": 10000; "aspect": { "max": 100; "min": 0.01 }; "choices": 50; "controls": 32; "filterIds": 20000; "legendItems": 24; "legendLabel": 64; "maxCoordinate": 1000000; "maxHeight": 20000; "messageBytes": number; "messagesPerSecond": 240; "minHeight": 120; "paceStepMs": { "max": 5000; "min": 300 }; "readyTimeoutMs": 10000; "steps": 1000; "summaryDescription": 256; "summaryFactIds": 1000; "summaryItems": 32; "summaryKind": 256; "summaryNoun": 64; "textLength": 4096; "themeTokens": 256; "tokenLength": 512 }
+rendererLimits: { "annotationCount": 1000000; "annotationLabel": 64; "annotations": 10000; "aspect": { "max": 100; "min": 0.01 }; "choices": 50; "controls": 32; "documentTimeoutMs": 10000; "filterIds": 20000; "legendItems": 24; "legendLabel": 64; "maxCoordinate": 1000000; "maxHeight": 20000; "messageBytes": number; "messagesPerSecond": 240; "minHeight": 120; "paceStepMs": { "max": 5000; "min": 300 }; "readyTimeoutMs": 10000; "steps": 1000; "summaryDescription": 256; "summaryFactIds": 1000; "summaryItems": 32; "summaryKind": 256; "summaryNoun": 64; "textLength": 4096; "themeTokens": 256; "tokenLength": 512 }
 ```
 
 Bounds the host enforces on renderer-to-host messages.
@@ -2230,7 +2291,7 @@ Manifest each renderer bundle ships as `renderer.json` beside its `index.html`.
 ### `RendererMessage`
 
 ```ts
-type RendererMessage = { "capabilities": RendererCapabilities; "type": "ready" } | { "controls": Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false | true; "type": "toggle" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" | "download" | "expand" | "filter" | "fit" | "next" | "previous" | "reset" | "search" | "settings" | "zoom-in" | "zoom-out"; "type": "action" }>; "type": "controls" } | { "ends": Array<number>; "slots"?: number; "type": "steps" } | { "id": null | string; "path"?: string; "type": "select" } | { "id": null | string; "type": "hover" } | { "id": string; "rect": AnchorRect | null; "type": "anchor" } | { "id": string; "type": "annotation" } | { "line"?: number; "path": string; "type": "open" } | { "message": string; "type": "error" } | { "progress": number; "type": "rendered" } | { "px": number; "type": "height" } | { "ratio": number; "type": "aspect" } | { "type": "legend" } & RendererLegend | { "type": "summary" } & RendererSummary | { "type": "viewport" } & ScrollPosition
+type RendererMessage = { "capabilities": RendererCapabilities; "type": "ready" } | { "controls": Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false | true; "type": "toggle" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" | "download" | "expand" | "filter" | "fit" | "next" | "previous" | "reset" | "search" | "settings" | "zoom-in" | "zoom-out"; "type": "action" }>; "type": "controls" } | { "ends": Array<number>; "slots"?: number; "type": "steps" } | { "id": null | string; "path"?: string; "type": "select" } | { "id": null | string; "type": "hover" } | { "id": string; "rect": AnchorRect | null; "type": "anchor" } | { "id": string; "type": "annotation" } | { "line"?: number; "path": string; "type": "open" } | { "message": string; "type": "error" } | { "progress": number; "type": "rendered" } | { "px": number; "type": "height" } | { "ratio": number; "type": "aspect" } | { "renderer": string; "type": "document-request" } | { "type": "legend" } & RendererLegend | { "type": "summary" } & RendererSummary | { "type": "viewport" } & ScrollPosition
 ```
 
 Every message a renderer sends its host, without its envelope (`RendererEnvelope`), as `parseRendererMessage`
@@ -2247,6 +2308,14 @@ The same policy for a `<meta http-equiv>` element, which cannot carry the
 `sandbox` directive. Built bundles include it so static hosting without
 header control still forbids network access; hosts must not rely on it for
 untrusted bundles.
+
+### `rendererNamePattern`
+
+```ts
+rendererNamePattern: RegExp
+```
+
+A renderer name, as `renderer.json` declares it.
 
 ### `RendererOptions`
 
@@ -2628,6 +2697,18 @@ What `useRenderer` declares and how it behaves.
 | `applyTheme` | `"applyTheme"?: false \| true` | Apply the host theme and reduced-motion preference to the document element (default true). |
 | `capabilities` | `"capabilities": RendererCapabilities` | What the renderer supports, posted in `ready`. Read once on mount: later changes are ignored. |
 | `onAction` | `"onAction"?: { (id: string): void }` | Called when the person activates one of the declared `action` controls. |
+
+## Renderer (`@githubnext/projections/renderer`)
+
+### `withFragment`
+
+```ts
+withFragment(html: string, fragment: string): string
+```
+
+The document with its URL fragment set first thing, before its own scripts: a `srcdoc` frame has no URL of its own
+to carry the channel, so it sets the fragment from inside, as a host's frame URL would have it. A host whose policy
+admits scripts by nonce (an editor webview) supplies documents whose scripts carry it, and this one carries it too.
 
 ## Rings (`@githubnext/projections/renderer`)
 

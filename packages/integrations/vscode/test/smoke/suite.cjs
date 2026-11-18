@@ -26,6 +26,7 @@ const workflows = [
   require('./workflows/recent-changes.cjs'),
   require('./workflows/agent-tools.cjs'),
   require('./workflows/custom-renderer.cjs'),
+  require('./workflows/nested-renderers.cjs'),
   require('./workflows/new-projection.cjs'),
   require('./workflows/current-view.cjs'),
 ]

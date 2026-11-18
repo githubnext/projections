@@ -17,7 +17,7 @@ import type {PresentationSettings} from '@githubnext/projections-schemas'
 import type {RendererFrame} from '../frame.js'
 import type {ComparisonMode, Side} from '../modes.js'
 import type {PaneState} from '../pane.js'
-import type {RendererEntry} from '../registry.js'
+import type {RendererDocuments, RendererEntry} from '../registry.js'
 import type {Row, Variation, ViewSubject} from '../model.js'
 import type {Holds} from '../playback.js'
 import type {ProjectionSelection, ProjectionTarget, TargetAnnotation, TargetResolution} from '../targets/target.js'
@@ -59,6 +59,11 @@ export type ProjectionOptions = {
    * The person may choose among them (`setRenderer`).
    */
   renderers?: readonly RendererEntry[]
+  /**
+   * Built-in renderer documents for renderers that nest them (`document-request`): usually `builtinRendererDocuments`
+   * of the host's whole catalog, not only `renderers`. Omitted, such requests are refused.
+   */
+  rendererDocuments?: RendererDocuments | undefined
   /** Shown whenever the requested renderer is unavailable or was substituted. */
   rendererNotice?: string | undefined
   /** Informational notices, for example how the compared revisions define the projection differently. */
@@ -215,6 +220,8 @@ export interface ProjectionController {
 
   renderer: RendererEntry | undefined
   renderers: readonly RendererEntry[]
+  /** Built-in renderer documents for renderers that nest them (`ProjectionOptions.rendererDocuments`). */
+  rendererDocuments: RendererDocuments | undefined
   rendererStatus: RendererStatus
   panes: Readonly<Record<PaneKey, PaneState>>
   /** The progress the animated frame last acknowledged painting. */

@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto'
 import {existsSync, readdirSync, readFileSync, statSync, utimesSync} from 'node:fs'
 import {join} from 'node:path'
 import {bound, TOOLS} from '../../lib/gates.ts'
-import {buildState, dependenciesOf} from '../../lib/builds.ts'
+import {buildState, dependenciesOf, recordChecked} from '../../lib/builds.ts'
 import {findUnit, inDependencyOrder, loadUnits, type Unit} from '../../lib/packages.ts'
 import {parseProblems, tail, type Problem} from '../../lib/problems.ts'
 import {newestOutput, run} from '../../lib/repo.ts'
@@ -131,11 +131,13 @@ export async function buildReport(root: string, options: BuildOptions, progress?
     }
     progress?.(`▸ ${unit.path}: ${reason}`)
     const before = snapshot(root, unit)
+    const started = Date.now()
     const ran = await run(root, {argv: ['npm', 'run', 'build', '--workspace', unit.names[0] as string]})
     const seconds = Math.round(ran.durationMs / 100) / 10
     if (ran.exitCode === 0) {
       const unchanged = restoreIfUnchanged(before, snapshot(root, unit))
-      if (!unchanged) rebuilt.add(unit.path)
+      if (unchanged) recordChecked(root, unit.path, started)
+      else rebuilt.add(unit.path)
       progress?.(`  ${unchanged ? 'unchanged' : 'built'} (${Math.round(ran.durationMs / 1000)}s)`)
       steps.push({workspace: unit.path, status: unchanged ? 'unchanged' : 'built', reason, seconds})
       continue

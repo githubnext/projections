@@ -1,7 +1,7 @@
 // Builds the default comparator as a comparator module (core WebAssembly, zero
 // imports) into packages/comparators/default/dist/default-comparator.wasm.
 import {spawnSync} from 'node:child_process'
-import {mkdirSync, readFileSync, writeFileSync} from 'node:fs'
+import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs'
 import {fileURLToPath} from 'node:url'
 
 const root = fileURLToPath(new URL('../../../../', import.meta.url))
@@ -43,4 +43,5 @@ for (const [name, kind] of [
   if (exports.get(name) !== kind) throw new Error(`Comparator module must export ${kind} ${name}`)
 }
 mkdirSync(new URL('../dist/', import.meta.url), {recursive: true})
-writeFileSync(artifact, bytes)
+// Written only when it changed: the CLI's build embeds the module and rebuilds whenever it is rewritten.
+if (!existsSync(artifact) || !readFileSync(artifact).equals(bytes)) writeFileSync(artifact, bytes)

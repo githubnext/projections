@@ -6,6 +6,7 @@ import {join} from 'node:path'
 import {fileURLToPath} from 'node:url'
 import test from 'node:test'
 import type {Affected} from '../src/lib/affected.ts'
+import {buildState, recordChecked} from '../src/lib/builds.ts'
 import {gates, type GateContext} from '../src/lib/gates.ts'
 import type {Unit} from '../src/lib/packages.ts'
 import {restoreIfUnchanged, snapshot, staleness} from '../src/commands/work/build.ts'
@@ -109,6 +110,11 @@ test('build: outputs written again unchanged keep their times, so nothing above 
   workspace(root, 'lib', {src: 100, dist: 900})
   assert.equal(restoreIfUnchanged(before, snapshot(root, lib)), true)
   assert.equal(statSync(join(root, 'lib/dist/index.js')).mtimeMs, 200_000)
+  // Its src, rewritten, is newer than those kept times; the recorded check says it is current all the same.
+  workspace(root, 'lib', {src: 500, dist: 200})
+  assert.equal(buildState(root, lib), 'stale')
+  recordChecked(root, 'lib', 600_000)
+  assert.equal(buildState(root, lib), 'current')
   writeFileSync(join(root, 'lib/dist/index.js'), 'changed')
   assert.equal(restoreIfUnchanged(before, snapshot(root, lib)), false)
 })

@@ -10,7 +10,7 @@
 // the module's `projections.interpreter` custom section.
 import {spawnSync} from 'node:child_process'
 import {createHash} from 'node:crypto'
-import {mkdirSync, readFileSync, writeFileSync} from 'node:fs'
+import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs'
 import {homedir} from 'node:os'
 import {join} from 'node:path'
 import {fileURLToPath} from 'node:url'
@@ -110,7 +110,8 @@ for (const prefix of [cargoHome, root.replace(/[\\/]$/, ''), homedir()]) {
   if (prefix && text.includes(prefix)) throw new Error(`rules.wasm names the machine-specific path ${prefix}; remap it`)
 }
 mkdirSync(new URL('../dist/', import.meta.url), {recursive: true})
-writeFileSync(artifact, bytes)
+// Written only when it changed: the CLI's build embeds the module and rebuilds whenever it is rewritten.
+if (!existsSync(artifact) || !readFileSync(artifact).equals(bytes)) writeFileSync(artifact, bytes)
 console.log(`rules.wasm: ${bytes.length} bytes, interpreter ${identity}`)
 
 // The notices cover every third-party crate the wasm32 build compiles in.

@@ -226,13 +226,21 @@ async fn renderer_development_servers_need_trust() {
         use std::io::{Read, Write};
         let manifest = r#"{"format":"projections.renderer","version":0,"name":"flags","title":"Flags","handles":[]}"#;
         for mut stream in listener.incoming().flatten() {
-            let mut request = [0u8; 1024];
-            let _ = stream.read(&mut request);
+            // The whole request first: closing with unread bytes resets the connection, losing the response.
+            let mut request = Vec::new();
+            let mut buffer = [0u8; 1024];
+            while !request.windows(4).any(|window| window == b"\r\n\r\n") {
+                match stream.read(&mut buffer) {
+                    Ok(0) | Err(_) => break,
+                    Ok(read) => request.extend_from_slice(&buffer[..read]),
+                }
+            }
             let _ = write!(
                 stream,
                 "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{manifest}",
                 manifest.len()
             );
+            let _ = stream.shutdown(std::net::Shutdown::Write);
         }
     });
     for trust in [false, true] {
@@ -266,6 +274,7 @@ async fn renderer_development_servers_need_trust() {
             if !trust || policy.get("rendererDevServer").is_some() {
                 break;
             }
+            tokio::time::sleep(std::time::Duration::from_millis(200)).await;
         }
         assert_eq!(
             policy["rendererRequiresTrust"], false,

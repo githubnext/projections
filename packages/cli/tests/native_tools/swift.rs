@@ -39,3 +39,51 @@ fn native_swift_dump_package_agrees_with_reading_the_manifest() {
     assert_eq!(targets, expected);
     assert!(!computed.to_string().contains(root.to_str().unwrap()));
 }
+
+/// swift-public-api builds each side of the compatibility fixture with the
+/// real toolchain, and reads the same declarations from the graphs it writes
+/// as from the graphs captured in the fixture.
+#[test]
+fn native_swift_public_api_reads_what_the_compiler_writes() {
+    if !selected(&["PROJECTIONS_NATIVE_SWIFT"]) {
+        return;
+    }
+    let fixture = fixtures("swift-public-api").join("compatibility");
+    let execution = json!({"timeoutMs": 300000, "environment": ["HOME", "DEVELOPER_DIR", "TMPDIR"]});
+    let swift = tool("PROJECTIONS_SWIFT", "swift");
+    for side in ["before", "after"] {
+        let scratch = Scratch::new();
+        let root = &scratch.0;
+        copy(&fixture.join(side), root, &[".build"]);
+        copy(&fixture.join(format!("{side}.symbols")), &root.join("captured"), &[]);
+        let built = collect(
+            root,
+            &definition("swift-public-api", json!({"swiftPath": swift}), execution.clone()),
+            true,
+        )
+        .unwrap();
+        let imported = collect(
+            root,
+            &definition(
+                "swift-public-api",
+                json!({"symbolGraphPath": "captured", "modules": ["Ledger"]}),
+                json!({}),
+            ),
+            false,
+        )
+        .unwrap();
+        let declarations = |extraction: &serde_json::Value| {
+            items(extraction, "entities")
+                .iter()
+                .map(|entity| (entity["id"].clone(), entity["data"].clone()))
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(declarations(&built), declarations(&imported), "{side}");
+        assert_eq!(items(&built, "relationships"), items(&imported, "relationships"), "{side}");
+        assert!(
+            items(&built, "entities")
+                .iter()
+                .any(|entity| entity["evidence"][0]["source"] == "Sources/Ledger/Ledger.swift")
+        );
+    }
+}

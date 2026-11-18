@@ -1,0 +1,2640 @@
+{
+ "metadata": {
+  "formatVersion": {
+   "major": 0,
+   "minor": 6,
+   "patch": 0
+  },
+  "generator": "Apple Swift version 6.4.2"
+ },
+ "module": {
+  "name": "Ledger",
+  "platform": {
+   "architecture": "arm64",
+   "operatingSystem": {
+    "minimumVersion": {
+     "major": 12,
+     "minor": 0
+    },
+    "name": "macosx"
+   },
+   "vendor": "apple"
+  }
+ },
+ "relationships": [
+  {
+   "kind": "requirementOf",
+   "source": "s:6Ledger7AccountP2idSSvp",
+   "target": "s:6Ledger7AccountP"
+  },
+  {
+   "kind": "requirementOf",
+   "source": "s:6Ledger7AccountP4postyyAA5EntryVKF",
+   "target": "s:6Ledger7AccountP"
+  },
+  {
+   "kind": "defaultImplementationOf",
+   "source": "s:6Ledger7AccountPAAE4postyyAA5EntryVKF",
+   "target": "s:6Ledger7AccountP4postyyAA5EntryVKF"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:6Ledger9EntryKindO",
+   "target": "s:SQ",
+   "targetFallback": "Swift.Equatable"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:6Ledger9EntryKindO",
+   "target": "s:SH",
+   "targetFallback": "Swift.Hashable"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:6Ledger9EntryKindO",
+   "target": "s:SY",
+   "targetFallback": "Swift.RawRepresentable"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:6Ledger9EntryKindO",
+   "target": "s:s12CaseIterableP",
+   "targetFallback": "Swift.CaseIterable"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:6Ledger9EntryKindO",
+   "target": "s:s8SendableP",
+   "targetFallback": "Swift.Sendable"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:6Ledger9EntryKindO",
+   "target": "s:s16SendableMetatypeP",
+   "targetFallback": "Swift.SendableMetatype"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:6Ledger9EntryKindO5debityA2CmF",
+   "target": "s:6Ledger9EntryKindO"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:6Ledger9EntryKindO6credityA2CmF",
+   "target": "s:6Ledger9EntryKindO"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:6Ledger9EntryKindO8rawValueACSgSS_tcfc",
+   "sourceOrigin": {
+    "displayName": "RawRepresentable.init(rawValue:)",
+    "identifier": "s:SY8rawValuexSg03RawB0Qz_tcfc"
+   },
+   "target": "s:6Ledger9EntryKindO"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:6Ledger5EntryV",
+   "target": "s:s8SendableP",
+   "targetFallback": "Swift.Sendable"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:6Ledger5EntryV",
+   "target": "s:s16SendableMetatypeP",
+   "targetFallback": "Swift.SendableMetatype"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:6Ledger5EntryV6amount0A4Core6AmountVvp",
+   "target": "s:6Ledger5EntryV"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:6Ledger5EntryV4kindAA0B4KindOvp",
+   "target": "s:6Ledger5EntryV"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:6Ledger5EntryV6amount4kindAC0A4Core6AmountV_AA0B4KindOtcfc",
+   "target": "s:6Ledger5EntryV"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:6LedgerAAC7entriesxvp",
+   "target": "s:6LedgerAAC"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:6LedgerAACAByxGycfc",
+   "target": "s:6LedgerAAC"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:6LedgerAAC6recordySiAA5EntryVYaKF",
+   "target": "s:6LedgerAAC"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:6LedgerAAC7balance2in0A4Core6AmountVSS_tF",
+   "target": "s:6LedgerAAC"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:6LedgerAAC3addyyAA5EntryVF",
+   "target": "s:6LedgerAAC"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:10LedgerCore6AmountV",
+   "target": "s:s23CustomStringConvertibleP",
+   "targetFallback": "Swift.CustomStringConvertible"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:10LedgerCore6AmountV",
+   "target": "s:s9EscapableP",
+   "targetFallback": "Swift.Escapable"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:10LedgerCore6AmountV",
+   "target": "s:s8CopyableP",
+   "targetFallback": "Swift.Copyable"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:10LedgerCore6AmountV0A0E11descriptionSSvp",
+   "sourceOrigin": {
+    "displayName": "CustomStringConvertible.description",
+    "identifier": "s:s23CustomStringConvertibleP11descriptionSSvp"
+   },
+   "target": "s:10LedgerCore6AmountV",
+   "targetFallback": "LedgerCore.Amount"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:10LedgerCore6AmountV",
+   "target": "s:SH",
+   "targetFallback": "Swift.Hashable"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:10LedgerCore6AmountV",
+   "target": "s:s8SendableP",
+   "targetFallback": "Swift.Sendable"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:10LedgerCore6AmountV",
+   "target": "s:SQ",
+   "targetFallback": "Swift.Equatable"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:10LedgerCore6AmountV",
+   "target": "s:s16SendableMetatypeP",
+   "targetFallback": "Swift.SendableMetatype"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:10LedgerCore6AmountV10minorUnitss5Int64Vvp",
+   "target": "s:10LedgerCore6AmountV",
+   "targetFallback": "LedgerCore.Amount"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:10LedgerCore6AmountV8currencySSvp",
+   "target": "s:10LedgerCore6AmountV",
+   "targetFallback": "LedgerCore.Amount"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:10LedgerCore6AmountV10minorUnits8currencyACs5Int64V_SStcfc",
+   "target": "s:10LedgerCore6AmountV",
+   "targetFallback": "LedgerCore.Amount"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:10LedgerCore6AmountV1poiyA2C_ACtFZ",
+   "target": "s:10LedgerCore6AmountV",
+   "targetFallback": "LedgerCore.Amount"
+  }
+ ],
+ "symbols": [
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "protocol"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "Account"
+    },
+    {
+     "kind": "text",
+     "spelling": " : AnyObject"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6Ledger7AccountP"
+   },
+   "kind": {
+    "displayName": "Protocol",
+    "identifier": "swift.protocol"
+   },
+   "location": {
+    "position": {
+     "character": 16,
+     "line": 2
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "navigator": [
+     {
+      "kind": "identifier",
+      "spelling": "Account"
+     }
+    ],
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "protocol"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "Account"
+     }
+    ],
+    "title": "Account"
+   },
+   "pathComponents": [
+    "Account"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "var"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "id"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:SS",
+     "spelling": "String"
+    },
+    {
+     "kind": "text",
+     "spelling": " { "
+    },
+    {
+     "kind": "keyword",
+     "spelling": "get"
+    },
+    {
+     "kind": "text",
+     "spelling": " }"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6Ledger7AccountP2idSSvp"
+   },
+   "kind": {
+    "displayName": "Instance Property",
+    "identifier": "swift.property"
+   },
+   "location": {
+    "position": {
+     "character": 8,
+     "line": 3
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "var"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "id"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:SS",
+      "spelling": "String"
+     }
+    ],
+    "title": "id"
+   },
+   "pathComponents": [
+    "Account",
+    "id"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "func"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "post"
+    },
+    {
+     "kind": "text",
+     "spelling": "("
+    },
+    {
+     "kind": "externalParam",
+     "spelling": "_"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "internalParam",
+     "spelling": "entry"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:6Ledger5EntryV",
+     "spelling": "Entry"
+    },
+    {
+     "kind": "text",
+     "spelling": ") "
+    },
+    {
+     "kind": "keyword",
+     "spelling": "throws"
+    }
+   ],
+   "functionSignature": {
+    "parameters": [
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "entry"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:6Ledger5EntryV",
+        "spelling": "Entry"
+       }
+      ],
+      "name": "entry"
+     }
+    ],
+    "returns": [
+     {
+      "kind": "text",
+      "spelling": "()"
+     }
+    ]
+   },
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6Ledger7AccountP4postyyAA5EntryVKF"
+   },
+   "kind": {
+    "displayName": "Instance Method",
+    "identifier": "swift.method"
+   },
+   "location": {
+    "position": {
+     "character": 9,
+     "line": 4
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "func"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "post"
+     },
+     {
+      "kind": "text",
+      "spelling": "("
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:6Ledger5EntryV",
+      "spelling": "Entry"
+     },
+     {
+      "kind": "text",
+      "spelling": ") "
+     },
+     {
+      "kind": "keyword",
+      "spelling": "throws"
+     }
+    ],
+    "title": "post(_:)"
+   },
+   "pathComponents": [
+    "Account",
+    "post(_:)"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "func"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "post"
+    },
+    {
+     "kind": "text",
+     "spelling": "("
+    },
+    {
+     "kind": "externalParam",
+     "spelling": "_"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "internalParam",
+     "spelling": "entry"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:6Ledger5EntryV",
+     "spelling": "Entry"
+    },
+    {
+     "kind": "text",
+     "spelling": ") "
+    },
+    {
+     "kind": "keyword",
+     "spelling": "throws"
+    }
+   ],
+   "functionSignature": {
+    "parameters": [
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "entry"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:6Ledger5EntryV",
+        "spelling": "Entry"
+       }
+      ],
+      "name": "entry"
+     }
+    ],
+    "returns": [
+     {
+      "kind": "text",
+      "spelling": "()"
+     }
+    ]
+   },
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6Ledger7AccountPAAE4postyyAA5EntryVKF"
+   },
+   "kind": {
+    "displayName": "Instance Method",
+    "identifier": "swift.method"
+   },
+   "location": {
+    "position": {
+     "character": 16,
+     "line": 8
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "func"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "post"
+     },
+     {
+      "kind": "text",
+      "spelling": "("
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:6Ledger5EntryV",
+      "spelling": "Entry"
+     },
+     {
+      "kind": "text",
+      "spelling": ") "
+     },
+     {
+      "kind": "keyword",
+      "spelling": "throws"
+     }
+    ],
+    "title": "post(_:)"
+   },
+   "pathComponents": [
+    "Account",
+    "post(_:)"
+   ],
+   "swiftExtension": {
+    "extendedModule": "Ledger",
+    "typeKind": "swift.protocol"
+   }
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "enum"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "EntryKind"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6Ledger9EntryKindO"
+   },
+   "kind": {
+    "displayName": "Enumeration",
+    "identifier": "swift.enum"
+   },
+   "location": {
+    "position": {
+     "character": 12,
+     "line": 11
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "navigator": [
+     {
+      "kind": "identifier",
+      "spelling": "EntryKind"
+     }
+    ],
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "enum"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "EntryKind"
+     }
+    ],
+    "title": "EntryKind"
+   },
+   "pathComponents": [
+    "EntryKind"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "case"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "debit"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6Ledger9EntryKindO5debityA2CmF"
+   },
+   "kind": {
+    "displayName": "Case",
+    "identifier": "swift.enum.case"
+   },
+   "location": {
+    "position": {
+     "character": 9,
+     "line": 12
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "case"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "debit"
+     }
+    ],
+    "title": "EntryKind.debit"
+   },
+   "pathComponents": [
+    "EntryKind",
+    "debit"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "case"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "credit"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6Ledger9EntryKindO6credityA2CmF"
+   },
+   "kind": {
+    "displayName": "Case",
+    "identifier": "swift.enum.case"
+   },
+   "location": {
+    "position": {
+     "character": 9,
+     "line": 13
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "case"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "credit"
+     }
+    ],
+    "title": "EntryKind.credit"
+   },
+   "pathComponents": [
+    "EntryKind",
+    "credit"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "init"
+    },
+    {
+     "kind": "text",
+     "spelling": "?("
+    },
+    {
+     "kind": "externalParam",
+     "spelling": "rawValue"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:SS",
+     "spelling": "String"
+    },
+    {
+     "kind": "text",
+     "spelling": ")"
+    }
+   ],
+   "functionSignature": {
+    "parameters": [
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "rawValue"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:SS",
+        "spelling": "String"
+       }
+      ],
+      "name": "rawValue"
+     }
+    ]
+   },
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6Ledger9EntryKindO8rawValueACSgSS_tcfc"
+   },
+   "kind": {
+    "displayName": "Initializer",
+    "identifier": "swift.init"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "init"
+     },
+     {
+      "kind": "text",
+      "spelling": "?("
+     },
+     {
+      "kind": "externalParam",
+      "spelling": "rawValue"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:SS",
+      "spelling": "String"
+     },
+     {
+      "kind": "text",
+      "spelling": ")"
+     }
+    ],
+    "title": "init(rawValue:)"
+   },
+   "pathComponents": [
+    "EntryKind",
+    "init(rawValue:)"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "struct"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "Entry"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6Ledger5EntryV"
+   },
+   "kind": {
+    "displayName": "Structure",
+    "identifier": "swift.struct"
+   },
+   "location": {
+    "position": {
+     "character": 14,
+     "line": 16
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "navigator": [
+     {
+      "kind": "identifier",
+      "spelling": "Entry"
+     }
+    ],
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "struct"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "Entry"
+     }
+    ],
+    "title": "Entry"
+   },
+   "pathComponents": [
+    "Entry"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "let"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "amount"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:10LedgerCore6AmountV",
+     "spelling": "Amount"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6Ledger5EntryV6amount0A4Core6AmountVvp"
+   },
+   "kind": {
+    "displayName": "Instance Property",
+    "identifier": "swift.property"
+   },
+   "location": {
+    "position": {
+     "character": 15,
+     "line": 17
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "let"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "amount"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:10LedgerCore6AmountV",
+      "spelling": "Amount"
+     }
+    ],
+    "title": "amount"
+   },
+   "pathComponents": [
+    "Entry",
+    "amount"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "let"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "kind"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:6Ledger9EntryKindO",
+     "spelling": "EntryKind"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6Ledger5EntryV4kindAA0B4KindOvp"
+   },
+   "kind": {
+    "displayName": "Instance Property",
+    "identifier": "swift.property"
+   },
+   "location": {
+    "position": {
+     "character": 15,
+     "line": 18
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "let"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "kind"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:6Ledger9EntryKindO",
+      "spelling": "EntryKind"
+     }
+    ],
+    "title": "kind"
+   },
+   "pathComponents": [
+    "Entry",
+    "kind"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "init"
+    },
+    {
+     "kind": "text",
+     "spelling": "("
+    },
+    {
+     "kind": "externalParam",
+     "spelling": "amount"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:10LedgerCore6AmountV",
+     "spelling": "Amount"
+    },
+    {
+     "kind": "text",
+     "spelling": ", "
+    },
+    {
+     "kind": "externalParam",
+     "spelling": "kind"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:6Ledger9EntryKindO",
+     "spelling": "EntryKind"
+    },
+    {
+     "kind": "text",
+     "spelling": " = .debit)"
+    }
+   ],
+   "functionSignature": {
+    "parameters": [
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "amount"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:10LedgerCore6AmountV",
+        "spelling": "Amount"
+       }
+      ],
+      "name": "amount"
+     },
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "kind"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:6Ledger9EntryKindO",
+        "spelling": "EntryKind"
+       }
+      ],
+      "name": "kind"
+     }
+    ]
+   },
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6Ledger5EntryV6amount4kindAC0A4Core6AmountV_AA0B4KindOtcfc"
+   },
+   "kind": {
+    "displayName": "Initializer",
+    "identifier": "swift.init"
+   },
+   "location": {
+    "position": {
+     "character": 11,
+     "line": 20
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "init"
+     },
+     {
+      "kind": "text",
+      "spelling": "("
+     },
+     {
+      "kind": "externalParam",
+      "spelling": "amount"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:10LedgerCore6AmountV",
+      "spelling": "Amount"
+     },
+     {
+      "kind": "text",
+      "spelling": ", "
+     },
+     {
+      "kind": "externalParam",
+      "spelling": "kind"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:6Ledger9EntryKindO",
+      "spelling": "EntryKind"
+     },
+     {
+      "kind": "text",
+      "spelling": ")"
+     }
+    ],
+    "title": "init(amount:kind:)"
+   },
+   "pathComponents": [
+    "Entry",
+    "init(amount:kind:)"
+   ]
+  },
+  {
+   "accessLevel": "open",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "class"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "Ledger"
+    },
+    {
+     "kind": "text",
+     "spelling": "<"
+    },
+    {
+     "kind": "genericParameter",
+     "spelling": "Store"
+    },
+    {
+     "kind": "text",
+     "spelling": "> "
+    },
+    {
+     "kind": "keyword",
+     "spelling": "where"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "typeIdentifier",
+     "spelling": "Store"
+    },
+    {
+     "kind": "text",
+     "spelling": " : "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:Sm",
+     "spelling": "RangeReplaceableCollection"
+    },
+    {
+     "kind": "text",
+     "spelling": ", "
+    },
+    {
+     "kind": "typeIdentifier",
+     "spelling": "Store"
+    },
+    {
+     "kind": "text",
+     "spelling": "."
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:ST7ElementQa",
+     "spelling": "Element"
+    },
+    {
+     "kind": "text",
+     "spelling": " == "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:6Ledger5EntryV",
+     "spelling": "Entry"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6LedgerAAC"
+   },
+   "kind": {
+    "displayName": "Class",
+    "identifier": "swift.class"
+   },
+   "location": {
+    "position": {
+     "character": 11,
+     "line": 26
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "navigator": [
+     {
+      "kind": "identifier",
+      "spelling": "Ledger"
+     }
+    ],
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "class"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "Ledger"
+     }
+    ],
+    "title": "Ledger"
+   },
+   "pathComponents": [
+    "Ledger"
+   ],
+   "swiftGenerics": {
+    "constraints": [
+     {
+      "kind": "conformance",
+      "lhs": "Store",
+      "rhs": "RangeReplaceableCollection",
+      "rhsPrecise": "s:Sm"
+     },
+     {
+      "kind": "sameType",
+      "lhs": "Store.Element",
+      "rhs": "Entry",
+      "rhsPrecise": "s:6Ledger5EntryV"
+     }
+    ],
+    "parameters": [
+     {
+      "depth": 0,
+      "index": 0,
+      "name": "Store"
+     }
+    ]
+   }
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "var"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "entries"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:6LedgerAAC5Storexmfp",
+     "spelling": "Store"
+    },
+    {
+     "kind": "text",
+     "spelling": " { get }"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6LedgerAAC7entriesxvp"
+   },
+   "kind": {
+    "displayName": "Instance Property",
+    "identifier": "swift.property"
+   },
+   "location": {
+    "position": {
+     "character": 28,
+     "line": 27
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "var"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "entries"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:6LedgerAAC5Storexmfp",
+      "spelling": "Store"
+     }
+    ],
+    "title": "entries"
+   },
+   "pathComponents": [
+    "Ledger",
+    "entries"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "init"
+    },
+    {
+     "kind": "text",
+     "spelling": "()"
+    }
+   ],
+   "functionSignature": {},
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6LedgerAACAByxGycfc"
+   },
+   "kind": {
+    "displayName": "Initializer",
+    "identifier": "swift.init"
+   },
+   "location": {
+    "position": {
+     "character": 11,
+     "line": 29
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "init"
+     },
+     {
+      "kind": "text",
+      "spelling": "()"
+     }
+    ],
+    "title": "init()"
+   },
+   "pathComponents": [
+    "Ledger",
+    "init()"
+   ],
+   "swiftGenerics": {
+    "constraints": [
+     {
+      "kind": "conformance",
+      "lhs": "Store",
+      "rhs": "RangeReplaceableCollection",
+      "rhsPrecise": "s:Sm"
+     },
+     {
+      "kind": "sameType",
+      "lhs": "Store.Element",
+      "rhs": "Entry",
+      "rhsPrecise": "s:6Ledger5EntryV"
+     }
+    ],
+    "parameters": [
+     {
+      "depth": 0,
+      "index": 0,
+      "name": "Store"
+     }
+    ]
+   }
+  },
+  {
+   "accessLevel": "open",
+   "declarationFragments": [
+    {
+     "kind": "attribute",
+     "spelling": "@discardableResult"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "keyword",
+     "spelling": "func"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "record"
+    },
+    {
+     "kind": "text",
+     "spelling": "("
+    },
+    {
+     "kind": "externalParam",
+     "spelling": "_"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "internalParam",
+     "spelling": "entry"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:6Ledger5EntryV",
+     "spelling": "Entry"
+    },
+    {
+     "kind": "text",
+     "spelling": ") "
+    },
+    {
+     "kind": "keyword",
+     "spelling": "async"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "keyword",
+     "spelling": "throws"
+    },
+    {
+     "kind": "text",
+     "spelling": " -> "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:Si",
+     "spelling": "Int"
+    }
+   ],
+   "functionSignature": {
+    "parameters": [
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "entry"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:6Ledger5EntryV",
+        "spelling": "Entry"
+       }
+      ],
+      "name": "entry"
+     }
+    ],
+    "returns": [
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:Si",
+      "spelling": "Int"
+     }
+    ]
+   },
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6LedgerAAC6recordySiAA5EntryVYaKF"
+   },
+   "kind": {
+    "displayName": "Instance Method",
+    "identifier": "swift.method"
+   },
+   "location": {
+    "position": {
+     "character": 14,
+     "line": 32
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "func"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "record"
+     },
+     {
+      "kind": "text",
+      "spelling": "("
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:6Ledger5EntryV",
+      "spelling": "Entry"
+     },
+     {
+      "kind": "text",
+      "spelling": ") "
+     },
+     {
+      "kind": "keyword",
+      "spelling": "async"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "keyword",
+      "spelling": "throws"
+     },
+     {
+      "kind": "text",
+      "spelling": " -> "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:Si",
+      "spelling": "Int"
+     }
+    ],
+    "title": "record(_:)"
+   },
+   "pathComponents": [
+    "Ledger",
+    "record(_:)"
+   ],
+   "swiftGenerics": {
+    "constraints": [
+     {
+      "kind": "conformance",
+      "lhs": "Store",
+      "rhs": "RangeReplaceableCollection",
+      "rhsPrecise": "s:Sm"
+     },
+     {
+      "kind": "sameType",
+      "lhs": "Store.Element",
+      "rhs": "Entry",
+      "rhsPrecise": "s:6Ledger5EntryV"
+     }
+    ],
+    "parameters": [
+     {
+      "depth": 0,
+      "index": 0,
+      "name": "Store"
+     }
+    ]
+   }
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "func"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "balance"
+    },
+    {
+     "kind": "text",
+     "spelling": "("
+    },
+    {
+     "kind": "externalParam",
+     "spelling": "in"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "internalParam",
+     "spelling": "currency"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:SS",
+     "spelling": "String"
+    },
+    {
+     "kind": "text",
+     "spelling": ") -> "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:10LedgerCore6AmountV",
+     "spelling": "Amount"
+    }
+   ],
+   "functionSignature": {
+    "parameters": [
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "currency"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:SS",
+        "spelling": "String"
+       }
+      ],
+      "internalName": "currency",
+      "name": "in"
+     }
+    ],
+    "returns": [
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:10LedgerCore6AmountV",
+      "spelling": "Amount"
+     }
+    ]
+   },
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6LedgerAAC7balance2in0A4Core6AmountVSS_tF"
+   },
+   "kind": {
+    "displayName": "Instance Method",
+    "identifier": "swift.method"
+   },
+   "location": {
+    "position": {
+     "character": 16,
+     "line": 37
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "func"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "balance"
+     },
+     {
+      "kind": "text",
+      "spelling": "("
+     },
+     {
+      "kind": "externalParam",
+      "spelling": "in"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:SS",
+      "spelling": "String"
+     },
+     {
+      "kind": "text",
+      "spelling": ") -> "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:10LedgerCore6AmountV",
+      "spelling": "Amount"
+     }
+    ],
+    "title": "balance(in:)"
+   },
+   "pathComponents": [
+    "Ledger",
+    "balance(in:)"
+   ],
+   "swiftGenerics": {
+    "constraints": [
+     {
+      "kind": "conformance",
+      "lhs": "Store",
+      "rhs": "RangeReplaceableCollection",
+      "rhsPrecise": "s:Sm"
+     },
+     {
+      "kind": "sameType",
+      "lhs": "Store.Element",
+      "rhs": "Entry",
+      "rhsPrecise": "s:6Ledger5EntryV"
+     }
+    ],
+    "parameters": [
+     {
+      "depth": 0,
+      "index": 0,
+      "name": "Store"
+     }
+    ]
+   }
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "func"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "add"
+    },
+    {
+     "kind": "text",
+     "spelling": "("
+    },
+    {
+     "kind": "externalParam",
+     "spelling": "_"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "internalParam",
+     "spelling": "entry"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:6Ledger5EntryV",
+     "spelling": "Entry"
+    },
+    {
+     "kind": "text",
+     "spelling": ")"
+    }
+   ],
+   "functionSignature": {
+    "parameters": [
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "entry"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:6Ledger5EntryV",
+        "spelling": "Entry"
+       }
+      ],
+      "name": "entry"
+     }
+    ],
+    "returns": [
+     {
+      "kind": "text",
+      "spelling": "()"
+     }
+    ]
+   },
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:6LedgerAAC3addyyAA5EntryVF"
+   },
+   "kind": {
+    "displayName": "Instance Method",
+    "identifier": "swift.method"
+   },
+   "location": {
+    "position": {
+     "character": 16,
+     "line": 41
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "func"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "add"
+     },
+     {
+      "kind": "text",
+      "spelling": "("
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:6Ledger5EntryV",
+      "spelling": "Entry"
+     },
+     {
+      "kind": "text",
+      "spelling": ")"
+     }
+    ],
+    "title": "add(_:)"
+   },
+   "pathComponents": [
+    "Ledger",
+    "add(_:)"
+   ],
+   "swiftGenerics": {
+    "constraints": [
+     {
+      "kind": "conformance",
+      "lhs": "Store",
+      "rhs": "RangeReplaceableCollection",
+      "rhsPrecise": "s:Sm"
+     },
+     {
+      "kind": "sameType",
+      "lhs": "Store.Element",
+      "rhs": "Entry",
+      "rhsPrecise": "s:6Ledger5EntryV"
+     }
+    ],
+    "parameters": [
+     {
+      "depth": 0,
+      "index": 0,
+      "name": "Store"
+     }
+    ]
+   }
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "var"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "description"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:SS",
+     "spelling": "String"
+    },
+    {
+     "kind": "text",
+     "spelling": " { "
+    },
+    {
+     "kind": "keyword",
+     "spelling": "get"
+    },
+    {
+     "kind": "text",
+     "spelling": " }"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:10LedgerCore6AmountV0A0E11descriptionSSvp"
+   },
+   "kind": {
+    "displayName": "Instance Property",
+    "identifier": "swift.property"
+   },
+   "location": {
+    "position": {
+     "character": 15,
+     "line": 47
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/Ledger/Ledger.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "var"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "description"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:SS",
+      "spelling": "String"
+     }
+    ],
+    "title": "description"
+   },
+   "pathComponents": [
+    "Amount",
+    "description"
+   ],
+   "swiftExtension": {
+    "extendedModule": "LedgerCore",
+    "typeKind": "swift.struct"
+   }
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "struct"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "Amount"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:10LedgerCore6AmountV"
+   },
+   "kind": {
+    "displayName": "Structure",
+    "identifier": "swift.struct"
+   },
+   "names": {
+    "navigator": [
+     {
+      "kind": "identifier",
+      "spelling": "Amount"
+     }
+    ],
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "struct"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "Amount"
+     }
+    ],
+    "title": "Amount"
+   },
+   "pathComponents": [
+    "Amount"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "var"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "minorUnits"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:s5Int64V",
+     "spelling": "Int64"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:10LedgerCore6AmountV10minorUnitss5Int64Vvp"
+   },
+   "kind": {
+    "displayName": "Instance Property",
+    "identifier": "swift.property"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "var"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "minorUnits"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:s5Int64V",
+      "spelling": "Int64"
+     }
+    ],
+    "title": "minorUnits"
+   },
+   "pathComponents": [
+    "Amount",
+    "minorUnits"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "let"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "currency"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:SS",
+     "spelling": "String"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:10LedgerCore6AmountV8currencySSvp"
+   },
+   "kind": {
+    "displayName": "Instance Property",
+    "identifier": "swift.property"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "let"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "currency"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:SS",
+      "spelling": "String"
+     }
+    ],
+    "title": "currency"
+   },
+   "pathComponents": [
+    "Amount",
+    "currency"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "init"
+    },
+    {
+     "kind": "text",
+     "spelling": "("
+    },
+    {
+     "kind": "externalParam",
+     "spelling": "minorUnits"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:s5Int64V",
+     "spelling": "Int64"
+    },
+    {
+     "kind": "text",
+     "spelling": ", "
+    },
+    {
+     "kind": "externalParam",
+     "spelling": "currency"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:SS",
+     "spelling": "String"
+    },
+    {
+     "kind": "text",
+     "spelling": ")"
+    }
+   ],
+   "functionSignature": {
+    "parameters": [
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "minorUnits"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:s5Int64V",
+        "spelling": "Int64"
+       }
+      ],
+      "name": "minorUnits"
+     },
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "currency"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:SS",
+        "spelling": "String"
+       }
+      ],
+      "name": "currency"
+     }
+    ]
+   },
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:10LedgerCore6AmountV10minorUnits8currencyACs5Int64V_SStcfc"
+   },
+   "kind": {
+    "displayName": "Initializer",
+    "identifier": "swift.init"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "init"
+     },
+     {
+      "kind": "text",
+      "spelling": "("
+     },
+     {
+      "kind": "externalParam",
+      "spelling": "minorUnits"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:s5Int64V",
+      "spelling": "Int64"
+     },
+     {
+      "kind": "text",
+      "spelling": ", "
+     },
+     {
+      "kind": "externalParam",
+      "spelling": "currency"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:SS",
+      "spelling": "String"
+     },
+     {
+      "kind": "text",
+      "spelling": ")"
+     }
+    ],
+    "title": "init(minorUnits:currency:)"
+   },
+   "pathComponents": [
+    "Amount",
+    "init(minorUnits:currency:)"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "static"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "keyword",
+     "spelling": "func"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "+"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "text",
+     "spelling": "("
+    },
+    {
+     "kind": "internalParam",
+     "spelling": "lhs"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:10LedgerCore6AmountV",
+     "spelling": "Amount"
+    },
+    {
+     "kind": "text",
+     "spelling": ", "
+    },
+    {
+     "kind": "internalParam",
+     "spelling": "rhs"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:10LedgerCore6AmountV",
+     "spelling": "Amount"
+    },
+    {
+     "kind": "text",
+     "spelling": ") -> "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:10LedgerCore6AmountV",
+     "spelling": "Amount"
+    }
+   ],
+   "functionSignature": {
+    "parameters": [
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "lhs"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:10LedgerCore6AmountV",
+        "spelling": "Amount"
+       }
+      ],
+      "name": "lhs"
+     },
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "rhs"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:10LedgerCore6AmountV",
+        "spelling": "Amount"
+       }
+      ],
+      "name": "rhs"
+     }
+    ],
+    "returns": [
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:10LedgerCore6AmountV",
+      "spelling": "Amount"
+     }
+    ]
+   },
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:10LedgerCore6AmountV1poiyA2C_ACtFZ"
+   },
+   "kind": {
+    "displayName": "Operator",
+    "identifier": "swift.func.op"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "static"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "keyword",
+      "spelling": "func"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "+"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "text",
+      "spelling": "("
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:10LedgerCore6AmountV",
+      "spelling": "Amount"
+     },
+     {
+      "kind": "text",
+      "spelling": ", "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:10LedgerCore6AmountV",
+      "spelling": "Amount"
+     },
+     {
+      "kind": "text",
+      "spelling": ") -> "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:10LedgerCore6AmountV",
+      "spelling": "Amount"
+     }
+    ],
+    "title": "+(_:_:)"
+   },
+   "pathComponents": [
+    "Amount",
+    "+(_:_:)"
+   ]
+  }
+ ]
+}

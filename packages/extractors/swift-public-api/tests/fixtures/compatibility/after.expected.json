@@ -1,0 +1,1003 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "module",
+          "term": "module",
+          "visibility": "public"
+        },
+        "signature": "module Ledger"
+      },
+      "id": "swift:Ledger",
+      "kind": "module",
+      "label": "Ledger"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "interface",
+          "term": "protocol",
+          "visibility": "public"
+        },
+        "signature": "protocol Account : AnyObject"
+      },
+      "id": "swift:Ledger.Account",
+      "kind": "protocol",
+      "label": "Account"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "abstract": true,
+          "declaration": "property",
+          "readonly": true,
+          "term": "property",
+          "type": {
+            "text": "String"
+          },
+          "visibility": "public"
+        },
+        "signature": "var id: String { get }"
+      },
+      "id": "swift:Ledger.Account.id",
+      "kind": "property",
+      "label": "id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "abstract": true,
+          "declaration": "property",
+          "readonly": true,
+          "term": "property",
+          "type": {
+            "text": "String"
+          },
+          "visibility": "public"
+        },
+        "signature": "var owner: String { get }"
+      },
+      "id": "swift:Ledger.Account.owner",
+      "kind": "property",
+      "label": "owner"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "native": {
+            "throws": true
+          },
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "entry",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Entry"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Void"
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "func post(_ entry: Entry) throws"
+      },
+      "id": "swift:Ledger.Account.post(_:)",
+      "kind": "method",
+      "label": "post(_:)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "struct",
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Swift.Comparable"
+            },
+            {
+              "relation": "implements",
+              "type": "Swift.CustomStringConvertible"
+            },
+            {
+              "relation": "implements",
+              "type": "Swift.Equatable"
+            },
+            {
+              "relation": "implements",
+              "type": "Swift.Hashable"
+            },
+            {
+              "relation": "implements",
+              "type": "Swift.Sendable"
+            }
+          ],
+          "term": "struct",
+          "visibility": "public"
+        },
+        "signature": "struct Amount"
+      },
+      "id": "swift:Ledger.Amount",
+      "kind": "struct",
+      "label": "Amount"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "function",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "lhs",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Amount"
+                  },
+                  "variadic": false
+                },
+                {
+                  "name": "rhs",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Amount"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Amount"
+              }
+            }
+          ],
+          "static": true,
+          "term": "func.op",
+          "visibility": "public"
+        },
+        "signature": "static func + (lhs: Amount, rhs: Amount) -> Amount"
+      },
+      "id": "swift:Ledger.Amount.+(_:_:)",
+      "kind": "operator",
+      "label": "+(_:_:)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "function",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "lhs",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Amount"
+                  },
+                  "variadic": false
+                },
+                {
+                  "name": "rhs",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Amount"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Amount"
+              }
+            }
+          ],
+          "static": true,
+          "term": "func.op",
+          "visibility": "public"
+        },
+        "signature": "static func - (lhs: Amount, rhs: Amount) -> Amount"
+      },
+      "id": "swift:Ledger.Amount.-(_:_:)",
+      "kind": "operator",
+      "label": "-(_:_:)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "function",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "lhs",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Amount"
+                  },
+                  "variadic": false
+                },
+                {
+                  "name": "rhs",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Amount"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Bool"
+              }
+            }
+          ],
+          "static": true,
+          "term": "func.op",
+          "visibility": "public"
+        },
+        "signature": "static func < (lhs: Amount, rhs: Amount) -> Bool"
+      },
+      "id": "swift:Ledger.Amount.<(_:_:)",
+      "kind": "operator",
+      "label": "<(_:_:)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "property",
+          "readonly": true,
+          "term": "property",
+          "type": {
+            "text": "String"
+          },
+          "visibility": "public"
+        },
+        "signature": "let currency: String"
+      },
+      "id": "swift:Ledger.Amount.currency",
+      "kind": "property",
+      "label": "currency"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "property",
+          "readonly": true,
+          "term": "property",
+          "type": {
+            "text": "String"
+          },
+          "visibility": "public"
+        },
+        "signature": "var description: String { get }"
+      },
+      "id": "swift:Ledger.Amount.description",
+      "kind": "property",
+      "label": "description"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "constructor",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "minorUnits",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Int64"
+                  },
+                  "variadic": false
+                },
+                {
+                  "name": "currency",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "String"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Amount"
+              }
+            }
+          ],
+          "term": "init",
+          "visibility": "public"
+        },
+        "signature": "init(minorUnits: Int64, currency: String)"
+      },
+      "id": "swift:Ledger.Amount.init(minorUnits:currency:)",
+      "kind": "init",
+      "label": "init(minorUnits:currency:)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "property",
+          "readonly": true,
+          "term": "property",
+          "type": {
+            "text": "Int64"
+          },
+          "visibility": "public"
+        },
+        "signature": "var minorUnits: Int64"
+      },
+      "id": "swift:Ledger.Amount.minorUnits",
+      "kind": "property",
+      "label": "minorUnits"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "struct",
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Swift.Sendable"
+            }
+          ],
+          "term": "struct",
+          "visibility": "public"
+        },
+        "signature": "struct Entry"
+      },
+      "id": "swift:Ledger.Entry",
+      "kind": "struct",
+      "label": "Entry"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "property",
+          "readonly": true,
+          "term": "property",
+          "type": {
+            "text": "Amount"
+          },
+          "visibility": "public"
+        },
+        "signature": "let amount: Amount"
+      },
+      "id": "swift:Ledger.Entry.amount",
+      "kind": "property",
+      "label": "amount"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "constructor",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "amount",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Amount"
+                  },
+                  "variadic": false
+                },
+                {
+                  "default": ".debit",
+                  "name": "kind",
+                  "optional": true,
+                  "passing": "value",
+                  "type": {
+                    "text": "EntryKind"
+                  },
+                  "variadic": false
+                },
+                {
+                  "default": "nil",
+                  "name": "memo",
+                  "optional": true,
+                  "passing": "value",
+                  "type": {
+                    "text": "String?"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Entry"
+              }
+            }
+          ],
+          "term": "init",
+          "visibility": "public"
+        },
+        "signature": "init(amount: Amount, kind: EntryKind = .debit, memo: String? = nil)"
+      },
+      "id": "swift:Ledger.Entry.init(amount:kind:memo:)",
+      "kind": "init",
+      "label": "init(amount:kind:memo:)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "property",
+          "readonly": true,
+          "term": "property",
+          "type": {
+            "text": "EntryKind"
+          },
+          "visibility": "public"
+        },
+        "signature": "let kind: EntryKind"
+      },
+      "id": "swift:Ledger.Entry.kind",
+      "kind": "property",
+      "label": "kind"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "property",
+          "readonly": true,
+          "term": "property",
+          "type": {
+            "text": "String?"
+          },
+          "visibility": "public"
+        },
+        "signature": "let memo: String?"
+      },
+      "id": "swift:Ledger.Entry.memo",
+      "kind": "property",
+      "label": "memo"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "enum",
+          "supertypes": [
+            {
+              "relation": "implements",
+              "type": "Swift.CaseIterable"
+            },
+            {
+              "relation": "implements",
+              "type": "Swift.Equatable"
+            },
+            {
+              "relation": "implements",
+              "type": "Swift.Hashable"
+            },
+            {
+              "relation": "implements",
+              "type": "Swift.RawRepresentable"
+            },
+            {
+              "relation": "implements",
+              "type": "Swift.Sendable"
+            }
+          ],
+          "term": "enum",
+          "visibility": "public"
+        },
+        "signature": "enum EntryKind"
+      },
+      "id": "swift:Ledger.EntryKind",
+      "kind": "enum",
+      "label": "EntryKind"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "variant",
+          "term": "enum.case",
+          "visibility": "public"
+        },
+        "signature": "case adjustment"
+      },
+      "id": "swift:Ledger.EntryKind.adjustment",
+      "kind": "case",
+      "label": "EntryKind.adjustment"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "variant",
+          "term": "enum.case",
+          "visibility": "public"
+        },
+        "signature": "case credit"
+      },
+      "id": "swift:Ledger.EntryKind.credit",
+      "kind": "case",
+      "label": "EntryKind.credit"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "variant",
+          "term": "enum.case",
+          "visibility": "public"
+        },
+        "signature": "case debit"
+      },
+      "id": "swift:Ledger.EntryKind.debit",
+      "kind": "case",
+      "label": "EntryKind.debit"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "constructor",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "rawValue",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "String"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "EntryKind"
+              }
+            }
+          ],
+          "term": "init",
+          "visibility": "public"
+        },
+        "signature": "init?(rawValue: String)"
+      },
+      "id": "swift:Ledger.EntryKind.init(rawValue:)",
+      "kind": "init",
+      "label": "init(rawValue:)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "class",
+          "native": {
+            "where": [
+              "Store.Element == Entry"
+            ]
+          },
+          "sealed": true,
+          "term": "class",
+          "typeParameters": [
+            {
+              "constraints": [
+                "RangeReplaceableCollection"
+              ],
+              "name": "Store"
+            }
+          ],
+          "visibility": "public"
+        },
+        "signature": "class Ledger<Store> where Store : RangeReplaceableCollection, Store.Element == Entry"
+      },
+      "id": "swift:Ledger.Ledger",
+      "kind": "class",
+      "label": "Ledger"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "attributes": [
+            "@available(*, deprecated, message: \"Use record(_:)\")"
+          ],
+          "declaration": "method",
+          "native": {
+            "where": [
+              "Store.Element == Entry"
+            ]
+          },
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "entry",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Entry"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Void"
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "func add(_ entry: Entry)"
+      },
+      "id": "swift:Ledger.Ledger.add(_:)",
+      "kind": "method",
+      "label": "add(_:)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "method",
+          "native": {
+            "where": [
+              "Store.Element == Entry"
+            ]
+          },
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "in",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "String"
+                  },
+                  "variadic": false
+                },
+                {
+                  "default": "nil",
+                  "name": "asOf",
+                  "optional": true,
+                  "passing": "value",
+                  "type": {
+                    "text": "Date?"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Amount"
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "func balance(in currency: String, asOf date: Date? = nil) -> Amount"
+      },
+      "id": "swift:Ledger.Ledger.balance(in:asOf:)",
+      "kind": "method",
+      "label": "balance(in:asOf:)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "property",
+          "readonly": true,
+          "term": "property",
+          "type": {
+            "text": "Store"
+          },
+          "visibility": "public"
+        },
+        "signature": "var entries: Store { get }"
+      },
+      "id": "swift:Ledger.Ledger.entries",
+      "kind": "property",
+      "label": "entries"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "declaration": "constructor",
+          "native": {
+            "where": [
+              "Store.Element == Entry"
+            ]
+          },
+          "signatures": [
+            {
+              "parameters": [],
+              "returns": {
+                "text": "Ledger"
+              }
+            }
+          ],
+          "term": "init",
+          "visibility": "public"
+        },
+        "signature": "init()"
+      },
+      "id": "swift:Ledger.Ledger.init()",
+      "kind": "init",
+      "label": "init()"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "contract": {
+          "attributes": [
+            "@discardableResult"
+          ],
+          "declaration": "method",
+          "native": {
+            "async": true,
+            "throws": true,
+            "where": [
+              "Store.Element == Entry"
+            ]
+          },
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "entry",
+                  "optional": false,
+                  "passing": "value",
+                  "type": {
+                    "text": "Entry"
+                  },
+                  "variadic": false
+                }
+              ],
+              "returns": {
+                "text": "Int"
+              }
+            }
+          ],
+          "term": "method",
+          "visibility": "public"
+        },
+        "signature": "@discardableResult func record(_ entry: Entry) async throws -> Int"
+      },
+      "id": "swift:Ledger.Ledger.record(_:)",
+      "kind": "method",
+      "label": "record(_:)"
+    }
+  ],
+  "metadata": {
+    "ecosystem": "swift"
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Account",
+      "id": "contains:swift%3ALedger.Account:swift%3ALedger.Account.id",
+      "kind": "contains",
+      "to": "swift:Ledger.Account.id"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Account",
+      "id": "contains:swift%3ALedger.Account:swift%3ALedger.Account.owner",
+      "kind": "contains",
+      "to": "swift:Ledger.Account.owner"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Account",
+      "id": "contains:swift%3ALedger.Account:swift%3ALedger.Account.post(_%3A)",
+      "kind": "contains",
+      "to": "swift:Ledger.Account.post(_:)"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Amount",
+      "id": "contains:swift%3ALedger.Amount:swift%3ALedger.Amount.%2B(_%3A_%3A)",
+      "kind": "contains",
+      "to": "swift:Ledger.Amount.+(_:_:)"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Amount",
+      "id": "contains:swift%3ALedger.Amount:swift%3ALedger.Amount.%3C(_%3A_%3A)",
+      "kind": "contains",
+      "to": "swift:Ledger.Amount.<(_:_:)"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Amount",
+      "id": "contains:swift%3ALedger.Amount:swift%3ALedger.Amount.-(_%3A_%3A)",
+      "kind": "contains",
+      "to": "swift:Ledger.Amount.-(_:_:)"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Amount",
+      "id": "contains:swift%3ALedger.Amount:swift%3ALedger.Amount.currency",
+      "kind": "contains",
+      "to": "swift:Ledger.Amount.currency"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Amount",
+      "id": "contains:swift%3ALedger.Amount:swift%3ALedger.Amount.description",
+      "kind": "contains",
+      "to": "swift:Ledger.Amount.description"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Amount",
+      "id": "contains:swift%3ALedger.Amount:swift%3ALedger.Amount.init(minorUnits%3Acurrency%3A)",
+      "kind": "contains",
+      "to": "swift:Ledger.Amount.init(minorUnits:currency:)"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Amount",
+      "id": "contains:swift%3ALedger.Amount:swift%3ALedger.Amount.minorUnits",
+      "kind": "contains",
+      "to": "swift:Ledger.Amount.minorUnits"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Entry",
+      "id": "contains:swift%3ALedger.Entry:swift%3ALedger.Entry.amount",
+      "kind": "contains",
+      "to": "swift:Ledger.Entry.amount"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Entry",
+      "id": "contains:swift%3ALedger.Entry:swift%3ALedger.Entry.init(amount%3Akind%3Amemo%3A)",
+      "kind": "contains",
+      "to": "swift:Ledger.Entry.init(amount:kind:memo:)"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Entry",
+      "id": "contains:swift%3ALedger.Entry:swift%3ALedger.Entry.kind",
+      "kind": "contains",
+      "to": "swift:Ledger.Entry.kind"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Entry",
+      "id": "contains:swift%3ALedger.Entry:swift%3ALedger.Entry.memo",
+      "kind": "contains",
+      "to": "swift:Ledger.Entry.memo"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.EntryKind",
+      "id": "contains:swift%3ALedger.EntryKind:swift%3ALedger.EntryKind.adjustment",
+      "kind": "contains",
+      "to": "swift:Ledger.EntryKind.adjustment"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.EntryKind",
+      "id": "contains:swift%3ALedger.EntryKind:swift%3ALedger.EntryKind.credit",
+      "kind": "contains",
+      "to": "swift:Ledger.EntryKind.credit"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.EntryKind",
+      "id": "contains:swift%3ALedger.EntryKind:swift%3ALedger.EntryKind.debit",
+      "kind": "contains",
+      "to": "swift:Ledger.EntryKind.debit"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.EntryKind",
+      "id": "contains:swift%3ALedger.EntryKind:swift%3ALedger.EntryKind.init(rawValue%3A)",
+      "kind": "contains",
+      "to": "swift:Ledger.EntryKind.init(rawValue:)"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Ledger",
+      "id": "contains:swift%3ALedger.Ledger:swift%3ALedger.Ledger.add(_%3A)",
+      "kind": "contains",
+      "to": "swift:Ledger.Ledger.add(_:)"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Ledger",
+      "id": "contains:swift%3ALedger.Ledger:swift%3ALedger.Ledger.balance(in%3AasOf%3A)",
+      "kind": "contains",
+      "to": "swift:Ledger.Ledger.balance(in:asOf:)"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Ledger",
+      "id": "contains:swift%3ALedger.Ledger:swift%3ALedger.Ledger.entries",
+      "kind": "contains",
+      "to": "swift:Ledger.Ledger.entries"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Ledger",
+      "id": "contains:swift%3ALedger.Ledger:swift%3ALedger.Ledger.init()",
+      "kind": "contains",
+      "to": "swift:Ledger.Ledger.init()"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger.Ledger",
+      "id": "contains:swift%3ALedger.Ledger:swift%3ALedger.Ledger.record(_%3A)",
+      "kind": "contains",
+      "to": "swift:Ledger.Ledger.record(_:)"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger",
+      "id": "contains:swift%3ALedger:swift%3ALedger.Account",
+      "kind": "contains",
+      "to": "swift:Ledger.Account"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger",
+      "id": "contains:swift%3ALedger:swift%3ALedger.Amount",
+      "kind": "contains",
+      "to": "swift:Ledger.Amount"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger",
+      "id": "contains:swift%3ALedger:swift%3ALedger.Entry",
+      "kind": "contains",
+      "to": "swift:Ledger.Entry"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger",
+      "id": "contains:swift%3ALedger:swift%3ALedger.EntryKind",
+      "kind": "contains",
+      "to": "swift:Ledger.EntryKind"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "swift:Ledger",
+      "id": "contains:swift%3ALedger:swift%3ALedger.Ledger",
+      "kind": "contains",
+      "to": "swift:Ledger.Ledger"
+    }
+  ],
+  "schema": "api/v0"
+}

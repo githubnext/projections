@@ -38,6 +38,7 @@ Built-in extractors that draw with it by default:
 | [`typescript-public-api`](../extractors/typescript-public-api.md) | `api`                  |
 | [`rust-public-api`](../extractors/rust-public-api.md)             | `api`                  |
 | [`go-public-api`](../extractors/go-public-api.md)                 | `api`                  |
+| [`swift-public-api`](../extractors/swift-public-api.md)           | `api`                  |
 | [`dotnet-public-api`](../extractors/dotnet-public-api.md)         | `api`                  |
 | [`rails-routes`](../extractors/rails-routes.md)                   | `api`                  |
 
@@ -158,7 +159,8 @@ place.
 - The extractors it draws by default:
   [`typescript-public-api`](../extractors/typescript-public-api.md),
   [`rust-public-api`](../extractors/rust-public-api.md),
-  [`go-public-api`](../extractors/go-public-api.md) and
+  [`go-public-api`](../extractors/go-public-api.md),
+  [`swift-public-api`](../extractors/swift-public-api.md) and
   [`dotnet-public-api`](../extractors/dotnet-public-api.md).
 - The
   [`api-compatibility`](../../../packages/comparators/api-compatibility/README.md)

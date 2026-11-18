@@ -29,6 +29,7 @@ projections-extractor-renderer-scenarios = { path = "../renderer-scenarios" }
 projections-extractor-repository-map = { path = "../repository-map" }
 projections-extractor-rust-public-api = { path = "../rust-public-api" }
 projections-extractor-sdk = { path = "../sdk" }
+projections-extractor-swift-public-api = { path = "../swift-public-api" }
 projections-extractor-swift-package-dependencies = { path = "../swift-package-dependencies" }
 projections-extractor-terraform-infrastructure = { path = "../terraform-infrastructure" }
 projections-extractor-tetragon-policies = { path = "../tetragon-policies" }

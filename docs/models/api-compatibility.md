@@ -3,8 +3,9 @@
 Status: **adopted** for `api/v0`. Implemented by the
 [`api-compatibility` comparator](../../packages/comparators/api-compatibility),
 the `contract` facts the `dotnet-public-api`, `typescript-public-api`,
-`rust-public-api` and `go-public-api` extractors write, and the
-[`api` renderer](../../packages/renderers/api).
+`rust-public-api`, `go-public-api` and `swift-public-api` extractors write
+(Swift's own rules aren't modeled yet; its changes get the rules every ecosystem
+shares), and the [`api` renderer](../../packages/renderers/api).
 
 A reviewer looking at an API projection wants one answer before any other:
 **does this change break the people who use the API?** This document decides

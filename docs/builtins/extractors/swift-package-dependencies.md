@@ -30,7 +30,9 @@ It reads the manifest without running it, so it needs no Swift toolchain and no
 compute their targets (`#if`, loops, functions, environment variables) need
 SwiftPM to evaluate them: see [What it reads](#what-it-reads).
 
-For Xcode projects (`.xcodeproj`) use [`xcode-modules`](xcode-modules.md).
+For Xcode projects (`.xcodeproj`) use [`xcode-modules`](xcode-modules.md); for
+what a package exports rather than what it depends on,
+[`swift-public-api`](swift-public-api.md).
 
 ## What it reads
 
@@ -149,6 +151,7 @@ The package's targets and products are the graph's roots, drawn on the left.
 
 - [`graph`](../renderers/graph.md), whose `dependencies` presentation draws it.
 - [`xcode-modules`](xcode-modules.md), the same graph for Xcode projects.
+- [`swift-public-api`](swift-public-api.md), for what a package exports.
 - [`cargo-dependencies`](cargo-dependencies.md) and
   [`workspace-dependencies`](workspace-dependencies.md), the same for Rust and
   Node.

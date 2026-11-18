@@ -61,6 +61,7 @@ with an explicit error, never a fallback.
 | --- | --- |
 | `typescript-public-api` | Node.js 20+ and the repository's own installed `typescript` 5.x/6.x (or `@typescript/typescript6` beside TypeScript 7) ([TypeScript support](typescript-support/README.md)) |
 | `nestjs-di` | Node.js 20+, the repository's own installed `typescript` 5.x/6.x and `@nestjs/core` 9.3+ ([NestJS](nestjs-di/README.md)) |
+| `swift-public-api` | The package's Swift toolchain 5.9+, which builds it, when not importing symbol graphs ([Swift public API](swift-public-api/README.md)) |
 | `go-public-api` | Go 1.24+ ([Go public API](go-public-api/README.md), [Go support](go-support/README.md)) |
 | `rust-public-api` | The project's Cargo with a nightly toolchain for rustdoc JSON format 61 ([Rust public API](rust-public-api/README.md)) |
 | `dotnet-public-api`, `dotnet-di`, `efcore-schema` | .NET SDK 8.0.100+; the slim helper ships prebuilt and uses the SDK's Roslyn and the application's own dependency injection and EF Core ([.NET support](dotnet-support/README.md)) |

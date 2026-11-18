@@ -21,6 +21,8 @@ pub(super) struct Checker<'a> {
     pub(super) has_head: bool,
     /// The browser to run renderer checks in; `None` with `--no-render`.
     pub(super) executable: Option<Result<PathBuf>>,
+    /// One browser serves every projection's renderer checks and image.
+    pub(super) browsers: crate::browser::Pool,
 }
 
 /// A projection whose extraction is rendered.

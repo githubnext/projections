@@ -11,10 +11,17 @@
 //! WebSocket to it. The browser runs in its own process group (Unix) or Job
 //! Object (Windows) and is stopped with every process it started, and its
 //! temporary profile removed, on every exit path.
+//!
+//! Only a few browsers start at once on the machine (`gate`), one that aborts
+//! while starting is started once more, and a [`Pool`] lets several renders share
+//! one browser, each [`Page`] in its own browser context.
 
 mod base64;
 mod connection;
+mod gate;
 mod locate;
+mod page;
+mod pool;
 mod session;
 mod switches;
 #[cfg(unix)]
@@ -29,6 +36,8 @@ use std::{
 pub use base64::{base64_decode, base64_encode};
 pub use connection::Commands;
 pub use locate::find;
+pub use page::Page;
+pub use pool::Pool;
 pub use session::Browser;
 
 /// The largest protocol message accepted, enough for a full-size screenshot.

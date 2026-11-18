@@ -108,8 +108,14 @@ fn repository() -> (tempfile::TempDir, String, String) {
 /// Runs the CLI with a private temporary directory, which must stay empty:
 /// the browser profile is removed on every exit path.
 fn cli(repo: &Path, browser: &Path, args: &[&str]) -> Output {
+    cli_with(repo, browser, args, &[])
+}
+
+/// [`cli`] with more environment variables.
+fn cli_with(repo: &Path, browser: &Path, args: &[&str], environment: &[(&str, &Path)]) -> Output {
     let temporary = tempfile::tempdir().unwrap();
     let output = Command::new(env!("CARGO_BIN_EXE_projections"))
+        .envs(environment.iter().copied())
         .arg("-C")
         .arg(repo)
         .args(args)
@@ -258,6 +264,43 @@ fn snapshots_of_one_revision_are_identical_and_follow_size_scale_and_theme() {
     assert!(!refused.status.success());
     assert!(String::from_utf8_lossy(&refused.stderr).contains("already exists"));
     assert_eq!(fs::read(file("first.png")).unwrap(), first);
+}
+
+/// Waiting for a launch slot, while other processes start their browsers, doesn't spend the render's --timeout.
+#[test]
+fn waiting_for_a_launch_slot_leaves_the_render_its_whole_timeout() {
+    let Some(browser) = prerequisites("launch slot wait") else {
+        return;
+    };
+    let (repo, _, head) = repository();
+    let cache = tempfile::tempdir().unwrap();
+    let slots = cache.path().join("browser-launches");
+    let mut directory = fs::DirBuilder::new();
+    #[cfg(unix)]
+    std::os::unix::fs::DirBuilderExt::mode(&mut directory, 0o700);
+    directory.create(&slots).unwrap();
+    let held: Vec<_> = (0..2)
+        .map(|slot| {
+            let file = fs::File::create(slots.join(format!("slot-{slot}.lock"))).unwrap();
+            file.lock().unwrap();
+            file
+        })
+        .collect();
+    let released = std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_secs(10));
+        drop(held);
+    });
+    let output = tempfile::tempdir().unwrap();
+    let png = output.path().join("waited.png");
+    let shown = cli_with(
+        repo.path(),
+        &browser,
+        &["show", &head, "-p", "files", "--timeout", "8", "--png", &png.to_string_lossy()],
+        &[("PROJECTIONS_CACHE_DIR", cache.path())],
+    );
+    released.join().unwrap();
+    succeeded(&shown);
+    assert!(png.is_file());
 }
 
 /// How steep the image's edges are: of the differences in luminance between horizontally adjacent pixels that are
@@ -647,6 +690,50 @@ async fn the_port_and_pipe_transports_render_the_same_image() {
             panic!("the transports rendered different images: {difference}");
         }
     }
+}
+
+/// Renders that share a browser draw what a fresh browser draws: each page's context leaves nothing to the next.
+#[tokio::test(flavor = "multi_thread")]
+async fn renders_sharing_a_browser_match_a_fresh_one() {
+    let Some(browser) = prerequisites("shared browser") else {
+        return;
+    };
+    let (repo, base, head) = repository();
+    let runner = Runner::new(repo.path().to_owned(), false).with_executable(env!("CARGO_BIN_EXE_projections"));
+    let document = runner.compare_with("files", &base, &head, DefinitionSource::Base).unwrap().document;
+    let request = |theme| snapshot::Request {
+        document: document.clone(),
+        repo: repo.path().to_owned(),
+        trust: false,
+        definition: DefinitionSource::Base,
+        definition_revision: None,
+        assets: assets(),
+        mode: Some(snapshot::Mode::SideBySide),
+        progress: None,
+        focus: snapshot::Focus::default(),
+        theme,
+        frame: snapshot::Frame::Card,
+        matte: None,
+        width: 400,
+        height: 300,
+        scale: 1.0,
+        browser: browser.clone(),
+        transport: Transport::default(),
+        timeout: Duration::from_secs(60),
+        cancel: Arc::new(AtomicBool::new(false)),
+    };
+    let fresh = snapshot::render(request(snapshot::Theme::Light)).await.unwrap();
+    let browsers = browser::Pool::new();
+    let first = snapshot::render_with(request(snapshot::Theme::Light), &browsers).await.unwrap();
+    let dark = snapshot::render_with(request(snapshot::Theme::Dark), &browsers).await.unwrap();
+    let again = snapshot::render_with(request(snapshot::Theme::Light), &browsers).await.unwrap();
+    tokio::task::spawn_blocking(move || browsers.close()).await.unwrap();
+    for (name, png) in [("first", &first.png), ("again", &again.png)] {
+        if let Err(difference) = same_image(&fresh.png, png) {
+            panic!("the {name} shared render differs from a fresh browser's: {difference}");
+        }
+    }
+    assert!(same_image(&first.png, &dark.png).is_err(), "the dark render drew the light theme");
 }
 
 #[test]

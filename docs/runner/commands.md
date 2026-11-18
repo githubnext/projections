@@ -394,6 +394,16 @@ private profile. It runs in its own process group (Unix) or Job Object (Windows)
 and is stopped, with everything it started, and its profile removed, on success,
 failure and Ctrl+C.
 
+At most two browsers start at once for a user, across every process: a launch
+holds one of two lock files in the cache directory (`browser-launches/`) from
+starting the browser until its DevTools connection answers, so parallel tests or
+several sessions stagger their launches rather than starting many at the same
+moment, which macOS answers by aborting them. A browser ended by a signal before
+it answers is started once more. One `check` runs every projection's renderer
+checks and image in one browser, and the Inspector service keeps the browser
+that draws thumbnails and screenshots for 30 seconds after each; every render
+opens its page in its own browser context, so nothing carries over between them.
+
 **What is rendered.** The CLI computes the document exactly as `show` or
 `compare` would, then opens the Inspector's mountable bundle at the reserved
 origin `https://projections.invalid` with nothing listening: the DevTools Fetch

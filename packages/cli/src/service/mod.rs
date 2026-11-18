@@ -189,6 +189,11 @@ impl Service {
         })
     }
 
+    /// The browsers this service's renders share.
+    pub fn browsers(&self) -> &crate::browser::Pool {
+        &self.state.browsers
+    }
+
     /// Stops jobs, sweeps, thumbnails and long polls, and waits for jobs to finish.
     pub async fn close(&self) {
         shutdown(self.state.clone()).await;

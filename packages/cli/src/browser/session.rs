@@ -3,6 +3,7 @@
 
 use std::{
     io::Read,
+    path::PathBuf,
     process::{Child, Command, Stdio},
     sync::{
         Arc, Mutex,
@@ -19,12 +20,58 @@ use serde_json::{Value, json};
 use super::{
     LaunchOptions, STDERR_TAIL_BYTES, Transport,
     connection::{Commands, Dispatch, EventHook, Writer},
+    gate,
     switches::arguments,
     websocket::{connect_socket, read_socket},
 };
 #[cfg(unix)]
 use super::{connection::read_pipe, unix};
 use crate::supervision::Group;
+
+/// The DevTools pipes the browser was started with (Unix only).
+#[cfg(unix)]
+type Pipes = Option<unix::Pipes>;
+#[cfg(not(unix))]
+type Pipes = ();
+
+/// What connecting to a started browser needs.
+struct Pending {
+    pipes: Pipes,
+    sender: mpsc::Sender<Result<Value, String>>,
+}
+
+/// How a browser was launched: a reused one must have been launched the same way.
+#[derive(Clone, PartialEq, Debug)]
+pub(super) struct Launched {
+    executable: PathBuf,
+    transport: Transport,
+    width: u32,
+    height: u32,
+    scale: f64,
+}
+
+impl Launched {
+    pub(super) fn of(options: &LaunchOptions<'_>) -> Self {
+        Self {
+            executable: options.executable.to_path_buf(),
+            transport: options.transport,
+            width: options.width,
+            height: options.height,
+            scale: options.scale,
+        }
+    }
+}
+
+#[cfg(unix)]
+fn signalled(status: std::process::ExitStatus) -> bool {
+    use std::os::unix::process::ExitStatusExt;
+    status.signal().is_some()
+}
+
+#[cfg(not(unix))]
+fn signalled(_: std::process::ExitStatus) -> bool {
+    false
+}
 
 /// A running headless browser and its DevTools connection.
 pub struct Browser {
@@ -36,17 +83,35 @@ pub struct Browser {
     hook: Arc<Mutex<Option<EventHook>>>,
     stderr: Arc<Mutex<Vec<u8>>>,
     cancel: Arc<AtomicBool>,
+    pub(super) launched: Launched,
     stopped: bool,
     // Dropped after the browser is stopped, so the profile can be removed.
     profile: tempfile::TempDir,
 }
 
 impl Browser {
-    /// Starts the browser with a fresh private profile and connects to it.
+    /// Starts the browser with a fresh private profile and connects to it. At
+    /// most a few browsers start at once on this machine (see `gate`), and one
+    /// that aborts before its DevTools connection answers is started once more.
     pub fn launch(options: LaunchOptions<'_>) -> Result<Self> {
         if cfg!(not(unix)) && options.transport == Transport::Pipe {
             bail!("The DevTools pipe transport is only available on Unix");
         }
+        let _slot = gate::acquire(&options.cancel)?;
+        let mut retried = false;
+        loop {
+            let (mut browser, pending) = Self::spawn(&options)?;
+            match browser.connect(pending, options.transport) {
+                Ok(()) => return Ok(browser),
+                Err(_) if !retried && browser.aborted() => retried = true,
+                Err(error) if retried => return Err(error.context("The browser was started again after it aborted while starting")),
+                Err(error) => return Err(error),
+            }
+        }
+    }
+
+    /// Starts the browser process; [`Browser::connect`] then reaches it.
+    fn spawn(options: &LaunchOptions<'_>) -> Result<(Self, Pending)> {
         let profile = tempfile::Builder::new()
             .prefix("projections-browser-")
             .tempdir()
@@ -74,6 +139,8 @@ impl Browser {
         } else {
             None
         };
+        #[cfg(not(unix))]
+        let pipes = ();
         let mut child = command
             .spawn()
             .with_context(|| format!("Could not start the browser {}", options.executable.display()))?;
@@ -99,25 +166,33 @@ impl Browser {
             });
         }
         let (sender, messages) = mpsc::channel();
-        let hook: Arc<Mutex<Option<EventHook>>> = Arc::default();
-        let dispatch = Dispatch {
-            sender,
-            hook: hook.clone(),
-        };
-        let mut browser = Browser {
+        let browser = Browser {
             child,
             group,
             writer: Arc::default(),
             messages,
             next_id: Arc::new(AtomicU64::new(1)),
-            hook,
+            hook: Arc::default(),
             stderr,
-            cancel: options.cancel,
+            cancel: options.cancel.clone(),
+            launched: Launched::of(options),
             stopped: false,
             profile,
         };
+        Ok((browser, Pending { pipes, sender }))
+    }
+
+    /// Connects to the started browser and waits until it answers.
+    fn connect(&mut self, pending: Pending, transport: Transport) -> Result<()> {
         let deadline = Instant::now() + Duration::from_secs(30);
-        let writer = match options.transport {
+        let Pending { pipes, sender } = pending;
+        #[cfg(not(unix))]
+        let () = pipes;
+        let dispatch = Dispatch {
+            sender,
+            hook: self.hook.clone(),
+        };
+        let writer = match transport {
             #[cfg(unix)]
             Transport::Pipe => {
                 let (writer, reader) = pipes.context("Missing DevTools pipes")?.connect();
@@ -127,7 +202,7 @@ impl Browser {
             #[cfg(not(unix))]
             Transport::Pipe => unreachable!(),
             Transport::Port => {
-                let endpoint = browser.active_port(deadline)?;
+                let endpoint = self.active_port(deadline)?;
                 let (stream, reader) = connect_socket(&endpoint)?;
                 let writer = Arc::new(Mutex::new(stream));
                 let pong = writer.clone();
@@ -135,11 +210,27 @@ impl Browser {
                 Writer::Socket(writer)
             }
         };
-        *browser.writer.lock().unwrap_or_else(|error| error.into_inner()) = Some(writer);
-        browser
-            .call("Browser.getVersion", json!({}), None, deadline)
+        *self.writer.lock().unwrap_or_else(|error| error.into_inner()) = Some(writer);
+        self.call("Browser.getVersion", json!({}), None, deadline)
             .context("The browser did not answer on its DevTools connection")?;
-        Ok(browser)
+        Ok(())
+    }
+
+    /// Whether the browser, its connection having failed, was ended by a signal
+    /// (on macOS, an abort while registering with the window server) rather
+    /// than exiting, being cancelled or still running.
+    fn aborted(&mut self) -> bool {
+        if self.cancel.load(Ordering::SeqCst) {
+            return false;
+        }
+        let deadline = Instant::now() + Duration::from_secs(1);
+        loop {
+            match self.child.try_wait() {
+                Ok(Some(status)) => return signalled(status),
+                Ok(None) if Instant::now() < deadline => thread::sleep(Duration::from_millis(20)),
+                _ => return false,
+            }
+        }
     }
 
     /// The `ws://` endpoint the browser writes to `DevToolsActivePort`.
@@ -229,6 +320,21 @@ impl Browser {
                 }
             }
         }
+    }
+
+    /// Whether the browser is still running.
+    pub(super) fn running(&mut self) -> bool {
+        !self.stopped && matches!(self.child.try_wait(), Ok(None))
+    }
+
+    /// Cancels waits with `cancel` from now on, for a reused browser's next render.
+    pub(super) fn set_cancel(&mut self, cancel: Arc<AtomicBool>) {
+        self.cancel = cancel;
+    }
+
+    /// Discards the browser's events again.
+    pub(super) fn clear_events(&self) {
+        *self.hook.lock().unwrap_or_else(|error| error.into_inner()) = None;
     }
 
     /// Handles the browser's events on the connection's reader thread instead

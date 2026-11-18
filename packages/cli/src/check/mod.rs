@@ -95,11 +95,22 @@ pub async fn check(runner: &Runner, options: Options) -> Result<Value> {
         executable: options.render.then(|| browser::find(options.browser.as_deref())),
         root,
         options: &options,
+        browsers: browser::Pool::new(),
     };
     let mut projections: Vec<Value> = broken.iter().map(|failure| invalid_entry(failure)).collect();
+    let mut checked = Ok(());
     for definition in &selected {
-        projections.push(checker.projection(definition).await?);
+        match checker.projection(definition).await {
+            Ok(projection) => projections.push(projection),
+            Err(error) => {
+                checked = Err(error);
+                break;
+            }
+        }
     }
+    let browsers = checker.browsers.clone();
+    tokio::task::spawn_blocking(move || browsers.close()).await?;
+    checked?;
     let ok = projections.iter().all(|projection| projection["ok"] == true);
     Ok(json!({"format": "projections.check", "version": 0, "ok": ok, "projections": projections}))
 }

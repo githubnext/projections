@@ -45,12 +45,14 @@ pub async fn page(request: PageRequest) -> Result<Snapshot> {
         cancel: Arc::new(AtomicBool::new(false)),
     };
     let (png, settled) = tokio::task::spawn_blocking(move || {
-        let (mut browser, session) = open(&options)?;
+        let browsers = crate::browser::Pool::single_use();
+        let (mut browser, page) = open(&options, &browsers)?;
+        let session = page.session.clone();
         let deadline = Instant::now() + options.timeout;
         let shot = navigate(&mut browser, &session, &options.url, deadline)
             .and_then(|()| wait_ready(&mut browser, &session, &options, deadline))
             .and_then(|()| stable_capture(&mut browser, &session, &options, deadline));
-        browser.close()?;
+        browsers.give(browser, page)?;
         shot
     })
     .await

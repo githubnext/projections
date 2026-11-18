@@ -21,8 +21,9 @@ inputs:
     default: githubnext/projections
   reuse-base-artifact:
     description: >-
-      On pull requests, reuse the merge base's own projections artifact (from the newest successful run for that
-      commit) instead of extracting the base again. The CLI verifies every reused extraction; without one, the base
+      On pull requests, reuse the merge base's own projections artifact (from the newest successful run of this
+      workflow file for that commit, for a push or a pull request from this repository, never a fork's) instead of
+      extracting the base again. The CLI verifies every reused extraction; without one, the base
       is extracted here, in a workspace prepared by the repository's environment file when trust is true.
     default: 'true'
   build-from-source:
@@ -37,6 +38,13 @@ inputs:
   retention-days:
     description: Days to keep the artifact (0 uses the repository default)
     default: '0'
+  attest:
+    description: >-
+      Attest the artifact's manifest (GitHub artifact attestations), so `projections --ci --artifact DIR` can
+      authenticate a downloaded copy as this repository's official CI output. Needs id-token: write and
+      attestations: write, and attestations available to the repository (public, or GitHub Enterprise Cloud). Skipped
+      on pull requests from forks, which can't attest.
+    default: 'false'
   summary:
     description: Write each projection's result, steps and changes to the job summary
     default: 'true'
@@ -97,6 +105,9 @@ outputs:
   artifact-id:
     description: ID of the uploaded Actions artifact
     value: ${{ steps.upload.outputs.artifact-id }}
+  attestation-url:
+    description: URL of the artifact manifest's attestation, when attest is true
+    value: ${{ steps.attest.outputs.attestation-url }}
   cli-version:
     description: The CLI's --version output
     value: ${{ steps.install.outputs.cli-version }}
@@ -150,6 +161,15 @@ runs:
         if-no-files-found: error
         include-hidden-files: false
         overwrite: true
+    # The manifest lists every document's SHA-256, so attesting it covers the artifact. A fork's pull request gets no
+    # id-token and isn't the repository's own CI output anyway.
+    - id: attest
+      if: >-
+        inputs.attest == 'true' && (github.event_name == 'push' || (github.event_name == 'pull_request' &&
+        github.event.pull_request.head.repo.full_name == github.repository))
+      uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+      with:
+        subject-path: ${{ steps.collect.outputs.manifest }}
     # Renders from the saved documents: no extractor runs again and no token is passed.
     - id: snapshots
       if: inputs.snapshots != ''

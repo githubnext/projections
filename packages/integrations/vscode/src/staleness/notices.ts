@@ -1,12 +1,12 @@
 import type {ResultStamp, Staleness} from '../staleness.ts'
 
 /** Badges in the order a pair shows them: the one that most qualifies the result wins. */
-const badgeOrder = ['Stale', 'Approximate', 'Observed', 'From CI', 'Local']
+const badgeOrder = ['Stale', 'Approximate', 'Observed', 'Imported', 'From CI', 'Local']
 
 /**
  * The badge a result earns beside its choice, from its sides' `provenance.execution` through `badge`
  * (`environment-model.ts`'s `provenanceBadge`, so the side bar, tabs and the environment view agree): the one that
- * most qualifies it (Stale, then Approximate, Observed, From CI, Local), with each side's detail.
+ * most qualifies it (Stale, then Approximate, Observed, Imported, From CI, Local), with each side's detail.
  */
 export function resultBadge<Badge extends {label: string; detail: string}>(
   stamp: ResultStamp,

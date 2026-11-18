@@ -267,10 +267,12 @@ observation (`determinism: "observed"`, live or varying data such as timings)
 says **Observed 5 minutes ago · Refresh** (from `provenance.execution.at`)
 instead of whether it is out of date, unless its `fidelity` is `stale`; and a
 badge beside the choice says who observed the result and how faithfully: **From
-CI** (the commit's official extraction), **Local**, **Approximate**, **Stale**
-or **Observed**, from `provenanceBadge()` (`src/environment-model.ts`, shared
-with the environment view), the one that most qualifies either side, with each
-side's detail in its tooltip.
+CI** (the commit's official extraction: an artifact authenticated as the
+repository's own CI run), **Imported** (from an artifact nothing authenticated,
+such as an `--artifact` directory without a verified attestation), **Local**,
+**Approximate**, **Stale** or **Observed**, from `provenanceBadge()`
+(`src/environment-model.ts`, shared with the environment view), the one that
+most qualifies either side, with each side's detail in its tooltip.
 
 ## Developing a projection
 

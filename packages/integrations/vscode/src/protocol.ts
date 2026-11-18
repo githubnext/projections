@@ -69,7 +69,7 @@ export interface TabPairLabels {
   edits?: 'yours' | 'committed'
   /** The result is an observation (live or varying data): `Observed 5 minutes ago`, beside Refresh. */
   observed?: {text: string; title: string}
-  /** Who observed the result, and how faithfully (`provenanceBadge`): `From CI`, `Local`, `Approximate`, `Stale` or `Observed`. */
+  /** Who observed the result, and how faithfully (`provenanceBadge`): `From CI`, `Imported`, `Local`, `Approximate`, `Stale` or `Observed`. */
   provenance?: {label: string; title: string}
 }
 

@@ -20,11 +20,12 @@ Every input is optional.
 | `trust` | `false` | Pass --trust, allowing extractors that run repository code (custom commands and toolchain-based built-ins). On pull requests this runs code from the pull request's head. Leave false unless every projection you need requires it and the workflow has no secrets or write permissions. |
 | `version` |  | CLI release to install: a release tag such as v0.1.0, a major version such as v0 (its newest stable release), or latest. Defaults to the action's own version tag (for @v0, v0's newest stable release), else latest. |
 | `cli-repository` | `githubnext/projections` | Repository whose releases publish the CLI. |
-| `reuse-base-artifact` | `true` | On pull requests, reuse the merge base's own projections artifact (from the newest successful run for that commit) instead of extracting the base again. The CLI verifies every reused extraction; without one, the base is extracted here, in a workspace prepared by the repository's environment file when trust is true. |
+| `reuse-base-artifact` | `true` | On pull requests, reuse the merge base's own projections artifact (from the newest successful run of this workflow file for that commit, for a push or a pull request from this repository, never a fork's) instead of extracting the base again. The CLI verifies every reused extraction; without one, the base is extracted here, in a workspace prepared by the repository's environment file when trust is true. |
 | `build-from-source` | `false` | Build the CLI from the action's source instead of installing a release (needs Rust; for testing unreleased versions). |
 | `working-directory` | `.` | The checkout to examine; it needs full history (actions/checkout with fetch-depth 0). |
 | `artifact-name` | `projections` | Actions artifact name. |
 | `retention-days` | `0` | Days to keep the artifact (0 uses the repository default). |
+| `attest` | `false` | Attest the artifact's manifest (GitHub artifact attestations), so `projections --ci --artifact DIR` can authenticate a downloaded copy as this repository's official CI output. Needs id-token: write and attestations: write, and attestations available to the repository (public, or GitHub Enterprise Cloud). Skipped on pull requests from forks, which can't attest. |
 | `summary` | `true` | Write each projection's result, steps and changes to the job summary. |
 | `comment` | `false` | Also post the summary as one pull request comment, updated on each run (needs pull-requests write). |
 | `hosted-url` |  | Origin of a hosted view of the uploaded artifact, such as https://projections.example, to link from the summary and the comment. Empty links none. |
@@ -46,6 +47,7 @@ Every input is optional.
 | `projections` | Number of projections. |
 | `failed` | Number of projections that failed. |
 | `artifact-id` | ID of the uploaded Actions artifact. |
+| `attestation-url` | URL of the artifact manifest's attestation, when attest is true. |
 | `cli-version` | The CLI's --version output. |
 | `snapshots-directory` | The snapshots directory (PNG files and snapshots.json), when snapshots is set. |
 | `snapshots-artifact-id` | ID of the uploaded snapshots artifact. |

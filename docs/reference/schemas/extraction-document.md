@@ -69,10 +69,11 @@ Where and how faithfully the runner extracted it.
 | `determinism` | [`determinism`](definition.md#determinism) |  |  |
 | `environment` | string |  | Fingerprint of the run's environment: the Projections version, `PATH` and the granted variables' values, hashed. Pattern `^sha256:[0-9a-f]{64}$`. |
 | `at` | string |  | When the run happened, in UTC. Pattern `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$`. |
-| `official` | boolean |  | True for the run the team's CI published: the commit's official extraction. |
+| `official` | boolean |  | True for the run the repository's own CI published, authenticated (`ci.authentication`): the commit's official extraction. False for an imported artifact nothing authenticated. |
 | `ci` | object |  | The CI run whose artifact supplied it. |
 | `ci.repository` | string | Yes | At least 1 character. |
 | `ci.run` | integer | Yes | At least 1. At most 9007199254740991. |
 | `ci.workflow` | string |  | At least 1 character. |
+| `ci.authentication` | `"download"` or `"attestation"` |  | How the run was established: `download` when the CLI downloaded the artifact from a run GitHub's API identified as the repository's own Projections workflow, `attestation` when an imported artifact's attestation verified and named such a run. Absent for an unauthenticated import, whose manifest alone names the run. |
 
 No other properties are allowed.

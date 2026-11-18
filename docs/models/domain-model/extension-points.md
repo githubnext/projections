@@ -94,10 +94,11 @@ one run in one environment**, not a pure value. Three consequences follow.
 **Authority.** A commit's official extraction is the run the team's CI published
 (the Action's artifact). Local runs are labelled as runs. Every extraction's
 `provenance.execution` records the run: where it ran (`source`), its environment
-fingerprint, when (`at`), and for a CI run the repository and run ID with
-`official: true`. Hosts show the official run for a commit by default and say
-_From CI_, _Local_, _Approximate_ or _Stale_
-([local execution](../../design/local-execution.md)).
+fingerprint, when (`at`), and for a CI run the repository and run ID, with
+`official: true` only when that run is authenticated as the repository's own CI
+(an imported artifact nothing authenticated is labelled imported). Hosts show
+the official run for a commit by default and say _From CI_, _Imported_, _Local_,
+_Approximate_ or _Stale_ ([local execution](../../design/local-execution.md)).
 
 **Determinism classes.** An extractor declares how reproducible it is, as
 `execution.determinism` in the definition and `determinism` in a built-in's

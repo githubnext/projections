@@ -104,6 +104,9 @@ pub struct ExecutionPolicy {
     pub artifacts: Vec<PathBuf>,
     /// Download the repository's own CI artifacts with `gh` (`--ci`).
     pub download: bool,
+    /// The workflow files whose runs' artifacts are the repository's own CI
+    /// output (`--ci-workflow`), ahead of the configuration's `ciWorkflows`.
+    pub ci_workflows: Vec<String>,
     /// Extract a `HEAD` commit in place despite untracked files (`--in-place`).
     pub in_place: bool,
     /// The workspace strategy (`--workspace`), ahead of configuration.
@@ -184,11 +187,25 @@ impl Runner {
             || self.repository_root().is_ok_and(|root| {
                 crate::workspaces::config().is_ok_and(|config| crate::workspaces::setting(&config, &root, "ci") == Some(json!(true)))
             });
+        let mut workflows = policy.ci_workflows.clone();
+        if workflows.is_empty()
+            && let Ok(root) = self.repository_root()
+            && let Ok(config) = crate::workspaces::config()
+        {
+            workflows = match crate::workspaces::setting(&config, &root, "ciWorkflows") {
+                Some(Value::String(workflow)) => vec![workflow],
+                Some(Value::Array(workflows)) => workflows
+                    .iter()
+                    .filter_map(|workflow| workflow.as_str().map(str::to_owned))
+                    .collect(),
+                _ => Vec::new(),
+            };
+        }
         let mut runner = self
             .with_regenerate(policy.regenerate)
             .with_in_place(policy.in_place)
             .with_workspace(policy.workspace)
-            .with_artifacts(policy.artifacts.clone(), download);
+            .with_ci_artifacts(policy.artifacts.clone(), download, workflows);
         if policy.cache {
             runner = match runner.clone().with_cache() {
                 Ok(cached) => cached,
@@ -252,8 +269,15 @@ impl Runner {
 
     /// Reuses verified extractions from CI artifacts in `directories` and, when
     /// `download`, from the repository's own CI runs (`gh`).
-    pub fn with_artifacts(mut self, directories: Vec<PathBuf>, download: bool) -> Self {
-        self.artifacts = Arc::new(crate::ci_artifacts::Artifacts::new(directories, download));
+    pub fn with_artifacts(self, directories: Vec<PathBuf>, download: bool) -> Self {
+        self.with_ci_artifacts(directories, download, Vec::new())
+    }
+
+    /// As [`Self::with_artifacts`], accepting only runs of the workflow files
+    /// `workflows` names (paths or file names); empty accepts the workflows
+    /// that use the Projections Action on the default branch.
+    pub fn with_ci_artifacts(mut self, directories: Vec<PathBuf>, download: bool, workflows: Vec<String>) -> Self {
+        self.artifacts = Arc::new(crate::ci_artifacts::Artifacts::new(directories, download, workflows));
         self
     }
 

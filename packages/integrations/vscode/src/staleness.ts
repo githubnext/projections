@@ -37,9 +37,9 @@ export interface SideResult {
     environment?: string
     /** When it ran, UTC. */
     at?: string
-    /** The commit's official extraction: the one the team's CI published. */
+    /** The commit's official extraction: the one the repository's own CI published, authenticated. */
     official?: boolean
-    ci?: {repository?: string; run?: number | string; workflow?: string}
+    ci?: {repository?: string; run?: number | string; workflow?: string; authentication?: 'download' | 'attestation'}
     /** The repository paths the extractor depended on (local execution M5). */
     scope?: string[]
   }

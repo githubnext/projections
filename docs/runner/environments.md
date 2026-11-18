@@ -89,9 +89,11 @@ in the per-user configuration directory (`PROJECTIONS_CONFIG_DIR`, else
 then the environment file's `workspace.strategy`; and otherwise automatically:
 `fresh` for fewer than 2,000 files and 20 MiB tracked, `worktree` when free disk
 space is at least four times the tracked size, else `clone` where the filesystem
-supports it, else `none`. (`"ci": true` in the configuration turns on `--ci`.)
-Each strategy keeps up to four slots per repository, each locked with an OS file
-lock while a run uses it, so concurrent runs never share one.
+supports it, else `none`. (`"ci": true` in the configuration turns on `--ci`,
+and `"ciWorkflows": [".github/workflows/ci.yml"]` names the workflow files whose
+runs `--ci` accepts, as [`--ci-workflow`](caches.md#ci-artifacts-as-a-source)
+does.) Each strategy keeps up to four slots per repository, each locked with an
+OS file lock while a run uses it, so concurrent runs never share one.
 `projections workspace list` shows them (strategy, commit, prepared steps,
 whether in use) and `projections workspace clean` removes those not in use, with
 their Git worktree registrations. Removing the cache directory is safe too;

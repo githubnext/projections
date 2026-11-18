@@ -54,7 +54,7 @@ export function keptSides(
 }
 
 /**
- * Whether a tab shows its result's provenance badge: only when it is unusual (From CI, Approximate, Stale or Observed).
+ * Whether a tab shows its result's provenance badge: only when it is unusual (From CI, Imported, Approximate, Stale or Observed).
  * An ordinary local extraction shows none; the summary bar's tooltip names it either way.
  */
 export function unusualProvenance(label: string | undefined): boolean {

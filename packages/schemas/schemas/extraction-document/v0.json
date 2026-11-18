@@ -146,7 +146,7 @@
           "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
         },
         "official": {
-          "description": "True for the run the team's CI published: the commit's official extraction.",
+          "description": "True for the run the repository's own CI published, authenticated (`ci.authentication`): the commit's official extraction. False for an imported artifact nothing authenticated.",
           "type": "boolean"
         },
         "ci": {
@@ -157,7 +157,11 @@
           "properties": {
             "repository": {"type": "string", "minLength": 1},
             "run": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
-            "workflow": {"type": "string", "minLength": 1}
+            "workflow": {"type": "string", "minLength": 1},
+            "authentication": {
+              "description": "How the run was established: `download` when the CLI downloaded the artifact from a run GitHub's API identified as the repository's own Projections workflow, `attestation` when an imported artifact's attestation verified and named such a run. Absent for an unauthenticated import, whose manifest alone names the run.",
+              "enum": ["download", "attestation"]
+            }
           }
         }
       }

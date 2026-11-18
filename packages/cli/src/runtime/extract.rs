@@ -64,9 +64,8 @@ impl Runner {
         {
             Self::restamp(&mut document, examined, definition);
             let document = artifact::validate_extraction(&document)?;
-            if let (Some(key), Some(cache)) = (&key, &self.cache) {
-                let _ = cache.put(key, &document);
-            }
+            // Not cached: whether CI's extraction is official depends on the
+            // artifact policy, which is checked again on every run.
             self.harvest(definition, &document, crate::generation_store::Source::Ci);
             return Ok(document);
         }

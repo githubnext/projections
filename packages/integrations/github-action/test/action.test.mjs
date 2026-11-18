@@ -10,6 +10,7 @@ import {Ajv2020} from 'ajv/dist/2020.js'
 import {
   artifactManifest,
   artifactRuns,
+  workflowPath,
   cliArguments,
   commentBody,
   commentMarker,
@@ -105,17 +106,35 @@ test('events: pull_request compares merge base to head with the base definition;
     '--trust',
     '--in-place',
   ])
+  const own = {
+    event: 'push',
+    path: '.github/workflows/ci.yml',
+    repository: {full_name: 'octo-org/delivery'},
+    head_repository: {full_name: 'Octo-Org/delivery'},
+  }
   assert.deepEqual(
-    artifactRuns({
-      workflow_runs: [
-        {id: 1, created_at: '2026-01-01T00:00:00Z', conclusion: 'success'},
-        {id: 2, created_at: '2026-01-02T00:00:00Z', conclusion: 'success'},
-        {id: 3, created_at: '2026-01-03T00:00:00Z', conclusion: 'failure'},
-        {id: 'x'},
-      ],
-    }),
+    artifactRuns(
+      {
+        workflow_runs: [
+          {id: 1, created_at: '2026-01-01T00:00:00Z', conclusion: 'success', ...own},
+          {id: 2, created_at: '2026-01-02T00:00:00Z', conclusion: 'success', ...own, event: 'pull_request'},
+          {id: 3, created_at: '2026-01-03T00:00:00Z', conclusion: 'failure', ...own},
+          {id: 'x', ...own},
+          // A fork's pull request, another workflow file and another event are never reused.
+          {id: 4, created_at: '2026-01-04T00:00:00Z', ...own, event: 'pull_request', head_repository: {full_name: 'mallory/delivery'}},
+          {id: 5, created_at: '2026-01-05T00:00:00Z', ...own, path: '.github/workflows/other.yml'},
+          {id: 6, created_at: '2026-01-06T00:00:00Z', ...own, event: 'pull_request_target'},
+        ],
+      },
+      {repository: 'octo-org/delivery', workflow: '.github/workflows/ci.yml'},
+    ),
     [2, 1],
   )
+  assert.equal(
+    workflowPath('Octo-Org/delivery/.github/workflows/ci.yml@refs/pull/7/merge', 'octo-org/delivery'),
+    '.github/workflows/ci.yml',
+  )
+  assert.equal(workflowPath('mallory/delivery/.github/workflows/ci.yml@refs/heads/main', 'octo-org/delivery'), undefined)
   assert.deepEqual(eventSubject('push', {after: sha('d')}, 'refs/heads/main'), {kind: 'push', ref: 'refs/heads/main', revision: sha('d')})
   assert.throws(() => eventSubject('push', {after: '0'.repeat(40)}, 'refs/heads/main'), /deleted/)
   assert.throws(() => eventSubject('pull_request_target', {}), /secrets/)
@@ -440,7 +459,7 @@ test("the base side reuses the merge base's own CI artifact, which the base step
     path.join(bin, 'gh'),
     `#!/bin/sh
 case "$*" in
-  *"actions/runs?head_sha=${base}"*) printf '%s' '{"workflow_runs":[{"id":555,"conclusion":"success","created_at":"2026-01-01T00:00:00Z"}]}' ;;
+  *"actions/runs?head_sha=${base}"*) printf '%s' '{"workflow_runs":[{"id":555,"conclusion":"success","created_at":"2026-01-01T00:00:00Z","event":"push","path":".github/workflows/ci.yml","repository":{"full_name":"octo-org/delivery"},"head_repository":{"full_name":"octo-org/delivery"}}]}' ;;
   *"actions/runs/555/artifacts"*) printf '%s' '{"artifacts":[{"name":"projections","expired":false}]}' ;;
   "run download 555 --repo octo-org/delivery --name projections --dir "*) cp -R '${published}/.' "$9" ;;
   *) echo "unexpected gh $*" >&2; exit 1 ;;
@@ -462,13 +481,15 @@ esac
       GITHUB_EVENT_PATH: eventPath,
       GITHUB_REF: 'refs/pull/7/merge',
       GITHUB_REPOSITORY: 'octo-org/delivery',
+      GITHUB_WORKFLOW_REF: 'octo-org/delivery/.github/workflows/ci.yml@refs/pull/7/merge',
       GITHUB_OUTPUT: outputs,
     },
   })
   assert.equal(downloaded.status, 0, downloaded.stderr + downloaded.stdout)
   assert.doesNotMatch(downloaded.stdout, /::warning/)
   const baseArtifact = readFileSync(outputs, 'utf8').match(/^directory=(.*)$/m)[1]
-  // The comparison's base side is CI's official extraction; the head is extracted in place.
+  // The comparison's base side is CI's extraction, labelled imported (the CLI can't authenticate the base step's
+  // download); the head is extracted in place.
   const {outputs: collected} = collect(
     directory,
     repo,
@@ -483,7 +504,8 @@ esac
   const files = manifest.projections.find(projection => projection.id === 'files')
   const document = JSON.parse(readFileSync(path.join(collected.directory, files.path), 'utf8'))
   assert.equal(document.before.provenance.execution.source, 'ci')
-  assert.equal(document.before.provenance.execution.official, true)
+  assert.equal(document.before.provenance.execution.official, false)
+  assert.equal(document.before.provenance.execution.ci.authentication, undefined)
   assert.equal(document.after.provenance.execution.source, 'local-git-objects')
 })
 
@@ -609,14 +631,19 @@ fi
   assert.doesNotMatch(readFileSync(log, 'utf8'), /attestation/)
 })
 
-test('action.yml passes inputs through the environment, pins upload-artifact and keeps tokens away from extraction', async () => {
+test('action.yml passes inputs through the environment, pins its actions and keeps tokens away from extraction', async () => {
   const {parse} = await import('yaml')
   const action = parse(readFileSync(path.join(root, 'action.yml'), 'utf8'))
   assert.equal(action.runs.using, 'composite')
   for (const step of action.runs.steps) {
     if (step.run) assert.equal(step.run.includes('${{'), false, 'Expressions must enter through env, not shell text')
-    if (step.uses) assert.match(step.uses, /^actions\/upload-artifact@[a-f0-9]{40}$/)
+    if (step.uses) assert.match(step.uses, /^actions\/(?:upload-artifact|attest)@[a-f0-9]{40}$/)
   }
+  // Attesting is opt-in (it needs id-token and attestations write), covers the manifest, and skips forks' pull requests.
+  const attest = action.runs.steps.find(step => step.id === 'attest')
+  assert.equal(action.inputs.attest.default, 'false')
+  assert.equal(attest.with['subject-path'], '${{ steps.collect.outputs.manifest }}')
+  assert.match(attest.if, /github\.event\.pull_request\.head\.repo\.full_name == github\.repository/)
   // A composite action's run steps see its ref and repository only through these expressions, not GITHUB_ACTION_*.
   const install = action.runs.steps.find(step => step.id === 'install')
   assert.equal(install.env.ACTION_REF, '${{ github.action_ref }}')

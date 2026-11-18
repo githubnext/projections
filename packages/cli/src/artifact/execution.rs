@@ -103,9 +103,15 @@ pub fn validate_execution(value: &Value) -> Result<Value> {
         normalized["official"] = official.clone();
     }
     if let Some(ci) = value.get("ci") {
-        fields(ci, &["repository", "run", "workflow"], "provenance.execution.ci")?;
+        fields(ci, &["repository", "run", "workflow", "authentication"], "provenance.execution.ci")?;
         if let Some(workflow) = ci.get("workflow") {
             text(workflow, "provenance.execution.ci.workflow")?;
+        }
+        if let Some(authentication) = ci.get("authentication") {
+            ensure!(
+                matches!(authentication.as_str(), Some("download" | "attestation")),
+                "Unsupported provenance.execution.ci.authentication"
+            );
         }
         text(&ci["repository"], "provenance.execution.ci.repository")?;
         ensure!(

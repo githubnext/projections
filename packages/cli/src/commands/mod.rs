@@ -86,10 +86,13 @@ pub struct Sources {
     /// Don't read or write the persistent extraction cache
     #[arg(long)]
     pub no_cache: bool,
-    /// Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh
+    /// Reuse extractions of commits from this repository's own CI runs (their projections artifact), downloaded with gh: push and same-repository pull request runs of the Projections workflow, never a fork's
     #[arg(long)]
     pub ci: bool,
-    /// Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json); repeatable
+    /// A workflow file (path or file name) whose runs are the Projections workflow for --ci; repeatable [default: the configuration's ciWorkflows, else the workflows using githubnext/projections on the default branch]
+    #[arg(long, value_name = "FILE")]
+    pub ci_workflow: Vec<String>,
+    /// Reuse extractions from a downloaded CI artifact directory (holding projections.artifact.json), labelled imported unless --ci verifies its attestation; repeatable
     #[arg(long, value_name = "DIR")]
     pub artifact: Vec<PathBuf>,
     /// Extract a commit that is this checkout's HEAD in place even when untracked files (such as CI's build output) are present; tracked files must be unmodified
@@ -136,6 +139,7 @@ impl Sources {
             cache: !self.no_cache,
             artifacts: self.artifact.clone(),
             download: self.ci,
+            ci_workflows: self.ci_workflow.clone(),
             in_place: self.in_place,
             workspace: self.workspace.map(WorkspaceStrategy::strategy),
             regenerate: self.regenerate,

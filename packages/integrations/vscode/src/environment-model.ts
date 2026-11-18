@@ -91,7 +91,7 @@ export function workspaceArguments(setting: unknown): string[] {
 
 /** The badge an extraction's run earns, from `provenance.execution`: who observed it, and how faithfully. */
 export interface ProvenanceBadge {
-  label: 'From CI' | 'Local' | 'Approximate' | 'Stale' | 'Observed'
+  label: 'From CI' | 'Imported' | 'Local' | 'Approximate' | 'Stale' | 'Observed'
   detail: string
 }
 
@@ -104,10 +104,11 @@ export function provenanceBadge(document: unknown): ProvenanceBadge | undefined 
     return {label: 'Approximate', detail: "Extracted with the working tree's dependencies, whose lockfiles differ from this revision's."}
   if (execution.source === 'ci') {
     const ci = execution.ci as {repository?: string; run?: number} | undefined
-    return {
-      label: 'From CI',
-      detail: `The official extraction, published by CI run ${ci?.run ?? '?'} of ${ci?.repository ?? 'this repository'}${at}.`,
-    }
+    const run = `CI run ${ci?.run ?? '?'} of ${ci?.repository ?? 'this repository'}`
+    // Only an authenticated artifact is official; an imported one only claims its run.
+    return execution.official === true
+      ? {label: 'From CI', detail: `The official extraction, published by ${run}${at}.`}
+      : {label: 'Imported', detail: `Imported from an artifact that names ${run}${at}; unauthenticated, so not the official extraction.`}
   }
   if (execution.determinism === 'observed') return {label: 'Observed', detail: `An observation of varying data, made locally${at}.`}
   const where: Record<string, string> = {

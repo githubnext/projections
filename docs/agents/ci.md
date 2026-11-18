@@ -174,9 +174,13 @@ of the head into the base (`refs/pull/<number>/merge`). So:
 
 - **The merge base** is reused, not extracted, when the merge base's own CI run
   succeeded and uploaded a `projections` artifact: usually the push run on the
-  default branch. The Action downloads it and the CLI verifies each extraction.
-  This is why the step should run on pushes to the default branch, in a run that
-  succeeds; artifacts also expire after `retention-days`.
+  default branch. Only a run of the same workflow file, in this repository, for
+  a push or a pull request from this repository counts (a fork's pull request
+  runs its own workflow files, so its artifact is never reused). The Action
+  downloads it and the CLI verifies each extraction, labelling it imported, not
+  official, since the CLI's step holds no token to authenticate it. This is why
+  the step should run on pushes to the default branch, in a run that succeeds;
+  artifacts also expire after `retention-days`.
 - **Projections that only read files** read both commits from Git objects:
   nothing is installed for them.
 - **Projections that run your toolchain** (with [trust](#trust)) need each
@@ -223,6 +227,7 @@ itself; a commit SHA, branch or `@latest` installs the latest release.
 | `summary` | `true` | Write each projection's result, steps and changes to the job summary. |
 | `comment` | `false` | Also post the summary as one pull request comment, updated on each run. Needs `pull-requests: write`. |
 | `retention-days` | repository default | How long GitHub keeps the artifact. |
+| `attest` | `false` | Attest the artifact's manifest with [GitHub artifact attestations](#attesting-the-artifact). Needs `id-token: write` and `attestations: write`. |
 | `fail-on-error` | `false` | Fail the job when a projection fails. By default failures are reported per projection, in the summary and as annotations, and the job succeeds. |
 | `snapshots` | none | Projection IDs to render as PNG [snapshots](#snapshots), light and dark. |
 | `snapshots-commit`, `snapshots-path` | `false`, `.github/projections/snapshots` | On pushes to the default branch, commit the snapshots for embedding in a README. Needs `contents: write`. |
@@ -241,6 +246,21 @@ under the job), not the whole workflow. With `trust: true` the job must keep
 only read permissions and no secrets, as [Trust](#trust) explains. Pull requests
 from forks never get a writable token, so they get no comment, but their job
 summary and artifact are still produced.
+
+### Attesting the artifact
+
+With `attest: true` the Action attests the artifact's manifest,
+`projections.artifact.json`, which lists every document's SHA-256, with
+`actions/attest`. A downloaded copy can then be authenticated:
+`projections show <commit> --ci --artifact DIR` runs `gh attestation verify` on
+its manifest and treats it as the commit's official extraction only when the
+attestation names a run of this repository's Projections workflow for a push or
+a pull request from this repository. Without an attestation, an imported
+directory is reused but labelled imported. It needs `id-token: write` and
+`attestations: write` on the job, and artifact attestations available to the
+repository (public repositories, or private ones on GitHub Enterprise Cloud).
+Pull requests from forks skip it: they get no `id-token`, and their runs are
+never the repository's own CI output.
 
 ## Snapshots
 
@@ -319,7 +339,8 @@ run, with the snapshots when there are any.
 `projections` artifact, unzip it, and open a projection's document,
 `projections/<id>.json`, with **Projections: Open Artifact…** (or from the
 Explorer's context menu). It presents the saved comparison or extraction as it
-was saved and runs nothing.
+was saved and runs nothing; its provenance, including whether it calls itself
+official, is the document's own claim.
 
 **From the pull request.**
 [`projections pr <number>`](https://github.com/githubnext/projections/blob/main/docs/runner/pull-requests.md) reproduces a pull

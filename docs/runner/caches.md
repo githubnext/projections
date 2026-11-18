@@ -85,13 +85,42 @@ names a downloaded `projections` artifact (a directory holding
 `projections.artifact.json`), and `--ci` downloads the artifact of this
 repository's newest successful GitHub Actions run for the commit with `gh` (the
 repository is the `origin` remote; `PROJECTIONS_GH` names another `gh`), keeping
-it under `artifacts/<repository>/<run>/` in the per-user cache. Downloading is
-the only network request this adds, and only with `--ci`. An extraction is
+it under `artifacts/<repository>/<run>/` in the per-user cache, with a record of
+the run beside it (`<run>.json`). Downloading, and verifying attestations, are
+the only network requests this adds, and only with `--ci`. An extraction is
 reused only when its file's SHA-256 matches the manifest, its own digest
 verifies, it describes exactly that clean commit, and its definition digest
-matches the definition being applied; its provenance then says `source: ci`,
-`official: true` and names the run. Both sides of a pull request artifact's
-comparisons are available, so a merge base CI compared is reused too.
+matches the definition being applied; its provenance then says `source: ci` and
+names the run. Both sides of a pull request artifact's comparisons are
+available, so a merge base CI compared is reused too.
+
+Only an authenticated extraction is `official: true`. `--ci` downloads only from
+a run that GitHub's API says succeeded in this repository for a `push`, or for a
+`pull_request` whose head repository is this repository, never a fork's (whose
+run uses the fork's own workflow files and can upload anything), and that ran
+the Projections workflow: a workflow file `--ci-workflow FILE` or the
+configuration's `ciWorkflows` (a path or file name, or a list;
+[configuration](environments.md)) names, else one whose file on the default
+branch uses `githubnext/projections`. Its provenance says
+`ci: {repository, run, workflow, authentication: "download"}`. An `--artifact`
+directory is authenticated only by its attestation: with `--ci`, the CLI runs
+`gh attestation verify` on its manifest (the Action attests it with
+[`attest: true`](../setup/ci.md#attesting-the-artifact)) and requires the
+attestation to name a run that passes the same checks
+(`authentication: "attestation"`). Any other imported extraction is still
+reused, but with `official: false` and no `authentication`: its manifest alone
+names the run, and nothing confirms it. If GitHub can't be reached (`gh`
+unauthenticated, offline, no `origin`), a matching import is still used,
+labelled imported; with nothing to fall back on, the error is reported.
+
+A download's record names the host, repository, run and workflow, and why the
+workflow was accepted (`configured` or `uses-action`). It is reused only while
+it matches the current `origin` and the active policy still accepts it: a
+workflow the configuration names, or, with none named, one accepted because it
+used the Projections Action, not merely because an earlier configuration named
+it. Downloads an earlier version kept without a complete record aren't used;
+`--ci` checks and records the run again. CI's extractions aren't kept in the
+extraction cache, so whether one is official is decided again on every run.
 
 `projections check --parity REV --ci` extracts a commit locally, with nothing
 reused, and compares it with CI's artifact for the same commit and definition: a

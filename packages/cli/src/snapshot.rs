@@ -366,7 +366,6 @@ fn page_state(browser: &mut Browser, session: &str, deadline: Instant) -> Result
 
 /// Takes a browser from `browsers` and opens a page set up for capture: its size, density, theme and the served host.
 fn open(options: &Capture, browsers: &browser::Pool) -> Result<(Browser, Page)> {
-    let deadline = Instant::now() + options.timeout;
     let mut browser = browsers.take(LaunchOptions {
         executable: &options.browser,
         transport: options.transport,
@@ -375,6 +374,8 @@ fn open(options: &Capture, browsers: &browser::Pool) -> Result<(Browser, Page)> 
         scale: options.scale,
         cancel: options.cancel.clone(),
     })?;
+    // From here: waiting for a launch slot doesn't spend the page's budget.
+    let deadline = Instant::now() + options.timeout;
     let page = browser.open_page(deadline)?;
     let session = page.session.as_str();
     browser.call(

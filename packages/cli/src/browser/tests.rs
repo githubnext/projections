@@ -150,3 +150,39 @@ fn a_pool_reuses_a_browser_launched_the_same_way() {
     render(&pool, 100);
     assert_eq!(started(), 4, "a single-use or closed pool keeps nothing");
 }
+
+#[cfg(unix)]
+#[test]
+fn one_worker_closes_a_kept_browser_once_it_is_idle() {
+    let directory = tempfile::tempdir().unwrap();
+    let (executable, starts) = answering_browser(directory.path());
+    let started = || std::fs::read_to_string(&starts).unwrap().lines().count();
+    let pool = Pool::expiring(Duration::from_millis(500));
+    let render = || {
+        let mut browser = pool
+            .take(LaunchOptions {
+                executable: &executable,
+                transport: Transport::Pipe,
+                width: 100,
+                height: 100,
+                scale: 1.0,
+                cancel: Arc::new(AtomicBool::new(false)),
+            })
+            .unwrap();
+        let page = browser.open_page(Instant::now() + Duration::from_secs(10)).unwrap();
+        pool.give(browser, page).unwrap();
+    };
+    // Renders that keep coming keep the browser, each moving its expiry later, with one worker throughout.
+    for _ in 0..4 {
+        render();
+        std::thread::sleep(Duration::from_millis(300));
+    }
+    assert_eq!(started(), 1);
+    assert_eq!(pool.workers_started(), 1);
+    // Once idle, the worker closes it and stops; the next render starts a browser and a worker again.
+    std::thread::sleep(Duration::from_millis(1000));
+    assert!(!pool.kept());
+    render();
+    assert_eq!((started(), pool.workers_started()), (2, 2));
+    pool.close();
+}

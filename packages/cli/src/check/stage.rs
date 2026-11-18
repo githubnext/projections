@@ -50,8 +50,6 @@ pub(super) async fn renderer_checks(
     let keys = keys.to_vec();
     let browsers = browsers.clone();
     let results = tokio::task::spawn_blocking(move || -> Result<Vec<(String, Value)>> {
-        // Starting the browser and the stage has its own budget; each scenario then gets the whole timeout.
-        let deadline = Instant::now() + timeout;
         let mut browser = browsers.take(browser::LaunchOptions {
             executable: &executable,
             transport: browser::Transport::default(),
@@ -60,6 +58,9 @@ pub(super) async fn renderer_checks(
             scale: 1.0,
             cancel,
         })?;
+        // Opening the stage has its own budget, from after any wait for a launch slot; each scenario then gets the
+        // whole timeout.
+        let deadline = Instant::now() + timeout;
         let page = browser.open_page(deadline)?;
         let results = served
             .attach(&mut browser, &page.session, handle, deadline)

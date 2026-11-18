@@ -10,6 +10,11 @@ export interface InspectorHostTheme {
   colorMode: 'light' | 'dark'
   accent?: string
   tokens?: Readonly<{[name: string]: string}>
+  /**
+   * Token overrides for a color mode other than the host's, sent while the person's theme choice shows that mode (the
+   * other mode of a theme seed, which has its own colors for both).
+   */
+  modes?: Readonly<Partial<Record<'light' | 'dark', Readonly<{[name: string]: string}>>>>
 }
 
 /**

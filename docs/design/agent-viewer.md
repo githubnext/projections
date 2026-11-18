@@ -248,6 +248,20 @@ they are present: `--background-color-default`, `--border-color-default`,
 `--font-sans`, `--font-mono`, `--text-body-medium` and `data-color-mode`, as
 `host-vscode` maps VS Code's, and sends renderer frames the theme tokens they
 map to, so the stage is the app's too. It also sets `--status-bar-color`.
+Another app that shows the page in its own browser pane (a custom agent harness)
+can't theme it so, and its agent passes the app's colors instead: a **theme
+seed** in the page's link (`?theme=`, which `projections view --theme` writes),
+`{"light": {...}, "dark": {...}}`, each mode a `background` and optionally
+`text`, `muted`, `border`, `accent`, `focus`, `sans` and `mono`. These are
+exactly the app theme's inputs (`appThemeTokens`, which the canvas mapping uses
+too), so a seed is mapped as the canvas's variables are; host core's
+`parseThemeSeed` accepts only colors `parseColor` reads and plain font lists,
+and the CLI checks the same. The seed lives only in its link, never in the
+viewer's state or on the machine, so a page opened elsewhere (the Copilot canvas
+on the same viewer) keeps its own theme. Per page, a seed wins over the app's
+theme, which wins over the default; a mode the seed leaves out keeps the page's
+own. The format and how an agent finds its app's colors are in
+[the agent tools](../runner/agent-tools.md#a-theme-seed-for-another-apps-browser-pane).
 
 ### 4. One tool catalog, answered by whichever surface shows the view
 

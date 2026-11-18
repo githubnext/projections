@@ -130,7 +130,7 @@ drift between surfaces, such as a stale VS Code manifest:
 ## The viewer
 
 ```sh
-projections view [--open] [--trust] [--port N] [-p ID] [--choice CHOICE | --before REV --after REV] [--mode MODE] [--viewer NAME]
+projections view [--open] [--trust] [--port N] [-p ID] [--choice CHOICE | --before REV --after REV] [--mode MODE] [--viewer NAME] [--theme SEED]
 projections view show|current|screenshot|refresh [--viewer NAME]
 projections view stop [--rotate]
 ```
@@ -196,6 +196,63 @@ the repository (or with `-C DIR`). For example, in an MCP client configuration:
 In VS Code, the Projections extension already gives the agent these tools for
 each workspace folder, on the backend its views share, so `projections mcp`
 isn't registered there: the agent would see every tool twice.
+
+### A theme seed for another app's browser pane
+
+An app that shows the viewer in its own browser pane, such as a custom agent
+harness, can't theme the page the way the Copilot app and VS Code do, so the
+page's default whites and greys may not match the app around it. The agent can
+give the page the app's colors instead: a **theme seed**, a few colors and
+families for each color mode, from which the page derives the rest of its theme
+(the stage, cards and bands, rules, focus ring and accent, contrast-corrected
+change colors) as it does from the Copilot app's.
+
+```json
+{
+  "light": {"background": "#f7f6f3", "text": "#2f2e2b", "muted": "#75736d", "border": "#e4e2dd", "accent": "#c96442"},
+  "dark": {"background": "#1f1e1c", "text": "#ecebe7", "border": "#3a3935", "accent": "#d97757"}
+}
+```
+
+- `light` and `dark` are each optional; a mode the seed leaves out keeps the
+  page's own theme in that mode. The page's color mode still follows the app
+  (else the system); the seed decides only its colors.
+- Each mode takes `background` (required: the app's surface the page sits on),
+  `text`, `muted`, `border`, `accent` (selection, links), `focus` (the focus
+  ring; the accent when absent) and `sans` and `mono` (font family names the
+  page already has; a seed loads no fonts). Nothing else is accepted.
+- Colors are `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb()` or `rgba()`; families are
+  plain or quoted names separated by commas; each value is at most 512
+  characters and the seed at most 4096. Anything else is refused whole, so a
+  seed never reaches the page as CSS.
+- `projections view --theme SEED` and `projections view show --theme SEED` take
+  it as inline JSON or a JSON file's path, check it (an invalid seed fails with
+  what is wrong) and put it in the link they print and open, as `?theme=` with
+  the seed's compact JSON, percent-encoded. With `projections mcp`, add
+  `?theme=` to the URL `open_projection` gives
+  (`encodeURIComponent(JSON.stringify(seed))`; a `#` must be `%23`).
+- The seed lives only in that link, not in the viewer: a page opened from
+  another link (the Copilot app's canvas on the same viewer, another browser)
+  keeps its own theme. Reloading and reconnecting keep it. A page whose seed
+  isn't valid ignores it, says so in its status line, and `current_view` says
+  why; `current_view` also says when a page took one.
+- A seed in the link wins over the Copilot app's theme, which wins over the
+  default theme.
+
+The seed belongs to the app, not to the repository or the machine (one machine
+may run several apps, the Copilot app among them), so Projections keeps no
+default seed. The agent finds the colors from the app itself: its own CSS or
+source when the agent can read them, a screenshot of itself sampled for its
+surface, text and rule colors, or by asking the person. It keeps the seed in the
+app's own agent instructions (its custom instructions or `AGENTS.md`) and passes
+it every time it opens the page. In the Copilot app and VS Code, which theme the
+viewer themselves, it passes none. For example, an instruction for a harness:
+
+```md
+When you show a Projections viewer in this app's browser pane, open it with
+`projections view show --theme .harness/projections-theme.json …` (that file
+holds the seed above), or add its `?theme=` to the URL you open.
+```
 
 ### MCP Apps hosts
 

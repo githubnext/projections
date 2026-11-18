@@ -83,6 +83,21 @@ separate inspector to start.
   writes `.github/extensions/projections/extension.mjs`), then open the
   `projections` canvas, whose input is `open_projection`'s. It shows the same
   viewer in the app's theme, which a page in a browser tab doesn't get.
+- **In your own app's browser pane** (a custom harness showing the page beside
+  you), when the page's default whites and greys don't match the app around it,
+  give it the app's colors: `projections view show --theme SEED` (inline JSON
+  or a JSON file) puts a theme seed in the link it prints, as `?theme=`; over
+  MCP, add `?theme=` with the seed's percent-encoded JSON to the URL yourself.
+  A seed is `{"light": {...}, "dark": {...}}` (either mode may be left out);
+  each mode has a `background` and optionally `text`, `muted`, `border`,
+  `accent`, `focus`, `sans` and `mono` (font names), colors as `#rrggbb` or
+  `rgb()`, for example
+  `{"light": {"background": "#f7f6f3", "text": "#2f2e2b", "border": "#e4e2dd"}}`.
+  The seed is your app's, not the repository's: take the colors from its own
+  CSS or source, a screenshot of yourself, or ask the person, keep it in your
+  app's own instructions (custom instructions, `AGENTS.md`) and pass it every
+  time you open the page. Never in the Copilot app or VS Code, which theme the
+  viewer themselves. `current_view` says whether the page took it.
 - **Talk it through**: say what they're looking at and what it shows (what
   changed, in what steps, what looks wrong), and show the next projection or
   pair on the same page. `current_view` (`projections view current`) says what

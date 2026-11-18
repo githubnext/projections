@@ -316,6 +316,7 @@ projections view [OPTIONS]
 | `--entity <ID>` | An entity, relationship or change to select, by ID. |
 | `--scenario <ID>` | A scenario from the projection's renderer scenarios, shown instead of revisions. |
 | `--viewer <NAME>` | Show it in a named viewer, its own page and URL beside the others, to show several projections side by side. Default: the default viewer. |
+| `--theme <SEED>` | Color the page as the app that shows it, for a harness whose surfaces the default theme doesn't match: a theme seed, inline JSON or a JSON file, `{"light": {"background": …, "border": …}, "dark": {…}}`. It goes in the printed link (`?theme=`), so only a page opened from that link takes it. Default: the page's own theme. |
 | `--port <PORT>` | The port to listen on; 0 for any free one. Default: the port this project's viewer last listened on, else any free one. |
 | `--open` | Also open the page in the default browser. |
 | `--trust` | Let it run repository code (custom extractors and renderers). Review the projections' code first. A viewer already running without trust is replaced, at the same URL. |
@@ -347,6 +348,7 @@ projections view show [OPTIONS]
 | `--entity <ID>` | An entity, relationship or change to select, by ID. |
 | `--scenario <ID>` | A scenario from the projection's renderer scenarios, shown instead of revisions. |
 | `--viewer <NAME>` | Show it in a named viewer, its own page and URL beside the others, to show several projections side by side. Default: the default viewer. |
+| `--theme <SEED>` | Color the page as the app that shows it, for a harness whose surfaces the default theme doesn't match: a theme seed, inline JSON or a JSON file, `{"light": {"background": …, "border": …}, "dark": {…}}`. It goes in the printed link (`?theme=`), so only a page opened from that link takes it. Default: the page's own theme. |
 | `--open` | Also open the page in the default browser. |
 | `--trust` | Let the viewer run repository code: one is started with trust, or replaces one running without it. |
 | `--port <PORT>` | The port a viewer this starts listens on; 0 for any free one. Refused when a viewer already runs on another. Default: the port this project's viewer last listened on, else any free one. |

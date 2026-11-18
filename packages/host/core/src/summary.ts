@@ -156,7 +156,7 @@ export function fitSummary(widths: readonly number[], available: number, more: n
  * Follows how many summary figures fit in a bar (`fitSummary`) as it resizes. The bar draws every figure once more in
  * a hidden measuring row: elements marked `data-summary-measure` holding one `data-summary-figure` per figure, in
  * order, and a `data-summary-more` button. Content marked `data-summary-fixed` (such as the varied toggle) always
- * stays in the bar and takes its room first. `key` changes whenever the figures' text does.
+ * stays in the bar and takes its room first, at the end and as much again at the start, so the figures stay centred. `key` changes whenever the figures' text does.
  */
 export function useSummaryFit(bar: RefObject<HTMLElement | null>, count: number, key: string): number {
   const [shown, setShown] = useState(count)
@@ -174,7 +174,8 @@ export function useSummaryFit(bar: RefObject<HTMLElement | null>, count: number,
         (sum, item) => sum + item.getBoundingClientRect().width + gap,
         0,
       )
-      const available = element.clientWidth - padding - fixed
+      // The figures sit centred: the room the fixed content takes at the end is kept free at the start too.
+      const available = element.clientWidth - padding - 2 * fixed
       setShown(
         fitSummary(
           figures.map(figure => figure.getBoundingClientRect().width),

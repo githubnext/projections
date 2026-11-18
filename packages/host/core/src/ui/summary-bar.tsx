@@ -281,40 +281,42 @@ export function SummaryBar({projection: p, className}: {projection: ProjectionCo
           </PopoverContent>
         </Popover>
       )}
-      <span aria-hidden="true" className="pj:flex-1" />
-      <ScopeHiddenFigure projection={p} />
-      {regenerated > 0 && (
-        <span data-summary-fixed="" className="pj:flex pj:shrink-0">
-          <button
-            type="button"
-            className={cn(figureButton, 'ph-regenerated-toggle pj:gap-1 pj:[&_svg]:size-3 pj:[&_svg]:shrink-0')}
-            aria-pressed={p.regeneratedOnly}
-            title={
-              p.regeneratedOnly ? 'Show every item' : 'Show only the items whose generated values were regenerated from the same inputs'
-            }
-            data-regenerated={regenerated}
-            onClick={() => p.setRegeneratedOnly(!p.regeneratedOnly)}
-          >
-            <Sparkle aria-hidden="true" />
-            <span className="ph-cap">{regenerated.toLocaleString()} regenerated</span>
-          </button>
-        </span>
-      )}
-      {within > 0 && (
-        <span data-summary-fixed="" className="pj:flex pj:shrink-0">
-          <button
-            type="button"
-            className={cn(figureButton, 'ph-varied-toggle pj:gap-1 pj:[&_svg]:size-3 pj:[&_svg]:shrink-0')}
-            aria-pressed={p.variedOnly}
-            title={p.variedOnly ? 'Show every item' : 'Show only the items that varied within tolerance'}
-            data-varied-within={within}
-            onClick={() => p.setVariedOnly(!p.variedOnly)}
-          >
-            <Activity aria-hidden="true" />
-            <span className="ph-cap">{within.toLocaleString()} varied within tolerance</span>
-          </button>
-        </span>
-      )}
+      {/* As wide as the lead spacer, so the figures stay centred; the fixed content sits at its end. */}
+      <span className="ph-summary-trail pj:flex pj:flex-1 pj:items-center pj:justify-end pj:gap-1">
+        <ScopeHiddenFigure projection={p} />
+        {regenerated > 0 && (
+          <span data-summary-fixed="" className="pj:flex pj:shrink-0">
+            <button
+              type="button"
+              className={cn(figureButton, 'ph-regenerated-toggle pj:gap-1 pj:[&_svg]:size-3 pj:[&_svg]:shrink-0')}
+              aria-pressed={p.regeneratedOnly}
+              title={
+                p.regeneratedOnly ? 'Show every item' : 'Show only the items whose generated values were regenerated from the same inputs'
+              }
+              data-regenerated={regenerated}
+              onClick={() => p.setRegeneratedOnly(!p.regeneratedOnly)}
+            >
+              <Sparkle aria-hidden="true" />
+              <span className="ph-cap">{regenerated.toLocaleString()} regenerated</span>
+            </button>
+          </span>
+        )}
+        {within > 0 && (
+          <span data-summary-fixed="" className="pj:flex pj:shrink-0">
+            <button
+              type="button"
+              className={cn(figureButton, 'ph-varied-toggle pj:gap-1 pj:[&_svg]:size-3 pj:[&_svg]:shrink-0')}
+              aria-pressed={p.variedOnly}
+              title={p.variedOnly ? 'Show every item' : 'Show only the items that varied within tolerance'}
+              data-varied-within={within}
+              onClick={() => p.setVariedOnly(!p.variedOnly)}
+            >
+              <Activity aria-hidden="true" />
+              <span className="ph-cap">{within.toLocaleString()} varied within tolerance</span>
+            </button>
+          </span>
+        )}
+      </span>
     </div>
   )
 }

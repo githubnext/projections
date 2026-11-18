@@ -46,7 +46,7 @@ const meta = {
         rendererNotice={
           args.withoutRenderer ? 'No renderer bundle is available here, so the host offers its table and text views.' : resolution.notice
         }
-        presentation={presentation}
+        presentation={args.changesOnly === undefined ? presentation : {...presentation, changesOnly: args.changesOnly}}
         colorMode={themeOf(globals)}
         beforeLabel="Before"
         afterLabel="After"
@@ -90,13 +90,19 @@ export const Extraction: Story = {name: 'One extraction', args: {scenario: 'grap
  * Test results whose durations are volatile: two tests varied within tolerance (unchanged, counted in the toolbar's
  * "2 varied within tolerance" toggle, never highlighted), one slowed beyond it (modified, with the volatile marker).
  */
-export const VolatileVariation: Story = {name: 'Volatile variation', args: {scenario: 'graph/test-timings', initialMode: 'diff'}}
+export const VolatileVariation: Story = {
+  name: 'Volatile variation',
+  args: {scenario: 'graph/test-timings', initialMode: 'diff', changesOnly: false},
+}
 /**
  * Class summaries a model wrote, declared as generated values: Cart reworded from the same inputs (unchanged, counted
  * in the "1 regenerated" toggle), Orders' summary regenerated because the class changed, and Invoices' only because the
  * model changed (gathered last by the model-upgrades comparator). Select a class for its Generated value.
  */
-export const GeneratedValues: Story = {name: 'Generated values', args: {scenario: 'graph/class-summaries', initialMode: 'diff'}}
+export const GeneratedValues: Story = {
+  name: 'Generated values',
+  args: {scenario: 'graph/class-summaries', initialMode: 'diff', changesOnly: false},
+}
 export const WithoutRenderer: Story = {name: 'Without a renderer', args: {withoutRenderer: true}}
 export const NoticesAndDiagnostics: Story = {name: 'Notices and diagnostics', args: {notices: true}}
 export const Annotated: Story = {

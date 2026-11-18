@@ -45,7 +45,9 @@ based on, and `Package.resolved` from the project's workspace
   `upper` modifiers, so `Harbor Widgets` is `Harbor_Widgets`, as
   `xcodebuild -showBuildSettings` reports. A module name that uses a setting the
   files don't define (one set on the command line or by the build system) is
-  `null` and listed in `metadata.unresolvedModules`.
+  `null` and listed in `metadata.unresolvedModules`. xcconfig files are read as
+  Xcode reads them: `//` starts a comment anywhere on a line, a trailing `\`
+  continues a line, and `#include` follows.
 - **Dependencies**: a target's `depends-on` another records whether it is
   `explicit` (a target dependency, including one in another project read here),
   `linked` (it links the other target's product: Xcode's implicit dependency)
@@ -54,15 +56,24 @@ based on, and `Package.resolved` from the project's workspace
   relationship, naming the `product`, to an `external-package` with its
   `location`, the project's `requirement` and the `version`, `revision` or
   `branch` `Package.resolved` pins; packages it pins that the project doesn't
-  reference are `transitive`.
+  reference are `transitive`. When projects pin one package differently, it has
+  each project's pin, as `resolved`, instead of one `version`. A product listed
+  without its package (a local package added as a folder) belongs to the one
+  local package the project refers to that declares it; otherwise it's listed in
+  `metadata.unresolved`.
 - **Imports**: the top-level `import` declarations of each target's Swift files,
   those its Sources build phase lists and those in the folders it synchronizes
   (Xcode 16), less the folders' exceptions for it. An import of another target's
   module marks their relationship `imported` (and `testable` for
   `@testable import`); one with no declared or linked dependency is an `imports`
-  relationship. An import only inside `#if` is `conditional`. Other modules
-  (`Foundation`, `SwiftUI`) are listed in the target's `imports`. Set `imports`
-  to `false` to read only the project files.
+  relationship. When several targets have the module's name (an iOS and a macOS
+  framework), the one the target declares or links is meant; with neither, the
+  only one in its project or, failing that, the only one; otherwise the import
+  names no target. An import only inside `#if` is `conditional`. Other modules
+  (`Foundation`, `SwiftUI`) are listed in the target's `imports`. A source with
+  a literal the reader can't read (a bare regex) gives the imports before it,
+  and is listed in `metadata.unreadSources`. Set `imports` to `false` to read
+  only the project files.
 
 IDs are the project's path and the target's name
 (`xcode:App%2FHarbor.xcodeproj:target:Harbor`); packages share

@@ -1,13 +1,11 @@
 //! The Swift packages a target uses: its package product dependencies and
-//! the packages they come from, and what `Package.resolved` pins.
+//! the packages they come from.
 
 use crate::project::{Project, normalize};
-use anyhow::Result;
-use projections_extractor_sdk::Context;
 use projections_extractor_swift_support::manifest::{Requirement, identity};
-use projections_extractor_swift_support::{Pin, resolved};
 use serde_json::{Map, Value};
 
+#[derive(Clone)]
 pub(crate) struct Package {
     pub identity: String,
     /// `repository` or `local`.
@@ -19,8 +17,8 @@ pub(crate) struct Package {
 
 pub(crate) struct ProductDependency {
     pub product: String,
-    /// The package it comes from; none for a product of a local package the
-    /// project lists as a folder rather than a package reference.
+    /// The package it comes from; none when the project doesn't say (a local
+    /// package listed as a folder), until `locals::attribute` finds it.
     pub package: Option<Package>,
 }
 
@@ -51,7 +49,7 @@ fn package(project: &Project, reference: &Map<String, Value>) -> Option<Package>
         }
         "XCLocalSwiftPackageReference" => {
             let path = reference.get("relativePath")?.as_str()?;
-            let location = normalize(&crate::join(&project.dir, path));
+            let location = normalize(&crate::join(&project.source_root, path));
             Some(Package {
                 identity: identity(path),
                 source: "local",
@@ -76,23 +74,4 @@ fn requirement(requirement: &Map<String, Value>) -> Option<String> {
         _ => return None,
     };
     parsed.describe()
-}
-
-/// The `Package.resolved` Xcode keeps for the project: in its own workspace,
-/// else in a workspace beside it.
-pub(crate) fn pins(cx: &Context, project: &Project, files: &[String]) -> Result<Option<(String, Vec<Pin>)>> {
-    let own = crate::join(&project.path, "project.xcworkspace/xcshareddata/swiftpm/Package.resolved");
-    let beside = files.iter().find(|file| {
-        crate::parent_dir(file).ends_with(".xcworkspace/xcshareddata/swiftpm")
-            && file.ends_with("/Package.resolved")
-            && crate::parent_dir(&crate::parent_dir(&crate::parent_dir(&crate::parent_dir(file)))) == project.dir
-    });
-    let path = if cx.exists(&own)? { Some(own) } else { beside.cloned() };
-    match path {
-        Some(path) => {
-            let pins = resolved::read(&cx.read_json(&path)?)?;
-            Ok(Some((path, pins)))
-        }
-        None => Ok(None),
-    }
 }

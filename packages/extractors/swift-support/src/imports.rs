@@ -1,7 +1,6 @@
 //! A Swift file's top-level `import` declarations.
 
-use crate::lexer::{Kind, Token, tokens};
-use anyhow::Result;
+use crate::lexer::{Kind, Token, prefix};
 
 /// One `import`.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -20,9 +19,11 @@ pub struct Import {
 
 const ACCESS: [&str; 6] = ["public", "package", "internal", "fileprivate", "private", "open"];
 
-/// The imports in `source`, in order.
-pub fn imports(source: &str) -> Result<Vec<Import>> {
-    let tokens = tokens(source)?;
+/// The imports in `source`, in order, and, when part of it can't be read (a
+/// literal this lexer doesn't know), why: imports up to there are returned,
+/// since one later in the file is unusual, rather than failing the file.
+pub fn imports(source: &str) -> (Vec<Import>, Option<String>) {
+    let (tokens, unread) = prefix(source);
     let mut found = Vec::new();
     let (mut depth, mut conditional) = (0usize, 0usize);
     for (at, token) in tokens.iter().enumerate() {
@@ -39,7 +40,7 @@ pub fn imports(source: &str) -> Result<Vec<Import>> {
             _ => {}
         }
     }
-    Ok(found)
+    (found, unread.map(|error| format!("{error:#}")))
 }
 
 /// The import whose `import` keyword is at `at`.
@@ -84,7 +85,8 @@ mod tests {
     #[test]
     fn reads_top_level_imports_with_their_attributes_kind_and_conditions() {
         let source = "@testable import Harbor\npublic import struct Foundation.URL\n#if canImport(UIKit)\n@preconcurrency import UIKit\n#endif\nfunc f() { let import = 1 }\n// import Hidden\nimport A; import B\n";
-        let found = imports(source).unwrap();
+        let (found, unread) = imports(source);
+        assert_eq!(unread, None);
         let summary: Vec<(&str, Vec<&str>, Option<&str>, bool)> = found
             .iter()
             .map(|import| {
@@ -106,5 +108,15 @@ mod tests {
                 ("B", vec![], None, false),
             ]
         );
+    }
+
+    #[test]
+    fn reads_past_regex_literals_and_stops_where_it_cannot_read() {
+        let (found, unread) = imports("import A\nlet pattern = #/\"/#\nimport B\n");
+        assert_eq!(found.iter().map(|import| import.module.as_str()).collect::<Vec<_>>(), ["A", "B"]);
+        assert_eq!(unread, None);
+        let (found, unread) = imports("import A\nlet s = \"unterminated\nimport B\n");
+        assert_eq!(found.iter().map(|import| import.module.as_str()).collect::<Vec<_>>(), ["A"]);
+        assert!(unread.unwrap().contains("line 2"));
     }
 }

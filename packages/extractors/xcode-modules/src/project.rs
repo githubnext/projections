@@ -9,8 +9,11 @@ use std::collections::BTreeMap;
 pub(crate) struct Project {
     /// The `.xcodeproj` directory, project-relative: `App/Harbor.xcodeproj`.
     pub path: String,
-    /// The directory holding it, which `SOURCE_ROOT` paths are relative to.
+    /// The directory holding it.
     pub dir: String,
+    /// Its source root: `dir` with the project's `projectDirPath`, which
+    /// `SOURCE_ROOT` paths and local packages are relative to.
+    pub source_root: String,
     pub object_version: String,
     objects: Map<String, Value>,
     root: String,
@@ -31,6 +34,7 @@ impl Project {
         let dir = crate::parent_dir(path);
         let mut project = Project {
             path: path.to_owned(),
+            source_root: dir.clone(),
             dir,
             object_version: document["objectVersion"].as_str().unwrap_or_default().to_owned(),
             objects,
@@ -41,8 +45,10 @@ impl Project {
             &project.dir,
             project.root_object().get("projectDirPath").and_then(Value::as_str).unwrap_or(""),
         );
+        project.source_root = normalize(&base);
         if let Some(main) = project.root_object().get("mainGroup").and_then(Value::as_str).map(str::to_owned) {
-            project.resolve(&main, Some(&normalize(&base)), 0);
+            let root = project.source_root.clone();
+            project.resolve(&main, Some(&root), 0);
         }
         Ok(project)
     }
@@ -78,6 +84,14 @@ impl Project {
             .filter_map(|(id, value)| Some((id.as_str(), value.as_object()?)))
     }
 
+    /// Every object of the class `isa`.
+    pub fn references<'a>(&'a self, isa: &'a str) -> impl Iterator<Item = &'a Map<String, Value>> {
+        self.objects
+            .values()
+            .filter_map(Value::as_object)
+            .filter(move |object| object.get("isa").and_then(Value::as_str) == Some(isa))
+    }
+
     /// The project's targets, in its order: `(id, target)`.
     pub fn targets(&self) -> Vec<(&str, &Map<String, Value>)> {
         self.each(self.root_object(), "targets").collect()
@@ -95,7 +109,7 @@ impl Project {
         let own = object.get("path").and_then(Value::as_str);
         let path = match object.get("sourceTree").and_then(Value::as_str).unwrap_or("<group>") {
             "<group>" => parent.map(|parent| own.map_or_else(|| parent.to_owned(), |own| normalize(&crate::join(parent, own)))),
-            "SOURCE_ROOT" => Some(normalize(&crate::join(&self.dir, own.unwrap_or("")))),
+            "SOURCE_ROOT" => Some(normalize(&crate::join(&self.source_root, own.unwrap_or("")))),
             _ => None,
         };
         let path = path.filter(|path| !path.starts_with(".."));
@@ -137,5 +151,19 @@ pub(crate) fn product_type(target: &Map<String, Value>) -> String {
         Some(kind) => kind.strip_prefix("com.apple.product-type.").unwrap_or(kind).to_owned(),
         None if target.get("isa").and_then(Value::as_str) == Some("PBXAggregateTarget") => "aggregate".into(),
         None => "legacy".into(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Project;
+
+    #[test]
+    fn source_root_paths_start_at_the_projects_directory_path() {
+        let text = "{ objects = { R = { isa = PBXProject; mainGroup = G; projectDirPath = ..; targets = (); }; G = { isa = PBXGroup; children = (F, S); sourceTree = \"<group>\"; }; F = { isa = PBXFileReference; path = Sources/App.swift; sourceTree = SOURCE_ROOT; }; S = { isa = PBXGroup; children = (); path = Shared; sourceTree = \"<group>\"; }; }; rootObject = R; }";
+        let project = Project::read("Config/App.xcodeproj", text).unwrap();
+        assert_eq!(project.source_root, "");
+        assert_eq!(project.paths["F"], "Sources/App.swift");
+        assert_eq!(project.paths["S"], "Shared");
     }
 }

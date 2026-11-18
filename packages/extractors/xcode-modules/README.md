@@ -25,15 +25,16 @@ sources import. The user guide is
   into JSON values.
 - `project`: every file reference's and group's project-relative path, through
   the group tree from the main group: `<group>` paths are relative to the
-  enclosing group, `SOURCE_ROOT` to the project's directory; other source trees
-  (`BUILT_PRODUCTS_DIR`, `SDKROOT`, absolute paths) and paths outside the
-  repository aren't followed.
+  enclosing group, `SOURCE_ROOT` to the project's source root (its directory
+  with `projectDirPath`); other source trees (`BUILT_PRODUCTS_DIR`, `SDKROOT`,
+  absolute paths) and paths outside the repository aren't followed.
 - `settings`: a target's settings in one configuration: defaults (`TARGET_NAME`,
   `PRODUCT_NAME = $(TARGET_NAME)`,
   `PRODUCT_MODULE_NAME = $(PRODUCT_NAME:c99extidentifier)`, `PROJECT_NAME`),
   then the project's xcconfig (with its `#include`s) and settings, then the
   target's; `$(inherited)` takes the layer below. References expand recursively;
-  an unknown setting or modifier leaves the value unresolved.
+  an unknown setting or modifier leaves the value unresolved. xcconfig lines are
+  logical lines: `//` comments are removed and a trailing `\` continues a line.
 - `sources`: Swift files from the Sources build phase and from synchronized
   folders (`fileSystemSynchronizedGroups`), less the
   `PBXFileSystemSynchronizedBuildFileExceptionSet` entries for the target.
@@ -43,6 +44,11 @@ sources import. The user guide is
 - `packages`: `XCSwiftPackageProductDependency` and its
   `XCRemoteSwiftPackageReference` (requirement normalized as SwiftPM does) or
   `XCLocalSwiftPackageReference`.
+- `locals`: the local packages a project refers to (package references and
+  folders holding a `Package.swift`), read without running their manifests, so a
+  product listed without its package is attributed to the one that declares it.
+- `pins`: each project's `Package.resolved`; a package projects pin differently
+  keeps every project's pin.
 
 [`swift-support`](../swift-support/README.md) reads imports and
 `Package.resolved`, and builds the package entities.
@@ -53,12 +59,13 @@ sources import. The user guide is
 | Entity | `id` | `kind` | `data` |
 |---|---|---|---|
 | Target | `xcode:<project path>:target:<name>` | `target` | `project`, `type`, `module`, `sdk`, `configuration`, `imports` |
-| Package | `swiftpm:package:<identity>` | `external-package` | `source`, `location`, `requirement`, `version`/`revision`/`branch`, `transitive` |
+| Package | `swiftpm:package:<identity>` | `external-package` | `source`, `location`, `requirement`, `version`/`revision`/`branch` (or, pinned differently by projects, `resolved` per project), `transitive` |
 
 Relationships: `depends-on` between targets (`explicit`, `linked`, `imported`,
 `conditional`, `testable`), `imports` between targets when only imported, and
 `depends-on` to packages (`product`, `imported`). `metadata` lists the
-`projects` (`path`, `objectVersion`, `resolved`), `unresolvedModules` and
+`projects` (`path`, `objectVersion`, `resolved`), `unresolvedModules`,
+`unresolved` (`[target ID, product]`), `unreadSources` (`{file, reason}`) and
 `limitations`.
 
 ## Tests

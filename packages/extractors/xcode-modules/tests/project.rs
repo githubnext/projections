@@ -106,3 +106,58 @@ fn imports_can_be_left_out_and_projects_named() {
     let missing = extract(json!({"projects": ["Other.xcodeproj"]}));
     assert_eq!(missing["entities"], json!([]));
 }
+
+/// The fixture with its project file edited: `edit` rewrites project.pbxproj.
+fn edited(edit: impl Fn(String) -> String) -> Value {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../../target/xcode-modules-tests")
+        .join(format!("{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    copy(&fixture(), &root);
+    let project = root.join("Harbor.xcodeproj/project.pbxproj");
+    std::fs::write(&project, edit(std::fs::read_to_string(&project).unwrap())).unwrap();
+    let files = repository_files(&root).unwrap();
+    let definition = json!({"id": "xcode", "extractor": "xcode-modules", "inputs": {}});
+    let extraction = collect(&testing::context(&root, definition).with_files(files)).unwrap();
+    std::fs::remove_dir_all(&root).unwrap();
+    extraction
+}
+
+fn copy(source: &Path, destination: &Path) {
+    std::fs::create_dir_all(destination).unwrap();
+    for entry in std::fs::read_dir(source).unwrap() {
+        let entry = entry.unwrap();
+        if entry.file_type().unwrap().is_dir() {
+            copy(&entry.path(), &destination.join(entry.file_name()));
+        } else {
+            std::fs::copy(entry.path(), destination.join(entry.file_name())).unwrap();
+        }
+    }
+}
+
+#[test]
+fn a_product_without_its_package_is_the_local_package_that_declares_it_or_unresolved() {
+    // Without `package`, as a local package listed as a folder is.
+    let without = |text: String| {
+        text.replace(
+            "\t\t\tpackage = 25614AEF581B3B88D6796DC1 /* XCLocalSwiftPackageReference \"Packages/Telemetry\" */;\n",
+            "",
+        )
+    };
+    let extraction = edited(without);
+    let edge = find(
+        &extraction["relationships"],
+        |r| r["from"] == APP && r["data"]["product"] == "Telemetry",
+        "Telemetry",
+    );
+    assert_eq!(edge["to"], "swiftpm:package:telemetry");
+    let extraction = edited(|text| without(text).replace("productName = Telemetry;", "productName = Unknown;"));
+    assert_eq!(extraction["metadata"]["unresolved"], json!([[APP, "Unknown"]]));
+    assert!(
+        !extraction["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|e| e["id"] == "swiftpm:package:unknown")
+    );
+}

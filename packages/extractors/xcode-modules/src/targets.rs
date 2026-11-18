@@ -1,14 +1,15 @@
 //! Each target of the projects read: its module name, sources' imports, the
 //! targets it depends on or links, and the package products it uses.
 
+use crate::locals::{attribute, local_products};
 use crate::packages::{ProductDependency, products};
 use crate::project::{Project, product_type};
 use crate::settings::{configuration, expand, settings};
 use crate::sources::swift_files;
-use anyhow::{Context as _, Result};
+use anyhow::Result;
 use projections_extractor_sdk::{Context, key};
 use projections_extractor_swift_support::{Import, imports};
-use serde_json::{Map, Value};
+use serde_json::{Map, Value, json};
 
 pub(crate) struct Target {
     pub id: String,
@@ -24,6 +25,9 @@ pub(crate) struct Target {
     pub links: Vec<String>,
     pub products: Vec<ProductDependency>,
     pub imports: Vec<Import>,
+    /// `{file, reason}` for each source whose imports were read only up to a
+    /// part the reader can't read.
+    pub unread: Vec<Value>,
 }
 
 pub(crate) fn id(project: &Project, name: &str) -> String {
@@ -39,6 +43,7 @@ pub(crate) fn targets(cx: &Context, projects: &[Project], options: &Options) -> 
     let files = cx.files()?;
     let mut found = Vec::new();
     for (index, project) in projects.iter().enumerate() {
+        let locals = local_products(cx, project)?;
         for (object_id, target) in project.targets() {
             let name = target.get("name").and_then(Value::as_str).unwrap_or_default().to_owned();
             let configuration = configuration(project, target, options.configuration).map(str::to_owned);
@@ -47,13 +52,18 @@ pub(crate) fn targets(cx: &Context, projects: &[Project], options: &Options) -> 
                 None => Default::default(),
             };
             let module = settings.get("PRODUCT_MODULE_NAME").and_then(|value| expand(&settings, value));
-            let mut imported = Vec::new();
+            let (mut imported, mut unread) = (Vec::new(), Vec::new());
             if options.imports {
                 for file in swift_files(project, object_id, target, files) {
-                    let source = cx.read_source(&file)?;
-                    imported.extend(imports(&source).with_context(|| format!("Reading the imports of {file}"))?);
+                    let (found, reason) = imports(&cx.read_source(&file)?);
+                    imported.extend(found);
+                    if let Some(reason) = reason {
+                        unread.push(json!({"file": file, "reason": reason}));
+                    }
                 }
             }
+            let mut products = products(project, target);
+            attribute(&mut products, &locals);
             found.push(Target {
                 id: id(project, &name),
                 project: index,
@@ -63,8 +73,9 @@ pub(crate) fn targets(cx: &Context, projects: &[Project], options: &Options) -> 
                 configuration,
                 dependencies: dependencies(projects, index, target),
                 links: links(projects, index, target),
-                products: products(project, target),
+                products,
                 imports: imported,
+                unread,
                 name,
             });
         }

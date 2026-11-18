@@ -5,7 +5,9 @@
 //! files and sources; nothing runs.
 
 mod graph;
+mod locals;
 mod packages;
+mod pins;
 mod plist;
 mod project;
 mod settings;
@@ -60,23 +62,39 @@ pub fn collect(cx: &Context) -> Result<Value> {
         projects.push(Project::read(&path, &cx.read_source(&file)?)?);
     }
     let found = targets::targets(cx, &projects, &targets::Options { configuration, imports })?;
-    let mut pins = Vec::new();
+    let mut per_project = Vec::new();
     let mut described = Vec::new();
     for project in &projects {
-        let resolved = packages::pins(cx, project, cx.files()?)?;
+        let resolved = pins::pins(cx, project, cx.files()?)?;
         described.push(
             json!({"path": project.path, "objectVersion": project.object_version, "resolved": resolved.as_ref().map(|(path, _)| path)}),
         );
-        pins.extend(resolved.map(|(_, pins)| pins).unwrap_or_default());
+        per_project.push((project.path.clone(), resolved.map(|(_, pins)| pins).unwrap_or_default()));
     }
+    let (pins, conflicts) = pins::merge(per_project);
     let paths: Vec<String> = projects.iter().map(|project| project.path.clone()).collect();
-    let graph = graph::build(&found, &pins, &paths, imports);
+    let mut graph = graph::build(&found, &pins, &paths, imports);
+    // A package pinned differently by different projects shows each project's pin.
+    for entity in &mut graph.entities {
+        let identity = entity["label"].as_str().unwrap_or_default().to_owned();
+        if entity["kind"] == "external-package"
+            && let Some(by_project) = conflicts.get(&identity)
+            && let Some(data) = entity["data"].as_object_mut()
+        {
+            for field in ["version", "revision", "branch"] {
+                data.remove(field);
+            }
+            data.insert("resolved".into(), json!(by_project));
+        }
+    }
     let unnamed: Vec<&str> = found
         .iter()
         .filter(|target| target.module.is_none())
         .map(|target| target.id.as_str())
         .collect();
-    let mut metadata = json!({"projects": described, "unresolvedModules": unnamed});
+    let unread: Vec<&Value> = found.iter().flat_map(|target| &target.unread).collect();
+    let mut metadata =
+        json!({"projects": described, "unresolvedModules": unnamed, "unresolved": graph.unresolved, "unreadSources": unread});
     if imports {
         metadata["limitations"] = json!([
             "Imports are read from the Swift sources' text: imports inside `#if` count whichever branch they're in (marked `conditional`), and `canImport` isn't evaluated."

@@ -11,6 +11,8 @@ use std::collections::{BTreeMap, BTreeSet};
 pub(crate) struct Graph {
     pub entities: Vec<Value>,
     pub relationships: Vec<Value>,
+    /// `[target ID, product]` for each product whose package isn't known.
+    pub unresolved: Vec<Value>,
 }
 
 /// What one target's relationship to another records.
@@ -34,6 +36,7 @@ pub(crate) fn build(targets: &[Target], pins: &[Pin], projects: &[String], impor
     }
     let mut entities = Vec::new();
     let mut relationships = Vec::new();
+    let mut unresolved = Vec::new();
     for target in targets {
         let mut links: BTreeMap<String, Link> = BTreeMap::new();
         for to in &target.dependencies {
@@ -44,15 +47,16 @@ pub(crate) fn build(targets: &[Target], pins: &[Pin], projects: &[String], impor
         }
         let mut products: BTreeMap<String, (String, bool)> = BTreeMap::new();
         for dependency in &target.products {
-            let to = match &dependency.package {
-                Some(package) => externals.declare(
-                    &package.identity,
-                    package.source,
-                    package.location.clone(),
-                    package.requirement.clone(),
-                ),
-                None => externals.declare(&dependency.product.to_lowercase(), "local", dependency.product.clone(), None),
+            let Some(package) = &dependency.package else {
+                unresolved.push(json!([target.id, dependency.product]));
+                continue;
             };
+            let to = externals.declare(
+                &package.identity,
+                package.source,
+                package.location.clone(),
+                package.requirement.clone(),
+            );
             products.insert(dependency.product.clone(), (to, false));
         }
         let mut other = BTreeSet::new();
@@ -91,22 +95,35 @@ pub(crate) fn build(targets: &[Target], pins: &[Pin], projects: &[String], impor
     entities.sort_by(|a, b| a["id"].as_str().cmp(&b["id"].as_str()));
     relationships.sort_by(|a, b| a["id"].as_str().cmp(&b["id"].as_str()));
     relationships.dedup_by(|a, b| a["id"] == b["id"]);
-    Graph { entities, relationships }
+    Graph {
+        entities,
+        relationships,
+        unresolved,
+    }
 }
 
-/// The targets whose module `target` imports as `module`: those of its own
-/// project when any are, else every one.
+/// The target whose module `target` imports as `module`: those of its
+/// candidates it declares or links (an iOS and a macOS framework may share a
+/// module name); else the only candidate in its own project; else the only
+/// one. An import several targets could satisfy, with none of them declared
+/// or linked, names no target.
 fn importable(modules: &BTreeMap<&str, Vec<&Target>>, target: &Target, module: &str) -> Vec<String> {
     let candidates = modules.get(module).map(Vec::as_slice).unwrap_or_default();
-    let own: Vec<String> = candidates
-        .iter()
-        .filter(|other| other.project == target.project)
-        .map(|other| other.id.clone())
-        .collect();
-    if own.is_empty() {
-        candidates.iter().map(|other| other.id.clone()).collect()
-    } else {
-        own
+    let ids = |keep: &dyn Fn(&Target) -> bool| -> Vec<String> {
+        candidates
+            .iter()
+            .filter(|other| keep(other))
+            .map(|other| other.id.clone())
+            .collect()
+    };
+    let declared = ids(&|other| target.dependencies.contains(&other.id) || target.links.contains(&other.id));
+    if !declared.is_empty() {
+        return declared;
+    }
+    match (ids(&|other| other.project == target.project).as_slice(), candidates) {
+        ([only], _) => vec![only.clone()],
+        ([], [only]) => vec![only.id.clone()],
+        _ => Vec::new(),
     }
 }
 
@@ -138,3 +155,6 @@ fn relationship(from: &str, to: &str, link: &Link, imports: bool) -> Value {
     }
     json!({"id": key(&[kind, from, to]), "kind": kind, "from": from, "to": to, "data": data, "confidence": "authoritative"})
 }
+
+#[cfg(test)]
+mod tests;

@@ -92,18 +92,52 @@ fn xcconfig(cx: &Context, path: &str, depth: usize) -> Result<Vec<(String, Strin
     if depth > 16 || !cx.exists(path)? {
         return Ok(values);
     }
-    for line in cx.read_source(path)?.lines() {
+    for line in logical_lines(&cx.read_source(path)?) {
         let line = line.trim();
         if let Some(include) = line.strip_prefix("#include?").or_else(|| line.strip_prefix("#include")) {
             let included = include.trim().trim_matches('"');
             let included = crate::project::normalize(&crate::join(&crate::parent_dir(path), included));
             values.extend(xcconfig(cx, &included, depth + 1)?);
-        } else if let Some((key, value)) = line.split_once('=')
-            && !line.starts_with("//")
-        {
-            let value = value.split(" //").next().unwrap_or(value).trim().trim_end_matches(';');
-            values.push((key.trim().to_owned(), value.trim().to_owned()));
+        } else if let Some((key, value)) = line.split_once('=') {
+            values.push((key.trim().to_owned(), value.trim().trim_end_matches(';').trim().to_owned()));
         }
     }
     Ok(values)
+}
+
+/// An xcconfig file's lines as Xcode reads them: `//` starts a comment
+/// anywhere on a line, and a line ending in `\` continues on the next.
+fn logical_lines(text: &str) -> Vec<String> {
+    let mut lines = Vec::new();
+    let mut current = String::new();
+    for line in text.lines() {
+        let code = line.find("//").map_or(line, |comment| &line[..comment]);
+        match code.trim_end().strip_suffix('\\') {
+            Some(continued) => {
+                current.push_str(continued);
+                current.push(' ');
+            }
+            None => {
+                current.push_str(code);
+                lines.push(std::mem::take(&mut current));
+            }
+        }
+    }
+    if !current.is_empty() {
+        lines.push(current);
+    }
+    lines
+}
+
+#[cfg(test)]
+mod tests {
+    use super::logical_lines;
+
+    #[test]
+    fn comments_end_lines_and_backslashes_continue_them() {
+        // What `xcodebuild -showBuildSettings` reports for the same file.
+        let lines = logical_lines("A = \\\n    Widgetry\nB = a//comment\n#include \"Extra.xcconfig\" // shared\n// whole line\n");
+        let lines: Vec<&str> = lines.iter().map(|line| line.trim()).collect();
+        assert_eq!(lines, ["A =      Widgetry", "B = a", "#include \"Extra.xcconfig\"", ""]);
+    }
 }

@@ -49,6 +49,7 @@
     "@githubnext/projections-renderer-file-packing": "0.1.0",
     "@githubnext/projections-renderer-graph": "0.1.0",
     "@githubnext/projections-renderer-runtime-policy": "0.1.0",
+    "@githubnext/projections-renderer-agentic-workflows": "0.1.0",
     "@githubnext/projections-renderer-text-diff": "0.1.0",
     "@playwright/test": "^1.55.0",
     "@types/react": "^19.1.0",

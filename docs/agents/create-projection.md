@@ -395,7 +395,7 @@ package; otherwise, and in other languages, write the JSON above.
 - `metrics/v0`: measurements: every entity carries a numeric `data.value` and optionally a string `data.unit`. Built-in extractors present it with `code-statistics`.
 - `api/v0`: public API declarations; `export`, `type`, `member`, `function`, `class`, `interface`, `method`, `property` and `enum` entities carry a string `data.signature` and optionally a `data.contract` object of compatibility facts. Built-in extractors present it with `api`.
 - `database/v0`: tables, columns, keys and constraints; `column` entities carry `data.type` and optionally `data.databaseType` (a string or null), and booleans `data.nullable` and `data.primaryKey`; `constraint` and `primary-key` entities may name `data.table` and `data.columns`, and `foreign-key` and `relation` relationships `data.columns` and `data.principalColumns`. Built-in extractors present it with `database`.
-- `architecture/v0`: components and their connections, as `graph/v0`, for architecture and infrastructure. Built-in extractors present it with `architecture`, `dependency-injection`, `infrastructure`, `runtime-policy`.
+- `architecture/v0`: components and their connections, as `graph/v0`, for architecture and infrastructure. Built-in extractors present it with `agentic-workflows`, `dependency-injection`, `infrastructure`, `runtime-policy`.
   - With `"vocabularies": ["dependency-injection/v0"]`: `service`, `registration` and `implementation` entities and `dependsOn` relationships of a dependency-injection container, with lifetimes and keys; the engine checks its typed `data`.
   - With `"vocabularies": ["infrastructure/v0"]`: resources, data sources, modules and resource groups with their `data.type`, `data.provider` and planned `data.action`; the engine checks its typed `data`.
   - With `"vocabularies": ["runtime-policy/v0"]`: kernel runtime policies (such as Tetragon): `policy`, `hook`, `selector` and `subject` entities; the engine checks its typed `data`.
@@ -477,6 +477,7 @@ NAME`) to one of the renderers this CLI includes:
 - `api`: API
 - `database`: Database (also named `schema`)
 - `runtime-policy`: Runtime security policies
+- `agentic-workflows`: Agentic workflows
 - `text-diff`: Text diff
 
 Each presents the schemas the extractors above pair it with;

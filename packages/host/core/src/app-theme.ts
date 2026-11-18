@@ -27,6 +27,13 @@ export interface AppThemeColors {
 }
 
 /**
+ * How an app theme draws its rules and card edges: `contrast` (the default) lifts the app's border to 3:1 against
+ * every surface, as the token set's divider promises; `app` draws them in the app's own border, as given (an app such
+ * as Claude Code whose rules are quiet), and sends lines that carry meaning (`color-connector`) at 3:1 instead.
+ */
+export type AppThemeRules = 'contrast' | 'app'
+
+/**
  * Renderer theme token overrides from an app's colors, so a renderer's stage, cards, text, rules, accent, focus ring
  * and type are the app's own: `color-bg` and the stage (`color-surface-canvas`) are the background, cards and header
  * bands one visible step from it toward the text, text and muted text the app's, rules its border, the accent and focus
@@ -40,15 +47,9 @@ export interface AppThemeColors {
  * Every override keeps that contrast: text 4.5:1 against the surfaces, edges, the divider and focus 3:1, fills drawn
  * behind text keep it readable. A color that is missing or isn't an sRGB color (or a safe font list) keeps the default
  * it would have replaced; without a background there is no app theme, and no overrides. Only token names of the
- * current set are returned, each a value the renderer protocol accepts.
+ * current set are returned, each a value the renderer protocol accepts. With `rules` `app`, rules and card edges are
+ * the app's border as given, and only `color-connector` (and controls) keep 3:1.
  */
-/**
- * How an app theme draws its rules and card edges: `contrast` (the default) lifts the app's border to 3:1 against
- * every surface, as the token set's divider promises; `app` draws them in the app's own border, as given (an app such
- * as Claude Code whose rules are quiet), and sends lines that carry meaning (`color-connector`) at 3:1 instead.
- */
-export type AppThemeRules = 'contrast' | 'app'
-
 export function appThemeTokens(
   colors: AppThemeColors,
   colorMode: ColorMode,

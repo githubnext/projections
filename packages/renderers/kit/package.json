@@ -1,6 +1,6 @@
 {
   "name": "@githubnext/projections-renderer-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -35,8 +35,8 @@
     "*.css"
   ],
   "dependencies": {
-    "@githubnext/projections-renderer-sdk": "0.1.0",
-    "@githubnext/projections-schemas": "0.1.0",
+    "@githubnext/projections-renderer-sdk": "0.2.0",
+    "@githubnext/projections-schemas": "0.2.0",
     "elkjs": "^0.12.1",
     "lucide": "^1.64.0",
     "perfect-arrows": "^0.3.7"
@@ -54,7 +54,7 @@
     }
   },
   "devDependencies": {
-    "@githubnext/projections-engine": "0.1.0",
+    "@githubnext/projections-engine": "0.2.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "react": "^19.1.0",

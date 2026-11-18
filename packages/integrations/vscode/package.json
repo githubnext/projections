@@ -1,7 +1,7 @@
 {
   "name": "projections-vscode",
   "displayName": "Projections",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "license": "MIT",
   "description": "See the systems in your codebase, and how a change reshapes them: the Projections Inspector, Explore, Adopt and Add to CI in VS Code, backed by the projections CLI",
@@ -1539,8 +1539,8 @@
     "screenshots:new-projection": "node scripts/screenshots/new-projection-screenshots.mjs"
   },
   "dependencies": {
-    "@githubnext/projections-host-vscode": "0.1.0",
-    "@githubnext/projections-inspector": "0.1.0"
+    "@githubnext/projections-host-vscode": "0.2.0",
+    "@githubnext/projections-inspector": "0.2.0"
   },
   "devDependencies": {
     "@types/react": "^19.1.0",

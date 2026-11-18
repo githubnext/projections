@@ -107,10 +107,11 @@ export function formatThemeSeed(seed: ThemeSeed): string {
 }
 
 /**
- * Renderer theme token overrides from a seed for `colorMode` (`appThemeTokens`), or `undefined` when the seed leaves
- * that mode out, so the page keeps its own theme in it.
+ * Renderer theme token overrides from a seed for `colorMode` (`appThemeTokens`, with the app's own rules), or
+ * `undefined` when the seed leaves that mode out, so the page keeps its own theme in it.
  */
 export function themeSeedTokens(seed: ThemeSeed, colorMode: ColorMode): Partial<Record<ThemeTokenName, string>> | undefined {
   const colors = seed[colorMode]
-  return colors ? appThemeTokens(colors, colorMode) : undefined
+  // A seed is an app's own look, so its rules are drawn in its border as given (see `AppThemeRules`).
+  return colors ? appThemeTokens(colors, colorMode, 'app') : undefined
 }

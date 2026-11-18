@@ -442,13 +442,15 @@ that can't draw it draws it `dashed`.
 ### `optionalThemeTokenNames`
 
 ```ts
-optionalThemeTokenNames: readonly ["stage-inset", "stage-inset-top", "stage-max-height"]
+optionalThemeTokenNames: readonly ["stage-inset", "stage-inset-top", "stage-max-height", "color-connector"]
 ```
 
 Layout tokens a host may send that have no default (`resolveThemeTokens` leaves them undefined), so a renderer reads
 each with its own value as the fallback: `stage-inset`, the space between the frame's edges and its content on every
 side, `stage-inset-top`, the space above the content where the host overlays the frame's top, and `stage-max-height`,
-the most a content-sized stage that pans and zooms asks for (`px`, or `vh` of the host's window).
+the most a content-sized stage that pans and zooms asks for (`px`, or `vh` of the host's window), and
+`color-connector`, the color of lines that carry meaning (a graph's links), for a host whose `color-divider` is its
+app's own quiet rule rather than a 3:1 edge; renderers fall back to `color-divider`.
 
 ### `orderComparisonModes`
 

@@ -2,7 +2,7 @@
 // (its stage, text, rules, focus and accent) mapped onto renderer theme token overrides that keep the token set's
 // contrast. The GitHub Copilot app's canvas (copilot-canvas-theme.ts) maps its own variables onto these.
 
-import {defaultThemeTokens, rendererLimits, themeTokenNames} from '@githubnext/projections-renderer-sdk/protocol'
+import {defaultThemeTokens, optionalThemeTokenNames, rendererLimits, themeTokenNames} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ColorMode, ThemeTokenName} from '@githubnext/projections-renderer-sdk/protocol'
 import {composite, contrast, ensureContrast, formatColor, mix, parseColor, withAlpha} from './color.js'
 import type {Rgba} from './color.js'
@@ -42,7 +42,18 @@ export interface AppThemeColors {
  * it would have replaced; without a background there is no app theme, and no overrides. Only token names of the
  * current set are returned, each a value the renderer protocol accepts.
  */
-export function appThemeTokens(colors: AppThemeColors, colorMode: ColorMode): Partial<Record<ThemeTokenName, string>> {
+/**
+ * How an app theme draws its rules and card edges: `contrast` (the default) lifts the app's border to 3:1 against
+ * every surface, as the token set's divider promises; `app` draws them in the app's own border, as given (an app such
+ * as Claude Code whose rules are quiet), and sends lines that carry meaning (`color-connector`) at 3:1 instead.
+ */
+export type AppThemeRules = 'contrast' | 'app'
+
+export function appThemeTokens(
+  colors: AppThemeColors,
+  colorMode: ColorMode,
+  rules: AppThemeRules = 'contrast',
+): Partial<Record<ThemeTokenName, string>> {
   const defaults = defaultThemeTokens(colorMode)
   const color = (value: string | undefined) => parseColor(value?.trim())
   const fallback = (name: ThemeTokenName) => parseColor(defaults[name])!
@@ -91,7 +102,10 @@ export function appThemeTokens(colors: AppThemeColors, colorMode: ColorMode): Pa
   set('color-surface-raised', raised)
   set('color-surface-header', header)
   set('color-surface-inset', inset)
-  set('color-divider', edge)
+  // An app's own rules, when it asks for them: its border as given, and its edge only for lines that carry meaning.
+  const own = rules === 'app' && rule !== undefined
+  set('color-divider', own ? border : edge)
+  if (own) (tokens as Record<string, string>)['color-connector'] = formatColor(edge)
   set('color-border', border)
   set('color-border-muted', withAlpha(border, 0.7))
   set('color-border-emphasis', edge)
@@ -220,7 +234,7 @@ export function fontList(value: string | undefined): string | undefined {
   return /^(?:"[^"\\;{}<>]+"|'[^'\\;{}<>]+'|[\w -]+)(?:\s*,\s*(?:"[^"\\;{}<>]+"|'[^'\\;{}<>]+'|[\w -]+))*$/.test(text) ? text : undefined
 }
 
-const known = new Set<string>(themeTokenNames)
+const known = new Set<string>([...themeTokenNames, ...optionalThemeTokenNames])
 /** The overrides the token set and the renderer protocol accept: known names, colors that parse, values short enough. */
 function validTokens(tokens: Partial<Record<ThemeTokenName, string>>): Partial<Record<ThemeTokenName, string>> {
   return Object.fromEntries(

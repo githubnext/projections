@@ -1,0 +1,10 @@
+{
+  "id": "renderer-gallery",
+  "title": "Renderer gallery",
+  "description": "Every built-in renderer's fixture scenarios, drawn by the renderer itself inside the gallery: synthetic data from the committed scenarios documents, so viewing it runs no repository code. A comparison shows which scenarios a change added, removed or redrew.",
+  "extractor": "renderer-scenarios",
+  "renderer": "gallery",
+  "inputs": {
+    "include": ["packages/renderers/*/scenarios.json"]
+  }
+}

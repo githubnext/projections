@@ -39,8 +39,10 @@ export async function webviewAssets(): Promise<InspectorAssets> {
         return await Promise.all(
           entries.map(async entry => {
             // Each bundle is one self-contained document; its scripts get this page's nonce, which the policy it
-            // inherits as a Blob document requires. Its own policy (no network, no frames) still applies.
-            return {...entry, url: rendererDocument(await (await fetchOk(entry.url)).text())}
+            // inherits as a Blob document requires. Its own policy (no network, no frames) still applies. A renderer
+            // that nests it (`document-request`) gets the same text: its frame inherits the nesting renderer's policy.
+            const html = mount.rendererDocumentHtml(await (await fetchOk(entry.url)).text(), config.nonce)
+            return {...entry, url: URL.createObjectURL(new Blob([html], {type: 'text/html'})), document: async () => html}
           }),
         )
       } catch (error) {

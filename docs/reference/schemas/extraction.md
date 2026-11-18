@@ -44,7 +44,7 @@ Type: `"graph/v0"` or `"dag/v0"` or `"treemap/v0"` or `"metrics/v0"` or `"api/v0
 
 ### `vocabulary`
 
-Type: `"dependency-injection/v0"` or `"infrastructure/v0"` or `"runtime-policy/v0"` or `"agentic-workflows/v0"`.
+Type: `"dependency-injection/v0"` or `"infrastructure/v0"` or `"runtime-policy/v0"` or `"agentic-workflows/v0"` or `"scenarios/v0"`.
 
 ### `confidence`
 

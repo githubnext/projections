@@ -41,7 +41,7 @@ export {
   supportedComparisonModes,
 } from './protocol/comparison-modes.js'
 export type {ComparisonMode} from './protocol/comparison-modes.js'
-export {isPropertyPath, isEnvelope} from './protocol/validation.js'
+export {isPropertyPath, isEnvelope, rendererNamePattern} from './protocol/validation.js'
 export {summaryFactTones} from './protocol/summary/fact.js'
 export {parseSummaryItems} from './protocol/summary/items.js'
 export type {SummaryNoun} from './protocol/summary/figure.js'
@@ -73,6 +73,7 @@ export type {
   AnchorRect,
   ScrollPosition,
   RendererMessage,
+  RendererDocument,
   HostEnvelope,
   RendererEnvelope,
 } from './protocol/messages.js'

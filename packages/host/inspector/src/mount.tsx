@@ -41,7 +41,7 @@ export type {InspectorTransport, InspectorTransportRequest, InspectorChangeChann
 /** The host's renderer catalog loader, for hosts that supply their own `InspectorAssets.renderers`. */
 export {loadRendererCatalog} from '@githubnext/projections-host'
 /** Renderer documents as Blob URLs with the page's script nonce, for hosts whose frames load them that way. */
-export {rendererBlobDocument} from '@githubnext/projections-host'
+export {rendererBlobDocument, rendererDocumentHtml} from '@githubnext/projections-host'
 export {relayRendererFrames} from './frames.js'
 export {
   createMessageTransport,

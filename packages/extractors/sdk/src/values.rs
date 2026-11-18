@@ -13,6 +13,18 @@ pub fn parse_json(raw: &str) -> Result<Value> {
     Ok(response["result"].clone())
 }
 
+/// An extraction as the Engine normalizes it (validated, with its items in
+/// canonical order), for an extractor whose data holds other extractions, such
+/// as fixtures. Fails with the Engine's diagnostics when it isn't valid.
+pub fn normalize_extraction(value: &Value) -> Result<Value> {
+    projections_engine::normalize(value, "").map_err(|failure| {
+        anyhow::anyhow!(
+            "Invalid extraction: {}",
+            failure.iter().map(ToString::to_string).collect::<Vec<_>>().join("; ")
+        )
+    })
+}
+
 pub fn text<'a>(value: &'a Value, label: &str) -> Result<&'a str> {
     let s = value.as_str().with_context(|| format!("{label} must be a nonempty string"))?;
     ensure!(

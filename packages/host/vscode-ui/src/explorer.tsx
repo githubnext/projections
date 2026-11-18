@@ -190,6 +190,7 @@ export function VscodeComparisonExplorer(props: VscodeComparisonExplorerProps) {
           {...(props.playing !== undefined ? {playing: props.playing} : {})}
           {...(props.onPlayingChange ? {onPlayingChange: props.onPlayingChange} : {})}
           renderers={pair.renderers}
+          rendererDocuments={pair.rendererDocuments}
           presentation={pair.presentation}
           highlighting={props.highlighting ?? highlighting}
           onHighlightingChange={changeHighlighting}

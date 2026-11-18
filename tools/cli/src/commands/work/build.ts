@@ -1,6 +1,9 @@
 // `build`: a workspace and the workspaces it needs, rebuilding only what is out of date. `npm run build` rebuilds
 // every workspace, including the release CLI and Storybook; this rebuilds a dependency only when it was never built,
 // its src is newer than its dist, or a dependency of its own was rebuilt or is newer, as make would.
+import {createHash} from 'node:crypto'
+import {existsSync, readdirSync, readFileSync, statSync, utimesSync} from 'node:fs'
+import {join} from 'node:path'
 import {bound, TOOLS} from '../../lib/gates.ts'
 import {buildState, dependenciesOf} from '../../lib/builds.ts'
 import {findUnit, inDependencyOrder, loadUnits, type Unit} from '../../lib/packages.ts'
@@ -19,12 +22,42 @@ export type BuildOptions = {
 
 export type BuildStep = {
   workspace: string
-  status: 'built' | 'current' | 'planned' | 'failed' | 'skip'
+  status: 'built' | 'unchanged' | 'current' | 'planned' | 'failed' | 'skip'
   reason: string
   seconds?: number
   problems?: Problem[]
   moreProblems?: number
   tail?: string[]
+}
+
+/** A workspace's build outputs: every file under its dist and artifacts, with content hash and times. */
+type Snapshot = Map<string, {hash: string; atime: Date; mtime: Date}>
+
+export function snapshot(root: string, unit: Unit): Snapshot {
+  const files: Snapshot = new Map()
+  const visit = (directory: string) => {
+    for (const entry of readdirSync(directory, {withFileTypes: true})) {
+      const path = join(directory, entry.name)
+      if (entry.isDirectory()) visit(path)
+      else if (entry.isFile()) {
+        const {atime, mtime} = statSync(path)
+        files.set(path, {hash: createHash('sha256').update(readFileSync(path)).digest('hex'), atime, mtime})
+      }
+    }
+  }
+  for (const output of ['dist', 'artifacts']) if (existsSync(join(root, unit.path, output))) visit(join(root, unit.path, output))
+  return files
+}
+
+/**
+ * When a build wrote the same outputs again, puts their times back, so what depends on them stays current; a build
+ * that always runs (one Cargo keeps current) then rebuilds nothing above it. True when nothing changed.
+ */
+export function restoreIfUnchanged(before: Snapshot, after: Snapshot): boolean {
+  if (!before.size || before.size !== after.size) return false
+  for (const [path, file] of after) if (before.get(path)?.hash !== file.hash) return false
+  for (const [path, file] of before) utimesSync(path, file.atime, file.mtime)
+  return true
 }
 
 const builds = (unit: Unit | undefined): boolean => Boolean(unit?.kinds.includes('npm') && unit.scripts.includes('build'))
@@ -97,14 +130,17 @@ export async function buildReport(root: string, options: BuildOptions, progress?
       continue
     }
     progress?.(`▸ ${unit.path}: ${reason}`)
+    const before = snapshot(root, unit)
     const ran = await run(root, {argv: ['npm', 'run', 'build', '--workspace', unit.names[0] as string]})
-    progress?.(`  ${ran.exitCode === 0 ? 'built' : 'failed'} (${Math.round(ran.durationMs / 1000)}s)`)
     const seconds = Math.round(ran.durationMs / 100) / 10
     if (ran.exitCode === 0) {
-      rebuilt.add(unit.path)
-      steps.push({workspace: unit.path, status: 'built', reason, seconds})
+      const unchanged = restoreIfUnchanged(before, snapshot(root, unit))
+      if (!unchanged) rebuilt.add(unit.path)
+      progress?.(`  ${unchanged ? 'unchanged' : 'built'} (${Math.round(ran.durationMs / 1000)}s)`)
+      steps.push({workspace: unit.path, status: unchanged ? 'unchanged' : 'built', reason, seconds})
       continue
     }
+    progress?.(`  failed (${Math.round(ran.durationMs / 1000)}s)`)
     failed = true
     const problems = parseProblems(ran.output, root, unit.path)
     steps.push({

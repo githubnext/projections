@@ -242,7 +242,7 @@ cli.command('check', {
 cli.command('build', {
   description:
     'Build a workspace and the workspaces it needs, rebuilding a dependency only when it is out of date; npm run build rebuilds all of them, the release CLI and Storybook included',
-  hint: "A dependency is rebuilt when it was never built, its src is newer than its dist, or one of its own dependencies was rebuilt or is newer. Workspaces that build Rust always run: Cargo skips what is current. Changes outside src (a vite config, a build script) aren't seen: pass --force.",
+  hint: "A dependency is rebuilt when it was never built, its src is newer than its dist, or one of its own dependencies was rebuilt or is newer. Workspaces that build Rust always run, Cargo skipping what is current; one whose outputs come out the same (`unchanged`) keeps their times, so nothing above it rebuilds. Changes outside src (a vite config, a build script) aren't seen: pass --force.",
   args: z.object({target: z.string().optional().describe('A workspace: path or npm name')}),
   options: z.object({
     affected: z.boolean().default(false).describe('The changed workspaces (not their dependants), and what they need'),
@@ -262,7 +262,7 @@ cli.command('build', {
     steps: z.array(
       z.object({
         workspace: z.string(),
-        status: z.enum(['built', 'current', 'planned', 'failed', 'skip']),
+        status: z.enum(['built', 'unchanged', 'current', 'planned', 'failed', 'skip']),
         reason: z.string(),
         seconds: z.number().optional(),
         problems: z.array(problem).optional(),

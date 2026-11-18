@@ -21,10 +21,17 @@ export const artifact = fileURLToPath(new URL('../dist/rules.wasm', import.meta.
 const maximumMemory = 256 * 1024 * 1024
 const cargoHome = process.env.CARGO_HOME ?? join(homedir(), '.cargo')
 
+// Its own target directory: Cargo keeps one build of each workspace crate per target directory, and this build's
+// flags (below) differ from the default comparator's and its features from the rules editor's, so sharing either's
+// would rebuild the Engine and the comparators in both on every build.
+const targetDirectory = 'target/rules'
+
 const cargoArgs = [
   'rustc',
   '--locked',
   '--release',
+  '--target-dir',
+  targetDirectory,
   '-p',
   'projections-comparator-rules',
   '--target',
@@ -80,7 +87,7 @@ if (result.error) throw result.error
 if (result.status !== 0) process.exit(result.status ?? 1)
 const identity = languageDigest()
 const bytes = Buffer.concat([
-  readFileSync(`${root}/target/wasm32-unknown-unknown/release/projections_comparator_rules.wasm`),
+  readFileSync(`${root}/${targetDirectory}/wasm32-unknown-unknown/release/projections_comparator_rules.wasm`),
   customSection('projections.interpreter', identity),
 ])
 const module = new WebAssembly.Module(bytes)

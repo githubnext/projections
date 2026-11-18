@@ -1,6 +1,6 @@
 // `check --fast`, `build` and `test --filter`: the cheap steps before a full check, and when a dependency needs rebuilding.
 import assert from 'node:assert/strict'
-import {mkdirSync, mkdtempSync, utimesSync, writeFileSync} from 'node:fs'
+import {mkdirSync, mkdtempSync, statSync, utimesSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {fileURLToPath} from 'node:url'
@@ -8,7 +8,7 @@ import test from 'node:test'
 import type {Affected} from '../src/lib/affected.ts'
 import {gates, type GateContext} from '../src/lib/gates.ts'
 import type {Unit} from '../src/lib/packages.ts'
-import {staleness} from '../src/commands/work/build.ts'
+import {restoreIfUnchanged, snapshot, staleness} from '../src/commands/work/build.ts'
 import {testPlan} from '../src/commands/work/test.ts'
 
 const unit = (path: string, overrides: Partial<Unit> = {}): Unit => ({
@@ -99,6 +99,18 @@ test('build: a dependency is current until its src, or a dependency of its own, 
   workspace(root, 'new', {src: 100})
   assert.equal(staleness(root, units, unit('new'), new Set()), 'not built')
   assert.equal(staleness(root, units, unit('wasm', {dependsOn: ['core']}), new Set()), 'builds Rust, which Cargo keeps current')
+})
+
+test('build: outputs written again unchanged keep their times, so nothing above them rebuilds', () => {
+  const root = mkdtempSync(join(tmpdir(), 'tools-unchanged-'))
+  const lib = unit('lib')
+  workspace(root, 'lib', {src: 100, dist: 200})
+  const before = snapshot(root, lib)
+  workspace(root, 'lib', {src: 100, dist: 900})
+  assert.equal(restoreIfUnchanged(before, snapshot(root, lib)), true)
+  assert.equal(statSync(join(root, 'lib/dist/index.js')).mtimeMs, 200_000)
+  writeFileSync(join(root, 'lib/dist/index.js'), 'changed')
+  assert.equal(restoreIfUnchanged(before, snapshot(root, lib)), false)
 })
 
 test('test --filter narrows each runner to the matching tests, and needs a target', () => {

@@ -87,13 +87,21 @@ example with tests.
     stays in the runner's supervision, and records its stderr as a diagnostic;
   - `helper(installed, source)`: your executable's own helper files, from the
     directory you configure with `with_helpers` or their source location.
+  - `compare(request)`: two extractions' comparison by the default comparator or
+    a comparator file (its bytes, read from the revision), computed in the
+    runner's comparator sandbox, for an extractor whose data holds comparisons
+    (`renderer-scenarios`). Only a runner that provides the service, through
+    `with_comparisons`, can: the `projections` CLI does for its built-in
+    extractors; elsewhere `compare` fails, saying so. Extractors that don't call
+    it are unaffected.
 - `execute` and `run` run a tool with the base environment and the granted
   variables, after checking trust.
 - `path`, `read_source`, `read_json` and `read_file`: repository-contained paths
   that never traverse symlinks, and bounded reads. JSON is parsed by the
   Engine's strict parser, which rejects duplicate keys and unsafe numbers.
 - `extraction`, `relationship`, `key`, `stable`, `exported` and friends: build
-  extractions with stable, escaped identities.
+  extractions with stable, escaped identities; `normalize_extraction` checks and
+  normalizes an extraction your data holds, such as a fixture.
 - `Scratch`: a private build directory inside the examined revision.
 - With the `testing` feature, `testing::context` and `testing::trusted` build a
   context for a directory without a runner, and `golden` compares JSON with a

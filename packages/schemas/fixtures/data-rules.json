@@ -4,7 +4,8 @@
     "dependency-injection/v0": ["architecture/v0"],
     "infrastructure/v0": ["architecture/v0"],
     "runtime-policy/v0": ["architecture/v0"],
-    "agentic-workflows/v0": ["architecture/v0"]
+    "agentic-workflows/v0": ["architecture/v0"],
+    "scenarios/v0": ["graph/v0"]
   },
   "rules": [
     {
@@ -426,6 +427,36 @@
       "collection": "entities",
       "kinds": ["group"],
       "fields": [{"name":"workflows","type":"strings","required":false}]
+    },
+    {
+      "schema": "graph/v0",
+      "vocabulary": "scenarios/v0",
+      "collection": "entities",
+      "kinds": ["scenarios"],
+      "fields": [
+        {"name":"path","type":"text","required":true},
+        {"name":"renderer","type":"string","required":false},
+        {"name":"scenarios","type":"strings","required":false}
+      ]
+    },
+    {
+      "schema": "graph/v0",
+      "vocabulary": "scenarios/v0",
+      "collection": "entities",
+      "kinds": ["scenario"],
+      "fields": [
+        {"name":"renderer","type":"text","required":true},
+        {"name":"bundle","type":"string","required":false},
+        {"name":"mode","type":{"enum":["extraction","comparison"]},"required":true},
+        {"name":"extraction","type":"object","required":false},
+        {"name":"before","type":"object","required":false},
+        {"name":"after","type":"object","required":false},
+        {"name":"comparison","type":"object","required":false},
+        {"name":"comparator","type":"string","required":false},
+        {"name":"group","type":"string","required":false},
+        {"name":"description","type":"string","required":false},
+        {"name":"presentation","type":"object","required":false}
+      ]
     }
   ]
 }

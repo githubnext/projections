@@ -7,7 +7,7 @@ import type {RendererMessage} from './messages.js'
 import {anchorRect, scrollPosition} from './positions.js'
 import {steps} from './steps-message.js'
 import {parseSummaryItems} from './summary/items.js'
-import {envelopeKeys, finite, isEnvelope, isPropertyPath, keys, text} from './validation.js'
+import {envelopeKeys, finite, isEnvelope, isPropertyPath, keys, rendererNamePattern, text} from './validation.js'
 
 type Fields = Record<string, unknown>
 
@@ -87,6 +87,11 @@ const parsers: {[type: string]: (message: Fields) => RendererMessage | undefined
     if (!keys(message, [...envelopeKeys, 'controls'])) return undefined
     const controls = parseControls(message.controls)
     return controls ? {type: 'controls', controls} : undefined
+  },
+  'document-request'(message) {
+    if (!keys(message, [...envelopeKeys, 'renderer'])) return undefined
+    const {renderer} = message
+    return typeof renderer === 'string' && rendererNamePattern.test(renderer) ? {type: 'document-request', renderer} : undefined
   },
 }
 

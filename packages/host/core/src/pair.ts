@@ -2,8 +2,8 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {customComparator, type ExtractionDocument, type ProjectionEngine} from '@githubnext/projections-schemas'
 import {ComparisonError, computeComparison} from './compare.js'
 import type {ComparatorSource, ComputedComparison, RulesRuntime} from './compare.js'
-import {compatibleRenderers, resolveRenderer} from './registry.js'
-import type {RendererEntry, RendererResolution, WithheldRenderer} from './registry.js'
+import {builtinRendererDocuments, compatibleRenderers, resolveRenderer} from './registry.js'
+import type {RendererDocuments, RendererEntry, RendererResolution, WithheldRenderer} from './registry.js'
 import type {ViewSubject} from './model.js'
 import type {PresentationDefaults} from './projection.js'
 
@@ -27,6 +27,11 @@ export interface ComparisonPairOptions {
   rules?: RulesRuntime
   /** Built-in renderer bundles. */
   renderers: readonly RendererEntry[]
+  /**
+   * Built-in renderer documents for renderers that nest them (`document-request`). Defaults to the built-in entries of
+   * `renderers`; a host that offers fewer bundles than it has passes its whole catalog's.
+   */
+  rendererDocuments?: RendererDocuments
   /**
    * Supplies a custom renderer bundle for a definition that declares one, or
    * says why it is withheld. Without a bundle the built-in renderer for the
@@ -83,6 +88,8 @@ export interface ComparisonPair {
   resolution: RendererResolution
   /** The resolved renderer first, then every other bundle that can present this projection. */
   renderers: readonly RendererEntry[]
+  /** The built-in renderers' documents, from every bundle of `ComparisonPairOptions.renderers`, for renderers that nest them. */
+  rendererDocuments: RendererDocuments
   /** Definition defaults for host and renderer settings (`definition.presentation`). */
   presentation: PresentationDefaults | undefined
   /** Chooses the base; an empty key shows one extraction. */
@@ -172,6 +179,8 @@ export function useComparisonPair(options: ComparisonPairOptions): ComparisonPai
     () => (document ? resolveRenderer(document.projection.renderer, renderers, customRenderer?.(document), document.extraction) : {}),
     [document, renderers, customRenderer],
   )
+  const supplied = options.rendererDocuments
+  const rendererDocuments = useMemo(() => supplied ?? builtinRendererDocuments(renderers), [supplied, renderers])
   const compatible = useMemo(
     () => (document ? compatibleRenderers(document, renderers, resolution.renderer) : []),
     [document, renderers, resolution.renderer],
@@ -210,6 +219,7 @@ export function useComparisonPair(options: ComparisonPairOptions): ComparisonPai
     comparator: outcome.status === 'compared' ? outcome.result.comparator : undefined,
     resolution,
     renderers: compatible,
+    rendererDocuments,
     presentation: document?.provenance.definition.presentation,
     setBefore: setBeforeKey,
     setAfter: setAfterKey,

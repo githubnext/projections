@@ -10,6 +10,7 @@ import {
 import {documentRings} from './rings.js'
 import {optionalThemeTokenNames, resolveThemeTokens} from './tokens.js'
 import {dispatch, replayed, resumeSession, type RendererHandlers} from './client/host-messages.js'
+import {documentRequests} from './client/documents.js'
 import type {
   AnchorRect,
   HostMessage,
@@ -23,6 +24,8 @@ import type {
 } from './protocol.js'
 
 export type {RendererHandlers} from './client/host-messages.js'
+export {embedRenderer} from './embed.js'
+export type {EmbedOptions, EmbeddedRenderer} from './embed.js'
 
 /** What `connectRenderer` declares, and where it connects. */
 export interface ConnectOptions {
@@ -100,6 +103,13 @@ export interface RendererClient {
    * `capabilities.controls`). Throws if a declaration is invalid.
    */
   declareOptions(controls: readonly RendererControl[]): void
+  /**
+   * Asks the host for the document of the built-in renderer `name` (for example `graph`), to run in a frame nested in
+   * this one (`embedRenderer` does both). Resolves with its `index.html` text, as the host runs it; rejects with the
+   * host's reason when it supplies none (an unknown or custom renderer, or a host without documents), or after
+   * `rendererLimits.documentTimeoutMs` without an answer. Repeated requests for one name share one answer.
+   */
+  requestDocument(name: string): Promise<string>
   /** Observes every valid host message after the handlers run. Returns a function that stops observing. */
   subscribe(listener: (message: HostMessage) => void): () => void
   /** Requests the height of `element` whenever it resizes. Returns a function that stops observing. */
@@ -163,7 +173,9 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
   }
   const {messages, replay} = resumeSession(view, channel)
   const rings = options.rings === false ? null : documentRings(view)
+  const documents = documentRequests(view, post, message => new RendererConnectionError(message))
   const deliver = (message: HostMessage) => {
+    if (message.type === 'document') return documents.answer(message)
     if (message.type === 'select') rings?.controller.set({selected: message.id})
     if (message.type === 'hover') rings?.controller.set({hovered: message.id})
     if (message.type === 'init') rings?.controller.set({hovered: null, selected: null})
@@ -242,6 +254,7 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
         y: round(Math.max(0, position.y)),
         ...(position.key === undefined ? {} : {key: position.key}),
       }),
+    requestDocument: name => documents.request(name),
     declareOptions(controls) {
       const parsed = parseControls(controls)
       if (!parsed) throw new RendererConnectionError('Invalid control declarations')
@@ -271,6 +284,7 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
     },
     dispose() {
       disposed = true
+      documents.dispose()
       rings?.release()
       view.removeEventListener('message', listener)
       for (const observer of observers) observer.disconnect()

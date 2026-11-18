@@ -1,4 +1,5 @@
 import {useEffect, useRef, useState} from 'react'
+import {builtinRendererDocuments} from '@githubnext/projections-host'
 import {ScopedRoot} from '@githubnext/projections-host/ui/components'
 import type {StageApi, StageState} from '@githubnext/projections-renderer-testing'
 import {stageApi} from './session.js'
@@ -19,7 +20,7 @@ export function StagePage({store, context}: {store: FixturesStore; context: Fixt
   const container = useRef<HTMLDivElement>(null)
   const [state, setState] = useState<StageState | undefined>()
   useEffect(() => {
-    const stage = new Stage(container.current!, setState)
+    const stage = new Stage(container.current!, setState, builtinRendererDocuments(context.builtins))
     window.projectionsStage = stageApi(stage, store, context)
     document.documentElement.dataset.projectionsStage = 'ready'
     return () => {

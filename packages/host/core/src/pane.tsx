@@ -16,7 +16,7 @@ import type {
 } from '@githubnext/projections-renderer-sdk/protocol'
 import {RendererFrame} from './frame.js'
 import type {RendererFrameEvent} from './frame/types.js'
-import type {RendererEntry} from './registry.js'
+import type {RendererDocuments, RendererEntry} from './registry.js'
 
 /**
  * What a `RendererPane` reports through `onState`: its frame's status (with the failure `message`), the renderer's
@@ -58,6 +58,8 @@ export const loadingPane: PaneState = {status: 'loading', steps: [], rendererErr
  */
 export interface RendererPaneProps {
   renderer: RendererEntry
+  /** Built-in renderer documents for a renderer that nests them (`RendererFrameOptions.builtinDocuments`). */
+  documents?: RendererDocuments | undefined
   /** Appended to the frame's accessible name, for example `before revision`. */
   label?: string
   init: InitPayload
@@ -94,6 +96,8 @@ export interface RendererPaneProps {
   /** How far, CSS px, the frame extends past the pane's start and end edges (see `ProjectionStageProps.bleed`). */
   bleed?: {start: number; end: number}
 }
+
+const noDocuments = "This host doesn't supply renderer documents"
 
 /** One sandboxed renderer frame with its loading and failure states. */
 export function RendererPane(props: RendererPaneProps) {
@@ -210,6 +214,8 @@ export function RendererPane(props: RendererPaneProps) {
       ...(latest.current.options ? {options: latest.current.options} : {}),
       onEvent,
       fill: latest.current.fill,
+      // The latest supply, so a catalog that loads after the frame still answers its requests.
+      builtinDocuments: name => callbacks.current.documents?.(name) ?? Promise.reject(new Error(noDocuments)),
     })
     if (latest.current.hoveredId !== null) created.hover(latest.current.hoveredId)
     if (latest.current.selectedPath !== undefined) created.select(latest.current.selectedId, latest.current.selectedPath)

@@ -4,15 +4,14 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs/promises')
 const path = require('node:path')
 const vscode = require('vscode')
-const {execFileSync} = require('node:child_process')
-const {until} = require('../helpers.cjs')
+const {until, git: run} = require('../helpers.cjs')
 
 module.exports = async function currentView({folder, api, invoke}) {
   // The agent knows the projection tab the person is looking at. A CI pipeline whose last commit removes the Test
   // job (and splits it into Unit tests and Deploy) is shown on Last commit, pinned to its tab: the folder's choice and
   // the suggested pair (the branch since main) only add jobs. Asked "what is this projection?" and "what was
   // removed?", the agent reads the current view and compares exactly what is on screen, and says so.
-  const git = (...args) => execFileSync('git', args, {cwd: folder.fsPath, encoding: 'utf8', stdio: 'pipe'}).trim()
+  const git = (...args) => run(folder.fsPath, ...args)
   const workflow = jobs => `name: CI\non: [push]\njobs:\n${jobs}`
   const job = (id, name, needs) =>
     `  ${id}:\n    name: ${name}\n${needs ? `    needs: ${needs}\n` : ''}    runs-on: ubuntu-latest\n    steps:\n      - run: echo ${id}\n`
@@ -23,12 +22,12 @@ module.exports = async function currentView({folder, api, invoke}) {
     path.join(folder.fsPath, '.github', 'projections', 'ci-jobs.json'),
     `${JSON.stringify({id: 'ci-jobs', title: 'CI pipeline', extractor: 'github-actions-jobs', renderer: 'dag', inputs: {workflowPath: '.github/workflows/ci.yml'}}, null, 2)}\n`,
   )
-  git('add', '.github/workflows/ci.yml', '.github/projections/ci-jobs.json')
-  git('-c', 'commit.gpgsign=false', 'commit', '--quiet', '-m', 'Add CI workflow')
+  await git('add', '.github/workflows/ci.yml', '.github/projections/ci-jobs.json')
+  await git('-c', 'commit.gpgsign=false', 'commit', '--quiet', '-m', 'Add CI workflow')
   await fs.writeFile(ciFile, workflow(job('build', 'Build') + job('unit', 'Unit tests', 'build') + job('deploy', 'Deploy', 'unit')))
-  git('add', '.github/workflows/ci.yml')
-  git('-c', 'commit.gpgsign=false', 'commit', '--quiet', '-m', 'Deploy after unit tests')
-  const [before, after] = [git('rev-parse', 'HEAD~1'), git('rev-parse', 'HEAD')]
+  await git('add', '.github/workflows/ci.yml')
+  await git('-c', 'commit.gpgsign=false', 'commit', '--quiet', '-m', 'Deploy after unit tests')
+  const [before, after] = [await git('rev-parse', 'HEAD~1'), await git('rev-parse', 'HEAD')]
   assert.ok(vscode.lm.tools.some(tool => tool.name === 'projections_current_view'))
   await until('the CI pipeline row', async () => api.rows()[0].projections.some(row => row.id === 'ci-jobs'))
   const opened = await invoke('projections_open_projection', {projection: 'ci-jobs', before: 'HEAD~1', after: 'HEAD', pin: true})
@@ -101,7 +100,7 @@ module.exports = async function currentView({folder, api, invoke}) {
   )
   // Before the commit that added the workflow, the pipeline didn't exist yet: the tab shows its jobs added, with a
   // notice naming the missing file, rather than an extraction failure.
-  const added = git('rev-parse', 'HEAD~2')
+  const added = await git('rev-parse', 'HEAD~2')
   await invoke('projections_open_projection', {projection: 'ci-jobs', before: 'HEAD~2', after: 'HEAD~1', pin: true})
   const notice = `\`.github/workflows/ci.yml\` doesn't exist at \`${added.slice(0, 8)}\`, so its contents show as added.`
   const missing = await until(

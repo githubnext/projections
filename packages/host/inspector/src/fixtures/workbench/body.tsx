@@ -1,6 +1,6 @@
 import type {ReactNode} from 'react'
 import {ComparisonError} from '@githubnext/projections-host'
-import type {ComputedComparison, RendererEntry, TargetAnnotation, ViewSubject} from '@githubnext/projections-host'
+import type {ComputedComparison, RendererDocuments, RendererEntry, TargetAnnotation, ViewSubject} from '@githubnext/projections-host'
 import {LoadingStatus, ProjectionView} from '@githubnext/projections-host/ui'
 import {Alert, AlertDescription, AlertTitle, cn} from '@githubnext/projections-host/ui/components'
 import {CircleAlert, LoaderCircle} from 'lucide-react'
@@ -24,6 +24,7 @@ export function WorkbenchBody({
   subject,
   resolution,
   renderers,
+  rendererDocuments,
   annotations,
   colorMode,
   viewport,
@@ -37,6 +38,7 @@ export function WorkbenchBody({
   subject: ViewSubject | undefined
   resolution: ReturnType<typeof scenarioRenderer> | undefined
   renderers: RendererEntry[]
+  rendererDocuments: RendererDocuments
   annotations: TargetAnnotation[] | undefined
   colorMode: 'light' | 'dark'
   viewport: Viewport
@@ -98,6 +100,7 @@ export function WorkbenchBody({
             renderer={resolution?.renderer}
             rendererNotice={resolution?.notice}
             renderers={renderers}
+            rendererDocuments={rendererDocuments}
             presentation={scenario.presentation}
             colorMode={colorMode}
             initialProgress={0}

@@ -6,7 +6,7 @@
 //! process for the extractors compiled into this executable, written with the
 //! public extractor SDK as any Rust extractor would be.
 
-use projections_extractor_sdk::Context;
+use projections_extractor_sdk::{ComparisonRequest, Context};
 use std::path::PathBuf;
 use std::process::ExitCode;
 
@@ -24,6 +24,19 @@ pub fn main(id: &str, helpers: Helpers) -> ExitCode {
             Some(directory) => Ok(Some(directory.clone())),
             None => crate::assets::collector_directory_in(helpers.cache.as_deref()),
         })
+        .with_comparisons(compare)
     });
     projections_extractor_sdk::serve(context, |cx| projections_extractor_catalog::collect(id, cx))
+}
+
+/// Compares for a built-in extractor exactly as for a projection: the default
+/// comparator module or a comparator file, run in the comparator runtime's
+/// sandbox and validated by the Engine. Comparator files are data, so this runs
+/// no repository code.
+fn compare(request: &ComparisonRequest<'_>) -> anyhow::Result<serde_json::Value> {
+    match request.file {
+        Some((path, rules)) => crate::artifact::run_custom_comparator(path, rules, request.before, request.after, request.options)
+            .map(|(comparison, _)| comparison),
+        None => crate::artifact::default_comparison(request.before, request.after, request.options),
+    }
 }

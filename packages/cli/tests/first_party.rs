@@ -92,6 +92,23 @@ fn cases(root: &Path) -> Vec<(&'static str, Value)> {
     ] {
         copy(&fixtures(id).join(file), &root.join("snapshots").join(id).join(file));
     }
+    // Renderer scenarios, one compared: the built-in and the command both compare in the CLI's sandbox.
+    let graph = |ids: &[&str]| {
+        json!({"protocolVersion": 0, "schema": "graph/v0", "relationships": [],
+            "entities": ids.iter().map(|id| json!({"id": id, "kind": "service", "label": id})).collect::<Vec<_>>()})
+    };
+    fs::create_dir_all(root.join("scenarios")).unwrap();
+    fs::write(
+        root.join("scenarios/scenarios.json"),
+        serde_json::to_vec_pretty(
+            &json!({"format": "projections.scenarios", "version": 0, "renderer": "graph", "scenarios": [
+                {"id": "one", "title": "One revision", "extraction": graph(&["a"])},
+                {"id": "split", "title": "A split", "before": graph(&["a"]), "after": graph(&["b", "c"])}
+            ]}),
+        )
+        .unwrap(),
+    )
+    .unwrap();
     let snapshot = |id: &str, file: &str| json!({"snapshot": format!("snapshots/{id}/{file}")});
     let mut cases = vec![
         ("workspace-dependencies", json!({"root": "npm"})),
@@ -110,6 +127,7 @@ fn cases(root: &Path) -> Vec<(&'static str, Value)> {
         ("prisma-schema", json!({"schema": "prisma/schema.prisma"})),
         ("rails-schema", json!({"schema": "rails/db/schema.rb"})),
         ("rails-routes", json!({"routes": "rails/config/routes.rb"})),
+        ("renderer-scenarios", json!({"include": ["scenarios/**/scenarios.json"]})),
         (
             "tetragon-policies",
             json!({"paths": ["tetragon/**/*.yaml"], "namespace": "security"}),

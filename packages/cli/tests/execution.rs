@@ -7,6 +7,10 @@ use projections_cli::runtime::Runner;
 use serde_json::{Value, json};
 use std::{collections::BTreeMap, fs, path::Path, process::Command};
 
+#[cfg(unix)]
+#[path = "../src/test_support.rs"]
+mod test_support;
+
 fn git(root: &Path, args: &[&str]) -> String {
     let output = Command::new("git")
         .args([
@@ -385,7 +389,6 @@ fn a_verified_ci_artifact_supplies_a_commit_without_running_anything() {
 /// A stand-in for gh answering `responses` (a shell `case` pattern over its
 /// arguments → its output), logging every call; anything else fails.
 fn fake_gh(directory: &Path, responses: &[(&str, &str)]) -> std::path::PathBuf {
-    use std::os::unix::fs::PermissionsExt;
     let log = directory.join("calls.log");
     let mut script = format!("#!/bin/sh\necho \"$@\" >> '{}'\ncase \"$*\" in\n", log.display());
     for (pattern, output) in responses {
@@ -393,8 +396,7 @@ fn fake_gh(directory: &Path, responses: &[(&str, &str)]) -> std::path::PathBuf {
     }
     script.push_str("  *) echo \"unexpected gh $*\" >&2; exit 1 ;;\nesac\n");
     let gh = directory.join("gh");
-    fs::write(&gh, script).unwrap();
-    fs::set_permissions(&gh, fs::Permissions::from_mode(0o755)).unwrap();
+    test_support::write_executable(&gh, &script);
     gh
 }
 

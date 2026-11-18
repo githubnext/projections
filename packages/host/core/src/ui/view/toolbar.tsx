@@ -188,7 +188,10 @@ export function ViewToolbar({
           </div>
         </div>
       </ToolbarRow>
-      {showPlayback && plan.rows === 2 && <ToolbarRow className="ph-toolbar-playback-row pj:pr-1.5">{playback}</ToolbarRow>}
+      {/* Ending in the slider (`minimal`), the row insets it so its thumb clears the border; a percent or button ends it at the edge inset. */}
+      {showPlayback && plan.rows === 2 && (
+        <ToolbarRow className={cn('ph-toolbar-playback-row', plan.playback === 'minimal' && 'pj:pr-1.5')}>{playback}</ToolbarRow>
+      )}
     </Toolbar>
   )
 }

@@ -69,7 +69,7 @@ function lockOf(toolbar: HTMLElement, plan: ToolbarPlan): ((candidate: ToolbarPl
 
 /**
  * The widest toolbar a two-row plan suits: one whose row 1, at its minimums, still fills `firstRowFill` of the row
- * (the toolbar's padding and border take 10px). Plans that merge the pickers are the last resort and have no limit,
+ * (the toolbar's padding takes 8px). Plans that merge the pickers are the last resort and have no limit,
  * and neither has a row 1 in its fullest forms (the mode region centred, or after the start region), which is the row
  * the other modes show at the same width.
  */
@@ -77,7 +77,7 @@ function rowCeiling(toolbar: HTMLElement, plan: ToolbarPlan): number {
   const fullest = plan.pair === 'full' && plan.mode === 'icons' && plan.more.length === 0
   if (plan.rows !== 2 || plan.pair === 'merged' || fullest) return Infinity
   const row = toolbar.querySelector(':scope > .ph-toolbar-row')
-  return row ? fitWidth(row) / firstRowFill + 10 : Infinity
+  return row ? fitWidth(row) / firstRowFill + 8 : Infinity
 }
 
 /**
@@ -98,7 +98,7 @@ export function useToolbarLayout(
   )
   const {plan, width} = useFitPlan(toolbar, plans, {key, signature, locate, lock: lockOf, ceiling: rowCeiling})
   const sliderMin = width > 0 && width < narrowToolbar ? sliderMinimum.narrow : sliderMinimum.regular
-  // A second row plans for a slider spanning most of the row (the toolbar's padding and border take 10px).
-  const sliderFitMin = plan.rows === 2 ? Math.max(sliderMin, Math.ceil(playbackRowShare * (width - 10))) : sliderMin
+  // A second row plans for a slider spanning most of the row (the toolbar's padding takes 8px).
+  const sliderFitMin = plan.rows === 2 ? Math.max(sliderMin, Math.ceil(playbackRowShare * (width - 8))) : sliderMin
   return {plan, sliderMin, sliderFitMin}
 }

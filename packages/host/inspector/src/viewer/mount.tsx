@@ -15,6 +15,7 @@ import type {InspectorHost} from '../host.js'
 import {InspectorRequestError, requestErrorMessage} from '../transport.js'
 import type {InspectorTransport} from '../transport.js'
 import {apply} from './apply.js'
+import {openRendererDocuments} from './documents.js'
 import {markReady, pageId, pairKey, settle, unapplied} from './page.js'
 import type {ViewerPage} from './page.js'
 import {ViewerHeader, ViewerShown, createStore, mountWaiting} from './chrome.js'
@@ -82,6 +83,7 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
   // The viewer this page shows: the one the options or the page's URL name, else the default one.
   const name = options.viewer ?? new URLSearchParams(location.search).get('viewer') ?? undefined
   const named = name && name !== 'default' ? {viewer: name} : {}
+  const stopDocuments = openRendererDocuments(!options.transport)
   const store = createStore()
   if (themed.notice) store.set(themed.notice)
   const abort = new AbortController()
@@ -249,6 +251,7 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
       clearInterval(timer)
       waiting.remove()
       mounted?.unmount()
+      stopDocuments()
     },
   }
 }

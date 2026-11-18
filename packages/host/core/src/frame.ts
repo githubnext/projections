@@ -15,8 +15,9 @@ import type {
 import {HeightRequests, MessageGate} from './frame/admission.js'
 import {ProgressFlow} from './frame/progress-flow.js'
 import {replay, selectMessage} from './frame/replay.js'
-import {fillStyle, frameElement, nonce, observeViewport, viewportOf} from './frame/element.js'
+import {fillStyle, frameElement, frameUrl, nonce, observeViewport, viewportOf} from './frame/element.js'
 import {FrameLifecycle} from './frame/lifecycle.js'
+import {OpenedDocument} from './frame/opened.js'
 import type {RendererFrameEvent, RendererFrameOptions, RendererFrameStatus} from './frame/types.js'
 
 /**
@@ -36,6 +37,10 @@ import type {RendererFrameEvent, RendererFrameOptions, RendererFrameStatus} from
  *   acknowledges painting the previous one.
  * - A renderer that does not become ready, navigates its frame or floods the
  *   host is stopped and reported; the host's own views remain available.
+ * - A frame whose document loads but whose renderer doesn't answer (an
+ *   embedding browser that blocks the frame's URL) can open the renderer's
+ *   document itself once, as a Blob document in the same sandboxed frame
+ *   (`documents`, by default the page's `setRendererDocuments`).
  */
 export class RendererFrame {
   readonly iframe: HTMLIFrameElement
@@ -61,6 +66,8 @@ export class RendererFrame {
   private readonly flow: ProgressFlow
   private readonly lifecycle: FrameLifecycle
   private readonly resize: ResizeObserver | undefined
+  private readonly url: URL
+  private readonly opened: OpenedDocument
 
   constructor(options: RendererFrameOptions) {
     this.view = options.window ?? options.container.ownerDocument.defaultView ?? window
@@ -75,13 +82,17 @@ export class RendererFrame {
     this.flow = new ProgressFlow(this.view, options.acknowledgementTimeoutMs ?? 1000, progress =>
       this.send({type: 'progress', ...progress}),
     )
-    const iframe = frameElement(options, this.view, this.channel, this.fill)
+    this.url = frameUrl(options, this.view, this.channel)
+    this.opened = new OpenedDocument(options.documents)
+    const iframe = frameElement(options, this.opened.first ? undefined : this.url, this.fill)
     this.iframe = iframe
     this.gate = new MessageGate(this.view, iframe, this.channel)
     const readyTimeoutMs = options.readyTimeoutMs ?? rendererLimits.readyTimeoutMs
-    this.lifecycle = new FrameLifecycle(this.view, iframe, readyTimeoutMs, this.onEvent, () => this.teardown())
+    const reopen = this.opened.retries ? () => this.open() : undefined
+    this.lifecycle = new FrameLifecycle(this.view, iframe, readyTimeoutMs, this.onEvent, () => this.teardown(), reopen)
     this.view.addEventListener('message', this.received)
     options.container.append(iframe)
+    if (this.opened.first) this.open()
     this.resize = observeViewport(iframe, this.view, viewport => this.send({type: 'viewport', ...viewport}))
   }
 
@@ -184,7 +195,13 @@ export class RendererFrame {
     this.lifecycle.dispose()
   }
 
+  /** Opens the renderer's document itself and loads it into the frame, keeping the fragment. */
+  private open(): void {
+    this.opened.open(this.iframe, this.url, this.lifecycle)
+  }
+
   private teardown(): void {
+    this.opened.revoke()
     this.view.removeEventListener('message', this.received)
     this.flow.dispose()
     this.resize?.disconnect()
@@ -253,6 +270,7 @@ export class RendererFrame {
   /** The renderer became ready: sends it the presented documents and the state set while it loaded. */
   private ready(capabilities: RendererCapabilities): void {
     if (!this.lifecycle.ready()) return
+    this.opened.ready()
     this.capabilities = capabilities
     this.declared = capabilities.controls ?? []
     this.onEvent({type: 'ready', capabilities})

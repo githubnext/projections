@@ -90,6 +90,19 @@ separate inspector to start.
   writes `.github/extensions/projections/extension.mjs`), then open the
   `projections` canvas, whose input is `open_projection`'s. It shows the same
   viewer in the app's theme, which a page in a browser tab doesn't get.
+- **In Claude Code's Preview pane** (the Claude app), `preview_start` takes
+  only a server named in `.claude/launch.json`, not a URL. Add one entry that
+  runs the viewer in the foreground on a fixed port, in Claude's colors
+  (`--theme claude`; add `--trust` only if the projection runs repository
+  code), keeping any other entries:
+  `{"version": "0.0.1", "configurations": [{"name": "projections-viewer", "runtimeExecutable": "projections", "runtimeArgs": ["view", "--port", "47470", "--theme", "claude"], "port": 47470, "autoPort": false}]}`
+  (any free port; `autoPort: false` keeps Claude from moving it). Start it with
+  `preview_start`, then navigate the Preview tab to the full link that
+  `projections view show --theme claude …` prints for it, path, token and
+  `?theme=` included: the bare port only shows a page asking for its full
+  link. The link stays the same when the viewer restarts. Whether
+  `.claude/launch.json` is committed or ignored is the repository's choice; ask
+  before committing it.
 - **In your own app's browser pane** (a custom harness showing the page beside
   you), when the page's default whites and greys don't match the app around it,
   give it the app's colors: `projections view show --theme SEED` (inline JSON

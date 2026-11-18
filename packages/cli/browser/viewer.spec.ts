@@ -2,7 +2,7 @@
 // mode, mirrors them across open pages, refuses requests without its token, and names no files, even on errors. At a
 // canvas's width its header text is whole and its chrome lies flat, edge to edge, every control works, and a page that
 // loses its server says so and takes no input. A named viewer is a page of its own, and the person switches a page's
-// projection from its title.
+// projection from its title. Where a browser won't load renderer frames' URLs, the page opens their documents itself.
 import {test, expect, chromium} from '@playwright/test'
 import type {Page} from '@playwright/test'
 import {execFileSync, spawn, spawnSync} from 'node:child_process'
@@ -246,6 +246,46 @@ async function openCanvas(page: Page, link = url) {
     )
     .toBe(true)
 }
+
+test("where a browser blocks renderer frames from loading the viewer's URLs, the page opens their documents itself, still isolated", async ({
+  page,
+}) => {
+  // Claude Code's Preview pane cancels any request from an opaque origin to a loopback address as a client block: a
+  // sandboxed renderer frame's navigation to the viewer. The page's own requests still go through.
+  const blocked: string[] = []
+  await page.route(/\/renderers\/.+\/index\.html$/, (route, request) => {
+    if (!request.isNavigationRequest() || !request.frame().parentFrame()) return route.continue()
+    blocked.push(request.url())
+    return route.abort('blockedbyclient')
+  })
+  await openCanvas(page)
+  expect(blocked.length).toBeGreaterThan(0)
+  const frame = page.locator('.ph-frame').first()
+  await expect(frame).toHaveAttribute('src', /^blob:/)
+  await expect(frame).toHaveAttribute('sandbox', 'allow-scripts')
+  const renderer = page.frames().find(each => each.url().startsWith('blob:'))!
+  // The document is the renderer's, in an opaque origin, and its own policy still refuses every request.
+  expect(await renderer.evaluate(() => self.origin)).toBe('null')
+  expect(
+    await renderer.evaluate(
+      link =>
+        fetch(link).then(
+          () => 'fetched',
+          () => 'refused',
+        ),
+      url,
+    ),
+  ).toBe('refused')
+  expect(
+    await renderer.evaluate(() => {
+      try {
+        return parent.document ? 'reached' : 'refused'
+      } catch {
+        return 'refused'
+      }
+    }),
+  ).toBe('refused')
+})
 
 test('at a canvas width, the header text is whole and centred', async ({page}) => {
   const failed: string[] = []

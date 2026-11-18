@@ -6,13 +6,6 @@ import {hostTag, rendererTag} from '../protocol.js'
 import type {RendererReply} from '../protocol.js'
 import {config, fromExtension, post} from './host.js'
 
-/** A renderer document with `nonce` on its script elements (parsed, so script text that mentions tags is untouched). */
-export function withNonce(html: string, nonce: string): string {
-  const document = new DOMParser().parseFromString(html, 'text/html')
-  for (const script of document.querySelectorAll('script')) script.setAttribute('nonce', nonce)
-  return `<!doctype html>\n${document.documentElement.outerHTML}`
-}
-
 async function fetchOk(url: string): Promise<Response> {
   const response = await fetch(url)
   if (!response.ok) throw new Error(`${url} returned ${response.status}`)
@@ -20,7 +13,7 @@ async function fetchOk(url: string): Promise<Response> {
 }
 
 /** A renderer document as a Blob URL, with this page's nonce on its scripts. */
-const rendererDocument = (html: string) => URL.createObjectURL(new Blob([withNonce(html, config.nonce)], {type: 'text/html'}))
+const rendererDocument = (html: string) => mount.rendererBlobDocument(html, config.nonce)
 
 /**
  * The Inspector's assets as a webview can use them. A webview can't start a Worker from a resource URL (another

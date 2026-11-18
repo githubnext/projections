@@ -186,6 +186,36 @@ reuses the viewer, its actions are the same four tools, and the page follows the
 app's theme
 ([the canvas](../../packages/integrations/copilot-canvas/README.md)).
 
+In Claude Code's Preview pane (the Claude app), `preview_start` starts only a
+server named in `.claude/launch.json`, so the agent adds an entry that runs the
+viewer in the foreground on a fixed port with Claude's colors, starts it, and
+navigates the Preview tab to the full link
+`projections view show --theme claude` prints (the bare port shows only a page
+asking for the full link):
+
+```json
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "projections-viewer",
+      "runtimeExecutable": "projections",
+      "runtimeArgs": ["view", "--port", "47470", "--theme", "claude"],
+      "port": 47470,
+      "autoPort": false
+    }
+  ]
+}
+```
+
+`--trust` belongs in `runtimeArgs` only when the projection runs repository
+code, and `autoPort: false` keeps Claude from moving the server to another port,
+which the viewer wouldn't follow. Whether `.claude/launch.json` is committed or
+ignored is the repository's choice. The pane refuses requests from a sandboxed
+frame to a loopback address, the viewer's renderer frames among them, so the
+page opens a renderer's document itself there, in the same sandboxed frame
+([the agent viewer](../design/agent-viewer.md#renderer-frames-a-browser-wont-load)).
+
 Add it to an agent as a stdio server whose command is `projections mcp`, run in
 the repository (or with `-C DIR`). For example, in an MCP client configuration:
 
@@ -226,11 +256,12 @@ change colors) as it does from the Copilot app's.
   characters and the seed at most 4096. Anything else is refused whole, so a
   seed never reaches the page as CSS.
 - `projections view --theme SEED` and `projections view show --theme SEED` take
-  it as inline JSON or a JSON file's path, check it (an invalid seed fails with
-  what is wrong) and put it in the link they print and open, as `?theme=` with
-  the seed's compact JSON, percent-encoded. With `projections mcp`, add
-  `?theme=` to the URL `open_projection` gives
-  (`encodeURIComponent(JSON.stringify(seed))`; a `#` must be `%23`).
+  it as a built-in seed's name (`claude`, for Claude Code's Preview pane),
+  inline JSON or a JSON file's path, check it (an invalid seed fails with what
+  is wrong) and put it in the link they print and open, as `?theme=` with the
+  seed's compact JSON, percent-encoded. With `projections mcp`, add `?theme=` to
+  the URL `open_projection` gives (`encodeURIComponent(JSON.stringify(seed))`; a
+  `#` must be `%23`).
 - The seed lives only in that link, not in the viewer: a page opened from
   another link (the Copilot app's canvas on the same viewer, another browser)
   keeps its own theme. Reloading and reconnecting keep it. A page whose seed
@@ -241,12 +272,16 @@ change colors) as it does from the Copilot app's.
 
 The seed belongs to the app, not to the repository or the machine (one machine
 may run several apps, the Copilot app among them), so Projections keeps no
-default seed. The agent finds the colors from the app itself: its own CSS or
-source when the agent can read them, a screenshot of itself sampled for its
-surface, text and rule colors, or by asking the person. It keeps the seed in the
-app's own agent instructions (its custom instructions or `AGENTS.md`) and passes
-it every time it opens the page. In the Copilot app and VS Code, which theme the
-viewer themselves, it passes none. For example, an instruction for a harness:
+default seed. Its only built-in seed is `claude`, Claude Code's Preview pane,
+from the Claude app's own design tokens; in dark mode its background is the
+pane's backdrop, which shows as a thin inset either side of the page, so the
+page meets it seamlessly. The agent finds the colors from the app itself: its
+own CSS or source when the agent can read them, a screenshot of itself sampled
+for its surface, text and rule colors, or by asking the person. It keeps the
+seed in the app's own agent instructions (its custom instructions or
+`AGENTS.md`) and passes it every time it opens the page. In the Copilot app and
+VS Code, which theme the viewer themselves, it passes none. For example, an
+instruction for a harness:
 
 ```md
 When you show a Projections viewer in this app's browser pane, open it with

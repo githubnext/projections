@@ -89,9 +89,10 @@ impl Fixture {
             "collector.sh",
             json!(["/bin/sh", "collector.sh"]),
             if slow {
+                // Written whole, then renamed, so a reader never sees the file before its pid.
                 format!(
-                    "cat >/dev/null\nprintf '%s' \"$$\" > '{}'\nsleep 120\n",
-                    root.join("collector.pid").display()
+                    "cat >/dev/null\nprintf '%s' \"$$\" > '{pid}.tmp'\nmv '{pid}.tmp' '{pid}'\nsleep 120\n",
+                    pid = root.join("collector.pid").display()
                 )
             } else {
                 format!("cat >/dev/null\nprintf '%s\\n' '{state}'\nprintf 'fixture diagnostic' >&2\n")
@@ -111,8 +112,8 @@ impl Fixture {
             ]),
             if slow {
                 format!(
-                    "[IO.File]::WriteAllText('{}', \"$PID\")\nStart-Sleep -Seconds 120\n",
-                    root.join("collector.pid").display()
+                    "[IO.File]::WriteAllText('{pid}.tmp', \"$PID\")\n[IO.File]::Move('{pid}.tmp', '{pid}')\nStart-Sleep -Seconds 120\n",
+                    pid = root.join("collector.pid").display()
                 )
             } else {
                 format!("[Console]::Out.Write('{state}')\n[Console]::Error.Write('fixture diagnostic')\n")

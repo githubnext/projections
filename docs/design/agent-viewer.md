@@ -538,15 +538,19 @@ document so.
 Isolation is the same. The frame keeps `sandbox="allow-scripts"`, so the
 document is in an opaque origin, and the host still accepts messages only from
 an opaque origin on the frame's channel. A Blob document has no response
-headers: it keeps the renderer policy from its own `<meta>` element (every
-directive but `sandbox`, which the frame's attribute supplies) and inherits the
-page's policy on top. So the viewer's page policy, sent with each page response,
-admits exactly what the renderer policy grants and nothing a document can use to
-escape it: scripts carrying that response's random nonce (only the page's code
-reads it, and it stamps it only on renderer documents), `blob:` frames, `data:`
-fonts and media, and `blob:` workers and media. The renderer's own policy still
-refuses every request and frame, and the Blob URL is revoked once its renderer
-is ready.
+headers, so the page puts the renderer policy first in its head as a `<meta>`
+element (every directive but `sandbox`, which the frame's attribute supplies)
+before anything of the bundle's, whatever metadata the bundle has: policies only
+narrow, so nothing after it can loosen it. The document also inherits the page's
+policy on top. So the viewer's page policy, sent with each page response, admits
+exactly what the renderer policy grants and nothing a document can use to escape
+it: scripts carrying that response's random nonce (only the page's code reads
+it, and it stamps it only on renderer documents), `blob:` frames, `data:` fonts
+and media, and `blob:` workers and media. The renderer policy still refuses
+every request and frame, and the Blob URL is revoked once its renderer is ready.
+What starts this is only the absence of a renderer's `ready`, never a message or
+request of the renderer's: a renderer can't ask for it, and the document it gets
+is its own bundle under the same policy.
 
 - The page shows no paths, commands or raw errors; diagnostics go only to the
   agent.

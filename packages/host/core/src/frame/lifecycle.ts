@@ -36,12 +36,19 @@ export class FrameLifecycle {
     this.readyTimer = this.startReadyTimer()
   }
 
-  /** The frame is about to load its renderer's document again, another way: it counts as its first. */
-  reopening(): void {
-    this.loads = 0
+  /** The frame is opening its renderer's document another way: the renderer gets the full ready timeout again. */
+  rearm(): void {
     this.view.clearTimeout(this.unansweredTimer)
     this.view.clearTimeout(this.readyTimer)
     this.readyTimer = this.startReadyTimer()
+  }
+
+  /**
+   * The frame is about to load the document it opened: that load counts as its first. Only then, so a load of the
+   * frame's own document meanwhile still counts against it.
+   */
+  reloading(): void {
+    this.loads = 0
   }
 
   private startReadyTimer(): number {

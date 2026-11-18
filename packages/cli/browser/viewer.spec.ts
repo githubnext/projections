@@ -264,8 +264,10 @@ test("where a browser blocks renderer frames from loading the viewer's URLs, the
   await expect(frame).toHaveAttribute('src', /^blob:/)
   await expect(frame).toHaveAttribute('sandbox', 'allow-scripts')
   const renderer = page.frames().find(each => each.url().startsWith('blob:'))!
-  // The document is the renderer's, in an opaque origin, and its own policy still refuses every request.
+  // The document is the renderer's, in an opaque origin, under the renderer policy the page put first in its head, and
+  // that policy refuses every request.
   expect(await renderer.evaluate(() => self.origin)).toBe('null')
+  expect(await renderer.evaluate(() => document.head.firstElementChild?.getAttribute('content'))).toContain("connect-src 'none'")
   expect(
     await renderer.evaluate(
       link =>

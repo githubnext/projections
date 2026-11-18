@@ -28,7 +28,7 @@ export class OpenedDocument {
   open(iframe: HTMLIFrameElement, url: URL, lifecycle: FrameLifecycle): void {
     const opener = this.opener
     if (!opener) return
-    lifecycle.reopening()
+    lifecycle.rearm()
     opener(url).then(
       blob => {
         // A renderer that answered meanwhile (one slow to start) keeps its document.
@@ -37,10 +37,14 @@ export class OpenedDocument {
           return
         }
         this.url = blob
+        lifecycle.reloading()
         iframe.src = `${blob}${url.hash}`
       },
-      (error: unknown) =>
-        lifecycle.fail(`The renderer's document could not be opened: ${error instanceof Error ? error.message : String(error)}`),
+      (error: unknown) => {
+        // Nor does a renderer that answered meanwhile depend on this document.
+        if (lifecycle.status !== 'loading') return
+        lifecycle.fail(`The renderer's document could not be opened: ${error instanceof Error ? error.message : String(error)}`)
+      },
     )
   }
 

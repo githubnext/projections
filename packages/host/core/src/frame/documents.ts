@@ -1,9 +1,11 @@
+import {rendererMetaContentSecurityPolicy} from '@githubnext/projections-renderer-sdk/protocol'
+
 /**
  * Renderer documents a page opens itself, as Blob URLs. Some embedding browsers refuse to load a renderer's URL into
  * its sandboxed frame: Claude Code's Preview pane cancels any request from an opaque origin to a loopback address, so a
  * viewer on `127.0.0.1` can't load its own renderer frames there. The page can still fetch the renderer document and
  * open it as a Blob document in the same sandboxed frame. The frame keeps its sandbox (an opaque origin, scripts only)
- * and the document keeps its own policy, from its `<meta>` element; it also inherits the page's policy, which must
+ * and the document gets the renderer policy as its first `<meta>` element; it also inherits the page's policy, which must
  * admit its scripts by the nonce stamped on them and everything else the renderer policy grants (`blob:` frames for the
  * page, `data:` fonts and media, `blob:` workers and media).
  */
@@ -11,16 +13,25 @@
 /** Opens the renderer document at a URL as a Blob URL (without the fragment), or fails. */
 export type RendererDocumentOpener = (url: URL) => Promise<string>
 
-/** A renderer document with `nonce` on its script elements (parsed, so script text that mentions tags is untouched). */
-export function withNonce(html: string, nonce: string): string {
+/**
+ * A renderer document as a page opens it itself: the renderer policy first in its head, so it governs everything after
+ * it whatever the bundle's own metadata says (policies only ever narrow), and `nonce` on its script elements (parsed,
+ * so script text that mentions tags is untouched). It stands in for the policy the bundle's response would carry, which
+ * a Blob document has no headers for; the frame's `sandbox` attribute stands in for that policy's `sandbox` directive.
+ */
+export function rendererDocumentHtml(html: string, nonce: string): string {
   const document = new DOMParser().parseFromString(html, 'text/html')
   for (const script of document.querySelectorAll('script')) script.setAttribute('nonce', nonce)
+  const policy = document.createElement('meta')
+  policy.httpEquiv = 'Content-Security-Policy'
+  policy.content = rendererMetaContentSecurityPolicy
+  document.head.prepend(policy)
   return `<!doctype html>\n${document.documentElement.outerHTML}`
 }
 
-/** A renderer document as a Blob URL, with `nonce` on its scripts. */
+/** A renderer document as a Blob URL, under the renderer policy and with `nonce` on its scripts. */
 export const rendererBlobDocument = (html: string, nonce: string): string =>
-  URL.createObjectURL(new Blob([withNonce(html, nonce)], {type: 'text/html'}))
+  URL.createObjectURL(new Blob([rendererDocumentHtml(html, nonce)], {type: 'text/html'}))
 
 /**
  * An opener that fetches the renderer document from the page's own origin and opens it with the page's script

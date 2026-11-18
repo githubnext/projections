@@ -179,8 +179,9 @@ pub struct ViewShow {
     #[arg(long, value_name = "NAME")]
     pub viewer: Option<String>,
     /// Color the page as the app that shows it, for a harness whose surfaces the default theme doesn't match: a theme
-    /// seed, inline JSON or a JSON file, `{"light": {"background": …, "border": …}, "dark": {…}}`. It goes in the
-    /// printed link (`?theme=`), so only a page opened from that link takes it [default: the page's own theme]
+    /// seed: a built-in one's name (`claude`, Claude Code's Preview pane), inline JSON or a JSON file,
+    /// `{"light": {"background": …, "border": …}, "dark": {…}}`. It goes in the printed link (`?theme=`), so only a
+    /// page opened from that link takes it [default: the page's own theme]
     #[arg(long, value_name = "SEED")]
     pub theme: Option<String>,
 }

@@ -13,14 +13,19 @@ use serde_json::{Value, json};
 use subtle::ConstantTimeEq;
 
 use super::{
-    MAX_RESPONSE_BYTES, Shared, VIEWER_CSP, Views,
+    MAX_RESPONSE_BYTES, Shared, Views,
     pages::{control_state, page_state, query_map, report},
     show::{choose, show},
     state::{Chooser, ViewState},
     stop, surface, url,
 };
 
-const PAGE: &str = "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"referrer\" content=\"no-referrer\"><title>Projections</title><link rel=\"stylesheet\" href=\"./mount.css\"></head><body><div id=\"root\"></div><script type=\"module\" src=\"./viewer.js\"></script></body></html>";
+/// The page, with its response's script nonce (see [`super::viewer_csp`]).
+fn page(nonce: &str) -> String {
+    format!(
+        "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"referrer\" content=\"no-referrer\"><title>Projections</title><link rel=\"stylesheet\" href=\"./mount.css\"></head><body><div id=\"root\"></div><script type=\"module\" nonce=\"{nonce}\" src=\"./viewer.js\"></script></body></html>"
+    )
+}
 const SCRIPT: &str = "import {mountViewer} from './mount.js'\nmountViewer(document.getElementById('root'))\n";
 /// What any request without the token gets, the bare port's included: what the viewer is and how to get its link,
 /// never the link itself. Only the person's own agent or terminal has the token; a page that redirected the bare port
@@ -158,7 +163,12 @@ async fn endpoint(shared: &Arc<Shared>, request: Request, method: &Method, path:
             if let Ok(name) = super::viewer_name(query.get("viewer").map(String::as_str)) {
                 shared.seen.loaded(&name);
             }
-            bytes_response(PAGE.as_bytes().to_vec(), "text/html; charset=utf-8", Some(VIEWER_CSP))
+            let nonce = super::script_nonce();
+            bytes_response(
+                page(&nonce).into_bytes(),
+                "text/html; charset=utf-8",
+                Some(&super::viewer_csp(&nonce)),
+            )
         }
         (Method::GET, "/viewer.js") => {
             shared.seen.script();

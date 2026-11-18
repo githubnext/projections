@@ -1,3 +1,4 @@
+import type {RendererDocumentOpener} from './documents.js'
 import type {
   AnchorRect,
   InitPayload,
@@ -75,4 +76,10 @@ export interface RendererFrameOptions {
    * content height; the renderer then scrolls inside the frame.
    */
   fill?: boolean
+  /**
+   * Opens the renderer's document as a Blob URL, for when the frame's document loads but its renderer doesn't answer
+   * (an embedding browser that refuses to load the URL into a sandboxed frame): the frame then loads that document
+   * instead, once. By default the page's (`setRendererDocuments`); `null` never does.
+   */
+  documents?: RendererDocumentOpener | null
 }

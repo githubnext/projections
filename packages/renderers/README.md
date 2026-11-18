@@ -218,7 +218,8 @@ renderers.
     `graph-horizontal`, `dag`, `architecture`, `infrastructure`, `dependencies`,
     `dependency-injection` and `database` are zoomable; `file-packing` lays out
     at the frame's size, so all of it is always in view; `api`,
-    `code-statistics`, `runtime-policy` and `text-diff` are document-style.
-    Opening fitted replaced an 11 px readable floor on 2026-11-10, and the 8 px
-    opening floor was added the same day (see the kit guide's
+    `code-statistics`, `runtime-policy`, `agentic-workflows` and `text-diff` are
+    document-style. Opening fitted replaced an 11 px readable floor on
+    2026-11-10, and the 8 px opening floor was added the same day (see the kit
+    guide's
     [filling the frame](../../docs/guides/renderer-kit.md#filling-the-frame)).

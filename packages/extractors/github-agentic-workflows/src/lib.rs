@@ -38,7 +38,7 @@ pub fn descriptor() -> Descriptor {
         title: "Agentic workflows",
         description: "GitHub Agentic Workflows: what starts each one, its engine, tools and their scope, network, permissions, safe outputs, budgets and imports, and whether its lock file is current",
         schema: SCHEMA,
-        renderer: "architecture",
+        renderer: "agentic-workflows",
         trust: Trust::None,
         access: Access::Files,
         determinism: Determinism::Pure,

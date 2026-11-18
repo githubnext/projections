@@ -1,0 +1,1528 @@
+[
+  {
+    "name": "rails_health_check",
+    "verb": "GET",
+    "path": "/up(.:format)",
+    "controller": "rails/health",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "root",
+    "verb": "GET",
+    "path": "/",
+    "controller": "storefront",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "new_session",
+    "verb": "GET",
+    "path": "/session/new(.:format)",
+    "controller": "sessions",
+    "action": "new",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "session",
+    "verb": "DELETE",
+    "path": "/session(.:format)",
+    "controller": "sessions",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/session(.:format)",
+    "controller": "sessions",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "passwords",
+    "verb": "POST",
+    "path": "/passwords(.:format)",
+    "controller": "passwords",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "new_password",
+    "verb": "GET",
+    "path": "/passwords/new(.:format)",
+    "controller": "passwords",
+    "action": "new",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "edit_password",
+    "verb": "GET",
+    "path": "/passwords/:token/edit(.:format)",
+    "controller": "passwords",
+    "action": "edit",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "password",
+    "verb": "PATCH",
+    "path": "/passwords/:token(.:format)",
+    "controller": "passwords",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/passwords/:token(.:format)",
+    "controller": "passwords",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "billing_account",
+    "verb": "GET",
+    "path": "/account/billing(.:format)",
+    "controller": "profiles",
+    "action": "billing",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "new_account",
+    "verb": "GET",
+    "path": "/account/new(.:format)",
+    "controller": "profiles",
+    "action": "new",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "edit_account",
+    "verb": "GET",
+    "path": "/account/edit(.:format)",
+    "controller": "profiles",
+    "action": "edit",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "account",
+    "verb": "GET",
+    "path": "/account(.:format)",
+    "controller": "profiles",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/account(.:format)",
+    "controller": "profiles",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/account(.:format)",
+    "controller": "profiles",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/account(.:format)",
+    "controller": "profiles",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "search_products",
+    "verb": "GET",
+    "path": "/products/search(.:format)",
+    "controller": "products",
+    "action": "search",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "on_sale_products",
+    "verb": "GET",
+    "path": "/products/on-sale(.:format)",
+    "controller": "products",
+    "action": "on_sale",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "review_comments",
+    "verb": "GET",
+    "path": "/reviews/:review_id/comments(.:format)",
+    "controller": "comments",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/reviews/:review_id/comments(.:format)",
+    "controller": "comments",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "product_reviews",
+    "verb": "GET",
+    "path": "/products/:product_sku/reviews(.:format)",
+    "controller": "reviews",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/products/:product_sku/reviews(.:format)",
+    "controller": "reviews",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "new_product_review",
+    "verb": "GET",
+    "path": "/products/:product_sku/reviews/new(.:format)",
+    "controller": "reviews",
+    "action": "new",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "edit_review",
+    "verb": "GET",
+    "path": "/reviews/:id/edit(.:format)",
+    "controller": "reviews",
+    "action": "edit",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "review",
+    "verb": "GET",
+    "path": "/reviews/:id(.:format)",
+    "controller": "reviews",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/reviews/:id(.:format)",
+    "controller": "reviews",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/reviews/:id(.:format)",
+    "controller": "reviews",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/reviews/:id(.:format)",
+    "controller": "reviews",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "products",
+    "verb": "GET",
+    "path": "/products(.:format)",
+    "controller": "products",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "product",
+    "verb": "GET",
+    "path": "/products/:sku(.:format)",
+    "controller": "products",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "order_items",
+    "verb": "GET",
+    "path": "/orders/:order_id/items(.:format)",
+    "controller": "line_items",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/orders/:order_id/items(.:format)",
+    "controller": "line_items",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "new_order_item",
+    "verb": "GET",
+    "path": "/orders/:order_id/items/new(.:format)",
+    "controller": "line_items",
+    "action": "new",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "edit_order_item",
+    "verb": "GET",
+    "path": "/orders/:order_id/items/:id/edit(.:format)",
+    "controller": "line_items",
+    "action": "edit",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "order_item",
+    "verb": "GET",
+    "path": "/orders/:order_id/items/:id(.:format)",
+    "controller": "line_items",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/orders/:order_id/items/:id(.:format)",
+    "controller": "line_items",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/orders/:order_id/items/:id(.:format)",
+    "controller": "line_items",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/orders/:order_id/items/:id(.:format)",
+    "controller": "line_items",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "order_shipment",
+    "verb": "GET",
+    "path": "/orders/:order_id/shipment(.:format)",
+    "controller": "shipments",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "receipt_order",
+    "verb": "GET",
+    "path": "/orders/:id/receipt(.:format)",
+    "controller": "orders",
+    "action": "receipt",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "cancel_order",
+    "verb": "PATCH",
+    "path": "/orders/:id/cancel(.:format)",
+    "controller": "orders",
+    "action": "cancel",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "archive_order",
+    "verb": "POST",
+    "path": "/orders/:id/archive(.:format)",
+    "controller": "orders",
+    "action": "archive",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/orders/:id/archive(.:format)",
+    "controller": "orders",
+    "action": "unarchive",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "orders",
+    "verb": "GET",
+    "path": "/orders(.:format)",
+    "controller": "orders",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/orders(.:format)",
+    "controller": "orders",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "new_order",
+    "verb": "GET",
+    "path": "/orders/new(.:format)",
+    "controller": "orders",
+    "action": "new",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "order",
+    "verb": "GET",
+    "path": "/orders/:id(.:format)",
+    "controller": "orders",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/orders/:id(.:format)",
+    "controller": "orders",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/orders/:id(.:format)",
+    "controller": "orders",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "category",
+    "verb": "GET",
+    "path": "/c/:id(.:format)",
+    "controller": "categories",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "news_index",
+    "verb": "GET",
+    "path": "/news(.:format)",
+    "controller": "news",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "news",
+    "verb": "GET",
+    "path": "/news/:id(.:format)",
+    "controller": "news",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "page",
+    "verb": "GET",
+    "path": "/pages/:slug(.:format)",
+    "controller": "pages",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "slug": "/[a-z0-9-]+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "help",
+    "verb": "GET",
+    "path": "/help(.:format)",
+    "controller": "pages",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "slug": "\"help\""
+    },
+    "defaults": {
+      "slug": "\"help\""
+    }
+  },
+  {
+    "name": "legacy_catalog",
+    "verb": "GET",
+    "path": "/legacy/catalog(.:format)",
+    "controller": null,
+    "action": null,
+    "redirect": "redirect(301, /products)",
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "contact",
+    "verb": "GET|POST",
+    "path": "/contact(.:format)",
+    "controller": "contact",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "",
+    "path": "/webhooks/:provider",
+    "controller": "webhooks",
+    "action": "receive",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "stores",
+    "verb": "GET",
+    "path": "(/:locale)/stores(.:format)",
+    "controller": "stores",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "locale": "/en|fr/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "promo_campaigns",
+    "verb": "GET",
+    "path": "/promo/campaigns(.:format)",
+    "controller": "marketing/campaigns",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "promo_campaign",
+    "verb": "GET",
+    "path": "/promo/campaigns/:id(.:format)",
+    "controller": "marketing/campaigns",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "admin_root",
+    "verb": "GET",
+    "path": "/admin(.:format)",
+    "controller": "admin/dashboard",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "admin_product_variants",
+    "verb": "GET",
+    "path": "/admin/products/:product_id/variants(.:format)",
+    "controller": "admin/variants",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/admin/products/:product_id/variants(.:format)",
+    "controller": "admin/variants",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "new_admin_product_variant",
+    "verb": "GET",
+    "path": "/admin/products/:product_id/variants/new(.:format)",
+    "controller": "admin/variants",
+    "action": "new",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "edit_admin_product_variant",
+    "verb": "GET",
+    "path": "/admin/products/:product_id/variants/:id/edit(.:format)",
+    "controller": "admin/variants",
+    "action": "edit",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "admin_product_variant",
+    "verb": "PATCH",
+    "path": "/admin/products/:product_id/variants/:id(.:format)",
+    "controller": "admin/variants",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/admin/products/:product_id/variants/:id(.:format)",
+    "controller": "admin/variants",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/admin/products/:product_id/variants/:id(.:format)",
+    "controller": "admin/variants",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "admin_products",
+    "verb": "GET",
+    "path": "/admin/products(.:format)",
+    "controller": "admin/products",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/admin/products(.:format)",
+    "controller": "admin/products",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "new_admin_product",
+    "verb": "GET",
+    "path": "/admin/products/new(.:format)",
+    "controller": "admin/products",
+    "action": "new",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "edit_admin_product",
+    "verb": "GET",
+    "path": "/admin/products/:id/edit(.:format)",
+    "controller": "admin/products",
+    "action": "edit",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "admin_product",
+    "verb": "GET",
+    "path": "/admin/products/:id(.:format)",
+    "controller": "admin/products",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/admin/products/:id(.:format)",
+    "controller": "admin/products",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/admin/products/:id(.:format)",
+    "controller": "admin/products",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/admin/products/:id(.:format)",
+    "controller": "admin/products",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "refund_admin_order",
+    "verb": "POST",
+    "path": "/admin/orders/:id/refund(.:format)",
+    "controller": "admin/orders",
+    "action": "refund",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "admin_orders",
+    "verb": "GET",
+    "path": "/admin/orders(.:format)",
+    "controller": "admin/orders",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "admin_order",
+    "verb": "GET",
+    "path": "/admin/orders/:id(.:format)",
+    "controller": "admin/orders",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/admin/orders/:id(.:format)",
+    "controller": "admin/orders",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/admin/orders/:id(.:format)",
+    "controller": "admin/orders",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "admin_user_notes",
+    "verb": "GET",
+    "path": "/admin/users/:user_id/notes(.:format)",
+    "controller": "admin/notes",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/admin/users/:user_id/notes(.:format)",
+    "controller": "admin/notes",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "new_admin_user_note",
+    "verb": "GET",
+    "path": "/admin/users/:user_id/notes/new(.:format)",
+    "controller": "admin/notes",
+    "action": "new",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "edit_admin_note",
+    "verb": "GET",
+    "path": "/admin/notes/:id/edit(.:format)",
+    "controller": "admin/notes",
+    "action": "edit",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "admin_note",
+    "verb": "GET",
+    "path": "/admin/notes/:id(.:format)",
+    "controller": "admin/notes",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/admin/notes/:id(.:format)",
+    "controller": "admin/notes",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/admin/notes/:id(.:format)",
+    "controller": "admin/notes",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/admin/notes/:id(.:format)",
+    "controller": "admin/notes",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "admin_users",
+    "verb": "GET",
+    "path": "/admin/users(.:format)",
+    "controller": "admin/users",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/admin/users(.:format)",
+    "controller": "admin/users",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "new_admin_user",
+    "verb": "GET",
+    "path": "/admin/users/new(.:format)",
+    "controller": "admin/users",
+    "action": "new",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "edit_admin_user",
+    "verb": "GET",
+    "path": "/admin/users/:id/edit(.:format)",
+    "controller": "admin/users",
+    "action": "edit",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "admin_user",
+    "verb": "GET",
+    "path": "/admin/users/:id(.:format)",
+    "controller": "admin/users",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/admin/users/:id(.:format)",
+    "controller": "admin/users",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/admin/users/:id(.:format)",
+    "controller": "admin/users",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/admin/users/:id(.:format)",
+    "controller": "admin/users",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "admin_inventory_index",
+    "verb": "GET",
+    "path": "/admin/inventory(.:format)",
+    "controller": "admin/inventory",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "admin_inventory",
+    "verb": "GET",
+    "path": "/admin/inventory/:id(.:format)",
+    "controller": "admin/inventory",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "admin_sales_report",
+    "verb": "GET",
+    "path": "/admin/reports/sales(.:format)",
+    "controller": "admin/reports",
+    "action": "sales",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "api_v1_products",
+    "verb": "GET",
+    "path": "/api/v1/products(.:format)",
+    "controller": "api/v1/products",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "format": ":json"
+    },
+    "defaults": {
+      "format": ":json"
+    }
+  },
+  {
+    "name": "api_v1_product",
+    "verb": "GET",
+    "path": "/api/v1/products/:id(.:format)",
+    "controller": "api/v1/products",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "format": ":json"
+    },
+    "defaults": {
+      "format": ":json"
+    }
+  },
+  {
+    "name": "api_v1_orders",
+    "verb": "GET",
+    "path": "/api/v1/orders(.:format)",
+    "controller": "api/v1/orders",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "format": ":json"
+    },
+    "defaults": {
+      "format": ":json"
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/api/v1/orders(.:format)",
+    "controller": "api/v1/orders",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "format": ":json"
+    },
+    "defaults": {
+      "format": ":json"
+    }
+  },
+  {
+    "name": "api_v1_order",
+    "verb": "GET",
+    "path": "/api/v1/orders/:id(.:format)",
+    "controller": "api/v1/orders",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "format": ":json"
+    },
+    "defaults": {
+      "format": ":json"
+    }
+  },
+  {
+    "name": "api_v1_me",
+    "verb": "GET",
+    "path": "/api/v1/me(.:format)",
+    "controller": "api/v1/accounts",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "format": ":json"
+    },
+    "defaults": {
+      "format": ":json"
+    }
+  },
+  {
+    "name": "partners_reports",
+    "verb": "GET",
+    "path": "/reports(.:format)",
+    "controller": "partners/reports",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "subdomain": "\"partners\""
+    },
+    "defaults": {
+      "subdomain": "\"partners\""
+    }
+  },
+  {
+    "name": "checkout",
+    "verb": "GET",
+    "path": "/checkout(.:format)",
+    "controller": "checkout",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "checkout_confirm",
+    "verb": "POST",
+    "path": "/checkout/confirm(.:format)",
+    "controller": "checkout",
+    "action": "confirm",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "sidekiq_web",
+    "verb": "",
+    "path": "/jobs",
+    "controller": null,
+    "action": null,
+    "redirect": null,
+    "endpoint": "Sidekiq::Web",
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "health",
+    "verb": "",
+    "path": "/healthz",
+    "controller": null,
+    "action": null,
+    "redirect": null,
+    "endpoint": "HealthCheck",
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "support_ticket_messages",
+    "verb": "POST",
+    "path": "/support/tickets/:ticket_id/messages(.:format)",
+    "controller": "support/messages",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "support_tickets",
+    "verb": "GET",
+    "path": "/support/tickets(.:format)",
+    "controller": "support/tickets",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/support/tickets(.:format)",
+    "controller": "support/tickets",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "support_ticket",
+    "verb": "GET",
+    "path": "/support/tickets/:id(.:format)",
+    "controller": "support/tickets",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  }
+]

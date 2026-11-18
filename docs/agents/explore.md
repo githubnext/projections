@@ -78,10 +78,11 @@ the Command Palette.
 
 Explore looks at the files your repository holds and proposes the projections
 that apply, each with why: workspace dependencies when it finds package
-manifests, the database when it finds a Prisma schema, the job graph of your
-Actions workflows, the file map, and so on. It writes nothing. The **Explore**
-view lists them and runs each projection on the last 20 merges into your branch
-(or your last commits, if you squash or rebase).
+manifests, the database when it finds a Prisma schema or a Rails `db/schema.rb`,
+a Rails application's routes, the job graph of your Actions workflows, the file
+map, and so on. It writes nothing. The **Explore** view lists them and runs each
+projection on the last 20 merges into your branch (or your last commits, if you
+squash or rebase).
 
 The grid shows, for every pull request, what each projection saw: how many
 changes, a small picture of its diff, and "No change" where it saw nothing. Each

@@ -1,0 +1,1061 @@
+[
+  {
+    "name": "account_invoices",
+    "verb": "GET",
+    "path": "/:account_id/invoices(.:format)",
+    "controller": "invoices",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/:account_id/invoices(.:format)",
+    "controller": "invoices",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "account_invoice",
+    "verb": "GET",
+    "path": "/:account_id/invoices/:id(.:format)",
+    "controller": "invoices",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/:account_id/invoices/:id(.:format)",
+    "controller": "invoices",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/:account_id/invoices/:id(.:format)",
+    "controller": "invoices",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/:account_id/invoices/:id(.:format)",
+    "controller": "invoices",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "account_payments",
+    "verb": "GET",
+    "path": "/:account_id/payments(.:format)",
+    "controller": "payments",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/:account_id/payments(.:format)",
+    "controller": "payments",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "account_payment",
+    "verb": "GET",
+    "path": "/:account_id/payments/:id(.:format)",
+    "controller": "payments",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/:account_id/payments/:id(.:format)",
+    "controller": "payments",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/:account_id/payments/:id(.:format)",
+    "controller": "payments",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/:account_id/payments/:id(.:format)",
+    "controller": "payments",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "account_entry_attachments",
+    "verb": "GET",
+    "path": "/:account_id/entries/:entry_id/attachments(.:format)",
+    "controller": "attachments",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/:account_id/entries/:entry_id/attachments(.:format)",
+    "controller": "attachments",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "account_attachment",
+    "verb": "DELETE",
+    "path": "/:account_id/attachments/:id(.:format)",
+    "controller": "attachments",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "preview_account_entry",
+    "verb": "GET",
+    "path": "/:account_id/entries/:id/preview(.:format)",
+    "controller": "entries",
+    "action": "preview",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "account_ledger_entries",
+    "verb": "GET",
+    "path": "/:account_id/ledgers/:ledger_id/entries(.:format)",
+    "controller": "entries",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/:account_id/ledgers/:ledger_id/entries(.:format)",
+    "controller": "entries",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "account_entry",
+    "verb": "GET",
+    "path": "/:account_id/entries/:id(.:format)",
+    "controller": "entries",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/:account_id/entries/:id(.:format)",
+    "controller": "entries",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/:account_id/entries/:id(.:format)",
+    "controller": "entries",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/:account_id/entries/:id(.:format)",
+    "controller": "entries",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "account_ledger_balance",
+    "verb": "GET",
+    "path": "/:account_id/ledgers/:ledger_id/balance(.:format)",
+    "controller": "ledgers",
+    "action": "balance",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "account_ledgers",
+    "verb": "GET",
+    "path": "/:account_id/ledgers(.:format)",
+    "controller": "ledgers",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/:account_id/ledgers(.:format)",
+    "controller": "ledgers",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "account_ledger",
+    "verb": "GET",
+    "path": "/:account_id/ledgers/:id(.:format)",
+    "controller": "ledgers",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/:account_id/ledgers/:id(.:format)",
+    "controller": "ledgers",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/:account_id/ledgers/:id(.:format)",
+    "controller": "ledgers",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/:account_id/ledgers/:id(.:format)",
+    "controller": "ledgers",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "account_id": "/\\d+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "images_root",
+    "verb": "GET",
+    "path": "/photos(.:format)",
+    "controller": "pictures",
+    "action": "gallery",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "search_images",
+    "verb": "GET",
+    "path": "/photos/search(.:format)",
+    "controller": "pictures",
+    "action": "search",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "images",
+    "verb": "GET",
+    "path": "/photos(.:format)",
+    "controller": "pictures",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/photos(.:format)",
+    "controller": "pictures",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "image",
+    "verb": "GET",
+    "path": "/photos/:id(.:format)",
+    "controller": "pictures",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/photos/:id(.:format)",
+    "controller": "pictures",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/photos/:id(.:format)",
+    "controller": "pictures",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/photos/:id(.:format)",
+    "controller": "pictures",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "tags",
+    "verb": "GET",
+    "path": "/tags(.:format)",
+    "controller": "taxonomy/tags",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "settings_keys",
+    "verb": "GET",
+    "path": "/settings/keys(.:format)",
+    "controller": "keys",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/settings/keys(.:format)",
+    "controller": "keys",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "export_settings",
+    "verb": "GET",
+    "path": "/settings/export(.:format)",
+    "controller": "settings",
+    "action": "export",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "settings",
+    "verb": "GET",
+    "path": "/settings(.:format)",
+    "controller": "settings",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/settings(.:format)",
+    "controller": "settings",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/settings(.:format)",
+    "controller": "settings",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/settings(.:format)",
+    "controller": "settings",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/settings(.:format)",
+    "controller": "settings",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "bo_audits",
+    "verb": "GET",
+    "path": "/backoffice/audits(.:format)",
+    "controller": "admin/audits",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "bo_audit",
+    "verb": "GET",
+    "path": "/backoffice/audits/:id(.:format)",
+    "controller": "admin/audits",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "bo_logout",
+    "verb": "DELETE",
+    "path": "/backoffice/logout(.:format)",
+    "controller": "sessions",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "bo_reports_daily",
+    "verb": "GET",
+    "path": "/backoffice/reports/daily(/:date)(.:format)",
+    "controller": "admin/reports/daily",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "i_job_runs",
+    "verb": "GET",
+    "path": "/i/jobs/:job_id/runs(.:format)",
+    "controller": "internal/runs",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/i/jobs/:job_id/runs(.:format)",
+    "controller": "internal/runs",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "i_run",
+    "verb": "GET",
+    "path": "/i/runs/:id(.:format)",
+    "controller": "internal/runs",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/i/runs/:id(.:format)",
+    "controller": "internal/runs",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/i/runs/:id(.:format)",
+    "controller": "internal/runs",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/i/runs/:id(.:format)",
+    "controller": "internal/runs",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "internal_jobs",
+    "verb": "GET",
+    "path": "/internal/jobs(.:format)",
+    "controller": "internal/jobs",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/internal/jobs(.:format)",
+    "controller": "internal/jobs",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "i_job",
+    "verb": "GET",
+    "path": "/i/jobs/:id(.:format)",
+    "controller": "internal/jobs",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PATCH",
+    "path": "/i/jobs/:id(.:format)",
+    "controller": "internal/jobs",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "PUT",
+    "path": "/i/jobs/:id(.:format)",
+    "controller": "internal/jobs",
+    "action": "update",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "DELETE",
+    "path": "/i/jobs/:id(.:format)",
+    "controller": "internal/jobs",
+    "action": "destroy",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "v2_webhooks",
+    "verb": "GET",
+    "path": "/v2/webhooks(.:format)",
+    "controller": "v2/webhooks",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/v2/webhooks(.:format)",
+    "controller": "v2/webhooks",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "ping",
+    "verb": "GET",
+    "path": "/ping(.:format)",
+    "controller": "status",
+    "action": "ping",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "version",
+    "verb": "GET",
+    "path": "/version(.:format)",
+    "controller": "status",
+    "action": "version",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "public_feeds",
+    "verb": "GET",
+    "path": "/public_feeds(.:format)",
+    "controller": "feeds",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "public_feed",
+    "verb": "GET",
+    "path": "/public_feeds/:id(.:format)",
+    "controller": "feeds",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "trending",
+    "verb": "GET",
+    "path": "/trending(.:format)",
+    "controller": "feeds",
+    "action": "trending",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "only": "[:index, :show]"
+    },
+    "defaults": {
+      "only": "[:index, :show]"
+    }
+  },
+  {
+    "name": "short_account",
+    "verb": "GET",
+    "path": "/@:username(.:format)",
+    "controller": "accounts",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "webhooks_stripe",
+    "verb": "POST",
+    "path": "/webhooks/stripe(.:format)",
+    "controller": "webhooks",
+    "action": "stripe",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "webhooks_health",
+    "verb": "GET",
+    "path": "/webhooks/health(.:format)",
+    "controller": "webhooks",
+    "action": "health",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "reports",
+    "verb": "GET",
+    "path": "/reports(.:format)",
+    "controller": "v2/reports",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "reports_monthly",
+    "verb": "GET",
+    "path": "/reports/monthly(.:format)",
+    "controller": "reports",
+    "action": "monthly",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "GET",
+    "path": "/exports/:id.csv",
+    "controller": "exports",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "GET",
+    "path": "/feeds/:slug.:format",
+    "controller": "feeds",
+    "action": "show",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+      "format": "/.+/"
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "search",
+    "verb": "GET",
+    "path": "/search(.:format)",
+    "controller": "search",
+    "action": "index",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": "graphql",
+    "verb": "POST|GET",
+    "path": "/graphql(.:format)",
+    "controller": "graphql",
+    "action": "execute",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  },
+  {
+    "name": null,
+    "verb": "POST",
+    "path": "/events(.:format)",
+    "controller": "events",
+    "action": "create",
+    "redirect": null,
+    "endpoint": null,
+    "requirements": {
+    },
+    "defaults": {
+    }
+  }
+]

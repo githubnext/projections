@@ -361,6 +361,44 @@ fn prisma_source_schemas_are_parsed_natively_without_node_or_prisma() {
 }
 
 #[test]
+fn rails_schemas_and_routes_are_read_without_ruby_or_trust() {
+    let fixture = Fixture::new();
+    fixture.put(
+        "web/db/schema.rb",
+        "ActiveRecord::Schema[7.1].define(version: 2024_01_01_000000) do\n  create_table \"users\", force: :cascade do |t|\n    t.string \"email\", null: false\n  end\nend\n",
+    );
+    fixture.put(
+        "web/config/routes.rb",
+        "Rails.application.routes.draw do\n  resources :users, only: :show\n  devise_for :admins\nend\n",
+    );
+    let schema = fixture.collect("rails-schema", json!({})).unwrap();
+    assert_eq!(schema["schema"], "database/v0");
+    let mut labels: Vec<_> = schema["entities"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|e| e["label"].as_str().unwrap())
+        .collect();
+    labels.sort();
+    assert_eq!(labels, ["email", "id", "primary-key (id)", "users"]);
+    let routes = fixture.collect("rails-routes", json!({})).unwrap();
+    assert_eq!(routes["schema"], "api/v0");
+    let labels: Vec<_> = routes["entities"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|e| e["label"].as_str().unwrap())
+        .collect();
+    assert_eq!(labels, ["GET /users/:id", "devise_for :admins"]);
+    fixture.put(
+        "web/config/routes.rb",
+        "Rails.application.routes.draw do\n  resources :users do\nend\n",
+    );
+    let error = fixture.collect("rails-routes", json!({})).unwrap_err();
+    assert!(format!("{error:#}").contains("web/config/routes.rb:"), "{error:#}");
+}
+
+#[test]
 fn package_version_bumps_compare_as_one_modified_package() {
     let modified = |id: &str, before: &str, after: &str, inputs: Value| {
         let fixture = Fixture::new();
@@ -645,6 +683,19 @@ fn every_built_in_extracts_a_missing_declared_input_as_empty_and_names_it() {
             vec!["prisma/a.prisma", "prisma/models"],
         ),
         ("prisma-schema", snapshot.clone(), false, vec!["exports/state.json"]),
+        (
+            "rails-schema",
+            json!({"schema":"web/db/schema.rb"}),
+            false,
+            vec!["web/db/schema.rb"],
+        ),
+        ("rails-schema", snapshot.clone(), false, vec!["exports/state.json"]),
+        (
+            "rails-routes",
+            json!({"routes":"web/config/routes.rb"}),
+            false,
+            vec!["web/config/routes.rb"],
+        ),
         ("django-schema", snapshot.clone(), false, vec!["exports/state.json"]),
         ("dotnet-public-api", snapshot.clone(), false, vec!["exports/state.json"]),
         ("dotnet-di", snapshot.clone(), false, vec!["exports/state.json"]),

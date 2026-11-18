@@ -22,6 +22,8 @@ projections-extractor-spring-di = { path = "../spring-di" }
 projections-extractor-nestjs-di = { path = "../nestjs-di" }
 projections-extractor-nuget-dependencies = { path = "../nuget-dependencies" }
 projections-extractor-prisma-schema = { path = "../prisma-schema" }
+projections-extractor-rails-routes = { path = "../rails-routes" }
+projections-extractor-rails-schema = { path = "../rails-schema" }
 projections-extractor-repository-map = { path = "../repository-map" }
 projections-extractor-rust-public-api = { path = "../rust-public-api" }
 projections-extractor-sdk = { path = "../sdk" }

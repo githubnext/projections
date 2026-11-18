@@ -1499,6 +1499,8 @@ dependencies = [
  "projections-extractor-nestjs-di",
  "projections-extractor-nuget-dependencies",
  "projections-extractor-prisma-schema",
+ "projections-extractor-rails-routes",
+ "projections-extractor-rails-schema",
  "projections-extractor-repository-map",
  "projections-extractor-rust-public-api",
  "projections-extractor-scip-file-references",
@@ -1640,12 +1642,45 @@ dependencies = [
 ]
 
 [[package]]
+name = "projections-extractor-rails-routes"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "projections-engine",
+ "projections-extractor-ruby-support",
+ "projections-extractor-sdk",
+ "regex",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
+name = "projections-extractor-rails-schema"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "projections-engine",
+ "projections-extractor-ruby-support",
+ "projections-extractor-sdk",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
 name = "projections-extractor-repository-map"
 version = "0.1.0"
 dependencies = [
  "anyhow",
  "projections-extractor-sdk",
  "serde_json",
+]
+
+[[package]]
+name = "projections-extractor-ruby-support"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "regex",
 ]
 
 [[package]]

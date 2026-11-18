@@ -70,6 +70,8 @@ fn cases(root: &Path) -> Vec<(&'static str, Value)> {
         &root.join("workflows/ci.yml"),
     );
     copy(&fixtures("prisma-schema").join("schema.prisma"), &root.join("prisma/schema.prisma"));
+    copy(&fixtures("rails-schema").join("storefront/db"), &root.join("rails/db"));
+    copy(&fixtures("rails-routes").join("storefront/config"), &root.join("rails/config"));
     copy(&fixtures("scip-file-references").join("scip-typescript"), &root.join("scip"));
     copy(&fixtures("tetragon-policies").join("library/repo/policies"), &root.join("tetragon"));
     for (id, file) in [
@@ -97,6 +99,8 @@ fn cases(root: &Path) -> Vec<(&'static str, Value)> {
         ("rust-public-api", json!({"rustdocJson": "rust/rustdoc.json"})),
         ("github-actions-jobs", json!({"workflowPath": "workflows/ci.yml"})),
         ("prisma-schema", json!({"schema": "prisma/schema.prisma"})),
+        ("rails-schema", json!({"schema": "rails/db/schema.rb"})),
+        ("rails-routes", json!({"routes": "rails/config/routes.rb"})),
         (
             "tetragon-policies",
             json!({"paths": ["tetragon/**/*.yaml"], "namespace": "security"}),

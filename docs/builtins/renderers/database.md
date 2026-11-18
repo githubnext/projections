@@ -18,9 +18,9 @@ migration add, drop or change?"
 ## When to use it
 
 Use it to review schema changes from the model the application defines (EF Core,
-Django, Prisma) rather than from migration scripts: a column made required, a
-type widened, a foreign key added, a table renamed. It draws one schema at a
-time; data, row counts and query plans aren't part of it.
+Django, Prisma, Rails) rather than from migration scripts: a column made
+required, a type widened, a foreign key added, a table renamed. It draws one
+schema at a time; data, row counts and query plans aren't part of it.
 
 The renderer also answers to `schema`, an older name for the same renderer: it
 draws exactly the same.
@@ -34,6 +34,7 @@ Built-in extractors that draw with it by default:
 | [`efcore-schema`](../extractors/efcore-schema.md) | `database`             |
 | [`django-schema`](../extractors/django-schema.md) | `database`             |
 | [`prisma-schema`](../extractors/prisma-schema.md) | `database`             |
+| [`rails-schema`](../extractors/rails-schema.md)   | `database`             |
 
 <!-- end generated: extractors -->
 

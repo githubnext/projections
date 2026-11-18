@@ -212,6 +212,18 @@ runtime. Missing tools or enabled-but-broken native tests fail explicitly.
   6.19.3 schema-engine output: multi-file schemas and folders, mapped/native
   types, defaults, indexes, keys, relations, views, composite types, semantic
   changes and malformed schemas.
+- `rails-schema`: Static `db/schema.rb` reading of a Rails 7.1 PostgreSQL dump
+  and a Rails 6 MySQL dump: implicit, typed and composite primary keys, sized,
+  array, virtual and enum columns, lambda defaults, expression, partial and
+  fulltext indexes, checks, foreign keys with default columns from the
+  application's inflections, Rails 7's datetime precision, multiple databases,
+  skipped statements, a migration's before and after, and malformed files.
+- `rails-routes`: Static routing-DSL evaluation checked against the route tables
+  ActionPack 6.1.7.10's own router builds from two fixture applications (names,
+  verbs, paths, controllers, actions and order): resources, singular resources,
+  shallow nesting, namespaces, scopes, concerns, `draw`, mounts, redirects,
+  constraints, API-only applications and custom inflections; plus unresolved gem
+  macros, loops, computed arguments and conditions.
 - `django-schema`: Actual Django registry execution, implicit objects, stable
   model moves, constraints, semantic changes, explicit settings precedence and
   database-access rejection.

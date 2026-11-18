@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Draws the images in docs/images/readme/ (the README's and docs/gallery.md's) with the CLI and the real renderers:
+// Draws the images in docs/images/readme/ (the README's, docs/gallery.md's and some built-in pages') with the CLI and the real renderers:
 // what `projections show` or `projections compare --png` draws, one image per built-in renderer, for public
 // repositories at pinned commits and for the small projects in docs/images/sources/ named below, in the light and dark themes. Run it
 // after a change to a renderer these images use:
@@ -138,6 +138,20 @@ const images = [
     },
     trust: true,
     image: {width: 760, height: 432, scale: 2},
+  },
+  {
+    // A Rails migration that adds user accounts, read from db/schema.rb without Ruby.
+    name: 'rails-schema',
+    example: 'docs/images/sources/account-recovery',
+    definition: {extractor: 'rails-schema', renderer: 'database', inputs: {schema: 'app/db/schema.rb'}},
+    image: {width: 760, height: 720, scale: 2},
+  },
+  {
+    // The same change's routes, from config/routes.rb.
+    name: 'rails-routes',
+    example: 'docs/images/sources/account-recovery',
+    definition: {extractor: 'rails-routes', renderer: 'api', inputs: {routes: 'app/config/routes.rb'}},
+    image: {width: 760, height: 960, scale: 2},
   },
   {
     name: 'text-diff',

@@ -1,0 +1,11 @@
+[package]
+name = "projections-extractor-ruby-support"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow = "1"
+regex = "1"

@@ -1783,6 +1783,15 @@ maxZoom(fit: number): number
 
 The largest zoom multiple for a stage fitted at `fit`.
 
+### `mixedChange`
+
+```ts
+mixedChange(change: { "renamed"?: false | true | undefined; "status": "added" | "modified" | "removed" | "unchanged"; "varied"?: Array<Varied> | undefined }): false | true
+```
+
+Whether a row changed in two ways, renamed and changed: no one hue is right for it, so a card draws it neutral and
+each status word in its own hue (`pk-mixed-change`), never one change color inside another.
+
 ### `ModelStep`
 
 ```ts

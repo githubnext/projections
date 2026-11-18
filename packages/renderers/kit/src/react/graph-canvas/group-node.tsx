@@ -1,6 +1,6 @@
 // A compound boundary: a dashed outline round its children, with its heading and status footer.
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
-import {classifyChange} from '../../emphasis.js'
+import {classifyChange, mixedChange} from '../../emphasis.js'
 import type {TransitionNode} from '../../graph-transition.js'
 import {SvgChangeStatus} from '../components.js'
 import {displayed, groupHeading} from './cards.js'
@@ -16,7 +16,7 @@ export function GroupNode({node, drawing, holdsChanges = false}: {node: Transiti
   const emphasis = props.emphasis(node)
   return (
     <g
-      className={`graph-node graph-group ${selectedId === node.id ? 'selected' : ''}${holdsChanges ? ' pk-holds-changes' : ''}`}
+      className={`graph-node graph-group ${selectedId === node.id ? 'selected' : ''}${holdsChanges ? ' pk-holds-changes' : ''}${mixedChange(node) ? ' pk-mixed-change' : ''}`}
       data-entity-id={node.id}
       {...mark(node, emphasis)}
       opacity={node.opacity}

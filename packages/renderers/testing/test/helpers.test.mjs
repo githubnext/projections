@@ -535,8 +535,9 @@ test('nested-accents fails a change color inside another, and lets an item keep 
       ...own,
       {outer: card, inner: paint('ins.pill', 'added', 'background-color', 'a')},
       {outer: card, inner: paint('del.pill', 'removed', 'color')},
-      // Another entity's surface in the same hue nests too.
+      // Another entity's surface or text in the same hue nests too.
       {outer: card, inner: paint('span.row[data-entity-id="b"]', 'modified', 'background-color', 'b')},
+      {outer: card, inner: paint('span.name', 'modified', 'color', 'b')},
     ]),
     subject,
     {checks: ['nested-accents']},
@@ -546,5 +547,32 @@ test('nested-accents fails a change color inside another, and lets an item keep 
     'In the diff: ins.pill (added background-color) is drawn inside li.card[data-entity-id="a"] (modified background-color)',
     'In the diff: del.pill (removed color) is drawn inside li.card[data-entity-id="a"] (modified background-color)',
     'In the diff: span.row[data-entity-id="b"] (modified background-color) is drawn inside li.card[data-entity-id="a"] (modified background-color)',
+    'In the diff: span.name (modified color) is drawn inside li.card[data-entity-id="a"] (modified background-color)',
   ])
+})
+
+test('nested-accents measures the animation in animated mode, after the diff', async () => {
+  const calls = []
+  const driver = {
+    async load(_subject, options) {
+      calls.push(`load ${options.comparisonMode ?? 'default'} ${options.progress}`)
+      return {
+        status: 'ready',
+        steps: [0.5, 0.75, 1],
+        capabilities: {changeHighlighting: 'supported', comparisonModes: ['diff', 'animated']},
+      }
+    },
+    async seek(progress) {
+      calls.push(`seek ${progress}`)
+      return {status: 'ready', steps: []}
+    },
+    async measure(call) {
+      return call === 'accents' ? [] : undefined
+    },
+    sleep: async () => {},
+  }
+  const [result] = await runChecks(driver, subject, {checks: ['nested-accents']})
+  assert.equal(result.status, 'pass')
+  // The diff is measured first; the animation's first step is loaded in animated mode again, the next sought.
+  assert.deepEqual(calls.slice(1), ['load animated 0', 'load diff 1', 'load animated 0.5', 'seek 0.75'])
 })

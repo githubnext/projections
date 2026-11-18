@@ -1,5 +1,5 @@
 // An entity's card: its surface, change border and status footer, its file icon, and its text.
-import {classifyChange} from '../../emphasis.js'
+import {classifyChange, mixedChange} from '../../emphasis.js'
 import type {TransitionNode} from '../../graph-transition.js'
 import {diffCardMetrics} from '../../diff-card/metrics.js'
 import {displayed, DiffCardLines} from './cards.js'
@@ -36,7 +36,7 @@ export function EntityCard({node, drawing}: {node: TransitionNode; drawing: Draw
       transform={`translate(${node.x} ${node.y}) scale(${0.9 + node.opacity * 0.1})`}
       {...mark(node, emphasis)}
       opacity={node.opacity}
-      className={`graph-node ${selectedId === node.id ? 'selected' : ''}${receded(node.id) ? ' receded' : ''}`}
+      className={`graph-node ${selectedId === node.id ? 'selected' : ''}${receded(node.id) ? ' receded' : ''}${mixedChange(node) ? ' pk-mixed-change' : ''}`}
       role="button"
       tabIndex={0}
       aria-label={action ? action.label : label(node, entity)}

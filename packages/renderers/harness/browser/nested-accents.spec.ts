@@ -28,10 +28,7 @@ const cases = [
 ]
 
 const crossing = (nestings: NestedAccent[]) =>
-  nestings.filter(
-    ({outer, inner}) =>
-      inner.family !== outer.family || (inner.property !== 'color' && inner.entity !== undefined && inner.entity !== outer.entity),
-  )
+  nestings.filter(({outer, inner}) => inner.family !== outer.family || (inner.entity !== undefined && inner.entity !== outer.entity))
 
 for (const {key, what, restore} of cases) {
   test(`${key}: the diff draws ${what} neutral, and the probe finds the nesting when it isn't`, async ({page}, testInfo) => {
@@ -48,3 +45,24 @@ for (const {key, what, restore} of cases) {
     expect(crossing(await stage.measure<NestedAccent[]>('accents')).length).toBeGreaterThan(0)
   })
 }
+
+test('the probe measures a closed outline, a straight line in it and what a categorical part holds', async ({page}, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium-desktop', 'The probe reads computed styles, the same in every engine.')
+  const stage = await openStage(page, harnessInspector(), {scenario: 'graph/npm-react-update', progress: 1, comparisonMode: 'diff'})
+  await stage.frame.locator('.pk').evaluate(root => {
+    const probe = document.createElement('div')
+    probe.innerHTML = `
+      <svg width="300" height="120" class="nesting-probe">
+        <path d="M 10 10 H 290 V 110 H 10 Z" style="fill: none; stroke: var(--projections-color-modified); stroke-width: 2px" />
+        <line x1="40" y1="60" x2="200" y2="60" style="stroke: var(--projections-color-removed); stroke-width: 2px" />
+      </svg>
+      <div class="nesting-probe-card" style="background: var(--projections-color-modified-muted)">
+        <span data-projections-category="probe" style="background: var(--projections-chart-1)">
+          <span class="nesting-probe-gain" style="background: var(--projections-color-added-muted)">+</span>
+        </span>
+      </div>`
+    root.prepend(probe)
+  })
+  const found = crossing(await stage.measure<NestedAccent[]>('accents')).map(({outer, inner}) => `${inner.element} in ${outer.element}`)
+  expect(found).toEqual(expect.arrayContaining(['line in path', 'span.nesting-probe-gain in div.nesting-probe-card']))
+})

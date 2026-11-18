@@ -16,25 +16,36 @@ async function presentations(
   if (modes.includes('diff'))
     views.push({where: 'In the diff', load: () => driver.load(subject, {progress: 1, comparisonMode: 'diff', highlighting: 1})})
   if (modes.includes('animated')) {
-    const {steps} = await driver.load(subject, {progress: 0})
+    const {steps} = await driver.load(subject, {progress: 0, comparisonMode: 'animated'})
     const ends = steps.filter(end => end > 0 && end < 1)
     const at = ends.length ? ends.filter((_, index) => index % Math.ceil(ends.length / 8) === 0) : [0.5]
-    for (const progress of at)
-      views.push({where: `At progress ${Math.round(progress * 1000) / 1000}`, load: () => driver.seek(progress, {highlighting: 1})})
-  } else if (modes.some(mode => progressModes.includes(mode)))
-    views.push({where: 'At progress 0.5', load: () => driver.load(subject, {progress: 0.5, highlighting: 1})})
+    // The first loads the animation (the diff may have been loaded since), the rest seek through it.
+    at.forEach((progress, index) =>
+      views.push({
+        where: `At progress ${Math.round(progress * 1000) / 1000}`,
+        load: () =>
+          index ? driver.seek(progress, {highlighting: 1}) : driver.load(subject, {progress, comparisonMode: 'animated', highlighting: 1}),
+      }),
+    )
+  } else {
+    const progressMode = modes.find(mode => progressModes.includes(mode))
+    if (progressMode)
+      views.push({
+        where: 'At progress 0.5',
+        load: () => driver.load(subject, {progress: 0.5, comparisonMode: progressMode, highlighting: 1}),
+      })
+  }
   return views
 }
 
 const named = (paint: AccentPaint) => `${paint.element} (${paint.family} ${paint.property})`
-const surface = (paint: AccentPaint) => paint.property !== 'color'
 
 /**
- * Whether a nesting breaks the rule: a different hue inside a change color, or the same hue on another entity's
- * surface. An item's own emphasis in its own hue (its status text, icon, or marks within its line) is one accent.
+ * Whether a nesting breaks the rule: a different hue inside a change color, or the same hue painted by another
+ * entity. An item's own emphasis in its own hue (its status text, icon, or marks within its line) is one accent.
  */
 const nests = ({outer, inner}: NestedAccent) =>
-  inner.family !== outer.family || (surface(inner) && inner.entity !== undefined && inner.entity !== outer.entity)
+  inner.family !== outer.family || (inner.entity !== undefined && inner.entity !== outer.entity)
 
 export const accentChecks: Pick<Checks, 'nested-accents'> = {
   async 'nested-accents'(driver, subject, {modes}) {

@@ -17,7 +17,11 @@ interface Painted {
 /** Whether an SVG element encloses what it paints: a filled shape, or a closed outline. */
 function svgSurface(element: Element, style: CSSStyleDeclaration): boolean {
   if (!(element instanceof SVGGeometryElement) || element instanceof SVGLineElement || element instanceof SVGPolylineElement) return false
-  if (element instanceof SVGPathElement) return style.fill !== 'none' && !/^(rgba?\(.*,\s*0\)|transparent)$/.test(style.fill)
+  // A path encloses when it is filled, or closed (an outline drawn round something).
+  if (element instanceof SVGPathElement)
+    return (
+      (style.fill !== 'none' && !/^(rgba?\(.*,\s*0\)|transparent)$/.test(style.fill)) || /[zZ]\s*$/.test(element.getAttribute('d') ?? '')
+    )
   return true
 }
 
@@ -35,7 +39,8 @@ function paintOf(painted: Painted, paint: Paint): AccentPaint {
  * `inner` by its own circle, so one packed against the edge still counts).
  */
 function inside(inner: DOMRect, outer: DOMRect, round: boolean, innerRound: boolean): boolean {
-  if (!(inner.width > 0 && inner.height > 0)) return false
+  // A horizontal or vertical line has a box of no height or width.
+  if (!(inner.width > 0 || inner.height > 0)) return false
   if (round && innerRound) {
     const distance = Math.hypot(
       inner.left + inner.width / 2 - (outer.left + outer.width / 2),
@@ -62,7 +67,7 @@ function inside(inner: DOMRect, outer: DOMRect, round: boolean, innerRound: bool
 /**
  * Every change or accent color drawn inside another: an HTML element whose background or border is a change hue
  * (added, removed, modified, moved) or the accent, with a descendant painting one; or an SVG shape filled or outlined
- * in one, with an element painted over it, inside its box, that paints one. Categorical colors
+ * in one, with an element painted over it, inside its shape, that paints one. A categorical part's fill or background
  * (`data-projections-category`), focus and selection rings (outlines) and host chrome aren't accents here.
  */
 export function nestedAccents(root: Element = document.body): NestedAccent[] {
@@ -72,7 +77,6 @@ export function nestedAccents(root: Element = document.body): NestedAccent[] {
   const walk = (element: Element) => {
     if (
       element.hasAttribute('data-projections-host-overlay') ||
-      element.hasAttribute('data-projections-category') ||
       ['SCRIPT', 'STYLE', 'TEMPLATE', 'HEAD', 'defs', 'DEFS', 'title', 'desc', 'mask', 'clipPath', 'marker', 'pattern'].includes(
         element.tagName,
       )
@@ -81,7 +85,11 @@ export function nestedAccents(root: Element = document.body): NestedAccent[] {
     const style = getComputedStyle(element)
     if (style.display === 'none') return
     if (visible(element) && !visuallyHidden(element, style)) {
-      const paints = paintsOf(element, style, hues)
+      // A categorical part's fill or background is the category palette's, not an accent; the rest of it still counts.
+      const paints = paintsOf(element, style, hues).filter(
+        paint =>
+          !(element.hasAttribute('data-projections-category') && (paint.property === 'fill' || paint.property === 'background-color')),
+      )
       if (paints.length) {
         const svg = element instanceof SVGElement
         const surface = paints.find(paint =>

@@ -125,9 +125,9 @@ more, with the default comparison of each beside it.
 ## Related
 
 - Comparator files that ship with Projections:
-  [`api-compatibility`](../../../packages/comparators/api-compatibility/README.md)
-  and
-  [`runtime-policy`](../../../packages/comparators/runtime-policy/README.md).
+  [`api-compatibility`](../../../packages/comparators/api-compatibility/README.md),
+  [`runtime-policy`](../../../packages/comparators/runtime-policy/README.md) and
+  [`agentic-workflows`](../../../packages/comparators/agentic-workflows/README.md).
 - [Comparisons](../../contracts/comparisons.md): the rules every comparison
   follows, whichever comparator made it.
 

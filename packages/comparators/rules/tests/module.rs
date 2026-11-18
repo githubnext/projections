@@ -107,6 +107,11 @@ fn the_module_runs_the_rules_in_the_sandbox_() {
             root().join("packages/extractors/tetragon-policies/tests/fixtures/credentials/after.expected.json"),
         ),
         (
+            "agentic-workflows",
+            root().join("packages/extractors/github-agentic-workflows/tests/fixtures/docs-bot/before.expected.json"),
+            root().join("packages/extractors/github-agentic-workflows/tests/fixtures/docs-bot/after.expected.json"),
+        ),
+        (
             "api-compatibility",
             fixtures.join("api/fixtures/go-before.json"),
             fixtures.join("api/fixtures/go-after.json"),

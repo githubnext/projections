@@ -1,4 +1,4 @@
-// The rule coverage gate of the built-in rules comparators (api-compatibility, runtime-policy): runs the rules
+// The rule coverage gate of the built-in rules comparators (api-compatibility, runtime-policy, agentic-workflows): runs the rules
 // interpreter's suites (packages/comparators/rules/tests) with PROJECTIONS_RULES_COVERAGE naming a scratch directory,
 // where they write what each comparison covered, then packages/cli/tests/rules_coverage.rs, which runs each
 // comparator's *.comparator.test.yaml with coverage, adds the suites' counts, prints what is uncovered by line and holds

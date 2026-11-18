@@ -1,0 +1,224 @@
+# yaml-language-server: $schema=../../schemas/schemas/comparator-tests/v0.json
+#
+# What a reviewer should read in agentic workflow changes, as cases over the
+# github-agentic-workflows extractor's fixtures and hand-made edges. Run them with
+# `projections check -p <id>` in a repository whose projection uses these rules.
+format: projections.comparator-tests
+version: 0
+
+cases:
+  - name: the docs-bot pull request leads with the dropped guardrail, then wider scope
+    before: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/before.expected.json
+    after: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/after.expected.json
+    expect:
+      changes:
+        - id: workflow:.github/workflows/docs-bot.md
+          summary: '`docs-bot` no longer loads `skills/check-links` (`guardrail`).'
+          # Correspondence and statuses are the default comparator's.
+          status: modified
+          correspondence: exact
+        - id: workflow:.github/workflows/docs-bot-links.md
+          summary: '`docs-bot-links` can run more commands: any command.'
+        - id: workflow:.github/workflows/docs-bot-examples.md
+          summary: '`docs-bot-examples` reaches less of the network: `python`.'
+        - id: workflow:.github/workflows/docs-bot-digest.md
+          summary: New agentic workflow `docs-bot-digest`, which can write `create-discussion`.
+        - id: workflow:.github/workflows/issue-triage.md
+          summary: '`issue-triage` can write more: `add-labels` also `priority`.'
+        - {id: group:docs-bot, summary: 'Group `docs-bot` changes: `docs-bot-digest` joins.'}
+      # Steps rank by their widest change: the modified workflows' step leads with the dropped gate, before the added workflow's.
+      order: [workflow:.github/workflows/docs-bot.md, workflow:.github/workflows/docs-bot-digest.md]
+      steps:
+        - summary: '`docs-bot` no longer loads `skills/check-links` (`guardrail`).'
+        - summary: New agentic workflow `docs-bot-digest`, which can write `create-discussion`.
+      metadata:
+        agenticWorkflows:
+          interpretations:
+            workflow:.github/workflows/docs-bot.md:
+              - {name: gate-removed, level: warning, items: ['`skills/check-links` (`guardrail`)']}
+              - {name: repos-widened, level: warning, items: ['`octo-org/docs-site`']}
+              - {name: permissions-widened, level: warning, items: ['`pull-requests: read`']}
+              - name: outputs-widened
+                level: warning
+                items:
+                  - '`create-pull-request` to `octo-org/docs-site`'
+                  - '`create-issue` max `1` → `3`'
+                  - '`dispatch-workflow` max `2` → `3`, also starts `docs-bot-digest`'
+              - {name: tools-widened, level: warning, items: [toolset `pull_requests`, 'min-integrity `approved` → `unapproved`']}
+              - {name: budget-raised, level: warning, items: [AI credits per run `2000` → `5000`]}
+            workflow:.github/workflows/issue-triage.md:
+              - {name: outputs-widened, level: warning, items: ['`add-labels` also `priority`']}
+              - {name: lock-stale, level: warning, items: ['`.github/workflows/issue-triage.lock.yml` is stale']}
+    snapshot: snapshots/docs-bot.json
+
+  - name: the reverse change narrows, and a gate added back is a note
+    before: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/after.expected.json
+    after: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/before.expected.json
+    expect:
+      changes:
+        - id: workflow:.github/workflows/docs-bot.md
+          summary: '`docs-bot` now loads `skills/check-links` (`guardrail`).'
+        - {id: workflow:.github/workflows/docs-bot-digest.md, summary: Agentic workflow `docs-bot-digest` is removed.}
+        - id: workflow:.github/workflows/issue-triage.md
+          summary: '`issue-triage` can write less: `add-labels` no longer `priority`.'
+      metadata:
+        agenticWorkflows:
+          interpretations:
+            workflow:.github/workflows/issue-triage.md:
+              - {name: outputs-narrowed, level: note, items: ['`add-labels` no longer `priority`']}
+              - {name: lock-current, level: note, items: ['`.github/workflows/issue-triage.lock.yml` is current']}
+
+  - name: a public workflow's pull request widens its network, outputs, toolsets and timeout
+    before: ../../extractors/github-agentic-workflows/tests/fixtures/repo-ask/before.expected.json
+    after: ../../extractors/github-agentic-workflows/tests/fixtures/repo-ask/after.expected.json
+    expect:
+      changes:
+        - id: workflow:.github/workflows/repo-ask.md
+          summary: '`repo-ask` can reach more of the network: `*.readthedocs.io`, `python`.'
+      metadata:
+        agenticWorkflows:
+          interpretations:
+            workflow:.github/workflows/repo-ask.md:
+              - {name: network-widened, level: warning, items: ['`*.readthedocs.io`', '`python`']}
+              - {name: outputs-widened, level: warning, items: ['`create-issue`', '`add-comment` max `1` → `3`']}
+              - {name: tools-widened, level: warning, items: [toolset `actions`]}
+              - {name: budget-raised, level: warning, items: [timeout (minutes) `20` → `30`]}
+    snapshot: snapshots/repo-ask.json
+
+  - name: only the named classes are gates
+    before: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/before.expected.json
+    after: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/after.expected.json
+    options: {gates: [security-review]}
+    expect:
+      changes:
+        - id: workflow:.github/workflows/docs-bot.md
+          summary: '`docs-bot` can reach more repositories: `octo-org/docs-site`.'
+
+  - name: the named classes are gates
+    before: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/before.expected.json
+    after: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/after.expected.json
+    options: {gates: [guardrail]}
+    expect:
+      changes:
+        - id: workflow:.github/workflows/docs-bot.md
+          summary: '`docs-bot` no longer loads `skills/check-links` (`guardrail`).'
+
+  - name: a change nothing interprets keeps the default step summary
+    before:
+      extraction:
+        protocolVersion: 0
+        schema: architecture/v0
+        vocabularies: [agentic-workflows/v0]
+        entities:
+          - {id: 'workflow:a.md', kind: workflow, label: a, data: {path: a.md, description: Old}}
+        relationships: []
+    after:
+      extraction:
+        protocolVersion: 0
+        schema: architecture/v0
+        vocabularies: [agentic-workflows/v0]
+        entities:
+          - {id: 'workflow:a.md', kind: workflow, label: a, data: {path: a.md, description: New}}
+        relationships: []
+    expect:
+      changes: [{id: 'workflow:a.md', status: modified, summary: null}]
+      steps: [{summary: null}]
+
+  - name: identical extractions need no interpretation
+    before: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/after.expected.json
+    after: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/after.expected.json
+    expect:
+      count: {changes: 0, steps: 0}
+
+  - name: unknown options are rejected
+    before: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/before.expected.json
+    after: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/after.expected.json
+    options: {gate: [guardrail]}
+    expect:
+      error: takes only `gates`
+
+  - name: gates must name classes
+    before: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/before.expected.json
+    after: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/after.expected.json
+    options: {gates: guardrail}
+    expect:
+      error: must be a list of class names
+
+  - name: gates must be class names
+    before: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/before.expected.json
+    after: ../../extractors/github-agentic-workflows/tests/fixtures/docs-bot/after.expected.json
+    options: {gates: [1]}
+    expect:
+      error: must be a list of class names
+
+  - name: every interpretation, in both directions, from hand-made workflows
+    # One workflow per decision; fixtures/edges-*.json.
+    before: fixtures/edges-before.json
+    after: fixtures/edges-after.json
+    expect:
+      changes:
+        - {id: workflow:.github/workflows/bash-still-any.md, summary: null}
+        - {id: workflow:.github/workflows/outputs-expression.md, summary: null}
+        - {id: workflow:.github/workflows/described.md, summary: null}
+        - id: workflow:.github/workflows/repos-unguarded.md
+          summary: '`repos-unguarded` can reach more repositories: any repository its token reaches (no `allowed-repos`).'
+        - id: workflow:.github/workflows/tools-wider.md
+          summary: >-
+            `tools-wider` has more tools or looser guards: tool `edit`, MCP server `docs`, toolset `issues`,
+            min-integrity `approved` → `none`, no longer read-only, lockdown off.
+        - id: workflow:.github/workflows/budget-up.md
+          summary: >-
+            `budget-up` may spend more: timeout (minutes) `20` → `30`, turns `5` → default, tool calls `10` → `20.5`,
+            AI credits per run `1000` → `unlimited`.
+        - {id: group:new, summary: 'Group `new` changes: `added` joins.'}
+        - {id: workflow:.github/workflows/bash-anything.md, summary: '`bash-anything` can run more commands: bash for any command.'}
+        - {id: workflow:.github/workflows/lock-unverified.md, summary: null}
+        - {id: note:readme, summary: null}
+        - {id: workflow:.github/workflows/invalid-now.md, summary: null}
+        - {id: workflow:.github/workflows/invalid-fixed.md, summary: null}
+        - id: workflow:.github/workflows/outputs-scalar.md
+          summary: '`outputs-scalar` can write more: `dispatch-workflow` also starts `deploy`, `call-workflow` max `1` → `2`.'
+        - id: workflow:.github/workflows/triggers-rescheduled.md
+          summary: '`triggers-rescheduled` starts on other terms: `pull_request` `draft: false` → `draft: true`, `schedule` `daily` → `hourly`.'
+      metadata:
+        agenticWorkflows:
+          interpretations:
+            workflow:.github/workflows/triggers-unfiltered.md:
+              - name: triggers-widened
+                level: warning
+                items: ['`push` no longer limited by `branches`', '`push` no longer limited by `paths-ignore`']
+            workflow:.github/workflows/triggers-filtered.md:
+              - name: triggers-widened
+                level: warning
+                items: ['`pull_request` `paths-ignore` no longer `docs/**`', '`pull_request` `types` also `synchronize`']
+              - name: triggers-narrowed
+                level: note
+                items: ['`pull_request` now limited by `branches-ignore` `wip/*`', '`pull_request` `paths-ignore` also `tests/**`']
+    snapshot: snapshots/edges.json
+
+  - name: a split or a merge keeps the default comparison
+    before:
+      extraction:
+        protocolVersion: 0
+        schema: architecture/v0
+        vocabularies: [agentic-workflows/v0]
+        entities:
+          - {id: 'workflow:a.md', kind: workflow, label: a, data: {path: a.md, secrets: [A]}}
+          - {id: 'workflow:x.md', kind: workflow, label: x, data: {path: x.md}}
+          - {id: 'workflow:y.md', kind: workflow, label: y, data: {path: y.md, secrets: [Y]}}
+        relationships: []
+    after:
+      extraction:
+        protocolVersion: 0
+        schema: architecture/v0
+        vocabularies: [agentic-workflows/v0]
+        entities:
+          - {id: 'workflow:b.md', kind: workflow, label: b, previousIds: ['workflow:a.md'], data: {path: b.md}}
+          - {id: 'workflow:c.md', kind: workflow, label: c, previousIds: ['workflow:a.md'], data: {path: c.md, secrets: [C]}}
+          - {id: 'workflow:z.md', kind: workflow, label: z, previousIds: ['workflow:x.md', 'workflow:y.md'], data: {path: z.md}}
+        relationships: []
+    expect:
+      count: {changes: 2}
+      changes:
+        - {item: 'workflow:a.md', correspondence: split, summary: null}
+        - {item: 'workflow:z.md', correspondence: merge, summary: null}

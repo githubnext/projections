@@ -70,6 +70,7 @@ fn every_comparator_test_file_in_the_repository_passes() {
         "packages/cli/templates/starter.comparator.test.yaml",
         "packages/comparators/api-compatibility/api-compatibility.comparator.test.yaml",
         "packages/comparators/runtime-policy/runtime-policy.comparator.test.yaml",
+        "packages/comparators/agentic-workflows/agentic-workflows.comparator.test.yaml",
         "examples/comparators/moved-components/moved-components.comparator.test.yaml",
         "examples/comparators/priority-order/priority-order.comparator.test.yaml",
     ] {

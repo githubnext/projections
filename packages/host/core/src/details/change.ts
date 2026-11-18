@@ -39,8 +39,9 @@ const humanize = (name: string) => {
 /**
  * The comparator's classification of a change, as words, from the comparison's metadata conventions:
  * `metadata.compatibility.changes[id].level` (the api-compatibility comparator: "Breaking", "Additive", …) and
- * `metadata.runtimePolicy.interpretations[id]` (the runtime-policy comparator: "Scope broadened", …). Comparator
- * metadata is untrusted: anything malformed is ignored.
+ * `metadata.runtimePolicy.interpretations[id]` (the runtime-policy comparator: "Scope broadened", …) and
+ * `metadata.agenticWorkflows.interpretations[id]` (the agentic-workflows comparator's `{name}` findings: "Network
+ * widened", …). Comparator metadata is untrusted: anything malformed is ignored.
  */
 export function changeTags(subject: ViewSubject, rowId: string): string[] {
   if (subject.mode !== 'comparison') return []
@@ -57,5 +58,11 @@ export function changeTags(subject: ViewSubject, rowId: string): string[] {
   const interpretations = isRecord(runtime) && isRecord(runtime['interpretations']) ? runtime['interpretations'] : undefined
   const names = interpretations && Object.hasOwn(interpretations, rowId) ? interpretations[rowId] : undefined
   if (Array.isArray(names)) for (const name of names) if (typeof name === 'string' && humanize(name)) tags.push(humanize(name))
+  const agentic = metadata['agenticWorkflows']
+  const findings = isRecord(agentic) && isRecord(agentic['interpretations']) ? agentic['interpretations'] : undefined
+  const found = findings && Object.hasOwn(findings, rowId) ? findings[rowId] : undefined
+  if (Array.isArray(found))
+    for (const finding of found)
+      if (isRecord(finding) && typeof finding['name'] === 'string' && humanize(finding['name'])) tags.push(humanize(finding['name']))
   return [...new Set(tags)]
 }

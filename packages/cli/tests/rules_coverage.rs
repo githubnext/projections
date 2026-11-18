@@ -1,5 +1,5 @@
 //! The rule coverage gate of the built-in rules comparators,
-//! api-compatibility and runtime-policy: `npm run test:rust:rules-coverage`
+//! api-compatibility, runtime-policy and agentic-workflows: `npm run test:rust:rules-coverage`
 //! (tools/scripts/rules-coverage.mjs) runs the rules interpreter's own suites
 //! with `PROJECTIONS_RULES_COVERAGE` naming a directory, where they write what
 //! they covered, then this test, which runs each comparator's
@@ -17,7 +17,7 @@ use std::{fs, path::Path};
 /// of these rules is an ecosystem's or the runtime policy model's rule, so
 /// each is pinned by a test; a branch no input can take is removed, or
 /// excluded with a `coverage-ignore:` comment saying why.
-const GATES: [(&str, [f64; 3]); 2] = [
+const GATES: [(&str, [f64; 3]); 3] = [
     (
         "packages/comparators/api-compatibility/api-compatibility.comparator.yaml",
         [100.0, 100.0, 100.0],
@@ -25,6 +25,10 @@ const GATES: [(&str, [f64; 3]); 2] = [
     (
         "packages/comparators/runtime-policy/runtime-policy.comparator.yaml",
         [0.0, 0.0, 0.0],
+    ),
+    (
+        "packages/comparators/agentic-workflows/agentic-workflows.comparator.yaml",
+        [100.0, 100.0, 100.0],
     ),
 ];
 

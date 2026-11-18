@@ -47,6 +47,7 @@ pub fn rules_path(name: &str) -> PathBuf {
     let root = root();
     match name {
         "runtime-policy" => root.join("packages/comparators/runtime-policy/runtime-policy.comparator.yaml"),
+        "agentic-workflows" => root.join("packages/comparators/agentic-workflows/agentic-workflows.comparator.yaml"),
         "api-compatibility" => root.join("packages/comparators/api-compatibility/api-compatibility.comparator.yaml"),
         "default-order" => root.join("packages/comparators/rules/tests/rules/default-order.yaml"),
         // The starter `projections init --comparator custom` scaffolds.

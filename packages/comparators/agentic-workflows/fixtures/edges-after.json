@@ -1,0 +1,842 @@
+{
+  "protocolVersion": 0,
+  "schema": "architecture/v0",
+  "vocabularies": [
+    "agentic-workflows/v0"
+  ],
+  "entities": [
+    {
+      "id": "group:lab",
+      "kind": "group",
+      "label": "lab",
+      "data": {
+        "workflows": [
+          "bash-any",
+          "bash-fewer"
+        ]
+      }
+    },
+    {
+      "id": "group:new",
+      "kind": "group",
+      "label": "new",
+      "data": {
+        "workflows": [
+          "added"
+        ]
+      }
+    },
+    {
+      "id": "note:readme",
+      "kind": "note",
+      "label": "readme"
+    },
+    {
+      "id": "workflow:.github/workflows/added-quietly.md",
+      "kind": "workflow",
+      "label": "added-quietly",
+      "data": {
+        "path": ".github/workflows/added-quietly.md",
+        "lock": {
+          "path": ".github/workflows/added-quietly.lock.yml",
+          "status": "current"
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/added.md",
+      "kind": "workflow",
+      "label": "added",
+      "data": {
+        "path": ".github/workflows/added.md",
+        "safeOutputs": {
+          "handlers": [
+            {
+              "kind": "create-issue"
+            }
+          ]
+        },
+        "lock": {
+          "path": ".github/workflows/added.lock.yml",
+          "status": "missing"
+        },
+        "unrecognized": [
+          "hologram"
+        ]
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/bash-any.md",
+      "kind": "workflow",
+      "label": "bash-any",
+      "data": {
+        "path": ".github/workflows/bash-any.md",
+        "bash": [
+          "*",
+          "git"
+        ]
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/bash-anything.md",
+      "kind": "workflow",
+      "label": "bash-anything",
+      "data": {
+        "path": ".github/workflows/bash-anything.md",
+        "bash": [
+          "*"
+        ]
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/bash-disabled.md",
+      "kind": "workflow",
+      "label": "bash-disabled",
+      "data": {
+        "path": ".github/workflows/bash-disabled.md",
+        "bash": null
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/bash-enabled.md",
+      "kind": "workflow",
+      "label": "bash-enabled",
+      "data": {
+        "path": ".github/workflows/bash-enabled.md",
+        "bash": [
+          "git"
+        ]
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/bash-fewer.md",
+      "kind": "workflow",
+      "label": "bash-fewer",
+      "data": {
+        "path": ".github/workflows/bash-fewer.md",
+        "bash": [
+          "git"
+        ]
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/bash-limited.md",
+      "kind": "workflow",
+      "label": "bash-limited",
+      "data": {
+        "path": ".github/workflows/bash-limited.md",
+        "bash": [
+          "git"
+        ]
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/bash-more.md",
+      "kind": "workflow",
+      "label": "bash-more",
+      "data": {
+        "path": ".github/workflows/bash-more.md",
+        "bash": [
+          "git",
+          "make"
+        ]
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/bash-still-any.md",
+      "kind": "workflow",
+      "label": "bash-still-any",
+      "data": {
+        "path": ".github/workflows/bash-still-any.md",
+        "bash": [
+          "*",
+          "git"
+        ]
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/budget-down.md",
+      "kind": "workflow",
+      "label": "budget-down",
+      "data": {
+        "path": ".github/workflows/budget-down.md",
+        "limits": {
+          "timeoutMinutes": {
+            "value": 20,
+            "declared": true
+          },
+          "maxTurns": {
+            "value": 5,
+            "declared": true
+          },
+          "maxToolCalls": {
+            "value": 10,
+            "declared": true
+          },
+          "maxAiCredits": {
+            "value": 1000,
+            "declared": true
+          }
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/budget-up.md",
+      "kind": "workflow",
+      "label": "budget-up",
+      "data": {
+        "path": ".github/workflows/budget-up.md",
+        "limits": {
+          "timeoutMinutes": {
+            "value": 30,
+            "declared": true
+          },
+          "maxToolCalls": {
+            "value": 20.5,
+            "declared": true
+          },
+          "maxAiCredits": {
+            "value": "unlimited",
+            "declared": true
+          },
+          "maxDailyAiCredits": {
+            "value": 10,
+            "declared": true
+          }
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/described.md",
+      "kind": "workflow",
+      "label": "described",
+      "data": {
+        "path": ".github/workflows/described.md",
+        "description": "New"
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/engine-switched.md",
+      "kind": "workflow",
+      "label": "engine-switched",
+      "data": {
+        "path": ".github/workflows/engine-switched.md",
+        "engine": {
+          "id": "claude",
+          "model": "sonnet"
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/gate-added.md",
+      "kind": "workflow",
+      "label": "gate-added",
+      "data": {
+        "path": ".github/workflows/gate-added.md",
+        "skills": [
+          {
+            "ref": "skills/check-new@v1",
+            "name": "skills/check-new",
+            "classes": [
+              "guardrail"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/gate-removed.md",
+      "kind": "workflow",
+      "label": "gate-removed",
+      "data": {
+        "path": ".github/workflows/gate-removed.md",
+        "imports": [],
+        "skills": []
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/integrity-dropped.md",
+      "kind": "workflow",
+      "label": "integrity-dropped",
+      "data": {
+        "path": ".github/workflows/integrity-dropped.md",
+        "github": {
+          "settings": {}
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/invalid-fixed.md",
+      "kind": "workflow",
+      "label": "invalid-fixed",
+      "data": {
+        "path": ".github/workflows/invalid-fixed.md",
+        "skills": [
+          {
+            "ref": "skills/check-a",
+            "name": "skills/check-a",
+            "classes": [
+              "guardrail"
+            ]
+          }
+        ],
+        "lock": {
+          "path": "x.lock.yml",
+          "status": "current"
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/invalid-now.md",
+      "kind": "workflow",
+      "label": "invalid-now",
+      "data": {
+        "path": ".github/workflows/invalid-now.md",
+        "findings": [
+          {
+            "kind": "invalid",
+            "message": "Its front matter can't be read"
+          }
+        ]
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/loads-changed.md",
+      "kind": "workflow",
+      "label": "loads-changed",
+      "data": {
+        "path": ".github/workflows/loads-changed.md",
+        "imports": [
+          {
+            "path": "shared/b.md",
+            "classes": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/lock-lost.md",
+      "kind": "workflow",
+      "label": "lock-lost",
+      "data": {
+        "path": ".github/workflows/lock-lost.md",
+        "lock": {
+          "path": ".github/workflows/lock-lost.lock.yml",
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/lock-recompiled.md",
+      "kind": "workflow",
+      "label": "lock-recompiled",
+      "data": {
+        "path": ".github/workflows/lock-recompiled.md",
+        "lock": {
+          "path": ".github/workflows/lock-recompiled.lock.yml",
+          "status": "current"
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/lock-staled.md",
+      "kind": "workflow",
+      "label": "lock-staled",
+      "data": {
+        "path": ".github/workflows/lock-staled.md",
+        "lock": {
+          "path": ".github/workflows/lock-staled.lock.yml",
+          "status": "stale"
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/lock-unknown.md",
+      "kind": "workflow",
+      "label": "lock-unknown",
+      "data": {
+        "path": ".github/workflows/lock-unknown.md"
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/lock-unverified.md",
+      "kind": "workflow",
+      "label": "lock-unverified",
+      "data": {
+        "path": ".github/workflows/lock-unverified.md",
+        "lock": {
+          "path": ".github/workflows/lock-unverified.lock.yml",
+          "status": "unverified"
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/network-narrower.md",
+      "kind": "workflow",
+      "label": "network-narrower",
+      "data": {
+        "path": ".github/workflows/network-narrower.md",
+        "network": {
+          "allowed": [
+            "defaults"
+          ],
+          "blocked": [
+            "evil.example"
+          ]
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/network-wider.md",
+      "kind": "workflow",
+      "label": "network-wider",
+      "data": {
+        "path": ".github/workflows/network-wider.md",
+        "network": {
+          "allowed": [
+            "defaults",
+            "python"
+          ],
+          "blocked": []
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/outputs-added.md",
+      "kind": "workflow",
+      "label": "outputs-added",
+      "data": {
+        "path": ".github/workflows/outputs-added.md",
+        "safeOutputs": {
+          "handlers": [
+            {
+              "kind": "add-comment",
+              "max": 1
+            },
+            {
+              "kind": "create-issue",
+              "max": 1,
+              "targetRepo": "o/r"
+            },
+            {
+              "kind": "noop"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/outputs-expression.md",
+      "kind": "workflow",
+      "label": "outputs-expression",
+      "data": {
+        "path": ".github/workflows/outputs-expression.md",
+        "safeOutputs": {
+          "handlers": [
+            {
+              "kind": "add-comment",
+              "max": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/outputs-loosened.md",
+      "kind": "workflow",
+      "label": "outputs-loosened",
+      "data": {
+        "path": ".github/workflows/outputs-loosened.md",
+        "safeOutputs": {
+          "handlers": [
+            {
+              "kind": "add-labels",
+              "max": "unlimited",
+              "allowed": [
+                "bug",
+                "x"
+              ],
+              "staged": false,
+              "draft": false,
+              "targetRepo": "o/r",
+              "allowedRepos": [
+                "o/s"
+              ],
+              "workflows": [
+                "w"
+              ]
+            }
+          ],
+          "jobs": [
+            "notify"
+          ],
+          "staged": false
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/outputs-retargeted.md",
+      "kind": "workflow",
+      "label": "outputs-retargeted",
+      "data": {
+        "path": ".github/workflows/outputs-retargeted.md",
+        "safeOutputs": {
+          "handlers": [
+            {
+              "kind": "create-issue",
+              "max": "${{ inputs.n }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/outputs-scalar.md",
+      "kind": "workflow",
+      "label": "outputs-scalar",
+      "data": {
+        "path": ".github/workflows/outputs-scalar.md",
+        "safeOutputs": {
+          "handlers": [
+            {
+              "kind": "dispatch-workflow",
+              "max": 1,
+              "workflows": [
+                "build",
+                "deploy"
+              ]
+            },
+            {
+              "kind": "call-workflow",
+              "max": 2,
+              "workflows": "lint"
+            }
+          ]
+        },
+        "lock": {
+          "path": "x.lock.yml",
+          "status": "current"
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/outputs-tightened.md",
+      "kind": "workflow",
+      "label": "outputs-tightened",
+      "data": {
+        "path": ".github/workflows/outputs-tightened.md",
+        "safeOutputs": {
+          "handlers": [
+            {
+              "kind": "add-labels",
+              "max": 5,
+              "allowed": [
+                "bug"
+              ],
+              "staged": true,
+              "draft": true,
+              "allowedRepos": [],
+              "workflows": []
+            }
+          ],
+          "jobs": [],
+          "staged": true
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/permissions-added.md",
+      "kind": "workflow",
+      "label": "permissions-added",
+      "data": {
+        "path": ".github/workflows/permissions-added.md",
+        "permissions": {
+          "all": "read",
+          "issues": "write"
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/permissions-granted.md",
+      "kind": "workflow",
+      "label": "permissions-granted",
+      "data": {
+        "path": ".github/workflows/permissions-granted.md",
+        "permissions": {
+          "contents": "write"
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/permissions-lowered.md",
+      "kind": "workflow",
+      "label": "permissions-lowered",
+      "data": {
+        "path": ".github/workflows/permissions-lowered.md",
+        "permissions": {
+          "contents": "read"
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/repos-added.md",
+      "kind": "workflow",
+      "label": "repos-added",
+      "data": {
+        "path": ".github/workflows/repos-added.md",
+        "github": {
+          "repos": [
+            "o/a",
+            "o/b"
+          ]
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/repos-guarded.md",
+      "kind": "workflow",
+      "label": "repos-guarded",
+      "data": {
+        "path": ".github/workflows/repos-guarded.md",
+        "github": {
+          "repos": [
+            "o/a"
+          ]
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/repos-removed.md",
+      "kind": "workflow",
+      "label": "repos-removed",
+      "data": {
+        "path": ".github/workflows/repos-removed.md",
+        "github": {
+          "repos": [
+            "o/a"
+          ]
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/repos-unguarded.md",
+      "kind": "workflow",
+      "label": "repos-unguarded",
+      "data": {
+        "path": ".github/workflows/repos-unguarded.md",
+        "github": {
+          "repos": null
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/secrets-added.md",
+      "kind": "workflow",
+      "label": "secrets-added",
+      "data": {
+        "path": ".github/workflows/secrets-added.md",
+        "secrets": [
+          "DEPLOY_TOKEN"
+        ]
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/secrets-removed.md",
+      "kind": "workflow",
+      "label": "secrets-removed",
+      "data": {
+        "path": ".github/workflows/secrets-removed.md",
+        "secrets": []
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/strict-off.md",
+      "kind": "workflow",
+      "label": "strict-off",
+      "data": {
+        "path": ".github/workflows/strict-off.md",
+        "strict": false
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/strict-on.md",
+      "kind": "workflow",
+      "label": "strict-on",
+      "data": {
+        "path": ".github/workflows/strict-on.md",
+        "strict": true
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/tools-narrower.md",
+      "kind": "workflow",
+      "label": "tools-narrower",
+      "data": {
+        "path": ".github/workflows/tools-narrower.md",
+        "tools": [],
+        "mcpServers": [],
+        "github": {
+          "toolsets": [
+            "default"
+          ],
+          "settings": {
+            "minIntegrity": "merged",
+            "readOnly": true,
+            "lockdown": true
+          }
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/tools-wider.md",
+      "kind": "workflow",
+      "label": "tools-wider",
+      "data": {
+        "path": ".github/workflows/tools-wider.md",
+        "tools": [
+          "edit"
+        ],
+        "mcpServers": [
+          "docs"
+        ],
+        "github": {
+          "toolsets": [
+            "default",
+            "issues"
+          ],
+          "settings": {
+            "minIntegrity": "none",
+            "readOnly": false
+          }
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/triggers-fewer.md",
+      "kind": "workflow",
+      "label": "triggers-fewer",
+      "data": {
+        "path": ".github/workflows/triggers-fewer.md",
+        "triggers": [
+          {
+            "event": "push"
+          }
+        ],
+        "activation": {
+          "roles": [
+            "admin"
+          ]
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/triggers-filtered.md",
+      "kind": "workflow",
+      "label": "triggers-filtered",
+      "data": {
+        "path": ".github/workflows/triggers-filtered.md",
+        "triggers": [
+          {
+            "event": "pull_request",
+            "detail": "types: opened, synchronize; branches-ignore: wip/*; paths-ignore: *.md, tests/**",
+            "filters": {
+              "types": [
+                "opened",
+                "synchronize"
+              ],
+              "branches-ignore": [
+                "wip/*"
+              ],
+              "paths-ignore": [
+                "*.md",
+                "tests/**"
+              ]
+            }
+          }
+        ],
+        "lock": {
+          "path": "x.lock.yml",
+          "status": "current"
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/triggers-more.md",
+      "kind": "workflow",
+      "label": "triggers-more",
+      "data": {
+        "path": ".github/workflows/triggers-more.md",
+        "triggers": [
+          {
+            "event": "push"
+          },
+          {
+            "event": "issues"
+          }
+        ],
+        "activation": {
+          "roles": [
+            "admin",
+            "all"
+          ]
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/triggers-rescheduled.md",
+      "kind": "workflow",
+      "label": "triggers-rescheduled",
+      "data": {
+        "path": ".github/workflows/triggers-rescheduled.md",
+        "triggers": [
+          {
+            "event": "pull_request",
+            "detail": "draft: true",
+            "filters": {
+              "draft": [
+                "true"
+              ]
+            }
+          },
+          {
+            "event": "schedule",
+            "detail": "hourly"
+          }
+        ],
+        "lock": {
+          "path": "x.lock.yml",
+          "status": "current"
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/triggers-unfiltered.md",
+      "kind": "workflow",
+      "label": "triggers-unfiltered",
+      "data": {
+        "path": ".github/workflows/triggers-unfiltered.md",
+        "triggers": [
+          {
+            "event": "push"
+          }
+        ],
+        "lock": {
+          "path": "x.lock.yml",
+          "status": "current"
+        }
+      }
+    },
+    {
+      "id": "workflow:.github/workflows/unrecognized.md",
+      "kind": "workflow",
+      "label": "unrecognized",
+      "data": {
+        "path": ".github/workflows/unrecognized.md",
+        "unrecognized": [
+          "hologram"
+        ]
+      }
+    }
+  ],
+  "relationships": []
+}

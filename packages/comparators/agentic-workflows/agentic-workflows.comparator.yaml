@@ -1,0 +1,650 @@
+# yaml-language-server: $schema=../../schemas/schemas/comparator/v0.json
+#
+# The agentic workflow comparator as rules, from the agentic workflow model
+# (docs/models/agentic-workflow-model.md).
+format: projections.comparator
+version: 0
+description: >-
+  Interprets each agentic workflow change by the direction it moves what an unattended agent may do:
+  widened scope (a repository, tool, toolset, bash command, network domain, permission, safe output
+  or a higher limit on one, a secret, a higher budget, a guardrail no longer loaded) is a warning,
+  and narrowing is a note. Writes one summary per change, orders the steps so the widest changes
+  come first, and records the interpretations in metadata.agenticWorkflows.
+
+defaults:
+  # The import and skill classes (the extractor's `classes` input) whose removal is a warning; `*` is every class.
+  gates: ['*']
+
+checks:
+  - assert: maps.keys(options).all(key, key == 'gates')
+    message: >-
+      'invalid options: unknown field `%s`; this comparator takes only `gates`'.format([maps.keys(options).filter(key, key != 'gates')[0]])
+  - assert: type(options.gates) == list && options.gates.all(gate, type(gate) == string)
+    message: "'invalid options: `gates` must be a list of class names'"
+
+functions:
+  rank:
+    description: An interpretation's severity, most severe first; the first fourteen are warnings.
+    params:
+      - name: name
+        type: string
+        values:
+          - gate-removed
+          - repos-widened
+          - permissions-widened
+          - bash-widened
+          - network-widened
+          - outputs-widened
+          - tools-widened
+          - secrets-added
+          - strict-disabled
+          - triggers-widened
+          - budget-raised
+          - workflow-added
+          - lock-stale
+          - unrecognized-field
+          - engine-changed
+          - triggers-changed
+          - loads-changed
+          - gate-added
+          - repos-narrowed
+          - permissions-narrowed
+          - bash-narrowed
+          - network-narrowed
+          - outputs-narrowed
+          - tools-narrowed
+          - secrets-removed
+          - strict-enabled
+          - triggers-narrowed
+          - budget-lowered
+          - lock-current
+          - workflow-removed
+          - group-changed
+    returns: int
+    body: |-
+      match(name, {
+        'gate-removed': 0, 'repos-widened': 1, 'permissions-widened': 2, 'bash-widened': 3,
+        'network-widened': 4, 'outputs-widened': 5, 'tools-widened': 6, 'secrets-added': 7,
+        'strict-disabled': 8, 'triggers-widened': 9, 'budget-raised': 10, 'workflow-added': 11,
+        'lock-stale': 12, 'unrecognized-field': 13, 'engine-changed': 14, 'triggers-changed': 15,
+        'loads-changed': 16, 'gate-added': 17, 'repos-narrowed': 18, 'permissions-narrowed': 19,
+        'bash-narrowed': 20, 'network-narrowed': 21, 'outputs-narrowed': 22, 'tools-narrowed': 23,
+        'secrets-removed': 24, 'strict-enabled': 25, 'triggers-narrowed': 26, 'budget-lowered': 27,
+        'lock-current': 28, 'workflow-removed': 29, 'group-changed': 30
+        // coverage-ignore: every name an interpretation takes is listed above
+      }, 31)
+
+  finding:
+    description: >-
+      One interpretation: its name, `warning` when it widens an agent's scope or needs attention
+      (`note` otherwise), and what it is about, each item text with inline code.
+    params: [{name: name, type: string}, {name: items, type: list<string>}]
+    body: "{'name': name, 'level': rank(name) < 14 ? 'warning' : 'note', 'items': items}"
+
+  gained:
+    description: The values of `now` that `was` doesn't have.
+    params: [was, now]
+    body: now.filter(value, !(value in was))
+
+  codes:
+    params: [values]
+    returns: list<string>
+    body: values.map(value, prose.code(string(value)))
+
+  both:
+    description: A widening and a narrowing interpretation, each when it has items.
+    params: [{name: wide, type: string}, wider, {name: narrow, type: string}, narrower]
+    body: collect({size(wider) > 0:finding(wide, wider), size(narrower) > 0:finding(narrow, narrower)})
+
+  # Budgets and limits: numbers, `unlimited`, or an expression compared only for equality.
+
+  amount:
+    description: A limit as a number to compare, `unlimited` as the largest; null for an expression.
+    params: [value]
+    body: |-
+      cond({
+        value == 'unlimited': 1.0e18,
+        type(value) == int || type(value) == double: double(value)
+      }, null)
+
+  raised:
+    description: >-
+      Whether a limit rose from `was` to `now`; an explicit limit dropped (back to gh-aw's default,
+      or no limit) counts as raised.
+    params: [was, now]
+    returns: bool
+    body: |-
+      was != null && (now == null || (amount(was) != null && amount(now) != null && amount(now) > amount(was)))
+
+  shown:
+    params: [value]
+    returns: string
+    body: "value == null ? 'default' : prose.code(type(value) == string ? value : json(value))"
+
+  moved:
+    description: '`name was → now`, for a value that moved.'
+    params: [{name: name, type: string}, was, now]
+    returns: string
+    body: "template('{name} {was} → {now}', {'name': name, 'was': shown(was), 'now': shown(now)})"
+
+  # The sections of a workflow that exists on both sides, each as its widening and narrowing interpretations.
+
+  network:
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    variables:
+      - name: was
+        expression: before.data.?network.orValue({})
+      - name: now
+        expression: after.data.?network.orValue({})
+    body: |-
+      both('network-widened',
+        codes(gained(variables.was.?allowed.orValue([]), variables.now.?allowed.orValue([])))
+          + gained(variables.now.?blocked.orValue([]), variables.was.?blocked.orValue([]))
+            .map(domain, 'no longer blocks ' + prose.code(domain)),
+        'network-narrowed',
+        codes(gained(variables.now.?allowed.orValue([]), variables.was.?allowed.orValue([])))
+          + gained(variables.was.?blocked.orValue([]), variables.now.?blocked.orValue([]))
+            .map(domain, 'blocks ' + prose.code(domain)))
+
+  integrity:
+    description: "`min-integrity`'s strictness, -1 when unset."
+    params: [value]
+    returns: int
+    body: "value == null ? -1 : {'none': 0, 'unapproved': 1, 'approved': 2, 'merged': 3}[?string(value)].orValue(0)"
+
+  guards:
+    description: >-
+      The GitHub tool's guard settings that loosen (`wider`) or tighten from `was` to `now`: a lower
+      `min-integrity` (or none) loosens, and so does turning `read-only` or `lockdown` off.
+    params: [was, now, {name: wider, type: bool}]
+    returns: list<string>
+    variables:
+      - name: from
+        expression: integrity(was.?minIntegrity.orValue(null))
+      - name: to
+        expression: integrity(now.?minIntegrity.orValue(null))
+    body: |-
+      collect({
+        variables.from != variables.to && (variables.to < variables.from) == wider:
+          moved('min-integrity', was.?minIntegrity.orValue(null), now.?minIntegrity.orValue(null)),
+        was.?readOnly.orValue(false) == wider && now.?readOnly.orValue(false) != wider:
+          wider ? 'no longer read-only' : 'read-only',
+        was.?lockdown.orValue(false) == wider && now.?lockdown.orValue(false) != wider:
+          wider ? 'lockdown off' : 'lockdown on'
+      })
+
+  named:
+    description: What `item` gains over `other` among tools, MCP servers and GitHub toolsets.
+    params: [{name: other, type: Item}, {name: item, type: Item}]
+    returns: list<string>
+    body: |-
+      gained(other.data.?tools.orValue([]), item.data.?tools.orValue([])).map(name, 'tool ' + prose.code(name))
+        + gained(other.data.?mcpServers.orValue([]), item.data.?mcpServers.orValue([])).map(name, 'MCP server ' + prose.code(name))
+        + gained(other.data.?github.?toolsets.orValue([]), item.data.?github.?toolsets.orValue([]))
+          .map(name, 'toolset ' + prose.code(name))
+
+  tools:
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    variables:
+      - name: was
+        expression: before.data.?github.?settings.orValue({})
+      - name: now
+        expression: after.data.?github.?settings.orValue({})
+    body: |-
+      both('tools-widened', named(before, after) + guards(variables.was, variables.now, true),
+        'tools-narrowed', named(after, before) + guards(variables.was, variables.now, false))
+
+  repos:
+    description: >-
+      The repositories the GitHub tool may reach: a repository added to `allowed-repos`, or the guard
+      dropped, widens; a repository removed, or a guard added, narrows.
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    variables:
+      - name: was
+        expression: before.data.?github.?repos.orValue(null)
+      - name: now
+        expression: after.data.?github.?repos.orValue(null)
+    body: |-
+      both('repos-widened',
+        cond({variables.was == null: [], variables.now == null: ['any repository its token reaches (no `allowed-repos`)']},
+          codes(gained(variables.was, variables.now))),
+        'repos-narrowed',
+        cond({variables.now == null: [], variables.was == null: ['only ' + codes(variables.now).join(', ')]},
+          codes(gained(variables.now, variables.was))))
+
+  commands:
+    params: [commands]
+    returns: string
+    body: "'*' in commands ? 'any command' : codes(commands).join(', ')"
+
+  bash:
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    variables:
+      - name: was
+        expression: before.data.?bash.orValue(null)
+      - name: now
+        expression: after.data.?bash.orValue(null)
+    body: |-
+      both('bash-widened',
+        cond({
+          variables.now == null: [],
+          variables.was == null: ['bash for ' + commands(variables.now)],
+          '*' in variables.was: [],
+          '*' in variables.now: ['any command']
+        }, codes(gained(variables.was, variables.now))),
+        'bash-narrowed',
+        cond({
+          variables.was == null: [],
+          variables.now == null: ['no bash'],
+          '*' in variables.now: [],
+          '*' in variables.was: ['only ' + commands(variables.now)]
+        }, codes(gained(variables.now, variables.was))))
+
+  grant:
+    description: The level `permissions` grants `scope`, as a name; `all` applies to every scope it doesn't name.
+    params: [permissions, {name: scope, type: string}]
+    returns: string
+    body: |-
+      permissions == null ? 'none' : string(permissions[?scope].orValue(permissions[?'all'].orValue('none')))
+
+  strength:
+    params: [{name: level, type: string}]
+    returns: int
+    body: "{'read': 1, 'write': 2}[?level].orValue(0)"
+
+  permissions:
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    variables:
+      - name: was
+        expression: before.data.?permissions.orValue(null)
+      - name: now
+        expression: after.data.?permissions.orValue(null)
+      - name: scopes
+        expression: |-
+          ids.sort(((variables.was == null ? [] : maps.keys(variables.was))
+            + (variables.now == null ? [] : maps.keys(variables.now))).distinct())
+    body: |-
+      both('permissions-widened',
+        variables.scopes.filter(scope, strength(grant(variables.now, scope)) > strength(grant(variables.was, scope)))
+          .map(scope, prose.code(scope + ': ' + grant(variables.now, scope))),
+        'permissions-narrowed',
+        variables.scopes.filter(scope, strength(grant(variables.now, scope)) < strength(grant(variables.was, scope)))
+          .map(scope, prose.code(scope + ': ' + grant(variables.now, scope))))
+
+  # Safe outputs: each handler, and how its limits loosen or tighten.
+
+  handlers:
+    params: [{name: item, type: Item}]
+    body: item.data.?safeOutputs.?handlers.orValue([])
+
+  kinds:
+    params: [{name: item, type: Item}]
+    body: handlers(item).map(handler, handler.kind)
+
+  handler:
+    description: The handler of `kind`, which `item` has.
+    params: [{name: item, type: Item}, {name: kind, type: string}]
+    body: handlers(item).filter(handler, handler.kind == kind)[0]
+
+  target:
+    params: [handler]
+    returns: string
+    body: "handler.?targetRepo.orValue(null) != null ? ' to ' + prose.code(string(handler.targetRepo)) : ''"
+
+  listed:
+    description: A setting gh-aw takes as one value or a list, as a list.
+    params: [value]
+    body: 'type(value) == list ? value : [value]'
+
+  diff:
+    description: What `now` adds to `was` when `wider`, or what it drops; a single value counts as a list of one.
+    params: [was, now, {name: wider, type: bool}]
+    body: 'wider ? gained(listed(was), listed(now)) : gained(listed(now), listed(was))'
+
+  loosened:
+    description: >-
+      How a handler's limits loosen from `was` to `now` (`wider`) or tighten: a higher `max` (or the
+      explicit one dropped), another target repository, more allowed repositories, labels or
+      workflows, and staging or drafts turned off.
+    params: [was, now, {name: wider, type: bool}]
+    returns: list<string>
+    variables:
+      - name: max
+        expression: |-
+          wider ? raised(was.?max.orValue(null), now.?max.orValue(null)) : raised(now.?max.orValue(null), was.?max.orValue(null))
+      - name: target
+        expression: now.?targetRepo.orValue(null)
+      - name: repos
+        expression: codes(diff(was.?allowedRepos.orValue([]), now.?allowedRepos.orValue([]), wider))
+      - name: allowed
+        expression: codes(diff(was.?allowed.orValue([]), now.?allowed.orValue([]), wider))
+      - name: workflows
+        expression: codes(diff(was.?workflows.orValue([]), now.?workflows.orValue([]), wider))
+    body: |-
+      collect({
+        variables.max: moved('max', was.?max.orValue(null), now.?max.orValue(null)),
+        variables.target != was.?targetRepo.orValue(null) && (variables.target != null) == wider:
+          wider ? 'to ' + prose.code(string(variables.target)) : 'back to this repository',
+        size(variables.repos) > 0: (wider ? 'also to ' : 'no longer to ') + variables.repos.join(', '),
+        was.?staged.orValue(false) == wider && now.?staged.orValue(false) != wider: wider ? 'no longer staged' : 'staged',
+        was.?draft.orValue(false) == wider && now.?draft.orValue(false) != wider: wider ? 'no longer as drafts' : 'as drafts',
+        size(variables.allowed) > 0: (wider ? 'also ' : 'no longer ') + variables.allowed.join(', '),
+        size(variables.workflows) > 0: (wider ? 'also starts ' : 'no longer starts ') + variables.workflows.join(', ')
+      })
+
+  written:
+    description: What the workflow may now write beyond what it could (`wider`), or no longer may.
+    params: [{name: before, type: Item}, {name: after, type: Item}, {name: wider, type: bool}]
+    returns: list<string>
+    variables:
+      - name: was
+        expression: before.data.?safeOutputs.orValue({})
+      - name: now
+        expression: after.data.?safeOutputs.orValue({})
+      - name: changed
+        expression: |-
+          kinds(after).filter(kind, kind in kinds(before))
+            .map(kind, [kind, loosened(handler(before, kind), handler(after, kind), wider)])
+            .filter(entry, size(entry[1]) > 0)
+    body: |-
+      (wider ? gained(kinds(before), kinds(after)).map(kind, prose.code(kind) + target(handler(after, kind)))
+        : codes(gained(kinds(after), kinds(before))))
+        + variables.changed.map(entry, prose.code(string(entry[0])) + ' ' + entry[1].join(', '))
+        + diff(variables.was.?jobs.orValue([]), variables.now.?jobs.orValue([]), wider).map(job, 'job ' + prose.code(job))
+        + collect({
+          variables.was.?staged.orValue(false) == wider && variables.now.?staged.orValue(false) != wider:
+            wider ? 'outputs no longer staged' : 'outputs staged'
+        })
+
+  outputs:
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    body: both('outputs-widened', written(before, after, true), 'outputs-narrowed', written(before, after, false))
+
+  # Secrets, triggers, budgets, gates and the rest.
+
+  secrets:
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    variables:
+      - name: was
+        expression: before.data.?secrets.orValue([])
+      - name: now
+        expression: after.data.?secrets.orValue([])
+    body: both('secrets-added', codes(gained(variables.was, variables.now)), 'secrets-removed', codes(gained(variables.now, variables.was)))
+
+  starts:
+    description: What can start a workflow, its trigger events, then the roles that may.
+    params: [{name: other, type: Item}, {name: item, type: Item}]
+    returns: list<string>
+    variables:
+      - name: was
+        expression: other.data.?triggers.orValue([]).map(trigger, trigger.event)
+      - name: now
+        expression: item.data.?triggers.orValue([]).map(trigger, trigger.event)
+    body: |-
+      codes(gained(variables.was, variables.now))
+        + gained(other.data.?activation.?roles.orValue([]), item.data.?activation.?roles.orValue([]))
+          .map(role, 'role ' + prose.code(string(role)))
+
+  trigger:
+    description: The trigger of `event` that `item` has, `{}` when it has none.
+    params: [{name: item, type: Item}, {name: event, type: string}]
+    body: (item.data.?triggers.orValue([]).filter(trigger, trigger.event == event) + [{}])[0]
+
+  shared:
+    description: The trigger events both revisions have.
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    returns: list<string>
+    body: |-
+      before.data.?triggers.orValue([]).map(trigger, string(trigger.event))
+        .filter(event, after.data.?triggers.orValue([]).exists(trigger, trigger.event == event))
+
+  restrictions:
+    description: >-
+      How the filters of an event both revisions have loosen (`wider`) or tighten from `was` to
+      `now`. Dropping a filter loosens it and adding one tightens it; more values loosen an
+      inclusion filter (`branches`) and tighten an exclusion filter (`paths-ignore`). `draft`
+      has no direction.
+    params: [{name: event, type: string}, was, now, {name: wider, type: bool}]
+    returns: list<string>
+    variables:
+      - name: from
+        expression: 'wider ? was : now'
+      - name: to
+        expression: 'wider ? now : was'
+      - name: both
+        expression: maps.keys(was).filter(key, key != 'draft' && key in now)
+    body: |-
+      maps.keys(variables.from).filter(key, key != 'draft' && !(key in variables.to)).map(key,
+        prose.code(event) + (wider ? ' no longer limited by ' + prose.code(key)
+          : ' now limited by ' + prose.code(key) + ' ' + codes(variables.from[key]).join(', ')))
+        + variables.both.map(key, (key.endsWith('-ignore') != wider ? gained(was[key], now[key]) : gained(now[key], was[key]))
+          .map(value, prose.code(event) + ' ' + prose.code(key) + (key.endsWith('-ignore') != wider ? ' also ' : ' no longer ')
+            + prose.code(value))).flatten()
+
+  reshaped:
+    description: >-
+      Triggers both revisions have whose detail changes in no clear direction (a schedule, a
+      command's name, `draft`): `event was → now`.
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    returns: list<string>
+    body: |-
+      shared(before, after).filter(event, trigger(before, event).?detail.orValue(null) != trigger(after, event).?detail.orValue(null)
+          && size(restrictions(event, trigger(before, event).?filters.orValue({}), trigger(after, event).?filters.orValue({}), true)
+            + restrictions(event, trigger(before, event).?filters.orValue({}), trigger(after, event).?filters.orValue({}), false)) == 0)
+        .map(event, moved(prose.code(event), trigger(before, event).?detail.orValue(null), trigger(after, event).?detail.orValue(null)))
+
+  filtered:
+    description: How the triggers both revisions have loosen (`wider`) or tighten.
+    params: [{name: before, type: Item}, {name: after, type: Item}, {name: wider, type: bool}]
+    returns: list<string>
+    body: |-
+      shared(before, after).map(event, restrictions(event, trigger(before, event).?filters.orValue({}),
+        trigger(after, event).?filters.orValue({}), wider)).flatten()
+
+  triggers:
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    body: |-
+      both('triggers-widened', starts(before, after) + filtered(before, after, true),
+        'triggers-narrowed', starts(after, before) + filtered(before, after, false))
+        + collect({size(reshaped(before, after)) > 0: finding('triggers-changed', reshaped(before, after))})
+
+  limit:
+    params: [{name: item, type: Item}, {name: key, type: string}]
+    body: item.data.?limits.orValue({})[?key].orValue({}).?value.orValue(null)
+
+  budget:
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    variables:
+      - name: names
+        expression: |-
+          [['timeoutMinutes', 'timeout (minutes)'], ['maxTurns', 'turns'], ['maxToolCalls', 'tool calls'],
+            ['maxAiCredits', 'AI credits per run'], ['maxDailyAiCredits', 'AI credits per day']]
+    body: |-
+      both('budget-raised',
+        variables.names.filter(pair, raised(limit(before, pair[0]), limit(after, pair[0])))
+          .map(pair, moved(pair[1], limit(before, pair[0]), limit(after, pair[0]))),
+        'budget-lowered',
+        variables.names.filter(pair, raised(limit(after, pair[0]), limit(before, pair[0])))
+          .map(pair, moved(pair[1], limit(before, pair[0]), limit(after, pair[0]))))
+
+  gate:
+    description: Whether an import or skill with these classes is a gate (`options.gates`).
+    params: [classes]
+    returns: bool
+    body: classes.exists(class, '*' in options.gates || class in options.gates)
+
+  loaded:
+    description: What `item` loads, imports by path and skills by reference without its `@ref`, with their classes.
+    params: [{name: item, type: Item}]
+    body: |-
+      item.data.?imports.orValue([]).map(entry, {'name': entry.path, 'classes': entry.?classes.orValue([])})
+        + item.data.?skills.orValue([]).map(entry, {'name': entry.?name.orValue(entry.ref), 'classes': entry.?classes.orValue([])})
+
+  loads:
+    description: The names of what `item` loads that are gates (`gates`) or aren't.
+    params: [{name: item, type: Item}, {name: gates, type: bool}]
+    returns: list<string>
+    body: loaded(item).filter(entry, gate(entry.classes) == gates).map(entry, string(entry.name))
+
+  gateItem:
+    description: A gate as text, with its classes.
+    params: [{name: item, type: Item}, {name: name, type: string}]
+    returns: string
+    body: |-
+      prose.code(name) + ' (' + codes(loaded(item).filter(entry, entry.name == name)[0].classes).join(', ') + ')'
+
+  gates:
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    body: |-
+      both('gate-removed', gained(loads(after, true), loads(before, true)).map(name, gateItem(before, name)),
+        'gate-added', gained(loads(before, true), loads(after, true)).map(name, gateItem(after, name)))
+        + collect({
+          loads(before, false) != loads(after, false): finding('loads-changed',
+            gained(loads(before, false), loads(after, false)).map(name, 'loads ' + prose.code(name))
+              + gained(loads(after, false), loads(before, false)).map(name, 'no longer loads ' + prose.code(name)))
+        })
+
+  engine:
+    params: [{name: item, type: Item}]
+    returns: string
+    body: |-
+      string(item.data.?engine.?id.orValue('copilot'))
+        + (item.data.?engine.?model.orValue(null) != null ? ' ' + string(item.data.engine.model) : '')
+
+  status:
+    params: [{name: item, type: Item}]
+    returns: string
+    body: string(item.data.?lock.?status.orValue('missing'))
+
+  lock:
+    description: A lock that becomes stale or missing (or is, for a new workflow), or becomes current again.
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    variables:
+      - name: now
+        expression: status(after)
+      - name: stale
+        expression: variables.now in ['stale', 'missing']
+    body: |-
+      collect({
+        variables.stale && (before == null || status(before) != variables.now):
+          finding('lock-stale', [prose.code(string(after.data.?lock.?path.orValue(after.label))) + ' is ' + variables.now]),
+        !variables.stale && before != null && status(before) in ['stale', 'missing'] && variables.now == 'current':
+          finding('lock-current', [prose.code(string(after.data.lock.path)) + ' is current'])
+      })
+
+  unknown:
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    variables:
+      - name: found
+        expression: |-
+          codes(gained(before == null ? [] : before.data.?unrecognized.orValue([]), after.data.?unrecognized.orValue([])))
+    body: "collect({size(variables.found) > 0: finding('unrecognized-field', variables.found)})"
+
+  changed:
+    description: Every interpretation of a workflow on both sides.
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    body: |-
+      gates(before, after) + repos(before, after) + permissions(before, after) + bash(before, after)
+        + network(before, after) + outputs(before, after) + tools(before, after) + secrets(before, after)
+        + triggers(before, after) + budget(before, after)
+        + collect({
+          before.data.?strict.orValue(true) != after.data.?strict.orValue(true):
+            finding(after.data.?strict.orValue(true) ? 'strict-enabled' : 'strict-disabled', []),
+          engine(before) != engine(after): finding('engine-changed', [prose.code(engine(before)) + ' → ' + prose.code(engine(after))])
+        })
+
+  members:
+    description: The workflows a group holds; none when the group is absent.
+    params: [{name: item, type: Item}]
+    body: 'item == null ? [] : item.data.?workflows.orValue([])'
+
+  invalid:
+    description: Whether the extractor couldn't read a workflow's front matter, so it has only its path.
+    params: [{name: item, type: Item}]
+    returns: bool
+    body: "item != null && item.data.?findings.orValue([]).exists(found, found.kind == 'invalid')"
+
+  interpret:
+    description: >-
+      A change's interpretations, most severe first; none for a workflow either revision can't read,
+      which the extractor's finding explains.
+    params: [{name: before, type: Item}, {name: after, type: Item}]
+    variables:
+      - name: kind
+        expression: '(after != null ? after : before).kind'
+    body: |-
+      match(variables.kind, {
+        'workflow': cond({
+          invalid(before) || invalid(after): [],
+          after == null: [finding('workflow-removed', [])],
+          before == null: [finding('workflow-added', codes(kinds(after)))] + lock(before, after) + unknown(before, after)
+        }, changed(before, after) + lock(before, after) + unknown(before, after)),
+        'group': [finding('group-changed',
+          gained(members(after), members(before)).map(name, prose.code(string(name)) + ' leaves')
+            + gained(members(before), members(after)).map(name, prose.code(string(name)) + ' joins'))]
+      }, []).sortBy(found, rank(found.name))
+
+  sentence:
+    description: One sentence for a change, by its most severe interpretation.
+    params: [found, {name: name, type: string}]
+    returns: string
+    variables:
+      - name: items
+        expression: found.items.join(', ')
+    body: |-
+      match(string(found.name), {
+        'gate-removed': template('{name} no longer loads {items}.', {'name': name, 'items': variables.items}),
+        'repos-widened': template('{name} can reach more repositories: {items}.', {'name': name, 'items': variables.items}),
+        'permissions-widened': template('{name} has more permissions: {items}.', {'name': name, 'items': variables.items}),
+        'bash-widened': template('{name} can run more commands: {items}.', {'name': name, 'items': variables.items}),
+        'network-widened': template('{name} can reach more of the network: {items}.', {'name': name, 'items': variables.items}),
+        'outputs-widened': template('{name} can write more: {items}.', {'name': name, 'items': variables.items}),
+        'tools-widened': template('{name} has more tools or looser guards: {items}.', {'name': name, 'items': variables.items}),
+        'secrets-added': template('{name} references more secrets: {items}.', {'name': name, 'items': variables.items}),
+        'strict-disabled': template('{name} no longer runs in strict mode.', {'name': name}),
+        'triggers-widened': template('{name} can be started in more ways: {items}.', {'name': name, 'items': variables.items}),
+        'budget-raised': template('{name} may spend more: {items}.', {'name': name, 'items': variables.items}),
+        'workflow-added': template('New agentic workflow {name}{writes}.', {
+          'name': name,
+          'writes': size(found.items) > 0 ? ', which can write ' + variables.items : ''
+        }),
+        'lock-stale': template('{items}: compile {name} with `gh aw compile`.', {'name': name, 'items': variables.items}),
+        'unrecognized-field': template('{name} uses fields gh-aw may not know: {items}.', {'name': name, 'items': variables.items}),
+        'engine-changed': template('{name} runs on another engine: {items}.', {'name': name, 'items': variables.items}),
+        'triggers-changed': template('{name} starts on other terms: {items}.', {'name': name, 'items': variables.items}),
+        'loads-changed': template('{name} loads other imports or skills: {items}.', {'name': name, 'items': variables.items}),
+        'gate-added': template('{name} now loads {items}.', {'name': name, 'items': variables.items}),
+        'repos-narrowed': template('{name} reaches fewer repositories: {items}.', {'name': name, 'items': variables.items}),
+        'permissions-narrowed': template('{name} has fewer permissions: {items}.', {'name': name, 'items': variables.items}),
+        'bash-narrowed': template('{name} can run fewer commands: {items}.', {'name': name, 'items': variables.items}),
+        'network-narrowed': template('{name} reaches less of the network: {items}.', {'name': name, 'items': variables.items}),
+        'outputs-narrowed': template('{name} can write less: {items}.', {'name': name, 'items': variables.items}),
+        'tools-narrowed': template('{name} has fewer tools or tighter guards: {items}.', {'name': name, 'items': variables.items}),
+        'secrets-removed': template('{name} references fewer secrets: {items}.', {'name': name, 'items': variables.items}),
+        'strict-enabled': template('{name} now runs in strict mode.', {'name': name}),
+        'triggers-narrowed': template('{name} can be started in fewer ways: {items}.', {'name': name, 'items': variables.items}),
+        'budget-lowered': template('{name} may spend less: {items}.', {'name': name, 'items': variables.items}),
+        'lock-current': template('{items}.', {'items': variables.items}),
+        'workflow-removed': template('Agentic workflow {name} is removed.', {'name': name}),
+        'group-changed': template('Group {name} changes: {items}.', {'name': name, 'items': variables.items})
+        // coverage-ignore: `found.name` is always one of the names above
+      }, '')
+
+classify:
+  # A split or a merge has several items on one side, and keeps the default comparison.
+  where: change.collection == 'entities' && size(befores) <= 1 && size(afters) <= 1
+  variables:
+    - name: found
+      expression: interpret(beforeItem, afterItem)
+  summary: 'size(variables.found) == 0 ? null : sentence(variables.found[0], prose.code(item.label))'
+  annotation: 'size(variables.found) == 0 ? null : variables.found'
+
+steps:
+  # Widest first: a change ranks by its most severe interpretation, a step by its widest change, and a
+  # step takes the summary of that change.
+  rank: 'annotation != null ? rank(string(annotation[0].name)) : null'
+  summary: 'lead != null ? lead.summary : null'
+
+metadata:
+  values:
+    agenticWorkflows: "{'version': 0, 'interpretations': annotations}"

@@ -1,0 +1,69 @@
+{
+  "changes": [
+    {
+      "after": [
+        "workflow:.github/workflows/repo-ask.md"
+      ],
+      "before": [
+        "workflow:.github/workflows/repo-ask.md"
+      ],
+      "collection": "entities",
+      "correspondence": "exact",
+      "id": "workflow:.github/workflows/repo-ask.md",
+      "status": "modified",
+      "summary": "`repo-ask` can reach more of the network: `*.readthedocs.io`, `python`."
+    }
+  ],
+  "metadata": {
+    "agenticWorkflows": {
+      "interpretations": {
+        "workflow:.github/workflows/repo-ask.md": [
+          {
+            "items": [
+              "`*.readthedocs.io`",
+              "`python`"
+            ],
+            "level": "warning",
+            "name": "network-widened"
+          },
+          {
+            "items": [
+              "`create-issue`",
+              "`add-comment` max `1` → `3`"
+            ],
+            "level": "warning",
+            "name": "outputs-widened"
+          },
+          {
+            "items": [
+              "toolset `actions`"
+            ],
+            "level": "warning",
+            "name": "tools-widened"
+          },
+          {
+            "items": [
+              "timeout (minutes) `20` → `30`"
+            ],
+            "level": "warning",
+            "name": "budget-raised"
+          }
+        ]
+      },
+      "version": 0
+    }
+  },
+  "order": {
+    "reverse": "mirror"
+  },
+  "protocolVersion": 0,
+  "steps": [
+    {
+      "changes": [
+        "workflow:.github/workflows/repo-ask.md"
+      ],
+      "kind": "restructure",
+      "summary": "`repo-ask` can reach more of the network: `*.readthedocs.io`, `python`."
+    }
+  ]
+}

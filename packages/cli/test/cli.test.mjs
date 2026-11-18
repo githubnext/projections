@@ -147,6 +147,7 @@ test('extractor list/init work without execution; invalid flags, duplicate outpu
       'go-public-api',
       'cargo-dependencies',
       'swift-package-dependencies',
+      'xcode-modules',
       'nuget-dependencies',
       'terraform-infrastructure',
       'azure-what-if',

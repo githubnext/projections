@@ -1,0 +1,555 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		069D6508DF501492E1C5C2E1 /* HarborKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5436652FC4E837383BD6E538 /* HarborKit.framework */; };
+		0EDEC81F2D21AC11F40405B2 /* HarborKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5436652FC4E837383BD6E538 /* HarborKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		370242D4DC6773E6E67F6E29 /* Schedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9852CED3C55AC50AD14F7CF9 /* Schedule.swift */; };
+		44786A2E1B9149DCE24FA0E7 /* Berth.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF80ACBABAE3B34C4188D44C /* Berth.swift */; };
+		5249A8963BA0C637D510B912 /* Harbor_Widgets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C553BE4E633EECC7AA40370 /* Harbor_Widgets.framework */; };
+		5E1C8423794A5F0BA55E9EF8 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = C247906C23C84C8C089EEEFE /* OrderedCollections */; };
+		BCAEEE3B8614003210E73E89 /* Telemetry in Frameworks */ = {isa = PBXBuildFile; productRef = 2505987986BC763AEC4BE799 /* Telemetry */; };
+		CE221009FEC586447EC5872E /* Widgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 781264E3953BA23B179A0F18 /* Widgets.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8DA47D8875EEFC3E843B19BA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 389D69BDFF9DB0089E405373;
+			remoteInfo = HarborKit;
+		};
+		C6D7AE75AB859DE6D316B926 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FCB630182BBCB77B5DD9B79D;
+			remoteInfo = Harbor;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		0744D14EA1EE1A119FAF56D0 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				0EDEC81F2D21AC11F40405B2 /* HarborKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0C553BE4E633EECC7AA40370 /* Harbor_Widgets.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Harbor_Widgets.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4EE69E2D8B54DD8A33515610 /* HarborTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HarborTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5436652FC4E837383BD6E538 /* HarborKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = HarborKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		781264E3953BA23B179A0F18 /* Widgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widgets.swift; sourceTree = "<group>"; };
+		9852CED3C55AC50AD14F7CF9 /* Schedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Schedule.swift; sourceTree = "<group>"; };
+		9D351E86F59F29DE624FA515 /* Harbor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Harbor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D947DAA0BD194E377C31C20C /* Widgets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Widgets.xcconfig; sourceTree = "<group>"; };
+		FF80ACBABAE3B34C4188D44C /* Berth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Berth.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		FE5464E0FD10250F09F93843 /* Exceptions for "Harbor" folder in "Harbor" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = FCB630182BBCB77B5DD9B79D /* Harbor */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		A3EAC28ACC35F7DCD35E8E15 = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				FE5464E0FD10250F09F93843 /* Exceptions for "Harbor" folder in "Harbor" target */,
+			);
+			path = Harbor;
+			sourceTree = "<group>";
+		};
+		F6408B891A96CD6932F49438 = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = HarborTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		009B61FCE2E5F1EE025DD7E8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		49B189FA8C33E996B2493B2F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		77BF003FADD28745D4E74214 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				069D6508DF501492E1C5C2E1 /* HarborKit.framework in Frameworks */,
+				5249A8963BA0C637D510B912 /* Harbor_Widgets.framework in Frameworks */,
+				BCAEEE3B8614003210E73E89 /* Telemetry in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FF2D14F349B8FFAD1E3F5A77 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5E1C8423794A5F0BA55E9EF8 /* OrderedCollections in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		30C92E9A43262ECD27EDC34E /* Widgets */ = {
+			isa = PBXGroup;
+			children = (
+				781264E3953BA23B179A0F18 /* Widgets.swift */,
+				D947DAA0BD194E377C31C20C /* Widgets.xcconfig */,
+			);
+			name = Widgets;
+			path = Shared/Widgets;
+			sourceTree = "<group>";
+		};
+		4183E58B3100C997E5C3BBD3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9D351E86F59F29DE624FA515 /* Harbor.app */,
+				5436652FC4E837383BD6E538 /* HarborKit.framework */,
+				0C553BE4E633EECC7AA40370 /* Harbor_Widgets.framework */,
+				4EE69E2D8B54DD8A33515610 /* HarborTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		55BC601D3C24ADC37B31739E = {
+			isa = PBXGroup;
+			children = (
+				A3EAC28ACC35F7DCD35E8E15 /* Harbor */,
+				653C34235E2552992D42BA51 /* HarborKit */,
+				30C92E9A43262ECD27EDC34E /* Widgets */,
+				F6408B891A96CD6932F49438 /* HarborTests */,
+				D269506BBC521E17CE4DA59C /* Frameworks */,
+				4183E58B3100C997E5C3BBD3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		653C34235E2552992D42BA51 /* HarborKit */ = {
+			isa = PBXGroup;
+			children = (
+				FF80ACBABAE3B34C4188D44C /* Berth.swift */,
+				9852CED3C55AC50AD14F7CF9 /* Schedule.swift */,
+			);
+			path = HarborKit;
+			sourceTree = "<group>";
+		};
+		D269506BBC521E17CE4DA59C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1EC77A7D01CF479CA350C9C4 /* HarborTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A32B23E231B72A719E3E52D0 /* Build configuration list for PBXNativeTarget "HarborTests" */;
+			buildPhases = (
+				A70F0C35A7C5417F6B805442 /* Sources */,
+				49B189FA8C33E996B2493B2F /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BD05BD681C6EA9E5ADEB9CB1 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				F6408B891A96CD6932F49438 /* HarborTests */,
+			);
+			name = HarborTests;
+			productName = HarborTests;
+			productReference = 4EE69E2D8B54DD8A33515610 /* HarborTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		389D69BDFF9DB0089E405373 /* HarborKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0DDE380CBCAC6F4EE7998746 /* Build configuration list for PBXNativeTarget "HarborKit" */;
+			buildPhases = (
+				781C4782EFE3DC53EC8EAD3E /* Sources */,
+				FF2D14F349B8FFAD1E3F5A77 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HarborKit;
+			packageProductDependencies = (
+				C247906C23C84C8C089EEEFE /* OrderedCollections */,
+			);
+			productName = HarborKit;
+			productReference = 5436652FC4E837383BD6E538 /* HarborKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		F392B05AB4988C4D68202CE2 /* Harbor Widgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 84B0D3B4086B17048DB74CEF /* Build configuration list for PBXNativeTarget "Harbor Widgets" */;
+			buildPhases = (
+				A3AD7752B95922715939A56C /* Sources */,
+				009B61FCE2E5F1EE025DD7E8 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Harbor Widgets";
+			productName = "Harbor Widgets";
+			productReference = 0C553BE4E633EECC7AA40370 /* Harbor_Widgets.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		FCB630182BBCB77B5DD9B79D /* Harbor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AE00E44D1CF6E2E3FA93958F /* Build configuration list for PBXNativeTarget "Harbor" */;
+			buildPhases = (
+				AB2871415A4719D5792A2162 /* Sources */,
+				77BF003FADD28745D4E74214 /* Frameworks */,
+				0744D14EA1EE1A119FAF56D0 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E4BE9D002906ED43D21EFB7E /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A3EAC28ACC35F7DCD35E8E15 /* Harbor */,
+			);
+			name = Harbor;
+			packageProductDependencies = (
+				2505987986BC763AEC4BE799 /* Telemetry */,
+			);
+			productName = Harbor;
+			productReference = 9D351E86F59F29DE624FA515 /* Harbor.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		98F54143AB4E86B28C3AFEE0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = EA14EA6A43D4399E6D2CE974 /* Build configuration list for PBXProject "Harbor" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 55BC601D3C24ADC37B31739E;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				BCC535D46F122CEACF1960FF /* XCRemoteSwiftPackageReference "swift-collections" */,
+				25614AEF581B3B88D6796DC1 /* XCLocalSwiftPackageReference "Packages/Telemetry" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 4183E58B3100C997E5C3BBD3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FCB630182BBCB77B5DD9B79D /* Harbor */,
+				389D69BDFF9DB0089E405373 /* HarborKit */,
+				F392B05AB4988C4D68202CE2 /* Harbor Widgets */,
+				1EC77A7D01CF479CA350C9C4 /* HarborTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		781C4782EFE3DC53EC8EAD3E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				44786A2E1B9149DCE24FA0E7 /* Berth.swift in Sources */,
+				370242D4DC6773E6E67F6E29 /* Schedule.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A3AD7752B95922715939A56C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CE221009FEC586447EC5872E /* Widgets.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A70F0C35A7C5417F6B805442 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AB2871415A4719D5792A2162 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BD05BD681C6EA9E5ADEB9CB1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FCB630182BBCB77B5DD9B79D /* Harbor */;
+			targetProxy = C6D7AE75AB859DE6D316B926 /* PBXContainerItemProxy */;
+		};
+		E4BE9D002906ED43D21EFB7E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 389D69BDFF9DB0089E405373 /* HarborKit */;
+			targetProxy = 8DA47D8875EEFC3E843B19BA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1CCFD19E7372D7652568864A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D947DAA0BD194E377C31C20C /* Widgets.xcconfig */;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.harbor.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		1EC98E9EA14AD07BDECAFFE1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.harbor;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		317EACABD514D1D3EA97A00A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.harbor;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		7948283E5107F24A0B9489C6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.harbor.kit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		821CA3BC8DB76CBC0FD95C2E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		8713E503614C4FE48D28424E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D947DAA0BD194E377C31C20C /* Widgets.xcconfig */;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.harbor.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		9389068CA6939C16BD23C608 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.harbor.kit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A8FE0F82BD9163C55EFE881D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		B533B3A0ACAFD31296783A31 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.harbor.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Harbor.app/Contents/MacOS/Harbor";
+			};
+			name = Debug;
+		};
+		DB81ACE1220F24218670085B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.harbor.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Harbor.app/Contents/MacOS/Harbor";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0DDE380CBCAC6F4EE7998746 /* Build configuration list for PBXNativeTarget "HarborKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9389068CA6939C16BD23C608 /* Debug */,
+				7948283E5107F24A0B9489C6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		84B0D3B4086B17048DB74CEF /* Build configuration list for PBXNativeTarget "Harbor Widgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1CCFD19E7372D7652568864A /* Debug */,
+				8713E503614C4FE48D28424E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A32B23E231B72A719E3E52D0 /* Build configuration list for PBXNativeTarget "HarborTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B533B3A0ACAFD31296783A31 /* Debug */,
+				DB81ACE1220F24218670085B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AE00E44D1CF6E2E3FA93958F /* Build configuration list for PBXNativeTarget "Harbor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1EC98E9EA14AD07BDECAFFE1 /* Debug */,
+				317EACABD514D1D3EA97A00A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EA14EA6A43D4399E6D2CE974 /* Build configuration list for PBXProject "Harbor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A8FE0F82BD9163C55EFE881D /* Debug */,
+				821CA3BC8DB76CBC0FD95C2E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		25614AEF581B3B88D6796DC1 /* XCLocalSwiftPackageReference "Packages/Telemetry" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Telemetry;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BCC535D46F122CEACF1960FF /* XCRemoteSwiftPackageReference "swift-collections" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-collections.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2505987986BC763AEC4BE799 /* Telemetry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 25614AEF581B3B88D6796DC1 /* XCLocalSwiftPackageReference "Packages/Telemetry" */;
+			productName = Telemetry;
+		};
+		C247906C23C84C8C089EEEFE /* OrderedCollections */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BCC535D46F122CEACF1960FF /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = OrderedCollections;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+}

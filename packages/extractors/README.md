@@ -68,6 +68,7 @@ with an explicit error, never a fallback.
 | `spring-di` | A JDK 17+ with `javac` and the project's Gradle or Maven (wrapper or on PATH); Spring Boot 3.0+ ([Spring](spring-di/README.md)) |
 | `cargo-dependencies`, `nuget-dependencies`, `terraform-infrastructure`, `azure-what-if` | The ecosystem's tool when not importing a pre-exported model |
 | `swift-package-dependencies` | Nothing; a Swift toolchain only with `manifest: "dump-package"` ([Swift package dependencies](swift-package-dependencies/README.md)) |
+| `xcode-modules` | Nothing: it reads project files and sources without Xcode ([Xcode modules](xcode-modules/README.md)) |
 | `scip-file-references` | The project's own SCIP indexer (`scip-typescript`, `rust-analyzer`, `scip-go`, `scip-python`, …) when not reading an existing index ([SCIP](scip-file-references/README.md)) |
 | `command-output` | Whatever the configured repository commands run |
 | `tetragon-policies` | Nothing, or the repository's own `helm` or `kustomize` when it renders a chart or kustomization ([Tetragon policies](tetragon-policies/README.md)) |

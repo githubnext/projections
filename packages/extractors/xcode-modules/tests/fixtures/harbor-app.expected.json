@@ -1,0 +1,194 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "location": "https://github.com/apple/swift-collections.git",
+        "requirement": "1.1.0..<2.0.0",
+        "revision": "88754449ab766a739610b660e117762115fabc9c",
+        "source": "repository",
+        "version": "1.7.6"
+      },
+      "id": "swiftpm:package:swift-collections",
+      "kind": "external-package",
+      "label": "swift-collections"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "location": "https://github.com/apple/swift-log.git",
+        "revision": "c7413d967b97aae67c46452bf7645bdb7b200e8e",
+        "source": "repository",
+        "transitive": true,
+        "version": "1.17.2"
+      },
+      "id": "swiftpm:package:swift-log",
+      "kind": "external-package",
+      "label": "swift-log"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "location": "Packages/Telemetry",
+        "source": "local"
+      },
+      "id": "swiftpm:package:telemetry",
+      "kind": "external-package",
+      "label": "telemetry"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "configuration": "Release",
+        "imports": [
+          "SwiftUI"
+        ],
+        "module": "Harbor",
+        "project": "Harbor.xcodeproj",
+        "sdk": "macosx",
+        "type": "application"
+      },
+      "id": "xcode:Harbor.xcodeproj:target:Harbor",
+      "kind": "target",
+      "label": "Harbor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "configuration": "Release",
+        "imports": [
+          "SwiftUI"
+        ],
+        "module": "Harbor_Widgets",
+        "project": "Harbor.xcodeproj",
+        "sdk": "macosx",
+        "type": "framework"
+      },
+      "id": "xcode:Harbor.xcodeproj:target:Harbor%20Widgets",
+      "kind": "target",
+      "label": "Harbor Widgets"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "configuration": "Release",
+        "imports": [
+          "Foundation",
+          "os"
+        ],
+        "module": "HarborKit",
+        "project": "Harbor.xcodeproj",
+        "sdk": "macosx",
+        "type": "framework"
+      },
+      "id": "xcode:Harbor.xcodeproj:target:HarborKit",
+      "kind": "target",
+      "label": "HarborKit"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "configuration": "Release",
+        "imports": [
+          "XCTest"
+        ],
+        "module": "HarborTests",
+        "project": "Harbor.xcodeproj",
+        "sdk": "macosx",
+        "type": "bundle.unit-test"
+      },
+      "id": "xcode:Harbor.xcodeproj:target:HarborTests",
+      "kind": "target",
+      "label": "HarborTests"
+    }
+  ],
+  "metadata": {
+    "limitations": [
+      "Imports are read from the Swift sources' text: imports inside `#if` count whichever branch they're in (marked `conditional`), and `canImport` isn't evaluated."
+    ],
+    "projects": [
+      {
+        "objectVersion": "77",
+        "path": "Harbor.xcodeproj",
+        "resolved": "Harbor.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+      }
+    ],
+    "unresolvedModules": []
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "imported": true,
+        "product": "Telemetry"
+      },
+      "from": "xcode:Harbor.xcodeproj:target:Harbor",
+      "id": "depends-on:xcode%3AHarbor.xcodeproj%3Atarget%3AHarbor:swiftpm%3Apackage%3Atelemetry:Telemetry",
+      "kind": "depends-on",
+      "to": "swiftpm:package:telemetry"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "explicit": false,
+        "imported": true,
+        "linked": true
+      },
+      "from": "xcode:Harbor.xcodeproj:target:Harbor",
+      "id": "depends-on:xcode%3AHarbor.xcodeproj%3Atarget%3AHarbor:xcode%3AHarbor.xcodeproj%3Atarget%3AHarbor%2520Widgets",
+      "kind": "depends-on",
+      "to": "xcode:Harbor.xcodeproj:target:Harbor%20Widgets"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "explicit": true,
+        "imported": true,
+        "linked": true
+      },
+      "from": "xcode:Harbor.xcodeproj:target:Harbor",
+      "id": "depends-on:xcode%3AHarbor.xcodeproj%3Atarget%3AHarbor:xcode%3AHarbor.xcodeproj%3Atarget%3AHarborKit",
+      "kind": "depends-on",
+      "to": "xcode:Harbor.xcodeproj:target:HarborKit"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "imported": true,
+        "product": "OrderedCollections"
+      },
+      "from": "xcode:Harbor.xcodeproj:target:HarborKit",
+      "id": "depends-on:xcode%3AHarbor.xcodeproj%3Atarget%3AHarborKit:swiftpm%3Apackage%3Aswift-collections:OrderedCollections",
+      "kind": "depends-on",
+      "to": "swiftpm:package:swift-collections"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "explicit": true,
+        "imported": true,
+        "linked": false,
+        "testable": true
+      },
+      "from": "xcode:Harbor.xcodeproj:target:HarborTests",
+      "id": "depends-on:xcode%3AHarbor.xcodeproj%3Atarget%3AHarborTests:xcode%3AHarbor.xcodeproj%3Atarget%3AHarbor",
+      "kind": "depends-on",
+      "to": "xcode:Harbor.xcodeproj:target:Harbor"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "explicit": false,
+        "imported": true,
+        "linked": false,
+        "testable": true
+      },
+      "from": "xcode:Harbor.xcodeproj:target:HarborTests",
+      "id": "imports:xcode%3AHarbor.xcodeproj%3Atarget%3AHarborTests:xcode%3AHarbor.xcodeproj%3Atarget%3AHarborKit",
+      "kind": "imports",
+      "to": "xcode:Harbor.xcodeproj:target:HarborKit"
+    }
+  ],
+  "schema": "graph/v0"
+}

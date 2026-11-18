@@ -65,14 +65,16 @@ pub(super) async fn current(shared: &Shared, view_of: &NamedView, why: bool) -> 
     let current_page = !page.is_null() && summary["projection"]["id"] == projection;
     if current_page {
         page::describe(&mut lines, view, summary);
-        if let Some(line) = theme_line(&page["theme"]) {
-            lines.push(line);
-        }
     } else {
         lines.push(
             "No page shows it yet, so its mode, selection and counts aren't known: open the URL for the person, or screenshot renders it."
                 .to_owned(),
         );
+    }
+    // The theme is the page's, whatever it shows: a page still loading the projection has already taken its link's seed
+    // or ignored it, and reported so.
+    if let Some(line) = theme_line(&page["theme"]) {
+        lines.push(line);
     }
     let build = shared.service.renderer_builds().and_then(|builds| builds.state(projection));
     if let Some(build) = &build {

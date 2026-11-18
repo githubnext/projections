@@ -60,3 +60,36 @@ fn local_packages_are_found_relative_to_their_dependent() {
     assert_eq!(packages::local_dir("", "../Elsewhere"), None);
     assert_eq!(packages::local_dir("", "/absolute"), None);
 }
+
+#[test]
+fn a_product_named_without_its_package_is_the_local_package_that_declares_it() {
+    use projections_extractor_swift_support::manifest::statics;
+    let package = |dir: &str, source: &str| packages::Package {
+        dir: dir.into(),
+        place: if dir.is_empty() { ".".into() } else { dir.into() },
+        manifest: statics::read(source).unwrap(),
+        how: "static",
+    };
+    let root = package(
+        "",
+        "let package = Package(name: \"App\", dependencies: [.package(path: \"Packages/Telemetry\"), .package(path: \"Packages/Other\")], targets: [.target(name: \"App\", dependencies: [\"Metrics\", \"Shared\"])])",
+    );
+    let telemetry = package(
+        "Packages/Telemetry",
+        "let package = Package(name: \"Telemetry\", products: [.library(name: \"Metrics\", targets: [\"Metrics\"]), .library(name: \"Shared\", targets: [\"Metrics\"])], targets: [.target(name: \"Metrics\")])",
+    );
+    let other = package(
+        "Packages/Other",
+        "let package = Package(name: \"Other\", products: [.library(name: \"Shared\", targets: [\"O\"])], targets: [.target(name: \"O\")])",
+    );
+    let graph = graph::Graph::build(&[root, telemetry, other], &[]);
+    let from = "swiftpm:.:target:App";
+    assert!(
+        graph
+            .relationships
+            .iter()
+            .any(|edge| edge["from"] == from && edge["to"] == "swiftpm:Packages%2FTelemetry:product:Metrics")
+    );
+    // Two local packages declare `Shared`, so which one is meant is unknown.
+    assert_eq!(graph.unresolved, vec![json!([from, "Shared"])]);
+}

@@ -7,6 +7,8 @@ use anyhow::{Result, bail};
 pub(super) struct Parser<'a> {
     pub tokens: &'a [Token],
     pub at: usize,
+    /// The index of `tokens[0]` in the whole file.
+    pub base: usize,
 }
 
 /// Tokens that end an expression inside brackets or an argument list.
@@ -78,9 +80,14 @@ impl Parser<'_> {
                 let name = name.text.clone();
                 self.at += 1;
                 expr = match expr {
-                    Expr::Path { implicit, mut names, line } => {
+                    Expr::Path {
+                        implicit,
+                        mut names,
+                        line,
+                        at,
+                    } => {
                         names.push(name);
-                        Expr::Path { implicit, names, line }
+                        Expr::Path { implicit, names, line, at }
                     }
                     _ => Expr::Opaque {
                         line,
@@ -122,12 +129,14 @@ impl Parser<'_> {
                     implicit: true,
                     names: vec![name.text.clone()],
                     line,
+                    at: self.base + self.at - 1,
                 }
             }
             (Kind::Ident, name) => Expr::Path {
                 implicit: false,
                 names: vec![name.into()],
                 line,
+                at: self.base + self.at,
             },
             (Kind::Str { interpolated: false }, value) => Expr::Str(value.into()),
             (Kind::Str { interpolated: true }, _) => opaque("string interpolation"),

@@ -30,12 +30,15 @@ the same model.
   concatenation, implicit member calls (`.target(name:dependencies:path:)`,
   `.product(name:package:condition:)`, `.package(url:from:)`, …), version ranges
   and `Version(1, 2, 3)`, and top-level constants they name. Unconditional
-  top-level `+=` and `append` to a constant or to `package.products`,
-  `package.dependencies` and `package.targets` are applied. Any other change to
-  those, or to a target's `dependencies`, `name` or `path`, anywhere (in a loop,
-  condition or function), and any value read from `#if`, interpolation, closures
-  or other operators, fails with the line. Requirements are normalized as
-  `PackageDescription` does: `from:` and `.upToNextMajor(from:)` to the next
+  top-level `+=` and `append` to a constant apply to its uses after them, as
+  arrays are values; those to `package.products`, `package.dependencies` and
+  `package.targets` apply wherever they are, as the package is an object. Any
+  other change to those, or to a target's `dependencies`, `name` or `path`,
+  anywhere (in a loop, condition, function or an initializer), and any value
+  read from `#if`, interpolation, closures or other operators, fails with the
+  line. Following constants is bounded, so a manifest whose constants expand
+  without end fails rather than exhausting memory. Requirements are normalized
+  as `PackageDescription` does: `from:` and `.upToNextMajor(from:)` to the next
   major version, `.upToNextMinor(from:)` to the next minor one, `a...b` to just
   past `b`'s patch. Identities follow SwiftPM: the last component of the URL or
   path without `.git`, or the registry ID, lowercased.
@@ -55,7 +58,10 @@ the same model.
 | Product | `swiftpm:<directory>:product:<name>` | `product` | `package`, `type`, `linkage` (libraries) |
 | External package | `swiftpm:package:<identity>` | `external-package` | `source`, `location`, `requirement`, `version`/`revision`/`branch`, `transitive` |
 
-`<directory>` is the package's repository-relative directory, `.` for the root.
+`<directory>` is the package's directory relative to the root package's, `.` for
+the root package. A product named without its package (by name, as manifests
+before tools version 5.2 may) is the product of the one local package that
+declares it; when none or several do, the dependency is unresolved.
 Relationships are `includes` (product to target, ID
 `includes:<product>:<target>`) and `depends-on` (target to target, product or
 package, ID `depends-on:<from>:<to>:<name>`, with `product`, `platforms` and

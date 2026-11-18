@@ -105,6 +105,17 @@ impl Graph {
     }
 }
 
+/// The local packages `package` depends on that declare a product `name`.
+fn exporting<'a>(package: &Package, name: &str, locals: &BTreeMap<&str, &'a Package>) -> Vec<&'a Package> {
+    package
+        .manifest
+        .dependencies
+        .iter()
+        .filter_map(|declared| local(package, declared, locals))
+        .filter(|local| local.manifest.products.iter().any(|product| product.name == name))
+        .collect()
+}
+
 /// The package read from the project that a local dependency names, if any.
 fn local<'a>(package: &Package, dependency: &Dependency, locals: &BTreeMap<&str, &'a Package>) -> Option<&'a Package> {
     match &dependency.source {
@@ -123,7 +134,9 @@ fn condition(data: &mut Value, condition: &Condition) {
 }
 
 /// What `dependency` of a target in `package` names, as SwiftPM resolves it: a
-/// target of the same package, or a product of a package it depends on.
+/// target of the same package, or a product of a package it depends on. A
+/// product named without its package (by name, as manifests before tools
+/// version 5.2 may) is the one local package that declares it, if exactly one does.
 fn resolve(package: &Package, dependency: &TargetDependency, locals: &BTreeMap<&str, &Package>, externals: &mut Externals) -> Destination {
     let manifest = &package.manifest;
     let has_target = manifest.targets.iter().any(|target| target.name == dependency.name);
@@ -137,12 +150,14 @@ fn resolve(package: &Package, dependency: &TargetDependency, locals: &BTreeMap<&
         DependencyKind::Target if has_target => return Destination::Node(target_id(package, &dependency.name)),
         DependencyKind::ByName if has_target => return Destination::Node(target_id(package, &dependency.name)),
         DependencyKind::Target => return Destination::Unresolved,
-        DependencyKind::ByName => named(&dependency.name),
+        DependencyKind::ByName | DependencyKind::Product { package: None } => named(&dependency.name),
         DependencyKind::Product { package: Some(name) } => named(name),
-        DependencyKind::Product { package: None } => None,
     };
     let Some(declared) = declared else {
-        return Destination::Unresolved;
+        return match exporting(package, &dependency.name, locals).as_slice() {
+            [only] => Destination::Node(product_id(only, &dependency.name)),
+            _ => Destination::Unresolved,
+        };
     };
     match local(package, declared, locals) {
         Some(local) if local.manifest.products.iter().any(|product| product.name == dependency.name) => {

@@ -42,8 +42,9 @@ reads `Package.resolved` next to the root manifest.
 **Reading the manifest without running it.** `Package.swift` is Swift code. By
 default the extractor reads it as data: the `Package(…)` initializer, the
 top-level constants it refers to (`let shared: [Target.Dependency] = […]`),
-arrays joined with `+`, and unconditional top-level `package.targets += […]` or
-`.append(…)`. Requirements are normalized as SwiftPM does (`from: "1.1.0"` is
+arrays joined with `+`, and unconditional top-level `+= […]` or `.append(…)`, to
+a constant (for uses after it) or to `package.targets` and its siblings.
+Requirements are normalized as SwiftPM does (`from: "1.1.0"` is
 `1.1.0..<2.0.0`), and a test compares the result with SwiftPM's own evaluation
 of the same manifests. Code that changes something else, such as
 `for target in package.targets { target.swiftSettings = … }`, is ignored, since

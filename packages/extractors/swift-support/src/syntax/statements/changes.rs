@@ -7,21 +7,29 @@ use super::super::expr::skip::{closes, opens};
 use super::Mutation;
 use crate::lexer::{Kind, Token};
 
-/// Methods that change an array in place.
-const MUTATING: [&str; 9] = [
+/// Methods that change an array in place: `RangeReplaceableCollection`'s and
+/// `MutableCollection`'s.
+const MUTATING: [&str; 15] = [
     "append",
     "insert",
     "remove",
     "removeAll",
     "removeFirst",
     "removeLast",
+    "removeSubrange",
+    "popFirst",
+    "popLast",
+    "replaceSubrange",
     "sort",
     "reverse",
-    "replaceSubrange",
+    "shuffle",
+    "swapAt",
+    "partition",
 ];
 
-/// Every change to a value the statement makes.
-pub(super) fn mutations(statement: &[Token], conditional: bool, found: &mut Vec<Mutation>) {
+/// Every change to a value the statement makes. `offset` is the index of its
+/// first token in the file.
+pub(super) fn mutations(statement: &[Token], offset: usize, conditional: bool, found: &mut Vec<Mutation>) {
     for (at, token) in statement.iter().enumerate() {
         if token.kind != Kind::Ident {
             continue;
@@ -36,13 +44,14 @@ pub(super) fn mutations(statement: &[Token], conditional: bool, found: &mut Vec<
         };
         let (start, path) = chain(statement, at);
         let appended = match change {
-            Change::Append(offset) if start == 0 && !conditional => appended(&rest[offset..]),
+            Change::Append(skip) if start == 0 && !conditional => appended(&rest[skip..], offset + at + 1 + skip),
             _ => None,
         };
         found.push(Mutation {
             path,
             appended,
             line: token.line,
+            end: offset + statement.len(),
         });
     }
 }
@@ -119,8 +128,9 @@ fn change(rest: &[Token]) -> Option<Change> {
 }
 
 /// What `+= value` or `.append(value)` (from the `(`) adds, as an array.
-fn appended(tokens: &[Token]) -> Option<Expr> {
-    let mut parser = Parser { tokens, at: 0 };
+/// `base` is the index of `tokens[0]` in the file.
+fn appended(tokens: &[Token], base: usize) -> Option<Expr> {
+    let mut parser = Parser { tokens, at: 0, base };
     if !tokens.first()?.punct("(") {
         let value = parser.expression().ok()?;
         return (parser.at == tokens.len()).then_some(value);

@@ -29,6 +29,9 @@ pub struct Mutation {
     /// other change, or one inside a condition, loop or function.
     pub appended: Option<Expr>,
     pub line: usize,
+    /// The index just past the statement that makes it in the file's tokens:
+    /// the change applies to uses of the value from there on.
+    pub end: usize,
 }
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -39,7 +42,7 @@ pub struct Program {
 
 /// The program `tokens` hold.
 pub fn program(tokens: &[Token]) -> Program {
-    let mut parser = Parser { tokens, at: 0 };
+    let mut parser = Parser { tokens, at: 0, base: 0 };
     let mut program = Program::default();
     let mut conditional = 0usize;
     while let Some(token) = parser.peek().cloned() {
@@ -57,7 +60,7 @@ pub fn program(tokens: &[Token]) -> Program {
             _ => {
                 let start = parser.at;
                 skip_statement(&mut parser);
-                mutations(&tokens[start..parser.at], conditional > 0, &mut program.mutations);
+                mutations(&tokens[start..parser.at], start, conditional > 0, &mut program.mutations);
             }
         }
     }
@@ -107,6 +110,9 @@ fn binding(parser: &mut Parser, program: &mut Program, conditional: bool) -> boo
             }
         }
     };
+    // An initializer can change values too (`let last = package.targets.removeLast()`);
+    // such a change is never one this reader evaluates.
+    mutations(&parser.tokens[value_start..parser.at], value_start, true, &mut program.mutations);
     program.bindings.insert(name, Binding { value, conditional, line });
     true
 }

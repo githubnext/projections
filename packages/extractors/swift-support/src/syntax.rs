@@ -15,10 +15,13 @@ pub enum Expr {
     Str(String),
     Number(String),
     /// A member path: `.v13` (implicit, no base), `Version.init`, `deps`.
+    /// `at` is the index of its first token in the file, which orders it
+    /// against the statements that change the values it names.
     Path {
         implicit: bool,
         names: Vec<String>,
         line: usize,
+        at: usize,
     },
     Call {
         callee: Box<Expr>,
@@ -66,6 +69,14 @@ impl Expr {
                 Self::Path { implicit: true, names, .. } if names.len() == 1 => Some((names[0].as_str(), args)),
                 _ => None,
             },
+            _ => None,
+        }
+    }
+
+    /// Where a path starts in the file's tokens.
+    pub fn position(&self) -> Option<usize> {
+        match self {
+            Self::Path { at, .. } => Some(*at),
             _ => None,
         }
     }

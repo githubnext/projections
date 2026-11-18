@@ -100,9 +100,11 @@ progress-mode card's `data-status`) that holds changed parts marked
 neutral, as is a `Group` holding changed items and a graph boundary with changed
 cards or links inside it (`boundariesHoldingChanges`). Mark `pk-holds-changes`
 on anything that has changes drawn over it rather than inside it, as the file
-packing does for a folder around changed files. Status words (`.pk-status-part`)
-follow the nearest changed element around them. The `nested-accents` renderer
-check fails any change or accent color drawn inside another.
+packing does for a folder around changed files; `EntityCard` and `Group` take
+`holdsChanges` for changes no `data-change` marks, as the gallery's do around a
+nested renderer drawing a comparison. Status words (`.pk-status-part`) follow
+the nearest changed element around them. The `nested-accents` renderer check
+fails any change or accent color drawn inside another.
 
 ## Item rings
 

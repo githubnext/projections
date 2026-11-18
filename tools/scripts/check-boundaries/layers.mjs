@@ -59,12 +59,7 @@ export const layers = [
   [
     'packages/cli',
     [],
-    [
-      'packages/engine/js',
-      'packages/host/inspector',
-      'packages/renderers/testing',
-      'packages/extractors/typescript-support',
-    ],
+    ['packages/engine/js', 'packages/host/inspector', 'packages/renderers/testing', 'packages/extractors/typescript-support'],
   ],
   ['packages/extractors/typescript-support', [], ['packages/schemas', 'packages/engine/js']],
   // Samples to copy; class-summaries uses the published package's extractor helpers, as a copy would.

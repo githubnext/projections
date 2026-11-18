@@ -64,6 +64,25 @@ inputs job), again before packing `@githubnext/projections` (the release proof),
 and before publishing to npm (`publish-npm.yml`). dist itself refuses a tag that
 is not the CLI's version.
 
+## Release notes
+
+A release's notes are its section of [`CHANGELOG.md`](../../CHANGELOG.md),
+headed with its tag (`## v0.2.0`). dist reads the section when it plans the
+release, titles the GitHub release with its heading and puts the notes above the
+install instructions it writes. A prerelease without a section of its own uses
+its version's (`v0.2.0-beta.1` uses `## v0.2.0`, titled `v0.2.0-beta.1`), so a
+release candidate and the release share one set of notes. A version with no
+section gets dist's install instructions alone.
+
+Write the section as changes merge, in the same pull request or soon after, and
+lead with **Behaviour changes**: anything that can make a passing check, command
+or workflow fail or act differently, and what to change. Keep each paragraph and
+list item on one line (`.oxfmtrc.json` doesn't wrap this file): GitHub can
+render a single line break as a break, as it does in comments. `dist plan`
+(below) prints the release's title and body, so check them before tagging. Notes
+stay editable after publishing, unlike assets:
+`gh release edit v0.2.0 --notes-file`.
+
 ## Repository settings
 
 A release depends on these settings of the repository, which a repository
@@ -90,8 +109,9 @@ administrator makes once, before the first release:
 
 ## Cutting a release
 
-1. Bump the version (above) and merge it. The release is cut from that commit on
-   `main`.
+1. Bump the version (above) and merge it, with the version's
+   [release notes](#release-notes) already on `main`. The release is cut from
+   that commit on `main`.
 2. Tag it and push the tag. Tag rulesets let only maintainers create `v*.*.*`
    tags, and nobody move or delete them:
 

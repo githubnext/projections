@@ -1,16 +1,17 @@
 // `check --fast`, `build` and `test --filter`: the cheap steps before a full check, and when a dependency needs rebuilding.
 import assert from 'node:assert/strict'
-import {mkdirSync, mkdtempSync, statSync, utimesSync, writeFileSync} from 'node:fs'
+import {spawnSync} from 'node:child_process'
+import {mkdirSync, mkdtempSync, rmSync, statSync, unlinkSync, utimesSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {fileURLToPath} from 'node:url'
 import test from 'node:test'
 import type {Affected} from '../src/lib/affected.ts'
-import {buildState, recordChecked} from '../src/lib/builds.ts'
+import {buildState, recordBuild} from '../src/lib/builds.ts'
 import {gates, type GateContext} from '../src/lib/gates.ts'
 import type {Unit} from '../src/lib/packages.ts'
 import {restoreIfUnchanged, snapshot, staleness} from '../src/commands/work/build.ts'
-import {testPlan} from '../src/commands/work/test.ts'
+import {nodeTestPattern, testPlan} from '../src/commands/work/test.ts'
 
 const unit = (path: string, overrides: Partial<Unit> = {}): Unit => ({
   path,
@@ -32,15 +33,17 @@ const affected = (changed: string[], dependants: string[], kinds: Affected['kind
   kinds,
 })
 
-/** A workspace with a src and a dist file, modified at the given times (seconds). */
+/** A workspace with a src and a dist file, files and directories modified at the given times (seconds). */
 function workspace(root: string, path: string, times: {src: number; dist?: number}) {
   mkdirSync(join(root, path, 'src'), {recursive: true})
   writeFileSync(join(root, path, 'src/index.ts'), '')
   utimesSync(join(root, path, 'src/index.ts'), times.src, times.src)
+  utimesSync(join(root, path, 'src'), times.src, times.src)
   if (times.dist === undefined) return
   mkdirSync(join(root, path, 'dist'), {recursive: true})
   writeFileSync(join(root, path, 'dist/index.js'), '')
   utimesSync(join(root, path, 'dist/index.js'), times.dist, times.dist)
+  utimesSync(join(root, path, 'dist'), times.dist, times.dist)
 }
 
 const plan = (name: string, context: GateContext) => (gates.find(gate => gate.name === name) as (typeof gates)[number]).plan(context)
@@ -69,6 +72,12 @@ test('cargo check covers the changed crates with --fast, and their dependants wi
   assert.deepEqual(plan('cargo-check', {root: '.', units, affected: affected(['docs'], [], ['docs']), fast: true}), {
     skip: 'no Rust changed',
   })
+  // The workspace's own manifest, lockfile or toolchain affect every crate, alone or beside a crate's change.
+  for (const changed of [[], ['core']])
+    assert.deepEqual(
+      argvs(plan('cargo-check', {root: '.', units, affected: affected(changed, [], ['rust']), files: ['Cargo.lock'], fast: true})),
+      ['cargo check --workspace --all-targets --locked --message-format short'],
+    )
 })
 
 test('--fast typechecks only the changed workspaces, once their dependencies are built and current', () => {
@@ -78,7 +87,7 @@ test('--fast typechecks only the changed workspaces, once their dependencies are
   const context = {root, units, affected: affected(['app'], [], ['ts']), fast: true}
   assert.deepEqual(argvs(plan('typecheck', context)), ['npm run typecheck --workspace @fixture/app'])
   workspace(root, 'lib', {src: 300, dist: 200})
-  assert.match((plan('typecheck', context) as {skip: string}).skip, /app \(lib unbuilt or older than its src\)/)
+  assert.match((plan('typecheck', context) as {skip: string}).skip, /app \(lib unbuilt, unfinished or older than its src\)/)
   // One that can be checked still is; the other waits, noted.
   const both = plan('typecheck', {...context, affected: affected(['app', 'lib'], ['other'], ['ts'])})
   assert.deepEqual(argvs(both), ['npm run typecheck --workspace @fixture/lib'])
@@ -102,6 +111,34 @@ test('build: a dependency is current until its src, or a dependency of its own, 
   assert.equal(staleness(root, units, unit('wasm', {dependsOn: ['core']}), new Set()), 'builds Rust, which Cargo keeps current')
 })
 
+test('build: a deleted source file, or a build that did not finish, makes a workspace stale', () => {
+  const root = mkdtempSync(join(tmpdir(), 'tools-stale-'))
+  const lib = unit('lib')
+  workspace(root, 'lib', {src: 100, dist: 200})
+  writeFileSync(join(root, 'lib/src/extra.ts'), '')
+  utimesSync(join(root, 'lib/src/extra.ts'), 100, 100)
+  utimesSync(join(root, 'lib/src'), 100, 100)
+  assert.equal(buildState(root, lib), 'current')
+  unlinkSync(join(root, 'lib/src/extra.ts'))
+  assert.equal(buildState(root, lib), 'stale')
+  workspace(root, 'lib', {src: 100, dist: 200})
+  // A failed build can leave outputs newer than their src; only a successful one clears this.
+  recordBuild(root, 'lib', {building: true})
+  assert.equal(staleness(root, [lib], lib, new Set()), 'its last build did not finish')
+  recordBuild(root, 'lib', {})
+  assert.equal(staleness(root, [lib], lib, new Set()), undefined)
+})
+
+test('build: a workspace checked unchanged after its dependency rebuilt stays current against it', () => {
+  const root = mkdtempSync(join(tmpdir(), 'tools-checked-'))
+  const units = [unit('lib'), unit('app', {dependsOn: ['lib']})]
+  workspace(root, 'lib', {src: 100, dist: 400})
+  workspace(root, 'app', {src: 100, dist: 300})
+  assert.equal(staleness(root, units, units[1] as Unit, new Set()), 'lib was built after it')
+  recordBuild(root, 'app', {checked: 500_000})
+  assert.equal(staleness(root, units, units[1] as Unit, new Set()), undefined)
+})
+
 test('build: outputs written again unchanged keep their times, so nothing above them rebuilds', () => {
   const root = mkdtempSync(join(tmpdir(), 'tools-unchanged-'))
   const lib = unit('lib')
@@ -110,10 +147,17 @@ test('build: outputs written again unchanged keep their times, so nothing above 
   workspace(root, 'lib', {src: 100, dist: 900})
   assert.equal(restoreIfUnchanged(before, snapshot(root, lib)), true)
   assert.equal(statSync(join(root, 'lib/dist/index.js')).mtimeMs, 200_000)
+  // A build that empties and refills its output directories gets their times back too (Cargo watches directories).
+  const emptied = snapshot(root, lib)
+  rmSync(join(root, 'lib/dist'), {recursive: true})
+  mkdirSync(join(root, 'lib/dist'))
+  writeFileSync(join(root, 'lib/dist/index.js'), '')
+  assert.equal(restoreIfUnchanged(emptied, snapshot(root, lib)), true)
+  assert.equal(statSync(join(root, 'lib/dist')).mtimeMs, 200_000)
   // Its src, rewritten, is newer than those kept times; the recorded check says it is current all the same.
   workspace(root, 'lib', {src: 500, dist: 200})
   assert.equal(buildState(root, lib), 'stale')
-  recordChecked(root, 'lib', 600_000)
+  recordBuild(root, 'lib', {checked: 600_000})
   assert.equal(buildState(root, lib), 'current')
   writeFileSync(join(root, 'lib/dist/index.js'), 'changed')
   assert.equal(restoreIfUnchanged(before, snapshot(root, lib)), false)
@@ -121,10 +165,27 @@ test('build: outputs written again unchanged keep their times, so nothing above 
 
 test('test --filter narrows each runner to the matching tests, and needs a target', () => {
   const fixture = fileURLToPath(new URL('fixtures/repo/', import.meta.url))
-  const commands = (options: Parameters<typeof testPlan>[1]) => testPlan(fixture, options).runs.map(run => run.command.argv.join(' '))
-  assert.deepEqual(commands({target: 'app', rust: true, filter: 'parses'}), [
-    'npm test --workspace @fixture/app -- --test-name-pattern=parses',
-    'cargo test --locked -p fixture-app parses',
-  ])
+  const runs = testPlan(fixture, {target: 'app', rust: true, filter: 'parses'}).runs.map(run => run.command)
+  assert.deepEqual(
+    runs.map(command => command.argv.join(' ')),
+    ['npm test --workspace @fixture/app', 'cargo test --locked -p fixture-app parses'],
+  )
+  assert.match(runs[0]?.env?.['NODE_OPTIONS'] ?? '', /--test-name-pattern="parses"/)
   assert.throws(() => testPlan(fixture, {filter: 'parses'}), /needs a target/)
+})
+
+test('test --filter: node --test with named files runs only the matching tests', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'tools-filter-'))
+  writeFileSync(join(directory, 'a.test.mjs'), "import test from 'node:test'\ntest('alpha one', () => {})\ntest('beta', () => {})\n")
+  // As a workspace's script runs it: the files named, the pattern from the environment.
+  // Without the outer test runner's context, which makes a nested node --test skip its files.
+  const {NODE_TEST_CONTEXT: _context, ...env} = process.env
+  const ran = spawnSync(process.execPath, ['--test', '--test-reporter=tap', 'a.test.mjs'], {
+    cwd: directory,
+    env: {...env, NODE_OPTIONS: nodeTestPattern('alpha one')},
+    encoding: 'utf8',
+  })
+  assert.equal(ran.status, 0, ran.stderr)
+  assert.match(ran.stdout, /^# tests 1$/m)
+  assert.match(ran.stdout, /ok 1 - alpha one/)
 })

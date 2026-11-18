@@ -58,6 +58,14 @@ export function counts(output: string): {passed?: number; failed?: number} {
 
 const MAX_BROWSER_WORKERS = 2
 
+/**
+ * NODE_OPTIONS selecting the tests whose name matches. Workspaces' test scripts name their files
+ * (`node --test test/*.test.mjs`), and node reads options only before those, so an appended one is ignored.
+ */
+export function nodeTestPattern(filter: string): string {
+  return [process.env['NODE_OPTIONS'], `--test-name-pattern="${filter.replace(/[\\"]/g, '\\$&')}"`].filter(Boolean).join(' ')
+}
+
 /** The test commands for the options: workspace suites, Rust crates and, only when asked, one browser project. */
 export function testPlan(root: string, options: TestOptions): {runs: Run[]; notes: string[]} {
   const units = loadUnits(root)
@@ -119,14 +127,8 @@ export function testPlan(root: string, options: TestOptions): {runs: Run[]; note
       runs.push({
         target: unit.path,
         command: {
-          argv: [
-            'npm',
-            'test',
-            '--workspace',
-            unit.names[0] as string,
-            // Every workspace's test script ends with node --test, which takes the pattern.
-            ...(filter === undefined ? [] : ['--', `--test-name-pattern=${filter}`]),
-          ],
+          argv: ['npm', 'test', '--workspace', unit.names[0] as string],
+          ...(filter === undefined ? {} : {env: {NODE_OPTIONS: nodeTestPattern(filter)}}),
         },
       })
     // A crate-only target, or any crate when Rust is asked for or affected.

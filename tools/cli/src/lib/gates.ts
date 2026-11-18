@@ -87,9 +87,9 @@ function fastTypecheck(context: GateContext): Plan {
     const outdated = unit.dependsOn.filter(path => {
       const dependency = context.units.find(entry => entry.path === path)
       const state = dependency && buildState(context.root, dependency)
-      return state === 'unbuilt' || state === 'stale'
+      return state !== undefined && state !== 'current'
     })
-    if (outdated.length) waiting.push(`${unit.path} (${outdated.join(', ')} unbuilt or older than its src)`)
+    if (outdated.length) waiting.push(`${unit.path} (${outdated.join(', ')} unbuilt, unfinished or older than its src)`)
     return !outdated.length
   })
   const note = waiting.length ? `not checked until ${TOOLS} build <workspace>: ${waiting.join('; ')}` : undefined
@@ -273,8 +273,10 @@ export const gates: Gate[] = [
     optional: true,
     plan: context => {
       if (context.affected && !context.affected.kinds.includes('rust')) return {skip: 'no Rust changed'}
-      const crates = context.affected ? affectedCrates(context, context.fast) : []
-      if (context.affected && !crates.length) return {skip: 'no crate changed'}
+      // The workspace manifest, lockfile and toolchain belong to no crate and affect every one.
+      const everything = (context.files ?? []).some(path => /^(Cargo\.(toml|lock)|rust-toolchain\.toml)$/.test(path))
+      const crates = context.affected && !everything ? affectedCrates(context, context.fast) : []
+      if (context.affected && !everything && !crates.length) return {skip: 'no crate changed'}
       return {
         commands: [
           {

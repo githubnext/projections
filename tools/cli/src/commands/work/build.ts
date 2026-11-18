@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto'
 import {existsSync, readdirSync, readFileSync, statSync, utimesSync} from 'node:fs'
 import {join} from 'node:path'
 import {bound, TOOLS} from '../../lib/gates.ts'
-import {buildState, dependenciesOf, recordChecked} from '../../lib/builds.ts'
+import {buildRecords, buildState, dependenciesOf, outputTime, recordBuild} from '../../lib/builds.ts'
 import {findUnit, inDependencyOrder, loadUnits, type Unit} from '../../lib/packages.ts'
 import {parseProblems, tail, type Problem} from '../../lib/problems.ts'
 import {newestOutput, run} from '../../lib/repo.ts'
@@ -30,23 +30,31 @@ export type BuildStep = {
   tail?: string[]
 }
 
-/** A workspace's build outputs: every file under its dist and artifacts, with content hash and times. */
-type Snapshot = Map<string, {hash: string; atime: Date; mtime: Date}>
+type Times = {atime: Date; mtime: Date}
+
+/**
+ * A workspace's build outputs: every file under its dist and artifacts with its content hash and times, and every
+ * directory with its times. Watchers such as Cargo's `rerun-if-changed` on a directory read directories' times too,
+ * and a build that empties and refills one changes them.
+ */
+type Snapshot = {files: Map<string, Times & {hash: string}>; directories: Map<string, Times>}
 
 export function snapshot(root: string, unit: Unit): Snapshot {
-  const files: Snapshot = new Map()
+  const taken: Snapshot = {files: new Map(), directories: new Map()}
   const visit = (directory: string) => {
+    const {atime, mtime} = statSync(directory)
+    taken.directories.set(directory, {atime, mtime})
     for (const entry of readdirSync(directory, {withFileTypes: true})) {
       const path = join(directory, entry.name)
       if (entry.isDirectory()) visit(path)
       else if (entry.isFile()) {
         const {atime, mtime} = statSync(path)
-        files.set(path, {hash: createHash('sha256').update(readFileSync(path)).digest('hex'), atime, mtime})
+        taken.files.set(path, {hash: createHash('sha256').update(readFileSync(path)).digest('hex'), atime, mtime})
       }
     }
   }
   for (const output of ['dist', 'artifacts']) if (existsSync(join(root, unit.path, output))) visit(join(root, unit.path, output))
-  return files
+  return taken
 }
 
 /**
@@ -54,9 +62,12 @@ export function snapshot(root: string, unit: Unit): Snapshot {
  * that always runs (one Cargo keeps current) then rebuilds nothing above it. True when nothing changed.
  */
 export function restoreIfUnchanged(before: Snapshot, after: Snapshot): boolean {
-  if (!before.size || before.size !== after.size) return false
-  for (const [path, file] of after) if (before.get(path)?.hash !== file.hash) return false
-  for (const [path, file] of before) utimesSync(path, file.atime, file.mtime)
+  if (!before.files.size || before.files.size !== after.files.size || before.directories.size !== after.directories.size) return false
+  for (const [path, file] of after.files) if (before.files.get(path)?.hash !== file.hash) return false
+  for (const path of after.directories.keys()) if (!before.directories.has(path)) return false
+  for (const [path, file] of before.files) utimesSync(path, file.atime, file.mtime)
+  // Deepest first: setting a directory's times doesn't touch its parent's, but keep the order obvious.
+  for (const [path, times] of [...before.directories].sort((a, b) => b[0].length - a[0].length)) utimesSync(path, times.atime, times.mtime)
   return true
 }
 
@@ -67,13 +78,15 @@ export function staleness(root: string, units: readonly Unit[], unit: Unit, rebu
   // Cargo decides for itself what a Rust build needs; outside the workspace's directory, too.
   if (unit.kinds.includes('crate') || unit.dependsOn.some(path => units.find(entry => entry.path === path)?.kinds.includes('crate')))
     return 'builds Rust, which Cargo keeps current'
-  const state = buildState(root, unit)
+  const records = buildRecords(root)
+  const state = buildState(root, unit, records)
   if (state === undefined) return 'has no src and dist to compare'
   if (state === 'unbuilt') return 'not built'
+  if (state === 'incomplete') return 'its last build did not finish'
   if (state === 'stale') return 'src is newer than dist'
   const changed = unit.dependsOn.find(path => rebuilt.has(path))
   if (changed) return `${changed} was rebuilt`
-  const output = newestOutput(root, `${unit.path}/dist`) ?? 0
+  const output = outputTime(root, unit, records) ?? 0
   const newer = unit.dependsOn.find(path => {
     const dependency = units.find(entry => entry.path === path)
     return builds(dependency) && (newestOutput(root, `${path}/dist`) ?? 0) > output
@@ -132,12 +145,15 @@ export async function buildReport(root: string, options: BuildOptions, progress?
     progress?.(`▸ ${unit.path}: ${reason}`)
     const before = snapshot(root, unit)
     const started = Date.now()
+    // Until it succeeds: a build that fails part way can leave outputs newer than their src.
+    const previous = buildRecords(root)[unit.path] ?? {}
+    recordBuild(root, unit.path, {...previous, building: true})
     const ran = await run(root, {argv: ['npm', 'run', 'build', '--workspace', unit.names[0] as string]})
     const seconds = Math.round(ran.durationMs / 100) / 10
     if (ran.exitCode === 0) {
       const unchanged = restoreIfUnchanged(before, snapshot(root, unit))
-      if (unchanged) recordChecked(root, unit.path, started)
-      else rebuilt.add(unit.path)
+      recordBuild(root, unit.path, unchanged ? {checked: started} : {})
+      if (!unchanged) rebuilt.add(unit.path)
       progress?.(`  ${unchanged ? 'unchanged' : 'built'} (${Math.round(ran.durationMs / 1000)}s)`)
       steps.push({workspace: unit.path, status: unchanged ? 'unchanged' : 'built', reason, seconds})
       continue

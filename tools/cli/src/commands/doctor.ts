@@ -81,7 +81,7 @@ export function buildFindings(root: string): Finding[] {
   for (const unit of loadUnits(root)) {
     const state = buildState(root, unit)
     if (state === 'unbuilt') unbuilt.push(unit.path)
-    else if (state === 'stale') stale.push(unit.path)
+    else if (state === 'stale' || state === 'incomplete') stale.push(unit.path)
   }
   if (stale.length)
     findings.push({

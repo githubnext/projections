@@ -185,6 +185,11 @@ runtime. Missing tools or enabled-but-broken native tests fail explicitly.
   `az bicep build` argv.
 - `github-actions-jobs`: Declared jobs and `needs` from workflow YAML; malformed
   YAML, duplicate keys, dangling `needs`, expressions and cycles rejected.
+- `github-agentic-workflows`: Golden extractions of real gh-aw and agentics
+  workflows and of synthetic pull requests compiled by gh-aw v1.3.0: imports
+  merged with their provenance, groups, classes, renamed and unknown fields, and
+  lock files checked current, stale and missing; the lock check matches gh-aw
+  for every workflow of a gh-aw checkout in an opt-in test (`GH_AW_CHECKOUT`).
 - `tetragon-policies`: Golden extractions of Tetragon-validated policies
   covering every hook family, lists, selector macros, monitor mode, workload and
   node scope, version skew and templated values; deterministic across file

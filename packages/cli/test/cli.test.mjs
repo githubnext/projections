@@ -150,6 +150,7 @@ test('extractor list/init work without execution; invalid flags, duplicate outpu
       'terraform-infrastructure',
       'azure-what-if',
       'github-actions-jobs',
+      'github-agentic-workflows',
       'tetragon-policies',
       'dotnet-public-api',
       'dotnet-di',

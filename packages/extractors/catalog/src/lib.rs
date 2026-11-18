@@ -44,6 +44,7 @@ registry!(
     projections_extractor_terraform_infrastructure,
     projections_extractor_azure_what_if,
     projections_extractor_github_actions_jobs,
+    projections_extractor_github_agentic_workflows,
     projections_extractor_tetragon_policies,
     projections_extractor_dotnet_public_api,
     projections_extractor_dotnet_di,

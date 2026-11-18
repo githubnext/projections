@@ -14,7 +14,7 @@ export type DomainSchema = (typeof domainSchemas)[number]
  * Vocabularies: typed conventions over a domain schema that an extraction opts into with `vocabularies`,
  * such as dependency injection over `architecture/v0`. The engine checks their rules like a schema's.
  */
-export const vocabularyNames = ['dependency-injection/v0', 'infrastructure/v0', 'runtime-policy/v0'] as const
+export const vocabularyNames = ['dependency-injection/v0', 'infrastructure/v0', 'runtime-policy/v0', 'agentic-workflows/v0'] as const
 /** A vocabulary name, such as `dependency-injection/v0`, from `vocabularyNames`. */
 export type Vocabulary = (typeof vocabularyNames)[number]
 /**

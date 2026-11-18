@@ -55,6 +55,7 @@ test('every published schema is draft 2020-12 at its URL, compiles strictly and 
     'metrics',
     'scenarios',
     'treemap',
+    'vocabularies/agentic-workflows',
     'vocabularies/dependency-injection',
     'vocabularies/infrastructure',
     'vocabularies/runtime-policy',

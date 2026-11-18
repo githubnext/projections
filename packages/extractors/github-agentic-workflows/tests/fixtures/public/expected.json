@@ -1,0 +1,429 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "activation": {
+          "roles": [
+            "admin",
+            "maintainer",
+            "write"
+          ],
+          "rolesDeclared": false,
+          "settings": {}
+        },
+        "bash": [
+          "*"
+        ],
+        "concurrency": null,
+        "custom": {
+          "jobs": [],
+          "steps": {}
+        },
+        "deprecated": [],
+        "description": "Creates one focused Primer-styled diagram for a rotating documentation page each day",
+        "engine": {
+          "declared": true,
+          "id": "codex"
+        },
+        "findings": [],
+        "github": {
+          "repos": null,
+          "settings": {},
+          "toolsets": []
+        },
+        "imports": [
+          {
+            "classes": [],
+            "found": true,
+            "path": "shared/reporting.md",
+            "resolved": ".github/workflows/shared/reporting.md"
+          },
+          {
+            "classes": [],
+            "found": true,
+            "path": "shared/pr-safe-output-defaults.md",
+            "resolved": ".github/workflows/shared/pr-safe-output-defaults.md"
+          }
+        ],
+        "limits": {
+          "maxAiCredits": {
+            "declared": false,
+            "value": 1000
+          },
+          "maxDailyAiCredits": {
+            "declared": false,
+            "value": "unlimited"
+          },
+          "timeoutMinutes": {
+            "declared": true,
+            "value": 20
+          }
+        },
+        "lock": {
+          "path": ".github/workflows/daily-documentation-diagram.lock.yml",
+          "status": "current"
+        },
+        "mcpServers": [],
+        "name": "Daily Documentation Diagram",
+        "network": {
+          "allowed": [
+            "defaults",
+            "github",
+            "node"
+          ],
+          "blocked": [],
+          "declared": true
+        },
+        "path": ".github/workflows/daily-documentation-diagram.md",
+        "permissions": {
+          "contents": "read",
+          "copilot-requests": "write",
+          "issues": "read",
+          "pull-requests": "read"
+        },
+        "safeOutputs": {
+          "allowedDomains": null,
+          "handlers": [
+            {
+              "draft": true,
+              "kind": "create-pull-request",
+              "max": 1,
+              "maxDeclared": false
+            },
+            {
+              "kind": "noop",
+              "max": 2,
+              "maxDeclared": false
+            }
+          ],
+          "jobs": [],
+          "sources": {},
+          "staged": false
+        },
+        "secrets": [],
+        "skills": [
+          {
+            "classes": [],
+            "name": "cathrynlavery/diagram-design/skills/diagram-design",
+            "ref": "cathrynlavery/diagram-design/skills/diagram-design@648c2a597839301e06df1e7434a08bde9f42eed3"
+          }
+        ],
+        "sources": {},
+        "strict": true,
+        "tools": [
+          "bash",
+          "cache-memory",
+          "edit"
+        ],
+        "triggers": [
+          {
+            "detail": "daily",
+            "event": "schedule"
+          },
+          {
+            "event": "workflow_dispatch"
+          }
+        ],
+        "unrecognized": [],
+        "unrecognizedValues": []
+      },
+      "evidence": [
+        {
+          "kind": "gh-aw-workflow",
+          "source": ".github/workflows/daily-documentation-diagram.md"
+        },
+        {
+          "kind": "gh-aw-import",
+          "source": ".github/workflows/shared/reporting.md"
+        },
+        {
+          "kind": "gh-aw-import",
+          "source": ".github/workflows/shared/pr-safe-output-defaults.md"
+        },
+        {
+          "kind": "gh-aw-lock",
+          "source": ".github/workflows/daily-documentation-diagram.lock.yml"
+        }
+      ],
+      "id": "workflow:.github/workflows/daily-documentation-diagram.md",
+      "kind": "workflow",
+      "label": "daily-documentation-diagram"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "activation": {
+          "roles": [
+            "admin",
+            "maintainer",
+            "write"
+          ],
+          "rolesDeclared": false,
+          "settings": {}
+        },
+        "bash": [
+          "curl*"
+        ],
+        "concurrency": null,
+        "custom": {
+          "jobs": [],
+          "steps": {}
+        },
+        "deprecated": [],
+        "description": "Tests network firewall functionality and validates security rules for workflow network access",
+        "engine": {
+          "declared": true,
+          "id": "copilot"
+        },
+        "findings": [],
+        "github": {
+          "repos": null,
+          "settings": {},
+          "toolsets": []
+        },
+        "imports": [
+          {
+            "classes": [],
+            "found": true,
+            "path": "shared/otlp.md",
+            "resolved": ".github/workflows/shared/otlp.md"
+          }
+        ],
+        "limits": {
+          "maxAiCredits": {
+            "declared": false,
+            "value": 1000
+          },
+          "maxDailyAiCredits": {
+            "declared": false,
+            "value": "unlimited"
+          },
+          "timeoutMinutes": {
+            "declared": true,
+            "value": 5
+          }
+        },
+        "lock": {
+          "path": ".github/workflows/firewall.lock.yml",
+          "status": "current"
+        },
+        "mcpServers": [],
+        "name": null,
+        "network": {
+          "allowed": [
+            "*.grafana.net",
+            "*.sentry.io",
+            "defaults",
+            "node"
+          ],
+          "blocked": [],
+          "declared": true
+        },
+        "path": ".github/workflows/firewall.md",
+        "permissions": {
+          "contents": "read",
+          "issues": "read",
+          "pull-requests": "read"
+        },
+        "safeOutputs": {
+          "allowedDomains": null,
+          "handlers": [],
+          "jobs": [],
+          "sources": {},
+          "staged": false
+        },
+        "secrets": [
+          "GH_AW_OTEL_GRAFANA_AUTHORIZATION",
+          "GH_AW_OTEL_GRAFANA_ENDPOINT",
+          "GH_AW_OTEL_SENTRY_AUTHORIZATION",
+          "GH_AW_OTEL_SENTRY_ENDPOINT"
+        ],
+        "skills": [],
+        "sources": {
+          "network:*.grafana.net": [
+            "shared/otlp.md"
+          ],
+          "network:*.sentry.io": [
+            "shared/otlp.md"
+          ]
+        },
+        "strict": true,
+        "tools": [
+          "bash",
+          "cli-proxy"
+        ],
+        "triggers": [
+          {
+            "event": "workflow_dispatch"
+          }
+        ],
+        "unrecognized": [],
+        "unrecognizedValues": []
+      },
+      "evidence": [
+        {
+          "kind": "gh-aw-workflow",
+          "source": ".github/workflows/firewall.md"
+        },
+        {
+          "kind": "gh-aw-import",
+          "source": ".github/workflows/shared/otlp.md"
+        },
+        {
+          "kind": "gh-aw-lock",
+          "source": ".github/workflows/firewall.lock.yml"
+        }
+      ],
+      "id": "workflow:.github/workflows/firewall.md",
+      "kind": "workflow",
+      "label": "firewall"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "activation": {
+          "roles": [
+            "admin",
+            "maintainer",
+            "write"
+          ],
+          "rolesDeclared": false,
+          "settings": {}
+        },
+        "bash": [
+          "*"
+        ],
+        "concurrency": null,
+        "custom": {
+          "jobs": [],
+          "steps": {
+            "steps": 2
+          }
+        },
+        "deprecated": [],
+        "description": "Daily automated link checker that finds and fixes broken links in documentation files",
+        "engine": {
+          "declared": false,
+          "id": "copilot"
+        },
+        "findings": [],
+        "github": {
+          "repos": null,
+          "settings": {},
+          "toolsets": [
+            "default"
+          ]
+        },
+        "imports": [],
+        "limits": {
+          "maxAiCredits": {
+            "declared": false,
+            "value": 1000
+          },
+          "maxDailyAiCredits": {
+            "declared": false,
+            "value": "unlimited"
+          },
+          "timeoutMinutes": {
+            "declared": true,
+            "value": 60
+          }
+        },
+        "lock": {
+          "compiler": "v0.93.3",
+          "path": ".github/workflows/link-checker.lock.yml",
+          "status": "current"
+        },
+        "mcpServers": [],
+        "name": null,
+        "network": {
+          "allowed": [
+            "github",
+            "node",
+            "python"
+          ],
+          "blocked": [],
+          "declared": true
+        },
+        "path": ".github/workflows/link-checker.md",
+        "permissions": {
+          "contents": "read",
+          "copilot-requests": "write",
+          "issues": "read",
+          "pull-requests": "read"
+        },
+        "safeOutputs": {
+          "allowedDomains": null,
+          "handlers": [
+            {
+              "kind": "create-pull-request",
+              "max": 1,
+              "maxDeclared": false
+            },
+            {
+              "kind": "noop",
+              "max": 2,
+              "maxDeclared": false
+            }
+          ],
+          "jobs": [],
+          "sources": {},
+          "staged": false
+        },
+        "secrets": [],
+        "skills": [],
+        "sources": {},
+        "strict": true,
+        "tools": [
+          "bash",
+          "cache-memory",
+          "github"
+        ],
+        "triggers": [
+          {
+            "detail": "daily on weekdays",
+            "event": "schedule"
+          }
+        ],
+        "unrecognized": [],
+        "unrecognizedValues": []
+      },
+      "evidence": [
+        {
+          "kind": "gh-aw-workflow",
+          "source": ".github/workflows/link-checker.md"
+        },
+        {
+          "kind": "gh-aw-lock",
+          "source": ".github/workflows/link-checker.lock.yml"
+        }
+      ],
+      "id": "workflow:.github/workflows/link-checker.md",
+      "kind": "workflow",
+      "label": "link-checker"
+    }
+  ],
+  "metadata": {
+    "compilers": [
+      "v0.93.3"
+    ],
+    "engine": "gh-aw",
+    "ghAw": {
+      "commit": "789cc9c2da60fca3b4e0396591c7179be3b5d9eb",
+      "release": "v1.3.0",
+      "schema": "https://github.com/github/gh-aw/blob/v1.3.0/pkg/parser/schemas/main_workflow_schema.json"
+    },
+    "limitations": [
+      "The front matter as declared, merged with local imports: gh-aw's compiler isn't run, so natural-language triggers stay as written and defaults gh-aw fills in are shown only where noted.",
+      "Imports from other repositories are listed but not read; gh-aw fetches them when it compiles."
+    ],
+    "workflows": 3
+  },
+  "protocolVersion": 0,
+  "relationships": [],
+  "schema": "architecture/v0",
+  "vocabularies": [
+    "agentic-workflows/v0"
+  ]
+}

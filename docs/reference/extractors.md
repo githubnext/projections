@@ -24,6 +24,7 @@ it was removed) isn't an error: the extractor describes that revision without it
 | [`terraform-infrastructure`](#terraform-infrastructure) | `architecture/v0` | `infrastructure` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`azure-what-if`](#azure-what-if) | `architecture/v0` | `infrastructure` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`github-actions-jobs`](#github-actions-jobs) | `dag/v0` | `dag` | No (`none`) |
+| [`github-agentic-workflows`](#github-agentic-workflows) | `architecture/v0` | `architecture` | No (`none`) |
 | [`tetragon-policies`](#tetragon-policies) | `architecture/v0` | `runtime-policy` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`dotnet-public-api`](#dotnet-public-api) | `api/v0` | `api` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`dotnet-di`](#dotnet-di) | `architecture/v0` | `dependency-injection` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
@@ -309,6 +310,32 @@ A definition to start from:
   },
   "renderer": "dag",
   "title": "GitHub Actions jobs"
+}
+```
+
+## `github-agentic-workflows`
+
+**Agentic workflows.** GitHub Agentic Workflows: what starts each one, its engine, tools and their scope, network, permissions, safe outputs, budgets and imports, and whether its lock file is current. See [its page](../builtins/extractors/github-agentic-workflows.md).
+
+- Schema: `architecture/v0`
+- Default renderer: `architecture`
+- Needs `--trust`: No (`none`)
+
+| Input | Meaning |
+|---|---|
+| `classes` | An object of class name (such as guardrail) to globs of import paths and skill references; the comparator warns when a classified import or skill is removed. |
+| `exclude` | Array of globs to skip. |
+| `groups` | "prefix" to group each workflow with the workflows named after it and a dash, or an object of group name to globs of workflow paths or names. |
+| `paths` | Array of globs selecting workflow markdown; default .github/workflows/*.md. Files without `on` (shared components) and README.md are skipped. |
+
+A definition to start from:
+
+```json
+{
+  "extractor": "github-agentic-workflows",
+  "id": "github-agentic-workflows",
+  "renderer": "architecture",
+  "title": "Agentic workflows"
 }
 ```
 

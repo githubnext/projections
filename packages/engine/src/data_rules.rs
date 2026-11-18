@@ -91,6 +91,7 @@ pub const VOCABULARIES: &[(&str, &[&str])] = &[
     ("dependency-injection/v0", &["architecture/v0"]),
     ("infrastructure/v0", &["architecture/v0"]),
     ("runtime-policy/v0", &["architecture/v0"]),
+    ("agentic-workflows/v0", &["architecture/v0"]),
 ];
 
 pub const DATA_RULES: &[DataRule] = &[
@@ -273,6 +274,28 @@ pub const DATA_RULES: &[DataRule] = &[
         collection: "relationships",
         kinds: Some(&["matches", "excludes"]),
         fields: &[field("operator", String, false), field("parent", Boolean, false)],
+    },
+    DataRule {
+        schema: "architecture/v0",
+        vocabulary: Some("agentic-workflows/v0"),
+        collection: "entities",
+        kinds: Some(&["workflow"]),
+        fields: &[
+            field("path", Text, true),
+            field("name", NullableString, false),
+            field("group", String, false),
+            field("tools", Strings, false),
+            field("secrets", Strings, false),
+            field("unrecognized", Strings, false),
+            field("strict", Boolean, false),
+        ],
+    },
+    DataRule {
+        schema: "architecture/v0",
+        vocabulary: Some("agentic-workflows/v0"),
+        collection: "entities",
+        kinds: Some(&["group"]),
+        fields: &[field("workflows", Strings, false)],
     },
 ];
 

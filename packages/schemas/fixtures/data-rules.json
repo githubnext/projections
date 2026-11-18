@@ -3,7 +3,8 @@
   "vocabularies": {
     "dependency-injection/v0": ["architecture/v0"],
     "infrastructure/v0": ["architecture/v0"],
-    "runtime-policy/v0": ["architecture/v0"]
+    "runtime-policy/v0": ["architecture/v0"],
+    "agentic-workflows/v0": ["architecture/v0"]
   },
   "rules": [
     {
@@ -403,6 +404,28 @@
         {"name":"operator","type":"string","required":false},
         {"name":"parent","type":"boolean","required":false}
       ]
+    },
+    {
+      "schema": "architecture/v0",
+      "vocabulary": "agentic-workflows/v0",
+      "collection": "entities",
+      "kinds": ["workflow"],
+      "fields": [
+        {"name":"path","type":"text","required":true},
+        {"name":"name","type":"nullable-string","required":false},
+        {"name":"group","type":"string","required":false},
+        {"name":"tools","type":"strings","required":false},
+        {"name":"secrets","type":"strings","required":false},
+        {"name":"unrecognized","type":"strings","required":false},
+        {"name":"strict","type":"boolean","required":false}
+      ]
+    },
+    {
+      "schema": "architecture/v0",
+      "vocabulary": "agentic-workflows/v0",
+      "collection": "entities",
+      "kinds": ["group"],
+      "fields": [{"name":"workflows","type":"strings","required":false}]
     }
   ]
 }

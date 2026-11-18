@@ -153,6 +153,8 @@ export type DependencyInjectionExtraction = ExtractionOf<'architecture/v0', 'dep
 export type InfrastructureExtraction = ExtractionOf<'architecture/v0', 'infrastructure/v0'>
 /** A normalized `architecture/v0` extraction declaring `runtime-policy/v0`, with its kinds' typed `data`. */
 export type RuntimePolicyExtraction = ExtractionOf<'architecture/v0', 'runtime-policy/v0'>
+/** A normalized `architecture/v0` extraction declaring `agentic-workflows/v0`, with its kinds' typed `data`. */
+export type AgenticWorkflowsExtraction = ExtractionOf<'architecture/v0', 'agentic-workflows/v0'>
 
 /** The item, narrowed to kind `K`: with its typed `data` when its schema types `K`. */
 export type OfKind<T extends {kind: string}, K extends string> = [Extract<T, {kind: K}>] extends [never]

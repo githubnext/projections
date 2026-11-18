@@ -96,6 +96,7 @@ fn vocabulary_summary(vocabulary: &str) -> &'static str {
             "resources, data sources, modules and resource groups with their `data.type`, `data.provider` and planned `data.action`"
         }
         "runtime-policy/v0" => "kernel runtime policies (such as Tetragon): `policy`, `hook`, `selector` and `subject` entities",
+        "agentic-workflows/v0" => "agentic workflows (such as GitHub Agentic Workflows): `workflow` and `group` entities",
         _ => "",
     }
 }

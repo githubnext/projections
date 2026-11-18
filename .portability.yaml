@@ -2,6 +2,9 @@
 # check:portability; docs/maintainers/runner-coverage.md#platform-coverage). Each entry excuses every match of one rule
 # in one file and says why the code is right on Linux, macOS and Windows. An entry that no longer matches fails.
 allow:
+  - path: packages/cli/src/test_support.rs
+    rule: posix-shell
+    reason: Unit-test helper compiled only on Unix (cfg(test) and cfg(unix)); it writes stand-in executables from a sh child so no forked test thread inherits the write descriptor (ETXTBSY).
   - path: packages/extractors/typescript-support/src/nestjs.ts
     rule: posix-path-module
     reason: The module and entry inputs are repository paths, '/'-separated on every platform; startDirectory resolves the result natively.

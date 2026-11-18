@@ -165,6 +165,7 @@ function useViewChange(
 ) {
   const shown = useRef<Shown>(undefined)
   const scoped = useRef(scopeKey)
+  const rescoped = useRef(false)
   const used = useRef<GraphAnchor>(undefined)
   const held = useRef<{key: unknown; scale: number}>(undefined)
   const change = useRef<ViewChange>({pending: undefined}).current
@@ -195,11 +196,16 @@ function useViewChange(
     }
   }
   // A new scope lays the document out again: the cards move from the old layout to the new one, those it adds or leaves
-  // out fading in or out, rather than jumping.
-  if (previous && previous.transition !== transition && scoped.current !== scopeKey) {
+  // out fading in or out, rather than jumping. The layout arrives after the scope does (it's laid out in the
+  // background), so the change waits for it.
+  if (scoped.current !== scopeKey) {
     scoped.current = scopeKey
+    rescoped.current = true
+  }
+  if (previous && previous.transition !== transition && rescoped.current) {
+    rescoped.current = false
     if (!reducedMotion) setMorph({from: previous.frame, to: transition, mix: 0})
-  } else if (scoped.current !== scopeKey) scoped.current = scopeKey
+  }
   const moving = morph !== undefined && morph.to === transition && morph.mix < 1
   const frame = moving ? morphFrames(morph.from, target, morph.mix) : target
   const moved = morph?.from

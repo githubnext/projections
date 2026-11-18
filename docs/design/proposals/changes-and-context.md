@@ -163,8 +163,11 @@ Recorded as implementation chose within the decisions above.
 - The database moves between layouts frame by frame in script, not with CSS
   transitions: each link's ends are carried with their rows, and a link drawn
   the same way in both layouts moves its waypoints, while one drawn another way
-  takes its new route with its ends attached. Graph canvases already moved their
-  edges with their cards.
+  takes its new route with its ends attached; so does a relationship whose link
+  moves from its rows to its tables' headers (its column folds). Graph canvases
+  move their edges with their cards; they treat Changes and All as views of one
+  document, which they lay out in the background, so the move starts once the
+  new layout is ready.
 - A comparison without any change shows every item under the "No changes"
   notice, rather than receding everything.
 - Text diffs fold their unchanged lines in every scope, as a diff's hunks do:

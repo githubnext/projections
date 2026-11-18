@@ -20,9 +20,36 @@ import {refName} from './revisions.js'
  * viewer leaves such messages to the agent rather than showing them.
  */
 export function mentionsPath(text: string): boolean {
-  return /(^|[\s("'`])(\/|~\/|\.{1,2}\/|[A-Za-z]:\\)|[\w.-]+\/[\w.-]+\/|\b[\w-]+\.(json|ya?ml|[cm]?[jt]sx?|py|go|rs|cs|java|rb|toml|lock|md|html|css|sh)\b/.test(
-    text,
-  )
+  return pathStart.test(text) || nestedPath(text) || fileName(text)
+}
+
+const pathStart = /(?:^|[\s("'`])(?:\/|~\/|\.{1,2}\/|[A-Za-z]:\\)/
+const fileExtension = /^(?:json|ya?ml|[cm]?[jt]sx?|py|go|rs|cs|java|rb|toml|lock|md|html|css|sh)$/
+const wordCharacter = /\w/
+
+/** `a/b/`: two segments of word characters, dots and hyphens, each followed by a slash. */
+function nestedPath(text: string): boolean {
+  for (const run of text.split(/[^\w./-]+/)) {
+    const segments = run.split('/')
+    // The last segment has no slash after it.
+    for (let index = 0; index + 2 < segments.length; index++) if (segments[index] && segments[index + 1]) return true
+  }
+  return false
+}
+
+/** `name.json`: a run of word characters and hyphens, at least one a word character, then a known extension. */
+function fileName(text: string): boolean {
+  let named = false
+  for (let index = 0; index < text.length; index++) {
+    const character = text[index]!
+    if (character === '.' && named) {
+      let end = index + 1
+      while (end < text.length && wordCharacter.test(text[end]!)) end++
+      if (fileExtension.test(text.slice(index + 1, end))) return true
+    }
+    if (character !== '-') named = wordCharacter.test(character)
+  }
+  return false
 }
 
 /** A viewer's message in plain words, in place of what the workbench would show. */

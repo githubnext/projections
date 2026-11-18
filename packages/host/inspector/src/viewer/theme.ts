@@ -80,8 +80,8 @@ export function urlThemeSeed(search: string = location.search): ThemeSeedResult 
 }
 
 /**
- * The viewer page's theme: the host's when it gives one (an embedding host's `host.theme`), else the page's own (`pageTheme`), with the
- * theme seed in its URL. Says what the page reports of the seed, and the notice for one it ignored.
+ * The viewer page's theme: the host's when it gives one (an embedding host's `host.theme`), else the page's own
+ * (`pageTheme`), with the theme seed in its URL. Says what the page reports of the seed, and the notice for one it ignored.
  */
 export function viewerTheme(hostTheme: InspectorHost['theme']): {
   theme: NonNullable<InspectorHost['theme']>

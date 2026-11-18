@@ -18,6 +18,10 @@ test('a seed takes both modes, trimmed, and maps each onto the app theme', () =>
   assert.equal(themeSeedTokens(seed, 'light')['font-family'], 'Inter, sans-serif')
 })
 
+test('rgb() takes spaces anywhere between its parts', () => {
+  assert.ok(parseThemeSeed({light: {background: 'rgb(  247 246 243 )', border: 'rgba(0,0,0,  0.1)'}}).seed)
+})
+
 test('a mode the seed leaves out keeps the page its own theme', () => {
   const {seed} = parseThemeSeed({light: harness.light})
   assert.ok(themeSeedTokens(seed, 'light'))
@@ -37,6 +41,7 @@ test('a seed is refused, with what is wrong, unless every value is a color or a 
     'a url()': [{light: {background: '#fff', border: 'url(https://example.com/x)'}}, "theme.light.border isn't a color"],
     'CSS in a family': [{light: {background: '#fff', sans: 'Inter;}*{color:red'}}, "theme.light.sans isn't a font family list"],
     'a long value': [{light: {background: '#fff', mono: `"${'a'.repeat(600)}"`}}, 'longer than 512'],
+    'an rgb() of spaces': [{light: {background: `rgb(${' '.repeat(500)})`}}, "theme.light.background isn't a color"],
   }
   for (const [name, [value, message]] of Object.entries(refused)) {
     const result = parseThemeSeed(value)

@@ -23,7 +23,8 @@ export function parseColor(value: string | undefined): Rgba | undefined {
     const channel = (index: number) => Number.parseInt(full.slice(index * 2, index * 2 + 2), 16)
     return {r: channel(0), g: channel(1), b: channel(2), a: full.length === 8 ? channel(3) / 255 : 1}
   }
-  const functional = /^rgba?\(\s*([^)]+)\)$/.exec(text)?.[1]
+  // One run of anything but `)`: the parts are split (and blanks dropped) below, so no backtracking between runs.
+  const functional = /^rgba?\(([^)]+)\)$/.exec(text)?.[1]
   if (functional) {
     const parts = functional.split(/[\s,/]+/).filter(Boolean)
     if (parts.length < 3 || parts.length > 4) return undefined

@@ -30,7 +30,7 @@ pub fn read(argument: &str) -> Result<String> {
     };
     let value: Value = serde_json::from_str(&text).context("The theme isn't JSON")?;
     let text = format(&check(&value).map_err(anyhow::Error::msg)?);
-    if text.len() > SEED_LENGTH {
+    if length(&text) > SEED_LENGTH {
         bail!("The theme is longer than {SEED_LENGTH} characters");
     }
     Ok(text)
@@ -67,7 +67,7 @@ pub fn check(value: &Value) -> Result<Seed, String> {
             let Some(text) = text.as_str() else {
                 return Err(format!("{at} must be a string"));
             };
-            if text.chars().count() > VALUE_LENGTH {
+            if length(text) > VALUE_LENGTH {
                 return Err(format!("{at} is longer than {VALUE_LENGTH} characters"));
             }
             if FAMILIES.contains(&key) {
@@ -106,13 +106,19 @@ fn format(seed: &Seed) -> String {
     format!("{{{}}}", modes.join(","))
 }
 
+/// A string's length as the page measures it (JavaScript's `length`): in
+/// UTF-16 code units, so both accept the same seeds.
+fn length(text: &str) -> usize {
+    text.encode_utf16().count()
+}
+
 /// A color the page's `parseColor` reads: hex, `rgb()`/`rgba()` or `transparent`.
 fn color(text: &str) -> bool {
     let text = text.trim().to_ascii_lowercase();
     if Regex::new(r"^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$").unwrap().is_match(&text) || text == "transparent" {
         return true;
     }
-    let Some(inner) = Regex::new(r"^rgba?\(\s*([^)]+)\)$").unwrap().captures(&text) else {
+    let Some(inner) = Regex::new(r"^rgba?\(([^)]+)\)$").unwrap().captures(&text) else {
         return false;
     };
     let parts: Vec<&str> = Regex::new(r"[\s,/]+")
@@ -242,6 +248,11 @@ mod tests {
                 "theme.light.sans isn't a font",
             ),
             (json!({"light": {"background": "#fff", "mono": "a".repeat(600)}}), "longer than 512"),
+            // 256 supplementary characters are 512 UTF-16 code units, as the page counts them, plus the quotes.
+            (
+                json!({"light": {"background": "#fff", "sans": format!("\"{}\"", "\u{20000}".repeat(256))}}),
+                "longer than 512",
+            ),
         ] {
             let error = check(&value).unwrap_err();
             assert!(error.contains(message), "{value}: {error}");
@@ -249,5 +260,9 @@ mod tests {
         assert!(
             check(&json!({"light": {"background": "rgba(0, 0, 0, 50%)", "focus": "#0969DA", "mono": "ui-monospace, \"SF Mono\""}})).is_ok()
         );
+        // A seed long in UTF-8 bytes but not in UTF-16 code units is accepted, as the page accepts it.
+        let family = format!("\"{}\"", "\u{5b57}".repeat(500));
+        let mode = json!({"background": "#fff", "sans": family, "mono": family});
+        assert!(read(&json!({"light": mode, "dark": mode}).to_string()).is_ok());
     }
 }

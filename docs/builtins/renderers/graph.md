@@ -110,9 +110,9 @@ arrow to each. Other relationships stay arrows, across boundaries. Containment
 drawn as boundaries isn't counted in the summary bar, nor are modules when every
 one is drawn as a boundary: they only group the components it counts.
 
-One revision of up to 100 components draws every one: a large one opens at the
+One revision of up to 60 components draws every one: a large one opens at the
 readable text floor on its top row and scrolls, with nothing to click open. A
-comparison of more than 40 components (or one revision of more than 100, which
+comparison of more than 40 components (or one revision of more than 60, which
 would take too long to lay out whole) collapses each unchanged boundary into one
 summary card, named for the boundary and counting its components (`extractors`,
 `Module · 31 components`), with the boundary's own `data` (so a module the

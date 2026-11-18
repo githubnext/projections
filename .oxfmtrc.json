@@ -43,6 +43,12 @@
         "printWidth": 80,
         "embeddedLanguageFormatting": "off"
       }
+    },
+    {
+      "files": ["CHANGELOG.md"],
+      "options": {
+        "proseWrap": "never"
+      }
     }
   ]
 }

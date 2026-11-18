@@ -7,17 +7,20 @@ import {keyRowsOf, keysOf, primaryColumns} from './schema-keys.js'
 import {columnMarkers, linksOf} from './schema-links.js'
 /**
  * Longest-path depth from the roots. Where edges close a cycle (tables that reference each other), the edge a
- * depth-first walk in `nodes` order closes it with counts reversed, so every edge joins nodes of different depths: no
- * relationship ever links two cards of one rank, which would have to run behind the cards between them.
+ * depth-first walk closes it with counts reversed, so every edge joins nodes of different depths: no relationship ever
+ * links two cards of one rank, which would have to run behind the cards between them. The walk takes nodes and their
+ * neighbours in ID order, so the depths depend on the graph alone, never on the order nodes and edges are listed (a
+ * comparison and its reverse rank alike).
  */
 export function layerDepths(nodes: readonly string[], edges: readonly {from: string; to: string}[]): Map<string, number> {
   const outgoing = new Map(nodes.map(id => [id, [] as string[]]))
   for (const edge of edges)
     if (edge.from !== edge.to && outgoing.has(edge.to) && !outgoing.get(edge.from)?.includes(edge.to))
       outgoing.get(edge.from)?.push(edge.to)
+  for (const children of outgoing.values()) children.sort(compareIds)
   const acyclic = new Map(nodes.map(id => [id, new Set<string>()]))
   const walked = new Map<string, 'open' | 'done'>()
-  for (const root of nodes) {
+  for (const root of [...nodes].sort(compareIds)) {
     if (walked.has(root)) continue
     walked.set(root, 'open')
     const path = [{id: root, next: 0}]

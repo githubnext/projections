@@ -688,3 +688,19 @@ test('tables that reference each other still take ranks of their own, so no link
     assert.notEqual(depth.get(from), depth.get(to), `${from} and ${to} share a rank`)
   assert.ok(depth.get('purchases') > Math.max(depth.get('users'), depth.get('stores'), depth.get('licenses')))
 })
+
+test('where a cycle is broken depends on the graph alone, not on the order its tables and links are listed', async () => {
+  const {layerDepths} = await import('../node_modules/.cache/test/schema-model.js')
+  // b ⇄ c in one revision, a → b and c → a added in the other: a comparison lists one revision's links first.
+  const before = [
+    {from: 'b', to: 'c'},
+    {from: 'c', to: 'b'},
+  ]
+  const after = [
+    {from: 'a', to: 'b'},
+    {from: 'c', to: 'a'},
+  ]
+  const forward = layerDepths(['b', 'c', 'a'], [...before, ...after])
+  const reverse = layerDepths(['a', 'c', 'b'], [...after, ...before].reverse())
+  assert.deepEqual(new Map([...reverse].sort()), new Map([...forward].sort()))
+})

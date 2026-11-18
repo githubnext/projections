@@ -247,42 +247,46 @@ export function SummaryBar({projection: p, className}: {projection: ProjectionCo
           <li data-summary-more="" className="pj:inline-flex pj:size-5 pj:shrink-0" />
         </ul>
       </div>
-      {/* With the trailing spacer, centres the figures in the bar (the toggles stay at its end). */}
-      <span aria-hidden="true" className="ph-summary-lead pj:flex-1" />
-      <ul className="ph-summary-figures pj:flex pj:min-w-0 pj:items-center" aria-label={sentence}>
-        {figures.slice(0, shown).map((figure, index) => (
-          <Figure key={figure.key} projection={p} figure={figure} first={index === 0} />
-        ))}
-      </ul>
-      {hidden.length > 0 && (
-        <Popover>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              className={cn(figureButton, 'ph-summary-more pj:size-5 pj:justify-center pj:px-0 pj:[&_svg]:size-3.5')}
-              aria-label={`${hidden.length.toLocaleString()} more`}
-              title={`${hidden.length.toLocaleString()} more`}
+      {/* With the trailing spacer, centres the figures and their "…" in the bar (the toggles stay at its end); it gives
+          way first where the end needs more room. */}
+      <span aria-hidden="true" className="ph-summary-lead pj:min-w-0 pj:flex-1" />
+      <span className="ph-summary-centre pj:flex pj:min-w-0 pj:items-center pj:gap-1">
+        <ul className="ph-summary-figures pj:flex pj:min-w-0 pj:items-center" aria-label={sentence}>
+          {figures.slice(0, shown).map((figure, index) => (
+            <Figure key={figure.key} projection={p} figure={figure} first={index === 0} />
+          ))}
+        </ul>
+        {hidden.length > 0 && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={cn(figureButton, 'ph-summary-more pj:size-5 pj:justify-center pj:px-0 pj:[&_svg]:size-3.5')}
+                aria-label={`${hidden.length.toLocaleString()} more`}
+                title={`${hidden.length.toLocaleString()} more`}
+              >
+                <Ellipsis aria-hidden="true" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="start"
+              side="top"
+              collisionPadding={8}
+              aria-label="More of the summary"
+              className="ph-summary-popover pj:[--pj-summary-surface:var(--pj-popover)] pj:w-auto pj:max-w-[calc(100vw-1rem)] pj:gap-1 pj:p-2 pj:text-xs pj:text-muted-foreground"
             >
-              <Ellipsis aria-hidden="true" />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent
-            align="start"
-            side="top"
-            collisionPadding={8}
-            aria-label="More of the summary"
-            className="ph-summary-popover pj:[--pj-summary-surface:var(--pj-popover)] pj:w-auto pj:max-w-[calc(100vw-1rem)] pj:gap-1 pj:p-2 pj:text-xs pj:text-muted-foreground"
-          >
-            <ul className="pj:flex pj:flex-col pj:gap-1">
-              {hidden.map(figure => (
-                <Figure key={figure.key} projection={p} figure={figure} first />
-              ))}
-            </ul>
-          </PopoverContent>
-        </Popover>
-      )}
-      {/* As wide as the lead spacer, so the figures stay centred; the fixed content sits at its end. */}
-      <span className="ph-summary-trail pj:flex pj:flex-1 pj:items-center pj:justify-end pj:gap-1">
+              <ul className="pj:flex pj:flex-col pj:gap-1">
+                {hidden.map(figure => (
+                  <Figure key={figure.key} projection={p} figure={figure} first />
+                ))}
+              </ul>
+            </PopoverContent>
+          </Popover>
+        )}
+      </span>
+      {/* As wide as the lead spacer, so the figures stay centred; the fixed content sits at its end, on one line, never
+          narrower than it. */}
+      <span className="ph-summary-trail pj:flex pj:flex-1 pj:items-center pj:justify-end pj:gap-1 pj:whitespace-nowrap">
         <ScopeHiddenFigure projection={p} />
         {regenerated > 0 && (
           <span data-summary-fixed="" className="pj:flex pj:shrink-0">

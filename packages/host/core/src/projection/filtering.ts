@@ -57,9 +57,9 @@ function inScope(row: Row, scope: ViewScope, variedOnly: boolean, regeneratedOnl
 /**
  * The rows the scope and filters keep, the filter payload renderers apply, and each scope's count. The Changes scope
  * keeps the changes that pass the summary filter and find, and the unchanged items that give them context
- * (`changeContext`), so renderers show those at full strength and fold or recede the rest. The counts are the summary
- * bar's: its count figures' changes and totals (the kinds the renderer names, so a table's structural relationships
- * aren't counted beside its columns), else every row's.
+ * (`changeContext`), so renderers show those at full strength and fold or recede the rest. The counts are of the kinds
+ * the summary bar's count figures name (so a table's structural relationships aren't counted beside its columns), else
+ * of every row: its changes, and every item of both revisions, so All is more than Changes whenever Changes hides any.
  */
 export function useRowFilter(rows: readonly Row[], subject: ViewSubject, state: FilterState, summary: readonly SummaryFigure[]) {
   const {variedOnly, regeneratedOnly, summaryFilter, search} = state
@@ -98,10 +98,10 @@ export function useRowFilter(rows: readonly Row[], subject: ViewSubject, state: 
   const counts = useMemo<ScopeCounts>(() => {
     const noise = rows.filter(row => variedWithinTolerance(row) || regenerated(row)).length
     const left = hidden.reduce((total, item) => total + item.count, 0)
+    // Both over the same items, the union of the revisions, so All counts what Changes leaves out besides its changes.
     const figures = summary.filter(figure => figure.type === 'count')
-    if (!figures.length) return {changes: rows.filter(isScopeChange).length, all: rows.length, noise, hidden: left}
-    const sum = (count: (figure: SummaryFigure) => number) => figures.reduce((total, figure) => total + count(figure), 0)
-    return {changes: sum(figure => figure.added + figure.removed + figure.modified), all: sum(figure => figure.count), noise, hidden: left}
+    const counted = figures.length ? rows.filter(row => figures.some(figure => rowInSummary(row, {kinds: figure.kinds}))) : rows
+    return {changes: counted.filter(isScopeChange).length, all: counted.length, noise, hidden: left}
   }, [rows, summary, hidden])
   return {visibleRows, filter, counts, hidden}
 }

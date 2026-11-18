@@ -43,11 +43,15 @@ with a few changes reads at a legible size. Nothing is faded: what is shown is
 drawn at full strength, and context is told apart from the changes by the
 absence of change marks, not by opacity. A shown item's other parts fold (a
 context table's unchanged columns become one "12 unchanged columns" row that
-opens in place). One affordance over the stage says what is hidden ("Hiding 45
-unchanged tables and 380 columns · Show all"). Switching between Changes and All
-moves items from their old places to their new ones (skipped under reduced
-motion). No relationship is ever drawn to an item the scope leaves out: a
-changed relationship always brings both its ends.
+opens in place, and stays below them as "Hide 12 unchanged columns" to fold them
+again; every fold works this way, from the keyboard too). One affordance over
+the stage says what is hidden ("Hiding 45 unchanged tables and 380 columns ·
+Show all"). Switching between Changes and All moves items from their old places
+to their new ones, as does opening or closing a fold, and links stay attached to
+the rows they join throughout: only a link the change adds or removes fades (all
+of it skipped under reduced motion, which jumps). No relationship is ever drawn
+to an item the scope leaves out: a changed relationship always brings both its
+ends.
 
 ## Decisions
 
@@ -96,12 +100,14 @@ in scope and their context.
   derivation past the filter's ID limit), `foldList`, `useFolds` and `Fold`, and
   `MountOptions.scope`: a canvas declares `subset` (with its parts left out,
   kept whole or folded) and receives a `model` of only what is shown
-  (`scopedModel`), with `scope.all` and `scope.expand` to open folds.
+  (`scopedModel`), with `scope.all`, `scope.expand` to open folds and
+  `scope.collapse` to close them again.
 - **Renderers**: the api renderer folds declarations and text-diff its unchanged
   outputs; graph, database, dependency-injection, file-packing and
   runtime-policy lay out only the changes and their context. The database folds
   a shown table's other columns into one row; graph canvases and the database
-  move between the two layouts when the scope changes.
+  move between the two layouts when the scope changes or a fold opens or closes,
+  links attached.
 - **Hosts**: the scope switch in the default view's toolbar (the Inspector,
   `projections view` and the Copilot canvas), the VS Code UI and the
   Playground's pull request tab, which opens Changes in Diff.
@@ -132,11 +138,12 @@ Recorded as implementation chose within the decisions above.
   items are the same in both revisions, so the folds line up, but expanding a
   fold expands it in that pane only: the renderer protocol has no message for
   it, and milestone 1 adds none.
-- The scope counts are the summary bar's count figures: their changes, without
-  context ("Changes 4" for four changed declarations, though their tools show
-  too), and their totals. A table's structural relationships (a column's
-  `contains`) aren't counted beside its columns, so the switch and the summary
-  bar agree.
+- The scope counts are of the kinds the summary bar's count figures name: the
+  changes, without context ("Changes 4" for four changed declarations, though
+  their tools show too), and every item of either revision, so All is more than
+  Changes whenever Changes hides anything. A table's structural relationships (a
+  column's `contains`) aren't counted beside its columns, so the switch and the
+  summary bar agree.
 - Side by side panes fold from the union's scope, but each pane merges adjacent
   runs around items it doesn't have (an added row is absent from Before), so
   Before can show one fold where After shows two with the addition between.
@@ -149,6 +156,15 @@ Recorded as implementation chose within the decisions above.
   offers a choice that changes nothing.
 - Dependency-injection and file-packing layouts change at once when the scope
   changes; graph canvases and the database move between them.
+- An open fold stays where it was, labeled "Hide 7 unchanged columns" (or
+  declarations, outputs or lines), rather than becoming a separate collapse
+  control: the place to close it is the place it was opened. In a table it stays
+  last, below the columns it opened; in a list or text diff, above its run.
+- The database moves between layouts frame by frame in script, not with CSS
+  transitions: each link's ends are carried with their rows, and a link drawn
+  the same way in both layouts moves its waypoints, while one drawn another way
+  takes its new route with its ends attached. Graph canvases already moved their
+  edges with their cards.
 - A comparison without any change shows every item under the "No changes"
   notice, rather than receding everything.
 - Text diffs fold their unchanged lines in every scope, as a diff's hunks do:

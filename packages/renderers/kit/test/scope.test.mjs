@@ -11,7 +11,10 @@ test('a list folds every run of two or more items the scope leaves out, and keep
 
 test('an expanded fold lists its items, and without a scope nothing folds', () => {
   const items = ['a', 'b', 'c', 'd']
-  assert.deepEqual(ids(foldList(items, id => id, new Set(['c']), new Set(['a']))), ['a', 'b', 'c', 'd'])
+  // An expanded run keeps its fold, open, before its items: the way to fold them again.
+  const opened = foldList(items, id => id, new Set(['c']), new Set(['a']))
+  assert.deepEqual(ids(opened), ['[a b]', 'a', 'b', 'c', 'd'])
+  assert.equal(opened[0].open, true)
   assert.deepEqual(ids(foldList(items, id => id, undefined)), items)
 })
 
@@ -102,6 +105,13 @@ test('folded parts stand as one unchanged part of their entity, and opening a fo
   assert.equal(fold.after.kind, 'column')
   assert.deepEqual([...folds.get('pk-fold:orders')].sort(), ['orders.id', 'orders.total'])
   assert.ok(model.after.relationships.some(item => item.from === 'orders' && item.to === 'pk-fold:orders'))
+  // An open fold shows its parts and stays, as the way to fold them again.
+  const open = scopedModel(schemaModel, shown, 'fold', new Set(['pk-fold:orders'])).model
+  const hide = open.entities.find(row => row.id === 'pk-fold:orders')
+  assert.equal(hide.after.label, 'Hide 2 unchanged columns')
+  assert.deepEqual(hide.after.data, {open: true})
+  assert.ok(open.entities.some(row => row.id === 'orders.total'))
+  assert.ok(open.after.relationships.some(item => item.from === 'orders' && item.to === 'orders.total'))
   // Whole parts keep every column of a shown table instead.
   const whole = scopedModel(schemaModel, shown, 'whole').model
   assert.ok(whole.entities.some(row => row.id === 'customers.name'))

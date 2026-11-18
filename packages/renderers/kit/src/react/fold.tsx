@@ -2,7 +2,7 @@
 import {useCallback, useState} from 'react'
 import {createElement} from 'react'
 import type {ElementType} from 'react'
-import {ChevronsUpDown} from 'lucide'
+import {ChevronsDownUp, ChevronsUpDown} from 'lucide'
 import {foldList} from '../scope.js'
 import type {ChangesScope, Folded} from '../scope.js'
 
@@ -14,26 +14,35 @@ export function useFolds<T>(
   items: readonly T[],
   idOf: (item: T) => string,
   scope: ChangesScope | undefined,
-): {entries: Folded<T>[]; expand: (key: string) => void} {
+): {entries: Folded<T>[]; expand: (key: string) => void; collapse: (key: string) => void} {
   const shownKey = scope ? [...scope.shown].sort().join('\n') : ''
   const [expanded, setExpanded] = useState<{key: string; folds: ReadonlySet<string>}>({key: shownKey, folds: new Set()})
   const folds = expanded.key === shownKey ? expanded.folds : new Set<string>()
-  const expand = useCallback(
-    (fold: string) =>
-      setExpanded(previous => ({key: shownKey, folds: new Set([...(previous.key === shownKey ? previous.folds : []), fold])})),
+  const toggle = useCallback(
+    (fold: string, open: boolean) =>
+      setExpanded(previous => {
+        const next = new Set(previous.key === shownKey ? previous.folds : [])
+        if (open) next.add(fold)
+        else next.delete(fold)
+        return {key: shownKey, folds: next}
+      }),
     [shownKey],
   )
-  return {entries: foldList(items, idOf, scope?.shown, folds), expand}
+  const expand = useCallback((fold: string) => toggle(fold, true), [toggle])
+  const collapse = useCallback((fold: string) => toggle(fold, false), [toggle])
+  return {entries: foldList(items, idOf, scope?.shown, folds), expand, collapse}
 }
 
 /**
- * A fold: "12 unchanged declarations", a button that expands the run in place. `as` sets its element (`div` by
- * default, `tr` or `li` in tables and lists; a `tr` puts the button in one cell spanning `columns`).
+ * A fold: "12 unchanged declarations", a button that opens the run in place; `open`, "Hide 12 unchanged declarations"
+ * above the opened run, which folds it again. `as` sets its element (`div` by default, `tr` or `li` in tables and lists;
+ * a `tr` puts the button in one cell spanning `columns`).
  */
 export function Fold({
   count,
   noun,
-  onExpand,
+  open = false,
+  onToggle,
   as: Element = 'div',
   columns,
   className,
@@ -41,27 +50,32 @@ export function Fold({
   count: number
   /** The plural noun of the folded items, for example `declarations`. */
   noun: string
-  onExpand: () => void
+  /** Whether the run is open, its items listed after the fold. */
+  open?: boolean | undefined
+  onToggle: () => void
   as?: ElementType
   columns?: number
   className?: string
 }) {
-  const label = `${count.toLocaleString()} unchanged ${noun}`
+  const label = `${open ? 'Hide ' : ''}${count.toLocaleString()} unchanged ${noun}`
   const button = (
-    <button type="button" className="pk-fold-button" onClick={onExpand} aria-label={`Show ${label}`} title={`Show ${label}`}>
-      <FoldGlyph />
+    <button type="button" className="pk-fold-button" onClick={onToggle} aria-expanded={open} title={open ? label : `Show ${label}`}>
+      <FoldGlyph open={open} />
       <span className="pk-fold-label">{label}</span>
     </button>
   )
   return (
-    <Element className={`pk-fold${className ? ` ${className}` : ''}`} data-fold="">
+    <Element className={`pk-fold${className ? ` ${className}` : ''}`} data-fold={open ? 'open' : 'closed'}>
       {Element === 'tr' ? <td colSpan={columns}>{button}</td> : button}
     </Element>
   )
 }
 
-/** The fold's glyph, chevrons pointing up and down (Lucide's `chevrons-up-down`): the run opens both ways. */
-function FoldGlyph() {
+/**
+ * The fold's glyph: chevrons pointing apart (Lucide's `chevrons-up-down`), the run opens both ways; open, chevrons
+ * pointing together (`chevrons-down-up`).
+ */
+function FoldGlyph({open}: {open: boolean}) {
   return (
     <svg
       className="pk-fold-icon"
@@ -75,7 +89,7 @@ function FoldGlyph() {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      {ChevronsUpDown.map(([tag, attributes], index) => createElement(tag, {key: index, ...attributes}))}
+      {(open ? ChevronsDownUp : ChevronsUpDown).map(([tag, attributes], index) => createElement(tag, {key: index, ...attributes}))}
     </svg>
   )
 }

@@ -172,7 +172,7 @@ export function ApiView(props: RendererProps<typeof accepts>) {
   const shownScope = useMemo(() => scope && limitScope(scope, all, declarationLimit), [scope, all])
   const rows = shownScope ? all.filter(row => shownScope.shown.has(row.id)) : all.slice(0, declarationLimit)
   const scopeTotal = scope ? all.filter(row => scope.shown.has(row.id)).length : all.length
-  const {entries, expand} = useFolds(shownScope ? all : rows, row => row.id, shownScope)
+  const {entries, expand, collapse} = useFolds(shownScope ? all : rows, row => row.id, shownScope)
   const names = useMemo(() => ({before: qualifiedNames(model.before), after: qualifiedNames(model.after)}), [model])
   // One status cell width for every row, from the longest change status this comparison can show.
   const parts = Math.max(1, ...rows.map(row => statusParts(row).length))
@@ -194,7 +194,15 @@ export function ApiView(props: RendererProps<typeof accepts>) {
           <div className="api-declarations">
             {entries.map(entry => {
               if (entry.type === 'fold')
-                return <Fold key={`fold:${entry.key}`} count={entry.items.length} noun="declarations" onExpand={() => expand(entry.key)} />
+                return (
+                  <Fold
+                    key={`fold:${entry.key}`}
+                    count={entry.items.length}
+                    noun="declarations"
+                    open={entry.open}
+                    onToggle={() => (entry.open ? collapse : expand)(entry.key)}
+                  />
+                )
               const row = entry.item
               const common = {row, comparing, selected: selectedId === row.id, onSelect, compatibility, diff, names}
               if (diff) {

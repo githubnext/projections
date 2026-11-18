@@ -122,7 +122,9 @@ test('long unchanged runs fold into gaps around each change, and an opened gap s
     {kind: 'rows', start: 5, end: 12},
     {kind: 'gap', start: 12, end: 18},
   ])
+  // An opened gap keeps its fold before its rows, to fold them again.
   assert.deepEqual(segments(changed, 3, new Set([0])), [
+    {kind: 'open', start: 0, end: 5},
     {kind: 'rows', start: 0, end: 12},
     {kind: 'gap', start: 12, end: 18},
   ])

@@ -157,7 +157,8 @@ for (const fallback of [false, true])
     expectCentred(await capGaps(page, bar(page), total), 'bar', true)
     const centres = await bar(page).evaluate(element => {
       const box = element.getBoundingClientRect()
-      const figures = element.querySelector('.ph-summary-figures')!.getBoundingClientRect()
+      // The figures and, when some don't fit, their "…": what the bar centres.
+      const figures = element.querySelector('.ph-summary-centre')!.getBoundingClientRect()
       return {bar: box.left + box.width / 2, figures: figures.left + figures.width / 2}
     })
     expect(Math.abs(centres.bar - centres.figures), JSON.stringify(centres)).toBeLessThanOrEqual(1)

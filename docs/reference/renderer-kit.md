@@ -1331,19 +1331,20 @@ when it names none (`all`, or no request); in diff mode without a request, the c
 ### `Folded`
 
 ```ts
-type Folded<T> = { "item": T; "type": "item" } | { "items": Array<T>; "key": string; "type": "fold" }
+type Folded<T> = { "item": T; "type": "item" } | { "items": Array<T>; "key": string; "open"?: false | true; "type": "fold" }
 ```
 
-One entry of a folded list: an item it shows, or a fold standing for a run of items it doesn't.
+One entry of a folded list: an item it shows, or a fold standing for a run of items it doesn't. An `open` fold's items
+follow it, and it is the way to fold them again.
 
 ### `foldList`
 
 ```ts
-foldList<T>(items: Array<T>, idOf: { (item: T): string }, shown: ReadonlySet<string> | undefined, expanded?: ReadonlySet<string>): Array<{ "item": T; "type": "item" } | { "items": Array<T>; "key": string; "type": "fold" }>
+foldList<T>(items: Array<T>, idOf: { (item: T): string }, shown: ReadonlySet<string> | undefined, expanded?: ReadonlySet<string>): Array<{ "item": T; "type": "item" } | { "items": Array<T>; "key": string; "open"?: false | true; "type": "fold" }>
 ```
 
-A list with every run of items `shown` leaves out folded into one entry, keyed by its first item, unless `expanded`
-names it; a run of one item stays, as its fold would take as much room. Every item is shown when `shown` is
+A list with every run of items `shown` leaves out folded into one entry, keyed by its first item; a run `expanded`
+names is listed after its fold, `open`. A run of one item stays, as its fold would take as much room. Every item is shown when `shown` is
 undefined. Fold the union of a comparison (or each pane's list in the union's order) so both revisions fold alike.
 
 ### `foldPrefix`
@@ -2375,7 +2376,7 @@ backward travel enters first. Use a `DirectionLatch` to choose `direction`.
 ### `scopedModel`
 
 ```ts
-scopedModel<X extends Extraction>(model: ComparisonModel<X>, shown: ReadonlySet<string>, parts?: "fold" | "omit" | "whole"): ScopedModel<X>
+scopedModel<X extends Extraction>(model: ComparisonModel<X>, shown: ReadonlySet<string>, parts?: "fold" | "omit" | "whole", open?: ReadonlySet<string>): ScopedModel<X>
 ```
 
 A model of only what a scope shows, for a canvas to lay out: the shown entities and their `parts` (left out, whole or
@@ -2383,7 +2384,8 @@ folded), and the relationships between them. A relationship is kept only when bo
 is (its ends are its context), an unchanged one between shown items stays, and none is ever drawn to an item the
 scope leaves out. Steps keep their kept rows, and a step left with none is dropped. Every other item takes no room.
 A fold is an unchanged entity of its parts' most common kind, labeled with their counts and contained by its entity
-in each revision that has it.
+in each revision that has it. A fold in `open` shows its parts and stays, labeled `Hide …` with `data.open`, as the
+way to fold them again.
 
 ### `ScopedModel`
 
@@ -2420,8 +2422,9 @@ to show more of it.
 |---|---|---|
 | `all` | `"all": ComparisonModel<Extraction>` | The model of every item: what a canvas's `model` (`MountOptions.scope` `subset`) narrows. |
 | `changes` | `"changes": ReadonlySet<string>` | The change rows in scope, by row ID. |
+| `collapse` | `"collapse"(ids: Iterable<string, any, any>): void` | Folds these open folds again, or stops showing items `expand` added. |
 | `context` | `"context": ReadonlySet<string>` | The unchanged rows shown to read them: their relationships' endpoints and the items that contain them. |
-| `expand` | `"expand"(ids: Iterable<string, any, any>): void` | Shows these items too, or a fold's parts (`isFold`), as opening a fold does, until the host's scope changes. A canvas lays them out with the rest. |
+| `expand` | `"expand"(ids: Iterable<string, any, any>): void` | Shows these items too, or opens these folds (`isFold`), until the host's scope changes. A canvas lays them out with the rest; an open fold stays, as the way to fold its parts again. |
 | `shown` | `"shown": ReadonlySet<string>` | Both: every row the scope shows. |
 
 ### `ScrollStart`
@@ -3368,11 +3371,12 @@ Name and value rows, such as an entity's data.
 ### `Fold`
 
 ```ts
-Fold(__0: { "as"?: "a" | "abbr" | "address" | "animate" | "animateMotion" | "animateTransform" | "area" | "article" | "aside" | "audio" | "b" | "base" | "bdi" | "bdo" | "big" | "blockquote" | "body" | "br" | "button" | "canvas" | "caption" | "center" | "circle" | "cite" | "clipPath" | "code" | "col" | "colgroup" | "data" | "datalist" | "dd" | "defs" | "del" | "desc" | "details" | "dfn" | "dialog" | "div" | "dl" | "dt" | "ellipse" | "em" | "embed" | "feBlend" | "feColorMatrix" | "feComponentTransfer" | "feComposite" | "feConvolveMatrix" | "feDiffuseLighting" | "feDisplacementMap" | "feDistantLight" | "feDropShadow" | "feFlood" | "feFuncA" | "feFuncB" | "feFuncG" | "feFuncR" | "feGaussianBlur" | "feImage" | "feMerge" | "feMergeNode" | "feMorphology" | "feOffset" | "fePointLight" | "feSpecularLighting" | "feSpotLight" | "feTile" | "feTurbulence" | "fieldset" | "figcaption" | "figure" | "filter" | "footer" | "foreignObject" | "form" | "g" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "head" | "header" | "hgroup" | "hr" | "html" | "i" | "iframe" | "image" | "img" | "input" | "ins" | "kbd" | "keygen" | "label" | "legend" | "li" | "line" | "linearGradient" | "link" | "main" | "map" | "mark" | "marker" | "mask" | "menu" | "menuitem" | "meta" | "metadata" | "meter" | "mpath" | "nav" | "noindex" | "noscript" | "object" | "ol" | "optgroup" | "option" | "output" | "p" | "param" | "path" | "pattern" | "picture" | "polygon" | "polyline" | "pre" | "progress" | "q" | "radialGradient" | "rect" | "rp" | "rt" | "ruby" | "s" | "samp" | "script" | "search" | "section" | "select" | "set" | "slot" | "small" | "source" | "span" | "stop" | "strong" | "style" | "sub" | "summary" | "sup" | "svg" | "switch" | "symbol" | "table" | "tbody" | "td" | "template" | "text" | "textPath" | "textarea" | "tfoot" | "th" | "thead" | "time" | "title" | "tr" | "track" | "tspan" | "u" | "ul" | "use" | "var" | "video" | "view" | "wbr" | "webview" | ComponentClass<any, any> | FunctionComponent<any>; "className"?: string; "columns"?: number; "count": number; "noun": string; "onExpand": { (): void } }): Element
+Fold(__0: { "as"?: "a" | "abbr" | "address" | "animate" | "animateMotion" | "animateTransform" | "area" | "article" | "aside" | "audio" | "b" | "base" | "bdi" | "bdo" | "big" | "blockquote" | "body" | "br" | "button" | "canvas" | "caption" | "center" | "circle" | "cite" | "clipPath" | "code" | "col" | "colgroup" | "data" | "datalist" | "dd" | "defs" | "del" | "desc" | "details" | "dfn" | "dialog" | "div" | "dl" | "dt" | "ellipse" | "em" | "embed" | "feBlend" | "feColorMatrix" | "feComponentTransfer" | "feComposite" | "feConvolveMatrix" | "feDiffuseLighting" | "feDisplacementMap" | "feDistantLight" | "feDropShadow" | "feFlood" | "feFuncA" | "feFuncB" | "feFuncG" | "feFuncR" | "feGaussianBlur" | "feImage" | "feMerge" | "feMergeNode" | "feMorphology" | "feOffset" | "fePointLight" | "feSpecularLighting" | "feSpotLight" | "feTile" | "feTurbulence" | "fieldset" | "figcaption" | "figure" | "filter" | "footer" | "foreignObject" | "form" | "g" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "head" | "header" | "hgroup" | "hr" | "html" | "i" | "iframe" | "image" | "img" | "input" | "ins" | "kbd" | "keygen" | "label" | "legend" | "li" | "line" | "linearGradient" | "link" | "main" | "map" | "mark" | "marker" | "mask" | "menu" | "menuitem" | "meta" | "metadata" | "meter" | "mpath" | "nav" | "noindex" | "noscript" | "object" | "ol" | "optgroup" | "option" | "output" | "p" | "param" | "path" | "pattern" | "picture" | "polygon" | "polyline" | "pre" | "progress" | "q" | "radialGradient" | "rect" | "rp" | "rt" | "ruby" | "s" | "samp" | "script" | "search" | "section" | "select" | "set" | "slot" | "small" | "source" | "span" | "stop" | "strong" | "style" | "sub" | "summary" | "sup" | "svg" | "switch" | "symbol" | "table" | "tbody" | "td" | "template" | "text" | "textPath" | "textarea" | "tfoot" | "th" | "thead" | "time" | "title" | "tr" | "track" | "tspan" | "u" | "ul" | "use" | "var" | "video" | "view" | "wbr" | "webview" | ComponentClass<any, any> | FunctionComponent<any>; "className"?: string; "columns"?: number; "count": number; "noun": string; "onToggle": { (): void }; "open"?: false | true | undefined }): Element
 ```
 
-A fold: "12 unchanged declarations", a button that expands the run in place. `as` sets its element (`div` by
-default, `tr` or `li` in tables and lists; a `tr` puts the button in one cell spanning `columns`).
+A fold: "12 unchanged declarations", a button that opens the run in place; `open`, "Hide 12 unchanged declarations"
+above the opened run, which folds it again. `as` sets its element (`div` by default, `tr` or `li` in tables and lists;
+a `tr` puts the button in one cell spanning `columns`).
 
 ### `GeneratedMark`
 
@@ -3940,7 +3944,7 @@ is drawn at its scale, so a host never measures a scale about to change
 ### `useFolds`
 
 ```ts
-useFolds<T>(items: Array<T>, idOf: { (item: T): string }, scope: ChangesScope | undefined): { "entries": Array<{ "item": T; "type": "item" } | { "items": Array<T>; "key": string; "type": "fold" }>; "expand": { (key: string): void } }
+useFolds<T>(items: Array<T>, idOf: { (item: T): string }, scope: ChangesScope | undefined): { "collapse": { (key: string): void }; "entries": Array<{ "item": T; "type": "item" } | { "items": Array<T>; "key": string; "open"?: false | true; "type": "fold" }>; "expand": { (key: string): void } }
 ```
 
 Folds a list for the Changes scope (`foldList`) and keeps which folds the person expanded, until the scope's shown

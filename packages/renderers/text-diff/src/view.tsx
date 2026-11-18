@@ -113,12 +113,13 @@ function PlainLines({text, presentation}: {text: string; presentation: TextPrese
   )
 }
 
-/** A folded run of unchanged lines; activating it shows them. */
-function Gap({count, onExpand, span}: {count: number; onExpand: () => void; span?: boolean}) {
+/** A folded run of unchanged lines, which activating shows; open, above the run, the way to fold it again. */
+function Gap({count, open = false, onToggle, span}: {count: number; open?: boolean; onToggle: () => void; span?: boolean}) {
   return (
-    <div className={`td-row td-gap${span ? ' td-span' : ''}`}>
-      <button type="button" className="td-expand" onClick={onExpand}>
-        <span aria-hidden="true">⋯</span> {count.toLocaleString()} unchanged {count === 1 ? 'line' : 'lines'}
+    <div className={`td-row td-gap${span ? ' td-span' : ''}`} data-fold={open ? 'open' : 'closed'}>
+      <button type="button" className="td-expand" onClick={onToggle} aria-expanded={open}>
+        <span aria-hidden="true">⋯</span> {open ? 'Hide ' : ''}
+        {count.toLocaleString()} unchanged {count === 1 ? 'line' : 'lines'}
       </button>
     </div>
   )
@@ -129,10 +130,11 @@ interface DiffProps {
   presentation: TextPresentation
   expanded: ReadonlySet<number>
   expand: (start: number) => void
+  collapse: (start: number) => void
 }
 
 /** One column: removed lines then added lines in each change, with old and new line numbers. */
-function UnifiedDiff({diff, presentation, expanded, expand}: DiffProps) {
+function UnifiedDiff({diff, presentation, expanded, expand, collapse}: DiffProps) {
   const rows = diff.unified.slice(0, lineLimit)
   const parts = segments(
     rows.map(row => row.kind !== 'equal'),
@@ -144,8 +146,13 @@ function UnifiedDiff({diff, presentation, expanded, expand}: DiffProps) {
     <div className="td-body" data-layout="unified" data-presentation={presentation}>
       <div className="td-lines td-diff" style={style}>
         {parts.map((part: Segment) =>
-          part.kind === 'gap' ? (
-            <Gap key={`gap-${part.start}`} count={part.end - part.start} onExpand={() => expand(part.start)} />
+          part.kind !== 'rows' ? (
+            <Gap
+              key={`${part.kind}-${part.start}`}
+              count={part.end - part.start}
+              open={part.kind === 'open'}
+              onToggle={() => (part.kind === 'open' ? collapse : expand)(part.start)}
+            />
           ) : (
             rows.slice(part.start, part.end).map((line, offset, run) => (
               <div
@@ -206,7 +213,7 @@ function SplitCell({
  * filler, so unchanged lines stay aligned. Lines wrap within their column and
  * both cells of a row share its height.
  */
-function SplitDiff({diff, presentation, expanded, expand}: DiffProps) {
+function SplitDiff({diff, presentation, expanded, expand, collapse}: DiffProps) {
   const rows = diff.split.slice(0, lineLimit)
   const parts = segments(
     rows.map(row => row.left?.kind !== 'equal' || row.right?.kind !== 'equal'),
@@ -220,8 +227,14 @@ function SplitDiff({diff, presentation, expanded, expand}: DiffProps) {
         <div className="td-caption td-side-before">Before</div>
         <div className="td-caption td-side-after">After</div>
         {parts.map((part: Segment) =>
-          part.kind === 'gap' ? (
-            <Gap key={`gap-${part.start}`} count={part.end - part.start} onExpand={() => expand(part.start)} span />
+          part.kind !== 'rows' ? (
+            <Gap
+              key={`${part.kind}-${part.start}`}
+              count={part.end - part.start}
+              open={part.kind === 'open'}
+              onToggle={() => (part.kind === 'open' ? collapse : expand)(part.start)}
+              span
+            />
           ) : (
             rows.slice(part.start, part.end).map((row, offset, run) => (
               <div className="td-pair" key={part.start + offset}>
@@ -251,6 +264,7 @@ function OutputSection({
   const {selectedId, onSelect, comparing} = props
   const [expanded, setExpanded] = useState<ReadonlySet<number>>(new Set())
   const expand = useCallback((start: number) => setExpanded(previous => new Set([...previous, start])), [])
+  const collapse = useCallback((start: number) => setExpanded(previous => new Set([...previous].filter(item => item !== start))), [])
   const before = row.before && readOutput(row.before),
     after = row.after && readOutput(row.after)
   const output = (after ?? before)!
@@ -262,7 +276,7 @@ function OutputSection({
   } else {
     let diff = diffs.get(row.id)
     if (!diff) diffs.set(row.id, (diff = outputDiff(before?.text ?? '', after?.text ?? '')))
-    const shared: DiffProps = {diff, presentation: output.presentation, expanded, expand}
+    const shared: DiffProps = {diff, presentation: output.presentation, expanded, expand, collapse}
     body = (
       <>
         {!diff.minimal && (
@@ -336,7 +350,7 @@ export function TextDiffView(props: RendererProps<typeof accepts>) {
   const [ref, narrow] = useNarrow()
   const layout = narrow ? 'unified' : chosen
   // The Changes scope folds the outputs it doesn't show; each output's diff folds its unchanged lines in every scope.
-  const {entries, expand} = useFolds(rows, row => row.id, props.scope)
+  const {entries, expand, collapse} = useFolds(rows, row => row.id, props.scope)
   // One status width for every header, from the longest status this comparison can show.
   const parts = Math.max(1, ...rows.map(row => statusParts(row).length))
   const style: Style = {
@@ -352,7 +366,13 @@ export function TextDiffView(props: RendererProps<typeof accepts>) {
       ) : (
         entries.map(entry =>
           entry.type === 'fold' ? (
-            <Fold key={`fold:${entry.key}`} count={entry.items.length} noun="outputs" onExpand={() => expand(entry.key)} />
+            <Fold
+              key={`fold:${entry.key}`}
+              count={entry.items.length}
+              noun="outputs"
+              open={entry.open}
+              onToggle={() => (entry.open ? collapse : expand)(entry.key)}
+            />
           ) : (
             <OutputSection key={entry.item.id} row={entry.item} props={props} layout={layout} diffs={diffs} />
           ),

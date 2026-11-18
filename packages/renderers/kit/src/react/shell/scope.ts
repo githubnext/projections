@@ -3,7 +3,7 @@
 import {useCallback, useMemo, useState} from 'react'
 import type {FilterPayload} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ComparisonModel} from '../../model.js'
-import {changesScope, scopedModel} from '../../scope.js'
+import {changesScope, isFold, scopedModel} from '../../scope.js'
 import type {ScopeView} from '../../scope.js'
 import type {DocumentModel} from './document.js'
 import type {MountOptions} from './props.js'
@@ -23,27 +23,36 @@ export function useScopeView(
 ): {scope: ScopeView | undefined; document: DocumentModel | undefined} {
   const hostScope = useMemo(() => changesScope(resolved, filter), [resolved, filter])
   const key = hostScope ? [...hostScope.shown].sort().join('\n') : ''
+  // What the person opened since the host last changed the scope: items, and folds (which keep their place).
   const [opened, setOpened] = useState<{key: string; ids: ReadonlySet<string>}>({key, ids: none})
   const openedIds = opened.key === key ? opened.ids : none
   const subset = options?.layout === 'subset' ? (options.parts ?? 'omit') : undefined
   const scoped = useMemo(() => {
     if (!hostScope || !resolved) return undefined
-    const shown = openedIds.size ? new Set([...hostScope.shown, ...openedIds]) : hostScope.shown
-    return {shown, narrowed: subset ? scopedModel(resolved, shown, subset) : undefined}
+    const items = [...openedIds].filter(id => !isFold(id))
+    const shown = items.length ? new Set([...hostScope.shown, ...items]) : hostScope.shown
+    const folds = new Set([...openedIds].filter(isFold))
+    const narrowed = subset ? scopedModel(resolved, shown, subset, folds) : undefined
+    const open = [...folds].flatMap(id => narrowed?.folds.get(id) ?? [])
+    return {shown: open.length ? new Set([...shown, ...open]) : shown, narrowed}
   }, [hostScope, resolved, openedIds, subset])
-  const folds = scoped?.narrowed?.folds
-  const expand = useCallback(
-    (ids: Iterable<string>) =>
+  const change = useCallback(
+    (ids: Iterable<string>, add: boolean) =>
       setOpened(previous => {
         const next = new Set(previous.key === key ? previous.ids : none)
-        for (const id of ids) for (const part of folds?.get(id) ?? [id]) next.add(part)
+        for (const id of ids) {
+          if (add) next.add(id)
+          else next.delete(id)
+        }
         return {key, ids: next}
       }),
-    [key, folds],
+    [key],
   )
+  const expand = useCallback((ids: Iterable<string>) => change(ids, true), [change])
+  const collapse = useCallback((ids: Iterable<string>) => change(ids, false), [change])
   const scope = useMemo<ScopeView | undefined>(
-    () => (hostScope && scoped && resolved ? {...hostScope, shown: scoped.shown, all: resolved, expand} : undefined),
-    [hostScope, scoped, resolved, expand],
+    () => (hostScope && scoped && resolved ? {...hostScope, shown: scoped.shown, all: resolved, expand, collapse} : undefined),
+    [hostScope, scoped, resolved, expand, collapse],
   )
   const narrowed = scoped?.narrowed?.model
   const shownDocument = useMemo(

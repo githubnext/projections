@@ -172,28 +172,30 @@ function Marker({card, marker, tint, emphasis}: {card: Card; marker: FrameColumn
 
 /**
  * The columns the Changes scope leaves out of a shown table, folded into one row: a button that opens them in place (the
- * table grows to hold them, and the schema lays out again around it).
+ * table grows to hold them, and the schema lays out again around it). Once open, the row stays below them as "Hide 7
+ * unchanged columns", which folds them again.
  */
 function FoldRow({card, row}: {card: Card; row: FrameColumn}) {
   const {change: fold, entity: version, top, height, opacity} = row
   const label = version.label
+  const open = version.data?.open === true
   return (
-    <div className="database-row database-fold" style={{top, height, opacity}} data-fold="">
+    <div className="database-row database-fold" style={{top, height, opacity}} data-fold={open ? 'open' : 'closed'}>
       <button
         type="button"
         className="database-fold-button"
+        aria-expanded={open}
         onClick={event => {
           event.stopPropagation()
-          // After the click is handled: opening the fold replaces this button, and the shell would read a click on a
+          // After the click is handled: the new layout replaces this button, and the shell would read a click on a
           // detached element as one on the table.
-          setTimeout(() => card.props.scope?.expand([fold.id]))
+          setTimeout(() => (open ? card.props.scope?.collapse([fold.id]) : card.props.scope?.expand([fold.id])))
         }}
-        aria-label={`Show ${label}`}
-        title={`Show ${label}`}
+        title={open ? label : `Show ${label}`}
       >
         <svg className="database-fold-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path
-            d="M5 6l3-3 3 3M5 10l3 3 3-3"
+            d={open ? 'M5 3l3 3 3-3M5 13l3-3 3 3' : 'M5 6l3-3 3 3M5 10l3 3 3-3'}
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"

@@ -530,25 +530,3 @@
 .pk header .database-change-values.pk-value-change {
   justify-content: flex-start;
 }
-
-/*
- * Changing the scope lays the schema out again (Changes holds only the changed tables and their context): while it moves
- * (`data-scope-moving`), cards and rows glide to their new places and the links, which would otherwise jump, fade back
- * in once they have arrived. Never under reduced motion, which skips the move.
- */
-.database-view[data-scope-moving] :is(.database-table, .database-row, .database-canvas, .database-zoom) {
-  transition-property: top, left, width, height;
-  transition-duration: 320ms;
-  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
-}
-.database-view[data-scope-moving] .database-links {
-  opacity: 0;
-}
-.database-view .database-links {
-  transition: opacity 160ms ease-out;
-}
-@media (prefers-reduced-motion: reduce) {
-  .database-view .database-links {
-    transition: none;
-  }
-}

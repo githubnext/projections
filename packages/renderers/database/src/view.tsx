@@ -19,28 +19,49 @@ import {DatabaseTags, tagLimit} from './tags.js'
 import {Link, LinkHead} from './links-view.js'
 import {linkNamer} from './link-names.js'
 import {Table} from './table.js'
+import type {SchemaFrame} from './frame.js'
+import {morphSchemaFrame} from './morph.js'
 import {useNaturalHeight, useViewSize} from './view-size.js'
 
-/** How long tables and rows move between layouts when the scope changes (Changes and All). */
-const scopeMoveMs = 320
+/** How long cards, rows and links move to a new layout of the schema. */
+const moveMs = 320
 
 /**
- * Whether the schema is moving to a new scope's layout: from the render that lays it out again until the move ends, so
- * cards and rows glide to their new places rather than jump. Never under reduced motion.
+ * The frame to draw: `frame`, or while the schema moves to a new layout (a new `layout`, as when the scope changes or a
+ * fold opens or closes), a frame between the one drawn before and it, so cards, rows and links glide to their new
+ * places, the links attached throughout. Zoom, scrubbing and resizing follow `frame` at once, as does everything under
+ * reduced motion. Also whether it's moving.
  */
-function useScopeMove(scopeKey: string, reducedMotion: boolean): boolean {
-  const [moving, setMoving] = useState(false)
-  const [shown, setShown] = useState(scopeKey)
-  if (shown !== scopeKey) {
-    setShown(scopeKey)
-    if (!reducedMotion) setMoving(true)
-  }
+function useFrameMorph(frame: SchemaFrame, layout: unknown, reducedMotion: boolean): [SchemaFrame, boolean] {
+  const drawn = useRef(frame)
+  const seen = useRef(layout)
+  const [move, setMove] = useState<{from: SchemaFrame; mix: number}>()
   useLayoutEffect(() => {
-    if (!moving) return
-    const timer = setTimeout(() => setMoving(false), scopeMoveMs)
-    return () => clearTimeout(timer)
-  }, [moving, scopeKey])
-  return moving
+    if (seen.current === layout || reducedMotion) {
+      seen.current = layout
+      setMove(undefined)
+      return
+    }
+    seen.current = layout
+    // From what was drawn last, which may itself be mid-move.
+    const from = drawn.current
+    let start: number | undefined
+    let handle = 0
+    const step = (now: number) => {
+      start ??= now
+      const t = Math.min(1, (now - start) / moveMs)
+      setMove(t >= 1 ? undefined : {from, mix: 1 - (1 - t) ** 3})
+      if (t < 1) handle = requestAnimationFrame(step)
+    }
+    setMove({from, mix: 0})
+    handle = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(handle)
+  }, [layout, reducedMotion])
+  const shown = move ? morphSchemaFrame(move.from, frame, move.mix) : frame
+  useLayoutEffect(() => {
+    drawn.current = shown
+  })
+  return [shown, move !== undefined]
 }
 
 export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
@@ -74,7 +95,7 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
         : undefined,
     [diff, model, available, links, text.measure, text.chrome],
   )
-  const frame = union ? union.frame : transition!(progress)
+  const [frame, moving] = useFrameMorph(union ? union.frame : transition!(progress), model, props.reducedMotion)
   const tagSource = union ?? transition!
   const tableCount = (union ? union.layout : transition!.layouts.at(-1)!).tables.size
   // Opens with the whole schema in view, fitted to the stage (never magnified); zoom enlarges it. Every step shares
@@ -95,7 +116,6 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
       ?.querySelector(`[data-entity-id="${CSS.escape(props.selectedId)}"]`)
       ?.scrollIntoView?.({block: 'nearest', inline: 'nearest'})
   }, [props.selectedId])
-  const moving = useScopeMove(props.scope ? `changes:${props.scope.shown.size}` : 'all', props.reducedMotion)
   const empty = !model.entities.length
   const linkName = linkNamer(frame)
   return (
@@ -106,7 +126,7 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
       data-layout={frame.mode}
       data-zoom={zoom}
       data-diff={diff ? '' : undefined}
-      data-scope-moving={moving ? '' : undefined}
+      data-moving={moving ? '' : undefined}
     >
       {text.probe}
       <div className="database-zoom" style={{width: width * scale, height: natural === undefined ? undefined : natural * scale}}>

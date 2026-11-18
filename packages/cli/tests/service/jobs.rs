@@ -47,14 +47,7 @@ async fn concurrent_posts_are_bounded_and_cancel_waits_for_process_cleanup() {
     // Both are accepted: the second waits for the first, as jobs from every client queue.
     assert_eq!([first.status, second.status], [202, 202]);
     let (created, queued) = (first.json(), second.json());
-    timeout(Duration::from_secs(10), async {
-        while !fixture.root.join("collector.pid").exists() {
-            sleep(Duration::from_millis(10)).await;
-        }
-    })
-    .await
-    .unwrap();
-    let pid: i32 = fs::read_to_string(fixture.root.join("collector.pid")).unwrap().parse().unwrap();
+    let pid = collector_pid(&fixture).await;
     let cancelled = fixture
         .request(
             "POST",
@@ -83,14 +76,22 @@ async fn concurrent_posts_are_bounded_and_cancel_waits_for_process_cleanup() {
 async fn shutdown_cancels_native_process_before_returning() {
     let fixture = Fixture::new(true, false, true).await;
     fixture.job(json!({"projectionId":"example","before":"HEAD"})).await;
+    let pid = collector_pid(&fixture).await;
+    fixture.close().await;
+    assert!(!alive(pid), "collector {pid} survived shutdown");
+}
+
+/// The slow collector's process ID, once it has started and written it.
+async fn collector_pid(fixture: &Fixture) -> i32 {
+    let path = fixture.root.join("collector.pid");
     timeout(Duration::from_secs(10), async {
-        while !fixture.root.join("collector.pid").exists() {
+        loop {
+            if let Ok(text) = fs::read_to_string(&path) {
+                return text.parse().unwrap_or_else(|error| panic!("collector.pid holds {text:?}: {error}"));
+            }
             sleep(Duration::from_millis(10)).await;
         }
     })
     .await
-    .unwrap();
-    let pid: i32 = fs::read_to_string(fixture.root.join("collector.pid")).unwrap().parse().unwrap();
-    fixture.close().await;
-    assert!(!alive(pid), "collector {pid} survived shutdown");
+    .expect("the collector wrote its pid within 10 s")
 }

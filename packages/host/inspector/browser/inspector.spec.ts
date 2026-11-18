@@ -147,6 +147,25 @@ async function trust(page: Page) {
   await expect(page.locator('.pi-trust-state')).toHaveAttribute('data-trust', /granted|not-needed/)
 }
 
+/**
+ * How long a repository-mode page may take to extract both sides of its opening comparison and compare them, ms: two
+ * extractor runs on a cold backend (no extraction cache), which a starved Linux WebKit runner has taken 7 s over, the
+ * default expect timeout being for one interaction.
+ */
+const openingExtraction = 20_000
+
+/**
+ * Waits for a repository-mode page's opening comparison to be drawn, in its two stages, each with its own budget:
+ * extracting and comparing both sides (`openingExtraction`), then the renderer loading and painting it (the default
+ * timeout). A saved artifact (`reviewUrl`) extracts nothing and needs only the second.
+ */
+async function openingDrawn(page: Page) {
+  await expect(page.locator('.ph[data-mode="comparison"]'), 'the opening comparison, extracted and compared').toBeVisible({
+    timeout: openingExtraction,
+  })
+  await expect(page.locator('.ph[data-mode="comparison"][data-renderer-status="ready"]'), 'its renderer, painted').toBeVisible()
+}
+
 /** Sets a revision as Before or After from the Explorer's History, unless it already is. */
 async function mark(page: Page, ref: string, side: 'Before' | 'After') {
   await sidebar(page)
@@ -614,7 +633,7 @@ test('saving the projection re-extracts both sides; one side failing leaves the 
       extractor: {command: [process.execPath, 'collect.mjs']},
     }),
   )
-  await expect(page.locator('.ph[data-mode="comparison"]')).toBeVisible({timeout: 20_000})
+  await expect(page.locator('.ph[data-mode="comparison"]')).toBeVisible({timeout: openingExtraction})
   await expect(failure).toHaveCount(0)
   await sidebar(page)
   await expect(page.locator('[data-revision="HEAD~1"]')).toHaveAttribute('data-status', 'done')
@@ -629,7 +648,7 @@ test('a projection is three parts: override the renderer and the comparator for 
   await page.goto(app.url)
   await chooseProjection(page, 'Checkout architecture')
   await trust(page)
-  await expect(page.locator('.ph[data-mode="comparison"][data-renderer-status="ready"]')).toBeVisible()
+  await openingDrawn(page)
   await sidebar(page)
   const parts = page.locator('.pi-parts')
   await expect(parts.locator('.pi-part-trigger')).toHaveCount(3)
@@ -1140,7 +1159,7 @@ test('every title-bar control moves its content, never its box, while pressed; r
   await page.goto(app.url)
   // Pressed only once the opening comparison is drawn: on a starved runner, startup (the extractions landing, the
   // renderer loading) kept the page from answering a style read for two seconds, though the press showed at once.
-  await expect(page.locator('.ph[data-mode="comparison"][data-renderer-status="ready"]')).toBeVisible()
+  await openingDrawn(page)
   // By CSS: an open menu hides the rest of the page from assistive technology, and some controls open one on press.
   const toolbar = page.locator('.pi-titlebar [role="toolbar"]')
   /** The `translate` of a control's content: its element children, or a file button's face beside its input. */
@@ -1366,7 +1385,7 @@ for (const [theme, width] of [
     await trust(page)
     await chooseTheme(page, theme)
     await page.getByRole('note', {name: 'Tip'}).getByRole('button', {name: 'Dismiss tip'}).click()
-    await expect(page.locator('.ph[data-renderer-status="ready"]')).toBeVisible()
+    await openingDrawn(page)
     const gutter = 8
     const explorer = page.getByRole('complementary', {name: 'Explorer'})
     // The view's card sets the radius, border and surface every workbench card shares; inside it the view is flat.
@@ -1450,7 +1469,7 @@ test('the docked Details panel: toggled and resized like the Explorer, remembere
   const mobile = testInfo.project.name.includes('mobile')
   await page.goto(app.url)
   await trust(page)
-  await expect(page.locator('.ph[data-mode="comparison"][data-renderer-status="ready"]')).toBeVisible()
+  await openingDrawn(page)
   if (drawer(page)) await sidebar(page, false)
   const dock = page.getByRole('complementary', {name: 'Details'})
   // Closed until someone opens it; then it says how to fill it.

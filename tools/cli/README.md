@@ -19,6 +19,8 @@ Run it from the workspace root:
 
 ```sh
 npm run tools -- context           # start here: a one-screen briefing
+npm run tools -- check --fast      # first: the cheap gates over what changed; builds and tests nothing
+npm run tools -- build <workspace> # a workspace and what it needs, rebuilding only what is out of date
 npm run tools -- check --affected  # the gates, for what the change touches
 npm run tools -- test --affected   # the tests, likewise
 npm run tools -- --help            # every command; tools <command> --help for one
@@ -62,8 +64,9 @@ launcher's absolute path.
 | `docs search <words>`, `docs read <path or title>` | Local Markdown search and reading, by section |
 | `doctor` | Toolchains, the npm registry, installed dependencies, stale builds, Playwright browsers, memory |
 | `affected` | Changed workspaces and crates, their dependants, generated files to regenerate |
-| `check [--affected] [--only …]` | boundaries, casing, portability, icons, considered, lockfile, readmes, links, versions, format, lint, cargo-fmt, build, comparators, typecheck, docs (and clippy) |
-| `test [target] [--affected] [--rust] [--browser <project>]` | Unit and Rust tests; one browser project at a time, at most 2 workers |
+| `check [--affected] [--fast] [--only …]` | boundaries, casing, portability, icons, considered, lockfile, readmes, links, versions, format, lint, cargo-fmt, build, comparators, typecheck, docs (and clippy, cargo-check); `--fast` runs only the cheap ones over what changed, with `cargo check` and typecheck of just the changed crates and workspaces |
+| `build [target] [--affected] [--force] [--dry-run]` | Builds a workspace (or the changed ones) and the workspaces it depends on, rebuilding a dependency only when it is unbuilt or older than its src or its own dependencies, as make would |
+| `test [target] [--affected] [--rust] [--browser <project>] [--filter <name>]` | Unit and Rust tests; one browser project at a time, at most 2 workers; `--filter` runs only the tests whose name matches |
 | `generated [check]` | The generated files, their generators, and whether they are current |
 | `fix` | Formatters and offline regenerators, then what changed |
 | `update shadcn [components…] [--check\|--dry-run]` | Three-way merges the vendored shadcn/ui components with an upstream release (`--version`, `--unreleased`); needs the network, so `fix` never runs it |

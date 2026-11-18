@@ -1,11 +1,12 @@
 // `doctor`: is this machine ready to build and test the repository?
 import {existsSync, statSync} from 'node:fs'
 import {join} from 'node:path'
+import {buildState} from '../lib/builds.ts'
 import {TOOLS} from '../lib/gates.ts'
 import {cliBinary} from '../lib/needs.ts'
 import {linkFindings} from './link.ts'
 import {loadUnits} from '../lib/packages.ts'
-import {newestMtime, newestOutput, onPath, probe, readText, type Command} from '../lib/repo.ts'
+import {newestMtime, onPath, probe, readText, type Command} from '../lib/repo.ts'
 import {availableMemory, gigabytes, playwrightBrowsers} from '../lib/machine.ts'
 import {nightly, toolchains, type Status} from '../lib/toolchains.ts'
 
@@ -78,21 +79,16 @@ export function buildFindings(root: string): Finding[] {
   const stale: string[] = []
   const unbuilt: string[] = []
   for (const unit of loadUnits(root)) {
-    if (!unit.kinds.includes('npm') || !unit.scripts.includes('build') || !existsSync(join(root, unit.path, 'src'))) continue
-    const output = newestOutput(root, `${unit.path}/dist`)
-    if (output === undefined) {
-      unbuilt.push(unit.path)
-      continue
-    }
-    const source = newestMtime(root, `${unit.path}/src`)
-    if (source && source.mtime > output) stale.push(unit.path)
+    const state = buildState(root, unit)
+    if (state === 'unbuilt') unbuilt.push(unit.path)
+    else if (state === 'stale') stale.push(unit.path)
   }
   if (stale.length)
     findings.push({
       check: 'workspace builds',
       status: 'warn',
       detail: `dist older than src in ${stale.join(', ')}`,
-      fix: `${TOOLS} check --only build --affected, or npm run build`,
+      fix: `${TOOLS} build ${stale[0]}, or npm run build`,
     })
   if (unbuilt.length)
     findings.push({
@@ -153,7 +149,7 @@ export function doctorReport(root: string) {
   if (!existsSync(lock)) findings.push({check: 'dependencies', status: 'fail', detail: 'node_modules is not installed', fix: 'npm ci'})
   else if (statSync(join(root, 'package-lock.json')).mtimeMs > statSync(lock).mtimeMs + 1000)
     findings.push({check: 'dependencies', status: 'warn', detail: 'package-lock.json changed since the last install', fix: 'npm ci'})
-  else findings.push({check: 'dependencies', status: 'ok', detail: 'node_modules matches package-lock.json'})
+  else findings.push({check: 'dependencies', status: 'ok', detail: 'node_modules matches package-lock.json; npm ci is not needed'})
   findings.push(...registryFindings(root, probe(root, ['npm', 'config', 'get', 'registry'])))
   findings.push(...buildFindings(root))
   const browsers = playwrightBrowsers(root)

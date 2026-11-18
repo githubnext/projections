@@ -44,7 +44,10 @@ The repository's own command line, [`tools`](tools/cli/README.md), wraps these
 for agents and people: `npm run tools -- context` is a one-screen briefing, and
 `npm run tools -- check --affected` and `npm run tools -- test --affected` run
 the gates and tests for what a change touches (`npm run tools -- --help` lists
-the rest). Report friction with it, or with these docs, with
+the rest). `npm run tools -- check --fast` runs only the cheap gates over what
+changed, and `npm run tools -- build <workspace>` builds one workspace and
+whatever it depends on that is out of date, where `npm run build` rebuilds
+everything. Report friction with it, or with these docs, with
 `npm run tools -- feedback "<summary>"`, which drafts an issue. GitHub Copilot
 cloud agent starts from
 [`copilot-setup-steps.yml`](.github/workflows/copilot-setup-steps.yml), which
@@ -107,10 +110,42 @@ proves `packages/cli/dist/projections` moved into an empty directory without
 Node on PATH; pass `-- --binary FILE` to prove a release asset.
 
 Run the smallest checks covering a change first, then the relevant integration
-checks. Preserve strict error, cancellation, geometry, progress and input
-validation assertions. A failure is evidence to diagnose, not a reason to
-increase a deadline, drop a frame, substitute a fixture for an enabled native
-test or silently return an empty model.
+checks: `tools check --fast` (format, lint, `cargo check` and typecheck of what
+changed), then `tools build <workspace>` if a test needs built output, then the
+narrowest tests (`tools test <target> --filter <name>`), and only then
+`tools check --affected`, `tools test --affected` and the full `npm run check`.
+A compile error found by a test run or a full build costs minutes, and on a
+shared machine a wait for a slot, that `--fast` spends seconds on. Preserve
+strict error, cancellation, geometry, progress and input validation assertions.
+A failure is evidence to diagnose, not a reason to increase a deadline, drop a
+frame, substitute a fixture for an enabled native test or silently return an
+empty model.
+
+### Faster local builds (optional)
+
+Each checkout and worktree compiles every Rust dependency into its own
+`target/`. A shared compile cache such as
+[sccache](https://github.com/mozilla/sccache) lets a new worktree reuse the
+dependencies another one already compiled. It is a machine setting, not a
+repository one, so nothing here requires it:
+
+```toml
+# ~/.cargo/config.toml
+[build]
+rustc-wrapper = "/path/to/sccache"
+```
+
+Set its size in sccache's own configuration (`[cache.disk] size`; 10 GiB by
+default). `client_side_mode = true` there runs each compile in a child of Cargo,
+so memory is counted against the build that caused it. sccache caches dependency
+crates, not the workspace's own crates, which build incrementally, nor crates
+whose inputs name the checkout's path: those that read `OUT_DIR` (`serde`,
+`thiserror`) and everything above them, and procedural macros.
+`sccache --show-stats` shows what it hit.
+
+`npm ci` replaces `node_modules` from npm's cache; it is bound by the file
+system, not the registry. Run it only in a fresh checkout or after the lockfile
+changes (`npm run tools -- doctor` says when).
 
 ### Continuous integration
 

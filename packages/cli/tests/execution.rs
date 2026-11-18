@@ -470,9 +470,19 @@ fn ci_artifacts_are_downloaded_from_the_repository_runs_for_the_commit() {
     );
     let calls = fs::read_to_string(&log).unwrap();
     assert!(calls.contains("run download 4242 --repo github.com/acme/demo --name projections"));
+    // CI's extraction isn't kept in the extraction cache: without artifacts,
+    // the commit is extracted, never served as official from the cache.
+    let local = repository
+        .runner()
+        .with_cache_in(cache.path())
+        .unwrap()
+        .show("probe", &first, None)
+        .unwrap();
+    assert!(repository.probe_ran());
+    assert_ne!(local["provenance"]["execution"]["source"], "ci");
     // The download is kept in the cache and reused without gh.
     fs::remove_file(&log).unwrap();
-    fs::remove_dir_all(cache.path().join("extractions")).unwrap();
+    let _ = fs::remove_dir_all(cache.path().join("extractions"));
     let runner = repository
         .runner()
         .with_cache_in(cache.path())
@@ -483,6 +493,24 @@ fn ci_artifacts_are_downloaded_from_the_repository_runs_for_the_commit() {
     assert!(!log.exists());
     assert!(!repository.probe_ran());
 
+    // A download counts only for the origin repository it came from.
+    let none = fake_gh(bin.path(), &[("*", r#"printf '%s' '{"workflow_runs":[]}'"#)]);
+    git(
+        repository.path(),
+        &["remote", "set-url", "origin", "https://github.com/mallory/demo.git"],
+    );
+    let document = with_gh(&repository, &none)
+        .with_cache_base(cache.path())
+        .with_artifacts(Vec::new(), true)
+        .show("probe", &first, None)
+        .unwrap();
+    assert!(repository.probe_ran());
+    assert_ne!(document["provenance"]["execution"]["source"], "ci");
+    git(
+        repository.path(),
+        &["remote", "set-url", "origin", "https://github.com/acme/demo.git"],
+    );
+
     // A download an earlier version kept, without the record of its run, isn't
     // used unless GitHub's API identifies its run again.
     let downloads = fs::read_dir(cache.path().join("artifacts"))
@@ -492,8 +520,6 @@ fn ci_artifacts_are_downloaded_from_the_repository_runs_for_the_commit() {
         .unwrap()
         .path();
     fs::remove_file(downloads.join("4242.json")).unwrap();
-    fs::remove_dir_all(cache.path().join("extractions")).unwrap();
-    let none = fake_gh(bin.path(), &[("*", r#"printf '%s' '{"workflow_runs":[]}'"#)]);
     let document = with_gh(&repository, &none)
         .with_cache_in(cache.path())
         .unwrap()
@@ -545,8 +571,9 @@ fn a_fork_pull_request_run_is_never_the_repository_ci() {
     let calls = fs::read_to_string(&log).unwrap();
     assert!(!calls.contains("run download"), "{calls}");
     // Configuring the other workflow accepts its run, never the fork's.
+    let configured = tempfile::tempdir().unwrap();
     let document = with_gh(&repository, &gh)
-        .with_cache_in(tempfile::tempdir().unwrap().path())
+        .with_cache_in(configured.path())
         .unwrap()
         .with_ci_artifacts(Vec::new(), true, vec!["other.yml".into()])
         .show("probe", &first, None)
@@ -555,6 +582,27 @@ fn a_fork_pull_request_run_is_never_the_repository_ci() {
     assert_eq!(document["provenance"]["execution"]["ci"]["run"], 4243);
     assert_eq!(document["provenance"]["execution"]["official"], true);
     assert!(!fs::read_to_string(&log).unwrap().contains("run download 666"));
+    // Its download was accepted only because the configuration named it, so
+    // the default policy doesn't reuse it (nor the extraction cache).
+    let document = with_gh(&repository, &gh)
+        .with_cache_in(configured.path())
+        .unwrap()
+        .with_artifacts(Vec::new(), true)
+        .show("probe", &first, None)
+        .unwrap();
+    assert!(repository.probe_ran());
+    assert_ne!(document["provenance"]["execution"]["source"], "ci");
+    // Naming it again reuses the download without downloading.
+    fs::remove_file(&log).unwrap();
+    let document = with_gh(&repository, &gh)
+        .with_cache_in(configured.path())
+        .unwrap()
+        .with_ci_artifacts(Vec::new(), true, vec![".github/workflows/other.yml".into()])
+        .show("probe", &first, None)
+        .unwrap();
+    assert!(!repository.probe_ran());
+    assert_eq!(document["provenance"]["execution"]["official"], true);
+    assert!(!log.exists());
 }
 
 #[test]
@@ -615,6 +663,24 @@ fn an_imported_artifact_is_official_only_when_its_attestation_verifies() {
         .unwrap();
     assert!(!repository.probe_ran());
     assert_eq!(document["provenance"]["execution"]["official"], false);
+
+    // When GitHub can't be reached, the import is still used; without one,
+    // the failure is reported.
+    let unavailable = fake_gh(bin.path(), &[("*", "echo 'gh: not logged in' >&2; exit 4")]);
+    let document = with_gh(&repository, &unavailable)
+        .with_cache_base(tempfile::tempdir().unwrap().path())
+        .with_artifacts(vec![published.path().into()], true)
+        .show("probe", &first, None)
+        .unwrap();
+    assert!(!repository.probe_ran());
+    assert_eq!(document["provenance"]["execution"]["official"], false);
+    assert!(
+        with_gh(&repository, &unavailable)
+            .with_cache_base(tempfile::tempdir().unwrap().path())
+            .with_artifacts(Vec::new(), true)
+            .show("probe", &first, None)
+            .is_err()
+    );
 }
 
 #[test]

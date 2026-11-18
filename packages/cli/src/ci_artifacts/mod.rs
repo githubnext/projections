@@ -102,10 +102,23 @@ impl Artifacts {
         if found.as_ref().is_none_or(|held| held.origin.authentication.is_none())
             && self.download
             && self.attempted.lock().expect("attempts").insert(commit.to_owned())
-            && let Some(directory) = github::GitHub::new(runner, &self.workflows)?.download(commit, &downloads(runner)?)?
         {
-            let loaded = load(&directory, recorded(&directory, &self.workflows))?;
-            index.as_mut().expect("index").extend(loaded);
+            let downloaded = github::GitHub::new(runner, &self.workflows).and_then(|github| {
+                let Some(directory) = github.download(commit, &downloads(runner)?)? else {
+                    return Ok(Vec::new());
+                };
+                load(&directory, recorded(&directory, &self.workflows, Some(github.origin())))
+            });
+            match downloaded {
+                Ok(loaded) => index.as_mut().expect("index").extend(loaded),
+                // Downloading only tried to authenticate a usable import.
+                Err(error) if found.is_some() => {
+                    eprintln!(
+                        "projections: note: CI's artifact for {commit} couldn't be downloaded, so the imported one is used ({error:#})"
+                    );
+                }
+                Err(error) => return Err(error),
+            }
             found = matching(index.as_ref().expect("index"));
         }
         let Some(held) = found else {
@@ -168,8 +181,14 @@ impl Artifacts {
             };
             held.extend(extractions(directory, &manifest, &origin)?);
         }
+        // Earlier downloads count only for the current origin repository.
+        let current = origin(runner).ok();
         for directory in cached(runner) {
-            if let Some(origin) = recorded(&directory, &self.workflows) {
+            if let Some(origin) = recorded(
+                &directory,
+                &self.workflows,
+                current.as_ref().map(|(host, repository)| (host.as_str(), repository.as_str())),
+            ) {
                 held.extend(load(&directory, Some(origin))?);
             }
         }
@@ -184,13 +203,27 @@ fn record_path(directory: &Path) -> PathBuf {
 }
 
 /// The run `directory` was downloaded from, as recorded when GitHub's API
-/// identified it, if its workflow is still accepted. A download without a
-/// record (from an earlier version, which didn't check the run) isn't used.
-fn recorded(directory: &Path, workflows: &[String]) -> Option<Origin> {
+/// identified it, if it was downloaded from `current` (the origin's host and
+/// repository) and the active policy still accepts its workflow: one
+/// `workflows` names, or, when it names none, one accepted because it used the
+/// Projections Action (not merely because a configuration named it). A
+/// download without a complete record (from an earlier version, which didn't
+/// check the run) isn't used.
+fn recorded(directory: &Path, workflows: &[String], current: Option<(&str, &str)>) -> Option<Origin> {
     let record: Value = serde_json::from_slice(&fs::read(record_path(directory)).ok()?).ok()?;
+    let (host, repository) = current?;
+    let same = |field: &str, value: &str| record[field].as_str().is_some_and(|recorded| recorded.eq_ignore_ascii_case(value));
+    if !same("host", host) || !same("repository", repository) {
+        return None;
+    }
     let workflow = record["workflow"].as_str()?.to_owned();
-    let named = |named: &String| *named == workflow || workflow.rsplit('/').next() == Some(named.as_str());
-    if !workflows.is_empty() && !workflows.iter().any(named) {
+    let basis = github::Basis::parse(record["basis"].as_str()?)?;
+    let accepted = if workflows.is_empty() {
+        basis == github::Basis::UsesAction
+    } else {
+        github::names(workflows, &workflow)
+    };
+    if !accepted {
         return None;
     }
     Some(Origin {

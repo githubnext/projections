@@ -109,9 +109,18 @@ directory is authenticated only by its attestation: with `--ci`, the CLI runs
 attestation to name a run that passes the same checks
 (`authentication: "attestation"`). Any other imported extraction is still
 reused, but with `official: false` and no `authentication`: its manifest alone
-names the run, and nothing confirms it. Downloads an earlier version kept
-without a record of their run aren't used; `--ci` checks and records the run
-again.
+names the run, and nothing confirms it. If GitHub can't be reached (`gh`
+unauthenticated, offline, no `origin`), a matching import is still used,
+labelled imported; with nothing to fall back on, the error is reported.
+
+A download's record names the host, repository, run and workflow, and why the
+workflow was accepted (`configured` or `uses-action`). It is reused only while
+it matches the current `origin` and the active policy still accepts it: a
+workflow the configuration names, or, with none named, one accepted because it
+used the Projections Action, not merely because an earlier configuration named
+it. Downloads an earlier version kept without a complete record aren't used;
+`--ci` checks and records the run again. CI's extractions aren't kept in the
+extraction cache, so whether one is official is decided again on every run.
 
 `projections check --parity REV --ci` extracts a commit locally, with nothing
 reused, and compares it with CI's artifact for the same commit and definition: a

@@ -268,7 +268,12 @@ impl Runner {
     pub(super) fn cached(&self, key: &str, examined: &Revision, definition: &Value, digest: &str) -> Option<Value> {
         let cache = self.cache.as_ref()?;
         let mut document = cache.get(key)?;
-        if document["provenance"]["definitionDigest"] != digest || document["projection"]["id"] != definition["id"] {
+        // CI's extractions (cached by earlier versions) come from artifacts,
+        // under the current artifact policy, never from this cache.
+        if document["provenance"]["definitionDigest"] != digest
+            || document["projection"]["id"] != definition["id"]
+            || document["provenance"]["execution"]["source"] == "ci"
+        {
             return None;
         }
         // An entry that names a host directory is refused as a fresh run would be.

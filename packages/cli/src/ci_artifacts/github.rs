@@ -68,6 +68,11 @@ impl<'a> GitHub<'a> {
         })
     }
 
+    /// The host and `OWNER/REPO` it reads.
+    pub fn origin(&self) -> (&str, &str) {
+        (&self.host, &self.repository)
+    }
+
     fn gh(&self, arguments: &[&str]) -> Result<String> {
         let mut argv = vec![self.program.clone()];
         argv.extend(arguments.iter().map(|argument| (*argument).to_owned()));
@@ -83,17 +88,16 @@ impl<'a> GitHub<'a> {
     }
 
     /// The workflow file of `run` (an Actions run from GitHub's API) when its
-    /// artifact is this repository's own CI output, else `None`.
-    pub fn accepted(&self, run: &Value) -> Option<String> {
+    /// artifact is this repository's own CI output, with the basis it was
+    /// accepted on ([`Basis`]), else `None`.
+    pub fn accepted(&self, run: &Value) -> Option<(String, Basis)> {
         let workflow = candidate(run, &self.repository)?;
-        let allowed = if self.workflows.is_empty() {
-            self.runs_action(&workflow)
+        let basis = if self.workflows.is_empty() {
+            self.runs_action(&workflow).then_some(Basis::UsesAction)
         } else {
-            self.workflows
-                .iter()
-                .any(|named| *named == workflow || workflow.rsplit('/').next() == Some(named.as_str()))
+            names(self.workflows, &workflow).then_some(Basis::Configured)
         };
-        allowed.then_some(workflow)
+        basis.map(|basis| (workflow, basis))
     }
 
     /// Whether the workflow file at `path` on the default branch uses the
@@ -130,7 +134,7 @@ impl<'a> GitHub<'a> {
             let Some(id) = run["id"].as_u64().filter(|id| *id > 0) else {
                 continue;
             };
-            let Some(workflow) = self.accepted(run) else {
+            let Some((workflow, basis)) = self.accepted(run) else {
                 continue;
             };
             let artifacts = self.api(&format!("repos/{}/actions/runs/{id}/artifacts?name=projections", self.repository))?;
@@ -168,8 +172,10 @@ impl<'a> GitHub<'a> {
             if !target.join(super::MANIFEST).is_file() {
                 return Ok(None);
             }
-            // The record, not the artifact's own manifest, says whose run it is.
-            let record = json!({"repository": self.repository, "run": id, "workflow": workflow});
+            // The record, not the artifact's own manifest, says whose run it is,
+            // and on what basis its workflow was accepted.
+            let record = json!({"host": self.host, "repository": self.repository, "run": id,
+                "workflow": workflow, "basis": basis.as_str()});
             fs::write(super::record_path(&target), serde_json::to_vec(&record)?)?;
             return Ok(Some(target));
         }
@@ -216,7 +222,7 @@ impl<'a> GitHub<'a> {
         anyhow::ensure!(!signed.is_empty(), "no attestation names run {id} of {}", self.repository);
         let run = self.api(&format!("repos/{}/actions/runs/{id}", self.repository))?;
         anyhow::ensure!(run["conclusion"] == "success", "run {id} didn't succeed");
-        let workflow = self
+        let (workflow, _) = self
             .accepted(&run)
             .with_context(|| format!("run {id} isn't this repository's own Projections workflow"))?;
         anyhow::ensure!(signed.contains(&workflow), "run {id}'s attestation names another workflow");
@@ -227,6 +233,39 @@ impl<'a> GitHub<'a> {
             authentication: Some("attestation"),
         })
     }
+}
+
+/// Why a run's workflow file was accepted: the configuration named it
+/// (`ciWorkflows`, `--ci-workflow`), or, with none named, its file on the
+/// default branch uses the Projections Action.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Basis {
+    Configured,
+    UsesAction,
+}
+
+impl Basis {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Configured => "configured",
+            Self::UsesAction => "uses-action",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        match text {
+            "configured" => Some(Self::Configured),
+            "uses-action" => Some(Self::UsesAction),
+            _ => None,
+        }
+    }
+}
+
+/// Whether `workflows` (paths or file names) names the workflow file `workflow`.
+pub fn names(workflows: &[String], workflow: &str) -> bool {
+    workflows
+        .iter()
+        .any(|named| named == workflow || workflow.rsplit('/').next() == Some(named.as_str()))
 }
 
 /// The workflow file of `run` when it ran in `repository` for one of the

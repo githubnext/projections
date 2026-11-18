@@ -1,6 +1,6 @@
 {
   "name": "@githubnext/projections-renderer-dependency-injection",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -20,14 +20,14 @@
     "renderer": "dist"
   },
   "dependencies": {
-    "@githubnext/projections-renderer-kit": "0.1.0",
-    "@githubnext/projections-renderer-sdk": "0.1.0",
-    "@githubnext/projections-schemas": "0.1.0",
+    "@githubnext/projections-renderer-kit": "0.2.0",
+    "@githubnext/projections-renderer-sdk": "0.2.0",
+    "@githubnext/projections-schemas": "0.2.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@githubnext/projections-engine": "0.1.0",
+    "@githubnext/projections-engine": "0.2.0",
     "@playwright/test": "^1.55.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",

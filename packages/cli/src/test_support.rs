@@ -1,6 +1,6 @@
-//! Helpers shared by this crate's unit tests.
+//! Helpers shared by this crate's unit tests and, through `#[path]`, its integration tests.
 
-/// Writes an executable script at `path`, from a `sh` child rather than this process. Unit tests run in parallel
+/// Writes an executable script at `path`, from a `sh` child rather than this process. Tests run in parallel
 /// threads: a file this process held open for writing would be inherited by a child another thread forks at that
 /// moment, which holds it until its own exec, and executing the script meanwhile fails with ETXTBSY ("Text file
 /// busy"). The child's descriptor never reaches this process.

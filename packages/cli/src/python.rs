@@ -176,11 +176,7 @@ mod tests {
         for (name, version) in versions {
             let path = launcher(directory.path(), name);
             #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
-                std::fs::write(&path, format!("#!/bin/sh\necho Python {version}.12.0\n")).unwrap();
-                std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755)).unwrap();
-            }
+            crate::test_support::write_executable(&path, &format!("#!/bin/sh\necho Python {version}.12.0\n"));
             #[cfg(windows)]
             std::fs::write(&path, format!("@echo Python {version}.12.0\r\n")).unwrap();
         }

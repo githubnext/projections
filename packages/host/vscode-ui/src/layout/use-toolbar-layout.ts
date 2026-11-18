@@ -16,12 +16,15 @@ import {useFocusFollow} from './focus.js'
  */
 export function useToolbarLayout(toolbar: RefObject<HTMLElement | null>, content: ToolbarContent): ToolbarLayout & {step: number} {
   const {pickers = false, modes = false, playback = false} = content
+  // With nothing drawn at its start (a VS Code tab's slot for an ordinary result), the mode region leads the row, as in
+  // VS Code's own editor toolbars, and a tab keeps its one 35px row: found once rendered.
+  const [centre, setCentre] = useState(true)
   const actions = (content.actions === true ? actionCollapseOrder : content.actions || []).join(' ')
   const steps = useMemo(
-    () => toolbarSteps({pickers, modes, playback, actions: actions ? (actions.split(' ') as ToolbarAction[]) : []}),
-    [pickers, modes, playback, actions],
+    () => toolbarSteps({pickers, modes, playback, centre, actions: actions ? (actions.split(' ') as ToolbarAction[]) : []}),
+    [pickers, modes, playback, centre, actions],
   )
-  const ladder = `${pickers}|${modes}|${playback}|${actions}`
+  const ladder = `${pickers}|${modes}|${playback}|${centre}|${actions}`
   const key = content.key ?? ''
   const [state, setState] = useState({
     ladder,
@@ -50,6 +53,11 @@ export function useToolbarLayout(toolbar: RefObject<HTMLElement | null>, content
     if (!element) return
     const width = Math.floor(element.getBoundingClientRect().width)
     if (!width) return
+    const drawnStart = Boolean(element.querySelector(':scope > .phv-toolbar-start:has(> :not(:empty))'))
+    if (drawnStart !== centre) {
+      setCentre(drawnStart)
+      return
+    }
     const layout = steps[Math.min(state.step, steps.length - 1)]!
     const {need, rowNeed} = requiredWidth(element, layout.rows === 2 && !layout.playbackOverflow)
     // VSCode Elements render their shadow content a microtask after they mount: measure again once they have.
@@ -82,7 +90,7 @@ export function useToolbarLayout(toolbar: RefObject<HTMLElement | null>, content
         return previous
       return {...previous, narrow, stale: false, step: next, width, required, rowNeed: row}
     })
-  }, [toolbar, ladder, key, steps, state.step, state.width])
+  }, [toolbar, ladder, key, steps, centre, state.step, state.width])
 
   useLayoutEffect(() => {
     const element = toolbar.current

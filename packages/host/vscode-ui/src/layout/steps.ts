@@ -44,6 +44,8 @@ export interface ToolbarContent {
   actions?: boolean | readonly ToolbarAction[]
   /** Anything else that changes the regions' widths, for example the revision labels or the chip. */
   key?: string
+  /** The mode region may be centred (default true): there is something at the start to centre it against. */
+  centre?: boolean
 }
 
 /** A wider toolbar expands a collapsed step only once it has this much room beyond what the step needs. */
@@ -120,7 +122,7 @@ const centredSteps = {
 export function toolbarSteps(content: ToolbarContent): readonly ToolbarLayout[] {
   const actions = content.actions === true ? actionCollapseOrder : content.actions || []
   const seen = new Set<string>()
-  const centred = content.modes ? centredSteps[content.playback ? 'animated' : 'still'] : []
+  const centred = content.modes && content.centre !== false ? centredSteps[content.playback ? 'animated' : 'still'] : []
   return [...centred, ...(content.playback ? animatedSteps : stillSteps)]
     .map(layout => {
       const moreActions = layout.moreActions.filter(action => actions.includes(action))

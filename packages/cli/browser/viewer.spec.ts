@@ -530,6 +530,29 @@ test("a theme seed that isn't valid is ignored, and the page and the agent say s
   )
 })
 
+test('the agent reads what a page did with its theme seed while the page is still loading the projection', async ({page}) => {
+  // The page reports its theme in its first report, before the projection loads: with the definitions held, it never does.
+  let release = () => {}
+  const held = new Promise<void>(resolve => (release = resolve))
+  await page.route(/\/api\/definitions/, async route => {
+    await held
+    await route.continue().catch(() => {})
+  })
+  await page.goto(themed({light: {background: 'white;}body{display:none'}}))
+  // This page's report: its theme, and no projection yet (an earlier test's page reported the projection loaded).
+  await expect
+    .poll(async () => {
+      const shown = (await state()).page
+      return shown?.summary?.projection ? 'a loaded page' : (shown?.theme?.ignored ?? 'no theme')
+    })
+    .toContain("isn't a color")
+  const text = (await control('control/tool/current_view', {})).body.content[0].text
+  expect(text).toContain('No page shows it yet')
+  expect(text).toContain('Theme: the page ignored the theme seed in its link')
+  release()
+  await page.unrouteAll({behavior: 'ignoreErrors'})
+})
+
 test("a one-revision view says what it shows once, at the header's end, and its toolbar still spans the page", async ({page}) => {
   await page.setViewportSize(canvas)
   expect((await control('control/show', {projection: 'packages', choice: 'now'})).status).toBe(200)

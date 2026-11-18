@@ -60,6 +60,12 @@ warnings:
   percentBelowMax: 10
   percentAboveMin: 10
 variances:
+  CHANGELOG.md:
+    kind: declarative
+    reason: "Release notes, unwrapped on purpose (proseWrap: never in .oxfmtrc.json): each paragraph and list item is one line, because dist copies a version's section into its GitHub release body, where a single line break can render as a break mid-sentence (docs/maintainers/releasing.md#release-notes). Split a longer entry into sub-items."
+    metrics:
+      filesystem.longest_line:
+        max: 1000
   packages/cli/src/tools/catalog.rs:
     kind: declarative
     reason: "Agent tool descriptions: each tool's description is one literal that MCP clients and the VS Code extension's language model tools receive verbatim (packages/integrations/vscode/package.json is generated from it). rustfmt can't wrap a literal."

@@ -53,22 +53,54 @@ function literalColor(value: string): string | undefined {
   return plain.split(/[\s,/()]+/).find(word => namedColors.test(word))
 }
 
+/** The source with each closed comment's characters, but not its line breaks, blanked, so offsets and lines hold. */
+function blankComments(css: string): string {
+  let result = ''
+  let index = 0
+  for (;;) {
+    const start = css.indexOf('/*', index)
+    const end = start < 0 ? -1 : css.indexOf('*/', start + 2)
+    // An unclosed comment is left as it is: with no `*/` after it, none after a later `/*` either.
+    if (end < 0) return result + css.slice(index)
+    result += css.slice(index, start) + css.slice(start, end + 2).replace(/[^\n]/g, ' ')
+    index = end + 2
+  }
+}
+
+/** Each `{…}` with no braces inside, with the text since the brace before it as its selector, in one pass. */
+function* innermostBlocks(source: string): Generator<{selector: string; body: string; bodyStart: number}> {
+  let runStart = 0
+  let selectorStart = 0
+  let open = -1
+  for (let index = 0; index < source.length; index++) {
+    const character = source[index]
+    if (character === '{') {
+      selectorStart = runStart
+      open = index
+    } else if (character === '}') {
+      if (open >= 0) yield {selector: source.slice(selectorStart, open), body: source.slice(open + 1, index), bodyStart: open + 1}
+      open = -1
+    } else continue
+    runStart = index + 1
+  }
+}
+
 /** Lints one stylesheet's source. `file` names it in messages. */
 export function lintRendererStyles(css: string, file = 'styles'): StyleLintResult {
   const known = new Set<string>([...(themeTokenNames as readonly string[]), ...optionalThemeTokenNames, ...otherProperties])
   const errors: string[] = []
   const warnings: string[] = []
-  const source = css.replace(/\/\*[\s\S]*?\*\//g, comment => comment.replace(/[^\n]/g, ' '))
+  const source = blankComments(css)
   const line = (offset: number) => source.slice(0, offset).split('\n').length
   for (const match of source.matchAll(/var\(\s*--projections-([a-z0-9-]+)/gi)) {
     if (!known.has(match[1]!))
       errors.push(`${file}:${line(match.index!)}: --projections-${match[1]} is not a theme token, so its fallback always applies`)
   }
   // Declarations, with the selector of the block they are in.
-  for (const block of source.matchAll(/([^{}]*)\{([^{}]*)\}/g)) {
-    const selector = block[1]!.trim().replace(/\s+/g, ' ')
-    const bodyStart = block.index! + block[0].indexOf('{') + 1
-    for (const declaration of block[2]!.matchAll(/([a-z-]+)\s*:\s*([^;]+)/gi)) {
+  for (const block of innermostBlocks(source)) {
+    const selector = block.selector.trim().replace(/\s+/g, ' ')
+    const bodyStart = block.bodyStart
+    for (const declaration of block.body.matchAll(/([a-z-]+)\s*:\s*([^;]+)/gi)) {
       const property = declaration[1]!.toLowerCase()
       const value = declaration[2]!.trim()
       if (property.startsWith('--')) continue

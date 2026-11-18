@@ -107,22 +107,22 @@ per line, protocol version `2025-06-18` (it also accepts `2025-03-26` and
 (capabilities `{"tools": {"listChanged": false}}`, with instructions for the
 agent), `ping`, `tools/list` and `tools/call`; `notifications/initialized` is
 accepted and `notifications/cancelled` stops a call, which then gets no reply.
-Tool calls run concurrently. Standard output carries only protocol messages; diagnostics go to
-standard error. It serves the repository at `-C DIR` (or the working directory)
-and exits when standard input closes or on a signal. It lists exactly the tools
-`serve --stdio` lists, with the same schemas, so VS Code's agent and any other
-get the same tools. The view actions (`open_projection`, `current_view`,
-`refresh`) are answered by the viewer, and `compare`, `check`, `describe_part`,
-`set_part` and `screenshot` take what they omit from what it shows, saying so,
-as VS Code's tools do from the projection tab in front.
+Tool calls run concurrently. Standard output carries only protocol messages;
+diagnostics go to standard error. It serves the repository at `-C DIR` (or the
+working directory) and exits when standard input closes or on a signal. It lists
+exactly the tools `serve --stdio` lists, with the same schemas, so VS Code's
+agent and any other get the same tools. The view actions (`open_projection`,
+`current_view`, `refresh`) are answered by the viewer, and `compare`, `check`,
+`describe_part`, `set_part` and `screenshot` take what they omit from what it
+shows, saying so, as VS Code's tools do from the projection tab in front.
 
 **Reviewing a change to the tools.** This repository's `agent-tools` projection
 (`.github/projections/agent-tools.json`) lists every tool, its parameters and
 the surfaces that expose it (`projections mcp`, VS Code's `languageModelTools`
-and the Copilot app canvas), read from source at each
-revision. Its comparator classifies each change as the agents calling the tools
-meet it (a parameter removed, made required or narrowed is breaking) and flags
-drift between surfaces, such as a stale VS Code manifest:
+and the Copilot app canvas), read from source at each revision. Its comparator
+classifies each change as the agents calling the tools meet it (a parameter
+removed, made required or narrowed is breaking) and flags drift between
+surfaces, such as a stale VS Code manifest:
 `projections compare main.. -p agent-tools --trust`.
 
 ## The viewer
@@ -260,4 +260,3 @@ because Projections is for coding agents, which have a shell and a browser of
 their own. A host that supports MCP Apps gets the same tools as any other
 client: `open_projection` starts the viewer and gives its URL, which the agent
 opens in its own browser, or the system browser.
-

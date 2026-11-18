@@ -13,8 +13,6 @@ owns its lifecycle:
   `action.yml` stays at the repository root, where `uses:` finds it).
 - [`copilot-canvas`](copilot-canvas/README.md): the viewer as a canvas in the
   GitHub Copilot app.
-- [`mcp-apps`](mcp-apps/README.md): the viewer as an MCP App, in Claude Desktop
-  and other MCP Apps hosts (`projections mcp` serves it).
 
 ## What belongs here
 

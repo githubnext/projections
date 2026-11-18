@@ -195,7 +195,6 @@ packages/
     vscode/          the VS Code extension: the Inspector, Explore, Adopt and Add to CI beside your code
     github-action/   scripts of the GitHub Action (action.yml) that produces projections artifacts in CI
     copilot-canvas/  the Projections viewer as a canvas in the GitHub Copilot app
-    mcp-apps/        the Projections viewer as an MCP App (Claude Desktop and other MCP Apps hosts)
 tools/
   cli/           `tools`, this repository's command line for agents and people
   scripts/       build, check, release and documentation scripts

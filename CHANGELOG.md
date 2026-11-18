@@ -12,6 +12,8 @@ Projections 0.2.0 adds built-ins for Rails and makes the agent viewer easier to 
   - The token and port are kept per project in the user cache, readable only by you, so a viewer restarted after `view stop`, its idle exit or a reboot serves the same link.
   - `projections view stop --rotate` forgets it: the next viewer gets a new token, and earlier links stop working.
   - `view --port N` and `view show --port N` refuse while the project's viewer runs on another port, and refuse a taken port rather than picking another.
+- **The agent `compare` tool applies the viewer's definition to the viewer's pair** (#7). Comparing the pair the viewer shows, or a suggested pair such as a bookmark, without naming revisions now applies the definition the viewer applies (usually the working tree's) instead of the base revision's, so the result matches what's on screen and can differ from before. Pass `definition: base` for the previous choice. Given revisions keep the base/head rule.
+- **A bare `python` or `python3` command runs Python 3** (#5). In an extractor's or prepare step's command, the runner tries the name as written, then the other name, then `py -3`, and runs the first that reports Python 3. A `python` that is Python 2 is passed over, and with no Python 3 the command fails. Name a path, such as `.venv/bin/python`, to run an interpreter as written. Inside a container (`--isolation container`), commands run as written.
 - **`projections init` may put the agent skill elsewhere** (#22). Among `.agents/skills`, `.claude/skills` and `.github/skills`, it now picks the one holding most of the repository's own skills (the most widely read breaks ties) and says why. `--no-skill` writes none.
 
 ### Highlights
@@ -27,7 +29,7 @@ Projections 0.2.0 adds built-ins for Rails and makes the agent viewer easier to 
 
 - Named viewers, and the projection menu in the title (#9).
 - A stable viewer URL, `--port` on `view show`, and a 404 page for the bare port that says how to get the full link without revealing it (#17).
-- The viewer works framed by a page that isn't a secure context, such as plain http or a custom scheme: page IDs and the engine's hashing no longer need one (#17).
+- The viewer works framed by a page that isn't a secure context, such as plain http or a custom scheme: page IDs and the engine's hashing no longer need one (#17). Chrome still refuses to load loopback in a frame of a plain-http page on another host (its Local Network Access checks), so such a pane can't show the viewer.
 - When no page counts as open, `current_view` says what the viewer saw in the last 10 minutes: a page that never loaded its script or stopped asking, or requests without the token or for a non-loopback host (#17).
 - `projections view screenshot --page` captures the viewer's own page, header and toolbar included, without counting as the person's page (#17).
 - The `api` renderer lists changed rows first when a large API doesn't fit (#12).
@@ -42,7 +44,7 @@ Projections 0.2.0 adds built-ins for Rails and makes the agent viewer easier to 
 
 ### Platform
 
-- **Windows**: a bare `python3` or `python` in an extractor or prepare command runs the machine's Python 3 (the name as written, the other name, then `py -3`), so `init --language python` and `django-schema` work with a python.org install. `doctor` uses the same resolution, and Windows runs in CI (#5).
+- **Windows**: a bare `python3` or `python` in an extractor or prepare command outside a container runs the machine's Python 3 (see [Behaviour changes](#behaviour-changes)), so `init --language python` and `django-schema` work with a python.org install. `doctor` uses the same resolution, and Windows runs in CI (#5).
 
 ### Fixes
 

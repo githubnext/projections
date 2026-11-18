@@ -78,10 +78,24 @@ Write the section as changes merge, in the same pull request or soon after, and
 lead with **Behaviour changes**: anything that can make a passing check, command
 or workflow fail or act differently, and what to change. Keep each paragraph and
 list item on one line (`.oxfmtrc.json` doesn't wrap this file): GitHub can
-render a single line break as a break, as it does in comments. `dist plan`
-(below) prints the release's title and body, so check them before tagging. Notes
-stay editable after publishing, unlike assets:
-`gh release edit v0.2.0 --notes-file`.
+render a single line break as a break, as it does in comments. dist also packs
+`CHANGELOG.md` into each CLI archive, beside the README and licence.
+
+Check the title and body before tagging, with the dist version
+`dist-workspace.toml` pins (its default output lists only the artifacts):
+
+```sh
+dist plan --tag v0.2.0 --allow-dirty --output-format=json \
+  | jq -r '.announcement_title, .announcement_github_body'
+```
+
+Notes stay editable after publishing, unlike assets. The body holds dist's
+install instructions as well as the notes, so edit the whole of it:
+
+```sh
+gh release view v0.2.0 --json body --jq .body > body.md   # edit body.md
+gh release edit v0.2.0 --notes-file body.md
+```
 
 ## Repository settings
 

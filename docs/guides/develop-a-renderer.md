@@ -198,6 +198,8 @@ or skipped:
   earlier one changed is emphasized.
 - **Affordances inside their unit:** hover and selection rings stay inside the
   card or row they belong to; nested parts are tinted, not outlined.
+- **No change colors inside change colors:** only the innermost changed elements
+  are colored; an item that shows changes inside it stays neutral.
 - **Legend shown once:** at most one legend, and none when the host draws it.
 - **No horizontal overflow at phone width:** the document never scrolls sideways
   at 390 px.

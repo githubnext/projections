@@ -413,6 +413,14 @@
   font-weight: var(--projections-font-weight-semibold);
   color: color-mix(in srgb, var(--change) calc(var(--emphasis, 0) * 100%), var(--muted));
 }
+/*
+ * No nested change colors: a row's sign takes its change only when the row marks it itself, and a chip's when the
+ * chip is filled; a row inside a changed region, or a chip arriving or leaving with its row, says so by its glyph.
+ */
+.rp-row:not([data-change]) > .rp-sign,
+.rp-chip:not([data-change]) > .rp-chip-sign {
+  color: var(--muted);
+}
 
 /* Narrower frames: narrower columns. */
 @media (max-width: 1100px) {

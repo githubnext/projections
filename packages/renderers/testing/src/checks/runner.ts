@@ -9,13 +9,14 @@ import {styleChecks} from './style.js'
 import {comparisonChecks} from './comparison.js'
 import {frameChecks} from './frame.js'
 import {interactionChecks} from './interaction.js'
+import {accentChecks} from './accents.js'
 
 /** The comparison modes a renderer declared, in preference order (the SDK's default when it declares none). */
 export function declaredModes(state: Pick<StageState, 'capabilities'>): readonly ComparisonMode[] {
   return state.capabilities?.comparisonModes?.length ? state.capabilities.comparisonModes : progressModes
 }
 
-const run: Checks = {...styleChecks, ...comparisonChecks, ...interactionChecks, ...frameChecks}
+const run: Checks = {...styleChecks, ...comparisonChecks, ...interactionChecks, ...frameChecks, ...accentChecks}
 
 /** Runs the checks in order against one subject. A failure to load or measure fails that check, not the run. */
 export async function runChecks(driver: CheckDriver, subject: StageSubject, options: CheckOptions = {}): Promise<CheckResult[]> {

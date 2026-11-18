@@ -69,6 +69,8 @@ export interface GroupProps {
   onSelect?: (id: string) => void
   /** The title's heading level; 2 by default. */
   level?: 2 | 3 | 4
+  /** Changes are drawn inside it that no `data-change` marks (a nested renderer's frame): drawn neutral, as `EntityCard`'s. */
+  holdsChanges?: boolean
   /** The renderer's own class, for styling its body. */
   className?: string
   /** Inline style, such as custom properties the body reads. */
@@ -98,6 +100,7 @@ export function Group({
   selected = false,
   onSelect,
   level = 2,
+  holdsChanges = false,
   className,
   style,
   children,
@@ -110,7 +113,13 @@ export function Group({
   const text = typeof title === 'string' ? title : undefined
   const label = join('pk-group-label', 'pk-truncate', marks['data-change'] !== undefined && 'pk-diff-text')
   return (
-    <section className={join('pk-group', className)} aria-labelledby={heading} data-entity-id={id} {...marks} style={style}>
+    <section
+      className={join('pk-group', holdsChanges && 'pk-holds-changes', className)}
+      aria-labelledby={heading}
+      data-entity-id={id}
+      {...marks}
+      style={style}
+    >
       <header className="pk-group-header">
         <Heading className="pk-group-title" id={heading}>
           {/* The icon sits in a line of its own, so it shares the title's baseline in every engine. */}
@@ -167,6 +176,11 @@ export interface EntityCardProps {
   mark?: ChangeClassification | StatusChange
   /** Presence 0..1 while an entity is added or removed by the playing step (`timeline.presence`); 1 by default. */
   presence?: number
+  /**
+   * Changes are drawn inside it that no `data-change` marks (a nested renderer's frame): the card is drawn neutral
+   * (`pk-holds-changes`), so change colors never nest.
+   */
+  holdsChanges?: boolean
   /** Relationships and fields, below the name. */
   children?: ReactNode
 }
@@ -186,12 +200,13 @@ export function EntityCard({
   emphasis = 0,
   mark,
   presence = 1,
+  holdsChanges = false,
   children,
 }: EntityCardProps) {
   const style = {'--emphasis': emphasis, ...(presence < 1 ? {opacity: presence, visibility: presence > 0 ? 'visible' : 'hidden'} : {})}
   return (
     <li
-      className={join('pk-entity-card', mark !== undefined && 'pk-region', selected && 'selected')}
+      className={join('pk-entity-card', mark !== undefined && 'pk-region', selected && 'selected', holdsChanges && 'pk-holds-changes')}
       data-entity-id={id}
       data-projections-unit=""
       data-status={mark === undefined && change && emphasis > 0 ? (change.renamed ? 'renamed' : change.status) : undefined}

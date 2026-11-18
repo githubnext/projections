@@ -643,6 +643,14 @@ them in the kit's shell, along with that module's `options` (`nouns`, `facts`,
 - Accent and focus colors are only for focus and selection; change colors only
   for change status. No horizontal scrolling at 390 px. No network: the
   sandbox blocks it, so bundle every asset.
+- Never nest change colors: only the innermost changed elements are colored. A
+  modified card, row, table or boundary that shows changes inside it (added and
+  removed pills, an old and a new value, changed cards) stays neutral, with at
+  most a neutral edge and its status words muted; never an amber fill or edge
+  around green and red. The kit's components do this when changed parts carry
+  `data-change`; mark anything drawn over an item instead of inside it with
+  `pk-holds-changes`. The `nested-accents` check fails any change or accent
+  color drawn inside another.
 
 ### Comparator
 

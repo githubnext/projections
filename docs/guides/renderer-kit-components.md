@@ -87,6 +87,25 @@
   `text-transform: uppercase` or `capitalize` and on small caps); quiet a label
   with the type scale and the muted tone.
 
+## No nested change colors
+
+Only the innermost changed elements take a change hue (or the accent). An item
+that shows changes inside it (a modified card around its added and removed
+pills, a table around its changed columns, a boundary around changed cards)
+stays neutral: no tinted fill or change edge, just a neutral edge and its status
+words muted, so it can still be found while only what changed inside it is
+colored. The kit's styles do this. An item marked `data-change` (or a
+progress-mode card's `data-status`) that holds changed parts marked
+`data-change` (as a `ValueChange`'s pills are) or an `SvgValueChange` is drawn
+neutral, as is a `Group` holding changed items and a graph boundary with changed
+cards or links inside it (`boundariesHoldingChanges`). Mark `pk-holds-changes`
+on anything that has changes drawn over it rather than inside it, as the file
+packing does for a folder around changed files; `EntityCard` and `Group` take
+`holdsChanges` for changes no `data-change` marks, as the gallery's do around a
+nested renderer drawing a comparison. Status words (`.pk-status-part`) follow
+the nearest changed element around them. The `nested-accents` renderer check
+fails any change or accent color drawn inside another.
+
 ## Item rings
 
 Hover, keyboard focus and selection show as one ring per unit, drawn by the

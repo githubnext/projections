@@ -81,7 +81,7 @@ test('intermediate frames follow the kit ease, not a linear ramp', async () => {
     const typescript = slots(html).find(slot => slot.id === 'language:TypeScript')
     // The bar, the hatched gain inside it and the count all follow the eased value.
     assert.ok(Math.abs(typescript.width - (value / 1400) * 100) < 1e-9, `TypeScript bar at local ${local}`)
-    const gain = html.match(/data-statistics-id="language:TypeScript".*?class="stat-gain" style="left:([\d.e-]+)%/)
+    const gain = html.match(/data-statistics-id="language:TypeScript".*?class="stat-gain"[^>]* style="left:([\d.e-]+)%/)
     assert.ok(Math.abs(Number(gain[1]) - (1000 / value) * 100) < 1e-9, `TypeScript gain at local ${local}`)
     assert.match(html, new RegExp(`aria-label="Inspect TypeScript, ${Math.round(value).toLocaleString('en-US')} lines of code`))
     // The donut's slice and its percentage use the same eased counts (CSS shrinks in the same step).

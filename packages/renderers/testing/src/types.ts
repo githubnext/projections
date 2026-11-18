@@ -135,6 +135,7 @@ export type ProbeCall =
   | 'styles'
   | 'stageSurface'
   | 'stageInsets'
+  | 'accents'
   | 'viewport'
 
 /** An entity element as painted: its box, effective opacity, paint and visible text. */
@@ -265,6 +266,23 @@ export interface StyleMeasurement {
   exemptions: string[]
 }
 
+/** A hue family of the theme: a change color, or the accent. */
+export type AccentFamily = 'added' | 'removed' | 'modified' | 'moved' | 'accent'
+
+/** One hued paint of an element (probe call `accents`): the element, its family, the property and its entity, if any. */
+export interface AccentPaint {
+  element: string
+  family: AccentFamily
+  property: string
+  entity?: string
+}
+
+/** A change or accent color drawn inside another's surface (probe call `accents`). */
+export interface NestedAccent {
+  outer: AccentPaint
+  inner: AccentPaint
+}
+
 /** The color a renderer paints at one point of its field (probe call `stageSurface`). */
 export interface StageSurfaceSample {
   /** Where the point is, in words (`top left`), and its coordinates in CSS px. */
@@ -330,6 +348,7 @@ export type CheckId =
   | 'stage-insets'
   | 'type-scale'
   | 'spacing'
+  | 'nested-accents'
 
 /**
  * One check's outcome (`runChecks`): `skip` when it doesn't apply to the subject or renderer, `fail` when it found a

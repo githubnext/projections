@@ -45,6 +45,7 @@ Projections 0.2.0 adds built-ins for Rails and GitHub Agentic Workflows, makes t
 
 - `rails-schema` and `rails-routes` extractors (#21).
 - `github-agentic-workflows` extractor and the `agentic-workflows/v0` vocabulary (#29), the `agentic-workflows` comparator file (#30), and the `agentic-workflows` renderer, now the extractor's default (#31).
+- `renderer-scenarios` extractor and the `scenarios/v0` vocabulary, which read a repository's renderer `scenarios.json` documents, and the `gallery` renderer, which draws each scenario with its own built-in renderer. Together they make a renderer gallery that needs no `--trust` (#24).
 
 ### Viewer and hosts
 
@@ -64,6 +65,7 @@ Projections 0.2.0 adds built-ins for Rails and GitHub Agentic Workflows, makes t
 - Misplaced evidence fields (`line`, `column`, `file`, `path`…) fail with a message saying where they go (#22).
 - `bookmark run` takes `--definition-revision`, and compares bookmarks saved before their projection existed with the working tree's definition, saying so. The agent `compare` tool takes `definitionRevision` (#7).
 - In the GitHub Copilot app, agent guidance shows projections in the Projections canvas (#8).
+- Renderers can draw a built-in renderer nested inside them: `embedRenderer` in the renderer SDK asks the host for a built-in renderer's document by name, and the kit's `RendererProps` gain `environment` and `requestDocument`. Hosts serve only built-in renderers this way, never a URL, path or custom bundle (#24).
 
 ### Platform
 

@@ -1,6 +1,6 @@
 {
   "name": "@githubnext/projections-typescript-support",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -13,8 +13,8 @@
     "test:toolchains": "node test/toolchains.mjs"
   },
   "devDependencies": {
-    "@githubnext/projections-engine": "0.1.0",
-    "@githubnext/projections-schemas": "0.1.0",
+    "@githubnext/projections-engine": "0.2.0",
+    "@githubnext/projections-schemas": "0.2.0",
     "@nestjs/common": "^11.2.8",
     "@nestjs/core": "^11.2.8",
     "esbuild": "^0.28.2",

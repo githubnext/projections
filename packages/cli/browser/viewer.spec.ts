@@ -226,12 +226,12 @@ test("in the Copilot app's canvas, the page follows the app's theme tokens and c
 /** The canvas panel the GitHub Copilot app shows the page in. */
 const canvas = {width: 870, height: 900}
 
-/** Opens the page at a canvas's size on two named revisions, once the comparison is presented by the renderer. */
-async function openCanvas(page: Page) {
+/** Opens the page (at `link`, the viewer's URL by default) at a canvas's size on two named revisions, once the comparison is presented by the renderer. */
+async function openCanvas(page: Page, link = url) {
   await page.setViewportSize(canvas)
   await page.emulateMedia({colorScheme: 'dark'})
   expect((await control('control/show', {projection: 'packages', before: 'HEAD', after: long})).status).toBe(200)
-  await page.goto(url)
+  await page.goto(link)
   await expect(page.locator('.ph')).toHaveAttribute('data-renderer-status', 'ready', {timeout: 60_000})
   await expect(page.locator('.ph')).toHaveAttribute('data-comparison-mode', /.+/)
   // The page has applied what the agent shows, including a mode an earlier test left: until then, a mode it applies
@@ -420,6 +420,72 @@ test("in the Copilot app's canvas, the renderer's stage, text and families are t
   // Colors in other notations reach the renderer as sRGB.
   await expect.poll(async () => (await painted()).text).toBe('rgb(31, 35, 40)')
   expect((await painted()).stage).toMatch(/^rgb\((24\d|25\d), (24\d|25\d), (24\d|25\d)\)$/)
+})
+
+/** A warm off-white agent harness, and its dark twin, as `projections view --theme` takes them. */
+const harness = {
+  light: {background: '#f7f6f3', text: '#2f2e2b', muted: '#75736d', border: '#e4e2dd', accent: '#c96442'},
+  dark: {background: '#1f1e1c', text: '#ecebe7', border: '#3a3935', accent: '#d97757'},
+}
+const themed = (seed: unknown) => `${url}?theme=${encodeURIComponent(typeof seed === 'string' ? seed : JSON.stringify(seed))}`
+
+test("a theme seed in the link colors the stage and chrome in each mode it has, over the app's own", async ({page}) => {
+  await openCanvas(page, themed(harness))
+  /** The renderer frame's stage and text, and the chrome's header, rules and border variable, as they paint. */
+  const painted = async () => {
+    const frame = await (await page.locator('.ph iframe').first().elementHandle())!.contentFrame()
+    const stage = await frame!.evaluate(() => ({
+      stage: getComputedStyle(document.body).backgroundColor,
+      text: getComputedStyle(document.querySelector('.pk') ?? document.body).color,
+    }))
+    const chrome = await page.locator('.pi-viewer-header').evaluate(header => ({
+      header: getComputedStyle(header).backgroundColor,
+      border: getComputedStyle(header.closest('.pj-root')!).getPropertyValue('--pj-border').trim(),
+      fontSize: getComputedStyle(header).fontSize,
+    }))
+    return {...stage, ...chrome}
+  }
+  const dark = {stage: 'rgb(31, 30, 28)', text: 'rgb(236, 235, 231)', header: 'rgb(31, 30, 28)', border: '#3a3935', fontSize: '13px'}
+  const light = {stage: 'rgb(247, 246, 243)', text: 'rgb(47, 46, 43)', header: 'rgb(247, 246, 243)', border: '#e4e2dd', fontSize: '13px'}
+  await expect.poll(painted).toEqual(dark)
+  await page.emulateMedia({colorScheme: 'light'})
+  await expect.poll(painted).toEqual(light)
+  // The page says it took the seed, and the agent reads it.
+  await expect.poll(async () => (await state()).page?.theme).toEqual({seeded: true})
+  expect((await control('control/tool/current_view', {})).body.content[0].text).toContain('Theme: the theme seed in')
+  // The Copilot app's own theme doesn't replace a seed in the link: the seed is the more explicit.
+  await page.evaluate(() => {
+    const style = document.createElement('style')
+    style.textContent = ':root { --background-color-default: #14161c; --text-color-default: #e6e8ee; --border-color-default: #2d3340; }'
+    document.head.prepend(style)
+    document.documentElement.setAttribute('data-color-mode', 'dark')
+  })
+  await expect.poll(painted).toEqual(dark)
+
+  // A seed with only one mode colors only that one: the other keeps the page's own theme.
+  await page.emulateMedia({colorScheme: 'dark'})
+  await page.goto(themed({light: harness.light}))
+  await expect(page.locator('.ph')).toHaveAttribute('data-renderer-status', 'ready', {timeout: 60_000})
+  await expect.poll(async () => (await painted()).stage).not.toBe(dark.stage)
+  expect((await painted()).stage).not.toBe(light.stage)
+  await page.emulateMedia({colorScheme: 'light'})
+  await expect.poll(painted).toEqual(light)
+})
+
+test("a theme seed that isn't valid is ignored, and the page and the agent say so", async ({page}) => {
+  await page.emulateMedia({colorScheme: 'light'})
+  const warnings: string[] = []
+  page.on('console', message => void (message.type() === 'warning' && warnings.push(message.text())))
+  // A color that isn't one, which a stylesheet would take as CSS.
+  await page.goto(themed({light: {background: 'white;}body{display:none'}}))
+  await expect(page.locator('.pi-viewer-status')).toHaveText("This link's theme isn't valid, so the page keeps its own")
+  await expect(page.locator('.pi-viewer-status')).toHaveAttribute('title', /theme\.light\.background isn't a color/)
+  await expect(page.locator('html')).not.toHaveClass(/pi-app-theme/)
+  expect(warnings.join('\n')).toContain("theme.light.background isn't a color")
+  await expect.poll(async () => (await state()).page?.theme?.ignored).toContain("isn't a color")
+  expect((await control('control/tool/current_view', {})).body.content[0].text).toContain(
+    'Theme: the page ignored the theme seed in its link',
+  )
 })
 
 test("a one-revision view says what it shows once, at the header's end, and its toolbar still spans the page", async ({page}) => {

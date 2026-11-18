@@ -239,12 +239,13 @@ body {
 }
 
 /*
- * The agent viewer in the GitHub Copilot app's canvas (`projections view`): viewer/theme.ts marks the root
- * `pi-app-theme` while the app's theme tokens are there, and writes the chrome's colors as one generated rule
- * (`hostChromeVariables`, from the same tokens the renderer frames get), so the chrome and the stage are one theme.
+ * The agent viewer in the GitHub Copilot app's canvas, or given a theme seed (`?theme=`): viewer/theme.ts marks the
+ * root `pi-app-theme` while an app's theme tokens are there, and writes the chrome's colors as one generated rule per
+ * color mode (`hostChromeVariables`, from the same tokens the renderer frames get), so the chrome and the stage are one
+ * theme. The header takes the Copilot app's body size where it has one, else keeps its own.
  */
 .pi-app-theme .pi-viewer-header {
-  font-size: var(--text-body-medium);
+  font-size: var(--text-body-medium, 13px);
 }
 
 /*

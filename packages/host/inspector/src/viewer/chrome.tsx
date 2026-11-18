@@ -22,6 +22,10 @@ interface Snapshot {
   choosing?: string | undefined
   /** Why the person's choice didn't take, said in the status line until the state changes. */
   failed?: string | undefined
+  /** Something about the page itself, said in the status line while there is nothing else to say (an ignored theme). */
+  notice?: string | undefined
+  /** The notice's details, in the status line's tooltip. */
+  noticeDetail?: string | undefined
 }
 
 /** A tiny store the header reads. */
@@ -52,14 +56,19 @@ export type Store = ReturnType<typeof createStore>
  * control (`end`) closes the row.
  */
 export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactNode; onChoose?: (projection: string) => void}) {
-  const {state, status, stopped, projections, colorMode, choosing, failed} = useSyncExternalStore(store.subscribe, store.get, store.get)
+  const {state, status, stopped, projections, colorMode, choosing, failed, notice, noticeDetail} = useSyncExternalStore(
+    store.subscribe,
+    store.get,
+    store.get,
+  )
   const shown = choosing ?? state?.projection ?? undefined
   const title = shown
     ? choosing
       ? (projections.find(item => item.id === choosing)?.title ?? choosing)
       : (state?.title ?? shown)
     : 'Projections'
-  const line = failed ?? status
+  const line = failed ?? (status || notice)
+  const noticed = !failed && !status && Boolean(notice)
   return (
     <header className="pi-viewer-header pj:relative pj:z-20 pj:flex pj:min-w-0 pj:shrink-0 pj:items-center pj:gap-3 pj:border-b pj:border-divider pj:bg-surface-header pj:p-3 pj:text-[13px]">
       <ProjectionsMark tone="two-tone" className="pi-viewer-mark pj:text-foreground" />
@@ -74,10 +83,10 @@ export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactN
         <span
           role="status"
           aria-live="polite"
-          title={line}
+          title={noticed && noticeDetail ? `${line}: ${noticeDetail}` : line}
           className={cn(
             'pi-viewer-status pi-viewer-text pj:min-w-0 pj:max-w-[40%] pj:truncate pj:text-xs',
-            stopped || failed ? 'pj:font-medium pj:text-foreground' : 'pj:text-muted-foreground',
+            stopped || failed || noticed ? 'pj:font-medium pj:text-foreground' : 'pj:text-muted-foreground',
           )}
         >
           {line}
@@ -207,13 +216,18 @@ export function mountWaiting(element: HTMLElement, store: Store, host: Inspector
 }
 
 function WaitingPage({store}: {store: Store}) {
-  const {status, stopped} = useSyncExternalStore(store.subscribe, store.get, store.get)
+  const {status, stopped, notice, noticeDetail} = useSyncExternalStore(store.subscribe, store.get, store.get)
   return (
     <StartupShell>
       {stopped && <Stopped className="pj:fixed pj:inset-0" />}
       <p role="status" aria-live="polite" className="pi-viewer-idle pj:m-0 pj:text-center pj:text-sm pj:text-muted-foreground">
         {status}
       </p>
+      {notice && (
+        <p className="pi-viewer-notice pj:m-0 pj:text-center pj:text-xs pj:text-muted-foreground" title={noticeDetail}>
+          {notice}
+        </p>
+      )}
     </StartupShell>
   )
 }

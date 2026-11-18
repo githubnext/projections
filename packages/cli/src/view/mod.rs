@@ -24,6 +24,7 @@ mod show;
 pub mod state;
 pub mod surface;
 mod tasks;
+pub mod theme;
 
 pub use named::{DEFAULT_VIEWER, viewer_name};
 pub use surface::Views;

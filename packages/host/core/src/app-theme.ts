@@ -215,7 +215,7 @@ function onEmphasis(bg: Rgba, accent: Rgba): Rgba {
 }
 
 /** A font family list safe to send as a token: plain names and quoted names, no functions, braces or semicolons. */
-function fontList(value: string | undefined): string | undefined {
+export function fontList(value: string | undefined): string | undefined {
   const text = value?.trim().replace(/\s+/g, ' ')
   if (!text || text.length > rendererLimits.tokenLength) return undefined
   return /^(?:"[^"\\;{}<>]+"|'[^'\\;{}<>]+'|[\w -]+)(?:\s*,\s*(?:"[^"\\;{}<>]+"|'[^'\\;{}<>]+'|[\w -]+))*$/.test(text) ? text : undefined

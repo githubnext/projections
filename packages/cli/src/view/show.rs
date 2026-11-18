@@ -151,7 +151,7 @@ async fn check_scenario(service: &Service, projection: &str, scenario: &str) -> 
 }
 
 /// A query component, percent-encoded.
-fn encode(value: &str) -> String {
+pub(super) fn encode(value: &str) -> String {
     value
         .bytes()
         .map(|byte| {

@@ -13,4 +13,9 @@ extracts and replays again. Agents drive it with the open_projection,
 current_view, screenshot and refresh tools (projections mcp) or the subcommands
 below, which find the running viewer through a per-repository record in the user
 cache. --viewer NAME shows a named viewer: its own page and URL, independent of
-the default one, so several projections can be shown side by side.
+the default one, so several projections can be shown side by side. --theme SEED
+colors the page as the app showing it in its own browser pane (a custom agent
+harness; the GitHub Copilot app and VS Code theme it themselves): a theme seed,
+inline JSON or a JSON file, {"light": {...}, "dark": {...}}, each mode a
+background and optionally text, muted, border, accent, focus, sans and mono. It
+is checked, and goes only in the printed link, as ?theme=.

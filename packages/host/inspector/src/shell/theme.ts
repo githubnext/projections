@@ -9,7 +9,8 @@ const storageKey = 'projections-inspector-theme'
 /**
  * The person's theme choice, remembered in this browser, and the color mode it resolves to. System follows the
  * embedding host's theme when it has one (an editor's color theme), else the operating system's. `themeTokens` are the
- * host's renderer token overrides while the page shows the host's color mode (they are that mode's colors).
+ * host's renderer token overrides while the page shows the host's color mode (they are that mode's colors), or the
+ * host's overrides for the other mode when it has them (`InspectorHostTheme.modes`).
  */
 export function useTheme(): {
   preference: ThemePreference
@@ -37,7 +38,7 @@ export function useTheme(): {
   const host = useHostTheme()
   const system = useColorMode(preference)
   const colorMode = preference === 'auto' && host ? host.colorMode : system
-  const themeTokens = host?.tokens && host.colorMode === colorMode ? host.tokens : undefined
+  const themeTokens = host?.colorMode === colorMode ? host.tokens : host?.modes?.[colorMode]
   const commands: Command[] = (
     [
       ['auto', 'System'],

@@ -65,6 +65,9 @@ pub(super) async fn current(shared: &Shared, view_of: &NamedView, why: bool) -> 
     let current_page = !page.is_null() && summary["projection"]["id"] == projection;
     if current_page {
         page::describe(&mut lines, view, summary);
+        if let Some(line) = theme_line(&page["theme"]) {
+            lines.push(line);
+        }
     } else {
         lines.push(
             "No page shows it yet, so its mode, selection and counts aren't known: open the URL for the person, or screenshot renders it."
@@ -109,6 +112,16 @@ pub(super) async fn current(shared: &Shared, view_of: &NamedView, why: bool) -> 
             "rendererBuild": build.map(|build| json!({"phase": build.phase.name(), "error": build.error, "script": build.script, "package": build.package})),
         }),
     )
+}
+
+/// What colors the page, when its link has a theme seed (`?theme=`): the seed, or why the page ignored it.
+fn theme_line(theme: &Value) -> Option<String> {
+    if theme["seeded"] == true {
+        return Some("Theme: the theme seed in the page's link (?theme=) colors it.".to_owned());
+    }
+    theme["ignored"].as_str().map(|error| {
+        format!("Theme: the page ignored the theme seed in its link and keeps its own theme: {error}. Show it again with a valid --theme.")
+    })
 }
 
 /// The other viewers the server has, and what each shows; none when it has only this one.

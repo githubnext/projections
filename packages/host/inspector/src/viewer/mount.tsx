@@ -21,7 +21,7 @@ import {ViewerHeader, ViewerShown, createStore, mountWaiting} from './chrome.js'
 import {pageView} from './page-view.js'
 import {statusText} from './state.js'
 import type {MountedViewer, MountViewerOptions, ViewerState} from './state.js'
-import {markStatusBar, pageTheme} from './theme.js'
+import {markStatusBar, viewerTheme} from './theme.js'
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -43,7 +43,14 @@ function fetchTransport(base: URL, at: (path: string) => URL): InspectorTranspor
 }
 
 /** What the page reports: what it presents, and the person's selection and mode once the state has been applied. */
-function reportBody(page: string, named: {viewer?: string}, viewer: ViewerPage, handle: InspectorHandle, state: ViewerState) {
+function reportBody(
+  page: string,
+  named: {viewer?: string},
+  viewer: ViewerPage,
+  handle: InspectorHandle,
+  state: ViewerState,
+  theme: {seeded: true} | {ignored: string} | undefined,
+) {
   const summary = handle.summary()
   const view = handle.view()
   return {
@@ -58,6 +65,7 @@ function reportBody(page: string, named: {viewer?: string}, viewer: ViewerPage, 
     width: innerWidth,
     height: innerHeight,
     ...(view ? {progress: view.progress} : {}),
+    ...(theme ? {theme} : {}),
   }
 }
 
@@ -66,7 +74,8 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
   const base = new URL(options.base ?? new URL('./', document.baseURI))
   const at = (path: string) => new URL(path.replace(/^\//, ''), base)
   const transport = options.transport ?? fetchTransport(base, at)
-  const host: InspectorHost = {...options.host, theme: options.host?.theme ?? pageTheme()}
+  const themed = viewerTheme(options.host?.theme)
+  const host: InspectorHost = {...options.host, theme: themed.theme}
   const page = pageId()
   // A capture (`projections view screenshot --page`) watches without being counted or reporting: it isn't the person's.
   const capture = options.capture ?? new URLSearchParams(location.search).has('capture')
@@ -74,6 +83,7 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
   const name = options.viewer ?? new URLSearchParams(location.search).get('viewer') ?? undefined
   const named = name && name !== 'default' ? {viewer: name} : {}
   const store = createStore()
+  if (themed.notice) store.set(themed.notice)
   const abort = new AbortController()
   let mounted: MountedInspector | undefined
   const viewer: ViewerPage = {state: undefined, handle: null, shown: undefined, applied: unapplied(-1), reported: undefined}
@@ -86,7 +96,7 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
     settle(viewer, handle.view())
     store.set({status: statusText(state, handle.summary(), buildPhase())})
     markReady(viewer, handle, buildPhase())
-    const body = reportBody(page, named, viewer, handle, state)
+    const body = reportBody(page, named, viewer, handle, state, themed.report)
     const text = JSON.stringify(body)
     if (capture || text === reported) return
     reported = text

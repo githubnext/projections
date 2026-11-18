@@ -652,6 +652,17 @@ fn a_restarted_viewer_keeps_its_url_until_rotated_and_ports_are_never_silently_i
     let free_port = || std::net::TcpListener::bind("127.0.0.1:0").unwrap().local_addr().unwrap().port();
 
     let first = show(&[]);
+    // A theme seed goes only in the link it prints, wherever it prints it; one the page would ignore is refused.
+    let seed = r##"{"light": {"border": "#e4e2dd", "background": "#f7f6f3"}}"##;
+    let seeded = format!("{first}?theme=%7B%22light%22%3A%7B%22background%22%3A%22%23f7f6f3%22%2C%22border%22%3A%22%23e4e2dd%22%7D%7D");
+    assert_eq!(show(&["--theme", seed]), seeded);
+    let said = projections(&["view", "show", "--theme", seed]);
+    assert!(String::from_utf8_lossy(&said.stdout).contains(&format!("Showing Package map in the viewer: {seeded}\n")));
+    let said = projections(&["view", "--theme", seed]);
+    assert!(String::from_utf8_lossy(&said.stdout).contains(&format!("already running for this repository: {seeded}\n")));
+    let refused = projections(&["view", "show", "--theme", r#"{"light": {"background": "white"}}"#]);
+    assert!(!refused.status.success());
+    assert!(String::from_utf8_lossy(&refused.stderr).contains("theme.light.background isn't a color"));
     let kept = projections_cli::view::address::path_in(&cache, &top, "");
     assert!(kept.exists(), "the project's address is kept in the cache");
     #[cfg(unix)]

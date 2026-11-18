@@ -178,6 +178,11 @@ pub struct ViewShow {
     /// [default: the default viewer]
     #[arg(long, value_name = "NAME")]
     pub viewer: Option<String>,
+    /// Color the page as the app that shows it, for a harness whose surfaces the default theme doesn't match: a theme
+    /// seed, inline JSON or a JSON file, `{"light": {"background": …, "border": …}, "dark": {…}}`. It goes in the
+    /// printed link (`?theme=`), so only a page opened from that link takes it [default: the page's own theme]
+    #[arg(long, value_name = "SEED")]
+    pub theme: Option<String>,
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -189,6 +194,11 @@ pub enum ViewMode {
 }
 
 impl ViewShow {
+    /// The theme seed `--theme` gives, checked, as the page's `?theme=` takes it.
+    fn seed(&self) -> Result<Option<String>> {
+        self.theme.as_deref().map(crate::view::theme::read).transpose()
+    }
+
     /// `open_projection`'s input.
     pub fn input(&self) -> Value {
         let mut input = json!({});
@@ -240,6 +250,10 @@ async fn view_tool(root: &Path, command: ViewCommand) -> Result<()> {
         }
         return Ok(());
     }
+    let seed = match &command {
+        ViewCommand::Show { show, .. } => show.seed()?,
+        _ => None,
+    };
     let (name, input, json_output, start) = match &command {
         ViewCommand::Show {
             show, json, trust, port, ..
@@ -334,7 +348,12 @@ async fn view_tool(root: &Path, command: ViewCommand) -> Result<()> {
     )
     .await?;
     ensure!(response.status == 200, "The viewer refused ({})", response.status);
-    let outcome = crate::tools::Outcome::from_json(&response.json()?);
+    let mut outcome = crate::tools::Outcome::from_json(&response.json()?);
+    // The shown page's link, wherever it is given, carries the theme seed.
+    if let (Some(seed), Some(shown)) = (&seed, outcome.structured["url"].as_str().map(str::to_owned)) {
+        outcome.text = crate::view::theme::relink(&outcome.text, &shown, seed);
+        outcome.structured["url"] = json!(crate::view::theme::link(&shown, seed));
+    }
     if let (ViewCommand::Screenshot { out, .. }, Some(png)) = (&command, &outcome.image) {
         crate::create_file(out, png)?;
         eprintln!("Wrote {}", out.display());
@@ -362,6 +381,11 @@ pub async fn view(directory: &Path, args: View) -> Result<()> {
     }
     let input = args.show.input();
     let asked = input.as_object().is_some_and(|input| !input.is_empty());
+    let seed = args.show.seed()?;
+    let seeded = |url: &str| {
+        seed.as_deref()
+            .map_or_else(|| url.to_owned(), |seed| crate::view::theme::link(url, seed))
+    };
     // Asked for trust, a viewer running without it is replaced, at its URL when that is free, so its open pages
     // (a browser tab, the Copilot app's canvas) reconnect to the new one.
     let mut replacing = None;
@@ -389,6 +413,7 @@ pub async fn view(directory: &Path, args: View) -> Result<()> {
                     url = shown.to_owned();
                 }
             }
+            let url = seeded(&url);
             println!("A viewer is already running for this repository: {url}");
             if args.open {
                 open_browser(&url)?;
@@ -428,10 +453,10 @@ pub async fn view(directory: &Path, args: View) -> Result<()> {
         },
     )?;
     // A named viewer's page is the server's URL with its name.
-    let page = match crate::view::viewer_name(args.show.viewer.as_deref()) {
+    let page = seeded(&match crate::view::viewer_name(args.show.viewer.as_deref()) {
         Ok(name) if name != crate::view::DEFAULT_VIEWER => format!("{url}?viewer={name}"),
         _ => url.clone(),
-    };
+    });
     println!("{page}");
     eprintln!("Serving the Projections viewer for {}; press Ctrl+C to stop.", root.display());
     if args.open

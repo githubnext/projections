@@ -1,0 +1,149 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "activation": {
+          "roles": [
+            "admin",
+            "maintainer",
+            "write"
+          ],
+          "rolesDeclared": false,
+          "settings": {
+            "reaction": "eyes"
+          }
+        },
+        "bash": [
+          "*"
+        ],
+        "concurrency": null,
+        "custom": {
+          "jobs": [],
+          "steps": {}
+        },
+        "deprecated": [],
+        "description": "Interactive question-answering research agent triggered by the 'repo-ask' command.\nLeverages web search, repository inspection, and bash commands to research and answer\nquestions about the codebase. Provides accurate, concise responses by adding comments\nto the triggering issue or PR. Useful for deep repository analysis and documentation\nqueries.\n",
+        "engine": {
+          "declared": false,
+          "id": "copilot"
+        },
+        "findings": [],
+        "github": {
+          "repos": null,
+          "settings": {
+            "minIntegrity": "none"
+          },
+          "toolsets": [
+            "actions",
+            "default",
+            "discussions"
+          ]
+        },
+        "imports": [],
+        "limits": {
+          "maxAiCredits": {
+            "declared": false,
+            "value": 1000
+          },
+          "maxDailyAiCredits": {
+            "declared": false,
+            "value": "unlimited"
+          },
+          "timeoutMinutes": {
+            "declared": true,
+            "value": 30
+          }
+        },
+        "lock": {
+          "compiler": "v1.3.0",
+          "path": ".github/workflows/repo-ask.lock.yml",
+          "status": "current"
+        },
+        "mcpServers": [],
+        "name": null,
+        "network": {
+          "allowed": [
+            "*.readthedocs.io",
+            "defaults",
+            "python"
+          ],
+          "blocked": [],
+          "declared": true
+        },
+        "path": ".github/workflows/repo-ask.md",
+        "permissions": {
+          "all": "read"
+        },
+        "safeOutputs": {
+          "allowedDomains": null,
+          "handlers": [
+            {
+              "kind": "add-comment",
+              "max": 3
+            },
+            {
+              "kind": "create-issue",
+              "max": 1,
+              "maxDeclared": false
+            }
+          ],
+          "jobs": [],
+          "sources": {},
+          "staged": false
+        },
+        "secrets": [],
+        "skills": [],
+        "sources": {},
+        "strict": true,
+        "tools": [
+          "bash",
+          "github"
+        ],
+        "triggers": [
+          {
+            "detail": "repo-ask",
+            "event": "slash_command"
+          }
+        ],
+        "unrecognized": [],
+        "unrecognizedValues": []
+      },
+      "evidence": [
+        {
+          "kind": "gh-aw-workflow",
+          "source": ".github/workflows/repo-ask.md"
+        },
+        {
+          "kind": "gh-aw-lock",
+          "source": ".github/workflows/repo-ask.lock.yml"
+        }
+      ],
+      "id": "workflow:.github/workflows/repo-ask.md",
+      "kind": "workflow",
+      "label": "repo-ask"
+    }
+  ],
+  "metadata": {
+    "compilers": [
+      "v1.3.0"
+    ],
+    "engine": "gh-aw",
+    "ghAw": {
+      "commit": "789cc9c2da60fca3b4e0396591c7179be3b5d9eb",
+      "release": "v1.3.0",
+      "schema": "https://github.com/github/gh-aw/blob/v1.3.0/pkg/parser/schemas/main_workflow_schema.json"
+    },
+    "limitations": [
+      "The front matter as declared, merged with local imports: gh-aw's compiler isn't run, so natural-language triggers stay as written and defaults gh-aw fills in are shown only where noted.",
+      "Imports from other repositories are listed but not read; gh-aw fetches them when it compiles."
+    ],
+    "workflows": 1
+  },
+  "protocolVersion": 0,
+  "relationships": [],
+  "schema": "architecture/v0",
+  "vocabularies": [
+    "agentic-workflows/v0"
+  ]
+}

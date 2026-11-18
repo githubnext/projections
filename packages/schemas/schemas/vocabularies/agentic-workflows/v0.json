@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/vocabularies/agentic-workflows/v0.json",
+  "title": "Projections vocabulary agentic-workflows/v0",
+  "description": "Agentic workflows, such as GitHub Agentic Workflows: what starts each one, what its agent can reach and write, its budgets and imports, and groups of workflows that work together. Defined in docs/models/agentic-workflow-model.md.",
+  "allOf": [
+    {"$ref": "https://schemas.projections.githubnext.com/extraction/v0.json"},
+    {
+      "type": "object",
+      "required": ["vocabularies"],
+      "properties": {"vocabularies": {"contains": {"const": "agentic-workflows/v0"}}}
+    },
+    {"$ref": "#/$defs/refinement"}
+  ],
+  "$defs": {
+    "refinement": {
+      "description": "What `agentic-workflows/v0` adds to an extraction that declares it.",
+      "type": "object",
+      "properties": {
+        "schema": {"enum": ["architecture/v0"]},
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "allOf": [
+              {
+                "if": {"type": "object", "required": ["kind"], "properties": {"kind": {"enum": ["workflow"]}}},
+                "then": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": ["path"],
+                      "properties": {
+                        "path": {
+                          "$ref": "https://schemas.projections.githubnext.com/extraction/v0.json#/$defs/text",
+                          "description": "The workflow file, relative to the project."
+                        },
+                        "name": {
+                          "description": "The name the workflow declares, or null.",
+                          "type": ["string", "null"]
+                        },
+                        "group": {
+                          "description": "The group the workflow belongs to, when the definition groups workflows.",
+                          "type": "string"
+                        },
+                        "tools": {
+                          "description": "The tools its agent may use, such as `github` or `bash`.",
+                          "type": "array",
+                          "items": {"type": "string"}
+                        },
+                        "secrets": {
+                          "description": "The secrets its front matter and imports reference.",
+                          "type": "array",
+                          "items": {"type": "string"}
+                        },
+                        "unrecognized": {
+                          "description": "Fields the extractor’s pinned schema doesn’t declare, as dotted paths; one an import declares is prefixed with its path and a colon.",
+                          "type": "array",
+                          "items": {"type": "string"}
+                        },
+                        "strict": {"description": "Whether strict mode applies.", "type": "boolean"}
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {"type": "object", "required": ["kind"], "properties": {"kind": {"enum": ["group"]}}},
+                "then": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "workflows": {
+                          "description": "The names of the workflows it groups.",
+                          "type": "array",
+                          "items": {"type": "string"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

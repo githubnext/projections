@@ -1,0 +1,7 @@
+{
+  "name": "github/gh-aw main_workflow_schema.json (field names only)",
+  "version": "v1.3.0",
+  "commit": "789cc9c2da60fca3b4e0396591c7179be3b5d9eb",
+  "license": "MIT",
+  "source": "https://github.com/github/gh-aw/blob/v1.3.0/pkg/parser/schemas/main_workflow_schema.json"
+}

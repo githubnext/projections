@@ -1495,6 +1495,7 @@ dependencies = [
  "projections-extractor-dotnet-public-api",
  "projections-extractor-efcore-schema",
  "projections-extractor-github-actions-jobs",
+ "projections-extractor-github-agentic-workflows",
  "projections-extractor-go-public-api",
  "projections-extractor-nestjs-di",
  "projections-extractor-nuget-dependencies",
@@ -1589,6 +1590,18 @@ dependencies = [
  "anyhow",
  "projections-extractor-sdk",
  "serde_json",
+]
+
+[[package]]
+name = "projections-extractor-github-agentic-workflows"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "projections-engine",
+ "projections-extractor-sdk",
+ "regex",
+ "serde_json",
+ "tempfile",
 ]
 
 [[package]]

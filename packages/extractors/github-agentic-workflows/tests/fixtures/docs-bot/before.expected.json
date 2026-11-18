@@ -1,0 +1,648 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "activation": {
+          "roles": [
+            "admin",
+            "maintainer",
+            "write"
+          ],
+          "rolesDeclared": false,
+          "settings": {}
+        },
+        "bash": [
+          "make examples",
+          "python3"
+        ],
+        "concurrency": null,
+        "custom": {
+          "jobs": [],
+          "steps": {}
+        },
+        "deprecated": [],
+        "description": "Runs the documentation's code examples and proposes fixes as a draft pull request.",
+        "engine": {
+          "declared": false,
+          "id": "copilot"
+        },
+        "findings": [],
+        "github": {
+          "repos": null,
+          "settings": {},
+          "toolsets": []
+        },
+        "group": "docs-bot",
+        "imports": [
+          {
+            "classes": [],
+            "found": true,
+            "path": "shared/docs-common.md",
+            "resolved": ".github/workflows/shared/docs-common.md"
+          }
+        ],
+        "limits": {
+          "maxAiCredits": {
+            "declared": false,
+            "value": 1000
+          },
+          "maxDailyAiCredits": {
+            "declared": false,
+            "value": "unlimited"
+          },
+          "timeoutMinutes": {
+            "declared": true,
+            "value": 60
+          }
+        },
+        "lock": {
+          "compiler": "v1.3.0",
+          "path": ".github/workflows/docs-bot-examples.lock.yml",
+          "status": "current"
+        },
+        "mcpServers": [],
+        "name": null,
+        "network": {
+          "allowed": [
+            "*.previews.example.net",
+            "defaults",
+            "python"
+          ],
+          "blocked": [],
+          "declared": true
+        },
+        "path": ".github/workflows/docs-bot-examples.md",
+        "permissions": {
+          "contents": "read"
+        },
+        "safeOutputs": {
+          "allowedDomains": null,
+          "handlers": [
+            {
+              "draft": true,
+              "kind": "create-pull-request",
+              "max": 1,
+              "maxDeclared": false
+            }
+          ],
+          "jobs": [],
+          "sources": {},
+          "staged": false
+        },
+        "secrets": [],
+        "skills": [
+          {
+            "classes": [
+              "guardrail"
+            ],
+            "name": "skills/check-style",
+            "ref": "skills/check-style"
+          }
+        ],
+        "sources": {
+          "network:*.previews.example.net": [
+            "shared/docs-common.md"
+          ],
+          "tools:cache-memory": [
+            "shared/docs-common.md"
+          ]
+        },
+        "strict": true,
+        "tools": [
+          "bash",
+          "cache-memory",
+          "edit"
+        ],
+        "triggers": [
+          {
+            "event": "workflow_dispatch"
+          }
+        ],
+        "unrecognized": [],
+        "unrecognizedValues": []
+      },
+      "evidence": [
+        {
+          "kind": "gh-aw-workflow",
+          "source": ".github/workflows/docs-bot-examples.md"
+        },
+        {
+          "kind": "gh-aw-import",
+          "source": ".github/workflows/shared/docs-common.md"
+        },
+        {
+          "kind": "gh-aw-lock",
+          "source": ".github/workflows/docs-bot-examples.lock.yml"
+        }
+      ],
+      "id": "workflow:.github/workflows/docs-bot-examples.md",
+      "kind": "workflow",
+      "label": "docs-bot-examples"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "activation": {
+          "roles": [
+            "admin",
+            "maintainer",
+            "write"
+          ],
+          "rolesDeclared": false,
+          "settings": {}
+        },
+        "bash": [
+          "cat",
+          "ls",
+          "make linkcheck",
+          "python3"
+        ],
+        "concurrency": null,
+        "custom": {
+          "jobs": [
+            "build"
+          ],
+          "steps": {}
+        },
+        "deprecated": [],
+        "description": "Checks the documentation's links and comments with the broken ones.",
+        "engine": {
+          "declared": false,
+          "id": "copilot"
+        },
+        "findings": [],
+        "github": {
+          "repos": null,
+          "settings": {},
+          "toolsets": [
+            "actions",
+            "repos"
+          ]
+        },
+        "group": "docs-bot",
+        "imports": [
+          {
+            "classes": [],
+            "found": true,
+            "path": "shared/docs-common.md",
+            "resolved": ".github/workflows/shared/docs-common.md"
+          }
+        ],
+        "limits": {
+          "maxAiCredits": {
+            "declared": true,
+            "value": 1000
+          },
+          "maxDailyAiCredits": {
+            "declared": false,
+            "value": "unlimited"
+          },
+          "timeoutMinutes": {
+            "declared": true,
+            "value": 45
+          }
+        },
+        "lock": {
+          "compiler": "v1.3.0",
+          "path": ".github/workflows/docs-bot-links.lock.yml",
+          "status": "current"
+        },
+        "mcpServers": [],
+        "name": null,
+        "network": {
+          "allowed": [
+            "*.previews.example.net",
+            "defaults",
+            "python"
+          ],
+          "blocked": [],
+          "declared": true
+        },
+        "path": ".github/workflows/docs-bot-links.md",
+        "permissions": {
+          "actions": "read",
+          "contents": "read"
+        },
+        "safeOutputs": {
+          "allowedDomains": null,
+          "handlers": [
+            {
+              "kind": "add-comment",
+              "max": 1
+            }
+          ],
+          "jobs": [],
+          "sources": {},
+          "staged": false
+        },
+        "secrets": [],
+        "skills": [
+          {
+            "classes": [
+              "guardrail"
+            ],
+            "name": "skills/check-links",
+            "ref": "skills/check-links"
+          }
+        ],
+        "sources": {
+          "network:*.previews.example.net": [
+            "shared/docs-common.md"
+          ],
+          "tools:cache-memory": [
+            "shared/docs-common.md"
+          ]
+        },
+        "strict": true,
+        "tools": [
+          "bash",
+          "cache-memory",
+          "github"
+        ],
+        "triggers": [
+          {
+            "event": "workflow_dispatch"
+          }
+        ],
+        "unrecognized": [],
+        "unrecognizedValues": []
+      },
+      "evidence": [
+        {
+          "kind": "gh-aw-workflow",
+          "source": ".github/workflows/docs-bot-links.md"
+        },
+        {
+          "kind": "gh-aw-import",
+          "source": ".github/workflows/shared/docs-common.md"
+        },
+        {
+          "kind": "gh-aw-lock",
+          "source": ".github/workflows/docs-bot-links.lock.yml"
+        }
+      ],
+      "id": "workflow:.github/workflows/docs-bot-links.md",
+      "kind": "workflow",
+      "label": "docs-bot-links"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "activation": {
+          "roles": [
+            "admin",
+            "maintainer",
+            "write"
+          ],
+          "rolesDeclared": false,
+          "settings": {}
+        },
+        "bash": null,
+        "concurrency": "docs-bot",
+        "custom": {
+          "jobs": [],
+          "steps": {}
+        },
+        "deprecated": [],
+        "description": "Weekly documentation run that checks links, runs the code examples and files a summary issue.",
+        "engine": {
+          "declared": true,
+          "id": "copilot",
+          "model": "gpt-5"
+        },
+        "findings": [],
+        "github": {
+          "repos": [
+            "${{ github.repository }}"
+          ],
+          "settings": {
+            "minIntegrity": "approved"
+          },
+          "toolsets": [
+            "actions",
+            "repos"
+          ]
+        },
+        "group": "docs-bot",
+        "imports": [
+          {
+            "classes": [],
+            "found": true,
+            "path": "shared/docs-common.md",
+            "resolved": ".github/workflows/shared/docs-common.md"
+          }
+        ],
+        "limits": {
+          "maxAiCredits": {
+            "declared": true,
+            "value": 2000
+          },
+          "maxDailyAiCredits": {
+            "declared": true,
+            "value": 10000
+          },
+          "timeoutMinutes": {
+            "declared": true,
+            "value": 30
+          }
+        },
+        "lock": {
+          "compiler": "v1.3.0",
+          "path": ".github/workflows/docs-bot.lock.yml",
+          "status": "current"
+        },
+        "mcpServers": [],
+        "name": "Docs bot",
+        "network": {
+          "allowed": [
+            "*.previews.example.net",
+            "defaults",
+            "python"
+          ],
+          "blocked": [],
+          "declared": true
+        },
+        "path": ".github/workflows/docs-bot.md",
+        "permissions": {
+          "actions": "read",
+          "contents": "read",
+          "issues": "read"
+        },
+        "safeOutputs": {
+          "allowedDomains": null,
+          "handlers": [
+            {
+              "kind": "create-issue",
+              "max": 1
+            },
+            {
+              "kind": "dispatch-workflow",
+              "max": 2,
+              "workflows": [
+                "docs-bot-links",
+                "docs-bot-examples"
+              ]
+            }
+          ],
+          "jobs": [],
+          "sources": {},
+          "staged": false
+        },
+        "secrets": [],
+        "skills": [
+          {
+            "classes": [
+              "guardrail"
+            ],
+            "name": "skills/check-style",
+            "ref": "skills/check-style"
+          },
+          {
+            "classes": [
+              "guardrail"
+            ],
+            "name": "skills/check-links",
+            "ref": "skills/check-links"
+          }
+        ],
+        "sources": {
+          "network:*.previews.example.net": [
+            "shared/docs-common.md"
+          ],
+          "tools:cache-memory": [
+            "shared/docs-common.md"
+          ]
+        },
+        "strict": true,
+        "tools": [
+          "cache-memory",
+          "github"
+        ],
+        "triggers": [
+          {
+            "detail": "weekly on monday",
+            "event": "schedule"
+          },
+          {
+            "event": "workflow_dispatch"
+          }
+        ],
+        "unrecognized": [],
+        "unrecognizedValues": []
+      },
+      "evidence": [
+        {
+          "kind": "gh-aw-workflow",
+          "source": ".github/workflows/docs-bot.md"
+        },
+        {
+          "kind": "gh-aw-import",
+          "source": ".github/workflows/shared/docs-common.md"
+        },
+        {
+          "kind": "gh-aw-lock",
+          "source": ".github/workflows/docs-bot.lock.yml"
+        }
+      ],
+      "id": "workflow:.github/workflows/docs-bot.md",
+      "kind": "workflow",
+      "label": "docs-bot"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "activation": {
+          "roles": [
+            "admin",
+            "maintainer",
+            "write"
+          ],
+          "rolesDeclared": false,
+          "settings": {}
+        },
+        "bash": null,
+        "concurrency": null,
+        "custom": {
+          "jobs": [],
+          "steps": {}
+        },
+        "deprecated": [],
+        "description": "Labels new issues and asks for missing details.",
+        "engine": {
+          "declared": false,
+          "id": "copilot"
+        },
+        "findings": [],
+        "github": {
+          "repos": null,
+          "settings": {},
+          "toolsets": [
+            "issues",
+            "labels"
+          ]
+        },
+        "imports": [],
+        "limits": {
+          "maxAiCredits": {
+            "declared": false,
+            "value": 1000
+          },
+          "maxDailyAiCredits": {
+            "declared": false,
+            "value": "unlimited"
+          },
+          "timeoutMinutes": {
+            "declared": true,
+            "value": 10
+          }
+        },
+        "lock": {
+          "compiler": "v1.3.0",
+          "path": ".github/workflows/issue-triage.lock.yml",
+          "status": "current"
+        },
+        "mcpServers": [],
+        "name": null,
+        "network": {
+          "allowed": [
+            "defaults"
+          ],
+          "blocked": [],
+          "declared": true
+        },
+        "path": ".github/workflows/issue-triage.md",
+        "permissions": {
+          "all": "read"
+        },
+        "safeOutputs": {
+          "allowedDomains": null,
+          "handlers": [
+            {
+              "kind": "add-comment",
+              "max": 1
+            },
+            {
+              "allowed": [
+                "bug",
+                "enhancement",
+                "question",
+                "documentation"
+              ],
+              "kind": "add-labels",
+              "max": 3
+            }
+          ],
+          "jobs": [],
+          "sources": {},
+          "staged": false
+        },
+        "secrets": [],
+        "skills": [],
+        "sources": {},
+        "strict": true,
+        "tools": [
+          "github"
+        ],
+        "triggers": [
+          {
+            "detail": "types: opened, reopened",
+            "event": "issues",
+            "filters": {
+              "types": [
+                "opened",
+                "reopened"
+              ]
+            }
+          }
+        ],
+        "unrecognized": [],
+        "unrecognizedValues": []
+      },
+      "evidence": [
+        {
+          "kind": "gh-aw-workflow",
+          "source": ".github/workflows/issue-triage.md"
+        },
+        {
+          "kind": "gh-aw-lock",
+          "source": ".github/workflows/issue-triage.lock.yml"
+        }
+      ],
+      "id": "workflow:.github/workflows/issue-triage.md",
+      "kind": "workflow",
+      "label": "issue-triage"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "workflows": [
+          "docs-bot",
+          "docs-bot-examples",
+          "docs-bot-links"
+        ]
+      },
+      "id": "group:docs-bot",
+      "kind": "group",
+      "label": "docs-bot"
+    }
+  ],
+  "metadata": {
+    "compilers": [
+      "v1.3.0"
+    ],
+    "engine": "gh-aw",
+    "ghAw": {
+      "commit": "789cc9c2da60fca3b4e0396591c7179be3b5d9eb",
+      "release": "v1.3.0",
+      "schema": "https://github.com/github/gh-aw/blob/v1.3.0/pkg/parser/schemas/main_workflow_schema.json"
+    },
+    "limitations": [
+      "The front matter as declared, merged with local imports: gh-aw's compiler isn't run, so natural-language triggers stay as written and defaults gh-aw fills in are shown only where noted.",
+      "Imports from other repositories are listed but not read; gh-aw fetches them when it compiles."
+    ],
+    "workflows": 4
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "from": "workflow:.github/workflows/docs-bot.md",
+      "id": "dispatches:workflow%3A.github%2Fworkflows%2Fdocs-bot.md:workflow%3A.github%2Fworkflows%2Fdocs-bot-examples.md",
+      "kind": "dispatches",
+      "to": "workflow:.github/workflows/docs-bot-examples.md"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "workflow:.github/workflows/docs-bot.md",
+      "id": "dispatches:workflow%3A.github%2Fworkflows%2Fdocs-bot.md:workflow%3A.github%2Fworkflows%2Fdocs-bot-links.md",
+      "kind": "dispatches",
+      "to": "workflow:.github/workflows/docs-bot-links.md"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "group:docs-bot",
+      "id": "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot-examples.md",
+      "kind": "contains",
+      "to": "workflow:.github/workflows/docs-bot-examples.md"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "group:docs-bot",
+      "id": "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot-links.md",
+      "kind": "contains",
+      "to": "workflow:.github/workflows/docs-bot-links.md"
+    },
+    {
+      "confidence": "authoritative",
+      "from": "group:docs-bot",
+      "id": "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot.md",
+      "kind": "contains",
+      "to": "workflow:.github/workflows/docs-bot.md"
+    }
+  ],
+  "schema": "architecture/v0",
+  "vocabularies": [
+    "agentic-workflows/v0"
+  ]
+}

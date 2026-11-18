@@ -76,6 +76,10 @@ Runtime security policies use the `policy`, `probe`, `hook`, `selector` and
 [one model for runtime security policies](../models/runtime-policy-model.md),
 which the `tetragon-policies` extractor writes.
 
+Agentic workflows use the `workflow` and `group` vocabulary described in
+[one model for agentic workflows](../models/agentic-workflow-model.md), which
+the `github-agentic-workflows` extractor writes.
+
 Reject invalid Unicode, duplicate JSON object keys, nonfinite numbers, and
 integer values outside the JavaScript safe-integer range. Do not normalize
 Unicode text. Extractions are limited to 10,000 entities, 50,000 relationships,

@@ -74,6 +74,10 @@ fn cases(root: &Path) -> Vec<(&'static str, Value)> {
     copy(&fixtures("rails-routes").join("storefront/config"), &root.join("rails/config"));
     copy(&fixtures("scip-file-references").join("scip-typescript"), &root.join("scip"));
     copy(&fixtures("tetragon-policies").join("library/repo/policies"), &root.join("tetragon"));
+    copy(
+        &fixtures("github-agentic-workflows").join("public/.github"),
+        &root.join("agentic/.github"),
+    );
     for (id, file) in [
         ("dotnet-public-api", "api.json"),
         ("dotnet-di", "di.json"),
@@ -98,6 +102,7 @@ fn cases(root: &Path) -> Vec<(&'static str, Value)> {
         ),
         ("rust-public-api", json!({"rustdocJson": "rust/rustdoc.json"})),
         ("github-actions-jobs", json!({"workflowPath": "workflows/ci.yml"})),
+        ("github-agentic-workflows", json!({"paths": ["agentic/.github/workflows/*.md"]})),
         ("prisma-schema", json!({"schema": "prisma/schema.prisma"})),
         ("rails-schema", json!({"schema": "rails/db/schema.rb"})),
         ("rails-routes", json!({"routes": "rails/config/routes.rb"})),

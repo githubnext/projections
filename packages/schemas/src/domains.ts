@@ -101,6 +101,12 @@ export const vocabularies = {
     description:
       'Kernel runtime policies, such as Tetragon: policies, probes, the hooks they attach to, selectors and the workloads they cover.',
   },
+  'agentic-workflows/v0': {
+    schemas: ['architecture/v0'],
+    document: 'docs/models/agentic-workflow-model.md',
+    description:
+      'Agentic workflows, such as GitHub Agentic Workflows: what starts each one, what its agent can reach and write, its budgets and imports, and groups of workflows that work together.',
+  },
 } as const satisfies {[vocabulary in Vocabulary]: {schemas: readonly DomainSchema[]; document: string; description: string}}
 
 /**
@@ -309,6 +315,33 @@ export const dataRules = [
       operator: {type: 'string', description: 'How the binary path matches, such as `In` or `Prefix`.'},
       parent: {type: 'boolean', description: 'Whether it filters on the parent binary.'},
     },
+  },
+  // agentic-workflows/v0 (docs/models/agentic-workflow-model.md)
+  {
+    schema: 'architecture/v0',
+    vocabulary: 'agentic-workflows/v0',
+    collection: 'entities',
+    kinds: ['workflow'],
+    fields: {
+      path: {type: 'text', required: true, description: 'The workflow file, relative to the project.'},
+      name: {type: 'nullable-string', description: 'The name the workflow declares, or null.'},
+      group: {type: 'string', description: 'The group the workflow belongs to, when the definition groups workflows.'},
+      tools: {type: 'strings', description: 'The tools its agent may use, such as `github` or `bash`.'},
+      secrets: {type: 'strings', description: 'The secrets its front matter and imports reference.'},
+      unrecognized: {
+        type: 'strings',
+        description:
+          'Fields the extractor’s pinned schema doesn’t declare, as dotted paths; one an import declares is prefixed with its path and a colon.',
+      },
+      strict: {type: 'boolean', description: 'Whether strict mode applies.'},
+    },
+  },
+  {
+    schema: 'architecture/v0',
+    vocabulary: 'agentic-workflows/v0',
+    collection: 'entities',
+    kinds: ['group'],
+    fields: {workflows: {type: 'strings', description: 'The names of the workflows it groups.'}},
   },
 ] as const satisfies readonly DataRule[]
 

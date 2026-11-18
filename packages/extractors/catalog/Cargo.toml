@@ -16,6 +16,7 @@ projections-extractor-dotnet-di = { path = "../dotnet-di" }
 projections-extractor-dotnet-public-api = { path = "../dotnet-public-api" }
 projections-extractor-efcore-schema = { path = "../efcore-schema" }
 projections-extractor-github-actions-jobs = { path = "../github-actions-jobs" }
+projections-extractor-github-agentic-workflows = { path = "../github-agentic-workflows" }
 projections-extractor-go-public-api = { path = "../go-public-api" }
 projections-extractor-scip-file-references = { path = "../scip-file-references" }
 projections-extractor-spring-di = { path = "../spring-di" }

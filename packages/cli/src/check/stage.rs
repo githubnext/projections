@@ -15,12 +15,23 @@ use std::{
     time::{Duration, Instant},
 };
 
+/// The scenarios the renderer checks run: their documents, the projection's renderer bundle if it has one, whether that
+/// bundle may run (`--trust`), and the keys of the scenarios to check.
+pub(super) struct Scenarios<'a> {
+    pub sources: &'a [PathBuf],
+    pub bundle: Option<PathBuf>,
+    pub trust: bool,
+    pub keys: &'a [String],
+}
+
 /// Runs the host's renderer checks on `scenarios` in a headless browser.
 pub(super) async fn renderer_checks(
-    scenarios: &[PathBuf],
-    bundle: Option<PathBuf>,
-    trust: bool,
-    keys: &[String],
+    Scenarios {
+        sources: scenarios,
+        bundle,
+        trust,
+        keys,
+    }: Scenarios<'_>,
     executable: &Path,
     browsers: &browser::Pool,
     timeout: Duration,

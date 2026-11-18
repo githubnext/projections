@@ -5,7 +5,7 @@ use super::{
     failed,
     projection::{Checker, Rendered},
     scenarios::write_scenarios,
-    stage::renderer_checks,
+    stage::{Scenarios, renderer_checks},
     step,
 };
 use crate::{assets, browser, fixtures, runtime::DefinitionSource, snapshot};
@@ -33,10 +33,12 @@ impl Checker<'_> {
         }
         let (keys, titles) = scenario_keys(&loaded.value, self.options.from.is_some());
         match renderer_checks(
-            &sources,
-            target.bundle,
-            self.runner.trust,
-            &keys,
+            Scenarios {
+                sources: &sources,
+                bundle: target.bundle,
+                trust: self.runner.trust,
+                keys: &keys,
+            },
             executable,
             &self.browsers,
             self.options.timeout,

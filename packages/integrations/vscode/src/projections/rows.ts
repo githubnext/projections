@@ -43,6 +43,7 @@ export function rendererIcon(renderer: ProjectionDefinition['renderer'] | undefi
     'dependency-injection': 'plug',
     'text-diff': 'diff',
     'runtime-policy': 'shield',
+    'agentic-workflows': 'robot',
   }
   return icons[renderer] ?? 'symbol-structure'
 }

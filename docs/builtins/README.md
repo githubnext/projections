@@ -23,7 +23,7 @@ extension opens these pages when you select a built-in part.
 | [`terraform-infrastructure`](extractors/terraform-infrastructure.md) | Terraform resources, modules and references, with each resource's planned action. | `architecture/v0` | [`infrastructure`](renderers/graph.md) |
 | [`azure-what-if`](extractors/azure-what-if.md) | Azure resources, containment and references, with each resource's what-if change. | `architecture/v0` | [`infrastructure`](renderers/graph.md) |
 | [`github-actions-jobs`](extractors/github-actions-jobs.md) | Jobs and needs declared by a GitHub Actions workflow. | `dag/v0` | [`dag`](renderers/graph.md) |
-| [`github-agentic-workflows`](extractors/github-agentic-workflows.md) | GitHub Agentic Workflows: what starts each one, its engine, tools and their scope, network, permissions, safe outputs, budgets and imports, and whether its lock file is current. | `architecture/v0` | [`architecture`](renderers/graph.md) |
+| [`github-agentic-workflows`](extractors/github-agentic-workflows.md) | GitHub Agentic Workflows: what starts each one, its engine, tools and their scope, network, permissions, safe outputs, budgets and imports, and whether its lock file is current. | `architecture/v0` | [`agentic-workflows`](renderers/agentic-workflows.md) |
 | [`tetragon-policies`](extractors/tetragon-policies.md) | Kernel and user-space hooks that Tetragon tracing policies observe or enforce, with their conditions and the workloads they apply to. | `architecture/v0` | [`runtime-policy`](renderers/runtime-policy.md) |
 | [`dotnet-public-api`](extractors/dotnet-public-api.md) | Roslyn/.NET effective public API. | `api/v0` | [`api`](renderers/api.md) |
 | [`dotnet-di`](extractors/dotnet-di.md) | Executed .NET service registrations and the constructor graph they compose. | `architecture/v0` | [`dependency-injection`](renderers/dependency-injection.md) |
@@ -52,6 +52,7 @@ comparator file layers your own rules over it.
 <!-- prettier-ignore -->
 | Renderer | What it draws | Also answers to |
 |---|---|---|
+| [Agentic workflows](renderers/agentic-workflows.md) | Each workflow's triggers, scope, outputs and budgets, and the direction each change moves them. | — |
 | [API](renderers/api.md) | Exported declarations with before and after signatures. | — |
 | [Code statistics](renderers/code-statistics.md) | Per-language counts as bars or share, staged by the comparison's steps. | — |
 | [Database](renderers/database.md) | Relationship-aware ERD cards with staged schema transitions. | `schema` |

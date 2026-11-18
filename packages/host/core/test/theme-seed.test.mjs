@@ -63,3 +63,13 @@ test('the URL form is the JSON text, round trip', () => {
   assert.match(parseThemeSeedText(unencoded.searchParams.get('theme')).error, /percent-encode/)
   assert.match(parseThemeSeedText(`{"light":{"background":"${' '.repeat(5000)}"}}`).error, /longer than 4096/)
 })
+
+test('a font family list is read in one pass: quoted names may hold commas, and spaces and commas never backtrack', () => {
+  const sans = `"Segoe UI", 'Foo, Bar', "Inter's", system-ui , sans-serif`
+  assert.equal(parseThemeSeed({light: {background: '#fff', sans}}).seed?.light?.sans, sans)
+  for (const mono of ['a,', '"a" b', `"a\\b"`, "'a", 'a;b']) assert.ok(parseThemeSeed({light: {background: '#fff', mono}}).error, mono)
+  const started = performance.now()
+  const {error} = parseThemeSeed({light: {background: '#fff', sans: `a${' , a'.repeat(14)} ;`}})
+  assert.ok(performance.now() - started < 1000, `took ${Math.round(performance.now() - started)} ms`)
+  assert.match(error, /isn't a font family list/)
+})

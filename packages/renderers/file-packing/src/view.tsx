@@ -12,7 +12,7 @@ import type {PackSettings} from './pack/hierarchy.js'
 import type {accepts} from './accepts.js'
 import {depthControl, exclusionControls, folderControls, measureControl} from './controls.js'
 import {Circles, layoutMark, labelsMark, RootSurface} from './circles.js'
-import {diffViewBox, drawCircle, includedRows, packingDocument, packingPalette, sizeWords} from './document.js'
+import {diffViewBox, drawCircle, withHolders, includedRows, packingDocument, packingPalette, sizeWords} from './document.js'
 import type {Exclusions} from './document.js'
 import {nameOf, placeLabels} from './labels.js'
 import {useLabelSize, useStageSize} from './stage.js'
@@ -124,7 +124,7 @@ export function FilePackingRenderer(props: RendererProps<typeof accepts>) {
 
   const emphasisOf = props.emphasis
   const drawn = useMemo(
-    () => circles.map(circle => drawCircle(circle, {doc, decorations, emphasisOf, palette, onSelect, describeSize, diff})),
+    () => withHolders(circles.map(circle => drawCircle(circle, {doc, decorations, emphasisOf, palette, onSelect, describeSize, diff}))),
     [circles, decorations, doc, emphasisOf, palette, onSelect, describeSize, diff],
   )
   const shown = circles === all ? undefined : circles.length

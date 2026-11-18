@@ -201,7 +201,23 @@ export function drawCircle(circle: Circle, {doc, decorations, emphasisOf, palett
     flags,
     removedGhost,
     ground,
+    holdsChanges: false,
   }
+}
+
+/**
+ * Marks the folders that have an emphasized change drawn inside them (`holdsChanges`): their change ring is drawn
+ * neutral, so only the innermost changes carry a change color.
+ */
+export function withHolders(drawn: readonly Drawn[]): readonly Drawn[] {
+  const byId = new Map(drawn.map(item => [item.id, item]))
+  const holders = new Set<string>()
+  for (const item of drawn) {
+    if (!(item.changed && item.emphasis > 0.01)) continue
+    for (let parent = item.circle.parent; parent !== undefined && !holders.has(parent); parent = byId.get(parent)?.circle.parent)
+      holders.add(parent)
+  }
+  return holders.size ? drawn.map(item => (holders.has(item.id) ? {...item, holdsChanges: true} : item)) : drawn
 }
 
 /** Words joined as English lists them: `a`, `a and b`, `a, b and c`. */

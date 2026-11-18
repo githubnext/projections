@@ -3,7 +3,12 @@ import {signed} from './timeline.js'
 export function Delta({delta, emphasis, noun, format}: {delta: number; emphasis: number; noun: string; format: (value: number) => string}) {
   if (!delta || emphasis === 0) return null
   return (
-    <span className={`stat-delta-label ${delta > 0 ? 'added' : 'removed'}`} style={{opacity: emphasis}} aria-hidden={emphasis < 0.05}>
+    <span
+      className={`stat-delta-label ${delta > 0 ? 'added' : 'removed'}`}
+      data-change={delta > 0 ? 'added' : 'removed'}
+      style={{opacity: emphasis}}
+      aria-hidden={emphasis < 0.05}
+    >
       {signed(delta, format)}
       <span className="sr-only"> {noun}</span>
     </span>
@@ -53,12 +58,17 @@ export function Bar({
         {gained > 0 && (
           <span
             className={`stat-gain${diff ? ' diff' : ''}`}
+            data-change="added"
             style={{left: `${((value - gained) / (value || 1)) * 100}%`, opacity: emphasis}}
           />
         )}
       </span>
       {lost > 0 && (
-        <span className={`stat-loss${diff ? ' diff' : ''}`} style={{left: percent(value), width: percent(lost), opacity: emphasis}} />
+        <span
+          className={`stat-loss${diff ? ' diff' : ''}`}
+          data-change="removed"
+          style={{left: percent(value), width: percent(lost), opacity: emphasis}}
+        />
       )}
     </>
   )

@@ -6,6 +6,11 @@ What changed in each release of Projections. A version's section is the body of 
 
 Projections 0.2.0 adds built-ins for Rails and GitHub Agentic Workflows, makes the agent viewer easier to drive and to show in other apps (Claude Code's Preview pane among them), and tightens what runs without `--trust`. Read [Behaviour changes](#behaviour-changes) before upgrading: some can turn a passing check red.
 
+### Security
+
+- Custom renderers from a checked-out pull request ran without `--trust` (#19), and `--ci` treated artifacts from fork pull requests as official (#18). Both are fixed; see [Behaviour changes](#behaviour-changes).
+- Upgrade from 0.1.0. If you used `--ci`, delete the `artifacts/` and `extractions/` directories in the [per-user cache](https://github.com/githubnext/projections/blob/main/docs/runner/caches.md) (`~/.cache/projections` on Linux, `~/Library/Caches/projections` on macOS, `%LOCALAPPDATA%\projections` on Windows).
+
 ### Behaviour changes
 
 - **A repository's custom renderers run only with `--trust`** (#19). A custom renderer bundle is repository code, so it now follows the same rule as a custom extractor: `--trust` on the CLI, a trusted workspace in VS Code, `trust: true` in the Action. Before, a renderer from the working tree or any commit in `HEAD`'s history ran without trust, including a pull request's head once checked out. Without trust, hosts draw with the built-in renderer for the schema and show a notice.

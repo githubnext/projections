@@ -53,8 +53,8 @@ presentations of this bundle, and their scenarios live in `scenarios.json` here.
   counts the components of each kind (`contains` relationships are drawn as
   boundaries, not counted, and so are modules when every one is a boundary, see
   the kit's `boundaryNouns`), so there is no kind legend. One revision of up to
-  100 components draws every one. In a comparison of more than 40 components (or
-  one revision of more than 100), each unchanged boundary collapses into a
+  60 components draws every one. In a comparison of more than 40 components (or
+  one revision of more than 60), each unchanged boundary collapses into a
   summary card that counts its components and carries the boundary's own `data`,
   with its relationships joined to the card; activating it (a click, a double
   click, Enter or Space) expands it, and the kit draws an expand or collapse

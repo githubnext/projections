@@ -8,6 +8,7 @@ import {drawing} from './drawing.js'
 import type {LaidOutGraphProps} from './drawing.js'
 import {useFraming, useGraphZoom} from './framing.js'
 import {focusArea} from '../../graph-canvas/focus.js'
+import {boundariesHoldingChanges} from '../../graph-canvas/holds-changes.js'
 import {EntityCard} from './entity-card.js'
 import {GraphFooter} from './graph-footer.js'
 import {Arrowheads, drawnLinks, GraphLink} from './graph-link.js'
@@ -60,6 +61,7 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
   const draw = drawing(props, diff, emphasisInset(borders))
   const caption = props.focus ? props.focus.label : ''
   const links = drawnLinks(edges, nodeById, draw, labelsIn, borders)
+  const holding = boundariesHoldingChanges(nodes, edges, props.emphasis)
   return (
     <div className="graph-container" data-diff={diff ? '' : undefined}>
       {count > graphEntityLimit && (
@@ -99,7 +101,7 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
             {nodes
               .filter(node => node.group)
               .map(node => (
-                <GroupNode key={node.id} node={node} drawing={draw} />
+                <GroupNode key={node.id} node={node} drawing={draw} holdsChanges={holding.has(node.id)} />
               ))}
             {links.map(link => (
               <GraphLink key={link.edge.key} link={link} drawing={draw} sharedOpen={sharedOpen} inspect={inspectEdge} />

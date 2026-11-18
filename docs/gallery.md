@@ -184,6 +184,22 @@ token, and widens its scope
 ([`docs/images/sources/credentials-policy`](images/sources/credentials-policy/README.md),
 `tetragon-policies`).
 
+## Agentic workflows
+
+The [`agentic-workflows`](builtins/renderers/agentic-workflows.md) renderer
+draws each GitHub Agentic Workflow as a card: what starts it, what its agent can
+reach and write, its budgets and what it loads; with the agentic-workflows
+comparator, it says which changes widen what an agent may do.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="images/readme/agentic-workflows-dark.png">
+  <img width="1240" alt="A group of gh-aw documentation workflows: docs-bot reaches another repository, writes more and stops loading a guardrail, docs-bot-links may run any command and reach more domains, each section marked Widened" src="images/readme/agentic-workflows-light.png">
+</picture>
+
+A pull request widens a group of documentation workflows and drops a guardrail
+([`docs/images/sources/docs-bot`](images/sources/docs-bot/README.md),
+`github-agentic-workflows`).
+
 The [`graph`](builtins/renderers/graph.md) renderer's plain `graph` and
 `graph-horizontal` presentations draw the same cards and arrows as the
 presentations above, without their domain wording.

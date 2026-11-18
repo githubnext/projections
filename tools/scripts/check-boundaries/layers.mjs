@@ -12,6 +12,7 @@ const builtInRenderers = [
   'packages/renderers/file-packing',
   'packages/renderers/graph',
   'packages/renderers/runtime-policy',
+  'packages/renderers/agentic-workflows',
   'packages/renderers/text-diff',
 ]
 export const layers = [

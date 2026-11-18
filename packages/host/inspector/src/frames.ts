@@ -1,10 +1,9 @@
 /**
- * Custom renderer frames in a host whose frames may only be Blob documents (an editor webview, an MCP Apps host's
- * view). The Inspector loads a repository's custom renderer bundle from `<runner origin>/custom-renderers/…`, which
- * such a page can't load. So the page relays those URLs: when a renderer frame's `src` is set to one, before the frame
- * loads anything, `open` fetches the bundle through the host and the frame gets a Blob document of it instead, with
- * the same fragment (the renderer protocol's channel). Built-in renderers are made Blob documents up front in the same
- * way. Returns a function that stops relaying.
+ * Custom renderer frames in a host whose frames may only be Blob documents (an editor webview). The Inspector loads a
+ * repository's custom renderer bundle from `<runner origin>/custom-renderers/…`, which such a page can't load. So the
+ * page relays those URLs: when a renderer frame's `src` is set to one, before the frame loads anything, `open` fetches
+ * the bundle through the host and the frame gets a Blob document of it instead, with the same fragment (the renderer
+ * protocol's channel). Built-in renderers are made Blob documents up front in the same way. Returns a function that stops relaying.
  */
 export function relayRendererFrames(prefix: string, open: (url: URL) => Promise<string>, frame = globalThis.HTMLIFrameElement): () => void {
   const descriptor = Object.getOwnPropertyDescriptor(frame.prototype, 'src')

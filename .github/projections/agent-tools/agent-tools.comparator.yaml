@@ -19,7 +19,7 @@ description: >-
   another, or a parameter whose schema differs between them).
 
 defaults:
-  everyTool: [mcp, mcp-apps, vscode]
+  everyTool: [mcp, vscode]
   dropped: {vscode: [confirm]}
 
 checks:

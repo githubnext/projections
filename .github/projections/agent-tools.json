@@ -1,7 +1,7 @@
 {
   "id": "agent-tools",
   "title": "Agent tools",
-  "description": "Every tool Projections offers coding agents, its parameters (type, enum values, limits, required) and the surfaces that expose it: projections mcp, MCP Apps hosts, VS Code and the Copilot app canvas, read from source. Changes are classified as the agents calling them meet them, and drift between surfaces is flagged.",
+  "description": "Every tool Projections offers coding agents, its parameters (type, enum values, limits, required) and the surfaces that expose it: projections mcp, VS Code and the Copilot app canvas (and MCP Apps hosts, at revisions before the MCP App was removed), read from source. Changes are classified as the agents calling them meet them, and drift between surfaces is flagged.",
   "extractor": {
     "command": ["node", ".github/projections/agent-tools/extract.mjs"],
     "sources": [

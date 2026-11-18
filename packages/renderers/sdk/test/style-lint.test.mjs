@@ -39,3 +39,15 @@ test('hard-coded colors, font sizes and families and !important are warnings; fa
     ],
   )
 })
+
+test('unclosed comments and brace-free text are read in linear time', () => {
+  const started = performance.now()
+  for (const css of [`/*${'a/*'.repeat(100_000)}`, 'a'.repeat(200_000), `${'a{'.repeat(100_000)}`])
+    assert.deepEqual(lintRendererStyles(css).errors, [])
+  assert.ok(performance.now() - started < 1000, `took ${Math.round(performance.now() - started)} ms`)
+  const {warnings} = lintRendererStyles('/* a\n b */ .a { color: red; }\n/* unclosed { color: blue; }')
+  assert.deepEqual(warnings, [
+    "styles:2: .a { color: red }: the color red isn't a theme token; use var(--projections-color-…) (token.color in TSX)",
+    "styles:3: /* unclosed { color: blue }: the color blue isn't a theme token; use var(--projections-color-…) (token.color in TSX)",
+  ])
+})

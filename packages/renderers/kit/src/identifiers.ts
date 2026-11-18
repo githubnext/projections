@@ -9,17 +9,31 @@ export interface LabelPart {
 const requestMethod = /^(?:GET|HEAD|POST|PUT|PATCH|DELETE|OPTIONS)$/
 /** File names, dotted members and IDs: `main.js`, `Client.request`, `checkout.latency.p50`. */
 const dotted = /^[\w@$-]+(?:\.[\w$-]+)*\.[A-Za-z_$][\w$-]*$/
-const snake = /^[A-Za-z$][\w$]*_[\w$]+$/
+const word = /^[A-Za-z$][\w$]*$/
 const call = /^[A-Za-z_$][\w$.]*\(\)$/
 const pathLike = /^[\w@~.:{}[\]*$-]*\/[\w@~.:{}[\]*$/-]*$/
 
 function isCode(token: string): boolean {
   if (!/[A-Za-z]/.test(token)) return false
-  if (dotted.test(token) || snake.test(token) || call.test(token)) return true
+  // snake_case: an underscore after the first character and before the last.
+  const snake = word.test(token) && token.slice(1, -1).includes('_')
+  if (dotted.test(token) || snake || call.test(token)) return true
   // A path, but not prose such as `and/or`: rooted, nested, or ending in a file name.
   return (
     pathLike.test(token) && (/^[/.~@]/.test(token) || token.split('/').length > 2 || dotted.test(token.slice(token.lastIndexOf('/') + 1)))
   )
+}
+
+const opening = new Set('("\'[')
+const closing = new Set(')"\'],;:!?.')
+
+/** A token's opening punctuation, its middle and its closing punctuation, found in one pass from each end. */
+function punctuated(token: string): [string, string, string] {
+  let start = 0
+  while (start < token.length && opening.has(token[start]!)) start++
+  let end = token.length
+  while (end > start && closing.has(token[end - 1]!)) end--
+  return [token.slice(0, start), token.slice(start, end), token.slice(end)]
 }
 
 /**
@@ -36,7 +50,7 @@ export function identifierParts(text: string): LabelPart[] {
     else parts.push({text: value, code})
   }
   const tokens = text.split(/(\s+)/).map(token => {
-    const [, lead = '', bare = '', rest = ''] = /^([("'[]*)(.*?)([)"'\],;:!?.]*)$/s.exec(token) ?? []
+    const [lead, bare, rest] = punctuated(token)
     // A call keeps its closing parenthesis: `fetchJson()`.
     const closes = bare.endsWith('(') && rest.startsWith(')')
     const core = closes ? `${bare})` : bare,

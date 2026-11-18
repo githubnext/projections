@@ -5,11 +5,6 @@
 //! message per line, as `serve --stdio` frames it. Writes preview first and
 //! write on a second call with the preview's `confirm` token. See
 //! `docs/runner/agent-tools.md`.
-//!
-//! To an MCP Apps host (one whose `initialize` declares the extension) it also
-//! serves the viewer as a view the host shows itself ([`app`]).
-
-mod app;
 
 use std::{future::Future, sync::Arc};
 
@@ -29,38 +24,27 @@ pub const PROTOCOL_VERSION: &str = "2025-06-18";
 /// The protocol versions it speaks, newest first; the tools use nothing newer than the first.
 const VERSIONS: [&str; 3] = ["2025-06-18", "2025-03-26", "2024-11-05"];
 
-/// What an MCP session answers from: the tools, what `initialize` says and the viewer's page for MCP Apps hosts.
-/// `app` is whether the session's host shows that page itself.
+/// What an MCP session answers from: the tools and what `initialize` says.
 trait ToolHost: Send + Sync + 'static {
-    fn instructions(&self, app: bool) -> String;
+    fn instructions(&self) -> String;
     fn tools(&self) -> Value;
-    fn call(&self, name: String, arguments: Value, app: bool) -> impl Future<Output = Result<Value, String>> + Send;
-    /// The viewer's MCP App page, when this build has it.
-    fn page(&self) -> Option<&'static str>;
+    fn call(&self, name: String, arguments: Value) -> impl Future<Output = Result<Value, String>> + Send;
 }
 
 /// The agent tools over the service, with the viewer as the surface that shows the view.
 struct Agent {
     service: Arc<Service>,
     views: crate::view::Views,
-    relay: app::Relay,
 }
 
-/// How an MCP Apps host's agent shows the person a projection: the host shows the viewer itself.
-const APP_SHOWN: &str = "The person sees it in this conversation, where the host shows the viewer: there is no page to open.";
-
 impl ToolHost for Agent {
-    fn instructions(&self, app: bool) -> String {
-        let show = if app {
-            "Show the person the projections you set up or change, then discuss them: open_projection shows the viewer to them in this conversation (what they mean by \"open it in the inspector\" or \"show me\"), as an app the host shows beside or in the conversation; there is no page to open. "
-        } else {
-            "Show the person the projections you set up or change, then discuss them: open_projection starts the viewer, a page on this machine they watch while you drive it (what they mean by \"open it in the inspector\" or \"show me\"), and gives its URL. \
-            Open it for them yourself, in your own browser if you have one, else in the system browser (projections view show --open, run in the repository); give them the link only when you can open neither. "
-        };
+    fn instructions(&self) -> String {
         format!(
             "Projections shows the systems in this repository ({}) without lines of code: services, schemas, dependencies, public APIs, workflows, and how a change reshapes them. \
             Start with list_projections, or explore when the repository defines none yet. compare tells a change as steps with each change's meaning; sweep shows which recent changes each projection catches. \
-            {show}current_view says what it shows and what they selected, and screenshot renders it as an image. \
+            Show the person the projections you set up or change, then discuss them: open_projection starts the viewer, a page on this machine they watch while you drive it (what they mean by \"open it in the inspector\" or \"show me\"), and gives its URL. \
+            Open it for them yourself, in your own browser if you have one, else in the system browser (projections view show --open, run in the repository); give them the link only when you can open neither. \
+            current_view says what it shows and what they selected, and screenshot renders it as an image. \
             Writes (adopt, set_part, update_snapshots) preview first and write only when called again with the preview's confirm token: show the person the preview, and confirm only when they agree. \
             Never adopt on your own; a request to set projections up is the go-ahead to adopt the few worth having so you can show them. \
             Adding them to CI is the person's decision: when they ask, read the repository's workflows and propose where the Projections step goes, as `projections help agents ci` explains (usually a step in the job that already installs and builds), show the diff, and write it only once they agree. \
@@ -78,51 +62,24 @@ impl ToolHost for Agent {
         tools::list()
     }
 
-    async fn call(&self, name: String, arguments: Value, app: bool) -> Result<Value, String> {
-        if app && name == app::RELAY_TOOL {
-            return self.relay.call(&self.views, &arguments).await;
-        }
-        let mut outcome = tools::call_with_views(&self.service, Host::Agent, Some(&self.views), &name, &arguments).await?;
-        if app && name == "open_projection" {
-            outcome.text = outcome.text.replacen(crate::view::surface::NO_PAGE, APP_SHOWN, 1);
-        }
+    async fn call(&self, name: String, arguments: Value) -> Result<Value, String> {
+        let outcome = tools::call_with_views(&self.service, Host::Agent, Some(&self.views), &name, &arguments).await?;
         Ok(outcome.json())
-    }
-
-    fn page(&self) -> Option<&'static str> {
-        crate::assets::mcp_app()
     }
 }
 
-/// The answer to `initialize`, and whether the host shows the viewer's page itself (MCP Apps).
-fn initialize(host: &impl ToolHost, params: &Value) -> (Value, bool) {
+/// The answer to `initialize`.
+fn initialize(host: &impl ToolHost, params: &Value) -> Value {
     let requested = params["protocolVersion"].as_str().unwrap_or_default();
     let version = VERSIONS
         .into_iter()
         .find(|version| *version == requested)
         .unwrap_or(PROTOCOL_VERSION);
-    let app = app::negotiated(params) && host.page().is_some();
-    let mut capabilities = json!({"tools": {"listChanged": false}});
-    if app {
-        capabilities["resources"] = json!({"listChanged": false});
-    }
-    let result = json!({
+    json!({
         "protocolVersion": version,
-        "capabilities": capabilities,
+        "capabilities": {"tools": {"listChanged": false}},
         "serverInfo": {"name": "projections", "title": "Projections", "version": env!("CARGO_PKG_VERSION")},
-        "instructions": host.instructions(app),
-    });
-    (result, app)
-}
-
-/// An MCP Apps request (`resources/…`): its answer, or `None` for a method the session doesn't answer.
-fn resource_method(host: &impl ToolHost, method: &str, params: &Value) -> Option<Result<Value, (i64, String)>> {
-    let page = host.page()?;
-    Some(match method {
-        "resources/list" => Ok(app::resources()),
-        "resources/templates/list" => Ok(json!({"resourceTemplates": []})),
-        "resources/read" => app::read(params, page),
-        _ => return None,
+        "instructions": host.instructions(),
     })
 }
 
@@ -136,8 +93,6 @@ async fn session<H: ToolHost>(
     stop: impl Future<Output = ()>,
 ) {
     let inflight: Inflight = Arc::default();
-    // Whether the host shows the viewer's page itself, as its `initialize` said.
-    let mut app = false;
     tokio::pin!(stop);
     loop {
         let frame = tokio::select! {
@@ -184,16 +139,13 @@ async fn session<H: ToolHost>(
         };
         match method {
             "initialize" => {
-                let (result, negotiated) = initialize(host.as_ref(), &params);
-                app = negotiated;
-                let _ = output.send(reply(&id, result)).await;
+                let _ = output.send(reply(&id, initialize(host.as_ref(), &params))).await;
             }
             "ping" => {
                 let _ = output.send(reply(&id, json!({}))).await;
             }
             "tools/list" => {
-                let tools = if app { app::tools(host.tools()) } else { host.tools() };
-                let _ = output.send(reply(&id, tools)).await;
+                let _ = output.send(reply(&id, host.tools())).await;
             }
             "tools/call" => {
                 let (name, arguments) = match tool_params(&params) {
@@ -204,18 +156,13 @@ async fn session<H: ToolHost>(
                     }
                 };
                 let host = host.clone();
-                let work = async move { host.call(name, arguments, app).await.map_err(|message| (INVALID_PARAMS, message)) };
+                let work = async move { host.call(name, arguments).await.map_err(|message| (INVALID_PARAMS, message)) };
                 if let Some((code, message)) = spawn_tracked(&inflight, &output, &id, work) {
                     let _ = output.send(error(&id, code, &message)).await;
                 }
             }
             _ => {
-                let answer = match app.then(|| resource_method(host.as_ref(), method, &params)).flatten() {
-                    Some(Ok(result)) => reply(&id, result),
-                    Some(Err((code, message))) => error(&id, code, &message),
-                    None => error(&id, METHOD_NOT_FOUND, "Unknown method"),
-                };
-                let _ = output.send(answer).await;
+                let _ = output.send(error(&id, METHOD_NOT_FOUND, "Unknown method")).await;
             }
         }
     }
@@ -234,7 +181,6 @@ pub async fn serve(options: InspectorOptions) -> Result<()> {
     let agent = Arc::new(Agent {
         views: crate::view::Views::new(service.clone()),
         service: service.clone(),
-        relay: app::Relay::default(),
     });
     let (input, output, written) = crate::stdio::channels(writer);
     session(agent.clone(), input, output, async move {

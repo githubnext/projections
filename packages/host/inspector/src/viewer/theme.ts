@@ -50,7 +50,7 @@ const chromeVariables = (tokens: Tokens, colorMode: ColorMode) => ({
 
 /**
  * Gives the page an embedding app's theme, as renderer token overrides for its color mode (`copilotCanvasThemeTokens`,
- * `mcpAppThemeTokens`, `themeSeedTokens`) and, where the app has them, for the other mode (`modes`, a theme seed's):
+ * `themeSeedTokens`) and, where the app has them, for the other mode (`modes`, a theme seed's):
  * marks the root `pi-app-theme` and gives the chrome the stage's colors, its bands (header, toolbar, labels, summary
  * bar) flat on the app's own color, so the page continues the app's surface; hovers and wells keep the tokens' stepped
  * surfaces. Returns the theme the Inspector follows; without an app theme, removes it and returns `undefined`.
@@ -80,7 +80,7 @@ export function urlThemeSeed(search: string = location.search): ThemeSeedResult 
 }
 
 /**
- * The viewer page's theme: the host's when it gives one (an MCP Apps host), else the page's own (`pageTheme`), with the
+ * The viewer page's theme: the host's when it gives one (an embedding host's `host.theme`), else the page's own (`pageTheme`), with the
  * theme seed in its URL. Says what the page reports of the seed, and the notice for one it ignored.
  */
 export function viewerTheme(hostTheme: InspectorHost['theme']): {

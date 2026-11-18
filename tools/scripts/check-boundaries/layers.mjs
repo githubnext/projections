@@ -55,16 +55,13 @@ export const layers = [
     builtInRenderers,
   ],
   ['packages/integrations/vscode', ['packages/host/vscode-ui', 'packages/host/inspector'], []],
-  // The viewer as an MCP App: the Inspector's viewer page, with the host's theme mapping, built into one page.
-  ['packages/integrations/mcp-apps', ['packages/host/core', 'packages/host/inspector'], []],
-  // The CLI embeds the Inspector, the MCP App page, the renderer checks and the TypeScript helper at build time.
+  // The CLI embeds the Inspector, the renderer checks and the TypeScript helper at build time.
   [
     'packages/cli',
     [],
     [
       'packages/engine/js',
       'packages/host/inspector',
-      'packages/integrations/mcp-apps',
       'packages/renderers/testing',
       'packages/extractors/typescript-support',
     ],

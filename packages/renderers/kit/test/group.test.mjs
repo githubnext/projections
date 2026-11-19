@@ -4,9 +4,9 @@ import {readFileSync} from 'node:fs'
 import {createElement} from 'react'
 import {renderToStaticMarkup} from 'react-dom/server'
 import {Group} from '../dist/react.js'
+import {plain} from './markup.mjs'
 
 const html = (props, children = createElement('table', {className: 'body'})) => renderToStaticMarkup(createElement(Group, props, children))
-const plain = markup => markup.replace(/<[^>]+>/g, '')
 
 test('a group is a titled panel: a heading inside its header band labels the section, then its body', () => {
   const markup = html({title: 'Policies'})

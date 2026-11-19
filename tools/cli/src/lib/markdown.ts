@@ -36,13 +36,27 @@ export function stripFrontMatter(text: string): string {
   return present ? body.replace(/^\n+/, '') : text
 }
 
+/** The text outside HTML tags, in one pass: each `<…>` with something inside is dropped; a `<` that closes nothing stays. */
+export function withoutTags(text: string): string {
+  let result = ''
+  let index = 0
+  for (;;) {
+    const open = text.indexOf('<', index)
+    const close = open < 0 ? -1 : text.indexOf('>', open + 1)
+    if (close < 0) return result + text.slice(index)
+    // `<>` is text, not a tag.
+    result += close === open + 1 ? text.slice(index, close + 1) : text.slice(index, open)
+    index = close + 1
+  }
+}
+
 /** Inline Markdown to plain text: links and images to their text; code spans, emphasis and HTML tags removed. */
 export function plain(markdown: string): string {
-  return markdown
+  const text = markdown
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
     .replace(/\[([^\]]+)\]\[[^\]]*\]/g, '$1')
-    .replace(/<[^>]+>/g, '')
+  return withoutTags(text)
     .replace(/`([^`]*)`/g, '$1')
     .replace(/(\*\*|__)(.*?)\1/g, '$2')
     .replace(/\s+/g, ' ')

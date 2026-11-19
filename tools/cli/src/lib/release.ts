@@ -28,9 +28,12 @@ export function tagVersion(tag: string): string | undefined {
 
 export const lineOf = (text: string, index: number) => text.slice(0, index).split('\n').length
 
+/** `text` as a regular expression that matches it literally. */
+const regexLiteral = (text: string) => text.replace(/[\\^$.*+?()[\]{}|/-]/g, '\\$&')
+
 /** The body of the TOML table `[name]`: from its header to the next header. */
 export function table(text: string, name: string): {start: number; body: string} | undefined {
-  const header = new RegExp(`^\\[${name.replace(/[.[\]]/g, '\\$&')}\\][ \\t]*$`, 'm').exec(text)
+  const header = new RegExp(`^\\[${regexLiteral(name)}\\][ \\t]*$`, 'm').exec(text)
   if (!header) return undefined
   const start = header.index + header[0].length
   const next = /^\[/m.exec(text.slice(start))

@@ -105,6 +105,20 @@ const withoutCode = text =>
     .replace(/^[ \t]*(```|~~~)[^\n]*\n[\s\S]*?^[ \t]*\1[ \t]*$/gm, block => block.replace(/[^\n]/g, ' '))
     .replace(/(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)/g, span => span.replace(/[^\n]/g, ' '))
 
+/** The text outside HTML tags, in one pass: each `<…>` with something inside is dropped; a `<` that closes nothing stays. */
+function withoutTags(text) {
+  let result = ''
+  let index = 0
+  for (;;) {
+    const open = text.indexOf('<', index)
+    const close = open < 0 ? -1 : text.indexOf('>', open + 1)
+    if (close < 0) return result + text.slice(index)
+    // `<>` is text, not a tag.
+    result += close === open + 1 ? text.slice(index, close + 1) : text.slice(index, open)
+    index = close + 1
+  }
+}
+
 /** A page's anchors: its headings' slugs (repeats numbered) and HTML `id`s. */
 export function anchors(text) {
   const found = new Set()
@@ -114,9 +128,7 @@ export function anchors(text) {
       .slice(match.index, match.index + match[0].length)
       .replace(/^#{1,6} +/, '')
       .replace(/[ \t]*#*[ \t]*$/, '')
-    const plain = heading
-      .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
-      .replace(/<[^>]+>/g, '')
+    const plain = withoutTags(heading.replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1'))
       .replace(/`([^`]*)`/g, '$1')
       .replace(/(\*\*|__)(.*?)\1/g, '$2')
       .trim()

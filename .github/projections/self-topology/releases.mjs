@@ -33,7 +33,8 @@ export function actionScripts(text) {
 
 /** A TOML array's strings: `key = ["a", "b"]` (on one or more lines) in `text`, or undefined when absent. */
 export function tomlList(text, key) {
-  const match = new RegExp(`^\\s*${key.replace(/[-]/g, '\\-')}\\s*=\\s*\\[([^\\]]*)\\]`, 'm').exec(text)
+  const literal = key.replace(/[\\^$.*+?()[\]{}|/-]/g, '\\$&')
+  const match = new RegExp(`^\\s*${literal}\\s*=\\s*\\[([^\\]]*)\\]`, 'm').exec(text)
   return match ? [...match[1].matchAll(/["']([^"']+)["']/g)].map(([, value]) => value) : undefined
 }
 

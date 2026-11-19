@@ -9,6 +9,7 @@ import {compatibilityOf} from '../node_modules/.cache/test/compatibility.js'
 import {changesFirst, comparisonRows, qualifiedNames, readableId, revisionRows} from '../node_modules/.cache/test/model.js'
 import {signatureLayout, signatureSegments, signatureTokens} from '../node_modules/.cache/test/signature.js'
 import {ApiView} from '../node_modules/.cache/test/view.js'
+import {plain} from '../../kit/test/markup.mjs'
 
 const engine = createNativeEngine()
 const api = entities => ({protocolVersion: 0, schema: 'api/v0', entities, relationships: []})
@@ -62,7 +63,7 @@ const render = p => renderToStaticMarkup(createElement(ApiView, p))
 const footer = '<div class="pk-change-footer api-declaration-footer" data-change-footer=""></div>'
 /** A row's footer status text: the word per part (icons carry no text), empty for an unchanged row. */
 const statusOf = body =>
-  (/<div class="pk-change-footer api-declaration-footer" data-change-footer="">(.*?)<\/div>/.exec(body)?.[1] ?? '').replace(/<[^>]+>/g, '')
+  plain(/<div class="pk-change-footer api-declaration-footer" data-change-footer="">(.*?)<\/div>/.exec(body)?.[1] ?? '')
 const rowsOf = markup =>
   Object.fromEntries(
     [...markup.matchAll(/<section [^>]*data-entity-id="([^"]+)"[^>]*>(.*?)<\/section>/g)].map(([, id, body]) => [id, body]),
@@ -206,7 +207,7 @@ test('a nested declaration is named as code spells it, not by its encoded ID', a
   const model = await comparison(member('headers'), member('headers'))
   const html = render(props(model, {diff: true}))
   assert.match(html, /<code class="semantic-id"[^>]*>Response\.headers<\/code>/)
-  assert.doesNotMatch(html.replace(/<[^>]*>/g, ''), /%3A/)
+  assert.doesNotMatch(plain(html), /%3A/)
   // A top-level declaration's name is its label, so no second line repeats it.
   assert.equal(html.match(/class="semantic-id"/g).length, 1)
 })
@@ -296,8 +297,7 @@ async function classified(options = {}, metadata = {compatibility}) {
   const model = await comparison()
   return {...props(model, options), init: {mode: 'comparison', comparison: {metadata}}}
 }
-const compatibilityOfRow = body =>
-  (/<span class="api-compatibility [a-z]+"[^>]*>(.*?)<\/span><\/div>/.exec(body)?.[1] ?? '').replace(/<[^>]+>/g, '')
+const compatibilityOfRow = body => plain(/<span class="api-compatibility [a-z]+"[^>]*>(.*?)<\/span><\/div>/.exec(body)?.[1] ?? '')
 
 test('a classified diff keeps its notices, lists breaking changes first and states each level with its reason', async () => {
   const markup = render(await classified({diff: true}))

@@ -142,7 +142,7 @@ export function launcherText(path: string, launcher: Launcher, platform: Platfor
     `checkout=${shellQuote(launcher.checkout)}`,
     `node=${shellQuote(launcher.node)}`,
     'if [ ! -f "$checkout/tools/cli/src/launch.ts" ]; then',
-    `  echo "${message.replace(/`/g, '\\`')}: $checkout" >&2`,
+    `  printf '%s: %s\\n' ${shellQuote(message)} "$checkout" >&2`,
     '  exit 3',
     'fi',
     '[ -x "$node" ] || node=node',

@@ -62,8 +62,9 @@ body {
   --amber-highlight: var(--projections-color-modified-highlight);
   --violet-highlight: var(--projections-color-moved-highlight);
   /* Relationships: the divider, the neutral the token set keeps 3:1 or more against every surface, as a line that carries
-   * meaning needs (border-emphasis is a quiet edge, too faint for a graph's links on a dark stage). */
-  --edge: var(--projections-color-divider);
+   * meaning needs (border-emphasis is a quiet edge, too faint for a graph's links on a dark stage), unless the host
+   * sends a connector color because its divider is an app's quiet rule. */
+  --edge: var(--projections-color-connector, var(--projections-color-divider));
   --graph-bg: var(--stage);
   --dot: var(--projections-color-border);
   /* The host's categorical palette, in order. */

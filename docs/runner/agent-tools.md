@@ -253,6 +253,9 @@ change colors) as it does from the Copilot app's.
   plain or quoted names separated by commas; each value is at most 512
   characters and the seed at most 4096. Anything else is refused whole, so a
   seed never reaches the page as CSS.
+- Rules and card edges are drawn in the seed's `border` as given, as the app
+  draws its own, even when that is quieter than the default theme's 3:1 edges;
+  lines that carry meaning, such as a graph's links, keep 3:1.
 - `projections view --theme SEED` and `projections view show --theme SEED` take
   it as a built-in seed's name (`claude`, for Claude Code's Preview pane),
   inline JSON or a JSON file's path, check it (an invalid seed fails with what
@@ -271,15 +274,13 @@ change colors) as it does from the Copilot app's.
 The seed belongs to the app, not to the repository or the machine (one machine
 may run several apps, the Copilot app among them), so Projections keeps no
 default seed. Its only built-in seed is `claude`, Claude Code's Preview pane,
-from the Claude app's own design tokens; in dark mode its background is the
-pane's backdrop, which shows as a thin inset either side of the page, so the
-page meets it seamlessly. The agent finds the colors from the app itself: its
-own CSS or source when the agent can read them, a screenshot of itself sampled
-for its surface, text and rule colors, or by asking the person. It keeps the
-seed in the app's own agent instructions (its custom instructions or
-`AGENTS.md`) and passes it every time it opens the page. In the Copilot app and
-VS Code, which theme the viewer themselves, it passes none. For example, an
-instruction for a harness:
+matched to the Claude app's own panes beside it (Files, Terminal) in both modes.
+The agent finds the colors from the app itself: its own CSS or source when the
+agent can read them, a screenshot of itself sampled for its surface, text and
+rule colors, or by asking the person. It keeps the seed in the app's own agent
+instructions (its custom instructions or `AGENTS.md`) and passes it every time
+it opens the page. In the Copilot app and VS Code, which theme the viewer
+themselves, it passes none. For example, an instruction for a harness:
 
 ```md
 When you show a Projections viewer in this app's browser pane, open it with

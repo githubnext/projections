@@ -116,7 +116,8 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
   // (a diff on its first change), and scrolls.
   const floor = useOpeningFloor(content, tagSource)
   // A diff opens on its first change: a schema whose changes are far down (a new tag below the tables) still shows one.
-  const start = useMemo(() => (diff ? changesStart(view, content) : undefined), [diff])
+  // Another comparison in the same frame is a new start, so the view opens on its changes, not where the last one was.
+  const start = useMemo(() => (diff ? changesStart(view, content) : undefined), [diff, tagSource])
   const {zoom, scale} = useStageZoom(view, props.onAction, fit, {floor, ...(start ? {start} : {})})
   // A content-sized host gets the schema's own height; zoomed in, the height it is drawn at, up to the room the host
   // allows (its stage-max-height, else the protocol's maximum), so the stage grows into the page before it pans.

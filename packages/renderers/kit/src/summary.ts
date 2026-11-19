@@ -11,6 +11,8 @@ import type {
 } from '@githubnext/projections-renderer-sdk/protocol'
 import type {ComparisonModel} from './model.js'
 import {boundaryKinds, moduleGroups} from './layout/groups.js'
+import {compareIds} from './layout/model.js'
+import type {LayoutEdge, LayoutNode} from './layout/model.js'
 
 /** What a renderer's summary facts are computed from (`MountOptions.facts`): the document and its control values. */
 export interface SummaryFactContext {
@@ -84,21 +86,58 @@ export function rendererSummary(init: InitPayload, nouns?: SummaryNouns, facts: 
 
 /**
  * Nouns that leave grouping boundaries out of the summary: each of the boundary kinds `compound` names (see
- * `boundaryKinds`) whose every entity, in each revision, is drawn as a boundary round others (see `moduleGroups`), maps
- * to `false`. Such a box only groups the cards it holds, which the summary counts, so it is no figure beside them; a
- * kind some of whose entities are drawn as cards (a module others depend on) is counted whole, as the protocol counts
- * kinds. Spread it into a renderer's nouns: `{contains: false, ...boundaryNouns(model, true)}`.
+ * `boundaryKinds`) whose every entity is drawn as a boundary round others (see `moduleGroups`) in each revision and,
+ * in a comparison, in the union of both the canvas lays out for the diff and the steps between (see `unionGraph`),
+ * maps to `false`. Such a box only groups the cards it holds, which the summary counts, so it is no figure beside them;
+ * a kind some of whose entities are drawn as cards anywhere (a module others depend on, or one two parents hold across
+ * the revisions) is counted whole, as the protocol counts kinds. Spread it into a renderer's nouns:
+ * `{contains: false, ...boundaryNouns(model, true)}`.
  */
-export function boundaryNouns(model: Pick<ComparisonModel, 'before' | 'after'>, compound: boolean | readonly string[]): SummaryNouns {
+export function boundaryNouns(model: ComparisonModel, compound: boolean | readonly string[]): SummaryNouns {
   const kinds = boundaryKinds(compound)
-  const grouping = (extraction: ComparisonModel['before']) => {
-    const groups = moduleGroups(extraction.entities, extraction.relationships, kinds)
-    return (kind: string) => extraction.entities.every(entity => entity.kind !== kind || groups.has(entity.id))
+  const grouping = (entities: readonly LayoutNode[], relationships: readonly LayoutEdge[]) => {
+    const groups = moduleGroups(entities, relationships, kinds)
+    return (kind: string) => entities.every(entity => entity.kind !== kind || groups.has(entity.id))
   }
   const revisions = model.before === model.after ? [model.after] : [model.before, model.after]
-  const tests = revisions.map(grouping)
+  const tests = revisions.map(extraction => grouping(extraction.entities, extraction.relationships))
+  if (model.mode === 'comparison') {
+    const union = unionGraph(model)
+    tests.push(grouping(union.nodes, union.edges))
+  }
   const present = new Set(revisions.flatMap(extraction => extraction.entities.map(entity => entity.kind)))
   return Object.fromEntries(kinds.filter(kind => present.has(kind) && tests.every(test => test(kind))).map(kind => [kind, false]))
+}
+
+/**
+ * The union of a comparison's revisions as the graph canvas lays it out (see `stageLayout`): a node per entity row, of
+ * the first of its kinds, and a relationship whose ends differ between the revisions as both its old and its new edge,
+ * between entity rows.
+ */
+function unionGraph(model: ComparisonModel): {nodes: LayoutNode[]; edges: LayoutEdge[]} {
+  const nodes = model.entities.map(row => ({
+    id: row.id,
+    kind: [row.before?.kind, row.after?.kind].filter((kind): kind is string => kind !== undefined).sort(compareIds)[0]!,
+  }))
+  const edges: LayoutEdge[] = []
+  for (const change of model.relationships) {
+    const ends = (side: 'before' | 'after') => {
+      const row = change[side]
+      const map = model.entityRow[side]
+      const from = row && map.get(row.from),
+        to = row && map.get(row.to)
+      return from !== undefined && to !== undefined ? {from, to} : undefined
+    }
+    const old = ends('before'),
+      next = ends('after')
+    if ((change.before && !old) || (change.after && !next)) continue
+    if (old && next && old.from === next.from && old.to === next.to) edges.push({id: change.id, kind: change.after!.kind, ...next})
+    else {
+      if (old) edges.push({id: `${change.id}:before`, kind: change.before!.kind, ...old})
+      if (next) edges.push({id: `${change.id}:after`, kind: change.after!.kind, ...next})
+    }
+  }
+  return {nodes, edges}
 }
 
 /**

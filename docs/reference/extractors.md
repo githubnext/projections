@@ -19,6 +19,7 @@ it was removed) isn't an error: the extractor describes that revision without it
 | [`typescript-public-api`](#typescript-public-api) | `api/v0` | `api` | No (`none`) |
 | [`rust-public-api`](#rust-public-api) | `api/v0` | `api` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`go-public-api`](#go-public-api) | `api/v0` | `api` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
+| [`swift-public-api`](#swift-public-api) | `api/v0` | `api` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`cargo-dependencies`](#cargo-dependencies) | `graph/v0` | `dependencies` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`swift-package-dependencies`](#swift-package-dependencies) | `graph/v0` | `dependencies` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`xcode-modules`](#xcode-modules) | `graph/v0` | `dependencies` | No (`none`) |
@@ -171,6 +172,33 @@ A definition to start from:
   "id": "go-public-api",
   "renderer": "api",
   "title": "Go public API"
+}
+```
+
+## `swift-public-api`
+
+**Swift public API.** Swift compiler symbol graph public declarations. See [its page](../builtins/extractors/swift-public-api.md).
+
+- Schema: `api/v0`
+- Default renderer: `api`
+- Needs `--trust`: When it runs ecosystem tools or repository code (`when-executing-tools`)
+
+| Input | Meaning |
+|---|---|
+| `modules` | Modules to include; default the targets of the package's library products. |
+| `packagePath` | Repository-relative package directory; default ".". |
+| `scratchPath` | Build directory, relative to the package; default a private one per run. |
+| `swiftPath` | Swift executable; default swift. |
+| `symbolGraphPath` | Directory of pre-generated *.symbols.json files; otherwise runs swift package dump-symbol-graph. |
+
+A definition to start from:
+
+```json
+{
+  "extractor": "swift-public-api",
+  "id": "swift-public-api",
+  "renderer": "api",
+  "title": "Swift public API"
 }
 ```
 

@@ -18,6 +18,7 @@ extension opens these pages when you select a built-in part.
 | [`typescript-public-api`](extractors/typescript-public-api.md) | TypeScript compiler public export model. | `api/v0` | [`api`](renderers/api.md) |
 | [`rust-public-api`](extractors/rust-public-api.md) | rustdoc JSON public items. | `api/v0` | [`api`](renderers/api.md) |
 | [`go-public-api`](extractors/go-public-api.md) | go/types exported declarations, method sets and fields. | `api/v0` | [`api`](renderers/api.md) |
+| [`swift-public-api`](extractors/swift-public-api.md) | Swift compiler symbol graph public declarations. | `api/v0` | [`api`](renderers/api.md) |
 | [`cargo-dependencies`](extractors/cargo-dependencies.md) | Resolved Cargo metadata. | `graph/v0` | [`dependencies`](renderers/graph.md) |
 | [`swift-package-dependencies`](extractors/swift-package-dependencies.md) | Swift package products, targets, target dependencies and package dependencies with Package.resolved versions. | `graph/v0` | [`dependencies`](renderers/graph.md) |
 | [`xcode-modules`](extractors/xcode-modules.md) | Xcode targets with their module names, target and package product dependencies, and the modules their Swift sources import. | `graph/v0` | [`dependencies`](renderers/graph.md) |

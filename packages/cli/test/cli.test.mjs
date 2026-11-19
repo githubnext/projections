@@ -145,6 +145,7 @@ test('extractor list/init work without execution; invalid flags, duplicate outpu
       'typescript-public-api',
       'rust-public-api',
       'go-public-api',
+      'swift-public-api',
       'cargo-dependencies',
       'swift-package-dependencies',
       'xcode-modules',

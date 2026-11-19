@@ -1,0 +1,619 @@
+{
+ "metadata": {
+  "formatVersion": {
+   "major": 0,
+   "minor": 6,
+   "patch": 0
+  },
+  "generator": "Apple Swift version 6.4.2"
+ },
+ "module": {
+  "name": "LedgerCore",
+  "platform": {
+   "architecture": "arm64",
+   "operatingSystem": {
+    "minimumVersion": {
+     "major": 12,
+     "minor": 0
+    },
+    "name": "macosx"
+   },
+   "vendor": "apple"
+  }
+ },
+ "relationships": [
+  {
+   "kind": "conformsTo",
+   "source": "s:10LedgerCore6AmountV",
+   "target": "s:SH",
+   "targetFallback": "Swift.Hashable"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:10LedgerCore6AmountV",
+   "target": "s:s8SendableP",
+   "targetFallback": "Swift.Sendable"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:10LedgerCore6AmountV",
+   "target": "s:SQ",
+   "targetFallback": "Swift.Equatable"
+  },
+  {
+   "kind": "conformsTo",
+   "source": "s:10LedgerCore6AmountV",
+   "target": "s:s16SendableMetatypeP",
+   "targetFallback": "Swift.SendableMetatype"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:10LedgerCore6AmountV10minorUnitss5Int64Vvp",
+   "target": "s:10LedgerCore6AmountV"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:10LedgerCore6AmountV8currencySSvp",
+   "target": "s:10LedgerCore6AmountV"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:10LedgerCore6AmountV10minorUnits8currencyACs5Int64V_SStcfc",
+   "target": "s:10LedgerCore6AmountV"
+  },
+  {
+   "kind": "memberOf",
+   "source": "s:10LedgerCore6AmountV1poiyA2C_ACtFZ",
+   "target": "s:10LedgerCore6AmountV"
+  }
+ ],
+ "symbols": [
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "struct"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "Amount"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:10LedgerCore6AmountV"
+   },
+   "kind": {
+    "displayName": "Structure",
+    "identifier": "swift.struct"
+   },
+   "location": {
+    "position": {
+     "character": 14,
+     "line": 0
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/LedgerCore/Amount.swift"
+   },
+   "names": {
+    "navigator": [
+     {
+      "kind": "identifier",
+      "spelling": "Amount"
+     }
+    ],
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "struct"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "Amount"
+     }
+    ],
+    "title": "Amount"
+   },
+   "pathComponents": [
+    "Amount"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "var"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "minorUnits"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:s5Int64V",
+     "spelling": "Int64"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:10LedgerCore6AmountV10minorUnitss5Int64Vvp"
+   },
+   "kind": {
+    "displayName": "Instance Property",
+    "identifier": "swift.property"
+   },
+   "location": {
+    "position": {
+     "character": 15,
+     "line": 1
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/LedgerCore/Amount.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "var"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "minorUnits"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:s5Int64V",
+      "spelling": "Int64"
+     }
+    ],
+    "title": "minorUnits"
+   },
+   "pathComponents": [
+    "Amount",
+    "minorUnits"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "let"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "currency"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:SS",
+     "spelling": "String"
+    }
+   ],
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:10LedgerCore6AmountV8currencySSvp"
+   },
+   "kind": {
+    "displayName": "Instance Property",
+    "identifier": "swift.property"
+   },
+   "location": {
+    "position": {
+     "character": 15,
+     "line": 2
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/LedgerCore/Amount.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "let"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "currency"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:SS",
+      "spelling": "String"
+     }
+    ],
+    "title": "currency"
+   },
+   "pathComponents": [
+    "Amount",
+    "currency"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "init"
+    },
+    {
+     "kind": "text",
+     "spelling": "("
+    },
+    {
+     "kind": "externalParam",
+     "spelling": "minorUnits"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:s5Int64V",
+     "spelling": "Int64"
+    },
+    {
+     "kind": "text",
+     "spelling": ", "
+    },
+    {
+     "kind": "externalParam",
+     "spelling": "currency"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:SS",
+     "spelling": "String"
+    },
+    {
+     "kind": "text",
+     "spelling": ")"
+    }
+   ],
+   "functionSignature": {
+    "parameters": [
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "minorUnits"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:s5Int64V",
+        "spelling": "Int64"
+       }
+      ],
+      "name": "minorUnits"
+     },
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "currency"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:SS",
+        "spelling": "String"
+       }
+      ],
+      "name": "currency"
+     }
+    ]
+   },
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:10LedgerCore6AmountV10minorUnits8currencyACs5Int64V_SStcfc"
+   },
+   "kind": {
+    "displayName": "Initializer",
+    "identifier": "swift.init"
+   },
+   "location": {
+    "position": {
+     "character": 11,
+     "line": 4
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/LedgerCore/Amount.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "init"
+     },
+     {
+      "kind": "text",
+      "spelling": "("
+     },
+     {
+      "kind": "externalParam",
+      "spelling": "minorUnits"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:s5Int64V",
+      "spelling": "Int64"
+     },
+     {
+      "kind": "text",
+      "spelling": ", "
+     },
+     {
+      "kind": "externalParam",
+      "spelling": "currency"
+     },
+     {
+      "kind": "text",
+      "spelling": ": "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:SS",
+      "spelling": "String"
+     },
+     {
+      "kind": "text",
+      "spelling": ")"
+     }
+    ],
+    "title": "init(minorUnits:currency:)"
+   },
+   "pathComponents": [
+    "Amount",
+    "init(minorUnits:currency:)"
+   ]
+  },
+  {
+   "accessLevel": "public",
+   "declarationFragments": [
+    {
+     "kind": "keyword",
+     "spelling": "static"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "keyword",
+     "spelling": "func"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "identifier",
+     "spelling": "+"
+    },
+    {
+     "kind": "text",
+     "spelling": " "
+    },
+    {
+     "kind": "text",
+     "spelling": "("
+    },
+    {
+     "kind": "internalParam",
+     "spelling": "lhs"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:10LedgerCore6AmountV",
+     "spelling": "Amount"
+    },
+    {
+     "kind": "text",
+     "spelling": ", "
+    },
+    {
+     "kind": "internalParam",
+     "spelling": "rhs"
+    },
+    {
+     "kind": "text",
+     "spelling": ": "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:10LedgerCore6AmountV",
+     "spelling": "Amount"
+    },
+    {
+     "kind": "text",
+     "spelling": ") -> "
+    },
+    {
+     "kind": "typeIdentifier",
+     "preciseIdentifier": "s:10LedgerCore6AmountV",
+     "spelling": "Amount"
+    }
+   ],
+   "functionSignature": {
+    "parameters": [
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "lhs"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:10LedgerCore6AmountV",
+        "spelling": "Amount"
+       }
+      ],
+      "name": "lhs"
+     },
+     {
+      "declarationFragments": [
+       {
+        "kind": "identifier",
+        "spelling": "rhs"
+       },
+       {
+        "kind": "text",
+        "spelling": ": "
+       },
+       {
+        "kind": "typeIdentifier",
+        "preciseIdentifier": "s:10LedgerCore6AmountV",
+        "spelling": "Amount"
+       }
+      ],
+      "name": "rhs"
+     }
+    ],
+    "returns": [
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:10LedgerCore6AmountV",
+      "spelling": "Amount"
+     }
+    ]
+   },
+   "identifier": {
+    "interfaceLanguage": "swift",
+    "precise": "s:10LedgerCore6AmountV1poiyA2C_ACtFZ"
+   },
+   "kind": {
+    "displayName": "Operator",
+    "identifier": "swift.func.op"
+   },
+   "location": {
+    "position": {
+     "character": 23,
+     "line": 9
+    },
+    "uri": "file:///fixtures/compatibility/before/Sources/LedgerCore/Amount.swift"
+   },
+   "names": {
+    "subHeading": [
+     {
+      "kind": "keyword",
+      "spelling": "static"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "keyword",
+      "spelling": "func"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "identifier",
+      "spelling": "+"
+     },
+     {
+      "kind": "text",
+      "spelling": " "
+     },
+     {
+      "kind": "text",
+      "spelling": "("
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:10LedgerCore6AmountV",
+      "spelling": "Amount"
+     },
+     {
+      "kind": "text",
+      "spelling": ", "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:10LedgerCore6AmountV",
+      "spelling": "Amount"
+     },
+     {
+      "kind": "text",
+      "spelling": ") -> "
+     },
+     {
+      "kind": "typeIdentifier",
+      "preciseIdentifier": "s:10LedgerCore6AmountV",
+      "spelling": "Amount"
+     }
+    ],
+    "title": "+(_:_:)"
+   },
+   "pathComponents": [
+    "Amount",
+    "+(_:_:)"
+   ]
+  }
+ ]
+}

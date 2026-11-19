@@ -25,7 +25,8 @@ project files and sources without Xcode, so it needs no `--trust` and runs on
 Linux and Windows too.
 
 For a Swift package's own graph (`Package.swift`) use
-[`swift-package-dependencies`](swift-package-dependencies.md).
+[`swift-package-dependencies`](swift-package-dependencies.md); for what a module
+exports, [`swift-public-api`](swift-public-api.md).
 
 ## What it reads
 
@@ -137,6 +138,7 @@ Targets are the graph's roots.
 - [`graph`](../renderers/graph.md), whose `dependencies` presentation draws it.
 - [`swift-package-dependencies`](swift-package-dependencies.md), for Swift
   packages.
+- [`swift-public-api`](swift-public-api.md), for what a module exports.
 
 ## How it works
 

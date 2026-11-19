@@ -39,6 +39,7 @@ registry!(
     projections_extractor_typescript_public_api,
     projections_extractor_rust_public_api,
     projections_extractor_go_public_api,
+    projections_extractor_swift_public_api,
     projections_extractor_cargo_dependencies,
     projections_extractor_swift_package_dependencies,
     projections_extractor_xcode_modules,

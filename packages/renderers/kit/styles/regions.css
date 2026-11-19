@@ -82,13 +82,18 @@
 .pk :has(> .pk-status-tab-room) {
   text-align: center;
 }
+/*
+ * Where the tab joins, the pill's corners square and (flush) its bottom edge, which lies under the tab, clears, so no
+ * line crosses where a translucent tab joins. Both follow the pill's emphasis, as the tab's opacity does, so a fading
+ * tab hands back a neutral corner and edge rather than leaving the pill open.
+ */
 .pk :has(> .pk-status-tab-room > .pk-status-tab) {
-  border-end-start-radius: 0;
+  --pk-tab-corner: calc(var(--projections-radius) * (1 - var(--emphasis, 1)));
+  border-end-start-radius: var(--pk-tab-corner);
 }
-/* The pill's bottom edge lies under the tab: its corners square, and no line crosses where a translucent tab joins. */
 .pk :has(> .pk-status-tab-room[data-flush] > .pk-status-tab) {
-  border-end-end-radius: 0;
-  border-bottom-color: transparent;
+  border-end-end-radius: var(--pk-tab-corner);
+  border-bottom-color: color-mix(in srgb, transparent calc(var(--emphasis, 1) * 100%), var(--divider));
 }
 .pk .pk-status-tab.pk-region[data-change] {
   --emphasis: 1;

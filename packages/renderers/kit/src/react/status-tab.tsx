@@ -18,7 +18,9 @@ import {VariedMarker} from './components.js'
  * the pill is too narrow to keep its bottom-right corner radius clear of the
  * tab, the tab spans the pill's full width, its sides on the pill's borders,
  * and both the pill's bottom corners are squared, so pill and tab read as one
- * shape. A pill must
+ * shape. The squared corners and the hidden bottom edge follow the pill's
+ * `--emphasis`, so they fade with the tab; the pill's corners are expected to
+ * be `--projections-radius`. A pill must
  * be at least as wide as its tab: `measure` draws the tab at full strength
  * and its natural width, for measuring the room a pill needs (the wider of its
  * content and `.pk-status-tab`). It fades with `emphasis` and is absent at 0.
@@ -38,20 +40,22 @@ export function StatusTab({change, emphasis, measure = false}: {change: StatusCh
       element.removeAttribute('data-flush')
       const tab = element.firstElementChild
       if (!(tab instanceof HTMLElement)) return
-      // Layout widths, unscaled by a zoomed or fitted drawing, at the tab's natural width.
-      const style = getComputedStyle(element)
-      const corner =
-        (parseFloat(style.getPropertyValue('--projections-radius')) || 0) -
-        (parseFloat(style.getPropertyValue('--projections-border-width')) || 0)
-      // The room starts on the pill's left border, so only the right corner needs clearing.
-      if (tab.offsetWidth + corner > element.clientWidth + 0.5) element.setAttribute('data-flush', '')
+      const pill = element.parentElement
+      if (!pill) return
+      // Layout widths, unscaled by a zoomed or fitted drawing, at the tab's natural width, and the pill's corner as
+      // drawn (its top corner, which the tab never squares; a radius larger than half its height draws as half).
+      const radius = Math.min(parseFloat(getComputedStyle(pill).borderTopRightRadius) || 0, pill.offsetHeight / 2)
+      // The tab starts on the pill's left border, so only the right corner needs clearing.
+      if (tab.offsetWidth + radius > pill.offsetWidth + 0.5) element.setAttribute('data-flush', '')
     }
     update()
     if (typeof ResizeObserver === 'undefined') return
-    // The pill resizes with its slot, and the tab with its font.
+    // The pill resizes with its slot, and the tab with its font; a flush tab is stretched, so its parts are observed
+    // for their natural widths.
     const observer = new ResizeObserver(update)
     observer.observe(element)
-    if (element.firstElementChild) observer.observe(element.firstElementChild)
+    const tab = element.firstElementChild
+    if (tab) for (const box of [tab, ...tab.children]) observer.observe(box)
     return () => observer.disconnect()
   }, [drawn, measure])
   return (

@@ -3870,7 +3870,9 @@ the pill's bottom-left corner squared; the pill's content is centred. Where
 the pill is too narrow to keep its bottom-right corner radius clear of the
 tab, the tab spans the pill's full width, its sides on the pill's borders,
 and both the pill's bottom corners are squared, so pill and tab read as one
-shape. A pill must
+shape. The squared corners and the hidden bottom edge follow the pill's
+`--emphasis`, so they fade with the tab; the pill's corners are expected to
+be `--projections-radius`. A pill must
 be at least as wide as its tab: `measure` draws the tab at full strength
 and its natural width, for measuring the room a pill needs (the wider of its
 content and `.pk-status-tab`). It fades with `emphasis` and is absent at 0.

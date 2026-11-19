@@ -203,13 +203,6 @@ export interface TablePropsSource {
   setControl: (id: string, value: ControlValue) => void
   /** The Changes scope, which the table folds by (`RendererProps.scope`). */
   scope?: ChangesScope | undefined
-}) => number
-  selectedId: string | null
-  onSelect: (id: string | null) => void
-  locale: string
-  controls: {[id: string]: ControlValue}
-  setControl: (id: string, value: ControlValue) => void
-  scope?: ChangesScope | undefined
 }
 
 /**

@@ -7,6 +7,7 @@ import {
   useFrameFill,
   useFrameSizing,
   useOpeningFloor,
+  useStageHeightCap,
   useStageZoom,
 } from '@githubnext/projections-renderer-kit/react'
 import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
@@ -77,7 +78,6 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
   const content = useRef<HTMLDivElement>(null)
   const natural = useNaturalHeight(content)
   const diff = props.diff && props.comparing
-  useFrameFill(natural === undefined || !stage ? undefined : Math.ceil(natural + stage.padding))
   const links = props.controls.showRelationships !== false
   const text = useTextMeasure()
   const transition = useMemo(
@@ -115,6 +115,14 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
   // and scrolls.
   const floor = useOpeningFloor(content, tagSource)
   const {zoom, scale} = useStageZoom(view, props.onAction, fit, {floor})
+  // A content-sized host gets the schema's own height; zoomed in, the height it is drawn at, up to the room the host
+  // allows (its stage-max-height, else the protocol's maximum), so the stage grows into the page before it pans.
+  const cap = useStageHeightCap()
+  useFrameFill(
+    natural === undefined || !stage
+      ? undefined
+      : Math.ceil(Math.max(natural, Math.min(natural * scale, (cap ?? rendererLimits.maxHeight) - stage.padding)) + stage.padding),
+  )
   useContentAspect(natural ? width / natural : undefined)
   useEffect(() => {
     if (props.selectedId === null) return

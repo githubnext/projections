@@ -168,6 +168,10 @@ Recorded as implementation chose within the decisions above.
   move their edges with their cards; they treat Changes and All as views of one
   document, which they lay out in the background, so the move starts once the
   new layout is ready.
+- Nothing is presented while a chosen side of the pair is still extracting (the
+  view shows its loading state), and a canvas draws the first scope the host
+  chooses at once: the Changes scope is never pared down to from every item. A
+  side that fails to extract still leaves the other shown.
 - A comparison without any change shows every item under the "No changes"
   notice, rather than receding everything.
 - Text diffs fold their unchanged lines in every scope, as a diff's hunks do:

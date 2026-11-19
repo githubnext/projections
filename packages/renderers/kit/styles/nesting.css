@@ -1,0 +1,48 @@
+/*
+ * No nested change colors: only the innermost changed elements take a change hue. An item that holds changes is drawn
+ * neutral, with a neutral edge and muted status words, so it can still be found but only what changed inside it is
+ * colored. An item holds changes when it is marked with a change (`data-change`, or `data-status` in the progress
+ * modes) and holds changed parts marked `data-change` (a `ValueChange`'s pills are) or an SVG value change (`pk-svg-was`,
+ * `pk-svg-now`); a group holds the changed items in it; and a renderer marks `pk-holds-changes` on anything else that
+ * has changes drawn over it (a boundary around changed cards, a folder around changed files).
+ */
+.pk
+  :is(
+    :is([data-change], [data-status]):has(:is([data-change]:not(.pk-status-tab), .pk-svg-was, .pk-svg-now)),
+    .graph-node:has(:is([data-change], .pk-svg-was, .pk-svg-now)),
+    .pk-holds-changes
+  ) {
+  --pk-region-fill: transparent;
+  --pk-region-edge: var(--border-emphasis);
+  --pk-change-ink: var(--muted);
+  --change: var(--border-emphasis);
+}
+/*
+ * A kit card's marks (`CardChangeMarks`, a boundary's emphasis): no fill, a neutral edge and a neutral footer band. A
+ * card changed two ways (`mixedChange`: renamed and changed) is drawn so too, its status words each in their own hue.
+ */
+.pk
+  :is(.graph-node:has(:is([data-change], .pk-svg-was, .pk-svg-now)), .pk-holds-changes, .pk-mixed-change)
+  > :is(.node-emphasis, .node-footer-rule) {
+  fill: none;
+  stroke: var(--border-emphasis);
+}
+.pk :is(.graph-node:has(:is([data-change], .pk-svg-was, .pk-svg-now)), .pk-holds-changes, .pk-mixed-change) > .node-footer-band {
+  fill: var(--recessed);
+}
+/*
+ * Its own status words (`.pk-status-part`) are muted, not those of the changes inside it: every changed element resets
+ * `--pk-status-ink`, so status words follow the nearest changed element around them.
+ */
+.pk :is([data-change], [data-status]) {
+  --pk-status-ink: initial;
+}
+.pk
+  :is(
+    :is([data-change], [data-status]):has(:is([data-change]:not(.pk-status-tab), .pk-svg-was, .pk-svg-now)),
+    .graph-node:has(:is([data-change], .pk-svg-was, .pk-svg-now)),
+    .pk-holds-changes,
+    .pk-group:has(:is([data-change], [data-status]))
+  ) {
+  --pk-status-ink: var(--muted);
+}

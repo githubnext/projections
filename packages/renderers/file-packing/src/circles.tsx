@@ -122,6 +122,8 @@ export type Drawn = {
   removedGhost: boolean
   /** What the circle stands on: the stage at the top level, else its folder's fill (see `.fp-packing` in styles.css). */
   ground: 'stage' | 'folder'
+  /** A folder with emphasized changes inside it: its change ring is neutral, so change colors never nest (`withHolders`). */
+  holdsChanges: boolean
 }
 
 /** Performance marks for each layout and label placement, so tests and profiles can see when they run. */
@@ -147,7 +149,7 @@ export const Circles = memo(function Circles({
   })
   return (
     <>
-      {drawn.map(({circle, id, row, r, emphasis, changed, paint, folder, select, label, removedGhost, flags, ground}) => (
+      {drawn.map(({circle, id, row, r, emphasis, changed, paint, folder, select, label, removedGhost, flags, ground, holdsChanges}) => (
         <g
           key={id}
           data-entity-id={id}
@@ -185,7 +187,7 @@ export const Circles = memo(function Circles({
           {!folder && flags.length > 0 && <FlagDots flags={flags} r={r} />}
           {emphasis > 0.01 && changed && (
             <circle
-              className={`fp-emphasis ${classifyChange(row)}`}
+              className={`fp-emphasis ${classifyChange(row)}${holdsChanges ? ' pk-holds-changes' : ''}`}
               data-projections-edge=""
               r={Math.max(0, r - 1)}
               opacity={Math.min(1, emphasis)}
@@ -196,10 +198,11 @@ export const Circles = memo(function Circles({
       <g className="fp-labels" aria-hidden="true">
         {drawn
           .filter(({text, status}) => text !== undefined || status !== undefined)
-          .map(({circle, id, row, r, emphasis, folder, text, status, labelY, statusY, arc, ground}) => (
+          .map(({circle, id, row, r, emphasis, folder, text, status, labelY, statusY, arc, ground, holdsChanges}) => (
             <g
               key={id}
               data-label-for={id}
+              {...(holdsChanges ? {className: 'pk-holds-changes'} : {})}
               data-ground={ground}
               {...(folder ? {'data-folder': ''} : {})}
               transform={`translate(${circle.x},${circle.y})`}

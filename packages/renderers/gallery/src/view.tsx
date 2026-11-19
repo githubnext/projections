@@ -146,6 +146,7 @@ export function GalleryView(props: Props) {
         {...(comparing ? {change: row, emphasis: props.emphasis(row)} : {})}
         {...(diff && changed ? {mark: classifyChange(row)} : {})}
         presence={diff ? 1 : timeline.presence(row.id, progress)}
+        holdsChanges={nestedComparison(scenario)}
       >
         <div
           className="gl-card-body"
@@ -196,6 +197,7 @@ export function GalleryView(props: Props) {
                     ...(diff && comparing && document.status !== 'unchanged' ? {mark: classifyChange(document)} : {}),
                   }
                 : {})}
+              holdsChanges={runs.some(run => run.rows.some(row => nestedComparison(scenarioOf((row.after ?? row.before)!))))}
             >
               {runs.map(({group, rows}, index) => (
                 <section key={`${group ?? ''}:${index}`} className="gl-run" aria-label={group ?? entity?.label ?? 'Scenarios'}>
@@ -255,3 +257,6 @@ function RevisionChoice({
     </div>
   )
 }
+
+/** Whether a scenario's nested frame draws a comparison, in its own change colors: its card and group stay neutral. */
+const nestedComparison = (scenario: Scenario) => scenario.subject?.mode === 'comparison'

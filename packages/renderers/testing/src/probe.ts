@@ -7,6 +7,7 @@
  */
 import {
   affordanceFailures,
+  nestedAccents,
   clickBackground,
   clickEntity,
   clippedContent,
@@ -55,6 +56,7 @@ const calls: Record<ProbeCall, (args: unknown) => unknown> = {
   stageSurface: () => stageSurface(),
   stageInsets: () => stageInsets(),
   viewport: () => ({width: innerWidth, height: innerHeight}),
+  accents: () => nestedAccents(),
 }
 
 addEventListener('message', event => {

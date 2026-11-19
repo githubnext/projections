@@ -70,6 +70,12 @@ export interface RendererProps<T extends DomainSchema | readonly RendererAccepts
    * faded: what is shown is drawn at full strength, and what isn't takes no room. Undefined while every item is shown.
    */
   scope: ScopeView | undefined
+  /**
+   * Whether the host has said what it shows (its filter, and with it the scope). Until it does, every item is drawn,
+   * provisionally: a canvas that moves between layouts of the scope doesn't move from that one, so the first scope the
+   * host chooses is drawn at once rather than pared down to. Undefined where no host filter is wired (treat it as said).
+   */
+  filtered?: boolean | undefined
   /** 0 (before) to 1 (after); always 1 for an extraction. */
   progress: number
   /**

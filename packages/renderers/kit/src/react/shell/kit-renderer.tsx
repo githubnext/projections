@@ -124,6 +124,7 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
                           pane={pane}
                           focusRequest={focus}
                           scope={scope}
+                          filtered={filter !== undefined}
                           progress={position.progress}
                           highlighting={highlighting}
                           emphasis={emphasis}

@@ -144,7 +144,8 @@ export function InspectorApp({
     lists,
     authorized,
     trusted,
-    choices,
+    // Nothing to compare until a pair is shown (`usePresentedPair`): the view shows its loading state, not one side.
+    choices: after ? choices : [],
     before,
     after,
   })

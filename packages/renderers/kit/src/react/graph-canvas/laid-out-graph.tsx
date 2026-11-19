@@ -19,6 +19,9 @@ import type {Bounds} from './framing.js'
 import type {GraphAnchor} from './props.js'
 import {morphFrames, shiftFrame, viewChangeMs} from '../../graph-canvas/view-change.js'
 
+/** The scope key while the host hasn't said what it shows. */
+const provisional = 'provisional'
+
 /** What was drawn last: the frame, where it was framed and at what scale. */
 interface Shown {
   transition: GraphTransition
@@ -41,7 +44,8 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
   const scroller = useRef<HTMLDivElement>(null)
   const drawnScale = useRef(0)
   // The scope the layout shows: changing it (Changes and All) moves the cards between the two layouts.
-  const scopeKey = props.scope ? `changes:${props.scope.shown.size}` : 'all'
+  // Before the host's filter, every item is drawn provisionally: the first scope it chooses is drawn at once.
+  const scopeKey = props.filtered === false ? provisional : props.scope ? `changes:${props.scope.shown.size}` : 'all'
   const {frame, hold, overflow, change} = useViewChange(
     scroller,
     props.anchor,
@@ -199,8 +203,8 @@ function useViewChange(
   // out fading in or out, rather than jumping. The layout arrives after the scope does (it's laid out in the
   // background), so the change waits for it.
   if (scoped.current !== scopeKey) {
+    rescoped.current = scoped.current !== provisional
     scoped.current = scopeKey
-    rescoped.current = true
   }
   if (previous && previous.transition !== transition && rescoped.current) {
     rescoped.current = false

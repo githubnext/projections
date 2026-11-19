@@ -23,26 +23,30 @@ import type {SchemaFrame} from './frame.js'
 import {morphSchemaFrame} from './morph.js'
 import {useNaturalHeight, useViewSize} from './view-size.js'
 
+/** The document's identity while the host hasn't said what it shows. */
+const provisional = Symbol('provisional')
+
 /** How long cards, rows and links move to a new layout of the schema. */
 const moveMs = 320
 
 /**
- * The frame to draw: `frame`, or while the schema moves to a new layout (a new `layout`, as when the scope changes or a
- * fold opens or closes), a frame between the one drawn before and it, so cards, rows and links glide to their new
- * places, the links attached throughout. Zoom, scrubbing and resizing follow `frame` at once, as does everything under
- * reduced motion. Also whether it's moving.
+ * The frame to draw: `frame`, or while the schema moves to a new layout of the same `document` (a new `layout`, as
+ * when the scope changes or a fold opens or closes), a frame between the one drawn before and it, so cards, rows and
+ * links glide to their new places, the links attached throughout. Another document, zoom, scrubbing and resizing
+ * draw `frame` at once, as does everything under reduced motion. Also whether it's moving.
  */
-function useFrameMorph(frame: SchemaFrame, layout: unknown, reducedMotion: boolean): [SchemaFrame, boolean] {
+function useFrameMorph(frame: SchemaFrame, layout: unknown, document: unknown, reducedMotion: boolean): [SchemaFrame, boolean] {
   const drawn = useRef(frame)
-  const seen = useRef(layout)
+  const seen = useRef({layout, document})
   const [move, setMove] = useState<{from: SchemaFrame; mix: number}>()
   useLayoutEffect(() => {
-    if (seen.current === layout || reducedMotion) {
-      seen.current = layout
+    const same = seen.current.document === document
+    if (seen.current.layout === layout || !same || reducedMotion) {
+      seen.current = {layout, document}
       setMove(undefined)
       return
     }
-    seen.current = layout
+    seen.current = {layout, document}
     // From what was drawn last, which may itself be mid-move.
     const from = drawn.current
     let start: number | undefined
@@ -56,7 +60,7 @@ function useFrameMorph(frame: SchemaFrame, layout: unknown, reducedMotion: boole
     setMove({from, mix: 0})
     handle = requestAnimationFrame(step)
     return () => cancelAnimationFrame(handle)
-  }, [layout, reducedMotion])
+  }, [layout, document, reducedMotion])
   const shown = move ? morphSchemaFrame(move.from, frame, move.mix) : frame
   useLayoutEffect(() => {
     drawn.current = shown
@@ -95,7 +99,9 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
         : undefined,
     [diff, model, available, links, text.measure, text.chrome],
   )
-  const [frame, moving] = useFrameMorph(union ? union.frame : transition!(progress), model, props.reducedMotion)
+  // Before the host's filter, every table is drawn provisionally: the first scope it chooses is drawn at once.
+  const document = props.filtered === false ? provisional : (props.scope?.all ?? model)
+  const [frame, moving] = useFrameMorph(union ? union.frame : transition!(progress), model, document, props.reducedMotion)
   const tagSource = union ?? transition!
   const tableCount = (union ? union.layout : transition!.layouts.at(-1)!).tables.size
   // Opens with the whole schema in view, fitted to the stage (never magnified); zoom enlarges it. Every step shares

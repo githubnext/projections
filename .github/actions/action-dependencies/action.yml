@@ -1,0 +1,10 @@
+name: The GitHub Action's actions
+description: >-
+  Never runs. Names, at action.yml's own pins, every action the GitHub Action uses, so a workflow that runs the
+  checkout's action from the workspace (`uses: ./`, as action-e2e does) has them in its lockfile entries
+  (.github/workflows/actions.lock); the runner refuses one it doesn't lock. Keep it the same as action.yml.
+runs:
+  using: composite
+  steps:
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+    - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2

@@ -70,11 +70,11 @@ jobs:
         run: |
           if [ -z "$TAG" ]; then TAG=$(jq -r '.announcement_tag' <<< "$PLAN"); fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@v6.1.0
         with:
           ref: ${{ steps.release.outputs.tag }}
           persist-credentials: false
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+      - uses: actions/setup-node@v6.5.0
         with:
           node-version-file: .node-version
       - name: Check and stage the release's schemas
@@ -86,7 +86,7 @@ jobs:
           npm run build --workspace @githubnext/projections-schemas
           npm test --workspace @githubnext/projections-schemas
           node packages/schemas/scripts/publication.mjs --release "$TAG" --out "$RUNNER_TEMP/schemas"
-      - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+      - uses: azure/login@v3.1.0
         with:
           client-id: ${{ vars.SCHEMAS_AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.SCHEMAS_AZURE_TENANT_ID }}

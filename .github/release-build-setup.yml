@@ -2,7 +2,7 @@
 # dist-workspace.toml): the shared embedded inputs, the pinned toolchain with the
 # target, and the extractor helpers embedded and required.
 - name: Download the embedded inputs
-  uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+  uses: actions/download-artifact@v8.0.2
   with:
     name: embedded-inputs
     # The artifact is rooted at its paths' common ancestor, packages/.

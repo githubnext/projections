@@ -52,7 +52,9 @@ proofs and gh-named workflow artifacts, but no release), set
 dist calls these jobs with GitHub's self-repository syntax,
 `uses: $/.github/workflows/<job>.yml`: the workflow at the commit that is
 running. actionlint 1.7.12 doesn't know that form yet, so
-`.github/actionlint.yaml` ignores only that message for `release.yml`.
+`.github/actionlint.yaml` ignores only that message for `release.yml`, and only
+the matching one for the `$/` composite action steps of `ci.yml` and
+`engine-quality.yml`.
 
 ## Source-built GitHub CLI extension
 

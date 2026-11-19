@@ -1,5 +1,15 @@
 # actionlint (rhysd/actionlint) configuration.
 paths:
+  # The workflows run this repository's composite actions with the same self-repository syntax, `uses: $/<path>`, so
+  # the workflow dependency lockfile (.github/workflows/actions.lock) locks the actions they use; actionlint rejects
+  # only that form of the step.
+  .github/workflows/{ci,engine-quality}.yml:
+    ignore:
+      - 'specifying action "\$/[\w./-]+" in invalid format because ref is missing'
+  # A never-run step locks, for ci.yml, the actions of the GitHub Action that action-e2e runs as `uses: ./`.
+  .github/workflows/ci.yml:
+    ignore:
+      - 'constant expression "false" in condition'
   # dist 0.34.0 (dist-workspace.toml) calls the release's custom jobs with GitHub's self-repository syntax,
   # `uses: $/.github/workflows/<job>.yml`: the workflow at the running commit of this repository
   # (https://github.blog/changelog/2026-07-30-reference-same-repository-actions-with-self-repository-syntax/).

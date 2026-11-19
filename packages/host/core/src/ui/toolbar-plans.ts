@@ -56,17 +56,14 @@ export const signature = (plan: ToolbarPlan) =>
   `${plan.rows}:${plan.cluster}:${plan.pair}:${plan.mode}:${plan.playback}:${plan.more.join(',')}`
 
 /**
- * The plans the toolbar tries, most spacious first. With a mode region, the first plans centre it on the row in its
- * fullest forms, with every action inline: one row, or (with playback) two, playback alone on row 2, so choosing
- * Animated doesn't move the mode switch under the pointer; then (with playback) the same two rows with the mode region
- * after the start region. Then one row is preferred and collapses in priority order while it still fits at the
- * minimums: the pickers become compact triggers, the mode switch (icons only) becomes a dropdown, (with playback)
- * the steps and percent move into the playback group's overflow, the actions move into More one at a time
- * (`actionCollapseOrder`), and finally the steps and percent join them there. Only when one row can't fit even then
- * does playback take a planned second row, with a slider spanning at least 80% of it; row 1 then has the width to
- * itself, so it starts again from its most spacious forms and collapses in the same order, finally merging the
- * pickers into one compare button. Row 2 independently keeps the steps and percent inline, in the group's overflow,
- * or in More, whichever keeps its slider at 80%. Without playback the single row continues the same way.
+ * The plans the toolbar tries, most spacious first. With playback (animated mode, or the table and text views), the
+ * playback group always has a second row to itself, with a slider spanning at least 80% of it, so choosing Animated
+ * never moves the controls above it. Row 1 holds the start region, the mode region and the actions. With a mode region,
+ * it is first centred on the row in its fullest forms, then follows the start region; then the row collapses in
+ * priority order: the pickers become compact triggers, the mode switch (icons only) a dropdown, the actions move into
+ * More one at a time (`actionCollapseOrder`), and finally the pickers merge into one compare button. Row 2
+ * independently keeps the steps and percent inline, in the group's overflow, or in More, whichever keeps its slider at
+ * 80%. Without playback the single row follows the same order.
  */
 export function toolbarPlans(content: ToolbarContent): ToolbarPlan[] {
   const actions = actionCollapseOrder.filter(action => content.actions.includes(action))
@@ -81,27 +78,14 @@ export function toolbarPlans(content: ToolbarContent): ToolbarPlan[] {
   const plans: ToolbarPlan[] = []
   const playbacks = ['full', 'compact', 'minimal'] as const
   const cluster = 'start' as const
-  if (content.modes) {
-    const centred = {cluster: 'centre', pair: 'full', mode: 'icons', more: []} as const
-    // With playback, the same two rows with the mode region after the start region follow, before anything collapses.
-    if (content.playback)
-      for (const placement of ['centre', 'start'] as const)
-        plans.push(...playbacks.map(playback => ({rows: 2 as const, ...centred, cluster: placement, playback})))
-    else plans.push({rows: 1, ...centred, playback: 'full'})
-  }
+  const centred = {cluster: 'centre', pair: 'full', mode: 'icons', more: []} as const
   if (content.playback) {
-    for (const [pair, mode] of forms) plans.push({rows: 1, cluster, pair, mode, playback: 'full', more: []})
-    for (let count = 0; count <= actions.length; count++)
-      plans.push({rows: 1, cluster, pair: 'short', mode: 'menu', playback: 'compact', more: moved(count)})
-    plans.push({rows: 1, cluster, pair: 'short', mode: 'menu', playback: 'minimal', more: moved(actions.length)})
-    const two = (config: (typeof row)[number]) => playbacks.map(playback => ({rows: 2 as const, cluster, ...config, playback}))
-    // Two rows while row 1 stays full enough (`firstRowFill`, see `rowCeiling` in toolbar-layout.ts); then one row
-    // with the pickers merged; and two rows with them merged last.
-    plans.push(...row.filter(config => config.pair !== 'merged').flatMap(two))
-    for (const playback of ['compact', 'minimal'] as const)
-      plans.push({rows: 1, cluster, pair: 'merged', mode: 'menu', playback, more: moved(actions.length)})
-    plans.push(...row.filter(config => config.pair === 'merged').flatMap(two))
+    // Playback always has row 2 to itself. Row 1 is tried in each form with each playback form before it collapses
+    // further: first the mode region centred, then after the start region.
+    if (content.modes) plans.push(...playbacks.map(playback => ({rows: 2 as const, ...centred, playback})))
+    plans.push(...row.flatMap(config => playbacks.map(playback => ({rows: 2 as const, cluster, ...config, playback}))))
   } else {
+    if (content.modes) plans.push({rows: 1, ...centred, playback: 'full'})
     for (const config of row) plans.push({rows: 1, cluster, ...config, playback: 'full'})
   }
   const seen = new Set<string>()

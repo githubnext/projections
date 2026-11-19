@@ -26,8 +26,16 @@ for (const width of [1280, 600, 400, 320])
       await page.goto(story('projection-view--comparison', 'dark-modern', `tabStart:!true;initialMode:${mode}`))
       await ready(page)
       expectEdgeInsets(await measure(page), `tab at ${width}px, ${mode}`)
-      // One 35px row, hairline included, as the tab's skeleton strip draws it (packages/integrations/vscode/src/html.ts).
-      expect((await page.locator('.phv-toolbar').first().boundingBox())?.height).toBe(35)
+      // Row 1 is the tab's skeleton strip (packages/integrations/vscode/src/html.ts): 35px, hairline included. Animated
+      // playback has a second row of its own below that hairline.
+      const toolbar = page.locator('.phv-toolbar').first()
+      const height = (await toolbar.boundingBox())!.height
+      if (mode !== 'animated') expect(height).toBe(35)
+      else {
+        const top = (await toolbar.boundingBox())!.y
+        expect((await toolbar.locator(':scope > .phv-playback').boundingBox())!.y - top).toBe(34)
+        expect(height).toBeGreaterThan(35)
+      }
     })
 
 for (const width of [1280, 600, 400, 320])

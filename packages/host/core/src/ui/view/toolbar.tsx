@@ -49,7 +49,7 @@ export interface ViewToolbarProps {
 
 /**
  * The default view's toolbar. It is planned, never wrapped (toolbar-layout.ts): one row whose regions collapse in
- * priority order, or two rows, with playback and a full-width slider in the second.
+ * priority order, and with playback a second row, playback's alone, with a full-width slider.
  */
 export function ViewToolbar({
   projection: p,
@@ -90,7 +90,7 @@ export function ViewToolbar({
     `${comparing}-${mode}-${view}-${views.join()}-${showPlayback}-${showZoom}-${p.controls.length}-${p.stepEnds.length > 0}-${Boolean(props.actions)}-${p.availableModes.join()}-${p.variation?.within ?? 0}-${p.variation?.regenerated ?? 0}-${showScope && p.scope}`,
   )
   const centred = plan.cluster === 'centre'
-  const filterFits = () => Boolean(row.current && filterFitsRow(row.current, {centred, rows: plan.rows, sliderMin}))
+  const filterFits = () => Boolean(row.current && filterFitsRow(row.current, {centred, sliderMin}))
   const inMore = (action: ToolbarAction) => plan.more.includes(action)
   const hasMore = plan.more.length > 0 || (showPlayback && plan.playback === 'minimal')
   const start = typeof props.toolbarStart === 'function' ? props.toolbarStart(plan.pair !== 'full', plan.pair) : props.toolbarStart
@@ -133,7 +133,8 @@ export function ViewToolbar({
             {start}
           </div>
         ) : (
-          centred && <span aria-hidden="true" />
+          // Nothing at the start: an empty first cell, measured as nothing (it stretches across its half).
+          centred && <span aria-hidden="true" data-fit-min="0" />
         )}
         {(showModes || showScope) && (
           <div
@@ -149,7 +150,7 @@ export function ViewToolbar({
             {showScope && plan.mode !== 'menu' && <ScopeSwitch projection={p} />}
           </div>
         )}
-        {showPlayback && plan.rows === 1 ? playback : !centred && <span aria-hidden="true" data-fit-min="0" className="pj:flex-1" />}
+        {!centred && <span aria-hidden="true" data-fit-min="0" className="pj:flex-1" />}
         <div data-toolbar-region="end" className="ph-toolbar-end pj:flex pj:shrink-0 pj:items-center pj:gap-1.5 pj:justify-self-end">
           {showVaried && !inMore('varied') && (
             <>
@@ -161,13 +162,7 @@ export function ViewToolbar({
           {showZoom && !inMore('zoom') && <ZoomControls projection={p} />}
           <div className="pj:flex pj:items-center pj:gap-0.5">
             {on('search') && !inMore('filter') && (
-              <FilterButton
-                projection={p}
-                popover={plan.rows === 2 && !centred}
-                open={filterOpen}
-                onOpenChange={setFilterOpen}
-                canExpand={filterFits}
-              />
+              <FilterButton projection={p} open={filterOpen} onOpenChange={setFilterOpen} canExpand={filterFits} />
             )}
             {settings}
             {!inMore('info') && info}

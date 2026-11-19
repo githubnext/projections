@@ -175,7 +175,8 @@ test.describe('the toolbar collapses into VS Code’s overflow menus without ove
       }))
       expect(fit.scroll).toBeLessThanOrEqual(fit.client + 1)
       expect(fit.overlap).toBe(false)
-      if (width <= 600) await expect(toolbar.getByRole('button', {name: 'More', exact: true})).toBeVisible()
+      // Playback has row 2 to itself, so row 1 keeps every action until the explorer's pickers and modes crowd it.
+      if (width <= 390) await expect(toolbar.getByRole('button', {name: 'More', exact: true})).toBeVisible()
       if (width >= 1440) expect(await toolbar.getAttribute('data-actions-overflow')).toBeNull()
     })
   }

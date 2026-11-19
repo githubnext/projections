@@ -93,8 +93,8 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
       {on('title') && <h2 className="pj:sr-only">{p.projection.title}</h2>}
       {/*
         The toolbar is planned, never wrapped (toolbar-layout.ts): one row whose regions collapse in priority order,
-        or two rows, with playback and a full-width slider in the second. Start, mode and end keep their places in
-        row 1 across plans, so they aren't remounted when the playback group moves.
+        and with playback a second row, playback's alone, with a full-width slider. Start, mode and end keep their
+        places in row 1 across plans, so they aren't remounted when playback comes and goes.
       */}
       <ViewToolbar
         projection={p}

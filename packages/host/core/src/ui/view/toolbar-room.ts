@@ -13,15 +13,16 @@ function endRoom(toolbar: HTMLElement): number {
 }
 
 /**
- * Whether the filter can expand in the toolbar's row: only when the row's flexible room (the spacer and the slider
- * beyond its minimum) can take the field, so opening it never makes the row re-plan and move the Filter block while it
- * is in use. In a centred row, the room is what the end half holds beyond the actions, so the mode region stays
- * centred; a second row (playback's) leaves row 1 none.
+ * Whether the filter can expand in the toolbar's first row: only when the row's flexible room (the spacer and, with
+ * playback in the row, the slider beyond its minimum) can take the field, so opening it never makes the row re-plan and
+ * move the Filter block while it is in use; otherwise it opens in a popover. In a centred row, the room is what the end
+ * half holds beyond the actions, so the mode region stays centred.
  */
-export function filterFitsRow(toolbar: HTMLElement, plan: {centred: boolean; rows: 1 | 2; sliderMin: number}): boolean {
+export function filterFitsRow(toolbar: HTMLElement, plan: {centred: boolean; sliderMin: number}): boolean {
   if (plan.centred) return endRoom(toolbar) >= filterFieldWidth - filterButtonWidth
-  if (plan.rows !== 1) return false
-  const width = (selector: string) => toolbar.querySelector(selector)?.getBoundingClientRect().width ?? 0
-  const spare = width('[data-fit-min="0"]') + Math.max(0, width('.ph-progress') - plan.sliderMin)
+  const row = toolbar.querySelector(':scope > .ph-toolbar-row')
+  const width = (selector: string) => row?.querySelector(`:scope > ${selector}`)?.getBoundingClientRect().width ?? 0
+  const slider = row?.querySelector(':scope > [data-toolbar-region="playback"] .ph-progress')?.getBoundingClientRect().width
+  const spare = width('[data-fit-min="0"]') + (slider === undefined ? 0 : Math.max(0, slider - plan.sliderMin))
   return spare >= filterFieldWidth - filterButtonWidth
 }

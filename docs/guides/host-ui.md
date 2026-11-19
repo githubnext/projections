@@ -73,53 +73,46 @@ control at its minimum size: the slider at 160px (120px on a toolbar under
 the chip and the round play button) 32px tall. It shows the most spacious plan
 that fits.
 
-**The mode region is centred first.** While the row has room, the mode switch
-and the scope switch (Changes · All) sit together at the centre of the
-toolbar's whole width, the pickers at its start and the actions at its end, all
-in their fullest forms (`ToolbarRow`'s `centred` grid: the regions beside it get
-equal halves of what it leaves). It keeps 24px from them; with less room it
-moves to follow the pickers, still in its fullest forms. Animated playback then
-takes a second row of its own, so choosing Animated (or leaving it) never moves
-the mode switch under the pointer; the scope's counts keep the widest count's
-digits, so the region keeps its width as they change.
+**Playback always has a second row of its own** (animated mode, and the table
+and text views, which present progress in every mode): the play button, the step
+buttons, a slider spanning at least 80% of the row (inset from the toolbar's
+edge, so its thumb never touches the border) and the percent. The steps and
+percent move into the group's overflow ("More playback controls"), or into More,
+only when the row needs it to keep the slider's span. So choosing Animated, or
+leaving it, never moves the controls in row 1.
 
-Narrower still, **one row is preferred**: as the toolbar narrows, it collapses
-in priority order while one row still fits at those minimums:
+**The mode region is centred first.** While row 1 has room, the mode switch and
+the scope switch (Changes · All) sit together at the centre of the toolbar's
+whole width, the pickers at its start and the actions at its end, all in their
+fullest forms (`ToolbarRow`'s `centred` grid: the regions beside it get equal
+halves of what it leaves). It keeps 24px from them; with less room it moves to
+follow the pickers, still in its fullest forms. The scope's counts keep the
+widest count's digits, and its two forms (the switch, and the note when the
+Changes scope hides nothing) share one slot, so the region keeps its width as
+they change.
+
+Narrower still, row 1 collapses in priority order:
 
 1. the Before/After selects become compact triggers with the short revision
    names ("v1"), truncated, the full names as their titles;
 2. the mode switch drops its labels (each icon keeps its label as tooltip and
    accessible name), then becomes one dropdown button with the current mode's
-   icon ("Comparison mode: Animated");
-3. the step buttons and percent move into the playback group's overflow ("More
-   playback controls"); the slider stays;
-4. the actions move into **More** ("⋯") one at a time, in `actionCollapseOrder`:
-   zoom, About, full screen, then Filter (Settings and `actions` stay); then the
-   steps and percent join them there.
-
-Only when one row can't fit even then does playback take **a planned second
-row**: the play button, the step buttons, a slider spanning at least 80% of the
-row (inset from the toolbar's edge, so its thumb never touches the border) and
-the percent; the steps and percent move into the group's overflow, or into More,
-only when the row needs it to keep the slider's span. Row 1 then has the width
-to itself, so it starts again from its most spacious forms (all actions inline)
-and collapses in the same order; it is used only while it stays at least 62%
-full (`firstRowFill`), else one row with the pickers merged is preferred. Last:
-
-5. the pickers merge into one compare button ("v1 → v3", named "Revisions: …")
+   icon ("Comparison mode: Animated"); the scope then moves to Settings' "Show";
+3. the actions move into **More** ("⋯") one at a time, in `actionCollapseOrder`:
+   zoom, About, full screen, then Filter (Settings and `actions` stay);
+4. the pickers merge into one compare button ("v1 → v3", named "Revisions: …")
    whose "Revisions" popover holds both selects and Swap.
 
-Without playback (side by side, swipe, diff) the single row continues with
-step 5. With nothing at its start (one revision and no `toolbarStart`: no
-pickers, modes or playback) the band keeps its full width, with its end group
-(the chip, zoom, Filter, Settings, About, full screen) at the right. Hidden
-controls keep their accessible names in their overflow menus. A more spacious
-plan returns only once the toolbar is 24px wider than it needs (hysteresis), so
-the toolbar doesn't flicker at a boundary; while a person is using a region
-(focus in it, or in a popover it opened) its form is kept, so the control in
-their hands isn't remounted. On a two-row toolbar, Filter opens its field in a
-popover. Storybook shows the explorer at 1440, 1024, 768, 600, 480 and 390px
-(Default UI › Comparison explorer › At …px).
+With nothing at its start (one revision and no `toolbarStart`: no pickers, modes
+or playback) the band keeps its full width, with its end group (the chip, zoom,
+Filter, Settings, About, full screen) at the right. Hidden controls keep their
+accessible names in their overflow menus. A more spacious plan returns only once
+the toolbar is 24px wider than it needs (hysteresis), so the toolbar doesn't
+flicker at a boundary; while a person is using a region (focus in it, or in a
+popover it opened) its form is kept, so the control in their hands isn't
+remounted. Filter expands its field in row 1 when the row's spare room can take
+it, else it opens in a popover. Storybook shows the explorer at 1440, 1024, 768,
+600, 480 and 390px (Default UI › Comparison explorer › At …px).
 
 ### The stage
 

@@ -31,13 +31,11 @@ async function check(stage: StageHandle, label: string) {
   await stage.select(null)
 }
 
-for (const directory of [...new Set(scenarios.map(item => item.directory))]) {
-  test(`${directory}: hover and selection stay inside their unit`, async ({page}) => {
+// One test per scenario, so each has its own time and the suite's shards and workers share them: a renderer with many
+// large scenarios (the graph renderer's) took longer than one test's time on CI WebKit.
+for (const {key} of scenarios.filter(item => !item.customComparator))
+  test(`${key}: hover and selection stay inside their unit`, async ({page}) => {
     test.slow()
-    const inspector = harnessInspector()
-    for (const {key} of scenarios.filter(item => item.directory === directory && !item.customComparator)) {
-      const stage = await openStage(page, inspector, {scenario: key, progress: 1})
-      await check(stage, key)
-    }
+    const stage = await openStage(page, harnessInspector(), {scenario: key, progress: 1})
+    await check(stage, key)
   })
-}

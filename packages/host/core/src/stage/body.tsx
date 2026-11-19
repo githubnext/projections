@@ -8,7 +8,7 @@ import type {ProjectionController} from '../projection.js'
 import {paneArrangement, paneGeometry, useSize} from './arrangement.js'
 import type {PaneArrangement} from './arrangement.js'
 import {PaneBand, PaneChip, paneChipClearance} from './labels.js'
-import {accent, columnGapOf, paneBleed, stageLayout} from './layout.js'
+import {accent, columnGapOf, stackedGapsOf, paneBleed, stageLayout} from './layout.js'
 import type {PaneEdge, PaneLabels} from './layout.js'
 import {DefaultStatus} from './status.js'
 import {SwipeHandle} from './swipe-handle.js'
@@ -59,6 +59,7 @@ export function StageBody({
     stackBelow,
     current: arranged.current.arrangement,
     columnGap: columnGapOf(paneEdge),
+    ...stackedGapsOf(paneEdge),
     // Chips overlay their frames, so only header bands take height from the panes.
     band: paneLabels === 'visible' ? paneGeometry.band : 0,
   })

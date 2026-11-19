@@ -52,10 +52,11 @@
 }
 /*
  * A status tab (`StatusTab`) hangs off a pill's bottom edge: its room is reserved under every pill, and a changed pill
- * fills it with a tab joined to the pill (no top edge, overlapping the pill's border), rounded on its free corners and
- * centred under it. A pill too narrow to keep its corner radius clear of the tab (`data-flush`) has the tab span its
- * whole width, the tab's sides drawn on the pill's borders, and its own bottom corners squared, so the two are one
- * shape. The pill's content is centred too, so a pill widened for its status reads as balanced.
+ * fills it with a tab joined to the pill (no top edge, overlapping the pill's border) at its left, the tab's left side
+ * drawn on the pill's left border and the pill's bottom-left corner squared, rounded on the tab's free corners. A pill
+ * too narrow to keep its bottom-right corner radius clear of the tab (`data-flush`) has the tab span its whole width,
+ * both sides on the pill's borders, and both its bottom corners squared, so the two are one shape. The pill's content
+ * is centred, so a pill widened for its status reads as balanced.
  */
 .pk {
   --pk-tab-height: calc(var(--projections-font-size-xs) * 1.5);
@@ -63,16 +64,15 @@
 .pk-status-tab-room {
   position: absolute;
   top: 100%;
-  left: 0;
+  left: calc(-1 * var(--projections-border-width));
   right: 0;
   z-index: 1;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   height: var(--pk-tab-height);
   pointer-events: none;
 }
 .pk-status-tab-room[data-flush] {
-  left: calc(-1 * var(--projections-border-width));
   right: calc(-1 * var(--projections-border-width));
 }
 .pk .pk-status-tab-room[data-flush] > .pk-status-tab {
@@ -82,9 +82,11 @@
 .pk :has(> .pk-status-tab-room) {
   text-align: center;
 }
+.pk :has(> .pk-status-tab-room > .pk-status-tab) {
+  border-end-start-radius: 0;
+}
 /* The pill's bottom edge lies under the tab: its corners square, and no line crosses where a translucent tab joins. */
 .pk :has(> .pk-status-tab-room[data-flush] > .pk-status-tab) {
-  border-end-start-radius: 0;
   border-end-end-radius: 0;
   border-bottom-color: transparent;
 }

@@ -3865,10 +3865,12 @@ rounded on its free corners. Render it inside the pill (positioned:
 `position: relative` or otherwise), which keeps its single-line box; the
 pill's container reserves `--pk-tab-height` below every pill, so nothing
 moves when status appears, but an unchanged pill draws nothing there. The
-tab is centred under the pill, and so is the pill's content. Where the pill
-is too narrow to keep a corner radius clear of the tab on each side, the tab
-spans the pill's full width, its sides on the pill's borders, and the pill's
-bottom corners are squared, so pill and tab read as one shape. A pill must
+tab joins the pill at its left, its left side on the pill's left border and
+the pill's bottom-left corner squared; the pill's content is centred. Where
+the pill is too narrow to keep its bottom-right corner radius clear of the
+tab, the tab spans the pill's full width, its sides on the pill's borders,
+and both the pill's bottom corners are squared, so pill and tab read as one
+shape. A pill must
 be at least as wide as its tab: `measure` draws the tab at full strength
 and its natural width, for measuring the room a pill needs (the wider of its
 content and `.pk-status-tab`). It fades with `emphasis` and is absent at 0.

@@ -16,6 +16,17 @@ const licenseFile = /^(licen[cs]e|copying|notice)([-_.].*)?$/i
 // Licenses whose binary-form distribution must say where the source is.
 const sourceRequired = /\b(EPL|MPL|LGPL|GPL|CDDL|EUPL|CPL)\b/
 
+/** An SPDX expression's first `OR` alternative, without parentheses: `(MPL-2.0 OR Apache-2.0)` is MPL-2.0. */
+function firstAlternative(expression) {
+  const words = expression.split(/\s+/)
+  const or = words.indexOf('OR', 1)
+  return words
+    .slice(0, or < 0 ? undefined : or)
+    .join(' ')
+    .replace(/[()]/g, '')
+    .trim()
+}
+
 /**
  * The npm packages among a bundle's module IDs (as Rollup or esbuild report
  * them, with or without plugin prefixes and queries), except this
@@ -28,7 +39,9 @@ const sourceRequired = /\b(EPL|MPL|LGPL|GPL|CDDL|EUPL|CPL)\b/
 export function bundledPackages(moduleIds) {
   const found = new Map()
   for (const id of moduleIds) {
-    const file = id.replace(/^\0/, '').replace(/\?.*$/, '')
+    const unprefixed = id.replace(/^\0/, '')
+    const query = unprefixed.indexOf('?')
+    const file = query < 0 ? unprefixed : unprefixed.slice(0, query)
     const match = packageRoot.exec(file)
     // Vendored data is attributed wherever it is, including inside an installed package (`@githubnext/projections`
     // ships the SDK's `vendor/linguist` beside its bundles).
@@ -112,7 +125,7 @@ export function packageNotice(entry) {
   if (copyleft) {
     const source = repository(entry.directory)
     if (!source) throw new Error(`Bundled package ${entry.name}@${entry.version} (${entry.license}) declares no repository for its source`)
-    const elected = entry.license.split(/\s+OR\s+/)[0].replace(/[()]/g, '')
+    const elected = firstAlternative(entry.license)
     lines.push(`Distributed under ${elected}. Source: ${source}/tree/${entry.version}, unmodified.`)
   }
   // Copyleft packages are attributed from every script they publish, not just those bundled.

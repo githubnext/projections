@@ -12,8 +12,8 @@ import {buildModel} from '../node_modules/.cache/test/build.js'
 import {chipPrefix, conditionLines, effectProse, warnings} from '../node_modules/.cache/test/prose.js'
 import {findingLabels, interpretationIcons} from '../node_modules/.cache/test/model.js'
 
-const plain = markup => markup.replace(/<[^>]+>/g, '')
 import {RuntimePolicyView} from '../node_modules/.cache/test/view.js'
+import {plain} from '../../kit/test/markup.mjs'
 
 const engine = createNativeEngine()
 const runtime = createRulesRuntime()

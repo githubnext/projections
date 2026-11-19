@@ -10,6 +10,7 @@ import {codeStatisticsFacts, codeStatisticsNouns} from '../node_modules/.cache/t
 import {signed} from '../node_modules/.cache/test/timeline.js'
 import {compared} from './engine.mjs'
 import {loadPair} from './fixtures.mjs'
+import {plain} from '../../kit/test/markup.mjs'
 
 /** Diff mode as the shell presents it: one static frame at progress 1 with no schedule. */
 async function renderDiff(scenario, overrides = {}) {
@@ -56,7 +57,7 @@ async function barSentence(scenario, controls = {}) {
   const facts = codeStatisticsFacts({init, model, controls, rendererName: 'code-statistics'})
   return {sentence: summarySentence(rendererSummary(init, codeStatisticsNouns, facts).items, 'en-US'), before, after, comparison}
 }
-const words = html => html.replace(/<span class="sr-only">.*?<\/span>/g, '').replace(/<[^>]+>/g, '')
+const words = html => plain(html.replace(/<span class="sr-only">.*?<\/span>/g, ''))
 /** Each bar row's markup, by entity ID. */
 const rows = html =>
   new Map(

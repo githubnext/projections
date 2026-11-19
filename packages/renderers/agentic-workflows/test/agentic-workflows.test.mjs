@@ -8,6 +8,7 @@ import {createRulesRuntime} from '@githubnext/projections-comparator-runtime'
 import {buildModel, entries, findingsOf} from '../node_modules/.cache/test/model.js'
 import {agenticWorkflowsFacts} from '../node_modules/.cache/test/summary.js'
 import {AgenticWorkflowsView} from '../node_modules/.cache/test/view.js'
+import {plain} from '../../kit/test/markup.mjs'
 
 const runtime = createRulesRuntime()
 const rules = new Uint8Array(
@@ -17,17 +18,6 @@ const fixture = name =>
   JSON.parse(readFileSync(new URL(`../../../extractors/github-agentic-workflows/tests/fixtures/${name}`, import.meta.url), 'utf8'))
 const before = fixture('docs-bot/before.expected.json')
 const after = fixture('docs-bot/after.expected.json')
-/** The text of rendered markup: everything outside its tags. */
-function plain(markup) {
-  let text = ''
-  let inTag = false
-  for (const char of markup) {
-    if (char === '<') inTag = true
-    else if (char === '>') inTag = false
-    else if (!inTag) text += char
-  }
-  return text
-}
 
 // The agentic-workflows rules, run in the rules interpreter as hosts run them.
 const interpreted = (a = before, b = after) => runtime.compare(rules, {protocolVersion: 0, before: a, after: b, baseline: {}, options: {}})

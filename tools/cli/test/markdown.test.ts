@@ -10,6 +10,7 @@ import {
   section,
   stripFrontMatter,
   title,
+  withoutTags,
 } from '../src/lib/markdown.ts'
 
 test('front matter: plain, quoted and folded values, and the body after it', () => {
@@ -64,4 +65,15 @@ test('titles, headings outside fences, sections and list items', () => {
 test('clip cuts at a word boundary', () => {
   assert.equal(clip('short', 10), 'short')
   assert.equal(clip('one two three four', 12), 'one two…')
+})
+
+test('withoutTags drops each tag, leaves no tag behind, and keeps a `<` that closes nothing', () => {
+  assert.equal(withoutTags('a <b>bold</b> <img src="x"> c'), 'a bold  c')
+  assert.equal(withoutTags('<<script>script>alert(1)</script>'), 'script>alert(1)')
+  assert.equal(withoutTags('a < b'), 'a < b')
+  assert.equal(withoutTags('x <> y'), 'x <> y')
+  const started = performance.now()
+  assert.equal(withoutTags('<'.repeat(200_000)), '<'.repeat(200_000))
+  assert.equal(withoutTags(`${'<a'.repeat(100_000)}>`), '')
+  assert.ok(performance.now() - started < 1000, `took ${Math.round(performance.now() - started)} ms`)
 })

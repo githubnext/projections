@@ -454,8 +454,9 @@ changesScope(model: ComparisonModel<Extraction> | undefined, filter: FilterPaylo
 ```
 
 The Changes scope a renderer presents, or undefined when the host shows every item (or this is one extraction). The
-host's filter `ids` are what it shows, its changes and their context; past the filter's ID limit, or before the host
-says, the kit derives the same from the comparison's structure (`changeContext`).
+host's filter `ids` are what it shows, its changes and their context, each change with every row presenting it (a
+split's parts); past the filter's ID limit, or before the host says, the kit derives the same from the comparison's
+structure (`changeContext`).
 
 ### `ChangesScope`
 
@@ -573,6 +574,7 @@ same extraction and every row is unchanged.
 |---|---|---|
 | `after` | `"after": X` | The After extraction; the extraction itself in extraction mode. |
 | `before` | `"before": X` | The Before extraction; the extraction itself in extraction mode. |
+| `changeRows` | `"changeRows"?: ReadonlyMap<string, Array<string>>` | The presented rows of each comparison change with more than one item: a split's further parts and a merge's further sources are rows of their own, while the host names the change by its ID alone. |
 | `entities` | `"entities": Array<EntityChange<X["entities"][number]>>` | One row per entity across both extractions, its Before and After versions paired by the comparison. |
 | `entityRow` | `"entityRow": { "after": ReadonlyMap<string, string>; "before": ReadonlyMap<string, string> }` | Maps an entity ID of either extraction to the presented row that shows it. |
 | `mode` | `"mode": "comparison" \| "extraction"` | Whether this presents one extraction or a comparison of two. |
@@ -662,6 +664,19 @@ for the viewport opens from its leftmost box instead, as `'left'` does, never cu
 `clear` keeps that many more CSS px clear at the view's left, beside `margin`, reaching into the padding: content
 drawn flush with a host's stage inset (`inset.x` and `clear` the same) opens with its leftmost box that inset from
 the view's edge, on the host's column.
+
+### `ContextPaths`
+
+```ts
+interface ContextPaths
+```
+
+Which relationships `followContext` follows, by kind: to an item's sources (`incoming`), or its targets (`outgoing`).
+
+| Member | Signature | Description |
+|---|---|---|
+| `incoming` | `"incoming"?: { (kind: string): false \| true }` | Follow a relationship of this kind from its target back to its source (a dependency to the package that needs it). |
+| `outgoing` | `"outgoing"?: { (kind: string): false \| true }` | Follow a relationship of this kind from its source to its target (a probe to the hook it attaches to). |
 
 ### `countText`
 
@@ -1355,6 +1370,17 @@ foldPrefix: "pk-fold:"
 ```
 
 The ID prefix of a fold `scopedModel` adds: `pk-fold:` and the row ID of the entity whose parts it stands for.
+
+### `followContext`
+
+```ts
+followContext(model: ComparisonModel<Extraction>, changes: ReadonlySet<string>, paths: ContextPaths): Set<string>
+```
+
+The rows that place a comparison's changes along the relationships `paths` names, transitively: from each changed
+entity and each end of a changed relationship, in whichever revision has them, every entity reached and the
+relationships followed to it. For example a changed package's dependents up to the workspace, or a changed selector's
+probe, the probe's policy and the hook it attaches to.
 
 ### `followEndpoints`
 
@@ -3639,7 +3665,7 @@ How `mountRenderer` connects a renderer component to its host.
 | `interactions` | `"interactions"?: false` | Hover, anchors, scroll mirroring, the host's filter and annotation badges through `connectInteractions` over elements carrying `data-entity-id` (default on). `false` opts out and declares none of the interaction capabilities. |
 | `name` | `"name": string` | Bundle name, used for `data-renderer` on the root element. |
 | `nouns` | `"nouns"?: { (kind: string, collection: "entities" \| "relationships"): SummaryNoun \| false \| undefined } \| { readonly [key: string]: SummaryNoun \| false }` | The renderer's words for extraction kinds in the host's summary bar (`SummaryNouns`), for every document; see `declareNouns` for words that depend on the document. |
-| `scope` | `"scope"?: { "layout": "fold" } \| { "layout": "subset"; "parts"?: "fold" \| "omit" \| "whole" }` | How the Changes scope reaches the renderer. `fold` (the default): `model` holds every item and the renderer folds what `scope` leaves out, as a list does. `subset`: `model` holds only what the scope shows (`scopedModel`), with the shown entities' `parts` left out, kept whole or folded, so a canvas lays out only that; `scope.all` holds every item. |
+| `scope` | `"scope"?: { "context"?: { (all: ComparisonModel<Extraction>, changes: ReadonlySet<string>, renderer: string): Iterable<string, any, any> }; "layout": "subset"; "parts"?: "fold" \| "omit" \| "whole" } \| { "layout": "fold" }` | How the Changes scope reaches the renderer. `fold` (the default): `model` holds every item and the renderer folds what `scope` leaves out, as a list does. `subset`: `model` holds only what the scope shows (`scopedModel`), with the shown entities' `parts` left out, kept whole or folded, so a canvas lays out only that; `scope.all` holds every item. A subset renderer that needs more to place a change than its relationships' endpoints and containers (a package's path from the workspace, a selector's probe and hook) returns those items' row IDs from `context`, given every item, the changes in scope and its renderer name; they show as context. |
 | `steps` | `"steps"?: "manual" \| "schedule"` | `schedule` (default) reports the end of each scheduled step to the host; `manual` leaves it to the component through `reportSteps`. |
 
 ### `mountRenderer`
@@ -4133,7 +4159,7 @@ other change, so an item that varied only within tolerance stays unchanged.
 ### `ViewOptions`
 
 ```ts
-type ViewOptions = { steps?: "schedule" | "manual"; scope?: { layout: "fold"; } | { layout: "subset"; parts?: ScopedParts; }; controls?: readonly RendererControl[]; nouns?: SummaryNouns; facts?: SummaryFacts; interactions?: false; }
+type ViewOptions = { steps?: "schedule" | "manual"; scope?: { layout: "fold"; } | { layout: "subset"; parts?: ScopedParts; context?: (all: ComparisonModel<Extraction>, changes: ReadonlySet<string>, renderer: string) => Iterable<string>; }; controls?: readonly RendererControl[]; nouns?: SummaryNouns; facts?: SummaryFacts; interactions?: false; }
 ```
 
 What a view module may export as `options` beside its `View`, for the entry `rendererConfig({view})` generates: the

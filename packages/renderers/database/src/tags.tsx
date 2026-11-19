@@ -65,13 +65,11 @@ function useSlotSizes(tags: readonly Tag[], room: RefObject<HTMLDivElement | nul
         const box = element.getBoundingClientRect()
         return {width: box.width / unit, height: box.height / unit}
       }
-      // A slot is as wide as its widest name, or its status tab inset by the pill's corner radius, whichever is wider.
-      const corner = parseFloat(getComputedStyle(container).getPropertyValue('--projections-radius')) || 0
+      // A slot is as wide as its widest name or its status tab, whichever is wider (see the kit's `StatusTab`).
       setSizes({
         widths: items.map(item => {
           const status = item.querySelector<HTMLElement>('.pk-status-tab')
-          const tab = status ? size(status).width : 0
-          return Math.ceil(Math.max(size(item).width, tab ? tab + 2 * corner : 0))
+          return Math.ceil(Math.max(size(item).width, status ? size(status).width : 0))
         }),
         height: Math.max(0, ...items.map(item => Math.ceil(size(item).height))),
         columnGap: parseFloat(style.columnGap) || 0,

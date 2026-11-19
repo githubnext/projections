@@ -12,6 +12,14 @@
       "after": "test/fixtures/gateway-after.json"
     },
     {
+      "id": "gateway-table",
+      "title": "Gateway: table",
+      "description": "The gateway's counts as a table, a row per language and a column per count, sorted by lines of code. Sort by any column from its heading or the Sort settings; the rows keep one order for the whole transition, changed languages first with Changes first.",
+      "before": "test/fixtures/gateway-before.json",
+      "after": "test/fixtures/gateway-after.json",
+      "presentation": {"mode": "diff", "rendererOptions": {"chart": "table"}}
+    },
+    {
       "id": "gateway-priority",
       "title": "Gateway: Rust first (custom order)",
       "description": "The priority-order example comparator presents the step that adds Rust and Protobuf first, then CoffeeScript leaves and the other counts resize.",

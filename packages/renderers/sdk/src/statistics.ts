@@ -13,8 +13,11 @@ export type CodeStatisticsScope = 'all' | 'tests' | 'other'
 export interface CodeStatisticsOptions {
   /** The count each language row shows; ignored without `byLanguage`, which always shows code, comments and blanks. */
   measure: CodeStatisticsMeasure
-  /** `bars` for absolute values, `share` for each row's share of the total (`quantityShares`). */
-  chart: 'bars' | 'share'
+  /**
+   * `bars` for absolute values, `share` for each row's share of the total (`quantityShares`), `table` for every count
+   * in a sortable table.
+   */
+  chart: 'bars' | 'share' | 'table'
   /** One row per language, or `false` for the whole repository's code, comment and blank lines. */
   byLanguage: boolean
   /** Which files the counts cover. */

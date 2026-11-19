@@ -1,0 +1,219 @@
+/*
+ * Data tables (`DataTable`): a grid of rows, each a ring unit on the parent's columns (subgrid), so every row's edge
+ * is its own box. The rows draw the table's frame and every line in it, one per boundary: each row its top line and
+ * sides, the last its bottom. A changed row (`pk-region` with `data-change`) draws the lines around it in its hue,
+ * mixed with each line's neutral color by `--emphasis` (so nothing looks changed at the endpoints), and its bottom
+ * line over the next row's top line, so the line between a changed row and its neighbour is the change's whatever
+ * side it is on. A row around changed cells is drawn neutral, as everywhere in the kit (nesting.css).
+ */
+.pk .pk-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.pk .pk-table {
+  display: grid;
+  width: max-content;
+  min-width: 100%;
+  font-size: var(--projections-font-size-sm);
+  line-height: var(--projections-line-height);
+}
+.pk .pk-table > .pk-table-row {
+  --pk-table-rule: var(--border);
+  --pk-table-fill: transparent;
+  --pk-table-ring-room: var(--stroke-strong);
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  /* Room for the ring before the frozen first cell, which is positioned and would otherwise cover the ring's start. */
+  padding-inline-start: var(--pk-table-ring-room);
+  border: var(--stroke) solid var(--divider);
+  border-block-width: var(--stroke) 0;
+  border-top-color: var(--pk-table-rule);
+  background: linear-gradient(var(--pk-table-fill), var(--pk-table-fill)), var(--raised);
+  box-shadow: none;
+}
+/* The heading row: the frame's top edge, rounded, on a quiet band; the line under it is the divider. */
+.pk .pk-table > .pk-table-head {
+  border-top-color: var(--divider);
+  border-radius: var(--projections-radius) var(--projections-radius) 0 0;
+  background: color-mix(in srgb, var(--band) 45%, var(--raised));
+}
+.pk .pk-table > .pk-table-head + .pk-table-row {
+  --pk-table-rule: var(--divider);
+}
+.pk .pk-table > .pk-table-row:last-child {
+  border-bottom-width: var(--stroke);
+  border-radius: 0 0 var(--projections-radius) var(--projections-radius);
+}
+.pk .pk-table > .pk-table-head:last-child {
+  border-radius: var(--projections-radius);
+}
+.pk .pk-table > .pk-table-row.pk-region[data-change] {
+  --pk-table-fill: color-mix(in srgb, var(--pk-region-fill) var(--pk-region-amount), transparent);
+  --pk-table-hue: color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--divider));
+  position: relative;
+  z-index: 1;
+  border-color: var(--pk-table-hue);
+  border-top-color: color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--pk-table-rule));
+  box-shadow: 0 var(--stroke) 0 0 color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--border));
+}
+.pk .pk-table > .pk-table-row.pk-region[data-change]:last-child {
+  box-shadow: none;
+}
+/* A removed row's edge is dashed where it is its own (its sides); shared lines stay solid. */
+.pk .pk-table > .pk-table-row.pk-region[data-change='removed'] {
+  border-inline-style: dashed;
+}
+
+.pk .pk-table-cell {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: var(--projections-control-height-sm);
+  padding: 0 var(--projections-space-3);
+  white-space: nowrap;
+}
+.pk .pk-table-cell[data-align='end'] {
+  justify-content: flex-end;
+  font-variant-numeric: tabular-nums;
+}
+/* The first cell starts at the band's inset, the ring's room taken from its padding. */
+.pk .pk-table-row > .pk-table-cell:first-child {
+  padding-inline-start: calc(var(--projections-space-3) - var(--pk-table-ring-room));
+}
+/*
+ * The frozen first column: the row's heading stays in view when the table scrolls sideways, on the row's own surface
+ * and tint, with one line between it and the cells passing under it.
+ */
+.pk .pk-table[data-frozen] > .pk-table-row > .pk-table-cell:first-child {
+  position: sticky;
+  left: 0;
+  background: linear-gradient(var(--pk-table-fill), var(--pk-table-fill)), var(--raised);
+  box-shadow: inset calc(-1 * var(--stroke)) 0 0 var(--border);
+}
+.pk .pk-table[data-frozen] > .pk-table-head > .pk-table-cell:first-child {
+  background: color-mix(in srgb, var(--band) 45%, var(--raised));
+  box-shadow: inset calc(-1 * var(--stroke)) 0 0 var(--divider);
+}
+/* Text centred by its cap height in the row, so a capital E has the same room above and below it. */
+.pk .pk-table-text {
+  text-box: trim-both cap alphabetic;
+}
+@supports not (text-box: trim-both cap alphabetic) {
+  .pk .pk-table-text {
+    line-height: 1cap;
+  }
+}
+.pk .pk-table-code {
+  font-family: var(--font-mono);
+}
+
+/* Headings: words, quiet and small; a sortable one is a button the width of its cell, its mark in a fixed box. */
+.pk .pk-table-heading {
+  color: var(--muted);
+  font-size: var(--projections-font-size-xs);
+  font-weight: var(--projections-font-weight-semibold);
+}
+.pk .pk-table-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--projections-space-1);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.pk .pk-table-heading[data-align='end'] .pk-table-sort {
+  flex-direction: row-reverse;
+}
+.pk .pk-table-sort:hover,
+.pk .pk-table-heading[aria-sort] {
+  color: var(--text);
+}
+.pk .pk-table-sort:focus-visible {
+  outline: var(--projections-focus-ring-width) solid var(--focus);
+  outline-offset: var(--projections-focus-ring-offset);
+  border-radius: var(--projections-radius-sm);
+}
+.pk .pk-table-sort-mark {
+  flex: none;
+  width: 8px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.pk .pk-table-sort-mark[data-direction='none'] {
+  opacity: 0.45;
+}
+
+/* The row's heading is the button that selects it: plain, the whole cell. */
+.pk .pk-table-select {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.pk .pk-table-status {
+  justify-content: flex-start;
+  min-width: var(--pk-status-width);
+}
+.pk .pk-table-status > .pk-change-status {
+  display: flex;
+  align-items: center;
+}
+
+/*
+ * Changed cells. A pill's text stays where an unchanged cell's would be: its padding and edge reach into the cell's.
+ * In the progress modes a changed cell shows the version reached, a pill that takes its side's hue as the change is
+ * emphasized, and is plain text at the endpoints.
+ */
+.pk .pk-table-cell > .pk-value-change,
+.pk .pk-table-select > .pk-value-change {
+  flex-wrap: nowrap;
+  margin-inline-start: calc(-1 * (var(--projections-label-padding-x) + var(--stroke)));
+}
+.pk .pk-table-cell .pk-change-pill {
+  font-size: inherit;
+  overflow-wrap: normal;
+}
+.pk .pk-table-value.pk-change-pill {
+  margin-inline: calc(-1 * (var(--projections-label-padding-x) + var(--stroke)));
+  border-color: transparent;
+  background: none;
+}
+.pk .pk-table-value.pk-change-pill[data-change] {
+  border-color: color-mix(in srgb, var(--pk-region-edge) calc(var(--emphasis, 0) * 100%), transparent);
+  background: color-mix(in srgb, var(--pk-region-fill) calc(var(--emphasis, 0) * 100%), transparent);
+}
+
+/*
+ * In a group (`Group`), the table is its body: the group draws no edge of its own, its header band takes the top and
+ * sides, and the table's rows the rest, so a changed row's hue reaches the group's edge without a second line.
+ */
+.pk .pk-group:has(> .pk-table-scroll) {
+  border: 0;
+  background: none;
+  overflow: visible;
+}
+.pk .pk-group:has(> .pk-table-scroll) > .pk-group-header {
+  border: var(--stroke) solid var(--divider);
+  border-bottom: 0;
+  border-radius: var(--projections-radius) var(--projections-radius) 0 0;
+}
+.pk .pk-group > .pk-table-scroll > .pk-table > .pk-table-head {
+  border-radius: 0;
+}

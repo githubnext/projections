@@ -932,6 +932,21 @@ test('a summary fact may carry its changes and a description', () => {
   assert.equal(summary([{kind: 'route', noun, count: 1, description: 'Routes'}]), undefined)
 })
 
+test('a control value from the renderer validates strictly', () => {
+  for (const value of ['lines:descending', true, 0.5])
+    assert.deepEqual(parseRendererMessage(envelope({type: 'control', id: 'sort', value}), channel), {type: 'control', id: 'sort', value})
+  for (const message of [
+    {id: 'sort', value: ''},
+    {id: 'sort', value: 'x'.repeat(65)},
+    {id: 'sort', value: Number.NaN},
+    {id: 'sort', value: null},
+    {id: 'has space', value: true},
+    {id: 'sort'},
+    {id: 'sort', value: true, extra: 1},
+  ])
+    assert.equal(parseRendererMessage(envelope({type: 'control', ...message}), channel), undefined, JSON.stringify(message))
+})
+
 test('document-request and document validate strictly', () => {
   assert.deepEqual(parseRendererMessage(envelope({type: 'document-request', renderer: 'graph'}), channel), {
     type: 'document-request',

@@ -48,6 +48,7 @@ export const codeStatisticsControls = defineControls([
     choices: [
       {value: 'bars', label: 'Bars'},
       {value: 'share', label: 'Share'},
+      {value: 'table', label: 'Table'},
     ],
   },
 ])
@@ -86,7 +87,7 @@ export function codeStatisticsOptions(values: {[id: string]: ControlValue}): Cod
     byLanguage = values.byLanguage
   return {
     measure: typeof measure === 'string' && isCodeStatisticsMeasure(measure) ? measure : defaultCodeStatisticsOptions.measure,
-    chart: chart === 'share' ? 'share' : 'bars',
+    chart: chart === 'share' || chart === 'table' ? chart : 'bars',
     byLanguage: typeof byLanguage === 'boolean' ? byLanguage : defaultCodeStatisticsOptions.byLanguage,
     scope: isCodeStatisticsScope(values.scope) ? values.scope : defaultCodeStatisticsOptions.scope,
   }

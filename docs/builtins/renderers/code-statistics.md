@@ -42,6 +42,13 @@ One row per entity of the `metrics/v0` extraction (a language, in the
   inline, all on one scale.
 - **Share**: a donut of each language's share, with each row's count and change
   listed beside it; the host draws the color key once, beside the view.
+- **Table**: a row per language and a column per count (files, code,
+  comments, blank and all lines), largest code first. Activate a column's
+  heading, or choose **Sort by** in the settings, to sort by it either way;
+  **Changes first** puts the languages a comparison changed first. In a
+  comparison each language keeps one place for the whole transition, and
+  changed counts show as was/now pills. The language column stays in view when
+  the table scrolls sideways. **Measure** and **By language** don't apply.
 - **Composition** (**By language** off): code, comment and blank lines as three
   rows instead of one per language.
 
@@ -70,7 +77,9 @@ The host draws these controls; set their starting values in the definition's
 | Files | `scope` | `all` (All files), `tests` (Tests), `other` (Non-tests); offered when the extraction counts test files | `all` |
 | Measure | `measure` | `code` (Code), `comment` (Comments), `blank` (Blank), `lines` (All lines), `files` (Files); what each language row counts | `code` |
 | By language | `byLanguage` | `true` (one row per language), `false` (the code, comment and blank composition) | `true` |
-| Chart | `chart` | `bars` (Bars), `share` (Share) | `bars` |
+| Chart | `chart` | `bars` (Bars), `share` (Share), `table` (Table) | `bars` |
+| Sort by | `sort` | `none` (Original order), `<column>:ascending` or `<column>:descending` for `name`, `files`, `code`, `comment`, `blank` and `lines` (`value` for generic measurements); offered with the table | `code:descending` (`value:descending`) |
+| Changes first | `sortChangesFirst` | `true`, `false`; offered with the table | `false` |
 
 ```json
 "presentation": {"rendererOptions": {"scope": "tests", "chart": "share"}}

@@ -17,6 +17,13 @@
   border: var(--projections-border-width) solid var(--divider);
   border-radius: var(--projections-radius);
 }
+/* The table chart is its own frame (`DataTable`): the panel draws no edge or surface around it. */
+.statistics-panel[data-chart='table'] {
+  overflow: visible;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
 .statistics-view[data-diff-highlighting='false'] {
   --stat-value-width: 5.5rem;
 }

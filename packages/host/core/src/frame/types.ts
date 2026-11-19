@@ -1,6 +1,7 @@
 import type {RendererDocumentOpener} from './documents.js'
 import type {
   AnchorRect,
+  ControlValue,
   InitPayload,
   ProgressPayload,
   RendererCapabilities,
@@ -38,6 +39,8 @@ export type RendererFrameEvent =
   | ({type: 'viewport'} & ScrollPosition)
   /** The renderer replaced its declared controls. */
   | {type: 'controls'; controls: RendererControl[]}
+  /** The person set a declared control from the renderer's content (a sortable column header, say). */
+  | {type: 'control'; id: string; value: ControlValue}
   /** The person activated the annotation marker on an item. */
   | {type: 'annotation'; id: string}
   /** The renderer's legend for the host to draw; no items clears it. */

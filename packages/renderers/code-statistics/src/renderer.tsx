@@ -22,6 +22,7 @@ import {rowPresentation} from './presentation.js'
 import {amount, composition, compositionSeries, languageSeries} from './series.js'
 import type {Series} from './series.js'
 import {ShareChart} from './share.js'
+import {StatisticsTable, statisticsTableControls} from './table.js'
 import {DiffShareChart} from './share-diff.js'
 
 /** Rows drawn at once; the host's table presents the complete model. */
@@ -50,7 +51,11 @@ export function CodeStatisticsRenderer(props: RendererProps<typeof accepts>) {
   const scope = metrics ? 'all' : options.scope
   const chart = options.chart
   const {declareControls} = props
-  const declared = useMemo(() => codeStatisticsControlsFor(entities), [entities])
+  // The table chart adds its sort, which its headings set too.
+  const declared = useMemo(
+    () => [...codeStatisticsControlsFor(entities), ...(chart === 'table' ? statisticsTableControls(metrics) : [])],
+    [entities, chart, metrics],
+  )
   useEffect(() => declareControls(declared), [declared, declareControls])
   const motionOf = useMemo(() => (diff ? () => settled : statisticsMotion(model, schedule)), [diff, model, schedule])
   const patternId = `stat-hatch-${useId().replace(/[^A-Za-z0-9_-]/g, '')}`
@@ -127,12 +132,20 @@ export function CodeStatisticsRenderer(props: RendererProps<typeof accepts>) {
 
   return (
     <div className="statistics-view pk-stage" style={columns} data-diff-highlighting={comparing}>
-      <div className="statistics-panel" data-projections-content="">
+      <div className="statistics-panel" data-chart={chart} data-projections-content="">
         {/* The host's summary bar states the total, its change and the languages; the chart starts at the top. */}
         {!shown.length ? (
           <EmptyDomain title="Nothing counted at this point">
             {metrics ? 'This extraction has no measurements to show.' : 'This extraction has no language counts to show.'}
           </EmptyDomain>
+        ) : chart === 'table' ? (
+          <StatisticsTable
+            props={props}
+            metrics={metrics}
+            rows={metrics ? rows : 'language'}
+            scope={scope}
+            rowProgress={id => (diff ? 1 : (motions.get(id)?.local ?? 1))}
+          />
         ) : chart === 'bars' ? (
           <BarsChart shown={shown} scale={scale} p={p} />
         ) : diff ? (
@@ -141,13 +154,13 @@ export function CodeStatisticsRenderer(props: RendererProps<typeof accepts>) {
           <ShareChart shown={shown} total={total} patternId={patternId} p={p} />
         )}
 
-        {series.length > shown.length && (
+        {chart !== 'table' && series.length > shown.length && (
           <p className="graph-notice" role="status">
             Showing the largest {statisticsRowLimit} of {series.length} {metrics ? humanizeKind(rows).plural : 'languages'}. Use the host's
             table for the complete model.
           </p>
         )}
-        {!byLanguage && (
+        {!byLanguage && chart !== 'table' && (
           <p className="domain-caption">Every physical line counts once. A line carrying both code and a comment counts as code.</p>
         )}
       </div>

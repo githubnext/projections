@@ -5,6 +5,7 @@ import type {Envelope, RendererProjection, RendererEnvironment} from './frame.js
 import type {ComparisonMode} from './comparison-modes.js'
 import type {RendererSummary} from './summary/items.js'
 import type {RendererControl} from './controls/declaration.js'
+import type {ControlValue} from './controls/values.js'
 
 /**
  * What the host sends a renderer to present. `X` is the extraction type: a renderer that declares what it
@@ -330,6 +331,12 @@ export type RendererMessage =
   | ({type: 'viewport'} & ScrollPosition)
   /** Replaces the controls declared in `ready`, for example after a new document. */
   | {type: 'controls'; controls: RendererControl[]}
+  /**
+   * The person set a declared control from the renderer's own content, such as a sortable column header: the host
+   * applies `value` as if they had set it in its settings (ignoring a value the control doesn't accept), and sends
+   * the new values in `options`.
+   */
+  | {type: 'control'; id: string; value: ControlValue}
   /** The person activated the annotation marker on an item (after selecting it). */
   | {type: 'annotation'; id: string}
   /** The renderer's legend, which the host draws once outside the panes; replaces any earlier one. */

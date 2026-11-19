@@ -16,14 +16,22 @@ import type {FrameFillControl} from './frame.js'
 
 /**
  * The renderer's controls: the static ones from its mount options until it declares others (see
- * `RendererProps.declareControls`), and every control's value, defaults filled in.
+ * `RendererProps.declareControls`), and every control's value, defaults filled in. `setControl` sets one from the
+ * renderer's content: the host applies it and answers with its options, and until it does the value shows at once.
  */
 export function useDeclaredControls(
   client: RendererClient | undefined,
   initial: readonly RendererControl[] | undefined,
   options: RendererOptions,
-): {controls: {[id: string]: ControlValue}; declareControls: (controls: readonly RendererControl[]) => void} {
+): {
+  controls: {[id: string]: ControlValue}
+  declareControls: (controls: readonly RendererControl[]) => void
+  setControl: (id: string, value: ControlValue) => void
+} {
   const [declared, setDeclared] = useState<readonly RendererControl[]>(() => initial ?? [])
+  // A value set from the content, shown until the host's next options, which carry it (or, from a host that ignores
+  // the message, leave it out).
+  const [pending, setPending] = useState<{options: RendererOptions; values: {[id: string]: ControlValue}}>({options, values: {}})
   const declareControls = useCallback((controls: readonly RendererControl[]) => {
     setDeclared(previous => (JSON.stringify(previous) === JSON.stringify(controls) ? previous : controls))
   }, [])
@@ -31,8 +39,19 @@ export function useDeclaredControls(
     // Static declarations already went out in `ready`; later ones replace them.
     if (client && declared !== initial && !(declared.length === 0 && !initial)) client.declareOptions(declared)
   }, [client, declared, initial])
-  const controls = useMemo(() => controlValues(declared, options), [declared, options])
-  return {controls, declareControls}
+  const latest = useRef(options)
+  latest.current = options
+  const setControl = useCallback(
+    (id: string, value: ControlValue) => {
+      const shown = latest.current
+      setPending(previous => ({options: shown, values: {...(previous.options === shown ? previous.values : {}), [id]: value}}))
+      client?.setControl(id, value)
+    },
+    [client],
+  )
+  const values = pending.options === options ? pending.values : undefined
+  const controls = useMemo(() => controlValues(declared, values ? {...options, ...values} : options), [declared, options, values])
+  return {controls, declareControls, setControl}
 }
 
 /**

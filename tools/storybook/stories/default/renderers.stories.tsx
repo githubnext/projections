@@ -19,6 +19,23 @@ type Story = StoryObj<typeof meta>
 export const Api: Story = {name: 'API', ...rendererStory('api')}
 export const Architecture: Story = {name: 'Architecture', ...rendererStory('graph', 'architecture')}
 export const CodeStatistics: Story = {name: 'Code statistics', ...rendererStory('code-statistics')}
+/** The table chart: sortable columns, a frozen first column and the changes as value pills. */
+export const CodeStatisticsTable: Story = {
+  name: 'Code statistics, table',
+  ...rendererStory('code-statistics'),
+  args: {scenario: 'code-statistics/gateway-table'},
+}
+export const CodeStatisticsTableAnimated: Story = {
+  name: 'Code statistics, table, animated',
+  ...rendererStory('code-statistics'),
+  args: {scenario: 'code-statistics/gateway-table', initialMode: 'animated'},
+}
+export const CodeStatisticsTableMobile: Story = {
+  name: 'Code statistics, table, mobile',
+  ...rendererStory('code-statistics'),
+  args: {scenario: 'code-statistics/gateway-table'},
+  globals: mobile,
+}
 export const Dag: Story = {name: 'DAG', ...rendererStory('graph', 'dag')}
 export const Database: Story = {name: 'Database', ...rendererStory('database')}
 export const Dependencies: Story = {name: 'Dependencies', ...rendererStory('graph', 'dependencies')}

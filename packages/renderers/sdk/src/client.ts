@@ -13,6 +13,7 @@ import {dispatch, replayed, resumeSession, type RendererHandlers} from './client
 import {documentRequests} from './client/documents.js'
 import type {
   AnchorRect,
+  ControlValue,
   HostMessage,
   RendererControl,
   RendererEnvironment,
@@ -103,6 +104,12 @@ export interface RendererClient {
    * `capabilities.controls`). Throws if a declaration is invalid.
    */
   declareOptions(controls: readonly RendererControl[]): void
+  /**
+   * Sets a declared control's value from the renderer's own content, as the person changed it there (a sortable
+   * column header, say). The host applies it as if they had set it in its settings and answers with `options`; it
+   * ignores a value the control doesn't accept.
+   */
+  setControl(id: string, value: ControlValue): void
   /**
    * Asks the host for the document of the built-in renderer `name` (for example `graph`), to run in a frame nested in
    * this one (`embedRenderer` does both). Resolves with its `index.html` text, as the host runs it; rejects with the
@@ -259,6 +266,11 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
       const parsed = parseControls(controls)
       if (!parsed) throw new RendererConnectionError('Invalid control declarations')
       post({type: 'controls', controls: parsed})
+    },
+    setControl(id, value) {
+      const message = {projections: rendererProtocolVersion, channel, type: 'control' as const, id, value}
+      if (!parseRendererMessage(message, channel)) throw new RendererConnectionError('Invalid control value; see ControlValue')
+      post({type: 'control', id, value})
     },
     subscribe(listener) {
       subscribers.add(listener)

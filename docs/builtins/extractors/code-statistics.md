@@ -86,7 +86,8 @@ The [`code-statistics`](../renderers/code-statistics.md) renderer's controls
 choose what the chart shows, and a definition presets them in
 `presentation.rendererOptions`: **Measure** (`measure`: `code`, `comment`,
 `blank`, `lines` or `files`), **By language** (`byLanguage`, or the code,
-comment and blank composition), **Chart** (`chart`: `bars` or `share`) and
+comment and blank composition), **Chart** (`chart`: `bars`, `share` or `table`, with **Sort by**, `sort`, and
+**Changes first**, `sortChangesFirst`) and
 **Files** (`scope`: `all`, `tests` or `other`).
 
 ## What a comparison shows

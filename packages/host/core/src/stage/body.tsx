@@ -134,6 +134,7 @@ export function StageBody({
       selectedPath={stage.selectedPath[twoPanes ? side : 'main']}
       annotations={stage.annotations}
       onAnnotation={stage.onAnnotation}
+      onControl={projection.setControl}
       fill={fill}
       onAnchor={stage.onAnchor[side]}
       onState={twoPanes ? stage.onPaneState[side] : stage.onPaneState.main}

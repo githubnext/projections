@@ -47,7 +47,7 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
     }
   }, [])
   const {client, init, selection, selectionVersion} = renderer
-  const {controls, declareControls} = useDeclaredControls(client, options.controls, renderer.options)
+  const {controls, declareControls, setControl} = useDeclaredControls(client, options.controls, renderer.options)
   const hold = usePaintAcknowledgement(client, init, renderer.progress)
   const root = useRef<HTMLDivElement>(null)
   const {filling, fill} = useFrameFillReport(client, root)
@@ -138,6 +138,7 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
                           reportSteps={reportSteps}
                           controls={controls}
                           declareControls={declareControls}
+                          setControl={setControl}
                           onAction={onAction}
                           reportLegend={reportLegend}
                           declareNouns={declareNouns}

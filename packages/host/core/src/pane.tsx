@@ -3,6 +3,7 @@ import type {ReactNode} from 'react'
 import type {
   AnchorRect,
   AnnotationMark,
+  ControlValue,
   FilterPayload,
   RendererLegend,
   SummaryItem,
@@ -82,6 +83,8 @@ export interface RendererPaneProps {
   onSelect: (id: string | null, path?: string) => void
   /** The person activated an item's annotation marker. */
   onAnnotation?: (id: string) => void
+  /** The person set a declared control from the renderer's content; apply it as a change in the host's settings. */
+  onControl?: (id: string, value: ControlValue) => void
   onHover: (id: string | null) => void
   onOpen: (path: string, line?: number) => void
   onAnchor?: (id: string, rect: AnchorRect | null) => void
@@ -166,6 +169,9 @@ export function RendererPane(props: RendererPaneProps) {
           break
         case 'annotation':
           current.onAnnotation?.(event.id)
+          break
+        case 'control':
+          current.onControl?.(event.id, event.value)
           break
         case 'legend': {
           const {type: _type, ...legend} = event

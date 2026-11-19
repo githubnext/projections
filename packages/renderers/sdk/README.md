@@ -78,7 +78,11 @@ host draws them with its design system, sending values back in `options` (keyed
 by control `id`) and one-shot actions as `action {id}`. Declare controls in
 `capabilities.controls`. When they depend on the document, replace them later
 with `client.declareOptions(controls)` (the `controls` message) or the React
-`useDeclaredOptions(client, controls, options)`.
+`useDeclaredOptions(client, controls, options)`. When the renderer's own content
+sets a control too, such as a column heading that sorts, post the new value with
+`client.setControl(id, value)` (the `control` message): the host applies it as
+if the person had changed it in its settings and sends the new `options`, so the
+setting, its menu and an agent reading the controls always agree.
 
 ```ts
 const controls = defineControls([

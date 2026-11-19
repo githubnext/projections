@@ -1,6 +1,7 @@
 // Validating what a renderer sends its host.
 import {parseCapabilities} from './capabilities.js'
 import {parseControls} from './controls/declaration.js'
+import {parseControlMessage} from './controls/message.js'
 import {rendererLimits} from './frame.js'
 import {parseLegend} from './legend.js'
 import type {RendererMessage} from './messages.js'
@@ -88,6 +89,7 @@ const parsers: {[type: string]: (message: Fields) => RendererMessage | undefined
     const controls = parseControls(message.controls)
     return controls ? {type: 'controls', controls} : undefined
   },
+  control: parseControlMessage,
   'document-request'(message) {
     if (!keys(message, [...envelopeKeys, 'renderer'])) return undefined
     const {renderer} = message

@@ -136,6 +136,12 @@ export interface RendererProps<T extends DomainSchema | readonly RendererAccepts
    * are ignored.
    */
   declareControls: (controls: readonly RendererControl[]) => void
+  /**
+   * Sets a declared control from the renderer's own content, as the person changed it there (a sortable column
+   * header): the host applies it as if they had set it in its settings, remembers it and sends it back in `controls`.
+   * The new value shows at once.
+   */
+  setControl: (id: string, value: ControlValue) => void
   /** Subscribes to the host's `action` messages for declared action controls; returns an unsubscribe function. */
   onAction: (listener: (id: string) => void) => () => void
   /**

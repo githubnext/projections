@@ -509,7 +509,7 @@ mirrors its timeline exactly.
 ### `ContainmentSource`
 
 ```ts
-type ContainmentSource = { entities: Entity[]; relationships: Relationship[]; schema: "graph/v0" | "dag/v0" | "treemap/v0" | "metrics/v0" | "api/v0" | "database/v0" | "architecture/v0"; vocabularies?: ("dependency-injection/v0" | "infrastructure/v0" | "runtime-policy/v0" | "agentic-workflows/v0")[]; }
+type ContainmentSource = { entities: Entity[]; relationships: Relationship[]; schema: "graph/v0" | "dag/v0" | "treemap/v0" | "metrics/v0" | "api/v0" | "database/v0" | "architecture/v0"; vocabularies?: ("dependency-injection/v0" | "infrastructure/v0" | "runtime-policy/v0" | "agentic-workflows/v0" | "scenarios/v0")[]; }
 ```
 
 The parts of an extraction `isContainment` reads.

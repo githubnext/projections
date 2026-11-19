@@ -1274,6 +1274,7 @@ How `useFitScale` fits content to its stage.
 | Member | Signature | Description |
 |---|---|---|
 | `aspect` | `"aspect"?: number` | The shape (width / height) to report for arranging held panes, when the view opens on part of the content (see `StageZoomOptions.opening`) rather than all of it; default the content's own. |
+| `drawnScale` | `"drawnScale"?: number` | The scale the content is drawn at now (see `useStageZoom`). Zoomed in past where it opens, a content-sized host is asked for the height it takes at that scale, up to its `stage-max-height`, so the stage grows into the page before it pans; the fit itself never depends on it. |
 | `floor` | `"floor"?: number` | The scale at which the content's smallest text reaches the kit's `openingFloorPx` (see `useOpeningFloor`; pass the same to `useStageZoom`). When fitting the width draws text smaller, a content-sized host is asked for the height the content takes at that floor, where it opens, so the opening view pans only sideways. |
 | `maxScale` | `"maxScale"?: number` | Largest scale (default 1: small content is centred at its own size, never enlarged). |
 | `minHeight` | `"minHeight"?: number` | Smallest stage height to ask a content-sized host for, CSS px (default 200), unless the content is scaled down to its width. |
@@ -3483,6 +3484,7 @@ Everything but the renderer props is optional; the defaults draw every entity as
 | `direction` | `"direction": -1 \| 1` | The host's playback direction (`ProgressPayload.direction`): 1 toward After, -1 back toward Before. Always 1 for an extraction and in diff mode. `schedule` is already ordered for the direction the transition presents. |
 | `emphasis` | `"emphasis": EmphasisOf` | A change's emphasis now: 0 until its comparison step begins, then the host's highlighting; in a held pane, the host's highlighting (see `stepEmphasis`). Pass the row ID as the second argument when the object passed has none. |
 | `environment` | `"environment": RendererEnvironment` | The host's current theme, motion preference, locale and pane: `init`'s, or a later `environment`'s. |
+| `filtered` | `"filtered"?: false \| true \| undefined` | Whether the host has said what it shows (its filter, and with it the scope). Until it does, every item is drawn, provisionally: a canvas that moves between layouts of the scope doesn't move from that one, so the first scope the host chooses is drawn at once rather than pared down to. Undefined where no host filter is wired (treat it as said). |
 | `focus` | `"focus"?: undefined \| { "ids": ReadonlySet<string>; "label": string }` | Entity rows to bring forward, for example what depends on the selection: other cards and relationships recede. `label` says what is highlighted, for people who don't see the graph. |
 | `focusRequest` | `"focusRequest": RendererFocus \| undefined` | Where the host wants the opening view (`InitPayload.focus`), or a comparison's changes while the host shows changes only; undefined for the renderer's own choice. The shell scrolls the first focused item of a list into view itself; a renderer that places its own view (`useStageZoom`) frames what it names. |
 | `highlighting` | `"highlighting": number` | Host-chosen change emphasis, exactly 0 at both endpoints and for extractions. Use `emphasis(row)` for a change's own emphasis: it is scoped to the change's step. |
@@ -3780,6 +3782,7 @@ Everything a kit renderer component receives for one host state.
 | `direction` | `"direction": -1 \| 1` | The host's playback direction (`ProgressPayload.direction`): 1 toward After, -1 back toward Before. Always 1 for an extraction and in diff mode. `schedule` is already ordered for the direction the transition presents. |
 | `emphasis` | `"emphasis": EmphasisOf` | A change's emphasis now: 0 until its comparison step begins, then the host's highlighting; in a held pane, the host's highlighting (see `stepEmphasis`). Pass the row ID as the second argument when the object passed has none. |
 | `environment` | `"environment": RendererEnvironment` | The host's current theme, motion preference, locale and pane: `init`'s, or a later `environment`'s. |
+| `filtered` | `"filtered"?: false \| true \| undefined` | Whether the host has said what it shows (its filter, and with it the scope). Until it does, every item is drawn, provisionally: a canvas that moves between layouts of the scope doesn't move from that one, so the first scope the host chooses is drawn at once rather than pared down to. Undefined where no host filter is wired (treat it as said). |
 | `focusRequest` | `"focusRequest": RendererFocus \| undefined` | Where the host wants the opening view (`InitPayload.focus`), or a comparison's changes while the host shows changes only; undefined for the renderer's own choice. The shell scrolls the first focused item of a list into view itself; a renderer that places its own view (`useStageZoom`) frames what it names. |
 | `highlighting` | `"highlighting": number` | Host-chosen change emphasis, exactly 0 at both endpoints and for extractions. Use `emphasis(row)` for a change's own emphasis: it is scoped to the change's step. |
 | `hoveredId` | `"hoveredId": null \| string` | The entity the host says is hovered, in this frame or another pane, or `null`. The shell already marks its elements with `data-projections-hovered`; use this only for richer hover presentation. |
@@ -3936,7 +3939,8 @@ can zoom in, see `useStageZoom`), never above `maxScale`. Reports the height
 a content-sized host should give the frame: the stage at the width-fitted
 scale (or at `options.floor` when that is larger and the view opens there)
 plus everything around it, but never more than the host's `stage-max-height` (`useStageHeightCap`), when it sends
-one: content taller than that is fitted to the capped stage instead (or opens at the text floor and pans). Measured before paint and on every resize;
+one: content taller than that is fitted to the capped stage instead (or opens at the text floor and pans). Zoomed in
+(`options.drawnScale`), it asks for the content's height at that scale, up to the same cap. Measured before paint and on every resize;
 a new measurement holds the host's paint acknowledgement until the content
 is drawn at its scale, so a host never measures a scale about to change
 (such as the one before the renderer fills its frame).

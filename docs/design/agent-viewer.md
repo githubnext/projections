@@ -261,10 +261,13 @@ viewer's state or on the machine, so a page opened elsewhere (the Copilot canvas
 on the same viewer) keeps its own theme. Per page, a seed wins over the app's
 theme, which wins over the default; a mode the seed leaves out keeps the page's
 own. One seed is built in, by name: `--theme claude`, Claude Code's Preview
-pane, from the Claude app's design tokens, in both modes. Its dark background is
-the pane's own backdrop, which the pane shows as a 6 px inset either side of the
-page, so the page meets it seamlessly. The format and how an agent finds its
-app's colors are in
+pane, matched in both modes to the app's own panes beside it (Files, Terminal):
+their surface, rules, text and link blue. The pane's 6 px backdrop either side
+of the page is the app's chrome. A seed is an app's own look, so its rules and
+card edges are its `border` as given, even below the 3:1 the default divider
+keeps; lines that carry meaning (a graph's links) keep 3:1 as the optional
+`color-connector` token. The format and how an agent finds its app's colors are
+in
 [the agent tools](../runner/agent-tools.md#a-theme-seed-for-another-apps-browser-pane).
 
 ### 4. One tool catalog, answered by whichever surface shows the view

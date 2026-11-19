@@ -63,6 +63,9 @@ const same = (value: string): Pair => [value, value]
  *   background still reaches under it; the kit's stage padding is at its top the larger of the two.
  *   `stage-max-height` (`px`, or `vh` of the host's window) caps a content-sized stage that pans and zooms: a host
  *   that lays frames in its scrolling page sends it, and such a stage then pans by dragging, leaving the wheel to the page.
+ *   `color-connector` is the color of lines that carry meaning, such as a graph's links: a host whose `color-divider`
+ *   is its app's own quiet rule (an app theme seed) sends it at 3:1 or more against every surface, and renderers read
+ *   it with `color-divider` as the fallback.
  */
 const definitions = {
   'color-fg': ['#1a1b1c', '#f1f0ed'],
@@ -178,9 +181,11 @@ export const themeTokenNames = [...Object.keys(definitions), ...iconNames.map(ic
  * Layout tokens a host may send that have no default (`resolveThemeTokens` leaves them undefined), so a renderer reads
  * each with its own value as the fallback: `stage-inset`, the space between the frame's edges and its content on every
  * side, `stage-inset-top`, the space above the content where the host overlays the frame's top, and `stage-max-height`,
- * the most a content-sized stage that pans and zooms asks for (`px`, or `vh` of the host's window).
+ * the most a content-sized stage that pans and zooms asks for (`px`, or `vh` of the host's window), and
+ * `color-connector`, the color of lines that carry meaning (a graph's links), for a host whose `color-divider` is its
+ * app's own quiet rule rather than a 3:1 edge; renderers fall back to `color-divider`.
  */
-export const optionalThemeTokenNames = ['stage-inset', 'stage-inset-top', 'stage-max-height'] as const
+export const optionalThemeTokenNames = ['stage-inset', 'stage-inset-top', 'stage-max-height', 'color-connector'] as const
 
 /** The default value of every token for a color mode. */
 export function defaultThemeTokens(colorMode: ColorMode): Record<ThemeTokenName, string> {

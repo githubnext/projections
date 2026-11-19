@@ -66,6 +66,9 @@ them as `--projections-<name>` after `applyEnvironment`.
   background still reaches under it; the kit's stage padding is at its top the larger of the two.
   `stage-max-height` (`px`, or `vh` of the host's window) caps a content-sized stage that pans and zooms: a host
   that lays frames in its scrolling page sends it, and such a stage then pans by dragging, leaving the wheel to the page.
+  `color-connector` is the color of lines that carry meaning, such as a graph's links: a host whose `color-divider`
+  is its app's own quiet rule (an app theme seed) sends it at 3:1 or more against every surface, and renderers read
+  it with `color-divider` as the fallback.
 
 ## Colors
 

@@ -51,14 +51,22 @@ fn launches_wait_for_a_free_slot() {
     let waited = gate::acquire_in(directory.path(), &cancel, Duration::from_millis(200)).unwrap();
     assert!(!waited.held());
     assert!(started.elapsed() >= Duration::from_millis(200));
-    // A released slot is taken by the next launch, once it is free: a child another thread forks holds a copy of the
-    // slot's descriptor, and so its lock, until it execs (the descriptor closes on exec).
+    // A released slot is taken by the next launch once it is free. A child another thread forks holds a copy of the
+    // slot's descriptor, and so its lock, until it execs (the descriptor closes on exec): while one does, the dropped
+    // slots stay locked, and the next launch waits for them.
     #[cfg(unix)]
-    let forking = forking_child(Duration::from_millis(300));
+    {
+        let child = ForkedChild::spawn();
+        drop(held);
+        assert!(
+            !gate::acquire_in(directory.path(), &cancel, Duration::ZERO).unwrap().held(),
+            "the forked child holds both slots"
+        );
+        child.exec();
+    }
+    #[cfg(not(unix))]
     drop(held);
     assert!(gate::acquire_in(directory.path(), &cancel, Duration::from_secs(10)).unwrap().held());
-    #[cfg(unix)]
-    forking.join().unwrap();
     let taken: Vec<_> = (0..2)
         .map(|_| gate::acquire_in(directory.path(), &cancel, Duration::from_secs(10)).unwrap())
         .collect();
@@ -67,28 +75,49 @@ fn launches_wait_for_a_free_slot() {
     assert!(gate::acquire_in(directory.path(), &cancel, Duration::from_secs(60)).is_err());
 }
 
-/// Spawns `true` on another thread with a pause of `pause` between fork and exec, as a test thread's spawn can take,
-/// and returns once the child is forked: until it execs, it holds a copy of every descriptor this process has open.
+/// A child forked from another thread and held between fork and exec, as a test thread's spawn can be: until it
+/// execs, it holds a copy of every descriptor this process had open when it forked.
 #[cfg(unix)]
-fn forking_child(pause: Duration) -> std::thread::JoinHandle<()> {
-    use std::os::unix::process::CommandExt;
-    let (forked, wait) = std::sync::mpsc::channel();
-    let thread = std::thread::spawn(move || {
-        let mut command = std::process::Command::new("true");
-        // SAFETY: the pause only sleeps, which is async-signal-safe.
-        unsafe {
-            command.pre_exec(move || {
-                std::thread::sleep(pause);
-                Ok(())
-            });
-        }
-        forked.send(()).unwrap();
-        command.status().unwrap();
-    });
-    wait.recv().unwrap();
-    // The send comes just before the spawn; give the fork a moment to happen.
-    std::thread::sleep(Duration::from_millis(50));
-    thread
+struct ForkedChild {
+    release: std::io::PipeWriter,
+    thread: std::thread::JoinHandle<()>,
+}
+
+#[cfg(unix)]
+impl ForkedChild {
+    /// Returns once the child has forked; it waits in `pre_exec` until `exec`.
+    fn spawn() -> ForkedChild {
+        use std::io::Read;
+        use std::os::fd::AsRawFd;
+        use std::os::unix::process::CommandExt;
+        let (mut ready, ready_writer) = std::io::pipe().unwrap();
+        let (release_reader, release) = std::io::pipe().unwrap();
+        let (signal, wait) = (ready_writer.as_raw_fd(), release_reader.as_raw_fd());
+        let thread = std::thread::spawn(move || {
+            let mut command = std::process::Command::new("true");
+            // SAFETY: the child only writes to and reads from pipes it inherited, which is async-signal-safe.
+            unsafe {
+                command.pre_exec(move || {
+                    let mut byte = [1u8];
+                    libc::write(signal, byte.as_ptr().cast(), 1);
+                    libc::read(wait, byte.as_mut_ptr().cast(), 1);
+                    Ok(())
+                });
+            }
+            command.status().unwrap();
+            drop((ready_writer, release_reader));
+        });
+        ready.read_exact(&mut [0u8]).unwrap();
+        ForkedChild { release, thread }
+    }
+
+    /// Lets the child exec, closing its copies of the descriptors, and waits for it.
+    fn exec(self) {
+        use std::io::Write;
+        let ForkedChild { mut release, thread } = self;
+        release.write_all(&[1]).unwrap();
+        thread.join().unwrap();
+    }
 }
 
 /// A stand-in browser that records each start in `starts`, then runs `body`.

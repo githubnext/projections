@@ -440,36 +440,6 @@
 }
 
 /*
- * Diff mode: the union of both revisions, laid out once, with the summary line above it. Changed cards are edged in
- * their change's hue (dashed when removed); a wholly added or removed card is tinted, its rows marked by glyph only.
- * Changed rows of a card in both revisions are the kit's change regions. Every tint follows --emphasis, so with
- * highlighting off the diff draws plain.
- */
-.database-view[data-diff] .database-zoom {
-  margin: 0 auto auto;
-}
-.pk .database-view[data-diff] .database-table[data-change] {
-  outline: var(--stroke-strong) solid color-mix(in srgb, var(--pk-region-edge) calc(var(--emphasis) * 100%), var(--divider));
-  outline-offset: calc(-1 * var(--stroke-strong));
-}
-.pk .database-view[data-diff] .database-table:is([data-change='added'], [data-change='removed']) {
-  background: color-mix(in srgb, var(--pk-region-fill) calc(var(--emphasis) * 100%), var(--raised));
-}
-.pk .database-view[data-diff] .database-table[data-change] > header {
-  background: color-mix(in srgb, var(--pk-region-fill) calc(var(--emphasis) * 100%), var(--band));
-}
-.pk .database-view[data-diff] .database-table[data-change='removed'] {
-  outline: var(--stroke-strong) dashed color-mix(in srgb, var(--pk-region-edge) calc(var(--emphasis) * 100%), var(--divider));
-  outline-offset: calc(-1 * var(--stroke-strong));
-}
-/* Selection stays visible on a changed row: the accent tint and bar, inside the change edge. */
-.pk .database-column.pk-region[data-change].selected {
-  background-color: var(--accent-soft);
-  box-shadow:
-    inset var(--projections-border-width-thick) 0 0 var(--accent),
-    inset 0 0 0 var(--stroke) var(--pk-region-edge-color);
-}
-/*
  * A changed row with change lines spans a row slot per line: its own line, then each change. The layout sizes each
  * slot for its text (text.ts) and the row's grid takes those heights (grid-template-rows, set inline).
  */

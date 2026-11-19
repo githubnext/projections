@@ -1,5 +1,6 @@
 import '@githubnext/projections-renderer-kit/react.css'
 import './styles.css'
+import './diff.css'
 import {zoomControls} from '@githubnext/projections-renderer-kit'
 import {mountRenderer} from '@githubnext/projections-renderer-kit/react'
 import {defineControls} from '@githubnext/projections-renderer-sdk/protocol'

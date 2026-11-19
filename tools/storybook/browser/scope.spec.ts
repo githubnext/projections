@@ -133,3 +133,106 @@ test('under reduced motion the schema jumps to its new layout', async ({page, th
   expect(samples.some(sample => sample.moving)).toBe(false)
   expect(samples.at(-1)!.links.every(link => link.opacity > 0.99 && link.attached)).toBe(true)
 })
+
+/** A horizontal line an element paints: a border, an inset shadow's top or bottom edge, or an inset outline's. */
+interface Line {
+  y: number
+  /** Its thickness. */
+  width: number
+  left: number
+  right: number
+  by: string
+}
+
+/**
+ * Every pair of horizontal lines in the renderer document drawn side by side: overlapping across, and touching or under
+ * 2 px apart (lines that share pixels draw as one). Rows separated by one line each never have such a pair.
+ */
+async function doubledLines(frame: Frame): Promise<string[]> {
+  return frame.evaluate(() => {
+    const lines: Line[] = []
+    const drawn = (color: string) => color !== 'transparent' && !/rgba\([^)]*,\s*0\)$/.test(color)
+    const name = (element: Element) =>
+      `${element.tagName.toLowerCase()}.${[...element.classList].slice(0, 2).join('.')}${element.getAttribute('data-entity-id') ? `[${element.getAttribute('data-entity-id')}]` : ''}`
+    for (const element of document.body.querySelectorAll<HTMLElement>('*')) {
+      if (element.closest('svg')) continue
+      const box = element.getBoundingClientRect()
+      if (box.width < 8 || box.height < 2) continue
+      const style = getComputedStyle(element)
+      if (style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+      // Only what its clipping ancestors leave in view is drawn.
+      let top = -Infinity,
+        bottom = Infinity
+      for (let parent = element.parentElement; parent; parent = parent.parentElement)
+        if (getComputedStyle(parent).overflow !== 'visible') {
+          const clip = parent.getBoundingClientRect()
+          top = Math.max(top, clip.top)
+          bottom = Math.min(bottom, clip.bottom)
+        }
+      const add = (y: number, width: number) => {
+        if (y >= top && y < bottom) lines.push({y, width, left: box.left, right: box.right, by: name(element)})
+      }
+      for (const side of ['Top', 'Bottom'] as const) {
+        const width = parseFloat(style.getPropertyValue(`border-${side.toLowerCase()}-width`))
+        if (
+          width > 0 &&
+          style.getPropertyValue(`border-${side.toLowerCase()}-style`) !== 'none' &&
+          drawn(style.getPropertyValue(`border-${side.toLowerCase()}-color`))
+        )
+          add(side === 'Top' ? box.top : box.bottom - width, width)
+      }
+      // An inset shadow with only a vertical offset, or a spread, draws a top or bottom edge.
+      for (const shadow of style.boxShadow === 'none' ? [] : style.boxShadow.split(/,(?![^(]*\))/)) {
+        if (!shadow.includes('inset')) continue
+        const color = shadow.match(/(rgba?|color)\([^)]*\)/)?.[0] ?? ''
+        if (!drawn(color)) continue
+        const [x = 0, y = 0, , spread = 0] = (shadow.replace(color, '').match(/-?[\d.]+px/g) ?? []).map(parseFloat)
+        if (spread > 0) {
+          add(box.top + parseFloat(style.borderTopWidth), spread)
+          add(box.bottom - parseFloat(style.borderBottomWidth) - spread, spread)
+        } else if (x === 0 && y > 0) add(box.top + parseFloat(style.borderTopWidth), y)
+        else if (x === 0 && y < 0) add(box.bottom - parseFloat(style.borderBottomWidth) + y, -y)
+      }
+      const outline = parseFloat(style.outlineWidth)
+      if (style.outlineStyle !== 'none' && outline > 0 && parseFloat(style.outlineOffset) <= -outline && drawn(style.outlineColor)) {
+        add(box.top, outline)
+        add(box.bottom - outline, outline)
+      }
+    }
+    const doubled: string[] = []
+    for (const [index, a] of lines.entries())
+      for (const b of lines.slice(index + 1)) {
+        const across = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+        // Lines that share pixels draw as one; lines that touch, or nearly, draw as two.
+        const gap = Math.max(a.y, b.y) - Math.min(a.y + a.width, b.y + b.width)
+        if (across > 8 && gap > -0.5 && gap < 2) doubled.push(`${a.by} at ${a.y.toFixed(1)} beside ${b.by} at ${b.y.toFixed(1)}`)
+      }
+    return doubled
+  })
+}
+
+/**
+ * Renderers whose change regions still draw their edge inside a container's border (a text diff's output, a policy
+ * panel), so the two lines run side by side: known, until those containers let a change's hue replace their edge.
+ */
+const known = new Set(['text-diff', 'runtime-policy'])
+
+for (const story of ['api', 'database', 'text-diff', 'code-statistics', 'runtime-policy'])
+  test(`${story}: every boundary between rows is one line, in Diff and Animated, Changes and All`, async ({page, theme}) => {
+    test.fail(known.has(story), 'its change regions draw inside a container border')
+    await page.setViewportSize({width: 1440, height: 900})
+    for (const mode of ['diff', 'animated'])
+      for (const changesOnly of [true, false]) {
+        await page.goto(
+          new URL(
+            `iframe.html?id=default-ui-renderers--${story}&viewMode=story&globals=theme:${theme}&args=initialMode:${mode};changesOnly:!${changesOnly}`,
+            process.env.PROJECTIONS_STORYBOOK_URL,
+          ).href,
+        )
+        await expect(page.locator('.ph[data-renderer-status="ready"]').first()).toBeVisible({timeout: 30_000})
+        const element = page.locator('.ph iframe').first()
+        const frame = (await (await element.elementHandle())!.contentFrame())!
+        await page.waitForTimeout(800)
+        expect(await doubledLines(frame), `${story}, ${mode}, ${changesOnly ? 'Changes' : 'All'}`).toEqual([])
+      }
+  })

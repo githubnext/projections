@@ -12,6 +12,8 @@ import {baseType, columnType, declaredType} from './types.js'
 import type {FrameColumn, SchemaFrame} from './frame.js'
 import {ChangeLines, describeColumn, GlyphStatus, oneLine} from './row-parts.js'
 import type {Wrap} from './row-parts.js'
+import {placeAttributes, rowPlaces} from './row-edges.js'
+import type {RowPlace} from './row-edges.js'
 
 /** What every row of one card is drawn with. */
 interface Card {
@@ -27,6 +29,8 @@ interface Card {
   firstKey: number
   /** `pk-diff-text` in the diff, so text takes the diff's colours. */
   text: string
+  /** Each row's place in the card (`rowPlaces`). */
+  places: Map<string, RowPlace>
 }
 
 const select = (props: RendererProps, id: string) => (event: MouseEvent) => {
@@ -38,16 +42,16 @@ const select = (props: RendererProps, id: string) => (event: MouseEvent) => {
  * A row's change mark in the diff: tinted as a region in a card of both revisions (a wholly added or removed
  * card is tinted itself), and as tall as its change lines.
  */
-function mark({diff, survives}: Card, row: EntityChange<Entity>, lines: readonly ChangeLine[] | undefined, rowEmphasis: number) {
+function mark(card: Card, row: EntityChange<Entity>, lines: readonly ChangeLine[] | undefined, rowEmphasis: number) {
+  const {diff, survives} = card
+  const place = placeAttributes(card.places.get(row.id))
   return diff
     ? {
-        attributes: changeMark(row),
+        attributes: {...changeMark(row), ...place},
         className: `${survives && isChanged(row) ? ' pk-region' : ''}${lines ? ' database-spanning' : ''}`,
-        style: {
-          '--emphasis': rowEmphasis,
-        } as CSSProperties,
+        style: {'--emphasis': rowEmphasis} as CSSProperties,
       }
-    : {attributes: {}, className: '', style: {}}
+    : {attributes: place, className: '', style: {}}
 }
 
 /** A row's own slot, then its change lines, each in its slot. */
@@ -180,7 +184,12 @@ function FoldRow({card, row}: {card: Card; row: FrameColumn}) {
   const label = version.label
   const open = version.data?.open === true
   return (
-    <div className="database-row database-fold" style={{top, height, opacity}} data-fold={open ? 'open' : 'closed'}>
+    <div
+      className="database-row database-fold"
+      style={{top, height, opacity}}
+      data-fold={open ? 'open' : 'closed'}
+      {...placeAttributes(card.places.get(fold.id))}
+    >
       <button
         type="button"
         className="database-fold-button"
@@ -315,6 +324,7 @@ export function Table({table, props, diff, wrap}: {table: SchemaFrame['tables'][
     rowBadges: survives || diff,
     firstKey: Math.min(...columns.filter(row => row.kind === 'key').map(row => row.top)),
     text: diff ? ' pk-diff-text' : '',
+    places: rowPlaces(columns),
   }
   const view = entity.kind === 'view'
   const enumCard = entity.kind === 'enum'

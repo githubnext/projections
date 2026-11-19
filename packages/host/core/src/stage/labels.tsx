@@ -180,7 +180,8 @@ export const paneChipClearance = chipTop + chipHeight + chipTop
  * A revision's label as a slim header band above its pane (side by side and swipe), so the label never covers the
  * renderer's content: the band surface with a divider rule, in the token set's shared surface scale. Band and frame
  * sit inside one pane card (`paneCard`), whose single edge is the outline of both. `hidden` keeps the band only for
- * assistive technology: it takes no space and still names its pane.
+ * assistive technology: it takes no space and still names its pane. A host restyles it with `--pj-pane-band-bg`,
+ * `--pj-pane-band-fg` and `--pj-pane-band-rule`, as the default UI does to match its own bands.
  */
 export function PaneBand({
   side,
@@ -226,10 +227,12 @@ export function PaneBand({
         fontSize: '0.8em',
         fontWeight: 600,
         lineHeight: 1.5,
-        color: 'var(--projections-color-fg, #1f2328)',
-        background: 'var(--projections-color-surface-header, #f6f8fa)',
+        // A host's chrome restyles the band to match its own bands (the default UI's header surface and divider, which an
+        // app theme lays flat on the app's own color); without one, it takes the theme tokens.
+        color: 'var(--pj-pane-band-fg, var(--projections-color-fg, #1f2328))',
+        background: 'var(--pj-pane-band-bg, var(--projections-color-surface-header, #f6f8fa))',
         // The pane card around band and frame draws the outer edge; the band only rules itself off from the frame.
-        borderBottom: '1px solid var(--projections-color-divider, #818b98)',
+        borderBottom: '1px solid var(--pj-pane-band-rule, var(--projections-color-divider, #818b98))',
       }}
     >
       <span

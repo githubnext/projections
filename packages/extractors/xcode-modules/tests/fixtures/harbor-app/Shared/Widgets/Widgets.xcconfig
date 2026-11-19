@@ -1,0 +1,2 @@
+// Settings shared by the widget framework.
+SWIFT_STRICT_CONCURRENCY = complete

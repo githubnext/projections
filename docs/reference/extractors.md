@@ -21,6 +21,7 @@ it was removed) isn't an error: the extractor describes that revision without it
 | [`go-public-api`](#go-public-api) | `api/v0` | `api` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`cargo-dependencies`](#cargo-dependencies) | `graph/v0` | `dependencies` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`swift-package-dependencies`](#swift-package-dependencies) | `graph/v0` | `dependencies` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
+| [`xcode-modules`](#xcode-modules) | `graph/v0` | `dependencies` | No (`none`) |
 | [`nuget-dependencies`](#nuget-dependencies) | `graph/v0` | `dependencies` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`terraform-infrastructure`](#terraform-infrastructure) | `architecture/v0` | `infrastructure` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
 | [`azure-what-if`](#azure-what-if) | `architecture/v0` | `infrastructure` | When it runs ecosystem tools or repository code (`when-executing-tools`) |
@@ -221,6 +222,31 @@ A definition to start from:
   "id": "swift-package-dependencies",
   "renderer": "dependencies",
   "title": "Swift package dependencies"
+}
+```
+
+## `xcode-modules`
+
+**Xcode modules.** Xcode targets with their module names, target and package product dependencies, and the modules their Swift sources import. See [its page](../builtins/extractors/xcode-modules.md).
+
+- Schema: `graph/v0`
+- Default renderer: `dependencies`
+- Needs `--trust`: No (`none`)
+
+| Input | Meaning |
+|---|---|
+| `configuration` | Build configuration whose settings name modules; default each target's default configuration. |
+| `imports` | Read the modules each target's Swift files import; default true. |
+| `projects` | Array of .xcodeproj paths; default every one in the repository. |
+
+A definition to start from:
+
+```json
+{
+  "extractor": "xcode-modules",
+  "id": "xcode-modules",
+  "renderer": "dependencies",
+  "title": "Xcode modules"
 }
 ```
 

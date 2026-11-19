@@ -21,6 +21,8 @@ pub enum Kind {
     Punct,
     /// `#` and a name: `#if`, `#elseif`, `#else`, `#endif`, `#available`, …
     Directive,
+    /// An extended regex literal, `#/…/#`, kept as its source.
+    Regex,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -50,6 +52,15 @@ const SINGLE: &str = "()[]{},:;@$\\";
 
 /// The tokens of Swift `source`.
 pub fn tokens(source: &str) -> Result<Vec<Token>> {
+    match prefix(source) {
+        (tokens, None) => Ok(tokens),
+        (_, Some(error)) => Err(error),
+    }
+}
+
+/// The tokens of `source` up to the first it can't read, and why it stopped
+/// there: for readers that need only what comes first, such as imports.
+pub fn prefix(source: &str) -> (Vec<Token>, Option<anyhow::Error>) {
     let chars: Vec<char> = source.chars().collect();
     let mut lexer = Lexer {
         chars: &chars,
@@ -58,9 +69,11 @@ pub fn tokens(source: &str) -> Result<Vec<Token>> {
         tokens: Vec::new(),
     };
     while lexer.at < chars.len() {
-        lexer.next()?;
+        if let Err(error) = lexer.next() {
+            return (lexer.tokens, Some(error));
+        }
     }
-    Ok(lexer.tokens)
+    (lexer.tokens, None)
 }
 
 struct Lexer<'a> {
@@ -97,7 +110,7 @@ impl Lexer<'_> {
             '/' if self.peek(1) == Some('/') => self.line_comment(),
             '/' if self.peek(1) == Some('*') => self.block_comment()?,
             '"' => self.string(0)?,
-            '#' if matches!(self.peek(1), Some('"' | '#')) => self.raw_string()?,
+            '#' if matches!(self.peek(1), Some('"' | '#' | '/')) => self.raw_string()?,
             '#' => {
                 self.skip(1);
                 let name = self.word();

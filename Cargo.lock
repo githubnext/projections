@@ -1513,6 +1513,7 @@ dependencies = [
  "projections-extractor-tetragon-policies",
  "projections-extractor-typescript-public-api",
  "projections-extractor-workspace-dependencies",
+ "projections-extractor-xcode-modules",
  "serde_json",
 ]
 
@@ -1819,6 +1820,16 @@ dependencies = [
  "anyhow",
  "projections-extractor-sdk",
  "regex",
+ "serde_json",
+]
+
+[[package]]
+name = "projections-extractor-xcode-modules"
+version = "0.2.0"
+dependencies = [
+ "anyhow",
+ "projections-extractor-sdk",
+ "projections-extractor-swift-support",
  "serde_json",
 ]
 

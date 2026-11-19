@@ -10,6 +10,9 @@ impl Lexer<'_> {
         while self.peek(hashes) == Some('#') {
             hashes += 1;
         }
+        if self.peek(hashes) == Some('/') {
+            return self.regex(hashes);
+        }
         if self.peek(hashes) != Some('"') {
             let line = self.line;
             self.skip(1);
@@ -18,6 +21,27 @@ impl Lexer<'_> {
         }
         self.skip(hashes);
         self.string(hashes)
+    }
+
+    /// `#/…/#`: an extended regex literal, closed by `/` and as many `#`.
+    fn regex(&mut self, hashes: usize) -> Result<()> {
+        let line = self.line;
+        let start = self.at;
+        self.skip(hashes + 1);
+        loop {
+            match self.peek(0) {
+                None => bail!("Unterminated regex literal starting on line {line}"),
+                Some('/') if (1..=hashes).all(|offset| self.peek(offset) == Some('#')) => {
+                    self.skip(1 + hashes);
+                    break;
+                }
+                Some('\\') => self.skip(2),
+                Some(_) => self.skip(1),
+            }
+        }
+        let text = self.chars[start..self.at].iter().collect();
+        self.push(Kind::Regex, text, line);
+        Ok(())
     }
 
     /// The literal starting at the current `"`, closed by `"` and `hashes` `#`.

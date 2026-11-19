@@ -7,6 +7,7 @@ import {createNativeEngine} from '@githubnext/projections-engine/native'
 import {comparisonModel, scheduleSteps} from '@githubnext/projections-renderer-kit'
 import {columnType, declaredType, typeChange} from '../node_modules/.cache/test/types.js'
 import {DatabaseRenderer} from '../node_modules/.cache/test/view.js'
+import {plain} from '../../kit/test/markup.mjs'
 
 const fixture = name => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
 const column = data => ({id: 'c', kind: 'column', label: 'c', data})
@@ -75,7 +76,7 @@ test('real Prisma and Django retypes read as type changes', async () => {
     )
     assert.ok(html.includes(`Modified, type ${from} to ${to}`), `${id} in the markup`)
     // Types are drawn whole, in pieces the browser may wrap between.
-    const shown = [...html.matchAll(/<code[^>]*>(.*?)<\/code>/g)].map(match => match[1].replace(/<[^>]+>/g, ''))
+    const shown = [...html.matchAll(/<code[^>]*>(.*?)<\/code>/g)].map(match => plain(match[1]))
     assert.ok(shown.includes(to), `${id} shows ${to}`)
   }
 })

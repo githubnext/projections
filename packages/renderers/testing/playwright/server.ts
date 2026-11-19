@@ -239,7 +239,8 @@ export async function startInspector(options: InspectorOptions): Promise<Fixture
         )
         send(response, result.status, result.contentType || 'application/octet-stream', payload(result), result.headers)
       } catch (error) {
-        if (!aborted.signal.aborted) send(response, 502, 'text/plain', error instanceof Error ? error.message : String(error))
+        // The message only: the backend's errors and a bad body say what went wrong, and a stack says nothing more.
+        if (!aborted.signal.aborted) send(response, 502, 'text/plain', error instanceof Error ? error.message : 'The request failed')
       }
     })()
   })

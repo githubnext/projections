@@ -141,6 +141,7 @@ impl Parser<'_> {
             (Kind::Str { interpolated: false }, value) => Expr::Str(value.into()),
             (Kind::Str { interpolated: true }, _) => opaque("string interpolation"),
             (Kind::Number, value) => Expr::Number(value.into()),
+            (Kind::Regex, _) => opaque("a regex literal"),
             (Kind::Punct, "[") => return self.array(),
             (Kind::Punct, "(") => return self.parenthesized(),
             (Kind::Punct, "{") => {

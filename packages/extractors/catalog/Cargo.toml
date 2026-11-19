@@ -33,6 +33,7 @@ projections-extractor-swift-package-dependencies = { path = "../swift-package-de
 projections-extractor-terraform-infrastructure = { path = "../terraform-infrastructure" }
 projections-extractor-tetragon-policies = { path = "../tetragon-policies" }
 projections-extractor-command-output = { path = "../command-output" }
+projections-extractor-xcode-modules = { path = "../xcode-modules" }
 projections-extractor-typescript-public-api = { path = "../typescript-public-api" }
 projections-extractor-workspace-dependencies = { path = "../workspace-dependencies" }
 serde_json = { version = "1", features = ["float_roundtrip"] }

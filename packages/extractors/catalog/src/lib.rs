@@ -41,6 +41,7 @@ registry!(
     projections_extractor_go_public_api,
     projections_extractor_cargo_dependencies,
     projections_extractor_swift_package_dependencies,
+    projections_extractor_xcode_modules,
     projections_extractor_nuget_dependencies,
     projections_extractor_terraform_infrastructure,
     projections_extractor_azure_what_if,

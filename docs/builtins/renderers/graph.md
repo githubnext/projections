@@ -42,6 +42,7 @@ Built-in extractors that draw with it by default:
 | [`workspace-dependencies`](../extractors/workspace-dependencies.md)         | `dependencies`         |
 | [`cargo-dependencies`](../extractors/cargo-dependencies.md)                 | `dependencies`         |
 | [`swift-package-dependencies`](../extractors/swift-package-dependencies.md) | `dependencies`         |
+| [`xcode-modules`](../extractors/xcode-modules.md)                           | `dependencies`         |
 | [`nuget-dependencies`](../extractors/nuget-dependencies.md)                 | `dependencies`         |
 | [`terraform-infrastructure`](../extractors/terraform-infrastructure.md)     | `infrastructure`       |
 | [`azure-what-if`](../extractors/azure-what-if.md)                           | `infrastructure`       |

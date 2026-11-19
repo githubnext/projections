@@ -140,7 +140,9 @@ function tableLineProbes(): LineProbe[] {
 
 /** The screenshot's colors at `points` (CSS px of a `width`-wide frame), decoded in the page: no image library. */
 async function pixelsAt({png, width, points}: {png: string; width: number; points: {x: number; y: number}[]}) {
-  const bitmap = await createImageBitmap(await (await fetch(`data:image/png;base64,${png}`)).blob())
+  // Decoded from the bytes themselves: the stage page's content security policy refuses to fetch a data: URL.
+  const bytes = Uint8Array.from(atob(png), character => character.charCodeAt(0))
+  const bitmap = await createImageBitmap(new Blob([bytes], {type: 'image/png'}))
   const canvas = new OffscreenCanvas(bitmap.width, bitmap.height)
   const context = canvas.getContext('2d')!
   context.drawImage(bitmap, 0, 0)

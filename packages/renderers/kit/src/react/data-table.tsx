@@ -183,10 +183,27 @@ export function DataTable<T>({
 
 /** What `useTableProps` reads from a kit renderer's props. */
 export interface TablePropsSource {
+  /** Whether this is a comparison (`RendererProps.comparing`). */
   comparing: boolean
+  /** Whether the host shows the comparison in diff mode (`RendererProps.diff`). */
   diff: boolean
+  /** The frame's progress, 0 (Before) to 1 (After) (`RendererProps.progress`). */
   progress: number
+  /** A row's change emphasis (`RendererProps.emphasis`). */
   emphasis: (row: TableRow<unknown> & {id?: string}) => number
+  /** The host's selection (`RendererProps.selectedId`). */
+  selectedId: string | null
+  /** Selects an item (`RendererProps.onSelect`). */
+  onSelect: (id: string | null) => void
+  /** BCP 47 locale for numbers and comparing strings (`RendererProps.locale`). */
+  locale: string
+  /** The declared controls' values, the sort among them (`RendererProps.controls`). */
+  controls: {[id: string]: ControlValue}
+  /** Sets a control from the content, as a heading does the sort (`RendererProps.setControl`). */
+  setControl: (id: string, value: ControlValue) => void
+  /** The Changes scope, which the table folds by (`RendererProps.scope`). */
+  scope?: ChangesScope | undefined
+}) => number
   selectedId: string | null
   onSelect: (id: string | null) => void
   locale: string

@@ -58,6 +58,16 @@
 .pk .pk-table > .pk-table-head > .pk-table-cell:first-child {
   border-top-left-radius: var(--projections-radius);
 }
+/* The last row fills the frame's bottom corners, so its ring and left edge follow them. */
+.pk .pk-table > .pk-table-row:last-child {
+  border-radius: 0 0 var(--projections-radius) var(--projections-radius);
+}
+.pk .pk-table > .pk-table-row:last-child > .pk-table-cell:first-child {
+  border-bottom-left-radius: var(--projections-radius);
+}
+.pk .pk-table > .pk-table-head:last-child {
+  border-radius: var(--projections-radius);
+}
 /*
  * The foot: the frame's bottom edge and corners, over the last row's bottom line (whichever row the sort puts there),
  * drawn as a transparent box in the last row's last pixels, under any changed row's hue.

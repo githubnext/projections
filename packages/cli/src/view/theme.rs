@@ -19,28 +19,27 @@ const VALUE_LENGTH: usize = 512;
 /// The longest seed, as JSON text (`themeSeedMaxLength`).
 const SEED_LENGTH: usize = 4096;
 
-/// Claude Code's Preview pane, from the Claude app's own design tokens (its
-/// `gray` and `blue` ramps): in dark mode the pane's backdrop, which shows as a
-/// thin inset either side of the page, so the page meets it seamlessly, and in
-/// light mode its white surface; the app's text, secondary text, rules (its
-/// rule color at the opacity it draws them) and link blue; and the system
-/// families its own fonts fall back to, since a seed loads none.
+/// Claude Code's Preview pane, matched to the Claude app's own panes beside it
+/// (Files, Terminal), sampled from the app and checked against its design
+/// tokens: their surface, rules, text, secondary text and link blue, and the
+/// system families its own fonts fall back to, since a seed loads none. The
+/// pane's 6 px backdrop either side of the page is the app's chrome.
 const CLAUDE: &str = r##"{
   "light": {
     "background": "#ffffff",
-    "text": "#131313",
-    "muted": "#797979",
-    "border": "rgba(30, 30, 30, 0.12)",
-    "accent": "#1757ac",
+    "text": "#1a1a1a",
+    "muted": "#737373",
+    "border": "#e5e5e5",
+    "accent": "#0a3c98",
     "sans": "ui-sans-serif, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     "mono": "\"SF Mono\", ui-monospace, Menlo, Consolas, monospace"
   },
   "dark": {
-    "background": "#131313",
-    "text": "#f9f9f9",
-    "muted": "#959595",
-    "border": "rgba(224, 224, 224, 0.15)",
-    "accent": "#9dc8f7",
+    "background": "#191919",
+    "text": "#efefef",
+    "muted": "#9c9c9c",
+    "border": "#303030",
+    "accent": "#8bc4ff",
     "sans": "ui-sans-serif, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
     "mono": "\"SF Mono\", ui-monospace, Menlo, Consolas, monospace"
   }
@@ -242,7 +241,7 @@ mod tests {
     #[test]
     fn a_built_in_seed_is_named() {
         let seed: Value = serde_json::from_str(&read("claude").unwrap()).unwrap();
-        assert_eq!(seed["dark"]["background"], "#131313");
+        assert_eq!(seed["dark"]["background"], "#191919");
         assert_eq!(seed["light"]["background"], "#ffffff");
         // A file named like a built-in seed is read by its path.
         let directory = tempfile::tempdir().unwrap();

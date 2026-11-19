@@ -187,6 +187,8 @@
   margin-inline-start: calc(-1 * (var(--projections-label-padding-x) + var(--stroke)));
 }
 .pk .pk-table-cell .pk-change-pill {
+  flex: none;
+  max-width: none;
   font-size: inherit;
   overflow-wrap: normal;
 }

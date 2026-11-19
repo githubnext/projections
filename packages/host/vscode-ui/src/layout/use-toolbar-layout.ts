@@ -1,8 +1,8 @@
 // The toolbar's priority-collapse layout: the order its regions collapse in, measured against the toolbar's width.
 
-import {useLayoutEffect, useMemo, useState} from 'react'
+import {useLayoutEffect, useMemo, useRef, useState} from 'react'
 import type {RefObject} from 'react'
-import {actionCollapseOrder, choose, narrowToolbarWidth, toolbarSteps} from './steps.js'
+import {actionCollapseOrder, carryStep, choose, narrowToolbarWidth, toolbarSteps} from './steps.js'
 import type {ToolbarAction, ToolbarContent, ToolbarLayout} from './steps.js'
 import {requiredWidth} from './measure.js'
 import {useFocusFollow} from './focus.js'
@@ -15,10 +15,7 @@ import {useFocusFollow} from './focus.js'
  * at a boundary. Mark controls with `data-focus-id` so focus follows a control that changes form.
  */
 export function useToolbarLayout(toolbar: RefObject<HTMLElement | null>, content: ToolbarContent): ToolbarLayout & {step: number} {
-  const {pickers = false, modes = false, playback = false} = content
-  // With nothing drawn at its start (a VS Code tab's slot for an ordinary result), the mode region leads the row, as in
-  // VS Code's own editor toolbars, and a tab keeps its one 35px row: found once rendered.
-  const [centre, setCentre] = useState(true)
+  const {pickers = false, modes = false, playback = false, centre = true} = content
   const actions = (content.actions === true ? actionCollapseOrder : content.actions || []).join(' ')
   const steps = useMemo(
     () => toolbarSteps({pickers, modes, playback, centre, actions: actions ? (actions.split(' ') as ToolbarAction[]) : []}),
@@ -28,6 +25,7 @@ export function useToolbarLayout(toolbar: RefObject<HTMLElement | null>, content
   const key = content.key ?? ''
   const [state, setState] = useState({
     ladder,
+    steps,
     key,
     narrow: false,
     stale: false,
@@ -38,8 +36,12 @@ export function useToolbarLayout(toolbar: RefObject<HTMLElement | null>, content
   })
   let current = state
   if (state.ladder !== ladder) {
-    // Another collapse order: try it from the start.
-    current = {...state, ladder, key, stale: false, step: 0, required: [], rowNeed: undefined}
+    // Another collapse order. Playback coming or going keeps row 1's settled form and what was measured, corrected once
+    // that step is measured, so hysteresis still applies and row 1 doesn't move; anything else starts from the top.
+    const carried = carryStep(state.steps, state.step, state.required, steps)
+    current = carried
+      ? {...state, ladder, steps, key, stale: true, ...carried, rowNeed: undefined}
+      : {...state, ladder, steps, key, stale: false, step: 0, required: [], rowNeed: undefined}
     setState(current)
   } else if (state.key !== key) {
     // The same order with other content: keep the step, and correct what the others need once this one is measured.
@@ -53,11 +55,6 @@ export function useToolbarLayout(toolbar: RefObject<HTMLElement | null>, content
     if (!element) return
     const width = Math.floor(element.getBoundingClientRect().width)
     if (!width) return
-    const drawnStart = Boolean(element.querySelector(':scope > .phv-toolbar-start:has(> :not(:empty))'))
-    if (drawnStart !== centre) {
-      setCentre(drawnStart)
-      return
-    }
     const layout = steps[Math.min(state.step, steps.length - 1)]!
     const {need, rowNeed} = requiredWidth(element, layout.rows === 2 && !layout.playbackOverflow)
     // VSCode Elements render their shadow content a microtask after they mount: measure again once they have.
@@ -90,7 +87,7 @@ export function useToolbarLayout(toolbar: RefObject<HTMLElement | null>, content
         return previous
       return {...previous, narrow, stale: false, step: next, width, required, rowNeed: row}
     })
-  }, [toolbar, ladder, key, steps, centre, state.step, state.width])
+  }, [toolbar, ladder, key, steps, state.step, state.width])
 
   useLayoutEffect(() => {
     const element = toolbar.current
@@ -102,6 +99,28 @@ export function useToolbarLayout(toolbar: RefObject<HTMLElement | null>, content
     observer.observe(element)
     return () => observer.disconnect()
   }, [toolbar])
+
+  // Start content that changes on its own (a tab's notices come and go through their own store) changes what every
+  // step needs, without changing the toolbar's width: when the start region resizes, measure again, correcting the
+  // others. It is found after every render, since it mounts and unmounts with its content.
+  const start = useRef<{element: Element; observer: ResizeObserver} | null>(null)
+  useLayoutEffect(() => {
+    const element = toolbar.current?.querySelector(':scope > .phv-toolbar-start') ?? null
+    if (start.current?.element === element) return
+    start.current?.observer.disconnect()
+    start.current = null
+    if (!element) return
+    let width = element.getBoundingClientRect().width
+    const observer = new ResizeObserver(() => {
+      const next = element.getBoundingClientRect().width
+      if (Math.abs(next - width) < 0.5) return
+      width = next
+      setState(previous => ({...previous, stale: true, width: 0}))
+    })
+    observer.observe(element)
+    start.current = {element, observer}
+  })
+  useLayoutEffect(() => () => start.current?.observer.disconnect(), [])
 
   useFocusFollow(toolbar)
 

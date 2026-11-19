@@ -22,6 +22,8 @@ export function TabProjectionView(props: VscodeProjectionViewProps) {
       ? {
           toolbar: true,
           toolbarStart: (_compact: boolean, form: PairForm) => createElement(TabPairPicker, {form, postMessage: post}),
+          // Its start holds only notices: the switches lead the row, as in VS Code's own editor toolbars.
+          centreModes: false,
           // D5: out of date is the result's state, not a tool: a pill over the stage rather than in the toolbar.
           stageNotice: createElement(TabStaleNotice, {postMessage: post}),
         }

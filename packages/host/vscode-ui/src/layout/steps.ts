@@ -44,7 +44,7 @@ export interface ToolbarContent {
   actions?: boolean | readonly ToolbarAction[]
   /** Anything else that changes the regions' widths, for example the revision labels or the chip. */
   key?: string
-  /** The mode region may be centred (default true): there is something at the start to centre it against. */
+  /** The mode region may be centred (default true); `VscodeProjectionViewProps.centreModes`. */
   centre?: boolean
 }
 
@@ -146,4 +146,29 @@ export function choose(
     if (Math.max(own, row) + (index < current ? toolbarHysteresis : 0) <= width) return index
   }
   return steps.length - 1
+}
+
+/** Row 1's form in a step: where the mode region sits, the pickers, the mode switch and the actions in More. */
+const rowForm = (layout: ToolbarLayout) => `${layout.cluster}|${layout.pickers}|${layout.modes}|${layout.moreActions.join(' ')}`
+
+/**
+ * Carries a settled step into another collapse order (playback coming or going): the first step with the same row 1
+ * form, so row 1 doesn't move, and what each step was measured to need, by the same form (the playback row's own
+ * forms need a fresh measure). `undefined` when the old order has no such form.
+ */
+export function carryStep(
+  from: readonly ToolbarLayout[],
+  step: number,
+  required: readonly (number | undefined)[],
+  to: readonly ToolbarLayout[],
+): {step: number; required: (number | undefined)[]} | undefined {
+  const settled = from[step]
+  const index = settled ? to.findIndex(layout => rowForm(layout) === rowForm(settled)) : -1
+  if (index < 0) return undefined
+  const needs = new Map<string, number>()
+  for (const [position, layout] of from.entries()) {
+    const need = required[position]
+    if (need !== undefined && !needs.has(rowForm(layout))) needs.set(rowForm(layout), need)
+  }
+  return {step: index, required: to.map(layout => needs.get(rowForm(layout)))}
 }

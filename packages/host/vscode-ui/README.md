@@ -89,13 +89,13 @@ The same names and props as the default UI's blocks: `Toolbar`, `PairPicker`,
 priority-collapse layout (`useToolbarLayout`, `toolbarGrid`, `toolbarSteps`),
 which collapses in the same order as the default UI's. Animated playback always
 has a second row to itself. Row 1 first centres the mode region (the mode and
-scope switches), then puts it after the pickers (with nothing drawn at the
-toolbar's start, as in a tab, it leads the row instead); then compact pickers,
-the mode menu, the varied count, zoom, About, full screen and Filter into the
-toolbar's "…" (More Actions) one at a time, and merged pickers. Row 2 drops the
-slider's revision names, then moves its steps into its own "…" menu. The
-toolbar's `data-rows`, `data-cluster`, `data-pickers`, `data-modes`, `data-step`
-and `data-more-actions` say which layout applies.
+scope switches), then puts it after the pickers (a VS Code tab passes
+`centreModes: false`, so its switches lead the row instead); then compact
+pickers, the mode menu, the varied count, zoom, About, full screen and Filter
+into the toolbar's "…" (More Actions) one at a time, and merged pickers. Row 2
+drops the slider's revision names, then moves its steps into its own "…" menu.
+The toolbar's `data-rows`, `data-cluster`, `data-pickers`, `data-modes`,
+`data-step` and `data-more-actions` say which layout applies.
 
 - Toolbar actions: A view title bar's action bar: icon-only codicon buttons with
   VS Code's hover, active and focus states. The toolbar's edge controls sit as

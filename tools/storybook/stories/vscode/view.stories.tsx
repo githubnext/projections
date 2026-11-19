@@ -87,7 +87,7 @@ const meta = {
         {...(args.initialView ? {initialView: args.initialView} : {})}
         {...(args.annotations ? {annotations: sampleAnnotations(item)} : {})}
         {...(args.details ? {renderDetails} : {})}
-        {...(args.tabStart ? {toolbarStart: () => <div className="tp-pair" data-form="full" />} : {})}
+        {...(args.tabStart ? {toolbarStart: () => <div className="tp-pair" data-form="full" />, centreModes: false} : {})}
         {...(args.running ? {running: args.running === 'idle' ? null : args.running} : {})}
         {...(args.outOfDate !== undefined
           ? {

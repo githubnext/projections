@@ -1,17 +1,20 @@
 /*
  * Data tables (`DataTable`): a grid of rows, each a ring unit on the parent's columns (subgrid), so every row's edge
- * is its own box. The scroll box is the table's frame: its surface and edge, rounded, staying put when the table
- * scrolls sideways and clipping the rows to its corners. Inside it each row draws its top line, so each boundary is one
- * line and what a row paints never depends on where the sort puts it; the heading's divider covers the first row's.
- * A changed row (`pk-region` with `data-change`) draws its top line in its hue and its bottom line over the next row's
- * (the frame clips it under the last row), each mixed with the line's neutral color by `--emphasis` so nothing looks
- * changed at the endpoints, and sits above its neighbours: the line it shares with either takes the change's hue, as
- * the database renderer's rows do. A row around changed cells is drawn neutral, as everywhere in the kit (nesting.css).
+ * is its own box. The scroll box is the table's surface, rounded, clipping the rows to its corners. The rows draw every
+ * line, the frame's included, one per boundary: each row its top, bottom and right lines, overlapping its neighbours'
+ * by one stroke, and its first cell the frame's left edge, which stays put when the table scrolls sideways. The heading
+ * draws the frame's top, and the table's foot its bottom corners. What a row paints never depends on where the sort
+ * puts it.
+ *
+ * Where two lines meet, a change's hue wins over gray: rows are layered by what their lines say. A changed row whose
+ * lines carry its hue (`pk-region` with `data-change`: added, removed, renamed, or modified with no changed cells)
+ * sits above everything; a row drawn neutral because it holds changed cells (nesting.css) above the unchanged rows,
+ * the heading and the foot; a ringed row above all of them while ringed. Every hue is mixed with its line's neutral
+ * color by `--emphasis`, so nothing looks changed at the endpoints. The database renderer's rows follow the same rule.
  */
 .pk .pk-table-scroll {
   max-width: 100%;
   overflow-x: auto;
-  border: var(--stroke) solid var(--divider);
   border-radius: var(--projections-radius);
   background: var(--raised);
 }
@@ -23,6 +26,9 @@
   line-height: var(--projections-line-height);
 }
 .pk .pk-table > .pk-table-row {
+  /* The lines between rows, and the frame's edges. */
+  --pk-table-line: var(--border);
+  --pk-table-edge: var(--divider);
   --pk-table-fill: transparent;
   position: relative;
   /* The row's paint is a stacking context its cells sit in, under its ring (see the frozen column). */
@@ -30,24 +36,59 @@
   display: grid;
   grid-column: 1 / -1;
   grid-template-columns: subgrid;
-  border-top: var(--stroke) solid var(--border);
+  border: var(--stroke) solid var(--pk-table-line);
+  border-right-color: var(--pk-table-edge);
+  border-left: 0;
   background: linear-gradient(var(--pk-table-fill), var(--pk-table-fill)), var(--raised);
 }
-/* The heading row: a quiet band at the frame's top, its divider over the first row's line. */
+.pk .pk-table > .pk-table-row + .pk-table-row {
+  margin-top: calc(-1 * var(--stroke));
+}
+/* The frame's left edge, drawn by each row's first cell (see the frozen column). */
+.pk .pk-table > .pk-table-row > .pk-table-cell:first-child {
+  box-shadow: inset var(--stroke) 0 0 var(--pk-table-edge);
+}
+/* The heading row: a quiet band, the frame's top edge and corners, its divider over the first row's line. */
 .pk .pk-table > .pk-table-head {
+  --pk-table-line: var(--divider);
   z-index: 1;
-  border-top: 0;
-  border-bottom: var(--stroke) solid var(--divider);
+  border-radius: var(--projections-radius) var(--projections-radius) 0 0;
   background: color-mix(in srgb, var(--band) 45%, var(--raised));
 }
-.pk .pk-table > .pk-table-head + .pk-table-row {
-  margin-top: calc(-1 * var(--stroke));
+.pk .pk-table > .pk-table-head > .pk-table-cell:first-child {
+  border-top-left-radius: var(--projections-radius);
+}
+/*
+ * The foot: the frame's bottom edge and corners, over the last row's bottom line (whichever row the sort puts there),
+ * drawn as a transparent box in the last row's last pixels, under any changed row's hue.
+ */
+.pk .pk-table::after {
+  content: '';
+  position: relative;
+  z-index: 1;
+  grid-column: 1 / -1;
+  height: var(--projections-radius);
+  margin-top: calc(-1 * var(--projections-radius));
+  border: var(--stroke) solid var(--divider);
+  border-top: 0;
+  border-radius: 0 0 var(--projections-radius) var(--projections-radius);
+  pointer-events: none;
 }
 .pk .pk-table > .pk-table-row.pk-region[data-change] {
   --pk-table-fill: color-mix(in srgb, var(--pk-region-fill) var(--pk-region-amount), transparent);
+  --pk-table-line: color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--border));
+  --pk-table-edge: color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--divider));
+  z-index: 3;
+  box-shadow: none;
+}
+/* A row drawn neutral because it holds changed cells: its gray lines give way to any hue beside them. */
+.pk .pk-table > .pk-table-row.pk-region[data-change]:has([data-change]) {
   z-index: 2;
-  border-top-color: color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--border));
-  box-shadow: 0 var(--stroke) 0 0 color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--border));
+}
+.pk
+  .pk-table
+  > .pk-table-row:is(:hover, [data-projections-ring-hover], [data-projections-ring-selected], :focus-visible, :has(:focus-visible)) {
+  z-index: 4;
 }
 /*
  * A fold (the Changes scope's `Fold`) is a row like the others: one cell across the table, its line the row's top line,
@@ -101,11 +142,15 @@
   z-index: -1;
   left: 0;
   background: linear-gradient(var(--pk-table-fill), var(--pk-table-fill)), var(--raised);
-  box-shadow: inset calc(-1 * var(--stroke)) 0 0 var(--border);
+  box-shadow:
+    inset var(--stroke) 0 0 var(--pk-table-edge),
+    inset calc(-1 * var(--stroke)) 0 0 var(--border);
 }
 .pk .pk-table[data-frozen] > .pk-table-head > .pk-table-cell:first-child {
   background: color-mix(in srgb, var(--band) 45%, var(--raised));
-  box-shadow: inset calc(-1 * var(--stroke)) 0 0 var(--divider);
+  box-shadow:
+    inset var(--stroke) 0 0 var(--pk-table-edge),
+    inset calc(-1 * var(--stroke)) 0 0 var(--divider);
 }
 /* Text centred by its cap height in the row, so a capital E has the same room above and below it. */
 .pk .pk-table-text {
@@ -230,6 +275,9 @@
   border-radius: var(--projections-radius) var(--projections-radius) 0 0;
 }
 .pk .pk-group > .pk-table-scroll {
-  border-top: 0;
   border-radius: 0 0 var(--projections-radius) var(--projections-radius);
+}
+.pk .pk-group > .pk-table-scroll > .pk-table > .pk-table-head,
+.pk .pk-group > .pk-table-scroll > .pk-table > .pk-table-head > .pk-table-cell:first-child {
+  border-radius: 0;
 }

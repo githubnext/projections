@@ -1,7 +1,7 @@
 // node --test .github/projections/self-topology/
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {releaseChannels} from './releases.mjs'
+import {releaseChannels, tomlList} from './releases.mjs'
 
 const crate = {id: 'crate:tool', kind: 'rust-crate', root: '', directory: 'tool', data: {package: 'tool', targets: ['bin']}}
 const extension = {id: 'npm:ext', kind: 'npm-package', root: '', directory: 'ext', meta: {vscode: true}, data: {}}
@@ -50,4 +50,12 @@ ${condition}    steps:
   const inert = channels({'.github/workflows/publish.yml': publish("    if: needs.configured.outputs.ready == 'true'\n")})
   assert.deepEqual(inert, {})
   assert.deepEqual(channels({'.github/workflows/publish.yml': publish()}), {'npm:sdk': ['npm'], 'npm:ext': ['Marketplace']})
+})
+
+test('a TOML list is found by its literal key', () => {
+  const text = 'a.b = ["dot"]\naxb = ["any"]\npublish-jobs = ["./npm", \'homebrew\']\n'
+  assert.deepEqual(tomlList(text, 'a.b'), ['dot'])
+  assert.deepEqual(tomlList('axb = ["any"]', 'a.b'), undefined)
+  assert.deepEqual(tomlList(text, 'publish-jobs'), ['./npm', 'homebrew'])
+  assert.equal(tomlList(text, 'a\\'), undefined)
 })

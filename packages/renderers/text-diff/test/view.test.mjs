@@ -8,6 +8,7 @@ import {outputDiff, wordDiff} from '../node_modules/.cache/test/rows.js'
 import {readOutput, validateModel} from '../node_modules/.cache/test/model.js'
 import {segments} from '../node_modules/.cache/test/folding.js'
 import {outputOrder, TextDiffView} from '../node_modules/.cache/test/view.js'
+import {plain} from '../../kit/test/markup.mjs'
 
 const engine = createNativeEngine()
 const graph = entities => ({protocolVersion: 0, schema: 'graph/v0', entities, relationships: []})
@@ -180,13 +181,13 @@ test("each changed output states its status as text in a reserved cell at its he
   const {model} = await comparison()
   const markup = render(props(model, 1))
   const status = id =>
-    markup
-      .match(
+    plain(
+      markup.match(
         new RegExp(
           `<section[^>]*data-entity-id="${id}"[^>]*><header class="pk-group-header">.*?<span class="pk-change-status pk-group-status"[^>]*>(.*?)</span></header>`,
         ),
-      )[1]
-      .replace(/<[^>]+>/g, '')
+      )[1],
+    )
   assert.deepEqual(['report', 'gone', 'new', 'help'].map(status), ['Modified', 'Removed', 'Added', ''])
   assert.match(markup, /--pk-status-width:11ch/)
 })

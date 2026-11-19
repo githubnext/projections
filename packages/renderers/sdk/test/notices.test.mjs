@@ -6,7 +6,7 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {fileURLToPath} from 'node:url'
 import {build, loadConfigFromFile} from 'vite'
-import {bundleNotices, bundledPackages, mergeNotices, noticeSections} from '../build/notices.mjs'
+import {bundleNotices, bundledPackages, mergeNotices, noticeSections, packageNotice} from '../build/notices.mjs'
 import {rendererConfig} from '../dist/vite.js'
 
 const workspace = fileURLToPath(new URL('../../../../', import.meta.url))
@@ -134,6 +134,31 @@ test('vendored data is attributed inside an installed package too, and @githubne
       found.map(entry => [entry.name, entry.version, entry.license]),
       [['linguist', 'v9', 'MIT']],
     )
+  } finally {
+    await rm(root, {recursive: true, force: true})
+  }
+})
+
+test('module ID queries and SPDX alternatives are read in linear time', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'projections-notices-'))
+  try {
+    const directory = join(root, 'node_modules/elected')
+    await mkdir(directory, {recursive: true})
+    await writeFile(
+      join(directory, 'package.json'),
+      JSON.stringify({name: 'elected', version: '1.0.0', license: 'MPL-2.0', repository: 'git+https://example.com/elected.git'}),
+    )
+    await writeFile(join(directory, 'LICENSE'), 'MPL text')
+    assert.deepEqual(
+      bundledPackages([`\0${join(directory, 'index.js')}?commonjs-proxy?x`]).map(entry => entry.name),
+      ['elected'],
+    )
+    const entry = license => ({name: 'elected', version: '1.0.0', license, directory, files: []})
+    assert.match(packageNotice(entry('(MPL-2.0 OR Apache-2.0)')), /Distributed under MPL-2\.0\. Source/)
+    const started = performance.now()
+    assert.deepEqual(bundledPackages([`${'?'.repeat(100_000)}\n`]), [])
+    assert.match(packageNotice(entry(`MPL-2.0${' '.repeat(100_000)}x`)), /Distributed under MPL-2\.0 x\. Source/)
+    assert.ok(performance.now() - started < 1000, `took ${Math.round(performance.now() - started)} ms`)
   } finally {
     await rm(root, {recursive: true, force: true})
   }

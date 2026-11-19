@@ -286,6 +286,13 @@ test('every link in the bundle must open in the preview: a bundled page and its 
   ])
 })
 
+test('heading anchors drop HTML tags but keep a lone `<`, in linear time', () => {
+  assert.deepEqual([...anchors('# The <code>x</code> extractor\n\n## a < b\n')], ['the-x-extractor', 'a--b'])
+  const started = performance.now()
+  anchors(`# ${'<'.repeat(100_000)}\n`)
+  assert.ok(performance.now() - started < 1000, `took ${Math.round(performance.now() - started)} ms`)
+})
+
 test("the repository's bundle: every built-in extractor and renderer handle has a page, and every page links within it or to GitHub", async () => {
   const root = fileURLToPath(new URL('../../../../', import.meta.url))
   const {pages, index} = await planDocs(root)

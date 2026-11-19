@@ -21,9 +21,9 @@ import {
 } from '../dist/index.js'
 import {ChangePills, SvgValueChange, ValueChange} from '../dist/react.js'
 import {compare, entity, extraction, relationship} from './engine.mjs'
+import {plain} from './markup.mjs'
 
 const html = node => renderToStaticMarkup(node)
-const plain = markup => markup.replace(/<[^>]+>/g, '')
 
 async function rewired() {
   const before = extraction(

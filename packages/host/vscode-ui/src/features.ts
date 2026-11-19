@@ -12,7 +12,7 @@ export interface VscodeProjectionFeatures {
   modes?: readonly ComparisonMode[] | false
   /** Change highlighting in Settings. */
   highlighting?: boolean
-  /** "Changes only" in Settings. */
+  /** The scope (Changes, All, Noise): the toolbar's scope switch and "Show" in Settings. */
   changesOnly?: boolean
   /** The Filter action with "Filter rows". */
   search?: boolean

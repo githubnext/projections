@@ -1,4 +1,4 @@
-// The settings every host's Settings menu offers, as one hierarchy: a short top level ("Show as", "Changes only")
+// The settings every host's Settings menu offers, as one hierarchy: a short top level ("Show as", "Show")
 // and submenus for the rest, so the top level stays short however many options a renderer declares.
 import type {ControlIcon, RendererControl} from '@githubnext/projections-renderer-sdk/protocol'
 import type {Highlighting, ProjectionController} from './projection.js'
@@ -177,9 +177,35 @@ function playbackEntries(p: ProjectionController, features: SettingsFeatures | u
   return playback
 }
 
+/** Words for each scope where Settings offers it. */
+const scopeChoices = [
+  {value: 'changes', label: 'Changes'},
+  {value: 'all', label: 'Everything'},
+  {value: 'noise', label: 'Noise'},
+] as const
+
 /**
- * The Settings menu for a projection, every host's: "Show as" (with `showAs`, two views or more) and "Changes only"
- * at the top; then "Highlight changes", "Renderer" (more than one), "Playback" (animated: loop, holds, speed) and
+ * The scope, "Show": the changes (with their context), everything, and the noise when anything varied within tolerance
+ * or was regenerated.
+ */
+function scopeChoice(p: ProjectionController): SettingsEntry {
+  const choices = scopeChoices.filter(choice => choice.value !== 'noise' || p.scope === 'noise' || p.scopeCounts.noise > 0)
+  return {
+    type: 'choice',
+    id: 'scope',
+    label: 'Show',
+    options: choices.map(choice => ({
+      id: `scope-${choice.value}`,
+      label: choice.label,
+      checked: p.scope === choice.value,
+      select: () => p.setScope(choice.value),
+    })),
+  }
+}
+
+/**
+ * The Settings menu for a projection, every host's: "Show as" (with `showAs`, two views or more) at the top; then
+ * "Show" (the scope), "Highlight changes", "Renderer" (more than one), "Playback" (animated: loop, holds, speed) and
  * the renderer's option groups as submenus, each group its own submenu up to `maxRendererSubmenus` and one
  * "<Renderer> options" submenu holding them all beyond that.
  */
@@ -187,15 +213,11 @@ export function settingsModel(p: ProjectionController, features?: SettingsFeatur
   const groups: SettingsModel['groups'] = []
   const animated = p.comparing && p.mode === 'animated'
   if (showAs && showAs.views.length > 1) groups.push(showAsGroup(showAs))
-  if (p.comparing && on(features, 'changesOnly'))
-    groups.push({
-      id: 'view',
-      entries: [{type: 'toggle', id: 'changes-only', label: 'Changes only', checked: p.changesOnly, set: p.setChangesOnly}],
-    })
   const submenus: SettingsSubmenu[] = []
   const submenu = (id: string, label: string, entries: SettingsEntry[], detail = choiceDetail(entries)) => {
     if (entries.length) submenus.push({type: 'submenu', id, label, detail, groups: submenuGroups(id, label, entries)})
   }
+  if (p.comparing && on(features, 'changesOnly')) submenu('scope', 'Show', [scopeChoice(p)])
   if (p.comparing && on(features, 'highlighting'))
     submenu('highlighting', 'Highlight changes', [
       {
@@ -227,7 +249,7 @@ export function settingsModel(p: ProjectionController, features?: SettingsFeatur
   if (animated) submenu('playback', 'Playback', playbackEntries(p, features), `${p.speed}×`)
   if (submenus.length) groups.push({id: 'settings', entries: submenus})
   const title = p.renderer?.title
-  const taken = new Set(['show as', 'changes only', ...submenus.map(item => item.label.toLowerCase())])
+  const taken = new Set(['show as', 'show', ...submenus.map(item => item.label.toLowerCase())])
   const optionMenus = rendererOptionMenus(p, settingsControls(p, features), taken)
   if (optionMenus.length) groups.push({id: 'renderer-options', label: title ?? 'Renderer', entries: optionMenus})
   return {groups}

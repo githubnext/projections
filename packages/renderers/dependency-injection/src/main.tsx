@@ -8,6 +8,8 @@ import {accepts} from './accepts.js'
 
 mountRenderer(DependencyInjectionRenderer, {
   name: 'dependency-injection',
+  // The Changes scope lays out only the changed services and their context, each card whole.
+  scope: {layout: 'subset', parts: 'whole'},
   accepts,
   capabilities: {changeHighlighting: 'supported', comparisonModes: ['side-by-side', 'animated', 'swipe', 'diff']},
   // The host's summary bar counts services, registrations and links, and states the facets that changed.

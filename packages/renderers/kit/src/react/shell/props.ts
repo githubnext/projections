@@ -20,6 +20,7 @@ import type {SummaryNouns} from '@githubnext/projections-renderer-sdk/presentati
 import type {SummaryFacts} from '../../summary.js'
 import type {EmphasisOf} from '../../emphasis.js'
 import type {ComparisonModel} from '../../model.js'
+import type {ScopedParts, ScopeView} from '../../scope.js'
 import type {ScheduledStep} from '../../timeline.js'
 
 /**
@@ -62,6 +63,19 @@ export interface RendererProps<T extends DomainSchema | readonly RendererAccepts
    * view itself; a renderer that places its own view (`useStageZoom`) frames what it names.
    */
   focusRequest: RendererFocus | undefined
+  /**
+   * The Changes scope, while the host shows a comparison's changes and their context (`changesScope`): its `shown`
+   * items, with the parts the person opened (`expand`). A list folds the rest (`useFolds`, `Fold`); a canvas that
+   * declares `MountOptions.scope` `subset` receives a `model` of only what is shown and lays that out. Nothing is
+   * faded: what is shown is drawn at full strength, and what isn't takes no room. Undefined while every item is shown.
+   */
+  scope: ScopeView | undefined
+  /**
+   * Whether the host has said what it shows (its filter, and with it the scope). Until it does, every item is drawn,
+   * provisionally: a canvas that moves between layouts of the scope doesn't move from that one, so the first scope the
+   * host chooses is drawn at once rather than pared down to. Undefined where no host filter is wired (treat it as said).
+   */
+  filtered?: boolean | undefined
   /** 0 (before) to 1 (after); always 1 for an extraction. */
   progress: number
   /**
@@ -186,6 +200,21 @@ export interface MountOptions {
    * own: what it would count goes here.
    */
   facts?: SummaryFacts
+  /**
+   * How the Changes scope reaches the renderer. `fold` (the default): `model` holds every item and the renderer folds
+   * what `scope` leaves out, as a list does. `subset`: `model` holds only what the scope shows (`scopedModel`), with the
+   * shown entities' `parts` left out, kept whole or folded, so a canvas lays out only that; `scope.all` holds every
+   * item. A subset renderer that needs more to place a change than its relationships' endpoints and containers (a
+   * package's path from the workspace, a selector's probe and hook) returns those items' row IDs from `context`, given
+   * every item, the changes in scope and its renderer name; they show as context.
+   */
+  scope?:
+    | {layout: 'fold'}
+    | {
+        layout: 'subset'
+        parts?: ScopedParts
+        context?: (all: ComparisonModel, changes: ReadonlySet<string>, renderer: string) => Iterable<string>
+      }
   /**
    * Hover, anchors, scroll mirroring, the host's filter and annotation badges through `connectInteractions` over
    * elements carrying `data-entity-id` (default on). `false` opts out and

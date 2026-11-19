@@ -130,6 +130,8 @@ for (const theme of ['dark-modern', 'dark-high-contrast'] as const)
 
 test('a figure filters the renderer to its items, and pressed again shows every item', async ({page}) => {
   await open(page, 'summary-bar')
+  // Every item, so the figures filter from all of them (the Changes scope would narrow them first).
+  await page.getByRole('radiogroup', {name: 'Scope'}).locator('[data-scope="all"]').click()
   const workspaces = figures(page).filter({hasText: 'workspace'}).locator('[data-summary-total]')
   await workspaces.click()
   await expect(workspaces).toHaveAttribute('aria-pressed', 'true')

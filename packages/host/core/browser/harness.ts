@@ -161,7 +161,7 @@ const openMenu = (scope: Scope, name: string) =>
   pageOf(scope).getByRole('menu', {name, exact: true}).and(pageOf(scope).locator('[data-state="open"]'))
 
 /**
- * Opens the Settings menu unless it is open, and returns it: "Show as" and "Changes only", then submenus for
+ * Opens the Settings menu unless it is open, and returns it: "Show as", then submenus for "Show" (the scope),
  * "Highlight changes", "Renderer", "Playback" and the renderer's option groups (`openSettingsSubmenu`).
  */
 export async function openSettings(scope: Scope): Promise<Locator> {
@@ -198,6 +198,8 @@ export async function chooseSetting(scope: Scope, name: string, submenu?: string
   await menuItem(menu, name).click()
   await closeMenus(scope)
 }
+/** Shows every item: the All scope, from Settings' "Show" (the toolbar's scope switch leaves narrow rows). */
+export const showEverything = (scope: Scope) => chooseSetting(scope, 'Everything', 'Show')
 /** Whether a Settings item (in `submenu`) is checked; the menu is closed again after. */
 export async function expectSetting(scope: Scope, name: string, checked: boolean, submenu?: string) {
   const menu = submenu ? await openSettingsSubmenu(scope, submenu) : await openSettings(scope)

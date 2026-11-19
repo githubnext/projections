@@ -1,4 +1,4 @@
-import {compareIds} from '@githubnext/projections-renderer-kit'
+import {compareIds, isFold} from '@githubnext/projections-renderer-kit'
 import type {CardText, RowText} from './text.js'
 import {columnType} from './types.js'
 import type {SchemaKeyRow, SchemaModel, SchemaRowKind, SchemaState} from './schema.js'
@@ -104,7 +104,10 @@ function cardTexts(
           ? {kind: 'key', text: key.text, name: key.name}
           : values.has(id)
             ? {kind: 'value', text: values.get(id)!}
-            : {kind: 'column', name: nodes.get(id)!.label, type: columnType(nodes.get(id)!)},
+            : // A fold of the columns the Changes scope leaves out is one line of words, measured as a value is.
+              isFold(id)
+              ? {kind: 'value', text: nodes.get(id)!.label}
+              : {kind: 'column', name: nodes.get(id)!.label, type: columnType(nodes.get(id)!)},
       )
     }
   }

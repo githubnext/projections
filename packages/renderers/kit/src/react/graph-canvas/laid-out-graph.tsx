@@ -19,6 +19,9 @@ import type {Bounds} from './framing.js'
 import type {GraphAnchor} from './props.js'
 import {morphFrames, shiftFrame, viewChangeMs} from '../../graph-canvas/view-change.js'
 
+/** The scope key while the host hasn't said what it shows. */
+const provisional = 'provisional'
+
 /** What was drawn last: the frame, where it was framed and at what scale. */
 interface Shown {
   transition: GraphTransition
@@ -40,7 +43,19 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
   const {framing, bounds, flush} = useFraming(transition, diff)
   const scroller = useRef<HTMLDivElement>(null)
   const drawnScale = useRef(0)
-  const {frame, hold, overflow, change} = useViewChange(scroller, props.anchor, transition, target, bounds, drawnScale, props.reducedMotion)
+  // The scope the layout shows: changing it (Changes and All) moves the cards between the two layouts.
+  // Before the host's filter, every item is drawn provisionally: the first scope it chooses is drawn at once.
+  const scopeKey = props.filtered === false ? provisional : props.scope ? `changes:${props.scope.shown.size}` : 'all'
+  const {frame, hold, overflow, change} = useViewChange(
+    scroller,
+    props.anchor,
+    transition,
+    target,
+    bounds,
+    drawnScale,
+    props.reducedMotion,
+    scopeKey,
+  )
   const nodes = frame.nodes
   const nodeById = new Map(nodes.map(node => [node.id, node]))
   // A relationship's endpoints are named from the revision it comes from.
@@ -53,7 +68,8 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
     else onSelect(edge.id)
   }
   const request = props.focusRequest
-  const area = useMemo(() => focusArea(transition, diff, props.model, request), [transition, diff, props.model, request])
+  const shown = props.scope?.shown
+  const area = useMemo(() => focusArea(transition, diff, props.model, request, shown), [transition, diff, props.model, request, shown])
   const drawn = nodes.map(node => ({x: node.x - node.width / 2, y: node.y - node.height / 2, width: node.width, height: node.height}))
   const {zoom, scale, borders, keep} = useGraphZoom(scroller, framing, bounds, props.onAction, {area, request}, orientation, drawn, hold)
   drawnScale.current = scale
@@ -149,8 +165,11 @@ function useViewChange(
   bounds: Bounds,
   scale: RefObject<number>,
   reducedMotion: boolean,
+  scopeKey: string,
 ) {
   const shown = useRef<Shown>(undefined)
+  const scoped = useRef(scopeKey)
+  const rescoped = useRef(false)
   const used = useRef<GraphAnchor>(undefined)
   const held = useRef<{key: unknown; scale: number}>(undefined)
   const change = useRef<ViewChange>({pending: undefined}).current
@@ -179,6 +198,17 @@ function useViewChange(
       const start = shiftFrame(previous.frame, {x: to.x - from.x, y: to.y - from.y})
       setMorph(reducedMotion ? undefined : {from: start, to: transition, mix: 0})
     }
+  }
+  // A new scope lays the document out again: the cards move from the old layout to the new one, those it adds or leaves
+  // out fading in or out, rather than jumping. The layout arrives after the scope does (it's laid out in the
+  // background), so the change waits for it.
+  if (scoped.current !== scopeKey) {
+    rescoped.current = scoped.current !== provisional
+    scoped.current = scopeKey
+  }
+  if (previous && previous.transition !== transition && rescoped.current) {
+    rescoped.current = false
+    if (!reducedMotion) setMorph({from: previous.frame, to: transition, mix: 0})
   }
   const moving = morph !== undefined && morph.to === transition && morph.mix < 1
   const frame = moving ? morphFrames(morph.from, target, morph.mix) : target

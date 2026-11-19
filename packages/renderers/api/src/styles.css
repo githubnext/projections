@@ -46,6 +46,18 @@
   padding: var(--projections-space-2) var(--projections-space-4);
   border-bottom: var(--projections-border-width) solid var(--border);
 }
+/* A fold (the Changes scope) spans the row, aligned with the names, and separates like a row. */
+.api-declarations > .pk-fold {
+  grid-column: 1 / -1;
+}
+.api-declarations > .pk-fold > .pk-fold-button {
+  padding-inline: var(--projections-space-4);
+  border-top: 0;
+  border-bottom: var(--projections-border-width) solid var(--border);
+}
+.api-declarations > .pk-fold:last-child > .pk-fold-button {
+  border-bottom: 0;
+}
 /* Hover, focus and selection: the SDK's ring, over the row's own edge, its separator included. */
 .api-declaration-name {
   min-width: 0;

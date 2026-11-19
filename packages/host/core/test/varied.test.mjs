@@ -102,7 +102,7 @@ function probe(options) {
 }
 
 test('"varied only" shows exactly the items that varied within tolerance, and excludes "changes only"', () => {
-  const all = probe({})
+  const all = probe({initialChangesOnly: false})
   assert.deepEqual(all.variation, {within: 1, beyond: 1, regenerated: 0})
   assert.equal(all.variedOnly, false)
   assert.equal(all.visibleRows.length, rows.length)
@@ -131,11 +131,16 @@ test('turning one filter on turns the other off', () => {
   const varied = probe({changesOnly: true, onChangesOnlyChange: record('changesOnly'), onVariedOnlyChange: record('variedOnly')})
   varied.setVariedOnly(true)
   assert.deepEqual(requests, [
-    ['changesOnly', false],
     ['variedOnly', true],
+    ['changesOnly', false],
   ])
   requests.length = 0
-  const changes = probe({variedOnly: true, onChangesOnlyChange: record('changesOnly'), onVariedOnlyChange: record('variedOnly')})
+  const changes = probe({
+    changesOnly: false,
+    variedOnly: true,
+    onChangesOnlyChange: record('changesOnly'),
+    onVariedOnlyChange: record('variedOnly'),
+  })
   changes.setChangesOnly(true)
   assert.deepEqual(requests, [
     ['variedOnly', false],

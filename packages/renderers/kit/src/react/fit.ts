@@ -14,7 +14,8 @@ import {useContentAspect, useFrameFill, useFrameSizing, usePaintHold, useStageHe
  * a content-sized host should give the frame: the stage at the width-fitted
  * scale (or at `options.floor` when that is larger and the view opens there)
  * plus everything around it, but never more than the host's `stage-max-height` (`useStageHeightCap`), when it sends
- * one: content taller than that is fitted to the capped stage instead (or opens at the text floor and pans). Measured before paint and on every resize;
+ * one: content taller than that is fitted to the capped stage instead (or opens at the text floor and pans). Zoomed in
+ * (`options.drawnScale`), it asks for the content's height at that scale, up to the same cap. Measured before paint and on every resize;
  * a new measurement holds the host's paint acknowledgement until the content
  * is drawn at its scale, so a host never measures a scale about to change
  * (such as the one before the renderer fills its frame).
@@ -24,7 +25,7 @@ export function useFitScale(
   size: {width: number; height: number} | undefined,
   options: FitOptions = {},
 ): Fit {
-  const {padding = 16, maxScale = 1, minHeight = 200, floor = 0, aspect} = options
+  const {padding = 16, maxScale = 1, minHeight = 200, floor = 0, aspect, drawnScale = 0} = options
   const pad = fitPadding(padding)
   const down = fitPaddingDown(padding).total
   type Measured = {width: number; height: number; chrome: number | undefined}
@@ -104,7 +105,12 @@ export function useFitScale(
       : Math.min(natural, Math.max(cap, measured!.chrome! + least))
   if (preferred !== undefined && natural !== undefined && preferred < natural && size && measured && measured.width > 0)
     fit = fitScale(size, {width: measured.width, height: preferred - measured.chrome!}, {padding, maxScale})
-  const reported = preferred === undefined ? undefined : Math.round(preferred)
+  // Zoomed in past where it opens, the stage grows to the content's height at the drawn scale, up to the cap.
+  const zoomed =
+    preferred !== undefined && sizing === 'content' && drawnScale > opening && size
+      ? Math.max(preferred, Math.min(measured!.chrome! + size.height * drawnScale + down, cap ?? rendererLimits.maxHeight))
+      : preferred
+  const reported = zoomed === undefined ? undefined : Math.round(zoomed)
   useFrameFill(reported)
   useArrivedHeight(stage, sizing === 'content' ? reported : undefined, hold)
   useContentAspect(aspect ?? (size && size.width > 0 && size.height > 0 ? (size.width + 2 * pad.x) / (size.height + down) : undefined))

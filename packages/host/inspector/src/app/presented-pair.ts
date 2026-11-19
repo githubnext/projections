@@ -70,8 +70,9 @@ export function overriddenDocument(
 }
 
 /**
- * The shown pair's Before and After keys. Live, the pair is what is shown: a side that failed (or hasn't extracted yet)
- * leaves the other shown alone, unless another pair was shown whole (`holding`), which stays until this one is ready.
+ * The shown pair's Before and After keys. Live, the pair is what is shown: a side that failed leaves the other shown
+ * alone; while a side is still to extract (`pending`), another pair shown whole (`holding`) stays until this one is
+ * ready, and without one nothing is shown yet (no After), so the view never presents one side as if it were the pair.
  * An artifact shows its marked pair, or its last choice.
  */
 export function presentedSides({
@@ -79,6 +80,7 @@ export function presentedSides({
   marked,
   pairMarks,
   holding,
+  pending = false,
   has,
   lastChoice,
 }: {
@@ -86,10 +88,13 @@ export function presentedSides({
   marked: Marks
   pairMarks: Marks
   holding: HeldPair | undefined
+  /** Whether a side of the chosen pair is still to extract. */
+  pending?: boolean
   has: (key: string | undefined) => boolean
   lastChoice: string | undefined
 }): {before: string; after: string | undefined} {
   if (holding) return {before: holding.before, after: holding.after}
+  if (live && pending) return {before: '', after: undefined}
   const liveAfter = has(marked.b) ? marked.b : has(marked.a) ? marked.a : undefined
   const after = live ? liveAfter : pairMarks.b && has(pairMarks.b) ? pairMarks.b : lastChoice
   const before = pairMarks.a && pairMarks.a !== after && has(pairMarks.a) && (!live || has(marked.b)) ? pairMarks.a : ''

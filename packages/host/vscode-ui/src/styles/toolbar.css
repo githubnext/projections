@@ -52,6 +52,8 @@
 }
 .phv-toolbar[data-rows] > .phv-toolbar-mode {
   display: flex;
+  align-items: center;
+  gap: 6px;
   grid-area: mode;
 }
 .phv-toolbar[data-rows] > .phv-playback {

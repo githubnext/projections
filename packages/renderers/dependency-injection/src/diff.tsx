@@ -1,4 +1,4 @@
-import {useId, useMemo, useRef} from 'react'
+import {useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
 import type {CSSProperties} from 'react'
 import {
   cardBorderOutset,
@@ -392,9 +392,12 @@ export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, o
   // the floor on its top row's leftmost card (from the layout alone, never the frame's momentary size) and scrolls.
   const floor = useOpeningFloor(scroller, diff)
   const padding = useDiPadding()
-  const fit = useFitScale(scroller, bounds, {padding, floor})
+  // Zoomed in, a content-sized stage grows to the drawn scale (see `FitOptions.drawnScale`).
+  const [drawnScale, setDrawnScale] = useState(0)
+  const fit = useFitScale(scroller, bounds, {padding, floor, drawnScale})
   const start = useMemo(() => contentStart([...boxes.values()].slice(0, diUnitLimit), bounds, padding), [boxes, bounds, padding])
   const {zoom, scale} = useStageZoom(scroller, onAction, fit.scale, {floor, start})
+  useLayoutEffect(() => setDrawnScale(scale), [scale])
 
   return (
     <div className="di-view" data-diff="">

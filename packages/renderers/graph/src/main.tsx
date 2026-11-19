@@ -1,5 +1,6 @@
 import '@githubnext/projections-renderer-kit/react.css'
 import {useEffect, useMemo} from 'react'
+import {followContext} from '@githubnext/projections-renderer-kit'
 import {GraphCanvas, graphCanvasControls, graphCanvasPace, mountRenderer, useSummaryNouns} from '@githubnext/projections-renderer-kit/react'
 import type {SummaryFactContext, SummaryNouns} from '@githubnext/projections-renderer-kit'
 import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
@@ -110,6 +111,12 @@ function graphFacts({model, rendererName, controls}: SummaryFactContext) {
 
 mountRenderer(GraphRenderer, {
   name: 'graph',
+  // The Changes scope lays out only the changes and their context: the rest takes no room. A dependency graph keeps each
+  // changed package's path from the workspace, which says why it is installed.
+  scope: {
+    layout: 'subset',
+    context: (all, changes, renderer) => (renderer === 'dependencies' ? followContext(all, changes, {incoming: () => true}) : []),
+  },
   accepts,
   capabilities: {changeHighlighting: 'supported', pace: graphCanvasPace, comparisonModes: ['side-by-side', 'animated', 'swipe', 'diff']},
   controls: graphCanvasControls,

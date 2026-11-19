@@ -6,6 +6,8 @@ import {accepts} from './accepts.js'
 
 mountRenderer(FilePackingRenderer, {
   name: 'file-packing',
+  // The Changes scope packs only the changes and the groups that contain them.
+  scope: {layout: 'subset'},
   accepts,
   // Containment relationships are shown as nesting, never drawn on their own.
   capabilities: {

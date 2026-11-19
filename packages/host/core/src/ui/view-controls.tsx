@@ -276,7 +276,7 @@ const variationToggle =
 
 /**
  * The count of items that varied within tolerance ("3 varied within tolerance", from `variation.within`), as a toggle
- * that shows only those items, as "Changes only" shows only changes; pressed again, every item returns. Neutral and
+ * that shows only those items (the Noise scope); pressed again, every item returns. Neutral and
  * muted, never a change color: these items are unchanged. Renders nothing when nothing varied within tolerance.
  * `inline` draws it full width, for the More menu.
  */

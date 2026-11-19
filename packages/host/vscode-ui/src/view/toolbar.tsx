@@ -16,6 +16,7 @@ import {
 } from '../blocks.js'
 import type {PairForm} from '../blocks.js'
 import {toolbarGrid} from '../layout/grid.js'
+import {ScopeSwitch} from '../scope-switch.js'
 import {useToolbarLayout} from '../layout/use-toolbar-layout.js'
 import type {ToolbarLayout} from '../layout/steps.js'
 import {overflow, toolbarContent} from './toolbar-content.js'
@@ -31,10 +32,13 @@ const pairForms: Record<ToolbarLayout['pickers'], PairForm> = {full: 'full', com
 export function ViewToolbar(toolbarProps: ViewToolbarProps) {
   const {projection: p, props, features, modes, view, views, setView, root, fullscreen, beforeLabel, afterLabel} = toolbarProps
   const {on, showModeSwitch, showPlayback, showZoom, zoomControls, showVaried, collapsible} = toolbarContent(toolbarProps)
+  // The scope beside the mode: which part of the comparison, as the mode is how its revisions relate.
+  const showScope = p.comparing && on('changesOnly')
+  const modeRegion = showModeSwitch || showScope
   const toolbar = useRef<HTMLDivElement>(null)
   const layout = useToolbarLayout(toolbar, {
     pickers: typeof props.toolbarStart === 'function',
-    modes: showModeSwitch,
+    modes: modeRegion,
     playback: showPlayback,
     actions: collapsible,
     key: [
@@ -50,6 +54,7 @@ export function ViewToolbar(toolbarProps: ViewToolbarProps) {
       Boolean(props.toolbarStart),
       p.variation?.within ?? 0,
       p.variation?.regenerated ?? 0,
+      showScope && p.scope,
     ].join('|'),
   })
   const {inMore, settingsFeatures, moreItems} = overflow(layout, zoomControls, features)
@@ -66,13 +71,15 @@ export function ViewToolbar(toolbarProps: ViewToolbarProps) {
       <Toolbar
         ref={toolbar}
         layout={layout}
-        style={toolbarGrid(layout, {start: Boolean(start), mode: showModeSwitch, playback: showPlayback})}
+        style={toolbarGrid(layout, {start: Boolean(start), mode: modeRegion, playback: showPlayback})}
         onKeyDown={event => handlePlaybackKey(event, p)}
       >
         {start && <div className="phv-toolbar-start">{start}</div>}
-        {showModeSwitch && (
+        {modeRegion && (
           <div className="phv-toolbar-mode">
-            <ModeSwitch projection={p} modes={modes} variant={layout.modes} />
+            {showModeSwitch && <ModeSwitch projection={p} modes={modes} variant={layout.modes} />}
+            {/* A row short enough to fold the mode into a menu leaves the scope to Settings' "Show". */}
+            {showScope && layout.modes !== 'menu' && <ScopeSwitch projection={p} />}
           </div>
         )}
         {showPlayback && (

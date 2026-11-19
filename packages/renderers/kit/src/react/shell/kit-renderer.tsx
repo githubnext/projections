@@ -17,6 +17,8 @@ import {
   useStepsReport,
 } from './reports.js'
 import {focusedIds, focusRequest} from '../../focus.js'
+import type {ComparisonModel} from '../../model.js'
+import {useScopeView} from './scope.js'
 import {useHostFilter, useOpeningReveal} from './focus.js'
 import {useSelection} from './selection.js'
 import {useSummaryReport} from './summary.js'
@@ -77,9 +79,12 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
   const stageInsetTop = stageInsetOf(tokens, 'stage-inset-top')
   const stageMaxHeight = tokens?.['stage-max-height']
   const automatic = (options.steps ?? 'schedule') === 'schedule'
+  const filter = useHostFilter(client)
+  const resolved = model && !(model.model instanceof Error) ? model.model : undefined
+  const {scope, document} = useScopeView(resolved, filter, model, options.scope, init?.projection.renderer)
   const {comparing, diff, position, schedule, highlighting, emphasis} = useTimeline(
     init,
-    model,
+    document,
     {progress: renderer.progress, pane},
     automatic,
     reportSteps,
@@ -87,9 +92,7 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
   useEffect(() => {
     if (model?.model instanceof Error) onError(model.model.message)
   }, [model, onError])
-  const filter = useHostFilter(client)
   const focus = useMemo(() => focusRequest(init, filter), [init, filter])
-  const resolved = model && !(model.model instanceof Error) ? model.model : undefined
   const focused = useMemo(() => focusedIds(resolved, focus, diff), [resolved, focus, diff])
   useOpeningReveal(root, focused, resolved)
 
@@ -114,12 +117,14 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
                       <LegendContext.Provider value={reportLegend}>
                         <Renderer
                           init={init}
-                          model={model.model}
+                          model={document!.model as ComparisonModel}
                           comparing={comparing}
                           diff={diff}
                           comparisonMode={init.mode === 'comparison' ? init.comparisonMode : undefined}
                           pane={pane}
                           focusRequest={focus}
+                          scope={scope}
+                          filtered={filter !== undefined}
                           progress={position.progress}
                           highlighting={highlighting}
                           emphasis={emphasis}
@@ -165,6 +170,7 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
       data-comparison-mode={diff ? 'diff' : undefined}
       data-progress={init ? position.progress : undefined}
       data-highlighting={init ? position.highlighting : undefined}
+      data-scope={scope ? 'changes' : undefined}
       data-reduced-motion={renderer.environment?.reducedMotion ? 'true' : undefined}
       onKeyDown={onKeyDown}
     >

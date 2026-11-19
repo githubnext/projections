@@ -12,6 +12,7 @@ import {
   openSettings,
   openSettingsSubmenu,
   showAs,
+  showEverything,
   submenuItem,
   showAsChip,
 } from './harness.js'
@@ -169,15 +170,15 @@ test('Settings shows the projection as the renderer, a table or text; a chip in 
   const group = settings.getByRole('group', {name: 'Show as'})
   await expect(group.getByRole('menuitemradio')).toHaveText(['Graph', 'Table', 'Text'])
   await expect(group.getByRole('menuitemradio', {name: 'Graph'})).toBeChecked()
-  expect((await group.boundingBox())!.y).toBeLessThan((await menuItem(settings, 'Changes only').boundingBox())!.y)
+  expect((await group.boundingBox())!.y).toBeLessThan((await submenuItem(settings, 'Show').boundingBox())!.y)
   await group.getByRole('menuitemradio', {name: 'Graph'}).focus()
   await page.keyboard.press('ArrowDown')
   await expect(group.getByRole('menuitemradio', {name: 'Table'})).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(view(page)).toHaveAttribute('data-view', 'table')
-  // Renderer-only settings and the zoom actions go while the table shows; Changes only stays.
+  // Renderer-only settings and the zoom actions go while the table shows; the scope stays.
   const again = await openSettings(page)
-  await expect(menuItem(again, 'Changes only')).toBeVisible()
+  await expect(submenuItem(again, 'Show')).toBeVisible()
   await menuItem(again, 'Text').click()
   await expect(view(page)).toHaveAttribute('data-view', 'text')
   await closeMenus(page)
@@ -293,7 +294,8 @@ test('Settings, About, Filter and More open from the keyboard; Escape closes the
 test('Settings holds the view settings, without a connector setting', async ({page}) => {
   await open(page, 'before=v1&after=v3')
   const settings = await openSettings(page)
-  await expect(menuItem(settings, 'Changes only')).not.toBeChecked()
+  // A comparison opens on its changes.
+  await expect(submenuItem(settings, 'Show')).toContainText('Changes')
   // Submenus show their current values.
   await expect(submenuItem(settings, 'Highlight changes')).toContainText('During the transition')
   await expect(submenuItem(settings, 'Playback')).toContainText('1×')
@@ -321,6 +323,8 @@ test('reduced motion hides the Loop setting', async ({page}) => {
 
 test('Filter expands into the find field; Escape clears the query, then collapses the field back to the button', async ({page}) => {
   await open(page, 'before=v1&after=v3&view=table', desktop)
+  // Every item, so each row the filter keeps names the query (the Changes scope adds their context).
+  await showEverything(page)
   const button = toolbar(page).getByRole('button', {name: 'Filter', exact: true})
   await button.click()
   const field = page.getByLabel('Filter rows', {exact: true})
@@ -339,6 +343,7 @@ test('Filter expands into the find field; Escape clears the query, then collapse
   await expect(button).toBeFocused()
   // On a phone the field is in More.
   await open(page, 'before=v1&after=v3&view=table', iPhone13)
+  await showEverything(page)
   const inMore = await openFilter(page)
   await inMore.fill('pay')
   await expect(page.locator('.ph-table-view tbody tr[data-row-id]').first()).toContainText(/pay/i)

@@ -11,6 +11,7 @@ import {DetailCard} from './detail-card.js'
 import {ComparatorLine, featureOn, offeredModes, rendererLabel, spaceTogglesPlayback, zoomGroup} from './blocks.js'
 import type {ProjectionFeatures, ViewKind} from './blocks.js'
 import {Alert, AlertDescription} from './components/alert.js'
+import {Button} from './components/button.js'
 import {ScopedRoot} from './components/scoped-root.js'
 import {useColorMode} from './lib/color-mode.js'
 import {shadcnRendererTokens} from './lib/tokens.js'
@@ -19,6 +20,7 @@ import {viewOptions} from './view/options.js'
 import {RendererPaneStatus} from './view/pane-status.js'
 import type {ProjectionViewProps} from './view/props.js'
 import {ViewToolbar} from './view/toolbar.js'
+import {ScopeNotice} from './scope-notice.js'
 
 /** A notice under the toolbar: a band of the raised surface, edge to edge, ruled off below by a hairline. */
 const band = 'pj:shrink-0 pj:rounded-none pj:border-0 pj:border-b pj:border-divider pj:bg-surface-raised pj:py-2'
@@ -140,6 +142,17 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
           </AlertDescription>
         </Alert>
       )}
+      {comparing && p.scope === 'changes' && p.scopeCounts.changes === 0 && on('changesOnly') && (
+        <Alert role="status" className={cn('ph-no-changes', band)}>
+          <Info className="pj:h-4 pj:w-4" />
+          <AlertDescription className="pj:flex pj:flex-wrap pj:items-center pj:gap-x-3 pj:gap-y-1">
+            <span>No changes: both revisions present the same items.</span>
+            <Button type="button" variant="outline" size="sm" className="pj:h-7" onClick={() => p.setScope('all')}>
+              Show all
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
       {/* The detail card overlays the workspace (its containing block), so selecting never moves the stage. */}
       <div
         ref={workspace}
@@ -204,6 +217,8 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
             </div>
           )}
         </div>
+        {/* Without the summary bar, which says what the scope hides, a pill over the stage says it. */}
+        {on('changesOnly') && !on('summary') && <ScopeNotice projection={p} />}
         {props.details !== 'none' && (
           <DetailCard
             projection={p}

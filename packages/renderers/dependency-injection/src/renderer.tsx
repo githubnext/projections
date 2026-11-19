@@ -1,4 +1,4 @@
-import {useId, useMemo, useRef} from 'react'
+import {useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
 import type {ReactNode} from 'react'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import {cardBorderOutset, emphasisInset, classifyChange, contentStart, describeChange} from '@githubnext/projections-renderer-kit'
@@ -408,7 +408,9 @@ function TransitionView({
   // keeping the middle (the spine) in view. Both endpoints share the framing and the floor.
   const floor = useOpeningFloor(scroller, transition)
   const padding = useDiPadding()
-  const fit = useFitScale(scroller, bounds, {padding, floor})
+  // Zoomed in, a content-sized stage grows to the drawn scale (see `FitOptions.drawnScale`).
+  const [drawnScale, setDrawnScale] = useState(0)
+  const fit = useFitScale(scroller, bounds, {padding, floor, drawnScale})
   // The composition hangs from its root, centred at the top: a view that opens at the text floor opens there, on the
   // cards drawn when it is placed, with no card cut at its left edge (see `contentStart`).
   const drawn = useRef(units)
@@ -430,6 +432,7 @@ function TransitionView({
     [bounds, transition, padding],
   )
   const {zoom, scale} = useStageZoom(scroller, onAction, fit.scale, {floor, start})
+  useLayoutEffect(() => setDrawnScale(scale), [scale])
 
   return (
     <div className="di-view">

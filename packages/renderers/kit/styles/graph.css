@@ -307,9 +307,20 @@
   }
 }
 
-/* Items outside the host's find or "changes only" filter (`data-projections-filtered`) recede. */
+/*
+ * Items outside the host's find or scope filter (`data-projections-filtered`) recede to `--pk-recede` (see
+ * `scope.css`). On HTML boxes it is a filter, so it composes with the opacity renderers animate inline (a card fading
+ * in or out); inside SVG, where WebKit applies no CSS filter functions, it is the opacity, which overrides the
+ * presentation attribute renderers animate there.
+ */
 .pk [data-projections-filtered] {
-  opacity: 0.25;
+  --pk-recede: 0.25;
+}
+.pk [data-projections-filtered]:not(svg *) {
+  filter: opacity(var(--pk-recede));
+}
+.pk svg [data-projections-filtered] {
+  opacity: var(--pk-recede);
 }
 /* A card's facts (see GraphCanvas `badges` and `accent`): pills under its text, and a band along its leading edge. */
 .node-badge-surface {

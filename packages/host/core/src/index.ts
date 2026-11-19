@@ -38,9 +38,12 @@ export type {
   ProjectionController,
   ProjectionOptions,
   RendererStatus,
+  ScopeCounts,
+  ScopeHidden,
   StageBinding,
 } from './projection.js'
 export {ProjectionStage} from './stage.js'
+export {nothingHiddenTitle, scopeHiddenShort, scopeHiddenText} from './scope.js'
 export {arrangementHysteresis, paneArrangement, paneGeometry} from './stage/arrangement.js'
 export {PaneLabel} from './stage/labels.js'
 export {ProjectionLegend} from './stage/legend.js'
@@ -196,8 +199,9 @@ export {
   variedValue,
   variedWithin,
   variedWords,
+  viewScopes,
 } from '@githubnext/projections-renderer-sdk/presentation'
-export type {SummaryCount, SummaryDelta} from '@githubnext/projections-renderer-sdk/presentation'
+export type {SummaryCount, SummaryDelta, ViewScope} from '@githubnext/projections-renderer-sdk/presentation'
 export {useFullscreen} from './fullscreen.js'
 export type {FullscreenState} from './fullscreen.js'
 export {

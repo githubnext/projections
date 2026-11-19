@@ -1,0 +1,238 @@
+import {test as base, expect} from '@playwright/test'
+import type {Frame, Page} from '@playwright/test'
+import type {Theme} from './smoke.spec.js'
+
+const test = base.extend<{theme: Theme}>({theme: ['light', {option: true}]})
+
+/** One painted frame of the schema while it moves: whether it is moving, and every link's start and opacity. */
+interface Sample {
+  moving: boolean
+  links: {key: string; opacity: number; x: number; y: number; attached: boolean}[]
+}
+
+/** The schema's renderer frame. */
+async function schema(page: Page): Promise<Frame> {
+  const element = page.locator('.ph iframe').first()
+  await expect(element).toBeVisible()
+  const frame = await (await element.elementHandle())!.contentFrame()
+  await expect(frame!.locator('.database-table').first()).toBeVisible()
+  return frame!
+}
+
+/**
+ * Runs `act` in the renderer and samples every painted frame until the schema has settled: each link's start (in the
+ * canvas's units) and whether it touches the left or right side of a card, as a drawn link always leaves its row.
+ */
+async function sampleMove(frame: Frame, act: () => Promise<void>): Promise<Sample[]> {
+  await frame.evaluate(() => {
+    const samples: Sample[] = []
+    const window_ = window as unknown as {samples: Sample[]; sampling: boolean}
+    window_.samples = samples
+    window_.sampling = true
+    const read = () => {
+      const view = document.querySelector<HTMLElement>('.database-view')!
+      const cards = [...view.querySelectorAll<HTMLElement>('.database-table')].map(card => ({
+        x: parseFloat(card.style.left),
+        y: parseFloat(card.style.top),
+        width: parseFloat(card.style.width),
+        height: parseFloat(card.style.height),
+      }))
+      // How visible each link is: its own opacity and its layer's, which nothing may hide while the schema moves.
+      const layer = Number(getComputedStyle(view.querySelector('.database-links')!).opacity)
+      const links = [...view.querySelectorAll<SVGGElement>('[data-link-key]')].map(group => {
+        const [x, y] = (
+          group
+            .querySelector('path.database-link')!
+            .getAttribute('d')!
+            .match(/-?[\d.]+/g) ?? []
+        )
+          .slice(0, 2)
+          .map(Number)
+        const attached = cards.some(
+          card => Math.min(Math.abs(x! - card.x), Math.abs(x! - card.x - card.width)) < 1.5 && y! > card.y && y! < card.y + card.height,
+        )
+        // By relationship: one drawn another way in each layout (between rows, or the tables' headers) is the same link.
+        return {key: group.dataset.entityId!, opacity: layer * Number(group.getAttribute('opacity') ?? 1), x: x!, y: y!, attached}
+      })
+      samples.push({moving: view.hasAttribute('data-moving'), links})
+      if (window_.sampling) requestAnimationFrame(read)
+    }
+    requestAnimationFrame(read)
+  })
+  await act()
+  // Past the move (320 ms) and a few frames more.
+  await frame.waitForTimeout(700)
+  return frame.evaluate(() => {
+    const window_ = window as unknown as {samples: Sample[]; sampling: boolean}
+    window_.sampling = false
+    return window_.samples
+  })
+}
+
+/**
+ * Relationships drawn on both sides of a move never leave the drawing, never fade, and stay attached to their cards
+ * while it moves.
+ */
+function expectAttached(samples: Sample[], label: string) {
+  const first = samples[0]!,
+    last = samples.at(-1)!
+  const kept = [...new Set(first.links.map(link => link.key))].filter(key => last.links.some(link => link.key === key))
+  expect(kept.length, `${label}: some relationships are drawn on both sides of the move`).toBeGreaterThan(0)
+  expect(samples.filter(sample => sample.moving).length, `${label}: the schema moves over several frames`).toBeGreaterThan(3)
+  // A relationship's link drawn whole and attached at a frame (a relationship of several columns has several).
+  const drawn = (sample: Sample, key: string) => sample.links.find(item => item.key === key && item.opacity > 0.99 && item.attached)
+  for (const [index, sample] of samples.entries())
+    for (const key of kept) expect(drawn(sample, key), `${label}: ${key} is drawn whole, on its cards, at frame ${index}`).toBeTruthy()
+  // A link that travels far glides there over several frames, rather than jumping.
+  for (const key of kept) {
+    const starts = samples.map(sample => drawn(sample, key)!)
+    const travel = Math.hypot(starts.at(-1)!.x - starts[0]!.x, starts.at(-1)!.y - starts[0]!.y)
+    if (travel < 40) continue
+    const steps = starts.slice(1).map((point, index) => Math.hypot(point.x - starts[index]!.x, point.y - starts[index]!.y))
+    expect(Math.max(...steps), `${label}: ${key} glides ${Math.round(travel)} px`).toBeLessThan(travel * 0.6)
+  }
+}
+
+async function open(page: Page, theme: Theme) {
+  await page.setViewportSize({width: 1440, height: 900})
+  await page.goto(
+    new URL(
+      `iframe.html?id=default-ui-renderers--database&viewMode=story&globals=theme:${theme}&args=initialMode:diff`,
+      process.env.PROJECTIONS_STORYBOOK_URL,
+    ).href,
+  )
+  await expect(page.locator('.ph[data-renderer-status="ready"]').first()).toBeVisible({timeout: 30_000})
+  return schema(page)
+}
+
+test('opening and closing a fold and switching to All move the schema with every link attached', async ({page, theme}, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium-light', 'motion does not depend on the theme or browser')
+  const frame = await open(page, theme)
+  const fold = frame.locator('.database-fold-button').first()
+  await expect(fold).toHaveAttribute('aria-expanded', 'false')
+  const table = (await fold.evaluate(button => button.closest('[data-entity-id]')!.getAttribute('data-entity-id')))!
+  expectAttached(await sampleMove(frame, () => fold.click()), 'opening a fold')
+  // The open fold stays in its place, as the way to fold the columns again, from the keyboard too.
+  const hide = frame.locator(`section[data-entity-id=${JSON.stringify(table)}] .database-fold-button[aria-expanded="true"]`)
+  await expect(hide).toHaveText(/^Hide /)
+  expectAttached(await sampleMove(frame, () => hide.press('Enter')), 'closing it')
+  await expect(frame.locator(`section[data-entity-id=${JSON.stringify(table)}] .database-fold-button`)).toHaveAttribute(
+    'aria-expanded',
+    'false',
+  )
+  const all = page.locator('.ph-scope [data-scope="all"]').first()
+  expectAttached(await sampleMove(frame, () => all.click()), 'switching to All')
+  await expect(frame.locator('.database-fold-button')).toHaveCount(0)
+})
+
+test('under reduced motion the schema jumps to its new layout', async ({page, theme}, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium-light', 'motion does not depend on the theme or browser')
+  await page.emulateMedia({reducedMotion: 'reduce'})
+  const frame = await open(page, theme)
+  const samples = await sampleMove(frame, () => frame.locator('.database-fold-button').first().click())
+  expect(samples.some(sample => sample.moving)).toBe(false)
+  expect(samples.at(-1)!.links.every(link => link.opacity > 0.99 && link.attached)).toBe(true)
+})
+
+/** A horizontal line an element paints: a border, an inset shadow's top or bottom edge, or an inset outline's. */
+interface Line {
+  y: number
+  /** Its thickness. */
+  width: number
+  left: number
+  right: number
+  by: string
+}
+
+/**
+ * Every pair of horizontal lines in the renderer document drawn side by side: overlapping across, and touching or under
+ * 2 px apart (lines that share pixels draw as one). Rows separated by one line each never have such a pair.
+ */
+async function doubledLines(frame: Frame): Promise<string[]> {
+  return frame.evaluate(() => {
+    const lines: Line[] = []
+    const drawn = (color: string) => color !== 'transparent' && !/rgba\([^)]*,\s*0\)$/.test(color)
+    const name = (element: Element) =>
+      `${element.tagName.toLowerCase()}.${[...element.classList].slice(0, 2).join('.')}${element.getAttribute('data-entity-id') ? `[${element.getAttribute('data-entity-id')}]` : ''}`
+    for (const element of document.body.querySelectorAll<HTMLElement>('*')) {
+      if (element.closest('svg')) continue
+      const box = element.getBoundingClientRect()
+      if (box.width < 8 || box.height < 2) continue
+      const style = getComputedStyle(element)
+      if (style.visibility === 'hidden' || Number(style.opacity) === 0) continue
+      // Only what its clipping ancestors leave in view is drawn.
+      let top = -Infinity,
+        bottom = Infinity
+      for (let parent = element.parentElement; parent; parent = parent.parentElement)
+        if (getComputedStyle(parent).overflow !== 'visible') {
+          const clip = parent.getBoundingClientRect()
+          top = Math.max(top, clip.top)
+          bottom = Math.min(bottom, clip.bottom)
+        }
+      const add = (y: number, width: number) => {
+        if (y >= top && y < bottom) lines.push({y, width, left: box.left, right: box.right, by: name(element)})
+      }
+      for (const side of ['Top', 'Bottom'] as const) {
+        const width = parseFloat(style.getPropertyValue(`border-${side.toLowerCase()}-width`))
+        if (
+          width > 0 &&
+          style.getPropertyValue(`border-${side.toLowerCase()}-style`) !== 'none' &&
+          drawn(style.getPropertyValue(`border-${side.toLowerCase()}-color`))
+        )
+          add(side === 'Top' ? box.top : box.bottom - width, width)
+      }
+      // An inset shadow with only a vertical offset, or a spread, draws a top or bottom edge.
+      for (const shadow of style.boxShadow === 'none' ? [] : style.boxShadow.split(/,(?![^(]*\))/)) {
+        if (!shadow.includes('inset')) continue
+        const color = shadow.match(/(rgba?|color)\([^)]*\)/)?.[0] ?? ''
+        if (!drawn(color)) continue
+        const [x = 0, y = 0, , spread = 0] = (shadow.replace(color, '').match(/-?[\d.]+px/g) ?? []).map(parseFloat)
+        if (spread > 0) {
+          add(box.top + parseFloat(style.borderTopWidth), spread)
+          add(box.bottom - parseFloat(style.borderBottomWidth) - spread, spread)
+        } else if (x === 0 && y > 0) add(box.top + parseFloat(style.borderTopWidth), y)
+        else if (x === 0 && y < 0) add(box.bottom - parseFloat(style.borderBottomWidth) + y, -y)
+      }
+      const outline = parseFloat(style.outlineWidth)
+      if (style.outlineStyle !== 'none' && outline > 0 && parseFloat(style.outlineOffset) <= -outline && drawn(style.outlineColor)) {
+        add(box.top, outline)
+        add(box.bottom - outline, outline)
+      }
+    }
+    const doubled: string[] = []
+    for (const [index, a] of lines.entries())
+      for (const b of lines.slice(index + 1)) {
+        const across = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+        // Lines that share pixels draw as one; lines that touch, or nearly, draw as two.
+        const gap = Math.max(a.y, b.y) - Math.min(a.y + a.width, b.y + b.width)
+        if (across > 8 && gap > -0.5 && gap < 2) doubled.push(`${a.by} at ${a.y.toFixed(1)} beside ${b.by} at ${b.y.toFixed(1)}`)
+      }
+    return doubled
+  })
+}
+
+/**
+ * Renderers whose change regions still draw their edge inside a container's border (a text diff's output, a policy
+ * panel), so the two lines run side by side: known, until those containers let a change's hue replace their edge.
+ */
+const known = new Set(['text-diff', 'runtime-policy'])
+
+for (const story of ['api', 'database', 'text-diff', 'code-statistics', 'runtime-policy'])
+  test(`${story}: every boundary between rows is one line, in Diff and Animated, Changes and All`, async ({page, theme}) => {
+    test.fail(known.has(story), 'its change regions draw inside a container border')
+    await page.setViewportSize({width: 1440, height: 900})
+    for (const mode of ['diff', 'animated'])
+      for (const changesOnly of [true, false]) {
+        await page.goto(
+          new URL(
+            `iframe.html?id=default-ui-renderers--${story}&viewMode=story&globals=theme:${theme}&args=initialMode:${mode};changesOnly:!${changesOnly}`,
+            process.env.PROJECTIONS_STORYBOOK_URL,
+          ).href,
+        )
+        await expect(page.locator('.ph[data-renderer-status="ready"]').first()).toBeVisible({timeout: 30_000})
+        const element = page.locator('.ph iframe').first()
+        const frame = (await (await element.elementHandle())!.contentFrame())!
+        await page.waitForTimeout(800)
+        expect(await doubledLines(frame), `${story}, ${mode}, ${changesOnly ? 'Changes' : 'All'}`).toEqual([])
+      }
+  })

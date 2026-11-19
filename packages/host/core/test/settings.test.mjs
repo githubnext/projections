@@ -8,6 +8,8 @@ const projection = (overrides = {}) => ({
   mode: 'animated',
   reducedMotion: false,
   changesOnly: false,
+  scope: 'all',
+  scopeCounts: {changes: 2, all: 5, noise: 0},
   highlighting: 'animated',
   loop: true,
   holds: 'timeline',
@@ -22,6 +24,7 @@ const projection = (overrides = {}) => ({
   controls: [],
   controlValues: {},
   setChangesOnly() {},
+  setScope() {},
   setHighlighting() {},
   setRenderer() {},
   setLoop() {},
@@ -42,29 +45,35 @@ const topItems = model => model.groups.flatMap(group => group.entries.flatMap(en
 const submenuLabels = model =>
   model.groups.flatMap(group => group.entries.filter(entry => entry.type === 'submenu').map(entry => entry.label))
 
-test('the top level holds Show as and Changes only; the rest are submenus', () => {
+test('the top level holds Show as and the scope; the rest are submenus', () => {
   const model = settingsModel(projection(), {}, showAs)
   assert.deepEqual(
     model.groups[0].entries[0].options.map(option => option.label),
     ['Graph', 'Table', 'Text'],
   )
-  assert.equal(model.groups[1].entries[0].label, 'Changes only')
-  assert.deepEqual(submenuLabels(model), ['Highlight changes', 'Renderer', 'Playback'])
-  const playback = model.groups[2].entries[2]
+  assert.deepEqual(submenuLabels(model), ['Show', 'Highlight changes', 'Renderer', 'Playback'])
+  // The scope's submenu shows its value, and offers Noise only when something varied.
+  const scope = model.groups[1].entries[0]
+  assert.equal(scope.detail, 'Everything')
+  assert.deepEqual(
+    scope.groups[0].entries[0].options.map(option => option.label),
+    ['Changes', 'Everything'],
+  )
+  const playback = model.groups[1].entries[3]
   assert.deepEqual(
     playback.groups.map(group => group.label),
     [undefined, 'Holds', 'Speed'],
   )
   assert.equal(playback.detail, '1×')
   // A one-choice submenu shows its value, and its choice isn't headed by the submenu's own name again.
-  const highlighting = model.groups[2].entries[0]
+  const highlighting = model.groups[1].entries[1]
   assert.equal(highlighting.detail, 'During the transition')
   assert.equal(highlighting.groups[0].label, undefined)
 })
 
 test('Playback is only offered animated, and Renderer only with a choice of renderers', () => {
   const sideBySide = settingsModel(projection({mode: 'side-by-side', renderers: [{name: 'graph', title: 'Graph'}]}), {}, showAs)
-  assert.deepEqual(submenuLabels(sideBySide), ['Highlight changes'])
+  assert.deepEqual(submenuLabels(sideBySide), ['Show', 'Highlight changes'])
 })
 
 test('the dependency graph’s option groups carry distinct labels (no repeated renderer name)', () => {
@@ -108,7 +117,7 @@ test('at the extremes the top level stays short enough for a 400px webview', () 
   const many = Array.from({length: 30}, (_, index) => toggle(`t${index}`, `Toggle ${index}`, {group: `g${index}`}))
   const model = settingsModel(projection({controls: [...zoom, ...many]}), {}, showAs)
   const items = topItems(model)
-  // Show as (3), Changes only, Highlight changes, Renderer, Playback and the renderer's options.
+  // Show as (3), Show (the scope), Highlight changes, Renderer, Playback and the renderer's options.
   assert.ok(items.length <= 3 + 1 + 3 + maxRendererSubmenus, `${items.length} items`)
   assert.equal(items.length, 8)
   // The most a top level holds: `maxRendererSubmenus` groups of their own. In 26px items, with two headings, three

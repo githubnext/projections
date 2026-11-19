@@ -21,14 +21,16 @@ export interface FocusArea {
 
 /**
  * The area a focus request frames in a laid-out graph: the item it names with the cards it connects to, or every
- * changed card and relationship (with the cards at their ends) that this graph draws; undefined for everything (`all`,
- * or nothing it names is drawn). Without a request, diff mode frames the changes; other modes everything.
+ * changed card and relationship (with the cards at their ends) that this graph draws, and in the Changes scope
+ * (`shown`) the cards that give them context; undefined for everything (`all`, or nothing it names is drawn). Without
+ * a request, diff mode frames the changes; other modes everything.
  */
 export function focusArea(
   transition: GraphTransition,
   diff: boolean,
   model: ComparisonModel,
   request: RendererFocus | undefined,
+  shown?: ReadonlySet<string>,
 ): FocusArea | undefined {
   if (request?.id === undefined && (request?.on === 'all' || (!request && !diff) || model.mode !== 'comparison')) return undefined
   const frames: GraphFrame[] = diff ? [transition.diff] : [transition(0), transition(1)]
@@ -39,7 +41,7 @@ export function focusArea(
     wanted.add(request.id)
     for (const edge of edges)
       if (edge.id === request.id || edge.fromId === request.id || edge.toId === request.id) wanted.add(edge.fromId).add(edge.toId)
-  } else for (const row of model.entities) if (isChanged(row)) wanted.add(row.id)
+  } else for (const row of model.entities) if (isChanged(row) || shown?.has(row.id)) wanted.add(row.id)
   const routes = edges.filter(edge => (request?.id === undefined ? isChanged(edge) : edge.id === request.id))
   for (const edge of routes) wanted.add(edge.fromId).add(edge.toId)
   const boxOf = (node: {x: number; y: number; width: number; height: number}) => ({

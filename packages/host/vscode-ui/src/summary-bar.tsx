@@ -11,6 +11,8 @@ import {
   summaryFilterable,
   summaryFilterOf,
   useSummaryFit,
+  scopeHiddenShort,
+  scopeHiddenText,
 } from '@githubnext/projections-host'
 import type {ProjectionController, SummaryDelta, SummaryFigure} from '@githubnext/projections-host'
 import {uiCodicons} from './codicons.js'
@@ -200,7 +202,13 @@ export function SummaryBar({
   const within = p.comparing ? (p.variation?.within ?? 0) : 0
   const regenerated = p.comparing ? (p.variation?.regenerated ?? 0) : 0
   const sentence = figuresSentence(figures, p.comparing)
-  const shown = useSummaryFit(bar, figures.length, `${sentence}|${within}|${regenerated}|${p.comparing}|${running !== undefined}`)
+  // What the Changes scope leaves out, at the bar's end beside Show all.
+  const hiddenShort = p.comparing && p.scope === 'changes' ? scopeHiddenShort(p.scopeHidden) : undefined
+  const shown = useSummaryFit(
+    bar,
+    figures.length,
+    `${sentence}|${within}|${regenerated}|${p.comparing}|${running !== undefined}|${hiddenShort ?? ''}`,
+  )
   const hidden = figures.slice(shown)
   return (
     <div
@@ -257,6 +265,16 @@ export function SummaryBar({
         </>
       )}
       <span aria-hidden="true" className="phv-summary-spacer" />
+      {hiddenShort && (
+        <span data-summary-fixed="" data-scope-hidden="" className="phv-summary-fixed phv-summary-hidden">
+          <span className="phv-cap" title={scopeHiddenText(p.scopeHidden)}>
+            {hiddenShort}
+          </span>
+          <button type="button" className="phv-summary-button phv-summary-show-all" onClick={() => p.setScope('all')}>
+            <span className="phv-cap">Show all</span>
+          </button>
+        </span>
+      )}
       {regenerated > 0 && (
         <span data-summary-fixed="" className="phv-summary-fixed">
           <button

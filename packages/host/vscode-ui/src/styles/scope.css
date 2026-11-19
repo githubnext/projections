@@ -1,0 +1,112 @@
+/* The scope: its switch beside the mode, what it hides in the summary bar, and the pill when there is no bar. */
+/* The scope switch: text choices in the mode switch's frame, checked as VS Code's input option. */
+.phv-scope-switch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px;
+  border: 1px solid var(--vscode-input-border, var(--phv-border));
+  border-radius: 5px;
+}
+.phv-scope {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--vscode-foreground);
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+.phv-scope:hover {
+  background: var(--vscode-toolbar-hoverBackground);
+}
+.phv-scope[aria-checked='true'] {
+  border-color: var(--vscode-inputOption-activeBorder, transparent);
+  color: var(--vscode-inputOption-activeForeground, var(--vscode-foreground));
+  background: var(--vscode-inputOption-activeBackground);
+}
+.phv-scope:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+.phv-scope-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  color: var(--phv-muted);
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.phv-scope-note-name {
+  color: var(--vscode-foreground);
+}
+/* What the Changes scope hides, as a neutral pill over the bottom of the stage (never moving the layout). */
+.phv-scope-notice-slot {
+  position: absolute;
+  inset: auto 12px 12px;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+  pointer-events: none;
+}
+.phv-scope-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 26px;
+  padding: 0 4px 0 10px;
+  border: 1px solid var(--vscode-widget-border, var(--phv-border));
+  border-radius: 13px;
+  color: var(--vscode-descriptionForeground, var(--phv-muted));
+  background: var(--vscode-editorWidget-background, var(--phv-bg));
+  box-shadow: 0 2px 8px var(--vscode-widget-shadow, transparent);
+  font-size: 12px;
+  line-height: 1;
+  pointer-events: auto;
+}
+.phv-scope-notice-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.phv-scope-notice-action {
+  flex: none;
+  height: 20px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--vscode-textLink-foreground);
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.phv-scope-notice-action:hover {
+  background: var(--vscode-toolbar-hoverBackground);
+}
+.phv-scope-notice-action:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+.phv-scope-count {
+  color: var(--phv-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.phv-summary-hidden {
+  align-items: center;
+  gap: 4px;
+}
+.phv-summary-show-all {
+  color: var(--vscode-textLink-foreground);
+}

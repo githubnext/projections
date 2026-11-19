@@ -447,6 +447,31 @@ nothing for an unchanged one. The kit's styles draw a marked HTML
 dashed and their `pk-diff-text` struck through. Spread it on the element
 that carries `data-entity-id`.
 
+### `changesScope`
+
+```ts
+changesScope(model: ComparisonModel<Extraction> | undefined, filter: FilterPayload | undefined): ChangesScope | undefined
+```
+
+The Changes scope a renderer presents, or undefined when the host shows every item (or this is one extraction). The
+host's filter `ids` are what it shows, its changes and their context, each change with every row presenting it (a
+split's parts); past the filter's ID limit, or before the host says, the kit derives the same from the comparison's
+structure (`changeContext`).
+
+### `ChangesScope`
+
+```ts
+interface ChangesScope
+```
+
+What a Changes scope shows: the changes it is about and the unchanged items that give them context.
+
+| Member | Signature | Description |
+|---|---|---|
+| `changes` | `"changes": ReadonlySet<string>` | The change rows in scope, by row ID. |
+| `context` | `"context": ReadonlySet<string>` | The unchanged rows shown to read them: their relationships' endpoints and the items that contain them. |
+| `shown` | `"shown": ReadonlySet<string>` | Both: every row the scope shows. |
+
 ### `clampZoom`
 
 ```ts
@@ -549,6 +574,7 @@ same extraction and every row is unchanged.
 |---|---|---|
 | `after` | `"after": X` | The After extraction; the extraction itself in extraction mode. |
 | `before` | `"before": X` | The Before extraction; the extraction itself in extraction mode. |
+| `changeRows` | `"changeRows"?: ReadonlyMap<string, Array<string>>` | The presented rows of each comparison change with more than one item: a split's further parts and a merge's further sources are rows of their own, while the host names the change by its ID alone. |
 | `entities` | `"entities": Array<EntityChange<X["entities"][number]>>` | One row per entity across both extractions, its Before and After versions paired by the comparison. |
 | `entityRow` | `"entityRow": { "after": ReadonlyMap<string, string>; "before": ReadonlyMap<string, string> }` | Maps an entity ID of either extraction to the presented row that shows it. |
 | `mode` | `"mode": "comparison" \| "extraction"` | Whether this presents one extraction or a comparison of two. |
@@ -638,6 +664,19 @@ for the viewport opens from its leftmost box instead, as `'left'` does, never cu
 `clear` keeps that many more CSS px clear at the view's left, beside `margin`, reaching into the padding: content
 drawn flush with a host's stage inset (`inset.x` and `clear` the same) opens with its leftmost box that inset from
 the view's edge, on the host's column.
+
+### `ContextPaths`
+
+```ts
+interface ContextPaths
+```
+
+Which relationships `followContext` follows, by kind: to an item's sources (`incoming`), or its targets (`outgoing`).
+
+| Member | Signature | Description |
+|---|---|---|
+| `incoming` | `"incoming"?: { (kind: string): false \| true }` | Follow a relationship of this kind from its target back to its source (a dependency to the package that needs it). |
+| `outgoing` | `"outgoing"?: { (kind: string): false \| true }` | Follow a relationship of this kind from its source to its target (a probe to the hook it attaches to). |
 
 ### `countText`
 
@@ -1250,6 +1289,7 @@ How `useFitScale` fits content to its stage.
 | Member | Signature | Description |
 |---|---|---|
 | `aspect` | `"aspect"?: number` | The shape (width / height) to report for arranging held panes, when the view opens on part of the content (see `StageZoomOptions.opening`) rather than all of it; default the content's own. |
+| `drawnScale` | `"drawnScale"?: number` | The scale the content is drawn at now (see `useStageZoom`). Zoomed in past where it opens, a content-sized host is asked for the height it takes at that scale, up to its `stage-max-height`, so the stage grows into the page before it pans; the fit itself never depends on it. |
 | `floor` | `"floor"?: number` | The scale at which the content's smallest text reaches the kit's `openingFloorPx` (see `useOpeningFloor`; pass the same to `useStageZoom`). When fitting the width draws text smaller, a content-sized host is asked for the height the content takes at that floor, where it opens, so the opening view pans only sideways. |
 | `maxScale` | `"maxScale"?: number` | Largest scale (default 1: small content is centred at its own size, never enlarged). |
 | `minHeight` | `"minHeight"?: number` | Smallest stage height to ask a content-sized host for, CSS px (default 200), unless the content is scaled down to its width. |
@@ -1303,6 +1343,44 @@ focusedIds(model: ComparisonModel<Extraction> | undefined, focus: RendererFocus 
 
 The selection IDs a focus request names, in a model: its item, or every changed entity and relationship. Undefined
 when it names none (`all`, or no request); in diff mode without a request, the changes.
+
+### `Folded`
+
+```ts
+type Folded<T> = { "item": T; "type": "item" } | { "items": Array<T>; "key": string; "open"?: false | true; "type": "fold" }
+```
+
+One entry of a folded list: an item it shows, or a fold standing for a run of items it doesn't. An `open` fold's items
+follow it, and it is the way to fold them again.
+
+### `foldList`
+
+```ts
+foldList<T>(items: Array<T>, idOf: { (item: T): string }, shown: ReadonlySet<string> | undefined, expanded?: ReadonlySet<string>): Array<{ "item": T; "type": "item" } | { "items": Array<T>; "key": string; "open"?: false | true; "type": "fold" }>
+```
+
+A list with every run of items `shown` leaves out folded into one entry, keyed by its first item; a run `expanded`
+names is listed after its fold, `open`. A run of one item stays, as its fold would take as much room. Every item is shown when `shown` is
+undefined. Fold the union of a comparison (or each pane's list in the union's order) so both revisions fold alike.
+
+### `foldPrefix`
+
+```ts
+foldPrefix: "pk-fold:"
+```
+
+The ID prefix of a fold `scopedModel` adds: `pk-fold:` and the row ID of the entity whose parts it stands for.
+
+### `followContext`
+
+```ts
+followContext(model: ComparisonModel<Extraction>, changes: ReadonlySet<string>, paths: ContextPaths): Set<string>
+```
+
+The rows that place a comparison's changes along the relationships `paths` names, transitively: from each changed
+entity and each end of a changed relationship, in whichever revision has them, every entity reached and the
+relationships followed to it. For example a changed package's dependents up to the workspace, or a changed selector's
+probe, the probe's policy and the hook it attaches to.
 
 ### `followEndpoints`
 
@@ -1584,6 +1662,14 @@ isChanged(change: { "renamed"?: false | true | undefined; "status": "added" | "m
 ```
 
 Whether a row carries a change worth emphasizing.
+
+### `isFold`
+
+```ts
+isFold(id: string): false | true
+```
+
+Whether an item is a fold of left-out parts (`scopedModel` with `parts: 'fold'`), which opens with `ScopeView.expand`.
 
 ### `isKind`
 
@@ -2313,6 +2399,60 @@ endpoints, where every step has either not started or finished. A step that
 removes something gets a reading lead; travelling backward through explicit
 reverse steps, one that adds something gets a reading tail, the part that
 backward travel enters first. Use a `DirectionLatch` to choose `direction`.
+
+### `scopedModel`
+
+```ts
+scopedModel<X extends Extraction>(model: ComparisonModel<X>, shown: ReadonlySet<string>, parts?: "fold" | "omit" | "whole", open?: ReadonlySet<string>): ScopedModel<X>
+```
+
+A model of only what a scope shows, for a canvas to lay out: the shown entities and their `parts` (left out, whole or
+folded), and the relationships between them. A relationship is kept only when both its ends are: a changed one always
+is (its ends are its context), an unchanged one between shown items stays, and none is ever drawn to an item the
+scope leaves out. Steps keep their kept rows, and a step left with none is dropped. Every other item takes no room.
+A fold is an unchanged entity of its parts' most common kind, labeled with their counts and contained by its entity
+in each revision that has it. A fold in `open` shows its parts and stays, labeled `Hide …` with `data.open`, as the
+way to fold them again.
+
+### `ScopedModel`
+
+```ts
+interface ScopedModel<X extends Extraction = Extraction>
+```
+
+A model of only what a scope shows (`scopedModel`), and the parts each fold in it stands for.
+
+| Member | Signature | Description |
+|---|---|---|
+| `folds` | `"folds": ReadonlyMap<string, Array<string>>` | Each fold's left-out parts, by the fold's ID. |
+| `model` | `"model": ComparisonModel<X>` | The model of what the scope shows, with the folds standing for left-out parts. |
+
+### `ScopedParts`
+
+```ts
+type ScopedParts = "fold" | "omit" | "whole"
+```
+
+How `scopedModel` treats the parts of a shown entity (the items it contains): left out; kept whole, for a card that
+draws its parts as one; or folded, each entity's left-out parts standing as one more part, a fold (`foldPrefix`).
+
+### `ScopeView`
+
+```ts
+interface ScopeView extends ChangesScope
+```
+
+The Changes scope as a kit renderer receives it (`RendererProps.scope`): what it shows, every item's model, and a way
+to show more of it.
+
+| Member | Signature | Description |
+|---|---|---|
+| `all` | `"all": ComparisonModel<Extraction>` | The model of every item: what a canvas's `model` (`MountOptions.scope` `subset`) narrows. |
+| `changes` | `"changes": ReadonlySet<string>` | The change rows in scope, by row ID. |
+| `collapse` | `"collapse"(ids: Iterable<string, any, any>): void` | Folds these open folds again, or stops showing items `expand` added. |
+| `context` | `"context": ReadonlySet<string>` | The unchanged rows shown to read them: their relationships' endpoints and the items that contain them. |
+| `expand` | `"expand"(ids: Iterable<string, any, any>): void` | Shows these items too, or opens these folds (`isFold`), until the host's scope changes. A canvas lays them out with the rest; an open fold stays, as the way to fold its parts again. |
+| `shown` | `"shown": ReadonlySet<string>` | Both: every row the scope shows. |
 
 ### `ScrollStart`
 
@@ -3255,6 +3395,16 @@ Fields(__0: { "children": Iterable<ReactNode, any, any> | Promise<Iterable<React
 
 Name and value rows, such as an entity's data.
 
+### `Fold`
+
+```ts
+Fold(__0: { "as"?: "a" | "abbr" | "address" | "animate" | "animateMotion" | "animateTransform" | "area" | "article" | "aside" | "audio" | "b" | "base" | "bdi" | "bdo" | "big" | "blockquote" | "body" | "br" | "button" | "canvas" | "caption" | "center" | "circle" | "cite" | "clipPath" | "code" | "col" | "colgroup" | "data" | "datalist" | "dd" | "defs" | "del" | "desc" | "details" | "dfn" | "dialog" | "div" | "dl" | "dt" | "ellipse" | "em" | "embed" | "feBlend" | "feColorMatrix" | "feComponentTransfer" | "feComposite" | "feConvolveMatrix" | "feDiffuseLighting" | "feDisplacementMap" | "feDistantLight" | "feDropShadow" | "feFlood" | "feFuncA" | "feFuncB" | "feFuncG" | "feFuncR" | "feGaussianBlur" | "feImage" | "feMerge" | "feMergeNode" | "feMorphology" | "feOffset" | "fePointLight" | "feSpecularLighting" | "feSpotLight" | "feTile" | "feTurbulence" | "fieldset" | "figcaption" | "figure" | "filter" | "footer" | "foreignObject" | "form" | "g" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "head" | "header" | "hgroup" | "hr" | "html" | "i" | "iframe" | "image" | "img" | "input" | "ins" | "kbd" | "keygen" | "label" | "legend" | "li" | "line" | "linearGradient" | "link" | "main" | "map" | "mark" | "marker" | "mask" | "menu" | "menuitem" | "meta" | "metadata" | "meter" | "mpath" | "nav" | "noindex" | "noscript" | "object" | "ol" | "optgroup" | "option" | "output" | "p" | "param" | "path" | "pattern" | "picture" | "polygon" | "polyline" | "pre" | "progress" | "q" | "radialGradient" | "rect" | "rp" | "rt" | "ruby" | "s" | "samp" | "script" | "search" | "section" | "select" | "set" | "slot" | "small" | "source" | "span" | "stop" | "strong" | "style" | "sub" | "summary" | "sup" | "svg" | "switch" | "symbol" | "table" | "tbody" | "td" | "template" | "text" | "textPath" | "textarea" | "tfoot" | "th" | "thead" | "time" | "title" | "tr" | "track" | "tspan" | "u" | "ul" | "use" | "var" | "video" | "view" | "wbr" | "webview" | ComponentClass<any, any> | FunctionComponent<any>; "className"?: string; "columns"?: number; "count": number; "noun": string; "onToggle": { (): void }; "open"?: false | true | undefined }): Element
+```
+
+A fold: "12 unchanged declarations", a button that opens the run in place; `open`, "Hide 12 unchanged declarations"
+above the opened run, which folds it again. `as` sets its element (`div` by default, `tr` or `li` in tables and lists;
+a `tr` puts the button in one cell spanning `columns`).
+
 ### `GeneratedMark`
 
 ```ts
@@ -3360,6 +3510,7 @@ Everything but the renderer props is optional; the defaults draw every entity as
 | `direction` | `"direction": -1 \| 1` | The host's playback direction (`ProgressPayload.direction`): 1 toward After, -1 back toward Before. Always 1 for an extraction and in diff mode. `schedule` is already ordered for the direction the transition presents. |
 | `emphasis` | `"emphasis": EmphasisOf` | A change's emphasis now: 0 until its comparison step begins, then the host's highlighting; in a held pane, the host's highlighting (see `stepEmphasis`). Pass the row ID as the second argument when the object passed has none. |
 | `environment` | `"environment": RendererEnvironment` | The host's current theme, motion preference, locale and pane: `init`'s, or a later `environment`'s. |
+| `filtered` | `"filtered"?: false \| true \| undefined` | Whether the host has said what it shows (its filter, and with it the scope). Until it does, every item is drawn, provisionally: a canvas that moves between layouts of the scope doesn't move from that one, so the first scope the host chooses is drawn at once rather than pared down to. Undefined where no host filter is wired (treat it as said). |
 | `focus` | `"focus"?: undefined \| { "ids": ReadonlySet<string>; "label": string }` | Entity rows to bring forward, for example what depends on the selection: other cards and relationships recede. `label` says what is highlighted, for people who don't see the graph. |
 | `focusRequest` | `"focusRequest": RendererFocus \| undefined` | Where the host wants the opening view (`InitPayload.focus`), or a comparison's changes while the host shows changes only; undefined for the renderer's own choice. The shell scrolls the first focused item of a list into view itself; a renderer that places its own view (`useStageZoom`) frames what it names. |
 | `highlighting` | `"highlighting": number` | Host-chosen change emphasis, exactly 0 at both endpoints and for extractions. Use `emphasis(row)` for a change's own emphasis: it is scoped to the change's step. |
@@ -3384,6 +3535,7 @@ Everything but the renderer props is optional; the defaults draw every entity as
 | `reportSteps` | `"reportSteps": { (ends: Array<number>, slots?: number \| undefined): void }` | Report step boundaries where a host may hold, for renderers with their own timing, and optionally how many step slots the presentation spans (`timelineSlots`). |
 | `requestDocument` | `"requestDocument": { (name: string): Promise<string> }` | Asks the host for a built-in renderer's document, to run nested (`embedRenderer`); rejects with the host's reason when it supplies none (see `RendererClient.requestDocument`). |
 | `schedule` | `"schedule": Array<ScheduledStep>` | The comparison's steps on the progress axis for the direction this transition presents (see `DirectionLatch`). Empty for extractions. |
+| `scope` | `"scope": ScopeView \| undefined` | The Changes scope, while the host shows a comparison's changes and their context (`changesScope`): its `shown` items, with the parts the person opened (`expand`). A list folds the rest (`useFolds`, `Fold`); a canvas that declares `MountOptions.scope` `subset` receives a `model` of only what is shown and lays that out. Nothing is faded: what is shown is drawn at full strength, and what isn't takes no room. Undefined while every item is shown. |
 | `selectedId` | `"selectedId": null \| string` | The selected item's ID (an entity row ID, or a part's `data-entity-id`), or `null` when nothing is selected. |
 | `source` | `"source"?: unknown` | What `model` is a view of, when a renderer derives it (for example with groups expanded or collapsed): while a new model of the same document is laid out, the current layout stays on screen, and keyboard focus with it, instead of the loading state. |
 | `subtitle` | `"subtitle"?: undefined \| { (entity: Entity): string \| undefined }` | A few words under a card's label, such as what the entity is for: human text in sans, wrapped to the card on at most `subtitleMetrics.lines` lines and ending in an ellipsis when longer (the tooltip has it whole). The card grows a line for each line either revision needs; a changed one crossfades with the card's own step. Pass a stable function: a new one lays out again. |
@@ -3513,6 +3665,7 @@ How `mountRenderer` connects a renderer component to its host.
 | `interactions` | `"interactions"?: false` | Hover, anchors, scroll mirroring, the host's filter and annotation badges through `connectInteractions` over elements carrying `data-entity-id` (default on). `false` opts out and declares none of the interaction capabilities. |
 | `name` | `"name": string` | Bundle name, used for `data-renderer` on the root element. |
 | `nouns` | `"nouns"?: { (kind: string, collection: "entities" \| "relationships"): SummaryNoun \| false \| undefined } \| { readonly [key: string]: SummaryNoun \| false }` | The renderer's words for extraction kinds in the host's summary bar (`SummaryNouns`), for every document; see `declareNouns` for words that depend on the document. |
+| `scope` | `"scope"?: { "context"?: { (all: ComparisonModel<Extraction>, changes: ReadonlySet<string>, renderer: string): Iterable<string, any, any> }; "layout": "subset"; "parts"?: "fold" \| "omit" \| "whole" } \| { "layout": "fold" }` | How the Changes scope reaches the renderer. `fold` (the default): `model` holds every item and the renderer folds what `scope` leaves out, as a list does. `subset`: `model` holds only what the scope shows (`scopedModel`), with the shown entities' `parts` left out, kept whole or folded, so a canvas lays out only that; `scope.all` holds every item. A subset renderer that needs more to place a change than its relationships' endpoints and containers (a package's path from the workspace, a selector's probe and hook) returns those items' row IDs from `context`, given every item, the changes in scope and its renderer name; they show as context. |
 | `steps` | `"steps"?: "manual" \| "schedule"` | `schedule` (default) reports the end of each scheduled step to the host; `manual` leaves it to the component through `reportSteps`. |
 
 ### `mountRenderer`
@@ -3655,6 +3808,7 @@ Everything a kit renderer component receives for one host state.
 | `direction` | `"direction": -1 \| 1` | The host's playback direction (`ProgressPayload.direction`): 1 toward After, -1 back toward Before. Always 1 for an extraction and in diff mode. `schedule` is already ordered for the direction the transition presents. |
 | `emphasis` | `"emphasis": EmphasisOf` | A change's emphasis now: 0 until its comparison step begins, then the host's highlighting; in a held pane, the host's highlighting (see `stepEmphasis`). Pass the row ID as the second argument when the object passed has none. |
 | `environment` | `"environment": RendererEnvironment` | The host's current theme, motion preference, locale and pane: `init`'s, or a later `environment`'s. |
+| `filtered` | `"filtered"?: false \| true \| undefined` | Whether the host has said what it shows (its filter, and with it the scope). Until it does, every item is drawn, provisionally: a canvas that moves between layouts of the scope doesn't move from that one, so the first scope the host chooses is drawn at once rather than pared down to. Undefined where no host filter is wired (treat it as said). |
 | `focusRequest` | `"focusRequest": RendererFocus \| undefined` | Where the host wants the opening view (`InitPayload.focus`), or a comparison's changes while the host shows changes only; undefined for the renderer's own choice. The shell scrolls the first focused item of a list into view itself; a renderer that places its own view (`useStageZoom`) frames what it names. |
 | `highlighting` | `"highlighting": number` | Host-chosen change emphasis, exactly 0 at both endpoints and for extractions. Use `emphasis(row)` for a change's own emphasis: it is scoped to the change's step. |
 | `hoveredId` | `"hoveredId": null \| string` | The entity the host says is hovered, in this frame or another pane, or `null`. The shell already marks its elements with `data-projections-hovered`; use this only for richer hover presentation. |
@@ -3673,6 +3827,7 @@ Everything a kit renderer component receives for one host state.
 | `reportSteps` | `"reportSteps": { (ends: Array<number>, slots?: number \| undefined): void }` | Report step boundaries where a host may hold, for renderers with their own timing, and optionally how many step slots the presentation spans (`timelineSlots`). |
 | `requestDocument` | `"requestDocument": { (name: string): Promise<string> }` | Asks the host for a built-in renderer's document, to run nested (`embedRenderer`); rejects with the host's reason when it supplies none (see `RendererClient.requestDocument`). |
 | `schedule` | `"schedule": Array<ScheduledStep>` | The comparison's steps on the progress axis for the direction this transition presents (see `DirectionLatch`). Empty for extractions. |
+| `scope` | `"scope": ScopeView \| undefined` | The Changes scope, while the host shows a comparison's changes and their context (`changesScope`): its `shown` items, with the parts the person opened (`expand`). A list folds the rest (`useFolds`, `Fold`); a canvas that declares `MountOptions.scope` `subset` receives a `model` of only what is shown and lays that out. Nothing is faded: what is shown is drawn at full strength, and what isn't takes no room. Undefined while every item is shown. |
 | `selectedId` | `"selectedId": null \| string` | The selected item's ID (an entity row ID, or a part's `data-entity-id`), or `null` when nothing is selected. |
 | `viewport` | `"viewport": undefined \| { "height": number; "width": number }` | The frame's width and the host window's height, CSS px, as the host last reported them; undefined until then. |
 
@@ -3810,10 +3965,20 @@ can zoom in, see `useStageZoom`), never above `maxScale`. Reports the height
 a content-sized host should give the frame: the stage at the width-fitted
 scale (or at `options.floor` when that is larger and the view opens there)
 plus everything around it, but never more than the host's `stage-max-height` (`useStageHeightCap`), when it sends
-one: content taller than that is fitted to the capped stage instead (or opens at the text floor and pans). Measured before paint and on every resize;
+one: content taller than that is fitted to the capped stage instead (or opens at the text floor and pans). Zoomed in
+(`options.drawnScale`), it asks for the content's height at that scale, up to the same cap. Measured before paint and on every resize;
 a new measurement holds the host's paint acknowledgement until the content
 is drawn at its scale, so a host never measures a scale about to change
 (such as the one before the renderer fills its frame).
+
+### `useFolds`
+
+```ts
+useFolds<T>(items: Array<T>, idOf: { (item: T): string }, scope: ChangesScope | undefined): { "collapse": { (key: string): void }; "entries": Array<{ "item": T; "type": "item" } | { "items": Array<T>; "key": string; "open"?: false | true; "type": "fold" }>; "expand": { (key: string): void } }
+```
+
+Folds a list for the Changes scope (`foldList`) and keeps which folds the person expanded, until the scope's shown
+items change. Without a scope every item is listed.
 
 ### `useFrameFill`
 
@@ -3994,7 +4159,7 @@ other change, so an item that varied only within tolerance stays unchanged.
 ### `ViewOptions`
 
 ```ts
-type ViewOptions = { steps?: "schedule" | "manual"; controls?: readonly RendererControl[]; nouns?: SummaryNouns; facts?: SummaryFacts; interactions?: false; }
+type ViewOptions = { steps?: "schedule" | "manual"; scope?: { layout: "fold"; } | { layout: "subset"; parts?: ScopedParts; context?: (all: ComparisonModel<Extraction>, changes: ReadonlySet<string>, renderer: string) => Iterable<string>; }; controls?: readonly RendererControl[]; nouns?: SummaryNouns; facts?: SummaryFacts; interactions?: false; }
 ```
 
 What a view module may export as `options` beside its `View`, for the entry `rendererConfig({view})` generates: the

@@ -11,5 +11,6 @@ export type {
   RendererStatus,
   StageBinding,
 } from './projection/types.js'
+export type {ScopeCounts, ScopeHidden} from './projection/filtering.js'
 export {defaultDuration, minimumDurationMs, playbackDuration, progressForKey, stepDurationMs} from './projection/timing.js'
 export {useProjection} from './projection/use-projection.js'

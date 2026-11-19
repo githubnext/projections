@@ -25,6 +25,7 @@ export function renderExplorer(args: ScenarioArgs, {globals, loaded}: Pick<Story
       colorMode={themeOf(globals)}
       {...(args.initialMode ? {initialMode: args.initialMode} : {})}
       {...(args.initialView ? {initialView: args.initialView} : {})}
+      {...(args.changesOnly !== undefined ? {changesOnly: args.changesOnly} : {})}
       {...(args.annotations ? {annotations: sampleAnnotations(item)} : {})}
       {...(args.details ? {renderDetails} : {})}
     />

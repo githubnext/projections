@@ -13,6 +13,7 @@ import type {
   RendererTheme,
   ScrollPosition,
 } from '@githubnext/projections-renderer-sdk/protocol'
+import type {ViewScope} from '@githubnext/projections-renderer-sdk/presentation'
 import type {PresentationSettings} from '@githubnext/projections-schemas'
 import type {RendererFrame} from '../frame.js'
 import type {ComparisonMode, Side} from '../modes.js'
@@ -22,6 +23,7 @@ import type {Row, Variation, ViewSubject} from '../model.js'
 import type {Holds} from '../playback.js'
 import type {ProjectionSelection, ProjectionTarget, TargetAnnotation, TargetResolution} from '../targets/target.js'
 import type {SummaryFigure, SummaryFilter} from '../summary.js'
+import type {ScopeCounts, ScopeHidden} from './filtering.js'
 
 /**
  * Change highlighting: `animated` fades emphasis in and out with progress
@@ -141,21 +143,25 @@ export type ProjectionOptions = {
   Controllable<'mode', ComparisonMode> &
   Controllable<'swipePosition', number> &
   Controllable<'highlighting', Highlighting> &
+  /**
+   * The Changes scope: show a comparison's changes and the unchanged items that give them context (`changeContext`),
+   * folding or receding the rest. On by default (the definition's `presentation.changesOnly: false` opts out); off,
+   * the scope is everything.
+   */
   Controllable<'changesOnly', boolean> &
   /**
-   * Show only the items that varied within tolerance (`variation.within`): unchanged items whose volatile values
-   * differ. It and `changesOnly` exclude each other: turning one on turns the other off.
+   * The Noise scope's varied items: those that varied within tolerance (`variation.within`), unchanged items whose
+   * volatile values differ. It wins over `changesOnly`, which turning it on turns off.
    */
   Controllable<'variedOnly', boolean> &
   /**
    * Show only the items whose generated values were regenerated from the same inputs (`variation.regenerated`):
-   * unchanged items whose generated text was reworded. It, `variedOnly` and `changesOnly` exclude each other.
+   * unchanged items whose generated text was reworded. With `variedOnly`, the Noise scope; it wins over `changesOnly`.
    */
   Controllable<'regeneratedOnly', boolean> &
   /**
-   * The summary bar's filter: show only the items of a figure's kinds, or only those with one change status, as
-   * "changes only" shows only changes (`null`, every item). Turning it on turns off `changesOnly` and `variedOnly`,
-   * and turning either of them on clears it.
+   * The summary bar's filter: show only the items of a figure's kinds, or only those with one change status (`null`,
+   * every item). It narrows within the scope: in the Changes scope, those changes and their context.
    */
   Controllable<'summaryFilter', SummaryFilter | null> &
   /** Whether side by side draws a connector between the selected item in both panes. Off unless a host opts in. */
@@ -204,7 +210,7 @@ export interface ProjectionController {
   projection: {id: string; title: string; renderer?: string}
   /** Every row (entities, relationships, changes) for table and text views. */
   rows: readonly Row[]
-  /** Rows that match `search` and `changesOnly`. */
+  /** Rows the scope, summary filter and `search` keep: in the Changes scope, the changes they keep and their context. */
   visibleRows: readonly Row[]
   selectedRow: Row | undefined
   /** The renderer notice and informational notices, in display order. */
@@ -263,6 +269,22 @@ export interface ProjectionController {
   modesKnown: boolean
   swipePosition: number
   highlighting: Highlighting
+  /**
+   * Which part of a comparison is shown: `changes`, its changes and the items that give them context; `all`; or
+   * `noise`, the items that only varied (within tolerance, or regenerated). Always `all` for one extraction.
+   */
+  scope: ViewScope
+  /**
+   * How many items each scope holds, as the scope control counts them: the summary bar's count figures' changes
+   * (without their context) and totals, else every row's.
+   */
+  scopeCounts: ScopeCounts
+  /**
+   * What the Changes scope leaves out, by the summary bar's nouns (`45 tables`, `380 columns`), whatever the scope
+   * shown now; empty when every item is a change or gives one context, so Changes and All show the same.
+   */
+  scopeHidden: readonly ScopeHidden[]
+  /** Whether the scope is `changes`. */
   changesOnly: boolean
   /** Whether only the items that varied within tolerance are shown (see `variation`). */
   variedOnly: boolean
@@ -328,8 +350,11 @@ export interface ProjectionController {
   setMode(mode: ComparisonMode): void
   setSwipePosition(position: number): void
   setHighlighting(highlighting: Highlighting): void
+  /** Chooses the scope (see `scope`); the summary filter and find stay, narrowing within it. */
+  setScope(scope: ViewScope): void
+  /** Chooses the Changes scope, or every item. */
   setChangesOnly(changesOnly: boolean): void
-  /** Shows only the items that varied within tolerance, or every item again; turning it on turns off `changesOnly`. */
+  /** Shows only the items that varied within tolerance (the Noise scope), or every item again. */
   setVariedOnly(variedOnly: boolean): void
   /** Shows only the items whose generated values were regenerated from the same inputs, or every item again. */
   setRegeneratedOnly(regeneratedOnly: boolean): void

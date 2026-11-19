@@ -6,13 +6,14 @@ export function digits(count: number): number {
 /** Unchanged lines kept around each change; longer unchanged runs fold into a gap. */
 export const contextLines = 3
 
-/** A run of rows to show, or a folded run of unchanged rows. */
-export type Segment = {kind: 'rows'; start: number; end: number} | {kind: 'gap'; start: number; end: number}
+/** A run of rows to show, a folded run of unchanged rows, or the fold of an opened run, which comes before its rows. */
+export type Segment = {kind: 'rows' | 'gap' | 'open'; start: number; end: number}
 
 /**
  * Folds unchanged runs longer than twice the context into gaps, keeping
  * `context` lines next to every change. `expanded` lists the start index of
- * gaps the reader opened. A gap that would hide fewer than two lines is shown.
+ * gaps the reader opened, which stay as an `open` segment before their rows. A gap that would hide fewer than two lines
+ * is shown.
  */
 export function segments(changed: readonly boolean[], context = contextLines, expanded: ReadonlySet<number> = new Set()): Segment[] {
   const keep = changed.map(() => false)
@@ -28,8 +29,14 @@ export function segments(changed: readonly boolean[], context = contextLines, ex
       while (end < changed.length && keep[end]) end++
     } else {
       while (end < changed.length && !keep[end]) end++
-      if (end - index >= 2 && !expanded.has(index)) {
-        result.push({kind: 'gap', start: index, end})
+      if (end - index >= 2) {
+        if (!expanded.has(index)) {
+          result.push({kind: 'gap', start: index, end})
+          index = end
+          continue
+        }
+        // An opened run keeps its fold before its rows, as the way to fold them again.
+        result.push({kind: 'open', start: index, end}, {kind: 'rows', start: index, end})
         index = end
         continue
       }

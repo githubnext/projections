@@ -107,17 +107,19 @@ function probe(options) {
   return controller
 }
 
-test('the controller filters by a figure, and the bar filters exclude one another', () => {
-  const all = probe({})
+test('the controller filters by a figure, within the scope rather than instead of it', () => {
+  const all = probe({initialChangesOnly: false})
   const [workspaces] = all.summary
-  const filtered = probe({initialSummaryFilter: summaryFilterOf(workspaces, 'added')})
+  const filtered = probe({initialChangesOnly: false, initialSummaryFilter: summaryFilterOf(workspaces, 'added')})
   assert.deepEqual(
     filtered.visibleRows.map(row => row.id),
     ['c-new'],
   )
   assert.deepEqual(filtered.stage.filter.ids, ['c-new'])
-  // "Changes only" gives way to the figure's filter.
-  assert.equal(probe({initialSummaryFilter: summaryFilterOf(workspaces), initialChangesOnly: true}).changesOnly, false)
+  // The Changes scope stays: the figure narrows it to its changes and their context.
+  const scoped = probe({initialSummaryFilter: summaryFilterOf(workspaces)})
+  assert.equal(scoped.scope, 'changes')
+  assert.ok(scoped.visibleRows.every(row => row.status !== 'unchanged' || row.collection === 'entities'))
   const requests = []
   const record = name => value => requests.push([name, value])
   const controlled = probe({
@@ -129,20 +131,15 @@ test('the controller filters by a figure, and the bar filters exclude one anothe
     onSummaryFilterChange: record('summaryFilter'),
   })
   controlled.setSummaryFilter(summaryFilterOf(workspaces))
-  assert.deepEqual(requests, [
-    ['changesOnly', false],
-    ['summaryFilter', summaryFilterOf(workspaces)],
-  ])
+  assert.deepEqual(requests, [['summaryFilter', summaryFilterOf(workspaces)]])
   requests.length = 0
   probe({
+    changesOnly: false,
     summaryFilter: summaryFilterOf(workspaces),
     onChangesOnlyChange: record('changesOnly'),
     onSummaryFilterChange: record('summaryFilter'),
   }).setChangesOnly(true)
-  assert.deepEqual(requests, [
-    ['summaryFilter', null],
-    ['changesOnly', true],
-  ])
+  assert.deepEqual(requests, [['changesOnly', true]])
 })
 
 test('the Default UI bar draws each figure with its changes as filter toggles', () => {

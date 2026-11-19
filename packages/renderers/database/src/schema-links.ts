@@ -1,4 +1,4 @@
-import {compareIds} from '@githubnext/projections-renderer-kit'
+import {compareIds, isFold} from '@githubnext/projections-renderer-kit'
 import type {SchemaColumnRole, SchemaLink, SchemaMarker, SchemaState} from './schema.js'
 import {isEnum, names} from './vocabulary.js'
 import type {Cards} from './schema-model.js'
@@ -73,7 +73,8 @@ export function columnMarkers(
   const markers = new Map<string, SchemaMarker>()
   const ordered = new Map<string, string[]>()
   for (const table of tables) {
-    const rank = (id: string) => (primary.has(id) ? 0 : foreign.has(id) ? 1 : 2)
+    // Keys first, then the other columns, and last the fold of those the Changes scope leaves out.
+    const rank = (id: string) => (isFold(id) ? 3 : primary.has(id) ? 0 : foreign.has(id) ? 1 : 2)
     const columns = [...columnsOf.get(table)!].sort(
       (a, b) => rank(a) - rank(b) || compareIds(nodes.get(a)!.label, nodes.get(b)!.label) || compareIds(a, b),
     )

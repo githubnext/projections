@@ -19,6 +19,9 @@ const store = {
   },
 }
 
+/** The choice the tab shows (`TabChoice.id`: `pr:12`, `branch`…), once the extension has described it. */
+export const shownChoice = () => labels?.choice.id
+
 /**
  * The pair's revisions named for people, by ref, for the Inspector's panes, slider and
  * labels (`InspectorHost.revisionLabels`).

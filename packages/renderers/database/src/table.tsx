@@ -2,7 +2,7 @@ import type {CSSProperties, MouseEvent, ReactNode} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
-import {changeMark, classifyChange, describeChange, isChanged} from '@githubnext/projections-renderer-kit'
+import {changeMark, classifyChange, describeChange, isChanged, isFold} from '@githubnext/projections-renderer-kit'
 import {ChangeStatus, ValueChange} from '@githubnext/projections-renderer-kit/react'
 import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
 import {Breakable} from './measure.js'
@@ -12,6 +12,8 @@ import {baseType, columnType, declaredType} from './types.js'
 import type {FrameColumn, SchemaFrame} from './frame.js'
 import {ChangeLines, describeColumn, GlyphStatus, oneLine} from './row-parts.js'
 import type {Wrap} from './row-parts.js'
+import {placeAttributes, rowPlaces} from './row-edges.js'
+import type {RowPlace} from './row-edges.js'
 
 /** What every row of one card is drawn with. */
 interface Card {
@@ -27,6 +29,8 @@ interface Card {
   firstKey: number
   /** `pk-diff-text` in the diff, so text takes the diff's colours. */
   text: string
+  /** Each row's place in the card (`rowPlaces`). */
+  places: Map<string, RowPlace>
 }
 
 const select = (props: RendererProps, id: string) => (event: MouseEvent) => {
@@ -38,16 +42,16 @@ const select = (props: RendererProps, id: string) => (event: MouseEvent) => {
  * A row's change mark in the diff: tinted as a region in a card of both revisions (a wholly added or removed
  * card is tinted itself), and as tall as its change lines.
  */
-function mark({diff, survives}: Card, row: EntityChange<Entity>, lines: readonly ChangeLine[] | undefined, rowEmphasis: number) {
+function mark(card: Card, row: EntityChange<Entity>, lines: readonly ChangeLine[] | undefined, rowEmphasis: number) {
+  const {diff, survives} = card
+  const place = placeAttributes(card.places.get(row.id))
   return diff
     ? {
-        attributes: changeMark(row),
+        attributes: {...changeMark(row), ...place},
         className: `${survives && isChanged(row) ? ' pk-region' : ''}${lines ? ' database-spanning' : ''}`,
-        style: {
-          '--emphasis': rowEmphasis,
-        } as CSSProperties,
+        style: {'--emphasis': rowEmphasis} as CSSProperties,
       }
-    : {attributes: {}, className: '', style: {}}
+    : {attributes: place, className: '', style: {}}
 }
 
 /** A row's own slot, then its change lines, each in its slot. */
@@ -170,6 +174,50 @@ function Marker({card, marker, tint, emphasis}: {card: Card; marker: FrameColumn
   )
 }
 
+/**
+ * The columns the Changes scope leaves out of a shown table, folded into one row: a button that opens them in place (the
+ * table grows to hold them, and the schema lays out again around it). Once open, the row stays below them as "Hide 7
+ * unchanged columns", which folds them again.
+ */
+function FoldRow({card, row}: {card: Card; row: FrameColumn}) {
+  const {change: fold, entity: version, top, height, opacity} = row
+  const label = version.label
+  const open = version.data?.open === true
+  return (
+    <div
+      className="database-row database-fold"
+      style={{top, height, opacity}}
+      data-fold={open ? 'open' : 'closed'}
+      {...placeAttributes(card.places.get(fold.id))}
+    >
+      <button
+        type="button"
+        className="database-fold-button"
+        aria-expanded={open}
+        onClick={event => {
+          event.stopPropagation()
+          // After the click is handled: the new layout replaces this button, and the shell would read a click on a
+          // detached element as one on the table.
+          setTimeout(() => (open ? card.props.scope?.collapse([fold.id]) : card.props.scope?.expand([fold.id])))
+        }}
+        title={open ? label : `Show ${label[0]!.toLowerCase()}${label.slice(1)}`}
+      >
+        <svg className="database-fold-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path
+            d={open ? 'M5 3l3 3 3-3M5 13l3-3 3 3' : 'M5 6l3-3 3 3M5 10l3 3 3-3'}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span>{label}</span>
+      </button>
+    </div>
+  )
+}
+
 /** A column: its key marker, then its name and type whole, on one line when the card has room. */
 function ColumnRow({card, row}: {card: Card; row: FrameColumn}) {
   const {props, rowBadges, wrap, text} = card
@@ -276,6 +324,7 @@ export function Table({table, props, diff, wrap}: {table: SchemaFrame['tables'][
     rowBadges: survives || diff,
     firstKey: Math.min(...columns.filter(row => row.kind === 'key').map(row => row.top)),
     text: diff ? ' pk-diff-text' : '',
+    places: rowPlaces(columns),
   }
   const view = entity.kind === 'view'
   const enumCard = entity.kind === 'enum'
@@ -298,7 +347,9 @@ export function Table({table, props, diff, wrap}: {table: SchemaFrame['tables'][
       {/* The name is data, shown whole: the card is sized for it, and where the frame is too narrow it wraps, with the kind and status under it. */}
       <CardHeader card={card} entity={entity} header={header} status={status} />
       {columns.map(row =>
-        row.kind === 'value' ? (
+        isFold(row.change.id) ? (
+          <FoldRow key={row.change.id} card={card} row={row} />
+        ) : row.kind === 'value' ? (
           <ValueRow key={row.change.id} card={card} row={row} />
         ) : row.kind === 'key' && row.key ? (
           <KeyRow key={row.change.id} card={card} row={row} keyRow={row.key} />

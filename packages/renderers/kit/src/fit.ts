@@ -17,6 +17,12 @@ export interface FitOptions {
    * `StageZoomOptions.opening`) rather than all of it; default the content's own.
    */
   aspect?: number
+  /**
+   * The scale the content is drawn at now (see `useStageZoom`). Zoomed in past where it opens, a content-sized host is
+   * asked for the height it takes at that scale, up to its `stage-max-height`, so the stage grows into the page before
+   * it pans; the fit itself never depends on it.
+   */
+  drawnScale?: number
 }
 
 /** Space around fitted content, CSS px: across (each side, left and right) and down (top and bottom). */

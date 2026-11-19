@@ -8,6 +8,7 @@ import type {ProjectionController} from '../projection.js'
 import {figuresSentence, sameSummaryFilter, summaryFilterable, summaryFilterOf, useSummaryFit} from '../summary.js'
 import type {SummaryFigure} from '../summary.js'
 import {Popover, PopoverContent, PopoverTrigger} from './components/popover.js'
+import {scopeHiddenShort, scopeHiddenText} from '../scope.js'
 import {cn} from './lib/utils.js'
 
 const deltaTone: Record<SummaryDelta, string> = {
@@ -180,14 +181,34 @@ function Figure({
 }
 
 /**
+ * What the Changes scope leaves out, at the bar's end: "57 unchanged tables hidden" (every kind in its tooltip) and Show
+ * all, which shows every item. Nothing while another scope shows, or when Changes hides nothing.
+ */
+function ScopeHiddenFigure({projection: p}: {projection: ProjectionController}) {
+  const short = p.comparing && p.scope === 'changes' ? scopeHiddenShort(p.scopeHidden) : undefined
+  if (!short) return null
+  return (
+    <span data-summary-fixed="" data-scope-hidden="" className="pj:flex pj:shrink-0 pj:items-center pj:gap-1">
+      <span className="ph-cap" title={scopeHiddenText(p.scopeHidden)}>
+        {short}
+      </span>
+      <button type="button" className={cn(figureButton, 'ph-scope-show-all pj:text-foreground')} onClick={() => p.setScope('all')}>
+        <span className="ph-cap">Show all</span>
+      </button>
+    </span>
+  )
+}
+
+/**
  * The summary bar along the bottom of every projection view, like an editor's status bar: a band of the header's
  * surface, edge to edge, 28px under the hairline that rules it off above (so its 20px figures sit on whole pixels),
  * whose figures sit centred, at least as far from its edges as a capital E's cap height is from its top and bottom (its
  * padding is that space less the figure's own 4px and the E's left side bearing, about 0.1em). It shows a figure per kind in the renderer's words (`12 workspaces · 18
  * dependencies`), and in a comparison the changes of each in their change colors (`+1 −1`). Every figure filters to
- * its items, as "Changes only" does; pressed again, every item returns. The count of items that varied within
+ * its items, within the scope; pressed again, every item returns. The count of items that varied within
  * tolerance sits at its end as the same kind of toggle, and so does the count of items whose generated values were
- * regenerated from the same inputs ("N regenerated"). Figures that don't fit move into a "…" popover.
+ * regenerated from the same inputs ("N regenerated"), after what the Changes scope hides ("57 unchanged tables hidden ·
+ * Show all"). Figures that don't fit move into a "…" popover.
  */
 export function SummaryBar({projection: p, className}: {projection: ProjectionController; className?: string}) {
   const bar = useRef<HTMLDivElement>(null)
@@ -195,7 +216,11 @@ export function SummaryBar({projection: p, className}: {projection: ProjectionCo
   const within = p.comparing ? (p.variation?.within ?? 0) : 0
   const regenerated = p.comparing ? (p.variation?.regenerated ?? 0) : 0
   const sentence = figuresSentence(figures, p.comparing)
-  const shown = useSummaryFit(bar, figures.length, `${sentence}|${within}|${regenerated}|${p.comparing}`)
+  const shown = useSummaryFit(
+    bar,
+    figures.length,
+    `${sentence}|${within}|${regenerated}|${p.comparing}|${p.scope === 'changes' ? (scopeHiddenShort(p.scopeHidden) ?? '') : ''}`,
+  )
   const hidden = figures.slice(shown)
   return (
     <div
@@ -222,73 +247,80 @@ export function SummaryBar({projection: p, className}: {projection: ProjectionCo
           <li data-summary-more="" className="pj:inline-flex pj:size-5 pj:shrink-0" />
         </ul>
       </div>
-      {/* With the trailing spacer, centres the figures in the bar (the toggles stay at its end). */}
-      <span aria-hidden="true" className="ph-summary-lead pj:flex-1" />
-      <ul className="ph-summary-figures pj:flex pj:min-w-0 pj:items-center" aria-label={sentence}>
-        {figures.slice(0, shown).map((figure, index) => (
-          <Figure key={figure.key} projection={p} figure={figure} first={index === 0} />
-        ))}
-      </ul>
-      {hidden.length > 0 && (
-        <Popover>
-          <PopoverTrigger asChild>
+      {/* With the trailing spacer, centres the figures and their "…" in the bar (the toggles stay at its end); it gives
+          way first where the end needs more room. */}
+      <span aria-hidden="true" className="ph-summary-lead pj:min-w-0 pj:flex-1" />
+      <span className="ph-summary-centre pj:flex pj:min-w-0 pj:items-center pj:gap-1">
+        <ul className="ph-summary-figures pj:flex pj:min-w-0 pj:items-center" aria-label={sentence}>
+          {figures.slice(0, shown).map((figure, index) => (
+            <Figure key={figure.key} projection={p} figure={figure} first={index === 0} />
+          ))}
+        </ul>
+        {hidden.length > 0 && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={cn(figureButton, 'ph-summary-more pj:size-5 pj:justify-center pj:px-0 pj:[&_svg]:size-3.5')}
+                aria-label={`${hidden.length.toLocaleString()} more`}
+                title={`${hidden.length.toLocaleString()} more`}
+              >
+                <Ellipsis aria-hidden="true" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="start"
+              side="top"
+              collisionPadding={8}
+              aria-label="More of the summary"
+              className="ph-summary-popover pj:[--pj-summary-surface:var(--pj-popover)] pj:w-auto pj:max-w-[calc(100vw-1rem)] pj:gap-1 pj:p-2 pj:text-xs pj:text-muted-foreground"
+            >
+              <ul className="pj:flex pj:flex-col pj:gap-1">
+                {hidden.map(figure => (
+                  <Figure key={figure.key} projection={p} figure={figure} first />
+                ))}
+              </ul>
+            </PopoverContent>
+          </Popover>
+        )}
+      </span>
+      {/* As wide as the lead spacer, so the figures stay centred; the fixed content sits at its end, on one line, never
+          narrower than it. */}
+      <span className="ph-summary-trail pj:flex pj:flex-1 pj:items-center pj:justify-end pj:gap-1 pj:whitespace-nowrap">
+        <ScopeHiddenFigure projection={p} />
+        {regenerated > 0 && (
+          <span data-summary-fixed="" className="pj:flex pj:shrink-0">
             <button
               type="button"
-              className={cn(figureButton, 'ph-summary-more pj:size-5 pj:justify-center pj:px-0 pj:[&_svg]:size-3.5')}
-              aria-label={`${hidden.length.toLocaleString()} more`}
-              title={`${hidden.length.toLocaleString()} more`}
+              className={cn(figureButton, 'ph-regenerated-toggle pj:gap-1 pj:[&_svg]:size-3 pj:[&_svg]:shrink-0')}
+              aria-pressed={p.regeneratedOnly}
+              title={
+                p.regeneratedOnly ? 'Show every item' : 'Show only the items whose generated values were regenerated from the same inputs'
+              }
+              data-regenerated={regenerated}
+              onClick={() => p.setRegeneratedOnly(!p.regeneratedOnly)}
             >
-              <Ellipsis aria-hidden="true" />
+              <Sparkle aria-hidden="true" />
+              <span className="ph-cap">{regenerated.toLocaleString()} regenerated</span>
             </button>
-          </PopoverTrigger>
-          <PopoverContent
-            align="start"
-            side="top"
-            collisionPadding={8}
-            aria-label="More of the summary"
-            className="ph-summary-popover pj:[--pj-summary-surface:var(--pj-popover)] pj:w-auto pj:max-w-[calc(100vw-1rem)] pj:gap-1 pj:p-2 pj:text-xs pj:text-muted-foreground"
-          >
-            <ul className="pj:flex pj:flex-col pj:gap-1">
-              {hidden.map(figure => (
-                <Figure key={figure.key} projection={p} figure={figure} first />
-              ))}
-            </ul>
-          </PopoverContent>
-        </Popover>
-      )}
-      <span aria-hidden="true" className="pj:flex-1" />
-      {regenerated > 0 && (
-        <span data-summary-fixed="" className="pj:flex pj:shrink-0">
-          <button
-            type="button"
-            className={cn(figureButton, 'ph-regenerated-toggle pj:gap-1 pj:[&_svg]:size-3 pj:[&_svg]:shrink-0')}
-            aria-pressed={p.regeneratedOnly}
-            title={
-              p.regeneratedOnly ? 'Show every item' : 'Show only the items whose generated values were regenerated from the same inputs'
-            }
-            data-regenerated={regenerated}
-            onClick={() => p.setRegeneratedOnly(!p.regeneratedOnly)}
-          >
-            <Sparkle aria-hidden="true" />
-            <span className="ph-cap">{regenerated.toLocaleString()} regenerated</span>
-          </button>
-        </span>
-      )}
-      {within > 0 && (
-        <span data-summary-fixed="" className="pj:flex pj:shrink-0">
-          <button
-            type="button"
-            className={cn(figureButton, 'ph-varied-toggle pj:gap-1 pj:[&_svg]:size-3 pj:[&_svg]:shrink-0')}
-            aria-pressed={p.variedOnly}
-            title={p.variedOnly ? 'Show every item' : 'Show only the items that varied within tolerance'}
-            data-varied-within={within}
-            onClick={() => p.setVariedOnly(!p.variedOnly)}
-          >
-            <Activity aria-hidden="true" />
-            <span className="ph-cap">{within.toLocaleString()} varied within tolerance</span>
-          </button>
-        </span>
-      )}
+          </span>
+        )}
+        {within > 0 && (
+          <span data-summary-fixed="" className="pj:flex pj:shrink-0">
+            <button
+              type="button"
+              className={cn(figureButton, 'ph-varied-toggle pj:gap-1 pj:[&_svg]:size-3 pj:[&_svg]:shrink-0')}
+              aria-pressed={p.variedOnly}
+              title={p.variedOnly ? 'Show every item' : 'Show only the items that varied within tolerance'}
+              data-varied-within={within}
+              onClick={() => p.setVariedOnly(!p.variedOnly)}
+            >
+              <Activity aria-hidden="true" />
+              <span className="ph-cap">{within.toLocaleString()} varied within tolerance</span>
+            </button>
+          </span>
+        )}
+      </span>
     </div>
   )
 }

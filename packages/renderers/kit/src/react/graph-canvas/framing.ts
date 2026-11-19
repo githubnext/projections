@@ -1,5 +1,5 @@
 // The graph's frame: every layout the transition passes through, its bounds, and the stage's fit and zoom.
-import {useMemo, useRef} from 'react'
+import {useLayoutEffect, useMemo, useRef, useState} from 'react'
 import type {RefObject} from 'react'
 import type {RendererFocus} from '@githubnext/projections-renderer-sdk/protocol'
 import type {GraphTransition} from '../../graph-transition.js'
@@ -107,9 +107,12 @@ export function useGraphZoom(
   const floor = useOpeningFloor(scroller, framing)
   const padding = useGraphPadding()
   const flush = useStageInset() !== undefined
+  // The scale drawn last: zoomed in, a content-sized stage grows to it (see `FitOptions.drawnScale`).
+  const [drawnScale, setDrawnScale] = useState(0)
   const fit = useFitScale(scroller, bounds, {
     padding,
     floor,
+    drawnScale,
     ...(area && request ? {aspect: (area.box.width + 2 * padding.x) / (area.box.height + padding.top + padding.y)} : {}),
   })
   // Arrowheads stop on the outer edge of their target's border; a change border is inset so it never reaches further.
@@ -146,7 +149,9 @@ export function useGraphZoom(
       }),
     [area, request, floor, content, fit.scale, fit.width, fit.height, sized, orientation, padding],
   )
-  return {...useStageZoom(scroller, onAction, fit.scale, {floor, start, ...(opening ? {opening} : {}), ...(hold ? {hold} : {})}), borders}
+  const zoom = useStageZoom(scroller, onAction, fit.scale, {floor, start, ...(opening ? {opening} : {}), ...(hold ? {hold} : {})})
+  useLayoutEffect(() => setDrawnScale(zoom.scale), [zoom.scale])
+  return {...zoom, borders}
 }
 
 /** The opening view on a focus (see `useGraphZoom`), or undefined for the default one. */

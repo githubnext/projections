@@ -1,0 +1,71 @@
+/* The diff's card and row styling: change edges, tints, and the one line between rows (see styles.css). */
+/*
+ * Diff mode: the union of both revisions, laid out once, with the summary line above it. Changed cards are edged in
+ * their change's hue (dashed when removed); a wholly added or removed card is tinted, its rows marked by glyph only.
+ * Changed rows of a card in both revisions are the kit's change regions. Every tint follows --emphasis, so with
+ * highlighting off the diff draws plain.
+ */
+.database-view[data-diff] .database-zoom {
+  margin: 0 auto auto;
+}
+.pk .database-view[data-diff] .database-table[data-change] {
+  outline: var(--stroke-strong) solid color-mix(in srgb, var(--pk-region-edge) calc(var(--emphasis) * 100%), var(--divider));
+  outline-offset: calc(-1 * var(--stroke-strong));
+}
+.pk .database-view[data-diff] .database-table:is([data-change='added'], [data-change='removed']) {
+  background: color-mix(in srgb, var(--pk-region-fill) calc(var(--emphasis) * 100%), var(--raised));
+}
+.pk .database-view[data-diff] .database-table[data-change] > header {
+  background: color-mix(in srgb, var(--pk-region-fill) calc(var(--emphasis) * 100%), var(--band));
+}
+.pk .database-view[data-diff] .database-table[data-change='removed'] {
+  outline: var(--stroke-strong) dashed color-mix(in srgb, var(--pk-region-edge) calc(var(--emphasis) * 100%), var(--divider));
+  outline-offset: calc(-1 * var(--stroke-strong));
+}
+/*
+ * One line between two rows: a changed row draws the lines on both its sides in its own hue, over its neighbours' (the
+ * row under it, the header's bottom line when it is first, the card's edge when it is last), so a change region's edge
+ * is never drawn beside a neutral divider and its unchanged neighbours keep their own paint. It draws its sides over the
+ * card's neutral edge too, so its hue runs round it whole. It sits under the card's edge again while the card is
+ * ringed (hovered, selected or focused), or edged in a change hue of its own.
+ */
+.pk .database-table .database-row.pk-region[data-change] {
+  --database-row-edges: inset var(--stroke) 0 0 var(--pk-region-edge-color), inset calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color);
+  --database-row-ends: 0 var(--stroke) 0 0 var(--pk-region-edge-color);
+  border-top-color: var(--pk-region-edge-color);
+  box-shadow: var(--database-row-edges), var(--database-row-ends);
+}
+.pk .database-table .database-row.pk-region[data-change][data-first] {
+  border-top-color: transparent;
+  --database-row-ends: 0 var(--stroke) 0 0 var(--pk-region-edge-color), 0 calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color);
+}
+.pk .database-table .database-row.pk-region[data-change][data-last] {
+  --database-row-ends: inset 0 calc(-1 * var(--stroke)) 0 var(--pk-region-edge-color);
+  border-bottom-left-radius: var(--projections-radius);
+  border-bottom-right-radius: var(--projections-radius);
+}
+.pk .database-table .database-row.pk-region[data-change][data-first][data-last] {
+  border-top-color: transparent;
+  --database-row-ends:
+    0 calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color), inset 0 calc(-1 * var(--stroke)) 0 var(--pk-region-edge-color);
+}
+.pk
+  .database-table:not(
+    [data-change],
+    :hover,
+    [data-projections-ring-hover],
+    [data-projections-ring-selected],
+    :focus-visible,
+    :has(:focus-visible)
+  )
+  .database-row.pk-region[data-change] {
+  z-index: 0;
+}
+/* Selection stays visible on a changed row: the accent tint and bar, inside the change edge. */
+.pk .database-table .database-column.pk-region[data-change].selected {
+  background-color: var(--accent-soft);
+  box-shadow:
+    inset var(--projections-border-width-thick) 0 0 var(--accent),
+    inset calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color),
+    var(--database-row-ends);
+}

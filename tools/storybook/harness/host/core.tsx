@@ -28,6 +28,8 @@ function Review({subject, renderer}: {subject: ViewSubject; renderer: RendererEn
     mode,
     highlighting: 'on',
     connector: true,
+    // Every item, so the custom find field narrows all of them.
+    initialChangesOnly: false,
   })
   return (
     <main style={{fontFamily: 'system-ui', maxWidth: 1100, margin: '24px auto', padding: '0 16px'}}>

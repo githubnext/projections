@@ -16,7 +16,7 @@ import type {Rows} from './use-extractions.js'
 /**
  * The pair the main view presents: the live extractions of the selected projection (with the session's part
  * overrides applied) or the saved artifact, and its Before and After keys. While a newly chosen pair is extracting,
- * the pair shown before stays.
+ * the pair shown before stays, and before any pair has been shown, none is (no After).
  */
 export function usePresentedPair({
   api,
@@ -101,6 +101,7 @@ export function usePresentedPair({
     marked,
     pairMarks,
     holding,
+    pending: switching,
     has,
     lastChoice: choices.at(-1)?.key,
   })

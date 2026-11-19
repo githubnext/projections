@@ -64,6 +64,7 @@ export function StatisticsTable({
       {...table}
       diff={props.diff && props.comparing}
       label={metrics ? sentenceCase(rows) : 'Languages'}
+      noun={metrics ? 'measurements' : 'languages'}
       columns={columns}
       rows={props.model.entities}
       rowProgress={row => rowProgress(row.id)}

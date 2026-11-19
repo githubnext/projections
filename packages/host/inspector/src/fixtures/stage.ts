@@ -126,7 +126,8 @@ export class Stage {
         return
       case 'control': {
         const control = state.controls.find(item => item.id === event.id)
-        if (control && isControlValue(control, event.value)) this.setOptions({...this.options, [event.id]: event.value})
+        // Answered with the options either way, so a value the stage declines is undone in the renderer.
+        this.setOptions(control && isControlValue(control, event.value) ? {...this.options, [event.id]: event.value} : this.options)
         break
       }
       default:

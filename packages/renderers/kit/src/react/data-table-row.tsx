@@ -52,6 +52,8 @@ export function Row<T>({
   const presence = diff || (row.before && row.after) ? 1 : row.after ? progress : 1 - progress
   const struck = marked && row.status === 'removed'
   const style = {'--emphasis': emphasis, ...(presence < 1 ? {opacity: Math.max(0, presence)} : {})}
+  // A row absent from the revision shown keeps its slot but is out of the tab order and the accessibility tree.
+  const absent = presence <= 0.01
   return (
     <div
       role="row"
@@ -59,6 +61,7 @@ export function Row<T>({
       data-entity-id={row.id}
       data-projections-unit=""
       {...(marked ? changeMark(row) : {})}
+      {...(absent ? {inert: true, 'aria-hidden': true} : {})}
       style={style as CSSProperties}
     >
       {columns.map((column, index) => {
@@ -72,7 +75,9 @@ export function Row<T>({
             content
           )
         }
+        // Only a changed row's cells are changes: an unchanged one may still differ within a volatile value's tolerance.
         const differs =
+          changed &&
           row.before !== undefined &&
           row.after !== undefined &&
           (column.changed
@@ -80,18 +85,15 @@ export function Row<T>({
             : column.value !== undefined && !Object.is(column.value(row.before), column.value(row.after)))
         let content: ReactNode
         if (differs && diff) content = <ValueChange layout="inline" before={read(row.before!)} after={read(row.after!)} />
-        else if (differs)
-          // The version shown, as a pill that takes its side's hue while the change is emphasized and is plain text
-          // otherwise, so nothing looks changed at the endpoints.
-          content =
-            emphasis > 0 ? (
-              <span className="pk-change-pill pk-table-value" data-change={side === 'before' ? 'removed' : 'added'}>
-                <span className="sr-only">{side === 'before' ? 'was ' : 'now '}</span>
-                {read(item)}
-              </span>
-            ) : (
-              <span className="pk-change-pill pk-table-value">{read(item)}</span>
-            )
+        else if (differs && emphasis > 0)
+          // The version shown, as a pill in its side's hue while the change is emphasized; at the endpoints, plain text
+          // exactly as an unchanged cell draws it.
+          content = (
+            <span className="pk-change-pill pk-table-value" data-change={side === 'before' ? 'removed' : 'added'}>
+              <span className="sr-only">{side === 'before' ? 'was ' : 'now '}</span>
+              {read(item)}
+            </span>
+          )
         else content = <span className={join('pk-table-text', struck && 'pk-diff-text')}>{read(item)}</span>
         const align = column.align ?? (column.sort === 'number' ? 'end' : 'start')
         return (

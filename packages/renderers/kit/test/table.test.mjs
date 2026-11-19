@@ -108,11 +108,38 @@ test('the diff draws a changed cell as was and now, and marks only the innermost
   assert.match(removed, /pk-diff-text/)
 })
 
+test('the Changes scope folds each run of unshown rows, in the sorted order', () => {
+  const markup = table({
+    diff: true,
+    emphasis: () => 1,
+    sort: {column: 'lines', direction: 'ascending'},
+    scope: {shown: new Set(['a', 'r'])},
+    noun: 'files',
+  })
+  // Sorted a, b, m, r, n: b and m fold between a and r; n alone stays a row.
+  assert.deepEqual(
+    [...markup.matchAll(/data-entity-id="(\w)"|"pk-fold-label">(\d) unchanged files/g)].map(match => match[1] ?? `fold ${match[2]}`),
+    ['a', 'fold 2', 'r', 'n'],
+  )
+  assert.match(markup, /role="row" class="pk-table-row pk-table-fold"><div role="cell" class="pk-table-fold-cell">/)
+})
+
+test('an unchanged row whose values vary within tolerance draws no change', () => {
+  const varied = {id: 'v', before: {name: 'v', lines: 10, owner: 'x'}, after: {name: 'v', lines: 11, owner: 'x'}, status: 'unchanged'}
+  const markup = renderToStaticMarkup(
+    createElement(DataTable, {label: 'Files', columns, rows: [varied], comparing: true, diff: true, emphasis: () => 1}),
+  )
+  assert.doesNotMatch(markup, /pk-change-pill|data-change=/)
+})
+
 test('the progress modes show the version reached and nothing changed at the endpoints', () => {
   const before = table({progress: 0, emphasis: () => 0})
   assert.doesNotMatch(before, /data-change="/)
-  assert.match(before, /data-entity-id="a"[^>]*style="--emphasis:0;opacity:0"/)
+  assert.match(before, /data-entity-id="a"[^>]*inert=""[^>]*aria-hidden="true" style="--emphasis:0;opacity:0"/)
+  assert.doesNotMatch(before, /data-entity-id="b"[^>]*inert/)
   const moving = table({progress: 0.7, emphasis: row => (row.status === 'unchanged' ? 0 : 0.5)})
   const modified = moving.slice(moving.indexOf('data-entity-id="m"'), moving.indexOf('data-entity-id="n"'))
   assert.match(modified, /class="pk-change-pill pk-table-value" data-change="added"><span class="sr-only">now <\/span>40/)
+  const settled = table({progress: 1, emphasis: () => 0})
+  assert.doesNotMatch(settled, /pk-change-pill/)
 })

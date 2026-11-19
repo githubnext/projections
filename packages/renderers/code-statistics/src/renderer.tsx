@@ -134,7 +134,8 @@ export function CodeStatisticsRenderer(props: RendererProps<typeof accepts>) {
     <div className="statistics-view pk-stage" style={columns} data-diff-highlighting={comparing}>
       <div className="statistics-panel" data-chart={chart} data-projections-content="">
         {/* The host's summary bar states the total, its change and the languages; the chart starts at the top. */}
-        {!shown.length ? (
+        {/* The table lists every language whatever the measure counts, so only an extraction without any is empty. */}
+        {(chart === 'table' ? !tracked.length : !shown.length) ? (
           <EmptyDomain title="Nothing counted at this point">
             {metrics ? 'This extraction has no measurements to show.' : 'This extraction has no language counts to show.'}
           </EmptyDomain>

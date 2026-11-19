@@ -5,6 +5,8 @@ import {isSortable, nextSort, sortTableRows} from '../table.js'
 import {tableSortOf, tableSortValue} from '../table-controls.js'
 import type {SortableColumn, TableRow, TableSort} from '../table.js'
 import {Row} from './data-table-row.js'
+import {Fold, useFolds} from './fold.js'
+import type {ChangesScope} from '../scope.js'
 
 /** One column of a `DataTable`: its heading, what its cells show and how it sorts. */
 export interface DataTableColumn<T> extends SortableColumn<T> {
@@ -55,6 +57,13 @@ export interface DataTableProps<T> {
   locale?: string
   /** Keep the first column in view when the table scrolls sideways; on by default. */
   frozen?: boolean
+  /**
+   * The Changes scope (`RendererProps.scope`): each run of rows it doesn't show, in the sorted order, folds into one row
+   * that opens in place.
+   */
+  scope?: ChangesScope | undefined
+  /** The rows' plural noun, for a fold's words ("12 unchanged languages"); `rows` by default. */
+  noun?: string
 }
 
 /** The width each column's grid track takes. */
@@ -98,11 +107,14 @@ export function DataTable<T>({
   onSortChange,
   locale,
   frozen = true,
+  scope,
+  noun = 'rows',
 }: DataTableProps<T>) {
   const ordered = useMemo(
     () => sortTableRows(rows, columns, sort, {changesFirst: comparing && changesFirst, locale}),
     [rows, columns, sort, comparing, changesFirst, locale],
   )
+  const {entries, expand, collapse} = useFolds(ordered, row => row.id, scope)
   const template = [...columns.map(track), ...(comparing ? ['max-content'] : [])].join(' ')
   const sorted = sort && columns.some(column => column.id === sort.column && isSortable(column)) ? sort : null
   return (
@@ -137,20 +149,33 @@ export function DataTable<T>({
             </div>
           )}
         </div>
-        {ordered.map(row => (
-          <Row
-            key={row.id}
-            row={row}
-            columns={columns}
-            comparing={comparing}
-            diff={diff}
-            progress={rowProgress ? rowProgress(row) : progress}
-            emphasis={emphasis ? emphasis(row) : 0}
-            selected={selectedId === row.id}
-            onSelect={onSelect}
-            locale={locale}
-          />
-        ))}
+        {entries.map(entry =>
+          entry.type === 'fold' ? (
+            <div key={`fold:${entry.key}`} role="row" className="pk-table-row pk-table-fold">
+              <div role="cell" className="pk-table-fold-cell">
+                <Fold
+                  count={entry.items.length}
+                  noun={noun}
+                  open={entry.open}
+                  onToggle={() => (entry.open ? collapse : expand)(entry.key)}
+                />
+              </div>
+            </div>
+          ) : (
+            <Row
+              key={entry.item.id}
+              row={entry.item}
+              columns={columns}
+              comparing={comparing}
+              diff={diff}
+              progress={rowProgress ? rowProgress(entry.item) : progress}
+              emphasis={emphasis ? emphasis(entry.item) : 0}
+              selected={selectedId === entry.item.id}
+              onSelect={onSelect}
+              locale={locale}
+            />
+          ),
+        )}
       </div>
     </div>
   )
@@ -167,11 +192,12 @@ export interface TablePropsSource {
   locale: string
   controls: {[id: string]: ControlValue}
   setControl: (id: string, value: ControlValue) => void
+  scope?: ChangesScope | undefined
 }
 
 /**
- * A `DataTable`'s props from a kit renderer's (`RendererProps`): the comparison, mode, progress, emphasis, selection
- * and locale, and the sort held in the controls `tableSortControls` declares under `id` (`sort` by default), which a
+ * A `DataTable`'s props from a kit renderer's (`RendererProps`): the comparison, mode, progress, emphasis, selection,
+ * locale and Changes scope, and the sort held in the controls `tableSortControls` declares under `id` (`sort` by default), which a
  * heading's activation sets through the host, so the host remembers it, shows it in its settings and lets agents read
  * and set it. Spread them: `<DataTable {...useTableProps(props)} label columns rows />`.
  */
@@ -190,5 +216,6 @@ export function useTableProps(props: TablePropsSource, id = 'sort') {
     sort,
     changesFirst,
     onSortChange,
+    scope: props.scope,
   }
 }

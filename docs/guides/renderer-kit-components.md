@@ -258,8 +258,8 @@ stylesheet.
 
 ## Data tables
 
-`DataTable` draws items with comparable properties as a table: a row per item,
-a column per property. Use it rather than table markup of your own; it meets the
+`DataTable` draws items with comparable properties as a table: a row per item, a
+column per property. Use it rather than table markup of your own; it meets the
 checks as it is.
 
 ```tsx
@@ -285,8 +285,8 @@ export function View(props: RendererProps) {
   host's locale). `font: 'code'` sets identifiers and other symbols in the
   monospace font; headings are words, in the UI font. `align` (`end` for a
   numeric sort by default) and `width` (`fill` for the first column, `fit` for
-  the rest) shape it. A cell changed when its `value` differs between the
-  row's two versions, or as `changed(before, after)` says.
+  the rest) shape it. A cell changed when its `value` differs between the row's
+  two versions, or as `changed(before, after)` says.
 - **Rows.** The kit model's rows (`model.entities`) or any rows like them
   (`TableRow`: `id`, `before`, `after`, `status`). Each row is a ring unit with
   `data-entity-id`; its first cell is the button that selects it.
@@ -297,11 +297,11 @@ export function View(props: RendererProps) {
   direction, with the row's label and ID breaking ties. The sort is a renderer
   control: `tableSortControls({columns, default})` declares a "Sort by" choice
   (each column both ways, or the rows' own order) and a "Changes first" toggle
-  in the host's settings, so the host remembers the sort and agents read and
-  set it like any control. `useTableProps(props)` reads them and passes a
-  heading's activation to the host (`RendererProps.setControl`), so the
-  heading, the settings menu and an agent all set the same value. Without
-  `onSortChange`, headings don't sort.
+  in the host's settings, so the host remembers the sort and agents read and set
+  it like any control. `useTableProps(props)` reads them and passes a heading's
+  activation to the host (`RendererProps.setControl`), so the heading, the
+  settings menu and an agent all set the same value. Without `onSortChange`,
+  headings don't sort.
 - **Comparisons.** A row sorts by After's version (Before's for a removed row),
   so the order is the same at every point of the transition and rows never move
   while it plays. A status column says each change in words. In diff mode a
@@ -313,10 +313,14 @@ export function View(props: RendererProps) {
   side's hue as the change is emphasized and is plain text at the endpoints.
 - **Lines.** The rows draw the table's frame and every line in it, one per
   boundary. A changed row draws the lines around it in its hue, including the
-  one it shares with the row after it, so the line between a changed row and
-  its neighbour is the change's on either side. In a `Group` the table is the
-  body: the group draws no edge of its own and its header band joins the
-  table's frame.
+  one it shares with the row after it, so the line between a changed row and its
+  neighbour is the change's on either side. In a `Group` the table is the body:
+  the group draws no edge of its own and its header band joins the table's
+  frame.
+- **Changes scope.** With `scope` (`RendererProps.scope`, which `useTableProps`
+  passes), each run of rows the scope doesn't show, in the sorted order, folds
+  into one `Fold` row ("12 unchanged languages", with `noun`) that opens in
+  place; its line is the table's, not a second one.
 - **Scrolling.** A table wider than the frame scrolls sideways in its own box,
   its first column frozen (`frozen={false}` lets it scroll away).
 

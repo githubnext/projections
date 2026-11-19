@@ -8,10 +8,8 @@ import {before as invoicing} from '../test/fixtures.mjs'
  * tab), the tab spans it from border to border, and both its bottom corners are square; a wider tag keeps its
  * bottom-right corner, with the tab clear of it.
  */
-// Close-ups for review: STATUS_TAB_SHOTS=<directory> saves each tag, and the row, at four times its size;
-// STATUS_TAB_TEXT=left draws the tags' names left-aligned instead, to compare.
+// Close-ups for review: STATUS_TAB_SHOTS=<directory> saves each tag, and the row, at four times its size.
 const shots = process.env.STATUS_TAB_SHOTS
-const textVariant = process.env.STATUS_TAB_TEXT === 'left' ? 'left' : 'centred'
 if (shots) test.use({deviceScaleFactor: 4})
 
 const extension = (name: string) => ({id: `extension:${name}`, kind: 'extension', label: name, data: {version: '1.0'}})
@@ -30,12 +28,6 @@ for (const colorMode of ['light', 'dark'] as const)
       typeof openRenderer
     >[1])
     await renderer.measure('settle')
-    if (shots && textVariant === 'left')
-      await renderer.frame.locator('body').evaluate(body => {
-        const style = body.ownerDocument.createElement('style')
-        style.textContent = '.database-tags .database-tag { text-align: left !important }'
-        body.ownerDocument.head.append(style)
-      })
     const tag = (name: string) => renderer.frame.locator(`.database-tags .database-tag[data-entity-id="extension:${name}"]`)
     const geometry = (name: string) =>
       tag(name).evaluate(pill => {
@@ -61,7 +53,7 @@ for (const colorMode of ['light', 'dark'] as const)
       expect(Math.abs(shape.tabLeft - shape.left), `${name}: the tab's left edge is the tag's`).toBeLessThan(0.75)
       expect(Math.abs(shape.tabRight - shape.right), `${name}: the tab's right edge is the tag's`).toBeLessThan(0.75)
       expect(shape.corners, `${name}: square where the tab joins`).toEqual(['0px', '0px'])
-      if (textVariant === 'centred') expect(Math.abs(shape.textCentre - shape.centre), `${name}: its name is centred`).toBeLessThan(1)
+      expect(Math.abs(shape.textCentre - shape.centre), `${name}: its name is centred`).toBeLessThan(1)
     }
     for (const name of [long, 'billing_reconciler', 'ingest_scheduler']) {
       const wide = await geometry(name)
@@ -71,7 +63,7 @@ for (const colorMode of ['light', 'dark'] as const)
       expect(wide.corners[1], `${name}: keeps its bottom-right corner`).not.toBe('0px')
     }
     if (shots) {
-      const file = (name: string) => `${shots}/${name}-${textVariant}-${colorMode}-${info.project.name}.png`
+      const file = (name: string) => `${shots}/${name}-${colorMode}-${info.project.name}.png`
       for (const name of ['alive', 'usersd', long])
         await tag(name)
           .locator('xpath=..')

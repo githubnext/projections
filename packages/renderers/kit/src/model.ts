@@ -35,6 +35,11 @@ export interface ComparisonModel<X extends Extraction = Extraction> {
   reverse: 'mirror' | 'explicit'
   /** Backward presentation order (first presented when leaving progress 1) when `reverse` is `explicit`. */
   reverseSteps?: ModelStep[]
+  /**
+   * The presented rows of each comparison change with more than one item: a split's further parts and a merge's further
+   * sources are rows of their own, while the host names the change by its ID alone.
+   */
+  changeRows?: ReadonlyMap<string, readonly string[]>
 }
 
 function bothSides<T extends Entity | Relationship>(items: readonly T[]): EntityChange<T>[] {
@@ -84,10 +89,24 @@ export function comparisonModel<X extends Extraction>(before: X, after: X, compa
     entities: EntityChange<X['entities'][number]>[]
     relationships: EntityChange<X['relationships'][number]>[]
   }
-  const entityRow = {before: new Map<string, string>(), after: new Map<string, string>()}
-  for (const row of presented.entities) {
-    if (row.before) entityRow.before.set(row.before.id, row.id)
-    if (row.after) entityRow.after.set(row.after.id, row.id)
+  const itemRow = (rows: readonly {id: string; before?: {id: string}; after?: {id: string}}[]) => {
+    const map = {before: new Map<string, string>(), after: new Map<string, string>()}
+    for (const row of rows) {
+      if (row.before) map.before.set(row.before.id, row.id)
+      if (row.after) map.after.set(row.after.id, row.id)
+    }
+    return map
+  }
+  const entityRow = itemRow(presented.entities)
+  const rowOf = {entities: entityRow, relationships: itemRow(presented.relationships)}
+  const changeRows = new Map<string, readonly string[]>()
+  for (const change of comparison.changes) {
+    if (change.before.length + change.after.length <= 2) continue
+    const ids = [
+      ...change.before.map(id => rowOf[change.collection].before.get(id)),
+      ...change.after.map(id => rowOf[change.collection].after.get(id)),
+    ]
+    changeRows.set(change.id, [...new Set(ids.filter((id): id is string => id !== undefined))])
   }
   return {
     mode: 'comparison',
@@ -100,5 +119,6 @@ export function comparisonModel<X extends Extraction>(before: X, after: X, compa
     steps: presented.steps ?? [],
     reverse: presented.reverse ?? 'mirror',
     ...(presented.reverseSteps ? {reverseSteps: presented.reverseSteps} : {}),
+    ...(changeRows.size ? {changeRows} : {}),
   }
 }

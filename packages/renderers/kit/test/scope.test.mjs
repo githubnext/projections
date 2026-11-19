@@ -1,6 +1,6 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {changesScope, comparisonModel, extractionModel, foldList, isFold, scopedModel} from '../dist/index.js'
+import {changesScope, comparisonModel, extractionModel, foldList, followContext, isFold, scopedModel} from '../dist/index.js'
 
 const ids = items => items.map(entry => (entry.type === 'fold' ? `[${entry.items.join(' ')}]` : entry.item))
 
@@ -43,6 +43,20 @@ test('past the filter ID limit the kit derives the same scope, and there is none
   assert.deepEqual([...scope.shown].sort(), ['c', 'tool', 'tool/viewer'])
   assert.equal(changesScope(model, {query: '', changesOnly: false, ids: null}), undefined)
   assert.equal(changesScope(extractionModel(after), {query: '', changesOnly: true, ids: null}), undefined)
+})
+
+test("a split's further parts are in the scope with the change the host names", () => {
+  const split = comparisonModel(api([entity('handler')]), api([entity('read'), entity('write')]), {
+    protocolVersion: 0,
+    changes: [
+      {id: 'handler', collection: 'entities', before: ['handler'], after: ['read', 'write'], status: 'modified', correspondence: 'split'},
+    ],
+    steps: [{changes: ['handler']}],
+  })
+  assert.equal(split.entities.length, 2)
+  const scope = changesScope(split, {query: '', changesOnly: true, ids: ['handler']})
+  assert.deepEqual([...scope.shown].sort(), split.entities.map(row => row.id).sort())
+  assert.deepEqual([...scope.changes].sort(), split.entities.map(row => row.id).sort())
 })
 
 // A schema: two tables with columns; `orders` gains a column and a key to `customers`; `audit` is unrelated.
@@ -116,4 +130,32 @@ test('folded parts stand as one unchanged part of their entity, and opening a fo
   const whole = scopedModel(schemaModel, shown, 'whole').model
   assert.ok(whole.entities.some(row => row.id === 'customers.name'))
   assert.ok(!whole.entities.some(row => row.id === 'audit'))
+})
+
+test("a renderer's context follows the relationships it names: a changed package's path from the workspace", () => {
+  const graph = (version, extra = []) => ({
+    protocolVersion: 0,
+    schema: 'graph/v0',
+    entities: [
+      {id: 'workspace', kind: 'workspace', label: 'workspace'},
+      {id: 'a', kind: 'package', label: 'a'},
+      {id: 'b', kind: 'package', label: 'b', data: {version}},
+      {id: 'other', kind: 'package', label: 'other'},
+      ...extra,
+    ],
+    relationships: [
+      {id: 'workspace>a', kind: 'depends-on', from: 'workspace', to: 'a'},
+      {id: 'a>b', kind: 'depends-on', from: 'a', to: 'b'},
+      {id: 'workspace>other', kind: 'depends-on', from: 'workspace', to: 'other'},
+    ],
+  })
+  const model = comparisonModel(graph('1'), graph('2'), {
+    protocolVersion: 0,
+    changes: [{id: 'b', collection: 'entities', before: ['b'], after: ['b'], status: 'modified', correspondence: 'exact'}],
+    steps: [{changes: ['b']}],
+  })
+  assert.deepEqual([...followContext(model, new Set(['b']), {incoming: () => true})].sort(), ['a', 'a>b', 'workspace', 'workspace>a'])
+  // Only the kinds named, and in the direction named.
+  assert.deepEqual([...followContext(model, new Set(['b']), {outgoing: () => true})], [])
+  assert.deepEqual([...followContext(model, new Set(['b']), {incoming: kind => kind === 'contains'})], [])
 })

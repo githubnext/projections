@@ -7,7 +7,7 @@ import type {RendererControl} from '@githubnext/projections-renderer-sdk/protoco
 import {changeMark, presentedEmphasis, statusParts} from '@githubnext/projections-renderer-kit'
 import {ChangeFooter, EmptyDomain, Fold, Identifier, Notice, Prose, useFolds} from '@githubnext/projections-renderer-kit/react'
 import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
-import {changesFirst, comparisonRows, declarationLimit, limitScope, qualifiedNames, revisionRows} from './model.js'
+import {changesFirst, comparisonRows, declarationLimit, limitEntries, limitScope, qualifiedNames, revisionRows} from './model.js'
 import {breakingFirst, compatibilityOf, reasonText} from './compatibility.js'
 import type {Compatibility} from './compatibility.js'
 import type {Side} from './signature.js'
@@ -172,7 +172,12 @@ export function ApiView(props: RendererProps<typeof accepts>) {
   const shownScope = useMemo(() => scope && limitScope(scope, all, declarationLimit), [scope, all])
   const rows = shownScope ? all.filter(row => shownScope.shown.has(row.id)) : all.slice(0, declarationLimit)
   const scopeTotal = scope ? all.filter(row => scope.shown.has(row.id)).length : all.length
-  const {entries, expand, collapse} = useFolds(shownScope ? all : rows, row => row.id, shownScope)
+  const folded = useFolds(shownScope ? all : rows, row => row.id, shownScope)
+  const {expand, collapse} = folded
+  // The limit counts what is drawn: declarations outside a fold, and an opened fold's run.
+  const {entries, drawn} = useMemo(() => limitEntries(folded.entries, declarationLimit), [folded.entries])
+  // In scope but past the limit, or opened beyond it: what the notice counts as not drawn.
+  const total = shownScope ? folded.entries.filter(entry => entry.type === 'item').length + (scopeTotal - rows.length) : all.length
   const names = useMemo(() => ({before: qualifiedNames(model.before), after: qualifiedNames(model.after)}), [model])
   // One status cell width for every row, from the longest change status this comparison can show.
   const parts = Math.max(1, ...rows.map(row => statusParts(row).length))
@@ -181,8 +186,9 @@ export function ApiView(props: RendererProps<typeof accepts>) {
     <div className="api-view pk-stage" data-highlighting={highlighting > 0 ? 'on' : 'off'} style={style}>
       <div className="api-panel" data-projections-content="">
         {compatibility && <CompatibilityNotices compatibility={compatibility} />}
-        <Notice shown={rows.length} total={scopeTotal} noun="declarations" />
-        {!rows.length ? (
+        <Notice shown={drawn} total={total} noun="declarations" />
+        {/* Folded wholly (a pane whose declarations are all context elsewhere), a pane still lists its folds. */}
+        {!(shownScope ? all.length : rows.length) ? (
           breakingOnly ? (
             <EmptyDomain title="No breaking changes">No declaration in this comparison breaks its consumers.</EmptyDomain>
           ) : (

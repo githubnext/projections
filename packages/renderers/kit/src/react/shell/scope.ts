@@ -20,8 +20,17 @@ export function useScopeView(
   filter: FilterPayload | undefined,
   document: DocumentModel | undefined,
   options: MountOptions['scope'],
+  renderer = '',
 ): {scope: ScopeView | undefined; document: DocumentModel | undefined} {
-  const hostScope = useMemo(() => changesScope(resolved, filter), [resolved, filter])
+  const more = options?.layout === 'subset' ? options.context : undefined
+  const hostScope = useMemo(() => {
+    const scope = changesScope(resolved, filter)
+    if (!scope || !resolved || !more) return scope
+    // What the renderer needs to place the changes, beyond their endpoints and containers: shown as context.
+    const extra = [...more(resolved, scope.changes, renderer)].filter(id => !scope.shown.has(id))
+    if (!extra.length) return scope
+    return {changes: scope.changes, context: new Set([...scope.context, ...extra]), shown: new Set([...scope.shown, ...extra])}
+  }, [resolved, filter, more, renderer])
   const key = hostScope ? [...hostScope.shown].sort().join('\n') : ''
   // What the person opened since the host last changed the scope: items, and folds (which keep their place).
   const [opened, setOpened] = useState<{key: string; ids: ReadonlySet<string>}>({key, ids: none})

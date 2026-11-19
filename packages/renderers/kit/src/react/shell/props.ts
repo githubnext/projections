@@ -204,9 +204,17 @@ export interface MountOptions {
    * How the Changes scope reaches the renderer. `fold` (the default): `model` holds every item and the renderer folds
    * what `scope` leaves out, as a list does. `subset`: `model` holds only what the scope shows (`scopedModel`), with the
    * shown entities' `parts` left out, kept whole or folded, so a canvas lays out only that; `scope.all` holds every
-   * item.
+   * item. A subset renderer that needs more to place a change than its relationships' endpoints and containers (a
+   * package's path from the workspace, a selector's probe and hook) returns those items' row IDs from `context`, given
+   * every item, the changes in scope and its renderer name; they show as context.
    */
-  scope?: {layout: 'fold'} | {layout: 'subset'; parts?: ScopedParts}
+  scope?:
+    | {layout: 'fold'}
+    | {
+        layout: 'subset'
+        parts?: ScopedParts
+        context?: (all: ComparisonModel, changes: ReadonlySet<string>, renderer: string) => Iterable<string>
+      }
   /**
    * Hover, anchors, scroll mirroring, the host's filter and annotation badges through `connectInteractions` over
    * elements carrying `data-entity-id` (default on). `false` opts out and

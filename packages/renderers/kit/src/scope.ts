@@ -14,13 +14,15 @@ export type {ChangesScope} from '@githubnext/projections-renderer-sdk/presentati
 
 /**
  * The Changes scope a renderer presents, or undefined when the host shows every item (or this is one extraction). The
- * host's filter `ids` are what it shows, its changes and their context; past the filter's ID limit, or before the host
- * says, the kit derives the same from the comparison's structure (`changeContext`).
+ * host's filter `ids` are what it shows, its changes and their context, each change with every row presenting it (a
+ * split's parts); past the filter's ID limit, or before the host says, the kit derives the same from the comparison's
+ * structure (`changeContext`).
  */
 export function changesScope(model: ComparisonModel | undefined, filter: FilterPayload | undefined): ChangesScope | undefined {
   if (!model || model.mode !== 'comparison' || !filter?.changesOnly) return undefined
   if (filter.ids === null) return changeContext(scopeRows(model), model)
-  const shown = new Set(filter.ids)
+  // A split's or merge's further parts are rows of their own: the host's change ID names them all.
+  const shown = new Set(filter.ids.flatMap(id => [id, ...(model.changeRows?.get(id) ?? [])]))
   const changes = new Set<string>()
   const context = new Set<string>()
   for (const row of [...model.entities, ...model.relationships]) {

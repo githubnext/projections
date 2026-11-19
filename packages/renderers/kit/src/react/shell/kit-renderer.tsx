@@ -81,7 +81,7 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
   const automatic = (options.steps ?? 'schedule') === 'schedule'
   const filter = useHostFilter(client)
   const resolved = model && !(model.model instanceof Error) ? model.model : undefined
-  const {scope, document} = useScopeView(resolved, filter, model, options.scope)
+  const {scope, document} = useScopeView(resolved, filter, model, options.scope, init?.projection.renderer)
   const {comparing, diff, position, schedule, highlighting, emphasis} = useTimeline(
     init,
     document,

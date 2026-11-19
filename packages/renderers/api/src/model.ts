@@ -1,6 +1,6 @@
 import type {Entity, Extraction} from '@githubnext/projections-schemas'
 import {compareIds} from '@githubnext/projections-renderer-kit'
-import type {ChangesScope, ComparisonModel} from '@githubnext/projections-renderer-kit'
+import type {ChangesScope, ComparisonModel, Folded} from '@githubnext/projections-renderer-kit'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import type {Side} from './signature.js'
 
@@ -75,4 +75,25 @@ export function qualifiedNames(extraction: Extraction): Map<string, string> {
   for (const name of names.values()) counts.set(name, (counts.get(name) ?? 0) + 1)
   for (const [id, name] of names) if (counts.get(name)! > 1) names.set(id, readableId(id))
   return names
+}
+
+/**
+ * A folded list drawn with at most `limit` declarations: entries in order until the limit, counting a fold's opened run
+ * and any declaration outside a fold; then nothing more. Also how many it draws and would draw.
+ */
+export function limitEntries<T>(entries: readonly Folded<T>[], limit: number): {entries: Folded<T>[]; drawn: number; total: number} {
+  const kept: Folded<T>[] = []
+  let drawn = 0,
+    total = 0
+  for (const entry of entries) {
+    if (entry.type !== 'item') {
+      if (drawn < limit) kept.push(entry)
+      continue
+    }
+    total++
+    if (drawn >= limit) continue
+    kept.push(entry)
+    drawn++
+  }
+  return {entries: kept, drawn, total}
 }

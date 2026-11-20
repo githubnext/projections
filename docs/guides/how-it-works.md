@@ -1,46 +1,48 @@
 # Projections guide
 
-This guide explains how Projections works and how to customize it. The exact
-wire formats are specified in [the contracts](../contracts.md); the design
-behind them is recorded in the [domain model](../models/domain-model.md). To
-install the CLI, build your first projection and add it to CI with the GitHub
-Action, start with the [quick start](../setup/quick-start.md); the
-[security architecture](security.md) explains where each part runs.
+This guide walks through how Projections works and how to tailor it to your
+codebase. If you want to get up and running first, start with the
+[quick start](../setup/quick-start.md) to install the CLI, build a projection,
+and wire it into CI with the GitHub Action. For deeper reference, the
+[contracts](../contracts.md) specify the exact wire formats, the
+[domain model](../models/domain-model.md) captures the design behind them, and
+the [security architecture](security.md) explains where each piece runs.
 
 ---
 
 ## How Projections works
 
-Source code describes a system one file at a time. Projections shows you the
-system itself: the shape of a public API, which packages depend on which, how a
-database is structured, where the code is concentrated.
+Source code shows you a system one file at a time. Projections steps back and
+shows you the system itself: the shape of a public API, which packages depend on
+which, how a database is structured, or where code is concentrated.
 
-You choose what to see by choosing a **projection**, such as _Package
-dependencies_ or _Public API_. Each projection combines three components, each
-with its own configuration:
+You pick what you want to see by choosing a **projection**, such as _Package
+dependencies_ or _Public API_. Every projection brings together three
+components, each configured independently:
 
-- an **extractor**, which examines one **revision** of your repository—a commit,
-  or your working tree including uncommitted changes—and produces an
-  **extraction**: a JSON description of one aspect of the code;
-- a **comparator**, which relates two extractions and produces a **comparison**;
-- a **renderer**, which presents an extraction or a comparison, for example as
-  an interactive graph, a table or a text outline.
+- An **extractor** reads a single **revision** of your repository (either a
+  commit or your working tree, including uncommitted changes) and emits an
+  **extraction**—a JSON description of one aspect of the code.
+- A **comparator** takes two extractions and produces a **comparison** showing
+  how the first became the second.
+- A **renderer** turns an extraction or comparison into something you can read
+  and explore, like an interactive graph, a table, or a text outline.
 
 ```
   revision ──▶ extractor ──▶ extraction ──▶ renderer
 ```
 
-To see the package dependency graph of your main branch:
+To inspect the package dependency graph of your main branch, run:
 
 ```sh
 projections show main -p dependencies
 ```
 
-That is a complete use of Projections. Many teams publish projections of their
+That alone is a complete workflow. Many teams publish projections of their
 default branch as living architecture documentation.
 
-Omit the revision to use your working tree, so you can see the effect of changes
-before you commit them:
+Leave out the revision to inspect your working tree instead, so you can see the
+impact of your changes before committing them:
 
 ```sh
 projections show -p dependencies
@@ -48,27 +50,27 @@ projections show -p dependencies
 
 ### Seeing what changed
 
-Projections can also show how the code changed between two revisions, usually
-the base and head of a pull request.
+Projections can also show what changed between two revisions, most often the
+base and head of a pull request:
 
 ```sh
 projections compare main..HEAD -p dependencies
 ```
 
-Name only one revision to compare it with your working tree:
+Pass a single revision to compare it against your working tree:
 
 ```sh
 projections compare main -p dependencies
 ```
 
-Projections runs the extractor against both revisions, then passes the two
-extractions to the comparator. The comparison it produces describes how the
-first extraction became the second:
+Under the hood, Projections runs the extractor on both revisions and hands the
+two extractions to the comparator. The resulting comparison captures three
+things:
 
-- **which entities correspond** across the two revisions, including renames;
-- **what happened to each one**: added, removed, modified or renamed;
-- **the order in which to present the changes**, grouping changes that belong
-  together.
+- **Which entities correspond** across both revisions, including renames.
+- **What happened to each one**, whether it was added, removed, modified, or
+  renamed.
+- **How to order the changes**, grouping related edits so the story makes sense.
 
 ```
   base revision ──▶ extractor ──▶ extraction ─┐
@@ -76,26 +78,26 @@ first extraction became the second:
   head revision ──▶ extractor ──▶ extraction ─┘
 ```
 
-Comparisons are computed when you view them, so you can compare any two
-extractions from the same projection. On a pull request, for example, you can
-compare the base with the latest push, or see only what changed since the push
+Because comparisons are computed on demand, you can compare any two extractions
+from the same projection. On a pull request, for example, you can compare the
+base branch with the latest push, or look only at what changed since the push
 you last reviewed.
 
-The renderer presents the comparison. An interactive graph might animate between
-the two extractions step by step; a text renderer might list the same steps in
-order. Every renderer presents the same comparison, so they always agree on what
-changed.
+The renderer then displays that comparison. An interactive graph might step
+through the changes with animation, while a text renderer lists the exact same
+steps in order. Every renderer reads the same comparison, so they never disagree
+about what changed.
 
-> **If you've used `terraform plan` or ARM what-if,** the idea is similar: match
-> resources by identity, classify each change, and order the changes sensibly.
-> The difference is that a comparison explains a change that has already
-> happened in code. Its order exists to make the change understandable, not to
-> execute it.
+> **If you've used `terraform plan` or ARM what-if,** the mental model is
+> similar: match resources by identity, classify each change, and put the
+> changes in a sensible order. The difference is that a comparison explains a
+> change that already happened in code, so its order is built for human
+> understanding rather than execution.
 
 ### Defining a projection
 
-A projection definition names the projection's extractor and renderer and,
-optionally, its comparator.
+A projection definition names its extractor, its renderer, and optionally its
+comparator:
 
 ```json
 // .github/projections/dependencies.json
@@ -107,12 +109,12 @@ optionally, its comparator.
 }
 ```
 
-When `comparator` is omitted, the projection uses the default comparator. It
-matches entities by ID, honors declared renames, and presents connected changes
-together, dependencies before dependents.
+If you leave out `comparator`, Projections uses the default comparator. It
+matches entities by ID, respects declared renames, and groups connected changes
+together with dependencies shown before dependents.
 
-A definition can also choose how viewers first see it. Viewers can still change
-these settings:
+You can also set default viewing preferences in the definition. Viewers can
+still override any of them while exploring:
 
 ```json
 {
@@ -123,25 +125,26 @@ these settings:
 }
 ```
 
-`highlighting` (`animated`, `on`, `off`), `changesOnly`, `mode` (`animated`,
-`side-by-side`, `swipe`) and `durationMs` (playback length at normal speed, 500
-to 120000 milliseconds; by default about a second per step) are the same for
-every projection. `rendererOptions` sets the controls the chosen renderer
-offers; unknown settings are ignored with a notice.
+Four presentation fields work across every projection: `highlighting`
+(`animated`, `on`, or `off`), `changesOnly`, `mode` (`animated`, `side-by-side`,
+or `swipe`), and `durationMs` (total playback length at normal speed, from 500
+to 120000 milliseconds, defaulting to roughly a second per step). You can also
+pass `rendererOptions` to configure controls specific to the chosen renderer;
+any unknown options are ignored with a notice.
 
-Presentation settings are only viewers' starting point, so changing them doesn't
-change what the projection extracts: extractions made before and after such a
-change can still be compared.
+Because presentation settings only affect how a viewer opens the projection,
+changing them has no effect on what gets extracted. Extractions created before
+and after a presentation tweak can still be compared directly.
 
 ---
 
 ## Customizing Projections
 
-You can replace any of a projection's three components independently, or none at
-all. Custom extractors are the most common customization, and custom renderers
-are useful when a domain deserves its own presentation. Most teams never need a
-custom comparator: configuring the default one covers common needs. But all
-three are fully supported.
+You can swap out any of a projection's three components on its own, or use the
+built-ins as they are. Custom extractors are the most common starting point, and
+custom renderers pay off when a domain benefits from a tailored visual view.
+Most teams never need a custom comparator because configuring the default one
+handles common cases, though all three extension points are first-class.
 
 <!-- prettier-ignore -->
 | Component | Replace it when… | Written as |
@@ -150,24 +153,24 @@ three are fully supported.
 | **Renderer** | You want a different way to present extractions and comparisons | A web page that runs in a sandboxed frame |
 | **Comparator** | The default matching or ordering doesn't explain your changes well | A comparator file (`<name>.comparator.yaml`): YAML declarations and [CEL](https://cel.dev) expressions |
 
-Projections itself is a single standalone executable. Built-in extractors only
-need the toolchain your project already uses: .NET for Entity Framework Core
-schemas, Python for Django, Go for Go interfaces. Projections never requires
-Node.js unless your project already does, or you write a custom renderer, which
-is ordinary web development.
+Projections ships as a single standalone executable. Built-in extractors rely
+only on the toolchain your project already uses—.NET for Entity Framework Core
+schemas, Python for Django, Go for Go interfaces. You don't need Node.js unless
+your own project uses it or you're building a custom renderer, which is standard
+web development.
 
-The components communicate only through documented formats: extractions conform
-to the [extraction schema](schemas.md#extraction-schema), and comparisons
-conform to the [comparison schema](schemas.md#comparison-schema). A comparator
-therefore doesn't need to know which renderer will present its comparison, and a
-generic renderer can present a comparison built with domain knowledge it doesn't
-have.
+All three components communicate strictly through documented formats:
+extractions follow the [extraction schema](schemas.md#extraction-schema), and
+comparisons follow the [comparison schema](schemas.md#comparison-schema). That
+separation means a comparator never needs to know which renderer will draw its
+output, and a general-purpose renderer can present domain-specific comparisons
+without understanding the domain itself.
 
 ### Trust
 
-Projections runs code from your repository only when that code is reviewed or
-you explicitly trust it. The rule is the same for every component: **code from
-the revision you review runs freely; code that only a pull request's head
+Projections only runs code from your repository when it has already been
+reviewed or you explicitly trust it. One rule governs every component: **code
+from the revision you review runs freely; code that only a pull request's head
 supplies needs explicit trust.**
 
 <!-- prettier-ignore -->
@@ -179,62 +182,73 @@ supplies needs explicit trust.**
 | Custom renderer identical to the default branch's | A sandboxed frame | No |
 | Any other custom renderer, including the working tree's and a checked-out pull request's | A sandboxed frame | Yes, like a custom extractor |
 
-Why renderers at all? A renderer runs in a sandboxed frame
-(`sandbox="allow-scripts"`, and a content security policy that grants no origin
-and `connect-src 'none'`), so it can't read your files, call an API or fetch
-anything. But it does receive the extraction, which can describe private code,
-and browsers can't stop a sandboxed frame from navigating itself: a malicious
-renderer could encode the extraction into a URL and navigate to it. So a custom
-renderer is repository code like a custom extractor, and runs only with trust.
-The exception is a bundle byte-identical to the one on the repository's default
-branch (at the revision's merge base with `origin/HEAD`): the repository's
-maintainers merged it, and it only sees what is derived from the same
-repository. A pull request that adds or changes a renderer needs trust even
-after you check it out.
+You might wonder why renderers need trust if they already run in a sandboxed
+frame (`sandbox="allow-scripts"`, plus a content security policy with no origin
+and `connect-src 'none'`). That sandbox stops a renderer from reading your
+files, calling APIs, or making network requests. However, it still receives the
+extraction—which can describe private source code—and browsers can't prevent a
+sandboxed frame from navigating itself. A malicious renderer could encode
+extraction data into a URL and navigate there.
 
-Without trust, Projections shows the built-in renderer for the extraction's
-schema, or its table and text views, and says why. Concretely:
+For that reason, a custom renderer is treated as repository code, just like a
+custom extractor, and requires trust before it runs. The one exception is a
+bundle that is byte-identical to the version on the repository's default branch
+(at the revision's merge base with `origin/HEAD`): maintainers already reviewed
+and merged it, and it only ever sees data derived from the same repository. A
+pull request that adds or edits a renderer still needs trust even after you
+check it out locally.
 
-- `projections list --json` reports, per projection, whether its custom renderer
-  needs trust (`rendererRequiresTrust`).
-- The Inspector, the viewer, `show`/`compare --png` and `check`'s renderer
-  checks run a custom renderer that differs from the default branch's only with
-  `--trust`; in VS Code, only in a trusted workspace (its backend gets
-  `--trust`). Your own uncommitted renderer changes count too, so authoring a
-  renderer needs trust.
+When a custom renderer isn't trusted, Projections falls back to the built-in
+renderer for the extraction's schema (or its table and text views) and explains
+why. In practice:
+
+- `projections list --json` includes `rendererRequiresTrust` for each projection
+  so you can see which custom renderers need trust.
+- The Inspector, the viewer, `show`/`compare --png`, and `check`'s renderer
+  checks only run a modified custom renderer when `--trust` is passed (or in a
+  trusted workspace in VS Code, which passes `--trust` to its backend). Your own
+  uncommitted renderer edits count as modified too, so authoring a renderer
+  requires trust.
 - Hosted views never load custom renderers from artifacts.
 
 ### Determinism
 
-Think of extractions as test results. Like a test run, an extraction is an
-observation of a revision by one run in one environment, and like tests, the
-most useful ones are deterministic: the same revision always produces the same
-extraction, so comparisons show only what the change did. Read declared or
-resolved structure (manifests, lockfiles, compiler output, schemas) rather than
-timings, profiles or live services; sort what you emit; and keep clocks,
-absolute paths, random values and tool versions out of IDs.
+It helps to think of extractions like test results. Each extraction is an
+observation of a revision from a single run in a single environment. Just like
+tests, the most useful extractions are deterministic: running against the same
+revision always produces the same output, so comparisons highlight only real
+changes. Favor declared or resolved structure—manifests, lockfiles, compiler
+output, schemas—over timings, profiles, or live services. Sort everything you
+emit, and keep clocks, absolute paths, random values, and tool versions out of
+IDs.
 
-Projections doesn't block anything less than that. Declare how reproducible your
-extractor is with `execution.determinism`: `pure` (a function of the revision's
-files), `environmental` (also the toolchain and dependencies; the default) or
-`observed` (timings, coverage: every run is an observation). The class decides
-what may be reused: pure extractions by Git tree, environmental ones only in the
-same environment, observed ones never silently. `projections check` reruns your
-extractor and warns, naming the fields that varied, when two runs differ. As
-with tests, the run CI publishes is a commit's official extraction; local runs
-are labelled as runs. Comparators must be deterministic, and are: comparator
-rules are expressions with no clock, randomness or I/O, run in a sandbox. See
-[determinism and authority](../models/domain-model/extension-points.md#determinism-and-authority)
-for the reasoning.
+That said, Projections doesn't block non-deterministic data. Instead, you
+declare how reproducible your extractor is via `execution.determinism`:
+
+- `pure` depends only on the revision's files, so extractions can be reused by
+  Git tree.
+- `environmental` (the default) also depends on the toolchain and installed
+  dependencies, so extractions are reused only in the same environment.
+- `observed` covers timings, coverage, and other live measurements where every
+  run is a fresh observation and is never reused silently.
+
+When you run `projections check`, Projections runs your extractor twice and
+warns you—naming the exact fields that differed—if the outputs don't match. As
+with tests, the run CI publishes is a commit's official extraction, while local
+runs are clearly labelled as local runs. Comparators, by contrast, are always
+deterministic because their rules are pure expressions evaluated in a sandbox
+with no clock, randomness, or I/O. For the full rationale, see
+[determinism and authority](../models/domain-model/extension-points.md#determinism-and-authority).
 
 ### Volatile data
 
-Extractions are like test results: determinism is desirable, but some variation
-is real (a test's duration, a sample count, a benchmark's mean) and mustn't be
-blocked. Declare it, and comparisons separate expected variation from changes
-that matter. In the extraction, beside `metadata`, list the volatile values as
-JSON pointers under `/data/`, each with an optional tolerance (here in Python,
-with [`result()`](first-extractor.md#1-write-the-program)):
+Even when you want deterministic extractions, some real measurements naturally
+vary from run to run—test durations, sample counts, benchmark averages. Rather
+than hiding that data or letting it pollute diffs, you can declare it volatile
+so comparisons separate expected jitter from meaningful changes. List volatile
+values beside `metadata` as JSON pointers under `/data/`, with an optional
+tolerance (shown here in Python using
+[`result()`](first-extractor.md#1-write-the-program)):
 
 ```python
 result(
@@ -254,51 +268,54 @@ result(
 )
 ```
 
-A test whose duration moved within tolerance then shows as `unchanged`, with the
-varied path listed in its change's `varied` so the noise stays visible, and it
-is in no step. Beyond tolerance it is `modified`; a status change is `modified`
-as always. Only `data` can be volatile: IDs, kinds, labels and endpoints never
-are, so matching is unaffected. Without a tolerance any difference of the value
-counts as expected variation; a tolerance applies to numbers, and a difference
-is within it when any of its bounds (`absolute`, `relative`, `spread`) holds.
-When the two revisions declare different tolerances for a value, the tighter one
-applies. The declarations, and the volatile values themselves, are part of the
-extraction's digest. See
-[volatile data](../contracts/extractions.md#volatile-data) for every rule.
+If a test's duration shifts within tolerance, it stays `unchanged` and doesn't
+appear in any step, while the varied path is still recorded under `varied` so
+the noise remains inspectable. If it moves beyond tolerance—or if its status
+changes—it becomes `modified` as usual.
 
-Comparators stay deterministic; only the extraction varies. The official results
-are what CI publishes: a comparison in a pull request compares the extractions
-CI made, and a local rerun that varied within tolerance agrees with them.
+Only fields inside `data` can be volatile; IDs, kinds, labels, and endpoints
+never are, so entity matching is never affected. Omitting a tolerance treats any
+change to that value as expected variation. When you specify numeric tolerances,
+a change stays within bounds as long as any declared bound (`absolute`,
+`relative`, or `spread`) holds; if two revisions declare different tolerances
+for the same path, the tighter one wins. Both the volatile declarations and the
+measured values remain part of the extraction's digest. See
+[volatile data](../contracts/extractions.md#volatile-data) for the complete
+rules.
+
+Comparators remain deterministic—only the extraction itself varies. Because CI's
+published runs are official, a pull request compares the extractions CI
+produced, and a local rerun that varies within tolerance still agrees with them.
 
 #### Performance and other measured data
 
-For a measurement, record its spread and let the tolerance follow it:
+When you're tracking a measurement like a benchmark, record its spread and let
+the tolerance adapt to it:
 
-1. Run the benchmark N times and record the mean and the spread, for example
-   `data.meanMs` and `data.stdevMs`.
-2. Declare the mean volatile, bounded by the spread both runs recorded:
+1. Run the benchmark N times and record both the mean and the spread—for
+   example, `data.meanMs` and `data.stdevMs`.
+2. Declare the mean volatile and bound it by the spread from both runs:
 
    ```json
    {"kinds": ["benchmark"], "path": "/data/meanMs", "tolerance": {"spread": "/data/stdevMs", "factor": 2}}
    ```
 
-   The mean is within when it moved by at most
-   `2 × √(stdev_before² + stdev_after²)`. A run that didn't record a spread
-   can't use this bound, so its difference is beyond tolerance (with a reason)
-   unless another bound, such as `absolute`, holds.
+   The mean stays within tolerance when it shifts by at most
+   `2 × √(stdev_before² + stdev_after²)`. If a run didn't record a spread, this
+   bound can't apply, so the difference is treated as beyond tolerance (with a
+   reason attached) unless another bound such as `absolute` holds.
 
-3. Set the definition's determinism class to `observed`
-   (`execution.determinism`; see [Determinism](#determinism)), so tools know a
-   rerun may differ.
+3. Set `execution.determinism` to `observed` (see [Determinism](#determinism))
+   so tools know a rerun may produce different numbers.
 4. Treat CI's run as the official result.
 
 #### Generated values
 
-Some facts are easier to generate than to extract: what a package is responsible
-for, or what a class does, written by a language model. A model rewords its
-answer every time it's asked, so declare such a value **generated**, with the
-**basis** it was generated from: an object of named parts beside it in the
-item's `data`, each a string (usually a hash):
+Some facts are easier to generate than to extract directly—for instance, using a
+language model to summarize what a package or class is responsible for. Because
+a model rewords its answer on every call, mark such a field as **generated** and
+pair it with the **basis** it came from: an object of named string parts
+(usually hashes) stored right alongside it in the item's `data`:
 
 ```json
 "volatile": [
@@ -313,35 +330,36 @@ item's `data`, each a string (usually a hash):
 }
 ```
 
-Comparisons judge a generated value by its basis, never by its wording. With
-equal bases, a reworded value is expected variation: the item stays `unchanged`,
-listed with `varied` (`generated: true`), in no step, and `projections check`
-counts the rerun reproducible. When a part of the basis moved, the item is
-`modified`, and its `varied` entry names the parts in `because` (`["input"]`,
-`["model"]`), so hosts can say "regenerated because the input changed". The
-basis can't itself be volatile, and an item has a basis exactly when it has the
-value.
+Comparisons judge a generated value by its basis, never by its wording. If the
+basis didn't change, a reworded summary counts as expected variation: the item
+stays `unchanged`, appears in no step, records `varied` with `generated: true`,
+and passes `projections check` as reproducible. If any part of the basis
+changed, the item becomes `modified`, and its `varied` entry lists the changed
+keys in `because` (such as `["input"]` or `["model"]`), allowing hosts to
+explain that it was "regenerated because the input changed". A basis can't
+itself be volatile, and an item must include a basis whenever it includes the
+generated value.
 
-What goes in the basis decides what counts as a change, so put in everything
-that should regenerate the value, and nothing else:
+Whatever you put in the basis determines what triggers a meaningful change, so
+include everything that should cause regeneration and nothing else:
 
-- **The input, narrowly**: exactly what the model reads, such as the class's
-  source rather than its whole file. Normalize it (line endings, trailing
-  whitespace) before hashing it and before sending it.
-- **The prompt**: the system prompt and template, few-shot examples and the
-  generation parameters that change what comes back.
-- **The model, if a model upgrade should count**: a pinned, dated ID, kept
-  readable. Leave it out if an upgrade shouldn't regenerate anything.
-- **Never** sampling seeds, timestamps, request IDs, the revision, or
-  credentials of any kind, not even hashed: a basis is saved, published and
-  shown.
+- **Scope the input narrowly** to the exact text the model reads, such as a
+  class's own source rather than the entire file. Normalize line endings and
+  trailing whitespace before hashing and before calling the model.
+- **Include the prompt**, covering the system prompt, template, few-shot
+  examples, and any generation parameters that affect the output.
+- **Include the model if upgrades should matter**, using a pinned, dated,
+  readable model ID. Omit it if a model upgrade shouldn't trigger changes.
+- **Leave out** sampling seeds, timestamps, request IDs, the Git revision, and
+  any credentials—even hashed—because a basis is saved, published, and
+  displayed.
 
-Equal bases usually give byte-identical text too. The runner keeps a
-**generation store** of the values earlier extractions generated, keyed by the
-declared path and the basis, and hands the extractor a read-only snapshot
-(`request.generations.file`). An extractor that reuses a stored value for an
-equal basis never asks the model again. In JavaScript, the helpers in
-`@githubnext/projections/extractor` do the hashing and the lookup:
+In practice, equal bases usually yield byte-identical text too. The runner keeps
+a **generation store** of previously generated values keyed by path and basis,
+and passes a read-only snapshot to the extractor at `request.generations.file`.
+When an extractor finds a matching basis in the store, it can reuse the stored
+value without calling the model again. In JavaScript,
+`@githubnext/projections/extractor` handles both hashing and lookup:
 
 ```js
 import {basis, generations, readRequest} from '@githubnext/projections/extractor'
@@ -352,74 +370,74 @@ const summaryBasis = basis({input: classSource, prompt: PROMPT, model: 'gpt-4o-2
 const summary = await store.generate('/data/summary', summaryBasis, () => model.summarize(classSource))
 ```
 
-An extractor that calls a model is repository code that needs the network and
-credentials: declare `execution.network` and the credential variables in
-`execution.environment`, and run it with `--trust`. Declare it `environmental`
-(`check` warns about generated values in a `pure` extraction). Hosts mark every
-generated field **Generated**, show a value reworded from the same inputs as
-After's text with Before's wording a toggle away, and a value whose basis moved
-as both passages with the reason. The
-[`class-summaries`](../../examples/extractors/class-summaries/README.md) sample
-summarizes classes with a stand-in model; see
-[generated values](../design/generated-values.md) for the design.
+An extractor that calls a language model is repository code that needs network
+access and credentials. Declare `execution.network` and any required credential
+variables in `execution.environment`, mark it `environmental` (`check` warns if
+a `pure` extraction contains generated values), and run it with `--trust`.
+
+Hosts badge every generated field as **Generated**. When a value was reworded
+from the same inputs, hosts show the After text with a toggle to inspect Before;
+when the basis changed, they show both passages along with the reason. For a
+working example using a stand-in model, see the
+[`class-summaries`](../../examples/extractors/class-summaries/README.md) sample,
+or read [generated values](../design/generated-values.md) for the full design.
 
 ---
 
 ## Tutorials and guides
 
-The rest of the guide has a page per task:
+From here, pick the guide that matches what you're building:
 
-- [Embedding Projections](embedding.md): where the host fits in your
-  application, and building commenting on projections.
-- [Write your first extractor](first-extractor.md): a tutorial that writes an
-  extractor, defines its projection, then shows and compares it.
-- [Develop a renderer](develop-a-renderer.md): describe scenarios, open the
-  fixtures workbench, run the checks and test in CI.
-- [Control the order of changes](order-of-changes.md): configure the default
-  comparator, or write a custom comparator.
-- [Extraction and comparison schemas](schemas.md): the shape of extractions and
-  comparisons, and what Projections adds.
+- [Embedding Projections](embedding.md) — place the host inside your own
+  application and add commenting on projections.
+- [Write your first extractor](first-extractor.md) — write a custom extractor,
+  define its projection, and run it to show and compare revisions.
+- [Develop a renderer](develop-a-renderer.md) — author scenarios, use the
+  fixtures workbench, run checks, and test in CI.
+- [Control the order of changes](order-of-changes.md) — configure the default
+  comparator or write a custom one.
+- [Extraction and comparison schemas](schemas.md) — inspect the exact shape of
+  extractions and comparisons, plus the metadata Projections adds.
 
 ## Glossary
 
-**Projection** : A view of one aspect of a codebase that users can choose, such
-as _Package dependencies_. A projection combines an extractor, a comparator and
-a renderer, along with their configuration. Projection definitions live in
-`.github/projections/`.
+**Projection** — A view of one aspect of a codebase, such as _Package
+dependencies_. A projection pairs an extractor, a comparator, and a renderer
+with their configuration, defined in `.github/projections/`.
 
-**Revision** : The version of a repository an extractor examines: either a
-commit or a working tree, including uncommitted changes.
+**Revision** — The snapshot of a repository that an extractor inspects, either a
+specific commit or a working tree with uncommitted changes.
 
-**Extractor** : A program that examines one revision of a repository and
-produces an extraction. Built-in extractors cover common ecosystems; custom
-extractors can be written in any language.
+**Extractor** — A program that reads one revision of a repository and emits an
+extraction. Built-in extractors cover common ecosystems, and you can write
+custom extractors in any language.
 
-**Extraction** : A JSON description of one aspect of a repository at one
+**Extraction** — A JSON description of one aspect of a repository at a single
 revision, conforming to the extraction schema.
 
-**Comparator** : Relates two extractions from the same projection and produces a
-comparison. The default comparator matches by ID and presents connected changes
-together; a custom comparator (a comparator file) adds domain knowledge on top
-of it, and runs sandboxed wherever comparisons are viewed.
+**Comparator** — The component that relates two extractions from the same
+projection and produces a comparison. The default comparator matches by ID and
+groups connected changes together; a custom comparator file layers domain
+knowledge on top and runs sandboxed wherever comparisons are viewed.
 
-**Comparison** : A description of how one extraction became another: which
-entities correspond, what happened to each, and the order in which to present
-those changes.
+**Comparison** — A structured description of how one extraction became another:
+which entities correspond, what changed for each one, and the step order to
+present them in.
 
-**Baseline comparison** : The comparison produced by the default comparator,
-which custom comparators start from.
+**Baseline comparison** — The comparison produced by the default comparator,
+which every custom comparator builds on.
 
-**Renderer** : Presents an extraction, or a comparison of two, to a person: as
-an interactive graph, a table or text. Custom renderers run in a sandboxed frame
-without network access; one that only a pull request's head supplies needs
-explicit trust. Projections' built-in table and text views remain available
-alongside any renderer, so every projection can be used without relying on
-vision or motion.
+**Renderer** — The visual or textual presentation of an extraction or
+comparison, such as an interactive graph, a table, or a text outline. Custom
+renderers run in a sandboxed frame without network access, and any renderer
+introduced or modified by a pull request's head requires explicit trust.
+Projections' built-in table and text views stay available alongside every
+renderer, so every projection works without relying on vision or motion.
 
-**Runner** : The part of Projections that runs extractors: preparing each
-revision, enforcing time and output limits, validating output, and recording
+**Runner** — The part of Projections that executes extractors: preparing each
+revision, enforcing time and output limits, validating the output, and recording
 provenance.
 
-**Inspector** : The tool for developing and debugging extractors, comparators
-and renderers, in the Projections VS Code extension. It shows raw output,
-validation diagnostics and the rendered result side by side.
+**Inspector** — The development and debugging workspace in the Projections VS
+Code extension, showing raw output, validation diagnostics, and the rendered
+result side by side.

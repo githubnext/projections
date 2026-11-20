@@ -144,7 +144,13 @@ export function changeContext(rows: readonly ScopeRow[], revisions: Revisions, c
   const shown = new Set(changed)
   if (rows.some(row => row.context)) {
     const contextOf = rowContexts(rows, revisions)
-    for (const row of rows) if (changed.has(row.id)) for (const id of contextOf(row).rows) shown.add(id)
+    // A split's or merge's parts share their change's context: it is resolved once.
+    const resolved = new Set<object>()
+    for (const row of rows) {
+      if (!changed.has(row.id) || (row.context && resolved.has(row.context))) continue
+      if (row.context) resolved.add(row.context)
+      for (const id of contextOf(row).rows) shown.add(id)
+    }
   }
   // A comparison saved without context derives it here: the structure around the changes is the core's context.
   const rowOf: Record<Side, Map<string, string>> = {before: new Map(), after: new Map()}

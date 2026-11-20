@@ -2,7 +2,7 @@
 
 # <img src="brand/projections-mark-two-tone.svg" width="28" height="28" alt=""> Projections
 
-> **Understand your codebase (without reading every line)**
+> **Understand your codebase (without really reading it)**
 
 At this point, there's simply too much code to actually read it line-by-line...
 but that doesn't mean we shouldn't understand the systems we create and are

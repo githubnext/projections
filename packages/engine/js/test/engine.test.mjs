@@ -22,7 +22,7 @@ const argumentsOf = ({operation, extraction, before, after, comparison, json}) =
     ? [json]
     : operation === 'validate-comparison'
       ? [before, after, comparison]
-      : operation === 'vary'
+      : operation === 'vary' || operation === 'pair'
         ? [before, after]
         : [extraction]
 

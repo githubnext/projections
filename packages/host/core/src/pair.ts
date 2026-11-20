@@ -149,7 +149,8 @@ export function useComparisonPair(options: ComparisonPairOptions): ComparisonPai
       const declared = afterDocument.provenance.definition.comparator
       let comparator: ComparatorSource = {kind: 'default'}
       const custom = customComparator(declared)?.file
-      if (custom && beforeDocument.provenance.definitionDigest === afterDocument.provenance.definitionDigest) {
+      // Only a comparable pair needs its comparator; computeComparison reports any other.
+      if (custom && (await engine.pair(beforeDocument, afterDocument)).pairing === 'same') {
         const {loadComparator} = callbacks.current
         if (!loadComparator) throw new ComparisonError('comparator-unavailable', `The comparator ${custom} is not available here.`)
         comparator = await loadComparator(afterDocument, abort.signal)

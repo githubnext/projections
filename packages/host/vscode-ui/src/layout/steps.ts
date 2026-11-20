@@ -13,6 +13,11 @@ export const actionCollapseOrder: readonly ToolbarAction[] = ['varied', 'zoom', 
 export interface ToolbarLayout {
   /** One row, or two: row 2 is the playback group across the whole width (animated mode only). */
   rows: 1 | 2
+  /**
+   * Where the mode region (the mode and scope switches) sits: centred on the whole row, the picker at its start and
+   * the actions at its end; or after the picker, the row's free space between it and the actions.
+   */
+  cluster: 'centre' | 'start'
   /** Revision names at the slider's ends. */
   sliderEnds: boolean
   /** The pair picker: two selects, two compact triggers with short names, or one compare button with both. */
@@ -39,6 +44,8 @@ export interface ToolbarContent {
   actions?: boolean | readonly ToolbarAction[]
   /** Anything else that changes the regions' widths, for example the revision labels or the chip. */
   key?: string
+  /** The mode region may be centred (default true); `VscodeProjectionViewProps.centreModes`. */
+  centre?: boolean
 }
 
 /** A wider toolbar expands a collapsed step only once it has this much room beyond what the step needs. */
@@ -50,6 +57,7 @@ export const playbackRowShare = 0.8
 
 const step = (layout: Partial<ToolbarLayout>): ToolbarLayout => ({
   rows: 1,
+  cluster: 'start',
   sliderEnds: false,
   pickers: 'full',
   modes: 'segmented',
@@ -77,31 +85,30 @@ const rowForms: readonly Partial<ToolbarLayout>[] = [
 ]
 
 /**
- * The priority collapse, least collapsed first. One row is preferred: the slider's revision names go, the pickers
- * become compact triggers, the mode switch a menu, the steps and percentage move into the playback group's overflow,
- * then the actions move into More one at a time (the varied count, zoom, About, full screen, Filter). Only when one row can't fit even
- * then does animated mode plan two rows (the playback group alone on row 2, at full width): row 1 has the width to
- * itself, so it starts again from `rowForms`' most spacious form and collapses in the same order, finally merging the
- * pickers. Row 2 keeps its steps and percentage inline while the slider still spans `playbackRowShare` of the row,
- * independently of row 1. Without playback the row stays one row and follows `rowForms`.
+ * The priority collapse, least collapsed first. With playback (animated mode), the playback group always has row 2 to
+ * itself, at full width, so choosing Animated never moves the controls above it; row 1 holds the picker, the mode
+ * region and the actions. A toolbar with a mode region first centres it on row 1, in its fullest forms with every
+ * action inline; then the mode region follows the picker, and row 1 collapses in `rowForms`' order: compact pickers,
+ * the mode menu, the actions into More one at a time (the varied count, zoom, About, full screen, Filter), then merged
+ * pickers. Row 2 shows the revision names at the slider's ends while the row is at its most spacious, and keeps its
+ * steps and percentage inline while the slider still spans `playbackRowShare` of the row, independently of row 1.
+ * Without playback the row stays one row and follows `rowForms`.
  */
-const animatedSteps: readonly ToolbarLayout[] = [
-  step({sliderEnds: true}),
-  step({}),
-  step({pickers: 'compact'}),
-  step({pickers: 'compact', modes: 'menu'}),
-  ...Array.from({length: allActions + 1}, (_, count) =>
-    step({pickers: 'compact', modes: 'menu', playbackOverflow: true, moreActions: moved(count)}),
-  ),
-  ...rowForms.flatMap(form => [step({...form, rows: 2}), step({...form, rows: 2, playbackOverflow: true})]),
-]
+const twoRows = (form: Partial<ToolbarLayout>) => [step({...form, rows: 2}), step({...form, rows: 2, playbackOverflow: true})]
+const animatedSteps: readonly ToolbarLayout[] = [step({rows: 2, sliderEnds: true}), ...rowForms.flatMap(twoRows)]
 const stillSteps: readonly ToolbarLayout[] = rowForms.map(step)
+/** The steps before those, for a toolbar with a mode region. */
+const centredSteps = {
+  animated: [step({cluster: 'centre', rows: 2, sliderEnds: true}), ...twoRows({cluster: 'centre'})],
+  still: [step({cluster: 'centre'})],
+} as const
 
 /** The collapse order for a toolbar's content, without steps that change nothing it holds. */
 export function toolbarSteps(content: ToolbarContent): readonly ToolbarLayout[] {
   const actions = content.actions === true ? actionCollapseOrder : content.actions || []
   const seen = new Set<string>()
-  return (content.playback ? animatedSteps : stillSteps)
+  const centred = content.modes && content.centre !== false ? centredSteps[content.playback ? 'animated' : 'still'] : []
+  return [...centred, ...(content.playback ? animatedSteps : stillSteps)]
     .map(layout => {
       const moreActions = layout.moreActions.filter(action => actions.includes(action))
       return {
@@ -139,4 +146,29 @@ export function choose(
     if (Math.max(own, row) + (index < current ? toolbarHysteresis : 0) <= width) return index
   }
   return steps.length - 1
+}
+
+/** Row 1's form in a step: where the mode region sits, the pickers, the mode switch and the actions in More. */
+const rowForm = (layout: ToolbarLayout) => `${layout.cluster}|${layout.pickers}|${layout.modes}|${layout.moreActions.join(' ')}`
+
+/**
+ * Carries a settled step into another collapse order (playback coming or going): the first step with the same row 1
+ * form, so row 1 doesn't move, and what each step was measured to need, by the same form (the playback row's own
+ * forms need a fresh measure). `undefined` when the old order has no such form.
+ */
+export function carryStep(
+  from: readonly ToolbarLayout[],
+  step: number,
+  required: readonly (number | undefined)[],
+  to: readonly ToolbarLayout[],
+): {step: number; required: (number | undefined)[]} | undefined {
+  const settled = from[step]
+  const index = settled ? to.findIndex(layout => rowForm(layout) === rowForm(settled)) : -1
+  if (index < 0) return undefined
+  const needs = new Map<string, number>()
+  for (const [position, layout] of from.entries()) {
+    const need = required[position]
+    if (need !== undefined && !needs.has(rowForm(layout))) needs.set(rowForm(layout), need)
+  }
+  return {step: index, required: to.map(layout => needs.get(rowForm(layout)))}
 }

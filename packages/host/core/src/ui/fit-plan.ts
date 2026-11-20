@@ -9,7 +9,8 @@ const px = (value: string) => parseFloat(value) || 0
 /**
  * The width an element needs at its minimums. `data-fit-min` elements (the slider, spacers) need that many pixels;
  * `data-fit="row"` containers need their padding, border, gaps and their in-flow children's needs; `column`
- * containers the widest child's; anything else (blocks that never shrink) its current width.
+ * containers the widest child's; `centre` containers (three children, the middle one centred) the middle child's and
+ * twice the wider side's, so the middle one stays centred; anything else (blocks that never shrink) its current width.
  */
 export function fitWidth(element: Element): number {
   const min = element.getAttribute('data-fit-min')
@@ -25,6 +26,10 @@ export function fitWidth(element: Element): number {
   })
   const widths = items.map(fitWidth)
   if (fit === 'column') return frame + Math.max(0, ...widths)
+  if (fit === 'centre' && widths.length === 3) {
+    const [start, middle, end] = widths as [number, number, number]
+    return frame + middle + 2 * Math.max(start, end) + 2 * px(style.columnGap)
+  }
   return frame + widths.reduce((sum, width) => sum + width, 0) + px(style.columnGap) * Math.max(0, items.length - 1)
 }
 
@@ -75,7 +80,8 @@ export interface FitPlanOptions<T> {
  * measured as rendered, before paint, with `fitWidth` (mark flexible children with `data-fit-min` and measured rows
  * with `data-fit`); unmeasured plans are tried in order and the needs are cached until `key` changes. Elements marked
  * `data-toolbar-region` are observed too, so a block that grows replans. A plan more spacious than the current one is
- * chosen again only with `toolbarHysteresis` pixels to spare, so the bar doesn't flicker at a boundary.
+ * chosen again only with `toolbarHysteresis` pixels to spare, so the bar doesn't flicker at a boundary. Once a plan
+ * settles, the bar says at what width (`data-fit-settled`, in whole pixels), so a test can wait for it.
  */
 export function useFitPlan<T>(
   bar: RefObject<HTMLElement | null>,
@@ -118,6 +124,7 @@ export function useFitPlan<T>(
     const width = element.getBoundingClientRect().width
     if (Math.round(width) !== state.width) {
       // What a plan needs may depend on the width (say, a slider's minimum): render with it before measuring.
+      delete element.dataset.fitSettled
       setState(previous => ({...previous, width: Math.round(width)}))
       return
     }
@@ -137,9 +144,13 @@ export function useFitPlan<T>(
     }
     const known = m.needs.has(sign(plans[target]!))
     const switches = known ? ++m.steps : m.steps
-    if (target !== index && (!known || switches <= 4 || (!fits(plan) && switches <= 4 + plans.length)))
+    if (target !== index && (!known || switches <= 4 || (!fits(plan) && switches <= 4 + plans.length))) {
+      delete element.dataset.fitSettled
       setState(previous => ({...previous, plan: plans[target]!}))
-    else m.settled = plan
+    } else {
+      m.settled = plan
+      element.dataset.fitSettled = String(Math.round(width))
+    }
   }, [bar, plans, plan, index, key, state.width, state.tick])
 
   // Replan when the bar or one of its regions changes size.

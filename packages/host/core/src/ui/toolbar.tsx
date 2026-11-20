@@ -87,10 +87,22 @@ export function Toolbar({
   )
 }
 
-/** One planned line of a `rows` `Toolbar`: blocks in a row that never wraps. */
-export function ToolbarRow({children, className}: {children: ReactNode; className?: string}) {
+/**
+ * One planned line of a `rows` `Toolbar`: blocks in a row that never wraps. A `centred` row holds three blocks and
+ * centres the middle one on the whole row, the first at its start and the last at its end; the blocks beside it get
+ * equal halves of what is left, so each is laid out within its half.
+ */
+export function ToolbarRow({children, className, centred = false}: {children: ReactNode; className?: string; centred?: boolean}) {
   return (
-    <div data-fit="row" className={cn('ph-toolbar-row pj:flex pj:min-w-0 pj:flex-nowrap pj:items-center pj:gap-1.5', className)}>
+    <div
+      data-fit={centred ? 'centre' : 'row'}
+      data-centred={centred || undefined}
+      className={cn(
+        'ph-toolbar-row pj:min-w-0 pj:items-center pj:gap-1.5',
+        centred ? 'pj:grid pj:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]' : 'pj:flex pj:flex-nowrap',
+        className,
+      )}
+    >
       {children}
     </div>
   )

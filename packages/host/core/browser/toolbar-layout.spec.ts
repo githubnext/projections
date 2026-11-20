@@ -1,22 +1,29 @@
 import {test, expect} from '@playwright/test'
 import type {Page} from '@playwright/test'
-import {explorer} from './harness.js'
+import {explorer, story} from './harness.js'
 import {reachableNames, toolbarGeometry} from './toolbar-geometry.js'
 
 /**
  * The default UI's toolbar is planned, not wrapped (docs/guides/host-ui.md, "The toolbar"): it measures its own width and
- * collapses in priority order, using a second row only for playback. Sweeping the toolbar from 1600px to 320px in
+ * collapses in priority order; playback always takes a second row of its own. Sweeping the toolbar from 1600px to 320px in
  * 20px steps, in animated and side by side modes, every width must keep these rules.
  */
 test.skip(({isMobile}) => isMobile, 'The sweep sizes the toolbar itself; the desktop projects cover Chromium and WebKit.')
 
-/** Sizes the harness's view so the toolbar is `width` pixels wide, and waits for it to replan. */
+/**
+ * Sizes the harness's view so the toolbar is `width` pixels wide, and waits until its layout has settled at that width
+ * (`useFitPlan` marks the toolbar with `data-fit-settled`), rather than for a fixed number of frames.
+ */
 async function setWidth(page: Page, width: number) {
   await page.evaluate(async toolbarWidth => {
     const view = document.querySelector<HTMLElement>('.demo-sized')!
+    const toolbar = document.querySelector<HTMLElement>('.ph-toolbar')!
     // The explorer's padding (16px each side) surrounds the toolbar.
     view.style.width = `${toolbarWidth + 32}px`
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    const frame = () => new Promise(resolve => requestAnimationFrame(resolve))
+    await frame()
+    // A toolbar the width doesn't change keeps its mark; one that replans clears it until it settles again.
+    for (let i = 0; i < 600 && toolbar.dataset.fitSettled !== String(Math.round(toolbar.getBoundingClientRect().width)); i++) await frame()
   }, width)
 }
 
@@ -53,16 +60,19 @@ for (const [mode, query, expected] of [
       const geometry = await toolbarGeometry(page)
       expect(Math.round(geometry.width), at).toBe(width)
       expect(geometry.overflow, at).toBeLessThanOrEqual(0)
-      // At most two planned rows; a second row is the playback row, its slider spanning the row.
-      expect(geometry.rows.length, at).toBeLessThanOrEqual(2)
+      // Playback always has a second row to itself, its slider spanning the row; without it, one row.
+      expect(geometry.rows.length, at).toBe(mode === 'side by side' ? 1 : 2)
       if (geometry.rows.length === 2) {
-        expect(mode, at).not.toBe('side by side')
         expect(geometry.rows[1]!.playbackOnly, at).toBe(true)
         expect(geometry.slider!, at).toBeGreaterThanOrEqual(0.8 * geometry.rows[1]!.width)
-        // No empty-space fragments: the first row is mostly filled, and it collapses nothing while it has room.
-        expect(geometry.rows[0]!.fill, at).toBeGreaterThanOrEqual(0.6)
-        if (geometry.rows[0]!.collapsed) expect(geometry.rows[0]!.unused, at).toBeLessThan(0.4 * geometry.rows[0]!.width)
       }
+      // A centred mode region sits at the row's centre, 24px or more from the regions beside it.
+      if (geometry.rows[0]!.centred) {
+        expect(Math.abs(geometry.cluster!.offset), at).toBeLessThanOrEqual(1)
+        expect(geometry.cluster!.clearance, at).toBeGreaterThanOrEqual(24)
+        expect(geometry.rows[0]!.collapsed, at).toBe(false)
+      }
+      seen.add(`centred ${geometry.rows[0]!.centred}`)
       // Every control a person aims at is as tall as the others.
       expect(new Set(geometry.heights.map(control => control.height)), `${at}: ${JSON.stringify(geometry.heights)}`).toEqual(new Set([32]))
       // The content below starts right under the toolbar's hairline: the chrome is flat, with no gutter between them.
@@ -75,7 +85,6 @@ for (const [mode, query, expected] of [
           expect(thumb!.left, `${key} ${at}`).toBeGreaterThanOrEqual(geometry.left + 8)
           expect(thumb!.right, `${key} ${at}`).toBeLessThanOrEqual(geometry.left + geometry.width - 8)
         }
-      seen.add(`${geometry.rows.length}`)
       // Nothing overlaps or leaves the toolbar.
       expect(geometry.overlaps, at).toEqual([])
       expect(geometry.outside, at).toEqual([])
@@ -98,33 +107,10 @@ for (const [mode, query, expected] of [
         at,
       ).toBe(true)
     }
-    // Animated uses both layouts across the sweep; side by side stays on one row.
-    expect([...seen].sort()).toEqual(mode === 'side by side' ? ['1'] : ['1', '2'])
+    // Each centres the mode region (in the table view, the scope alone) on a wide toolbar and moves it after the
+    // pickers on a narrow one.
+    expect([...seen].sort()).toEqual(['centred false', 'centred true'])
   })
-
-test('the toolbar switches between one and two rows with hysteresis, so it does not flicker at the boundary', async ({page}) => {
-  await open(page, 'before=v1&after=v3')
-  const rows = async () => (await toolbarGeometry(page)).rows.length
-  let width = 1000
-  await setWidth(page, width)
-  expect(await rows()).toBe(1)
-  // Find the boundary coarsely, then in 4px steps from one row again: a 4px sweep from 1000px replans over a hundred
-  // times, which outlasts the test's time on CI's WebKit. One row returns 24px (the hysteresis) past where it is
-  // needed, which the coarse step may have passed by up to 20px.
-  while ((await rows()) === 1 && width > 320) await setWidth(page, (width -= 20))
-  expect(await rows()).toBe(2)
-  await setWidth(page, (width += 20 + 24 + 4))
-  expect(await rows()).toBe(1)
-  while ((await rows()) === 1 && width > 320) await setWidth(page, (width -= 4))
-  expect(await rows()).toBe(2)
-  // Growing a little (within the 24px hysteresis) keeps two rows; growing past it returns to one.
-  await setWidth(page, width + 12)
-  expect(await rows()).toBe(2)
-  await setWidth(page, width + 4)
-  expect(await rows()).toBe(2)
-  await setWidth(page, width + 40)
-  expect(await rows()).toBe(1)
-})
 
 test('mode icons never look like playback: Animated is a clapperboard, distinct from the play, pause and step icons', async ({page}) => {
   await open(page, 'before=v1&after=v3')
@@ -144,4 +130,77 @@ test('mode icons never look like playback: Animated is a clapperboard, distinct 
   await expect(menu).toBeVisible()
   await expect(menu.locator('svg[data-icon]')).toHaveAttribute('data-icon', 'clapperboard')
   await expect(menu).toHaveAttribute('title', 'Comparison mode: Animated')
+})
+
+test('the mode region is centred while the row has room, then follows the pickers, with hysteresis', async ({page}) => {
+  await open(page, 'before=v1&after=v3&mode=diff')
+  const centred = () =>
+    page
+      .locator('.ph-toolbar-row')
+      .first()
+      .evaluate(row => row.hasAttribute('data-centred'))
+  let width = 1600
+  await setWidth(page, width)
+  expect(await centred()).toBe(true)
+  // Narrowing from a centred row, it stays centred exactly while it fits, so the boundary is found coarsely and then
+  // in 4px steps from just above it, narrowing from a centred row again (widening would need the hysteresis).
+  while ((await centred()) && width > 320) await setWidth(page, (width -= 20))
+  await setWidth(page, 1600)
+  width += 20
+  await setWidth(page, width)
+  expect(await centred()).toBe(true)
+  while ((await centred()) && width > 320) await setWidth(page, (width -= 4))
+  const geometry = await toolbarGeometry(page)
+  // It gives up the centre before it would come within 24px of the pickers or the actions: next to the pickers, in
+  // its fullest forms.
+  expect(geometry.rows[0]!.collapsed).toBe(false)
+  expect(geometry.cluster!.clearance).toBeLessThan(24)
+  // Growing within the 24px hysteresis keeps it there; past it, it is centred again.
+  await setWidth(page, width + 12)
+  expect(await centred()).toBe(false)
+  await setWidth(page, width + 4 + 24 + 4)
+  expect(await centred()).toBe(true)
+})
+
+test('choosing Animated keeps the mode switch where it is: playback takes a second row', async ({page}) => {
+  for (const width of [1400, 1000]) {
+    await open(page, 'before=v1&after=v3&mode=diff')
+    await setWidth(page, width)
+    const before = await toolbarGeometry(page)
+    await page.getByRole('radio', {name: 'Animated'}).click()
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    await setWidth(page, width)
+    const after = await toolbarGeometry(page)
+    expect(after.rows.length, `at ${width}px`).toBe(2)
+    expect(after.rows[0]!.centred, `at ${width}px`).toBe(before.rows[0]!.centred)
+    expect(Math.abs(after.cluster!.left - before.cluster!.left), `at ${width}px`).toBeLessThanOrEqual(0.5)
+  }
+})
+
+test('with nothing at its start, the mode region is centred in every mode, and returns to the centre as the toolbar widens', async ({
+  page,
+}) => {
+  // A view with no toolbarStart (as the CLI viewer and the Copilot canvas show a comparison): the row's first cell is empty.
+  await page.setViewportSize({width: 1400, height: 800})
+  await page.goto(story('default-ui-projection-view--comparison'))
+  await expect(page.locator('.ph[data-renderer-status="ready"]')).toBeVisible()
+  const placement = async () => {
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    const geometry = await toolbarGeometry(page)
+    return {centred: geometry.rows[0]!.centred, offset: Math.abs(geometry.cluster!.offset), rows: geometry.rows.length}
+  }
+  for (const [mode, rows] of [
+    ['Diff', 1],
+    ['Animated', 2],
+  ] as const) {
+    await page.getByRole('radio', {name: mode}).first().click()
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    await page.setViewportSize({width: 1400, height: 800})
+    expect(await placement(), mode).toEqual({centred: true, offset: expect.any(Number), rows})
+    expect((await placement()).offset, mode).toBeLessThanOrEqual(1)
+    await page.setViewportSize({width: 700, height: 800})
+    expect((await placement()).centred, `${mode} at 700px`).toBe(false)
+    await page.setViewportSize({width: 1400, height: 800})
+    expect((await placement()).centred, `${mode} back at 1400px`).toBe(true)
+  }
 })

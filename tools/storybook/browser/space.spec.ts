@@ -4,8 +4,8 @@ import type {Theme} from './smoke.spec.js'
 const test = base.extend<{theme: Theme}>({theme: ['light', {option: true}]})
 
 /**
- * The default UI's prebuilt views fill the story canvas: a planned toolbar (never wrapped: one row, or on a phone in
- * animated mode a second row for playback with a full-width slider) and a stage that takes the rest. At 1440×900 and
+ * The default UI's prebuilt views fill the story canvas: a planned toolbar (never wrapped: one row, or in animated mode
+ * a second row for playback with a full-width slider) and a stage that takes the rest. At 1440×900 and
  * on an iPhone 13 the stage takes at least 80% of the view's height.
  */
 const stories = [
@@ -69,9 +69,9 @@ for (const id of stories)
       expect(measured.overflow).toBeLessThanOrEqual(0)
       expect(measured.rowOverflow).toBeLessThanOrEqual(0)
       expect(measured.collisions).toBe(0)
-      // Only animated playback may take a second row, and only where one row would collapse too far.
+      // Only animated playback may take a second row: below a centred mode region, or where one row would collapse too far.
       const animated = id.endsWith('--animated') || id.endsWith('--comparison')
-      expect(measured.rows).toBeLessThanOrEqual(width < 600 && animated ? 2 : 1)
+      expect(measured.rows).toBeLessThanOrEqual(animated ? 2 : 1)
       if (measured.secondRow) {
         expect(measured.secondRow.playback).toBe(true)
         expect(measured.secondRow.slider).toBeGreaterThanOrEqual(0.8)

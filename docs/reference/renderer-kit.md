@@ -468,9 +468,11 @@ changesScope(model: ComparisonModel<Extraction> | undefined, filter: FilterPaylo
 ```
 
 The Changes scope a renderer presents, or undefined when the host shows every item (or this is one extraction). The
-host's filter `ids` are what it shows, its changes and their context, each change with every row presenting it (a
-split's parts); past the filter's ID limit, or before the host says, the kit reads the same from the comparison's
-change context, or derives it from the structure for a comparison saved without context (`changeContext`).
+host's filter `scope` is what it shows, its changes and their context, each change with every row presenting it (a
+split's parts): the summary filter and find recede what they leave out (`ids`), never narrowing what is laid out. A
+host before `scope` sent it in `ids`. Past the filter's ID limit, or before the host says, the kit reads the same
+from the comparison's change context, or derives it from the structure for a comparison saved without context
+(`changeContext`).
 
 ### `ChangesScope`
 

@@ -173,7 +173,7 @@ Handlers for host messages. Each is optional; unknown or foreign messages never 
 | `action` | `"action"?(message: { id: string; }): void` | The person activated one of the renderer's `action` controls. |
 | `annotations` | `"annotations"?(items: Array<AnnotationMark>): void` | Markers to draw on items, replacing earlier ones (capability `annotations`). |
 | `environment` | `"environment"?(message: RendererEnvironment): void` | A new theme, motion preference, locale, pane or sizing; `applyEnvironment` applies it to CSS. |
-| `filter` | `"filter"?(message: { ids: string[] \| null; query: string; changesOnly: boolean; }): void` | The host's find and "changes only" settings changed. |
+| `filter` | `"filter"?(message: { scope?: string[] \| null; ids: string[] \| null; query: string; changesOnly: boolean; }): void` | The host's find and "changes only" settings changed. |
 | `hover` | `"hover"?(message: { id: string \| null; }): void` | The entity the person points at in any pane, or `null` (capability `hover`). |
 | `init` | `"init"?(message: RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "after": Extraction; "before": Extraction; "comparison": Comparison; "comparisonMode"?: "animated" \| "diff" \| "side-by-side" \| "swipe"; "mode": "comparison" } \| RendererEnvironment & { "focus"?: RendererFocus; "projection": RendererProjection } & { "extraction": Extraction; "mode": "extraction" }): void` | The document to present and the environment, first after `ready` and again whenever the host replaces the document; reset any per-document state. |
 | `options` | `"options"?(options: RendererOptions): void` | New settings, replacing the earlier ones: declared controls' values by `id` (see `controlValues`). |
@@ -1881,14 +1881,17 @@ conversation, and both sides ignore it.
 interface FilterPayload
 ```
 
-The host's find and "changes only" settings, as `filter` carries them. Renderers that declare `filter` de-emphasize
-or hide the items `ids` leaves out; `query` and `changesOnly` are for describing the state, not for matching again.
+The host's scope, summary filter and find, as `filter` carries them. The scope decides what a renderer lays out: in
+the Changes scope, `scope` (the changes and their context). The summary filter and find never remove or move
+anything: renderers that declare `filter` recede what is laid out that `ids` leaves out. `query` and `changesOnly`
+are for describing the state, not for matching again.
 
 | Member | Signature | Description |
 |---|---|---|
-| `changesOnly` | `"changesOnly": false \| true` | Whether the person asked to see only changed items; `ids` already reflects it. |
-| `ids` | `"ids": Array<string> \| null` | Matching selection IDs, or `null` when every item is shown or more than `rendererLimits.filterIds` match. |
+| `changesOnly` | `"changesOnly": false \| true` | Whether the person asked to see only changed items, the Changes scope: `scope` and `ids` already reflect it. |
+| `ids` | `"ids": Array<string> \| null` | The selection IDs the summary filter and find match, of every item (in the Noise scope, of its items): what is at full strength. `null` when nothing recedes or more than `rendererLimits.filterIds` match. |
 | `query` | `"query": string` | The find query as typed, or an empty string. |
+| `scope` | `"scope"?: Array<string> \| null` | The selection IDs the Changes scope shows, its changes and their context: what a renderer lays out. `null` outside the Changes scope or past `rendererLimits.filterIds`. Absent from hosts before it, which sent the Changes scope, narrowed by the summary filter and find, in `ids`. |
 
 ### `FontSizeStep`
 

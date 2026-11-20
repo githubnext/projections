@@ -80,7 +80,7 @@ export function recordSuccess(root: string, unit: Unit, inputs: string, before: 
   const after = snapshot(root, unit)
   const unchanged = restoreIfUnchanged(before, after)
   const outputs = [...after.files.keys()].map(path => relative(join(root, unit.path), path).split(sep).join('/')).sort()
-  recordBuild(root, unit.path, {...(unchanged ? {checked: started} : {}), inputs, outputs})
+  recordBuild(root, unit.path, {...(unchanged ? {checked: started} : {}), inputs, outputs, recorded: Date.now()})
   return unchanged
 }
 

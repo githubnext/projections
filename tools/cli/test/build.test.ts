@@ -223,6 +223,11 @@ test('build: an edit to a build script or configuration outside src makes a buil
   // A new configuration file counts too.
   writeFileSync(join(root, 'lib/vite.config.ts'), '')
   assert.equal(buildState(root, lib), 'stale')
+  // Rebuilt since by `npm run build`, which records nothing, its outputs are newer than that record: times decide.
+  utimesSync(join(root, 'lib/vite.config.ts'), 300, 300)
+  writeFileSync(join(root, 'lib/dist/index.js'), 'rebuilt')
+  utimesSync(join(root, 'lib/dist/index.js'), Date.now() / 1000 + 60, Date.now() / 1000 + 60)
+  assert.equal(buildState(root, lib), 'current')
 })
 
 test('build: a recorded output gone missing, or a deleted source, makes a built workspace stale', () => {

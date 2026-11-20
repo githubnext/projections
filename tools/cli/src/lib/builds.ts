@@ -15,10 +15,10 @@ export type BuildStatus = {state: 'current'} | {state: Exclude<BuildState, 'curr
  * What `tools build` knows beyond file times, per workspace: `checked`, when it last rebuilt the workspace and found
  * its outputs unchanged (ms; it keeps those outputs' old times, so this says they are current all the same),
  * `building`, set while a build runs and cleared only when it succeeds, and from its last successful build the
- * signature of its build inputs besides its src (`inputs`, see `inputSignature`) and the files it produced
- * (`outputs`, relative to the workspace).
+ * signature of its build inputs besides its src (`inputs`, see `inputSignature`), the files it produced (`outputs`,
+ * relative to the workspace) and when it recorded them (`recorded`, ms).
  */
-export type BuildRecord = {checked?: number; building?: boolean; inputs?: string; outputs?: string[]}
+export type BuildRecord = {checked?: number; building?: boolean; inputs?: string; outputs?: string[]; recorded?: number}
 
 const recordsFile = (root: string) => join(root, 'node_modules', '.cache', 'projections-tools', 'builds.json')
 
@@ -131,8 +131,8 @@ export function outputTime(root: string, unit: Unit, records = buildRecords(root
 /**
  * The state of a workspace's dist and, unless it is current, why; undefined when it builds no dist from a src (a
  * crate, a script-only workspace). With a signature from its last `tools build`, its inputs besides src must match it
- * and the outputs that build produced must all still be there. Without one (built by `npm run build`, or before
- * `tools build` kept signatures), those inputs must be older than its dist, as its src must be either way.
+ * and the outputs that build produced must all still be there. Without one, or when its outputs were written since
+ * (by `npm run build`), those inputs must be older than its dist, as its src must be either way.
  */
 export function buildStatus(root: string, unit: Unit, records = buildRecords(root)): BuildStatus | undefined {
   if (!unit.kinds.includes('npm') || !unit.scripts.includes('build') || !existsSync(join(root, unit.path, 'src'))) return undefined
@@ -142,7 +142,8 @@ export function buildStatus(root: string, unit: Unit, records = buildRecords(roo
   if (record?.building) return {state: 'incomplete', reason: 'its last build did not finish'}
   if (newestSource(root, `${unit.path}/src`) > output) return {state: 'stale', reason: 'src is newer than dist'}
   const inputs = buildInputs(root, unit)
-  if (record?.inputs === undefined) {
+  const written = newestOutput(root, `${unit.path}/dist`) ?? 0
+  if (record?.inputs === undefined || record.recorded === undefined || written > record.recorded) {
     const newer = inputs.find(input => statSync(join(root, input)).mtimeMs > output)
     return newer ? {state: 'stale', reason: `${newer} is newer than dist`} : {state: 'current'}
   }

@@ -45,11 +45,36 @@ const CLAUDE: &str = r##"{
   }
 }"##;
 
+/// The ChatGPT and Codex desktop apps, sampled from their own windows: the
+/// ChatGPT theme's background and foreground as its Appearance settings give
+/// them, the chat surface in dark, their secondary text, hairline rules and the
+/// blue they ring a selection with, and the system families they use.
+const CHATGPT: &str = r##"{
+  "light": {
+    "background": "#ffffff",
+    "text": "#1a1c1f",
+    "muted": "#57585b",
+    "border": "#ececec",
+    "accent": "#1557c0",
+    "sans": "ui-sans-serif, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Helvetica, Arial, sans-serif",
+    "mono": "ui-monospace, \"SF Mono\", Menlo, Monaco, Consolas, monospace"
+  },
+  "dark": {
+    "background": "#181818",
+    "text": "#ececec",
+    "muted": "#a3a3a3",
+    "border": "#303030",
+    "accent": "#6ea8fe",
+    "sans": "ui-sans-serif, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Helvetica, Arial, sans-serif",
+    "mono": "ui-monospace, \"SF Mono\", Menlo, Monaco, Consolas, monospace"
+  }
+}"##;
+
 /// The built-in seeds, by name: apps that show the viewer but can't give it
 /// their colors.
-pub const PRESETS: &[(&str, &str)] = &[("claude", CLAUDE)];
+pub const PRESETS: &[(&str, &str)] = &[("claude", CLAUDE), ("chatgpt", CHATGPT)];
 
-/// A theme seed from `--theme`: a built-in seed's name (`claude`), inline JSON
+/// A theme seed from `--theme`: a built-in seed's name (`claude`, `chatgpt`), inline JSON
 /// (starting with `{`), else a JSON file's path (a file named like a built-in
 /// seed is `./claude`). Returns its compact JSON, the value of the page's
 /// `?theme=`.
@@ -243,6 +268,11 @@ mod tests {
         let seed: Value = serde_json::from_str(&read("claude").unwrap()).unwrap();
         assert_eq!(seed["dark"]["background"], "#191919");
         assert_eq!(seed["light"]["background"], "#ffffff");
+        // Every built-in seed is one the page accepts, in both modes.
+        for (name, _) in PRESETS {
+            let seed: Value = serde_json::from_str(&read(name).unwrap()).unwrap();
+            assert!(seed["light"].is_object() && seed["dark"].is_object(), "{name}");
+        }
         // A file named like a built-in seed is read by its path.
         let directory = tempfile::tempdir().unwrap();
         std::fs::write(directory.path().join("claude"), r##"{"light":{"background":"#fff"}}"##).unwrap();

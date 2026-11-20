@@ -22,6 +22,7 @@ import {rendererState, useComparisonModes, useRendererControls} from './renderer
 import {useSelection} from './selection.js'
 import type {Anchors} from './selection.js'
 import {useStageBinding} from './stage-binding.js'
+import {paintState, useStatusEvents} from './paint.js'
 
 /**
  * The headless Projections host. It owns the state that must be correct and
@@ -95,6 +96,8 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
   const payloads = useRendererPayloads({options, renderer, mode, progress, direction, highlighting, theme, reducedMotion})
   const controls = useRendererControls({latest, internal, setInternal, options, renderer, panes, paneKeys})
   const status = rendererState(renderer, panes, paneKeys)
+  const paint = paintState({renderer, comparing, mode, progress, panes})
+  useStatusEvents({latest, status: status.status, paint, playing, mode, progress})
 
   const selection = useSelection({latest, request, subject, rows, selectedId, placed, anchors, frames})
 
@@ -147,6 +150,7 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
     rendererStatus: status.status,
     panes,
     renderedProgress: panes.main.rendered,
+    paint,
     position,
     progress,
     holds,

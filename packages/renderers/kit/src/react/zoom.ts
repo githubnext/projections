@@ -211,7 +211,7 @@ export function useStageZoom(
   )
   useDotGrid(scroller, fit * shown)
   useDragPan(scroller)
-  return {zoom: shown, scale: fit * shown, keep}
+  return {zoom: shown, scale: fit * shown, keep, opening: chosen === undefined}
 }
 
 /**

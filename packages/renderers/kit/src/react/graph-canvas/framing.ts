@@ -155,10 +155,20 @@ export function useGraphZoom(
       }),
     [area, request, floor, content, fit.scale, fit.width, fit.height, sized, orientation, padding, scrolled],
   )
-  // An opening centred on a focus keeps the fitted padding, as its placement does; every other view draws the padding
-  // a reading start is placed in.
-  const drawnPadding = opening?.centred ? padding : scrolled
   const zoom = useStageZoom(scroller, onAction, fit.scale, {floor, start, ...(opening ? {opening} : {}), ...(hold ? {hold} : {})})
+  // An opening centred on a focus keeps the fitted padding while it lasts, as its placement does; every other view, and
+  // that one once the person zooms or pans, draws the padding a reading start is placed in, so its top can scroll clear.
+  const centred = Boolean(opening?.centred && zoom.opening)
+  const drawnPadding = centred ? padding : scrolled
+  // Leaving a centred opening adds padding above the drawing: the view moves with it, so nothing jumps.
+  const wasCentred = useRef(centred)
+  const drawnTop = useRef(drawnPadding.top)
+  useLayoutEffect(() => {
+    const element = scroller.current
+    if (wasCentred.current && !centred && element) element.scrollTop += drawnPadding.top - drawnTop.current
+    wasCentred.current = centred
+    drawnTop.current = drawnPadding.top
+  }, [scroller, centred, drawnPadding.top])
   useLayoutEffect(() => setDrawnScale(zoom.scale), [zoom.scale])
   return {...zoom, borders, top: drawnPadding.top}
 }

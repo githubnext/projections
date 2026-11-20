@@ -67,6 +67,8 @@ export interface StageZoom {
   scale: number
   /** Keeps the view where the caller just scrolled it, as though the person had: later changes of scale keep its middle. */
   keep: () => void
+  /** Whether the view is still on its opening: the person hasn't zoomed or panned since, nor `hold` set a zoom. */
+  opening: boolean
 }
 
 /** Where `useStageZoom` opens the view; by default fitted, or at the text floor when fitting draws text too small. */

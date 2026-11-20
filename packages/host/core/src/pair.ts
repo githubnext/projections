@@ -11,7 +11,7 @@ import type {PresentationDefaults} from './projection.js'
 export interface ExtractionChoice {
   /** Stable key, for example a commit SHA or `working-tree`. */
   key: string
-  /** Label shown in the pair picker, for example `main · 1a2b3c4d`. */
+  /** Label shown in the pair picker, for example `main · "Add auth" · 2 days ago` (`formatRevisionLabel`); pickers and pane chips read its parts back (`parseRevisionLabel`). */
   label: string
   document: ExtractionDocument
 }

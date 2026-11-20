@@ -1,19 +1,5 @@
 import type {CSSProperties, ReactNode} from 'react'
-
-/** A chip label's parts: the revision's name (an identifier), its commit subject, and its age. */
-export interface ChipParts {
-  name: string
-  detail?: string | undefined
-  when?: string | undefined
-}
-
-/** Splits a revision label (`name · detail · when`, see the Inspector's `revisions.ts`) into its parts. */
-export function chipParts(label: string): ChipParts {
-  const parts = label.split(' · ')
-  const name = parts.shift() ?? ''
-  const when = parts.length && /\bago$|^just now$/.test(parts[parts.length - 1]!) ? parts.pop() : undefined
-  return {name, detail: parts.length ? parts.join(' · ') : undefined, when}
-}
+import {parseRevisionLabel} from '../revision-label.js'
 
 const mono = 'var(--projections-font-family-mono, ui-monospace, SFMono-Regular, Menlo, monospace)'
 const hash = /^[0-9a-f]{7,}$/
@@ -49,7 +35,7 @@ const trimmed = (style: CSSProperties, grow = false): CSSProperties =>
 export function ChipText({label, words, hidden}: {label: ReactNode; words: boolean; hidden: CSSProperties}): ReactNode {
   if (typeof label !== 'string') return label
   if (words) return <span style={trimmed({color: nameColour})}>{label}</span>
-  const {name, detail, when} = chipParts(label)
+  const {name, detail, when} = parseRevisionLabel(label)
   const subject = detail?.replace(/^"(.*)"$/, '$1')
   return (
     <>

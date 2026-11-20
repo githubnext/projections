@@ -93,6 +93,8 @@ export type {
   ViewKind,
 } from './view-model.js'
 export {useViewChoice} from './view-choice.js'
+export {formatRevisionLabel, parseRevisionLabel, revisionAge, revisionLabelName} from './revision-label.js'
+export type {RevisionLabelParts} from './revision-label.js'
 export {handlePlaybackShortcut, isPlaybackShortcut, rovingIndex, spaceKeeping} from './keyboard.js'
 export type {KeyEventLike} from './keyboard.js'
 export type {ViewChoice} from './view-choice.js'

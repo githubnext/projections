@@ -16,12 +16,13 @@ import {decodeComparatorOutput} from './decoding.js'
 import {encodeComparatorInput} from './encoding.js'
 import {EngineError, type DefaultComparator} from './transport.js'
 
-/** Only what pairing reads, so a pair of large extractions isn't sent to the engine whole. */
+/** Only what pairing reads, so a pair of large extractions isn't sent to the engine whole; a missing field stays missing. */
 function pairingSide(document: PairingSide): unknown {
   const side = document as Partial<PairingSide> | undefined
+  const present = (value: Record<string, unknown>) => Object.fromEntries(Object.entries(value).filter(([, field]) => field !== undefined))
   return {
-    projection: {id: side?.projection?.id},
-    provenance: {definition: side?.provenance?.definition, definitionDigest: side?.provenance?.definitionDigest},
+    projection: present({id: side?.projection?.id}),
+    provenance: present({definition: side?.provenance?.definition, definitionDigest: side?.provenance?.definitionDigest}),
   }
 }
 

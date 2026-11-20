@@ -42,11 +42,17 @@ impl<'a> Integrity<'a> {
                 }
             }
         }
-        if !(self.context_budget.spend(&context.before) && self.context_budget.spend(&context.after)) {
+        let named: usize = context.rules.iter().map(String::len).sum();
+        if !(self.context_budget.spend(&context.before)
+            && self.context_budget.spend(&context.after)
+            && self.context_budget.spend_bytes(named))
+        {
             return Err(fail(
                 "context-limit",
                 path,
-                &format!("A comparison's changes have at most {MAX_CONTEXT_TOTAL} context IDs, of at most {MAX_CONTEXT_BYTES} bytes"),
+                &format!(
+                    "A comparison's changes have at most {MAX_CONTEXT_TOTAL} context IDs, of at most {MAX_CONTEXT_BYTES} bytes with the names of the rules that added them"
+                ),
             ));
         }
         if let Some(expected) = self.core().context(change) {

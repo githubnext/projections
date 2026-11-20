@@ -98,9 +98,9 @@ covered by a change; and a change's `context` names other items of that revision
 or duplicate IDs, or an empty context), only on a change whose status or
 identity changed (`unexpected-context`), holds at least the core's context
 (`missing-context`), and stays within 1,000 IDs per change and revision and
-250,000 IDs and 16 MiB of ID bytes across the comparison (`context-limit`). A
-comparator cannot hide a change. Comparisons across different domain schemas are
-rejected.
+250,000 IDs and 16 MiB of ID and rule-name bytes across the comparison
+(`context-limit`). A comparator cannot hide a change. Comparisons across
+different domain schemas are rejected.
 
 ## The default comparator
 

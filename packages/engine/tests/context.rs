@@ -470,3 +470,28 @@ fn the_core_spends_the_comparisons_bytes_too_and_validation_agrees() {
         failure("context-limit", "/comparison/changes/299/context")
     );
 }
+
+#[test]
+fn validation_spends_the_names_of_the_rules_that_added_context() {
+    // 200 changed entities, each naming the one other with a 100 KB rule name: about 20 MB, past 16 MiB.
+    let side = |label: &str| {
+        let mut entities = vec![node("other", "other")];
+        entities.extend((0..200).map(|index| json!({"id": format!("changed{index:03}"), "kind": "k", "label": label})));
+        extraction("graph/v0", json!(entities), json!([]))
+    };
+    let (before, after) = (side("a"), side("b"));
+    let name = "n".repeat(100_000);
+    let changes: Vec<Value> = (0..200)
+        .map(|index| {
+            modified(
+                &format!("changed{index:03}"),
+                Some(json!({"before": [], "after": ["other"], "rules": [name]})),
+            )
+        })
+        .collect();
+    let fits = MAX_CONTEXT_BYTES / (name.len() + "other".len());
+    assert_eq!(
+        check(&before, &after, &comparison(changes)),
+        failure("context-limit", &format!("/comparison/changes/{fits}/context"))
+    );
+}

@@ -20,13 +20,12 @@
 // files, and output is sorted.
 import {readFileSync} from 'node:fs'
 import path from 'node:path'
+import {request, result} from '@githubnext/projections/extractor'
 import {cliDeclarations} from './cli.mjs'
 import {rulesDeclarations} from './rules.mjs'
 import {schemaDeclarations} from './schemas.mjs'
 
-const request = JSON.parse(readFileSync(0, 'utf8'))
-const root = request.repository?.root ? path.join(request.repository.root, request.repository.project ?? '') : process.cwd()
-const inputs = request.projection?.definition?.inputs ?? {}
+const {root, inputs} = request
 
 const missingInputs = []
 const read = file => {
@@ -53,17 +52,9 @@ if (inputs.cli?.reference) {
   if (text !== undefined) parts.push(cliDeclarations({text, source: inputs.cli.reference, exclude: inputs.cli.exclude}))
 }
 
-const byId = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
-process.stdout.write(
-  `${JSON.stringify(
-    {
-      protocolVersion: 0,
-      schema: 'api/v0',
-      entities: parts.flatMap(part => part.entities).sort(byId),
-      relationships: parts.flatMap(part => part.relationships).sort(byId),
-      ...(missingInputs.length ? {missingInputs: missingInputs.sort()} : {}),
-    },
-    null,
-    2,
-  )}\n`,
-)
+result({
+  schema: 'api/v0',
+  entities: parts.flatMap(part => part.entities),
+  relationships: parts.flatMap(part => part.relationships),
+  ...(missingInputs.length ? {missingInputs: missingInputs.sort()} : {}),
+})

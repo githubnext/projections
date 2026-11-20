@@ -106,6 +106,34 @@ def _within(directory, project):
     return os.path.join(directory, *project.split("/")) if project else directory
 
 
+# Messages name values in JSON's terms, as the JavaScript helpers' do (packages/schemas/fixtures/extractor-helpers.json).
+def _quoted(value):
+    try:
+        return json.dumps(value, ensure_ascii=False)
+    except (TypeError, ValueError):
+        return repr(value)
+
+
+def _described(value):
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "a boolean"
+    if isinstance(value, (int, float)):
+        return "a number"
+    if isinstance(value, str):
+        return "a string"
+    if isinstance(value, (list, tuple)):
+        return "an array"
+    if isinstance(value, Mapping):
+        return "an object"
+    return _article(type(value).__name__)
+
+
+def _article(noun):
+    return f"an {noun}" if noun[:1].lower() in tuple("aeiou") else f"a {noun}"
+
+
 def read_request(stream=None):
     """Reads the extractor request from `stream` (default: stdin) and returns it as a `Request`."""
     stream = sys.stdin if stream is None else stream
@@ -125,8 +153,9 @@ def read_request(stream=None):
         raise ValueError("The extractor request on stdin is not a JSON object")
     version = value.get("protocolVersion")
     if isinstance(version, bool) or version != PROTOCOL_VERSION:
+        has = f"protocolVersion {_quoted(version)}" if "protocolVersion" in value else "no protocolVersion"
         raise ValueError(
-            f"The extractor request has protocolVersion {version!r}; this module speaks {PROTOCOL_VERSION}. "
+            f"The extractor request has {has}; this module speaks {PROTOCOL_VERSION}. "
             "Use the module of the Projections that runs the extractor"
         )
     return Request(value)
@@ -156,26 +185,26 @@ def _items(items, field):
     if isinstance(items, Mapping):
         for key, item in items.items():
             if not isinstance(item, Mapping):
-                raise TypeError(f"{field}[{key!r}] is a {type(item).__name__}, not a dict")
+                raise TypeError(f"{field}[{_quoted(key)}] is {_described(item)}, not an object")
             if "id" in item and item["id"] != key:
-                raise ValueError(f"{field}[{key!r}] has the id {item['id']!r}; give it its key's, or none")
+                raise ValueError(f"{field}[{_quoted(key)}] has the id {_quoted(item['id'])}; give it its key's, or none")
             listed.append({"id": key, **item})
     elif isinstance(items, (str, bytes)) or not isinstance(items, Iterable):
-        raise TypeError(f"{field} must be a list of dicts, or a dict of them keyed by ID, not a {type(items).__name__}")
+        raise TypeError(f"{field} must be an array of objects, or an object of them keyed by ID, not {_described(items)}")
     else:
         for index, item in enumerate(items):
             if not isinstance(item, Mapping):
-                raise TypeError(f"{field}[{index}] is a {type(item).__name__}, not a dict")
+                raise TypeError(f"{field}[{index}] is {_described(item)}, not an object")
             if "id" not in item:
                 raise ValueError(f"{field}[{index}] has no id")
             listed.append(dict(item))
     for item in listed:
         identifier = item["id"]
         if not isinstance(identifier, str) or not identifier:
-            raise ValueError(f"A {singular}'s id must be a nonempty string, not {identifier!r}")
+            raise ValueError(f"{_article(singular).capitalize()}'s id must be a nonempty string, not {_quoted(identifier)}")
         for name in required:
             if not isinstance(item.get(name), str):
-                raise ValueError(f"The {singular} {identifier!r} needs {name!r}, a string")
+                raise ValueError(f"The {singular} {_quoted(identifier)} needs {name}, a string")
     return sorted(listed, key=lambda item: _sort_key(item["id"]))
 
 
@@ -190,7 +219,7 @@ def extraction(entities=(), relationships=(), *, schema=None, **fields):
     """
     schema = DEFAULT_SCHEMA if schema is None else schema
     if not isinstance(schema, str) or "/" not in schema:
-        raise ValueError(f"schema must name a domain schema, such as {DEFAULT_SCHEMA!r}, not {schema!r}")
+        raise ValueError(f"schema must name a domain schema, such as {_quoted(DEFAULT_SCHEMA)}, not {_quoted(schema)}")
     document = {
         "protocolVersion": PROTOCOL_VERSION,
         "schema": schema,
@@ -200,13 +229,13 @@ def extraction(entities=(), relationships=(), *, schema=None, **fields):
     seen = set()
     for item in document["entities"] + document["relationships"]:
         if item["id"] in seen:
-            raise ValueError(f"Two items have the id {item['id']!r}; entities and relationships share one set of IDs")
+            raise ValueError(f"Two items have the id {_quoted(item['id'])}; entities and relationships share one set of IDs")
         seen.add(item["id"])
     for name, value in fields.items():
         name = _PYTHONIC.get(name, name)
         if name not in _OPTIONAL:
             raise TypeError(
-                f"An extraction has no field {name!r}; besides its entities and relationships it may have "
+                f"An extraction has no field {_quoted(name)}; besides its entities and relationships it may have "
                 + ", ".join(_OPTIONAL)
             )
         if value is not None:
@@ -249,5 +278,5 @@ def _json(document):
             try:
                 encode(item)
             except (TypeError, ValueError):
-                raise ValueError(f"The item {item['id']!r} holds a value JSON can't represent ({error}); {advice}") from None
+                raise ValueError(f"The item {_quoted(item['id'])} holds a value JSON can't represent ({error}); {advice}") from None
         raise ValueError(f"The extraction holds a value JSON can't represent ({error}); {advice}") from None

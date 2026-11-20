@@ -77,7 +77,8 @@
   "scripts": {
     "build": "tsdown && node scripts/assets.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node scripts/check-pack.mjs --contents && node --test test/*.test.ts",
+    "test": "node scripts/extractor-module.mjs --check && node scripts/check-pack.mjs --contents && node --test test/*.test.ts",
+    "generate:extractor": "node scripts/extractor-module.mjs",
     "check:pack": "node scripts/check-pack.mjs"
   },
   "dependencies": {

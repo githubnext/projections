@@ -74,10 +74,37 @@ pipe a request in:
 (in PowerShell,
 `$env:PYTHONPATH = projections __python-path; Get-Content request.json | python tools/extract-flags.py`).
 
+In JavaScript or TypeScript, `@githubnext/projections/extractor` does the same,
+and Projections provides it to the extractors it runs with `node`, so there is
+nothing to install here either. Its accessors are camelCase (`request.root`,
+`request.repositoryRoot`), and `result()` takes one object. With the flags in
+JSON, which Node reads without a package:
+
+```js
+// tools/extract-flags.mjs
+import {readFileSync} from 'node:fs'
+import {join} from 'node:path'
+import {request, result} from '@githubnext/projections/extractor'
+
+const flags = JSON.parse(readFileSync(join(request.root, 'flags.json'), 'utf8'))
+result({
+  entities: Object.entries(flags).map(([name, flag]) => ({
+    id: `flag:${name}`,
+    kind: 'flag',
+    label: name,
+    data: {default: flag.default},
+  })),
+})
+```
+
+Install the `@githubnext/projections` package as a development dependency only
+if you want its types. To run the extractor by hand, preload the module the way
+Projections does:
+`node --require "$(projections __node-require)" tools/extract-flags.mjs < request.json`.
+
 Underneath, the request and the extraction are JSON on stdin and stdout
 ([the extractor contract](../contracts/extractors.md)), so an extractor in any
-language can write them directly. In JavaScript, `result()` from
-`@githubnext/projections/extractor` does what the Python module's does.
+language can write them directly.
 
 ## 2. Define the projection
 

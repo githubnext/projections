@@ -33,7 +33,6 @@ export function architecture(project, name) {
     packageNode,
     warnings,
     extraction: () => ({
-      protocolVersion: 0,
       schema: 'architecture/v0',
       entities: sort([...entities.values()]),
       relationships: sort([...relationships.values()]),

@@ -154,6 +154,16 @@ test('any change to a crate is a Rust change, and Markdown test data is not docu
   }
 })
 
+test("a crate a workspace's build compiles is its dependency, though its manifest doesn't say so", () => {
+  // packages/engine/js's build bundles the default comparator; packages/comparators/runtime/js's builds the rules crate.
+  const comparator = ciPlan(facts, ['packages/comparators/default/src/lib.rs'])
+  assert.ok(comparator.dependants.includes('packages/engine/js'))
+  assert.ok(comparator.browser.some(job => job.suite === 'rest' && !job.except.split(',').includes('packages/engine/js')))
+  const rules = ciPlan(facts, ['packages/comparators/rules/src/lib.rs'])
+  assert.ok(rules.dependants.includes('packages/comparators/runtime/js'))
+  assert.ok(rules.browser.some(job => job.suite === 'rest' && !job.except.split(',').includes('packages/comparators/runtime/js')))
+})
+
 test('release configuration runs the release check', () => {
   const plan = ciPlan(facts, ['dist-workspace.toml'])
   assert.deepEqual(plan.full, [])

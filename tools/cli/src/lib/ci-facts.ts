@@ -3,6 +3,7 @@
 // mutation testing examine, and the generator registry.
 import {existsSync, readdirSync} from 'node:fs'
 import {join, posix} from 'node:path'
+import {withBuildDependencies} from './ci-builds.ts'
 import {generators, type Generator} from './generated.ts'
 import {findUnit, loadUnits, ownerOf, type Unit} from './packages.ts'
 import {git, readJson, readText} from './repo.ts'
@@ -18,6 +19,7 @@ export type BrowserSuite = {
 }
 
 export type RepoFacts = {
+  /** The workspaces and crates, with the build dependencies their manifests don't declare (ci-builds.ts). */
   units: Unit[]
   browserSuites: BrowserSuite[]
   /** packages/renderers/<name> directories with a scenarios.json: the renderers the harness runs. */
@@ -117,7 +119,7 @@ export function readersOf(facts: Pick<RepoFacts, 'fileInputs'>, path: string): {
 }
 
 export function repoFacts(root: string): RepoFacts {
-  const units = loadUnits(root)
+  const units = withBuildDependencies(root, loadUnits(root))
   const script = (path: string, name: string) => readJson<Manifest>(root, `${path}/package.json`)?.scripts?.[name] ?? ''
   const renderers = join(root, 'packages/renderers')
   const harnessRenderers = readdirSync(renderers, {withFileTypes: true})

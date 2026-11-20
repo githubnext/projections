@@ -180,10 +180,12 @@ first job, `changes`, runs `tools/scripts/ci-plan.mjs`
 (`tools/cli/src/lib/ci-plan.ts`), which maps the changed files to their
 workspaces and crates and everything depending on them, with the same graph as
 `npm run tools -- affected`, plus what no manifest declares: the files crates
-read by path (`include_str!`, `CARGO_MANIFEST_DIR`), the extractions and
-comparators renderers' `scenarios.json` files name, and the renderers under the
-harness's `testDir`. A file only a crate's tests read runs that crate's suites
-without changing its dependants. Its summary lists each job and why it runs.
+read by path (`include_str!`, `CARGO_MANIFEST_DIR`), the crates and packages a
+workspace's `build` script compiles or builds (`cargo build -p`), the
+extractions and comparators renderers' `scenarios.json` files name, and the
+renderers under the harness's `testDir`. A file only a crate's tests read runs
+that crate's suites without changing its dependants. Its summary lists each job
+and why it runs.
 
 | Change                                                                                                                                                     | Runs                                                                                                                                                                               |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

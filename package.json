@@ -43,7 +43,7 @@
     "icons": "node tools/scripts/product-icons.mjs",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "check:boundaries": "node tools/scripts/check-boundaries.mjs",
+    "check:boundaries": "node --test tools/scripts/engine-contracts.test.mjs && node tools/scripts/check-boundaries.mjs",
     "check:casing": "node tools/scripts/check-casing.mjs",
     "check:portability": "node --test tools/scripts/check-portability.test.mjs && node tools/scripts/check-portability.mjs",
     "check:lockfile": "node tools/scripts/lockfile-registry.mjs",

@@ -372,6 +372,7 @@ fn open(options: &Capture, browsers: &browser::Pool) -> Result<(Browser, Page)> 
         width: options.width,
         height: options.height,
         scale: options.scale,
+        startup: options.timeout,
         cancel: options.cancel.clone(),
     })?;
     // From here: waiting for a launch slot doesn't spend the page's budget.

@@ -2155,6 +2155,20 @@ partOwners(model: ComparisonModel<Extraction> | undefined): ReadonlyMap<string, 
 The change each further part of a split or merge presents, by its row's ID: the host's filter names the change, and
 the part is kept with it (`InteractionOptions.partOf`).
 
+### `pillMetrics`
+
+```ts
+pillMetrics: { "baseline": 13; "height": 17; "padding": 3 }
+```
+
+A pill around one line of card text at the type scale's default size (12), aligned optically rather than by its box:
+the space above a capital E's top, below its baseline, left of its stem and right of a last capital H's right stem is
+about the same (to within a card unit: the pill is a whole number of them wide), with every edge on a whole card unit. The text's baseline is `baseline` under the
+pill's top: the sans fonts' cap height is about 8.6 card units, which leaves about 4.4 above it and 4 below. Its
+`padding` beyond the text's advance on each side is 3, which the glyphs' own side bearings (about 1 card unit) make
+about 4 to their stems. Measured from rendered pixels with the renderer testing package's `opticalInsets`. See
+`textPill`.
+
 ### `placeBadges`
 
 ```ts
@@ -3216,6 +3230,15 @@ type TableValue = false | null | number | string | true | undefined
 ```
 
 A cell's value, as a column reads it from one version of a row: what it sorts by and, by default, shows.
+
+### `textPill`
+
+```ts
+textPill(x: number, baseline: number, advance: number, anchor?: "end" | "start"): { "height": number; "width": number; "x": number; "y": number }
+```
+
+The box of a pill (see `pillMetrics`) around one line of text `advance` card units wide, its baseline at `baseline`,
+starting at `x` or, anchored at its `end`, ending there. The pill is a whole number of card units wide.
 
 ### `tidyRoute`
 

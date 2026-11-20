@@ -145,7 +145,11 @@ covered frame `stage-cover` (the covered rectangles in frame coordinates) and
 `stage-inset-top` (plus `stage-inset-bottom` for `foot` overlays at the stage's
 bottom) so renderers keep content clear of overlays. You can restyle chips
 individually with `--ph-pane-chip-bg`, `--ph-pane-chip-border`,
-`--ph-pane-chip-radius`, `--ph-pane-chip-fg`, and `--ph-pane-chip-name`, or set
+`--ph-pane-chip-radius`, `--ph-pane-chip-fg`, and `--ph-pane-chip-name`. Header
+bands take `--pj-pane-band-bg`, `--pj-pane-band-fg`, and `--pj-pane-band-rule`,
+and line their labels up with your layout through `--pj-pane-band-inset` (10px),
+or `--pj-pane-band-inset-start` and `--pj-pane-band-inset-end` separately (set
+them on `.ph-pane-label` or `.ph-swipe-label` to inset one side). Set
 `paneLabels: 'hidden'` when your host names revisions elsewhere; either way, the
 labels still name each pane for assistive technology.
 

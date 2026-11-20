@@ -144,4 +144,23 @@ test('mode icons never look like playback: Animated is a clapperboard, distinct 
   await expect(menu).toBeVisible()
   await expect(menu.locator('svg[data-icon]')).toHaveAttribute('data-icon', 'clapperboard')
   await expect(menu).toHaveAttribute('title', 'Comparison mode: Animated')
+  // Folded into a menu, the switch keeps the segmented control's box: its height, corners, fill and edge.
+  const [trigger, well] = await menu.evaluate(element => {
+    const measure = (target: Element) => {
+      const style = getComputedStyle(target)
+      return {
+        height: target.getBoundingClientRect().height,
+        radius: style.borderTopLeftRadius,
+        fill: style.backgroundColor,
+        edge: `${style.borderTopWidth} ${style.borderTopStyle} ${style.borderTopColor}`,
+      }
+    }
+    // A segmented control's box, as `SegmentedControl` draws it, beside the trigger.
+    const reference = Object.assign(document.createElement('div'), {className: 'pj:inline-flex pj:h-8 pj:rounded-md pj:border pj:bg-muted'})
+    element.parentElement!.append(reference)
+    const result = [measure(element), measure(reference)]
+    reference.remove()
+    return result
+  })
+  expect(trigger).toEqual(well)
 })

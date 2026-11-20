@@ -116,6 +116,7 @@ export function ModeSwitch({
       contentClassName="pj:w-48 pj:p-1"
       open={open}
       onOpenChange={setOpen}
+      // Folded into a menu, the switch keeps its box: the segmented control's height, corners, fill and edge.
       trigger={
         <Button
           type="button"
@@ -123,7 +124,7 @@ export function ModeSwitch({
           size="sm"
           aria-label={name}
           title={name}
-          className="ph-mode-button pj:h-8 pj:shrink-0 pj:gap-0.5 pj:border pj:border-input pj:bg-background pj:pr-1 pj:pl-2 pj:shadow-xs pj:dark:bg-input/30 pj:data-[state=open]:bg-accent pj:[&_svg]:size-4"
+          className="ph-mode-button pj:h-8 pj:shrink-0 pj:gap-0.5 pj:rounded-md pj:border pj:bg-muted pj:pr-1 pj:pl-2 pj:shadow-none pj:hover:bg-accent pj:data-[state=open]:bg-accent pj:[&_svg]:size-4"
         >
           <Icon aria-hidden="true" data-icon={iconName} />
           <ChevronDown aria-hidden="true" className="pj:size-3.5! pj:text-muted-foreground" />

@@ -2,75 +2,82 @@
 
 ## Building from source
 
-From the clean public workspace, use Node >=26.12.1, `npm ci`, then
-`npm run build`. Node is source-build tooling for the browser UI, helpers and
-packages, not the CLI runtime. The result, `packages/cli/dist/projections`, is
-the same self-contained executable as a release for the build host.
-`node packages/cli/scripts/build.mjs --target TRIPLE` builds into
-`packages/cli/dist/TRIPLE/` when that Rust target and its linker are installed;
-releases build each platform natively.
+To build the CLI from a clean public workspace, make sure you are on Node
+`>=26.12.1`, then run `npm ci` followed by `npm run build`. Node is only used to
+build the browser UI, helpers, and packages—not to run the CLI itself. The
+resulting binary at `packages/cli/dist/projections` is the same self-contained
+executable shipped in releases for your platform. If you want to cross-compile
+for another target whose Rust target and linker are installed, run
+`node packages/cli/scripts/build.mjs --target TRIPLE`, which outputs to
+`packages/cli/dist/TRIPLE/`; official releases build each platform natively.
 
-`cargo build --locked --release -p projections-cli` also builds the native CLI
-directly. It embeds the browser client only if it was built first, and embeds
-helpers only with `PROJECTIONS_EMBED_HELPERS=1` (set by
-`packages/cli/scripts/build.mjs`); without them it resolves helpers from this
-checkout's extractor crates. `PROJECTIONS_INSPECTOR_ASSETS` and
-`PROJECTIONS_COLLECTOR_ASSETS` override the embedded client and helpers for
-development. An asset-free build still supports CLI commands and fails
-explicitly if Inspector assets are requested.
+You can also invoke Cargo directly with
+`cargo build --locked --release -p projections-cli`. Keep in mind that Cargo
+only embeds the browser client if it was already built, and only embeds helpers
+when `PROJECTIONS_EMBED_HELPERS=1` is set (which
+`packages/cli/scripts/build.mjs` handles for you); otherwise the binary looks up
+helpers from this checkout's extractor crates. During development,
+`PROJECTIONS_INSPECTOR_ASSETS` and `PROJECTIONS_COLLECTOR_ASSETS` let you
+override the embedded client and helpers. An asset-free build still runs normal
+CLI commands and fails explicitly if anything requests Inspector assets.
 
 ## Release builds
 
-Releases are built with [dist](https://github.com/axodotdev/cargo-dist),
-configured in `dist-workspace.toml`. `.github/workflows/release.yml` is
-generated from it and never edited by hand: after changing the configuration or
-upgrading dist (whose version the file pins), run `node tools/scripts/dist.mjs`.
-CI runs `node tools/scripts/dist.mjs --check`. Pushing a tag such as `v0.1.0`,
-matching the workspace version, releases it:
+Releases are managed with [dist](https://github.com/axodotdev/cargo-dist) and
+configured in `dist-workspace.toml`. Never edit `.github/workflows/release.yml`
+by hand—whenever you change the configuration or upgrade dist (whose version is
+pinned in that file), regenerate the workflow with
+`node tools/scripts/dist.mjs`. CI verifies it stays in sync with
+`node tools/scripts/dist.mjs --check`.
 
-1. `release-inputs.yml` builds the platform-neutral embedded inputs once
-   (browser client, default comparator, .NET and TypeScript helpers).
-2. dist builds every target natively on a matching GitHub-hosted runner, with
-   the inputs and the helpers embedded and required
-   (`.github/release-build-setup.yml`), and attests its archives. Linux
-   executables are statically linked against musl, so they need no particular
-   glibc.
-3. `release-proof.yml` extracts each executable on its own platform, runs the
-   installed-binary proof (`npm run test:binary`) with Node absent from PATH,
-   including every embedded helper and a local `gh extension install`, and
-   publishes it under its gh name with its own `.sha256`.
-4. When every proof passes, a reviewer of the `release` environment approves the
-   release (`release-approval.yml`), which attests every asset. Only then does
-   dist create the GitHub release, with the gh-named executables, dist's
-   archives and installers, checksums and generated notes. No source tarball is
+Pushing a version tag that matches the workspace version (such as `v0.1.0`) runs
+the release pipeline:
+
+1. `release-inputs.yml` builds the platform-neutral embedded assets once: the
+   browser client, the default comparator, and the .NET and TypeScript helpers.
+2. dist builds every target natively on a matching GitHub-hosted runner,
+   embedding and requiring those inputs and helpers
+   (`.github/release-build-setup.yml`), and attests its archives. Linux binaries
+   are statically linked against musl so they do not depend on a specific glibc
+   version.
+3. `release-proof.yml` unpacks each binary on its own platform and runs the
+   installed-binary proof (`npm run test:binary`) with Node removed from PATH.
+   This exercises every embedded helper and a local `gh extension install`, then
+   publishes the binary under its gh name alongside its `.sha256` checksum.
+4. Once every proof passes, a reviewer for the `release` environment approves
+   the release (`release-approval.yml`), attesting every asset. Only then does
+   dist create the GitHub release with the gh-named executables, archives,
+   installers, checksums, and generated release notes. No source tarball is
    published.
 
-A pull request only plans a release. To dry-run the whole pipeline (builds,
-proofs and gh-named workflow artifacts, but no release), set
-`pr-run-mode = "upload"` temporarily on a pull request.
+Pull requests only plan a release by default. If you want to dry-run the full
+pipeline—builds, proofs, and gh-named workflow artifacts, without publishing a
+release—temporarily set `pr-run-mode = "upload"` on the pull request.
 
-dist calls these jobs with GitHub's self-repository syntax,
-`uses: $/.github/workflows/<job>.yml`: the workflow at the commit that is
-running. actionlint 1.7.12 doesn't know that form yet, so
-`.github/actionlint.yaml` ignores only that message for `release.yml`, and only
-the matching one for the `$/` composite action steps of `ci.yml` and
-`engine-quality.yml`.
+Because dist invokes these workflows with GitHub's self-repository syntax
+(`uses: $/.github/workflows/<job>.yml`, targeting the workflow at the running
+commit) and actionlint 1.7.12 does not recognize that form yet,
+`.github/actionlint.yaml` ignores only that specific message for `release.yml`,
+along with the matching message for the `$/` composite action steps in `ci.yml`
+and `engine-quality.yml`.
 
 ## Source-built GitHub CLI extension
 
-Released binaries install as a local extension directly; see
-[Install the CLI](../setup/install.md). To develop the extension from source
-instead, `tools/gh-projections/gh-projections` is a thin POSIX shell launcher
-for the **same** `packages/cli/dist/projections`, commands and linked Rust
-Engine as the standalone CLI. It preserves caller cwd, argv and exit status; it
-never installs dependencies, builds, downloads tools, or makes network calls on
-startup, and it executes the native binary directly, with no Node check or
-fallback. Individual commands retain their normal explicit behavior, including
-acquisition for `pr`. GitHub CLI remains optional for ordinary npm/standalone
-CLI use.
+Released binaries can be installed directly as a local `gh` extension; see
+[Install the CLI](../setup/install.md). If you are developing the extension from
+source instead, `tools/gh-projections/gh-projections` provides a thin POSIX
+shell launcher that runs the **same** `packages/cli/dist/projections` binary,
+commands, and linked Rust Engine as the standalone CLI.
 
-Prepare a Git checkout of this repository, then install its
-`tools/gh-projections` directory:
+The launcher preserves your working directory, arguments, and exit status, and
+invokes the native binary directly with no Node check or fallback. It never
+installs dependencies, builds, downloads tools, or makes network requests at
+startup—individual commands keep their normal explicit behavior, including
+acquisition for `pr`. The GitHub CLI remains optional for ordinary npm or
+standalone CLI use.
+
+To set up the source-built extension, prepare a Git checkout of this repository
+and install its `tools/gh-projections` directory:
 
 ```sh
 cd /path/to/projections
@@ -84,33 +91,38 @@ gh projections --help
 gh projections show HEAD -p services --trust
 ```
 
-Use an already installed `gh` and POSIX shell/`readlink`. Node and Rustup with
-the checked-in Rust toolchain/Wasm target are needed for explicit source
-preparation, not invocation. Preparation builds the host-compatible native CLI
-with embedded Inspector browser assets. This is **source-built integration**;
-released binaries are described in [Install the CLI](../setup/install.md).
-Optional extractor toolchains remain prerequisites only when selected. A missing
-native CLI build produces an explicit preparation error; the launcher never
-repairs it implicitly. GitHub CLI's local install links the prepared source, so
-retain that checkout and rebuild it explicitly after source updates. GitHub CLI
-names a local extension after its directory, so `tools/gh-projections` is the
-extension's `gh-projections` identity and the checkout itself may have any name;
-no remote repository rename, publication or GitHub API operation is required.
+Running the extension requires only an installed `gh` and a POSIX shell with
+`readlink`. Node and Rustup (with the checked-in Rust toolchain and Wasm target)
+are needed only during explicit source preparation, which builds the
+host-compatible native CLI with embedded Inspector browser assets. This workflow
+is for **source-built integration**; for prebuilt releases, see
+[Install the CLI](../setup/install.md).
 
-The opt-in distribution proof requires an actually installed `gh` and a prior
-public workspace build:
+Optional extractor toolchains remain prerequisites only when you select an
+extractor that uses them. If the native CLI binary hasn't been built, the
+launcher reports a clear preparation error rather than trying to repair it.
+Because `gh` links a local extension straight to the prepared directory, keep
+that checkout around and rebuild it after pulling source changes. GitHub CLI
+also derives the extension name from the installed directory, so
+`tools/gh-projections` gives it the `gh-projections` identity regardless of what
+your checkout folder is named—no remote repository rename, publication, or
+GitHub API call is required.
+
+To run the opt-in distribution proof (which requires an installed `gh` and a
+prior public workspace build):
 
 ```sh
 npm run test:gh --workspace @githubnext/projections-cli
 ```
 
-It extends the fresh-cache package proof with a disposable public-root layout,
-isolated HOME/XDG/GH_CONFIG_DIR and actual `gh extension install .`. It verifies
-help equality, real native-validated collection, trust failure, relative output
-in the caller repository and missing-build diagnostics through `gh projections`.
-A refusing local proxy plus disabled update checks detects unexpected
-API/network access by `gh`; only a fake offline authentication sentinel is used,
-never a user's credentials. Temporary registration/config is removed with the
-fixture. The explicit npm preparation/production dependency install may use the
-npm registry; the launcher and local gh proof do not install anything themselves
-or call a live GitHub API.
+This test extends the fresh-cache package proof with a disposable public-root
+layout, isolated HOME/XDG/GH_CONFIG_DIR directories, and a real
+`gh extension install .`. Through `gh projections`, it verifies help output
+parity, real native-validated collection, trust failures, relative output paths
+in the caller's repository, and missing-build diagnostics. A refusing local
+proxy combined with disabled update checks catches any unexpected API or network
+calls from `gh`, using only a fake offline authentication sentinel rather than
+real user credentials, and temporary registration and config are cleaned up with
+the fixture. While explicit npm preparation or production dependency installs
+may talk to the npm registry, the launcher and local gh proof never install
+anything themselves or call a live GitHub API.

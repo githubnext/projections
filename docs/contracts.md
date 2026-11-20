@@ -1,10 +1,10 @@
 # Projections contracts v0
 
-Package versions are release versions ([releasing](maintainers/releasing.md));
-the formats here have their own. Every format here is version 0: pre-stable, and
-it may change incompatibly without a compatibility reader. Version 1 will be the
-first stable version of the protocol, the domain schemas and the saved and
-renderer documents.
+Package versions track releases (see [releasing](maintainers/releasing.md)),
+while the document formats described here carry their own versions. Every format
+is currently at version 0: pre-stable, and subject to breaking changes without a
+compatibility reader. Version 1 will be the first stable release of the
+protocol, domain schemas, saved documents, and renderer frames.
 
 ```
   revision ──▶ extractor ──▶ extraction ──▶ renderer
@@ -14,21 +14,25 @@ renderer documents.
   head revision ──▶ extractor ──▶ extraction ─┘
 ```
 
-A **projection** combines an **extractor**, an optional **comparator** and a
-**renderer**. An extractor examines one revision and writes an **extraction**. A
-comparator relates two extractions of the same projection and writes a
-**comparison**. Extractors may be written in any language; no TypeScript or Rust
-SDK is required. Machine-readable draft-2020-12 schemas are shipped in
-`packages/schemas/schemas/<name>/v<major>.json`, and published at their `$id`,
-`https://schemas.projections.githubnext.com/<name>/v<major>.json` (see
+A **projection** brings together an **extractor**, an optional **comparator**,
+and a **renderer**. An extractor inspects one revision and emits an
+**extraction**. A comparator relates two extractions of the same projection and
+emits a **comparison**. Because the boundary is plain JSON over stdin and
+stdout, you can write extractors in any language without needing a TypeScript or
+Rust SDK.
+
+Machine-readable draft-2020-12 schemas ship in
+`packages/schemas/schemas/<name>/v<major>.json` and are published at their
+`$id`, `https://schemas.projections.githubnext.com/<name>/v<major>.json` (see
 [Versioning and publishing](#versioning-and-publishing)). They are generated
 from the TypeBox definitions in `packages/schemas/src/typebox`, which also
-provide the TypeScript types `packages/schemas/src/index.ts` exports; run
-`npm run generate --workspace @githubnext/projections-schemas` after changing
-them (`npm test` fails when the committed files are out of date). The schemas
-validate structure; they do not replace the Engine's identity, topology,
-numeric/raw-input, depth, digest and comparison-integrity validation. Register
-the referenced schemas together.
+supply the TypeScript types exported by `packages/schemas/src/index.ts`.
+Whenever you change those definitions, run
+`npm run generate --workspace @githubnext/projections-schemas` so the committed
+files stay in sync (`npm test` will fail if they drift). Keep in mind that JSON
+Schema only checks structure—it does not replace the Engine's identity,
+topology, numeric/raw-input, depth, digest, and comparison-integrity checks.
+Register all referenced schemas together when validating.
 
 <!-- prettier-ignore -->
 | Schema | `$id` | Document |
@@ -44,41 +48,41 @@ the referenced schemas together.
 
 ### Versioning and publishing
 
-Schemas have their own host, `https://schemas.projections.githubnext.com/`,
-which serves nothing else.
+Schemas live on their own dedicated host,
+`https://schemas.projections.githubnext.com/`, which serves nothing else.
 
 - **An ID names a major version only**, `<name>/v<major>.json`, and that is what
-  documents and editors refer to. Within a major, schemas change only additively
-  (new optional fields, new definitions, looser constraints), in place. Version
-  0 follows the same rule until 1.0.
-- **A breaking change is a new major**, `<name>/v<major + 1>.json`, published
-  alongside the previous one. A published major is never removed.
+  documents and editors point to. Within a major version, schemas evolve only in
+  place through additive changes (new optional fields, new definitions, or
+  looser constraints). Version 0 follows this same rule until 1.0.
+- **A breaking change gets a new major**, `<name>/v<major + 1>.json`, published
+  alongside the previous one. Published major versions are never removed.
 - **Every release publishes an immutable snapshot** of each schema at
-  `<name>/v<major>/<release>.json`, such as
-  `https://schemas.projections.githubnext.com/graph/v0/0.2.0.json`, where
-  `<release>` is the CLI's version. A snapshot's content is the schema as that
-  release shipped it, `$id` included, so pin a snapshot to stop following
-  additions. A prerelease writes snapshots only; a stable release also replaces
-  `v<major>.json`.
+  `<name>/v<major>/<release>.json` (for example,
+  `https://schemas.projections.githubnext.com/graph/v0/0.2.0.json`), where
+  `<release>` is the CLI's version. Each snapshot captures the exact schema
+  shipped in that release, `$id` included, so you can pin a snapshot if you
+  don't want to pick up additive changes automatically. Prereleases publish
+  snapshots only, while stable releases also update `v<major>.json`.
 
-The release workflow publishes the whole set: snapshots first, then each
-`v<major>.json`; it never deletes. Every file is served as
+The release workflow publishes the full set in order—snapshots first, then each
+`v<major>.json`—and never deletes old files. Every file is served as
 `application/schema+json` with `Access-Control-Allow-Origin: *`, so validators,
-browser editors and vscode.dev can fetch them directly; `v<major>.json` is
-cached for five minutes and snapshots for a year, as immutable.
-[Schema publishing](maintainers/schema-publishing.md) describes the setup. CI
-checks that every `$id` and `$ref` uses the schemas host and that the published
-set is complete.
+browser editors, and vscode.dev can fetch them directly. `v<major>.json` is
+cached for five minutes, while snapshots are cached as immutable for a year. See
+[Schema publishing](maintainers/schema-publishing.md) for the infrastructure
+details. CI verifies that every `$id` and `$ref` points to the schemas host and
+that the published set is complete.
 
-The TypeScript types of every document are public in
-`@githubnext/projections/schemas` (see [Packages](contracts/packages.md)). They
-are the static types of the TypeBox definitions the schemas are generated from,
-which stay in this repository's internal `packages/schemas/` workspace with the
-generated `packages/schemas/<name>/v<version>.json`.
+TypeScript types for every document are available publicly from
+`@githubnext/projections/schemas` (see [Packages](contracts/packages.md)). These
+are the static types of the TypeBox definitions that generate the schemas, while
+the source definitions and generated `packages/schemas/<name>/v<version>.json`
+files stay in this repository's internal `packages/schemas/` workspace.
 
-Editors that use [SchemaStore](https://www.schemastore.org) match files by path.
-A catalog entry for projection definitions, to propose once the URLs are public,
-would be:
+Editors backed by [SchemaStore](https://www.schemastore.org) match schemas by
+file path. Once the URLs are public, a catalog entry for projection definitions
+would look like this:
 
 ```json
 {
@@ -89,13 +93,13 @@ would be:
 }
 ```
 
-Match by path rather than adding `$schema` to a definition: definitions reject
-unknown fields.
+Use path matching rather than adding `$schema` to a definition file, because
+definitions reject unknown fields.
 
-Comparator files can name their schema in their first line, which the YAML
-language server reads,
-`# yaml-language-server: $schema=https://schemas.projections.githubnext.com/comparator/v0.json`,
-and the catalog entry for them would be:
+Comparator files, on the other hand, can declare their schema on line 1 for the
+YAML language server:
+`# yaml-language-server: $schema=https://schemas.projections.githubnext.com/comparator/v0.json`.
+Their SchemaStore catalog entry would be:
 
 ```json
 {
@@ -106,200 +110,220 @@ and the catalog entry for them would be:
 }
 ```
 
-and for their tests, `comparator-tests/v0.json`, matching
+Comparator test files use `comparator-tests/v0.json` and match
 `*.comparator.test.yaml` and `*.comparator.test.yml`.
 
 ### Schema-owned contracts
 
-TypeBox, in `packages/schemas`, is the one schema system for the contracts this
-repository owns: each schema provides the JSON Schema, the TypeScript type and
-the runtime validator, so a hand-written type never stands in for a checked one.
+TypeBox in `packages/schemas` is the single schema system for the contracts this
+repository owns. Each schema defines the JSON Schema, the TypeScript type, and
+the runtime validator together, so a hand-written type never stands in for a
+checked one.
 
-- **Published contracts**, `src/typebox`: the versioned documents above, with
-  their `$id`s and reference pages.
-- **The local runner's API**, `src/runner`, exported as
-  `@githubnext/projections-schemas/runner`: the responses of the Inspector
+- **Published contracts** (`src/typebox`): the versioned documents listed above,
+  along with their `$id`s and reference pages.
+- **The local runner's API** (`src/runner`, exported as
+  `@githubnext/projections-schemas/runner`): the responses from the Inspector
   service (`projections view` and [`serve --stdio`](runner/stdio-backend.md))
-  that its clients decode. It is internal and unversioned, never published: the
-  runner and its clients ship from the same commit. Its generated schema is
-  `packages/schemas/internal/runner-api.json`, outside the published set.
-  `decodeRunnerResponse(name, value)` checks a response whole, nested entries
-  included, and returns it typed, or throws a `RunnerResponseError` that names
-  the request and the JSON pointer of the value that doesn't match. It uses
-  TypeBox's interpreting checker, which needs no `eval` and so runs under the
-  Inspector's content security policy. Clients accept properties a schema
-  doesn't declare, so a runner can add a field without breaking them.
-- **Documents another boundary validates** are opaque in the runner API, which
+  that its clients decode. This API is internal, unversioned, and never
+  published because the runner and its clients always ship from the same commit.
+  Its generated schema lives outside the published set at
+  `packages/schemas/internal/runner-api.json`. Calling
+  `decodeRunnerResponse(name, value)` validates a response whole—nested entries
+  included—and returns it typed, or throws a `RunnerResponseError` naming the
+  request and the JSON pointer of the mismatching value. Because it uses
+  TypeBox's interpreting checker, it needs no `eval` and runs cleanly under the
+  Inspector's content security policy. Clients also tolerate extra properties a
+  schema doesn't declare, letting the runner add fields without breaking them.
+- **Documents another boundary validates** stay opaque in the runner API, which
   checks only the envelope its clients read: a saved document's `format` and
-  `version` (the CLI validated the document when it loaded it), and an explore
+  `version` (the CLI already validated the document on load) and an explore
   candidate's trial definition.
 
-**Rust conformance.** The Rust service has no generated types. Instead, its
+**Rust conformance.** The Rust service doesn't use generated types. Instead, its
 tests (`packages/cli/tests/service/conformance.rs`) check every runner API
-response they receive against `internal/runner-api.json`, more strictly than the
-clients: a property the schema doesn't declare fails. Changing a response
-therefore starts in the TypeBox source; regenerate the schema, and the service
-tests then hold the Rust side to it.
+response against `internal/runner-api.json` even more strictly than the clients
+do: any undeclared property fails the test. When you change a response, start in
+the TypeBox source, regenerate the schema, and let the service tests hold the
+Rust side to it.
 
-Host-to-renderer and renderer-to-host frame validation is asymmetric on purpose
-(see [renderer frames](contracts/renderer-frames.md)) and stays outside this
-rule.
+Host-to-renderer and renderer-to-host frame validation is intentionally
+asymmetric (see [renderer frames](contracts/renderer-frames.md)) and stays
+outside this rule.
 
 ## Pages
 
-Each page specifies one family of documents; the rules that apply to all of them
-follow.
+Each page below specifies one document family; the sections after this cover the
+rules shared across all of them.
 
-- [Packages](contracts/packages.md): the published packages and what each
-  exports.
-- [Extractions](contracts/extractions.md): the extraction document, volatile
-  data and canonical bytes.
-- [Extractor request and execution](contracts/extractors.md): what an extractor
-  receives, how it runs and the built-in extractors.
-- [Projection definitions](contracts/definitions.md): the definition file.
-- [Saved extractions and CI artifacts](contracts/saved-documents.md): saved
-  extraction documents and CI artifact manifests.
-- [Comparisons](contracts/comparisons.md): the comparison document, the default
-  comparator, comparator files and tests, the interpreter module and saved
-  comparisons.
-- [Scenarios](contracts/scenarios.md): renderer and comparator fixture
+- [Packages](contracts/packages.md) covers the published packages and what each
+  entry exports.
+- [Extractions](contracts/extractions.md) specifies the extraction document,
+  volatile data, and canonical bytes.
+- [Extractor request and execution](contracts/extractors.md) defines what an
+  extractor receives, how the runner executes it, and how built-in extractors
+  work.
+- [Projection definitions](contracts/definitions.md) documents the definition
+  file format.
+- [Saved extractions and CI artifacts](contracts/saved-documents.md) covers
+  saved extraction documents and CI artifact manifests.
+- [Comparisons](contracts/comparisons.md) specifies the comparison document, the
+  default comparator, custom comparator files and tests, the interpreter module,
+  and saved comparisons.
+- [Scenarios](contracts/scenarios.md) describes renderer and comparator fixture
   scenarios.
-- [Renderer frame protocol](contracts/renderer-frames.md): the messages between
-  a host and a renderer frame.
+- [Renderer frame protocol](contracts/renderer-frames.md) defines the message
+  protocol between a host and a renderer iframe.
 
 ## Text with inline code
 
-Human-readable strings in these documents mark inline code with backticks:
-comparison and step `summary`, notices, diagnostic `message`s, extractor error
-messages and extraction `metadata` text, and the text comparators and extractors
-put in their own metadata (such as `api-compatibility`'s reasons). Every
-identifier, type, member, signature, version, path, selector and other literal
-symbol goes in a span; human language stays outside:
+Human-readable strings in Projections documents wrap literal code tokens in
+backticks. This applies to comparison and step `summary` text, notices,
+diagnostic `message`s, extractor error messages, extraction `metadata` text, and
+any text that comparators or extractors put in their own metadata (such as
+`api-compatibility`'s reasons). Put every identifier, type, member, signature,
+version, path, selector, or other literal symbol inside a backtick span, and
+keep natural prose outside:
 
 ```
 Parameter `currency` was renamed to `currencyCode`, breaking named arguments
 ```
 
-A backslash escapes a literal backtick or backslash (`` \` ``, `\\`), inside a
-span or outside it; any other backslash is literal. An unclosed backtick is
-literal text. There is no other markup: no emphasis, links or nesting, and the
-text is never HTML.
+Use a backslash to escape a literal backtick or backslash (`` \` ``, `\\`) both
+inside and outside a span; any other backslash stays literal, and an unclosed
+backtick is treated as plain text. No other markup is supported—no emphasis,
+links, or nesting—and these strings are never interpreted as HTML.
 
-Viewers draw spans in the code font and the rest in the text font (the renderer
-kit's `Prose`, and the host's table and text views); attributes that take plain
-text, such as titles and accessible labels, drop the markers (`plainProse`).
-Plain-text output, such as the CLI's text rendering, keeps the backticks.
-`@githubnext/projections/schemas` exports `proseSpans`, `plainProse` and
-`codeSpan` (which escapes a string as one span).
+Viewers render code spans in monospace and the surrounding prose in the body
+font (via the renderer kit's `Prose` component and the host's table and text
+views). Plain-text attributes like tooltips and accessible labels strip the
+backtick markers using `plainProse`, while plain-text outputs like the CLI's
+text view keep them. `@githubnext/projections/schemas` exports `proseSpans`,
+`plainProse`, and `codeSpan` (which escapes a string into a single span).
 
 ## Trust
 
-Explicit trust (`--trust`, and the Inspector's trust confirmation) is required
-to run repository code. **Code from the reviewed revision runs freely; code that
-only a comparison's head supplies needs explicit trust.**
+Running code that comes from a repository requires explicit trust (`--trust` on
+the CLI, or the trust confirmation in the Inspector). **Code from the reviewed
+revision runs freely; code that only a comparison's head supplies needs explicit
+trust.**
 
-- An **extractor** requires trust when it is a command or a built-in extractor
-  that runs a toolchain (`requiresTrust` in `projections list` and the
-  Inspector's `policies`). Trust covers both revisions. Built-in extractors that
-  only read files never require it.
-- A **comparator** never requires trust: comparator files are data run by a
-  sandboxed interpreter.
+- An **extractor** needs trust whenever it runs a custom command or a built-in
+  extractor that invokes a toolchain (surfaced as `requiresTrust` in
+  `projections list` and in the Inspector's `policies`). Granting trust covers
+  both compared revisions. Built-in extractors that only read files never need
+  trust.
+- A **comparator** never needs trust, because comparator files are declarative
+  data executed inside a sandboxed interpreter.
 - A **custom renderer** bundle is repository code, so it requires trust
-  (`rendererRequiresTrust`), whichever revision supplies it: the working tree,
-  `HEAD`, a base or a head. The one exception is a bundle whose `index.html` and
-  `renderer.json` bytes are identical to the bundle the same projection declares
-  at the revision's merge base with the repository's default branch
-  (`refs/remotes/origin/HEAD`; for the working tree, `HEAD`'s merge base): that
-  renderer is the one the repository's maintainers merged, and everything it is
-  given is derived from the same repository. A checkout with no
-  `refs/remotes/origin/HEAD` (`git remote set-head origin --auto` sets it) has
-  no exception. Checking out a pull request doesn't change its default branch,
-  so a renderer the pull request adds or changes still needs trust. Every host
-  applies the rule: the Inspector and viewer, VS Code (a trusted workspace
-  passes `--trust`), `show`/`compare --png` and the `screenshot` tool, and
-  `check`'s renderer checks. A renderer development server serves the package's
-  live sources rather than the compared bundle, so the Inspector uses one only
-  with `--trust`. Bundles a scenarios document names follow
+  (`rendererRequiresTrust`) regardless of which revision supplies it—the working
+  tree, `HEAD`, a base, or a head. There is one exception: if a bundle's
+  `index.html` and `renderer.json` bytes match the bundle declared by the same
+  projection at the revision's merge base with the repository's default branch
+  (`refs/remotes/origin/HEAD`, or `HEAD`'s merge base for the working tree), it
+  runs without extra trust. That bundle was already merged by the repository's
+  maintainers, and everything it receives comes from the same repository. If a
+  checkout lacks `refs/remotes/origin/HEAD` (you can set it with
+  `git remote set-head origin --auto`), the exception does not apply. Checking
+  out a pull request does not change the default branch, so any renderer added
+  or modified by a pull request still requires trust. Every host enforces this
+  rule: the Inspector and viewer, VS Code (where a trusted workspace passes
+  `--trust`), `show`/`compare --png`, the `screenshot` tool, and `check`'s
+  renderer checks. Because a renderer development server serves live package
+  sources rather than the compared bundle, the Inspector only connects to one
+  with `--trust`. Bundles referenced by a scenarios document follow
   [the scenarios rule](contracts/scenarios.md).
 
-Renderer frames use `sandbox="allow-scripts"` and a content security policy that
-grants no origin (not even the host's) and `connect-src 'none'`, so a renderer
-can't read files, call APIs or fetch. Browsers can't, however, stop a sandboxed
-frame from navigating itself, so a malicious renderer could exfiltrate the data
-it receives by encoding it into a navigation URL. That is why renderer source is
-a trust decision. Without trust, hosts show the built-in renderer for the
-extraction's schema (the renderer named for, or handling, its schema family), or
-their table and text views, with a notice saying why. Hosted views never load
-artifact-supplied renderers.
+Renderer iframes run with `sandbox="allow-scripts"` and a content security
+policy that grants no origin (not even the host's) and sets
+`connect-src 'none'`. That prevents a renderer from reading files, calling host
+APIs, or making network requests. Even so, browsers cannot stop a sandboxed
+frame from navigating itself, which means a malicious renderer could exfiltrate
+the data it receives inside a navigation URL. That is why renderer source
+remains a trust boundary. Without trust, hosts fall back to the built-in
+renderer for the extraction's schema (whichever renderer is named for or handles
+that schema family), or to their table and text views, along with a notice
+explaining why. Hosted views never load artifact-supplied renderers.
 
 ## One implementation, native and browser
 
-The native and browser Engines implement the same request and response contract
-(engine ABI version 0). Operations are `parse-json`, `decode`, `normalize`,
-`canonicalize`, `validate-comparison`, `vary`, `pair` and `review`. `review`
-(`{comparison}`, reading only each change's `status`, `correspondence` and
-`varied` of a comparison the engine validated) says what a comparison asks of
-its reviewer: `{status, reviewable, content, identity, variation}`. A change is
-a content change when its status is `added`, `removed` or `modified`, an
-identity change when its correspondence is `declared`, `split` or `merge` (a
-renamed, modified item is both), reviewable when it is either, and expected
-variation when it is `unchanged`, `exact` and has `varied`. `status` is
-`changed` exactly when a change is reviewable, so expected variation alone
-leaves a comparison `unchanged`. The CLI's batch and artifact statuses are this
-`status` (`projections_engine::review`), and JavaScript hosts call
-`engine.review(comparison)` rather than counting `changes` themselves. `pair`
-(`{before, after}`, each reading only `projection.id`, `provenance.definition`
-and `provenance.definitionDigest` of an extraction document) decides whether two
-extractions can be compared and returns `{pairing}`: `same`; `projection` for
-different projections; `definition`, with the `differing` top-level fields, when
-the recorded definitions differ apart from `presentation` (whatever their
-digests say); or `components` when the definitions agree but the digests differ,
-because the declared sources' bytes do. It is the one implementation of that
-rule: the CLI calls `projections_engine::pairing`, JavaScript hosts
-`engine.pair(before, after)`, and the shared conformance corpus
-(`packages/schemas/fixtures/conformance.json`) runs it natively and in Wasm.
-Code outside the engine doesn't compare digests or definitions itself; the
-`no-restricted-syntax` entries in `tools/scripts/engine-contracts.mjs` flag it.
-`vary` (`{before, after}`) compares two extractions of the same revision, such
-as a rerun, item by item by ID with no matching, and returns
-`{equal, within, beyond}`: `equal` when the canonical bytes are identical;
-`within`, each `{collection, id, path, generated?}` whose volatile value varied
-within tolerance (a generated value reworded from an equal basis has
-`generated: true`); `beyond`, everything else that differs, each with a
-`reason`: volatile values beyond tolerance (a generated value whose basis moved
-has `generated` and `because`, and a reason such as "Regenerated because the
-model changed"), other fields (`/label`, `/data/<key>`), items in one run only
-(an empty `path`) and, without a collection or ID, `/schema`, `/vocabularies` or
-`/volatile`. The runs are reproducible when `beyond` is empty. JavaScript hosts
-call it as `engine.vary(before, after)`, Rust callers as
-`projections_engine::volatility::vary`. `parse-json` returns generic strict JSON
-for artifact envelopes, preserving duplicate-key, Unicode and numeric checks
-before host parsing; it allows 64 nested levels and 32 MiB. `decode` accepts raw
-extractor JSON so duplicate keys and numeric precision are checked before an
-ordinary host parser can erase that information. The Engine has no filesystem,
-Git, process, network, DOM, host theme or clock dependency. Diagnostics use JSON
-Pointer paths and stable machine-readable codes.
+Both the native and browser Engines implement the same request/response contract
+(engine ABI version 0), exposing eight operations: `parse-json`, `decode`,
+`normalize`, `canonicalize`, `validate-comparison`, `vary`, `pair`, and
+`review`.
 
-Inside, the Engine parses rather than validates: JSON stays at its boundary. The
-boundary strictly parses within the size limits, reads an extraction or a
-comparison once into a typed model, writes the model back, and computes
-canonical bytes and digests, which the protocol defines over JSON. Reading
-establishes every fact validation checks, so the model holds them by
-construction: IDs are unique, endpoints are entities, required fields are
-present, and an item's `data`, metadata and generated values are the Engine's
-own canonical values (finite numbers, safe integers, objects without duplicate
-keys, omitted and `null` kept apart). Matching, ordering, comparison integrity
-and volatility and tolerance judgments work on the model alone, as pure
-functions of owned values. Diagnostics are reported in the order the contract
-checks them, however a document is read. Rust callers read an extraction with
-`Extraction::from_json` and check a comparator's JSON comparison against two
-with `check_comparison`.
+- `review` (`{comparison}`, reading only each change's `status`,
+  `correspondence`, and `varied` fields on an engine-validated comparison)
+  summarizes what a comparison asks of a reviewer:
+  `{status, reviewable, content, identity, variation}`. A change counts as a
+  content change when its status is `added`, `removed`, or `modified`, an
+  identity change when its correspondence is `declared`, `split`, or `merge` (a
+  renamed and modified item counts as both), reviewable when it is either, and
+  expected variation when it is `unchanged`, `exact`, and has `varied`. `status`
+  is `changed` if and only if at least one change is reviewable, so expected
+  variation alone leaves a comparison `unchanged`. Both the CLI's batch and
+  artifact statuses (`projections_engine::review`) and JavaScript hosts
+  (`engine.review(comparison)`) use this result rather than counting `changes`
+  directly.
+- `pair` (`{before, after}`, reading only `projection.id`,
+  `provenance.definition`, and `provenance.definitionDigest` from each
+  extraction document) decides whether two extractions can be compared and
+  returns `{pairing}`: `same` when they match; `projection` when they belong to
+  different projections; `definition` (with the `differing` top-level fields)
+  when their recorded definitions differ outside `presentation` (regardless of
+  digests); or `components` when the definitions agree but the digests differ
+  because the declared sources' bytes changed. It is the single implementation
+  of that rule: the CLI calls `projections_engine::pairing`, JavaScript hosts
+  call `engine.pair(before, after)`, and the shared conformance corpus
+  (`packages/schemas/fixtures/conformance.json`) runs it both natively and in
+  Wasm. Code outside the engine never compares digests or definitions on its
+  own; the `no-restricted-syntax` rules in `tools/scripts/engine-contracts.mjs`
+  flag any attempt to do so.
 
-The browser-safe artifacts package strictly parses raw envelopes through the
-Engine and uses build-time-generated structural validators. It verifies
-extraction digests and projection/definition identity, then reruns the default
-comparator rather than accepting a saved change, status, step or summary claim.
-Artifact loading is bounded to 32 MiB UTF-8, independently of individual
-extraction limits. Validation does not authenticate provenance or replace
-archive-byte or source checks. Extraction and comparison viewing also work
+- `vary` (`{before, after}`) compares two extractions of the same revision—such
+  as a rerun—item by item by ID without matching. It returns
+  `{equal, within, beyond}`: `equal` is true when canonical bytes match;
+  `within` lists each `{collection, id, path, generated?}` whose volatile value
+  stayed within tolerance (with `generated: true` when a generated value was
+  reworded from an equal basis); and `beyond` lists every other difference, each
+  with a `reason`. Entries in `beyond` cover volatile values outside tolerance
+  (a generated value whose basis moved includes `generated`, `because`, and a
+  reason such as "Regenerated because the model changed"), non-volatile fields
+  (`/label`, `/data/<key>`), items present in only one run (using an empty
+  `path`), and top-level changes without a collection or ID (`/schema`,
+  `/vocabularies`, or `/volatile`). Two runs are reproducible when `beyond` is
+  empty. JavaScript hosts call `engine.vary(before, after)`, and Rust callers
+  use `projections_engine::volatility::vary`.
+- `parse-json` performs strict JSON parsing for artifact envelopes, catching
+  duplicate keys, invalid Unicode, and numeric errors before host parsing can
+  lose them. It allows up to 64 nesting levels and 32 MiB.
+- `decode` takes raw extractor JSON directly so duplicate keys and numeric
+  precision are checked before a standard JSON parser can erase them.
+
+The Engine has no filesystem, Git, process, network, DOM, host theme, or clock
+dependencies. All diagnostics use JSON Pointer paths and stable machine-readable
+codes.
+
+Internally, the Engine parses rather than merely validating—JSON stays at the
+boundary. That boundary parses strictly within size limits, decodes an
+extraction or comparison once into a typed model, serializes the model back out,
+and computes the canonical bytes and digests that the protocol defines over
+JSON. Because reading verifies every invariant up front, the in-memory model
+holds them by construction: IDs are unique, relationship endpoints refer to real
+entities, required fields exist, and item `data`, metadata, and generated values
+are stored as the Engine's own canonical values (finite numbers, safe integers,
+objects without duplicate keys, and omitted fields kept distinct from `null`).
+Matching, ordering, comparison integrity, and volatility/tolerance checks all
+run as pure functions over this typed model. Diagnostics are always emitted in
+the order the contract specifies, regardless of how a document is read. Rust
+callers decode an extraction with `Extraction::from_json` and validate a
+comparator's JSON comparison against two extractions with `check_comparison`.
+
+The browser-safe artifacts package parses raw envelopes strictly through the
+Engine and runs build-time-generated structural validators. It checks extraction
+digests and projection/definition identity, then reruns the default comparator
+instead of trusting any saved change, status, step, or summary claims. Artifact
+loading is capped at 32 MiB UTF-8, independent of individual extraction limits.
+Keep in mind that validation does not authenticate provenance or replace
+archive-byte or source checks. Viewing extractions and comparisons also works
 offline without authentication.

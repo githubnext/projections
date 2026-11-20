@@ -16,15 +16,28 @@
  * title in a header band inside its edge. The band holds one line: the title, which truncates with an ellipsis, muted
  * meta, then actions and the status cell at its end (`--pk-status-width`, reserved on every group in a comparison).
  * It clips to its outer edge (`clip-path`), not inside its border as `overflow` would, so a change region at its edge
- * draws its own edge over the group's: one line there, in the change's hue.
+ * draws its own edge over the group's: one line there, in the change's hue. Where the browser can, it clips with
+ * `overflow: clip` instead, its margin the border's width: the same outer edge, but snapped to whole pixels with the
+ * border, where a `clip-path` isn't and would cut off part of a border on a fractional edge. Its children's paint is
+ * not clipped inside the border, so what reaches a corner takes the inner radius (`--pk-group-inner-radius`, the radius
+ * less the border), concentric with the border, and never covers it: the header band its top corners, and a
+ * renderer's last row or band its bottom ones.
  */
 .pk .pk-group {
+  --pk-group-inner-radius: max(0px, calc(var(--projections-radius) - var(--projections-border-width)));
   display: flow-root;
   min-width: 0;
   border: var(--projections-border-width) solid var(--divider);
   border-radius: var(--projections-radius);
   background: var(--raised);
   clip-path: inset(0 round var(--projections-radius));
+}
+@supports (overflow-clip-margin: 1px) {
+  .pk .pk-group {
+    clip-path: none;
+    overflow: clip;
+    overflow-clip-margin: var(--projections-border-width);
+  }
 }
 .pk .pk-content-view > .pk-group + .pk-group {
   margin-top: var(--projections-space-3);
@@ -37,6 +50,8 @@
   padding: var(--projections-space-1) var(--projections-space-3);
   background: var(--band);
   border-bottom: var(--projections-border-width) solid var(--divider);
+  border-start-start-radius: var(--pk-group-inner-radius);
+  border-start-end-radius: var(--pk-group-inner-radius);
 }
 .pk .pk-group-title {
   display: flex;

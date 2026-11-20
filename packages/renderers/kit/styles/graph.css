@@ -85,13 +85,24 @@
 .graph-group .node-surface {
   rx: var(--projections-radius-lg);
 }
+/*
+ * A change edge is inset so its outer edge is the plain border's (`emphasisInset`: half the difference of the two
+ * strokes), and its radius is the card's less that inset, so its curve is concentric with the border's. A card's shape
+ * (`node-card-shape`, which a change band is clipped to) is the card's surface without its stroke.
+ */
+.pk {
+  --pk-emphasis-inset: max(0px, calc((var(--stroke-strong) - var(--stroke)) / 2));
+}
 .node-emphasis {
   pointer-events: none;
   stroke-width: var(--stroke-strong);
-  rx: var(--projections-radius);
+  rx: max(0px, calc(var(--projections-radius) - var(--pk-emphasis-inset)));
 }
 .graph-group .node-emphasis {
-  rx: var(--projections-radius-lg);
+  rx: max(0px, calc(var(--projections-radius-lg) - var(--pk-emphasis-inset)));
+}
+.node-card-shape {
+  rx: var(--projections-radius);
 }
 .node-emphasis.added {
   fill: var(--green-soft);

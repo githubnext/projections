@@ -18,7 +18,10 @@ but one decision, so they fold into one card:
 - A card is a kit graph card (the kit's card metrics and text styles): its kind
   line names the contract (or says `Self-registered` when the implementation is
   registered as its own type) with the **lifetime** at its right, and the
-  implementation sits under it; the stacking says one implements the other.
+  implementation sits under it; the stacking says one implements the other. The
+  lifetime is a pill inset in the card's top right (the kit's `pillMetrics`,
+  sized to the label as drawn and aligned optically), and the registration's
+  hover, focus and selection tint the pill, in its shape.
 - The **lifetime mark** beside those two lines draws the lifetime: solid for a
   singleton, dashed for scoped, dotted for transient, faint dots for an
   implementation no registration resolves. The host's legend shows each mark
@@ -89,7 +92,8 @@ Every changed card takes the kit graph card's change marks (the kit's
 `CardChangeMarks`, as the dependency graph's cards do): filled with its change's
 hue under a strong edge of it, and its status in a band across its bottom. The
 fill is drawn in slices, one per part (the lifetime, the contract and the
-implementation), so a part that changed tints its own slice with its own change.
+implementation), so a part that changed tints its own slice with its own change
+(the lifetime's pill stays neutral over it).
 
 - An added card is green, a removed one red, dashed and struck through.
 - A modified card shows each change in place, its old value struck through then

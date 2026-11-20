@@ -590,6 +590,16 @@ type ColorTokenName = "accent" | "accent-emphasis" | "accent-muted" | "added" | 
 
 Color token names without `color-`, such as `fg-muted` or `added-border`.
 
+### `columnGap`
+
+```ts
+columnGap: number
+```
+
+Space between columns on the grid a top-to-bottom layout's cards snap to (see `columnGrid`): a channel for a route between two cards, clear
+of both (`edgeNodeSpacing` each side), with room to spare, so columns read apart and a relationship can pass
+between them.
+
 ### `ColumnSort`
 
 ```ts
@@ -2006,7 +2016,10 @@ The sort a heading's activation asks for: the other direction for the sorted col
 nodeSpacing: 24
 ```
 
-Space between cards in a layer (ELK `spacing.nodeNode`), and between a card with no relationships and what it is placed beside (see `placeUnlinked`).
+Space ELK keeps between cards in a layer (ELK `spacing.nodeNode`), and between a card with no relationships and what
+it is placed beside (see `placeUnlinked`). ELK's placement at this spacing decides each card's layer, order and
+column; a graph on a grid then spreads its columns to `columnGap` (see `snapToGrid`), which leaves those decisions
+as they are.
 
 ### `NoRouteError`
 

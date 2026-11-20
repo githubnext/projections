@@ -55,6 +55,18 @@ export interface ComparisonSessionSettings {
   onLoopChange: (loop: boolean) => void
 }
 
+/** The settings a session keeps, and the handler each reports its changes to. */
+const handlerOf = {
+  mode: 'onModeChange',
+  swipePosition: 'onSwipePositionChange',
+  highlighting: 'onHighlightingChange',
+  changesOnly: 'onChangesOnlyChange',
+  search: 'onSearchChange',
+  connector: 'onConnectorChange',
+  loop: 'onLoopChange',
+} as const satisfies Partial<Record<keyof ComparisonSessionOptions, keyof ComparisonSessionOptions>>
+type Controlled = keyof typeof handlerOf
+
 /**
  * Where a session's settings start: each `initial…` option, else the definition's `presentation`, else the shared
  * default (no mode, so the renderer's default applies; the divider centred; animated highlighting; Changes; no find,
@@ -97,22 +109,25 @@ export function useComparisonSession(options: ComparisonSessionOptions): Compari
   const [search, setSearch] = useState(defaults.search)
   const [connector, setConnector] = useState(defaults.connector)
   const [loop, setLoop] = useState(defaults.loop)
-  // One handler per setting for the session's life, so views don't see new callbacks on every render.
+  // One handler per setting for the session's life, so views don't see new callbacks on every render. A setting the
+  // embedder controls keeps its value: the change is only requested, so a refused one isn't kept for later.
   const [handlers] = useState(() => {
     const changed =
-      <T>(set: (value: T) => void, notify: (options: ComparisonSessionOptions) => ((value: T) => void) | undefined) =>
-      (value: T) => {
-        set(value)
-        notify(latest.current)?.(value)
+      <K extends Controlled>(key: K, set: (value: NonNullable<ComparisonSessionOptions[K]>) => void) =>
+      (value: NonNullable<ComparisonSessionOptions[K]>) => {
+        const current = latest.current
+        const notify = current[handlerOf[key]] as ((value: NonNullable<ComparisonSessionOptions[K]>) => void) | undefined
+        if (current[key] === undefined) set(value)
+        notify?.(value)
       }
     return {
-      onModeChange: changed(setMode, current => current.onModeChange),
-      onSwipePositionChange: changed(setSwipePosition, current => current.onSwipePositionChange),
-      onHighlightingChange: changed(setHighlighting, current => current.onHighlightingChange),
-      onChangesOnlyChange: changed(setChangesOnly, current => current.onChangesOnlyChange),
-      onSearchChange: changed(setSearch, current => current.onSearchChange),
-      onConnectorChange: changed(setConnector, current => current.onConnectorChange),
-      onLoopChange: changed(setLoop, current => current.onLoopChange),
+      onModeChange: changed('mode', setMode),
+      onSwipePositionChange: changed('swipePosition', setSwipePosition),
+      onHighlightingChange: changed('highlighting', setHighlighting),
+      onChangesOnlyChange: changed('changesOnly', setChangesOnly),
+      onSearchChange: changed('search', setSearch),
+      onConnectorChange: changed('connector', setConnector),
+      onLoopChange: changed('loop', setLoop),
     }
   })
   const shownMode = options.mode ?? mode

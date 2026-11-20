@@ -44,7 +44,7 @@ Built-in Projections code-statistics renderer: per-language counts as bars or sh
 - Handles: `code-statistics`
 - Comparison modes: `diff`, `side-by-side`, `animated`, `swipe`
 - Package: `@githubnext/projections-renderer-code-statistics`
-- Example scenarios ([`scenarios.json`](../../packages/renderers/code-statistics/scenarios.json)): Gateway: JavaScript to TypeScript; Gateway: Rust first (custom order); Languages: arrival and departure; Languages: Python first (custom order); Methods per access scope; Gateway: one revision
+- Example scenarios ([`scenarios.json`](../../packages/renderers/code-statistics/scenarios.json)): Gateway: JavaScript to TypeScript; Gateway: table; Gateway: Rust first (custom order); Languages: arrival and departure; Languages: Python first (custom order); Methods per access scope; Gateway: one revision
 
 ## `database`
 

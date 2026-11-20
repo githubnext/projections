@@ -484,16 +484,7 @@ the machine's Python 3, including `python` or `py -3` on Windows.
 Set `"renderer"` in the definition (or `projections init <id> --renderer
 NAME`) to one of the renderers this CLI includes:
 
-- `graph`: Graph (also named `graph-horizontal`, `dag`, `architecture`, `infrastructure`, `dependencies`)
-- `file-packing`: File packing (also named `treemap`)
-- `dependency-injection`: Dependency injection
-- `code-statistics`: Code statistics
-- `api`: API
-- `database`: Database (also named `schema`)
-- `runtime-policy`: Runtime security policies
-- `agentic-workflows`: Agentic workflows
-- `text-diff`: Text diff
-- `gallery`: Gallery
+This build of the CLI doesn't include the built-in renderers; `projections extractor list` names the renderer each built-in extractor uses.
 
 Each presents the schemas the extractors above pair it with;
 `projections extractor list` shows every built-in extractor's schema and
@@ -512,7 +503,12 @@ is its framework-free half, `/kit/react` its React components and hooks, and
 kit already meets the checks the host holds every renderer to. The starter has
 no stylesheet: compose views from the kit's components (`ContentView`, `Group`,
 `CardGrid`, `EntityCard`, `Fields`, `Stack`, `Inline`, `Text`) and their props,
-and for an inline style they don't cover use `token` (`token.space(2)`).
+and for an inline style they don't cover use `token` (`token.space(2)`). For
+items with comparable properties (a row per item, a column per property), use
+the kit's `DataTable` rather than hand-built table markup: sortable headings
+held in the host's controls (`tableSortControls`, `useTableProps`), a frozen
+first column, value-change pills and one line per boundary, as the checks
+expect.
 `ContentView` sets its cards and tables in from the frame by the same stage
 padding on all four sides, as every host expects; don't pad or margin around it. The
 checks fail on any color, font size, spacing or radius that isn't a theme

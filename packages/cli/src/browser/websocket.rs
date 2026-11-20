@@ -4,7 +4,7 @@ use std::{
     io::{self, BufRead, BufReader, Read, Write},
     net::TcpStream,
     sync::{Arc, Mutex},
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 use anyhow::{Context, Result, ensure};
@@ -15,8 +15,8 @@ use super::{
     connection::{Dispatch, parse_message},
 };
 
-/// Connects to the browser's WebSocket endpoint on loopback.
-pub(super) fn connect_socket((port, path): &(u16, String)) -> Result<(TcpStream, BufReader<TcpStream>)> {
+/// Connects to the browser's WebSocket endpoint on loopback, its handshake answered by `deadline`.
+pub(super) fn connect_socket((port, path): &(u16, String), deadline: Instant) -> Result<(TcpStream, BufReader<TcpStream>)> {
     let stream = TcpStream::connect(("127.0.0.1", *port)).context("Cannot connect to the browser's DevTools port")?;
     stream.set_nodelay(true)?;
     let mut key = [0u8; 16];
@@ -26,7 +26,9 @@ pub(super) fn connect_socket((port, path): &(u16, String)) -> Result<(TcpStream,
         base64_encode(&key)
     );
     (&stream).write_all(request.as_bytes())?;
-    stream.set_read_timeout(Some(Duration::from_secs(10)))?;
+    // A zero read timeout is an error, so at least a millisecond.
+    let remaining = deadline.saturating_duration_since(Instant::now()).max(Duration::from_millis(1));
+    stream.set_read_timeout(Some(remaining))?;
     let mut reader = BufReader::new(stream.try_clone()?);
     let mut status = String::new();
     reader.read_line(&mut status)?;

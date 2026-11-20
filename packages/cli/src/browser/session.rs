@@ -203,7 +203,7 @@ impl Browser {
             Transport::Pipe => unreachable!(),
             Transport::Port => {
                 let endpoint = self.active_port(deadline, startup)?;
-                let (stream, reader) = connect_socket(&endpoint)?;
+                let (stream, reader) = connect_socket(&endpoint, deadline)?;
                 let writer = Arc::new(Mutex::new(stream));
                 let pong = writer.clone();
                 thread::spawn(move || read_socket(reader, pong, dispatch));

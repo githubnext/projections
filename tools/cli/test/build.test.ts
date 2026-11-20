@@ -1,16 +1,16 @@
 // `check --fast`, `build` and `test --filter`: the cheap steps before a full check, and when a dependency needs rebuilding.
 import assert from 'node:assert/strict'
 import {spawnSync} from 'node:child_process'
-import {mkdirSync, mkdtempSync, rmSync, statSync, unlinkSync, utimesSync, writeFileSync} from 'node:fs'
+import {mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, unlinkSync, utimesSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {fileURLToPath} from 'node:url'
 import test from 'node:test'
 import type {Affected} from '../src/lib/affected.ts'
-import {buildState, recordBuild} from '../src/lib/builds.ts'
+import {buildInputs, buildState, inputSignature, recordBuild} from '../src/lib/builds.ts'
 import {gates, type GateContext} from '../src/lib/gates.ts'
 import type {Unit} from '../src/lib/packages.ts'
-import {restoreIfUnchanged, snapshot, staleness} from '../src/commands/work/build.ts'
+import {recordSuccess, restoreIfUnchanged, snapshot, staleness} from '../src/commands/work/build.ts'
 import {nodeTestPattern, testPlan} from '../src/commands/work/test.ts'
 
 const unit = (path: string, overrides: Partial<Unit> = {}): Unit => ({
@@ -161,6 +161,92 @@ test('build: outputs written again unchanged keep their times, so nothing above 
   assert.equal(buildState(root, lib), 'current')
   writeFileSync(join(root, 'lib/dist/index.js'), 'changed')
   assert.equal(restoreIfUnchanged(before, snapshot(root, lib)), false)
+})
+
+/**
+ * A workspace as `workspace` makes it, with the build inputs beside its src: a manifest whose build runs a script, a
+ * tsconfig extending the root's and a script outside its scripts directory that the build names.
+ */
+function configured(root: string, path: string, times: {src: number; dist?: number}) {
+  workspace(root, path, times)
+  const build = 'tsc -p tsconfig.json && node scripts/css.mjs && node build/assets.mjs'
+  writeFileSync(join(root, path, 'package.json'), JSON.stringify({scripts: {build}}))
+  writeFileSync(join(root, path, 'tsconfig.json'), '{"extends": "../tsconfig.base.json"}')
+  writeFileSync(join(root, 'tsconfig.base.json'), '{}')
+  mkdirSync(join(root, path, 'scripts'), {recursive: true})
+  writeFileSync(join(root, path, 'scripts/css.mjs'), '')
+  mkdirSync(join(root, path, 'build'), {recursive: true})
+  writeFileSync(join(root, path, 'build/assets.mjs'), '')
+  for (const file of ['package.json', 'tsconfig.json', 'scripts/css.mjs', 'build/assets.mjs'])
+    utimesSync(join(root, path, file), times.src, times.src)
+  utimesSync(join(root, 'tsconfig.base.json'), times.src, times.src)
+}
+
+/** A successful `tools build` of `unit`: its inputs' signature first, then the outputs `write` leaves. */
+function built(root: string, unit: Unit, write: () => void, started = Date.now()): boolean {
+  const inputs = inputSignature(root, buildInputs(root, unit))
+  const before = snapshot(root, unit)
+  write()
+  return recordSuccess(root, unit, inputs, before, started)
+}
+
+test('build: an edit to a build script or configuration outside src makes a built workspace stale', () => {
+  const root = mkdtempSync(join(tmpdir(), 'tools-inputs-'))
+  const units = [unit('lib'), unit('app', {dependsOn: ['lib']})]
+  const [lib, app] = units as [Unit, Unit]
+  configured(root, 'lib', {src: 100, dist: 200})
+  workspace(root, 'app', {src: 100, dist: 300})
+  assert.deepEqual(buildInputs(root, lib), [
+    'lib/build/assets.mjs',
+    'lib/package.json',
+    'lib/scripts/css.mjs',
+    'lib/tsconfig.json',
+    'tsconfig.base.json',
+  ])
+  // Built outside `tools build`, it has only times to go by: a script newer than its dist makes it stale.
+  assert.equal(buildState(root, lib), 'current')
+  utimesSync(join(root, 'lib/scripts/css.mjs'), 250, 250)
+  assert.equal(staleness(root, units, lib, new Set()), 'lib/scripts/css.mjs is newer than dist')
+  built(root, lib, () => writeFileSync(join(root, 'lib/dist/index.js'), 'built'))
+  utimesSync(join(root, 'lib/dist/index.js'), 200, 200)
+  // Recorded, its inputs' content decides, not their times; untouched, it and what depends on it stay current.
+  assert.equal(buildState(root, lib), 'current')
+  assert.equal(staleness(root, units, app, new Set()), undefined)
+  for (const input of ['lib/scripts/css.mjs', 'lib/build/assets.mjs', 'lib/tsconfig.json', 'tsconfig.base.json', 'lib/package.json']) {
+    const path = join(root, input)
+    const content = readFileSync(path)
+    writeFileSync(path, `${content} `)
+    assert.equal(staleness(root, units, lib, new Set()), 'its build inputs changed since its last build', input)
+    writeFileSync(path, content)
+    assert.equal(buildState(root, lib), 'current', input)
+  }
+  // A new configuration file counts too.
+  writeFileSync(join(root, 'lib/vite.config.ts'), '')
+  assert.equal(buildState(root, lib), 'stale')
+})
+
+test('build: a recorded output gone missing, or a deleted source, makes a built workspace stale', () => {
+  const root = mkdtempSync(join(tmpdir(), 'tools-outputs-'))
+  const lib = unit('lib')
+  configured(root, 'lib', {src: 100, dist: 200})
+  writeFileSync(join(root, 'lib/src/extra.ts'), '')
+  utimesSync(join(root, 'lib/src/extra.ts'), 100, 100)
+  utimesSync(join(root, 'lib/src'), 100, 100)
+  built(root, lib, () => writeFileSync(join(root, 'lib/dist/styles.css'), ''))
+  assert.equal(buildState(root, lib), 'current')
+  unlinkSync(join(root, 'lib/dist/styles.css'))
+  assert.equal(staleness(root, [lib], lib, new Set()), 'lib/dist/styles.css is missing')
+  // Rebuilt with the same bytes, its outputs keep their times and it is current by the recorded check.
+  writeFileSync(join(root, 'lib/dist/styles.css'), '')
+  utimesSync(join(root, 'lib/dist/styles.css'), 200, 200)
+  assert.equal(
+    built(root, lib, () => writeFileSync(join(root, 'lib/dist/index.js'), ''), 300_000),
+    true,
+  )
+  assert.equal(statSync(join(root, 'lib/dist/index.js')).mtimeMs, 200_000)
+  assert.equal(buildState(root, lib), 'current')
+  unlinkSync(join(root, 'lib/src/extra.ts'))
+  assert.equal(staleness(root, [lib], lib, new Set()), 'src is newer than dist')
 })
 
 test('test --filter narrows each runner to the matching tests, and needs a target', () => {

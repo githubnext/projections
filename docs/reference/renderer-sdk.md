@@ -424,10 +424,12 @@ A basis value as the extraction records it: named parts.
 changeContext(rows: Array<ScopeRow>, revisions: { "after": ContainmentSource; "before": ContainmentSource }, changes?: Iterable<string, any, any> | undefined): ChangesScope
 ```
 
-The context of a comparison's changes, from its structure alone: a changed relationship's endpoints, and the items
-containing a changed or context entity (`isContainment`), with the containment relationships between them, in
-whichever revision has them. Context is only ever added, and never hides a change. `changes` narrows the changes to
-those row IDs (for example a find or summary filter's); by default every change (`isScopeChange`) is in scope.
+The context of a comparison's changes: each change's own (`Change.context`, the Engine's core context and what
+comparator rules added), else, for a comparison saved without it, the same structural derivation (`rowContexts`).
+Whatever is shown brings what a renderer needs to place it: a relationship its endpoints, and an entity the items
+containing it, traversed once for all of them. Context is only ever added, and never hides a change. `changes`
+narrows the changes to those row IDs (for example a find or summary filter's); by default every change
+(`isScopeChange`) is in scope.
 
 ### `ChangesScope`
 
@@ -591,6 +593,7 @@ by the comparison. This is presentation state, not a protocol document.
 |---|---|---|
 | `after` | `"after"?: T` | The item in the `after` extraction; absent for a removal and a further merged part. |
 | `before` | `"before"?: T` | The item in the `before` extraction; absent for an addition and a further split part. |
+| `context` | `"context"?: ChangeContext` | The comparison's `change.context`: the other items, by ID in each revision, a person needs to read the change. Absent for unchanged items and in a comparison saved without it; `changeContext` derives it from the structure then. |
 | `correspondence` | `"correspondence"?: "declared" \| "exact" \| "merge" \| "none" \| "split"` | How the comparison matched `before` to `after`; absent in a snapshot (`snapshotChanges`). |
 | `id` | `"id": string` | The row's stable ID: the comparison change's ID, or the item's own ID for an item the comparison doesn't mention and for the further parts of a split or merge (suffixed `~1`, `~2`… only if that collides). |
 | `previousId` | `"previousId"?: string` | The `before` item's ID when `renamed`, for showing what it was called. |
@@ -1129,6 +1132,31 @@ something, for example "api → queue (publishes)". `entityLabel` looks up an
 entity's label in the extraction the relationship comes from; endpoints it
 doesn't know show their IDs.
 
+### `RowContext`
+
+```ts
+interface RowContext
+```
+
+A change row's context: the rows that give it context, and the comparator rules that added any.
+
+| Member | Signature | Description |
+|---|---|---|
+| `derived` | `"derived": false \| true` | Whether it was derived from the comparison's structure because the comparison carries no context at all (one saved before comparisons had context). |
+| `rows` | `"rows": Array<string>` | The row IDs of its context, in the order found. |
+| `rules` | `"rules": Array<string>` | The comparator `context` rules that added to it (`ChangeContext.rules`). |
+
+### `rowContexts`
+
+```ts
+rowContexts(rows: Array<ScopeRow>, revisions: { "after": ContainmentSource; "before": ContainmentSource }): { (row: ScopeRow): RowContext }
+```
+
+The context of each change row of a comparison: the comparison's own (`Change.context`), none for a row it gives
+none, or, for a comparison saved without any context, the structural derivation the Engine's core context makes (a
+changed relationship's endpoints, and the items containing a changed or context entity, `isContainment`, with the
+containment relationships between them). Returns a function from a row to its context.
+
 ### `ScheduledStep`
 
 ```ts
@@ -1188,6 +1216,7 @@ A row as `changeContext` reads it: a host row, or a presented change (`scopeRows
 | `after` | `"after": Array<string>` | The row's item IDs in the after extraction. |
 | `before` | `"before": Array<string>` | The row's item IDs in the before extraction. |
 | `collection` | `"collection": "entities" \| "relationships"` | Whether the row is an entity or a relationship. |
+| `context` | `"context"?: ChangeContext \| undefined` | The comparison's context for the change (`Change.context`); absent for a comparison saved without it. |
 | `correspondence` | `"correspondence"?: "declared" \| "exact" \| "merge" \| "none" \| "split" \| undefined` | How the comparison matched the row's items; anything but `exact` is an identity change. |
 | `id` | `"id": string` | The row's ID: the change's ID, or the item's own for an unchanged one. |
 | `status` | `"status"?: "added" \| "modified" \| "removed" \| "unchanged" \| undefined` | The comparison's status for the row; `unchanged` (or absent) for an item it doesn't mention. |
@@ -2226,6 +2255,7 @@ declared capability to its contract. Optional flags default to off, except `draw
 | `annotations` | `"annotations"?: false \| true` | Whether the renderer draws the host's `annotations` and reports `annotation` when one is activated. |
 | `changeHighlighting` | `"changeHighlighting": "none" \| "supported"` | Whether the renderer visibly emphasizes changes using `highlighting`. |
 | `comparisonModes` | `"comparisonModes"?: Array<"animated" \| "diff" \| "side-by-side" \| "swipe">` | Comparison modes the renderer supports. Hosts show them in canonical order and open in the first: diff when it is supported, else side by side (`defaultComparisonMode`); the declared order doesn't matter. Without it, `defaultComparisonModes`. The same list belongs in the bundle's `renderer.json`, so a host can offer the right modes before the frame loads. |
+| `context` | `"context"?: false \| true` | Whether the renderer reads the comparison's change `context` (`Change.context`). Hosts strip `context` from the comparison a renderer without it is sent, so a renderer that checks comparisons against an older schema, which closes `Change`, keeps working. Kit renderers declare it. |
 | `controls` | `"controls"?: Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false \| true; "type": "toggle" } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } \| { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" \| "download" \| "expand" \| "filter" \| "fit" \| "next" \| "previous" \| "reset" \| "search" \| "settings" \| "zoom-in" \| "zoom-out"; "type": "action" }>` | Controls the host draws for the renderer, in display order. Values arrive in `options` under each control's `id`; actions arrive as `action`. A renderer may replace them later with a `controls` message. |
 | `drawsRelationships` | `"drawsRelationships"?: false \| true` | Whether the renderer draws relationships as elements marked with the relationship's ID in `data-entity-id`. Defaults to true; declare `false` only when it deliberately draws none, or shows them only as structure (nesting, order), so the renderer checks don't expect them. |
 | `filter` | `"filter"?: false \| true` | Whether the renderer honors the host's `filter`. |

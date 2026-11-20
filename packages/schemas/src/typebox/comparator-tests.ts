@@ -11,6 +11,7 @@ export type ComparatorTestChange = ({item: string; id?: never} | {id: string; it
   summary?: string | null
   before?: string[]
   after?: string[]
+  context?: {before?: string[]; after?: string[]; rules?: string[]} | null
 }
 
 /** What a case's comparison must be; every field is optional, and objects match on the keys they list. */
@@ -148,6 +149,7 @@ export const ComparatorTestsSchema = Type.Unsafe<ComparatorTests>({
               {required: ['summary']},
               {required: ['before']},
               {required: ['after']},
+              {required: ['context']},
             ],
             properties: {
               item: {...id, description: 'Selects the change whose `before` or `after` includes this item ID.'},
@@ -158,6 +160,19 @@ export const ComparatorTestsSchema = Type.Unsafe<ComparatorTests>({
               summary,
               before: ids,
               after: ids,
+              context: {
+                description:
+                  "The change's context: each listed field exactly (`before` and `after` in UTF-16 order, `rules` in the comparator's order); null expects none.",
+                oneOf: [
+                  {type: 'null'},
+                  {
+                    type: 'object',
+                    additionalProperties: false,
+                    minProperties: 1,
+                    properties: {before: ids, after: ids, rules: ids},
+                  },
+                ],
+              },
             },
           },
         },

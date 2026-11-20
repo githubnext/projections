@@ -21,6 +21,16 @@
         "M:Base.Fill(System.Int32@)"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Base",
+          "contains:T:Base:M:Base.Fill(System.Int32@)"
+        ],
+        "before": [
+          "T:Base",
+          "contains:T:Base:M:Base.Fill(System.Int32@)"
+        ]
+      },
       "correspondence": "exact",
       "id": "M:Base.Fill(System.Int32@)",
       "status": "modified",
@@ -34,6 +44,16 @@
         "M:Base.Fly"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Base",
+          "contains:T:Base:M:Base.Fly"
+        ],
+        "before": [
+          "T:Base",
+          "contains:T:Base:M:Base.Fly"
+        ]
+      },
       "correspondence": "exact",
       "id": "M:Base.Fly",
       "status": "modified",
@@ -47,6 +67,16 @@
         "M:Base.Max(System.Int32[])"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Base",
+          "contains:T:Base:M:Base.Max(System.Int32[])"
+        ],
+        "before": [
+          "T:Base",
+          "contains:T:Base:M:Base.Max(System.Int32[])"
+        ]
+      },
       "correspondence": "exact",
       "id": "M:Base.Max(System.Int32[])",
       "status": "modified",
@@ -60,6 +90,16 @@
         "M:Base.Retry(System.Int32)"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Base",
+          "contains:T:Base:M:Base.Retry(System.Int32)"
+        ],
+        "before": [
+          "T:Base",
+          "contains:T:Base:M:Base.Retry(System.Int32)"
+        ]
+      },
       "correspondence": "exact",
       "id": "M:Base.Retry(System.Int32)",
       "status": "modified",
@@ -73,6 +113,16 @@
         "M:Base.Run"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Base",
+          "contains:T:Base:M:Base.Run"
+        ],
+        "before": [
+          "T:Base",
+          "contains:T:Base:M:Base.Run"
+        ]
+      },
       "correspondence": "exact",
       "id": "M:Base.Run",
       "status": "modified",
@@ -86,6 +136,16 @@
         "M:Base.Stop"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Base",
+          "contains:T:Base:M:Base.Stop"
+        ],
+        "before": [
+          "T:Base",
+          "contains:T:Base:M:Base.Stop"
+        ]
+      },
       "correspondence": "exact",
       "id": "M:Base.Stop",
       "status": "modified",
@@ -99,6 +159,16 @@
         "M:Base.Sum(System.Int32[])"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Base",
+          "contains:T:Base:M:Base.Sum(System.Int32[])"
+        ],
+        "before": [
+          "T:Base",
+          "contains:T:Base:M:Base.Sum(System.Int32[])"
+        ]
+      },
       "correspondence": "exact",
       "id": "M:Base.Sum(System.Int32[])",
       "status": "modified",
@@ -112,6 +182,16 @@
         "M:Base.Swim"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Base",
+          "contains:T:Base:M:Base.Swim"
+        ],
+        "before": [
+          "T:Base",
+          "contains:T:Base:M:Base.Swim"
+        ]
+      },
       "correspondence": "exact",
       "id": "M:Base.Swim",
       "status": "modified",
@@ -125,6 +205,16 @@
         "M:Base.Wait(System.Int32)"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Base",
+          "contains:T:Base:M:Base.Wait(System.Int32)"
+        ],
+        "before": [
+          "T:Base",
+          "contains:T:Base:M:Base.Wait(System.Int32)"
+        ]
+      },
       "correspondence": "exact",
       "id": "M:Base.Wait(System.Int32)",
       "status": "modified",
@@ -138,6 +228,16 @@
         "M:Base.Walk"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Base",
+          "contains:T:Base:M:Base.Walk"
+        ],
+        "before": [
+          "T:Base",
+          "contains:T:Base:M:Base.Walk"
+        ]
+      },
       "correspondence": "exact",
       "id": "M:Base.Walk",
       "status": "modified",
@@ -151,6 +251,16 @@
         "M:Final.Fly"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Final",
+          "contains:T:Final:M:Final.Fly"
+        ],
+        "before": [
+          "T:Final",
+          "contains:T:Final:M:Final.Fly"
+        ]
+      },
       "correspondence": "exact",
       "id": "M:Final.Fly",
       "status": "modified",
@@ -164,6 +274,16 @@
         "M:Final.Go"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Final",
+          "contains:T:Final:M:Final.Go"
+        ],
+        "before": [
+          "T:Final",
+          "contains:T:Final:M:Final.Go"
+        ]
+      },
       "correspondence": "exact",
       "id": "M:Final.Go",
       "status": "modified",
@@ -177,6 +297,16 @@
         "M:IStore.Describe"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:IStore",
+          "contains:T:IStore:M:IStore.Describe"
+        ],
+        "before": [
+          "T:IStore",
+          "contains:T:IStore:M:IStore.Describe"
+        ]
+      },
       "correspondence": "exact",
       "id": "M:IStore.Describe",
       "status": "modified",
@@ -190,6 +320,16 @@
         "M:IStore.Parse(System.String)"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:IStore",
+          "contains:T:IStore:M:IStore.Parse(System.String)"
+        ],
+        "before": [
+          "T:IStore",
+          "contains:T:IStore:M:IStore.Parse(System.String)"
+        ]
+      },
       "correspondence": "exact",
       "id": "M:IStore.Parse(System.String)",
       "status": "modified",
@@ -203,6 +343,16 @@
         "P:Base.Id"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Base",
+          "contains:T:Base:P:Base.Id"
+        ],
+        "before": [
+          "T:Base",
+          "contains:T:Base:P:Base.Id"
+        ]
+      },
       "correspondence": "exact",
       "id": "P:Base.Id",
       "status": "modified",
@@ -216,6 +366,16 @@
         "P:Base.Key"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Base",
+          "contains:T:Base:P:Base.Key"
+        ],
+        "before": [
+          "T:Base",
+          "contains:T:Base:P:Base.Key"
+        ]
+      },
       "correspondence": "exact",
       "id": "P:Base.Key",
       "status": "modified",
@@ -229,6 +389,16 @@
         "P:Base.Name"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "T:Base",
+          "contains:T:Base:P:Base.Name"
+        ],
+        "before": [
+          "T:Base",
+          "contains:T:Base:P:Base.Name"
+        ]
+      },
       "correspondence": "exact",
       "id": "P:Base.Name",
       "status": "modified",

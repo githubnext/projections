@@ -15,13 +15,16 @@
  * A group (`Group`) is a titled panel: raised, edged with the divider and clipping its body to its corners, with its
  * title in a header band inside its edge. The band holds one line: the title, which truncates with an ellipsis, muted
  * meta, then actions and the status cell at its end (`--pk-status-width`, reserved on every group in a comparison).
+ * It clips to its outer edge (`clip-path`), not inside its border as `overflow` would, so a change region at its edge
+ * draws its own edge over the group's: one line there, in the change's hue.
  */
 .pk .pk-group {
+  display: flow-root;
   min-width: 0;
   border: var(--projections-border-width) solid var(--divider);
   border-radius: var(--projections-radius);
   background: var(--raised);
-  overflow: hidden;
+  clip-path: inset(0 round var(--projections-radius));
 }
 .pk .pk-content-view > .pk-group + .pk-group {
   margin-top: var(--projections-space-3);
@@ -130,6 +133,11 @@
   border: var(--projections-border-width) solid var(--border-strong);
   border-radius: var(--projections-radius-sm);
   background: var(--canvas);
+}
+/* A changed card that is a change region (`pk-region`) takes its edge's hue on its own border, one line, not beside it. */
+.pk .pk-entity-card.pk-region[data-change] {
+  border-color: color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--border-strong));
+  box-shadow: none;
 }
 /* The change's hue on the card's leading edge, drawn inside it, so emphasis never overlaps a neighbour. */
 .pk .pk-entity-card:not(.pk-region) {

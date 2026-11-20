@@ -4,6 +4,9 @@ use super::{COLLECTIONS, CORRESPONDENCES, KINDS, STATUSES};
 use projections_engine::pointer;
 use serde_json::{Map, Value};
 
+/// The fields a change expectation checks.
+const CHECKED: [&str; 6] = ["status", "correspondence", "summary", "before", "after", "context"];
+
 impl Reader {
     pub(super) fn expectations(&mut self, value: &Value, path: &str) -> Option<Expectations> {
         let fields = self.object(
@@ -89,12 +92,42 @@ impl Reader {
         Some(step)
     }
 
+    /// A change's expected `context`: null for none, or the IDs of either
+    /// revision and the rules that added them, each checked exactly.
+    fn context(&mut self, value: &Value, path: &str) {
+        if value.is_null() {
+            return;
+        }
+        let Some(fields) = self.object(value, path, "`context`", &["before", "after", "rules"]) else {
+            return;
+        };
+        if fields.is_empty() {
+            self.error(
+                path,
+                "`context` checks at least one of `before`, `after` or `rules`; null expects none",
+            );
+        }
+        for (key, value) in fields {
+            self.strings(value, &pointer(path, key), &format!("`context.{key}`"));
+        }
+    }
+
     pub(super) fn change(&mut self, value: &Value, path: &str) -> Option<ChangeExpectation> {
         let fields = self.object(
             value,
             path,
             "A change expectation",
-            &["item", "id", "collection", "status", "correspondence", "summary", "before", "after"],
+            &[
+                "item",
+                "id",
+                "collection",
+                "status",
+                "correspondence",
+                "summary",
+                "before",
+                "after",
+                "context",
+            ],
         )?;
         let selector = match (fields.get("item"), fields.get("id")) {
             (Some(item), None) => Selector::Item(self.string(item, &pointer(path, "item"), "`item`")?),
@@ -118,16 +151,17 @@ impl Reader {
                 "before" | "after" => {
                     self.strings(value, &at, &format!("`{key}`"));
                 }
+                "context" => self.context(value, &at),
                 _ => {}
             }
-            if ["status", "correspondence", "summary", "before", "after"].contains(&key.as_str()) {
+            if CHECKED.contains(&key.as_str()) {
                 checked.insert(key.clone(), value.clone());
             }
         }
         if checked.is_empty() {
             self.error(
                 path,
-                "A change expectation checks at least one of `status`, `correspondence`, `summary`, `before` or `after`",
+                "A change expectation checks at least one of `status`, `correspondence`, `summary`, `before`, `after` or `context`",
             );
         }
         Some(ChangeExpectation {

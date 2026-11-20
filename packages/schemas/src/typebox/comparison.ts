@@ -46,6 +46,39 @@ export const VariedSchema = define(
   ),
 )
 
+const ContextIds = define(
+  document,
+  'contextIds',
+  Type.Array(Text, {
+    maxItems: 1_000,
+    uniqueItems: true,
+    description: "Item IDs of one revision, entities or relationships, in UTF-16 order; never the change's own.",
+  }),
+)
+
+/** The JSON Schema of a change's `context`, the comparison schema's `$defs/context`. */
+export const ContextSchema = define(
+  document,
+  'context',
+  Closed(
+    {
+      before: ContextIds,
+      after: ContextIds,
+      rules: Type.Optional(
+        Type.Array(Text, {
+          minItems: 1,
+          uniqueItems: true,
+          description: "The comparator's `context` rules that added IDs, in its file's order; absent when the core's context is all of it.",
+        }),
+      ),
+    },
+    {
+      description:
+        "The other items a person needs to read the change, in each revision (a removal's in `before`): the core's context, a changed relationship's endpoints and the items containing what changed, and what comparator rules add. Present only on a change whose status or identity changed, and only when it names an item. Renderers receive it only when they declare the `context` capability.",
+    },
+  ),
+)
+
 /**
  * The JSON Schema of a `Change`, the comparison schema's `$defs/change`, with the ID counts and statuses each
  * correspondence allows; `validate-comparison` checks the IDs against the extractions.
@@ -72,6 +105,7 @@ export const ChangeSchema = define(
         }),
       ),
       summary: Type.Optional(Text),
+      context: Type.Optional(ContextSchema),
     },
     {
       allOf: [

@@ -30,8 +30,23 @@ const ci = {
     changes: {removed: 1, added: 5, unchanged: 1},
     items: [
       {id: 'job:test', label: 'Test', kind: 'job', status: 'removed'},
-      {id: 'job:unit', label: 'Unit tests', kind: 'job', status: 'added'},
+      {
+        id: 'job:unit',
+        label: 'Unit tests',
+        kind: 'job',
+        status: 'added',
+        context: {items: [{id: 'job:setup', label: 'Setup', kind: 'job'}], total: 3, rules: ['needs']},
+      },
       {id: 'job:build', label: 'Build', kind: 'job', status: 'unchanged'},
+      {id: 'job:format', label: 'Format', kind: 'job', status: 'unchanged', correspondence: 'split'},
+      {
+        id: 'job:lint',
+        label: 'Lint',
+        kind: 'job',
+        status: 'unchanged',
+        correspondence: 'declared',
+        context: {items: [{id: 'job:setup', label: 'Setup', kind: 'job'}], total: 1},
+      },
     ],
     selection: {id: 'job:unit', label: 'Unit tests', kind: 'job', status: 'added'},
     figures: [{noun: {singular: 'job', plural: 'jobs'}, count: 7, added: 5, removed: 1, modified: 0}],
@@ -57,6 +72,11 @@ test('the current view names the projection, its choice and revisions, mode, cou
   assert.match(text, /^Summary bar: 7 jobs \(\+5 −1\)\.$/m)
   assert.match(text, /^Changes: 1 removed, 5 added of 7 items\.$/m)
   assert.match(text, /^- removed job Test \[job:test\]$/m)
+  // A rename is unchanged, but it is a change: listed with its context.
+  assert.match(text, /^- unchanged \(declared\) job Lint \[job:lint\]\n {2}context: job Setup \[job:setup\]$/m)
+  // An identity change without context is listed too.
+  assert.match(text, /^- unchanged \(split\) job Format \[job:format\]$/m)
+  assert.match(text, /^- added job Unit tests \[job:unit\]\n {2}context: job Setup \[job:setup\] and 2 more \(added by rule `needs`\)$/m)
   assert.doesNotMatch(text, /Build/, 'unchanged items are only counted')
   assert.match(text, /^Selected: job Unit tests \[job:unit\], added\.$/m)
   assert.match(text, /^Up to date\.$/m)

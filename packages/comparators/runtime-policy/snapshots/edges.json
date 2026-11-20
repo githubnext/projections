@@ -688,6 +688,16 @@
         "applies-to:policy:tetragon:TracingPolicy:containers-cleared"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "policy:tetragon:TracingPolicy:containers-cleared",
+          "subject:workloads:pods%2C%20every%20container"
+        ],
+        "before": [
+          "policy:tetragon:TracingPolicy:containers-cleared",
+          "subject:workloads:pods%2C%20containers%20%60app%60"
+        ]
+      },
       "correspondence": "exact",
       "id": "applies-to:policy:tetragon:TracingPolicy:containers-cleared",
       "status": "modified"
@@ -700,6 +710,16 @@
         "applies-to:policy:tetragon:TracingPolicy:everything"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "policy:tetragon:TracingPolicy:everything",
+          "subject:workloads:every%20workload"
+        ],
+        "before": [
+          "policy:tetragon:TracingPolicy:everything",
+          "subject:workloads:pods%20where%20%60tier%20in%20%28web%29%60"
+        ]
+      },
       "correspondence": "exact",
       "id": "applies-to:policy:tetragon:TracingPolicy:everything",
       "status": "modified"
@@ -712,6 +732,16 @@
         "applies-to:policy:tetragon:TracingPolicy:exists"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "policy:tetragon:TracingPolicy:exists",
+          "subject:workloads:pods%20where%20%60a%20in%20%28x%29%60%2C%20%60%21b%60"
+        ],
+        "before": [
+          "policy:tetragon:TracingPolicy:exists",
+          "subject:workloads:pods%20where%20%60a%60%2C%20%60%21b%60"
+        ]
+      },
       "correspondence": "exact",
       "id": "applies-to:policy:tetragon:TracingPolicy:exists",
       "status": "modified"
@@ -724,6 +754,16 @@
         "applies-to:policy:tetragon:TracingPolicy:fewer-containers"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "policy:tetragon:TracingPolicy:fewer-containers",
+          "subject:workloads:pods%2C%20container%20%60app%60"
+        ],
+        "before": [
+          "policy:tetragon:TracingPolicy:fewer-containers",
+          "subject:workloads:pods%2C%20containers%20%60app%60%2C%20%60sidecar%60"
+        ]
+      },
       "correspondence": "exact",
       "id": "applies-to:policy:tetragon:TracingPolicy:fewer-containers",
       "status": "modified"
@@ -736,6 +776,16 @@
         "applies-to:policy:tetragon:TracingPolicy:fewer-values"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "policy:tetragon:TracingPolicy:fewer-values",
+          "subject:workloads:pods%20in%20%60a%60%20where%20%60app%20in%20%28x%29%60"
+        ],
+        "before": [
+          "policy:tetragon:TracingPolicy:fewer-values",
+          "subject:workloads:pods%20in%20%60a%60%20where%20%60app%20in%20%28x%2C%20y%29%60"
+        ]
+      },
       "correspondence": "exact",
       "id": "applies-to:policy:tetragon:TracingPolicy:fewer-values",
       "status": "modified"
@@ -746,6 +796,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "policy:tetragon:TracingPolicy:gains-scope",
+          "subject:workloads:pods%20where%20%60tier%20in%20%28web%29%60"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "applies-to:policy:tetragon:TracingPolicy:gains-scope",
       "status": "added"
@@ -758,6 +815,16 @@
         "applies-to:policy:tetragon:TracingPolicy:host-joins"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "policy:tetragon:TracingPolicy:host-joins",
+          "subject:workloads:host%20workloads"
+        ],
+        "before": [
+          "policy:tetragon:TracingPolicy:host-joins",
+          "subject:workloads:pods%20where%20%60tier%20in%20%28web%29%60"
+        ]
+      },
       "correspondence": "exact",
       "id": "applies-to:policy:tetragon:TracingPolicy:host-joins",
       "status": "modified"
@@ -770,6 +837,16 @@
         "applies-to:policy:tetragon:TracingPolicy:host-moves"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "policy:tetragon:TracingPolicy:host-moves",
+          "subject:workloads:host%20workloads%20in%20%60b%60"
+        ],
+        "before": [
+          "policy:tetragon:TracingPolicy:host-moves",
+          "subject:workloads:host%20workloads%20in%20%60a%60"
+        ]
+      },
       "correspondence": "exact",
       "id": "applies-to:policy:tetragon:TracingPolicy:host-moves",
       "status": "modified"
@@ -782,6 +859,16 @@
         "applies-to:policy:tetragon:TracingPolicy:in-to-not-in"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "policy:tetragon:TracingPolicy:in-to-not-in",
+          "subject:workloads:pods%20where%20%60env%20notin%20%28dev%29%60"
+        ],
+        "before": [
+          "policy:tetragon:TracingPolicy:in-to-not-in",
+          "subject:workloads:pods%20where%20%60env%20in%20%28dev%29%60"
+        ]
+      },
       "correspondence": "exact",
       "id": "applies-to:policy:tetragon:TracingPolicy:in-to-not-in",
       "status": "modified"
@@ -792,6 +879,13 @@
         "applies-to:policy:tetragon:TracingPolicy:loses-scope"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [],
+        "before": [
+          "policy:tetragon:TracingPolicy:loses-scope",
+          "subject:workloads:pods%20where%20%60tier%20in%20%28web%29%60"
+        ]
+      },
       "correspondence": "none",
       "id": "applies-to:policy:tetragon:TracingPolicy:loses-scope",
       "status": "removed"
@@ -804,6 +898,16 @@
         "applies-to:policy:tetragon:TracingPolicy:namespace-wide"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "policy:tetragon:TracingPolicy:namespace-wide",
+          "subject:workloads:pods%20in%20every%20namespace"
+        ],
+        "before": [
+          "policy:tetragon:TracingPolicy:namespace-wide",
+          "subject:workloads:pods%20in%20%60a%60"
+        ]
+      },
       "correspondence": "exact",
       "id": "applies-to:policy:tetragon:TracingPolicy:namespace-wide",
       "status": "modified"
@@ -816,6 +920,16 @@
         "applies-to:policy:tetragon:TracingPolicy:not-in-fewer"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "policy:tetragon:TracingPolicy:not-in-fewer",
+          "subject:workloads:pods%20where%20%60env%20notin%20%28dev%29%60"
+        ],
+        "before": [
+          "policy:tetragon:TracingPolicy:not-in-fewer",
+          "subject:workloads:pods%20where%20%60env%20notin%20%28dev%2C%20test%29%60"
+        ]
+      },
       "correspondence": "exact",
       "id": "applies-to:policy:tetragon:TracingPolicy:not-in-fewer",
       "status": "modified"
@@ -828,6 +942,16 @@
         "applies-to:policy:tetragon:TracingPolicy:not-in-implied"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "policy:tetragon:TracingPolicy:not-in-implied",
+          "subject:workloads:pods%20where%20%60env%20notin%20%28dev%29%60"
+        ],
+        "before": [
+          "policy:tetragon:TracingPolicy:not-in-implied",
+          "subject:workloads:pods%20where%20%60tier%20in%20%28web%29%60%2C%20%60env%20in%20%28prod%29%60"
+        ]
+      },
       "correspondence": "exact",
       "id": "applies-to:policy:tetragon:TracingPolicy:not-in-implied",
       "status": "modified"
@@ -840,6 +964,16 @@
         "applies-to:policy:tetragon:TracingPolicy:same-pods"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "policy:tetragon:TracingPolicy:same-pods",
+          "subject:workloads:pods%20labelled%20%60a%3Dx%60"
+        ],
+        "before": [
+          "policy:tetragon:TracingPolicy:same-pods",
+          "subject:workloads:pods%20where%20%60a%20in%20%28x%29%60"
+        ]
+      },
       "correspondence": "exact",
       "id": "applies-to:policy:tetragon:TracingPolicy:same-pods",
       "status": "modified"
@@ -852,6 +986,16 @@
         "applies-to:policy:tetragon:TracingPolicy:unknown-operator"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "policy:tetragon:TracingPolicy:unknown-operator",
+          "subject:workloads:pods%20where%20%60c%20%3E%202%60"
+        ],
+        "before": [
+          "policy:tetragon:TracingPolicy:unknown-operator",
+          "subject:workloads:pods%20where%20%60c%20%3E%201%60"
+        ]
+      },
       "correspondence": "exact",
       "id": "applies-to:policy:tetragon:TracingPolicy:unknown-operator",
       "status": "modified"
@@ -862,6 +1006,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "probe:tetragon:TracingPolicy:rules/kprobe:loose",
+          "probe:tetragon:TracingPolicy:rules/kprobe:loose/unhooked"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "filters:probe:tetragon:TracingPolicy:rules/kprobe:loose/unhooked",
       "status": "added"
@@ -872,6 +1023,13 @@
         "filters:probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/did-nothing"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [],
+        "before": [
+          "probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check",
+          "probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/did-nothing"
+        ]
+      },
       "correspondence": "none",
       "id": "filters:probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/did-nothing",
       "status": "removed"
@@ -882,6 +1040,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check",
+          "probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/elided-from-the-start"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "filters:probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/elided-from-the-start",
       "status": "added"
@@ -892,6 +1057,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check",
+          "probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/every-binary-filter"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "filters:probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/every-binary-filter",
       "status": "added"
@@ -902,6 +1074,13 @@
         "filters:probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/stopped-observing"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [],
+        "before": [
+          "probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check",
+          "probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/stopped-observing"
+        ]
+      },
       "correspondence": "none",
       "id": "filters:probe:tetragon:TracingPolicy:rules/kprobe:security_bprm_check/stopped-observing",
       "status": "removed"

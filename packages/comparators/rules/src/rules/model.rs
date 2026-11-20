@@ -155,6 +155,16 @@ pub struct Classify {
     pub annotation: Option<Expression>,
 }
 
+/// A `context` rule: per change it selects, the other items of each
+/// revision a person needs to read it, added to the core's context.
+pub struct ContextRule {
+    pub name: String,
+    pub when: Option<Expression>,
+    pub variables: Vec<Variable>,
+    pub before: Option<Expression>,
+    pub after: Option<Expression>,
+}
+
 /// Where a new step goes among the others.
 #[derive(Clone, Copy)]
 pub enum Place {
@@ -201,6 +211,7 @@ pub struct Rules {
     pub variables: Vec<Variable>,
     pub identity: Vec<Pass>,
     pub classify: Option<Classify>,
+    pub context: Vec<ContextRule>,
     pub steps: Option<Steps>,
     pub metadata: Option<Metadata>,
     /// Option values used when the comparison's `options` doesn't set them:
@@ -243,6 +254,12 @@ impl Rules {
             all.extend(variables(&classify.variables));
             all.extend(classify.summary.as_ref());
             all.extend(classify.annotation.as_ref());
+        }
+        for rule in &self.context {
+            all.extend(rule.when.as_ref());
+            all.extend(variables(&rule.variables));
+            all.extend(rule.before.as_ref());
+            all.extend(rule.after.as_ref());
         }
         match &self.steps {
             Some(Steps::Value(list, value)) => {

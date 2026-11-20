@@ -27,7 +27,7 @@ fn the_baseline_is_the_default_comparison_and_its_plan_writes_the_same_json() {
     let (before, after) = (typed(&before), typed(&after));
     assert_eq!(baseline(&before, &after).unwrap().to_json(), compared);
     let (matched, steps) = baseline_plan(&before, &after).unwrap();
-    assert_eq!(to_comparison(&matched.changes, steps).to_json(), compared);
+    assert_eq!(to_comparison(&before, &after, &matched.changes, steps).to_json(), compared);
     assert!(matched.pairs.contains_key("exact"));
     let other = typed(&graph("dag/v0", json!([])));
     for result in [baseline(&before, &other).map(|_| ()), baseline_plan(&before, &other).map(|_| ())] {

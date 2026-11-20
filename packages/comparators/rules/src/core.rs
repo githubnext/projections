@@ -27,6 +27,8 @@ pub struct Change {
     /// Whether a one-to-one pair differs outside its volatile values.
     pub residual: bool,
     pub summary: Option<String>,
+    /// The core's context, with what the file's `context` rules add.
+    pub context: Option<projections_engine::Context>,
 }
 
 impl From<matching::Change> for Change {
@@ -42,6 +44,7 @@ impl From<matching::Change> for Change {
             varied: change.varied,
             residual: change.residual,
             summary: None,
+            context: None,
         }
     }
 }
@@ -66,6 +69,20 @@ impl Change {
     /// doesn't run on it and steps don't hold it.
     pub fn is_variation(&self) -> bool {
         self.correspondence == Correspondence::Exact && self.status == Status::Unchanged && !self.varied.is_empty()
+    }
+
+    /// Whether a person reviews the change: its status, or its identity,
+    /// changed. Only these have context.
+    pub fn is_scope_change(&self) -> bool {
+        self.status != Status::Unchanged || self.correspondence != Correspondence::Exact
+    }
+
+    /// The change's own IDs on one side.
+    pub fn side(&self, side: projections_engine::Side) -> &[String] {
+        match side {
+            projections_engine::Side::Before => &self.before,
+            projections_engine::Side::After => &self.after,
+        }
     }
 
     /// The change as CEL sees it, built directly. `varied` is always a
@@ -98,6 +115,7 @@ impl Change {
             correspondence: self.correspondence,
             varied: self.varied.clone(),
             summary: self.summary.clone(),
+            context: self.context.clone(),
         }
     }
 }

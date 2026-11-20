@@ -106,6 +106,24 @@ nested renderer drawing a comparison. Status words (`.pk-status-part`) follow
 the nearest changed element around them. The `nested-accents` renderer check
 fails any change or accent color drawn inside another.
 
+## One line per boundary
+
+Rows, cards and panels that meet share one line between them, never two drawn
+side by side, and where a change region meets a neutral line its edge is that
+line, in the change's hue. The kit's change runs (`pk-region-run`, for rows that
+meet edge to edge) draw their edges on the lines around them: one stroke outside
+the run, over a neighbouring row's line, a header's bottom line or the
+container's edge. Where two runs meet, the later one's top edge is the boundary.
+`Group` clips to its outer edge (`clip-path`), so a run at its edge covers the
+group's border there. So a run needs that stroke to stay visible: a scrolling
+container reaches over its card's edge by the line's width and pads itself by it
+(as text diff's output does), and a row that draws a line of its own on a side
+gives that line the hue (`--pk-region-line`, fading to `--pk-line`) instead of
+an edge beside it (as runtime policy's rows, whose lines are their bottom
+borders, and text diff's After column do). A changed `EntityCard` that is a
+change region takes the hue on its own border, and a pill whose label is a
+`ValueChange` draws no frame around its two pills.
+
 ## Item rings
 
 Hover, keyboard focus and selection show as one ring per unit, drawn by the

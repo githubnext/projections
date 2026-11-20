@@ -14,7 +14,7 @@ use serde_json::{Value, json};
 /// model. Hosts rerun recorded comparisons when they verify them, so a
 /// behaviour change that isn't bumped makes saved comparisons fail
 /// verification rather than pass wrongly.
-pub const REVISION: u32 = 3;
+pub const REVISION: u32 = 4;
 
 /// The manifest: the format and its revision, the macros, the standard
 /// library's signatures and cost classes, the declared object types and the

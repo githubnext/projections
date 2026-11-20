@@ -96,6 +96,12 @@
   text-decoration: none;
   overflow-wrap: anywhere;
 }
+/* A pill whose label is a value change (`ValueChange`) is framed by its two pills: it draws no frame of its own around them. */
+.pk .pk-change-pill:has(> .pk-pill-label > .pk-value-change) {
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+}
 .pk button.pk-change-pill {
   cursor: pointer;
 }

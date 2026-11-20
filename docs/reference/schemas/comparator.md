@@ -22,6 +22,7 @@ definitions into [`packages/schemas/schemas/comparator/v0.json`](../../../packag
 | `classify.summary` | [`cel`](#cel) |  | A string, or null to leave the summary unset. |
 | `classify.annotation` | [`cel`](#cel) |  | Any JSON value, or null; available afterwards as `annotations[change.id]`. |
 | `classify.variables` | [`variables`](#variables) |  |  |
+| `context` | array of any or any |  | Context rules, in order, each evaluated after `classify` per change whose status or identity changed, seeing what `classify` sees and `annotation`. Each adds to the change's context, the other items a person needs to read it; context only grows from the core's and never hides a change. |
 | `steps` | [`cel`](#cel) or object or object |  | How the steps are made. Declarative: start from the baseline's steps (dropping changes the comparison no longer has), `add` new steps, `rank` them, then `summary`. Or `value`, one CEL expression for the whole list (the escape hatch). |
 | `metadata` | object |  | Comparison metadata keys, merged over the baseline's; a null value is omitted. |
 | `metadata.values` | map of [`cel`](#cel) | Yes |  |

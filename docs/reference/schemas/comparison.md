@@ -48,6 +48,24 @@ One volatile value that differs between a matched pair.
 
 No other properties are allowed.
 
+### `contextIds`
+
+Item IDs of one revision, entities or relationships, in UTF-16 order; never the change's own.
+
+Type: array of [`text`](#text). At most 1000 items. Items are unique.
+
+### `context`
+
+The other items a person needs to read the change, in each revision (a removal's in `before`): the core's context, a changed relationship's endpoints and the items containing what changed, and what comparator rules add. Present only on a change whose status or identity changed, and only when it names an item. Renderers receive it only when they declare the `context` capability.
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `before` | [`contextIds`](#contextids) | Yes |  |
+| `after` | [`contextIds`](#contextids) | Yes |  |
+| `rules` | array of [`text`](#text) |  | The comparator's `context` rules that added IDs, in its file's order; absent when the core's context is all of it. At least 1 item. Items are unique. |
+
+No other properties are allowed.
+
 ### `change`
 
 | Property | Type | Required | Description |
@@ -60,6 +78,7 @@ No other properties are allowed.
 | `correspondence` | `"exact"` or `"declared"` or `"split"` or `"merge"` or `"none"` | Yes |  |
 | `varied` | array of [`varied`](#varied) |  | The volatile values that differ, sorted by path; present exactly when one does. Only on `exact` and `declared` changes. An `exact` change whose every difference is within is `unchanged` and belongs to no step. At least 1 item. At most 60000 items. |
 | `summary` | [`text`](#text) |  |  |
+| `context` | [`context`](#context) |  |  |
 
 No other properties are allowed.
 

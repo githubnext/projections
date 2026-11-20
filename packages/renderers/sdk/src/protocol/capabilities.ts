@@ -14,6 +14,7 @@ const flags = [
   'anchors',
   'scrollSync',
   'filter',
+  'context',
   'annotations',
   'properties',
 ] as const

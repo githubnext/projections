@@ -77,15 +77,25 @@
   position: relative;
   z-index: -1;
 }
-/* Rows sit between the quieter rule; a category's hook lanes are ruled off from each other by the divider. */
-.rp-table > * + *,
-.rp-lane > * + *,
-.rp-region > * + *,
-.rp-rules > * + * {
-  border-top: var(--projections-border-width) solid var(--border);
+/*
+ * Rows sit between the quieter rule; a category's hook lanes are ruled off from each other by the divider. The line
+ * between two rows is the upper one's, so a change region below it, drawn later, lays its top edge over it (the kit's
+ * `pk-region-run`); a region gives its own line the change's hue.
+ */
+.rp-table > :not(:last-child),
+.rp-lane > :not(:last-child),
+.rp-region > :not(:last-child),
+.rp-rules > :not(:last-child) {
+  --pk-line: var(--border);
+  border-bottom: var(--projections-border-width) solid var(--border);
 }
-.rp-lanes > .rp-lane + .rp-lane {
-  border-top-color: var(--divider);
+.rp-lanes > .rp-lane:has(+ .rp-lane) {
+  --pk-line: var(--divider);
+  border-bottom-color: var(--divider);
+}
+.rp-view :is(.rp-table, .rp-lane, .rp-region, .rp-rules) > .pk-region-run[data-change][data-run-end]:not(:last-child) {
+  --pk-run-end: 0 0 0 0 transparent;
+  border-bottom-color: var(--pk-region-line);
 }
 /* What reaches the panel's bottom edge takes its inner corners, so a fill, edge or ring there follows the corner. */
 .rp-panel > .rp-table > :last-child,

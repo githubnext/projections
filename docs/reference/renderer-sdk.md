@@ -312,6 +312,7 @@ How `connectInteractions` finds entities and reports badge selections.
 | Member | Signature | Description |
 |---|---|---|
 | `attribute` | `"attribute"?: string` | Attribute that carries an element's selection ID (default `data-entity-id`). |
+| `partOf` | `"partOf"?: { (id: string): string \| undefined }` | The item an element's ID presents a part of, when the host names that item instead (a split's or merge's further parts, by their change): the filter keeps or recedes the part with it. |
 | `select` | `"select"?: { (id: string): void }` | Reports a selection when the person activates an annotation badge, in place of `client.select`, so the renderer can update its own selection too. It must still call `client.select(id)`. |
 | `window` | `"window"?: Window` | Defaults to the root's window. |
 

@@ -24,6 +24,11 @@ export interface InteractionOptions {
    * too. It must still call `client.select(id)`.
    */
   select?: (id: string) => void
+  /**
+   * The item an element's ID presents a part of, when the host names that item instead (a split's or merge's further
+   * parts, by their change): the filter keeps or recedes the part with it.
+   */
+  partOf?: (id: string) => string | undefined
 }
 
 /** The running interactions of one root (`connectInteractions`). */
@@ -82,7 +87,7 @@ export function connectInteractions(client: RendererClient, root: HTMLElement, o
   const entities: Entities = {root, attribute, excluded: node => badges.contains(node)}
   const entityOf = (target: EventTarget | null) => entityAt(entities, target)
   const elementsOf = (id: string) => entityElements(entities, id)
-  const isVisible = (id: string) => visible === null || visible.has(id)
+  const isVisible = (id: string) => visible === null || visible.has(id) || visible.has(options.partOf?.(id) ?? id)
   const isAnnotated = (id: string) => marks.has(id)
 
   function reportHover(id: string | null) {

@@ -18,6 +18,7 @@ import {
 } from './reports.js'
 import {focusedIds, focusRequest} from '../../focus.js'
 import type {ComparisonModel} from '../../model.js'
+import {partOwners} from '../../scope-filter.js'
 import {useScopeView} from './scope.js'
 import {useHostFilter, useOpeningReveal} from './focus.js'
 import {useSelection} from './selection.js'
@@ -54,7 +55,11 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
   const root = useRef<HTMLDivElement>(null)
   const {filling, fill} = useFrameFillReport(client, root)
   const reportAspect = useAspectReport(client)
-  const {selected, setSelection, onSelect} = useSelection(client, {selection, selectionVersion}, root, interactive)
+  const model = useDocumentModel(init)
+  const resolved = model && !(model.model instanceof Error) ? model.model : undefined
+  const owners = useMemo(() => partOwners(resolved), [resolved])
+  const partOf = useCallback((id: string) => owners.get(id), [owners])
+  const {selected, setSelection, onSelect} = useSelection(client, {selection, selectionVersion}, root, interactive, partOf)
   const onOpen = useCallback((path: string, line?: number) => client?.open(path, line), [client])
   const onError = useCallback((message: string) => client?.error(message), [client])
   const requestDocument = useCallback(
@@ -63,7 +68,6 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
   )
   const reportLegend = useLegendReport(client)
   const reportSteps = useStepsReport(client)
-  const model = useDocumentModel(init)
   const declareNouns = useSummaryReport(client, init, options, onError, {
     model: model && model.init === init ? model.model : undefined,
     controls,
@@ -82,7 +86,6 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
   const stageMaxHeight = tokens?.['stage-max-height']
   const automatic = (options.steps ?? 'schedule') === 'schedule'
   const filter = useHostFilter(client)
-  const resolved = model && !(model.model instanceof Error) ? model.model : undefined
   const {scope, document} = useScopeView(resolved, filter, model, options.scope, init?.projection.renderer)
   const {comparing, diff, position, schedule, highlighting, emphasis} = useTimeline(
     init,

@@ -483,6 +483,37 @@ test('connectRenderer posts ready to the host origin with the channel envelope',
   assert.equal(fake.posted.length, 7, 'nothing is posted after dispose')
 })
 
+test('observeHeight requests the height at once, before any resize is observed, then each new one', () => {
+  const fake = fakeWindow()
+  const observers = []
+  const Observer = globalThis.ResizeObserver
+  globalThis.ResizeObserver = class {
+    constructor(callback) {
+      this.callback = callback
+      observers.push(this)
+    }
+    observe() {}
+    disconnect() {}
+  }
+  try {
+    const client = connectRenderer({}, {capabilities: {changeHighlighting: 'none'}, window: fake.view})
+    let height = 320.4
+    client.observeHeight({getBoundingClientRect: () => ({height})})
+    const heights = () => fake.posted.map(({data}) => parseRendererMessage(data, channel)).filter(message => message.type === 'height')
+    assert.deepEqual(heights(), [{type: 'height', px: 321}])
+    observers[0].callback([])
+    assert.equal(heights().length, 1, 'the same height is not requested again')
+    height = 500
+    observers[0].callback([])
+    assert.deepEqual(heights(), [
+      {type: 'height', px: 321},
+      {type: 'height', px: 500},
+    ])
+  } finally {
+    globalThis.ResizeObserver = Observer
+  }
+})
+
 test('connectRenderer dispatches valid host messages and ignores foreign ones', () => {
   const fake = fakeWindow()
   const received = []

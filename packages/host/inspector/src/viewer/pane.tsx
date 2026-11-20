@@ -1,4 +1,4 @@
-import {useEffect, useSyncExternalStore} from 'react'
+import {useEffect, useLayoutEffect, useRef, useSyncExternalStore} from 'react'
 import {ProjectionsPane, usePaneRoom} from '@githubnext/projections-host/ui'
 import {StatusDot} from '../shell/switcher.js'
 import type {Store} from './chrome.js'
@@ -47,20 +47,37 @@ export function ViewerPane({store, onChoose}: {store: Store; onChoose: (projecti
   useEffect(() => {
     if (shown && paneFocus === 'pane') store.set({paneFocus: undefined})
   }, [shown, paneFocus, store])
+  // A pane that goes away while it holds focus (the page narrowing below its room) hands focus to the title's menu,
+  // which takes its place, rather than leaving it on the page.
+  const pane = useRef<HTMLDivElement>(null)
+  const focused = useRef(false)
+  useLayoutEffect(() => {
+    if (!shown && focused.current) {
+      focused.current = false
+      if (!document.activeElement || document.activeElement === document.body) store.set({paneFocus: 'menu'})
+    }
+  }, [shown, store])
   if (!shown) return null
   return (
-    <ProjectionsPane
-      className="pi-viewer-pane"
-      items={projections.map(item => ({
-        id: item.id,
-        title: item.title,
-        detail: <code className="pj:font-mono pj:text-[11px]">{item.id}</code>,
-        status: <StatusDot status={item.status} />,
-      }))}
-      current={choosing ?? state?.projection ?? undefined}
-      onChoose={onChoose}
-      onClose={() => setPanePinned(store, false)}
-      autoFocus={paneFocus === 'pane'}
-    />
+    <div
+      ref={pane}
+      className="pi-viewer-pane-slot pj:contents"
+      onFocus={() => (focused.current = true)}
+      onBlur={event => (focused.current = pane.current?.contains(event.relatedTarget as Node | null) ?? false)}
+    >
+      <ProjectionsPane
+        className="pi-viewer-pane"
+        items={projections.map(item => ({
+          id: item.id,
+          title: item.title,
+          detail: <code className="pj:font-mono pj:text-[11px]">{item.id}</code>,
+          status: <StatusDot status={item.status} />,
+        }))}
+        current={choosing ?? state?.projection ?? undefined}
+        onChoose={onChoose}
+        onClose={() => setPanePinned(store, false)}
+        autoFocus={paneFocus === 'pane'}
+      />
+    </div>
   )
 }

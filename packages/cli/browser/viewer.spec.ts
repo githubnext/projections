@@ -763,10 +763,12 @@ test('the person pins the projections pane from the title, and closes it back to
   await expect(pane).toBeVisible({timeout: 30_000})
   await expect(pane.locator('[aria-current="page"]')).not.toBeFocused()
 
-  // Too narrow for it, the page falls back to the menu, which doesn't offer it.
+  // Too narrow for it, the page falls back to the menu, which takes the focus the pane held and doesn't offer pinning.
+  await pane.locator('[aria-current="page"]').focus()
   await page.setViewportSize({width: 860, height: 800})
   await expect(pane).toHaveCount(0)
-  const narrow = header.getByRole('button', {name: 'Broken map, switch projection'})
+  const narrow = header.getByRole('button', {name: /, switch projection$/})
+  await expect(narrow).toBeFocused()
   await narrow.click()
   await expect(dialog.getByRole('option', {name: 'Pin projections pane'})).toHaveCount(0)
   await page.keyboard.press('Escape')

@@ -1,9 +1,10 @@
 # Command output
 
-What your own commands print, run in both revisions and compared line by line: a
-CLI's `--help`, a generated report, a schema dump, a build's list of outputs. It
-answers "what does this change do to the text these commands print?", which no
-source diff shows directly.
+This extractor runs commands you configure in both revisions and compares what
+they print line by line—whether that is a CLI's `--help` text, a generated
+report, a schema dump, or a list of build outputs. It answers what a source diff
+cannot show directly: how a change affects the actual text your commands
+produce.
 
 <!-- generated: facts -->
 
@@ -18,20 +19,22 @@ source diff shows directly.
 
 ## When to use it
 
-Use it when a command's output is the behavior to review: help text and error
-messages a CLI shows its users, a report or snapshot a script generates, the
-routes a framework lists, a configuration rendered from templates. A whitespace
-change in the source that leaves the output alone shows nothing; a one-character
-change in the output shows.
+Use this extractor when a command's printed output is the behavior you want to
+review—CLI help text and error messages, generated reports or snapshots,
+framework route tables, or rendered configuration templates. A whitespace tweak
+in source code that leaves the output untouched shows nothing, while even a
+single-character change in the output stands out immediately.
 
-It runs your commands, so it always needs `--trust`: review both revisions
-before you compare them. Nothing in a repository suggests it, so add the
-definition yourself. If the commands print structured data you'd rather compare
-item by item, see [Build your own](#build-your-own).
+Because it executes your commands, it always requires `--trust`; make sure you
+review both revisions before comparing them. Projections never suggests this
+extractor automatically, so add the definition yourself. If your commands output
+structured data that would be better compared item by item, see
+[Build your own](#build-your-own).
 
 ## What it reads
 
-The standard output of each command in `commands`, run in both revisions:
+The extractor captures standard output from each entry in `commands`, running
+every command in both revisions:
 
 ```json
 "inputs": {
@@ -42,26 +45,28 @@ The standard output of each command in `commands`, run in both revisions:
 }
 ```
 
-- `id`: a stable name (letters, digits, `.`, `_` and `-`), so the same command
-  is the same output across revisions.
-- `label`: the output's heading, typically the command line.
-- `command`: an argv array, run without a shell in the revision's root.
-- `presentation` (optional): `formatted` (the default) shows the text in a
-  monospace font, aligned and unwrapped; `prose` wraps it in the text font.
+- `id` gives the output a stable name (letters, digits, `.`, `_`, and `-`) so
+  Projections can match the same command across revisions.
+- `label` sets the heading shown above the output, usually the command itself.
+- `command` is an argv array executed directly from the revision root without a
+  shell.
+- `presentation` (optional) controls formatting: `formatted` (the default) uses
+  an aligned, unwrapped monospace font, while `prose` wraps the text in a
+  standard text font.
 
-Each command runs with a minimal environment: `PATH`, a UTF-8 locale, `TZ=UTC`,
-`TERM=dumb` and `NO_COLOR=1`, plus the variables the definition's
-`execution.environment` grants. It must exit with status 0. Standard error is
-kept as a diagnostic, never compared. The tools, and the dependencies each
-revision's commands need, must be available for both revisions. The definition's
-`execution.timeoutMs` (30 seconds by default) covers every command together:
+Each command runs in a minimal environment containing `PATH`, a UTF-8 locale,
+`TZ=UTC`, `TERM=dumb`, and `NO_COLOR=1`, plus any variables granted in
+`execution.environment`. Every command must exit with status 0. Standard error
+is kept for diagnostics and is never compared. Whatever tools and dependencies
+your commands need must be available for both revisions, and
+`execution.timeoutMs` (30 seconds by default) applies to all commands combined:
 
 ```json
 "execution": {"timeoutMs": 60000, "environment": ["HOME"]}
 ```
 
-Each command is one `output` entity, `output:<id>`, with its `text` exactly as
-printed, and no relationships.
+Each command becomes a single `output` entity (`output:<id>`) holding its exact
+printed `text`, with no relationships.
 
 ## Options
 
@@ -73,29 +78,32 @@ printed, and no relationships.
 
 <!-- end generated: inputs -->
 
-At most 16 commands, each printing at most 256 KiB of UTF-8 text. Output with
-control characters other than tabs and line breaks is rejected; `NO_COLOR=1` and
-`TERM=dumb` keep most tools from printing color codes.
+You can configure up to 16 commands, each producing up to 256 KiB of UTF-8 text.
+Output containing control characters other than tabs and line breaks is
+rejected—setting `NO_COLOR=1` and `TERM=dumb` prevents most tools from emitting
+ANSI color codes.
 
-The [`text-diff`](../renderers/text-diff.md) renderer's **Layout** control
-(`textDiffLayout`: `split` for two columns, the default, or `unified` for one)
-is preset in `presentation.rendererOptions`.
+You can preset the [`text-diff`](../renderers/text-diff.md) renderer's
+**Layout** control in `presentation.rendererOptions` via `textDiffLayout`
+(`split` for two columns, which is the default, or `unified` for a single
+column).
 
 ## What a comparison shows
 
-- **Outputs** added or removed, when a command is added to or removed from the
-  definition.
-- **Outputs** modified, whose text differs: a line diff, removed lines marked
-  `−` and added lines `+`, with the words that changed within a line marked more
-  strongly. Line-ending and final-newline changes show, annotated. Unchanged
-  runs longer than six lines fold, keeping three lines of context around each
-  change.
-- The summary bar counts the outputs and their changes, then every line in After
-  with the lines the diff added and removed:
-  `4 outputs +1 −1 ~2 · 21 lines +11 −9`.
+- **Added or removed outputs** appear whenever a command is added to or removed
+  from the definition.
+- **Modified outputs** render as a line-by-line diff, with removed lines marked
+  `−`, added lines marked `+`, and changed words highlighted within each line.
+  Changes to line endings or trailing newlines are called out explicitly.
+  Unchanged runs longer than six lines fold automatically, leaving three lines
+  of context around each change.
+- The summary bar tallies the outputs and their changes, followed by the total
+  lines in After and the net lines added and removed (for example,
+  `4 outputs +1 −1 ~2 · 21 lines +11 −9`).
 
-A comparison is shown only as a diff (no animation, side by side or swipe): text
-changes line by line, and the classic diff shows that best.
+Comparisons render strictly as a text diff (without animated, side-by-side, or
+swipe modes), since a classic diff is the clearest way to read line-by-line text
+changes.
 
 ## Start from this definition
 
@@ -114,67 +122,72 @@ changes line by line, and the classic diff shows that best.
 
 ## Limitations
 
-- Output can depend on more than the revision: installed tool versions, external
-  services, files outside the repository, the clock. Pin what you can, and keep
-  commands to what the revision decides.
+- Command output can be affected by factors outside the revision—installed tool
+  versions, external services, files outside the repository, or the system
+  clock. Pin what you can and keep commands focused on what the revision itself
+  determines.
 - `execution.network: false` is a declaration recorded with the extraction, not
   network isolation, and `--trust` is not a sandbox.
-- Standard output is stored with the extraction: don't print secrets.
-- Each output shows at most 2,000 diff rows.
+- Standard output is saved inside the extraction, so make sure your commands
+  never print secrets.
+- Each output displays at most 2,000 diff rows.
 
 ## Related
 
-- [`text-diff`](../renderers/text-diff.md), the renderer that draws it.
-- [`github-actions-jobs`](github-actions-jobs.md), for how a pipeline is
+- [`text-diff`](../renderers/text-diff.md) is the renderer that displays these
+  outputs.
+- [`github-actions-jobs`](github-actions-jobs.md) compares how a pipeline is
   declared rather than what a command prints.
-- [Volatile data](../../guides/how-it-works.md#volatile-data), for extractions
-  whose values vary between runs.
+- [Volatile data](../../guides/how-it-works.md#volatile-data) explains how to
+  handle extractions whose values shift between runs.
 
 ## How it works
 
-The [package README](../../../packages/extractors/command-output/README.md)
-covers how commands are run and what they're allowed.
+See the [package README](../../../packages/extractors/command-output/README.md)
+for how commands are executed and what limits apply.
 
 ## Build your own
 
-Write your own extractor when text isn't the best way to compare what your
-commands produce:
+Consider writing a custom extractor when plain text is not the best way to
+compare what your commands produce:
 
-- **Structured output**: a command that prints JSON (routes, feature flags, a
-  dependency list, an OpenAPI document) compares better as entities, so a
-  renamed route is one change and a reordered list is none. Parse it in an
-  extractor and pick a renderer for its shape.
-- **Output that varies between runs**: timestamps, durations or generated IDs
-  that would mark every run changed. Leave them out, or declare them volatile so
-  they only count beyond a tolerance.
-- **More than this extractor allows**: more than 16 commands, outputs over 256
-  KiB, or output that needs setup first.
+- **Structured output**, such as JSON listing routes, feature flags,
+  dependencies, or an OpenAPI document. Comparing structured data as entities
+  means a renamed route shows as one change and a reordered list shows as no
+  change at all. Parse it in a custom extractor and pair it with a renderer that
+  fits its shape.
+- **Output that varies between runs**, like timestamps, durations, or generated
+  IDs that would mark every run as changed. Strip them out in your extractor, or
+  declare them volatile so they only register beyond a tolerance.
+- **Larger or more complex runs** that exceed 16 commands or 256 KiB per output,
+  or that require setup steps beforehand.
 
-Try the lighter options first: add commands, or point one at a script that
-normalizes the output before printing it. If your program already prints an
-extraction, use it as the extractor directly
-(`projections init <id> --command '["node","tools/routes.mjs"]'`). To draw the
-outputs differently, keep this extractor and write a renderer.
+Try the lighter options first: add commands to this extractor, or point a
+command at a small wrapper script that normalizes output before printing it. If
+your tool already emits an extraction, you can run it directly as an extractor
+(`projections init <id> --command '["node","tools/routes.mjs"]'`). To display
+the same outputs differently, keep this extractor and write a custom renderer.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
-**Write a custom extractor, renderer or comparator** › **Custom extractor** (or
-**Custom extractor and renderer**), and pick its language. It writes the
-definition and a starter extractor (`extract.mjs`, `extract.py` or `extract.go`)
-under `.github/projections/<id>/`, drawn by the built-in graph renderer. Or
-choose **Ask an agent to write it** and describe what the projection should
-show.
+**In VS Code**, open the Projections view, choose **+ New Projection…**, and
+select **Write a custom extractor, renderer or comparator** › **Custom
+extractor** (or **Custom extractor and renderer**). Pick a language to scaffold
+the definition and a starter extractor (`extract.mjs`, `extract.py`, or
+`extract.go`) under `.github/projections/<id>/`, paired with the built-in graph
+renderer. You can also choose **Ask an agent to write it** and describe what you
+want to see.
 
-**With the CLI**, keep the text diff (any extractor whose entities are `output`s
-with a string `data.text` can use it):
+**With the CLI**, scaffold a new extractor while keeping the text-diff renderer
+(any extractor emitting `output` entities with a string `data.text` works with
+it):
 
 ```sh
 projections init <id> --language node --renderer text-diff
 ```
 
-An extractor is any program that prints an extraction. Run it with
-`projections show -p <id> --trust` as you change it; an open projection tab uses
-your uncommitted edits ("Your edits") and says when its results are out of date,
-and the Testing view runs the projection's checks.
-[Write your first extractor](../../guides/first-extractor.md) walks through one,
-and [Extraction schema](../../guides/schemas.md#extraction-schema) describes
-what it prints.
+An extractor is any program that prints an extraction. Run
+`projections show -p <id> --trust` while you iterate—an open projection tab
+picks up your uncommitted edits ("Your edits") and flags stale results, and the
+Testing view runs your projection's checks. Walk through
+[Write your first extractor](../../guides/first-extractor.md) to get started,
+and check [Extraction schema](../../guides/schemas.md#extraction-schema) for the
+output format.

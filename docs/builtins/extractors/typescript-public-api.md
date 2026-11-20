@@ -1,10 +1,10 @@
 # TypeScript public API
 
-What consumers of your TypeScript packages can import: every export of each
-package entry point, with its members and its signature as the repository's own
-TypeScript checker prints it. Compared across a pull request, it answers "what
-did this change add, remove or change in the public API, and does it break the
-people who use it?"
+This extractor captures everything consumers can import from your TypeScript
+packages—every export of every package entry point, along with its members and
+signature as printed by your repository's own TypeScript checker. Compared
+across a pull request, it shows what changed in your public API and whether
+consumers might break.
 
 <!-- generated: facts -->
 
@@ -18,57 +18,58 @@ people who use it?"
 
 ## When to use it
 
-Use it for libraries and shared packages: anything published to npm or imported
-by other packages in a monorepo, where a changed signature matters more than the
-source diff that caused it. Moving code between files, renaming private helpers
-or rewriting a function body changes nothing here; adding a required parameter,
-narrowing an accepted type or removing an export does. With the
-[`api-compatibility`](#classify-changes-as-breaking) comparator file, each
-change is also classified as breaking, additive or compatible.
+Use this extractor for libraries and shared packages—anything published to npm
+or imported across a monorepo—where signature changes matter far more than the
+internal code diff that produced them. Moving definitions between files,
+renaming private helpers, or refactoring a function body creates zero noise
+here, while adding a required parameter, narrowing an input type, or dropping an
+export stands out immediately. Pair it with the
+[`api-compatibility`](#classify-changes-as-breaking) comparator file to classify
+changes as breaking, additive, or compatible.
 
-It runs without `--trust`: it loads the TypeScript compiler installed in your
-checkout and type-checks your sources, but never imports your code, runs a build
-or evaluates configuration scripts.
+It needs no `--trust`: it loads the TypeScript compiler from your checkout and
+type-checks your source files without executing your code, running builds, or
+evaluating config scripts.
 
-It reads what can be imported, so an application with no exported API has little
-to show. For other languages use [`rust-public-api`](rust-public-api.md),
-[`go-public-api`](go-public-api.md) or
+Because it only inspects exported symbols, applications with no public API won't
+have much to show. For other languages, see
+[`rust-public-api`](rust-public-api.md), [`go-public-api`](go-public-api.md), or
 [`dotnet-public-api`](dotnet-public-api.md).
 
 ## What it reads
 
-- **Entry points.** `inputs.entrypoints` when set: an array of source files
-  (exported together as the package's `.`), or an object mapping public subpaths
-  to source files (`{".": "src/index.ts", "./testing": "src/testing.ts"}`).
-  Otherwise each package's `package.json` `exports`, with its subpaths,
-  conditions (`types` first) and wildcards, or `types` and `typings` when there
-  is no `exports`. A target that doesn't exist, such as an unbuilt
-  `dist/index.d.ts`, is never guessed to mean `src/index.ts`: set `entrypoints`
-  instead.
-- **The program.** `inputs.tsconfig` (or `inputs.tsconfigs`, a list), else a
-  root `tsconfig.json`, else a strict default program over every source file.
-  Project references are followed but not built.
-- **The compiler.** The repository's own `typescript` package, 5.x or 6.x (a
-  TypeScript 7 project also installs `@typescript/typescript6`), found in
-  `node_modules` from the tsconfig's directory up to the checkout root, and
-  Node.js 20 or newer on `PATH`. Projections bundles no compiler: run your
-  package manager's install (`npm ci`) first. Installed packages' declarations
-  are read from the checkout; workspace sources always come from the revision
-  being extracted.
+- **Entry points.** If `inputs.entrypoints` is set, it reads either an array of
+  source files (exposed together under `.`) or a map of public subpaths to
+  source files (`{".": "src/index.ts", "./testing": "src/testing.ts"}`).
+  Otherwise it reads each package's `package.json` `exports` field (including
+  subpaths, conditions prioritizing `types`, and wildcards), falling back to
+  `types` and `typings` if `exports` is absent. Missing targets such as an
+  unbuilt `dist/index.d.ts` are never guessed to mean `src/index.ts`—set
+  `entrypoints` explicitly instead.
+- **The TypeScript program.** Uses `inputs.tsconfig` (or `inputs.tsconfigs` for
+  a list), falling back to a root `tsconfig.json` or a strict default program
+  over all source files. Project references are followed, though not built.
+- **The compiler.** Uses your repository's installed `typescript` package (5.x
+  or 6.x; TypeScript 7 projects also install `@typescript/typescript6`),
+  resolved upward from the tsconfig directory in `node_modules`, along with
+  Node.js 20+ on `PATH`. Projections doesn't bundle a compiler, so run your
+  package manager install (`npm ci`) first. Third-party declarations come from
+  your checkout's installed packages, while workspace source files always come
+  from the revision being extracted.
 
-Each export is an `export` entity, or a `type` for interfaces and type aliases,
-with a `member` for each public or protected instance and static member,
-constructor, and index, call or construct signature. Overloads keep the
-checker's order. Private members, `#private` fields and implementation bodies
-are left out; a class that has private members is marked as compared nominally,
-without revealing them. IDs are the package name, the public subpath and the
-exported name, so moving a declaration to another file is no change, and
-renaming an export is one removal and one addition.
+Each export becomes an `export` entity (or `type` for interfaces and type
+aliases) with `member` children for public or protected instance and static
+members, constructors, and index, call, or construct signatures. Overloads
+preserve the checker's order. Private members, `#private` fields, and function
+bodies are omitted; classes with private members are marked for nominal
+comparison without exposing those fields.
 
-Every declaration also carries its contract (parameters and return types as
-union constituents, modifiers, heritage clauses), the facts the
-`api-compatibility` rules read. A compiler error fails the extraction rather
-than publishing an `any` signature.
+Because IDs combine the package name, public subpath, and exported name, moving
+a declaration to another file produces no diff, while renaming an export shows
+up as a removal and an addition. Every declaration also records contract details
+(parameter and return union constituents, modifiers, and heritage clauses) for
+`api-compatibility` rules. Type-checking errors fail extraction rather than
+silently emitting `any` signatures.
 
 ## Options
 
@@ -84,24 +85,23 @@ than publishing an `any` signature.
 
 ## What a comparison shows
 
-The [`api`](../renderers/api.md) renderer lists every declaration with its
-signature, side by side or as one diff:
+The [`api`](../renderers/api.md) renderer displays every declaration and its
+signature side by side or in a unified diff:
 
-- **Declarations** added, removed or modified, each with its signature diff:
-  removed runs struck out, added runs underlined.
-- **Renames** only when the definition's `correspondence` declares them;
-  otherwise a renamed export is a removal and an addition.
+- **Added, removed, or modified declarations**, with inline signature diffs
+  showing removed text struck through and added text underlined.
+- **Renames**, when declared in the definition's `correspondence` (otherwise a
+  renamed export appears as a removal and an addition).
 
-The summary bar counts declarations: `25 declarations +7 −1 ~8`.
+The summary bar tallies declarations and deltas (`25 declarations +7 −1 ~8`).
 
 ### Classify changes as breaking
 
-The default comparator says _that_ a declaration changed. The
-`api-compatibility` comparator file, which ships with Projections, says what the
-change means for consumers. It is a comparator file, not the default comparator:
-copy
+The default comparator tells you _that_ a declaration changed. To see what that
+change means for consumers, use the `api-compatibility` comparator file shipped
+with Projections. Copy
 [`api-compatibility.comparator.yaml`](../../../packages/comparators/api-compatibility/api-compatibility.comparator.yaml)
-into your repository and name it in the definition:
+into your repository and reference it in your definition:
 
 ```json
 {
@@ -113,38 +113,39 @@ into your repository and name it in the definition:
 }
 ```
 
-Each change is then `breaking`, `additive`, `compatible` or `unknown`, with a
-reason and the rule that decided it. TypeScript has no official breaking-change
-standard, so the rules decide assignability over the types the checker resolved:
+Every change is then classified as `breaking`, `additive`, `compatible`, or
+`unknown`, with an explanation and the rule that fired. Since TypeScript has no
+formal breaking-change specification, the rules evaluate assignability over the
+resolved types:
 
-- **Breaking**: a parameter became required (`required-parameter-added`) or was
-  removed (`parameter-removed`), a parameter accepts less
-  (`parameter-narrowed`), a return type is wider (`return-widened`), a required
-  member was added to an interface (`member-added`), a property became required,
-  optional or `readonly`, a type alias accepts less.
-- **Additive**: an optional parameter was added (`parameter-added`), a required
-  parameter became optional (`parameter-optional`), a parameter accepts more, a
-  type alias accepts more, an optional member was added.
-- **Compatible**: a parameter was renamed (`parameter-renamed`: arguments are
-  passed by position), a return type is narrower (`return-narrowed`).
-- **Unknown**: anything that needs structural comparison of two object types,
-  generics, or conditional or mapped types.
+- **Breaking** — adding a required parameter (`required-parameter-added`),
+  removing a parameter (`parameter-removed`), narrowing a parameter type
+  (`parameter-narrowed`), widening a return type (`return-widened`), adding a
+  required member to an interface (`member-added`), making a property required,
+  optional, or `readonly`, or narrowing a type alias.
+- **Additive** — adding an optional parameter (`parameter-added`), making a
+  required parameter optional (`parameter-optional`), widening a parameter type
+  or type alias, or adding an optional member.
+- **Compatible** — renaming a parameter (`parameter-renamed`, since JavaScript
+  arguments are positional) or narrowing a return type (`return-narrowed`).
+- **Unknown** — changes requiring structural comparison of two object types,
+  generics, or conditional and mapped types.
 
-The summary bar then counts each level, breaking first
-(`6 breaking changes · 9 additive changes · 1 compatible change`), each
-filtering to its changes; the diff lists breaking changes first, each row states
-its level and reason, and the renderer's **Breaking only** control
-(`breakingOnly` in `presentation.rendererOptions`) hides the rest. The counts
-are in the comparison's `metadata.compatibility`, so a workflow can fail a pull
-request that breaks the API:
+The summary bar groups counts by severity, breaking changes first
+(`6 breaking changes · 9 additive changes · 1 compatible change`), with each
+count filtering the list. The diff puts breaking changes at the top with their
+reasons, and **Breaking only** (`breakingOnly` in
+`presentation.rendererOptions`) hides everything else. Counts are exposed in
+`metadata.compatibility` so CI can gate pull requests on breaking changes:
 
 ```sh
 projections compare main...HEAD -p api --json > api.comparison.json
 jq -e '.comparison.metadata.compatibility.counts.breaking == 0' api.comparison.json
 ```
 
+See
 [API compatibility](../../models/api-compatibility.md#typescript-assignability-over-the-checkers-types)
-lists every rule.
+for the complete rule list.
 
 ## Start from this definition
 
@@ -165,69 +166,69 @@ lists every rule.
 
 ## Limitations
 
-- It reads the checker's static view of the exports, not exports created at run
-  time, and it is not a declaration emitter: what it shows is what the checker
-  sees through your `tsconfig`.
-- The compatibility rules can't compare two different object types, generic
-  instantiations, or conditional, mapped and template literal types; those
-  changes are `unknown`. Overloads are matched pairwise by position.
-- Both revisions of a comparison use the one installed compiler, so upgrading
-  TypeScript in the pull request doesn't add noise; comparing extractions saved
-  with different compiler versions can, because each version prints some types
-  differently.
-- Project references aren't built: generated declarations that don't exist yet
+- It reflects the type checker's static view through your `tsconfig`, not
+  runtime-generated exports, and it does not emit declaration files.
+- Compatibility rules can't structurally compare two different object types,
+  generic instantiations, or conditional, mapped, and template literal types;
+  those come back as `unknown`. Function overloads are matched pairwise by
+  position.
+- Both revisions in a comparison use the same installed TypeScript compiler, so
+  bumping TypeScript in a PR won't create false diffs. Comparing saved
+  extractions produced by different TypeScript versions can add formatting
+  noise, since compiler versions print some types differently.
+- Project references aren't built automatically: unbuilt generated declarations
   need source path mappings or explicit `entrypoints`.
-- Conflicting definitions of one export under different conditions fail rather
-  than picking one; give them distinct subpaths.
-- Yarn Plug'n'Play has no `node_modules`; use `nodeLinker: node-modules`.
+- Conflicting definitions for the same export across export conditions fail
+  rather than arbitrarily picking one—give them distinct subpaths instead.
+- Yarn Plug'n'Play has no `node_modules` directory; set
+  `nodeLinker: node-modules` to use this extractor.
 
 ## Related
 
-- [`api`](../renderers/api.md), the renderer that draws it.
-- The
-  [`api-compatibility`](../../../packages/comparators/api-compatibility/README.md)
-  comparator file, and [the default comparator](../comparators/default.md) it
-  builds on.
-- [`rust-public-api`](rust-public-api.md), [`go-public-api`](go-public-api.md)
-  and [`dotnet-public-api`](dotnet-public-api.md): the same model for Rust, Go
-  and .NET.
-- [`nestjs-di`](nestjs-di.md), which uses the same installed TypeScript to load
-  a NestJS application.
+- [`api`](../renderers/api.md) — the renderer that displays the API diff.
+- [`api-compatibility`](../../../packages/comparators/api-compatibility/README.md)
+  — the compatibility comparator file, built on
+  [the default comparator](../comparators/default.md).
+- [`rust-public-api`](rust-public-api.md), [`go-public-api`](go-public-api.md),
+  and [`dotnet-public-api`](dotnet-public-api.md) — the same API model for Rust,
+  Go, and .NET.
+- [`nestjs-di`](nestjs-di.md) — uses the same installed TypeScript compiler to
+  inspect NestJS apps.
 
 ## How it works
 
-The
+See the
 [package README](../../../packages/extractors/typescript-public-api/README.md)
-details entry-point discovery and what is recorded, and
+for details on entry-point discovery and recorded fields, and
 [TypeScript support](../../../packages/extractors/typescript-support/README.md)
-how the compiler is found.
+for how the compiler is located.
 
 ## Build your own
 
-Write your own extractor when the API you care about isn't what the checker
-exports:
+Consider writing a custom extractor when the TypeScript checker's exports aren't
+the surface you need:
 
-- **Another kind of API**: an HTTP API described by OpenAPI, a GraphQL schema,
-  your CLI's commands and flags, or the events a package emits.
-- **Facts the checker doesn't have**: release tags from TSDoc (`@beta`,
-  `@internal`), deprecations, the team that owns each entry point, or bundle
-  size per export.
-- **Another grain**: one entity per package or entry point instead of per
-  declaration.
+- **Another API contract**, such as an OpenAPI spec, a GraphQL schema, CLI
+  commands and flags, or emitted events.
+- **Metadata the checker doesn't track**, like TSDoc release tags (`@beta`,
+  `@internal`), deprecation notices, entry-point ownership, or per-export bundle
+  size.
+- **Coarser granularity**, emitting one entity per package or entry point rather
+  than per declaration.
 
-Try the lighter options first: `entrypoints` limits the API to the subpaths you
-publish (leaving out test helpers), and `tsconfig` picks the program. To change
-what counts as breaking, copy `api-compatibility.comparator.yaml` and edit its
-rules, or write your own comparator file; to draw the API differently, keep this
-extractor and write a renderer.
+Check the built-in options first: `entrypoints` limits extraction to published
+subpaths (skipping test helpers) and `tsconfig` selects the program. To
+customize breaking-change rules, copy and edit
+`api-compatibility.comparator.yaml` or write your own comparator file; to change
+the presentation, keep this extractor and write a custom renderer.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
+**In VS Code**, open the Projections view, select **+ New Projection…**, choose
 **Write a custom extractor, renderer or comparator** › **Custom extractor** (or
-**Custom extractor and renderer**), and pick its language. It writes the
-definition and a starter extractor (`extract.mjs`, `extract.py` or `extract.go`)
-under `.github/projections/<id>/`, drawn by the built-in graph renderer. Or
-choose **Ask an agent to write it** and describe what the projection should
-show.
+**Custom extractor and renderer**), and pick a language. That creates the
+definition and a starter extractor (`extract.mjs`, `extract.py`, or
+`extract.go`) under `.github/projections/<id>/`, paired with the built-in graph
+renderer. You can also choose **Ask an agent to write it** and describe what you
+want to see.
 
 **With the CLI**, keep the `api` renderer:
 
@@ -235,13 +236,14 @@ show.
 projections init <id> --language node --renderer api
 ```
 
-An extractor that writes `api/v0` declarations with a `data.signature` is drawn
-by the `api` renderer; one that also writes the same contract facts can use
-`api-compatibility` (its `options.ecosystem` names the rules when the extraction
-doesn't declare `metadata.ecosystem`). Run it with
-`projections show -p <id> --trust` as you change it; an open projection tab uses
-your uncommitted edits ("Your edits") and says when its results are out of date,
-and the Testing view runs the projection's checks.
-[Write your first extractor](../../guides/first-extractor.md) walks through one,
-and [Extraction schema](../../guides/schemas.md#extraction-schema) describes
-what it prints.
+Any extractor that emits `api/v0` declarations with `data.signature` works with
+the `api` renderer; emitting the same contract facts also unlocks
+`api-compatibility` (use `options.ecosystem` to pick the rule set if the
+extraction doesn't set `metadata.ecosystem`). Test changes as you go with
+`projections show -p <id> --trust`. An open projection tab picks up your
+uncommitted edits ("Your edits") and flags stale results, and the Testing view
+runs your projection's checks.
+[Write your first extractor](../../guides/first-extractor.md) walks through a
+complete example, and
+[Extraction schema](../../guides/schemas.md#extraction-schema) documents the
+output format.

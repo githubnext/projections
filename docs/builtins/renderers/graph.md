@@ -1,11 +1,11 @@
 # Graph
 
-Entities as cards and relationships as arrows, laid out in layers, with every
-change shown where it happens. One renderer serves six presentations of a graph:
-`graph`, `graph-horizontal`, `dag`, `architecture`, `infrastructure` and
-`dependencies`; the definition's `renderer` picks one. Compared across a pull
-request, it answers "what was added, removed or rewired, and what does it
-connect to?"
+This renderer draws entities as cards and relationships as arrows arranged in
+layers, highlighting every change right where it happens. A single renderer
+powers six domain presentations—`graph`, `graph-horizontal`, `dag`,
+`architecture`, `infrastructure`, and `dependencies`—chosen via the `renderer`
+field in your projection definition. Across a pull request, it shows what was
+added, removed, or rewired, and what connects to it.
 
 <!-- generated: facts -->
 
@@ -22,18 +22,18 @@ connect to?"
 
 ## When to use it
 
-Use it for anything whose meaning is in its connections: services and the calls
-between them, pipeline jobs and what they wait for, cloud resources and what
-they reference, packages and what pulls them in. Each presentation words the
-same graph for its domain, so pick the one that matches what the extraction
-describes; they all accept the same extractions.
+Use this renderer whenever the story lives in the connections—services and the
+calls between them, pipeline jobs and what they wait on, cloud resources and
+their references, or packages and what pulls them in. All six presentations
+accept the same extractions and tailor the wording and layout to their domain,
+so pick the one that best fits what you're reviewing.
 
-It suits graphs of up to a few hundred entities. For a containment hierarchy
-sized by weight (a file tree), use [`file-packing`](file-packing.md); for a
-container's registrations, [`dependency-injection`](dependency-injection.md);
-for a database schema, [`database`](database.md).
+It works best for graphs up to a few hundred entities. For weighted containment
+hierarchies like file trees, use [`file-packing`](file-packing.md); for DI
+container registrations, use [`dependency-injection`](dependency-injection.md);
+and for database schemas, use [`database`](database.md).
 
-Built-in extractors that draw with it by default:
+Built-in extractors that use it by default:
 
 <!-- generated: extractors -->
 
@@ -53,136 +53,134 @@ Built-in extractors that draw with it by default:
 
 ## What it draws
 
-Each entity is a card: its kind on a small line above, in words (`component`
-reads Component), and its label below, in the monospace font. Each relationship
-is an arrow from the source card to the target card. Cards are placed in layers
-(top to bottom, or left to right) so that most arrows point the same way, and
-every card of a graph shares one width, sized to its longest text; text that
-still doesn't fit ends in an ellipsis, and the card's tooltip has it whole.
+Each entity renders as a card with its kind in a small header line (`component`
+reads as Component) and its label in monospace underneath. Each relationship
+renders as a directed arrow from source to target. Cards are arranged in layers
+(top to bottom or left to right) so most arrows flow in one direction, and every
+card shares a uniform width sized to its longest text. Text that still overflows
+truncates with an ellipsis, with the full value available in a tooltip.
 
-The view opens fitted, with every card in view, unless that would draw its
-smallest text below 8 px. Then it opens at that size on the top row, centred
-across a top-to-bottom graph (from the leftmost card of a left-to-right one),
-and you scroll for the rest; **Fit to view** always returns to everything in
-view. A comparison in **Diff** that doesn't fit at 8 px opens, still at 8 px, on
-its changes instead: the changed cards and relationships centred when they fit
-there, else from their top-left card. A host can ask for another opening view
-(see `RendererFocus`): the changes in any mode, fitted (at most at full size,
-and not below 8 px), one item centred with the cards it connects to, or
-everything; images can fit it whole whatever its text size
-(`projections compare --png … --focus changes --fit`). At most 500 entities are
-drawn, with a notice.
+By default, the graph opens fitted to the viewport unless doing so would push
+the smallest text below 8 px. When that happens, it opens at 8 px on the top row
+(centered for top-to-bottom graphs, or starting from the leftmost card for
+left-to-right ones) so you can scroll; **Fit to view** always zooms back out to
+the full graph. In **Diff** mode, a graph that won't fit at 8 px focuses on its
+changes instead—centering all changed cards and arrows if they fit, or starting
+at the top-left changed card. Hosts can also request a specific opening focus
+via `RendererFocus` (changes fitted at 8 px–100%, a single item with its
+neighbors, or the full graph), and image exports can force-fit everything
+regardless of text size (`projections compare --png … --focus changes --fit`).
+At most 500 entities are drawn, with a notice if more exist.
 
-Many relationships into one card (a hub) each keep a port of their own: the card
-grows wider, up to four times its width, so their arrowheads stand at least 12
-units apart, and runs into it take tracks of their own across the gap above it.
-Selecting or hovering a card traces each of its relationships whole, under a
-halo.
+When many arrows converge on a single hub card, each gets its own port: the card
+widens (up to four times its base width) so arrowheads stay at least 12 units
+apart, and incoming edges take separate tracks across the gap above it. Hovering
+or selecting a card highlights all of its connected arrows with a halo.
 
 ### `graph`
 
-The general presentation, top to bottom. Every entity kind is a card and every
-relationship kind an arrow; nothing is grouped.
+The general-purpose, top-to-bottom layout. Every entity kind is a card and every
+relationship kind is an arrow, with no automatic grouping.
 
 ### `graph-horizontal`
 
-The same graph laid out left to right, for long chains and wide pipelines that
-would otherwise be one tall column.
+The same general layout rotated left to right—handy for long chains and wide
+pipelines that would otherwise form a single tall column.
 
 ### `dag`
 
-Pipelines, build graphs and other directed acyclic graphs, top to bottom: the
-presentation [`github-actions-jobs`](../extractors/github-actions-jobs.md) uses.
-In one revision of a `dag/v0` extraction made entirely of `job`s, where several
-jobs all wait on the same several jobs (and those lead nowhere else), their
-`precedes` arrows meet at one join point instead of crossing as a mesh, and
-**Inspect N shared dependencies** under the graph lists each of them so you can
-select it. A comparison draws every arrow on its own. (`graph` draws such an
-extraction the same way: the join points come from the extraction, not the
-name.)
+Top-to-bottom directed acyclic graphs for pipelines and build graphs, used by
+[`github-actions-jobs`](../extractors/github-actions-jobs.md). In a single
+revision of a `dag/v0` extraction made entirely of `job`s, if several jobs all
+wait on the same group of upstream jobs (which lead nowhere else), their
+`precedes` arrows merge at a single join point instead of crossing in a dense
+mesh, and **Inspect N shared dependencies** beneath the graph lets you list and
+select them. Comparisons draw each arrow individually. (`graph` applies the same
+join points whenever the extraction matches—the behavior comes from the data,
+not the presentation name.)
 
 ### `architecture`
 
-Components grouped by module: a `module` whose only relationships are the
-`contains` relationships to its children (each with no other parent) becomes a
-dashed boundary around them, named on its top edge, instead of a card with an
-arrow to each. Other relationships stay arrows, across boundaries. Containment
-drawn as boundaries isn't counted in the summary bar, nor are modules when every
-one is drawn as a boundary: they only group the components it counts.
+Groups components by module. Any `module` whose only relationships are
+`contains` edges to its children (where each child has no other parent) renders
+as a dashed boundary labeled along its top edge rather than a separate card with
+arrows. All other relationships remain arrows crossing boundaries. Containment
+edges rendered as boundaries aren't counted in the summary bar, nor are modules
+when every module is drawn as a boundary.
 
-One revision of up to 60 components draws every one: a large one opens at the
-readable text floor on its top row and scrolls, with nothing to click open. A
-comparison of more than 40 components (or one revision of more than 60, which
-would take too long to lay out whole) collapses each unchanged boundary into one
-summary card, named for the boundary and counting its components (`extractors`,
-`Module · 31 components`), with the boundary's own `data` (so a module the
-extractor describes and sizes keeps its subtitle, size and color); relationships
-into and out of it join the card, one arrow per pair of cards. A boundary stays
-open when anything in it changed, when a changed relationship touches it, or
-when it holds the item a host focused. A summary card shows an expand icon in
-its corner: clicking it (or double-clicking, or pressing Enter or Space on it),
-or an arrow joined to one, opens it, and a card in its place, with a collapse
-icon, collapses it again. Cards are controls, so clicking them never selects
-their text; selecting a hidden component elsewhere (the host's table, the other
-pane) opens the boundary that holds it. The **Every component** control shows
-every boundary open.
+A single revision with up to 60 components renders fully expanded; larger graphs
+open at the 8 px text floor on the top row so you can scroll without clicking
+anything open. In comparisons over 40 components—or single revisions over 60,
+which would be slow to lay out whole—unchanged boundaries collapse into summary
+cards showing the module name and count (`extractors`, `Module · 31 components`)
+while preserving the boundary's own `data` (subtitle, size, color). Incoming and
+outgoing edges merge onto the summary card, one arrow per pair of cards. Any
+boundary containing a changed item, touched by a changed relationship, or
+holding a host-focused item stays open.
+
+Collapsed summary cards show an expand icon in the corner: click, double-click,
+or press Enter/Space on the card (or an arrow attached to it) to expand it, and
+use the collapse icon to fold it back up. Cards behave as controls so clicking
+them never accidentally selects text, and selecting a hidden component in the
+host's table or another pane automatically expands its boundary. Toggle **Every
+component** to expand all boundaries at once.
 
 ### `infrastructure`
 
-Cloud resources in the
-[infrastructure model](../../models/infrastructure-model.md), as
+Draws cloud resources following the
+[infrastructure model](../../models/infrastructure-model.md) used by
 [`terraform-infrastructure`](../extractors/terraform-infrastructure.md) and
-[`azure-what-if`](../extractors/azure-what-if.md) write it. A card's kind line
-is its resource type (`aws_db_instance`, `virtualNetworks/subnets`, a data
-source as `data.<type>`) and its label the resource's name. Modules, resource
-groups and parent resources whose only relationships are containment (a virtual
-network around its subnets) are boundaries.
+[`azure-what-if`](../extractors/azure-what-if.md). Each card's kind line shows
+its resource type (`aws_db_instance`, `virtualNetworks/subnets`, or
+`data.<type>` for data sources), and its label shows the resource name. Modules,
+resource groups, and parent resources with containment-only relationships (such
+as a virtual network around its subnets) render as boundaries.
 
-A change is worded as its planned action, an icon and a word on the card:
-**Create**, **Destroy**, **Replace** (**Replace, create first** when the new
-resource is created before the old one is destroyed), **Update in place**,
-**Redeploy**, **Read**, **Import**, **Forget** and **Moved**, so a replacement
-never reads like an update. One revision shows each resource's pending action
-after its type (`aws_db_instance · Replace`).
+Changes use planned-action icons and labels directly on each card—**Create**,
+**Destroy**, **Replace** (**Replace, create first** when the replacement is
+created before destroying the old resource), **Update in place**, **Redeploy**,
+**Read**, **Import**, **Forget**, and **Moved**—so a replacement never looks
+like an in-place update. Single-revision views also display pending actions
+beside the resource type (`aws_db_instance · Replace`).
 
-With **Dependents** on, selecting a resource brings forward everything with a
-path of `references` to it and recedes the rest, and the footer says how many
+With **Dependents** turned on, selecting a resource highlights everything with a
+`references` path to it, dims everything else, and notes the count in the footer
 (`3 resources depend on db`).
 
 ### `dependencies`
 
-A package dependency graph, left to right from the workspace members
+A left-to-right package dependency graph starting from workspace members
 (`data.workspaceMember`), NuGet projects and target frameworks, or Swift targets
-and products: what each pulls in, directly and transitively. A card names its
-kind (Workspace, Package, or the extractor's own, such as Project), with the
-package name and its version as code.
+and products, showing direct and transitive dependencies. Each card displays its
+kind (Workspace, Package, or an extractor-specific kind like Project) above the
+package name and version in monospace.
 
-Lockfiles resolve hundreds of packages, so it shows what explains a change and
-summarizes the rest:
+Because lockfiles often resolve hundreds of packages, this presentation surfaces
+what explains a change and summarizes the rest:
 
-- **Always shown**: the roots, their direct dependencies, every changed package,
-  both ends of every changed dependency, and the shortest path from a root that
-  pulls each of them in.
-- **Collapsed**: every other package belongs to the first shown package that
-  pulls it in, which gets one summary card ("12 more packages"). Selecting the
-  summary expands that package by one level; the card stays in its place as
-  "Collapse 12 packages", which closes the group again (and clears a selection
-  it hides). **All packages** shows everything, with no summary cards.
-- **One arrow per package**: a shared package keeps the arrow from the package
-  that first pulls it in, plus every dependency added or removed; its other
-  dependents are counted on its kind line ("Package · +3 dependents"). **Every
-  dependency** draws them all.
-- **Focus**: selecting a package brings forward what depends on it and what it
-  depends on, drawn arrows or not, and the footer says how many
-  (`3 packages depend on debug; it depends on 1 package`).
+- **Always visible.** Roots, their direct dependencies, every changed package,
+  both ends of every changed dependency, and the shortest path from a root to
+  each of them stay expanded.
+- **Collapsed subtrees.** Remaining packages group under the first visible
+  package that pulls them in as a single summary card ("12 more packages").
+  Selecting it expands that package by one level and turns the card into
+  "Collapse 12 packages" to fold it back up (clearing any selection it hides).
+  Turn on **All packages** to show everything without summary cards.
+- **One arrow per package.** Shared packages keep only the arrow from the first
+  package that pulls them in, plus any added or removed dependency; extra
+  dependents are counted on the kind line ("Package · +3 dependents"). Turn on
+  **Every dependency** to draw all edges.
+- **Focus highlighting.** Selecting a package highlights both its dependents and
+  its dependencies—whether or not every arrow is drawn—and shows the counts in
+  the footer (`3 packages depend on debug; it depends on 1 package`).
 
-NuGet's `resolved` relationships (which target framework a package belongs to)
-are membership, not dependencies, and aren't drawn.
+NuGet's `resolved` relationships indicate target-framework membership rather
+than dependencies and aren't drawn.
 
 ## Options
 
-The host draws these controls; set their starting values in the definition's
-`presentation.rendererOptions` by ID:
+The host provides these controls; set their starting values by ID in
+`presentation.rendererOptions`:
 
 <!-- prettier-ignore -->
 | Presentation | Control | ID | Values | Default |
@@ -205,18 +203,17 @@ The host draws these controls; set their starting values in the definition's
 "presentation": {"rendererOptions": {"badges": "/data/capabilities", "colorBy": "/data/scope", "icon": "/data/icon"}}
 ```
 
-The card options show facts the extraction keeps in `data` on the canvas:
+The card options surface extra metadata from each entity's `data` directly on
+the canvas:
 
-- **Subtitle** draws a text field (what the entity is for, say) under each
-  card's label in the text font, wrapped on up to three lines and ending in an
-  ellipsis when longer; the card's tooltip has it whole. The card grows a line
-  for each line.
-- **Icon** draws a small icon before each card's kind line (and before a
-  boundary's heading), in the kind line's muted color, so the parts of a system
-  read at a glance. The field's value names the icon; it is never markup or a
-  URL, since the data is untrusted and renderers run sandboxed. The renderer
-  draws only its own fixed set of [Lucide](https://lucide.dev/icons) icons, by
-  their Lucide names:
+- **Subtitle** renders a text field (such as a short description) beneath the
+  card's label in the body font, wrapping up to three lines with an ellipsis and
+  showing the full text on hover. Cards grow taller to fit each line.
+- **Icon** places a small muted icon before each card's kind line (and before
+  boundary headings) so system components are easy to scan. The field holds an
+  icon name—never raw markup or a URL, since extraction data is untrusted and
+  renderers run sandboxed. Only this fixed set of
+  [Lucide](https://lucide.dev/icons) icon names is supported:
 
   <!-- card-icons -->
 
@@ -235,116 +232,106 @@ The card options show facts the extraction keeps in `data` on the canvas:
 
   <!-- end card-icons -->
 
-  The `icon` field is always a choice, so a definition that presets it applies
-  to revisions from before their icons too, which draw none. A card whose field
-  names any other icon draws none, and the summary bar warns of it
-  (`1 unknown icon`, filtering to those cards, its tooltip naming them). A
-  changed icon crossfades with the card's step; the diff shows the After icon
-  and lists the change with the card's other field changes.
+  The `icon` field is always offered as a choice so definitions presetting it
+  still work cleanly on older revisions without icons. Unknown icon names render
+  no icon and trigger a summary-bar warning (`1 unknown icon`) that filters to
+  affected cards and names them on hover. Changed icons crossfade during their
+  step; Diff mode displays the After icon and notes the change alongside other
+  field updates.
 
-- **Size by** shows a numeric field's value on each card, compact (`12K`), at
-  the right of the card's kind line, and the legend says what the number is
-  (`Number on each card: tokens`). Every card keeps one width, so the cards line
-  up in columns. A changed value crossfades with its card's step.
-- **Badges** draws a field's values as small monospace pills under each card's
-  label: each item of a list, a string or number itself, and a `true` boolean as
-  the field's name. The card grows a row for each row of badges.
-- **Labels** draws a field's values the same way in the text font, for words
-  rather than code (`property tests`, `on npm`), before the badges.
-- **Highlights** draws a field's values first, as semibold labels with a shield
-  check in the accent color: the fact to see before any other (how a component
-  is formally verified, say).
-- **Tags** draws a field's values last, as a quiet line of code without pills
-  (where a component runs, say).
+- **Size by** displays a numeric field's value compactly (such as `12K`) on the
+  right of each card's kind line, with the legend explaining what the number
+  represents (`Number on each card: tokens`). Cards keep a uniform width so
+  columns stay aligned, and value changes crossfade during their step.
+- **Badges** renders a field's values as compact monospace pills beneath the
+  label—one per list item, a single string or number, or the field's name for a
+  `true` boolean—expanding the card as rows wrap.
+- **Labels** renders values the same way in the body font (for prose tags like
+  `property tests` or `on npm`), placed ahead of badges.
+- **Highlights** renders values first as semibold accent labels with a
+  shield-check icon—useful for high-priority facts such as formal verification.
+- **Tags** renders values last as a quiet monospace line without pill borders
+  (for example, where a component runs).
 
-In **Diff**, a modified card lists only the data changes it doesn't mark itself
-(its size, badges, labels, highlights and tags show their own change), and
-counts fields holding objects in one line (`2 more fields changed`); the host's
-details show them.
+In **Diff** mode, a modified card only lists `data` changes that aren't already
+shown inline (size, badges, labels, highlights, and tags display their own
+diffs), summarizing nested object changes in one line (`2 more fields changed`)
+with full details in the host's details panel.
 
-- **Color by** draws a band in a color per value along each card's leading edge:
-  its kind, or a field's value (a boolean as the field's name or `not <field>`).
-  Cards without the field have no band.
-- **Relationships** draws only one kind of relationship (containment is always
-  drawn), for a graph whose kinds together are a tangle.
-- **Relationship colors** draws each relationship kind in its own color.
+- **Color by** adds a colored accent stripe along each card's leading edge based
+  on its kind or a field value (booleans show the field name or `not <field>`).
+  Cards missing that field show no stripe.
+- **Relationships** filters the canvas to a single relationship kind (while
+  always keeping containment boundaries), which helps untangle dense graphs.
+- **Relationship colors** gives each relationship kind its own distinct color.
 
-Colors come from the theme's categorical palette, never the change colors, and
-no card value shares a color with a relationship kind. A field whose every value
-names a programming language (`Rust`, `TypeScript`) takes the languages' GitHub
-colors instead, as file packing and code statistics do. The host's legend lists
-them: the card colors under the field's name (or **Kind**), then a line for each
-relationship kind. A field the document doesn't have isn't offered, and the host
-says so when the definition presets one.
+Colors come from the theme's categorical palette—never from change colors—and
+card values never collide with relationship colors. If every value in a field is
+a programming language (`Rust`, `TypeScript`), it uses GitHub's language colors
+just like file packing and code statistics. The host's legend lists card colors
+under the field name (or **Kind**), followed by each relationship kind. Fields
+absent from the extraction aren't offered, and the host notes when a preset
+field isn't present.
 
-Every presentation also has the zoom actions **Zoom in**, **Zoom out** and **Fit
-to view** (`zoom-in`, `zoom-out`, `zoom-fit`); they are actions, not options, so
-they can't be preset. Ctrl/⌘-wheel and pinch zoom in the frame, and the canvas
-scrolls to pan.
+Every presentation also provides **Zoom in**, **Zoom out**, and **Fit to view**
+(`zoom-in`, `zoom-out`, `zoom-fit`) as interactive actions rather than preset
+options, along with Ctrl/⌘-wheel, pinch zoom, and scroll-to-pan.
 
-It presents a comparison in every mode: Diff, where a comparison opens, then
-Side by side, Animated and Swipe. `presentation.mode` picks another to open in.
+All four comparison modes are supported—Diff (the default), Side by side,
+Animated, and Swipe. Set `presentation.mode` to open in another mode.
 
 ## What a comparison shows
 
-- **Side by side and Swipe**: each pane draws one revision in its own layout.
-  While the host highlights changes, each pane marks its side of them in the
-  card's footer (`+ Added`, `− Removed`, `~ Modified`, `→ Renamed`, or the
-  presentation's own words).
-- **Animated**: one graph moves from Before to After in the comparison's steps.
-  Removed cards fade, then the layout closes their gap; added cards get room,
-  then fade in; arrows come and go with their endpoints and crossfade when
-  rewired. Cards keep their layers and order throughout, so nothing passes
-  through anything else, and the view never zooms while you scrub: where a
-  revision's own layout would move a card or boundary through another, that end
-  of the animation keeps the places of the graph with both revisions, and cards
-  only fade in or out there. A module emptied by removals stays a boundary.
-- **Diff**: one static graph of both revisions. Added cards and arrows are in
-  the added color; removed ones stay where they were, dashed and struck through;
-  modified cards are amber, with a renamed label or a changed version shown old
-  (struck through) then new; an arrow rewired between other cards is drawn
-  twice, its old route removed and its new one added. Diff cards show their text
-  whole, wrapping instead of ending in an ellipsis. A modified card lists what
-  changed in its `data`, each field with its old value struck through and its
-  new one (`null` when absent); it shows three, then counts the rest. In
-  `infrastructure`, a changed resource's card lists its attribute changes
-  instead (down to the setting, `properties.hardwareProfile.vmSize`), what
-  forces a replacement first and values known only after apply last. Badges a
-  modified card gained are in the added color, and those it lost are struck
-  through.
+- **Side by side and Swipe** lay out each revision in its own pane and mark its
+  changes in each card's footer (`+ Added`, `− Removed`, `~ Modified`,
+  `→ Renamed`, or the presentation's domain wording) when highlighting is on.
+- **Animated** transitions a single graph from Before to After step by step.
+  Removed cards fade out before their gap closes, added cards open room before
+  fading in, and arrows follow their endpoints or crossfade when rewired. Cards
+  preserve their layers and order so nothing passes through another card and the
+  viewport never zooms mid-scrub; if a single-revision layout would cause a
+  crossing, that endpoint keeps the combined layout and fades cards in or out in
+  place. A module emptied by removals stays visible as a boundary.
+- **Diff** merges both revisions into one static graph. Added cards and arrows
+  use the added color, removed ones stay in place dashed and struck through, and
+  modified cards appear in amber with old labels or versions struck through
+  before new ones. Rewired arrows appear twice—removed on the old route and
+  added on the new one. Diff cards wrap text instead of truncating, and modified
+  cards list up to three changed `data` fields inline (old value struck through,
+  then new value, using `null` when absent) before counting the rest. In
+  `infrastructure`, changed resource cards instead list attribute-level diffs
+  (down to paths like `properties.hardwareProfile.vmSize`), putting changes that
+  force replacement first and apply-time values last. Added badges appear in the
+  added color and removed badges are struck through.
 
-Change marks follow the host's highlighting, so Before, After and highlighting
-off draw the graph plain.
+Change marks follow the host's highlighting toggle, so Before, After, and
+unhighlighted views render plain.
 
-The **summary bar** counts each kind, with its changes, in the presentation's
-words; kinds it doesn't name take the host's
-(`5 components +1 −1 · 3 modules · 4 uses +3 −3`). Every figure filters to its
-items. A kind drawn only as boundaries round other cards (`architecture`'s
-modules, `infrastructure`'s modules and resource groups) is no figure: its boxes
-group cards the bar already counts. Then the presentation's facts:
+The **summary bar** counts each entity and relationship kind with its deltas in
+the presentation's wording, falling back to host labels for unnamed kinds
+(`5 components +1 −1 · 3 modules · 4 uses +3 −3`). Every count acts as a filter.
+Kinds rendered purely as boundaries (`architecture` modules, `infrastructure`
+modules and resource groups) aren't counted separately since they only group
+cards already in the bar. Each presentation then appends its own summary facts:
 
-- `graph`, `graph-horizontal`, `dag` and `architecture`: the counts alone;
-  `precedes` relationships count as dependencies (`6 dependencies`).
-- `infrastructure`: resources, data sources, and modules and resource groups
-  drawn as cards, then the plan in Terraform's order and words, each action with
-  its icon and count
-  (`2 to add · 3 to change · 1 to replace · 1 to destroy · 1 to move`, and
-  `to import`, `to redeploy`, `to read` and `to forget`). In one revision it
-  counts each resource's pending action, as a plan does. Modules and resource
-  groups aren't in the plan.
-- `dependencies`: workspaces (or projects and target frameworks), packages and
-  each kind of dependency (`dev dependency`, `peer dependency`), then, in a
-  comparison, upgrades and downgrades by the part of the version that moved
+- `graph`, `graph-horizontal`, `dag`, and `architecture` show counts only
+  (`precedes` edges count as dependencies, such as `6 dependencies`).
+- `infrastructure` counts resources, data sources, and card-rendered modules and
+  resource groups, followed by Terraform-style plan actions with icons
+  (`2 to add · 3 to change · 1 to replace · 1 to destroy · 1 to move`, plus
+  `to import`, `to redeploy`, `to read`, and `to forget`). Single-revision views
+  count pending actions the same way, excluding modules and resource groups.
+- `dependencies` counts workspaces (or projects and target frameworks),
+  packages, and dependency kinds (`dev dependency`, `peer dependency`). In
+  comparisons, it breaks down version bumps by semver level
   (`18 major upgrades · 6 minor upgrades · 4 patch upgrades · 1 patch downgrade`),
-  packages whose versions can't be ordered (`2 packages changed otherwise`) or
-  that were renamed, and how many changed packages are direct dependencies
-  (`3 direct dependencies changed`). On the cards a version change reads
-  **Upgraded** or **Downgraded**, and in Diff names the bump (**Major upgrade**,
-  **Patch downgrade**).
+  notes non-orderable or renamed packages (`2 packages changed otherwise`), and
+  highlights direct dependency changes (`3 direct dependencies changed`). Cards
+  label version changes as **Upgraded** or **Downgraded**, and Diff mode names
+  the exact bump (**Major upgrade**, **Patch downgrade**).
 
-Selecting a card or an arrow selects it in every pane and in the host's table;
-the host's details show the change, with the comparator's summary of it when
-there is one.
+Selecting any card or arrow highlights it across every pane and in the host's
+table, where the details panel shows the change and any comparator summary.
 
 ## Start from this definition
 
@@ -363,82 +350,85 @@ there is one.
 
 ## Screenshot
 
-The `architecture` presentation side by side: `InvoiceService` arrives in the
-`invoicing` module with its new dependencies.
+Here is the `architecture` presentation side by side: `InvoiceService` arrives
+inside the `invoicing` module along with its new dependencies.
 
 ![The architecture presentation side by side: modules drawn as dashed boundaries, and InvoiceService marked Added in the invoicing module with its new arrows](../../images/comparators/moved-components-default.png)
 
 ## Limitations
 
-- It draws at most 500 entities. Narrow larger graphs at the extractor (its
-  include and exclude inputs, where it has them), or use the host's table.
-- Layout is automatic: you can't pin a card or choose its layer, and cards are
-  grouped only by containment-only `module`s (`architecture`) or the boundary
-  kinds of `infrastructure`.
-- Outside Diff, long names end in an ellipsis; the tooltip and the host's
-  details have them whole.
-- In Diff only `infrastructure` lists a modified card's field changes; the other
-  presentations mark the card modified and show its label or version change, and
-  the host's details list its fields.
-- The join points of `dag` appear only in one revision of an extraction made
-  entirely of `job`s.
-- `dependencies` orders versions as semantic versions; any other version (a
-  commit hash, a tag, a compound range) reads **Modified**.
+- At most 500 entities are drawn. For larger graphs, filter at the extractor
+  (using its include/exclude inputs where available) or inspect everything in
+  the host's table.
+- Layout is automatic—you can't pin cards or assign custom layers, and grouping
+  is limited to containment-only `module`s in `architecture` and the boundary
+  kinds in `infrastructure`.
+- Outside Diff mode, long labels truncate with an ellipsis; check the tooltip or
+  the host's details panel for the full text.
+- In Diff mode, only `infrastructure` lists attribute-level changes on modified
+  cards; other presentations mark the card modified with its label or version
+  change, while the host's details panel shows individual fields.
+- Join points in `dag` appear only in a single-revision view of an extraction
+  composed entirely of `job`s.
+- `dependencies` compares versions using semantic versioning; non-semver strings
+  (such as commit hashes, tags, or compound ranges) simply display as
+  **Modified**.
 
 ## Related
 
-- The extractors it draws by default:
+- Default extractors:
   [`workspace-dependencies`](../extractors/workspace-dependencies.md),
-  [`cargo-dependencies`](../extractors/cargo-dependencies.md) and
+  [`cargo-dependencies`](../extractors/cargo-dependencies.md), and
   [`nuget-dependencies`](../extractors/nuget-dependencies.md) (`dependencies`);
   [`terraform-infrastructure`](../extractors/terraform-infrastructure.md) and
   [`azure-what-if`](../extractors/azure-what-if.md) (`infrastructure`);
-  [`github-actions-jobs`](../extractors/github-actions-jobs.md) (`dag`);
+  [`github-actions-jobs`](../extractors/github-actions-jobs.md) (`dag`); and
   [`scip-file-references`](../extractors/scip-file-references.md) (`graph`).
-- [`file-packing`](file-packing.md), which also draws `graph/v0`: a containment
-  hierarchy as nested circles.
+- [`file-packing`](file-packing.md) — also renders `graph/v0`, drawing
+  containment hierarchies as nested circles.
 - [`dependency-injection`](dependency-injection.md) and
-  [`runtime-policy`](runtime-policy.md), which draw `architecture/v0`
-  extractions written in their own vocabularies.
-- [The default comparator](../comparators/default.md), which decides the steps
-  the animation plays.
+  [`runtime-policy`](runtime-policy.md) — render `architecture/v0` extractions
+  using their own domain vocabularies.
+- [The default comparator](../comparators/default.md) — determines the step
+  order for animations.
 
 ## How it works
 
-The [package README](../../../packages/renderers/graph/README.md) covers how one
-bundle serves every presentation, and the
-[renderer kit guide](../../guides/renderer-kit-graphs.md) the shared graph
-canvas, its layout and its routes.
+See the [package README](../../../packages/renderers/graph/README.md) for how a
+single bundle powers all six presentations, and the
+[renderer kit guide](../../guides/renderer-kit-graphs.md) for the shared graph
+canvas, layout, and routing.
 
 ## Build your own
 
-The graph draws every graph the same way: cards, arrows and the layers the
-layout chooses. Write your own renderer when the picture should say more:
+The built-in graph renderer draws every graph as cards and arrows in
+automatically chosen layers. Build a custom renderer when your team needs a more
+specialized diagram:
 
-- **Your own visual language**: swimlanes per team, a map of regions and zones,
-  a sequence or state diagram, C4 or BPMN notation, an icon for each kind of
-  service.
-- **Grouping or placement it doesn't do**: cards grouped by owner or deployment
-  unit, layers you choose rather than the layout's, a fixed place for what
-  readers look for first.
-- **Emphasis from your data**: the critical path, heat by a metric (latency,
-  cost, test time), or sizes and colors that carry meaning.
+- **A different visual language** — swimlanes per team, a map of regions and
+  zones, sequence or state diagrams, C4 or BPMN notation, or custom icons per
+  service type.
+- **Custom grouping or placement** — cards grouped by owner or deployment unit,
+  fixed layers you control, or a dedicated spot for high-priority nodes.
+- **Data-driven emphasis** — highlighting the critical path, heat-mapping by
+  latency, cost, or test time, or encoding meaning in custom sizes and colors.
 
-Try the lighter options first. Another presentation may already fit:
-`graph-horizontal` for long chains, `architecture` to draw containment as
-boundaries (write `module` entities that only `contains` their children). The
-controls above and `presentation.mode` set how it opens, and
-[`file-packing`](file-packing.md) draws the same `graph/v0` extraction as a
-hierarchy. To change which changes come first, or to word each change in your
-domain (the host's details show it), add a comparator file.
+Check the lighter options first. Another built-in presentation may already fit:
+`graph-horizontal` handles long chains, and `architecture` turns
+containment-only `module` entities (using `contains`) into boundaries. The
+controls above and `presentation.mode` customize how the view opens, and
+[`file-packing`](file-packing.md) renders the same `graph/v0` extraction as a
+hierarchy. If you only want to reorder steps or add domain-specific change
+summaries (which appear in the host's details panel), add a comparator file
+instead.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
+**In VS Code**, select **+ New Projection…** in the Projections view, choose
 **Write a custom extractor, renderer or comparator** › **Custom renderer**, and
-pick the built-in extractor it draws. It writes the definition
-(`.github/projections/<id>.json`) and a TypeScript, Vite and React renderer
-package built on the renderer kit (`.github/projections/<id>/renderer`), and
-opens the definition and the projection's tab. Or choose **Ask an agent to write
-it** and describe what the projection should show.
+pick the built-in extractor it draws. VS Code scaffolds the definition
+(`.github/projections/<id>.json`) and a TypeScript, Vite, and React renderer
+package built on the renderer kit (`.github/projections/<id>/renderer`), then
+opens both the definition and the projection tab. You can also choose **Ask an
+agent to write it** and describe what you want shown.
 
 **With the CLI**:
 
@@ -446,15 +436,16 @@ it** and describe what the projection should show.
 projections init <id> --extractor <extractor> --renderer custom
 ```
 
-Then, in the renderer package, run `npm install`, then `npm run dev` for a
-development server with hot updates, `npm run workbench` to open its scenarios
-in the fixtures workbench in a browser, and `npm test` to run the renderer
-checks on every scenario. In VS Code an open projection tab uses your
-uncommitted definition edits ("Your edits"), and saving the renderer's sources
-rebuilds it (in a trusted workspace, while its tab is open, with its `watch` or
-`build` script) and reloads the view; the Testing view runs each projection's
-checks (`projections check -p <id>`, renderer checks included).
-[Develop a renderer](../../guides/develop-a-renderer.md) walks through it; the
-[renderer kit guide](../../guides/renderer-kit.md) and the
-[renderer kit API](../../reference/renderer-kit.md) cover the graph canvas this
-renderer is built from, which yours can use too.
+Inside the generated renderer package, run `npm install`, then use `npm run dev`
+for a hot-reloading dev server, `npm run workbench` to preview your scenarios in
+the browser, and `npm test` to run renderer checks across every scenario.
+
+In VS Code, an open projection tab picks up your uncommitted definition edits
+("Your edits"), and saving renderer source files automatically rebuilds and
+reloads the view in a trusted workspace (using its `watch` or `build` script).
+Run projection and renderer checks from the Testing view or via
+`projections check -p <id>`. For a full walkthrough, see
+[Develop a renderer](../../guides/develop-a-renderer.md), the
+[renderer kit guide](../../guides/renderer-kit.md), and the
+[renderer kit API](../../reference/renderer-kit.md)—including the shared graph
+canvas that this renderer is built on.

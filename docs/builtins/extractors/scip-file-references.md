@@ -1,9 +1,10 @@
 # SCIP file references
 
-Which files in the repository refer to definitions in other files, read from a
-[SCIP](https://github.com/scip-code/scip) index that the project's own indexer
-produces. Compared across a pull request, it answers "which files now depend on
-which others, and which cross-file references did this change add or remove?"
+This extractor maps which files in your repository reference definitions in
+other files, using a [SCIP](https://github.com/scip-code/scip) index produced by
+your project's own indexer. Compared across a pull request, it shows which files
+now depend on which others, and which cross-file references were added or
+removed.
 
 <!-- generated: facts -->
 
@@ -18,27 +19,31 @@ which others, and which cross-file references did this change add or remove?"
 
 ## When to use it
 
-Use it to review a change's reach in code: a module that starts importing from
-another layer, a file split in two and who now refers to each half, a helper
-whose last caller in another file went away. It is language-agnostic: it works
-wherever a SCIP indexer does (TypeScript and JavaScript, Rust, Go, Python, Java
-and other JVM languages, C and C++, Ruby, .NET), because the indexer, not
-Projections, understands the language.
+Use this extractor when you want to see how far a change reaches across your
+codebase—for example, a module starting to import from another architectural
+layer, a file split in two and who now calls each half, or a helper losing its
+last external caller. Because the SCIP indexer handles language semantics rather
+than Projections, it works for any language with a SCIP indexer (TypeScript and
+JavaScript, Rust, Go, Python, Java and other JVM languages, C and C++, Ruby,
+.NET).
 
-Running the indexer runs project tooling, so it needs `--trust`; reading an
-index the revision already contains doesn't. It works at the grain of files; for
-a package-level graph use [`workspace-dependencies`](workspace-dependencies.md)
-or [`cargo-dependencies`](cargo-dependencies.md), and for what a package
-exports, [`typescript-public-api`](typescript-public-api.md) and its siblings.
+Running an indexer executes project tooling, so it requires `--trust`; reading a
+pre-generated index already in the revision does not. This extractor works at
+the file level—for package-level graphs, see
+[`workspace-dependencies`](workspace-dependencies.md) or
+[`cargo-dependencies`](cargo-dependencies.md), and for package exports, see
+[`typescript-public-api`](typescript-public-api.md) and its sibling API
+extractors.
 
 ## What it reads
 
-A SCIP index of the revision, from one of two sources (set exactly one):
+Provide a SCIP index for each revision using one of two mutually exclusive
+inputs:
 
-- **`indexer`**: the indexer's argv, run without a shell in the revision (or in
-  `root`) at each revision you compare. `{output}` in it is replaced with a
-  private path outside the revision; without it, the indexer must write
-  `index.scip` in its working directory, as SCIP indexers do by default.
+- **`indexer`** — the command argv to run (without a shell) in the revision or
+  in `root`. Any `{output}` placeholder is replaced with a private path outside
+  the revision; if you omit it, the indexer is expected to write `index.scip` in
+  its working directory, which is the standard SCIP default.
 
   | Language               | `indexer`                                                |
   | ---------------------- | -------------------------------------------------------- |
@@ -47,30 +52,30 @@ A SCIP index of the revision, from one of two sources (set exactly one):
   | Go                     | `["scip-go", "--output", "{output}"]`                    |
   | Python                 | `["scip-python", "index", "--output", "{output}"]`       |
 
-  Install the indexer version the project uses. A revision examined in a copy
-  borrows the `node_modules` folders installed in your checkout while the
-  indexer runs, so external types resolve as they do there; other ecosystems'
-  indexers find dependencies in their own caches, which the definition grants
-  through `execution.environment`. Indexing usually takes longer than the
-  default 30-second timeout:
+  Make sure the indexer version your project uses is installed. When examining a
+  revision in a temporary copy, the extractor borrows your checkout's
+  `node_modules` folders during indexing so external types resolve normally;
+  indexers for other ecosystems locate their caches through variables you allow
+  in `execution.environment`. Because indexing often exceeds the default
+  30-second limit, raise the timeout:
 
   ```json
   "execution": {"timeoutMs": 120000}
   ```
 
-- **`index`**: a repository-relative `.scip` file in the revision, such as one
-  CI generated. It runs nothing, but the index must match the revision: a
-  document the revision doesn't have is an error, because a stale index explains
-  the wrong code.
+- **`index`** — a repository-relative `.scip` file committed in the revision
+  (for example, one generated in CI). Nothing executes, though the index must
+  match the revision: referencing a document that doesn't exist in that revision
+  fails with an error so a stale index never misleads you.
 
-A reference is a use of a symbol defined in another indexed file of the
-repository; imports count. Each file that refers to or is referred to from
-another file is a `file` entity, its ID the percent-encoded path
-(`file:src%2Fapi.ts`). Each pair of files is one `references` relationship from
-the referring file to the defining one, with how many distinct `references` it
-makes, how many distinct symbols (`symbolCount`), and the first 50 of those
-symbols. Symbols leave out their package version, so upgrading a dependency
-alone doesn't change the graph.
+Any use of a symbol defined in another indexed repository file (including
+imports) counts as a reference. Every file that references or is referenced by
+another becomes a `file` entity with a percent-encoded path ID
+(`file:src%2Fapi.ts`). Each pair of files is linked by a single `references`
+relationship pointing from the caller to the defining file, recording the total
+number of `references`, the number of distinct symbols (`symbolCount`), and the
+first 50 symbol names. Package versions are stripped from symbol strings so a
+dependency bump alone doesn't churn the graph.
 
 ## Options
 
@@ -86,19 +91,19 @@ alone doesn't change the graph.
 
 ## What a comparison shows
 
-- **Files** added or removed: a file that starts or stops referring to, or being
-  referred to from, another file.
-- **References** added or removed: a file that starts or stops using definitions
-  from another.
-- **References** modified: the same two files, with more or fewer references or
-  different symbols.
+- **Added or removed files** that begin or stop participating in cross-file
+  references.
+- **Added or removed references** when one file starts or stops using
+  definitions from another.
+- **Modified references** between the same pair of files when the reference
+  count or referenced symbols change.
 
-The [`graph`](../renderers/graph.md) renderer lays the files out in layers along
-the references and keeps survivors in place through the change. Its summary bar
-counts files and references, and how many of each were added, removed and
-modified; it adds no facts of its own. A large graph opens at a readable size
-(text no smaller than 8 px) and scrolls, rather than fitting everything at a
-size nobody can read.
+The [`graph`](../renderers/graph.md) renderer arranges files in layers along the
+reference direction and keeps unchanged files in place across transitions. The
+summary bar counts files and references along with added, removed, and modified
+totals without adding extra computed facts. Large graphs open at a readable zoom
+level (text at least 8 px) and scroll instead of shrinking everything until it's
+illegible.
 
 ## Start from this definition
 
@@ -125,61 +130,63 @@ size nobody can read.
 
 ## Limitations
 
-- Only cross-file references between files of the repository are modeled.
-  References within a file, local symbols and references to dependencies aren't
-  (the extraction's `metadata.externalReferences` counts the last), and
-  documents the indexer reports that aren't files of the revision (generated or
-  ignored files) are left out and counted in `metadata.excludedDocuments`.
-- A moved or renamed file is a removed file and an added one. Declare known
+- Only cross-file references between files inside the repository are modeled.
+  Same-file references, local symbols, and references to external dependencies
+  are omitted (external ones are counted in `metadata.externalReferences`). Any
+  indexed documents that aren't part of the revision—such as generated or
+  ignored files—are skipped and counted in `metadata.excludedDocuments`.
+- Moving or renaming a file appears as a removal and an addition. Declare known
   moves in the definition's `correspondence`
   (`{"file:src%2Fnew.ts": ["file:src%2Fold.ts"]}`) to compare them as one
   change.
-- The installed packages the indexer sees are your checkout's, for every
-  revision compared, so a revision that changes dependencies resolves external
-  types against the checkout's versions. References inside the repository don't
-  depend on them.
-- The renderer draws at most 500 files, and says so; for a larger repository,
-  index a part of it with `root`.
-- Indexes are limited to 128 MiB.
+- Every compared revision resolves external types against the packages currently
+  installed in your checkout. References within the repository itself aren't
+  affected by this.
+- The renderer displays up to 500 files and notes when more exist; for larger
+  repositories, scope indexing to a subdirectory with `root`.
+- SCIP index files are capped at 128 MiB.
 
 ## Related
 
-- [`graph`](../renderers/graph.md), which draws it.
-- [`repository-map`](repository-map.md): every file, sized and placed in its
-  folders, without the references between them.
-- [The default comparator](../comparators/default.md), which can order steps by
-  how many files refer to each (`order.by: dependents`).
+- [`graph`](../renderers/graph.md) — the renderer that draws the reference
+  graph.
+- [`repository-map`](repository-map.md) — every file sized and nested in its
+  folders, without reference edges.
+- [The default comparator](../comparators/default.md) — supports ordering steps
+  by incoming references (`order.by: dependents`).
 
 ## How it works
 
-The
+See the
 [package README](../../../packages/extractors/scip-file-references/README.md)
-covers running indexers, the installed packages they see, and the model.
+for details on running indexers, how installed packages are exposed, and the
+extraction model.
 
 ## Build your own
 
-Write your own extractor when file-to-file references aren't the structure you
-need to see:
+Consider writing a custom extractor if file-to-file references aren't the right
+level of abstraction:
 
-- **Another grain**: modules, packages, services or architectural layers instead
-  of files, by grouping the same SCIP data under your own names.
-- **Facts the index doesn't have**: which team owns each file, which layer it
-  belongs to, or which references cross a boundary your architecture forbids.
-- **No SCIP indexer**: a language without one, or references your own tools
-  already compute (an import graph, a call graph).
+- **Higher-level grouping**, rolling the same SCIP data up into modules,
+  packages, services, or architectural layers.
+- **Extra context**, annotating files with team ownership, architectural layer,
+  or flagging references that violate layer boundaries.
+- **Non-SCIP sources**, for languages without a SCIP indexer or for import/call
+  graphs your own tools already produce.
 
-Try the lighter options first: `root` indexes one part of a monorepo, and
-`index` reads an index your CI already produces. To draw the same graph
-differently, keep this extractor and write a renderer; to flag references that
-matter (a UI file reaching into the database layer), add a comparator file.
+Check the built-in options first: `root` narrows indexing to part of a monorepo,
+and `index` reads an index built by CI. If you want to highlight specific
+violations (such as a UI file reaching into the database layer), add a
+comparator file; if you want a different layout, keep this extractor and write a
+custom renderer.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
+**In VS Code**, open the Projections view, select **+ New Projection…**, choose
 **Write a custom extractor, renderer or comparator** › **Custom extractor** (or
-**Custom extractor and renderer**), and pick its language. It writes the
-definition and a starter extractor (`extract.mjs`, `extract.py` or `extract.go`)
-under `.github/projections/<id>/`, drawn by the built-in graph renderer. Or
-choose **Ask an agent to write it** and describe what the projection should
-show.
+**Custom extractor and renderer**), and pick a language. That creates the
+definition and a starter extractor (`extract.mjs`, `extract.py`, or
+`extract.go`) under `.github/projections/<id>/`, paired with the built-in graph
+renderer. You can also choose **Ask an agent to write it** and describe what you
+want to see.
 
 **With the CLI**:
 
@@ -187,11 +194,12 @@ show.
 projections init <id> --language node
 ```
 
-The starter is drawn by the same `graph` renderer. An extractor is any program
-that prints an extraction. Run it with `projections show -p <id> --trust` as you
-change it; an open projection tab uses your uncommitted edits ("Your edits") and
-says when its results are out of date, and the Testing view runs the
-projection's checks.
-[Write your first extractor](../../guides/first-extractor.md) walks through one,
-and [Extraction schema](../../guides/schemas.md#extraction-schema) describes
-what it prints.
+The starter uses the same `graph` renderer. An extractor can be any program that
+prints an extraction. Test changes as you go with
+`projections show -p <id> --trust`. An open projection tab picks up your
+uncommitted edits ("Your edits") and flags stale results, and the Testing view
+runs your projection's checks.
+[Write your first extractor](../../guides/first-extractor.md) walks through a
+complete example, and
+[Extraction schema](../../guides/schemas.md#extraction-schema) documents the
+output format.

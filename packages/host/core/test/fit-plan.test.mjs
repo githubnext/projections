@@ -126,6 +126,7 @@ test("every state of the bar's lifecycle", () => {
       {type: 'fitted', plan: 'narrow', locked: false},
       {type: 'observed'},
       {type: 'frame', width: 800},
+      {type: 'rendered'},
       {type: 'moved'},
       {type: 'pressed'},
       {type: 'released'},
@@ -143,8 +144,49 @@ test("every state of the bar's lifecycle", () => {
       'a plan changes only by planning': ({from, to}) => from.plan === to.plan || to.kind === 'planning' || to.plan === to.settled,
       'a press never starts a replan': ({event, to, from}) =>
         event.type !== 'pressed' || to.kind !== 'planning' || from.kind === 'planning',
-      'measuring again counts a run': ({event, from, to}) => !['frame', 'replan'].includes(event.type) || to.run === from.run + 1,
+      'measuring again counts a run': ({event, from, to, handled}) =>
+        !handled || !['frame', 'replan', 'rendered'].includes(event.type) || to.run === from.run + 1,
     },
     complete: true,
   })
+})
+
+test('needs carried to new plans by a key, and shifted alike when the shown plan measures differently', async () => {
+  const {carryNeeds, shiftNeeds} = await import('../dist/fit-plan/needs.js')
+  const sign = plan => plan.id
+  const form = plan => plan.form
+  const from = [
+    {id: 'centre', form: 'centre'},
+    {id: 'start', form: 'start'},
+    {id: 'start, short', form: 'short'},
+  ]
+  const to = [
+    {id: 'centre, two rows', form: 'centre'},
+    {id: 'centre, two rows, overflow', form: 'centre'},
+    {id: 'start, two rows', form: 'start'},
+    {id: 'merged, two rows', form: 'merged'},
+  ]
+  const needs = new Map([
+    ['centre', 900],
+    ['start', 700],
+  ])
+  // Each new plan takes the need of its form, so returning to the centre still needs the hysteresis.
+  const carried = carryNeeds(from, to, from[1], needs, sign, form)
+  assert.deepEqual(Object.fromEntries(carried), {
+    'centre, two rows': 900,
+    'centre, two rows, overflow': 900,
+    'start, two rows': 700,
+  })
+  // Nothing carries when the shown plan's form is gone.
+  assert.equal(carryNeeds(from, to, from[2], needs, sign, form), undefined)
+  // The shown plan measures 40px more: every known need moves with it.
+  shiftNeeds(carried, 'start, two rows', 740)
+  assert.deepEqual(Object.fromEntries(carried), {
+    'centre, two rows': 940,
+    'centre, two rows, overflow': 940,
+    'start, two rows': 740,
+  })
+  // Unknown before, it moves nothing.
+  shiftNeeds(carried, 'merged, two rows', 300)
+  assert.equal(carried.get('centre, two rows'), 940)
 })

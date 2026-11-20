@@ -168,24 +168,33 @@ export function diagnostic(value: unknown): RulesDiagnostic {
  * load-time checks and returns the comparator digest, cached per rules
  * content; `compare` runs one comparison.
  */
+/**
+ * Per call: `signal` cancels the check or comparison, which then stops its Worker or runner process and rejects with
+ * `cancelled`, so a caller with an overall deadline (`AbortSignal.timeout`) never leaves one running past it.
+ */
+export interface RulesCallOptions {
+  signal?: AbortSignal
+}
+
 export interface RulesRuntime {
-  check(rules: Uint8Array): Promise<CheckedRules>
-  compare(rules: Uint8Array, input: unknown): Promise<unknown>
+  check(rules: Uint8Array, options?: RulesCallOptions): Promise<CheckedRules>
+  compare(rules: Uint8Array, input: unknown, options?: RulesCallOptions): Promise<unknown>
 }
 
 /** Caches `check` per rules content, so a host checks each rules file once. */
 export function cachedChecks(
-  check: (rules: Uint8Array) => Promise<CheckedRules>,
+  check: (rules: Uint8Array, options?: RulesCallOptions) => Promise<CheckedRules>,
   capacity = 64,
-): (rules: Uint8Array) => Promise<CheckedRules> {
+): (rules: Uint8Array, options?: RulesCallOptions) => Promise<CheckedRules> {
   const cache = new Map<string, Promise<CheckedRules>>()
-  return async rules => {
+  return async (rules, options) => {
     const key = await sha256(rules)
     let checked = cache.get(key)
     if (checked) {
       cache.delete(key)
     } else {
-      checked = check(rules)
+      // A cancelled check fails and leaves the cache, so a later caller checks again.
+      checked = check(rules, options)
       checked.catch(() => cache.delete(key))
     }
     cache.set(key, checked)

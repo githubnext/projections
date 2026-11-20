@@ -40,8 +40,8 @@ export const limits = Object.freeze({
  * (`invalid-module`, `forbidden-import`, `missing-export`, `invalid-export`), the input was (`invalid-input`,
  * `input-too-large`), it hit a bound (`out-of-fuel` and `table-limit` in the native runner, `deadline`,
  * `memory-limit`), it trapped (`trap`), its result was malformed (`invalid-return`, `output-too-large`,
- * `invalid-output`), it returned `{"error": message}` (`comparator-error`), or its Worker or runner process failed
- * (`worker`).
+ * `invalid-output`), it returned `{"error": message}` (`comparator-error`), its Worker or runner process failed
+ * (`worker`), or the caller's signal cancelled it (`cancelled`, the run stopped).
  */
 export type ComparatorErrorCode =
   | 'invalid-module'
@@ -60,6 +60,7 @@ export type ComparatorErrorCode =
   | 'invalid-output'
   | 'comparator-error'
   | 'worker'
+  | 'cancelled'
 
 /** A comparator module could not be loaded or run. Never falls back to another comparison. */
 export class ComparatorRuntimeError extends Error {

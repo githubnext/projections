@@ -3,7 +3,7 @@ import {runInWorker} from './host.js'
 import type {ExecuteRequest} from './execute.js'
 
 /** Runs one request in a fresh `worker_threads` Worker, terminated at the deadline. */
-export function run(request: ExecuteRequest, deadlineMs: number): Promise<unknown> {
+export function run(request: ExecuteRequest, deadlineMs: number, signal?: AbortSignal): Promise<unknown> {
   return runInWorker(
     events => {
       const worker = new Worker(new URL('./node-worker-entry.js', import.meta.url))
@@ -18,5 +18,6 @@ export function run(request: ExecuteRequest, deadlineMs: number): Promise<unknow
     },
     request,
     deadlineMs,
+    signal,
   )
 }

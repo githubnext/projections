@@ -127,6 +127,17 @@ test('terminates comparators that run past the deadline', async () => {
   await rejects(runComparator(bytes, input, {deadlineMs: 200}), 'deadline')
 })
 
+test('the caller’s signal stops a running comparator, and one already aborted never starts it', async () => {
+  const controller = new AbortController()
+  const started = performance.now()
+  const running = runComparator(comparator(comparison, {body: forever}), input, {deadlineMs: 30_000}, controller.signal)
+  setTimeout(() => controller.abort(new Error('the artifact deadline passed')), 100)
+  await rejects(running, 'cancelled', /^the comparator run was cancelled: the artifact deadline passed$/)
+  // Well before the comparator's own 30 s deadline: the Worker was terminated, not left looping.
+  assert.ok(performance.now() - started < 5000)
+  await rejects(runComparator(comparator(comparison), input, {}, AbortSignal.abort()), 'cancelled')
+})
+
 test('stops memory growth beyond the cap', async () => {
   const limit = /^comparator tried to grow its memory beyond the 1048576-byte limit$/
   const grow = pages => [...op.i32Const(pages), ...op.memoryGrow, ...op.drop]

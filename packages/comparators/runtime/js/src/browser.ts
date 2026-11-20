@@ -4,7 +4,15 @@ import {cachedChecks, checkedRules, compareRequest, inspectRequest, loadRulesInt
 
 export {ComparatorRuntimeError, limits, type ComparatorErrorCode} from './abi.js'
 export type {RunComparatorOptions} from './host.js'
-export {RulesError, isComparatorFile, rulesComparatorDigest, type CheckedRules, type RulesDiagnostic, type RulesRuntime} from './rules.js'
+export {
+  RulesError,
+  isComparatorFile,
+  rulesComparatorDigest,
+  type CheckedRules,
+  type RulesCallOptions,
+  type RulesDiagnostic,
+  type RulesRuntime,
+} from './rules.js'
 
 /** The sandbox bounds for `createRulesRuntime` in a browser, and where its Worker script and interpreter are served. */
 export interface BrowserComparatorOptions extends RunComparatorOptions {
@@ -35,19 +43,20 @@ export function createRulesRuntime(options: BrowserComparatorOptions = {}): Rule
       return new Uint8Array(await response.arrayBuffer())
     })
   return {
-    check: cachedChecks(async rules => {
+    check: cachedChecks(async (rules, call) => {
       const loaded = await interpreter()
       const report = await run(
         inspectRequest(loaded, rules, resolved.maxMemoryPages, resolved.maxOutputBytes),
         resolved.deadlineMs,
         options.workerUrl,
+        call?.signal,
       )
       return checkedRules(loaded, report)
     }),
-    async compare(rules, input) {
+    async compare(rules, input, call) {
       const loaded = await interpreter()
       const request = compareRequest(loaded, rules, input, resolved.maxInputBytes, resolved.maxMemoryPages, resolved.maxOutputBytes)
-      return run(request, resolved.deadlineMs, options.workerUrl)
+      return run(request, resolved.deadlineMs, options.workerUrl, call?.signal)
     },
   }
 }

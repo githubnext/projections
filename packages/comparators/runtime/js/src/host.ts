@@ -84,14 +84,28 @@ export interface WorkerEvents {
 }
 
 /** Runs one request in a fresh worker, terminating it on completion, failure or deadline. */
-export function runInWorker(spawn: (events: WorkerEvents) => WorkerHandle, request: ExecuteRequest, deadlineMs: number): Promise<unknown> {
+/** The error for a run its caller's signal cancelled. */
+export function cancelled(signal: AbortSignal): ComparatorRuntimeError {
+  const reason = signal.reason instanceof Error ? `: ${signal.reason.message}` : ''
+  return new ComparatorRuntimeError('cancelled', `the comparator run was cancelled${reason}`)
+}
+
+export function runInWorker(
+  spawn: (events: WorkerEvents) => WorkerHandle,
+  request: ExecuteRequest,
+  deadlineMs: number,
+  signal?: AbortSignal,
+): Promise<unknown> {
   return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(cancelled(signal))
     let settled = false
     let worker: WorkerHandle | undefined
+    const abort = () => finish(cancelled(signal!))
     const finish = (error: ComparatorRuntimeError | undefined, value?: unknown) => {
       if (settled) return
       settled = true
       clearTimeout(timer)
+      signal?.removeEventListener('abort', abort)
       worker?.terminate()
       if (error) reject(error)
       else resolve(value)
@@ -100,6 +114,7 @@ export function runInWorker(spawn: (events: WorkerEvents) => WorkerHandle, reque
       () => finish(new ComparatorRuntimeError('deadline', `comparator exceeded its ${deadlineMs} ms deadline`)),
       deadlineMs,
     )
+    signal?.addEventListener('abort', abort, {once: true})
     try {
       worker = spawn({
         message(data) {

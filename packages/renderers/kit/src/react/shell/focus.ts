@@ -12,7 +12,9 @@ export function useHostFilter(client: RendererClient | undefined): FilterPayload
   useEffect(
     () =>
       client?.subscribe(message => {
-        if (message.type === 'filter') setFilter({query: message.query, changesOnly: message.changesOnly, ids: message.ids})
+        if (message.type !== 'filter') return
+        const {query, changesOnly, ids, scope} = message
+        setFilter({query, changesOnly, ids, ...(scope === undefined ? {} : {scope})})
       }),
     [client],
   )

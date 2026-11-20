@@ -184,7 +184,9 @@ export function connectInteractions(client: RendererClient, root: HTMLElement, o
       schedule()
     },
     filter(message) {
-      visible = message.ids === null ? null : new Set(message.ids)
+      // A host before `scope` sent the Changes scope in `ids`: what is laid out, none of it receding.
+      const legacy = message.scope === undefined && message.changesOnly
+      visible = message.ids === null || legacy ? null : new Set(message.ids)
       markFiltered(entities, isVisible, isAnnotated)
       schedule()
     },

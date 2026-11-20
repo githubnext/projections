@@ -255,3 +255,70 @@ for (const story of ['api', 'database', 'text-diff', 'text-diff-one-column', 'co
         expect(await doubledLines(frame), `${story}, ${mode}, ${changesOnly ? 'Changes' : 'All'}`).toEqual([])
       }
   })
+
+/**
+ * Every entity element the renderer draws: where it is, and whether the host's filter leaves it out and how far that
+ * recedes it (its own `filter: opacity()` or, inside SVG, its opacity).
+ */
+async function entities(frame: Frame) {
+  return frame.evaluate(() =>
+    [...document.querySelectorAll<Element>('[data-entity-id]')].map(element => {
+      const box = element.getBoundingClientRect()
+      const style = getComputedStyle(element)
+      const filtered = element.hasAttribute('data-projections-filtered')
+      const recede = element.closest('svg') ? Number(style.opacity) : Number(style.filter.match(/opacity\(([\d.]+)\)/)?.[1] ?? 1)
+      return {
+        id: element.getAttribute('data-entity-id')!,
+        rect: [box.x, box.y, box.width, box.height].map(value => Math.round(value)).join(' '),
+        filtered,
+        recede,
+      }
+    }),
+  )
+}
+
+test('a summary figure recedes what it leaves out and moves nothing, in Changes and in All', async ({page, theme}, testInfo) => {
+  test.skip(!testInfo.project.name.startsWith('chromium-light') && !testInfo.project.name.startsWith('chromium-dark'), 'layout, not engine')
+  await page.setViewportSize({width: 1440, height: 900})
+  await page.emulateMedia({reducedMotion: 'reduce'})
+  await page.goto(
+    new URL(
+      `iframe.html?id=default-ui-renderers--dependency-injection&viewMode=story&globals=theme:${theme}&args=initialMode:diff`,
+      process.env.PROJECTIONS_STORYBOOK_URL,
+    ).href,
+  )
+  await expect(page.locator('.ph[data-renderer-status="ready"]').first()).toBeVisible({timeout: 30_000})
+  const frame = (await (await page.locator('.ph iframe').first().elementHandle())!.contentFrame())!
+  const figure = page
+    .getByRole('group', {name: 'Summary'})
+    .locator('.ph-summary-figures > [data-summary-figure]')
+    .filter({hasText: 'registrations'})
+    .locator('button[data-summary-total]')
+  for (const scope of ['changes', 'all']) {
+    await page.locator(`.ph-scope [data-scope="${scope}"]`).first().click()
+    await expect(page.locator('.ph')).toHaveAttribute('data-renderer-status', 'ready')
+    await page.waitForTimeout(500)
+    const before = await entities(frame)
+    expect(
+      before.filter(entity => entity.filtered),
+      scope,
+    ).toEqual([])
+    await figure.click()
+    await expect(figure).toHaveAttribute('aria-pressed', 'true')
+    await expect.poll(async () => (await entities(frame)).some(entity => entity.filtered)).toBe(true)
+    const after = await entities(frame)
+    // The scope's layout stays: every element keeps its place, and none comes or goes.
+    expect(
+      after.map(({id, rect}) => `${id} ${rect}`),
+      scope,
+    ).toEqual(before.map(({id, rect}) => `${id} ${rect}`))
+    // The registrations stay as they were; everything else the scope shows recedes to a quarter.
+    expect(
+      after.some(entity => !entity.filtered),
+      scope,
+    ).toBe(true)
+    after.forEach((entity, index) => expect(entity.recede, `${scope}: ${entity.id}`).toBe(entity.filtered ? 0.25 : before[index]!.recede))
+    await figure.click()
+    await expect(figure).toHaveAttribute('aria-pressed', 'false')
+  }
+})

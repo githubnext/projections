@@ -22,13 +22,23 @@ export function elementsOf({root, attribute, excluded}: Entities, id: string): E
   return [...root.querySelectorAll<Element>(`[${attribute}="${CSS.escape(id)}"]`)].filter(element => !excluded(element))
 }
 
-/** Marks the elements the filter excludes (`isVisible`) and those annotated (`isAnnotated`). */
+/**
+ * Marks the elements the filter excludes (`isVisible`) and those annotated (`isAnnotated`). An element holding one the
+ * filter keeps isn't marked, as receding it would recede what it holds: only the parts it leaves out recede (a card
+ * whose registration a summary figure names stays, and its other lines recede).
+ */
 export function markFiltered(entities: Entities, isVisible: (id: string) => boolean, isAnnotated: (id: string) => boolean) {
   const {root, attribute, excluded} = entities
-  for (const element of root.querySelectorAll(`[${attribute}]`)) {
-    if (excluded(element)) continue
+  const elements = [...root.querySelectorAll(`[${attribute}]`)].filter(element => !excluded(element))
+  const holding = new Set<Element>()
+  for (const element of elements) {
+    if (!isVisible(element.getAttribute(attribute) ?? '')) continue
+    for (let parent = element.parentElement; parent && parent !== root && !holding.has(parent); parent = parent.parentElement)
+      holding.add(parent)
+  }
+  for (const element of elements) {
     const id = element.getAttribute(attribute) ?? ''
-    toggle(element, filteredAttribute, !isVisible(id))
+    toggle(element, filteredAttribute, !isVisible(id) && !holding.has(element))
     toggle(element, annotatedAttribute, isAnnotated(id))
   }
 }

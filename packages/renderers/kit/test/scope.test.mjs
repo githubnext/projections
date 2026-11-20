@@ -38,6 +38,17 @@ test("the Changes scope is the host's shown IDs, split into changes and context"
   assert.deepEqual([...scope.context], ['tool'])
 })
 
+test("the summary filter and find narrow only what is at full strength: the host's `scope` is what is laid out", () => {
+  const scope = changesScope(model, {query: '', changesOnly: true, ids: ['c'], scope: ['tool', 'tool/viewer', 'c']})
+  assert.deepEqual([...scope.shown].sort(), ['c', 'tool', 'tool/viewer'])
+  // Past the limit, the scope is derived again, whatever the matches.
+  assert.deepEqual([...changesScope(model, {query: 'c', changesOnly: true, ids: ['c'], scope: null}).shown].sort(), [
+    'c',
+    'tool',
+    'tool/viewer',
+  ])
+})
+
 test('past the filter ID limit the kit derives the same scope, and there is none while every item shows', () => {
   const scope = changesScope(model, {query: '', changesOnly: true, ids: null})
   assert.deepEqual([...scope.shown].sort(), ['c', 'tool', 'tool/viewer'])

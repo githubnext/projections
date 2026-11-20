@@ -51,8 +51,10 @@ mirrors scrolling between them.
   Hosts that don't say leave it out; fit both dimensions then. The kit's
   `useFrameSizing()` returns it.
 - `action`: `id` of an activated `action` control
-- `filter`: `query`, `changesOnly`, `ids` (matching selection IDs, or `null`):
-  the host's find and "changes only" settings (capability `filter`)
+- `filter`: `query`, `changesOnly`, `ids` (matching selection IDs, or `null`),
+  `scope` (in the Changes scope, what to lay out): the host's scope, summary
+  filter and find (capability `filter`). Lay out `scope`; recede what `ids`
+  leaves out, never removing or moving it
 - `hover`: `id` or `null`: the entity the person is pointing at in any pane
   (capability `hover`)
 - `scroll`: `x`, `y` (CSS px, ≥ 0), optional `key`: scroll that container to

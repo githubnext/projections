@@ -41,8 +41,10 @@ in range, at most 64 KiB, at most 240 per second. The renderer speaks first with
 - `scroll` *: `x`, `y` (CSS px), optional `key`: scroll a container to mirror
   another pane
 - `action`: `id`: the person activated a declared `action` control
-- `filter` *: `query`, `changesOnly`, `ids`: the matching selection IDs, or
-  `null` when nothing is filtered
+- `filter` *: `query`, `changesOnly`, `ids`: the selection IDs the summary
+  filter and find match, to recede the rest, or `null` when nothing recedes;
+  optional `scope`: in the Changes scope, the IDs it lays out (hosts before it
+  sent the scope in `ids`)
 - `annotations` *:
   `items [{id, count?, label?, tone?: "neutral" | "attention" | "done" | "subtle"}]`:
   markers to draw on items, replacing earlier ones

@@ -53,7 +53,6 @@
 /* The heading row: a quiet band, the frame's top edge and corners, its divider over the first row's line. */
 .pk .pk-table > .pk-table-head {
   --pk-table-line: var(--divider);
-  z-index: 5;
   border-radius: var(--projections-radius) var(--projections-radius) 0 0;
   background: color-mix(in srgb, var(--band) 45%, var(--raised));
 }
@@ -90,17 +89,33 @@
   --pk-table-fill: color-mix(in srgb, var(--pk-region-fill) var(--pk-region-amount), transparent);
   --pk-table-line: color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--border));
   --pk-table-edge: color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--divider));
-  z-index: 3;
   box-shadow: none;
 }
-/* A row drawn neutral because it holds changed cells: its gray lines give way to any hue beside them. */
-.pk .pk-table > .pk-table-row.pk-region[data-change]:has([data-change]) {
+/*
+ * The layers (see above), each rule of the same specificity, so their order alone decides: a hued row, then a row
+ * neutral because it holds changed cells (it matches both), then a ringed row, then the heading, which is the frame's.
+ */
+.pk .pk-table > :where(.pk-table-row.pk-region[data-change]) {
+  z-index: 3;
+}
+.pk .pk-table > :where(.pk-table-row.pk-region[data-change]:has([data-change])) {
   z-index: 2;
 }
 .pk
   .pk-table
-  > .pk-table-row:is(:hover, [data-projections-ring-hover], [data-projections-ring-selected], :focus-visible, :has(:focus-visible)) {
+  > :where(
+    .pk-table-row:not(.pk-table-head):is(
+        :hover,
+        [data-projections-ring-hover],
+        [data-projections-ring-selected],
+        :focus-visible,
+        :has(:focus-visible)
+      )
+  ) {
   z-index: 4;
+}
+.pk .pk-table > :where(.pk-table-head) {
+  z-index: 5;
 }
 /*
  * A fold (the Changes scope's `Fold`) is a row like the others: one cell across the table, its line the row's top line,

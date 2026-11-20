@@ -285,4 +285,34 @@ for (const colorMode of ['light', 'dark'] as const)
       }
     // The sorts put both an unchanged or neutral row and a changed one under the heading.
     expect([...firsts].some(change => change === 'removed' || change === 'added')).toBe(true)
+
+    // A focused heading over a hovered row, unchanged, neutral or changed: the heading still wins. Read the line's
+    // exact pixel, as the hovered row's ring is drawn beside it.
+    for (const [sort, expected] of [
+      ['comment:ascending', 'unchanged'],
+      ['code:descending', 'modified'],
+      ['name:ascending', 'removed'],
+    ] as const) {
+      const stage = await openStage(page, inspector, {
+        scenario: 'code-statistics/gateway',
+        comparisonMode: 'diff',
+        colorMode,
+        options: {chart: 'table', sort},
+      })
+      await stage.measure('settle')
+      await page.keyboard.press('Shift')
+      await stage.frame.getByRole('button', {name: 'Language'}).focus()
+      await stage.frame.locator('.pk-table > [data-entity-id]').first().hover()
+      await stage.measure('settle')
+      const {first, points} = await stage.frame.locator('body').evaluate(headingLines)
+      expect(first, sort).toBe(expected)
+      const width = (await stage.iframe.boundingBox())!.width
+      const png = (await stage.iframe.screenshot()).toString('base64')
+      const scale = await page.evaluate(() => devicePixelRatio)
+      const exact = (await page.evaluate(pixelsAt, {png, width, points})).map((line, index) => {
+        const at = points[index]!.across === 'y' ? points[index]!.y : points[index]!.x
+        return line[Math.floor(at * scale) - Math.floor((at - 1) * scale)]
+      })
+      expect(exact[0], `${sort}: a focused heading's rule over a hovered ${first} row`).toEqual(exact[2])
+    }
   })

@@ -62,8 +62,8 @@ ends.
 4. Changes removes what it leaves out from view in every mode, Animated included
    (revised after testing: fading left a large schema tiny and its faded items
    below accessible contrast).
-5. Defaults per surface: a pull request (the Playground PR tab, the VS Code pull
-   request choice, `projections pr`) opens Changes in Diff; bookmarks and
+5. Defaults per surface: a pull request (a host's pull request page, the VS Code
+   pull request choice, `projections pr`) opens Changes in Diff; bookmarks and
    compare in the viewer open Changes; one revision has no scope. A definition
    opts out with `presentation.changesOnly: false`, the field keeping its name
    and now meaning Changes rather than All.
@@ -109,8 +109,8 @@ in scope and their context.
   move between the two layouts when the scope changes or a fold opens or closes,
   links attached.
 - **Hosts**: the scope switch in the default view's toolbar (the Inspector,
-  `projections view` and the Copilot canvas), the VS Code UI and the
-  Playground's pull request tab, which opens Changes in Diff.
+  `projections view` and the Copilot canvas), the VS Code UI and the pull
+  request pages of hosts that embed it, which opens Changes in Diff.
 
 ## Milestone 2: the contract
 
@@ -191,10 +191,11 @@ Recorded as implementation chose within the decisions above.
   notice, rather than receding everything.
 - Text diffs fold their unchanged lines in every scope, as a diff's hunks do:
   lines aren't items. The Changes scope folds the unchanged outputs.
-- Pull requests open in Diff on the Playground's tab and VS Code's pull request
-  choice (over a definition's `presentation.mode`, as a surface default). A
-  `projections pr` document opens in the Changes scope but in its definition's
-  mode: the Inspector's document view doesn't know it holds a pull request yet.
+- Pull requests open in Diff on hosts' pull request pages and VS Code's pull
+  request choice (over a definition's `presentation.mode`, as a surface
+  default). A `projections pr` document opens in the Changes scope but in its
+  definition's mode: the Inspector's document view doesn't know it holds a pull
+  request yet.
 - Text diffs keep three unchanged lines around each change, as `git diff` does,
   so a run of up to seven lines between two changes stays open.
 - A change's context may name items of other changes, such as the modified table

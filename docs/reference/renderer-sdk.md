@@ -425,10 +425,11 @@ changeContext(rows: Array<ScopeRow>, revisions: { "after": ContainmentSource; "b
 ```
 
 The context of a comparison's changes: each change's own (`Change.context`, the Engine's core context and what
-comparator rules added), else, for a comparison saved without it, the same structural derivation (`rowContexts`),
-traversed once for all the changes. A shown relationship's endpoints are shown too, so a renderer can draw it.
-Context is only ever added, and never hides a change. `changes` narrows the changes to those row IDs (for example a
-find or summary filter's); by default every change (`isScopeChange`) is in scope.
+comparator rules added), else, for a comparison saved without it, the same structural derivation (`rowContexts`).
+Whatever is shown brings what a renderer needs to place it: a relationship its endpoints, and an entity the items
+containing it, traversed once for all of them. Context is only ever added, and never hides a change. `changes`
+narrows the changes to those row IDs (for example a find or summary filter's); by default every change
+(`isScopeChange`) is in scope.
 
 ### `ChangesScope`
 

@@ -188,3 +188,15 @@ test("a shown relationship's endpoints are shown, though the context that names 
     'tool:check>tool:check/path',
   ])
 })
+
+test('a shown entity brings the items containing it, though the context that names it skips them', () => {
+  const withProperty = {
+    ...comparison,
+    changes: comparison.changes.map(change =>
+      change.id === 'tool:listen' ? {...change, context: {before: [], after: ['tool:check/path'], rules: ['paths']}} : change,
+    ),
+  }
+  const contextRows = scopeRows(presentComparison(before, after, withProperty))
+  const scope = changeContext(contextRows, {before, after}, ['tool:listen'])
+  assert.deepEqual([...scope.context].sort(), ['tool:check', 'tool:check/path', 'tool:check>tool:check/path'])
+})

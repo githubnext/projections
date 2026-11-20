@@ -132,38 +132,33 @@ export function rowContexts(rows: readonly ScopeRow[], revisions: Revisions): (r
 
 /**
  * The context of a comparison's changes: each change's own (`Change.context`, the Engine's core context and what
- * comparator rules added), else, for a comparison saved without it, the same structural derivation (`rowContexts`),
- * traversed once for all the changes. A shown relationship's endpoints are shown too, so a renderer can draw it.
- * Context is only ever added, and never hides a change. `changes` narrows the changes to those row IDs (for example a
- * find or summary filter's); by default every change (`isScopeChange`) is in scope.
+ * comparator rules added), else, for a comparison saved without it, the same structural derivation (`rowContexts`).
+ * Whatever is shown brings what a renderer needs to place it: a relationship its endpoints, and an entity the items
+ * containing it, traversed once for all of them. Context is only ever added, and never hides a change. `changes`
+ * narrows the changes to those row IDs (for example a find or summary filter's); by default every change
+ * (`isScopeChange`) is in scope.
  */
 export function changeContext(rows: readonly ScopeRow[], revisions: Revisions, changes?: Iterable<string>): ChangesScope {
   const inScope = changes ? new Set(changes) : undefined
   const changed = new Set(rows.filter(row => (inScope ? inScope.has(row.id) : isScopeChange(row))).map(row => row.id))
   const shown = new Set(changed)
-  const rowOf: Record<Side, Map<string, string>> = {before: new Map(), after: new Map()}
-  for (const row of rows) for (const side of sides) for (const id of row[side]) rowOf[side].set(id, row.id)
-  const show = (side: Side, id: string) => {
-    const rowId = rowOf[side].get(id)
-    if (rowId !== undefined) shown.add(rowId)
-  }
-  const structure = {before: structureOf(revisions.before), after: structureOf(revisions.after)}
   if (rows.some(row => row.context)) {
     const contextOf = rowContexts(rows, revisions)
     for (const row of rows) if (changed.has(row.id)) for (const id of contextOf(row).rows) shown.add(id)
-  } else
-    for (const side of sides) {
-      const reached = new Set<string>()
-      for (const row of rows) if (changed.has(row.id)) traverse(structure[side], row, side, reached)
-      for (const id of reached) show(side, id)
+  }
+  // A comparison saved without context derives it here: the structure around the changes is the core's context.
+  const rowOf: Record<Side, Map<string, string>> = {before: new Map(), after: new Map()}
+  for (const row of rows) for (const side of sides) for (const id of row[side]) rowOf[side].set(id, row.id)
+  const placed = new Set(shown)
+  for (const side of sides) {
+    const structure = structureOf(revisions[side])
+    const reached = new Set<string>()
+    for (const row of rows) if (placed.has(row.id)) traverse(structure, row, side, reached)
+    for (const id of reached) {
+      const rowId = rowOf[side].get(id)
+      if (rowId !== undefined) shown.add(rowId)
     }
-  for (const row of rows)
-    if (row.collection === 'relationships' && shown.has(row.id))
-      for (const side of sides)
-        for (const id of row[side]) {
-          const end = structure[side].ends.get(id)
-          if (end) for (const entity of [end.from, end.to]) show(side, entity)
-        }
+  }
   return {changes: changed, context: new Set([...shown].filter(id => !changed.has(id))), shown}
 }
 

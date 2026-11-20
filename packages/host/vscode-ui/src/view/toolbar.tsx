@@ -38,7 +38,7 @@ export function ViewToolbar(toolbarProps: ViewToolbarProps) {
   const toolbar = useRef<HTMLDivElement>(null)
   const layout = useToolbarLayout(toolbar, {
     pickers: typeof props.toolbarStart === 'function',
-    centre: props.centreModes ?? true,
+    centre: props.centreModes ?? false,
     modes: modeRegion,
     playback: showPlayback,
     actions: collapsible,

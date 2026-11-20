@@ -122,8 +122,8 @@ export interface VscodeProjectionViewProps {
    */
   toolbarStart?: ReactNode | ((compact: boolean, form: PairForm) => ReactNode)
   /**
-   * Centre the mode and scope switches on the toolbar while it has room (default true). A VS Code tab, whose start holds
-   * only notices, passes false: its switches lead the row, as in VS Code's own editor toolbars.
+   * Centre the mode and scope switches on the toolbar while it has room (default false: they lead the row, as in VS
+   * Code's own editor toolbars and every other host).
    */
   centreModes?: boolean
   /**

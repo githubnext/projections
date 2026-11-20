@@ -176,6 +176,8 @@ export function useSummaryFit(
       const style = element.ownerDocument.defaultView?.getComputedStyle(element)
       const padding = style ? parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) : 0
       const gap = style ? parseFloat(style.columnGap) || 0 : 0
+      // The fixed content at its full width: measured with the bar out of its tight form (below).
+      element.removeAttribute('data-tight')
       const fixed = [...element.querySelectorAll<HTMLElement>('[data-summary-fixed]')].reduce(
         (sum, item) => sum + item.getBoundingClientRect().width + gap,
         0,
@@ -183,8 +185,12 @@ export function useSummaryFit(
       // The figures sit centred: the room the fixed content takes at the end is kept free at the start too.
       // A bar as wide as its content (in a floating foot) fits to the room it may grow to (`room`), not to itself, and
       // keeps no room at its start: it grows to fit its figures, so they are centred anyway.
-      const width = room?.current?.clientWidth ?? element.clientWidth
+      const holder = element.parentElement
+      const width = room?.current ? room.current.clientWidth - (holder ? holder.offsetWidth - holder.clientWidth : 0) : element.clientWidth
       const available = width - padding - (room?.current ? 1 : 2) * fixed
+      // Too narrow for even the "…" beside the fixed content: the bar is tight, and the fixed content's words give way
+      // (summary-bar.tsx cuts them with an ellipsis) so nothing overlaps the "…".
+      if (available < more + gap) element.setAttribute('data-tight', '')
       setShown(
         fitSummary(
           figures.map(figure => figure.getBoundingClientRect().width),

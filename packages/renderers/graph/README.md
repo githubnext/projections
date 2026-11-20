@@ -51,12 +51,15 @@ presentations of this bundle, and their scenarios live in `scenarios.json` here.
   Boundaries are ELK compound nodes, laid out with their children, and
   interpolate with them. Each card names its kind, and the host's summary bar
   counts the components of each kind (`contains` relationships are drawn as
-  boundaries, not counted), so there is no kind legend. Above 40 components,
-  each unchanged boundary collapses into a summary card that counts its
-  components and carries the boundary's own `data`, with its relationships
-  joined to the card; activating it (a click, a double click, Enter or Space)
-  expands it, and the kit draws an expand or collapse icon on such cards
-  (`syntheticAction`'s `expanded`) (`src/architecture/collapse.ts`).
+  boundaries, not counted, and so are modules when every one is a boundary, see
+  the kit's `boundaryNouns`), so there is no kind legend. One revision of up to
+  60 components draws every one. In a comparison of more than 40 components (or
+  one revision of more than 60), each unchanged boundary collapses into a
+  summary card that counts its components and carries the boundary's own `data`,
+  with its relationships joined to the card; activating it (a click, a double
+  click, Enter or Space) expands it, and the kit draws an expand or collapse
+  icon on such cards (`syntheticAction`'s `expanded`)
+  (`src/architecture/collapse.ts`).
 - `infrastructure` presents
   [the infrastructure model](../../../docs/models/infrastructure-model.md)
   (`terraform-infrastructure`, `azure-what-if`) as a resource graph. A card's

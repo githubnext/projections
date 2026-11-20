@@ -1,5 +1,6 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
+import {readFile} from 'node:fs/promises'
 import {parseRendererMessage} from '@githubnext/projections-renderer-sdk/protocol'
 import {rendererLimits} from '@githubnext/projections-renderer-sdk/protocol'
 import {rendererSummary, summaryChange} from '../dist/index.js'
@@ -128,4 +129,42 @@ test("the definition's nouns (presentation.kinds) word its kinds over the render
   const worded = rendererSummary(subject, kind => (kind === 'service' ? {singular: 'app', plural: 'apps'} : undefined))
   assert.deepEqual(nouns(worded, 'calls'), {singular: 'request', plural: 'requests'})
   assert.deepEqual(nouns(worded, 'service'), {singular: 'app', plural: 'apps'})
+})
+
+test('modules drawn only as boundaries round others are no summary figure; a kind with a card among them still is', async () => {
+  const {boundaryNouns, comparisonModel, extractionModel} = await import('../dist/index.js')
+  const {compare} = await import('./engine.mjs')
+  const model = async (before, after) => comparisonModel(before, after, await compare(before, after))
+  const grouped = extraction(
+    [
+      {id: 'core', label: 'core', kind: 'module'},
+      {id: 'a', label: 'a', kind: 'service'},
+      {id: 'b', label: 'b', kind: 'service'},
+    ],
+    [
+      {id: 'core-a', kind: 'contains', from: 'core', to: 'a'},
+      {id: 'core-b', kind: 'contains', from: 'core', to: 'b'},
+      {id: 'ab', kind: 'calls', from: 'a', to: 'b'},
+    ],
+  )
+  assert.deepEqual(boundaryNouns(extractionModel(grouped), true), {module: false})
+  assert.deepEqual(boundaryNouns(await model(grouped, grouped), true), {module: false})
+  // A module something depends on is drawn as a card, so modules are counted whole.
+  const linked = {...grouped, entities: [...grouped.entities, {id: 'shared', label: 'shared', kind: 'module'}]}
+  linked.relationships = [...grouped.relationships, {id: 'a-shared', kind: 'imports', from: 'a', to: 'shared'}]
+  assert.deepEqual(boundaryNouns(await model(grouped, linked), true), {})
+  // Only the kinds the canvas may draw as boundaries.
+  assert.deepEqual(boundaryNouns(extractionModel(grouped), ['resource-group']), {})
+})
+
+test('a module each revision draws as a boundary but the diff union draws as a card is counted', async () => {
+  const {boundaryNouns, comparisonModel} = await import('../dist/index.js')
+  const {compare} = await import('./engine.mjs')
+  // graph/storage-module: db and blobs move from the app module into a new storage module. Each revision draws every
+  // module as a boundary, but in the union db and blobs have two parents, so app and storage are cards there.
+  const scenarios = JSON.parse(await readFile(new URL('../../graph/scenarios.json', import.meta.url), 'utf8')).scenarios
+  const {before, after} = scenarios.find(scenario => scenario.id === 'storage-module')
+  const model = comparisonModel(before, after, await compare(before, after))
+  assert.deepEqual(boundaryNouns({...model, mode: 'extraction', before, after: before}, true), {module: false}, 'one revision')
+  assert.deepEqual(boundaryNouns(model, true), {})
 })

@@ -1,0 +1,2921 @@
+{
+  "entities": [
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": true,
+        "table": "table:/License",
+        "type": "DateTime",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 50
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FLicense/expiresAt",
+      "kind": "column",
+      "label": "expiresAt"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": {
+          "args": [],
+          "name": "autoincrement"
+        },
+        "hasDefault": true,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/License",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 46
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FLicense/id",
+      "kind": "column",
+      "label": "id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/License",
+        "type": "String",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 49
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FLicense/key",
+      "kind": "column",
+      "label": "key"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/License",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 48
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FLicense/productId",
+      "kind": "column",
+      "label": "productId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/License",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 47
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FLicense/userId",
+      "kind": "column",
+      "label": "userId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": {
+          "args": [],
+          "name": "autoincrement"
+        },
+        "hasDefault": true,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Product",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 37
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FProduct/id",
+      "kind": "column",
+      "label": "id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Product",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 40
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FProduct/priceCents",
+      "kind": "column",
+      "label": "priceCents"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Product",
+        "type": "String",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 39
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FProduct/sku",
+      "kind": "column",
+      "label": "sku"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Product",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 38
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FProduct/storeId",
+      "kind": "column",
+      "label": "storeId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Purchase",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 62
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FPurchase/amountCents",
+      "kind": "column",
+      "label": "amountCents"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": {
+          "args": [],
+          "name": "autoincrement"
+        },
+        "hasDefault": true,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Purchase",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 58
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FPurchase/id",
+      "kind": "column",
+      "label": "id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Purchase",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 61
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FPurchase/licenseId",
+      "kind": "column",
+      "label": "licenseId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": {
+          "args": [],
+          "name": "now"
+        },
+        "hasDefault": true,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Purchase",
+        "type": "DateTime",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 63
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FPurchase/purchasedAt",
+      "kind": "column",
+      "label": "purchasedAt"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Purchase",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 60
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FPurchase/storeId",
+      "kind": "column",
+      "label": "storeId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Purchase",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 59
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FPurchase/userId",
+      "kind": "column",
+      "label": "userId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Refund",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 74
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FRefund/amountCents",
+      "kind": "column",
+      "label": "amountCents"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Refund",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 73
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FRefund/approvedById",
+      "kind": "column",
+      "label": "approvedById"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": {
+          "args": [],
+          "name": "autoincrement"
+        },
+        "hasDefault": true,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Refund",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 71
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FRefund/id",
+      "kind": "column",
+      "label": "id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Refund",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 72
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FRefund/purchaseId",
+      "kind": "column",
+      "label": "purchaseId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": {
+          "args": [],
+          "name": "autoincrement"
+        },
+        "hasDefault": true,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Store",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 27
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FStore/id",
+      "kind": "column",
+      "label": "id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Store",
+        "type": "String",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 28
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FStore/name",
+      "kind": "column",
+      "label": "name"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/Store",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 29
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FStore/ownerId",
+      "kind": "column",
+      "label": "ownerId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": true,
+        "table": "table:/User",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 16
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FUser/currentLicenseId",
+      "kind": "column",
+      "label": "currentLicenseId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/User",
+        "type": "String",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 15
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FUser/email",
+      "kind": "column",
+      "label": "email"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": null,
+        "hasDefault": false,
+        "list": false,
+        "nativeType": null,
+        "nullable": true,
+        "table": "table:/User",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 17
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FUser/homeStoreId",
+      "kind": "column",
+      "label": "homeStoreId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseType": null,
+        "default": {
+          "args": [],
+          "name": "autoincrement"
+        },
+        "hasDefault": true,
+        "list": false,
+        "nativeType": null,
+        "nullable": false,
+        "table": "table:/User",
+        "type": "Int",
+        "updatedAt": false
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 14
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "column:table%3A%2FUser/id",
+      "kind": "column",
+      "label": "id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "productId"
+        ],
+        "onDelete": null,
+        "onUpdate": null,
+        "references": [
+          "id"
+        ],
+        "table": "table:/License",
+        "target": "table:/Product",
+        "type": "foreign-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 52
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FLicense/foreign-key/%5B%22productId%22%5D/table%3A%2FProduct",
+      "kind": "constraint",
+      "label": "foreign-key (productId)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "userId"
+        ],
+        "onDelete": null,
+        "onUpdate": null,
+        "references": [
+          "id"
+        ],
+        "table": "table:/License",
+        "target": "table:/User",
+        "type": "foreign-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 51
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FLicense/foreign-key/%5B%22userId%22%5D/table%3A%2FUser",
+      "kind": "constraint",
+      "label": "foreign-key (userId)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseName": null,
+        "fields": [
+          {
+            "name": "id"
+          }
+        ],
+        "table": "table:/License",
+        "type": "primary-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 46
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FLicense/primary-key/%5B%22id%22%5D",
+      "kind": "constraint",
+      "label": "primary-key (id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseName": null,
+        "fields": [
+          {
+            "name": "key"
+          }
+        ],
+        "table": "table:/License",
+        "type": "unique"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 49
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FLicense/unique/%5B%22key%22%5D",
+      "kind": "constraint",
+      "label": "unique (key)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "storeId"
+        ],
+        "onDelete": null,
+        "onUpdate": null,
+        "references": [
+          "id"
+        ],
+        "table": "table:/Product",
+        "target": "table:/Store",
+        "type": "foreign-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 41
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FProduct/foreign-key/%5B%22storeId%22%5D/table%3A%2FStore",
+      "kind": "constraint",
+      "label": "foreign-key (storeId)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseName": null,
+        "fields": [
+          {
+            "name": "id"
+          }
+        ],
+        "table": "table:/Product",
+        "type": "primary-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 37
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FProduct/primary-key/%5B%22id%22%5D",
+      "kind": "constraint",
+      "label": "primary-key (id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseName": null,
+        "fields": [
+          {
+            "name": "sku"
+          }
+        ],
+        "table": "table:/Product",
+        "type": "unique"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 39
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FProduct/unique/%5B%22sku%22%5D",
+      "kind": "constraint",
+      "label": "unique (sku)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "licenseId"
+        ],
+        "onDelete": null,
+        "onUpdate": null,
+        "references": [
+          "id"
+        ],
+        "table": "table:/Purchase",
+        "target": "table:/License",
+        "type": "foreign-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 66
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FPurchase/foreign-key/%5B%22licenseId%22%5D/table%3A%2FLicense",
+      "kind": "constraint",
+      "label": "foreign-key (licenseId)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "storeId"
+        ],
+        "onDelete": null,
+        "onUpdate": null,
+        "references": [
+          "id"
+        ],
+        "table": "table:/Purchase",
+        "target": "table:/Store",
+        "type": "foreign-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 65
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FPurchase/foreign-key/%5B%22storeId%22%5D/table%3A%2FStore",
+      "kind": "constraint",
+      "label": "foreign-key (storeId)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "userId"
+        ],
+        "onDelete": null,
+        "onUpdate": null,
+        "references": [
+          "id"
+        ],
+        "table": "table:/Purchase",
+        "target": "table:/User",
+        "type": "foreign-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 64
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FPurchase/foreign-key/%5B%22userId%22%5D/table%3A%2FUser",
+      "kind": "constraint",
+      "label": "foreign-key (userId)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseName": null,
+        "fields": [
+          {
+            "name": "id"
+          }
+        ],
+        "table": "table:/Purchase",
+        "type": "primary-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 58
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FPurchase/primary-key/%5B%22id%22%5D",
+      "kind": "constraint",
+      "label": "primary-key (id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "approvedById"
+        ],
+        "onDelete": null,
+        "onUpdate": null,
+        "references": [
+          "id"
+        ],
+        "table": "table:/Refund",
+        "target": "table:/User",
+        "type": "foreign-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 76
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FRefund/foreign-key/%5B%22approvedById%22%5D/table%3A%2FUser",
+      "kind": "constraint",
+      "label": "foreign-key (approvedById)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "purchaseId"
+        ],
+        "onDelete": null,
+        "onUpdate": null,
+        "references": [
+          "id"
+        ],
+        "table": "table:/Refund",
+        "target": "table:/Purchase",
+        "type": "foreign-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 75
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FRefund/foreign-key/%5B%22purchaseId%22%5D/table%3A%2FPurchase",
+      "kind": "constraint",
+      "label": "foreign-key (purchaseId)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseName": null,
+        "fields": [
+          {
+            "name": "id"
+          }
+        ],
+        "table": "table:/Refund",
+        "type": "primary-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 71
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FRefund/primary-key/%5B%22id%22%5D",
+      "kind": "constraint",
+      "label": "primary-key (id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "ownerId"
+        ],
+        "onDelete": null,
+        "onUpdate": null,
+        "references": [
+          "id"
+        ],
+        "table": "table:/Store",
+        "target": "table:/User",
+        "type": "foreign-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 30
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FStore/foreign-key/%5B%22ownerId%22%5D/table%3A%2FUser",
+      "kind": "constraint",
+      "label": "foreign-key (ownerId)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseName": null,
+        "fields": [
+          {
+            "name": "id"
+          }
+        ],
+        "table": "table:/Store",
+        "type": "primary-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 27
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FStore/primary-key/%5B%22id%22%5D",
+      "kind": "constraint",
+      "label": "primary-key (id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "currentLicenseId"
+        ],
+        "onDelete": null,
+        "onUpdate": null,
+        "references": [
+          "id"
+        ],
+        "table": "table:/User",
+        "target": "table:/License",
+        "type": "foreign-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 18
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FUser/foreign-key/%5B%22currentLicenseId%22%5D/table%3A%2FLicense",
+      "kind": "constraint",
+      "label": "foreign-key (currentLicenseId)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "columns": [
+          "homeStoreId"
+        ],
+        "onDelete": null,
+        "onUpdate": null,
+        "references": [
+          "id"
+        ],
+        "table": "table:/User",
+        "target": "table:/Store",
+        "type": "foreign-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 19
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FUser/foreign-key/%5B%22homeStoreId%22%5D/table%3A%2FStore",
+      "kind": "constraint",
+      "label": "foreign-key (homeStoreId)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseName": null,
+        "fields": [
+          {
+            "name": "id"
+          }
+        ],
+        "table": "table:/User",
+        "type": "primary-key"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 14
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FUser/primary-key/%5B%22id%22%5D",
+      "kind": "constraint",
+      "label": "primary-key (id)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseName": null,
+        "fields": [
+          {
+            "name": "currentLicenseId"
+          }
+        ],
+        "table": "table:/User",
+        "type": "unique"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 16
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FUser/unique/%5B%22currentLicenseId%22%5D",
+      "kind": "constraint",
+      "label": "unique (currentLicenseId)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "databaseName": null,
+        "fields": [
+          {
+            "name": "email"
+          }
+        ],
+        "table": "table:/User",
+        "type": "unique"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 15
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "constraint:table%3A%2FUser/unique/%5B%22email%22%5D",
+      "kind": "constraint",
+      "label": "unique (email)"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "namespace": null,
+        "provider": "postgresql"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 45
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "table:/License",
+      "kind": "table",
+      "label": "License"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "namespace": null,
+        "provider": "postgresql"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 36
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "table:/Product",
+      "kind": "table",
+      "label": "Product"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "namespace": null,
+        "provider": "postgresql"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 57
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "table:/Purchase",
+      "kind": "table",
+      "label": "Purchase"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "namespace": null,
+        "provider": "postgresql"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 70
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "table:/Refund",
+      "kind": "table",
+      "label": "Refund"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "namespace": null,
+        "provider": "postgresql"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 26
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "table:/Store",
+      "kind": "table",
+      "label": "Store"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {
+        "namespace": null,
+        "provider": "postgresql"
+      },
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 13
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "id": "table:/User",
+      "kind": "table",
+      "label": "User"
+    }
+  ],
+  "metadata": {
+    "authority": "Prisma schema language, parsed by Projections",
+    "framework": "prisma",
+    "limitations": [
+      "Desired Prisma model, not a live database or migration history; no database connection, generation or Prisma installation is involved.",
+      "Ignored (@ignore, @@ignore) and Unsupported fields are not columns; composite types are not relational columns.",
+      "Implicit many-to-many relations are relationships, not invented physical join tables.",
+      "Unnamed constraint identities use ordered database columns, not connector-generated SQL names; relationMode, mapped foreign-key names and implicit referential-action defaults are not inferred.",
+      "Connector-specific capability checks (supported native types, index types and arguments per database) are left to Prisma."
+    ],
+    "sources": [
+      "prisma/schema.prisma"
+    ]
+  },
+  "protocolVersion": 0,
+  "relationships": [
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 52
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FLicense/foreign-key/%5B%22productId%22%5D/table%3A%2FProduct",
+      "id": "constrains:constraint%3Atable%253A%252FLicense%2Fforeign-key%2F%255B%2522productId%2522%255D%2Ftable%253A%252FProduct/column%3Atable%253A%252FLicense%2FproductId/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FLicense/productId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 51
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FLicense/foreign-key/%5B%22userId%22%5D/table%3A%2FUser",
+      "id": "constrains:constraint%3Atable%253A%252FLicense%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252FUser/column%3Atable%253A%252FLicense%2FuserId/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FLicense/userId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 46
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FLicense/primary-key/%5B%22id%22%5D",
+      "id": "constrains:constraint%3Atable%253A%252FLicense%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FLicense%2Fid/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FLicense/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 49
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FLicense/unique/%5B%22key%22%5D",
+      "id": "constrains:constraint%3Atable%253A%252FLicense%2Funique%2F%255B%2522key%2522%255D/column%3Atable%253A%252FLicense%2Fkey/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FLicense/key"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 41
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FProduct/foreign-key/%5B%22storeId%22%5D/table%3A%2FStore",
+      "id": "constrains:constraint%3Atable%253A%252FProduct%2Fforeign-key%2F%255B%2522storeId%2522%255D%2Ftable%253A%252FStore/column%3Atable%253A%252FProduct%2FstoreId/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FProduct/storeId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 37
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FProduct/primary-key/%5B%22id%22%5D",
+      "id": "constrains:constraint%3Atable%253A%252FProduct%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FProduct%2Fid/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FProduct/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 39
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FProduct/unique/%5B%22sku%22%5D",
+      "id": "constrains:constraint%3Atable%253A%252FProduct%2Funique%2F%255B%2522sku%2522%255D/column%3Atable%253A%252FProduct%2Fsku/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FProduct/sku"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 66
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FPurchase/foreign-key/%5B%22licenseId%22%5D/table%3A%2FLicense",
+      "id": "constrains:constraint%3Atable%253A%252FPurchase%2Fforeign-key%2F%255B%2522licenseId%2522%255D%2Ftable%253A%252FLicense/column%3Atable%253A%252FPurchase%2FlicenseId/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FPurchase/licenseId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 65
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FPurchase/foreign-key/%5B%22storeId%22%5D/table%3A%2FStore",
+      "id": "constrains:constraint%3Atable%253A%252FPurchase%2Fforeign-key%2F%255B%2522storeId%2522%255D%2Ftable%253A%252FStore/column%3Atable%253A%252FPurchase%2FstoreId/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FPurchase/storeId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 64
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FPurchase/foreign-key/%5B%22userId%22%5D/table%3A%2FUser",
+      "id": "constrains:constraint%3Atable%253A%252FPurchase%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252FUser/column%3Atable%253A%252FPurchase%2FuserId/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FPurchase/userId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 58
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FPurchase/primary-key/%5B%22id%22%5D",
+      "id": "constrains:constraint%3Atable%253A%252FPurchase%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FPurchase%2Fid/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FPurchase/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 76
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FRefund/foreign-key/%5B%22approvedById%22%5D/table%3A%2FUser",
+      "id": "constrains:constraint%3Atable%253A%252FRefund%2Fforeign-key%2F%255B%2522approvedById%2522%255D%2Ftable%253A%252FUser/column%3Atable%253A%252FRefund%2FapprovedById/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FRefund/approvedById"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 75
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FRefund/foreign-key/%5B%22purchaseId%22%5D/table%3A%2FPurchase",
+      "id": "constrains:constraint%3Atable%253A%252FRefund%2Fforeign-key%2F%255B%2522purchaseId%2522%255D%2Ftable%253A%252FPurchase/column%3Atable%253A%252FRefund%2FpurchaseId/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FRefund/purchaseId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 71
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FRefund/primary-key/%5B%22id%22%5D",
+      "id": "constrains:constraint%3Atable%253A%252FRefund%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FRefund%2Fid/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FRefund/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 30
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FStore/foreign-key/%5B%22ownerId%22%5D/table%3A%2FUser",
+      "id": "constrains:constraint%3Atable%253A%252FStore%2Fforeign-key%2F%255B%2522ownerId%2522%255D%2Ftable%253A%252FUser/column%3Atable%253A%252FStore%2FownerId/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FStore/ownerId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 27
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FStore/primary-key/%5B%22id%22%5D",
+      "id": "constrains:constraint%3Atable%253A%252FStore%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FStore%2Fid/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FStore/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 18
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FUser/foreign-key/%5B%22currentLicenseId%22%5D/table%3A%2FLicense",
+      "id": "constrains:constraint%3Atable%253A%252FUser%2Fforeign-key%2F%255B%2522currentLicenseId%2522%255D%2Ftable%253A%252FLicense/column%3Atable%253A%252FUser%2FcurrentLicenseId/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FUser/currentLicenseId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 19
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FUser/foreign-key/%5B%22homeStoreId%22%5D/table%3A%2FStore",
+      "id": "constrains:constraint%3Atable%253A%252FUser%2Fforeign-key%2F%255B%2522homeStoreId%2522%255D%2Ftable%253A%252FStore/column%3Atable%253A%252FUser%2FhomeStoreId/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FUser/homeStoreId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 14
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FUser/primary-key/%5B%22id%22%5D",
+      "id": "constrains:constraint%3Atable%253A%252FUser%2Fprimary-key%2F%255B%2522id%2522%255D/column%3Atable%253A%252FUser%2Fid/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FUser/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 16
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FUser/unique/%5B%22currentLicenseId%22%5D",
+      "id": "constrains:constraint%3Atable%253A%252FUser%2Funique%2F%255B%2522currentLicenseId%2522%255D/column%3Atable%253A%252FUser%2FcurrentLicenseId/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FUser/currentLicenseId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 15
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FUser/unique/%5B%22email%22%5D",
+      "id": "constrains:constraint%3Atable%253A%252FUser%2Funique%2F%255B%2522email%2522%255D/column%3Atable%253A%252FUser%2Femail/",
+      "kind": "constrains",
+      "to": "column:table%3A%2FUser/email"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 50
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/License",
+      "id": "contains:table%3A%2FLicense/column%3Atable%253A%252FLicense%2FexpiresAt/",
+      "kind": "contains",
+      "to": "column:table%3A%2FLicense/expiresAt"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 46
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/License",
+      "id": "contains:table%3A%2FLicense/column%3Atable%253A%252FLicense%2Fid/",
+      "kind": "contains",
+      "to": "column:table%3A%2FLicense/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 49
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/License",
+      "id": "contains:table%3A%2FLicense/column%3Atable%253A%252FLicense%2Fkey/",
+      "kind": "contains",
+      "to": "column:table%3A%2FLicense/key"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 48
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/License",
+      "id": "contains:table%3A%2FLicense/column%3Atable%253A%252FLicense%2FproductId/",
+      "kind": "contains",
+      "to": "column:table%3A%2FLicense/productId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 47
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/License",
+      "id": "contains:table%3A%2FLicense/column%3Atable%253A%252FLicense%2FuserId/",
+      "kind": "contains",
+      "to": "column:table%3A%2FLicense/userId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 52
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/License",
+      "id": "contains:table%3A%2FLicense/constraint%3Atable%253A%252FLicense%2Fforeign-key%2F%255B%2522productId%2522%255D%2Ftable%253A%252FProduct/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FLicense/foreign-key/%5B%22productId%22%5D/table%3A%2FProduct"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 51
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/License",
+      "id": "contains:table%3A%2FLicense/constraint%3Atable%253A%252FLicense%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252FUser/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FLicense/foreign-key/%5B%22userId%22%5D/table%3A%2FUser"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 46
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/License",
+      "id": "contains:table%3A%2FLicense/constraint%3Atable%253A%252FLicense%2Fprimary-key%2F%255B%2522id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FLicense/primary-key/%5B%22id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 49
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/License",
+      "id": "contains:table%3A%2FLicense/constraint%3Atable%253A%252FLicense%2Funique%2F%255B%2522key%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FLicense/unique/%5B%22key%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 37
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Product",
+      "id": "contains:table%3A%2FProduct/column%3Atable%253A%252FProduct%2Fid/",
+      "kind": "contains",
+      "to": "column:table%3A%2FProduct/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 40
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Product",
+      "id": "contains:table%3A%2FProduct/column%3Atable%253A%252FProduct%2FpriceCents/",
+      "kind": "contains",
+      "to": "column:table%3A%2FProduct/priceCents"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 39
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Product",
+      "id": "contains:table%3A%2FProduct/column%3Atable%253A%252FProduct%2Fsku/",
+      "kind": "contains",
+      "to": "column:table%3A%2FProduct/sku"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 38
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Product",
+      "id": "contains:table%3A%2FProduct/column%3Atable%253A%252FProduct%2FstoreId/",
+      "kind": "contains",
+      "to": "column:table%3A%2FProduct/storeId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 41
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Product",
+      "id": "contains:table%3A%2FProduct/constraint%3Atable%253A%252FProduct%2Fforeign-key%2F%255B%2522storeId%2522%255D%2Ftable%253A%252FStore/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FProduct/foreign-key/%5B%22storeId%22%5D/table%3A%2FStore"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 37
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Product",
+      "id": "contains:table%3A%2FProduct/constraint%3Atable%253A%252FProduct%2Fprimary-key%2F%255B%2522id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FProduct/primary-key/%5B%22id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 39
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Product",
+      "id": "contains:table%3A%2FProduct/constraint%3Atable%253A%252FProduct%2Funique%2F%255B%2522sku%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FProduct/unique/%5B%22sku%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 62
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Purchase",
+      "id": "contains:table%3A%2FPurchase/column%3Atable%253A%252FPurchase%2FamountCents/",
+      "kind": "contains",
+      "to": "column:table%3A%2FPurchase/amountCents"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 58
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Purchase",
+      "id": "contains:table%3A%2FPurchase/column%3Atable%253A%252FPurchase%2Fid/",
+      "kind": "contains",
+      "to": "column:table%3A%2FPurchase/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 61
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Purchase",
+      "id": "contains:table%3A%2FPurchase/column%3Atable%253A%252FPurchase%2FlicenseId/",
+      "kind": "contains",
+      "to": "column:table%3A%2FPurchase/licenseId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 63
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Purchase",
+      "id": "contains:table%3A%2FPurchase/column%3Atable%253A%252FPurchase%2FpurchasedAt/",
+      "kind": "contains",
+      "to": "column:table%3A%2FPurchase/purchasedAt"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 60
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Purchase",
+      "id": "contains:table%3A%2FPurchase/column%3Atable%253A%252FPurchase%2FstoreId/",
+      "kind": "contains",
+      "to": "column:table%3A%2FPurchase/storeId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 59
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Purchase",
+      "id": "contains:table%3A%2FPurchase/column%3Atable%253A%252FPurchase%2FuserId/",
+      "kind": "contains",
+      "to": "column:table%3A%2FPurchase/userId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 66
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Purchase",
+      "id": "contains:table%3A%2FPurchase/constraint%3Atable%253A%252FPurchase%2Fforeign-key%2F%255B%2522licenseId%2522%255D%2Ftable%253A%252FLicense/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FPurchase/foreign-key/%5B%22licenseId%22%5D/table%3A%2FLicense"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 65
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Purchase",
+      "id": "contains:table%3A%2FPurchase/constraint%3Atable%253A%252FPurchase%2Fforeign-key%2F%255B%2522storeId%2522%255D%2Ftable%253A%252FStore/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FPurchase/foreign-key/%5B%22storeId%22%5D/table%3A%2FStore"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 64
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Purchase",
+      "id": "contains:table%3A%2FPurchase/constraint%3Atable%253A%252FPurchase%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252FUser/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FPurchase/foreign-key/%5B%22userId%22%5D/table%3A%2FUser"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 58
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Purchase",
+      "id": "contains:table%3A%2FPurchase/constraint%3Atable%253A%252FPurchase%2Fprimary-key%2F%255B%2522id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FPurchase/primary-key/%5B%22id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 74
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Refund",
+      "id": "contains:table%3A%2FRefund/column%3Atable%253A%252FRefund%2FamountCents/",
+      "kind": "contains",
+      "to": "column:table%3A%2FRefund/amountCents"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 73
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Refund",
+      "id": "contains:table%3A%2FRefund/column%3Atable%253A%252FRefund%2FapprovedById/",
+      "kind": "contains",
+      "to": "column:table%3A%2FRefund/approvedById"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 71
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Refund",
+      "id": "contains:table%3A%2FRefund/column%3Atable%253A%252FRefund%2Fid/",
+      "kind": "contains",
+      "to": "column:table%3A%2FRefund/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 72
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Refund",
+      "id": "contains:table%3A%2FRefund/column%3Atable%253A%252FRefund%2FpurchaseId/",
+      "kind": "contains",
+      "to": "column:table%3A%2FRefund/purchaseId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 76
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Refund",
+      "id": "contains:table%3A%2FRefund/constraint%3Atable%253A%252FRefund%2Fforeign-key%2F%255B%2522approvedById%2522%255D%2Ftable%253A%252FUser/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FRefund/foreign-key/%5B%22approvedById%22%5D/table%3A%2FUser"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 75
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Refund",
+      "id": "contains:table%3A%2FRefund/constraint%3Atable%253A%252FRefund%2Fforeign-key%2F%255B%2522purchaseId%2522%255D%2Ftable%253A%252FPurchase/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FRefund/foreign-key/%5B%22purchaseId%22%5D/table%3A%2FPurchase"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 71
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Refund",
+      "id": "contains:table%3A%2FRefund/constraint%3Atable%253A%252FRefund%2Fprimary-key%2F%255B%2522id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FRefund/primary-key/%5B%22id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 27
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Store",
+      "id": "contains:table%3A%2FStore/column%3Atable%253A%252FStore%2Fid/",
+      "kind": "contains",
+      "to": "column:table%3A%2FStore/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 28
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Store",
+      "id": "contains:table%3A%2FStore/column%3Atable%253A%252FStore%2Fname/",
+      "kind": "contains",
+      "to": "column:table%3A%2FStore/name"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 29
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Store",
+      "id": "contains:table%3A%2FStore/column%3Atable%253A%252FStore%2FownerId/",
+      "kind": "contains",
+      "to": "column:table%3A%2FStore/ownerId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 30
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Store",
+      "id": "contains:table%3A%2FStore/constraint%3Atable%253A%252FStore%2Fforeign-key%2F%255B%2522ownerId%2522%255D%2Ftable%253A%252FUser/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FStore/foreign-key/%5B%22ownerId%22%5D/table%3A%2FUser"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 27
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/Store",
+      "id": "contains:table%3A%2FStore/constraint%3Atable%253A%252FStore%2Fprimary-key%2F%255B%2522id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FStore/primary-key/%5B%22id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 16
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/User",
+      "id": "contains:table%3A%2FUser/column%3Atable%253A%252FUser%2FcurrentLicenseId/",
+      "kind": "contains",
+      "to": "column:table%3A%2FUser/currentLicenseId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 15
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/User",
+      "id": "contains:table%3A%2FUser/column%3Atable%253A%252FUser%2Femail/",
+      "kind": "contains",
+      "to": "column:table%3A%2FUser/email"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 17
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/User",
+      "id": "contains:table%3A%2FUser/column%3Atable%253A%252FUser%2FhomeStoreId/",
+      "kind": "contains",
+      "to": "column:table%3A%2FUser/homeStoreId"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 14
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/User",
+      "id": "contains:table%3A%2FUser/column%3Atable%253A%252FUser%2Fid/",
+      "kind": "contains",
+      "to": "column:table%3A%2FUser/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 18
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/User",
+      "id": "contains:table%3A%2FUser/constraint%3Atable%253A%252FUser%2Fforeign-key%2F%255B%2522currentLicenseId%2522%255D%2Ftable%253A%252FLicense/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FUser/foreign-key/%5B%22currentLicenseId%22%5D/table%3A%2FLicense"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 19
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/User",
+      "id": "contains:table%3A%2FUser/constraint%3Atable%253A%252FUser%2Fforeign-key%2F%255B%2522homeStoreId%2522%255D%2Ftable%253A%252FStore/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FUser/foreign-key/%5B%22homeStoreId%22%5D/table%3A%2FStore"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 14
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/User",
+      "id": "contains:table%3A%2FUser/constraint%3Atable%253A%252FUser%2Fprimary-key%2F%255B%2522id%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FUser/primary-key/%5B%22id%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 16
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/User",
+      "id": "contains:table%3A%2FUser/constraint%3Atable%253A%252FUser%2Funique%2F%255B%2522currentLicenseId%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FUser/unique/%5B%22currentLicenseId%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 15
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "table:/User",
+      "id": "contains:table%3A%2FUser/constraint%3Atable%253A%252FUser%2Funique%2F%255B%2522email%2522%255D/",
+      "kind": "contains",
+      "to": "constraint:table%3A%2FUser/unique/%5B%22email%22%5D"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 52
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "column:table%3A%2FLicense/productId",
+      "id": "foreign-key:column%3Atable%253A%252FLicense%2FproductId/column%3Atable%253A%252FProduct%2Fid/constraint%3Atable%253A%252FLicense%2Fforeign-key%2F%255B%2522productId%2522%255D%2Ftable%253A%252FProduct",
+      "kind": "foreign-key",
+      "to": "column:table%3A%2FProduct/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 51
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "column:table%3A%2FLicense/userId",
+      "id": "foreign-key:column%3Atable%253A%252FLicense%2FuserId/column%3Atable%253A%252FUser%2Fid/constraint%3Atable%253A%252FLicense%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252FUser",
+      "kind": "foreign-key",
+      "to": "column:table%3A%2FUser/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 41
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "column:table%3A%2FProduct/storeId",
+      "id": "foreign-key:column%3Atable%253A%252FProduct%2FstoreId/column%3Atable%253A%252FStore%2Fid/constraint%3Atable%253A%252FProduct%2Fforeign-key%2F%255B%2522storeId%2522%255D%2Ftable%253A%252FStore",
+      "kind": "foreign-key",
+      "to": "column:table%3A%2FStore/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 66
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "column:table%3A%2FPurchase/licenseId",
+      "id": "foreign-key:column%3Atable%253A%252FPurchase%2FlicenseId/column%3Atable%253A%252FLicense%2Fid/constraint%3Atable%253A%252FPurchase%2Fforeign-key%2F%255B%2522licenseId%2522%255D%2Ftable%253A%252FLicense",
+      "kind": "foreign-key",
+      "to": "column:table%3A%2FLicense/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 65
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "column:table%3A%2FPurchase/storeId",
+      "id": "foreign-key:column%3Atable%253A%252FPurchase%2FstoreId/column%3Atable%253A%252FStore%2Fid/constraint%3Atable%253A%252FPurchase%2Fforeign-key%2F%255B%2522storeId%2522%255D%2Ftable%253A%252FStore",
+      "kind": "foreign-key",
+      "to": "column:table%3A%2FStore/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 64
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "column:table%3A%2FPurchase/userId",
+      "id": "foreign-key:column%3Atable%253A%252FPurchase%2FuserId/column%3Atable%253A%252FUser%2Fid/constraint%3Atable%253A%252FPurchase%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252FUser",
+      "kind": "foreign-key",
+      "to": "column:table%3A%2FUser/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 76
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "column:table%3A%2FRefund/approvedById",
+      "id": "foreign-key:column%3Atable%253A%252FRefund%2FapprovedById/column%3Atable%253A%252FUser%2Fid/constraint%3Atable%253A%252FRefund%2Fforeign-key%2F%255B%2522approvedById%2522%255D%2Ftable%253A%252FUser",
+      "kind": "foreign-key",
+      "to": "column:table%3A%2FUser/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 75
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "column:table%3A%2FRefund/purchaseId",
+      "id": "foreign-key:column%3Atable%253A%252FRefund%2FpurchaseId/column%3Atable%253A%252FPurchase%2Fid/constraint%3Atable%253A%252FRefund%2Fforeign-key%2F%255B%2522purchaseId%2522%255D%2Ftable%253A%252FPurchase",
+      "kind": "foreign-key",
+      "to": "column:table%3A%2FPurchase/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 30
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "column:table%3A%2FStore/ownerId",
+      "id": "foreign-key:column%3Atable%253A%252FStore%2FownerId/column%3Atable%253A%252FUser%2Fid/constraint%3Atable%253A%252FStore%2Fforeign-key%2F%255B%2522ownerId%2522%255D%2Ftable%253A%252FUser",
+      "kind": "foreign-key",
+      "to": "column:table%3A%2FUser/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 18
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "column:table%3A%2FUser/currentLicenseId",
+      "id": "foreign-key:column%3Atable%253A%252FUser%2FcurrentLicenseId/column%3Atable%253A%252FLicense%2Fid/constraint%3Atable%253A%252FUser%2Fforeign-key%2F%255B%2522currentLicenseId%2522%255D%2Ftable%253A%252FLicense",
+      "kind": "foreign-key",
+      "to": "column:table%3A%2FLicense/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 19
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "column:table%3A%2FUser/homeStoreId",
+      "id": "foreign-key:column%3Atable%253A%252FUser%2FhomeStoreId/column%3Atable%253A%252FStore%2Fid/constraint%3Atable%253A%252FUser%2Fforeign-key%2F%255B%2522homeStoreId%2522%255D%2Ftable%253A%252FStore",
+      "kind": "foreign-key",
+      "to": "column:table%3A%2FStore/id"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 52
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FLicense/foreign-key/%5B%22productId%22%5D/table%3A%2FProduct",
+      "id": "references:constraint%3Atable%253A%252FLicense%2Fforeign-key%2F%255B%2522productId%2522%255D%2Ftable%253A%252FProduct/table%3A%2FProduct/",
+      "kind": "references",
+      "to": "table:/Product"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 51
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FLicense/foreign-key/%5B%22userId%22%5D/table%3A%2FUser",
+      "id": "references:constraint%3Atable%253A%252FLicense%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252FUser/table%3A%2FUser/",
+      "kind": "references",
+      "to": "table:/User"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 41
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FProduct/foreign-key/%5B%22storeId%22%5D/table%3A%2FStore",
+      "id": "references:constraint%3Atable%253A%252FProduct%2Fforeign-key%2F%255B%2522storeId%2522%255D%2Ftable%253A%252FStore/table%3A%2FStore/",
+      "kind": "references",
+      "to": "table:/Store"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 66
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FPurchase/foreign-key/%5B%22licenseId%22%5D/table%3A%2FLicense",
+      "id": "references:constraint%3Atable%253A%252FPurchase%2Fforeign-key%2F%255B%2522licenseId%2522%255D%2Ftable%253A%252FLicense/table%3A%2FLicense/",
+      "kind": "references",
+      "to": "table:/License"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 65
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FPurchase/foreign-key/%5B%22storeId%22%5D/table%3A%2FStore",
+      "id": "references:constraint%3Atable%253A%252FPurchase%2Fforeign-key%2F%255B%2522storeId%2522%255D%2Ftable%253A%252FStore/table%3A%2FStore/",
+      "kind": "references",
+      "to": "table:/Store"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 64
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FPurchase/foreign-key/%5B%22userId%22%5D/table%3A%2FUser",
+      "id": "references:constraint%3Atable%253A%252FPurchase%2Fforeign-key%2F%255B%2522userId%2522%255D%2Ftable%253A%252FUser/table%3A%2FUser/",
+      "kind": "references",
+      "to": "table:/User"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 76
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FRefund/foreign-key/%5B%22approvedById%22%5D/table%3A%2FUser",
+      "id": "references:constraint%3Atable%253A%252FRefund%2Fforeign-key%2F%255B%2522approvedById%2522%255D%2Ftable%253A%252FUser/table%3A%2FUser/",
+      "kind": "references",
+      "to": "table:/User"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 75
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FRefund/foreign-key/%5B%22purchaseId%22%5D/table%3A%2FPurchase",
+      "id": "references:constraint%3Atable%253A%252FRefund%2Fforeign-key%2F%255B%2522purchaseId%2522%255D%2Ftable%253A%252FPurchase/table%3A%2FPurchase/",
+      "kind": "references",
+      "to": "table:/Purchase"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 30
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FStore/foreign-key/%5B%22ownerId%22%5D/table%3A%2FUser",
+      "id": "references:constraint%3Atable%253A%252FStore%2Fforeign-key%2F%255B%2522ownerId%2522%255D%2Ftable%253A%252FUser/table%3A%2FUser/",
+      "kind": "references",
+      "to": "table:/User"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 18
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FUser/foreign-key/%5B%22currentLicenseId%22%5D/table%3A%2FLicense",
+      "id": "references:constraint%3Atable%253A%252FUser%2Fforeign-key%2F%255B%2522currentLicenseId%2522%255D%2Ftable%253A%252FLicense/table%3A%2FLicense/",
+      "kind": "references",
+      "to": "table:/License"
+    },
+    {
+      "confidence": "authoritative",
+      "data": {},
+      "evidence": [
+        {
+          "kind": "prisma-schema",
+          "location": {
+            "line": 19
+          },
+          "source": "prisma/schema.prisma"
+        }
+      ],
+      "from": "constraint:table%3A%2FUser/foreign-key/%5B%22homeStoreId%22%5D/table%3A%2FStore",
+      "id": "references:constraint%3Atable%253A%252FUser%2Fforeign-key%2F%255B%2522homeStoreId%2522%255D%2Ftable%253A%252FStore/table%3A%2FStore/",
+      "kind": "references",
+      "to": "table:/Store"
+    }
+  ],
+  "schema": "database/v0"
+}

@@ -12,13 +12,18 @@ import {placeUnlinked} from './unlinked.js'
 import {columnGrid, snapToGrid} from './grid.js'
 import type {Box} from './unlinked.js'
 
+/**
+ * Lays the graph out with layer gap `gap`, in `given`'s order and alignment when given. With `enough`, it gives up on
+ * routing, returning no layout, once the gap is known to need at least that much more room (`crowding`).
+ */
 export async function layOut(
   nodes: readonly LayoutNode[],
   edges: readonly LayoutEdge[],
   options: GraphLayoutOptions,
   gap: number,
   given?: Plan,
-): Promise<{layout: GraphLayout; crowding: number; plan: Plan}> {
+  enough?: number,
+): Promise<{layout: GraphLayout | undefined; crowding: number; plan: Plan; alignment: GraphLayout['alignment']}> {
   const input = elkInput(nodes, edges, options)
   const {direction, across, groups, hints, placed, stages, viaJunction, ordered, unlinked, elkId, elkEdges, parts} = input
   // Without a reference layout, ELK first orders the cards to cross least, then places them in that order. Graphs with
@@ -91,29 +96,35 @@ export async function layOut(
     sizes.set(node.id, {width: box.width, height: box.height})
   }
   const nodeOf = new Map<string, string>([...elkId].map(([id, elk]) => [elk, id]))
-  const {routes, ports, crowding} = routeEdges({
-    edges: placed,
-    parts: new Map(placed.map(edge => [edge.id, parts.get(edge.id)!])),
-    ends: new Map(
-      elkEdges.map(edge => [
-        edge.id,
-        {from: nodeOf.get(edge.sources[0]!) ?? edge.sources[0]!, to: nodeOf.get(edge.targets[0]!) ?? edge.targets[0]!},
+  const routed = routeEdges(
+    {
+      edges: placed,
+      parts: new Map(placed.map(edge => [edge.id, parts.get(edge.id)!])),
+      ends: new Map(
+        elkEdges.map(edge => [
+          edge.id,
+          {from: nodeOf.get(edge.sources[0]!) ?? edge.sources[0]!, to: nodeOf.get(edge.targets[0]!) ?? edge.targets[0]!},
+        ]),
+      ),
+      polylines,
+      boxes: new Map([
+        ...[...points].map(([id, point]) => [id, {...point, ...sizes.get(id)!}] as const),
+        ...stages.map((_, index) => {
+          const box = boxes.get(`j${index}`)!
+          return [`j${index}`, {x: box.x + box.width / 2, y: box.y + box.height / 2, width: 0, height: 0}] as const
+        }),
       ]),
-    ),
-    polylines,
-    boxes: new Map([
-      ...[...points].map(([id, point]) => [id, {...point, ...sizes.get(id)!}] as const),
-      ...stages.map((_, index) => {
-        const box = boxes.get(`j${index}`)!
-        return [`j${index}`, {x: box.x + box.width / 2, y: box.y + box.height / 2, width: 0, height: 0}] as const
-      }),
-    ]),
-    cards: new Set([...points.keys()].filter(id => !groups.has(id))),
-    loose: unlinked,
-    direction,
-    gap,
-    grid: Boolean(grid),
-  })
+      cards: new Set([...points.keys()].filter(id => !groups.has(id))),
+      loose: unlinked,
+      direction,
+      gap,
+      grid: Boolean(grid),
+    },
+    enough,
+  )
+  // Routing stopped once the gap was known to be too narrow: there is no layout, only how much wider it must be.
+  if (!('routes' in routed)) return {layout: undefined, crowding: routed.crowding, plan, alignment}
+  const {routes, ports, crowding} = routed
   const junctions = stages.map((_, index) => {
     const box = boxes.get(`j${index}`)!
     return {x: box.x + box.width / 2, y: box.y + box.height / 2}
@@ -134,5 +145,6 @@ export async function layOut(
     },
     crowding,
     plan,
+    alignment,
   }
 }

@@ -5,11 +5,19 @@ import {fileURLToPath} from 'node:url'
 import {settings, type RunComparatorOptions} from './host.js'
 import {run} from './node-worker.js'
 import {cachedChecks, checkedRules, diagnostic, compareRequest, inspectRequest, loadRulesInterpreter, type RulesRuntime} from './rules.js'
-import {ComparatorRuntimeError, limits} from './abi.js'
+import {ComparatorRuntimeError, abortable, cancelled, limits} from './abi.js'
 
 export {ComparatorRuntimeError, limits, type ComparatorErrorCode} from './abi.js'
 export type {RunComparatorOptions} from './host.js'
-export {RulesError, isComparatorFile, rulesComparatorDigest, type CheckedRules, type RulesDiagnostic, type RulesRuntime} from './rules.js'
+export {
+  RulesError,
+  isComparatorFile,
+  rulesComparatorDigest,
+  type CheckedRules,
+  type RulesCallOptions,
+  type RulesDiagnostic,
+  type RulesRuntime,
+} from './rules.js'
 
 const rulesUrl = new URL('./rules.wasm', import.meta.url)
 /** The packaged rules interpreter, checked and compiled once. */
@@ -23,15 +31,19 @@ export const nodeRulesInterpreter = () => loadRulesInterpreter(rulesUrl.href, as
 export function createRulesRuntime(options: RunComparatorOptions = {}): RulesRuntime {
   const resolved = settings(options)
   return {
-    check: cachedChecks(async rules => {
-      const interpreter = await nodeRulesInterpreter()
-      const report = await run(inspectRequest(interpreter, rules, resolved.maxMemoryPages, resolved.maxOutputBytes), resolved.deadlineMs)
+    check: cachedChecks(async (rules, call) => {
+      const interpreter = await abortable(nodeRulesInterpreter(), call?.signal)
+      const report = await run(
+        inspectRequest(interpreter, rules, resolved.maxMemoryPages, resolved.maxOutputBytes),
+        resolved.deadlineMs,
+        call?.signal,
+      )
       return checkedRules(interpreter, report)
     }),
-    async compare(rules, input) {
-      const interpreter = await nodeRulesInterpreter()
+    async compare(rules, input, call) {
+      const interpreter = await abortable(nodeRulesInterpreter(), call?.signal)
       const request = compareRequest(interpreter, rules, input, resolved.maxInputBytes, resolved.maxMemoryPages, resolved.maxOutputBytes)
-      return run(request, resolved.deadlineMs)
+      return run(request, resolved.deadlineMs, call?.signal)
     },
   }
 }
@@ -62,10 +74,10 @@ export function createNativeRulesRuntime(options: NativeRulesRuntimeOptions = {}
   }
   const interpreter = options.interpreter ?? fileURLToPath(new URL('./rules.wasm', import.meta.url))
   const executable = options.executable ?? packagedRunner()
-  const call = (request: unknown) => runNative(executable, interpreter, request, deadlineMs)
+  const call = (request: unknown, signal?: AbortSignal) => runNative(executable, interpreter, request, deadlineMs, signal)
   return {
-    check: cachedChecks(async rules => {
-      const result = (await call({operation: 'check', rules: rulesSource(rules)})) as {
+    check: cachedChecks(async (rules, options) => {
+      const result = (await call({operation: 'check', rules: rulesSource(rules)}, options?.signal)) as {
         digest?: unknown
         canonical?: unknown
         warnings?: unknown
@@ -79,7 +91,7 @@ export function createNativeRulesRuntime(options: NativeRulesRuntimeOptions = {}
         warnings: Array.isArray(result.warnings) ? result.warnings.map(diagnostic) : [],
       }
     }),
-    compare: (rules, input) => call({operation: 'compare', rules: rulesSource(rules), input}),
+    compare: (rules, input, options) => call({operation: 'compare', rules: rulesSource(rules), input}, options?.signal),
   }
 }
 
@@ -127,16 +139,19 @@ const codes = new Set<string>([
   'comparator-error',
 ])
 
-function runNative(executable: string, interpreter: string, request: unknown, deadlineMs: number): Promise<unknown> {
+function runNative(executable: string, interpreter: string, request: unknown, deadlineMs: number, signal?: AbortSignal): Promise<unknown> {
   return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(cancelled(signal))
     const child = spawn(executable, ['--interpreter', interpreter], {stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true})
     const chunks: Buffer[] = []
     let size = 0
     let settled = false
+    const abort = () => finish(cancelled(signal!))
     const finish = (error: ComparatorRuntimeError | undefined, value?: unknown) => {
       if (settled) return
       settled = true
       clearTimeout(timer)
+      signal?.removeEventListener('abort', abort)
       if (error) {
         child.kill('SIGKILL')
         reject(error)
@@ -146,6 +161,7 @@ function runNative(executable: string, interpreter: string, request: unknown, de
       () => finish(new ComparatorRuntimeError('deadline', `the rules runner exceeded its ${deadlineMs} ms deadline`)),
       deadlineMs,
     )
+    signal?.addEventListener('abort', abort, {once: true})
     child.on('error', error => finish(new ComparatorRuntimeError('worker', `the rules runner failed to start: ${error.message}`)))
     child.stdout.on('data', (chunk: Buffer) => {
       size += chunk.length

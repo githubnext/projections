@@ -127,6 +127,17 @@ test('terminates comparators that run past the deadline', async () => {
   await rejects(runComparator(bytes, input, {deadlineMs: 200}), 'deadline')
 })
 
+test('the caller’s signal stops a running comparator, and one already aborted never starts it', async () => {
+  const controller = new AbortController()
+  const started = performance.now()
+  const running = runComparator(comparator(comparison, {body: forever}), input, {deadlineMs: 30_000}, controller.signal)
+  setTimeout(() => controller.abort(new Error('the artifact deadline passed')), 100)
+  await rejects(running, 'cancelled', /^the comparator run was cancelled: the artifact deadline passed$/)
+  // Well before the comparator's own 30 s deadline: the Worker was terminated, not left looping.
+  assert.ok(performance.now() - started < 5000)
+  await rejects(runComparator(comparator(comparison), input, {}, AbortSignal.abort()), 'cancelled')
+})
+
 test('stops memory growth beyond the cap', async () => {
   const limit = /^comparator tried to grow its memory beyond the 1048576-byte limit$/
   const grow = pages => [...op.i32Const(pages), ...op.memoryGrow, ...op.drop]
@@ -232,4 +243,30 @@ test('rejects invalid input', async () => {
     'input-too-large',
     /^comparator input is \d+ bytes, exceeding the 8-byte limit$/,
   )
+})
+
+test('a cancelled check fails only its own caller: others keep their check, and a success is shared with later callers', async () => {
+  const {cachedChecks} = await import('../dist/rules.js')
+  const starts = []
+  const check = cachedChecks(
+    (rules, options) =>
+      new Promise((resolve, reject) => {
+        starts.push(options.signal)
+        options.signal?.addEventListener('abort', () => reject(new ComparatorRuntimeError('cancelled', 'cancelled')))
+        setTimeout(() => resolve({digest: 'sha256:d', canonical: '', warnings: []}), 50)
+      }),
+  )
+  const rules = new TextEncoder().encode('rules: []')
+  const controller = new AbortController()
+  const mine = check(rules, {signal: controller.signal})
+  const shared = check(rules)
+  await new Promise(resolve => setTimeout(resolve, 10))
+  controller.abort()
+  await rejects(mine, 'cancelled')
+  assert.equal((await shared).digest, 'sha256:d')
+  // A settled success is shared, even with a caller that has a signal, without checking again.
+  assert.equal((await check(rules, {signal: new AbortController().signal})).digest, 'sha256:d')
+  assert.equal(starts.length, 2)
+  // An already-aborted caller gets no result, cached or not.
+  await rejects(check(rules, {signal: AbortSignal.abort()}), 'cancelled')
 })

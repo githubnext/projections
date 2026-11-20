@@ -43,8 +43,14 @@ pub(super) fn text<'a>(value: Option<&'a Value>, label: &str) -> Result<&'a str>
         .with_context(|| format!("{label} must be a nonempty string"))
 }
 
-pub(super) fn flag(value: Option<&Value>, default: bool) -> bool {
-    value.and_then(Value::as_bool).unwrap_or(default)
+/// A boolean field: `default` when it is absent or null, and an error when it
+/// is anything but `true` or `false` (a quoted `"false"` among them).
+pub(super) fn flag(value: Option<&Value>, default: bool, label: &str) -> Result<bool> {
+    match value {
+        None | Some(Value::Null) => Ok(default),
+        Some(Value::Bool(flag)) => Ok(*flag),
+        Some(other) => bail!("{label} must be true or false, not {other}"),
+    }
 }
 
 /// Fields Projections doesn't model yet, kept so a change to them still

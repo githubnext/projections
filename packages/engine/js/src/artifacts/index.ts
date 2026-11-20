@@ -89,8 +89,8 @@ async function verifyExtraction(document: ExtractionDocument, engine: Projection
  * `createNativeRulesRuntime()` from `@githubnext/projections-comparator-runtime`.
  */
 export interface ArtifactRulesRuntime {
-  check(rules: Uint8Array): Promise<{digest: string}>
-  compare(rules: Uint8Array, input: unknown): Promise<unknown>
+  check(rules: Uint8Array, options?: {signal?: AbortSignal}): Promise<{digest: string}>
+  compare(rules: Uint8Array, input: unknown, options?: {signal?: AbortSignal}): Promise<unknown>
 }
 
 /**
@@ -101,6 +101,8 @@ export interface ArtifactRulesRuntime {
 export interface ArtifactRules {
   bytes: Uint8Array
   runtime: ArtifactRulesRuntime
+  /** Cancels the rerun: the runtime stops its worker or process, and loading fails. */
+  signal?: AbortSignal
 }
 
 async function verifyComparison(value: ComparisonDocument, engine: ProjectionEngine, rules?: ArtifactRules): Promise<ComparisonDocument> {
@@ -149,7 +151,7 @@ async function rerunCustom(
   // The file supplied must be the comparator file that produced the comparison: its digest covers its meaning and the interpreter.
   let digest: string
   try {
-    ;({digest} = await rules.runtime.check(rules.bytes))
+    ;({digest} = await rules.runtime.check(rules.bytes, rules.signal ? {signal: rules.signal} : {}))
   } catch (error) {
     throw new ArtifactError(
       'ARTIFACT_RULES',
@@ -166,13 +168,11 @@ async function rerunCustom(
   }
   let output: unknown
   try {
-    output = await rules.runtime.compare(rules.bytes, {
-      protocolVersion: 0,
-      before: before.extraction,
-      after: after.extraction,
-      baseline: {},
-      options: custom.options ?? {},
-    })
+    output = await rules.runtime.compare(
+      rules.bytes,
+      {protocolVersion: 0, before: before.extraction, after: after.extraction, baseline: {}, options: custom.options ?? {}},
+      rules.signal ? {signal: rules.signal} : {},
+    )
   } catch (error) {
     throw new ArtifactError(
       'ARTIFACT_RULES',

@@ -106,7 +106,7 @@ pub fn add(model: &mut Model, document: &Document, default_namespace: Option<&st
             }
         }
     }
-    if flag(spec.get("loader"), false) {
+    if flag(spec.get("loader"), false, &format!("{label} spec.loader"))? {
         let probe = Probe {
             hook: key(&["hook", "loader"]),
             hook_data: json!({"hookType":"loader","target":"loader","stability":"stable","category":"process"}),

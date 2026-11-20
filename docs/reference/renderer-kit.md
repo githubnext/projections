@@ -1959,10 +1959,13 @@ The sort a heading's activation asks for: the other direction for the sorted col
 ### `nodeSpacing`
 
 ```ts
-nodeSpacing: 24
+nodeSpacing: number
 ```
 
-Space between cards in a layer (ELK `spacing.nodeNode`), and between a card with no relationships and what it is placed beside (see `placeUnlinked`).
+Space between cards in a layer (ELK `spacing.nodeNode`), and between a card with no relationships and what it is
+placed beside (see `placeUnlinked`): a channel for a route between two cards, clear of both (`edgeNodeSpacing` each
+side), with room to spare, so columns read apart and a relationship can pass between them. ELK widens a gap
+further for each route it carries.
 
 ### `numericValue`
 

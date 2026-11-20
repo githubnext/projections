@@ -38,9 +38,10 @@ function listed(items, field) {
     if (!isObject(item)) throw new TypeError(`${field}[${quoted(key)}] is ${described(item)}, not an object`)
     if (item.id !== void 0 && item.id !== key)
       throw new RangeError(`${field}[${quoted(key)}] has the id ${quoted(item.id)}; give it its key's, or none`)
+    const {id: _id, ...fields} = item
     return {
       id: key,
-      ...item,
+      ...fields,
     }
   }
   let list

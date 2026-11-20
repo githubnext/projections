@@ -31,7 +31,8 @@ function listed(items: unknown, field: 'entities' | 'relationships'): Record<str
     if (!isObject(item)) throw new TypeError(`${field}[${quoted(key)}] is ${described(item)}, not an object`)
     if (item.id !== undefined && item.id !== key)
       throw new RangeError(`${field}[${quoted(key)}] has the id ${quoted(item.id)}; give it its key's, or none`)
-    return {id: key, ...item}
+    const {id: _id, ...fields} = item
+    return {id: key, ...fields}
   }
   let list: Record<string, unknown>[]
   if (items instanceof Map) list = [...items].map(([key, item]) => keyed(key as string, item))

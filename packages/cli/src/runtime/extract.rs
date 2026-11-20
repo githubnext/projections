@@ -267,12 +267,9 @@ impl Runner {
                 crate::python::prepend(&mut environment, directory, crate::python::SEPARATOR);
             }
             let preloaded;
-            let argv = match node
-                .as_deref()
-                .and_then(|directory| directory.join(crate::node::PRELOAD).to_str().map(str::to_owned))
-            {
-                Some(preload) => {
-                    preloaded = crate::node::preload(argv, &preload);
+            let argv = match node.as_deref().and_then(Path::to_str) {
+                Some(directory) => {
+                    preloaded = crate::node::preload(argv, directory, std::path::MAIN_SEPARATOR);
                     &preloaded[..]
                 }
                 None => argv,

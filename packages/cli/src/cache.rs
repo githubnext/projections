@@ -83,6 +83,13 @@ pub fn unpack(base: &Path, version: &str, files: &[Entry]) -> Result<PathBuf> {
         .prefix(".staging-")
         .tempdir_in(&helpers)
         .context("Cannot create a staging directory for the extractor helpers")?;
+    // A helper set is readable by anyone who reaches it (the base and `helpers` stay private): a container engine
+    // whose user namespace maps the container's user away from the owner, as rootless Podman's does, mounts it.
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(staging.path(), fs::Permissions::from_mode(0o755))?;
+    }
     for (path, bytes) in files {
         write(staging.path(), path, bytes)?;
     }
@@ -209,7 +216,7 @@ fn write(root: &Path, path: &str, bytes: &[u8]) -> Result<()> {
             #[cfg(unix)]
             {
                 use std::os::unix::fs::DirBuilderExt;
-                builder.mode(0o700);
+                builder.mode(0o755);
             }
             builder.create(&parent)?;
         }
@@ -219,7 +226,7 @@ fn write(root: &Path, path: &str, bytes: &[u8]) -> Result<()> {
     #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt;
-        options.mode(0o600);
+        options.mode(0o644);
     }
     let mut file = options
         .open(&destination)

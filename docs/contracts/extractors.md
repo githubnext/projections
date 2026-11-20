@@ -141,8 +141,9 @@ stdout, which an extractor in any language can write directly.
 
 A custom extractor whose program is the bare name `node` gets the same helpers
 for JavaScript and TypeScript: the runner adds `--require` and the path of a
-preload script, also unpacked into its cache, before the command's own
-arguments. The script registers a resolve hook for one specifier,
+preload script, also unpacked into its cache, before the command's own arguments
+(and, when they turn on Node's permission model with `--permission`, read access
+to that directory). The script registers a resolve hook for one specifier,
 `@githubnext/projections/extractor`, which then loads the module this runner
 ships, ahead of any installed copy; every other import resolves as usual. ES
 modules don't search `NODE_PATH`, so an extractor in `.mjs`, `.js` or `.ts`

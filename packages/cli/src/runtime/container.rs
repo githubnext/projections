@@ -204,7 +204,7 @@ fn create_argv(
             "--mount".into(),
             format!("type=bind,src={directory},dst={},readonly", crate::node::CONTAINER_DIRECTORY),
         ]);
-        argv = crate::node::preload(&argv, &format!("{}/{}", crate::node::CONTAINER_DIRECTORY, crate::node::PRELOAD));
+        argv = crate::node::preload(&argv, crate::node::CONTAINER_DIRECTORY, '/');
     }
     for (key, value) in container_environment {
         create.extend(["--env".into(), format!("{key}={value}")]);

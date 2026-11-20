@@ -82,7 +82,7 @@ test('without a snapshot, or with an unreadable one, every value is generated', 
 
 test('an extraction fills in the protocol and sorts its items by ID, as the Engine does', () => {
   const document = extraction({
-    entities: {'team:b': {kind: 'team', label: 'B'}, 'team:a': {id: 'team:a', kind: 'team', label: 'A'}},
+    entities: {'team:b': {id: undefined, kind: 'team', label: 'B'}, 'team:a': {id: 'team:a', kind: 'team', label: 'A'}},
     relationships: new Map([['owns', {kind: 'owns', from: 'team:a', to: 'team:b'}]]),
     metadata: {authority: 'declared'},
     volatile: undefined,

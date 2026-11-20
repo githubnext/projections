@@ -22,21 +22,31 @@ const FILES: &[crate::cache::Entry] = &[
     ("register.cjs", include_bytes!("../node/register.cjs")),
 ];
 
-/// The directory holding the module, unpacked and verified under the cache base `base`.
+/// The directory holding the module, unpacked and verified under the cache base `base`. On Unix it is the real path,
+/// with no symlinks for Node to resolve on the way, which its permission model would have to allow.
 pub fn directory_in(base: &Path) -> Result<PathBuf> {
-    crate::cache::unpack(base, env!("CARGO_PKG_VERSION"), FILES)
+    let directory = crate::cache::unpack(base, env!("CARGO_PKG_VERSION"), FILES)?;
+    #[cfg(unix)]
+    let directory = directory.canonicalize()?;
+    Ok(directory)
 }
 
-/// `argv` with `preload` (the path of [`PRELOAD`]) preloaded, when its program is the bare name `node`; any other
-/// argv, including a path to a Node executable, as it is.
-pub fn preload(argv: &[String], preload: &str) -> Vec<String> {
-    match argv.split_first() {
-        Some((program, rest)) if program == "node" => [program.clone(), "--require".into(), preload.into()]
-            .into_iter()
-            .chain(rest.iter().cloned())
-            .collect(),
-        _ => argv.to_vec(),
+/// `argv` with [`PRELOAD`] in `directory` (joined with `separator`) preloaded, when its program is the bare name
+/// `node`; any other argv, including a path to a Node executable, as it is. Under Node's permission model
+/// (`--permission`), the module's directory is readable too, so the preload doesn't stop the extractor.
+pub fn preload(argv: &[String], directory: &str, separator: char) -> Vec<String> {
+    let Some((program, rest)) = argv.split_first().filter(|(program, _)| *program == "node") else {
+        return argv.to_vec();
+    };
+    let mut preloaded = vec![program.clone(), "--require".into(), format!("{directory}{separator}{PRELOAD}")];
+    if rest
+        .iter()
+        .any(|argument| argument == "--permission" || argument == "--experimental-permission")
+    {
+        preloaded.push(format!("--allow-fs-read={directory}"));
     }
+    preloaded.extend(rest.iter().cloned());
+    preloaded
 }
 
 #[cfg(test)]
@@ -51,7 +61,7 @@ mod tests {
     #[test]
     fn a_bare_node_preloads_the_module_and_other_programs_run_as_written() {
         assert_eq!(
-            preload(&argv(&["node", "--no-warnings", "extract.mjs"]), "/cache/register.cjs"),
+            preload(&argv(&["node", "--no-warnings", "extract.mjs"]), "/cache", '/'),
             argv(&["node", "--require", "/cache/register.cjs", "--no-warnings", "extract.mjs"])
         );
         for written in [
@@ -59,8 +69,24 @@ mod tests {
             argv(&["/usr/bin/node", "x.mjs"]),
             argv(&["npx", "tsx", "x.ts"]),
         ] {
-            assert_eq!(preload(&written, "/cache/register.cjs"), written);
+            assert_eq!(preload(&written, "/cache", '/'), written);
         }
+    }
+
+    #[test]
+    fn under_the_permission_model_the_module_is_readable() {
+        assert_eq!(
+            preload(&argv(&["node", "--permission", "--allow-fs-read=.", "x.mjs"]), "/cache", '/'),
+            argv(&[
+                "node",
+                "--require",
+                "/cache/register.cjs",
+                "--allow-fs-read=/cache",
+                "--permission",
+                "--allow-fs-read=.",
+                "x.mjs"
+            ])
+        );
     }
 
     #[test]
@@ -87,7 +113,14 @@ mod tests {
              result({entities: {[`project:${request.project}`]: {kind: 'project', label: request.id}}})\n",
         )
         .unwrap();
-        let mut argv = preload(&argv(&["node", "extract.mjs"]), directory.join(PRELOAD).to_str().unwrap());
+        // Under the permission model, reading only the project, as a careful extractor might.
+        let project_path = project.path().canonicalize().unwrap();
+        let allowed = format!("--allow-fs-read={}", project_path.display());
+        let mut argv = preload(
+            &argv(&["node", "--permission", &allowed, "extract.mjs"]),
+            directory.to_str().unwrap(),
+            std::path::MAIN_SEPARATOR,
+        );
         argv[0] = node.to_string_lossy().into_owned();
         let environment: BTreeMap<String, String> = std::env::vars()
             .filter(|(name, _)| name == "PATH" || name == "SystemRoot")

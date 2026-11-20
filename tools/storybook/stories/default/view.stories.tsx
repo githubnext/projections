@@ -104,6 +104,8 @@ export const GeneratedValues: Story = {
   args: {scenario: 'graph/class-summaries', initialMode: 'diff', changesOnly: false},
 }
 export const WithoutRenderer: Story = {name: 'Without a renderer', args: {withoutRenderer: true}}
+/** A comparison without changes: the Changes scope says so and offers every item. */
+export const NoChanges: Story = {name: 'No changes', args: {unchanged: true}}
 export const NoticesAndDiagnostics: Story = {name: 'Notices and diagnostics', args: {notices: true}}
 export const Annotated: Story = {
   name: 'Annotations and the detail card slot',

@@ -1,18 +1,23 @@
 // A card's change marks in a comparison: its tinted fill and change edge, and its status footer band.
+import {useId} from 'react'
 import {cardTextMetrics} from '../../card-text.js'
 import {SvgChangeStatus} from '../components.js'
 import type {ChangeClassification, StatusPart} from '../../emphasis.js'
 import {cardFooterHeight} from '../../layout.js'
-import {footerBand} from './cards.js'
 
-/** The corner radius of a graph card's shape, in card units: the footer band's bottom corners follow it. */
+/**
+ * The corner radius a graph card's shape is drawn with, in card units, where the theme's radius (`rx` in CSS,
+ * `--projections-radius`) doesn't reach: a shape's CSS `rx` wins over it.
+ */
 export const cardCornerRadius = 6
 
 /**
  * A changed card's marks, as every kit card draws them: the card filled with its change's soft hue under a strong
- * edge of the same hue (inset by `inset`, see `emphasisInset`), and a footer band `footer` tall across its bottom,
- * ruled off from the body, holding the status words centred (see `SvgChangeStatus`). The edge is drawn again over
- * the band, so the band never covers the border or its corners. Draw it over the card's surface and under its text;
+ * edge of the same hue (inset by `inset`, see `emphasisInset`, with its radius less the inset, so it is concentric with
+ * the card's border), and a footer band `footer` tall across its bottom, ruled off from the body, holding the status
+ * words centred (see `SvgChangeStatus`). The band is clipped to the card's shape (`node-card-shape`, rounded as the
+ * card's surface is), so its corners follow the card's, and the edge is drawn again over it, so the band never covers
+ * the border or pokes outside its corners. Draw it over the card's surface and under its text;
  * everything fades with `emphasis`, and nothing is drawn at zero. `fill: false` leaves the body's fill to the
  * caller, for a card whose parts tint their own slices of it.
  *
@@ -47,14 +52,26 @@ export function CardChangeMarks({
   footer?: number
   fill?: boolean
 }) {
+  const shape = useId()
   if (emphasis <= 0.01) return null
   const bottom = y + height
   const rule = bottom - footer
-  const edge = {x: x + inset, y: y + inset, width: width - 2 * inset, height: height - 2 * inset, rx: cardCornerRadius}
+  const edge = {x: x + inset, y: y + inset, width: width - 2 * inset, height: height - 2 * inset, rx: Math.max(0, cardCornerRadius - inset)}
   return (
     <>
       {fill && <rect className={`node-emphasis ${classification}`} data-projections-edge="" {...edge} opacity={emphasis} />}
-      <path className={`node-footer-band ${classification}`} d={footerBand(x, rule, width, bottom, cardCornerRadius)} opacity={emphasis} />
+      <clipPath id={shape}>
+        <rect className="node-card-shape" x={x} y={y} width={width} height={height} rx={cardCornerRadius} />
+      </clipPath>
+      <rect
+        className={`node-footer-band ${classification}`}
+        x={x}
+        y={rule}
+        width={width}
+        height={footer}
+        clipPath={`url(#${shape})`}
+        opacity={emphasis}
+      />
       <line className={`node-footer-rule ${classification}`} x1={x} x2={x + width} y1={rule} y2={rule} opacity={emphasis} />
       <rect
         className={`node-emphasis node-emphasis-edge ${classification}`}

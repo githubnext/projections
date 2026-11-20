@@ -121,38 +121,6 @@ export function ChangeStatus({change, emphasis, className}: {change: StatusChang
   )
 }
 
-/**
- * A pill's or chip's status as a tab hanging off its bottom edge: the icon and
- * word per part, filled and edged in the status hue, joined flush to the pill
- * and rounded on its free corners. Render it inside the pill (positioned:
- * `position: relative` or otherwise), which keeps its single-line box; the
- * pill's container reserves `--pk-tab-height` below every pill, so nothing
- * moves when status appears, but an unchanged pill draws nothing there. It
- * fades with `emphasis` and is absent at 0. `measure` draws it at full
- * strength, for measuring the room a pill needs (`.pk-status-tab` width plus
- * twice `--projections-radius`). The pill's accessible name carries the
- * status, so the tab is hidden from assistive technology.
- */
-export function StatusTab({change, emphasis, measure = false}: {change: StatusChange; emphasis: number; measure?: boolean}) {
-  const shown = measure ? 1 : emphasis
-  const parts = shown > 0.01 ? statusParts(change) : []
-  return (
-    <span className="pk-status-tab-room" aria-hidden="true">
-      {parts.length > 0 && (
-        <span className="pk-status-tab pk-region" data-change={classifyChange(change)} style={{opacity: Math.min(1, shown)}}>
-          {parts.map(part => (
-            <span key={part.status} className={`pk-status-part ${part.status}`} data-change-status={part.status}>
-              <Icon name={part.icon} />
-              {part.label}
-            </span>
-          ))}
-          {variedBeyond(change) && <VariedMarker />}
-        </span>
-      )}
-    </span>
-  )
-}
-
 let statusFont = ''
 let statusCanvas: CanvasRenderingContext2D | null | undefined
 

@@ -382,7 +382,6 @@
   color: var(--text);
   font: inherit;
   font-size: var(--projections-font-size-xs);
-  text-align: left;
   white-space: normal;
   cursor: pointer;
 }

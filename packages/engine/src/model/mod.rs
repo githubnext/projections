@@ -5,7 +5,7 @@
 mod comparison;
 mod extraction;
 
-pub use comparison::{Change, Comparison, Correspondence, Counts, Reverse, Status, Step, StepKind, variation};
+pub use comparison::{Change, Comparison, Context, Correspondence, Counts, Reverse, Status, Step, StepKind, variation};
 pub use extraction::{Confidence, Entity, Evidence, Extraction, Item, ItemRef, Link, Location, Node, Relationship};
 pub use projections_engine_verified::datum::{Datum, Fields, Number, lookup};
 

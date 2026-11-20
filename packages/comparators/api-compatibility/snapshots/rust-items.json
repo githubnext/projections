@@ -60,6 +60,16 @@
         "rust:kit::Config::port"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:rust:kit::Config>rust:kit::Config::port",
+          "rust:kit::Config"
+        ],
+        "before": [
+          "contains:rust:kit::Config>rust:kit::Config::port",
+          "rust:kit::Config"
+        ]
+      },
       "correspondence": "exact",
       "id": "rust:kit::Config::port",
       "status": "modified",
@@ -71,6 +81,13 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:rust:kit::Config>rust:kit::Config::retries",
+          "rust:kit::Config"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "rust:kit::Config::retries",
       "status": "added",
@@ -123,6 +140,16 @@
         "rust:kit::Level::High"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:rust:kit::Level>rust:kit::Level::High",
+          "rust:kit::Level"
+        ],
+        "before": [
+          "contains:rust:kit::Level>rust:kit::Level::High",
+          "rust:kit::Level"
+        ]
+      },
       "correspondence": "exact",
       "id": "rust:kit::Level::High",
       "status": "modified",
@@ -136,6 +163,16 @@
         "rust:kit::Level::Low"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:rust:kit::Level>rust:kit::Level::Low",
+          "rust:kit::Level"
+        ],
+        "before": [
+          "contains:rust:kit::Level>rust:kit::Level::Low",
+          "rust:kit::Level"
+        ]
+      },
       "correspondence": "exact",
       "id": "rust:kit::Level::Low",
       "status": "modified",
@@ -160,6 +197,13 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:rust:kit::Mode>rust:kit::Mode::Fast",
+          "rust:kit::Mode"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "rust:kit::Mode::Fast",
       "status": "added",
@@ -236,6 +280,15 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:rust:kit::Shape::Circle>rust:kit::Shape::Circle::radius",
+          "contains:rust:kit::Shape>rust:kit::Shape::Circle",
+          "rust:kit::Shape",
+          "rust:kit::Shape::Circle"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "rust:kit::Shape::Circle::radius",
       "status": "added",
@@ -247,6 +300,15 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:rust:kit::Shape::Square>rust:kit::Shape::Square::side",
+          "contains:rust:kit::Shape>rust:kit::Shape::Square",
+          "rust:kit::Shape",
+          "rust:kit::Shape::Square"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "rust:kit::Shape::Square::side",
       "status": "added",
@@ -273,6 +335,16 @@
         "rust:kit::Store::Item"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:rust:kit::Store>rust:kit::Store::Item",
+          "rust:kit::Store"
+        ],
+        "before": [
+          "contains:rust:kit::Store>rust:kit::Store::Item",
+          "rust:kit::Store"
+        ]
+      },
       "correspondence": "exact",
       "id": "rust:kit::Store::Item",
       "status": "modified",
@@ -286,6 +358,16 @@
         "rust:kit::Store::MAX"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:rust:kit::Store>rust:kit::Store::MAX",
+          "rust:kit::Store"
+        ],
+        "before": [
+          "contains:rust:kit::Store>rust:kit::Store::MAX",
+          "rust:kit::Store"
+        ]
+      },
       "correspondence": "exact",
       "id": "rust:kit::Store::MAX",
       "status": "modified",
@@ -312,6 +394,16 @@
         "rust:kit::Store::get"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:rust:kit::Store>rust:kit::Store::get",
+          "rust:kit::Store"
+        ],
+        "before": [
+          "contains:rust:kit::Store>rust:kit::Store::get",
+          "rust:kit::Store"
+        ]
+      },
       "correspondence": "exact",
       "id": "rust:kit::Store::get",
       "status": "modified",
@@ -401,6 +493,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "rust:kit::Config",
+          "rust:kit::Config::retries"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:rust:kit::Config>rust:kit::Config::retries",
       "status": "added"
@@ -411,6 +510,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "rust:kit::Mode",
+          "rust:kit::Mode::Fast"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:rust:kit::Mode>rust:kit::Mode::Fast",
       "status": "added"
@@ -421,6 +527,15 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "contains:rust:kit::Shape>rust:kit::Shape::Circle",
+          "rust:kit::Shape",
+          "rust:kit::Shape::Circle",
+          "rust:kit::Shape::Circle::radius"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:rust:kit::Shape::Circle>rust:kit::Shape::Circle::radius",
       "status": "added"
@@ -431,6 +546,15 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "contains:rust:kit::Shape>rust:kit::Shape::Square",
+          "rust:kit::Shape",
+          "rust:kit::Shape::Square",
+          "rust:kit::Shape::Square::side"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:rust:kit::Shape::Square>rust:kit::Shape::Square::side",
       "status": "added"

@@ -62,6 +62,8 @@ export {
 } from './summary.js'
 export type {SummaryFigure, SummaryFilter, SummaryKind} from './summary.js'
 export {rowDetails} from './details.js'
+export {changeContextItems} from './context-items.js'
+export type {ContextItems} from './context-items.js'
 export {changeParts, changeTags} from './details/change.js'
 export {generatedForm} from './details/generated.js'
 export {variedText} from './details/fields.js'

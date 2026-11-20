@@ -1,5 +1,14 @@
 // Comparison changes paired into per-item before and after rows.
-import type {ChangeStatus, Comparison, Correspondence, Entity, Extraction, Relationship, Varied} from '@githubnext/projections-schemas'
+import type {
+  ChangeContext,
+  ChangeStatus,
+  Comparison,
+  Correspondence,
+  Entity,
+  Extraction,
+  Relationship,
+  Varied,
+} from '@githubnext/projections-schemas'
 import {presentOrder} from '../steps.js'
 import type {PresentedOrder} from '../steps.js'
 
@@ -33,6 +42,11 @@ export interface EntityChange<T> {
    * (`variedBeyond`).
    */
   varied?: readonly Varied[]
+  /**
+   * The comparison's `change.context`: the other items, by ID in each revision, a person needs to read the change. Absent
+   * for unchanged items and in a comparison saved without it; `changeContext` derives it from the structure then.
+   */
+  context?: ChangeContext
 }
 
 /**
@@ -95,12 +109,12 @@ export function presentComparison(before: Extraction, after: Extraction, compari
         ...(renamed ? {renamed: true} : {}),
         ...(renamed && prior !== undefined ? {previousId: prior} : {}),
         ...(change.varied?.length ? {varied: change.varied} : {}),
+        ...(change.context ? {context: change.context} : {}),
       })
-      // Further split parts arrive, and further merged parts leave, on their own.
-      for (const id of others)
-        rows.push({id: unique(id), after: lookup(currentById, id), status: change.status, correspondence: change.correspondence})
-      for (const id of merged)
-        rows.push({id: unique(id), before: lookup(oldById, id), status: change.status, correspondence: change.correspondence})
+      // Further split parts arrive, and further merged parts leave, on their own, with the change's context.
+      const part = {status: change.status, correspondence: change.correspondence, ...(change.context ? {context: change.context} : {})}
+      for (const id of others) rows.push({id: unique(id), after: lookup(currentById, id), ...part})
+      for (const id of merged) rows.push({id: unique(id), before: lookup(oldById, id), ...part})
     }
     for (const item of current) {
       if (referenced.after.has(item.id)) continue

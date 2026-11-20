@@ -2,7 +2,9 @@
 //! serialize to exactly the JSON the protocol defines, so `to_json` and the
 //! bytes written agree.
 
-use crate::model::{Change, Comparison, Entity, Evidence, Extraction, Fields, ItemRef, Location, Number, Relationship, Reverse, Step};
+use crate::model::{
+    Change, Comparison, Context, Entity, Evidence, Extraction, Fields, ItemRef, Location, Number, Relationship, Reverse, Step,
+};
 use crate::volatility::{Declaration, Tolerance, Variation, Varied};
 use serde::ser::{Serialize, Serializer};
 use serde_json::{Value, json};
@@ -28,6 +30,7 @@ enum Field<'a> {
     Entities(&'a [Entity]),
     Relationships(&'a [Relationship]),
     Varied(&'a [Varied]),
+    Context(&'a Context),
     Changes(&'a [Change]),
     Steps(&'a [Step]),
     Object(Vec<Entry<'a>>),
@@ -53,6 +56,7 @@ impl Serialize for Field<'_> {
             Field::Entities(entities) => serializer.collect_seq(*entities),
             Field::Relationships(relationships) => serializer.collect_seq(*relationships),
             Field::Varied(varied) => serializer.collect_seq(*varied),
+            Field::Context(context) => context.serialize(serializer),
             Field::Changes(changes) => serializer.collect_seq(*changes),
             Field::Steps(steps) => serializer.collect_seq(*steps),
             Field::Object(entries) => object(serializer, entries),
@@ -181,6 +185,13 @@ entries!(Change, |this| [
     ("correspondence", Some(Field::Text(this.correspondence.name()))),
     ("varied", nonempty(&this.varied).map(Field::Varied)),
     ("summary", this.summary.as_deref().map(Field::Text)),
+    ("context", this.context.as_ref().map(Field::Context)),
+]);
+
+entries!(Context, |this| [
+    ("before", Some(Field::Texts(&this.before))),
+    ("after", Some(Field::Texts(&this.after))),
+    ("rules", nonempty(&this.rules).map(Field::Texts)),
 ]);
 
 impl Change {

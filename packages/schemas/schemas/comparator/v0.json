@@ -110,6 +110,33 @@
         "variables": {"$ref": "#/$defs/variables"}
       }
     },
+    "context": {
+      "description": "Context rules, in order, each evaluated after `classify` per change whose status or identity changed, seeing what `classify` sees and `annotation`. Each adds to the change's context, the other items a person needs to read it; context only grows from the core's and never hides a change.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "$ref": "#/$defs/identifier",
+            "description": "Unique among the context rules; the comparison names it in the context it added to."
+          },
+          "description": {"type": "string"},
+          "where": {"$ref": "#/$defs/cel", "description": "Skips the change unless true."},
+          "before": {
+            "$ref": "#/$defs/cel",
+            "description": "A `list<string>` of before item IDs (entities or relationships): a removal's context, or what the change needs before. The change's own items are left out."
+          },
+          "after": {
+            "$ref": "#/$defs/cel",
+            "description": "A `list<string>` of after item IDs (entities or relationships). The change's own items are left out."
+          },
+          "variables": {"$ref": "#/$defs/variables"}
+        },
+        "anyOf": [{"required": ["before"]}, {"required": ["after"]}]
+      }
+    },
     "steps": {
       "description": "How the steps are made. Declarative: start from the baseline's steps (dropping changes the comparison no longer has), `add` new steps, `rank` them, then `summary`. Or `value`, one CEL expression for the whole list (the escape hatch).",
       "oneOf": [

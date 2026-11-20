@@ -26,11 +26,22 @@ export interface FrameState {
 }
 
 /**
+ * The `init` a renderer is sent: the comparison's change `context` only to a renderer that declares the `context`
+ * capability, as a renderer that checks comparisons against an older schema rejects it.
+ */
+export function initMessage(init: InitPayload, capabilities: RendererCapabilities | undefined): HostMessage {
+  if (init.mode !== 'comparison' || capabilities?.context || !init.comparison.changes.some(change => change.context))
+    return {type: 'init', ...init}
+  const changes = init.comparison.changes.map(({context: _context, ...change}) => change)
+  return {type: 'init', ...init, comparison: {...init.comparison, changes}}
+}
+
+/**
  * The messages that bring a renderer that just became ready up to date: the presented documents, then the state set
  * while it loaded that its capabilities accept.
  */
 export function replay(state: FrameState, capabilities: RendererCapabilities): HostMessage[] {
-  const messages: HostMessage[] = [{type: 'init', ...state.init}]
+  const messages: HostMessage[] = [initMessage(state.init, capabilities)]
   if (Object.keys(state.options).length) messages.push({type: 'options', options: state.options})
   if (state.selection !== null) messages.push(selectMessage(state.selection, state.selectionPath))
   if (state.marks.length && capabilities.annotations) messages.push({type: 'annotations', items: state.marks})

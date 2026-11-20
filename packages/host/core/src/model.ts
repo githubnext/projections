@@ -5,7 +5,16 @@ import {
   variedBeyond,
   variedWithinTolerance,
 } from '@githubnext/projections-renderer-sdk/presentation'
-import type {ChangeStatus, Comparison, Correspondence, Entity, Extraction, Relationship, Varied} from '@githubnext/projections-schemas'
+import type {
+  ChangeContext,
+  ChangeStatus,
+  Comparison,
+  Correspondence,
+  Entity,
+  Extraction,
+  Relationship,
+  Varied,
+} from '@githubnext/projections-schemas'
 import {codeSpan, escapeProse} from '@githubnext/projections-schemas'
 
 const codes = (ids: readonly string[]): string => ids.map(codeSpan).join(', ')
@@ -38,6 +47,8 @@ export interface Row {
    * tolerance; a `modified` one may have values beyond it.
    */
   varied?: readonly Varied[]
+  /** The comparison's context for the change (`change.context`): the other items a person needs to read it. */
+  context?: ChangeContext
 }
 
 type Labels = (id: string) => string | undefined
@@ -109,6 +120,7 @@ export function subjectRows(subject: ViewSubject): Row[] {
         ...(change.summary ? {summary: change.summary} : {}),
         ...(step === undefined ? {} : {step}),
         ...(change.varied?.length ? {varied: change.varied} : {}),
+        ...(change.context ? {context: change.context} : {}),
       }
     })
     .sort((a, b) => (a.step ?? Infinity) - (b.step ?? Infinity))

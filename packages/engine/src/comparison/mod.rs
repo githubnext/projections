@@ -3,18 +3,21 @@
 //!
 //! The parser reads a comparison's JSON and calls these checks in the order
 //! the contract fixes, so the first problem reported is the same whichever
-//! part of a change it is in: each change's ID, its `varied`, its references
-//! and its shape ([`Integrity::claim_id`] to [`Integrity::record`]), then
+//! part of a change it is in: each change's ID, its `varied`, its references,
+//! its context and its shape ([`Integrity::claim_id`] to
+//! [`Integrity::record`]), then
 //! every pair's assessment, the variation summary, hidden changes and the
 //! steps' coverage.
 
 mod changes;
+mod context;
 mod integrity;
 mod steps;
 
 pub(crate) use integrity::Inconsistent;
 pub(crate) use steps::reverse_steps;
 
+use crate::context::{Budget, Core};
 use crate::model::{Change, Collection, Extraction, ItemRef, Side};
 use crate::volatility::Declarations;
 use crate::{Failure, fail};
@@ -32,6 +35,11 @@ pub(crate) struct Integrity<'a> {
     claimed: Vec<(Change, String)>,
     /// The changes that are only expected variation.
     variation: HashSet<String>,
+    extractions: [&'a Extraction; 2],
+    /// The core's context, built when a change first has context.
+    core: Option<Core<'a>>,
+    /// What remains of the comparison's context budget, after the changes so far.
+    context_budget: Budget,
 }
 
 impl<'a> Integrity<'a> {
@@ -59,6 +67,9 @@ impl<'a> Integrity<'a> {
             referenced: HashSet::new(),
             claimed: Vec::new(),
             variation: HashSet::new(),
+            extractions: [before, after],
+            core: None,
+            context_budget: Budget::COMPARISON,
         })
     }
 

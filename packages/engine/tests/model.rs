@@ -79,6 +79,7 @@ fn typed_comparisons_write_the_protocols_json() {
         correspondence: Correspondence::Exact,
         varied: Vec::new(),
         summary: Some("Relabelled".to_owned()),
+        context: None,
     };
     let comparison = Comparison {
         changes: vec![change.clone()],

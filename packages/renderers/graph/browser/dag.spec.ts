@@ -5,6 +5,9 @@ import {pipeline} from '../../kit/browser/fixtures.js'
 import {scrubSuite, selectionSuite} from '../../kit/browser/suite.js'
 import {paneStatusSuite, statusSuite} from '../../kit/browser/status.js'
 
+// Close-ups for review (SOURCE_DOT_SHOTS=<directory>) are taken at three times the size.
+if (process.env.SOURCE_DOT_SHOTS) test.use({deviceScaleFactor: 3})
+
 scrubSuite([pipeline()])
 selectionSuite(pipeline(), 'package')
 statusSuite(pipeline())
@@ -56,7 +59,7 @@ test("a relationship's junction dot takes its line's color while the relationshi
       const box = (await junction.boundingBox())!
       await page.screenshot({
         path: `${process.env.SOURCE_DOT_SHOTS}/graph-junction-${info.project.name}.png`,
-        clip: {x: box.x - 60, y: box.y - 40, width: 120, height: 80},
+        clip: {x: box.x - 80, y: box.y - 50, width: 160, height: 100},
       })
     }
     const {line, dot} = await colors()

@@ -4,6 +4,9 @@ import {openRenderer} from '@githubnext/projections-renderer-harness/playwright'
 import type {Extraction} from '@githubnext/projections-schemas'
 import {loadFixture} from '../test/fixtures.mjs'
 
+// Close-ups for review (SOURCE_DOT_SHOTS=<directory>) are taken at three times the size.
+if (process.env.SOURCE_DOT_SHOTS) test.use({deviceScaleFactor: 3})
+
 const before = loadFixture('before') as Extraction
 const after = loadFixture('after') as Extraction
 
@@ -78,13 +81,14 @@ test('a card is one focus and selection ring: parts never outline, nothing overf
 
 test("a link's source dot takes its line's color while the link is hovered or selected", async ({page}, info) => {
   const renderer = await openRenderer(page, {renderer: 'dependency-injection', extraction: after})
-  const link = renderer.frame.locator('g[data-entity-id]:has(> .di-link-origin)').first()
-  const id = (await link.getAttribute('data-entity-id'))!
-  const colors = () =>
-    link.evaluate(group => ({
-      line: getComputedStyle(group.querySelector('.di-link')!).stroke,
-      dot: getComputedStyle(group.querySelector('.di-link-origin')!).fill,
-    }))
+  // Each link's clear copy of its origin dot, drawn over every link, takes the ring's color with the link.
+  const ring = renderer.frame.locator('.di-link-origin-ring').first()
+  const id = (await ring.getAttribute('data-projections-ring-with'))!
+  const link = renderer.frame.locator(`g[data-entity-id="${id}"]`)
+  const colors = async () => ({
+    line: await link.locator('.di-link').evaluate(line => getComputedStyle(line).stroke),
+    dot: await ring.evaluate(dot => getComputedStyle(dot).fill),
+  })
   const resting = (await colors()).line
   for (const state of ['hover', 'selection'] as const) {
     await (state === 'hover' ? renderer.hover(id) : renderer.select(id))
@@ -93,7 +97,7 @@ test("a link's source dot takes its line's color while the link is hovered or se
     if (process.env.SOURCE_DOT_SHOTS && state === 'hover')
       await page.screenshot({
         path: `${process.env.SOURCE_DOT_SHOTS}/dependency-injection-${info.project.name}.png`,
-        clip: await clipAround(link),
+        clip: await clipAround(ring),
       })
     const {line, dot} = await colors()
     expect(dot, `${state}: the source dot takes the line's color`).toBe(line)
@@ -102,7 +106,7 @@ test("a link's source dot takes its line's color while the link is hovered or se
 })
 
 /** The link's source end, with room around it. */
-async function clipAround(link: Locator) {
-  const dot = (await link.locator('.di-link-origin').boundingBox())!
-  return {x: dot.x - 60, y: dot.y - 40, width: 120, height: 80}
+async function clipAround(ring: Locator) {
+  const dot = (await ring.boundingBox())!
+  return {x: dot.x - 80, y: dot.y - 50, width: 160, height: 100}
 }

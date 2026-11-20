@@ -88,6 +88,8 @@ ecosystems:
 
 - [Contributing](../CONTRIBUTING.md): setup, the checks and the repository's
   invariants.
+- [State machines](guides/state-machines.md): how the hosts and integrations
+  model lifecycles, and the checks that hold them to it.
 - [Design decisions](design/): why things are the way they are, each with its
   status. [Proposals](design/proposals/) are still open. The
   [engine evaluation](design/engine-evaluation.md) records measured Rust

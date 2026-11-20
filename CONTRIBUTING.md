@@ -182,6 +182,7 @@ depends on, is in `packages/`; the repository's own tooling is in `tools/`:
 ```
 packages/
   schemas/       language-neutral contracts (JSON Schema, TypeScript types) and the conformance corpus
+  machine/       explicit state machines for the hosts' and integrations' lifecycles, with an actor and a test kit
   engine/        Rust Engine (native + Wasm); engine/js is its TypeScript transport and verified artifact loading
   comparators/   the default comparator, the comparator rules interpreter and its sandboxed runtime, and the API compatibility and runtime policy rules
   extractors/    one Rust crate per built-in extractor, with shared support, the catalog and helpers
@@ -232,6 +233,9 @@ These hold for every change; `npm run tools -- context` prints them.
   `tools/scripts/check-boundaries/layers.mjs`).
 - First-party extractors, comparators and renderers use only the public SDKs
   third parties use.
+- Lifecycles in the hosts and integrations are explicit state machines
+  (`packages/machine`), each with an `explore` test; `npm run check:machines`
+  keeps implicit ones from growing.
 - Generated files are never edited by hand: change their sources and regenerate
   (`npm run tools -- generated`).
 - JSON Schemas change only additively within a major version.

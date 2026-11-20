@@ -2,6 +2,7 @@
 import type {Point} from '../edge-arrows.js'
 import {sampleSpline} from '../splines.js'
 import type {Spline} from '../splines.js'
+import {crossingWork} from './crossing-work.js'
 
 /**
  * Where two routes cross: their sampled courses intersect anywhere but
@@ -30,6 +31,8 @@ function segmentDistance(point: Point, a: Point, b: Point): number {
 
 /** A sampled route's segments in runs of `chunk`, each with its bounds, and the bounds of the whole. */
 interface Chunks {
+  /** Each segment's bounds (from sample `i` to `i + 1`), four numbers apiece: left, right, top, bottom. */
+  bounds: Float64Array
   runs: Run[]
   /** The runs in groups of `group`, with the bounds of each group: long routes are mostly far from each other. */
   groups: {runs: Run[]; box: Box}[]
@@ -80,7 +83,16 @@ function chunksOf(points: readonly Point[]): Chunks {
       ],
     })
   }
-  value = {runs, groups, box: all}
+  const bounds = new Float64Array(Math.max(0, 4 * (points.length - 1)))
+  for (let index = 0; index + 1 < points.length; index++) {
+    const a = points[index]!,
+      b = points[index + 1]!
+    bounds[4 * index] = Math.min(a.x, b.x)
+    bounds[4 * index + 1] = Math.max(a.x, b.x)
+    bounds[4 * index + 2] = Math.min(a.y, b.y)
+    bounds[4 * index + 3] = Math.max(a.y, b.y)
+  }
+  value = {bounds, runs, groups, box: all}
   chunked.set(points, value)
   return value
 }
@@ -127,46 +139,54 @@ function crossingsBetween(pa: readonly Point[], pb: readonly Point[], ignore: re
   const [headA, headB] = same(pa[0], pb[0]) ? [together(pa, pb, false), together(pb, pa, false)] : [0, 0]
   const [tailA, tailB] = same(pa.at(-1), pb.at(-1)) ? [together(pa, pb, true), together(pb, pa, true)] : [0, 0]
   const shared = (list: readonly Point[], index: number, head: number, tail: number) => index < head || index + 1 >= list.length - tail
-  const near = (point: Point) => ignore.some(at => Math.hypot(point.x - at.x, point.y - at.y) < radius)
+  const near = (point: Point) => (crossingWork.proximity++, ignore.some(at => Math.hypot(point.x - at.x, point.y - at.y) < radius))
   const cross = (o: Point, p: Point, q: Point) => (p.x - o.x) * (q.y - o.y) - (p.y - o.y) * (q.x - o.x)
   // A group of `pa`'s runs is tested only against the groups of `pb` its bounds reach, a run only against their runs
   // its bounds reach, and each segment only against those its own bounds reach: the same pairs, in the same order, as
   // testing every segment against every run.
+  const reach: Run[] = []
   for (const {runs, box: groupBox} of ca.groups) {
     if (apart(groupBox, cb.box)) continue
     const nearby = cb.groups.filter(other => !apart(groupBox, other.box))
     if (!nearby.length) continue
     for (const run of runs) {
-      const reach = nearby.flatMap(other => other.runs.filter(candidate => !apart(run.box, candidate.box)))
+      reach.length = 0
+      for (const other of nearby) for (const candidate of other.runs) if (!apart(run.box, candidate.box)) reach.push(candidate)
       if (!reach.length) continue
       for (let i = run.from; i < run.to; i++) {
         if (shared(pa, i, headA, tailA)) continue
-        const [a1, a2] = [pa[i]!, pa[i + 1]!]
-        const ax0 = Math.min(a1.x, a2.x),
-          ax1 = Math.max(a1.x, a2.x),
-          ay0 = Math.min(a1.y, a2.y),
-          ay1 = Math.max(a1.y, a2.y)
+        const ax0 = ca.bounds[4 * i]!,
+          ax1 = ca.bounds[4 * i + 1]!,
+          ay0 = ca.bounds[4 * i + 2]!,
+          ay1 = ca.bounds[4 * i + 3]!
         if (ax1 < cb.box[0] || ax0 > cb.box[1] || ay1 < cb.box[2] || ay0 > cb.box[3]) continue
-        if (near(a1) || near(a2)) continue
+        const a1 = pa[i]!,
+          a2 = pa[i + 1]!
         for (const {from, to, box} of reach) {
           if (ax1 < box[0] || ax0 > box[1] || ay1 < box[2] || ay0 > box[3]) continue
           for (let j = from; j < to; j++) {
+            if (ax1 < cb.bounds[4 * j]! || cb.bounds[4 * j + 1]! < ax0 || ay1 < cb.bounds[4 * j + 2]! || cb.bounds[4 * j + 3]! < ay0)
+              continue
             if (shared(pb, j, headB, tailB)) continue
-            const [b1, b2] = [pb[j]!, pb[j + 1]!]
-            if (ax1 < Math.min(b1.x, b2.x) || Math.max(b1.x, b2.x) < ax0) continue
-            if (ay1 < Math.min(b1.y, b2.y) || Math.max(b1.y, b2.y) < ay0) continue
-            if (near(b1) || near(b2)) continue
+            crossingWork.compared++
+            const b1 = pb[j]!,
+              b2 = pb[j + 1]!
             const d1 = cross(b1, b2, a1),
-              d2 = cross(b1, b2, a2),
-              d3 = cross(a1, a2, b1),
+              d2 = cross(b1, b2, a2)
+            if (!(d1 * d2 < 0)) continue
+            const d3 = cross(a1, a2, b1),
               d4 = cross(a1, a2, b2)
+            if (!(d3 * d4 < 0)) continue
             // A proper crossing: each passes from one side of the other to the other. Routes that run together (a shared
-            // trunk) or touch where they part are collinear there and never cross.
+            // trunk) or touch where they part are collinear there and never cross. Segments near an ignored point don't
+            // count; that is tested last, as crossings are rare and the test is not.
             const product = Math.hypot(a2.x - a1.x, a2.y - a1.y) * Math.hypot(b2.x - b1.x, b2.y - b1.y)
             if (
-              d1 * d2 < 0 &&
-              d3 * d4 < 0 &&
-              Math.min(Math.abs(d1), Math.abs(d2), Math.abs(d3), Math.abs(d4)) > 1e-6 * Math.max(1, product)
+              Math.min(Math.abs(d1), Math.abs(d2), Math.abs(d3), Math.abs(d4)) > 1e-6 * Math.max(1, product) &&
+              !near(a1) &&
+              !near(a2) &&
+              !near(b1) &&
+              !near(b2)
             ) {
               const t = d1 / (d1 - d2)
               result.push({x: a1.x + (a2.x - a1.x) * t, y: a1.y + (a2.y - a1.y) * t})

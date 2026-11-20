@@ -170,7 +170,9 @@ function TagPill({tag, slot, props, diff}: {tag: FrameTag; slot: TagSlot | undef
       ? tag.change.before.label
       : undefined
   const fade = renamed ? easeWithin(tag.label.mix, 0.1, 0.9) : 0
-  const geometry: CSSProperties = slot ? {transform: `translate(${slot.x}px, ${slot.y}px)`, width: slot.width} : {visibility: 'hidden'}
+  // Placed by its offsets, not a transform: WebKit keeps a transformed slot's old place in the block's scrollable
+  // overflow after the slots move (to a narrower width), so the block would still scroll to where it was.
+  const geometry: CSSProperties = slot ? {left: slot.x, top: slot.y, width: slot.width} : {visibility: 'hidden'}
   const status = emphasis > 0.01 && isChanged(tag.change) ? `, ${describeChange(tag.change)}` : ''
   return (
     <div

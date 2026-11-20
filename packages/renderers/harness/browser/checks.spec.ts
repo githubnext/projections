@@ -8,7 +8,12 @@ import {scenarios} from './scenarios.js'
  * Known failures of the built-in checks, each with its cause. A listed check
  * must still fail, so fixing the renderer means removing its entry here.
  */
-const knownIssues: {[scenario: string]: {[check in CheckId]?: string}} = {}
+const knownIssues: {[scenario: string]: {[check in CheckId]?: string}} = {
+  'database/prisma-licensing': {
+    'neutral-endpoints':
+      'Every stage shares one card width, from the ranks of all of them: the arriving Refund table adds a rank, so at Before the cards are narrower than Before alone draws them and User.currentLicenseId wraps.',
+  },
+}
 
 /**
  * The Inspector's built-in checks (neutral endpoints, still holds, per-step

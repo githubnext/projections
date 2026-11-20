@@ -45,195 +45,197 @@ projections show HEAD -p services --trust --output /tmp/services.extraction.json
 projections validate /tmp/services.extraction.json
 ```
 
-- `explore`: Propose the projections whose built-in extractors apply here, from
-  the files Git tracks (each extractor declares `detects` patterns), with the
-  files that suggested each. Writes nothing. Prints them and how to try them in
-  VS Code (**Projections: Explore Repository**, whose Explore view sweeps them);
-  `--list` prints only them. `--sweep` runs each candidate and every defined
-  projection on the last `--last N` (default 20, at most 100) first-parent
-  merges into the branch when merges are at least half of its recent
-  first-parent commits, else on its first-parent commits (a repository that
-  squashes or rebases), extracting every revision with the working tree's
-  definition, at most `--concurrency N` (default 2) extractors at once, and
-  prints how much each changed on each, best signal first: a projection that
-  changed on at most a quarter of the changes (likely the structural ones)
-  before one that changed on more, one that changed on four in five or more
-  (likely noise: it doesn't single out the changes that matter) and one that
-  never changed, then which are worth a look. Fewer than four changes aren't
-  judged. `-p ID` limits it, `--json` prints the `projections.sweep` document,
-  each ready projection with its `signal` (`rare`, `steady`, `unknown`, `noisy`
-  or `quiet`). Projections that run repository code are skipped without
-  `--trust`.
-- `adopt ID...`: Write each explored candidate's definition
-  (`.github/projections/ID.json`, or `.projections/` when the repository uses
-  it; never over a file) and add the `--bookmarks N` (default 3) changes it
-  changed most on in a sweep of the last `--last N` to
-  `.projections-bookmarks.json`. `--dry-run` prints the files instead.
-- `init [ID]`: Scaffold a projection, or add parts to an existing one, and write
-  or update the agent skill (`projections/SKILL.md` in the skills directory that
-  already holds it, else the one of `.agents/skills`, `.claude/skills` and
-  `.github/skills` holding the repository's own skills, else `.agents/skills`;
-  `--skills-dir DIR` chooses, `--no-skill` writes none, and `--claude` adds it
-  to `.claude/skills` for Claude Code; see
-  [agent skills](../setup/agent-skills.md)), printing where it went. A new
-  projection gets a starter extractor in the project's toolchain (Node when the
-  root has `package.json`; Python for `pyproject.toml`, `requirements.txt`,
-  `setup.py` or `Pipfile`; Go for `go.mod`; otherwise
-  `--language node|python|go` is required) and the built-in `graph` renderer.
-  `--extractor ID` and `--command ARGV_JSON` use a built-in extractor or an
-  existing program instead; `--renderer NAME` picks a built-in renderer, and
-  `--renderer custom` scaffolds a renderer package (TypeScript, Vite, React, the
-  renderer SDK and kit) in `ID/renderer/`; `--comparator custom` scaffolds a
-  starter comparator file, `ID/ID.comparator.yaml`, and its tests. For an
-  existing projection, only the named parts are added and only their definition
-  fields change. Without `ID`, writes only the skill. Never overwrites a
-  projection file and runs nothing. A custom renderer depends on
-  `@githubnext/projections`, which isn't on npm yet, by the URL of the tarball
-  attached to this CLI's GitHub release; `PROJECTIONS_RENDERER_PACKAGES=DIR`
-  instead installs it from an `npm pack` tarball in `DIR` (such as one built
-  from a Git submodule), and a development build from a clone
-  (`npm run tools -- install`) from the clone's packed
-  `dist/dogfood/githubnext-projections.tgz` with a `file:` reference.
-- `check [-p ID]...`: Verify projections end to end (every one the working tree
-  defines, by default): the definition is valid, the working tree extracts, a
-  rerun of it gives the same extraction, up to the fields it declares `volatile`
-  and their tolerances (the Engine's `vary` judges; a difference beyond them
-  warns, naming the items and fields that varied; `--strict-determinism` makes
-  it fail, and an `observed` extraction isn't rerun; generated values reworded
-  from an equal basis are expected variation, with a note to reuse them through
-  the [generation store](caches.md#generation-store), and a `pure` definition
-  that produces generated values warns), a declared scope is verified by
-  extracting only the scope (see [Scopes](execution.md#scopes)), a custom
-  extractor run from a copy holding only the definition's own files gives the
-  same extraction (otherwise it warns: the extractor reads files beside it,
-  which a comparison takes from the definition's revision on both sides; see
-  [Definitions and execution](execution.md#exact-source-and-explicit-execution)),
-  a custom extractor's `data` holds no fields that change when something other
-  than their item does (it warns about counts and lists of things elsewhere,
-  such as `fileCount` or `importers`, and line numbers, unless the definition
-  reads the field or declares it volatile: each makes its item modified on
-  changes that didn't touch it), `HEAD` compares with it (the working tree's
-  definition applied to both), a custom comparator passes the tests beside its
-  comparator file (`*.comparator.test.yaml`; `--update` writes their snapshots
-  and `--coverage` reports which of the comparator file's functions, expressions
-  and branches they run, see
-  [Comparator tests](stdio-backend.md#comparator-tests)), a custom renderer's
-  bundle is built and newer than its sources, and, in a headless browser, the
-  renderer passes the checks every renderer is held to, on the working tree and
-  the comparison (each presented as the definition's `presentation` says) and a
-  custom renderer package's own `scenarios.json`. Each check is `pass`, `fail`,
-  `warn` or `skip`, in words; the exit status is nonzero when any fails.
-  `--png FILE` also draws the (one) projection's working tree (an existing file
-  fails that step only); `--from FILE` checks raw extractor output for the one
-  projection instead of extracting, skipping the comparison; `--no-render` skips
-  the browser; `--parity REV` also compares a local extraction of a commit with
-  CI's (see [CI artifacts](caches.md#ci-artifacts-as-a-source)); `--json` prints
-  the `projections.check` document.
-- `doctor [-p ID]...`: What this checkout needs to run its projections: the Git
-  checkout and its commits, valid definitions, the environment (what is
-  declared, what the working tree has prepared, stale steps, missing tools) and
-  the workspace strategy and why, each extractor's program and files, custom
-  renderer bundles (and running development servers), comparator files, the
-  agent skill and a browser for images and checks. Runs no repository code and
-  changes nothing; exits nonzero when something is missing. `--json` prints the
-  `projections.doctor` document.
-- `prepare`: Run the environment file's prepare steps, in the working tree by
-  default or, with `--revision REV`, in the workspace for that commit; each step
-  runs only when its key files changed since it last ran there (`--force`
-  reruns; `--step ID` selects). Needs `--trust`. `--json` prints the
-  `projections.prepare` document. See
+- `explore` proposes built-in projections that fit this repository by matching
+  Git-tracked files against each extractor's `detects` patterns, listing the
+  files that suggested each candidate without writing anything. By default it
+  prints the candidates along with instructions for trying them in VS Code
+  (**Projections: Explore Repository**, whose Explore view sweeps them); pass
+  `--list` to print only the candidates. Pass `--sweep` to run every candidate
+  and defined projection across the last `--last N` (default 20, maximum 100)
+  first-parent merges into the branch when merges make up at least half of
+  recent first-parent commits—or across first-parent commits for repositories
+  that squash or rebase. Each revision is extracted using the working tree's
+  definition with up to `--concurrency N` (default 2) extractors in parallel,
+  and results are ranked best signal first: projections that changed on at most
+  a quarter of changes (likely structural) appear ahead of those that changed
+  more often, those that changed on four in five or more (likely noise), and
+  those that never changed, followed by a summary of which are worth a look.
+  Fewer than four changes aren't judged. Use `-p ID` to narrow the sweep, and
+  `--json` to print the `projections.sweep` document with each ready
+  projection's `signal` (`rare`, `steady`, `unknown`, `noisy`, or `quiet`).
+  Projections that run repository code are skipped unless `--trust` is passed.
+- `adopt ID...` writes definitions for the chosen explore candidates into
+  `.github/projections/ID.json` (or `.projections/` if the repository uses it,
+  never overwriting an existing file) and adds the `--bookmarks N` (default 3)
+  changes where each moved the most—from a sweep of the last `--last N`
+  changes—to `.projections-bookmarks.json`. Pass `--dry-run` to preview the
+  files without writing them.
+- `init [ID]` scaffolds a new projection, adds parts to an existing one, and
+  writes or updates the agent skill (`projections/SKILL.md`, placed in whichever
+  skills directory already holds it, otherwise whichever of `.agents/skills`,
+  `.claude/skills`, or `.github/skills` holds the repository's own skills, and
+  otherwise `.agents/skills`; override with `--skills-dir DIR`, skip with
+  `--no-skill`, or add to `.claude/skills` for Claude Code with `--claude`—see
+  [agent skills](../setup/agent-skills.md)), printing where it wrote. A new
+  projection gets a starter extractor matching the project's toolchain (Node
+  when the root has `package.json`; Python for `pyproject.toml`,
+  `requirements.txt`, `setup.py`, or `Pipfile`; Go for `go.mod`; otherwise pass
+  `--language node|python|go`) and the built-in `graph` renderer. Pass
+  `--extractor ID` or `--command ARGV_JSON` to use a built-in extractor or an
+  existing command instead, `--renderer NAME` to pick a built-in renderer,
+  `--renderer custom` to scaffold a renderer package (TypeScript, Vite, React,
+  the renderer SDK, and kit) in `ID/renderer/`, or `--comparator custom` to
+  scaffold a starter comparator file (`ID/ID.comparator.yaml`) and its tests.
+  For an existing projection, only the requested parts are added and only their
+  definition fields are updated. Calling it without `ID` writes only the skill.
+  It never overwrites existing projection files and never runs code. Because
+  `@githubnext/projections` isn't published to npm yet, custom renderers depend
+  on the tarball attached to this CLI's GitHub release by URL; setting
+  `PROJECTIONS_RENDERER_PACKAGES=DIR` installs it from an `npm pack` tarball in
+  `DIR` (for instance, one built from a Git submodule), while a development
+  build from a clone (`npm run tools -- install`) uses a `file:` reference to
+  `dist/dogfood/githubnext-projections.tgz`.
+- `check [-p ID]...` verifies projections end to end (all projections defined in
+  the working tree by default). It confirms that the definition is valid, the
+  working tree extracts cleanly, and a rerun produces the same extraction up to
+  declared `volatile` fields and their tolerances (judged by the Engine's
+  `vary`; unexpected variation warns and names the differing items and fields,
+  `--strict-determinism` turns that warning into a failure, and `observed`
+  extractions aren't rerun; reworded generated values from an equal basis are
+  expected variation with a note to reuse them via the
+  [generation store](caches.md#generation-store), while a `pure` definition that
+  produces generated values warns). It also checks that any declared scope holds
+  when extracting only the scope (see [Scopes](execution.md#scopes)), that a
+  custom extractor produces the same result when run from a copy containing only
+  the definition's own files—warning if it reads files beside itself, which
+  comparisons always take from the definition revision on both sides (see
+  [Definitions and execution](execution.md#exact-source-and-explicit-execution))—and
+  that a custom extractor's `data` doesn't embed fields that change when
+  unrelated items change (warning on counts or lists of external items like
+  `fileCount` or `importers`, or line numbers, unless read by the definition or
+  declared volatile, since they mark items modified unnecessarily). Finally, it
+  compares `HEAD` against the working tree using the working tree's definition,
+  runs any comparator tests beside a custom comparator file
+  (`*.comparator.test.yaml`, with `--update` to rewrite snapshots and
+  `--coverage` to report exercised functions, expressions, and branches—see
+  [Comparator tests](stdio-backend.md#comparator-tests)), checks that a custom
+  renderer's bundle is built and newer than its sources, and runs the standard
+  renderer checks in a headless browser against the working tree, the comparison
+  (formatted per the definition's `presentation`), and a custom renderer
+  package's `scenarios.json`. Each check reports `pass`, `fail`, `warn`, or
+  `skip` in plain words, and the command exits nonzero if any check fails. Pass
+  `--png FILE` to also render the single projection's working tree (failing only
+  that step if the file already exists), `--from FILE` to check raw extractor
+  output for that projection without extracting or comparing, `--no-render` to
+  skip the browser checks, `--parity REV` to compare a local extraction against
+  CI's (see [CI artifacts](caches.md#ci-artifacts-as-a-source)), or `--json` to
+  print the `projections.check` document.
+- `doctor [-p ID]...` inspects what this checkout needs to run its projections:
+  the Git checkout and commits, definition validity, the environment (what is
+  declared, what the working tree has prepared, stale steps, and missing tools),
+  the active workspace strategy and why it was chosen, each extractor's program
+  and files, custom renderer bundles (and running dev servers), comparator
+  files, the agent skill, and an available browser for images and checks. It
+  never runs repository code or modifies files, exits nonzero if anything is
+  missing, and supports `--json` for the `projections.doctor` document.
+- `prepare` runs the environment file's prepare steps in the working tree—or,
+  with `--revision REV`, in the workspace for that commit. Each step runs only
+  if its key files changed since its last run there (`--force` reruns all steps;
+  `--step ID` selects specific ones). Requires `--trust` and supports `--json`
+  for the `projections.prepare` document. See
   [Environments and workspaces](environments.md#environments-and-workspaces).
-- `workspace list`, `workspace clean`: The workspaces Projections keeps for
-  toolchain extractions of other commits, and removing those not in use.
-- `show [REVISION]`: Run the projection's extractor on one revision (the working
-  tree by default) and present the extraction. `-p ID` names the projection; it
-  can be omitted when the revision defines exactly one. `--all` shows every
-  defined projection. `--definition-revision REV` applies another revision's
-  definition, so extractions of several revisions can be compared. `--from FILE`
-  presents a saved extraction or comparison instead of extracting; with `-p ID`,
-  `FILE` is raw extractor output (what an extractor writes to stdout, possibly
-  hand-made), which the working tree's definition normalizes, digests and
-  validates without running anything. `--png FILE` also draws it; see
-  [Images](#images).
-- `compare <BASE>[..<HEAD>]`: Extract both revisions with one definition, run
-  the comparator and present the comparison. One revision compares with the
-  working tree; `<BASE>...<HEAD>` starts at their merge base; an empty side
-  means `HEAD`, as in Git. `-p ID` names the projection; `--all` compares every
-  projection either revision defines. `--definition base|head` chooses which
-  revision's definition and component code apply to both;
-  `--definition-revision REV` applies another revision's instead, for example
-  `working-tree` to try uncommitted projection code on real history.
-  `--before-extraction FILE --after-extraction FILE [--comparator FILE]`
-  compares saved extractions without running extractors. `--png FILE` also draws
-  it.
-- `list`: The validated definitions at `--revision` (working tree by default)
-  with `requiresTrust` and `rendererRequiresTrust`, without running anything.
-  `defaults` says when the working tree defines none and the built-in defaults
-  (`workspace-dependencies` and `repository-map`) apply. Once a repository
-  defines its own projections the defaults are no longer listed, but they stay
-  addressable by ID (`-p repository-map`) until one of its definitions uses that
-  ID. A definition file that isn't valid doesn't hide the others: `invalid`
-  lists each with its `path` and `diagnostics` (each with the offending field's
-  `pointer` and `location`, `{path, line, column}`), the text names it as
+- `workspace list` and `workspace clean` inspect the workspaces Projections
+  keeps for toolchain extractions of other commits and delete any that aren't in
+  use.
+- `show [REVISION]` runs a projection's extractor on a single revision (the
+  working tree by default) and prints the result. Specify the projection with
+  `-p ID` (optional if the revision defines only one) or use `--all` to show
+  every defined projection. Pass `--definition-revision REV` to apply another
+  revision's definition so extractions across revisions can be compared later.
+  With `--from FILE`, `show` renders a saved extraction or comparison without
+  running an extractor; combined with `-p ID`, `FILE` is treated as raw
+  extractor stdout (even hand-written), which the working tree's definition
+  normalizes, digests, and validates. Pass `--png FILE` to also render an image
+  (see [Images](#images)).
+- `compare <BASE>[..<HEAD>]` extracts both revisions using one definition, runs
+  the comparator, and prints the comparison. Passing a single revision compares
+  it with the working tree; `<BASE>...<HEAD>` starts at their merge base; an
+  empty side defaults to `HEAD`, just like Git. Use `-p ID` for one projection
+  or `--all` for every projection defined in either revision. Choose which
+  revision's definition and component code apply to both sides with
+  `--definition base|head`, or pick another revision with
+  `--definition-revision REV` (such as `working-tree` to test uncommitted
+  projection code against real history). To compare saved extractions without
+  running extractors, pass
+  `--before-extraction FILE --after-extraction FILE [--comparator FILE]`. Add
+  `--png FILE` to render an image too.
+- `list` prints the validated definitions at `--revision` (working tree by
+  default) along with `requiresTrust` and `rendererRequiresTrust`, without
+  running any code. `defaults` indicates when the working tree has no authored
+  definitions and the built-in defaults (`workspace-dependencies` and
+  `repository-map`) apply; once you author projections, the defaults disappear
+  from `list` but remain addressable by ID (`-p repository-map`) unless a
+  definition reuses that ID. Invalid definition files never hide valid ones:
+  `invalid` lists each with its `path` and `diagnostics` (including the field's
+  `pointer` and `location`, `{path, line, column}`), text output prints
   `id: invalid: path:line:column: message`, and the command exits nonzero.
-- `serve --stdio`: The Inspector's backend for an editor extension that starts
-  the CLI (the VS Code extension does), as JSON-RPC over standard input and
-  output, with no port or listener: the working tree live, or with
-  `--document FILE` a saved extraction, comparison or pull request review
-  (running nothing), or with `--fixtures` scenario fixtures for developing
-  renderers and comparators; see [Stdio backend](stdio-backend.md). `--trust`
-  lets it run repository code.
-- `mcp`: Projections' [agent tools](agent-tools.md) for a coding agent (GitHub
-  Copilot CLI, Claude Code, any MCP client): a Model Context Protocol server
-  over standard input and output. `--trust` lets the tools run repository code
-  and write outside an explore session.
-- `bookmark list`, `bookmark run [ID]...`: Saved comparisons in
-  `.projections-bookmarks.json`: list them, or compare them (all by default) as
-  a batch. Each applies its base revision's definition; when neither of its
-  revisions defines the projection (a bookmark saved before the projection was
-  written), the working tree's applies, with a notice saying so.
-  `--definition base|head` insists on one side's; `--definition-revision REV`
-  applies another revision's to every bookmark.
-- `pr NUMBER|URL`: Untrusted review of an existing GitHub pull request; see
-  [Untrusted pull request review](pull-requests.md).
-- `extractor list`, `extractor view ID`: Built-in extractors: their inputs,
-  schema, renderer, execution policy and definition template.
-- `validate FILE|-`: Validate a saved extraction, comparison or scenarios
-  document (`-` reads standard input). `--json` prints the result, `--quiet`
-  nothing. A comparison made by a custom comparator is reproduced only with
-  `--comparator FILE`; otherwise the result says it wasn't
-  (`"reproduced": false`).
-- `help [COMMAND|TOPIC]`: Help for a command, or `help authoring`: the guide to
-  building a projection (the agent skill's text), or `help agents [NAME]`: the
-  prompts a coding agent follows (`explore`, `create-projection`, `ci`,
-  `install`), bundled with the CLI, the same as `docs/agents/*.md`.
-- `licenses`: The license and third-party notices for everything the executable
-  includes.
+- `serve --stdio` runs the Inspector's JSON-RPC backend over standard input and
+  output (with no port or listener) for editor extensions such as VS Code. It
+  serves the live working tree by default, a saved extraction, comparison, or
+  pull request review with `--document FILE` (running nothing), or scenario
+  fixtures for renderer and comparator development with `--fixtures` (see
+  [Stdio backend](stdio-backend.md)). Pass `--trust` to allow repository code.
+- `mcp` exposes Projections' [agent tools](agent-tools.md) as a Model Context
+  Protocol server over standard input and output for coding agents like GitHub
+  Copilot CLI, Claude Code, or any other MCP client. Pass `--trust` to allow
+  running repository code and writing outside an explore session.
+- `bookmark list` and `bookmark run [ID]...` list or run saved comparisons from
+  `.projections-bookmarks.json` (running all of them by default as a batch).
+  Each bookmark uses its base revision's definition, falling back to the working
+  tree's definition with a notice if neither revision defines the projection (as
+  with a bookmark created before the projection existed). Override with
+  `--definition base|head` to insist on one side, or `--definition-revision REV`
+  to apply a single revision's definition to every bookmark.
+- `pr NUMBER|URL` runs an untrusted review of an existing GitHub pull request;
+  see [Untrusted pull request review](pull-requests.md).
+- `extractor list` and `extractor view ID` list built-in extractors and show
+  each one's inputs, schema, renderer, execution policy, and definition
+  template.
+- `validate FILE|-` validates a saved extraction, comparison, or scenarios
+  document (`-` reads from standard input). Pass `--json` for structured output
+  or `--quiet` to suppress output. Custom comparator comparisons are only
+  reproduced when you supply `--comparator FILE`; otherwise the output records
+  `"reproduced": false`.
+- `help [COMMAND|TOPIC]` shows help for a command, `help authoring` prints the
+  projection authoring guide (the same text as the agent skill), and
+  `help agents [NAME]` prints the bundled coding-agent prompts (`explore`,
+  `create-projection`, `ci`, `install`, matching `docs/agents/*.md`).
+- `licenses` prints the license and third-party notices for everything bundled
+  in the executable.
 
-Every command takes `-C DIR` (`--directory`): any directory inside a Git
-checkout, whose top level is used, so commands also work from subdirectories
-without it. Commands that run extractors accept `--trust` and the container
-options below. A repository needs at least one commit, because every working
-tree records the commit it is based on.
+Every command accepts `-C DIR` (`--directory`) pointing to any directory inside
+a Git checkout and resolves its top level automatically, so commands work from
+subdirectories even without the flag. Commands that run extractors also accept
+`--trust` and the container isolation options. Because every working tree
+records the commit it is based on, the repository must have at least one commit.
 
-Commands that extract also take `--no-cache` (skip the
+Commands that extract also share `--no-cache` (bypass the
 [extraction cache](caches.md#extraction-cache)), `--ci` and `--artifact DIR`
 (reuse [CI artifacts](caches.md#ci-artifacts-as-a-source)), `--in-place`
-(extract a commit that is the checkout's `HEAD` in place despite untracked
-files, as in CI) and `--workspace STRATEGY` (see
-[Environments and workspaces](environments.md#environments-and-workspaces)) and
-`--regenerate` (generate [generated values](caches.md#generation-store) again
-rather than reuse the generation store's); `serve --stdio` and `mcp` take the
-same options.
+(extract a commit matching the checkout's `HEAD` in place even when untracked
+files exist, as in CI), `--workspace STRATEGY` (see
+[Environments and workspaces](environments.md#environments-and-workspaces)), and
+`--regenerate` (recompute [generated values](caches.md#generation-store) instead
+of reusing stored ones). `serve --stdio` and `mcp` accept the same options.
 
 ## Errors
 
-A failure prints its message to stderr with what to do next, and the exit status
-is 1 (2 for a malformed command line). Extractor failures include the
-extractor's exit status and stderr; an invalid extraction lists each problem
-with its code and the JSON pointer of the offending item. With `--json` (or
-`--output`), a failure also prints a `projections.error` document to stdout, so
-tools and agents can act on it:
+When a command fails, it writes an error message and next steps to stderr and
+exits with status 1 (or 2 for an invalid command line). Extractor failures
+include the exit status and stderr; invalid extractions list every issue with
+its error code and JSON pointer. When `--json` or `--output` is set, failures
+also print a `projections.error` document to stdout so scripts and agents can
+handle them programmatically:
 
 ```json
 {
@@ -255,49 +257,49 @@ tools and agents can act on it:
 }
 ```
 
-`code` is `TRUST_REQUIRED`, `EXTRACTOR_FAILED` (with `stderr`),
-`INVALID_EXTRACTION`, `INVALID_INPUT` or `ERROR`. A failed process is named by
-its file name (a built-in by its extractor ID), never by the absolute path it
-ran from. The Inspector and the VS Code extension show the extractor's own error
-once: the stderr line that says what went wrong (an `Extractor <id>:` report,
-the first `Error:`-style line, a Python traceback's last line or a Rust panic's
-message), never a source location or excerpt; the whole stderr is behind **Raw
-output**.
+The `code` field is one of `TRUST_REQUIRED`, `EXTRACTOR_FAILED` (which includes
+`stderr`), `INVALID_EXTRACTION`, `INVALID_INPUT`, or `ERROR`. Failed processes
+are identified by filename (or extractor ID for built-ins), never by the
+absolute path they ran from. The Inspector and VS Code extension surface the
+extractor's own error once—picking the key stderr line (an `Extractor <id>:`
+message, the first `Error:`-style line, the last line of a Python traceback, or
+a Rust panic message) without source excerpts—while tucking the full stderr
+under **Raw output**.
 
 ## Output
 
-`show` and `compare` print an accessible plain-text rendering by default: no
-color, layout or symbols that need sight to interpret. `show` lists entities
-grouped by kind, each followed by its outgoing relationships. `compare` names
-both revisions, the comparator and definition digest, any definition notices,
-counts by status, then each step in order with its changes (`Added`, `Removed`,
-`Changed`, `Renamed`, `Split`, `Merged`) and their summaries.
+By default, `show` and `compare` output accessible plain text without colors,
+ASCII art, or symbols that depend on sight. `show` groups entities by kind and
+lists each entity's outgoing relationships beneath it. `compare` prints both
+revisions, the comparator and definition digest, any definition notices, status
+counts, and each step in order with its changes (`Added`, `Removed`, `Changed`,
+`Renamed`, `Split`, `Merged`) and summaries.
 
-`--json` prints the saved extraction (`projections.extraction` version 0),
-comparison (`projections.comparison` version 0) or, with `--all` or
-`bookmark run`, batch (`projections.batch` version 0) document instead.
-`--output FILE` writes the same JSON to a new file (never overwriting),
-pretty-printed with two-space indentation (compact only when just that fits the
-size limits below), and prints nothing. Comparison documents carry definition
-notices in `notices` (omitted when there are none), and batch items carry them
-in `notices` too. In JSON modes the notices are also printed to stderr as
-`projections: note: ...`.
+Pass `--json` to print the structured document instead: `projections.extraction`
+(version 0), `projections.comparison` (version 0), or—for `--all` and
+`bookmark run`—`projections.batch` (version 0). Pass `--output FILE` to write
+that JSON to a new file (never overwriting an existing one), pretty-printed with
+two-space indentation (falling back to compact JSON only if needed to fit the
+size limits) and printing nothing to stdout. Comparison documents include
+definition notices in `notices` (omitted when empty), as do batch items; in JSON
+modes, notices are also echoed to stderr as `projections: note: ...`.
 
-When a declared input (a file, folder or glob a built-in's `inputs` name)
-doesn't exist at a revision, the built-in extracts that revision as empty and
-lists the input in the extraction's `missingInputs`, rather than failing.
-`compare` then shows its contents as added (missing before) or removed (missing
-after) and adds a notice naming the input and the revision. `show` prints a
-note; when the extraction is empty, it says the projection has nothing to show
-at that revision. `check` still fails its extraction step, since at the checked
-revision a missing input is a misconfiguration. A file that exists but doesn't
-parse is an error as before.
+If a declared input (a file, folder, or glob named in a built-in's `inputs`)
+does not exist at a revision, the built-in produces an empty extraction and
+records the path in `missingInputs` instead of failing. In a comparison,
+`compare` then shows the contents as added (if missing before) or removed (if
+missing after) with a notice naming the input and revision. `show` prints a
+note, and explains that the projection has nothing to show when the extraction
+is empty. `check` still fails its extraction step, since a missing input at the
+checked revision is a misconfiguration. An input file that exists but fails to
+parse remains an error.
 
 ## Images
 
-`--png FILE` on `show` and `compare` also writes a PNG of what the Inspector
-shows, for READMEs, pull request comments and other places that can show an
-image but not run a renderer. The text (or JSON) is printed as usual:
+Pass `--png FILE` to `show` or `compare` to save a PNG of what the Inspector
+renders—useful for READMEs, pull request comments, or anywhere that displays
+images but cannot run a live renderer. Normal text (or JSON) output is still
+printed as usual:
 
 ```sh
 projections show -p files --png files.png                          # the working tree
@@ -311,48 +313,46 @@ projections show --from saved.comparison.json --side after --png head.png
 projections show -p files --frame none --png bare.png             # the renderer's content alone
 ```
 
-By default the image is one rounded card with a hairline border: the renderer's
-content on top, then its legend and the summary bar, each ruled off by a
-hairline. Outside the rounded corners the PNG is transparent, with a pixel of
-room around the card, so it sits on any background, GitHub's light and dark
-READMEs included. Its surface, border and rules follow `--theme`; for a README,
-draw one image per theme and pick between them with `<picture>` and
-`prefers-color-scheme`.
+By default, the PNG renders as a single rounded card with a hairline border: the
+renderer's content at the top, followed by its legend and summary bar separated
+by hairlines. The area outside the rounded corners is transparent with a pixel
+of breathing room around the card, so it blends cleanly onto any background,
+including GitHub's light and dark READMEs. Card surfaces, borders, and rules
+follow `--theme`; for a README, render one image per theme and switch between
+them using `<picture>` and `prefers-color-scheme`.
 
 <!-- prettier-ignore -->
 | Option | Default | Meaning |
 |---|---|---|
-| `--png FILE` | | The PNG to create. An existing file is never replaced. The other options require it or `--frames`. |
-| `--frames DIR` | | Comparisons only, instead of `--png`: the animated playback as the viewer loops it back and forth at 1× speed, as PNG frames in the new directory `DIR` (see animations below). |
-| `--fps N` | `12` | With `--frames`: how often playback is sampled, 1–60 frames a second. |
-| `--theme light\|dark` | `light` | The host theme the renderer receives. |
-| `--frame card\|none` | `card` | `card`: one rounded card holding the renderer's content, its legend and the summary bar, transparent outside its corners; the card hugs the content, so the image is as tall as the card, at most `--height` (`--frames` keeps every frame the viewport's size). `none`: the renderer's content alone, edge to edge and opaque, for embedding in a frame of your own. |
-| `--matte COLOR` | | Card frame only: fill outside the rounded corners with `#rgb` or `#rrggbb` instead of transparency, for formats without alpha (see animations below). |
-| `--width N`, `--height N` | `1280`, `800` | The viewport in CSS pixels (64–4096). The stage fills it, up to the content's height in a card; renderers scroll inside, so content beyond it is clipped. |
-| `--scale N` | `1` | Device pixels per CSS pixel (0.5–4); `2` for high-density displays. |
-| `--mode animated\|side-by-side\|diff` | the renderer's default | Comparisons only. Without `--mode`, the image shows the mode the Inspector opens in: the renderer's diff when it has one, else side by side. A mode the renderer doesn't offer is an error that lists the ones it does. |
-| `--progress 0..1` | `1` | Animated comparisons only (it implies `--mode animated`): the transition's progress, 0 showing the base and 1 the head. |
-| `--side before\|after` | | Comparisons only: one side alone, as an extraction, drawn by the renderer of the definition that explained the comparison (so a pull request's head is drawn by the base's renderer). The Action's before and after thumbnails use it. |
-| `--browser PATH` | | The browser executable (see below). |
-| `--timeout SECONDS` | `60`, plus a second for every five entities (at most 600) | How long the renderer may take to finish painting. |
+| `--png FILE` | | Path of the PNG to create. Never overwrites an existing file. All other image options require this or `--frames`. |
+| `--frames DIR` | | Comparisons only (instead of `--png`): captures the animated playback as the viewer loops it back and forth at 1× speed, writing PNG frames into the new directory `DIR` (see animations below). |
+| `--fps N` | `12` | Used with `--frames`: sampling rate from 1–60 frames per second. |
+| `--theme light\|dark` | `light` | Host theme passed to the renderer. |
+| `--frame card\|none` | `card` | `card` wraps the renderer's content, legend, and summary bar in a rounded card with transparent corners, shrinking vertically to hug the content up to `--height` (`--frames` keeps every frame at the full viewport size). `none` outputs the renderer's content edge to edge and opaque for embedding in your own frame. |
+| `--matte COLOR` | | Card frame only: fills outside the rounded corners with `#rgb` or `#rrggbb` instead of transparency, for image formats without alpha (see animations below). |
+| `--width N`, `--height N` | `1280`, `800` | Viewport dimensions in CSS pixels (64–4096). The stage fills the viewport up to the content's height in card mode; overflowing content is clipped since renderers scroll internally. |
+| `--scale N` | `1` | Device pixels per CSS pixel (0.5–4); use `2` for high-density displays. |
+| `--mode animated\|side-by-side\|diff` | the renderer's default | Comparisons only. Without `--mode`, it defaults to the mode the Inspector opens in: the renderer's diff if it supports one, otherwise side by side. Choosing an unsupported mode fails and lists the available modes. |
+| `--progress 0..1` | `1` | Animated comparisons only (implies `--mode animated`): transition progress, from 0 (base) to 1 (head). |
+| `--side before\|after` | | Comparisons only: renders a single side as an extraction using the renderer from the comparison's definition (so a pull request's head is drawn by the base's renderer). Used by the Action's before and after thumbnails. |
+| `--browser PATH` | | Path to the browser executable (see below). |
+| `--timeout SECONDS` | `60`, plus a second for every five entities (at most 600) | Maximum time the renderer has to finish painting. |
 
-`--from FILE` (on `show`) draws a saved extraction or comparison without
-extracting anything; `--definition`, `--trust` and the container options mean
-what they always do. `projections check --png FILE` draws a projection the same
+On `show`, `--from FILE` renders a saved extraction or comparison without
+running any extractor; `--definition`, `--trust`, and the container options
+behave as usual. `projections check --png FILE` renders a projection the same
 way.
 
-**Animations.** `--frames DIR` records the animated comparison as the viewer
-plays it looping, at 1× speed: forward from the base to the head, a hold, then
-backward, and a hold, with the renderer's own steps in each direction (motion
-can differ by direction), its pace, and a hold at each step. It writes the
-frames, `000.png`, `001.png` and so on, and `frames.json`, which lists each
-frame's `file`, `progress`, `direction` and `durationMs`. A hold is one frame
-with its whole duration, and the list starts where the hold at the base starts,
-so playing the frames in order, looped, matches the viewer. Both ends show no
-change highlighting. Assemble the frames with their durations, for example into
-an animated PNG with ffmpeg. APNG keeps full colour and transparency, so the
-card's rounded corners sit cleanly on any background, and a `.png` file plays as
-an animation in browsers and on GitHub:
+**Animations.** Passing `--frames DIR` captures an animated comparison exactly
+as the viewer loops it at 1× speed: forward from base to head, a hold, backward
+to base, and a hold—preserving direction-specific motion, pacing, and per-step
+holds. It writes `000.png`, `001.png`, and so on, alongside `frames.json`
+listing each frame's `file`, `progress`, `direction`, and `durationMs`. Each
+hold is emitted as a single frame with its full duration, starting at the base
+hold so looping the sequence matches the viewer; both endpoints omit change
+highlighting. You can assemble the frames into an animated PNG with ffmpeg—APNG
+preserves full color and alpha transparency so the rounded card sits cleanly on
+any background, and `.png` animations play natively in browsers and on GitHub:
 
 ```sh
 projections compare main..HEAD -p files --output change.json
@@ -364,78 +364,79 @@ console.log(`file frames/${frames.at(-1).file}`)' > list.txt
 ffmpeg -f concat -i list.txt -vf format=rgba -fps_mode vfr -plays 0 -f apng change-dark.png
 ```
 
-GIF has only on-or-off transparency, so its corners would fringe. For a GIF,
-draw the frames with `--matte` set to the background the GIF will sit on (for
-example `#ffffff`, or `#0d1117` for GitHub's default dark theme), keep the theme
-and matte paired, and encode with a palette:
+Because GIF only supports binary transparency (which causes fringing on rounded
+corners), pass `--matte` matching the target background (for example `#ffffff`,
+or `#0d1117` for GitHub's default dark theme), keep theme and matte paired, and
+encode with a palette:
 `-vf 'split[a][b];[a]palettegen=reserve_transparent=0[p];[b][p]paletteuse=dither=none' -loop 0 change-dark.gif`.
 
-`--scale` applies to the renderer's frame too, so a `--scale 2` image has text
-as sharp as the display it is drawn for.
+`--scale` applies inside the renderer's frame as well, so `--scale 2` produces
+crisp text for high-density displays.
 
-**Browser.** The CLI bundles no browser. It drives an installed Chrome, Chromium
-or Microsoft Edge, headless, over the Chrome DevTools Protocol with a small
-built-in client: `--browser PATH`, else the `PROJECTIONS_BROWSER` environment
-variable, else the first of `google-chrome`, `google-chrome-stable`, `chromium`,
-`chromium-browser`, `microsoft-edge`, `msedge` (and on Windows `chrome.exe`,
-`msedge.exe`) on `PATH`, else the usual install locations (`/Applications/*.app`
-on macOS, Program Files and the local application data directory on Windows,
-`/opt/google/chrome` on Linux). Without one, the command fails and names
-`--browser`. GitHub-hosted runners have Chrome. The browser's own sandbox is
-never disabled, so Chrome refuses to start as root (for example in a container);
-run the command as a regular user.
+**Browser.** The CLI does not bundle a browser. Instead, it drives an installed
+Chrome, Chromium, or Microsoft Edge headlessly over the Chrome DevTools Protocol
+using a lightweight built-in client. It looks for a browser in this order:
+`--browser PATH`, the `PROJECTIONS_BROWSER` environment variable, the first
+match on `PATH` among `google-chrome`, `google-chrome-stable`, `chromium`,
+`chromium-browser`, `microsoft-edge`, `msedge` (plus `chrome.exe` and
+`msedge.exe` on Windows), and finally standard install paths
+(`/Applications/*.app` on macOS, Program Files and local AppData on Windows,
+`/opt/google/chrome` on Linux). If none is found, the command fails and mentions
+`--browser`. GitHub-hosted runners include Chrome out of the box. Because the
+CLI never disables the browser's sandbox, Chrome will refuse to launch as root
+(such as inside a container)—run the command as a regular user.
 
-The browser runs with a fresh temporary profile, no extensions, sync, first-run
-UI or background networking, and with every host other than `127.0.0.1`
-unresolvable. On Unix it is driven over `--remote-debugging-pipe` (file
-descriptors 3 and 4), so it opens no port; Windows can't pass extra descriptors,
-so there it listens on an ephemeral loopback port that it records only in the
-private profile. It runs in its own process group (Unix) or Job Object (Windows)
-and is stopped, with everything it started, and its profile removed, on success,
-failure and Ctrl+C.
+The browser launches with a clean temporary profile, no extensions, sync,
+first-run UI, or background networking, and blocks DNS resolution for every host
+except `127.0.0.1`. On Unix it communicates over `--remote-debugging-pipe` (file
+descriptors 3 and 4) without opening a port; on Windows, where extra descriptors
+cannot be passed, it binds an ephemeral loopback port recorded only in the
+private profile. The browser runs in its own process group (Unix) or Job Object
+(Windows) and is shut down cleanly—along with its child processes and temporary
+profile—on success, failure, or Ctrl+C.
 
-At most two browsers start at once for a user, across every process: a launch
-holds one of two lock files in the cache directory (`browser-launches/`) from
-starting the browser until its DevTools connection answers, so parallel tests or
-several sessions stagger their launches rather than starting many at the same
-moment, which macOS answers by aborting them. A browser ended by a signal before
-it answers is started once more. One `check` runs every projection's renderer
-checks and image in one browser, and the Inspector service keeps the browser
-that draws thumbnails and screenshots for 30 seconds after each; every render
-opens its page in its own browser context, so nothing carries over between them.
+Across all processes for a user, at most two browsers launch at the same time:
+each launch holds one of two lock files in `browser-launches/` inside the cache
+directory until its DevTools connection responds. This staggers parallel test
+runs or concurrent sessions so macOS doesn't abort simultaneous launches. If a
+browser is killed by a signal before responding, the CLI retries launching it
+once. A single `check` run reuses one browser across every projection's renderer
+checks and image, and the Inspector service keeps its thumbnail/screenshot
+browser alive for 30 seconds after each render; every render still uses an
+isolated browser context so no state leaks between them.
 
-**What is rendered.** The CLI computes the document exactly as `show` or
-`compare` would, then opens the Inspector's mountable bundle at the reserved
-origin `https://projections.invalid` with nothing listening: the DevTools Fetch
-domain pauses every request of the page, its Workers and its renderer frames,
-and the CLI answers each in-process (the page, the Inspector's assets, and the
-Inspector service in document mode for `/api/`, `/renderers/` and
+**What is rendered.** The CLI computes the document identically to `show` or
+`compare`, then opens the Inspector's mountable bundle at the reserved origin
+`https://projections.invalid` with no listening server. Using the DevTools Fetch
+domain, the CLI intercepts every request from the page, its Workers, and its
+renderer frames and answers them in-process (serving the page, Inspector assets,
+and the Inspector service in document mode for `/api/`, `/renderers/`, and
 `/custom-renderers/`). The chrome-free snapshot page validates the document with
-the shared Engine and presents it through the host's stage, legend included,
-with the Inspector's policies: built-in renderers come from the executable, and
-run in `sandbox="allow-scripts"` frames under the renderer content security
-policy (no network). A definition's custom renderer is served from its
-definition revision with the same [trust rule](../contracts.md#trust) as the
-Inspector's: one that differs from the default branch's needs `--trust` (also
-accepted with `--from` and `--before-extraction`, where it allows only the
-renderer); without it the built-in renderer for the schema is used, with a note
-on stderr. A comparison made by a custom comparator is presented as the CLI
-computed it, after both extractions are verified.
+the shared Engine and renders it through the host stage—legend included—under
+the Inspector's normal policies: built-in renderers come from the executable and
+run inside `sandbox="allow-scripts"` frames with a strict content security
+policy (no network). Custom renderers are served from their definition revision
+under the same [trust rule](../contracts.md#trust) as the Inspector: a renderer
+that differs from the default branch's requires `--trust` (also accepted with
+`--from` and `--before-extraction`, where it authorizes only the renderer);
+without `--trust`, the CLI falls back to the built-in renderer for that schema
+and notes it on stderr. Custom comparator comparisons are displayed as computed
+once both extractions pass verification.
 
-**Same input, same image.** The page reports ready only once every pane has
-acknowledged painting the requested progress (the renderer's `rendered`
-message), fonts have loaded and two more frames have passed, with no playback.
-The browser renders in software with a fixed viewport and scale, sRGB, no font
-hinting or subpixel text, hidden scrollbars, reduced motion, the `en-US` locale
-and the UTC time zone. The CLI then takes screenshots until two consecutive ones
-are identical (a note says so if a renderer never settles). Two images of the
-same document with the same browser and fonts show the same content: the
-dimensions and every pixel match, except that Chrome's software rasterizer can
-round a few anti-aliased edge pixels (rounded corners) one level differently
-from one launch to the next. Other machines, browser versions or system fonts
-can differ more.
+**Same input, same image.** The snapshot page signals readiness only after every
+pane has acknowledged painting the requested progress (via the renderer's
+`rendered` message), fonts have loaded, and two additional frames have elapsed
+with playback paused. Rendering runs in software with a fixed viewport and
+scale, sRGB color, no font hinting or subpixel text, hidden scrollbars, reduced
+motion, the `en-US` locale, and UTC. The CLI then captures screenshots until two
+consecutive frames are identical (printing a note if a renderer never settles).
+Two renders of the same document with the same browser and fonts match in
+dimensions and pixels, aside from minor one-level anti-aliasing variations
+Chrome's software rasterizer occasionally produces on rounded corners across
+launches; different machines, browser versions, or system fonts can vary more.
 
-**Not SVG.** Images are raster only. Renderers are untrusted code that draws
-inside a sandboxed frame, so an SVG they produced could carry scripts, external
-references or content that escapes its frame; exporting one safely would need a
-sanitizer and a renderer contract for vector output. That is future work.
+**Not SVG.** Image output is raster-only. Because renderers are untrusted code
+running inside sandboxed frames, an SVG they emit could contain scripts,
+external references, or markup that escapes its frame. Supporting safe vector
+export would require a sanitizer and a dedicated vector renderer contract, which
+remains future work.

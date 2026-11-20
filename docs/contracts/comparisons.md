@@ -1,6 +1,7 @@
 # Comparisons
 
-A comparator is a pure function of two extractions of one projection definition.
+A comparator is a pure function that takes two extractions from the same
+projection definition and describes what changed between them.
 
 ```json
 {
@@ -22,176 +23,204 @@ A comparator is a pure function of two extractions of one projection definition.
 }
 ```
 
-`changes` lists every entity and relationship whose status is `added`, `removed`
-or `modified`, plus identity-only changes (`unchanged` with `declared`, `split`
-or `merge` correspondence) and pairs whose only differences are
-[volatile](extractions.md#volatile-data) values within tolerance (`unchanged`
-with `varied`). Shapes: `added` has no before ID and one after ID; `removed` the
-reverse; `exact` pairs one ID with itself; `declared` pairs two different IDs;
-`split` has one before ID and two or more after IDs; `merge` has two or more
-before IDs and one after ID. A change ID is unique within the comparison; by
-convention it is the first after ID, or the before ID for a removal.
+`changes` lists every entity and relationship whose status is `added`,
+`removed`, or `modified`, along with identity-only changes (`unchanged` with
+`declared`, `split`, or `merge` correspondence) and pairs whose only differences
+are [volatile](extractions.md#volatile-data) values within tolerance
+(`unchanged` with `varied`). Each correspondence kind has a fixed shape: `added`
+has no before ID and one after ID; `removed` is the reverse; `exact` pairs one
+ID with itself; `declared` pairs two different IDs; `split` maps one before ID
+to two or more after IDs; and `merge` maps two or more before IDs to one after
+ID. Every change ID is unique within the comparison—by convention, the first
+after ID, or the before ID for a removal.
 
-An `exact` or `declared` change has `varied` exactly when a volatile value
-differs between its items: each `{path, within, reason?, generated?, because?}`,
-sorted by path, as the engine's volatility rules judge it (`reason` only when a
-spread bound was unavailable and no other bound held, or a generated value is on
-one side only; `generated: true` for a
-[generated value](extractions.md#generated-values), with `because` naming the
-basis parts that moved when its bases differ). Its status is `unchanged` when
-the content is equal modulo variation within tolerance, so a change whose
-differences are all within is `unchanged` with `varied`; a `modified` change may
-carry `varied` with `within: false` entries, and `within: true` ones beside
-them. Splits, merges, additions and removals never have `varied`. Unchanged
-pairs without volatile differences are omitted as before, but pairs with them
-must be listed, so no comparator hides variation. When any change has `varied`,
-the comparison has `variation`: `within` counts the `unchanged` changes with
-`varied`, `beyond` the `modified` changes with at least one `within: false`
-entry; it is absent otherwise.
+An `exact` or `declared` change includes `varied` whenever a volatile value
+differs between its items. Each entry is
+`{path, within, reason?, generated?, because?}`, sorted by path, as judged by
+the engine's volatility rules (`reason` appears only when a spread bound was
+unavailable and no other bound held, or when a generated value exists on one
+side only; `generated: true` marks a
+[generated value](extractions.md#generated-values), with `because` listing the
+basis parts that changed when its bases differ). A pair's status is `unchanged`
+when its content is equal modulo variation within tolerance, so an item whose
+differences are all within tolerance is `unchanged` with `varied`. A `modified`
+change may also carry `varied` entries with `within: false` alongside
+`within: true` entries. Splits, merges, additions, and removals never carry
+`varied`. Unchanged pairs with no volatile differences are still omitted, while
+pairs with volatile differences must be listed so no comparator can hide
+variation. Whenever any change has `varied`, the comparison includes
+`variation`, where `within` counts `unchanged` changes with `varied` and
+`beyond` counts `modified` changes with at least one `within: false` entry;
+otherwise `variation` is omitted.
 
-A change whose status or identity changed may have `context`: the other items a
-person needs to read it, by ID in each revision (`before` and `after`, each in
-UTF-16 order, at most 1,000; a removal's context is in `before`), and `rules`,
-the comparator `context` rules that added to it. The Engine's **core context**
-is structural: a changed relationship's endpoints, and the items containing a
-changed or context entity, with the containment relationships that place them,
-in that revision. Containment (`from` contains `to`) is a `contains`
-relationship in every domain schema, plus a database table's `constraint` and
-`index` and, in the dependency-injection vocabulary, any relationship from a
-`service` to a `registration` or from a `registration` to an `implementation`,
-by the kinds of the entities at its ends. The core's context is bounded: taking
-the changes in order, each keeps its nearest items first (endpoints, then
-containers level by level), at most 1,000 per revision, from a budget of 250,000
-IDs and 16 MiB of ID bytes for the comparison, so it always fits the limits
-below and a change past the budget has none. Every comparator gives each change
-the core's context, and a comparator file's [`context` rules](#comparator-files)
-add to it; context is only ever added, and context never hides a change. A
-viewer's Changes scope shows the changes and their context, folding the rest;
-its `current_view` lists each change's context. `context` is absent when it
-would name nothing, on expected variation and on unchanged changes, and in
-comparisons saved before comparisons had context, for which presentation derives
-the same structural context (`changeContext` in the renderer SDK).
+Any change whose status or identity changed may carry `context`: the IDs of
+surrounding items someone needs to understand it in each revision (`before` and
+`after`, each sorted in UTF-16 order and capped at 1,000, with a removal's
+context in `before`), plus `rules` listing any comparator `context` rules that
+contributed to it. The Engine computes a structural **core context**
+automatically: a changed relationship's endpoints, and the items containing a
+changed or context entity along with the containment relationships linking them
+in that revision. Containment (`from` contains `to`) covers `contains`
+relationships in every domain schema, a database table's `constraint` and
+`index`, and in the dependency-injection vocabulary any relationship from a
+`service` to a `registration` or from a `registration` to an `implementation`
+based on the endpoint entity kinds.
 
-`steps` groups change IDs in presentation order, with an optional `kind`
-(`remove`, `restructure` or `add`). Steps hold changes that matter: an `exact`
-change that is `unchanged` with `varied` is expected variation and appears in no
-step. A `declared` change with only variation within tolerance is still a rename
-and belongs to a step like any other. With `order.reverse: "mirror"` (the
-default) playing backward presents the steps in reverse; `explicit` requires
-`reverseSteps`. A comparison never contains positions, colors or timing.
+Core context stays bounded: walking changes in order, each change keeps its
+nearest items first (endpoints, then containers level by level), up to 1,000 per
+revision, drawing from a comparison-wide budget of 250,000 IDs and 16 MiB of ID
+bytes so it always fits within validation limits (changes past the budget
+receive none). Every comparator provides the core context, and a comparator
+file's [`context` rules](#comparator-files) can only add to it—never hide a
+change. In viewers, the Changes scope displays changed items together with their
+context and folds everything else, and `current_view` lists each change's
+context. `context` is omitted when empty, on expected variation and unchanged
+changes, and in older saved comparisons written before context existed (where
+presentation derives the same structural context via `changeContext` in the
+renderer SDK).
 
-The Engine's `validate-comparison` operation checks a comparison against both
-extractions: every referenced ID exists in the named extraction and collection
-and belongs to at most one change; every change except expected variation
-appears in exactly one step (and exactly once in `reverseSteps` when explicit),
-and expected variation in none (`variation-in-step`); change IDs are unique;
-shapes match status and correspondence; an `exact` or `declared` change has the
-`varied` the volatility rules compute (`inconsistent-variation`, or
-`unexpected-varied` on another correspondence) and is `modified` exactly when
-its canonical content differs modulo variation within tolerance, with
-relationship endpoints compared through one-to-one entity correspondence;
-`variation` is present exactly when a change has `varied` and holds its counts
-(`missing-variation`, `unexpected-variation`, `inconsistent-variation`); and
-every item that differs, even only within tolerance, or is added or removed is
-covered by a change; and a change's `context` names other items of that revision
-(`unknown-reference`, or `invalid-context` for the change's own items, unsorted
-or duplicate IDs, or an empty context), only on a change whose status or
-identity changed (`unexpected-context`), holds at least the core's context
-(`missing-context`), and stays within 1,000 IDs per change and revision and
-250,000 IDs and 16 MiB of ID and rule-name bytes across the comparison
-(`context-limit`). A comparator cannot hide a change. Comparisons across
-different domain schemas are rejected.
+`steps` organizes change IDs into presentation order, with an optional `kind`
+(`remove`, `restructure`, or `add`). Steps only contain changes that matter: an
+`exact` change that is `unchanged` with `varied` is expected variation and does
+not belong in any step, whereas a `declared` change with only within-tolerance
+variation is still a rename and belongs in a step like any other change. With
+`order.reverse: "mirror"` (the default), playing backward runs the steps in
+reverse; setting `explicit` requires `reverseSteps`. Comparisons never store
+layout positions, colors, or animation timing.
+
+The Engine's `validate-comparison` operation verifies a comparison against both
+extractions:
+
+- Every referenced ID exists in the named extraction and collection and belongs
+  to at most one change, and all change IDs are unique.
+- Every change except expected variation appears in exactly one step (and once
+  in `reverseSteps` when explicit), while expected variation appears in none
+  (`variation-in-step`).
+- Shapes match each change's status and correspondence.
+- Every `exact` or `declared` change carries the exact `varied` entries computed
+  by the volatility rules (`inconsistent-variation`, or `unexpected-varied` on
+  other correspondences) and is `modified` if and only if its canonical content
+  differs modulo variation within tolerance (comparing relationship endpoints
+  through one-to-one entity correspondence).
+- `variation` is present if and only if a change has `varied`, with matching
+  counts (`missing-variation`, `unexpected-variation`,
+  `inconsistent-variation`).
+- Every item that differs—even only within tolerance—or is added or removed is
+  covered by a change, so no comparator can hide a change.
+- Each change's `context` references only other items in that revision
+  (`unknown-reference`, or `invalid-context` for the change's own items,
+  unsorted or duplicate IDs, or an empty context), appears only on changes whose
+  status or identity changed (`unexpected-context`), includes at least the core
+  context (`missing-context`), and stays within 1,000 IDs per change and
+  revision and 250,000 IDs / 16 MiB of ID and rule-name bytes overall
+  (`context-limit`).
+
+Comparisons across different domain schemas are rejected.
 
 ## The default comparator
 
-`packages/comparators/default` is written in Rust and runs as a WebAssembly
-module, `default-comparator.wasm`, in every host: the CLI runs it in the same
-sandboxed runtime and under the same limits as the rules interpreter. It matches
-exact IDs first, then explicit `previousIds` claims in either direction, so a
-reversed pair recognizes the same connection. One-to-one claims are `declared`;
-a claim group with one before item is a `split` and one with one after item a
-`merge`; any other group is an `ambiguous-correspondence` error. The default
-order groups changes connected through the change itself, changes peers at the
-same depth together, removes leaves first and adds roots first as exact mirror
-images, bounds the number of waves by merging adjacent layers, and places other
-changes in one `restructure` step between them. `order.by` (`dependents`, the
-number of incoming relationships in the after extraction or the before
-extraction for removals, or a numeric `data.<key>`) sorts steps within each
-phase by the largest value of their members, `descending` by default; ties keep
-the default order and steps without values go last. One-to-one pairs are judged
-through the extractions' volatile declarations: a pair that varied only within
-tolerance is listed as `unchanged` with `varied` in no step, one beyond
-tolerance is `modified` with `varied`, and the comparison counts its
-`variation`. Each change has the core's `context`.
+`packages/comparators/default` is written in Rust and runs everywhere as a
+WebAssembly module, `default-comparator.wasm`. The CLI executes it inside the
+same sandboxed runtime and under the same resource limits as the rules
+interpreter.
+
+It matches exact IDs first, then follows explicit `previousIds` claims in either
+direction so a reversed comparison recognizes the same continuity. One-to-one
+claims become `declared` changes; a claim group with one before item becomes a
+`split`; a group with one after item becomes a `merge`; and any other grouping
+fails with `ambiguous-correspondence`. For presentation order, the default
+comparator groups connected changes together, updates peers at the same depth
+together, removes leaves first and adds roots first as exact mirror images,
+merges adjacent layers to bound the number of waves, and places remaining
+changes in a single `restructure` step in between.
+
+Setting `order.by` (either `dependents`—the count of incoming relationships in
+the after extraction, or in the before extraction for removals—or a numeric
+`data.<key>`) sorts steps within each phase by the largest value among their
+members, `descending` by default; ties preserve the default order and steps
+without values go last. One-to-one pairs are evaluated against both extractions'
+volatile declarations: pairs that varied only within tolerance are recorded as
+`unchanged` with `varied` and omitted from steps, pairs beyond tolerance become
+`modified` with `varied`, the comparison tallies `variation`, and every change
+receives the core `context`.
 
 ## Comparator files
 
-A custom comparator is a comparator file, `<name>.comparator.yaml` (or `.yml`):
-YAML in a restricted subset (one document, at most 1 MiB and 32 levels; no
-anchors, aliases, tags, merge keys or duplicate keys; plain scalars resolve as
-YAML 1.2's core schema, narrowed to `null`, booleans and decimal numbers), valid
-against
-[`comparator/v0.json`](../../packages/schemas/schemas/comparator/v0.json) once
-parsed (`format: projections.comparator`, `version: 0`). It layers over the
-default comparator: its matching runs first, then the file's `identity` passes
-over what it left unmatched; `classify` adds a summary and an annotation per
-change; `context` rules add to each change's context; `steps` reorders or adds
-steps from the default order; `metadata` adds values. Expressions are
-[CEL](https://github.com/google/cel-spec) with the standard library listed in
+A custom comparator is a YAML file named `<name>.comparator.yaml` (or `.yml`)
+using a restricted YAML subset: one document, at most 1 MiB and 32 nesting
+levels, no anchors, aliases, tags, merge keys, or duplicate keys, with plain
+scalars resolved via YAML 1.2's core schema narrowed to `null`, booleans, and
+decimal numbers. Once parsed, it must validate against
+[`comparator/v0.json`](../../packages/schemas/schemas/comparator/v0.json)
+(`format: projections.comparator`, `version: 0`).
+
+A comparator file layers cleanly on top of the default comparator:
+
+- Default matching runs first, and the file's `identity` passes run over
+  whatever remains unmatched.
+- `classify` attaches a summary and annotation per change.
+- `context` rules add extra items to each change's context.
+- `steps` reorders or inserts steps relative to the default order.
+- `metadata` attaches comparison-level values.
+
+Expressions use [CEL](https://github.com/google/cel-spec) with the standard
+library documented in
 [Custom comparators](../design/declarative-comparators.md#the-standard-library),
-checked against declared types when the file loads; a file with any problem is
-rejected with every diagnostic (`{code, path, message}`, the message carrying
-the YAML line and column). Evaluation is bounded by a deterministic cost budget
-of 2×10⁸ units (`cost-limit`). The core enforces the comparison rules above, so
-a comparator cannot hide or invent a change.
+type-checked against declared types when the file loads. Any invalid file is
+rejected with all diagnostics at once (`{code, path, message}`, including YAML
+line and column numbers). Evaluation is bounded by a deterministic cost budget
+of 2×10⁸ units (`cost-limit`). Because the Engine enforces all comparison
+invariants above, a comparator file can never hide or fabricate a change.
 
-Every host runs comparator files in the rules interpreter, `rules.wasm`,
-sandboxed: the CLI and servers in wasmi, browsers in a dedicated Worker (see
-[the interpreter module](#the-interpreter-module)), which computes the default
-baseline itself. The Engine validates the comparator's comparison against both
-extractions before anyone presents it. Any failure, from an invalid file to an
-exceeded bound, is explicit; hosts never fall back to the default comparison.
+Every host executes comparator files inside the sandboxed rules interpreter,
+`rules.wasm`—using wasmi in the CLI and servers, and a dedicated Worker in
+browsers (see [the interpreter module](#the-interpreter-module))—which computes
+the default baseline itself. The Engine always validates the resulting
+comparison against both extractions before anything displays it. Any error, from
+a malformed file to an exceeded budget, fails explicitly; hosts never silently
+fall back to the default comparison.
 
-The interpreter's identity is the `sha256:<hex>` digest of the rules language's
-manifest (`packages/comparators/rules/language.json`: the format and its
-behaviour revision, the macros, the standard library's signatures and cost
-classes, the declared types and the cost budget), which its build records in a
-`projections.interpreter` custom section; a module without that section is
-identified by the digest of its bytes. Builds on different hosts, and refactors
-of the interpreter, keep the identity; changes to the language don't. A custom
+The interpreter's identity is the `sha256:<hex>` digest of the rules language
+manifest (`packages/comparators/rules/language.json`, covering the format and
+behavior revision, macros, standard library signatures and cost classes,
+declared types, and cost budget), embedded at build time in a
+`projections.interpreter` custom section (a module without that section falls
+back to the digest of its bytes). That means cross-host builds and internal
+refactors keep the same identity, while language changes get a new one. A custom
 comparator's digest is `sha256:` over `projections-rules-comparator\n`, the
-interpreter's identity, `\n` and the canonical file (the RFC 8785 JSON of the
-parsed YAML), so it changes with the file's meaning or the interpreter, not with
-comments or layout.
+interpreter's identity, `\n`, and the canonical file (RFC 8785 JSON of the
+parsed YAML), so it changes only when the file's semantics or the interpreter
+change—never on comments or formatting.
 
 ## Comparator tests
 
-A comparator file's tests are the file beside it with `.test` before the
-extension: `X.comparator.test.yaml` for `X.comparator.yaml` (`.yml` likewise).
-They are YAML in the same restricted subset (one document, at most 1 MiB; no
-anchors, aliases, tags, merge keys or duplicate keys), valid against
+Tests for a comparator file live right next to it with `.test` before the
+extension: `X.comparator.test.yaml` for `X.comparator.yaml` (and `.yml`
+likewise). They use the same restricted YAML subset (one document, up to 1 MiB,
+no anchors, aliases, tags, merge keys, or duplicate keys) and validate against
 [`comparator-tests/v0.json`](../../packages/schemas/schemas/comparator-tests/v0.json):
 `format: projections.comparator-tests`, `version: 0`, optional `description` and
-`options`, and `cases`, a non-empty list. Unknown fields, duplicate case names
-and malformed sources are rejected with their line and column, all at once.
+`options`, and a non-empty `cases` list. Unknown fields, duplicate case names,
+and malformed sources are all reported together with their line and column
+numbers.
 
-A case has a `name`, unique in the file and its ID, `before` and `after`
-sources, optional `options` (replacing the file's; without either, the options
-of the projection whose tests run, else `{}`), and `expect`, a `snapshot` or
-both; a case with neither asserts nothing and is rejected. A source is a fixture
-path (shorthand for `{file}`), `{extraction}` inline or `{revision}`. Fixture
-and snapshot paths are relative to the test file, use `/`, and must stay inside
-the repository, lexically and after resolving links. A fixture is an extraction
-or a `projections.extraction` document (its `extraction` is used);
-`{revision: R}` is the projection extracted at `R`, or the working tree for
-`working-tree`, with the working tree's definition, under the usual trust
-policy. The Engine normalizes every extraction, and the comparator runs exactly
-as everywhere else: in the sandboxed interpreter, with the comparison validated
-by the Engine.
+Each case has a unique `name` (its ID), `before` and `after` sources, optional
+`options` (overriding the file's options; if neither is set, it inherits the
+tested projection's options or defaults to `{}`), and `expect`, a `snapshot`, or
+both (a case with neither asserts nothing and is rejected). A source can be a
+fixture path (shorthand for `{file}`), an inline `{extraction}`, or
+`{revision}`. Fixture and snapshot paths are relative to the test file, use `/`,
+and must remain inside the repository both lexically and after symlink
+resolution. Fixtures can be raw extractions or `projections.extraction`
+documents (using their `extraction` field), while `{revision: R}` extracts the
+projection at `R` (or the working tree for `working-tree`) using the working
+tree's definition under the usual trust policy. The Engine normalizes every
+extraction, and the comparator runs identically to production—inside the
+sandboxed interpreter, validated by the Engine.
 
-Expectations are partial. Objects match on the keys they list (an expected
-`null` also matches an absent key); arrays, strings and numbers match exactly.
-An empty object expects nothing; assert emptiness with `count`.
+Expectations are partial: objects match on the keys they specify (an expected
+`null` also matches an absent key), while arrays, strings, and numbers match
+exactly. An empty object asserts nothing; use `count` to assert emptiness.
 
 <!-- prettier-ignore -->
 | Field | Passes when |
@@ -203,116 +232,119 @@ An empty object expects nothing; assert emptiness with `count`.
 | `metadata: {...}` | The comparison's metadata contains it |
 | `error: text` | The comparator fails, with `text` in its message. Such a case lists no other expectation or snapshot |
 
-A change's `context: {before?, after?, rules?}` matches its context field by
-field, each list exactly (IDs in UTF-16 order, rules in the file's order);
-`context: null` expects none.
+A change's `context: {before?, after?, rules?}` checks each listed field as an
+exact list (IDs in UTF-16 order, rules in file order), while `context: null`
+expects no context.
 
-A failure records the expectation's JSON pointer in the test file (for example
-`/cases/0/expect/steps/1/changes`), a one-line message, its line and column, and
-for mismatches the `expected` and `actual` values and a line diff of their JSON.
+When an expectation fails, the failure report includes its JSON pointer in the
+test file (such as `/cases/0/expect/steps/1/changes`), a one-line message, its
+line and column, and—for value mismatches—the `expected` and `actual` values
+along with a line diff of their JSON.
 
-A snapshot holds the whole validated comparison as JSON with keys sorted by
-UTF-16 code units, two-space indentation and a trailing newline. It is compared
-by value, so reformatting it changes nothing. A missing or different snapshot
-fails until `projections check --update` writes it; updating writes only
-snapshots, never expectations.
+A snapshot stores the entire validated comparison as JSON with keys sorted by
+UTF-16 code units, two-space indentation, and a trailing newline. Snapshots are
+compared by value so formatting tweaks don't cause spurious failures. A missing
+or mismatched snapshot fails until you run `projections check --update`, which
+only updates snapshots and never alters expectations.
 
-**Why a sibling file, not a `tests:` section.** A custom comparator's digest
-covers the canonical comparator file, so tests inside it would change the
-comparator's identity with every test edit, invalidating saved comparisons and
-showing the comparator as changed in a pull request in a hosted view. Hosts
-fetch only the comparator file at a revision (up to 1 MiB) and must not fetch
-tests or fixtures, and tests name files relative to themselves, which pure
-comparator data shouldn't. Test files are never part of a definition's digest
-and never read by hosts.
+**Why a sibling file, not a `tests:` section.** Because a custom comparator's
+digest hashes the canonical comparator file, embedding tests inside it would
+change the comparator's identity every time you edited a test—invalidating saved
+comparisons and making the comparator look modified in pull requests on hosted
+views. Hosts also fetch only the comparator file at a revision (up to 1 MiB) and
+shouldn't need to fetch tests or fixtures, and tests reference relative files
+that don't belong in pure comparator data. Test files are never included in a
+definition's digest and are never read by hosts.
 
-`projections check` runs the tests beside each projection's comparator file,
-once per projection (a case without options takes that projection's, and a
-revision case extracts with its definition); see
-[the runner](../runner/stdio-backend.md#comparator-tests) for the step and the
+`projections check` runs the sibling test file beside each projection's
+comparator file once per projection (supplying that projection's options to
+cases without their own, and using its definition for revision cases). See
+[the runner](../runner/stdio-backend.md#comparator-tests) for the check step and
 API.
 
 ### Rule coverage
 
-`projections check --coverage` (and `coverage: true` in the API and
-`run_comparator_tests`) also reports which parts of the comparator file the
-cases ran. The interpreter counts, in a comparator read for coverage only:
+Running `projections check --coverage` (or setting `coverage: true` in the API
+and `run_comparator_tests`) reports which parts of a comparator file your test
+cases actually exercised. In coverage mode, the interpreter tracks:
 
-- **functions**: each function in `functions`, when its body runs;
-- **expressions**: every other expression (checks, variables, identity passes,
-  classify, steps, metadata) when it is evaluated; a check's `message` and
-  `path` run only when the check fails;
-- **branches**: each outcome of every decision: a conditional's condition true
-  and false (and so each `match` case and its default, and each `cond` and
-  `collect` entry), each operand of `&&` and `||` true and false, the predicate
-  of `exists`, `all`, `exists_one` and `filter` true and false, and a `map`
-  running its body. A conditional whose else branch is another conditional
-  doesn't list its false outcome separately: reaching the next one is the same
-  thing.
+- **functions** — each entry in `functions` whenever its body runs.
+- **expressions** — every other expression (checks, variables, identity passes,
+  classify, steps, metadata) when evaluated; a check's `message` and `path` only
+  execute when the check fails.
+- **branches** — both outcomes of every decision: a conditional's true and false
+  paths (including each `match` case and default, and each `cond` and `collect`
+  entry), each operand of `&&` and `||` being true and false, the predicates of
+  `exists`, `all`, `exists_one`, and `filter` returning true and false, and a
+  `map` running its body. When a conditional's else branch is another
+  conditional, its false outcome is not listed separately because reaching the
+  next condition already proves it.
 
-A covered comparison is the comparison an uncovered one gives, at the same cost
-in units; the probes are calls CEL can't spell, the counts are sums, so they
-don't depend on threads or timing, and nothing leaves the sandbox but the
-report. The report, `projections.rules-coverage` version 0, lists every entry
-with its comparator-file `path` (JSON pointer), `line`, `column` and `count`:
-`functions` by `name`, `expressions`, and `branches` with their `kind`
-(`conditional`, `match`, `cond`, `and`, `or`, `exists`, `all`, `exists_one`,
-`filter`, `map`), `condition` as written (shortened) and `outcome`. The cases'
-reports are summed per test file, and the step reports covered and total entries
-of each kind, the percentage, and every uncovered entry by line, for example
-``uncovered X.comparator.yaml:74:12 `value == null` was never true``.
+Coverage instrumentation produces the exact same comparison at the exact same
+cost-unit budget: probes use internal calls CEL cannot express, counts are
+deterministic sums independent of threads or timing, and nothing leaves the
+sandbox except the report. The report (`projections.rules-coverage`, version 0)
+lists every entry with its comparator-file `path` (JSON pointer), `line`,
+`column`, and `count`: `functions` by `name`, `expressions`, and `branches` with
+their `kind` (`conditional`, `match`, `cond`, `and`, `or`, `exists`, `all`,
+`exists_one`, `filter`, `map`), shortened source `condition`, and `outcome`.
+Case reports are summed per test file, and the check step reports covered and
+total counts per kind, the percentage, and every uncovered entry by line—for
+example, ``uncovered X.comparator.yaml:74:12 `value == null` was never true``.
 
-A branch no input can take is better removed. One that stays (a defensive
-default, say) is excluded with a comment on its line, or alone on the line
-before it: `# coverage-ignore: <reason>` in YAML, or
-`// coverage-ignore: <reason>` inside a block of CEL. Excluded entries are
-listed with their reason and don't count; a comment without a reason excludes
-nothing.
+If a branch can never be taken, it is usually best to remove it. When a branch
+needs to stay (such as a defensive default), exclude it with a comment on the
+same line or alone on the line immediately above: `# coverage-ignore: <reason>`
+in YAML, or `// coverage-ignore: <reason>` inside a CEL block. Excluded entries
+are listed with their reason and omitted from totals; a comment without a reason
+excludes nothing.
 
-The built-in rules comparators are held to rule coverage gates
-(`npm run test:rust:rules-coverage`, part of `npm run test:rust`): their
-comparator tests and the rules interpreter's own suites together must cover
-every function, expression and branch (`packages/cli/tests/rules_coverage.rs`).
+Built-in rules comparators are held to strict coverage gates via
+`npm run test:rust:rules-coverage` (part of `npm run test:rust`): together,
+their comparator tests and the interpreter's own test suites must cover every
+function, expression, and branch (`packages/cli/tests/rules_coverage.rs`).
 
 ## The interpreter module
 
-The rules interpreter and the default comparator are Projections' own
-WebAssembly modules, and their interface is internal to hosts: users never
-supply modules. Each is a core module with **zero imports** that exports
-`memory`, `projections_alloc(len: i32) -> i32` and
-`projections_compare(ptr: i32, len: i32) -> i64`. Its input is UTF-8 JSON
-`{"protocolVersion": 0, "before", "after", "baseline", "options"}` and its
-output, packed as `(ptr << 32) | len`, is a comparison or
-`{"error": "message"}`. Hosts instantiate it afresh for every run, bound memory
-(256 MiB by default) and execution (fuel in wasmi: 10¹¹ units for the default
-comparator, 10¹² for rules; a wall-clock deadline in browsers), and treat any
-trap, exceeded bound, invalid JSON or failed validation as an explicit failure.
-The default comparator module ignores `baseline` (hosts pass it an empty one,
-since its result is the baseline), declares a 256 MiB memory maximum, and is
-published as `default-comparator.wasm`.
+Both the rules interpreter and the default comparator are Projections' own
+internal WebAssembly modules—users never supply WebAssembly modules. Each is a
+core module with **zero imports** that exports `memory`,
+`projections_alloc(len: i32) -> i32`, and
+`projections_compare(ptr: i32, len: i32) -> i64`. It reads UTF-8 JSON shaped as
+`{"protocolVersion": 0, "before", "after", "baseline", "options"}` and returns a
+pointer/length packed as `(ptr << 32) | len` pointing to either a comparison or
+`{"error": "message"}`. Hosts create a fresh instance per run, enforce memory
+limits (256 MiB by default) and execution limits (wasmi fuel: 10¹¹ units for the
+default comparator and 10¹² for rules; a wall-clock deadline in browsers), and
+treat any trap, exceeded limit, malformed JSON, or validation failure as an
+explicit error. The default comparator ignores `baseline` (hosts pass an empty
+object since it computes the baseline itself), declares a 256 MiB memory
+ceiling, and ships as `default-comparator.wasm`.
 
-The interpreter also exports `projections_rules_inspect(ptr, len) -> i64`
-(input: the comparator file's UTF-8 text; output: `{"canonical"}`, the RFC 8785
-JSON of the parsed file, with `{"warnings"}` when the check found lint warnings,
-or `{"diagnostics"}`). Its comparison input carries `options` =
-`{"rules": "<UTF-8 text>", "options": <the definition's options>}`; it computes
-the default baseline itself and ignores `baseline`. Its
-`projections_rules_cover(ptr, len) -> i64` takes the same input and returns
-`{"comparison"}` or `{"error"}` with `"coverage"`, the comparison's rule
-coverage report ([Rule coverage](#rule-coverage)), which a failed comparison has
-too; `null` when the rules don't load.
+The rules interpreter exposes two additional exports:
 
-Editors' language service is a separate module, `rules-editor.wasm`, which only
-the VS Code extension ships. It has zero imports and exports `memory`,
-`projections_alloc` and `projections_rules_editor(ptr, len) -> i64`. Its input
-is the UTF-8 JSON
-`{"op": "tokens" | "diagnostics" | "hover" | "complete", "source", "kind"?: "rules" | "tests", "line"?, "column"?}`,
-and its output is JSON: semantic tokens, diagnostics with their positions, a
-hover, or completions and the range they replace, with 1-based lines and
-code-point columns
-([Editing comparator files](../design/declarative-comparators.md#editing-comparator-files)).
-It reads the language manifest but doesn't change it, so it isn't part of the
-interpreter's identity, and `rules.wasm` doesn't carry it.
+- `projections_rules_inspect(ptr, len) -> i64` takes a comparator file's UTF-8
+  text and returns either `{"canonical"}` (the RFC 8785 JSON of the parsed file,
+  plus `{"warnings"}` if linting found warnings) or `{"diagnostics"}`. Its
+  comparison input passes `options` as
+  `{"rules": "<UTF-8 text>", "options": <the definition's options>}`, computing
+  the default baseline internally and ignoring `baseline`.
+- `projections_rules_cover(ptr, len) -> i64` takes the same comparison input and
+  returns `{"comparison"}` or `{"error"}` alongside `"coverage"`, the run's rule
+  coverage report ([Rule coverage](#rule-coverage))—included even when the
+  comparison fails, or `null` if the rules fail to load.
+
+Editor support lives in a separate module, `rules-editor.wasm`, shipped only
+with the VS Code extension. It also has zero imports and exports `memory`,
+`projections_alloc`, and `projections_rules_editor(ptr, len) -> i64`. It accepts
+UTF-8 JSON
+`{"op": "tokens" | "diagnostics" | "hover" | "complete", "source", "kind"?: "rules" | "tests", "line"?, "column"?}`
+and returns JSON with semantic tokens, positioned diagnostics, hover content, or
+completions with replacement ranges using 1-based lines and code-point columns
+(see
+[Editing comparator files](../design/declarative-comparators.md#editing-comparator-files)).
+Because it only reads the language manifest without altering it, it is not part
+of the interpreter's identity and is not bundled into `rules.wasm`.
 
 ## Saved comparisons
 
@@ -325,37 +357,39 @@ interpreter's identity, and `rules.wasm` doesn't carry it.
 }
 ```
 
-`notices` is optional: at most 20 nonempty strings of at most 4,096 characters,
-omitted when there are none. They explain how the compared revisions define the
-projection differently: the other revision changes the definition or its
-component code (declared sources), or doesn't define the projection. They are
-informational, never verified or used for comparison, and viewers display them.
+`notices` is optional (at most 20 nonempty strings of up to 4,096 characters,
+omitted when empty). Notices inform viewers when the compared revisions define
+the projection differently—for example, when the other revision edits the
+definition or its declared sources, or doesn't define the projection at all.
+They are informational only, never verified or used during comparison.
 
-A custom comparator's `id` is its comparator file's path (as the definition
-names it), and its `digest` is the comparator digest defined above.
+For a custom comparator, `id` is the comparator file path as written in the
+definition, and `digest` is the custom comparator digest defined above.
 
-A comparison whose changes have `context` is a valid `comparison/v0` document,
-as the schema only gained an optional field, but CLIs and viewers from before
-context reject it: their comparisons are closed objects that don't know the
-field. Viewers rerun the comparator anyway, and saved comparisons without
-`context` stay valid; presentation derives their context from the structure.
+A comparison whose changes include `context` is still a valid `comparison/v0`
+document because the field is optional, though older CLIs and viewers written
+before context existed will reject it because they validate comparisons as
+closed objects. Viewers rerun the comparator anyway, and older saved comparisons
+without `context` remain valid because presentation derives structural context
+automatically.
 
-Extractions are compared only when the engine pairs them (`pair`, see
+Two extractions can only be compared when the engine pairs them (`pair`, see
 [One implementation](../contracts.md#one-implementation-native-and-browser)):
-one projection, recorded definitions that agree apart from `presentation`, and
-equal `definitionDigest` values. Otherwise the mismatch is reported, explaining
-whether the definition or its declared sources differ. By default a comparison
-applies the base revision's definition, with one version of its component code,
-to both revisions; `--definition head` uses the head revision's definition. A
-projection missing at the definition revision is an explicit error naming an
-option that works: the other revision's definition when it has one, else
-`--definition-revision` with the working tree (or `HEAD`).
+they must belong to the same projection, have recorded definitions that agree
+outside `presentation`, and share equal `definitionDigest` values. Otherwise
+Projections reports the mismatch and tells you whether the definition or its
+declared sources differ. By default, a comparison applies the base revision's
+definition and component code to both revisions, while `--definition head` uses
+the head revision's definition instead. If the projection is missing at the
+chosen definition revision, Projections fails explicitly and suggests a working
+option: the other revision's definition if it exists, or `--definition-revision`
+pointing to the working tree or `HEAD`.
 
-Viewers rerun the comparator, which is deterministic, rather than trusting a
-saved comparison; the default comparator is always available. A comparison made
-by a custom comparator is verified with the comparator file its definition
-names, from a source the viewer trusts (a hosted view fetches it from the
-repository at the merge base and head), whose digest must equal the comparison's
-comparator digest, and which must reproduce it. Comparisons whose comparator
-digest differs from the available default comparator module, or whose comparator
-file isn't available, are not verified and are rejected.
+Because comparators are deterministic, viewers rerun the comparator rather than
+trusting a saved comparison's claims. The default comparator is always built in.
+For a custom comparator, the viewer loads the comparator file named by the
+definition from a trusted source (hosted views fetch it from the repository at
+the merge base and head), checks that its digest matches the comparison's
+comparator digest, and confirms that rerunning it reproduces the comparison. Any
+saved comparison whose comparator digest doesn't match the available default
+module, or whose comparator file cannot be retrieved and verified, is rejected.

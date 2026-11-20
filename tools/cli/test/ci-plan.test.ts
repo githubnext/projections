@@ -15,7 +15,8 @@ const fullBrowserJobs =
 
 test('the facts come from the repository', () => {
   const suites = facts.browserSuites.map(suite => suite.path)
-  for (const suite of [...Object.keys(linuxLayout), ...nativeBackend]) assert.ok(suites.includes(suite), suite)
+  for (const suite of [...Object.keys(linuxLayout), ...nativeBackend.all, ...nativeBackend.fixtures])
+    assert.ok(suites.includes(suite), suite)
   assert.ok(facts.browserSuites.find(suite => suite.path === 'packages/host/core')?.uses.includes('tools/storybook'))
   assert.ok(facts.harnessRenderers.includes('database') && !facts.harnessRenderers.includes('kit'))
   assert.deepEqual(facts.coverage, ['packages/engine', 'packages/comparators/default'])
@@ -107,12 +108,13 @@ test('an Engine change runs the Rust, Windows, Verus and mutation jobs and every
   assert.equal(plan.jobs.release, false)
 })
 
-test("an extractor's change skips the suites that use only the CLI's backend", () => {
+test("an extractor's change runs the Inspector, which extracts, but not the suites that serve fixtures", () => {
   const plan = ciPlan(facts, ['packages/extractors/django-schema/src/lib.rs'])
   assert.equal(plan.jobs.windows, true)
   assert.equal(plan.jobs.mutants || plan.jobs.verus || plan.jobs.coverage, false)
-  assert.deepEqual(names(plan.browser), ['rest'])
-  assert.ok(!plan.browser[0]?.except.split(',').includes('packages/cli'))
+  assert.deepEqual(names(plan.browser), ['packages/host/inspector, 1/2', 'packages/host/inspector, 2/2', 'rest'])
+  assert.ok(plan.browser[2]?.except.split(',').includes('examples/renderers/minimal'))
+  assert.ok(!plan.browser[2]?.except.split(',').includes('packages/cli'))
 })
 
 test('CI, toolchain, lockfile and tooling changes, and any reason given, run everything', () => {

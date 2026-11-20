@@ -11,8 +11,11 @@ import {matches} from './repo.ts'
 
 /** Workspaces whose code runs only in a browser: a change to these alone needs no macOS or Windows run. */
 const browserOnly = ['packages/renderers/**', 'packages/host/**', 'tools/storybook', 'examples/renderers/**']
-/** The suites whose tests run against the native CLI's backend (`projections serve`), which runs no extractor. */
-export const nativeBackend = [HARNESS, 'packages/host/inspector', 'examples/renderers/minimal']
+/**
+ * The suites whose tests run the native CLI's backend (`projections serve`). The Inspector's also explores and extracts
+ * from repositories; the others serve fixtures, so they run no extractor and an extractor's change doesn't reach them.
+ */
+export const nativeBackend = {all: ['packages/host/inspector'], fixtures: [HARNESS, 'examples/renderers/minimal']}
 const CLI = 'packages/cli'
 const SDK = 'packages/sdk'
 const ENGINE = ['packages/engine', 'packages/engine/verified']
@@ -61,13 +64,16 @@ export type CiPlan = {
 /** Each browser suite reached by `changed`: through its own graph, a workspace its script builds, or the CLI backend. */
 function affectedSuites(facts: RepoFacts, changed: readonly string[]): Set<string> {
   const reached = new Set([...changed, ...dependantsOf(facts.units, changed)])
-  const backend = changed.filter(path => !path.startsWith('packages/extractors/'))
-  const backendReached = backend.includes(CLI) || dependantsOf(facts.units, backend).includes(CLI)
+  const cli = (units: readonly string[]) => units.includes(CLI) || dependantsOf(facts.units, units).includes(CLI)
+  const backend = {all: cli(changed), fixtures: cli(changed.filter(path => !path.startsWith('packages/extractors/')))}
   return new Set(
     facts.browserSuites
       .filter(
         suite =>
-          reached.has(suite.path) || suite.uses.some(path => reached.has(path)) || (nativeBackend.includes(suite.path) && backendReached),
+          reached.has(suite.path) ||
+          suite.uses.some(path => reached.has(path)) ||
+          (nativeBackend.all.includes(suite.path) && backend.all) ||
+          (nativeBackend.fixtures.includes(suite.path) && backend.fixtures),
       )
       .map(suite => suite.path),
   )

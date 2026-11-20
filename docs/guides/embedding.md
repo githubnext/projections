@@ -31,6 +31,13 @@ function Review({subject, renderer}) {
 }
 ```
 
+A whole custom UI on the core alone, in plain elements, is the Storybook story
+**Core / Custom host** (`tools/storybook/stories/core/custom-host.stories.tsx`):
+the views and which controls show come from the core's view model, and the mode
+and scope switches, playback, the Space shortcut and the summary's filter
+toggles from its helpers, so it behaves as the default and VS Code UIs do
+([the view model](host-core.md#the-view-model)).
+
 The [host guide](host.md) documents the full API.
 
 ## Building commenting on projections

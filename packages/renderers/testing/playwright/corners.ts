@@ -31,10 +31,16 @@ export interface CornerReport {
 }
 
 /**
- * The box a locator draws, scrolled into view (`align`: its top or its bottom edge first, for a box taller than the view): an element's border box, radii and solid border widths, or an SVG `rect`'s stroked outline
- * (its stroke centred on its edge; none when dashed). `null` when it has no rounded, bordered corner.
+ * The box a locator draws, scrolled into view (`align`: its top or its bottom edge first, for a box taller than the
+ * view): an element's border box, radii and solid border widths, or its solid outline where it has no border (an edge
+ * drawn inside its box with a negative `outline-offset`, as database cards do), or an SVG `rect`'s stroked outline (its
+ * stroke centred on its edge; none when dashed). `frame` is the width of an edge its contents draw instead, along its
+ * rounded edge: a data table's scroll box, whose rows draw its lines. `null` when it has no rounded, edged corner.
  */
-export async function cornerBox(locator: Locator, {align}: {align?: 'start' | 'end'} = {}): Promise<CornerBox | null> {
+export async function cornerBox(
+  locator: Locator,
+  {align, frame}: {align?: 'start' | 'end'; frame?: number} = {},
+): Promise<CornerBox | null> {
   if (align) {
     await locator.evaluate((element, block) => element.scrollIntoView({block, inline: 'nearest'}), align)
     // With room past the edge for its corners' pictures, scrolling the host page too: a sandboxed frame as tall as its
@@ -49,7 +55,7 @@ export async function cornerBox(locator: Locator, {align}: {align?: 'start' | 'e
   } else await locator.scrollIntoViewIfNeeded()
   const box = await locator.boundingBox()
   if (!box) return null
-  const drawn = await locator.evaluate(element => {
+  const drawn = await locator.evaluate((element, frame) => {
     const style = getComputedStyle(element)
     const rect = element.getBoundingClientRect()
     if (element instanceof SVGRectElement) {
@@ -66,35 +72,35 @@ export async function cornerBox(locator: Locator, {align}: {align?: 'start' | 'e
         height: rect.height,
         radii: [rx, rx, rx, rx].map(r => r * unit),
         borders: [stroke, stroke, stroke, stroke],
+        outset: 0,
       }
     }
     const radius = (value: string) =>
       value.endsWith('%') ? (parseFloat(value) / 100) * Math.min(rect.width, rect.height) : parseFloat(value) || 0
     // Its layout width, before any transform on it or its ancestors, so the scale below takes them in.
     const laid = element instanceof HTMLElement && element.offsetWidth ? element.offsetWidth : rect.width
-    return {
-      svg: false,
-      width: laid,
-      height: rect.height,
-      radii: [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].map(
-        radius,
-      ),
-      borders: (['Top', 'Right', 'Bottom', 'Left'] as const).map(side =>
-        style.getPropertyValue(`border-${side.toLowerCase()}-style`) === 'solid'
-          ? parseFloat(style.getPropertyValue(`border-${side.toLowerCase()}-width`))
-          : 0,
-      ),
-    }
-  })
+    const radii = [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].map(
+      radius,
+    )
+    const borders = (['top', 'right', 'bottom', 'left'] as const).map(side =>
+      style.getPropertyValue(`border-${side}-style`) === 'solid' ? parseFloat(style.getPropertyValue(`border-${side}-width`)) : 0,
+    )
+    if (frame !== undefined) return {svg: false, width: laid, height: rect.height, radii, borders: [frame, frame, frame, frame], outset: 0}
+    const outline = style.outlineStyle === 'solid' ? parseFloat(style.outlineWidth) : 0
+    if (borders.some(width => width > 0) || !outline) return {svg: false, width: laid, height: rect.height, radii, borders, outset: 0}
+    // An outline's outer edge lies its offset plus its width outside the box, and its corners follow the radii there.
+    const outset = parseFloat(style.outlineOffset) + outline
+    return {svg: false, width: laid, height: rect.height, radii, borders: [outline, outline, outline, outline], outset}
+  }, frame)
   // How much it is scaled, by a transform on it, an ancestor or the host's frame (a transformed stage): the box in the
   // page against its own layout box (an SVG rect's is already in screen units).
   const scale = drawn.width ? box.width / drawn.width : 1
-  const inflate = drawn.svg ? drawn.borders[0]! / 2 : 0
+  const inflate = drawn.svg ? drawn.borders[0]! / 2 : drawn.outset
   const left = box.x - inflate * scale,
     top = box.y - inflate * scale
   const width = box.width + 2 * inflate * scale,
     height = box.height + 2 * inflate * scale
-  let radii = drawn.radii.map(r => (r + inflate) * scale) as CornerBox['radii']
+  let radii = drawn.radii.map(r => (r > 0 ? Math.max(0, r + inflate) : 0) * scale) as CornerBox['radii']
   // As a browser does, scale every radius down when two on a side overlap.
   const fit = Math.min(
     1,
@@ -161,7 +167,11 @@ function cornerProbes(
  * around a curve against its own sides, a third colour inside it (a fill that isn't concentric with it) or paint
  * outside the curve. Corners need the same border on both their sides and a radius larger than it; others are skipped. Take the page at a device scale of 2 or more for a precise measure.
  */
-export async function cornerReport(page: Page, target: Locator | CornerBox, {label = 'box'}: {label?: string} = {}): Promise<CornerReport> {
+export async function cornerReport(
+  page: Page,
+  target: Locator | CornerBox,
+  {label = 'box', frame}: {label?: string; frame?: number} = {},
+): Promise<CornerReport> {
   const scale = await page.evaluate(() => devicePixelRatio)
   const probes: CornerProbe[] = []
   // A locator's top corners, then its bottom ones, each pair in view in turn, so a box taller than the view is measured.
@@ -169,8 +179,8 @@ export async function cornerReport(page: Page, target: Locator | CornerBox, {lab
     'left' in target
       ? [[async () => target, [0, 1, 2, 3]]]
       : [
-          [() => cornerBox(target, {align: 'start'}), [0, 1]],
-          [() => cornerBox(target, {align: 'end'}), [2, 3]],
+          [() => cornerBox(target, {align: 'start', ...(frame === undefined ? {} : {frame})}), [0, 1]],
+          [() => cornerBox(target, {align: 'end', ...(frame === undefined ? {} : {frame})}), [2, 3]],
         ]
   for (const [find, corners] of passes) {
     const box = await find()

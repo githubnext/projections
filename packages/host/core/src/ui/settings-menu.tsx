@@ -23,8 +23,8 @@ import {
 } from './components/dropdown-menu.js'
 import {Popover, PopoverAnchor, PopoverContent} from './components/popover.js'
 import {cn} from './lib/utils.js'
-import {featureOn} from './features.js'
-import type {ProjectionFeatures} from './features.js'
+import {featureOn} from '../view-model.js'
+import type {ProjectionFeatures} from '../view-model.js'
 import {viewIcons} from './view-controls.js'
 import type {ShowAsOptions} from './view-controls.js'
 

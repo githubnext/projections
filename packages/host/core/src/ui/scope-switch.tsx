@@ -1,14 +1,8 @@
 import type {ViewScope} from '@githubnext/projections-renderer-sdk/presentation'
 import type {ProjectionController} from '../projection.js'
-import {nothingHiddenTitle} from '../scope.js'
+import {scopeChoice} from '../view-model.js'
 import {SegmentedControl, SegmentedControlItem} from './components/segmented-control.js'
 import {cn} from './lib/utils.js'
-
-const scopeNames: Record<ViewScope, {label: string; title: string}> = {
-  changes: {label: 'Changes', title: 'Show the changes and what they need to be read, folding the rest'},
-  all: {label: 'All', title: 'Show every item'},
-  noise: {label: 'Noise', title: 'Show only the items that varied within tolerance or were regenerated'},
-}
 
 /**
  * The "Scope" radio group (arrow keys select): Changes and All, their counts in the tooltip ("… (4)"), and Noise while
@@ -18,8 +12,7 @@ const scopeNames: Record<ViewScope, {label: string; title: string}> = {
 export function ScopeSwitch({projection: p}: {projection: ProjectionController}) {
   if (!p.comparing) return null
   // Every item is a change or gives one context: Changes and All show the same, so there is nothing to switch.
-  const nothingHidden = !p.scopeCounts.hidden && p.scope !== 'noise'
-  const scopes: ViewScope[] = p.scope === 'noise' ? ['changes', 'all', 'noise'] : ['changes', 'all']
+  const {nothingHidden, noteTitle, options} = scopeChoice(p)
   // Both forms share one cell, the other one invisible, so the slot keeps its width when the form changes.
   const form = (shown: boolean) => cn('pj:col-start-1 pj:row-start-1', !shown && 'pj:invisible')
   return (
@@ -29,7 +22,7 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
           'ph-scope ph-scope-note pj:inline-flex pj:h-8 pj:shrink-0 pj:items-center pj:gap-1.5 pj:px-2 pj:text-sm pj:text-muted-foreground',
           form(nothingHidden),
         )}
-        title={`${nothingHiddenTitle} (${p.scopeCounts.changes.toLocaleString()})`}
+        title={noteTitle}
         data-scope="none"
         aria-hidden={!nothingHidden || undefined}
       >
@@ -44,20 +37,11 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
         onValueChange={value => p.setScope(value as ViewScope)}
         className={cn('ph-scope pj:shrink-0', form(!nothingHidden))}
       >
-        {scopes.map(scope => {
-          const {label, title} = scopeNames[scope]
-          return (
-            <SegmentedControlItem
-              key={scope}
-              value={scope}
-              data-scope={scope}
-              title={`${title} (${p.scopeCounts[scope].toLocaleString()})`}
-              className="pj:px-2"
-            >
-              <span className="ph-scope-label">{label}</span>
-            </SegmentedControlItem>
-          )
-        })}
+        {options.map(({scope, label, title}) => (
+          <SegmentedControlItem key={scope} value={scope} data-scope={scope} title={title} className="pj:px-2">
+            <span className="ph-scope-label">{label}</span>
+          </SegmentedControlItem>
+        ))}
       </SegmentedControl>
     </span>
   )

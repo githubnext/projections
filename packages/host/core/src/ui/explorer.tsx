@@ -41,6 +41,7 @@ export interface ComparisonExplorerProps
       | 'controllerRef'
       | 'onProgressChange'
       | 'initialView'
+      | 'playbackInViews'
       | 'progress'
       | 'playing'
       | 'onPlayingChange'
@@ -233,6 +234,7 @@ export function ComparisonExplorer(props: ComparisonExplorerProps) {
           swipePosition={props.swipePosition ?? swipe}
           onSwipePositionChange={changeSwipe}
           {...(props.initialView ? {initialView: props.initialView} : {})}
+          {...(props.playbackInViews ? {playbackInViews: props.playbackInViews} : {})}
         />
       )}
     </ScopedRoot>

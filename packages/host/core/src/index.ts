@@ -59,12 +59,31 @@ export {
   sameSummaryFilter,
   summaryFigures,
   summaryFilterable,
+  summaryFactTitle,
   summaryFilterOf,
+  summaryToggle,
+  summaryToggleTitle,
   useSummaryFit,
 } from './summary.js'
 export type {SummaryFigure, SummaryFilter, SummaryKind} from './summary.js'
 export {chooseFitPlan, fitWidth, toolbarHysteresis, useFitPlan} from './fit-plan.js'
 export type {FitChoice, FitHysteresis, FitPlanOptions} from './fit-plan.js'
+export {
+  featureOn,
+  offeredModes,
+  offeredViews,
+  recoveryView,
+  rendererLabel,
+  scopeChoice,
+  scopeNames,
+  shownView,
+  viewControls,
+  viewLabel,
+  viewNotices,
+} from './view-model.js'
+export type {FeatureName, ProjectionFeatures, ScopeChoice, ScopeOption, ViewControls, ViewControlsOptions, ViewKind} from './view-model.js'
+export {useViewChoice} from './view-choice.js'
+export type {ViewChoice} from './view-choice.js'
 export {rowDetails} from './details.js'
 export {changeContextItems} from './context-items.js'
 export type {ContextItems} from './context-items.js'

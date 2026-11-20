@@ -1,13 +1,7 @@
 import {useRef} from 'react'
 import {flushSync} from 'react-dom'
-import {nothingHiddenTitle, scopeHiddenText} from '@githubnext/projections-host'
-import type {ProjectionController, ViewScope} from '@githubnext/projections-host'
-
-const scopeNames: Record<ViewScope, {label: string; title: string}> = {
-  changes: {label: 'Changes', title: 'Show the changes and what they need to be read, folding the rest'},
-  all: {label: 'All', title: 'Show every item'},
-  noise: {label: 'Noise', title: 'Show only the items that varied within tolerance or were regenerated'},
-}
+import {scopeChoice, scopeHiddenText} from '@githubnext/projections-host'
+import type {ProjectionController} from '@githubnext/projections-host'
 
 /**
  * The scope, beside the mode switch and like it a radio group (arrows move and choose, the checked one is in the tab
@@ -18,8 +12,8 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
   const group = useRef<HTMLDivElement>(null)
   if (!p.comparing) return null
   // Every item is a change or gives one context: Changes and All show the same, so there is nothing to switch.
-  const nothingHidden = !p.scopeCounts.hidden && p.scope !== 'noise'
-  const scopes: ViewScope[] = p.scope === 'noise' ? ['changes', 'all', 'noise'] : ['changes', 'all']
+  const {nothingHidden, noteTitle, options} = scopeChoice(p)
+  const scopes = options.map(option => option.scope)
   const index = Math.max(0, scopes.indexOf(p.scope))
   const choose = (next: number) => {
     const scope = scopes[(next + scopes.length) % scopes.length]!
@@ -31,7 +25,7 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
     <span className="phv-scope-slot">
       <span
         className="phv-scope-note"
-        title={`${nothingHiddenTitle} (${p.scopeCounts.changes.toLocaleString()})`}
+        title={noteTitle}
         data-scope="none"
         data-inactive={!nothingHidden || undefined}
         aria-hidden={!nothingHidden || undefined}
@@ -56,24 +50,21 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
           choose(edge ?? index + step)
         }}
       >
-        {scopes.map((scope, position) => {
-          const {label, title} = scopeNames[scope]
-          return (
-            <button
-              key={scope}
-              type="button"
-              role="radio"
-              aria-checked={p.scope === scope}
-              title={`${title} (${p.scopeCounts[scope].toLocaleString()})`}
-              tabIndex={position === index ? 0 : -1}
-              className="phv-scope"
-              data-scope={scope}
-              onClick={() => p.setScope(scope)}
-            >
-              {label}
-            </button>
-          )
-        })}
+        {options.map(({scope, label, title}, position) => (
+          <button
+            key={scope}
+            type="button"
+            role="radio"
+            aria-checked={p.scope === scope}
+            title={title}
+            tabIndex={position === index ? 0 : -1}
+            className="phv-scope"
+            data-scope={scope}
+            onClick={() => p.setScope(scope)}
+          >
+            {label}
+          </button>
+        ))}
       </div>
     </span>
   )

@@ -22,7 +22,7 @@ import {RendererControl} from './controls.js'
 import {Button} from './components/button.js'
 import {SegmentedControl, SegmentedControlItem} from './components/segmented-control.js'
 import {cn} from './lib/utils.js'
-import type {ViewKind} from './features.js'
+import type {ViewKind} from '../view-model.js'
 import {ToolbarPopover} from './toolbar-popover.js'
 import {closeOn, MoreContext} from './toolbar.js'
 

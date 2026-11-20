@@ -3,7 +3,7 @@ import type {Diagnostic} from '@githubnext/projections-schemas'
 import type {ProjectionController} from '../projection.js'
 import {Badge} from './components/badge.js'
 import {cn} from './lib/utils.js'
-import {rendererLabel} from './features.js'
+import {rendererLabel} from '../view-model.js'
 import {ToolbarPopover} from './toolbar-popover.js'
 
 /** Limitations the extractions declare in `metadata.limitations`. */

@@ -36,9 +36,9 @@ test('side by side shows both revisions in labeled panes, without playback contr
   await expect(entity(pane(page, 'before'), 'legacy')).toBeVisible()
   await expect(pane(page, 'after').locator('[data-entity-id="legacy"]')).toHaveCount(0)
   await expect(entity(pane(page, 'after'), 'audit')).toBeVisible()
-  // The table and text views keep the host's playback.
+  // Playback is Animated's: the table and text views have none in side by side either.
   await showAs(page, 'Table')
-  await expect(page.getByRole('group', {name: 'Comparison playback'})).toBeVisible()
+  await expect(page.getByRole('group', {name: 'Comparison playback'})).toHaveCount(0)
   await expect(modeControls(page)).toHaveCount(0)
 })
 

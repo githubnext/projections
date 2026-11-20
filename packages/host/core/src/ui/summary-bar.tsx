@@ -5,7 +5,7 @@ import {summaryCountText, summaryDeltas, summaryDeltaText, summaryDeltaWords} fr
 import type {SummaryDelta} from '@githubnext/projections-renderer-sdk/presentation'
 import {iconMaskStyle} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ProjectionController} from '../projection.js'
-import {figuresSentence, sameSummaryFilter, summaryFilterable, summaryFilterOf, useSummaryFit} from '../summary.js'
+import {figuresSentence, summaryFactTitle, summaryFilterable, summaryToggle, summaryToggleTitle, useSummaryFit} from '../summary.js'
 import type {SummaryFigure} from '../summary.js'
 import {Popover, PopoverAnchor, PopoverContent, PopoverTrigger} from './components/popover.js'
 import {scopeHiddenShort, scopeHiddenText} from '../scope.js'
@@ -72,12 +72,6 @@ const factIcon = (icon: string): CSSProperties => ({
   ...iconMaskStyle(icon),
 })
 
-/** A fact's tooltip: its description, then what activating it does when it filters. */
-const factTitle = (figure: SummaryFigure, pressed: boolean | undefined) =>
-  [figure.description, pressed === undefined ? undefined : pressed ? 'Show every item' : `Show only the ${figure.noun.plural}`]
-    .filter(Boolean)
-    .join('\n') || undefined
-
 /**
  * A fact figure: its icon, count and noun, in its tone; a filter toggle when it names its items. In a comparison its
  * changes follow, in their change colors as a count's do, as words for assistive technology; they don't filter.
@@ -95,8 +89,7 @@ function Fact({
   measure?: boolean
   menu?: boolean
 }) {
-  const filter = summaryFilterOf(figure)
-  const pressed = sameSummaryFilter(p.summaryFilter, filter)
+  const {pressed, next} = summaryToggle(p.summaryFilter, figure)
   const tone = figure.tone && figure.tone !== 'neutral' ? deltaTone[figure.tone] : undefined
   const content = (
     <>
@@ -114,18 +107,18 @@ function Fact({
           className={cn(buttonClass(menu), 'pj:gap-1', tone)}
           aria-pressed={pressed}
           aria-description={figure.description}
-          title={factTitle(figure, pressed)}
+          title={summaryFactTitle(figure, pressed)}
           data-summary-total={figure.count}
           data-tone={figure.tone}
           tabIndex={measure ? -1 : undefined}
-          onClick={() => p.setSummaryFilter(pressed ? null : filter)}
+          onClick={() => p.setSummaryFilter(next)}
         >
           {content}
         </button>
       ) : (
         <span
           className={cn('pj:inline-flex pj:h-5 pj:items-center pj:gap-1 pj:px-1 pj:whitespace-nowrap', tone)}
-          title={factTitle(figure, undefined)}
+          title={summaryFactTitle(figure)}
           data-summary-total={figure.count}
           data-tone={figure.tone}
         >
@@ -167,11 +160,8 @@ function Figure({
 }) {
   if (figure.type === 'fact')
     return <Fact projection={p} figure={figure} first={first} {...(measure ? {measure} : {})} {...(menu ? {menu} : {})} />
-  const toggle = (status?: SummaryDelta) => {
-    const next = summaryFilterOf(figure, status)
-    p.setSummaryFilter(sameSummaryFilter(p.summaryFilter, next) ? null : next)
-  }
-  const pressed = (status?: SummaryDelta) => sameSummaryFilter(p.summaryFilter, summaryFilterOf(figure, status))
+  const toggle = (status?: SummaryDelta) => p.setSummaryFilter(summaryToggle(p.summaryFilter, figure, status).next)
+  const pressed = (status?: SummaryDelta) => summaryToggle(p.summaryFilter, figure, status).pressed
   const total = summaryCountText(figure.count, figure.noun)
   const tab = measure ? -1 : undefined
   return (
@@ -186,7 +176,7 @@ function Figure({
         type="button"
         className={buttonClass(menu)}
         aria-pressed={pressed()}
-        title={pressed() ? 'Show every item' : `Show only the ${figure.noun.plural}`}
+        title={summaryToggleTitle(figure, pressed())}
         data-summary-total={figure.count}
         tabIndex={tab}
         onClick={() => toggle()}

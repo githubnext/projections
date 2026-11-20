@@ -9,6 +9,7 @@ import type {ChangeClassification} from '../../emphasis.js'
 import type {TransitionEdge, TransitionNode} from '../../graph-transition.js'
 import {changeMark} from '../../diff/model.js'
 import {drawnEdge} from '../../graph-canvas/edges.js'
+import type {Point} from '../../edge-arrows.js'
 import {edgeDescription} from './drawing.js'
 import type {Drawing} from './drawing.js'
 
@@ -118,8 +119,27 @@ export function GraphLink({
   )
 }
 
-/** Arrowheads are drawn over the cards, so a tip on a card's face sits on top of its border. */
-export function Arrowheads({links, drawing}: {links: readonly DrawnLink[]; drawing: Drawing}) {
+/** The junction a relationship routed through a shared-prerequisite stage passes, if it is drawn. */
+function junctionOf(edge: TransitionEdge, junctions: readonly Point[]): Point | undefined {
+  if (!edge.shared) return undefined
+  return junctions.find(junction => edge.points.some(point => Math.hypot(point.x - junction.x, point.y - junction.y) < 1))
+}
+
+/**
+ * Arrowheads are drawn over the cards, so a tip on a card's face sits on top of its border. Each also carries a clear
+ * copy of its relationship's junction dot, which the SDK fills in the ring's color while the relationship is hovered,
+ * focused or selected: a junction is shared by every relationship through it, so the one drawn junction can't be
+ * any single relationship's edge.
+ */
+export function Arrowheads({
+  links,
+  drawing,
+  junctions = [],
+}: {
+  links: readonly DrawnLink[]
+  drawing: Drawing
+  junctions?: readonly Point[]
+}) {
   const {props, receded} = drawing
   return (
     <g className="graph-arrowheads" aria-hidden="true">
@@ -140,6 +160,12 @@ export function Arrowheads({links, drawing}: {links: readonly DrawnLink[]; drawi
             data-direction={`${arrow.direction.x},${arrow.direction.y}`}
             data-base={`${arrow.base.x},${arrow.base.y}`}
           />
+          {(() => {
+            const junction = junctionOf(edge, junctions)
+            return (
+              junction && <circle className="graph-junction-ring" data-projections-edge="fill" cx={junction.x} cy={junction.y} r="2.5" />
+            )
+          })()}
         </g>
       ))}
     </g>

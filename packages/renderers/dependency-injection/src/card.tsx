@@ -158,8 +158,53 @@ export function routeLinks(
 }
 
 /**
- * One link: a focusable hit path, the arrow and its origin dot,
- * and its parameter while either card is selected. In diff mode it carries
+ * The links' origin dots, over the links: one at each start point, which links leaving a card at the same point share,
+ * then a clear copy for each link that the SDK fills in the ring's color while that link is hovered, focused or
+ * selected (`data-projections-ring-with`). So the dot takes its link's state whichever link drew it last.
+ */
+export function LinkOrigins({
+  links,
+  routes,
+}: {
+  links: readonly Pick<DiLinkFrame, 'id' | 'key' | 'opacity'>[]
+  routes: ReadonlyMap<string, {start: Point}>
+}) {
+  const starts = new Map<string, Point & {opacity: number}>()
+  for (const link of links) {
+    const start = routes.get(link.key)?.start
+    if (!start) continue
+    const at = `${start.x.toFixed(2)},${start.y.toFixed(2)}`
+    starts.set(at, {...start, opacity: Math.max(starts.get(at)?.opacity ?? 0, link.opacity)})
+  }
+  return (
+    <g className="di-link-origins" aria-hidden="true">
+      {[...starts].map(([at, start]) => (
+        <circle key={at} cx={start.x} cy={start.y} r="2.6" className="di-link-origin" opacity={start.opacity} />
+      ))}
+      {links.map(link => {
+        const start = routes.get(link.key)?.start
+        return (
+          start && (
+            <circle
+              key={link.key}
+              cx={start.x}
+              cy={start.y}
+              r="2.6"
+              className="di-link-origin-ring"
+              data-projections-edge="fill"
+              data-projections-ring-with={link.id}
+              opacity={link.opacity}
+            />
+          )
+        )
+      })}
+    </g>
+  )
+}
+
+/**
+ * One link: a focusable hit path and the arrow (its origin dot is
+ * `LinkOrigins`'), and its parameter while either card is selected. In diff mode it carries
  * its change (`data-change`), a removed link stays dashed and a rewired
  * link's two parts say which endpoints they show.
  */
@@ -230,7 +275,6 @@ export function LinkView({
           strokeDasharray={dashed ? '5 3' : undefined}
         />
       </g>
-      <circle cx={start.x} cy={start.y} r="2.6" className="di-link-origin" />
       {labelled && (link.parameter || link.resolution || link.alias) && (
         <text
           x={(start.x + end.x) / 2}

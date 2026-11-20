@@ -155,6 +155,26 @@ test('the selection anchor follows the item through page scrolling and compariso
   }
 })
 
+test('the selection anchor survives a mode change with no scrolling, where the frame keeps its size and place', async ({page}) => {
+  // Stacked side by side and swipe put the after frame at the same size and place on a phone-wide stage.
+  await page.setViewportSize({width: 390, height: 844})
+  await open(page, 'before=v1&after=v3&fill=false&mode=side-by-side')
+  await expect(page.locator('.ph-panes')).toHaveAttribute('data-stacked', 'true')
+  await selectTarget(page, 'entity.after.payments')
+  const inside = async () => {
+    const current = await anchor(page)
+    const after = await page.locator('[data-side="after"] iframe.ph-frame').boundingBox()
+    if (current === 'none' || !after) return 'none'
+    return current.side === 'after' && current.x >= Math.floor(after.x) && current.y >= Math.floor(after.y)
+      ? 'inside after pane'
+      : JSON.stringify(current)
+  }
+  await expect.poll(inside).toBe('inside after pane')
+  await chooseMode(page, 'Swipe')
+  await expect(view(page)).toHaveAttribute('data-comparison-mode', 'swipe')
+  await expect.poll(inside).toBe('inside after pane')
+})
+
 test('relationships are selectable in a graph renderer and resolve to relationship targets', async ({page}) => {
   await open(page, 'before=v1&after=v3')
   await expect(page.locator('.ph-frame-host')).toHaveAttribute('data-renderer', 'graph')

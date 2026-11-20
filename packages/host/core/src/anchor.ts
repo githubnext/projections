@@ -17,13 +17,15 @@ function same(a: ProjectionAnchor | null, b: ProjectionAnchor | null): boolean {
  * Follows where a row (default: the selection) is drawn, in host viewport
  * coordinates, so a consumer can place an overlay such as a comment popover
  * beside it. Updates when the renderer reports a move (its own scrolling,
- * resizing or layout, and mode changes) and when the host page scrolls or
+ * resizing or layout), when the mode changes, and when the host page scrolls or
  * resizes; `null` while the item isn't visible or the renderer doesn't report
  * anchors.
  */
 export function useProjectionAnchor(projection: ProjectionController, rowId?: string | null, side?: Side): ProjectionAnchor | null {
   const id = rowId === undefined ? projection.selectedId : rowId
   const measure = projection.anchorFor
+  // A mode change can move a frame without resizing it or scrolling the page, so it measures again too.
+  const mode = projection.mode
   const [anchor, setAnchor] = useState<ProjectionAnchor | null>(null)
   useLayoutEffect(() => {
     let frame = 0
@@ -46,6 +48,6 @@ export function useProjectionAnchor(projection: ProjectionController, rowId?: st
       removeEventListener('resize', schedule)
       observer.disconnect()
     }
-  }, [measure, id, side])
+  }, [measure, id, side, mode])
   return anchor
 }

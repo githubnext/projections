@@ -42,7 +42,6 @@ export interface CardFacts {
   subtitle?: (entity: Entity) => string | undefined
   /** The card icon a field names (`cardIconNames`), before the card's kind line. */
   icon?: (entity: Entity) => string | undefined
-  weight?: (entity: Entity) => number | undefined
   /** The size field's number, compact (`12K`), at the right of a card's kind line. */
   detail?: (entity: Entity) => string | undefined
   accent?: (entity: Entity) => CardAccent | undefined
@@ -85,8 +84,8 @@ export function cardFacts(model: ComparisonModel, options: CardFactOptions): Car
     if (entry.category.key.startsWith('card:')) cardItems.push({label: entry.category.label, ...entry.swatch})
   // The title names what colors the cards (a field's name verbatim); relationship kinds are lines, which say what they are.
   const title = colorBy ? (field ?? 'Kind') : options.kinds.length ? 'Relationships' : 'Cards'
-  // What a card's gauge means has no swatch: it is said in words.
-  const sizeItems: LegendItem[] = sizeField === undefined ? [] : [{label: `Top bar: ${sizeField}`}]
+  // What the number on each card is has no swatch: it is said in words.
+  const sizeItems: LegendItem[] = sizeField === undefined ? [] : [{label: `Number on each card: ${sizeField}`}]
   const items = [...cardItems, ...edgeItems, ...sizeItems]
   // Highlights first, then labels and badges on pills, then the quiet tags.
   const badgeParts: ((entity: Entity) => CardBadge[])[] = []
@@ -102,7 +101,6 @@ export function cardFacts(model: ComparisonModel, options: CardFactOptions): Car
     ...(sizeField === undefined
       ? {}
       : {
-          weight: (entity: Entity) => numberValue(entity, sizeField),
           detail: (entity: Entity) => {
             const value = numberValue(entity, sizeField)
             return value === undefined ? undefined : compact.format(value)

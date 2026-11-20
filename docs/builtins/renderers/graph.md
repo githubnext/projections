@@ -242,13 +242,10 @@ The card options show facts the extraction keeps in `data` on the canvas:
   changed icon crossfades with the card's step; the diff shows the After icon
   and lists the change with the card's other field changes.
 
-- **Size by** draws a bar along each card's top edge, from its leading corner in
-  the card's color, as long as the square root of a numeric field's share of the
-  largest value, so the heavy parts of a graph stand out while every card keeps
-  one width and the cards line up in columns. The number itself, compact
-  (`12K`), is at the right of the card's kind line, and the legend says what the
-  bar means (`Top bar: tokens`). A changed value's bar grows or shrinks with its
-  card's step.
+- **Size by** shows a numeric field's value on each card, compact (`12K`), at
+  the right of the card's kind line, and the legend says what the number is
+  (`Number on each card: tokens`). Every card keeps one width, so the cards line
+  up in columns. A changed value crossfades with its card's step.
 - **Badges** draws a field's values as small monospace pills under each card's
   label: each item of a list, a string or number itself, and a `true` boolean as
   the field's name. The card grows a row for each row of badges.

@@ -83,7 +83,7 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
   )
   drawnScale.current = scale
   useAnchoredScroll(scroller, change, transition, target, bounds, scale, keep)
-  const draw = drawing(props, diff, emphasisInset(borders))
+  const draw = drawing(props, diff, emphasisInset(borders), borders.normal)
   const caption = props.focus ? props.focus.label : ''
   const links = drawnLinks(edges, nodeById, draw, labelsIn, borders)
   const holding = boundariesHoldingChanges(nodes, edges, props.emphasis)

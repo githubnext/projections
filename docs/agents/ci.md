@@ -21,7 +21,7 @@ gets a summary of how its projections changed, without anyone running anything
 locally. Your repository's own CI produces them with one step, the Projections
 GitHub Action. It writes the summary to the workflow run (and, if you like, to a
 pull request comment) and uploads the documents as an artifact, which you can
-[open in VS Code](#reviewing-the-results).
+[review locally or in a hosted view](#reviewing-the-results).
 
 Where that step belongs depends on your CI, so nothing writes it for you. Your
 coding agent can read your workflows, propose where it fits and show you the
@@ -335,18 +335,18 @@ projection shows its diagnostics; failures are also annotations on the run. With
 `comment: true`, the same summary is the pull request's comment, updated on each
 run, with the snapshots when there are any.
 
-**In VS Code.** To see a projection drawn with its renderer, download the run's
-`projections` artifact, unzip it, and open a projection's document,
-`projections/<id>.json`, with **Projections: Open Artifact…** (or from the
-Explorer's context menu). It presents the saved comparison or extraction as it
-was saved and runs nothing; its provenance, including whether it calls itself
-official, is the document's own claim.
-
 **From the pull request.**
 [`projections pr <number>`](https://github.com/githubnext/projections/blob/main/docs/runner/pull-requests.md) reproduces a pull
 request's comparisons locally, from its merge base to its head with the base's
 definitions, without trusting its code; `--output FILE` saves the review for
-**Projections: Open Artifact…**.
+later inspection.
+
+**In VS Code (alternate path).** If you use the VS Code extension, download the
+run's `projections` artifact, unzip it, and open a projection's document,
+`projections/<id>.json`, with **Projections: Open Artifact…** (or from the
+Explorer's context menu). It presents the saved comparison or extraction as it
+was saved and runs nothing; its provenance, including whether it calls itself
+official, is the document's own claim.
 
 **A hosted view.** The artifact follows a
 [documented contract](https://github.com/githubnext/projections/blob/main/docs/contracts/saved-documents.md#ci-artifacts), so a

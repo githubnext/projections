@@ -35,12 +35,6 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
 }
 
-/** A definition without `presentation`, which never affects extractions or their digest. */
-function withoutPresentation(definition: Definition): Omit<Definition, 'presentation'> {
-  const {presentation: _presentation, ...rest} = definition
-  return rest
-}
-
 function sameJson(left: unknown, right: unknown): boolean {
   if (left === right) return true
   if (Array.isArray(left)) {
@@ -112,15 +106,12 @@ export interface ArtifactRules {
 }
 
 async function verifyComparison(value: ComparisonDocument, engine: ProjectionEngine, rules?: ArtifactRules): Promise<ComparisonDocument> {
-  if (value.before.projection.id !== value.after.projection.id) {
+  // One definition, with one version of its component code, explains both revisions (the engine decides).
+  const {pairing} = await engine.pair(value.before, value.after)
+  if (pairing === 'projection') {
     throw new ArtifactError('ARTIFACT_PROJECTION', '/after/projection/id', 'A comparison must describe the same projection')
   }
-  // One definition, with one version of its component code, explains both revisions.
-  // Presentation defaults are only viewers' initial settings and may differ.
-  if (
-    value.before.provenance.definitionDigest !== value.after.provenance.definitionDigest ||
-    !sameJson(withoutPresentation(value.before.provenance.definition), withoutPresentation(value.after.provenance.definition))
-  ) {
+  if (pairing !== 'same') {
     throw new ArtifactError(
       'ARTIFACT_DEFINITION',
       '/after/provenance/definitionDigest',

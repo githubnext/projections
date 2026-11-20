@@ -17,8 +17,7 @@ export async function snapshotDocument(value: unknown, engine: ProjectionEngine)
     if (
       before?.format !== 'projections.extraction' ||
       after?.format !== 'projections.extraction' ||
-      before.projection.id !== after.projection.id ||
-      before.provenance.definitionDigest !== after.provenance.definitionDigest ||
+      (await engine.pair(before, after)).pairing !== 'same' ||
       !document.comparison ||
       !document.comparator
     ) {

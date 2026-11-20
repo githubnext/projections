@@ -69,6 +69,7 @@ pub(super) async fn renderer_checks(
             width: 1280,
             height: 800,
             scale: 1.0,
+            startup: timeout,
             cancel,
         })?;
         // Opening the stage has its own budget, from after any wait for a launch slot; each scenario then gets the

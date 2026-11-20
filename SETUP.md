@@ -22,11 +22,12 @@ viewer, a page on their machine that you drive.
    `projections init` writes a skill for you
    (`.agents/skills/projections/SKILL.md`) with the whole authoring loop.
 4. **Show them** to the person in the viewer: `projections view show -p <id>`
-   (or the `open_projection` tool when you run `projections mcp`). When they ask
-   to "open it in the inspector", they mean this viewer. In the GitHub Copilot
-   app, show it in the Projections canvas rather than a browser tab: run
-   `projections canvas install` once, then open the `projections` canvas. The
-   canvas takes the app's theme; a browser tab can't.
+   (or the `open_projection` tool when you run `projections mcp`). Open the
+   viewer in your in-app browser if you have one, or in a standalone browser
+   with `--open`. When they ask to "open it in the inspector", they mean this
+   viewer. In the GitHub Copilot app, show it in the Projections canvas rather
+   than a browser tab: run `projections canvas install` once, then open the
+   `projections` canvas. The canvas takes the app's theme; a browser tab can't.
 5. **CI only when asked**: `projections help agents ci` proposes where
    Projections goes in their workflows; never change CI without their agreement.
 

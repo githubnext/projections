@@ -4,7 +4,8 @@
 use anyhow::{Context, Result, bail, ensure};
 use serde_json::{Value, json};
 
-use super::{byte_sha256, extraction::sha256_digest, fields, semantic_definition, validate_extraction};
+use super::{byte_sha256, extraction::sha256_digest, fields, validate_extraction};
+use projections_engine::Pairing;
 
 /// The default comparator module embedded in this executable, loaded once. It
 /// runs in the comparator runtime, sandboxed with the same limits as rules.
@@ -163,26 +164,30 @@ pub fn run_custom_comparator_with_coverage(
     (comparison, coverage)
 }
 
-/// Explains why two extractions can't be compared, or `None` when they can.
+/// Explains why two extractions can't be compared, or `None` when they can:
+/// the engine pairs them ([`projections_engine::pairing`]), and they must share
+/// one domain schema.
 pub fn pairing_mismatch(before: &Value, after: &Value) -> Option<String> {
-    if before["projection"]["id"] != after["projection"]["id"] {
-        return Some(format!(
-            "Compared extractions come from different projections ({} and {})",
-            before["projection"]["id"], after["projection"]["id"]
-        ));
-    }
     let (old, new) = (&before["provenance"], &after["provenance"]);
-    if old["definitionDigest"] != new["definitionDigest"] {
-        return Some(format!(
-            "Compared extractions come from different projection definitions ({} and {}): {}. Extract both revisions with one definition",
-            old["definitionDigest"],
-            new["definitionDigest"],
-            if semantic_definition(&old["definition"]) == semantic_definition(&new["definition"]) {
-                "the definition's declared component sources differ"
-            } else {
-                "the projection definition itself differs"
-            }
-        ));
+    let differ = |why: String| {
+        Some(format!(
+            "Compared extractions come from different projection definitions ({} and {}): {why}. Extract both revisions with one definition",
+            old["definitionDigest"], new["definitionDigest"],
+        ))
+    };
+    match projections_engine::pairing(before, after) {
+        Err(failure) => return Some(format!("Compared extractions can't be paired: {}", failure[0])),
+        Ok(Pairing::Same) => {}
+        Ok(Pairing::Projection) => {
+            return Some(format!(
+                "Compared extractions come from different projections ({} and {})",
+                before["projection"]["id"], after["projection"]["id"]
+            ));
+        }
+        Ok(Pairing::Definition(differing)) => {
+            return differ(format!("the projection definition itself differs ({})", differing.join(", ")));
+        }
+        Ok(Pairing::Components) => return differ("the definition's declared component sources differ".into()),
     }
     if before["extraction"]["schema"] != after["extraction"]["schema"] {
         return Some("Compared extractions must share one domain schema".into());

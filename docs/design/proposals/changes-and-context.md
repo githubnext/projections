@@ -70,9 +70,10 @@ ends.
 6. Scope filters nest: the summary bar's figures and find narrow within the
    scope ("+1 workspaces" in Changes is that change and its context), and
    renderer controls apply on top. They used to exclude each other.
-7. The toolbar shows the scope beside the mode, with counts ("Changes 4 · All
-   82"). Noise stays reachable from Settings ("Show") and the summary bar's
-   variation figures, and joins the switch while it is the scope.
+7. The toolbar shows the scope beside the mode, its counts in the tooltip only,
+   since in the switch they distracted. Noise stays reachable from Settings
+   ("Show") and the summary bar's variation figures, and joins the switch while
+   it is the scope.
 8. Folds are computed on the union (the diff model), never per side.
 9. Context is only ever added: rules can add context, never remove the core's,
    and nothing hides a change.
@@ -139,9 +140,9 @@ Recorded as implementation chose within the decisions above.
   fold expands it in that pane only: the renderer protocol has no message for
   it, and milestone 1 adds none.
 - The scope counts are of the kinds the summary bar's count figures name: the
-  changes, without context ("Changes 4" for four changed declarations, though
-  their tools show too), and every item of either revision, so All is more than
-  Changes whenever Changes hides anything. A table's structural relationships (a
+  changes, without context (4 for four changed declarations, though their tools
+  show too), and every item of either revision, so All is more than Changes
+  whenever Changes hides anything. A table's structural relationships (a
   column's `contains`) aren't counted beside its columns, so the switch and the
   summary bar agree.
 - Side by side panes fold from the union's scope, but each pane merges adjacent
@@ -152,7 +153,7 @@ Recorded as implementation chose within the decisions above.
   extractors name those relationships differently, and the renderer reads them
   by their ends. `isContainment` replaces a list of kinds.
 - When the Changes scope would hide nothing (every item is a change or gives one
-  context), the switch is replaced by "Changes 2 · nothing hidden", so it never
+  context), the switch is replaced by "Changes · nothing hidden", so it never
   offers a choice that changes nothing.
 - Dependency-injection and file-packing layouts change at once when the scope
   changes; graph canvases and the database move between them.

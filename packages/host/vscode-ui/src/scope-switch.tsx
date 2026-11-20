@@ -11,8 +11,8 @@ const scopeNames: Record<ViewScope, {label: string; title: string}> = {
 
 /**
  * The scope, beside the mode switch and like it a radio group (arrows move and choose, the checked one is in the tab
- * order): Changes and All with their counts ("Changes 4", "All 82"), and Noise while it is the scope. When the Changes
- * scope hides nothing, a note says so instead ("Changes 2 · nothing hidden"), in the same room. Hidden unless comparing.
+ * order): Changes and All, their counts in the tooltip ("… (4)"), and Noise while it is the scope. When the Changes
+ * scope hides nothing, a note says so instead ("Changes · nothing hidden"), in the same room. Hidden unless comparing.
  */
 export function ScopeSwitch({projection: p}: {projection: ProjectionController}) {
   const group = useRef<HTMLDivElement>(null)
@@ -21,8 +21,6 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
   const nothingHidden = !p.scopeCounts.hidden && p.scope !== 'noise'
   const scopes: ViewScope[] = p.scope === 'noise' ? ['changes', 'all', 'noise'] : ['changes', 'all']
   const index = Math.max(0, scopes.indexOf(p.scope))
-  // Every count takes the widest one's digits, so the switch (centred in the toolbar) keeps its width as counts change.
-  const digits = Math.max(...scopes.map(scope => p.scopeCounts[scope].toLocaleString().length))
   const choose = (next: number) => {
     const scope = scopes[(next + scopes.length) % scopes.length]!
     flushSync(() => p.setScope(scope))
@@ -39,7 +37,6 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
         aria-hidden={!nothingHidden || undefined}
       >
         <span className="phv-scope-note-name">Changes</span>
-        <span className="phv-scope-count">{p.scopeCounts.changes.toLocaleString()}</span>
         <span aria-hidden="true">·</span>
         nothing hidden
       </span>
@@ -60,7 +57,6 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
         }}
       >
         {scopes.map((scope, position) => {
-          const count = p.scopeCounts[scope].toLocaleString()
           const {label, title} = scopeNames[scope]
           return (
             <button
@@ -68,17 +64,13 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
               type="button"
               role="radio"
               aria-checked={p.scope === scope}
-              aria-label={`${label}, ${count}`}
-              title={`${title} (${count})`}
+              title={`${title} (${p.scopeCounts[scope].toLocaleString()})`}
               tabIndex={position === index ? 0 : -1}
               className="phv-scope"
               data-scope={scope}
               onClick={() => p.setScope(scope)}
             >
               {label}
-              <span aria-hidden="true" className="phv-scope-count" style={{minWidth: `${digits}ch`}}>
-                {count}
-              </span>
             </button>
           )
         })}

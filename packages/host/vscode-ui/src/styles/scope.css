@@ -11,7 +11,6 @@
 .phv-scope {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
   height: 20px;
   padding: 0 6px;
   border: 1px solid transparent;
@@ -97,10 +96,6 @@
 .phv-scope-notice-action:focus-visible {
   outline: 1px solid var(--vscode-focusBorder);
   outline-offset: -1px;
-}
-.phv-scope-count {
-  color: var(--phv-muted);
-  font-variant-numeric: tabular-nums;
 }
 
 .phv-summary-hidden {

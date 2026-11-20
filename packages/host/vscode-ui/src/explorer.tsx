@@ -1,7 +1,6 @@
-import {useCallback, useRef, useState} from 'react'
-import {ComparisonError, useComparisonPair} from '@githubnext/projections-host'
-import type {ComparisonMode, ComparisonPairOptions, Highlighting} from '@githubnext/projections-host'
-import {PairPicker, offeredModes} from './blocks.js'
+import {ComparisonError, useComparisonPair, useComparisonSession} from '@githubnext/projections-host'
+import type {ComparisonPairOptions} from '@githubnext/projections-host'
+import {PairPicker} from './blocks.js'
 import type {PairForm} from './blocks.js'
 import {LoadingStatus} from './loading.js'
 import {Notice} from './notice.js'
@@ -62,7 +61,10 @@ export interface VscodeComparisonExplorerProps
       | 'initialHolds'
       | 'fill'
       | 'toolbar'
-    > {}
+    > {
+  /** The scope the explorer starts in: the definition's `presentation.changesOnly`, else Changes (`useComparisonSession`). */
+  initialChangesOnly?: boolean
+}
 
 /**
  * The VS Code pair picker: choose any two extractions of a projection and see
@@ -74,49 +76,8 @@ export interface VscodeComparisonExplorerProps
  */
 export function VscodeComparisonExplorer(props: VscodeComparisonExplorerProps) {
   const pair = useComparisonPair(props)
-  const callbacks = useRef(props)
-  callbacks.current = props
-  // The view remounts while a new pair is computed, so the explorer keeps the uncontrolled settings.
-  // Undefined until chosen: the renderer's default mode applies, among those the features offer.
-  const [mode, setMode] = useState<ComparisonMode | undefined>(() => {
-    const initial = props.initialMode ?? pair.presentation?.mode
-    const modes = offeredModes(props.features)
-    return initial && modes.includes(initial) ? initial : props.features?.modes ? modes[0] : undefined
-  })
-  const [swipe, setSwipe] = useState(0.5)
-  const [highlighting, setHighlighting] = useState<Highlighting>(pair.presentation?.highlighting ?? 'animated')
-  const [changesOnly, setChangesOnly] = useState(pair.presentation?.changesOnly ?? true)
-  const [search, setSearch] = useState('')
-  const [connector, setConnector] = useState(props.initialConnector ?? false)
-  const changeConnector = useCallback((value: boolean) => {
-    setConnector(value)
-    callbacks.current.onConnectorChange?.(value)
-  }, [])
-  const [loop, setLoop] = useState(props.initialLoop ?? true)
-  const changeLoop = useCallback((value: boolean) => {
-    setLoop(value)
-    callbacks.current.onLoopChange?.(value)
-  }, [])
-  const changeMode = useCallback((value: ComparisonMode) => {
-    setMode(value)
-    callbacks.current.onModeChange?.(value)
-  }, [])
-  const changeSwipe = useCallback((value: number) => {
-    setSwipe(value)
-    callbacks.current.onSwipePositionChange?.(value)
-  }, [])
-  const changeHighlighting = useCallback((value: Highlighting) => {
-    setHighlighting(value)
-    callbacks.current.onHighlightingChange?.(value)
-  }, [])
-  const changeChangesOnly = useCallback((value: boolean) => {
-    setChangesOnly(value)
-    callbacks.current.onChangesOnlyChange?.(value)
-  }, [])
-  const changeSearch = useCallback((value: string) => {
-    setSearch(value)
-    callbacks.current.onSearchChange?.(value)
-  }, [])
+  // The view remounts while a new pair is computed, so the session above it keeps the settings across pairs.
+  const session = useComparisonSession({...props, presentation: pair.presentation})
   const {extractions, before, after, outcome, subject, document, resolution} = pair
   if (!after || !document) {
     return (
@@ -193,12 +154,7 @@ export function VscodeComparisonExplorer(props: VscodeComparisonExplorerProps) {
           renderers={pair.renderers}
           rendererDocuments={pair.rendererDocuments}
           presentation={pair.presentation}
-          highlighting={props.highlighting ?? highlighting}
-          onHighlightingChange={changeHighlighting}
-          changesOnly={props.changesOnly ?? changesOnly}
-          onChangesOnlyChange={changeChangesOnly}
-          search={props.search ?? search}
-          onSearchChange={changeSearch}
+          {...session}
           {...(props.controlValues ? {controlValues: props.controlValues} : {})}
           {...(props.onControlChange ? {onControlChange: props.onControlChange} : {})}
           {...(props.onAction ? {onAction: props.onAction} : {})}
@@ -210,15 +166,7 @@ export function VscodeComparisonExplorer(props: VscodeComparisonExplorerProps) {
           {...(props.controllerRef ? {controllerRef: props.controllerRef} : {})}
           fill={fill}
           {...(props.toolbar === false ? {toolbar: false} : {})}
-          connector={props.connector ?? connector}
-          onConnectorChange={changeConnector}
-          loop={props.loop ?? loop}
-          onLoopChange={changeLoop}
           {...(props.initialHolds ? {initialHolds: props.initialHolds} : {})}
-          {...((props.mode ?? mode) ? {mode: (props.mode ?? mode)!} : {})}
-          onModeChange={changeMode}
-          swipePosition={props.swipePosition ?? swipe}
-          onSwipePositionChange={changeSwipe}
           {...(props.initialView ? {initialView: props.initialView} : {})}
           {...(props.playbackInViews ? {playbackInViews: props.playbackInViews} : {})}
         />

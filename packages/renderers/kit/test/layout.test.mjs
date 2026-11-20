@@ -442,6 +442,13 @@ test('cards with no relationships and nothing else make a grid, in ID order', as
     assert.equal(layers.length, 3, `${orientation}: √5 rounded up layers`)
     const read = [...cards].sort((a, b) => a[flowStart] - b[flowStart] || a[acrossStart] - b[acrossStart]).map(card => card.id)
     assert.deepEqual(read, ['a', 'b', 'c', 'd', 'e'], `${orientation}: in ID order, layer by layer`)
+    if (orientation === 'vertical') {
+      // On the layout's column grid, as cards ELK places are: a column apart, `columnGap` between neighbours.
+      const pitch = cards[0].right - cards[0].left + columnGap
+      for (const card of cards) assert.ok(Number.isInteger((card.left - 32) / pitch), `${card.id} at ${card.left}, off the ${pitch} grid`)
+      const first = cards.filter(card => card.top === layers[0]).sort((a, b) => a.left - b.left)
+      assert.equal(first[1].left - first[0].right, columnGap, 'neighbours a column gap apart')
+    }
   }
 })
 

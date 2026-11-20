@@ -1,5 +1,6 @@
 // Cards on a grid: one pitch across the flow, and every card's leading edge on a column line in every layer.
 import type {Point} from '../edge-arrows.js'
+import {cardHeight, cardWidth} from './model.js'
 import {columnGap, median, nodeSpacing, rootPadding} from './placement.js'
 import type {ElkInput} from './elk-input.js'
 import type {Box} from './unlinked.js'
@@ -23,7 +24,10 @@ export function columnGrid(input: ElkInput, boxes: ReadonlyMap<string, Box>): Gr
   const breadth = direction === 'DOWN' ? 'width' : 'height'
   const breadths = [
     ...laid.map(node => boxes.get(elkId.get(node.id)!)![breadth]),
-    ...nodes.filter(node => unlinked.has(node.id)).map(node => (direction === 'DOWN' ? node.width : node.height) ?? 0),
+    // An unlinked card's size as it is placed (`placeUnlinked`): its own, or a card's.
+    ...nodes
+      .filter(node => unlinked.has(node.id))
+      .map(node => (direction === 'DOWN' ? (node.width ?? cardWidth) : (node.height ?? cardHeight(node.kind)))),
   ].filter(value => value > 0)
   if (!breadths.length) return undefined
   // Left to right, cards of different heights (their text, their changes) would leave rows half empty: they keep

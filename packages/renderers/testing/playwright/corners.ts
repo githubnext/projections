@@ -57,7 +57,9 @@ export async function cornerBox(locator: Locator, {align}: {align?: 'start' | 'e
       const unit = matrix ? Math.hypot(matrix.a, matrix.b) : 1
       // A dashed outline has no thickness to keep around its curve.
       const stroke = style.stroke === 'none' || style.strokeDasharray !== 'none' ? 0 : parseFloat(style.strokeWidth) * unit
-      const rx = parseFloat(style.getPropertyValue('rx')) || element.rx.baseVal.value
+      // CSS `rx` wins where it applies, `0px` included; the attribute only where it is `auto` or unset.
+      const css = parseFloat(style.getPropertyValue('rx'))
+      const rx = Number.isNaN(css) ? element.rx.baseVal.value : css
       return {
         svg: true,
         width: rect.width,
@@ -68,9 +70,11 @@ export async function cornerBox(locator: Locator, {align}: {align?: 'start' | 'e
     }
     const radius = (value: string) =>
       value.endsWith('%') ? (parseFloat(value) / 100) * Math.min(rect.width, rect.height) : parseFloat(value) || 0
+    // Its layout width, before any transform on it or its ancestors, so the scale below takes them in.
+    const laid = element instanceof HTMLElement && element.offsetWidth ? element.offsetWidth : rect.width
     return {
       svg: false,
-      width: rect.width,
+      width: laid,
       height: rect.height,
       radii: [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].map(
         radius,
@@ -82,7 +86,8 @@ export async function cornerBox(locator: Locator, {align}: {align?: 'start' | 'e
       ),
     }
   })
-  // The frame's scale, if a host scales it (a transformed stage): the box in the page against the box in the frame.
+  // How much it is scaled, by a transform on it, an ancestor or the host's frame (a transformed stage): the box in the
+  // page against its own layout box (an SVG rect's is already in screen units).
   const scale = drawn.width ? box.width / drawn.width : 1
   const inflate = drawn.svg ? drawn.borders[0]! / 2 : 0
   const left = box.x - inflate * scale,

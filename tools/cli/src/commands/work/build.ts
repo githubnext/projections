@@ -1,11 +1,12 @@
 // `build`: a workspace and the workspaces it needs, rebuilding only what is out of date. `npm run build` rebuilds
 // every workspace, including the release CLI and Storybook; this rebuilds a dependency only when it was never built,
-// its src is newer than its dist, or a dependency of its own was rebuilt or is newer, as make would.
+// its src or other build inputs changed since (`buildStatus`), or a dependency of its own was rebuilt or is newer, as
+// make would.
 import {createHash} from 'node:crypto'
 import {existsSync, readdirSync, readFileSync, statSync, utimesSync} from 'node:fs'
-import {join} from 'node:path'
+import {join, relative, sep} from 'node:path'
 import {bound, TOOLS} from '../../lib/gates.ts'
-import {buildRecords, buildState, dependenciesOf, outputTime, recordBuild} from '../../lib/builds.ts'
+import {buildInputs, buildRecords, buildStatus, dependenciesOf, inputSignature, outputTime, recordBuild} from '../../lib/builds.ts'
 import {findUnit, inDependencyOrder, loadUnits, type Unit} from '../../lib/packages.ts'
 import {parseProblems, tail, type Problem} from '../../lib/problems.ts'
 import {newestOutput, run} from '../../lib/repo.ts'
@@ -71,6 +72,18 @@ export function restoreIfUnchanged(before: Snapshot, after: Snapshot): boolean {
   return true
 }
 
+/**
+ * Records a successful build of `unit` from inputs with signature `inputs`, along with the outputs it produced; when
+ * they came out unchanged, puts their times back and records when it checked. True when they did.
+ */
+export function recordSuccess(root: string, unit: Unit, inputs: string, before: Snapshot, started: number): boolean {
+  const after = snapshot(root, unit)
+  const unchanged = restoreIfUnchanged(before, after)
+  const outputs = [...after.files.keys()].map(path => relative(join(root, unit.path), path).split(sep).join('/')).sort()
+  recordBuild(root, unit.path, {...(unchanged ? {checked: started} : {}), inputs, outputs, recorded: Date.now()})
+  return unchanged
+}
+
 const builds = (unit: Unit | undefined): boolean => Boolean(unit?.kinds.includes('npm') && unit.scripts.includes('build'))
 
 /** Why `unit` needs building, or undefined when its dist is current. `rebuilt` holds the workspaces built this run. */
@@ -79,11 +92,9 @@ export function staleness(root: string, units: readonly Unit[], unit: Unit, rebu
   if (unit.kinds.includes('crate') || unit.dependsOn.some(path => units.find(entry => entry.path === path)?.kinds.includes('crate')))
     return 'builds Rust, which Cargo keeps current'
   const records = buildRecords(root)
-  const state = buildState(root, unit, records)
-  if (state === undefined) return 'has no src and dist to compare'
-  if (state === 'unbuilt') return 'not built'
-  if (state === 'incomplete') return 'its last build did not finish'
-  if (state === 'stale') return 'src is newer than dist'
+  const status = buildStatus(root, unit, records)
+  if (status === undefined) return 'has no src and dist to compare'
+  if (status.state !== 'current') return status.reason
   const changed = unit.dependsOn.find(path => rebuilt.has(path))
   if (changed) return `${changed} was rebuilt`
   const output = outputTime(root, unit, records) ?? 0
@@ -135,7 +146,7 @@ export async function buildReport(root: string, options: BuildOptions, progress?
             options.dryRun ? new Set(steps.filter(step => step.status === 'planned').map(step => step.workspace)) : rebuilt,
           )
     if (!reason) {
-      steps.push({workspace: unit.path, status: 'current', reason: 'dist is newer than its src and dependencies'})
+      steps.push({workspace: unit.path, status: 'current', reason: 'dist is current with its inputs and dependencies'})
       continue
     }
     if (options.dryRun) {
@@ -145,14 +156,15 @@ export async function buildReport(root: string, options: BuildOptions, progress?
     progress?.(`▸ ${unit.path}: ${reason}`)
     const before = snapshot(root, unit)
     const started = Date.now()
+    // The inputs it is built from: one edited while it builds leaves it stale.
+    const inputs = inputSignature(root, buildInputs(root, unit))
     // Until it succeeds: a build that fails part way can leave outputs newer than their src.
     const previous = buildRecords(root)[unit.path] ?? {}
     recordBuild(root, unit.path, {...previous, building: true})
     const ran = await run(root, {argv: ['npm', 'run', 'build', '--workspace', unit.names[0] as string]})
     const seconds = Math.round(ran.durationMs / 100) / 10
     if (ran.exitCode === 0) {
-      const unchanged = restoreIfUnchanged(before, snapshot(root, unit))
-      recordBuild(root, unit.path, unchanged ? {checked: started} : {})
+      const unchanged = recordSuccess(root, unit, inputs, before, started)
       if (!unchanged) rebuilt.add(unit.path)
       progress?.(`  ${unchanged ? 'unchanged' : 'built'} (${Math.round(ran.durationMs / 1000)}s)`)
       steps.push({workspace: unit.path, status: unchanged ? 'unchanged' : 'built', reason, seconds})

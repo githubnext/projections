@@ -10,13 +10,20 @@ import {reachableNames, toolbarGeometry} from './toolbar-geometry.js'
  */
 test.skip(({isMobile}) => isMobile, 'The sweep sizes the toolbar itself; the desktop projects cover Chromium and WebKit.')
 
-/** Sizes the harness's view so the toolbar is `width` pixels wide, and waits for it to replan. */
+/**
+ * Sizes the harness's view so the toolbar is `width` pixels wide, and waits until its layout has settled at that width
+ * (`useFitPlan` marks the toolbar with `data-fit-settled`), rather than for a fixed number of frames.
+ */
 async function setWidth(page: Page, width: number) {
   await page.evaluate(async toolbarWidth => {
     const view = document.querySelector<HTMLElement>('.demo-sized')!
+    const toolbar = document.querySelector<HTMLElement>('.ph-toolbar')!
     // The explorer's padding (16px each side) surrounds the toolbar.
     view.style.width = `${toolbarWidth + 32}px`
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    const frame = () => new Promise(resolve => requestAnimationFrame(resolve))
+    await frame()
+    // A toolbar the width doesn't change keeps its mark; one that replans clears it until it settles again.
+    for (let i = 0; i < 600 && toolbar.dataset.fitSettled !== String(Math.round(toolbar.getBoundingClientRect().width)); i++) await frame()
   }, width)
 }
 
@@ -127,8 +134,19 @@ test('mode icons never look like playback: Animated is a clapperboard, distinct 
 
 test('the mode region is centred while the row has room, then follows the pickers, with hysteresis', async ({page}) => {
   await open(page, 'before=v1&after=v3&mode=diff')
-  const centred = async () => (await toolbarGeometry(page)).rows[0]!.centred
+  const centred = () =>
+    page
+      .locator('.ph-toolbar-row')
+      .first()
+      .evaluate(row => row.hasAttribute('data-centred'))
   let width = 1600
+  await setWidth(page, width)
+  expect(await centred()).toBe(true)
+  // Narrowing from a centred row, it stays centred exactly while it fits, so the boundary is found coarsely and then
+  // in 4px steps from just above it, narrowing from a centred row again (widening would need the hysteresis).
+  while ((await centred()) && width > 320) await setWidth(page, (width -= 20))
+  await setWidth(page, 1600)
+  width += 20
   await setWidth(page, width)
   expect(await centred()).toBe(true)
   while ((await centred()) && width > 320) await setWidth(page, (width -= 4))

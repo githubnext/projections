@@ -38,11 +38,13 @@ const ci = {
         context: {items: [{id: 'job:setup', label: 'Setup', kind: 'job'}], total: 3, rules: ['needs']},
       },
       {id: 'job:build', label: 'Build', kind: 'job', status: 'unchanged'},
+      {id: 'job:format', label: 'Format', kind: 'job', status: 'unchanged', correspondence: 'split'},
       {
         id: 'job:lint',
         label: 'Lint',
         kind: 'job',
         status: 'unchanged',
+        correspondence: 'declared',
         context: {items: [{id: 'job:setup', label: 'Setup', kind: 'job'}], total: 1},
       },
     ],
@@ -71,7 +73,9 @@ test('the current view names the projection, its choice and revisions, mode, cou
   assert.match(text, /^Changes: 1 removed, 5 added of 7 items\.$/m)
   assert.match(text, /^- removed job Test \[job:test\]$/m)
   // A rename is unchanged, but it is a change: listed with its context.
-  assert.match(text, /^- unchanged job Lint \[job:lint\]\n {2}context: job Setup \[job:setup\]$/m)
+  assert.match(text, /^- unchanged \(declared\) job Lint \[job:lint\]\n {2}context: job Setup \[job:setup\]$/m)
+  // An identity change without context is listed too.
+  assert.match(text, /^- unchanged \(split\) job Format \[job:format\]$/m)
   assert.match(text, /^- added job Unit tests \[job:unit\]\n {2}context: job Setup \[job:setup\] and 2 more \(added by rule `needs`\)$/m)
   assert.doesNotMatch(text, /Build/, 'unchanged items are only counted')
   assert.match(text, /^Selected: job Unit tests \[job:unit\], added\.$/m)

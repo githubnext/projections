@@ -35,9 +35,10 @@ export interface InspectorSummary {
   comparison?: {compared: boolean; rows: number; changes: {[status: string]: number}}
   /**
    * The presented rows (entities, relationships, changes), changed ones first, at most 100: IDs for `selectEntity`. A
-   * change lists its context: the items a person needs to read it, which the Changes scope shows beside it.
+   * change lists its context: the items a person needs to read it, which the Changes scope shows beside it. An identity
+   * change (`unchanged` but renamed, split or merged) has its `correspondence`.
    */
-  items?: {id: string; label: string; kind: string; status?: string; context?: ContextItems}[]
+  items?: {id: string; label: string; kind: string; status?: string; correspondence?: string; context?: ContextItems}[]
   selection?: {id: string; label: string; kind: string; status?: string}
   error?: string
   /** The notices the view shows, for example that a declared input doesn't exist at one revision. */

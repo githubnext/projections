@@ -1,6 +1,8 @@
 // A comparison's changes and the context needed to read them: what a viewer's Changes scope shows.
 import type {ChangeContext, ChangeStatus, Correspondence, Extraction, Relationship} from '@githubnext/projections-schemas'
 import type {PresentedChanges} from './changes.js'
+import {structuralContext, structureOf, traverse} from './structure.js'
+import type {Structure} from './structure.js'
 
 /** The scopes of a comparison view: every item, the changes and their context, or the noise (items that only varied). */
 export type ViewScope = 'all' | 'changes' | 'noise'
@@ -99,9 +101,9 @@ export interface RowContext {
 
 /**
  * The context of each change row of a comparison: the comparison's own (`Change.context`), none for a row it gives
- * none, or, for a comparison saved without any context, the structural derivation the Engine's core context makes (a changed relationship's endpoints, and the items containing a
- * changed or context entity, `isContainment`, with the containment relationships between them). Returns a function
- * from a row to its context.
+ * none, or, for a comparison saved without any context, the structural derivation the Engine's core context makes (a
+ * changed relationship's endpoints, and the items containing a changed or context entity, `isContainment`, with the
+ * containment relationships between them). Returns a function from a row to its context.
  */
 export function rowContexts(rows: readonly ScopeRow[], revisions: Revisions): (row: ScopeRow) => RowContext {
   const rowOf: Record<Side, Map<string, string>> = {before: new Map(), after: new Map()}
@@ -128,54 +130,10 @@ export function rowContexts(rows: readonly ScopeRow[], revisions: Revisions): (r
   }
 }
 
-/** One revision's structure, indexed for context: each relationship's endpoints, and each contained entity's containers. */
-interface Structure {
-  ends: Map<string, {from: string; to: string}>
-  parents: Map<string, {parent: string; relationship: string}[]>
-}
-
-function structureOf(revision: ContainmentSource): Structure {
-  const contains = isContainment(revision)
-  const ends = new Map<string, {from: string; to: string}>()
-  const parents = new Map<string, {parent: string; relationship: string}[]>()
-  for (const relationship of revision.relationships) {
-    ends.set(relationship.id, relationship)
-    if (!contains(relationship)) continue
-    const list = parents.get(relationship.to) ?? []
-    list.push({parent: relationship.from, relationship: relationship.id})
-    parents.set(relationship.to, list)
-  }
-  return {ends, parents}
-}
-
-/** A row's structural context in one revision, as item IDs: what the Engine's core context holds. */
-function structuralContext(structure: Structure, row: ScopeRow, side: Side): Set<string> {
-  const found = new Set<string>()
-  const stack: string[] = []
-  for (const id of row[side]) {
-    if (row.collection === 'entities') stack.push(id)
-    else {
-      const end = structure.ends.get(id)
-      if (end) stack.push(end.from, end.to)
-    }
-  }
-  // Each entity and, transitively, what contains it.
-  while (stack.length) {
-    const id = stack.pop()!
-    if (found.has(id)) continue
-    found.add(id)
-    for (const {parent, relationship} of structure.parents.get(id) ?? []) {
-      found.add(relationship)
-      stack.push(parent)
-    }
-  }
-  for (const id of row[side]) found.delete(id)
-  return found
-}
-
 /**
  * The context of a comparison's changes: each change's own (`Change.context`, the Engine's core context and what
- * comparator rules added), else, for a comparison saved without it, the same structural derivation (`rowContexts`).
+ * comparator rules added), else, for a comparison saved without it, the same structural derivation (`rowContexts`),
+ * traversed once for all the changes. A shown relationship's endpoints are shown too, so a renderer can draw it.
  * Context is only ever added, and never hides a change. `changes` narrows the changes to those row IDs (for example a
  * find or summary filter's); by default every change (`isScopeChange`) is in scope.
  */
@@ -183,8 +141,29 @@ export function changeContext(rows: readonly ScopeRow[], revisions: Revisions, c
   const inScope = changes ? new Set(changes) : undefined
   const changed = new Set(rows.filter(row => (inScope ? inScope.has(row.id) : isScopeChange(row))).map(row => row.id))
   const shown = new Set(changed)
-  const contextOf = rowContexts(rows, revisions)
-  for (const row of rows) if (changed.has(row.id)) for (const id of contextOf(row).rows) shown.add(id)
+  const rowOf: Record<Side, Map<string, string>> = {before: new Map(), after: new Map()}
+  for (const row of rows) for (const side of sides) for (const id of row[side]) rowOf[side].set(id, row.id)
+  const show = (side: Side, id: string) => {
+    const rowId = rowOf[side].get(id)
+    if (rowId !== undefined) shown.add(rowId)
+  }
+  const structure = {before: structureOf(revisions.before), after: structureOf(revisions.after)}
+  if (rows.some(row => row.context)) {
+    const contextOf = rowContexts(rows, revisions)
+    for (const row of rows) if (changed.has(row.id)) for (const id of contextOf(row).rows) shown.add(id)
+  } else
+    for (const side of sides) {
+      const reached = new Set<string>()
+      for (const row of rows) if (changed.has(row.id)) traverse(structure[side], row, side, reached)
+      for (const id of reached) show(side, id)
+    }
+  for (const row of rows)
+    if (row.collection === 'relationships' && shown.has(row.id))
+      for (const side of sides)
+        for (const id of row[side]) {
+          const end = structure[side].ends.get(id)
+          if (end) for (const entity of [end.from, end.to]) show(side, entity)
+        }
   return {changes: changed, context: new Set([...shown].filter(id => !changed.has(id))), shown}
 }
 

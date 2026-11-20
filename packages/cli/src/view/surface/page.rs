@@ -142,8 +142,12 @@ fn changed_items(lines: &mut Vec<String>, view: &Value) {
         .as_array()
         .into_iter()
         .flatten()
-        // Identity changes (a rename, split or merge) are `unchanged` but carry context.
-        .filter(|item| item["status"].as_str().is_some_and(|status| status != "unchanged") || item["context"].is_object())
+        // Identity changes (a rename, split or merge) are `unchanged`, but changes.
+        .filter(|item| {
+            item["status"].as_str().is_some_and(|status| status != "unchanged")
+                || item["correspondence"].is_string()
+                || item["context"].is_object()
+        })
         .collect();
     if changed.is_empty() {
         return;
@@ -151,8 +155,12 @@ fn changed_items(lines: &mut Vec<String>, view: &Value) {
     lines.push("Changed items (status, kind, label [ID]), each with its context: the items the Changes scope shows to read it:".to_owned());
     for item in changed {
         lines.push(format!(
-            "- {} {} {} [{}]",
+            "- {}{} {} {} [{}]",
             item["status"].as_str().unwrap_or_default(),
+            item["correspondence"]
+                .as_str()
+                .map(|correspondence| format!(" ({correspondence})"))
+                .unwrap_or_default(),
             item["kind"].as_str().unwrap_or_default(),
             item["label"].as_str().unwrap_or_default(),
             item["id"].as_str().unwrap_or_default()

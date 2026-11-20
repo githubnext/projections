@@ -48,12 +48,12 @@ function changeLines(page: PageView): string[] {
       .map(([status, count]) => `${count} ${status}`)
     lines.push(`Changes: ${counts.length ? counts.join(', ') : 'none'} of ${page.rows ?? 0} items.`)
   }
-  // Identity changes (a rename, split or merge) are `unchanged` but carry context.
-  const changed = (page.items ?? []).filter(item => (item.status && item.status !== 'unchanged') || item.context)
+  // Identity changes (a rename, split or merge) are `unchanged`, but changes.
+  const changed = (page.items ?? []).filter(item => (item.status && item.status !== 'unchanged') || item.correspondence || item.context)
   if (changed.length) {
     lines.push('Changed items (status, kind, label [ID]), each with its context: the items the Changes scope shows to read it:')
     for (const item of changed) {
-      lines.push(`- ${item.status} ${item.kind} ${item.label} [${item.id}]`)
+      lines.push(`- ${item.status}${item.correspondence ? ` (${item.correspondence})` : ''} ${item.kind} ${item.label} [${item.id}]`)
       if (item.context) lines.push(`  ${contextText(item.context)}`)
     }
   }

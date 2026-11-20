@@ -13,8 +13,9 @@ fn a_change_is_listed_with_its_context() {
             {"id": "tool:check", "label": "check", "kind": "tool", "status": "modified",
              "context": {"items": [{"id": "module", "label": "module", "kind": "module"}], "total": 1, "derived": true}},
             {"id": "tool:view", "label": "view", "kind": "tool", "status": "unchanged"},
-            {"id": "tool:serve", "label": "serve", "kind": "tool", "status": "unchanged",
+            {"id": "tool:serve", "label": "serve", "kind": "tool", "status": "unchanged", "correspondence": "declared",
              "context": {"items": [{"id": "module", "label": "module", "kind": "module"}], "total": 1}},
+            {"id": "tool:listen", "label": "listen", "kind": "tool", "status": "unchanged", "correspondence": "declared"},
         ],
     });
     let mut lines = Vec::new();
@@ -28,7 +29,12 @@ fn a_change_is_listed_with_its_context() {
     );
     // A rename is unchanged, but it is a change: listed with its context; the unchanged item without context isn't.
     assert!(
-        text.contains("- unchanged tool serve [tool:serve]\n  context: module module [module]\n"),
+        text.contains("- unchanged (declared) tool serve [tool:serve]\n  context: module module [module]\n"),
+        "{text}"
+    );
+    // A rename without context is listed too.
+    assert!(
+        text.contains("- unchanged (declared) tool listen [tool:listen]\nSelected"),
         "{text}"
     );
     assert!(!text.contains("[tool:view]\n"), "{text}");

@@ -425,7 +425,8 @@ changeContext(rows: Array<ScopeRow>, revisions: { "after": ContainmentSource; "b
 ```
 
 The context of a comparison's changes: each change's own (`Change.context`, the Engine's core context and what
-comparator rules added), else, for a comparison saved without it, the same structural derivation (`rowContexts`).
+comparator rules added), else, for a comparison saved without it, the same structural derivation (`rowContexts`),
+traversed once for all the changes. A shown relationship's endpoints are shown too, so a renderer can draw it.
 Context is only ever added, and never hides a change. `changes` narrows the changes to those row IDs (for example a
 find or summary filter's); by default every change (`isScopeChange`) is in scope.
 
@@ -1151,9 +1152,9 @@ rowContexts(rows: Array<ScopeRow>, revisions: { "after": ContainmentSource; "bef
 ```
 
 The context of each change row of a comparison: the comparison's own (`Change.context`), none for a row it gives
-none, or, for a comparison saved without any context, the structural derivation the Engine's core context makes (a changed relationship's endpoints, and the items containing a
-changed or context entity, `isContainment`, with the containment relationships between them). Returns a function
-from a row to its context.
+none, or, for a comparison saved without any context, the structural derivation the Engine's core context makes (a
+changed relationship's endpoints, and the items containing a changed or context entity, `isContainment`, with the
+containment relationships between them). Returns a function from a row to its context.
 
 ### `ScheduledStep`
 

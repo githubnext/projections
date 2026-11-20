@@ -117,14 +117,26 @@ export function inspectorSummary(
   }
 }
 
-/** The presented rows, changed ones first, at most 100, each change with its context. */
+/** The presented rows, changed ones first (identity changes too), at most 100, each change with its context. */
 function summaryItems(controller: ProjectionController): NonNullable<InspectorSummary['items']> {
   const contextOf = changeContextItems(controller.rows, controller.subject)
+  // A rename, split or merge is `unchanged` but is a change; its correspondence says so.
+  const identity = (row: (typeof controller.rows)[number]) =>
+    row.correspondence && row.correspondence !== 'exact' && row.correspondence !== 'none' ? row.correspondence : undefined
+  const changed = (row: (typeof controller.rows)[number]) => Boolean((row.status && row.status !== 'unchanged') || identity(row))
   return [...controller.rows]
-    .sort((a, b) => Number(!a.status || a.status === 'unchanged') - Number(!b.status || b.status === 'unchanged'))
+    .sort((a, b) => Number(!changed(a)) - Number(!changed(b)))
     .slice(0, 100)
     .map(row => {
       const context = contextOf(row)
-      return {id: row.id, label: row.label, kind: row.kind, ...(row.status ? {status: row.status} : {}), ...(context ? {context} : {})}
+      const correspondence = identity(row)
+      return {
+        id: row.id,
+        label: row.label,
+        kind: row.kind,
+        ...(row.status ? {status: row.status} : {}),
+        ...(correspondence ? {correspondence} : {}),
+        ...(context ? {context} : {}),
+      }
     })
 }

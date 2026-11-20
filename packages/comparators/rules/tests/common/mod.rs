@@ -593,8 +593,8 @@ impl Golden {
         self.checked += 1;
         let code = |error: &str| error.split(':').next().unwrap().to_owned();
         let agree = match (self.expected(golden), &actual) {
-            // The originals predate context, the core's structural context every comparison now has.
-            (Ok(expected), Ok(actual)) => semantic(&expected) == semantic(&without_context(actual)),
+            // The originals predate context, so neither side's is compared: a rebased case records it.
+            (Ok(expected), Ok(actual)) => semantic(&without_context(&expected)) == semantic(&without_context(actual)),
             (Err(expected), Err(actual)) => expected == code(actual),
             _ => false,
         };

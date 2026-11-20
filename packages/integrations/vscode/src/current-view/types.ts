@@ -24,6 +24,8 @@ export interface ViewItem {
   label: string
   kind: string
   status?: string
+  /** An identity change's correspondence (`declared`, `split` or `merge`): `unchanged`, but a change. */
+  correspondence?: string
   /** A change's context: the items a person needs to read it, which the Changes scope shows beside it. */
   context?: ViewContext
 }

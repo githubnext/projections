@@ -172,3 +172,19 @@ test("every part of a split carries the change's context", () => {
     ],
   )
 })
+
+test("a shown relationship's endpoints are shown, though the context that names it doesn't name them", () => {
+  const withRelationship = {
+    ...comparison,
+    changes: comparison.changes.map(change =>
+      change.id === 'tool:listen' ? {...change, context: {before: [], after: ['tool:check>tool:check/path'], rules: ['paths']}} : change,
+    ),
+  }
+  const contextRows = scopeRows(presentComparison(before, after, withRelationship))
+  const scope = changeContext(contextRows, {before, after}, ['tool:listen'])
+  assert.deepEqual([...scope.context].sort(), ['tool:check', 'tool:check/path', 'tool:check>tool:check/path'])
+  // The change's own context stays as the comparison says.
+  assert.deepEqual(rowContexts(contextRows, {before, after})(contextRows.find(row => row.id === 'tool:listen')).rows, [
+    'tool:check>tool:check/path',
+  ])
+})

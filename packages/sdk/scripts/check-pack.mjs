@@ -44,7 +44,12 @@ const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
 const npmCli = process.env.npm_execpath
 // Scratch installs use the registry this workspace uses, wherever they are.
 const registry = /^registry=(.+)$/m.exec(readFileSync(join(workspace, '.npmrc'), 'utf8'))?.[1]
-const env = {...process.env, ...(registry && !process.env.npm_config_registry ? {npm_config_registry: registry} : {})}
+// npm retries a request that fails on the network or with a 5xx, never a missing version; a few more times here.
+const env = {
+  ...process.env,
+  ...(registry && !process.env.npm_config_registry ? {npm_config_registry: registry} : {}),
+  npm_config_fetch_retries: process.env.npm_config_fetch_retries ?? '5',
+}
 const npm = (args, cwd, extra = {}) =>
   execFileSync(npmCli ? process.execPath : 'npm', npmCli ? [npmCli, ...args] : args, {
     cwd,
@@ -52,6 +57,25 @@ const npm = (args, cwd, extra = {}) =>
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'inherit'],
   })
+/**
+ * Pins the scaffold's registry dependencies to the versions this workspace's lockfile installed, so the check builds
+ * with what CI already tested rather than whatever the registry newly lists for the scaffold's ranges (a release its
+ * mirror hasn't caught up with fails the install: `ETARGET No matching version found`). A range the installed version
+ * doesn't share a major version with is an error: the template and the workspace disagree.
+ */
+function pinToWorkspace(file) {
+  const scaffold = JSON.parse(readFileSync(file, 'utf8'))
+  for (const field of ['dependencies', 'devDependencies'])
+    for (const [name, range] of Object.entries(scaffold[field] ?? {})) {
+      const installed = join(workspace, 'node_modules', name, 'package.json')
+      if (!/^[\^~]?\d/.test(range) || !existsSync(installed)) continue
+      const {version} = JSON.parse(readFileSync(installed, 'utf8'))
+      if (version.split('.')[0] !== range.replace(/^[\^~]/, '').split('.')[0])
+        throw new Error(`The scaffold asks for ${name}@${range}, but this workspace installs ${version}`)
+      scaffold[field][name] = version
+    }
+  writeFileSync(file, `${JSON.stringify(scaffold, null, 2)}\n`)
+}
 const step = text => console.log(`\n▸ ${text}`)
 const failures = []
 const fail = text => failures.push(text)
@@ -257,6 +281,7 @@ export const build: RendererBuildOptions = {entry: 'src/main.ts', name: 'x', tit
       for (const file of sources.split('\n').filter(Boolean)) {
         if (internal.test(readFileSync(join(repository, file), 'utf8'))) fail(`The scaffold's ${file} names an internal workspace`)
       }
+      pinToWorkspace(join(renderer, 'package.json'))
       npm(['install', '--no-audit', '--no-fund'], renderer)
       // The browser the scaffold's Playwright drives; a no-op once installed.
       execFileSync(process.execPath, [join(renderer, 'node_modules/@playwright/test/cli.js'), 'install', 'chromium'], {

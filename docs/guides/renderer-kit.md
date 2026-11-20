@@ -132,9 +132,8 @@ click on the selected item, contains render failures (reported with
 - `onOpen(path, line?)`: Source navigation request (the host decides)
 - `reportSteps(ends)`: Hold points, for components that use `steps: 'manual'`
 - `controls`: Values of the declared controls, defaults filled in
-- `declareControls(controls)`, `setControl(id, value)`: Replace the declared
-  controls; set one from the content (a
-  [sortable heading](renderer-kit-components.md#data-tables))
+- `declareControls`, `setControl(id, value)`: Replace the controls; set one
+  ([a sorting heading](renderer-kit-components.md#data-tables))
 - `onAction(listener)`: Subscribes to `action` messages (or
   `useControlActions(onAction, {id: handler})`)
 - `options`, `viewport`, `reducedMotion`, `locale`: Host state

@@ -533,8 +533,8 @@ visual unit and follow its shape: a unit is an entity element not inside another
 one, or one marked `data-projections-unit`, and gets a ring inside its own
 border radius. An entity nested in a unit (a column in a table, a member in a
 card) is a part: it is tinted, never outlined, and units clip their contents to
-their own radius (`overflow: hidden`, or a clip path in SVG). The harness checks
-this for every renderer (`affordanceFailures` in
+their own radius (`overflow: hidden`, `clip-path` as `Group`, or SVG clip
+paths). The harness checks this for every renderer (`affordanceFailures` in
 `packages/renderers/kit/browser/invariants.ts`). `base.css` also styles change
 regions (`pk-region` with `data-change`), badges (the label tokens), status
 lines and icons, names, identifiers, empty and error states, notices, legends,

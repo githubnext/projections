@@ -24,7 +24,8 @@ export function horizontalOverflow(): OverflowMeasurement {
 
 /**
  * Elements that cut off their own content: `overflow` hidden or clip on an
- * axis with more content than fits on it, for example a row collapsed to a
+ * axis, or an inset `clip-path` (as `Group` clips to its outer edge), with
+ * more content than fits on it, for example a row collapsed to a
  * zero-height track or text pushed past a fixed box. Scroll containers, text
  * truncated with an ellipsis or a line clamp, and visually hidden content
  * (`sr-only`) are deliberate and don't count.
@@ -36,7 +37,8 @@ export function clippedContent(root: Element = document.body): string[] {
     if (!(element instanceof HTMLElement) || !visible(element)) continue
     const style = getComputedStyle(element)
     if (visuallyHidden(element, style)) continue
-    const cuts = (overflow: string) => overflow === 'hidden' || overflow === 'clip'
+    const inset = style.clipPath.startsWith('inset(')
+    const cuts = (overflow: string) => inset || overflow === 'hidden' || overflow === 'clip'
     const truncated = style.textOverflow === 'ellipsis' || (style.getPropertyValue('-webkit-line-clamp') || 'none') !== 'none'
     const vertical = cuts(style.overflowY) && !truncated && element.scrollHeight > element.clientHeight + 1
     const horizontal = cuts(style.overflowX) && !truncated && element.scrollWidth > element.clientWidth + 1

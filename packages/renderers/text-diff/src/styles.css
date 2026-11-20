@@ -25,6 +25,23 @@
   --td-line-height: calc(1em * var(--projections-line-height-relaxed));
   overflow-x: auto;
 }
+/*
+ * The body scrolls, so it would clip a changed line's edges, which lie on the lines around it (kit `pk-region-run`).
+ * It reaches over the card's edge, and the header's bottom line, by their width, with that width as padding: its lines
+ * stay where they were, and their edges have room to cover the card's there, so each boundary is one line.
+ */
+.text-diff-command > .td-body {
+  margin-inline: calc(-1 * var(--projections-border-width));
+  padding-inline: var(--projections-border-width);
+}
+.text-diff-command > .pk-group-header + .td-body {
+  margin-top: calc(-1 * var(--projections-border-width));
+  padding-top: var(--projections-border-width);
+}
+.text-diff-command > .td-body:last-child {
+  margin-bottom: calc(-1 * var(--projections-border-width));
+  padding-bottom: var(--projections-border-width);
+}
 .td-body[data-presentation='formatted'] {
   font-family: var(--font-mono);
   font-size: var(--projections-font-size-xs);
@@ -161,6 +178,34 @@
 }
 .td-split .td-side-after {
   border-left: var(--projections-border-width) solid var(--divider);
+}
+/*
+ * A changed line's bottom edge lies inside it, since the line under it paints later (its gutter, a hatched filler),
+ * except at the body's end, where it lies on the card's edge. A changed After line owns the line between the columns,
+ * so it gives that line the change's hue rather than drawing beside it; beside a changed Before line, the After side's
+ * line takes the Before line's hue.
+ */
+.pk .td-diff .pk-region-run[data-change][data-run-end] {
+  --pk-run-end: inset 0 calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color);
+}
+.pk .td-diff > .pk-region-run[data-change][data-run-end]:last-child,
+.pk .td-split > .td-pair:last-child > .pk-region-run[data-change][data-run-end] {
+  --pk-run-end:
+    calc(-1 * var(--stroke)) var(--stroke) 0 0 var(--pk-region-edge-color), var(--stroke) var(--stroke) 0 0 var(--pk-region-edge-color);
+}
+.pk .td-split .td-side-after.pk-region-run[data-change] {
+  border-left-color: var(--pk-region-line);
+  --pk-run-left: inset calc(var(--stroke-strong) - var(--stroke)) 0 0 0 var(--pk-region-edge-color);
+}
+.pk .td-split .td-side-after.pk-region-run[data-change][data-run-start] {
+  --pk-run-start:
+    0 calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color), var(--stroke) calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color);
+}
+.pk .td-split > .td-pair:last-child > .td-side-after.pk-region-run[data-change][data-run-end] {
+  --pk-run-end: 0 var(--stroke) 0 0 var(--pk-region-edge-color), var(--stroke) var(--stroke) 0 0 var(--pk-region-edge-color);
+}
+.pk .td-split .td-side-before[data-change='removed'] + .td-side-after:not([data-change]) {
+  border-left-color: color-mix(in srgb, var(--red-border) calc(var(--emphasis, 1) * 100%), var(--divider));
 }
 /* No line here: the shorter side's room is hatched over the inset surface, never a blank row. */
 .td-filler {

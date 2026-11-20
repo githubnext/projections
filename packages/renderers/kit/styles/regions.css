@@ -1,8 +1,7 @@
 /*
  * Change regions: a tinted area always has a defining edge in the same hue, never a fill alone. Mark the region with
  * `pk-region` and `data-change` (added, removed, modified, renamed or moved); both fill and edge scale with
- * `--emphasis` (0 at the endpoints, so the region is plain there). `pk-region-run` draws only the left edge, for a run
- * of rows; `data-run-start` and `data-run-end` add its top and bottom edges.
+ * `--emphasis` (0 at the endpoints, so the region is plain there).
  */
 .pk .pk-region[data-change] {
   --pk-region-amount: calc(var(--emphasis, 1) * 100%);
@@ -26,29 +25,40 @@
   --pk-region-fill: var(--violet-soft);
   --pk-region-edge: var(--violet-border);
 }
+/*
+ * A run of rows (`pk-region-run`, in a list or table whose rows meet edge to edge): a strong left edge and a right
+ * edge, with `data-run-start` and `data-run-end` adding its top and bottom. Its edges lie on the lines around it, not
+ * inside them: each is drawn one stroke outside the run, over the neighbouring line (a row's, a header's, its
+ * container's edge), so every boundary is one line, in the change's hue. It paints over what comes before it in the
+ * document (rows above it, its container's edge); a neighbour after it paints over its edge there, so a renderer
+ * gives that neighbour's line the hue, or draws the edge inside the run instead (`--pk-run-end: inset 0 calc(-1 *
+ * var(--stroke)) 0 0 var(--pk-region-edge-color)`). Where two runs meet, the later one's top edge is the boundary.
+ * The container must leave that stroke visible (a group's edge is; a scrolling container needs room for it). A row
+ * with a line of its own on a side gives that line the hue instead (`--pk-region-line`, which fades to `--pk-line`,
+ * the divider by default) and sets that side's variable to a transparent shadow.
+ */
 .pk .pk-region.pk-region-run[data-change] {
-  box-shadow:
-    inset var(--stroke-strong) 0 0 var(--pk-region-edge-color),
-    inset calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color);
+  --pk-region-line: color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--pk-line, var(--divider)));
+  --pk-run-left:
+    calc(-1 * var(--stroke)) 0 0 0 var(--pk-region-edge-color),
+    inset calc(var(--stroke-strong) - var(--stroke)) 0 0 0 var(--pk-region-edge-color);
+  --pk-run-right: var(--stroke) 0 0 0 var(--pk-region-edge-color);
+  --pk-run-start: 0 0 0 0 transparent;
+  --pk-run-end: 0 0 0 0 transparent;
+  box-shadow: var(--pk-run-left), var(--pk-run-right), var(--pk-run-start), var(--pk-run-end);
 }
+/* The corners too: each end is two copies, shifted out at both corners, so the frame meets the lines it crosses. */
 .pk .pk-region.pk-region-run[data-change][data-run-start] {
-  box-shadow:
-    inset var(--stroke-strong) 0 0 var(--pk-region-edge-color),
-    inset calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color),
-    inset 0 var(--stroke) 0 var(--pk-region-edge-color);
+  --pk-run-start:
+    calc(-1 * var(--stroke)) calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color),
+    var(--stroke) calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color);
 }
 .pk .pk-region.pk-region-run[data-change][data-run-end] {
-  box-shadow:
-    inset var(--stroke-strong) 0 0 var(--pk-region-edge-color),
-    inset calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color),
-    inset 0 calc(-1 * var(--stroke)) 0 var(--pk-region-edge-color);
+  --pk-run-end:
+    calc(-1 * var(--stroke)) var(--stroke) 0 0 var(--pk-region-edge-color), var(--stroke) var(--stroke) 0 0 var(--pk-region-edge-color);
 }
-.pk .pk-region.pk-region-run[data-change][data-run-start][data-run-end] {
-  box-shadow:
-    inset var(--stroke-strong) 0 0 var(--pk-region-edge-color),
-    inset calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color),
-    inset 0 var(--stroke) 0 var(--pk-region-edge-color),
-    inset 0 calc(-1 * var(--stroke)) 0 var(--pk-region-edge-color);
+.pk .pk-region.pk-region-run[data-change][data-run-end]:has(+ .pk-region-run[data-change][data-run-start]) {
+  --pk-run-end: 0 0 0 0 transparent;
 }
 /*
  * A status tab (`StatusTab`) hangs off a pill's bottom edge: its room is reserved under every pill, and a changed pill

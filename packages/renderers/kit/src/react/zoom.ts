@@ -28,6 +28,7 @@ export function useScrollAnchor(
   opening = false,
   start: ScrollStart = topLeft,
   onMove?: () => void,
+  clearCover = true,
 ): () => void {
   const center = useRef({x: 0.5, y: 0.5})
   // Whether the person has scrolled: only their own input counts, never a scroll the browser makes (clamping the
@@ -37,7 +38,8 @@ export function useScrollAnchor(
   // first row opens below the cover rather than under it; it still pans under it.
   const cover = useStageCover()
   const insetTop = useStageInsetTop()
-  const clear = cover?.length ? (insetTop ?? 0) : 0
+  // Not for an opening centred on a focus (`clearCover` false), which the placement already centres in the view.
+  const clear = clearCover && cover?.length ? (insetTop ?? 0) : 0
   const current = useRef({scale, opening, start, onMove, clear})
   current.current = {scale, opening, start, onMove, clear}
   // Places the view: at its start while it opens, else around the middle it had.
@@ -199,7 +201,14 @@ export function useStageZoom(
   const onMove = useRef(() => setChosen(previous => previous ?? current.current)).current
   // A larger stage raises the fit, which can lower the most a zoom may be.
   const shown = Math.min(chosen ?? opening, maxZoom(fit))
-  const keep = useScrollAnchor(scroller, fit * shown, chosen === undefined, options.opening?.start ?? options.start, onMove)
+  const keep = useScrollAnchor(
+    scroller,
+    fit * shown,
+    chosen === undefined,
+    options.opening?.start ?? options.start,
+    onMove,
+    !options.opening,
+  )
   useDotGrid(scroller, fit * shown)
   useDragPan(scroller)
   return {zoom: shown, scale: fit * shown, keep}

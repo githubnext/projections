@@ -134,20 +134,20 @@ coordinates) and `stage-inset-top` (the band they take), so renderers that
 honour them keep their content clear of the chip. It sits as far below the
 frame's top as from its side: a solid box in the utility bar's own fill, edge,
 corners and muted text (`--ph-utility-*`), 28px tall, the revision's name in
-mono at regular weight and its commit subject one step more muted (the age is in
-its tooltip). A host can restyle the chip alone with `--ph-pane-chip-bg`,
-`--ph-pane-chip-border`, `--ph-pane-chip-radius`, `--ph-pane-chip-fg` and
-`--ph-pane-chip-name`. `paneLabels: 'hidden'` drops the bands of side by side
-and swipe for a host that names the revisions elsewhere. Either way the labels
-name each pane for assistive technology. `utility` puts controls in the stage's
-utility area in its one-frame modes (animated, diff): a bar floating over the
-stage's top edge, inset from its sides and as wide as its content needs, instead
-of a toolbar row above the stage. The stage measures what it overlays on each
-frame (the bar, or the chips) and sends it the same two tokens, so the frame
-keeps clear of it and shows under it as it pans or scrolls. The default UI's
-`utilityArea` uses it for playback, with chips for the labels (see
-[the design note](../design/utility-area.md)). `renderStatus` renders a pane's
-loading or failure state; pass `null` to show `rendererStatus` and
+mono at regular weight and its commit subject in the text face, both muted (the
+age is in its tooltip). A host can restyle the chip alone with
+`--ph-pane-chip-bg`, `--ph-pane-chip-border`, `--ph-pane-chip-radius`,
+`--ph-pane-chip-fg` and `--ph-pane-chip-name`. `paneLabels: 'hidden'` drops the
+bands of side by side and swipe for a host that names the revisions elsewhere.
+Either way the labels name each pane for assistive technology. `utility` puts
+controls in the stage's utility area in its one-frame modes (animated, diff): a
+bar floating over the stage's top edge, inset from its sides and as wide as its
+content needs, instead of a toolbar row above the stage. The stage measures what
+it overlays on each frame (the bar, or the chips) and sends it the same two
+tokens, so the frame keeps clear of it and shows under it as it pans or scrolls.
+The default UI's `utilityArea` uses it for playback, with chips for the labels
+(see [the design note](../design/utility-area.md)). `renderStatus` renders a
+pane's loading or failure state; pass `null` to show `rendererStatus` and
 `rendererErrors` yourself. While a pane loads, its status covers the frame's
 area and is centered in it.
 

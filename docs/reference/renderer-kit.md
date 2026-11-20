@@ -4429,6 +4429,17 @@ default its top left, where reading begins) rather than cut through the middle.
 scroll key in content that overflows: the moment they start to pan.
 Returns a function that keeps the view where its caller just scrolled it.
 
+### `useScrolledPadding`
+
+```ts
+useScrolledPadding<P extends FitPadding>(padding: P, drawnScale: number, fitScale: number): P
+```
+
+The padding a fitted drawing is drawn with (its `--pk-fit-top`): `padding` while it is drawn at its fitted scale
+(`fitScale`), and once it is drawn larger and scrolls (opened at the text floor, or zoomed in: `drawnScale`), a top
+of at least the host's `stage-inset-top` under a cover, so its first row can open, and scroll back, clear of what the
+host overlays at the frame's top. The fit never reads it.
+
 ### `useStageCover`
 
 ```ts

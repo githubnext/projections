@@ -17,6 +17,7 @@ import {
   cardCornerRadius,
   useBorderWidths,
   useCoveredPadding,
+  useScrolledPadding,
   useFitScale,
   useLegend,
   useOpeningFloor,
@@ -397,7 +398,9 @@ export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, o
   // Zoomed in, a content-sized stage grows to the drawn scale (see `FitOptions.drawnScale`).
   const [drawnScale, setDrawnScale] = useState(0)
   const fit = useFitScale(scroller, bounds, {padding, floor, drawnScale})
-  const start = useMemo(() => contentStart([...boxes.values()].slice(0, diUnitLimit), bounds, padding), [boxes, bounds, padding])
+  // The padding as drawn (more under a cover once it scrolls): the opening view is placed in it.
+  const drawnPadding = useScrolledPadding(padding, drawnScale, fit.scale)
+  const start = useMemo(() => contentStart([...boxes.values()].slice(0, diUnitLimit), bounds, drawnPadding), [boxes, bounds, drawnPadding])
   const {zoom, scale} = useStageZoom(scroller, onAction, fit.scale, {floor, start})
   useLayoutEffect(() => setDrawnScale(scale), [scale])
 
@@ -411,7 +414,7 @@ export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, o
       <div
         className="di-scroll pk-dot-grid"
         ref={scroller}
-        style={{'--pk-fit-top': `${padding.top}px`} as CSSProperties}
+        style={{'--pk-fit-top': `${drawnPadding.top}px`} as CSSProperties}
         data-projections-scroll="dependency-injection"
         role="region"
         aria-label="Scrollable dependency composition"

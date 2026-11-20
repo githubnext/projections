@@ -174,13 +174,14 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
           fill && 'pj:flex-1',
         )}
       >
-        <div ref={panel} className="ph-panel pj:relative pj:flex pj:min-h-0 pj:min-w-0 pj:flex-1 pj:flex-col">
+        {/* Space toggles playback from the stage's chrome and from the floating playback over the table and text views. */}
+        <div ref={panel} className="ph-panel pj:relative pj:flex pj:min-h-0 pj:min-w-0 pj:flex-1 pj:flex-col" onKeyDown={space}>
           {/* The stage's chrome takes focus when clicked, so Space there toggles playback like in the toolbar. */}
           {renderer && (
             <div
               className="ph-stage-box pj:flex pj:min-h-0 pj:min-w-0 pj:flex-1 pj:flex-col pj:focus-visible:outline-hidden"
               hidden={view !== 'renderer'}
-              {...(space ? {tabIndex: -1, onKeyDown: space} : {})}
+              {...(space ? {tabIndex: -1} : {})}
             >
               <ProjectionStage
                 projection={p}

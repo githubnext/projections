@@ -33,7 +33,7 @@ export {CardChangeMarks, cardCornerRadius} from './react/graph-canvas/card-chang
 export {useBorderWidths} from './react/border.js'
 export {useDomainIndex} from './react/domain.js'
 export {useFitScale} from './react/fit.js'
-export {useCoveredPadding} from './react/covered-padding.js'
+export {useCoveredPadding, useScrolledPadding} from './react/covered-padding.js'
 export {useLegend} from './react/legend.js'
 export {useSummaryNouns} from './react/summary.js'
 export {useOpeningFloor, useScrollAnchor, useStageZoom} from './react/zoom.js'

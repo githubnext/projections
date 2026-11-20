@@ -117,8 +117,8 @@ const titleOf = (label: ReactNode) => (typeof label === 'string' ? {title: label
  *
  * A solid box in the stage's playback bar's own surface, edge and corners (`UtilityArea`'s `--ph-utility-bg`,
  * `--ph-utility-border` and `--ph-utility-radius`), 28px tall with 10px of padding, and its text: the revision's name
- * in mono at regular weight in the bar's muted text colour (`--ph-utility-muted`), then its commit subject, one step
- * more muted (`ChipText`). Its text is centred by cap height.
+ * in mono at regular weight in the bar's muted text colour (`--ph-utility-muted`), then its commit subject in the text
+ * face (`ChipText`). Its text is centred by cap height.
  * A host restyles the chip alone with `--ph-pane-chip-bg`, `--ph-pane-chip-border`, `--ph-pane-chip-radius`,
  * `--ph-pane-chip-fg` (the subject) and `--ph-pane-chip-name`.
  */

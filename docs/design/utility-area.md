@@ -31,9 +31,10 @@ when it's needed, for labels and controls.
   divider. A label chip, chosen from ten styles reviewed in place, is 28 px tall
   with 10 px of padding and takes the bar's own fill, edge, corners and text
   (`--ph-utility-*`), so the two read as one family: the revision's name in mono
-  at regular weight in the bar's muted text colour, then its commit subject one
-  step more muted, with its age in the tooltip. Its text is centred by cap
-  height (`text-box: trim-both cap alphabetic`).
+  at regular weight in the bar's muted text colour, then its commit subject in
+  the text face and the same colour (a subtler one fell below 4.5:1), with its
+  age in the tooltip. Its text is centred by cap height
+  (`text-box: trim-both cap alphabetic`).
 - The toolbar keeps one row in every mode. The title bar keeps its own row above
   the toolbar in the CLI viewer and canvas, as decided in #25.
 

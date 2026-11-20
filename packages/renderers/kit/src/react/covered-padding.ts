@@ -2,7 +2,7 @@ import {useLayoutEffect, useMemo, useState} from 'react'
 import type {RefObject} from 'react'
 import {coveredTop} from '../fit.js'
 import type {FitPadding} from '../fit.js'
-import {useStageCover} from './shell/frame.js'
+import {useStageCover, useStageInsetTop} from './shell/frame.js'
 
 /**
  * `padding` for content of `size` fitted to the stage element `stage` (as `useFitScale` fits it), with its top moved
@@ -48,4 +48,19 @@ export function useCoveredPadding<P extends FitPadding>(
     const top = coveredTop({cover, view: box, origin: box, size, padding, maxScale})
     return top === (padding.top ?? padding.y) ? padding : {...padding, top}
   }, [cover, box, size, padding, maxScale])
+}
+
+/**
+ * The padding a fitted drawing is drawn with (its `--pk-fit-top`): `padding` while it is drawn at its fitted scale
+ * (`fitScale`), and once it is drawn larger and scrolls (opened at the text floor, or zoomed in: `drawnScale`), a top
+ * of at least the host's `stage-inset-top` under a cover, so its first row can open, and scroll back, clear of what the
+ * host overlays at the frame's top. The fit never reads it.
+ */
+export function useScrolledPadding<P extends FitPadding>(padding: P, drawnScale: number, fitScale: number): P {
+  const cover = useStageCover()
+  const insetTop = useStageInsetTop()
+  const own = padding.top ?? padding.y
+  const scrolled = fitScale > 0 && drawnScale > fitScale * 1.001
+  const top = scrolled && cover?.length && insetTop !== undefined ? Math.max(own, insetTop) : own
+  return useMemo(() => (top === own ? padding : {...padding, top}), [padding, top, own])
 }

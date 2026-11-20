@@ -6,7 +6,7 @@ import type {GraphTransition} from '../../graph-transition.js'
 import {contentStart, openingZoom} from '../../zoom.js'
 import {useBorderWidths} from '../border.js'
 import {useFitScale} from '../fit.js'
-import {useCoveredPadding} from '../covered-padding.js'
+import {useCoveredPadding, useScrolledPadding} from '../covered-padding.js'
 import {useFrameSizing, useStageCover, useStageInset, useStageInsetTop} from '../shell/frame.js'
 import {useOpeningFloor, useStageZoom} from '../zoom.js'
 import type {ContentBox, ScrollStart} from '../../zoom.js'
@@ -118,6 +118,9 @@ export function useGraphZoom(
     drawnScale,
     ...(area && request ? {aspect: (area.box.width + 2 * padding.x) / (area.box.height + padding.top + padding.y)} : {}),
   })
+  // The padding as drawn (more under a cover once it scrolls), which the reading start is placed in. An opening on a
+  // focus centres the focus in the view instead, so it keeps the fitted padding.
+  const drawnPadding = useScrolledPadding(padding, area && request ? 0 : drawnScale, fit.scale)
   // Arrowheads stop on the outer edge of their target's border; a change border is inset so it never reaches further.
   const borders = useBorderWidths(scroller)
   const content = useMemo((): ContentBox => ({x: bounds.minX, y: bounds.minY, width: bounds.width, height: bounds.height}), [bounds])
@@ -134,8 +137,9 @@ export function useGraphZoom(
     }))
     const align = orientation === 'vertical' ? 'centre' : 'left'
     // Flush with the host's stage inset, the leftmost card opens that inset from the view's edge.
-    return view => contentStart(shown.current.length ? shown.current : all, content, padding, 12, align, flush ? padding.x : 0)(view)
-  }, [framing, content, orientation, padding, flush])
+    return view =>
+      contentStart(shown.current.length ? shown.current : all, content, drawnPadding, 12, align, flush ? drawnPadding.x : 0)(view)
+  }, [framing, content, orientation, drawnPadding, flush])
   const sized = useFrameSizing() === 'content'
   const opening = useMemo(
     () =>
@@ -154,7 +158,7 @@ export function useGraphZoom(
   )
   const zoom = useStageZoom(scroller, onAction, fit.scale, {floor, start, ...(opening ? {opening} : {}), ...(hold ? {hold} : {})})
   useLayoutEffect(() => setDrawnScale(zoom.scale), [zoom.scale])
-  return {...zoom, borders, top: padding.top}
+  return {...zoom, borders, top: drawnPadding.top}
 }
 
 /** The opening view on a focus (see `useGraphZoom`), or undefined for the default one. */

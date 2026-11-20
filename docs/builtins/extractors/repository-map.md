@@ -1,9 +1,9 @@
 # Repository map
 
-Every file in the repository, inside its folders, with its size in bytes (and,
-when you ask, its line count). Drawn as circles packed inside circles, it
-answers "where is this repository's weight, and which files and folders did this
-change add, remove, grow or shrink?"
+This extractor maps every file in your repository inside its folder hierarchy,
+weighted by byte size (and optionally line count). Drawn as nested circles, it
+lets you see where the repository's weight lives—and across a pull request,
+which files and folders were added, removed, grew, or shrank.
 
 <!-- generated: facts -->
 
@@ -17,34 +17,35 @@ change add, remove, grow or shrink?"
 
 ## When to use it
 
-Use it in any repository, whatever its languages, for a picture of a change's
-footprint: a new package or folder arriving, a vendored library leaving, a
-generated file that doubled in size, assets committed by mistake. It reads only
-the file list and file sizes, so it runs on any pull request without `--trust`,
-and it is one of the two projections the CLI shows for a repository with no
-definitions of its own.
+Use this extractor in any repository, regardless of language, to get a quick
+visual sense of a change's footprint: a new package or folder landing, a
+vendored library being removed, a generated file doubling in size, or large
+assets committed by mistake. Because it only inspects file paths and sizes, it
+runs on any pull request without `--trust`—and it is one of the two default
+projections the CLI offers when a repository has no definitions yet.
 
-It measures files, not what's in them: it can't tell a refactor from a rewrite
-of the same size, or say how code depends on other code. For lines of code per
-language use [`code-statistics`](code-statistics.md); for references between
-files, [`scip-file-references`](scip-file-references.md).
+It only measures file sizes, not code semantics, so it won't distinguish a
+refactor from a same-sized rewrite or show how files depend on one another. For
+lines of code broken down by language, use
+[`code-statistics`](code-statistics.md); for cross-file references, use
+[`scip-file-references`](scip-file-references.md).
 
 ## What it reads
 
-- The revision's file list: tracked files and untracked files Git doesn't
-  ignore. `.git` is never mapped.
-- Each file's size: the size of its blob in the revision, so the same revision
-  always maps the same way. A symlink is listed as a `symlink`, sized by the
-  length of its target path, and never followed.
-- With `lines: true`, each text file's content, to count its lines. A file with
-  a NUL byte in its first 8,000 bytes is binary, as Git decides, and gets no
-  line count.
+- **The file list** for the revision: all tracked files plus untracked files
+  that Git doesn't ignore. `.git` is always excluded.
+- **File sizes**, read from each file's blob in that revision so results are
+  deterministic. Symlinks are recorded as `symlink` entities sized by their
+  target path length and are never followed.
+- **Line counts** when `lines: true` is set. Any file with a NUL byte in its
+  first 8,000 bytes is treated as binary (matching Git's heuristic) and skips
+  line counting.
 
-Each folder is a `directory` entity and each file a `file` (or `symlink`) entity
-with its `path` and `size` (and `lines`), joined by `contains` relationships.
-IDs are paths (`file:src/index.ts`), so a file whose size changed is one
-modified file. Folders carry no size of their own; the renderer adds up what
-they hold.
+Each folder becomes a `directory` entity and each file becomes a `file` (or
+`symlink`) entity carrying its `path`, `size`, and optional `lines`, linked by
+`contains` relationships. Because IDs are based on paths (`file:src/index.ts`),
+a file whose size changes shows up as a single modified file. Folders don't
+store their own size; the renderer sums their contents.
 
 ## Options
 
@@ -58,33 +59,33 @@ they hold.
 
 <!-- end generated: inputs -->
 
-`include` and `exclude` are glob arrays (`*` within a folder, `**` across
-folders, `?` one character) matched against repository-relative paths:
+Both `include` and `exclude` accept glob arrays (`*` within a folder, `**`
+across folders, `?` for a single character) matched against repository-relative
+paths:
 
 ```json
 "inputs": {"include": ["src/**", "docs/**"], "exclude": ["**/*.snap"], "lines": true}
 ```
 
-These remove paths from the extraction itself. To keep them in the extraction
-but hide them in the picture, use the
-[`file-packing`](../renderers/file-packing.md) renderer's controls instead:
-**Hide dependencies and build output**, **Hide lockfiles**, a toggle per
-top-level folder, **Depth**, and **Size by** Bytes or Lines (offered when the
-extraction counts lines). A definition presets them in
-`presentation.rendererOptions`, for example
+Those filters drop paths from the extraction altogether. If you'd rather keep
+them in the data and toggle visibility in the UI, use the
+[`file-packing`](../renderers/file-packing.md) renderer's built-in controls:
+**Hide dependencies and build output**, **Hide lockfiles**, per-folder toggles,
+**Depth**, and **Size by** (Bytes or Lines, when line counts are enabled). You
+can preset those in `presentation.rendererOptions`, for example
 `{"hideLockfiles": true, "hideDependencies": true, "measure": "lines"}`.
 
 ## What a comparison shows
 
-- **Files** added or removed, each with a change-colored ring (dashed when
-  removed) and its status in words: `+ Added`, `− Removed`.
-- **Files** modified, whose size (or line count) changed: the circle grows or
-  shrinks during its step, and hovering it shows the new size and the change
+- **Added or removed files**, marked with a colored ring (dashed for removals)
+  and a status label (`+ Added`, `− Removed`).
+- **Modified files** whose size or line count changed: the circle grows or
+  shrinks during the transition, and hovering reveals the new size and delta
   (`+1.2 KB (was 3.4 KB)`).
-- **Folders** added or removed with the files in them.
+- **Added or removed folders** along with the files inside them.
 
-The summary bar counts files and directories, and how many of each were added,
-removed and modified. The renderer adds no facts of its own.
+The summary bar counts total files and directories alongside how many were
+added, removed, or modified. The renderer doesn't add any extra computed facts.
 
 ## Start from this definition
 
@@ -103,64 +104,70 @@ removed and modified. The renderer adds no facts of its own.
 
 ## Limitations
 
-- A move or rename is a removed file and an added one, because IDs are paths.
-  Declare known moves in the definition's `correspondence`
-  (`{"file:new/path.ts": ["file:old/path.ts"]}`) to compare them as one change.
-- An edit that leaves a file's size unchanged (and, with `lines`, its line
-  count) isn't a change: the extraction records sizes, not content.
-- Git-ignored files (installed dependencies, build output) aren't mapped.
-- An extraction is limited to 10,000 files and folders. A larger repository
-  fails with an error rather than a partial map; narrow it with `include` or
-  `exclude`.
+- Because IDs are file paths, moving or renaming a file shows up as a removal
+  and an addition. You can declare known moves in the definition's
+  `correspondence` (`{"file:new/path.ts": ["file:old/path.ts"]}`) to track them
+  as a single change.
+- Edits that leave a file's byte size (and line count, if `lines` is enabled)
+  identical won't show up as changes, since the extractor doesn't compare file
+  contents.
+- Git-ignored files (like installed dependencies or build output) aren't
+  included.
+- Extractions cap out at 10,000 files and folders. Larger repositories fail with
+  an error rather than showing a partial map; use `include` or `exclude` to
+  narrow the scope.
 
 ## Related
 
-- [`file-packing`](../renderers/file-packing.md), which draws it.
-- [`code-statistics`](code-statistics.md): lines of code by language, for the
-  same repository-wide view in another measure.
-- [The default comparator](../comparators/default.md), which can order steps by
-  size (`order.by: data.size`).
+- [`file-packing`](../renderers/file-packing.md) — the renderer that draws the
+  nested circles.
+- [`code-statistics`](code-statistics.md) — lines of code by language for a
+  different repository-wide view.
+- [The default comparator](../comparators/default.md) — supports ordering steps
+  by size (`order.by: data.size`).
 
 ## How it works
 
-The [package README](../../../packages/extractors/repository-map/README.md)
-covers what the extraction records for each file.
+See the [package README](../../../packages/extractors/repository-map/README.md)
+for details on what the extractor records for each file.
 
 ## Build your own
 
-Write your own extractor when files and sizes aren't the measure you need:
+Consider writing a custom extractor when file sizes aren't the metric you want:
 
-- **Another weight**: churn, test coverage, complexity or bundle contribution
-  per file, which only your tools know. Emit a `treemap/v0` hierarchy sized by
-  `data.value` and the same renderer draws it.
-- **Facts the file system doesn't have**: which team owns each folder (from
-  `CODEOWNERS` or your own inventory), which service deploys it, or which files
-  are generated.
-- **Another hierarchy**: modules, services or packages instead of folders.
+- **Different weights**, such as Git churn, test coverage, complexity, or bundle
+  size per file. Emit a `treemap/v0` hierarchy weighted by `data.value` and the
+  same renderer will draw it.
+- **Metadata outside the filesystem**, like team ownership from `CODEOWNERS` or
+  an internal inventory, deploying service, or generated-file markers.
+- **A different grouping**, organizing by modules, services, or packages instead
+  of directories.
 
-Try the lighter options first: `include` and `exclude` scope the map, `lines`
-sizes files by lines, and the renderer's controls hide dependencies, lockfiles
-and folders without changing the extraction. To draw the same files differently,
-keep this extractor and write a renderer.
+Check whether the built-in options already do what you need first: `include` and
+`exclude` narrow the map, `lines` switches to line counts, and the renderer's
+controls hide dependencies, lockfiles, and folders without touching the
+extraction. If you want to visualize the same file data differently, keep this
+extractor and write a custom renderer.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
+**In VS Code**, open the Projections view, select **+ New Projection…**, choose
 **Write a custom extractor, renderer or comparator** › **Custom extractor** (or
-**Custom extractor and renderer**), and pick its language. It writes the
-definition and a starter extractor (`extract.mjs`, `extract.py` or `extract.go`)
-under `.github/projections/<id>/`, drawn by the built-in graph renderer. Or
-choose **Ask an agent to write it** and describe what the projection should
-show.
+**Custom extractor and renderer**), and pick a language. That creates the
+definition and a starter extractor (`extract.mjs`, `extract.py`, or
+`extract.go`) under `.github/projections/<id>/`, paired with the built-in graph
+renderer. You can also choose **Ask an agent to write it** and describe what you
+want to see.
 
-**With the CLI**, keep this map's renderer:
+**With the CLI**, keep the `file-packing` renderer:
 
 ```sh
 projections init <id> --language node --renderer file-packing
 ```
 
-An extractor is any program that prints an extraction. Run it with
-`projections show -p <id> --trust` as you change it; an open projection tab uses
-your uncommitted edits ("Your edits") and says when its results are out of date,
-and the Testing view runs the projection's checks.
-[Write your first extractor](../../guides/first-extractor.md) walks through one,
-and [Extraction schema](../../guides/schemas.md#extraction-schema) describes
-what it prints.
+An extractor can be any program that prints an extraction. Test your changes as
+you go with `projections show -p <id> --trust`. An open projection tab picks up
+your uncommitted edits ("Your edits") and tells you when results are stale, and
+the Testing view runs your projection's checks.
+[Write your first extractor](../../guides/first-extractor.md) walks through a
+complete example, and
+[Extraction schema](../../guides/schemas.md#extraction-schema) documents the
+output format.

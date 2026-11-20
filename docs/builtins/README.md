@@ -2,10 +2,12 @@
 
 Every projection has three parts: an **extractor** reads the repository, a
 **comparator** decides what changed between two revisions, and a **renderer**
-draws the result. Projections ships built-ins for each, and any part can be your
-own. Each page here says what one built-in shows, what it reads, its options,
-what a comparison reports, and when to build your own instead. The VS Code
-extension opens these pages when you select a built-in part.
+draws the result. Projections ships built-ins for all three, and you can swap
+any of them out for your own.
+
+Each page below covers one built-in—what it shows, what it reads, its options,
+what a comparison reports, and when it makes sense to build your own instead.
+The VS Code extension also opens these pages when you select a built-in part.
 
 ## Extractors
 
@@ -47,8 +49,8 @@ extension opens these pages when you select a built-in part.
 ## Comparator
 
 The [default comparator](comparators/default.md) matches items by ID and
-declared renames, decides each change's status and orders the steps. A
-comparator file layers your own rules over it.
+declared renames, assigns each change's status, and orders the resulting steps.
+When you need domain-specific rules, a comparator file layers them on top of it.
 
 ## Renderers
 
@@ -71,38 +73,39 @@ comparator file layers your own rules over it.
 
 ## Writing a page
 
-Each built-in has one page, named after its ID (`extractors/<id>.md`,
-`renderers/<name>.md`, `comparators/default.md`). `npm run docs:check` fails
-when one is missing, and when a page names no built-in. The pages are for people
-using the built-in, not for the people maintaining it: internals (ABIs, build
-steps, test suites) stay in the package README, linked from the **How it works**
-section.
+Each built-in gets one page named after its ID: `extractors/<id>.md`,
+`renderers/<name>.md`, or `comparators/default.md`. Running `npm run docs:check`
+fails if any built-in is missing a page or if a page doesn't match a built-in.
+Write these pages for people using the built-in rather than people maintaining
+it. Implementation details like ABIs, build steps, and test suites belong in the
+package README, which you can link from **How it works**.
 
-Regions between `<!-- generated: NAME -->` and `<!-- end generated: NAME -->`
-come from the CLI's extractor catalog, the renderer manifests and the schemas.
-`npm run docs:generate` rewrites them; write everything else by hand. A page has
-these sections, in this order, leaving out any that don't apply:
+Anything between `<!-- generated: NAME -->` and `<!-- end generated: NAME -->`
+is generated from the CLI's extractor catalog, the renderer manifests, and the
+schemas. Run `npm run docs:generate` to refresh those blocks, and write
+everything else by hand. Follow this section order, skipping any section that
+doesn't apply:
 
-1. The title (the built-in's title) and one paragraph: what it shows and the
-   question it answers.
-2. The generated `facts`.
-3. **When to use it**: the repositories and changes it suits, and what it
-   doesn't cover.
-4. **What it reads** (extractors), **What it draws** (renderers) or **How it
-   decides** (the comparator).
-5. **Options**: an extractor's generated `inputs`; a renderer's controls and
-   their `presentation.rendererOptions` IDs; the comparator's generated
+1. The built-in's title and a short opening paragraph explaining what it shows
+   and what question it answers.
+2. The generated `facts` block.
+3. **When to use it** — which repositories and changes it fits, and what falls
+   outside its scope.
+4. **What it reads** (for extractors), **What it draws** (for renderers), or
+   **How it decides** (for the comparator).
+5. **Options** — an extractor's generated `inputs`, a renderer's controls and
+   their `presentation.rendererOptions` IDs, or the comparator's generated
    `options`.
-6. **What a comparison shows**: change kinds, interpretations and summary-bar
+6. **What a comparison shows** — change kinds, interpretations, and summary-bar
    facts.
-7. **Start from this definition**: the generated `definition`.
-8. A screenshot, when there is one.
+7. **Start from this definition** — the generated `definition` block.
+8. A screenshot, if one exists.
 9. **Limitations**.
-10. **Related**: other built-ins, linked.
-11. **How it works**: one line linking the package README.
-12. **Build your own**: reasons specific to this part, lighter alternatives
-    first, then how to start in VS Code and with the CLI, and the development
-    loop.
+10. **Related** — links to other relevant built-ins.
+11. **How it works** — a single line linking to the package README.
+12. **Build your own** — reasons specific to this part, starting with lighter
+    alternatives, followed by how to get started in VS Code and the CLI and what
+    the development loop looks like.
 
-Write human text in sentence case and data verbatim; put identifiers, paths, IDs
-and commands in code spans.
+Use sentence case for prose, keep data verbatim, and wrap identifiers, paths,
+IDs, and commands in code spans.

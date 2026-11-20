@@ -1,10 +1,10 @@
 # .NET public API
 
-The effective public API of a .NET project: every public and protected type and
-member its assembly exports, as the project's own C# compiler (Roslyn) sees it
-after its source generators run. Compared across a pull request, it answers
-"what did this change add, remove or change in the assembly's API, and does it
-break code compiled against it?"
+This extractor captures the effective public API of a .NET project—every public
+and protected type and member its assembly exports, exactly as the project's own
+C# compiler (Roslyn) sees it after source generators run. Compared across a pull
+request, it shows what was added, removed, or altered in the assembly's surface,
+and whether those changes break downstream callers.
 
 <!-- generated: facts -->
 
@@ -19,58 +19,61 @@ break code compiled against it?"
 
 ## When to use it
 
-Use it for class libraries and NuGet packages, to review API changes as
-declarations instead of a source diff: a removed overload, a parameter whose
-type or name changed, a class that became sealed, an interface that gained a
-member. Because it compiles the project the way its build does, members added by
-source generators are part of the API too. With the
-[`api-compatibility`](#classify-changes-as-breaking) comparator file, each
-change is classified by the rules of the .NET SDK's ApiCompat, telling binary
-breaks from source breaks.
+Use this extractor for class libraries and NuGet packages when you want to
+review API changes as clean declarations rather than scanning a source diff. It
+surfaces removed overloads, parameter type or name changes, newly sealed
+classes, and new interface members right away. Because it compiles the project
+the same way your build does, members emitted by source generators are included
+automatically. Pairing it with the
+[`api-compatibility`](#classify-changes-as-breaking) comparator file classifies
+every change using the .NET SDK's ApiCompat rules, distinguishing binary breaks
+from source breaks.
 
-It needs `--trust` and the project's .NET SDK (see
-[What it reads](#what-it-reads)). It supports C# projects. For TypeScript use
-[`typescript-public-api`](typescript-public-api.md), for Rust
-[`rust-public-api`](rust-public-api.md), for Go
+Extraction requires `--trust` and the project's .NET SDK (see
+[What it reads](#what-it-reads)), and currently supports C# projects. For
+TypeScript use [`typescript-public-api`](typescript-public-api.md), for Rust use
+[`rust-public-api`](rust-public-api.md), and for Go use
 [`go-public-api`](go-public-api.md).
 
 ## What it reads
 
-The project at `project` (required), for one `framework` of a multi-targeted
-project and the `configuration` (default `Release`):
+You point it at a required `project`, optionally choosing one `framework` in a
+multi-targeted project and a `configuration` (default `Release`):
 
-- **The project's own build.** It runs `dotnet build` into a scratch directory,
-  and the build reports its exact compiler arguments: sources, references,
-  defines, language version, nullable context, `.editorconfig` severities and
+- **The project's own build.** It runs `dotnet build` into a scratch directory
+  to capture the exact compiler arguments—sources, references, preprocessor
+  defines, language version, nullable context, `.editorconfig` severities, and
   source generators.
-- **The project's own compiler.** A small helper that ships prebuilt with
-  Projections (first-party code only) replays those arguments with the Roslyn of
-  the SDK that ran the build, the one `global.json` selects. It needs the .NET
-  SDK 8.0.100 or newer, as `dotnet` on `PATH` or the `dotnet` input.
-- **`--trust`**, because MSBuild targets and source generators are code from the
-  repository.
-- **NuGet packages** restore as your own build restores them: the project's
-  `nuget.config` decides the feeds, and your global packages folder is reused
-  when the definition grants `HOME` (or `NUGET_PACKAGES`) in
-  `execution.environment`; with neither, and no packages folder set by the
-  project, the restore starts from an empty folder.
-- **Or a file.** `snapshot` imports an extraction exported earlier; nothing
-  runs, and no trust or SDK is needed.
+- **The project's own compiler.** A small prebuilt helper shipped with
+  Projections (first-party code only) replays those compiler arguments using the
+  Roslyn instance from the SDK that ran the build (selected by `global.json`).
+  This requires .NET SDK 8.0.100 or newer, either as `dotnet` on `PATH` or via
+  the `dotnet` input.
+- **`--trust`** is required because MSBuild targets and source generators run
+  repository code.
+- **NuGet packages** restore just as they do in your normal build. Your
+  `nuget.config` selects the feeds, and your global packages cache is reused if
+  the definition grants `HOME` (or `NUGET_PACKAGES`) in `execution.environment`;
+  without either (and with no project-level packages folder), restore starts
+  from an empty cache.
+- **Or a file.** Pass `snapshot` to import a previously exported
+  extraction—nothing runs, and neither `--trust` nor the SDK is needed.
 
-It always compiles `project`; unlike the dependency-injection and EF Core
-extractors that share its helper, it takes no prebuilt `assembly`.
+Unlike the dependency-injection and EF Core extractors that share the same
+helper, this extractor always compiles `project` and does not accept a prebuilt
+`assembly`.
 
-The assembly is an `assembly` entity; each exported type a `type`, and each
-public or protected member a `method`, `property`, `field` or `event`. Private
-and internal members, method bodies and private setters are left out. IDs are
-documentation IDs with the assembly's name
+The assembly becomes an `assembly` entity, each exported type becomes a `type`,
+and each public or protected member becomes a `method`, `property`, `field`, or
+`event`. Private and internal members, method bodies, and private setters are
+excluded. Entity IDs use XML documentation IDs prefixed with the assembly name
 (`api:Http:M:Http.Client.Send(Http.Request)`), so each overload is its own
-declaration, a changed parameter type is one member removed and one added, and
-renaming a type is a removal and an addition. Every declaration carries its
-contract (visibility, `virtual` and `sealed`, the full base-type chain,
-parameter names and `ref` kinds, accessors, generic constraints, constant
-values, attributes), the facts ApiCompat's rules read. A failed build, generator
-or compilation fails the extraction.
+declaration, changing a parameter type appears as a removal plus an addition,
+and renaming a type appears as a removal plus an addition. Every declaration
+records its full contract—visibility, `virtual` and `sealed` modifiers, the
+complete base-type chain, parameter names and `ref` kinds, accessors, generic
+constraints, constant values, and attributes—providing the facts ApiCompat's
+rules inspect. Any build, generator, or compilation error fails the extraction.
 
 ## Options
 
@@ -88,21 +91,23 @@ or compilation fails the extraction.
 
 ## What a comparison shows
 
-The [`api`](../renderers/api.md) renderer lists every declaration with its
-signature, side by side or as one diff:
+The [`api`](../renderers/api.md) renderer displays every declaration with its
+signature, either side by side or in a unified diff:
 
-- **Declarations** added, removed or modified, each with its signature diff.
-- **Renames** only when the definition's `correspondence` declares them.
+- **Added, removed, or modified declarations** appear with inline signature
+  diffs.
+- **Renames** are tracked when declared in `correspondence` in your definition.
 
-The summary bar counts declarations: `36 declarations +10 −1 ~6`.
+The summary bar tallies declarations and deltas (for example,
+`36 declarations +10 −1 ~6`).
 
 ### Classify changes as breaking
 
-The default comparator says _that_ a declaration changed. The
-`api-compatibility` comparator file, which ships with Projections, says how it
-breaks consumers. It is a comparator file, not the default comparator: copy
+By default, the comparator only reports _that_ a declaration changed. To see
+whether a change breaks consumers, use the `api-compatibility` comparator file
+shipped with Projections. Copy
 [`api-compatibility.comparator.yaml`](../../../packages/comparators/api-compatibility/api-compatibility.comparator.yaml)
-into your repository and name it in the definition:
+into your repository and reference it in your definition:
 
 ```json
 {
@@ -116,35 +121,38 @@ into your repository and name it in the definition:
 }
 ```
 
-Each change is then `breaking`, `additive`, `compatible` or `unknown`, with a
-reason and the rule that decided it: ApiCompat's diagnostic ID in its default
-mode, with its two opt-in rules for parameter names and attributes enabled. A
-breaking change says whether it breaks code already compiled against the old
-assembly (`binary`), code being compiled (`source`), or both
-(`Breaking (binary, source): Return type changed from Receipt to Task<Receipt>.`):
+With that comparator enabled, each change is classified as `breaking`,
+`additive`, `compatible`, or `unknown`, paired with a reason and the ApiCompat
+diagnostic ID that triggered it (matching ApiCompat's default mode plus its two
+opt-in rules for parameter names and attributes). Breaking changes specify
+whether they break already-compiled callers (`binary`), code being recompiled
+(`source`), or both—for example,
+`Breaking (binary, source): Return type changed from Receipt to Task<Receipt>.`:
 
-- **Breaking**: a type or member removed or retyped (`CP0001`, `CP0002`), an
-  abstract member added to an unsealed type (`CP0005`), an interface member
-  added without a default implementation (`CP0006`), a base class or interface
-  removed, a type becoming sealed (`CP0009`), an enum value changed, `virtual`
-  removed, an attribute removed or changed, a parameter renamed (`CP0017`: it
-  breaks named arguments), visibility reduced (`CP0019`), a constant's value
-  changed (compiled consumers keep the old one), a parameter's `ref`, `out` or
-  `in` changed, a default value or `params` removed.
-- **Additive**: new types and members, an accessor added, a parameter gaining a
-  default value.
-- **Compatible**: `virtual` or an attribute added, visibility expanded, only
-  nullable annotations or formatting changed.
+- **Breaking** covers removed or retyped types and members (`CP0001`, `CP0002`),
+  adding an abstract member to an unsealed type (`CP0005`), adding an interface
+  member without a default implementation (`CP0006`), removing a base class or
+  interface, sealing a type (`CP0009`), changing an enum value, removing
+  `virtual`, removing or altering an attribute, renaming a parameter (`CP0017`,
+  which breaks named arguments), narrowing visibility (`CP0019`), changing a
+  constant's value (since compiled callers inline the old value), changing a
+  parameter's `ref`, `out`, or `in` modifier, or removing a default value or
+  `params`.
+- **Additive** covers new types and members, newly added accessors, and
+  parameters that gain a default value.
+- **Compatible** covers adding `virtual` or an attribute, widening visibility,
+  and changes limited to nullable annotations or formatting.
 
-The summary bar then counts each level, breaking first
-(`2 breaking changes · 5 additive changes · 1 compatible change`), each
-filtering to its changes, with the rules
-(`ApiCompat (default mode), reproduced`) as its tooltip; the diff lists breaking
-changes first with each reason, and the renderer's **Breaking only** control
-(`breakingOnly` in `presentation.rendererOptions`) hides the rest. A workflow
-can fail a pull request on `metadata.compatibility.counts.breaking`.
+The summary bar groups counts by severity, listing breaking changes first
+(`2 breaking changes · 5 additive changes · 1 compatible change`), with each
+count acting as a filter and a tooltip noting the rule set
+(`ApiCompat (default mode), reproduced`). Breaking changes also appear at the
+top of the diff with their explanations, and the **Breaking only** toggle
+(`breakingOnly` in `presentation.rendererOptions`) hides everything else. CI
+workflows can fail a pull request based on
+`metadata.compatibility.counts.breaking`. See
 [API compatibility](../../models/api-compatibility.md#net-apicompats-default-mode-reproduced)
-lists every rule.
+for the complete rule list.
 
 ## Start from this definition
 
@@ -166,76 +174,77 @@ lists every rule.
 
 ## Limitations
 
-- One project, one target framework and one configuration per projection; only
-  the project's own assembly is read, not the assemblies it references.
-- The rules are ApiCompat's, reproduced, not ApiCompat run on your package:
-  assembly identity and package-level checks aren't compared, a member moved to
-  a base class is reported as removed, and target frameworks aren't compared
-  with each other.
-- Analyzers and diagnostic suppressors don't run. SDKs before 8.0.300 report
-  compiler arguments on stdout, which limits a project to roughly 5,000 source
-  files and references.
-- Each revision is built, so extraction takes as long as a build, and custom
-  MSBuild targets can still have side effects.
+- Each projection targets a single project, target framework, and configuration,
+  and inspects only that project's own assembly—not referenced assemblies.
+- Compatibility checks reproduce ApiCompat's rules rather than running ApiCompat
+  directly on your NuGet package. Assembly identity and package-level checks are
+  not evaluated, moving a member up to a base class shows as a removal, and
+  different target frameworks are not cross-compared.
+- Roslyn analyzers and diagnostic suppressors do not run. On SDKs older than
+  8.0.300, compiler arguments are passed via stdout, which caps a project at
+  roughly 5,000 source files and references.
+- Because each revision is compiled, extraction takes about as long as a normal
+  build, and custom MSBuild targets can still execute side effects.
 
 ## Related
 
-- [`api`](../renderers/api.md), the renderer that draws it.
+- [`api`](../renderers/api.md) is the renderer that displays these declarations.
 - The
   [`api-compatibility`](../../../packages/comparators/api-compatibility/README.md)
-  comparator file, and [the default comparator](../comparators/default.md) it
-  builds on.
+  comparator file extends [the default comparator](../comparators/default.md)
+  with breaking-change rules.
 - [`typescript-public-api`](typescript-public-api.md),
-  [`rust-public-api`](rust-public-api.md) and
-  [`go-public-api`](go-public-api.md): the same model for other languages.
-- [`dotnet-di`](dotnet-di.md), [`efcore-schema`](efcore-schema.md) and
-  [`nuget-dependencies`](nuget-dependencies.md), more of a .NET application.
+  [`rust-public-api`](rust-public-api.md), and
+  [`go-public-api`](go-public-api.md) offer the same model for other languages.
+- [`dotnet-di`](dotnet-di.md), [`efcore-schema`](efcore-schema.md), and
+  [`nuget-dependencies`](nuget-dependencies.md) cover other parts of a .NET
+  codebase.
 
 ## How it works
 
-The [package README](../../../packages/extractors/dotnet-public-api/README.md)
-summarizes what it records, and
-[.NET support](../../../packages/extractors/dotnet-support/README.md) details
-the build replay, NuGet handling and the helper.
+See the
+[package README](../../../packages/extractors/dotnet-public-api/README.md) for
+what gets recorded, and
+[.NET support](../../../packages/extractors/dotnet-support/README.md) for build
+replay, NuGet restore behavior, and helper details.
 
 ## Build your own
 
-Write your own extractor when the compiled C# API isn't the surface you need to
-review:
+Consider writing a custom extractor when the compiled C# API is not the surface
+you need to review:
 
-- **Another surface**: an ASP.NET Core application's HTTP endpoints, a gRPC
-  contract, the messages a service publishes, or a library written in F# or
-  Visual Basic.
-- **Facts Roslyn doesn't have**: which APIs are marked preview in your release
-  notes, `PublicAPI.Shipped.txt` baselines, owners, or usage counts from your
-  telemetry.
-- **Another grain**: one entity per namespace or per package in a solution.
+- **Another surface**, such as ASP.NET Core HTTP endpoints, a gRPC contract,
+  messages published by a service, or a library written in F# or Visual Basic.
+- **Facts Roslyn does not know**, like preview markers from release notes,
+  `PublicAPI.Shipped.txt` baselines, team ownership, or usage telemetry.
+- **A different level of detail**, such as one entity per namespace or per
+  package in a solution.
 
-Try the lighter options first: `framework` and `configuration` choose what is
-compiled, and `snapshot` imports an API your build already exported. To change
-what counts as breaking (to ignore parameter renames, say), copy
-`api-compatibility.comparator.yaml` and edit its rules; to draw the API
-differently, keep this extractor and write a renderer.
+Check the built-in options first: `framework` and `configuration` select what
+gets built, and `snapshot` imports an API your CI build already exported. If you
+want to customize what counts as breaking (for example, ignoring parameter
+renames), copy `api-compatibility.comparator.yaml` and adjust its rules. To
+change the visual presentation, keep this extractor and write a custom renderer.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
-**Write a custom extractor, renderer or comparator** › **Custom extractor** (or
-**Custom extractor and renderer**), and pick its language: the repository's
-toolchain, Node.js, Python or Go. It writes the definition and a starter
-extractor under `.github/projections/<id>/`, drawn by the built-in graph
-renderer. Or choose **Ask an agent to write it** and describe what the
-projection should show.
+**In VS Code**, open the Projections view, choose **+ New Projection…**, and
+select **Write a custom extractor, renderer or comparator** › **Custom
+extractor** (or **Custom extractor and renderer**). Pick a language (your
+repository's toolchain, Node.js, Python, or Go) to scaffold the definition and a
+starter extractor under `.github/projections/<id>/`, paired with the built-in
+graph renderer. You can also choose **Ask an agent to write it** and describe
+what you want to see.
 
-**With the CLI**, keep the `api` renderer:
+**With the CLI**, scaffold a new extractor while keeping the `api` renderer:
 
 ```sh
 projections init <id> --language node --renderer api
 ```
 
-An extractor that writes `api/v0` declarations with a `data.signature` is drawn
-by the `api` renderer. Run it with `projections show -p <id> --trust` as you
-change it; an open projection tab uses your uncommitted edits ("Your edits") and
-says when its results are out of date, and the Testing view runs the
-projection's checks.
-[Write your first extractor](../../guides/first-extractor.md) walks through one,
-and [Extraction schema](../../guides/schemas.md#extraction-schema) describes
-what it prints.
+Any extractor that emits `api/v0` declarations with a `data.signature` works
+with the `api` renderer. Run `projections show -p <id> --trust` while you
+iterate—an open projection tab picks up your uncommitted edits ("Your edits")
+and flags stale results, and the Testing view runs your projection's checks.
+Walk through [Write your first extractor](../../guides/first-extractor.md) to
+get started, and check
+[Extraction schema](../../guides/schemas.md#extraction-schema) for the output
+format.

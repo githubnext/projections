@@ -1,11 +1,12 @@
 # EF Core schema
 
-The relational model an EF Core `DbContext` builds: its tables, columns with
-their store types, keys, indexes, check constraints and foreign keys, read from
-the application's own EF Core rather than from entity classes or migrations.
-Compared across a pull request, it answers "what does this change do to the
-database schema the application expects: which tables and columns arrive or
-leave, which types and nullability change, which keys and relationships move?"
+This extractor captures the relational model an EF Core `DbContext`
+builds—tables, columns with their store types, keys, indexes, check constraints,
+and foreign keys—by reading directly from your application's EF Core runtime
+rather than parsing entity classes or migrations. Compared across a pull
+request, it shows how a change reshapes the database schema your app expects:
+which tables and columns are added or removed, how types and nullability shift,
+and which keys or relationships move.
 
 <!-- generated: facts -->
 
@@ -20,53 +21,54 @@ leave, which types and nullability change, which keys and relationships move?"
 
 ## When to use it
 
-Use it in a .NET application that maps its data with EF Core 6 or later and a
-relational provider, to review schema changes as an entity-relationship diagram
-rather than a migration file or a model snapshot diff. It sees the model EF Core
-actually builds, including conventions, `OnModelCreating` configuration, owned
-types and table splitting, so a change to a convention or a fluent call shows up
-even when no entity class changed.
+Use this extractor in .NET applications backed by EF Core 6 or later and a
+relational provider when you want to review schema changes as an
+entity-relationship diagram instead of a migration or model snapshot diff.
+Because it inspects the model EF Core actually builds—including conventions,
+`OnModelCreating` configuration, owned types, and table splitting—a tweak to a
+convention or fluent API call shows up even if no entity class was touched.
 
-It describes the model the code expects, not a live database: it doesn't connect
-to one, apply migrations or detect drift. For a Django project use
-[`django-schema`](django-schema.md), for Prisma
+Keep in mind that this models what your code expects, not a live database. It
+never opens a connection, runs migrations, or detects drift against production.
+For Django use [`django-schema`](django-schema.md), and for Prisma use
 [`prisma-schema`](prisma-schema.md).
 
 ## What it reads
 
-It builds the project with the repository's own .NET SDK (8.0.100 or later) and
-loads the application's own EF Core by reflection, so it works with whichever
-version the application references. It finds the `DbContext` the way `dotnet ef`
-does:
+The extractor builds your project with the repository's own .NET SDK (8.0.100 or
+newer) and loads the application's EF Core version via reflection, so it works
+with whichever EF Core version you reference. It discovers your `DbContext` in
+the same order `dotnet ef` does:
 
-1. an `IDesignTimeDbContextFactory<TContext>` in the application or a project it
-   references (no host is built);
-2. a context registered in the application's host (for example with
-   `AddDbContext`), built but never started;
-3. a `DbContext` type with a public parameterless constructor.
+1. An `IDesignTimeDbContextFactory<TContext>` in the application or a referenced
+   project (without building a host).
+2. A context registered in the application's host (for instance with
+   `AddDbContext`), built without starting the host.
+3. A `DbContext` type with a public parameterless constructor.
 
-`context` picks one when a step finds several. `factoryType` and `factoryMethod`
-name your own static factory instead, which can return a `DbContext` or its
-design-time `IModel`. Finding the context runs the application's startup code
-(its `Main`, host builder, `Startup` or a design-time factory), which is why it
-needs `--trust`. It runs in the `Development` environment unless `environment`
-says otherwise, and `Development` hosts read your user secrets, as they do under
-`dotnet ef`. Nothing connects to a database merely to read the model.
+Use `context` to disambiguate when a step finds more than one context. You can
+also point `factoryType` and `factoryMethod` at your own static factory that
+returns either a `DbContext` or its design-time `IModel`. Because discovering
+the context runs application startup code (`Main`, host builder, `Startup`, or a
+design-time factory), extraction requires `--trust`. It defaults to the
+`Development` environment unless `environment` overrides it—just like
+`dotnet ef`, a `Development` host loads local user secrets. Reading the model
+never connects to a database.
 
-From EF Core's relational model it writes a `table` per table (named
-`schema.name` when it has a schema), a `column` per column with its store type
-as `data.type` (`nvarchar(200)`), its nullability, length, precision, defaults,
-computed SQL, collation and value generation; `primary-key`, `unique-key`,
-`index` and `check-constraint` entities for the table's keys, indexes and
-checks; and a `relation` relationship per foreign key, with its columns,
-principal columns and delete behavior (`onDelete`). IDs come from the database
-names (schema, table, column and constraint), not from CLR types or source
-paths, so renaming an entity class or moving a file while keeping its mapping
-changes nothing.
+From EF Core's relational model, the extractor emits a `table` per table (named
+`schema.name` when a schema is set), a `column` per column with its store type
+as `data.type` (`nvarchar(200)`), nullability, length, precision, defaults,
+computed SQL, collation, and value generation, plus `primary-key`, `unique-key`,
+`index`, and `check-constraint` entities. Each foreign key becomes a `relation`
+linking its columns to the principal columns along with its `onDelete` behavior.
+Because IDs come from database names (schema, table, column, and constraint)
+rather than CLR types or file paths, renaming an entity class or moving a file
+without changing its mapping produces no diff.
 
-`snapshot` reads a `database/v0` extraction exported earlier instead, with no
-build, no SDK and no trust; it is read from the revision being extracted, so
-each revision you compare needs its own.
+If you prefer not to build the project during extraction, pass `snapshot` to
+read a previously exported `database/v0` extraction with no build, SDK, or
+`--trust` required. Snapshot files are read from each revision being extracted,
+so every compared revision needs its own.
 
 ## Options
 
@@ -85,36 +87,35 @@ each revision you compare needs its own.
 
 <!-- end generated: inputs -->
 
-Every compared revision builds its own version of `project`, so commit what that
-build needs (`global.json`, NuGet configuration and lock files). Environment
-variables reach the build and the application only when listed in the
-definition's `execution.environment`, and a large solution may need a longer
+Each compared revision builds its own version of `project`, so make sure
+everything the build needs—`global.json`, NuGet configuration, and lock files—is
+committed. Environment variables are passed to the build and app only when
+listed in `execution.environment`, and larger solutions may need a higher
 `execution.timeoutMs`.
 
 ## What a comparison shows
 
 The [`database`](../renderers/database.md) renderer draws each table as a card
-with its columns, keys and indexes, and each foreign key as a link from the
+with its columns, keys, and indexes, and connects each foreign key from the
 dependent row to the principal one.
 
-- **Tables** added, removed or modified, and **columns** added or removed within
-  them.
-- **Column changes**: a new store type reads as a type change (`nvarchar(120)`
-  to `nvarchar(200)`), and a nullability change as made required or made
-  optional.
-- **Keys, indexes, check constraints and foreign keys** added, removed or
-  modified: an index that becomes unique, a foreign key whose delete behavior
-  changed from `Cascade` to `Restrict`.
+- **Tables and columns** highlight tables added, removed, or modified, as well
+  as columns added or removed inside them.
+- **Column changes** flag store type updates (such as `nvarchar(120)` to
+  `nvarchar(200)`) and nullability changes (made required or made optional).
+- **Keys, indexes, check constraints, and foreign keys** track additions,
+  removals, and edits—for instance, an index becoming unique or a foreign key
+  changing its delete behavior from `Cascade` to `Restrict`.
 
-The summary bar counts the schema by kind (tables, columns, primary keys,
-foreign keys, indexes and so on), each with its changes
-(`5 tables +1 · 24 columns +8 ~2`), then states what the counts can't: column
-types changed, columns made required or optional, and anything renamed, each
-filtering to its rows.
+The summary bar tallies schema objects by kind (tables, columns, primary keys,
+foreign keys, indexes, and so on) with their deltas
+(`5 tables +1 · 24 columns +8 ~2`), then summarizes higher-level shifts: changed
+column types, columns made required or optional, and renames. Clicking any count
+filters to the matching rows.
 
-Renaming a table or column in the database (`ToTable`, `HasColumnName`) gives it
-a new ID, so it reads as a removal and an addition; declare the old ID in the
-definition's `correspondence` to show it as a rename.
+Because IDs come from database names, renaming a table or column with `ToTable`
+or `HasColumnName` appears as a removal and an addition. Declare the old ID in
+`correspondence` in your definition to track it as a rename instead.
 
 ## Start from this definition
 
@@ -136,76 +137,81 @@ definition's `correspondence` to show it as a rename.
 
 ## Limitations
 
-- Views, sequences and provider-specific annotations aren't represented.
-- It needs a relational provider: the in-memory and Cosmos DB providers have no
-  relational model to read.
-- A custom factory that returns a trimmed runtime model (without design-time
-  metadata) can fail for lack of index and check-constraint details; return
+- Views, sequences, and provider-specific annotations are not represented.
+- A relational provider is required—the in-memory and Cosmos DB providers have
+  no relational model to inspect.
+- A custom factory that returns a trimmed runtime model (lacking design-time
+  metadata) can fail when index or check-constraint details are missing; return
   `context.GetService<IDesignTimeModel>().Model` instead.
-- Startup code runs with your user's privileges: it can read files, reach the
-  network and use whatever credentials its configuration finds. Trust only
-  repositories you have reviewed, and prefer an explicit factory or a
+- Startup code runs with your user's privileges, meaning it can read files,
+  access the network, and use whatever credentials its configuration finds. Only
+  trust repositories you have reviewed, and prefer an explicit factory or a
   non-`Development` environment in CI.
-- A large schema opens at a readable size (text no smaller than 8 px) and
-  scrolls, rather than shrinking to fit.
+- Large schemas open at a readable scale (text at least 8 px) and scroll instead
+  of shrinking to fit the viewport.
 
 ## Related
 
-- [`database`](../renderers/database.md), the renderer that draws it.
-- [`django-schema`](django-schema.md) and [`prisma-schema`](prisma-schema.md),
-  the same model for Django and Prisma.
-- [`dotnet-di`](dotnet-di.md) and [`dotnet-public-api`](dotnet-public-api.md),
-  which build the same .NET project to read its services and its public API.
-- [The default comparator](../comparators/default.md), which decides what
-  changed.
+- [`database`](../renderers/database.md) is the renderer that draws these
+  schemas.
+- [`django-schema`](django-schema.md) and [`prisma-schema`](prisma-schema.md)
+  provide the same model for Django and Prisma.
+- [`dotnet-di`](dotnet-di.md) and [`dotnet-public-api`](dotnet-public-api.md)
+  build the same .NET project to inspect its services and public API.
+- [The default comparator](../comparators/default.md) determines what changed
+  between revisions.
 
 ## How it works
 
-The [package README](../../../packages/extractors/efcore-schema/README.md) and
-the [.NET support README](../../../packages/extractors/dotnet-support/README.md)
-cover the helper, how the context is found and the adapter contract.
+See the [package README](../../../packages/extractors/efcore-schema/README.md)
+and the
+[.NET support README](../../../packages/extractors/dotnet-support/README.md) for
+details on the helper, context discovery, and the adapter contract.
 
 ## Build your own
 
-Write your own extractor when the model EF Core builds isn't the schema you want
-to review:
+Consider writing a custom extractor when EF Core's model is not the schema you
+want to review:
 
-- **Another data layer**: Dapper or raw SQL with hand-written migrations,
-  NHibernate, or a database-first project whose truth is a `.sql` script or a
-  `.dacpac`.
-- **The live database, not the model**: what is deployed, drift between the two,
-  or migration history.
-- **Facts EF Core doesn't have**: which team owns each table, which columns hold
-  personal data, row counts or table sizes from your own inventory.
-- **Objects it leaves out**: views, sequences, stored procedures or triggers.
+- **Another data layer**, such as Dapper or raw SQL with hand-written
+  migrations, NHibernate, or a database-first project defined by `.sql` scripts
+  or a `.dacpac`.
+- **The live database instead of the model**, including deployed state, schema
+  drift, or migration history.
+- **Facts EF Core does not track**, like table ownership by team, columns
+  holding personal data, or row counts and table sizes from an inventory.
+- **Database objects it omits**, such as views, sequences, stored procedures, or
+  triggers.
 
-Try the lighter options first: `context`, `environment` and an explicit
-`factoryType` and `factoryMethod` cover most applications whose startup can't
-run as is, and `snapshot` reads a schema your own tooling exported. To draw the
-schema differently, keep this extractor and write a renderer; to say which
-changes are destructive (a dropped column, a narrowed type), add a comparator
-file.
+Try the lighter options first: `context`, `environment`, and an explicit
+`factoryType` and `factoryMethod` cover most apps whose startup cannot run out
+of the box, while `snapshot` imports a schema exported by your own tooling. To
+change the visual layout, keep this extractor and write a custom renderer; to
+flag destructive changes (such as a dropped column or narrowed type), add a
+comparator file.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
-**Write a custom extractor, renderer or comparator** › **Custom extractor** (or
-**Custom extractor and renderer**), and pick its language. It writes the
-definition and a starter extractor (`extract.mjs`, `extract.py` or `extract.go`)
-under `.github/projections/<id>/`, drawn by the built-in graph renderer; print a
-`database/v0` extraction and set the definition's renderer to `database` to draw
-it as this one is. Or choose **Ask an agent to write it** and describe what the
-projection should show.
+**In VS Code**, open the Projections view, choose **+ New Projection…**, and
+select **Write a custom extractor, renderer or comparator** › **Custom
+extractor** (or **Custom extractor and renderer**). Pick a language to scaffold
+the definition and a starter extractor (`extract.mjs`, `extract.py`, or
+`extract.go`) under `.github/projections/<id>/`, paired with the built-in graph
+renderer. Emit a `database/v0` extraction and set the definition's renderer to
+`database` to get the same diagram view. You can also choose **Ask an agent to
+write it** and describe what you want to see.
 
-**With the CLI**, keep this schema's renderer:
+**With the CLI**, scaffold a new extractor while keeping the `database`
+renderer:
 
 ```sh
 projections init <id> --language node --renderer database
 ```
 
-An extractor is any program that prints an extraction. Run it with
-`projections show -p <id> --trust` as you change it; an open projection tab uses
-your uncommitted edits ("Your edits") and says when its results are out of date,
-and the Testing view runs the projection's checks.
-[Write your first extractor](../../guides/first-extractor.md) walks through one,
-and [Extraction schema](../../guides/schemas.md#extraction-schema) describes
-what it prints; the [`database/v0` schema](../../reference/schemas/database.md)
-lists the fields the `database` renderer reads.
+An extractor is any program that prints an extraction. Run
+`projections show -p <id> --trust` while you iterate—an open projection tab
+picks up your uncommitted edits ("Your edits") and flags stale results, and the
+Testing view runs your projection's checks. Walk through
+[Write your first extractor](../../guides/first-extractor.md) to get started,
+check [Extraction schema](../../guides/schemas.md#extraction-schema) for the
+output format, and see the
+[`database/v0` schema](../../reference/schemas/database.md) for the fields the
+`database` renderer expects.

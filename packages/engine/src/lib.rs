@@ -75,3 +75,5 @@ pub fn pointer(path: &str, key: &str) -> String {
 pub fn utf16_cmp(a: &str, b: &str) -> Ordering {
     a.encode_utf16().cmp(b.encode_utf16())
 }
+
+// CI gate test

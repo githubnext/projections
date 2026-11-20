@@ -132,6 +132,23 @@ test('an unchanged row whose values vary within tolerance draws no change', () =
   assert.doesNotMatch(markup, /pk-change-pill|data-change=/)
 })
 
+test('a value only one version has is one pill, and a changed cell reserves both widths', () => {
+  const grown = {id: 'g', before: {name: 'g', owner: 'x'}, after: {name: 'g', lines: 1000000, owner: 'x'}, status: 'modified'}
+  const diff = renderToStaticMarkup(
+    createElement(DataTable, {label: 'Files', columns, rows: [grown], comparing: true, diff: true, emphasis: () => 1}),
+  )
+  assert.doesNotMatch(diff, /<del/)
+  assert.match(diff, /<ins class="pk-change-pill" data-change="added"><span class="sr-only">now <\/span>1,000,000<\/ins>/)
+  const shrunk = {...grown, before: grown.after, after: {name: 'g', lines: 1, owner: 'x'}}
+  const moving = renderToStaticMarkup(
+    createElement(DataTable, {label: 'Files', columns, rows: [shrunk], comparing: true, progress: 0.8, emphasis: () => 0}),
+  )
+  assert.match(
+    moving,
+    /<span class="pk-table-reserve"><span class="pk-table-text">1<\/span><span class="pk-table-reserve-other" aria-hidden="true">1,000,000<\/span><\/span>/,
+  )
+})
+
 test('the progress modes show the version reached and nothing changed at the endpoints', () => {
   const before = table({progress: 0, emphasis: () => 0})
   assert.doesNotMatch(before, /data-change="/)

@@ -175,6 +175,20 @@
   font-family: var(--font-mono);
 }
 
+/* A changed cell outside the diff: the version shown over the other, unseen, so the column's width never changes. */
+.pk .pk-table-reserve {
+  display: inline-grid;
+  justify-items: start;
+}
+.pk .pk-table-cell[data-align='end'] .pk-table-reserve {
+  justify-items: end;
+}
+.pk .pk-table-reserve > * {
+  grid-area: 1 / 1;
+}
+.pk .pk-table-reserve-other {
+  visibility: hidden;
+}
 /* Headings: words, quiet and small; a sortable one is a button the width of its cell, its mark in a fixed box. */
 .pk .pk-table-heading {
   color: var(--muted);

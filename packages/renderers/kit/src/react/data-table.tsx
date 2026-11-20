@@ -212,7 +212,12 @@ export interface TablePropsSource {
  * and set it. Spread them: `<DataTable {...useTableProps(props)} label columns rows />`.
  */
 export function useTableProps(props: TablePropsSource, id = 'sort') {
-  const {sort, changesFirst} = tableSortOf(props.controls, id)
+  // Parsed once per value, so the table's order isn't sorted again on every frame of a transition.
+  const [sortValue, firstValue] = [props.controls[id], props.controls[`${id}ChangesFirst`]]
+  const {sort, changesFirst} = useMemo(
+    () => tableSortOf({[id]: sortValue, [`${id}ChangesFirst`]: firstValue} as {[id: string]: ControlValue}, id),
+    [id, sortValue, firstValue],
+  )
   const {setControl, emphasis, onSelect} = props
   const onSortChange = useCallback((next: Exclude<TableSort, null>) => setControl(id, tableSortValue(next)), [setControl, id])
   return {

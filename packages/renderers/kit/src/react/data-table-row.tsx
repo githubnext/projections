@@ -14,9 +14,9 @@ const join = (...names: (string | false | undefined)[]) => names.filter(Boolean)
 
 const shown = (value: ReactNode) => value !== undefined && value !== null && value !== false
 
-/** A cell value in words: numbers in the locale, missing values empty. */
-function formatted(value: TableValue, locale: string | undefined): string {
-  if (value === undefined || value === null || (typeof value === 'number' && Number.isNaN(value))) return ''
+/** A cell value in words: numbers in the locale; a missing value stays missing, so a value change shows only the other side. */
+function formatted(value: TableValue, locale: string | undefined): string | undefined {
+  if (value === undefined || value === null || (typeof value === 'number' && Number.isNaN(value))) return undefined
   if (typeof value === 'number') return value.toLocaleString(locale)
   if (typeof value === 'boolean') return value ? 'yes' : 'no'
   return value
@@ -95,6 +95,17 @@ export function Row<T>({
             </span>
           )
         else content = <span className={join('pk-table-text', struck && 'pk-diff-text')}>{read(item)}</span>
+        // Outside the diff a changed cell shows one version at a time; the other is laid out under it, unseen, so the
+        // column keeps one width for the whole transition and nothing moves when the value switches.
+        if (differs && !diff)
+          content = (
+            <span className="pk-table-reserve">
+              {content}
+              <span className="pk-table-reserve-other" aria-hidden="true">
+                {read(side === 'before' ? row.after! : row.before!)}
+              </span>
+            </span>
+          )
         const align = column.align ?? (column.sort === 'number' ? 'end' : 'start')
         return (
           <div

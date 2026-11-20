@@ -201,13 +201,15 @@ function Card({
     implementationZone,
   ]
   const scoped = sides.some(side => side.scope)
-  // The pill is as wide as the label shown, and between the two while they crossfade.
+  // The pill is as wide as the label shown, and between the two while they crossfade. The labels drawn (both, or one
+  // endpoint's) are measured whenever they change, so a seek straight from one endpoint to the other measures the new one.
   const labels = useRef<SVGGElement>(null)
   const crossfading = lifetimes[0] !== lifetimes[1] && frame.local > 0 && frame.local < 1
+  const drawn = crossfading ? 'both' : frame.local <= 0 ? 'before' : 'after'
   const advanceOf = useTextAdvances(
     labels,
     '.di-lifetime-label',
-    `${lifetimes.join('\n')}\n${crossfading}`,
+    `${lifetimes.join('\n')}\n${drawn}`,
     label => label.length * (sides.find(side => lifetimeLabelOf(side, side.lifetime) === label)?.scope ? advance.key : advance.lifetime),
   )
   const labelAdvance = crossfading

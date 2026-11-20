@@ -27,27 +27,29 @@ const hiddenPaint: Record<(typeof surfacePaint)[number], string> = {
   'outline-color': 'transparent',
 }
 
-/** Sets (or, with `null`, restores) inline style properties on every element, keeping what they had before. */
-async function restyle(locator: Locator, properties: Record<string, string> | null): Promise<void> {
-  await locator.evaluateAll((elements, properties) => {
-    for (const element of elements as (HTMLElement | SVGElement)[]) {
-      if (properties) {
-        const saved: Record<string, [string, string]> = {}
-        for (const [name, value] of Object.entries(properties)) {
-          saved[name] = [element.style.getPropertyValue(name), element.style.getPropertyPriority(name)]
-          element.style.setProperty(name, value, 'important')
+/**
+ * Sets inline style properties on every element, or with `null` restores each element's `style` attribute exactly as
+ * it was (shorthands such as `background` would otherwise clobber its longhands). `slot` names the saved copy, so the
+ * ink's and the surface's restyling never overwrite each other's.
+ */
+async function restyle(locator: Locator, slot: string, properties: Record<string, string> | null): Promise<void> {
+  await locator.evaluateAll(
+    (elements, [slot, properties]) => {
+      for (const element of elements as (HTMLElement | SVGElement)[]) {
+        if (properties) {
+          // A JSON string, or `null` for no style attribute at all.
+          element.dataset[slot] = JSON.stringify(element.getAttribute('style'))
+          for (const [name, value] of Object.entries(properties)) element.style.setProperty(name, value, 'important')
+        } else {
+          const saved = JSON.parse(element.dataset[slot] ?? 'null') as string | null
+          if (saved === null) element.removeAttribute('style')
+          else element.setAttribute('style', saved)
+          delete element.dataset[slot]
         }
-        element.dataset.opticalSaved = JSON.stringify(saved)
-      } else {
-        const saved = JSON.parse(element.dataset.opticalSaved ?? '{}') as Record<string, [string, string]>
-        for (const [name, [value, priority]] of Object.entries(saved)) {
-          if (value) element.style.setProperty(name, value, priority)
-          else element.style.removeProperty(name)
-        }
-        delete element.dataset.opticalSaved
       }
-    }
-  }, properties)
+    },
+    [slot, properties] as const,
+  )
 }
 
 /**
@@ -77,18 +79,18 @@ export async function opticalInsets(page: Page, {surface, ink}: {surface: Locato
   const picture = async () =>
     `data:image/png;base64,${(await page.screenshot({clip, animations: 'disabled', caret: 'hide', scale: 'device'})).toString('base64')}`
   const shown = await picture()
-  await restyle(ink, {visibility: 'hidden'})
+  await restyle(ink, 'opticalInk', {visibility: 'hidden'})
   let withoutInk: string, bare: string
   try {
     withoutInk = await picture()
-    await restyle(surface, hiddenPaint)
+    await restyle(surface, 'opticalSurface', hiddenPaint)
     try {
       bare = await picture()
     } finally {
-      await restyle(surface, null)
+      await restyle(surface, 'opticalSurface', null)
     }
   } finally {
-    await restyle(ink, null)
+    await restyle(ink, 'opticalInk', null)
   }
   const scale = await page.evaluate(() => devicePixelRatio)
   // The surface's box in the picture's device pixels, a device pixel larger each side for its antialiasing.

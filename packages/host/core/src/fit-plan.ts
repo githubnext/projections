@@ -7,6 +7,7 @@ import {flushSync} from 'react-dom'
 import {chooseFitPlan, toolbarHysteresis} from './fit-plan/choose.js'
 import {fitWidth} from './fit-plan/fit-width.js'
 import {useFocusRetention} from './fit-plan/focus.js'
+import {carryNeeds, shiftNeeds} from './fit-plan/needs.js'
 
 export {chooseFitPlan, toolbarHysteresis} from './fit-plan/choose.js'
 export type {FitChoice, FitHysteresis} from './fit-plan/choose.js'
@@ -14,8 +15,30 @@ export {fitWidth} from './fit-plan/fit-width.js'
 
 /** Options of `useFitPlan`. */
 export interface FitPlanOptions<T> {
-  /** What the bar holds; measured needs are kept until it changes. */
-  key: string
+  /**
+   * What the bar holds; measured needs are kept until it changes. A function of the bar's width (in whole pixels) for
+   * what changes with it, for example a slider's minimum that is narrower under some width.
+   */
+  key: string | ((width: number) => string)
+  /**
+   * When `key` changes, a region resizes or `pending` settles, keep the measured needs and move them all by as much as
+   * the shown plan's need moved once it is measured again, rather than measure each plan again (default `false`).
+   */
+  shiftNeeds?: boolean
+  /**
+   * When the plans change, each new plan takes the need of the first previous plan with the same key, when one of them
+   * has the shown plan's key; else every plan is measured again (default: needs are kept by signature).
+   */
+  carry?: (plan: T) => string
+  /**
+   * The need the choice uses for a plan, from what it was measured to need (`undefined` until it is), for example with a
+   * part measured once for several plans (default: that need). `undefined` tries the plan.
+   */
+  need?: (plan: T, measured: number | undefined) => number | undefined
+  /** Content still rendering, for example custom elements that draw after they mount: measure again once it settles. */
+  pending?: (element: HTMLElement) => Promise<unknown> | undefined
+  /** The bar's regions observed with it, so a block that grows replans (default `[data-toolbar-region]`). */
+  regions?: string
   /** A plan's identity (default `JSON.stringify`). */
   signature?: (plan: T) => string
   /** The plan in `plans` to render for a previous plan when the plans change (default: the same signature, else the first). */
@@ -40,6 +63,8 @@ export interface FitPlanOptions<T> {
    * replaces it, for example `{zoom: ['more']}` for a control that moves into an overflow.
    */
   focusFallbacks?: Readonly<Record<string, readonly string[]>>
+  /** How a control gets focus back (default `control.focus()`), for example the control in a custom element's shadow root. */
+  focusControl?: (control: HTMLElement) => void
 }
 
 /**
@@ -47,7 +72,8 @@ export interface FitPlanOptions<T> {
  * ResizeObserver on the element itself (not the viewport, since bars are embedded at any width). Each plan is
  * measured as rendered, before paint, with `measure` (by default `fitWidth`: mark flexible children with
  * `data-fit-min` and measured rows with `data-fit`); unmeasured plans are tried in order and the needs are cached until
- * `key` changes. Elements marked `data-toolbar-region` are observed too, so a block that grows replans. A plan more
+ * `key` changes (or shifted, `shiftNeeds`). Elements marked `data-toolbar-region` are observed too, so a block that
+ * grows replans. A bar without width (hidden) keeps its plan. A plan more
  * spacious than the current one is chosen again only with `hysteresis` pixels to spare, so the bar doesn't flicker at
  * a boundary (`chooseFitPlan`). Once a plan settles, the bar says at what width (`data-fit-settled`, in whole pixels),
  * so a test can wait for it. Controls marked `data-focus-id` keep focus when a new plan remounts them.
@@ -57,7 +83,6 @@ export function useFitPlan<T>(
   plans: readonly T[],
   options: FitPlanOptions<T>,
 ): {plan: T; index: number; width: number} {
-  const {key} = options
   const sign = options.signature ?? ((plan: T) => JSON.stringify(plan))
   const find =
     options.locate ??
@@ -66,10 +91,16 @@ export function useFitPlan<T>(
       return index < 0 ? 0 : index
     })
   const [state, setState] = useState<{plan: T; width: number; tick: number}>(() => ({plan: plans[0]!, width: 0, tick: 0}))
+  const key = typeof options.key === 'function' ? options.key(state.width) : options.key
   const memo = useRef({
     key,
+    plans,
+    shown: plans[0]!,
     needs: new Map<string, number>(),
     ceilings: new Map<string, number>(),
+    stale: false,
+    fresh: false,
+    regionWidths: new Map<Element, number>(),
     settled: plans[0]!,
     locked: false,
     steps: 0,
@@ -77,56 +108,83 @@ export function useFitPlan<T>(
   })
   const index = find(plans, state.plan)
   const plan = plans[index]!
-  const {lock, ceiling, measure = fitWidth, hysteresis = toolbarHysteresis} = options
-  const latest = useRef({sign, find, lock, ceiling, measure, hysteresis})
-  latest.current = {sign, find, lock, ceiling, measure, hysteresis}
+  const {lock, ceiling, measure = fitWidth, hysteresis = toolbarHysteresis, shiftNeeds: shift = false, carry, need, pending} = options
+  const regions = options.regions ?? '[data-toolbar-region]'
+  const latest = useRef({sign, find, lock, ceiling, measure, hysteresis, shift, carry, need, pending, regions})
+  latest.current = {sign, find, lock, ceiling, measure, hysteresis, shift, carry, need, pending, regions}
 
   useLayoutEffect(() => {
     const element = bar.current
     if (!element) return
-    const {sign, find, lock: lockOf, ceiling, measure, hysteresis} = latest.current
+    const {sign, find, lock: lockOf, ceiling, measure, hysteresis, shift, carry, need, pending, regions} = latest.current
     const m = memo.current
     if (m.key !== key) {
       m.key = key
-      m.needs.clear()
+      if (shift) m.stale = true
+      else m.needs.clear()
       m.ceilings.clear()
     }
+    if (m.plans !== plans) {
+      if (carry) {
+        const carried = carryNeeds(m.plans, plans, m.shown, m.needs, sign, carry)
+        m.needs = carried ?? new Map()
+        m.stale = carried !== undefined
+      }
+      m.plans = plans
+    }
     const width = element.getBoundingClientRect().width
+    if (width < 1) return
     if (Math.round(width) !== state.width) {
       // What a plan needs may depend on the width (say, a slider's minimum): render with it before measuring.
       delete element.dataset.fitSettled
       setState(previous => ({...previous, width: Math.round(width)}))
       return
     }
-    m.needs.set(sign(plan), Math.ceil(measure(element, plan)))
+    const measured = Math.ceil(measure(element, plan))
+    if (m.stale) shiftNeeds(m.needs, sign(plan), measured)
+    m.stale = false
+    m.needs.set(sign(plan), measured)
+    m.shown = plan
+    const later = pending?.(element)
+    if (later)
+      void later.then(() => {
+        if (memo.current.key !== key || memo.current.plans !== plans) return
+        if (shift) memo.current.stale = true
+        memo.current.fresh = true
+        setState(previous => ({...previous, tick: previous.tick + 1}))
+      })
     if (ceiling) m.ceilings.set(sign(plan), ceiling(element, plan))
     const lock = lockOf?.(element, plan)
     m.locked = Boolean(lock)
+    const needOf = (candidate: T) => (need ? need(candidate, m.needs.get(sign(candidate))) : m.needs.get(sign(candidate)))
     const target = chooseFitPlan({
       plans,
       width,
       settled: find(plans, m.settled),
-      need: candidate => m.needs.get(sign(candidate)),
+      need: needOf,
       ceiling: candidate => m.ceilings.get(sign(candidate)),
       hysteresis: typeof hysteresis === 'number' ? hysteresis : (from, to) => hysteresis(from, to, element),
       allowed: lock,
     })
     // Trying an unmeasured plan always adds information. Switching between measured plans could only repeat if
-    // measurements disagreed from one render to the next, so a burst of those settles; it never settles on a plan
-    // known not to fit while one that fits is known.
-    const fits = (candidate: T) => (m.needs.get(sign(candidate)) ?? Infinity) <= width + 0.5
+    // measurements disagreed from one render to the next, so a burst of those switches settles; it never settles on a
+    // plan known not to fit while one that fits is known. A change from outside (a region resized since the bar settled,
+    // content that finished rendering) starts a new burst.
+    const fits = (candidate: T) => (needOf(candidate) ?? Infinity) <= width + 0.5
     const burst = `${key}:${Math.round(width)}`
-    if (m.burst !== burst) {
+    if (m.burst !== burst || m.fresh) {
       m.burst = burst
       m.steps = 0
+      m.fresh = false
     }
-    const known = m.needs.has(sign(plans[target]!))
-    const switches = known ? ++m.steps : m.steps
+    const known = needOf(plans[target]!) !== undefined
+    const switches = known && target !== index ? ++m.steps : m.steps
     if (target !== index && (!known || switches <= 4 || (!fits(plan) && switches <= 4 + plans.length))) {
       delete element.dataset.fitSettled
       setState(previous => ({...previous, plan: plans[target]!}))
     } else {
       m.settled = plan
+      m.regionWidths = new Map([...element.querySelectorAll(regions)].map(region => [region, region.getBoundingClientRect().width]))
       element.dataset.fitSettled = String(Math.round(width))
     }
   }, [bar, plans, plan, index, key, state.width, state.tick])
@@ -139,7 +197,14 @@ export function useFitPlan<T>(
     // Replanning inside the observer's callback would resize observed elements mid-delivery (a ResizeObserver loop),
     // so it waits for the next frame, and renders synchronously there, before that frame's layout and paint.
     let frame = 0
-    const resize = new ResizeObserver(() => {
+    const resize = new ResizeObserver(entries => {
+      // A region that resized changed what the shown plan needs; one that isn't as wide as when the bar settled changed
+      // from outside, not as part of the plan it settled on.
+      const m = memo.current
+      const regions = entries.filter(entry => entry.target !== element)
+      if (latest.current.shift && regions.length) m.stale = true
+      if (regions.some(({target}) => Math.abs(target.getBoundingClientRect().width - (m.regionWidths.get(target) ?? NaN)) >= 0.5))
+        m.fresh = true
       if (frame) return
       frame = requestAnimationFrame(() => {
         frame = 0
@@ -162,7 +227,7 @@ export function useFitPlan<T>(
     const resize = observer.current
     const element = bar.current
     if (!resize || !element) return
-    const regions = new Set(element.querySelectorAll('[data-toolbar-region]'))
+    const regions = new Set(element.querySelectorAll(latest.current.regions))
     for (const region of observed.current) if (!regions.has(region)) resize.unobserve(region)
     for (const region of regions) if (!observed.current.has(region)) resize.observe(region)
     observed.current = regions
@@ -210,7 +275,7 @@ export function useFitPlan<T>(
     }
   }, [bar])
 
-  useFocusRetention(bar, options.focusFallbacks)
+  useFocusRetention(bar, options.focusFallbacks, options.focusControl)
 
   return {plan, index, width: state.width}
 }

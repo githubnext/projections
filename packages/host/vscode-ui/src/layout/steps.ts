@@ -127,48 +127,16 @@ export function toolbarSteps(content: ToolbarContent): readonly ToolbarLayout[] 
     })
 }
 
-/**
- * The first step that fits `width`: a less collapsed step than `current` needs `toolbarHysteresis` to spare. A step
- * not measured yet is tried. A second row with the steps inline also needs `rowNeed`, the width at which its slider
- * spans `playbackRowShare` of the row.
- */
-export function choose(
-  steps: readonly ToolbarLayout[],
-  required: readonly (number | undefined)[],
-  rowNeed: number | undefined,
-  current: number,
-  width: number,
-): number {
-  for (const [index, layout] of steps.entries()) {
-    const own = required[index]
-    const row = layout.rows === 2 && !layout.playbackOverflow ? rowNeed : 0
-    if (own === undefined || row === undefined) return index
-    if (Math.max(own, row) + (index < current ? toolbarHysteresis : 0) <= width) return index
-  }
-  return steps.length - 1
-}
-
 /** Row 1's form in a step: where the mode region sits, the pickers, the mode switch and the actions in More. */
-const rowForm = (layout: ToolbarLayout) => `${layout.cluster}|${layout.pickers}|${layout.modes}|${layout.moreActions.join(' ')}`
+export const rowForm = (layout: ToolbarLayout) => `${layout.cluster}|${layout.pickers}|${layout.modes}|${layout.moreActions.join(' ')}`
 
 /**
- * Carries a settled step into another collapse order (playback coming or going): the first step with the same row 1
- * form, so row 1 doesn't move, and what each step was measured to need, by the same form (the playback row's own
- * forms need a fresh measure). `undefined` when the old order has no such form.
+ * The step in `steps` to show for `layout`: the step itself, else, from another collapse order (playback coming or
+ * going), the first step with the same row 1 form, so row 1 doesn't move; else the first step.
  */
-export function carryStep(
-  from: readonly ToolbarLayout[],
-  step: number,
-  required: readonly (number | undefined)[],
-  to: readonly ToolbarLayout[],
-): {step: number; required: (number | undefined)[]} | undefined {
-  const settled = from[step]
-  const index = settled ? to.findIndex(layout => rowForm(layout) === rowForm(settled)) : -1
-  if (index < 0) return undefined
-  const needs = new Map<string, number>()
-  for (const [position, layout] of from.entries()) {
-    const need = required[position]
-    if (need !== undefined && !needs.has(rowForm(layout))) needs.set(rowForm(layout), need)
-  }
-  return {step: index, required: to.map(layout => needs.get(rowForm(layout)))}
+export function locateStep(steps: readonly ToolbarLayout[], layout: ToolbarLayout): number {
+  const same = steps.indexOf(layout)
+  if (same >= 0) return same
+  const form = steps.findIndex(step => rowForm(step) === rowForm(layout))
+  return form < 0 ? 0 : form
 }

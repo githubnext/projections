@@ -2,10 +2,10 @@ import {spawn} from 'node:child_process'
 import {readFileSync} from 'node:fs'
 import {readFile} from 'node:fs/promises'
 import {fileURLToPath} from 'node:url'
-import {cancelled, settings, type RunComparatorOptions} from './host.js'
+import {settings, type RunComparatorOptions} from './host.js'
 import {run} from './node-worker.js'
 import {cachedChecks, checkedRules, diagnostic, compareRequest, inspectRequest, loadRulesInterpreter, type RulesRuntime} from './rules.js'
-import {ComparatorRuntimeError, limits} from './abi.js'
+import {ComparatorRuntimeError, abortable, cancelled, limits} from './abi.js'
 
 export {ComparatorRuntimeError, limits, type ComparatorErrorCode} from './abi.js'
 export type {RunComparatorOptions} from './host.js'
@@ -32,7 +32,7 @@ export function createRulesRuntime(options: RunComparatorOptions = {}): RulesRun
   const resolved = settings(options)
   return {
     check: cachedChecks(async (rules, call) => {
-      const interpreter = await nodeRulesInterpreter()
+      const interpreter = await abortable(nodeRulesInterpreter(), call?.signal)
       const report = await run(
         inspectRequest(interpreter, rules, resolved.maxMemoryPages, resolved.maxOutputBytes),
         resolved.deadlineMs,
@@ -41,7 +41,7 @@ export function createRulesRuntime(options: RunComparatorOptions = {}): RulesRun
       return checkedRules(interpreter, report)
     }),
     async compare(rules, input, call) {
-      const interpreter = await nodeRulesInterpreter()
+      const interpreter = await abortable(nodeRulesInterpreter(), call?.signal)
       const request = compareRequest(interpreter, rules, input, resolved.maxInputBytes, resolved.maxMemoryPages, resolved.maxOutputBytes)
       return run(request, resolved.deadlineMs, call?.signal)
     },

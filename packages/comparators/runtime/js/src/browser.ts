@@ -1,3 +1,4 @@
+import {abortable} from './abi.js'
 import {run} from './browser-worker.js'
 import {settings, type RunComparatorOptions} from './host.js'
 import {cachedChecks, checkedRules, compareRequest, inspectRequest, loadRulesInterpreter, type RulesRuntime} from './rules.js'
@@ -44,7 +45,8 @@ export function createRulesRuntime(options: BrowserComparatorOptions = {}): Rule
     })
   return {
     check: cachedChecks(async (rules, call) => {
-      const loaded = await interpreter()
+      // Waiting for the shared interpreter, a caller can still be cancelled; the load carries on for the others.
+      const loaded = await abortable(interpreter(), call?.signal)
       const report = await run(
         inspectRequest(loaded, rules, resolved.maxMemoryPages, resolved.maxOutputBytes),
         resolved.deadlineMs,
@@ -54,7 +56,7 @@ export function createRulesRuntime(options: BrowserComparatorOptions = {}): Rule
       return checkedRules(loaded, report)
     }),
     async compare(rules, input, call) {
-      const loaded = await interpreter()
+      const loaded = await abortable(interpreter(), call?.signal)
       const request = compareRequest(loaded, rules, input, resolved.maxInputBytes, resolved.maxMemoryPages, resolved.maxOutputBytes)
       return run(request, resolved.deadlineMs, options.workerUrl, call?.signal)
     },

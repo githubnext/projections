@@ -1,4 +1,4 @@
-import {ComparatorRuntimeError, PAGE_BYTES, errors, limits} from './abi.js'
+import {ComparatorRuntimeError, PAGE_BYTES, cancelled, errors, limits} from './abi.js'
 import {encodeInput} from './input.js'
 import {inspectModule} from './module-check/inspect.js'
 import type {ExecuteRequest, ExecuteResult} from './execute.js'
@@ -84,12 +84,6 @@ export interface WorkerEvents {
 }
 
 /** Runs one request in a fresh worker, terminating it on completion, failure or deadline. */
-/** The error for a run its caller's signal cancelled. */
-export function cancelled(signal: AbortSignal): ComparatorRuntimeError {
-  const reason = signal.reason instanceof Error ? `: ${signal.reason.message}` : ''
-  return new ComparatorRuntimeError('cancelled', `the comparator run was cancelled${reason}`)
-}
-
 export function runInWorker(
   spawn: (events: WorkerEvents) => WorkerHandle,
   request: ExecuteRequest,

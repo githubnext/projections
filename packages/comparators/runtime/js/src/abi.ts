@@ -73,6 +73,35 @@ export class ComparatorRuntimeError extends Error {
   }
 }
 
+/** The error for a run its caller's signal cancelled. */
+export function cancelled(signal: AbortSignal): ComparatorRuntimeError {
+  const reason = signal.reason instanceof Error ? `: ${signal.reason.message}` : ''
+  return new ComparatorRuntimeError('cancelled', `the comparator run was cancelled${reason}`)
+}
+
+/**
+ * `promise`, or a rejection with `cancelled` as soon as `signal` aborts: this caller stops waiting, and the work
+ * `promise` stands for, which other callers may share, carries on.
+ */
+export function abortable<T>(promise: Promise<T>, signal: AbortSignal | undefined): Promise<T> {
+  if (!signal) return promise
+  if (signal.aborted) return Promise.reject(cancelled(signal))
+  return new Promise<T>((resolve, reject) => {
+    const abort = () => reject(cancelled(signal))
+    signal.addEventListener('abort', abort, {once: true})
+    promise.then(
+      value => {
+        signal.removeEventListener('abort', abort)
+        resolve(value)
+      },
+      (error: unknown) => {
+        signal.removeEventListener('abort', abort)
+        reject(error)
+      },
+    )
+  })
+}
+
 export const fail = (code: ComparatorErrorCode, message: string): never => {
   throw new ComparatorRuntimeError(code, message)
 }

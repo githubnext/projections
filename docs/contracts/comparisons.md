@@ -340,9 +340,11 @@ context reject it: their comparisons are closed objects that don't know the
 field. Viewers rerun the comparator anyway, and saved comparisons without
 `context` stay valid; presentation derives their context from the structure.
 
-Extractions are compared only when their `definitionDigest` values match;
-otherwise the mismatch is reported, explaining whether the definition or its
-declared sources differ. By default a comparison applies the base revision's
+Extractions are compared only when the engine pairs them (`pair`, see
+[One implementation](../contracts.md#one-implementation-native-and-browser)):
+one projection, recorded definitions that agree apart from `presentation`, and
+equal `definitionDigest` values. Otherwise the mismatch is reported, explaining
+whether the definition or its declared sources differ. By default a comparison applies the base revision's
 definition, with one version of its component code, to both revisions;
 `--definition head` uses the head revision's definition. A projection missing at
 the definition revision is an explicit error naming an option that works: the

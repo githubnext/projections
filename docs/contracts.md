@@ -200,7 +200,20 @@ artifact-supplied renderers.
 
 The native and browser Engines implement the same request and response contract
 (engine ABI version 0). Operations are `parse-json`, `decode`, `normalize`,
-`canonicalize`, `validate-comparison` and `vary`. `vary` (`{before, after}`)
+`canonicalize`, `validate-comparison`, `vary` and `pair`. `pair`
+(`{before, after}`, each reading only `projection.id`,
+`provenance.definition` and `provenance.definitionDigest` of an extraction
+document) decides whether two extractions can be compared and returns
+`{pairing}`: `same`; `projection` for different projections; `definition`, with
+the `differing` top-level fields, when the recorded definitions differ apart
+from `presentation` (whatever their digests say); or `components` when the
+definitions agree but the digests differ, because the declared sources' bytes
+do. It is the one implementation of that rule: the CLI calls
+`projections_engine::pairing`, JavaScript hosts `engine.pair(before, after)`,
+and the shared conformance corpus (`packages/schemas/fixtures/conformance.json`)
+runs it natively and in Wasm. Code outside the engine doesn't compare digests or
+definitions itself; the `no-restricted-syntax` entries in
+`tools/scripts/engine-contracts.mjs` flag it. `vary` (`{before, after}`)
 compares two extractions of the same revision, such as a rerun, item by item by
 ID with no matching, and returns `{equal, within, beyond}`: `equal` when the
 canonical bytes are identical; `within`, each

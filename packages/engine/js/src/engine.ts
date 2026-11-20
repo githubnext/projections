@@ -3,16 +3,27 @@ import type {
   DefaultComparatorOptions,
   CanonicalExtraction,
   Comparison,
+  DefinitionPairing,
   EngineRequest,
   EngineResponse,
   Extraction,
   Json,
+  PairingSide,
   ProjectionEngine,
   Variation,
 } from '@githubnext/projections-schemas'
 import {decodeComparatorOutput} from './decoding.js'
 import {encodeComparatorInput} from './encoding.js'
 import {EngineError, type DefaultComparator} from './transport.js'
+
+/** Only what pairing reads, so a pair of large extractions isn't sent to the engine whole. */
+function pairingSide(document: PairingSide): unknown {
+  const side = document as Partial<PairingSide> | undefined
+  return {
+    projection: {id: side?.projection?.id},
+    provenance: {definition: side?.provenance?.definition, definitionDigest: side?.provenance?.definitionDigest},
+  }
+}
 
 /**
  * Builds the `ProjectionEngine` API over one transport, which every factory (`createNativeEngine`, `createWasmEngine`,
@@ -58,6 +69,8 @@ export function engine(
     canonicalize: extraction => result<CanonicalExtraction>({version: 0, operation: 'canonicalize', extraction}),
     validateComparison,
     vary: (before, after) => result<Variation>({version: 0, operation: 'vary', before, after}),
+    pair: (before, after) =>
+      result<DefinitionPairing>({version: 0, operation: 'pair', before: pairingSide(before), after: pairingSide(after)}),
     async compare(before, after, options: DefaultComparatorOptions = {}) {
       const input = encodeComparatorInput(before, after, options)
       const output = decodeComparatorOutput(await (await comparator()).call(input))

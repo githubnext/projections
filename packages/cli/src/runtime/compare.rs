@@ -177,7 +177,7 @@ impl Runner {
             ));
         };
         // Presentation defaults don't change what is extracted or compared.
-        if artifact::semantic_definition(&other_definition) != artifact::semantic_definition(definition) {
+        if projections_engine::extraction_definition(&other_definition) != projections_engine::extraction_definition(definition) {
             return Some(format!(
                 "The {other_side} revision changes the definition of projection {shown}. {advice}"
             ));

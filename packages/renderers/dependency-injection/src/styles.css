@@ -135,6 +135,13 @@
   fill: var(--edge);
   pointer-events: none;
 }
+/* A link's copy of its origin dot (`LinkOrigins`): clear until the link is ringed, then the ring's color. */
+.di-link-origin-ring {
+  fill: transparent;
+  stroke: none;
+  stroke-width: 0;
+  pointer-events: none;
+}
 .di-link-hit {
   stroke: transparent;
   stroke-width: var(--projections-space-4);

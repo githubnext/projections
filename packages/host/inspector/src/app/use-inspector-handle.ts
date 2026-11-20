@@ -28,7 +28,7 @@ export function useInspectorHandle({
   actions,
   setSource,
   setMarks,
-  setQueue,
+  dropQueued,
   setRows,
 }: {
   handleRef: ((handle: InspectorHandle | null) => void) | undefined
@@ -37,7 +37,7 @@ export function useInspectorHandle({
   actions: HandleActions
   setSource: Dispatch<SetStateAction<'live' | 'artifact'>>
   setMarks: Dispatch<SetStateAction<{[projection: string]: Marks}>>
-  setQueue: Dispatch<SetStateAction<QueuedExtraction[]>>
+  dropQueued: (drop: (item: QueuedExtraction) => boolean) => void
   setRows: Dispatch<SetStateAction<Rows>>
 }) {
   const handleState = useRef(state)
@@ -65,7 +65,7 @@ export function useInspectorHandle({
         setMarks(current => ({...current, [target]: a ? {a, b} : {b}}))
         // A pair switched away from before it was extracted isn't extracted (its running job finishes).
         const wanted = new Set([a, b])
-        setQueue(current => current.filter(item => item.projection !== target || wanted.has(item.ref)))
+        dropQueued(item => item.projection === target && !wanted.has(item.ref))
         setRows(current => withoutQueued(current, target, wanted))
       },
       view: () => controllers.get() ?? null,
@@ -103,5 +103,5 @@ export function useInspectorHandle({
     }
     handleRef(handle)
     return () => handleRef(null)
-  }, [handleRef, controllers, setSource, setMarks, setQueue, setRows])
+  }, [handleRef, controllers, setSource, setMarks, dropQueued, setRows])
 }

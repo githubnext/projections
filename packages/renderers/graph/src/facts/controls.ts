@@ -60,7 +60,7 @@ export function factControls(fields: FactFields, kinds: readonly string[]): Rend
     controls.push({
       id: 'sizeBy',
       label: 'Size by',
-      description: "Make each card wider the larger a data field's number is, and show the number",
+      description: "Show a data field's number on each card, compact (12K)",
       type: 'choice',
       ...group,
       default: 'none',

@@ -19,8 +19,6 @@ import {expanderMetrics} from './entity-card.js'
 import {badgeCardWidth, badgeGrowth} from '../../graph-canvas/badges.js'
 import {fanInWidths} from '../../graph-canvas/fan-in.js'
 import {subtitleGrowth} from './subtitle.js'
-import {weightShares} from '../../graph-canvas/weight.js'
-import type {WeightShare} from '../../graph-canvas/weight.js'
 
 /**
  * The room a row's card keeps at the right of its kind line for its expander, when it has one (see `EntityCard`): on
@@ -123,9 +121,9 @@ export function GraphCanvas(props: GraphCanvasProps) {
     const width = Math.max(cardWidthRange.min, badgeWidth, ...model.entities.map(row => card(row).width))
     return new Map(model.entities.map(row => [row.id, card(row, width)]))
   }, [diff, model, fields, textScale, badgeWidth, icon])
-  // Hubs grow so the relationships into them keep apart (see `fanInWidths`); a card's weight is its gauge, not its
-  // width, so the cards keep one width and line up in columns (see `weightShares`).
-  const {weight, subtitle} = props
+  // Hubs grow so the relationships into them keep apart (see `fanInWidths`); otherwise the cards keep one width and
+  // line up in columns.
+  const {subtitle} = props
   const widths = useMemo(() => {
     if (cards) return fanInWidths(model, new Map([...cards].map(([id, card]) => [id, card.width])), orientation)
     const {kindLine, detail, prose, describeStatus} = text.current
@@ -138,7 +136,6 @@ export function GraphCanvas(props: GraphCanvasProps) {
     )
     return fanInWidths(model, new Map(model.entities.map(row => [row.id, width] as const)), orientation)
   }, [cards, model, comparing, textScale, badgeWidth, orientation, icon])
-  const shares = useMemo(() => (weight ? weightShares(model.entities, weight) : undefined), [weight, model])
   // Cards grow for their badge rows and their subtitle's lines.
   const badgeRows = useMemo(
     () => (badges ? badgeGrowth(model.entities, badges, widths, textScale) : undefined),
@@ -210,7 +207,6 @@ export function GraphCanvas(props: GraphCanvasProps) {
         textScale,
         badgeGrowth: badgeRows,
         subtitleGrowth: subtitleRows,
-        weightShares: shares,
       }
     : last
   drawn.current = shown
@@ -226,7 +222,6 @@ export function GraphCanvas(props: GraphCanvasProps) {
       textScale={shown.textScale}
       badgeGrowth={shown.badgeGrowth}
       subtitleGrowth={shown.subtitleGrowth}
-      weightShares={shown.weightShares}
     />
   ) : (
     <div className="graph-container">
@@ -251,5 +246,4 @@ interface Drawn {
   textScale: number
   badgeGrowth: ReadonlyMap<string, number> | undefined
   subtitleGrowth: ReadonlyMap<string, number> | undefined
-  weightShares: ReadonlyMap<string, WeightShare> | undefined
 }

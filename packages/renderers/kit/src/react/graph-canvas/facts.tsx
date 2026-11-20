@@ -1,4 +1,5 @@
 // A card's facts drawn: its badges, in rows under its text, and its accent band along its leading edge.
+import {useId} from 'react'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import type {TransitionNode} from '../../graph-transition.js'
 import {cardFooterHeight} from '../../layout.js'
@@ -81,34 +82,62 @@ export function CardBadges({node, drawing}: {node: TransitionNode; drawing: Draw
   )
 }
 
-/** A band along a card's leading edge, its corners rounded like the card's. */
-function accentBand(width: number, height: number, radius: number): string {
-  const x = -width / 2,
-    y = -height / 2,
-    w = badgeMetrics.accent,
-    r = Math.min(radius, height / 2)
-  return `M${x + r} ${y}H${x + w}V${y + height}H${x + r}A${r} ${r} 0 0 1 ${x} ${y + height - r}V${y + r}A${r} ${r} 0 0 1 ${x + r} ${y}Z`
-}
-
-/** A card's accent band: the shown revision's, crossfading with the card's own step when it changes. */
+/**
+ * A card's accent band: the shown revision's, crossfading with the card's own step when it changes. It is cut to the
+ * card's own corners (`clipPath`s of the card's shape, their radii the theme's), so it follows them. Its rim covers the
+ * outer half of the card's border along it, so the band replaces the border there rather than drawing beside it; the
+ * rim gives way while the card is ringed, so the ring shows round the whole card. Both stay as narrow as the band, so
+ * the band never encloses what the card holds.
+ */
 export function CardAccentBand({node, drawing}: {node: TransitionNode; drawing: Drawing}) {
-  const {props, diff} = drawing
+  const {props, diff, stroke} = drawing
+  const id = useId().replace(/[^a-zA-Z0-9_-]/g, '')
   if (!props.accent) return null
   const [before, after] = [node.before, node.after].map(side => (side ? props.accent!(side) : undefined))
+  const [left, top, half] = [-node.width / 2, -node.height / 2, stroke / 2]
   const band = (accent: CardAccent | undefined, opacity: number, key: string) =>
     accent && opacity > 0.001 ? (
-      <path
-        key={key}
-        className="node-accent"
-        d={accentBand(node.width, node.height, 6)}
-        style={{fill: accent.paint}}
-        opacity={opacity}
-        {...(accent.category === undefined ? {} : {'data-projections-category': accent.category})}
-      />
+      <g key={key} opacity={opacity} {...(accent.category === undefined ? {} : {'data-projections-category': accent.category})}>
+        <rect
+          className="node-accent-rim"
+          x={left - half}
+          y={top - half}
+          width={badgeMetrics.accent + half}
+          height={node.height + stroke}
+          clipPath={`url(#${id}-outer)`}
+          style={{fill: accent.paint}}
+        />
+        <rect
+          className="node-accent"
+          x={left}
+          y={top}
+          width={badgeMetrics.accent}
+          height={node.height}
+          clipPath={`url(#${id}-inner)`}
+          style={{fill: accent.paint}}
+        />
+      </g>
     ) : null
-  if (diff || !node.before || !node.after || before?.paint === after?.paint) return band(after ?? before, 1, 'accent')
+  const shapes = (
+    <defs>
+      <clipPath id={`${id}-outer`}>
+        <rect className="node-accent-outer" x={left - half} y={top - half} width={node.width + stroke} height={node.height + stroke} />
+      </clipPath>
+      <clipPath id={`${id}-inner`}>
+        <rect className="node-accent-inner" x={left} y={top} width={node.width} height={node.height} />
+      </clipPath>
+    </defs>
+  )
+  if (diff || !node.before || !node.after || before?.paint === after?.paint)
+    return (
+      <>
+        {shapes}
+        {band(after ?? before, 1, 'accent')}
+      </>
+    )
   return (
     <>
+      {shapes}
       {band(before, 1 - node.local, 'before')}
       {band(after, node.local, 'after')}
     </>

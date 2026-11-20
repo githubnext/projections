@@ -12,6 +12,36 @@ use std::collections::{BTreeSet, HashMap, HashSet, VecDeque};
 pub const MAX_CONTEXT: usize = 1_000;
 /// At most this many context IDs across a comparison's changes and revisions.
 pub const MAX_CONTEXT_TOTAL: usize = 250_000;
+/// At most this many bytes of context IDs across a comparison's changes and
+/// revisions: IDs aren't bounded in length, so the count alone doesn't bound
+/// the memory context takes.
+pub const MAX_CONTEXT_BYTES: usize = 16 * 1024 * 1024;
+
+/// What remains of a comparison's context budget: IDs and their bytes.
+#[derive(Debug, Clone, Copy)]
+pub struct Budget {
+    pub ids: usize,
+    pub bytes: usize,
+}
+
+impl Budget {
+    /// A whole comparison's.
+    pub const COMPARISON: Budget = Budget {
+        ids: MAX_CONTEXT_TOTAL,
+        bytes: MAX_CONTEXT_BYTES,
+    };
+
+    /// Spends `ids`; false, spending nothing, when they don't fit.
+    pub fn spend(&mut self, ids: &[String]) -> bool {
+        let bytes: usize = ids.iter().map(String::len).sum();
+        if ids.len() > self.ids || bytes > self.bytes {
+            return false;
+        }
+        self.ids -= ids.len();
+        self.bytes -= bytes;
+        true
+    }
+}
 
 /// Relationship kinds that place their `to` item inside their `from` item, in
 /// every domain schema.
@@ -111,12 +141,13 @@ impl<'a> Structure<'a> {
     /// The context of items `own`, of one collection: at most `limit` IDs,
     /// nearest first (a relationship's endpoints, then each entity's
     /// containers, level by level), in UTF-16 order and without `own`.
-    fn context<'o>(&'o self, relationships: bool, own: &'o [String], limit: usize) -> Vec<String> {
+    fn context<'o>(&'o self, relationships: bool, own: &'o [String], limit: usize, bytes: usize) -> Vec<String> {
         let mut found = Found {
             own: own.iter().map(String::as_str).collect(),
             seen: HashSet::new(),
             ids: Vec::new(),
             limit,
+            bytes,
         };
         let mut queue: VecDeque<&str> = VecDeque::new();
         for id in own {
@@ -156,31 +187,41 @@ struct Found<'o> {
     seen: HashSet<&'o str>,
     ids: Vec<&'o str>,
     limit: usize,
+    /// The bytes it may still take; spent to 0 when an ID no longer fits.
+    bytes: usize,
 }
 
 impl<'o> Found<'o> {
     /// Adds an ID that isn't the change's own, unless it is already found
     /// or the limit is reached.
     fn add(&mut self, id: &'o str) {
-        if !self.full() && !self.own.contains(id) && self.seen.insert(id) {
-            self.ids.push(id);
+        if self.full() || self.own.contains(id) || !self.seen.insert(id) {
+            return;
         }
+        if id.len() > self.bytes {
+            // The budget's bytes are spent: nothing more is added.
+            self.bytes = 0;
+            return;
+        }
+        self.bytes -= id.len();
+        self.ids.push(id);
     }
 
     fn full(&self) -> bool {
-        self.ids.len() >= self.limit
+        self.ids.len() >= self.limit || self.bytes == 0
     }
 }
 
 /// The core's context of a comparison's changes, over its two extractions,
 /// within the context limits: each change in order takes at most
 /// [`MAX_CONTEXT`] IDs per revision, nearest first, from what remains of the
-/// comparison's [`MAX_CONTEXT_TOTAL`], so a comparison of any extractions has
+/// comparison's [`MAX_CONTEXT_TOTAL`] IDs and [`MAX_CONTEXT_BYTES`] bytes, so
+/// a comparison of any extractions has
 /// a valid core context, and building it is bounded.
 pub struct Core<'a> {
     before: Structure<'a>,
     after: Structure<'a>,
-    remaining: usize,
+    remaining: Budget,
 }
 
 impl<'a> Core<'a> {
@@ -188,7 +229,7 @@ impl<'a> Core<'a> {
         Core {
             before: Structure::of(before),
             after: Structure::of(after),
-            remaining: MAX_CONTEXT_TOTAL,
+            remaining: Budget::COMPARISON,
         }
     }
 
@@ -209,10 +250,14 @@ impl<'a> Core<'a> {
     /// in the comparison's order.
     pub fn of(&mut self, collection: Collection, before: &[String], after: &[String]) -> Option<Context> {
         let relationships = collection == Collection::Relationships;
-        let before = self.before.context(relationships, before, MAX_CONTEXT.min(self.remaining));
-        self.remaining -= before.len();
-        let after = self.after.context(relationships, after, MAX_CONTEXT.min(self.remaining));
-        self.remaining -= after.len();
+        let before = self
+            .before
+            .context(relationships, before, MAX_CONTEXT.min(self.remaining.ids), self.remaining.bytes);
+        self.remaining.spend(&before);
+        let after = self
+            .after
+            .context(relationships, after, MAX_CONTEXT.min(self.remaining.ids), self.remaining.bytes);
+        self.remaining.spend(&after);
         let context = Context {
             before,
             after,

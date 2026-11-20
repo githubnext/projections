@@ -1,7 +1,7 @@
 //! A change's context: the core's structural context, and the Engine's checks
 //! of the context a comparison claims.
 
-use projections_engine::context::{Containment, Core, MAX_CONTEXT, MAX_CONTEXT_TOTAL, extend};
+use projections_engine::context::{Containment, Core, MAX_CONTEXT, MAX_CONTEXT_BYTES, MAX_CONTEXT_TOTAL, extend};
 use projections_engine::{Change, Collection, Correspondence, Extraction, Status, normalize, validate_comparison};
 use serde_json::{Value, json};
 
@@ -429,4 +429,44 @@ fn the_core_spends_the_comparisons_budget_in_order_and_validation_agrees() {
     }
     written["changes"][125]["context"] = json!({"before": [], "after": ["e0664"]});
     assert_eq!(check(&before, &after, &written), Ok(()));
+}
+
+#[test]
+fn the_core_spends_the_comparisons_bytes_too_and_validation_agrees() {
+    // A chain of 300 entities with 2 KB IDs, every label changed: about 90 MB of containers in all, past 16 MiB of
+    // context, though under the counts.
+    let id = |level: usize| format!("e{level:04}{}", "x".repeat(2000));
+    let side = |label: &str| {
+        let entities: Vec<Value> = (0..300)
+            .map(|level| json!({"id": id(level), "kind": "k", "label": label}))
+            .collect();
+        let relationships: Vec<Value> = (1..300)
+            .map(|level| edge(&format!("c{level:04}"), "contains", &id(level - 1), &id(level)))
+            .collect();
+        extraction("graph/v0", json!(entities), json!(relationships))
+    };
+    let (before, after) = (side("a"), side("b"));
+    let ids: Vec<String> = (0..300).map(id).collect();
+    let mut changes: Vec<Change> = ids
+        .iter()
+        .map(|id| change(id, Collection::Entities, &[id], &[id], Status::Modified, Correspondence::Exact))
+        .collect();
+    Core::new(&typed(&before), &typed(&after)).apply(&mut changes);
+    let bytes: usize = changes
+        .iter()
+        .flat_map(|change| change.context.iter())
+        .flat_map(|context| context.before.iter().chain(&context.after))
+        .map(String::len)
+        .sum();
+    assert!(bytes <= MAX_CONTEXT_BYTES && bytes > MAX_CONTEXT_BYTES - 4096, "{bytes}");
+    assert_eq!(changes.last().unwrap().context, None);
+    let mut written = json!({"protocolVersion": 0, "changes": changes.iter().map(Change::to_json).collect::<Vec<_>>(),
+        "steps": [{"changes": ids}]});
+    assert_eq!(check(&before, &after, &written), Ok(()));
+    // Past the bytes, a claimed context is refused, though it is within the counts.
+    written["changes"][299]["context"] = json!({"before": [], "after": [id(0), id(1), id(2)]});
+    assert_eq!(
+        check(&before, &after, &written),
+        failure("context-limit", "/comparison/changes/299/context")
+    );
 }

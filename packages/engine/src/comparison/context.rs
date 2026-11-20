@@ -1,5 +1,5 @@
 use super::Integrity;
-use crate::context::{Core, MAX_CONTEXT_TOTAL};
+use crate::context::{Core, MAX_CONTEXT_BYTES, MAX_CONTEXT_TOTAL};
 use crate::model::{Change, Collection, Context, Side};
 use crate::{Failure, fail, pointer};
 use std::collections::HashSet;
@@ -42,12 +42,11 @@ impl<'a> Integrity<'a> {
                 }
             }
         }
-        self.context_total += context.before.len() + context.after.len();
-        if self.context_total > MAX_CONTEXT_TOTAL {
+        if !(self.context_budget.spend(&context.before) && self.context_budget.spend(&context.after)) {
             return Err(fail(
                 "context-limit",
                 path,
-                &format!("A comparison's changes have at most {MAX_CONTEXT_TOTAL} context IDs"),
+                &format!("A comparison's changes have at most {MAX_CONTEXT_TOTAL} context IDs, of at most {MAX_CONTEXT_BYTES} bytes"),
             ));
         }
         if let Some(expected) = self.core().context(change) {

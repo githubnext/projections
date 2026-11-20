@@ -17,7 +17,7 @@ mod steps;
 pub(crate) use integrity::Inconsistent;
 pub(crate) use steps::reverse_steps;
 
-use crate::context::Core;
+use crate::context::{Budget, Core};
 use crate::model::{Change, Collection, Extraction, ItemRef, Side};
 use crate::volatility::Declarations;
 use crate::{Failure, fail};
@@ -38,8 +38,8 @@ pub(crate) struct Integrity<'a> {
     extractions: [&'a Extraction; 2],
     /// The core's context, built when a change first has context.
     core: Option<Core<'a>>,
-    /// How many context IDs the changes have so far.
-    context_total: usize,
+    /// What remains of the comparison's context budget, after the changes so far.
+    context_budget: Budget,
 }
 
 impl<'a> Integrity<'a> {
@@ -69,7 +69,7 @@ impl<'a> Integrity<'a> {
             variation: HashSet::new(),
             extractions: [before, after],
             core: None,
-            context_total: 0,
+            context_budget: Budget::COMPARISON,
         })
     }
 

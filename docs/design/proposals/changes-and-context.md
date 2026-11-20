@@ -133,17 +133,18 @@ in scope and their context.
 As built: `Change.context` is `{before, after, rules?}` in `comparison/v0`
 (validation codes `unknown-reference`, `invalid-context`, `unexpected-context`,
 `missing-context` and `context-limit`, 1,000 IDs per change and revision and
-250,000 per comparison); the Engine's `context` module computes the core's
-context, which the default comparator and the rules interpreter both apply
-(native and `rules.wasm` share the code), and which validation requires of any
-change with `context`; comparator files gain `context` rules and comparator
-tests `changes: [{id, context}]`; renderers declare the `context` capability,
-which kit renderers do, and `RendererFrame` strips `context` from the `init` of
-renderers that don't; `presentComparison`, `scopeRows` and host rows carry it,
-`changeContext` and the new `rowContexts` use it, and the host's Changes scope
-and filter IDs follow; the Inspector's summary items carry each change's context
-(`changeContextItems`), which `current_view` lists in the CLI viewer and VS
-Code. The rules language's revision is 4.
+250,000 IDs and 16 MiB of ID bytes per comparison); the Engine's `context`
+module computes the core's context, which the default comparator and the rules
+interpreter both apply (native and `rules.wasm` share the code), and which
+validation requires of any change with `context`; comparator files gain
+`context` rules and comparator tests `changes: [{id, context}]`; renderers
+declare the `context` capability, which kit renderers do, and `RendererFrame`
+strips `context` from the `init` of renderers that don't; `presentComparison`,
+`scopeRows` and host rows carry it, `changeContext` and the new `rowContexts`
+use it, and the host's Changes scope and filter IDs follow; the Inspector's
+summary items carry each change's context (`changeContextItems`), which
+`current_view` lists in the CLI viewer and VS Code. The rules language's
+revision is 4.
 
 ## Deviations
 
@@ -225,8 +226,9 @@ Recorded as implementation chose within the decisions above.
   because they carry context.
 - The core context is bounded where it is built, not only checked afterwards: in
   change order, each change keeps its nearest items first, at most 1,000 per
-  revision, from the comparison's budget of 250,000, so a deep containment chain
-  or a very large change set can't exhaust memory or make the default comparison
-  fail its own limits. Validation spends the same budget in the same order. The
-  renderer SDK's derivation for saved comparisons isn't bounded; it only runs in
-  presentation.
+  revision, from the comparison's budget of 250,000 IDs and 16 MiB of ID bytes
+  (IDs have no length limit, so the count alone doesn't bound memory), so a deep
+  containment chain or a very large change set can't exhaust memory or make the
+  default comparison fail its own limits. Validation spends the same budget in
+  the same order. The renderer SDK's derivation for saved comparisons isn't
+  bounded; it only runs in presentation.

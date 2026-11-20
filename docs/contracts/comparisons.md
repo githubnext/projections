@@ -62,15 +62,15 @@ relationship in every domain schema, plus a database table's `constraint` and
 by the kinds of the entities at its ends. The core's context is bounded: taking
 the changes in order, each keeps its nearest items first (endpoints, then
 containers level by level), at most 1,000 per revision, from a budget of 250,000
-for the comparison, so it always fits the limits below and a change past the
-budget has none. Every comparator gives each change the core's context, and a
-comparator file's [`context` rules](#comparator-files) add to it; context is
-only ever added, and context never hides a change. A viewer's Changes scope
-shows the changes and their context, folding the rest; its `current_view` lists
-each change's context. `context` is absent when it would name nothing, on
-expected variation and on unchanged changes, and in comparisons saved before
-comparisons had context, for which presentation derives the same structural
-context (`changeContext` in the renderer SDK).
+IDs and 16 MiB of ID bytes for the comparison, so it always fits the limits
+below and a change past the budget has none. Every comparator gives each change
+the core's context, and a comparator file's [`context` rules](#comparator-files)
+add to it; context is only ever added, and context never hides a change. A
+viewer's Changes scope shows the changes and their context, folding the rest;
+its `current_view` lists each change's context. `context` is absent when it
+would name nothing, on expected variation and on unchanged changes, and in
+comparisons saved before comparisons had context, for which presentation derives
+the same structural context (`changeContext` in the renderer SDK).
 
 `steps` groups change IDs in presentation order, with an optional `kind`
 (`remove`, `restructure` or `add`). Steps hold changes that matter: an `exact`
@@ -98,8 +98,9 @@ covered by a change; and a change's `context` names other items of that revision
 or duplicate IDs, or an empty context), only on a change whose status or
 identity changed (`unexpected-context`), holds at least the core's context
 (`missing-context`), and stays within 1,000 IDs per change and revision and
-250,000 across the comparison (`context-limit`). A comparator cannot hide a
-change. Comparisons across different domain schemas are rejected.
+250,000 IDs and 16 MiB of ID bytes across the comparison (`context-limit`). A
+comparator cannot hide a change. Comparisons across different domain schemas are
+rejected.
 
 ## The default comparator
 

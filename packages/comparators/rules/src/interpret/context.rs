@@ -8,7 +8,7 @@ use crate::core::Change;
 use crate::eval::{bind, run};
 use crate::rules::{ContextRule, Expression};
 use cel::{Context, Value as Cel};
-use projections_engine::context::{Core, MAX_CONTEXT, MAX_CONTEXT_TOTAL, extend};
+use projections_engine::context::{Budget, Core, MAX_CONTEXT, MAX_CONTEXT_BYTES, MAX_CONTEXT_TOTAL, extend};
 use projections_engine::{Extraction, Failure, Side};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
@@ -25,10 +25,10 @@ impl Comparator {
         annotations: &HashMap<String, Cel>,
     ) -> Result<(), Failure> {
         let mut core = Core::new(typed[0], typed[1]);
-        let mut total = 0;
+        let mut budget = Budget::COMPARISON;
         for change in changes.iter_mut().filter(|change| change.is_scope_change()) {
             change.context = core.of(change.collection, &change.before, &change.after);
-            total += size(change);
+            spend(&mut budget, change.context.as_ref(), None);
         }
         if self.rules.context.is_empty() {
             return Ok(());
@@ -40,11 +40,10 @@ impl Comparator {
             bind_items(&mut child, &index, change);
             child.add_variable_from_value("annotation", annotations.get(&change.id).cloned().unwrap_or(Cel::Null));
             for rule in &self.rules.context {
-                let had = size(change);
+                let had = change.context.clone();
                 add_context(rule, &child, &index, change)?;
                 // The comparison's context stays within its bound as it grows, not only when it is checked.
-                total += size(change) - had;
-                if total > MAX_CONTEXT_TOTAL {
+                if !spend(&mut budget, change.context.as_ref(), had.as_ref()) {
                     let expression = rule
                         .before
                         .as_ref()
@@ -53,7 +52,7 @@ impl Comparator {
                     return Err(expression.fail(
                         "context-limit",
                         &format!(
-                            "A comparison's changes have at most {MAX_CONTEXT_TOTAL} context IDs; rule `{}` exceeds it at {}",
+                            "A comparison's changes have at most {MAX_CONTEXT_TOTAL} context IDs, of at most {MAX_CONTEXT_BYTES} bytes; rule `{}` exceeds it at {}",
                             rule.name, change.id
                         ),
                     ));
@@ -64,12 +63,16 @@ impl Comparator {
     }
 }
 
-/// How many IDs a change's context has.
-fn size(change: &Change) -> usize {
-    change
-        .context
-        .as_ref()
-        .map_or(0, |context| context.before.len() + context.after.len())
+/// Spends what a change's context gained over `had` from the comparison's
+/// budget; false when it doesn't fit.
+fn spend(budget: &mut Budget, context: Option<&projections_engine::Context>, had: Option<&projections_engine::Context>) -> bool {
+    let Some(context) = context else { return true };
+    let new = |ids: &[String], old: Option<&[String]>| -> Vec<String> {
+        let old: HashSet<&str> = old.into_iter().flatten().map(String::as_str).collect();
+        ids.iter().filter(|id| !old.contains(id.as_str())).cloned().collect()
+    };
+    budget.spend(&new(&context.before, had.map(|had| had.before.as_slice())))
+        && budget.spend(&new(&context.after, had.map(|had| had.after.as_slice())))
 }
 
 /// Adds what one rule says to a change's context, when its `where` selects

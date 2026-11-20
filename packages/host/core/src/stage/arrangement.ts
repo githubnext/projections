@@ -37,7 +37,8 @@ export const paneGeometry = {band: 28, columnGap: 16, ruleGap: 1, rowGap: 20, gu
  * full width), a tall one sits left and right. Below `stackBelow` the panes always stack; without an aspect or a
  * height (a content-sized stage) they stay left and right. With `current`, the other arrangement must win by
  * `arrangementHysteresis`, so small resizes and changes in reported shape don't flip it back and forth. `columnGap` is
- * the space between left and right panes: `paneGeometry.columnGap` by default, `ruleGap` where they meet at a rule.
+ * the space between left and right panes: `paneGeometry.columnGap` by default, `ruleGap` where they meet at a rule;
+ * `rowGap` and `gutter` are the stacked panes' (see `stackedGapsOf`).
  */
 export function paneArrangement({
   width,
@@ -46,6 +47,8 @@ export function paneArrangement({
   stackBelow,
   current,
   columnGap = paneGeometry.columnGap,
+  rowGap = paneGeometry.rowGap,
+  gutter = paneGeometry.gutter,
   band = paneGeometry.band,
 }: {
   width: number
@@ -54,12 +57,13 @@ export function paneArrangement({
   stackBelow: number
   current?: PaneArrangement | undefined
   columnGap?: number
+  rowGap?: number
+  gutter?: number
   /** The height of each pane's label band: `paneGeometry.band`, or 0 when it has none (chips or hidden labels). */
   band?: number
 }): PaneArrangement {
   if (width < stackBelow) return 'stacked'
   if (!aspect || !(height > 0) || !Number.isFinite(width)) return current ?? 'columns'
-  const {rowGap, gutter} = paneGeometry
   // The fitted content's width in each arrangement: its pane's width, or its pane's height times the aspect.
   const fitted = (paneWidth: number, paneHeight: number) => Math.max(0, Math.min(paneWidth, paneHeight * aspect))
   const columns = fitted((width - columnGap) / 2, height - band)

@@ -106,11 +106,6 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
     setAnchors({before: {}, after: {}})
     selection.setPinned(null)
   }
-  const [shownMode, setShownMode] = useState(mode)
-  if (shownMode !== mode) {
-    setShownMode(mode)
-    setAnchors({before: {}, after: {}})
-  }
 
   const stage = useStageBinding({
     payloads,

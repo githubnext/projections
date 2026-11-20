@@ -42,6 +42,8 @@ export type {
   ScopeHidden,
   StageBinding,
 } from './projection.js'
+export {paintState} from './projection/paint.js'
+export type {PaintState, Painted} from './projection/paint.js'
 export {ProjectionStage} from './stage.js'
 export {nothingHiddenTitle, scopeHiddenShort, scopeHiddenText} from './scope.js'
 export {arrangementHysteresis, paneArrangement, paneGeometry} from './stage/arrangement.js'

@@ -220,9 +220,11 @@ test('panels clip their rows to their corners, rows are divided, and a removed l
     const lane = view.querySelector<HTMLElement>('[data-entity-id="hook:kprobe:security_mmap_file"]')!
     const transparent = (value: string) => value === 'rgba(0, 0, 0, 0)' || value === 'transparent'
     return {
-      group: [style('.pk-group').overflow, style('.pk-group').borderTopLeftRadius],
-      divided: [...view.querySelectorAll<HTMLElement>('.rp-rules > .rp-row + .rp-row')].every(
-        row => getComputedStyle(row).borderTopWidth !== '0px',
+      // The kit's group clips to its outer edge, so a change region at its edge draws over its border.
+      group: [style('.pk-group').clipPath.startsWith('inset('), style('.pk-group').borderTopLeftRadius],
+      // The line between two rows is the upper one's.
+      divided: [...view.querySelectorAll<HTMLElement>('.rp-rules > .rp-row:has(+ .rp-row)')].every(
+        row => getComputedStyle(row).borderBottomWidth !== '0px',
       ),
       lane: [lane.dataset.change, transparent(getComputedStyle(lane).backgroundColor)],
       inherited: [...lane.querySelectorAll<HTMLElement>('.rp-row[data-entity-id]')].map(row => [
@@ -232,7 +234,7 @@ test('panels clip their rows to their corners, rows are divided, and a removed l
       code: [...view.querySelectorAll('.rp-condition .pk-code')].map(code => code.textContent),
     }
   })
-  expect(read.group).toEqual(['hidden', '8px'])
+  expect(read.group).toEqual([true, '8px'])
   expect(read.divided).toBe(true)
   expect(read.lane).toEqual(['removed', false])
   expect(read.inherited).toEqual([

@@ -57,7 +57,8 @@
   --pk-run-end:
     calc(-1 * var(--stroke)) var(--stroke) 0 0 var(--pk-region-edge-color), var(--stroke) var(--stroke) 0 0 var(--pk-region-edge-color);
 }
-.pk .pk-region.pk-region-run[data-change][data-run-end]:has(+ .pk-region-run[data-change][data-run-start]) {
+/* As specific as a run's end alone, so a renderer's own bottom edge (cells side by side, not stacked) still wins. */
+.pk .pk-region.pk-region-run[data-change][data-run-end]:where(:has(+ .pk-region-run[data-change][data-run-start])) {
   --pk-run-end: 0 0 0 0 transparent;
 }
 /*

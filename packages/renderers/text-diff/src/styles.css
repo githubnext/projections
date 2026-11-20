@@ -181,11 +181,12 @@
 }
 /*
  * A changed line's bottom edge lies inside it, since the line under it paints later (its gutter, a hatched filler),
- * except at the body's end, where it lies on the card's edge. A changed After line owns the line between the columns,
+ * except at the body's end, where it lies on the card's edge; beside another run (a Before cell and its After cell), it
+ * keeps it, and in one column the next run's top edge lands on the same pixels. A changed After line owns the line between the columns,
  * so it gives that line the change's hue rather than drawing beside it; beside a changed Before line, the After side's
  * line takes the Before line's hue.
  */
-.pk .td-diff .pk-region-run[data-change][data-run-end] {
+.pk .td-body .td-diff .pk-region-run[data-change][data-run-end] {
   --pk-run-end: inset 0 calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color);
 }
 .pk .td-diff > .pk-region-run[data-change][data-run-end]:last-child,

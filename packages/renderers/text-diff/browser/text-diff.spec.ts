@@ -281,10 +281,11 @@ test('the line-number gutter runs unbroken from the strip or header to the card 
       const nums = [...card.querySelectorAll('.td-num')]
       if (!nums.length) return []
       const above = card.querySelector('.td-caption') ?? card.querySelector(':scope > header')!
-      const body = card.querySelector('.td-body')!.getBoundingClientRect()
+      // The card's inner bottom edge: the body reaches over the card's border, padded by its width.
+      const bottom = card.getBoundingClientRect().bottom - parseFloat(getComputedStyle(card).borderBottomWidth)
       const first = Math.min(...nums.map(num => num.getBoundingClientRect().top))
       const last = Math.max(...nums.map(num => num.getBoundingClientRect().bottom))
-      return [{id: card.getAttribute('data-entity-id'), top: first - above.getBoundingClientRect().bottom, bottom: body.bottom - last}]
+      return [{id: card.getAttribute('data-entity-id'), top: first - above.getBoundingClientRect().bottom, bottom: bottom - last}]
     }),
   )
   expect(gaps.length).toBeGreaterThan(0)

@@ -175,3 +175,29 @@ test("a capital E sits optically centred in the toolbar's text buttons", async (
   await mode.hover()
   expectCentred(await capGaps(page, mode, mode.locator('.ph-mode-label'), true), 'mode', true)
 })
+
+test("a notice's icon is centred on the row it explains: its text and, without changes, the Show all button", async ({page}) => {
+  for (const [id, notice] of [
+    ['default-ui-projection-view--no-changes', '.ph-no-changes'],
+    ['default-ui-projection-view--without-renderer', '.ph-notice'],
+  ] as const) {
+    // A story without a renderer never reports one ready: it is open once its notice shows.
+    await page.goto(story(id))
+    const alert = page.locator(notice).first()
+    await expect(alert).toBeVisible()
+    const rects = await alert.evaluate(element => {
+      const icon = element.querySelector(':scope > svg')!.getBoundingClientRect()
+      const description = element.querySelector('[data-slot="alert-description"]')!
+      // The row the icon labels: the button where there is one (the tallest thing on it), else the first text line.
+      const button = description.querySelector('button')?.getBoundingClientRect()
+      const range = document.createRange()
+      range.selectNodeContents(description)
+      const line = range.getClientRects()[0]!
+      const row = button ?? line
+      return {icon: icon.top + icon.height / 2, row: row.top + row.height / 2, top: icon.top, height: icon.height}
+    })
+    expect(Math.abs(rects.icon - rects.row), `${notice}: ${JSON.stringify(rects)}`).toBeLessThanOrEqual(0.5)
+    // On whole pixels.
+    expect(rects.top % 1, `${notice}: icon top`).toBe(0)
+  }
+})

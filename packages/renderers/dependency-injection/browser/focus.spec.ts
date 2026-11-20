@@ -1,4 +1,5 @@
 import {expect, test} from '@playwright/test'
+import type {Locator} from '@playwright/test'
 import {openRenderer} from '@githubnext/projections-renderer-harness/playwright'
 import type {Extraction} from '@githubnext/projections-schemas'
 import {loadFixture} from '../test/fixtures.mjs'
@@ -74,3 +75,34 @@ test('a card is one focus and selection ring: parts never outline, nothing overf
   expect(selected.ring.inside).toBe(true)
   expect(selected.lifetime).toBe(rest.lifetime)
 })
+
+test("a link's source dot takes its line's color while the link is hovered or selected", async ({page}, info) => {
+  const renderer = await openRenderer(page, {renderer: 'dependency-injection', extraction: after})
+  const link = renderer.frame.locator('g[data-entity-id]:has(> .di-link-origin)').first()
+  const id = (await link.getAttribute('data-entity-id'))!
+  const colors = () =>
+    link.evaluate(group => ({
+      line: getComputedStyle(group.querySelector('.di-link')!).stroke,
+      dot: getComputedStyle(group.querySelector('.di-link-origin')!).fill,
+    }))
+  const resting = (await colors()).line
+  for (const state of ['hover', 'selection'] as const) {
+    await (state === 'hover' ? renderer.hover(id) : renderer.select(id))
+    await expect.poll(async () => (await colors()).line, `${state}: the line takes the ring's color`).not.toBe(resting)
+    // Close-ups for review: SOURCE_DOT_SHOTS=<directory>.
+    if (process.env.SOURCE_DOT_SHOTS && state === 'hover')
+      await page.screenshot({
+        path: `${process.env.SOURCE_DOT_SHOTS}/dependency-injection-${info.project.name}.png`,
+        clip: await clipAround(link),
+      })
+    const {line, dot} = await colors()
+    expect(dot, `${state}: the source dot takes the line's color`).toBe(line)
+    await (state === 'hover' ? renderer.hover(null) : renderer.select(null))
+  }
+})
+
+/** The link's source end, with room around it. */
+async function clipAround(link: Locator) {
+  const dot = (await link.locator('.di-link-origin').boundingBox())!
+  return {x: dot.x - 60, y: dot.y - 40, width: 120, height: 80}
+}

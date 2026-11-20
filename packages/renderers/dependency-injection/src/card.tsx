@@ -230,7 +230,8 @@ export function LinkView({
           strokeDasharray={dashed ? '5 3' : undefined}
         />
       </g>
-      <circle cx={start.x} cy={start.y} r="2.6" className="di-link-origin" />
+      {/* The source dot is part of the link's edge, so it takes the link's hover, focus and selection color too. */}
+      <circle cx={start.x} cy={start.y} r="2.6" className="di-link-origin" data-projections-edge="fill" />
       {labelled && (link.parameter || link.resolution || link.alias) && (
         <text
           x={(start.x + end.x) / 2}

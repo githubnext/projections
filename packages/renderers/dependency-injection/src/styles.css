@@ -133,6 +133,7 @@
 }
 .di-link-origin {
   fill: var(--edge);
+  stroke-width: 0;
   pointer-events: none;
 }
 .di-link-hit {

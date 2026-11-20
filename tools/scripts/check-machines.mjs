@@ -1,8 +1,8 @@
 // The state-machine checks (docs/guides/state-machines.md), as `path:line: message` problems:
 // - the lifecycle rule (check-machines/lifecycle-rule.mjs) finds no more in a file than check-machines/baseline.json
 //   allows: existing implicit lifecycles are converted over time, and no new ones are added. A file with fewer than its
-//   baseline fails too, until `--update` lowers it, so the baseline only ever shrinks.
-// - every machine (`defineMachine`) is exported, and its workspace's tests explore it (`explore(` naming it).
+//   baseline fails too, until `--update` lowers it; `--update` never raises one, so the baseline only ever shrinks.
+// - every machine (`defineMachine`) is exported, and its workspace's tests pass it to `explore`.
 // Usage: node tools/scripts/check-machines.mjs [--update]
 import {readFile, readdir, writeFile} from 'node:fs/promises'
 import {existsSync} from 'node:fs'
@@ -29,13 +29,16 @@ for (const result of await eslint.lintFiles(lifecycleFiles)) {
   first[path] = found
 }
 const sorted = Object.fromEntries(Object.entries(counts).sort(([a], [b]) => (a < b ? -1 : 1)))
-if (update) {
+const committed = JSON.parse(await readFile(baselinePath, 'utf8'))
+const raised = Object.keys(sorted).some(path => sorted[path] > (committed[path] ?? 0))
+if (update && raised) console.log('The baseline only shrinks: model these lifecycles as machines instead (docs/guides/state-machines.md)')
+else if (update) {
   await writeFile(baselinePath, `${JSON.stringify(sorted, null, 2)}\n`)
   console.log(
     `Wrote ${posix(relative(root, baselinePath))}: ${Object.values(sorted).reduce((sum, count) => sum + count, 0)} in ${Object.keys(sorted).length} files`,
   )
 }
-const baseline = JSON.parse(await readFile(baselinePath, 'utf8'))
+const baseline = update && !raised ? sorted : committed
 for (const path of new Set([...Object.keys(counts), ...Object.keys(baseline)])) {
   const count = counts[path] ?? 0
   const allowed = baseline[path] ?? 0
@@ -80,7 +83,7 @@ for (const path of await files(join(root, 'packages'), /\.tsx?$/)) {
   if (!text.includes('defineMachine')) continue
   const at = index => text.slice(0, index).split('\n').length
   const named = [...text.matchAll(definition)]
-  if (named.length !== text.match(/\bdefineMachine\s*</g)?.length)
+  if (named.length !== (text.match(/\bdefineMachine\s*</g) ?? []).length)
     problems.push(
       `${posix(relative(root, path))}:${at(text.indexOf('defineMachine'))}: bind each machine to an exported const, so its explore test can import it`,
     )
@@ -88,7 +91,8 @@ for (const path of await files(join(root, 'packages'), /\.tsx?$/)) {
     const line = `${posix(relative(root, path))}:${at(match.index)}`
     if (!match[1]) problems.push(`${line}: export ${match[2]}, so its explore test can import it`)
     const workspace = workspaceOf(path)
-    const explored = (await testsOf(workspace)).some(test => test.includes('explore(') && new RegExp(`\\b${match[2]}\\b`).test(test))
+    // Passed to `explore`, perhaps through a namespace import (`explore(machines.name`).
+    const explored = (await testsOf(workspace)).some(test => new RegExp(`\\bexplore\\(\\s*(?:\\w+\\.)?${match[2]}\\b`).test(test))
     if (!explored)
       problems.push(
         `${line}: ${match[2]} has no explore test in ${posix(relative(root, join(workspace, 'test')))} (docs/guides/state-machines.md#test-it)`,

@@ -61,6 +61,8 @@ type Runner = (task: never, context: ActorContext<never>) => unknown
 
 interface Generation<E> {
   readonly context: ActorContext<E>
+  /** Whether it hasn't ended: its events are taken only while it lasts, also those already waiting. */
+  readonly live: boolean
   /** Takes what a runner returned: a cleanup to run at the end, or a promise whose rejection to report. */
   settle(result: unknown): void
   end(): void
@@ -71,7 +73,8 @@ const timer: Runner = ((activity: After<MachineEvent>, context: ActorContext<Mac
   return () => clearTimeout(id)
 }) as Runner
 
-function defaultReport(error: unknown) {
+/** Reports an error with `reportError`, else `console.error`: where an actor's errors go by default. */
+export function defaultReport(error: unknown) {
   const report = (globalThis as {reportError?: (error: unknown) => void}).reportError
   if (typeof report === 'function') report(error)
   else console.error(error)
@@ -85,7 +88,8 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
   let state = options.state
   let running = false
   let draining = false
-  const queue: E[] = []
+  /** Events waiting to be taken, each with the generation that sent it (none for `send`'s callers). */
+  const queue: {event: E; from: Generation<E> | undefined}[] = []
   const listeners = new Set<(state: S) => void>()
   const activities = new Map<string, Generation<E>>()
   const keyed = new Map<string, Generation<E>>()
@@ -96,7 +100,7 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
   const generation = (): Generation<E> => {
     const controller = new AbortController()
     let live = true
-    let cleanup: (() => void) | undefined
+    const cleanups: (() => void)[] = []
     const safely = (callback: () => void) => {
       try {
         callback()
@@ -104,16 +108,19 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
         report(error)
       }
     }
-    return {
+    const into: Generation<E> = {
       context: {
         send: event => {
-          if (live) send(event)
+          if (live) enqueue(event, into)
         },
         signal: controller.signal,
       },
+      get live() {
+        return live
+      },
       settle(result) {
         if (typeof result === 'function') {
-          if (live) cleanup = result as () => void
+          if (live) cleanups.push(result as () => void)
           else safely(result as () => void)
         } else if (result instanceof Promise)
           result.then(undefined, error => {
@@ -124,9 +131,10 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
         if (!live) return
         live = false
         controller.abort()
-        if (cleanup) safely(cleanup)
+        for (const cleanup of cleanups.splice(0)) safely(cleanup)
       },
     }
+    return into
   }
   let run = generation()
   run.end()
@@ -173,29 +181,36 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
       }
   }
 
+  // Takes waiting events in batches: every listener hears a batch before the events they send are taken.
   const drain = () => {
     if (!running || draining) return
     draining = true
-    const before = state
     try {
       while (running && queue.length) {
-        const {state: next, effects} = machine.transition(state, queue.shift() as E)
-        if (next !== state) {
-          state = next
-          syncActivities()
+        const before = state
+        while (running && queue.length) {
+          const {event, from} = queue.shift()!
+          // An event from a generation that ended while it waited is as stale as one sent after.
+          if (from && !from.live) continue
+          const {state: next, effects} = machine.transition(state, event)
+          if (next !== state) {
+            state = next
+            syncActivities()
+          }
+          for (const effect of effects) runEffect(effect)
         }
-        for (const effect of effects) runEffect(effect)
+        if (state !== before) for (const listener of [...listeners]) listener(state)
       }
     } finally {
       draining = false
     }
-    if (state !== before) for (const listener of [...listeners]) listener(state)
   }
 
-  const send = (event: E) => {
-    queue.push(event)
+  const enqueue = (event: E, from: Generation<E> | undefined) => {
+    queue.push({event, from})
     drain()
   }
+  const send = (event: E) => enqueue(event, undefined)
 
   return {
     getState: () => state,

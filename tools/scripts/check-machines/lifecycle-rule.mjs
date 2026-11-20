@@ -40,13 +40,23 @@ export const lifecycleRule = {
     schema: [],
   },
   create(context) {
+    const {sourceCode} = context
+    // The variables `useState` setters are bound to, so a call is one only when it resolves to one of them.
     const setters = new Set()
     const deferred = []
+    const resolve = identifier => {
+      for (let scope = sourceCode.getScope(identifier); scope; scope = scope.upper) {
+        const variable = scope.set.get(identifier.name)
+        if (variable) return variable
+      }
+      return undefined
+    }
     return {
       VariableDeclarator(node) {
         if (node.init?.type !== 'CallExpression' || calleeName(node.init.callee) !== 'useState') return
         const setter = node.id.type === 'ArrayPattern' ? node.id.elements[1] : undefined
-        if (setter?.type === 'Identifier') setters.add(setter.name)
+        if (setter?.type !== 'Identifier') return
+        for (const variable of sourceCode.getDeclaredVariables(node)) if (variable.name === setter.name) setters.add(variable)
       },
       CallExpression(node) {
         const name = calleeName(node.callee)
@@ -62,7 +72,7 @@ export const lifecycleRule = {
       },
       'Program:exit'() {
         for (const {node, setter, callback} of deferred)
-          if (setters.has(setter)) context.report({node, messageId: 'deferredSetState', data: {setter, callback}})
+          if (setters.has(resolve(node.callee))) context.report({node, messageId: 'deferredSetState', data: {setter, callback}})
       },
     }
   },

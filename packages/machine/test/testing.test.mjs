@@ -63,3 +63,11 @@ test('the stable key ignores key order and reads Maps and Sets', () => {
   assert.equal(stableKey({b: 1, a: new Set([2, 1])}), stableKey({a: new Set([1, 2]), b: 1}))
   assert.notEqual(stableKey({a: new Map([['x', 1]])}), stableKey({a: new Map([['x', 2]])}))
 })
+
+test('a timer fires once while its state keeps listing it, as in an actor', () => {
+  const ticking = defineMachine()({
+    states: {on: {on: {tick: state => ({kind: 'on', n: state.n + 1})}, activities: () => [after('tick', 1, {type: 'tick'})]}},
+  })
+  const result = explore(ticking, {from: {kind: 'on', n: 0}, events: [], invariants: {'one tick': state => state.n <= 1}})
+  assert.equal(result.states.size, 2)
+})

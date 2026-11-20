@@ -179,3 +179,51 @@ test('two activities with one key in a state are a definition error', () => {
   const twice = defineMachine()({states: {a: {on: {}, activities: () => [after('t', 1, {type: 'x'}), after('t', 2, {type: 'x'})]}}})
   assert.throws(() => createActor(twice, {state: {kind: 'a'}}).start(), /two activities keyed "t"/)
 })
+
+// A counter for ordering checks: `add` adds, effects ask for work and report back.
+const counter = defineMachine()({
+  states: {
+    counting: {
+      on: {
+        add: (state, event) => ({kind: 'counting', n: state.n + event.by}),
+        twice: state => emit(state, {type: 'work', key: 'work', by: 10}, {type: 'work', key: 'work', by: 100}),
+        hold: state => emit(state, {type: 'hold', name: 'a'}, {type: 'hold', name: 'b'}),
+      },
+    },
+  },
+})
+
+test('an event a superseded effect sent while it waited to be taken is dropped too', () => {
+  const actor = createActor(counter, {
+    state: {kind: 'counting', n: 0},
+    effects: {work: (effect, context) => context.send({type: 'add', by: effect.by}), hold: () => undefined},
+  })
+  actor.start()
+  actor.send({type: 'twice'})
+  // Both results were sent before either was taken; the first effect was superseded by then.
+  assert.equal(actor.getState().n, 100)
+})
+
+test("every effect's cleanup runs when the actor stops", () => {
+  const cleaned = []
+  const actor = createActor(counter, {
+    state: {kind: 'counting', n: 0},
+    effects: {work: () => undefined, hold: effect => () => cleaned.push(effect.name)},
+  })
+  actor.start()
+  actor.send({type: 'hold'})
+  actor.stop()
+  assert.deepEqual(cleaned, ['a', 'b'])
+})
+
+test('every listener hears a batch before the events listeners send are taken', () => {
+  const actor = createActor(counter, {state: {kind: 'counting', n: 0}, effects: {work: () => undefined, hold: () => undefined}})
+  const heard = []
+  actor.subscribe(state => {
+    if (state.n === 1) actor.send({type: 'add', by: 1})
+  })
+  actor.subscribe(state => heard.push(state.n))
+  actor.start()
+  actor.send({type: 'add', by: 1})
+  assert.deepEqual(heard, [1, 2])
+})

@@ -14,8 +14,9 @@ tester.run('machines/lifecycle', lifecycleRule, {
     'const [value, setValue] = useState(0); useEffect(() => { setValue(1) })',
     // A machine's send from a deferred callback is how results reach it.
     'const [state, send] = useMachine(machine, options); useEffect(() => { load().then(result => send({type: "loaded", result})) })',
-    // A function called from a promise callback that isn't a useState setter.
+    // A function called from a promise callback that isn't a useState setter, even one named like a setter elsewhere.
     'load().then(result => record(result))',
+    'function A() { const [v, setValue] = useState(0) } function B(setValue) { load().then(() => setValue(1)) }',
   ],
   invalid: [
     {code: 'const pressed = useRef(false)', errors: [{messageId: 'booleanRef'}]},

@@ -47,7 +47,7 @@ export interface ExploreOptions<S, E, F> {
   readonly key?: (state: S) => string
   /** The longest path to follow (default 12). */
   readonly depth?: number
-  /** The most distinct states to visit (default 20,000); `truncated` says whether it stopped there. */
+  /** The most distinct states (with the timers that fired in them) to visit (default 20,000); `truncated` says whether it stopped there. */
   readonly limit?: number
   /** Named checks of every state reached, given the shortest path to it. */
   readonly invariants?: Readonly<Record<string, (state: S, path: ExplorePath<S, E, F>) => boolean>>
@@ -115,11 +115,20 @@ export function explore<S extends MachineState, E extends MachineEvent, F extend
   const {depth = 12, limit = 20_000, timers = true, invariants = {}, transitions = {}} = options
   const key = options.key ?? stableKey
   const starts = (Array.isArray(options.from) ? options.from : [options.from]) as readonly S[]
-  const eventsIn = (state: S): readonly E[] => {
+  // A timer fires once while states keep listing its key, as in an actor: the walk tracks the keys that fired.
+  type Node = {path: ExplorePath<S, E, F>; fired: ReadonlySet<string>}
+  const pending = (state: S, fired: ReadonlySet<string>) =>
+    machine
+      .activities(state)
+      .flatMap(activity => (timers && activity.type === 'machine.after' && !fired.has(activity.key) ? [activity as After<E>] : []))
+  const eventsIn = (state: S, fired: ReadonlySet<string>): readonly {event: E; timer?: string}[] => {
     const given = typeof options.events === 'function' ? options.events(state) : options.events
-    if (!timers) return given
-    const fired = machine.activities(state).flatMap(activity => (activity.type === 'machine.after' ? [(activity as After<E>).event] : []))
-    return [...given, ...fired]
+    return [...given.map(event => ({event})), ...pending(state, fired).map(timer => ({event: timer.event, timer: timer.key}))]
+  }
+  /** The fired keys `to` still lists: a key it stops listing can fire again once listed anew. */
+  const firedIn = (to: S, fired: ReadonlySet<string>, timer: string | undefined) => {
+    const listed = new Set(machine.activities(to).map(activity => activity.key))
+    return new Set([...fired, ...(timer === undefined ? [] : [timer])].filter(key => listed.has(key)))
   }
   const fail = (check: string, what: string, path: ExplorePath<S, E, F>): never => {
     throw new ExplorationError(check, `${check} fails ${what}: ${describe(path)}`, path as ExplorePath<unknown, unknown, unknown>)
@@ -127,32 +136,38 @@ export function explore<S extends MachineState, E extends MachineEvent, F extend
 
   const states = new Map<string, S>()
   const taken = new Set<string>()
-  let frontier: ExplorePath<S, E, F>[] = []
+  const seen = new Set<string>()
+  let frontier: Node[] = []
   let truncated = false
-  const visit = (path: ExplorePath<S, E, F>) => {
-    const id = key(path.state)
-    if (states.has(id)) return
-    if (states.size >= limit) {
+  const visit = (node: Node) => {
+    const id = key(node.path.state)
+    const at = `${id}\u0000${[...node.fired].sort().join('\u0000')}`
+    if (seen.has(at)) return
+    if (seen.size >= limit) {
       truncated = true
       return
     }
-    states.set(id, path.state)
-    for (const [name, check] of Object.entries(invariants)) if (!check(path.state, path)) fail(name, `in "${path.state.kind}"`, path)
-    frontier.push(path)
+    seen.add(at)
+    if (!states.has(id)) {
+      states.set(id, node.path.state)
+      for (const [name, check] of Object.entries(invariants))
+        if (!check(node.path.state, node.path)) fail(name, `in "${node.path.state.kind}"`, node.path)
+    }
+    frontier.push(node)
   }
-  for (const start of starts) visit({start, steps: [], state: start})
+  for (const start of starts) visit({path: {start, steps: [], state: start}, fired: new Set()})
   for (let level = 0; level < depth && frontier.length; level++) {
     const current = frontier
     frontier = []
-    for (const path of current)
-      for (const event of eventsIn(path.state)) {
+    for (const {path, fired} of current)
+      for (const {event, timer} of eventsIn(path.state, fired)) {
         const {state: to, effects, handled} = machine.transition(path.state, event)
         const step: ExploreStep<S, E, F> = {from: path.state, event, to, effects, handled}
         if (handled) taken.add(`${path.state.kind}.${event.type}`)
         for (const [name, check] of Object.entries(transitions))
           if (!check(step, path))
             fail(name, `on "${event.type}" in "${path.state.kind}"`, {...path, steps: [...path.steps, step], state: to})
-        visit({start: path.start, steps: [...path.steps, step], state: to})
+        visit({path: {start: path.start, steps: [...path.steps, step], state: to}, fired: firedIn(to, fired, timer)})
       }
   }
 

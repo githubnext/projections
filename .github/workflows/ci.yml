@@ -193,7 +193,7 @@ jobs:
       - uses: $/.github/actions/verus
   # The browser suites: native Chromium and WebKit, desktop and mobile. The jobs, and how the large suites are sharded,
   # are the plan's (tools/cli/src/lib/ci-browser.ts): each affected suite, and `rest` for every other affected browser
-  # suite. A change to one or two renderers alone runs only their tests in the renderer harness.
+  # suite. A change to renderers alone leaves the other renderers' tests out of the renderer harness.
   browser:
     needs: changes
     if: needs.changes.outputs.browser != '[]'
@@ -213,7 +213,7 @@ jobs:
           suite: ${{ matrix.suite }}
           project: ${{ matrix.project }}
           shard: ${{ matrix.shard }}
-          grep: ${{ matrix.grep }}
+          grep-invert: ${{ matrix.grepInvert }}
           sharded: ${{ matrix.except }}
   # @githubnext/projections, the one npm package, as it would be published (docs/contracts/packages.md).
   package:
@@ -396,8 +396,8 @@ jobs:
           retention-days: 7
   # WebKit on macOS, the platform Safari runs on: the renderer harness's desktop WebKit project, which runs on Linux
   # WebKit in `browser`. Its tests take 10 to 30 minutes on a macOS runner, whose speed varies, after a 15-minute
-  # build: two shards keep each job well inside its limit. Like `browser`, it runs only one renderer's tests for a
-  # change to that renderer alone.
+  # build: two shards keep each job well inside its limit. Like `browser`, it leaves the other renderers' tests out for a
+  # change to renderers alone.
   browser-macos:
     needs: changes
     if: needs.changes.outputs.browser-macos != '[]'
@@ -417,7 +417,7 @@ jobs:
           suite: ${{ matrix.suite }}
           project: ${{ matrix.project }}
           shard: ${{ matrix.shard }}
-          grep: ${{ matrix.grep }}
+          grep-invert: ${{ matrix.grepInvert }}
   # The core Engine's and default comparator's coverage thresholds, when a change reaches them
   # (packages/engine/TESTING.md).
   coverage:

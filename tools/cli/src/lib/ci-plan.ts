@@ -5,40 +5,10 @@
 import {kindsOf} from './affected.ts'
 import {browserJobs, HARNESS, type BrowserJob} from './ci-browser.ts'
 import type {RepoFacts} from './ci-facts.ts'
-import {dependantsOf, ownerOf} from './packages.ts'
+import {sortChanges} from './ci-files.ts'
+import {dependantsOf} from './packages.ts'
 import {matches} from './repo.ts'
 
-/** Run everything: CI's definition, toolchains, lockfiles and root manifests, and the repository's own tooling. */
-const everything = [
-  '.github/workflows/**',
-  '.github/actions/**',
-  'package.json',
-  'package-lock.json',
-  'Cargo.toml',
-  'Cargo.lock',
-  'rust-toolchain.toml',
-  '.node-version',
-  '.npmrc',
-  '.cargo/**',
-  'tools/cli/**',
-  'tools/scripts/**',
-]
-/** Read only as documentation (unless a generator reads or writes it). */
-const documentation = ['**/*.md', 'docs/**', 'LICENSE', '.github/CODEOWNERS', '.github/ISSUE_TEMPLATE/**']
-/** Configuration only the checks in public-product read: file standards, formatting, lint, the self-projection. */
-const checksOnly = [
-  '.considered.yaml',
-  '.oxfmtrc.json',
-  'eslint.config.js',
-  '.portability.yaml',
-  'rustfmt.toml',
-  '.github/actionlint.yaml',
-  '.github/dependabot.yml',
-  '.github/projections/**',
-  '.projections-bookmarks.json',
-]
-const releaseFiles = ['dist-workspace.toml', '.github/release-build-setup.yml', '**/Cargo.toml']
-const actionFiles = ['action.yml']
 /** Workspaces whose code runs only in a browser: a change to these alone needs no macOS or Windows run. */
 const browserOnly = ['packages/renderers/**', 'packages/host/**', 'tools/storybook', 'examples/renderers/**']
 /** The suites whose tests run against the native CLI's backend (`projections serve`), which runs no extractor. */
@@ -88,26 +58,6 @@ export type CiPlan = {
   browserMacos: BrowserJob[]
 }
 
-type Sorted = {units: Set<string>; docs: string[]; checks: string[]; release: string[]; action: string[]; everything: string[]}
-
-function sort(facts: RepoFacts, paths: readonly string[], generators: Set<string>): Sorted {
-  const sorted: Sorted = {units: new Set(), docs: [], checks: [], release: [], action: [], everything: []}
-  for (const path of paths) {
-    const generated = facts.generators.filter(generator => matches(path, generator.inputs) || matches(path, generator.outputs))
-    for (const generator of generated) generators.add(generator.name)
-    if (!generated.length && path.endsWith('.md')) sorted.docs.push(path)
-    else if (matches(path, everything)) sorted.everything.push(path)
-    else if (ownerOf(facts.units, path)) sorted.units.add(ownerOf(facts.units, path)?.path as string)
-    else if (matches(path, documentation)) sorted.docs.push(path)
-    else if (matches(path, checksOnly)) sorted.checks.push(path)
-    else if (matches(path, actionFiles)) sorted.action.push(path)
-    else if (matches(path, releaseFiles)) sorted.release.push(path)
-    else sorted.everything.push(path)
-    if (matches(path, releaseFiles) && !sorted.release.includes(path)) sorted.release.push(path)
-  }
-  return sorted
-}
-
 /** Each browser suite reached by `changed`: through its own graph, a workspace its script builds, or the CLI backend. */
 function affectedSuites(facts: RepoFacts, changed: readonly string[]): Set<string> {
   const reached = new Set([...changed, ...dependantsOf(facts.units, changed)])
@@ -136,24 +86,26 @@ function harnessRenderers(facts: RepoFacts, changed: readonly string[], suites: 
 
 export function ciPlan(facts: RepoFacts, paths: readonly string[], reasons: readonly string[] = []): CiPlan {
   const generators = new Set<string>()
-  const sorted = sort(facts, paths, generators)
+  const sorted = sortChanges(facts, paths, generators)
   const full = [...reasons, ...sorted.everything.map(path => `changed ${path}`)]
   const all = full.length > 0
-  const changed = [...sorted.units].sort()
-  const dependants = dependantsOf(facts.units, changed)
+  const built = [...sorted.units].sort()
+  const changed = [...new Set([...built, ...sorted.tested])].sort()
+  const dependants = dependantsOf(facts.units, built).filter(path => !changed.includes(path))
   const reached = new Set([...changed, ...dependants])
-  const rust = all || kindsOf(paths).includes('rust')
+  const crates = new Set(facts.units.filter(unit => unit.kinds.includes('crate')).map(unit => unit.path))
+  const rust = all || kindsOf(paths).includes('rust') || changed.some(path => crates.has(path))
   const engine = all || changed.some(path => ENGINE.includes(path))
   const action = all || sorted.action.length > 0
   const platform = all || rust || action || changed.some(path => !matches(path, browserOnly))
   const release = all || sorted.release.length > 0 || generators.has('release-workflow')
   const docsOnly = !all && !changed.length && !generators.size && !sorted.checks.length && !sorted.release.length && !sorted.action.length
-  const suites = all ? new Set(facts.browserSuites.map(suite => suite.path)) : affectedSuites(facts, changed)
-  const renderers = all ? [] : harnessRenderers(facts, changed, suites)
+  const suites = all ? new Set(facts.browserSuites.map(suite => suite.path)) : affectedSuites(facts, built)
+  const renderers = all ? [] : harnessRenderers(facts, built, suites)
   const browser = browserJobs(
     facts.browserSuites.map(suite => suite.path),
     suites,
-    renderers.length ? renderers : undefined,
+    renderers.length ? {kept: renderers, others: facts.harnessRenderers.filter(name => !renderers.includes(name))} : undefined,
   )
   return {
     full,

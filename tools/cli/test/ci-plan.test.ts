@@ -62,7 +62,8 @@ test("one renderer's change runs that renderer's harness tests, on Linux only", 
     harness.map(job => [job.project, job.shard]),
     ['chromium-desktop', 'webkit-desktop', 'chromium-mobile', 'webkit-mobile'].map(project => [project, '']),
   )
-  assert.ok(harness.every(job => job.grep === rendererGrep(['database'])))
+  const others = facts.harnessRenderers.filter(name => name !== 'database')
+  assert.ok(harness.every(job => job.grepInvert === rendererGrep(others)))
   assert.deepEqual(names(plan.browserMacos), ['packages/renderers/harness, webkit-desktop (database)'])
   // The suites that bundle or build every renderer still run in full.
   for (const suite of ['packages/host/inspector', 'tools/storybook'])
@@ -72,12 +73,14 @@ test("one renderer's change runs that renderer's harness tests, on Linux only", 
     )
 })
 
-test('a renderer grep selects its specs and its scenarios, not other renderers', () => {
+test('a renderer grep matches its specs and scenarios; inverted, it keeps tests that name no renderer', () => {
   const grep = new RegExp(rendererGrep(['graph']))
   assert.ok(grep.test('graph/browser/dag.spec.ts dag layout'))
   assert.ok(grep.test('harness/browser/checks.spec.ts graph/service-platform: built-in renderer checks pass'))
   assert.ok(grep.test('harness/browser/fill.spec.ts graph zoom enlarges the opening view'))
   assert.ok(!grep.test('database/browser/diff.spec.ts the graph-free diff'))
+  assert.ok(!grep.test('harness/browser/harness.spec.ts the harness runs a bundle in the real host frame'))
+  assert.ok(!grep.test('harness/browser/gallery.spec.ts the gallery has every built-in scenario'))
 })
 
 test('a change to the kit every renderer uses runs the whole harness', () => {
@@ -117,6 +120,29 @@ test('CI, toolchain, lockfile and tooling changes, and any reason given, run eve
     assert.equal(plan.jobs.actionsLock && plan.jobs.release && plan.jobs.mutants, true, path)
   }
   assert.deepEqual(ciPlan(facts, ['README.md'], ['the ci:full label']).full, ['the ci:full label'])
+})
+
+test("files a crate's sources read by path are that crate's change, though no manifest says so", () => {
+  // The Engine's and default comparator's tests embed the conformance corpus; the Engine's read the generated schemas.
+  for (const path of ['packages/schemas/fixtures/conformance.json', 'packages/schemas/src/domains.ts']) {
+    const plan = ciPlan(facts, [path])
+    assert.ok(plan.changed.includes('packages/engine'), path)
+    assert.equal(plan.jobs.coverage && plan.jobs.windows, true, path)
+  }
+  // Read only by tests: the Engine's suites run, but crates depending on the Engine alone don't change.
+  const corpus = ciPlan(facts, ['packages/schemas/fixtures/conformance.json'])
+  assert.ok(!corpus.dependants.includes('packages/comparators/rules'))
+})
+
+test('any change to a crate is a Rust change, and Markdown test data is not documentation', () => {
+  for (const path of [
+    'packages/extractors/github-agentic-workflows/vendor/gh-aw/fields.json',
+    'packages/extractors/github-agentic-workflows/tests/fixtures/public/.github/workflows/firewall.md',
+  ]) {
+    const plan = ciPlan(facts, [path])
+    assert.equal(plan.flags.docsOnly, false, path)
+    assert.equal(plan.jobs.windows && plan.jobs.package, true, path)
+  }
 })
 
 test('release configuration runs the release check', () => {

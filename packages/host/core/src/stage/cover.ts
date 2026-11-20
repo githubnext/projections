@@ -26,11 +26,24 @@ export function insets(rects: readonly {y: number; height: number}[], height: nu
   const middle = height / 2
   const top = rects.filter(rect => rect.y + rect.height / 2 <= middle)
   const bottom = rects.filter(rect => rect.y + rect.height / 2 > middle)
-  const gapAbove = Math.max(0, Math.min(...top.map(rect => rect.y)))
-  const gapBelow = Math.max(0, Math.min(...bottom.map(rect => height - rect.y - rect.height)))
+  const band = (
+    side: typeof top,
+    edge: (rect: {y: number; height: number}) => number,
+    extent: (rect: {y: number; height: number}) => number,
+  ) => (side.length ? Math.max(...side.map(extent)) + Math.max(0, Math.min(...side.map(edge))) : 0)
   return {
-    insetTop: top.length ? Math.max(...top.map(rect => rect.y + rect.height)) + gapAbove : 0,
-    insetBottom: bottom.length ? height - Math.min(...bottom.map(rect => rect.y)) + gapBelow : 0,
+    // The lowest rectangle's bottom, and as much again as the highest one's gap above it.
+    insetTop: band(
+      top,
+      rect => rect.y,
+      rect => rect.y + rect.height,
+    ),
+    // Up from the frame's bottom: the highest rectangle's top, and as much again as the lowest one's gap below it.
+    insetBottom: band(
+      bottom,
+      rect => height - rect.y - rect.height,
+      rect => height - rect.y,
+    ),
   }
 }
 

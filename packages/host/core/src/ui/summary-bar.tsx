@@ -268,6 +268,8 @@ export function SummaryBar({
     room,
   )
   const hidden = figures.slice(shown)
+  // Without a foot to open against, the popover opens above the "…" and the legend's band (`bandAnchor`), read when placed.
+  const band = useRef({getBoundingClientRect: () => bandAnchor(bar.current)})
   return (
     <div
       ref={bar}
@@ -304,7 +306,7 @@ export function SummaryBar({
         </ul>
         {hidden.length > 0 && (
           <Popover>
-            <PopoverAnchor virtualRef={anchor ?? {current: {getBoundingClientRect: () => bandAnchor(bar.current)}}} />
+            <PopoverAnchor virtualRef={anchor ?? band} />
             <PopoverTrigger asChild>
               <button
                 type="button"

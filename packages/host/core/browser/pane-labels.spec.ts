@@ -117,12 +117,12 @@ for (const mode of ['side-by-side', 'swipe'] as const)
         const stacked = (await page.locator('.ph-panes[data-stacked]').count()) > 0
         if (side === 'after' && !stacked) expect(Math.abs(frame.x + frame.width - chipInset - (box.x + box.width))).toBeLessThanOrEqual(1)
         else expect(Math.abs(box.x - (frame.x + chipInset))).toBeLessThanOrEqual(1)
-        // Its own text is normal weight, and it never takes the pointer from the renderer under it.
+        // Its own text is normal weight, and it takes the pointer, so hovering it shows its whole label.
         const style = await chip.evaluate(element => {
           const computed = getComputedStyle(element)
           return {weight: computed.fontWeight, pointer: computed.pointerEvents}
         })
-        expect(style).toMatchObject({weight: '400', pointer: 'none'})
+        expect(style).toMatchObject({weight: '400', pointer: 'auto'})
         // The renderer is told how much of its top the chip takes, and starts its content below it.
         const inset = await iframe
           .contentFrame()

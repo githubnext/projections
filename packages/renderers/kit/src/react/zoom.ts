@@ -207,7 +207,7 @@ export function useStageZoom(
     chosen === undefined,
     options.opening?.start ?? options.start,
     onMove,
-    !options.opening,
+    !options.opening?.centred,
   )
   useDotGrid(scroller, fit * shown)
   useDragPan(scroller)

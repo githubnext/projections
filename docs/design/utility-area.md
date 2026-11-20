@@ -80,9 +80,9 @@ and not at all under reduced motion.
 
 - **Legibility over content.** The chips and the bar are solid, with the divider
   at their edge.
-- **Drags through the gaps.** Only the bar and chips take the pointer (the chips
-  don't at all); the area around them is the stage, so drags and clicks there
-  reach the frame.
+- **Drags through the gaps.** Only the bar and chips take the pointer (a chip
+  does so its tooltip can show its whole label and the revision's age); the area
+  around them is the stage, so drags and clicks there reach the frame.
 - **Narrow canvases.** The bar is at most the stage less its insets. Below 440
   px it moves the step buttons and percent into its own overflow, as the
   toolbar's compact playback does. Swipe's chips keep to their half of the

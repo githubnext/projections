@@ -112,8 +112,9 @@ const titleOf = (label: ReactNode) => (typeof label === 'string' ? {title: label
  * the renderer's own stage, over the frame's top corner, and takes no height from it. `inset` lines it up with where
  * the renderer's content starts (or ends, for a right-hand chip), and it sits as far below the frame's top; the stage
  * measures it over the frame and sends it as the frame's `stage-cover`, with the band it takes (`paneChipClearance`)
- * as its `stage-inset-top`, so a renderer that honours them keeps its content clear of the chip. It ignores the
- * pointer, so the renderer underneath stays clickable.
+ * as its `stage-inset-top`, so a renderer that honours them keeps its content clear of the chip. It takes the pointer,
+ * as the playback bar does, so hovering it shows its whole label (`title`: a cut subject and the revision's age); the
+ * renderer's content is kept clear of it, and the stage around it still reaches the frame.
  *
  * A solid box in the stage's playback bar's own surface, edge and corners (`UtilityArea`'s `--ph-utility-bg`,
  * `--ph-utility-border` and `--ph-utility-radius`), 28px tall with 10px of padding, and its text: the revision's name
@@ -172,7 +173,8 @@ export function PaneChip({
         fontWeight: 400,
         lineHeight: 1,
         borderRadius: 'var(--ph-pane-chip-radius, var(--ph-utility-radius, var(--projections-radius, 8px)))',
-        pointerEvents: 'none',
+        pointerEvents: 'auto',
+        cursor: 'default',
         // The playback bar's look (`UtilityArea`'s `--ph-utility-*`), so the stage's chips and bar read as one family.
         background: 'var(--ph-pane-chip-bg, var(--ph-utility-bg, var(--projections-color-surface-header, #f6f8fa)))',
         color: 'var(--ph-pane-chip-fg, var(--projections-color-fg-subtle, #818b98))',

@@ -118,9 +118,8 @@ export function useGraphZoom(
     drawnScale,
     ...(area && request ? {aspect: (area.box.width + 2 * padding.x) / (area.box.height + padding.top + padding.y)} : {}),
   })
-  // The padding as drawn (more under a cover once it scrolls), which the reading start is placed in. An opening on a
-  // focus centres the focus in the view instead, so it keeps the fitted padding.
-  const drawnPadding = useScrolledPadding(padding, area && request ? 0 : drawnScale, fit.scale)
+  // The padding as drawn once the drawing scrolls (more under a cover), which a reading start is placed in.
+  const scrolled = useScrolledPadding(padding, drawnScale, fit.scale)
   // Arrowheads stop on the outer edge of their target's border; a change border is inset so it never reaches further.
   const borders = useBorderWidths(scroller)
   const content = useMemo((): ContentBox => ({x: bounds.minX, y: bounds.minY, width: bounds.width, height: bounds.height}), [bounds])
@@ -137,9 +136,8 @@ export function useGraphZoom(
     }))
     const align = orientation === 'vertical' ? 'centre' : 'left'
     // Flush with the host's stage inset, the leftmost card opens that inset from the view's edge.
-    return view =>
-      contentStart(shown.current.length ? shown.current : all, content, drawnPadding, 12, align, flush ? drawnPadding.x : 0)(view)
-  }, [framing, content, orientation, drawnPadding, flush])
+    return view => contentStart(shown.current.length ? shown.current : all, content, scrolled, 12, align, flush ? scrolled.x : 0)(view)
+  }, [framing, content, orientation, scrolled, flush])
   const sized = useFrameSizing() === 'content'
   const opening = useMemo(
     () =>
@@ -153,9 +151,13 @@ export function useGraphZoom(
         sized,
         orientation,
         padding,
+        drawn: scrolled,
       }),
-    [area, request, floor, content, fit.scale, fit.width, fit.height, sized, orientation, padding],
+    [area, request, floor, content, fit.scale, fit.width, fit.height, sized, orientation, padding, scrolled],
   )
+  // An opening centred on a focus keeps the fitted padding, as its placement does; every other view draws the padding
+  // a reading start is placed in.
+  const drawnPadding = opening?.centred ? padding : scrolled
   const zoom = useStageZoom(scroller, onAction, fit.scale, {floor, start, ...(opening ? {opening} : {}), ...(hold ? {hold} : {})})
   useLayoutEffect(() => setDrawnScale(zoom.scale), [zoom.scale])
   return {...zoom, borders, top: drawnPadding.top}
@@ -172,6 +174,7 @@ function focusOpening({
   sized,
   orientation,
   padding,
+  drawn,
 }: {
   area: FocusArea | undefined
   request: RendererFocus | undefined
@@ -182,11 +185,13 @@ function focusOpening({
   /** Whether the host sizes the frame to the content, which it measures at the floor. */
   sized: boolean
   orientation: 'vertical' | 'horizontal'
-  /** The space around the fitted graph (`useGraphPadding`). */
+  /** The space around the fitted graph (`useGraphPadding`), which a centred opening is placed in. */
   padding: GraphPadding
-}): {zoom: number; start: ScrollStart} | undefined {
+  /** The padding drawn once the view scrolls (`useScrolledPadding`), which a reading start is placed in. */
+  drawn: GraphPadding
+}): {zoom: number; start: ScrollStart; centred: boolean} | undefined {
   if (!fit) return undefined
-  if (!area) return request?.fit ? {zoom: 1, start: {x: 0, y: 0}} : undefined
+  if (!area) return request?.fit ? {zoom: 1, start: {x: 0, y: 0}, centred: false} : undefined
   // Diff mode's own focus: only when everything doesn't fit at the floor.
   if (!request && openingZoom(fit, floor) <= 1) return undefined
   const {box} = area
@@ -205,17 +210,17 @@ function focusOpening({
     top: (box.y + box.height / 2 - content.y) * scale + padding.top - height / 2,
   })
   // Asked for: centred where the area fits, else its reading start, as the whole graph opens.
-  if (request) return {zoom: scale / fit, start: fits ? centred : contentStart(area.cards, content, padding)}
+  if (request) return {zoom: scale / fit, start: fits ? centred : contentStart(area.cards, content, drawn), centred: fits}
   // Diff mode's own focus: centred on its changes where they fit; else on the part of the view's size that holds the
   // most of them, the first such along the layers (the top of a graph laid out top to bottom).
   const reading: ScrollStart = view => {
     const corner = busiestWindow(area.cards, {width: view.width / view.scale, height: view.height / view.scale}, orientation)
     return {
-      left: (corner.x - content.x) * view.scale + padding.x,
-      top: (corner.y - content.y) * view.scale + padding.top,
+      left: (corner.x - content.x) * view.scale + drawn.x,
+      top: (corner.y - content.y) * view.scale + drawn.top,
     }
   }
-  return {zoom: scale / fit, start: uncutStart(fits ? centred : reading, area, content, fits, padding)}
+  return {zoom: scale / fit, start: uncutStart(fits ? centred : reading, area, content, fits, fits ? padding : drawn), centred: fits}
 }
 
 /**

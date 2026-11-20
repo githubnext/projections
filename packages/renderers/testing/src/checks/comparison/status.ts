@@ -12,9 +12,11 @@ export const statusChecks: Pick<Checks, 'stable-layout' | 'status-text'> = {
     const failures: string[] = []
     if (modes.includes('diff')) {
       await driver.load(subject, {progress: 1, comparisonMode: 'diff', highlighting: 1})
+      await sized(driver)
       const on = await samples(driver)
       const framedOn = await framed(driver)
       await driver.load(subject, {progress: 1, comparisonMode: 'diff', highlighting: 'off'})
+      await sized(driver)
       const moved = shifted(on, await samples(driver), 'In the diff')
       // Two loads of one diff that differ: say how each was framed, so a difference the frame makes shows.
       if (moved.length) moved.push(`In the diff, the frame with highlighting ${framedOn}; without it ${await framed(driver)}.`)
@@ -80,6 +82,22 @@ export const statusWords = /\b(Added|Removed|Modified|Renamed|Moved)\b/
 /** Progress values a renderer is presented at in its progress modes: through the transition when animated, else the endpoints. */
 function progressSamples(modes: readonly ComparisonMode[]): number[] {
   return modes.includes('animated') ? [0, 0.25, 0.5, 0.75, 1] : modes.some(mode => progressModes.includes(mode)) ? [0, 1] : []
+}
+
+/**
+ * Waits, a bounded while, for the frame to reach the height the renderer last asked for. A load resolves at the
+ * renderer's first painted frame, which a new frame paints at its initial height before the host has applied the
+ * renderer's request; a reused frame already has it. Two loads compared before that round trip differ by the frame,
+ * not the renderer.
+ */
+async function sized(driver: CheckDriver): Promise<void> {
+  for (let attempt = 0; attempt < 60; attempt++) {
+    const asked = (await driver.state()).height
+    // A renderer that asks for no height keeps the frame the host gives it.
+    if (asked === undefined && attempt >= 4) return
+    if (asked !== undefined && Math.abs((await driver.measure<OpeningMeasurement>('opening')).viewport.height - asked) < 1) return
+    await driver.measure('settle')
+  }
 }
 
 /** How the stage is framed now: the frame's size, the height the renderer asked for, and each zoomable canvas's visible area and drawn content. */

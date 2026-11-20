@@ -132,8 +132,8 @@ click on the selected item, contains render failures (reported with
 - `onOpen(path, line?)`: Source navigation request (the host decides)
 - `reportSteps(ends)`: Hold points, for components that use `steps: 'manual'`
 - `controls`: Values of the declared controls, defaults filled in
-- `declareControls(controls)`: Replaces the declared controls, for ones that
-  depend on the document
+- `declareControls`, `setControl(id, value)`: Replace the controls; set one
+  ([a sorting heading](renderer-kit-components.md#data-tables))
 - `onAction(listener)`: Subscribes to `action` messages (or
   `useControlActions(onAction, {id: handler})`)
 - `options`, `viewport`, `reducedMotion`, `locale`: Host state
@@ -300,7 +300,7 @@ Two pages continue this guide:
 - [Renderer kit: graph canvas and geometry](renderer-kit-graphs.md): the graph
   canvas, layout and geometry.
 - [Renderer kit components](renderer-kit-components.md): presentation helpers
-  and components, item rings and layout components.
+  and components, item rings, layout components and data tables.
 
 ## Diff mode
 

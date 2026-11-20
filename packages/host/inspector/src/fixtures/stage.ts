@@ -1,4 +1,4 @@
-import {RendererFrame} from '@githubnext/projections-host'
+import {RendererFrame, isControlValue} from '@githubnext/projections-host'
 import type {
   InitPayload,
   ProgressPayload,
@@ -49,6 +49,8 @@ export class Stage {
   private reusable = false
   /** The open frame fills a fixed height (`StageLoad.height`) rather than taking the height its renderer asks for. */
   private filling = false
+  /** The control values last sent, which a renderer's `control` message updates as a host's settings would. */
+  private options: RendererOptions = {}
   private readonly probe = new StageProbe(() => (this.current.status === 'ready' ? this.frame?.iframe.contentWindow : undefined))
 
   constructor(
@@ -122,6 +124,12 @@ export class Stage {
       case 'failed':
         this.fail(event.message)
         return
+      case 'control': {
+        const control = state.controls.find(item => item.id === event.id)
+        // Answered with the options either way, so a value the stage declines is undone in the renderer.
+        this.setOptions(control && isControlValue(control, event.value) ? {...this.options, [event.id]: event.value} : this.options)
+        break
+      }
       default:
         recordEvent(state, event)
         break
@@ -161,7 +169,8 @@ export class Stage {
       const first = this.rendered(this.current.progress)
       this.filling = Boolean(request.height)
       open.setFill(this.filling)
-      open.setOptions(request.options ?? {})
+      this.options = request.options ?? {}
+      open.setOptions(this.options)
       open.select(this.current.selection)
       open.hover(null)
       open.setEnvironment(this.frameEnvironment())
@@ -170,6 +179,7 @@ export class Stage {
     }
     this.reset()
     const {init, progress} = this.present(request, bundle)
+    this.options = request.options ?? {}
     this.reusable = Boolean(request.reuse)
     this.filling = Boolean(request.height)
     this.url = bundle.url
@@ -236,6 +246,7 @@ export class Stage {
   }
 
   setOptions(options: RendererOptions): void {
+    this.options = options
     this.frame?.setOptions(options)
   }
 

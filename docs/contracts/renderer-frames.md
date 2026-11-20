@@ -52,6 +52,8 @@ in range, at most 64 KiB, at most 240 per second. The renderer speaks first with
 - `ready`:
   `capabilities {changeHighlighting: "supported" | "none", toggleableRelationships?, drawsRelationships?, ownTimeline?, hover?, anchors?, scrollSync?, filter?, context?, annotations?, properties?, controls?}`
 - `controls`: `controls`: replaces the declared controls
+- `control`: `id`, `value`: the person set a declared control from the
+  renderer's content; the host applies it as a settings change
 - `rendered`: `progress` whose frame was painted
 - `select`: `id` or `null`, optional `path` (renderers declaring `properties`)
 - `annotation` *: `id`: the person activated the item's annotation marker (after
@@ -167,7 +169,11 @@ light and dark default, so a renderer can rely on all of them. The
 `action`) in `capabilities.controls` or a later `controls` message. The host
 draws them with its own design system, sends their values in `options` under
 each control's `id`, and sends `action` for one-shot actions. Declarations are
-validated strictly and dropped as a whole when invalid.
+validated strictly and dropped as a whole when invalid. A renderer whose content
+sets a control too (a sortable column heading sets the sort) posts `control`
+with its `id` and new value; the host applies it exactly as a change in its own
+settings (remembering it, drawing it in the menu, telling its embedder), ignores
+a value the declared control doesn't accept, and sends the new `options`.
 
 \* Optional. A host sends `hover` only to renderers declaring the `hover`
 capability, `scroll` only to renderers declaring `scrollSync`, and `filter` only

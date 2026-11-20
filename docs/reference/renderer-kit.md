@@ -514,7 +514,7 @@ A polyline without repeated points and with collinear runs merged.
 ### `codeStatisticsControls`
 
 ```ts
-codeStatisticsControls: readonly [{ "choices": Array<{ "label": string; "value": "blank" | "code" | "comment" | "files" | "lines" }>; "default": "blank" | "code" | "comment" | "files" | "lines"; "description": "What each language row counts"; "group": "statistics"; "groupLabel": "Statistics"; "id": "measure"; "label": "Measure"; "type": "choice" }, { "default": false | true; "description": "One row per language, or the code, comment and blank composition"; "group": "statistics"; "groupLabel": "Statistics"; "id": "byLanguage"; "label": "By language"; "type": "toggle" }, { "choices": [{ "label": "Bars"; "value": "bars" }, { "label": "Share"; "value": "share" }]; "default": "bars" | "share"; "group": "statistics"; "groupLabel": "Statistics"; "id": "chart"; "label": "Chart"; "type": "choice" }]
+codeStatisticsControls: readonly [{ "choices": Array<{ "label": string; "value": "blank" | "code" | "comment" | "files" | "lines" }>; "default": "blank" | "code" | "comment" | "files" | "lines"; "description": "What each language row counts"; "group": "statistics"; "groupLabel": "Statistics"; "id": "measure"; "label": "Measure"; "type": "choice" }, { "default": false | true; "description": "One row per language, or the code, comment and blank composition"; "group": "statistics"; "groupLabel": "Statistics"; "id": "byLanguage"; "label": "By language"; "type": "toggle" }, { "choices": [{ "label": "Bars"; "value": "bars" }, { "label": "Share"; "value": "share" }, { "label": "Table"; "value": "table" }]; "default": "bars" | "share" | "table"; "group": "statistics"; "groupLabel": "Statistics"; "id": "chart"; "label": "Chart"; "type": "choice" }]
 ```
 
 Code-statistics display controls, drawn by the host: `measure` (by language
@@ -555,6 +555,16 @@ type ColorTokenName = "accent" | "accent-emphasis" | "accent-muted" | "added" | 
 ```
 
 Color token names without `color-`, such as `fg-muted` or `added-border`.
+
+### `ColumnSort`
+
+```ts
+type ColumnSort<T> = "number" | "string" | false | { (a: T, b: T): number }
+```
+
+How a column orders its rows: `number` and `string` compare its `value` (strings naturally, so `v2` comes before
+`v10`), a function compares two versions of rows itself, and `false` makes the column unsortable. Without it a
+column with a `value` sorts as a string, or as a number when the values are numbers.
 
 ### `compareIds`
 
@@ -1693,6 +1703,14 @@ isKind(change: EntityChange<Entity>, ...kinds: Array<string>): false | true
 
 Whether either version of the row has one of `kinds`, so a row that changed kind matches both.
 
+### `isSortable`
+
+```ts
+isSortable<T>(column: SortableColumn<T>): false | true
+```
+
+Whether a column can be sorted: it has a comparison, or a value to compare, and isn't marked unsortable.
+
 ### `joinSplines`
 
 ```ts
@@ -1930,6 +1948,14 @@ smootherstep) for every kind of step, so a move starts and ends softly and
 a reversed comparison mirrors it exactly. Relationships morph on this same
 clock as their cards.
 
+### `nextSort`
+
+```ts
+nextSort<T>(sort: null | { "column": string; "direction": "ascending" | "descending" }, column: SortableColumn<T>): { "column": string; "direction": "ascending" | "descending" }
+```
+
+The sort a heading's activation asks for: the other direction for the sorted column, else its first direction.
+
 ### `nodeSpacing`
 
 ```ts
@@ -2034,6 +2060,14 @@ How `categoryPalette` assigns colors beyond its defaults.
 |---|---|---|
 | `distinct` | `"distinct"?: false \| true` | Choose each free slot to be as far as possible from every color already used (OKLab, in both themes), rather than by its preferred slot: for categories with no conventional color, such as entity kinds, so no two look alike. |
 | `pinned` | `"pinned"?: ReadonlyMap<string, "border-width" \| "border-width-thick" \| "chart-1" \| "chart-10" \| "chart-11" \| "chart-12" \| "chart-13" \| "chart-14" \| "chart-15" \| "chart-16" \| "chart-2" \| "chart-3" \| "chart-4" \| "chart-5" \| "chart-6" \| "chart-7" \| "chart-8" \| "chart-9" \| "color-accent" \| "color-accent-emphasis" \| "color-accent-muted" \| "color-added" \| "color-added-border" \| "color-added-emphasis" \| "color-added-highlight" \| "color-added-muted" \| "color-bg" \| "color-bg-inset" \| "color-bg-overlay" \| "color-bg-subtle" \| "color-border" \| "color-border-emphasis" \| "color-border-muted" \| "color-divider" \| "color-fg" \| "color-fg-muted" \| "color-fg-on-emphasis" \| "color-fg-subtle" \| "color-focus" \| "color-highlight" \| "color-modified" \| "color-modified-border" \| "color-modified-emphasis" \| "color-modified-highlight" \| "color-modified-muted" \| "color-moved" \| "color-moved-border" \| "color-moved-emphasis" \| "color-moved-highlight" \| "color-moved-muted" \| "color-removed" \| "color-removed-border" \| "color-removed-emphasis" \| "color-removed-highlight" \| "color-removed-muted" \| "color-surface-canvas" \| "color-surface-header" \| "color-surface-inset" \| "color-surface-raised" \| "control-height" \| "control-height-lg" \| "control-height-sm" \| "focus-ring-offset" \| "focus-ring-width" \| "font-family" \| "font-family-mono" \| "font-size" \| "font-size-lg" \| "font-size-sm" \| "font-size-xl" \| "font-size-xs" \| "font-weight-bold" \| "font-weight-medium" \| "font-weight-normal" \| "font-weight-semibold" \| "icon-added" \| "icon-additive" \| "icon-agent" \| "icon-application" \| "icon-blocked" \| "icon-breaking" \| "icon-bytecode" \| "icon-changed" \| "icon-collapse" \| "icon-comparator" \| "icon-compatible" \| "icon-credential" \| "icon-downgraded" \| "icon-enforced" \| "icon-error" \| "icon-exclude" \| "icon-expand" \| "icon-extractor" \| "icon-file" \| "icon-generated" \| "icon-hidden" \| "icon-host" \| "icon-import" \| "icon-include" \| "icon-info" \| "icon-modified" \| "icon-module" \| "icon-moved" \| "icon-namespace" \| "icon-network" \| "icon-other" \| "icon-policy" \| "icon-process" \| "icon-read" \| "icon-redeploy" \| "icon-removed" \| "icon-renamed" \| "icon-renderer" \| "icon-replace" \| "icon-rescoped" \| "icon-settings" \| "icon-unenforced" \| "icon-unknown" \| "icon-upgraded" \| "icon-varied" \| "icon-visible" \| "icon-warning" \| "icon-workload" \| "label-font-size" \| "label-font-weight" \| "label-height" \| "label-padding-x" \| "label-radius" \| "line-height" \| "line-height-relaxed" \| "line-height-tight" \| "radius" \| "radius-full" \| "radius-lg" \| "radius-sm" \| "shadow-lg" \| "shadow-md" \| "shadow-sm" \| "space-1" \| "space-2" \| "space-3" \| "space-4" \| "space-5" \| "space-6" \| "space-7" \| "space-8">` | Categories whose color is set (a definition's kind colors), by key: they keep it, and the rest keep clear of it. |
+
+### `parseTableSort`
+
+```ts
+parseTableSort(value: false | number | string | true | undefined): null | { "column": string; "direction": "ascending" | "descending" }
+```
+
+The sort a sort control's value names; `null` for `none` or anything else.
 
 ### `placeBadges`
 
@@ -2531,6 +2565,63 @@ smoothstep(value: number): number
 
 Cubic smoothstep of `value` clamped to [0, 1]: eases in and out, with zero speed at either end. `ramp` uses it.
 
+### `SortableColumn`
+
+```ts
+interface SortableColumn<T>
+```
+
+What the table's ordering needs of a column.
+
+| Member | Signature | Description |
+|---|---|---|
+| `firstDirection` | `"firstDirection"?: "ascending" \| "descending"` | The direction a first click on the heading sorts in; `ascending` by default. |
+| `id` | `"id": string` | Stable ID: letters, digits, `_`, `.` and `-`, at most 48 characters. It names the column in the sort control. |
+| `label` | `"label": string` | The column's heading, in words. |
+| `sort` | `"sort"?: "number" \| "string" \| false \| { (a: T, b: T): number }` | How the column orders rows (see `ColumnSort`). |
+| `value` | `"value"?: { (item: T): false \| null \| number \| string \| true \| undefined }` | The cell's value in one version of a row: what the column sorts by, and shows unless the column renders its own. |
+
+### `SortDirection`
+
+```ts
+type SortDirection = "ascending" | "descending"
+```
+
+Which way a column sorts.
+
+### `sortedVersion`
+
+```ts
+sortedVersion<T>(row: TableRow<T>): T
+```
+
+The version of a row a table sorts and labels it by: After's, or Before's for a removed row.
+
+### `SortTableOptions`
+
+```ts
+interface SortTableOptions<T>
+```
+
+Options of `sortTableRows`.
+
+| Member | Signature | Description |
+|---|---|---|
+| `changesFirst` | `"changesFirst"?: false \| true \| undefined` | Changed rows first, each part in the sort's order. |
+| `label` | `"label"?: undefined \| { (item: T): string }` | The row's label for breaking ties, before its ID: the first column's value by default. |
+| `locale` | `"locale"?: string \| undefined` | BCP 47 locale for comparing strings; the runtime's by default. |
+
+### `sortTableRows`
+
+```ts
+sortTableRows<T, R extends TableRow<T>>(rows: Array<R>, columns: Array<SortableColumn<T>>, sort: null | { "column": string; "direction": "ascending" | "descending" }, options?: SortTableOptions<T>): Array<R>
+```
+
+Rows in the table's order: by `sort`'s column (`null` keeps the given order), with rows missing a value last in
+either direction, then by label and ID, so equal rows never swap. A comparison sorts each row by After's version, or
+Before's for a removed row, so the order is the same at every point of the transition and rows never move while it
+plays. `changesFirst` puts changed rows (added, removed, modified, renamed) before the rest.
+
 ### `SpaceStep`
 
 ```ts
@@ -2954,6 +3045,82 @@ The width an SVG status line (`SvgChangeStatus`) takes with its words estimated 
 icon, a gap and the word, parts a gap apart, then the volatile marker. A card reserves it so its status always
 fits; `textScale` is the theme's extra-small type size over the default 12.
 
+### `TableRow`
+
+```ts
+interface TableRow<T>
+```
+
+A table row: one item across a comparison, as the kit's model pairs it (`EntityChange`), or a snapshot's item.
+
+| Member | Signature | Description |
+|---|---|---|
+| `after` | `"after"?: T \| undefined` | The item in After; absent for a removal. |
+| `before` | `"before"?: T \| undefined` | The item in Before; absent for an addition. |
+| `id` | `"id": string` | The row's selection ID, its `data-entity-id`. |
+| `renamed` | `"renamed"?: false \| true \| undefined` | True when the item kept its identity under another ID. |
+| `status` | `"status": "added" \| "modified" \| "removed" \| "unchanged"` | The row's change: `unchanged` in a snapshot. |
+
+### `TableSort`
+
+```ts
+type TableSort = null | { "column": string; "direction": "ascending" | "descending" }
+```
+
+The column a table is sorted by, and which way; `null` keeps the rows' own order.
+
+### `tableSortControls`
+
+```ts
+tableSortControls<T>(options: TableSortControlsOptions<T>): Array<ControlBase & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } | ControlBase & { "default": false | true; "type": "toggle" } | ControlBase & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } | ControlBase & { "icon"?: "collapse" | "download" | "expand" | "filter" | "fit" | "next" | "previous" | "reset" | "search" | "settings" | "zoom-in" | "zoom-out"; "type": "action" }>
+```
+
+A table's sort as renderer controls, which the host draws in its settings menu, remembers and lets agents read and
+set: a choice of each sortable column in either direction (or the rows' own order), and a "Changes first" toggle.
+Declare them (`MountOptions.controls`, or `declareControls`) and read them with `tableSortOf`; `DataTable` sets the
+choice when a heading is activated (see `useTableProps`).
+
+### `TableSortControlsOptions`
+
+```ts
+interface TableSortControlsOptions<T>
+```
+
+Options of `tableSortControls`.
+
+| Member | Signature | Description |
+|---|---|---|
+| `changesFirst` | `"changesFirst"?: false \| true` | Offer the "Changes first" toggle, on by default; `false` leaves it out. |
+| `changesFirstDefault` | `"changesFirstDefault"?: false \| true` | The changes-first toggle's default; off unless set. |
+| `columns` | `"columns": Array<SortableColumn<T>>` | The table's columns; each sortable one is offered both ways (24 at most). |
+| `default` | `"default"?: null \| { "column": string; "direction": "ascending" \| "descending" }` | The sort the table opens with; `null` (the default) keeps the rows' own order. |
+| `group` | `"group"?: { "id": string; "label": string }` | The controls' group and its label in the host's settings menu: `sort` and "Sort" by default. |
+| `id` | `"id"?: string` | The sort control's ID, `sort` by default; the changes-first toggle's is `<id>ChangesFirst`. |
+
+### `tableSortOf`
+
+```ts
+tableSortOf(values: { readonly [key: string]: false | number | string | true }, id?: string): { "changesFirst": false | true; "sort": null | { "column": string; "direction": "ascending" | "descending" } }
+```
+
+A table's sort from control values (`RendererProps.controls`), for the controls `tableSortControls` declares.
+
+### `tableSortValue`
+
+```ts
+tableSortValue(sort: null | { "column": string; "direction": "ascending" | "descending" }): string
+```
+
+The sort control's value for a sort: `<column>:ascending`, `<column>:descending`, or `none`.
+
+### `TableValue`
+
+```ts
+type TableValue = false | null | number | string | true | undefined
+```
+
+A cell's value, as a column reads it from one version of a row: what it sorts by and, by default, shows.
+
 ### `tidyRoute`
 
 ```ts
@@ -3344,6 +3511,70 @@ the frame (`data-projections-content`), on the stage that groups and cards stand
 by the same stage padding on all four sides: the host's `stage-inset`, else 12px. A renderer with a root of its own
 gets the same by giving it the class `pk-stage`.
 
+### `DataTable`
+
+```ts
+DataTable<T>(__0: DataTableProps<T>): Element
+```
+
+A data table: a row per item and a column per property, the first column frozen when it scrolls sideways, every
+heading a button that sorts by its column. In a comparison each row keeps one place for the whole transition
+(sorted by After's version, Before's for a removed row), a status column says its change in words, and changed cells
+are value changes: was and now pills in the diff, tinted by emphasis in the progress modes. An added or removed row
+is marked as a whole; a row around changed cells stays neutral. Every boundary is one line, which takes the change's
+hue when the row on either side of it is changed. Rows are selectable units (`data-entity-id`). Pass the sort and
+`onSortChange` from `useTableProps` to keep it in the host's controls (`tableSortControls`), or leave them out for a
+table that doesn't sort.
+
+### `DataTableColumn`
+
+```ts
+interface DataTableColumn<T> extends SortableColumn<T>
+```
+
+One column of a `DataTable`: its heading, what its cells show and how it sorts.
+
+| Member | Signature | Description |
+|---|---|---|
+| `align` | `"align"?: "end" \| "start"` | The cells' alignment: `end` for numbers (the default for a numeric `sort`), else `start`. |
+| `changed` | `"changed"?: { (before: T, after: T): false \| true }` | Whether the cell changed between a row's two versions: drawn as a value change (was, now) in the diff and tinted in the progress modes. By default, whether `value` differs. |
+| `firstDirection` | `"firstDirection"?: "ascending" \| "descending"` | The direction a first click on the heading sorts in; `ascending` by default. |
+| `font` | `"font"?: "code" \| "text"` | `code` for identifiers and other symbols (names, paths, versions), in the monospace font; `text` (default) for words. |
+| `id` | `"id": string` | Stable ID: letters, digits, `_`, `.` and `-`, at most 48 characters. It names the column in the sort control. |
+| `label` | `"label": string` | The column's heading, in words. |
+| `render` | `"render"?: { (item: T): Iterable<ReactNode, any, any> \| Promise<Iterable<ReactNode, any, any> \| ReactElement<unknown, string \| { (props: any): Iterable<ReactNode, any, any> \| Promise \| Promise<ReactNode> \| ReactElement<unknown, recursive> \| ReactPortal \| bigint \| false \| null \| number \| string \| true \| undefined } \| { new (props: any, context: any): Component<any, any, any> }> \| ReactPortal \| bigint \| false \| null \| number \| string \| true \| undefined> \| ReactElement<unknown, string \| { (props: any): Iterable<ReactNode, any, any> \| Promise<Iterable<ReactNode, any, any> \| ReactElement<unknown, recursive> \| ReactPortal \| bigint \| false \| null \| number \| string \| true \| undefined> \| Promise<ReactNode> \| ReactElement \| ReactPortal \| bigint \| false \| null \| number \| string \| true \| undefined } \| { new (props: any, context: any): Component<any, any, any> }> \| ReactPortal \| bigint \| false \| null \| number \| string \| true \| undefined }` | A cell's content for one version of a row; the formatted `value` by default. |
+| `sort` | `"sort"?: "number" \| "string" \| false \| { (a: T, b: T): number }` | How the column orders rows (see `ColumnSort`). |
+| `value` | `"value"?: { (item: T): false \| null \| number \| string \| true \| undefined }` | The cell's value in one version of a row: what the column sorts by, and shows unless the column renders its own. |
+| `width` | `"width"?: "fill" \| "fit"` | `fill` takes the width the table has to spare (the first column's default); `fit` (the others') fits the content. |
+
+### `DataTableProps`
+
+```ts
+interface DataTableProps<T>
+```
+
+Props of `DataTable`.
+
+| Member | Signature | Description |
+|---|---|---|
+| `changesFirst` | `"changesFirst"?: false \| true` | Changed rows before the rest. |
+| `columns` | `"columns": Array<DataTableColumn<T>>` | The columns, in order; the first is the row's heading, frozen when the table scrolls sideways. |
+| `comparing` | `"comparing"?: false \| true` | A comparison: a status column says each row's change in words. |
+| `diff` | `"diff"?: false \| true` | Diff mode: both versions at once, changed values as was/now pills and added and removed rows marked. |
+| `emphasis` | `"emphasis"?: { (row: TableRow<T>): number }` | A row's change emphasis (`RendererProps.emphasis`): 0 at both endpoints and before its step. |
+| `frozen` | `"frozen"?: false \| true` | Keep the first column in view when the table scrolls sideways; on by default. |
+| `label` | `"label": string` | The table's accessible name, such as what its rows are. |
+| `locale` | `"locale"?: string` | BCP 47 locale for numbers and comparing strings (`RendererProps.locale`). |
+| `noun` | `"noun"?: string` | The rows' plural noun, for a fold's words ("12 unchanged languages"); `rows` by default. |
+| `onSelect` | `"onSelect"?: { (id: string): void }` | Selects a row (`RendererProps.onSelect`), when its heading is activated. |
+| `onSortChange` | `"onSortChange"?: { (sort: { "column": string; "direction": "ascending" \| "descending" }): void }` | A heading was activated: the sort it asks for. Without it, headings don't sort. |
+| `progress` | `"progress"?: number` | The frame's progress, 0 (Before) to 1 (After), outside diff mode: each row shows the version it has reached. |
+| `rowProgress` | `"rowProgress"?: { (row: TableRow<T>): number }` | A row's progress through its own step (a staged timeline's `local`), for rows that change at different times. |
+| `rows` | `"rows": Array<TableRow<T>>` | The rows, in their own order (kept while unsorted): the kit's model rows (`model.entities`) or rows like them. |
+| `scope` | `"scope"?: ChangesScope \| undefined` | The Changes scope (`RendererProps.scope`): each run of rows it doesn't show, in the sorted order, folds into one row that opens in place. |
+| `selectedId` | `"selectedId"?: null \| string` | The host's selection (`RendererProps.selectedId`). |
+| `sort` | `"sort"?: null \| { "column": string; "direction": "ascending" \| "descending" }` | The sort; the rows' own order when `null` or absent. |
+
 ### `EdgeArrowMarker`
 
 ```ts
@@ -3553,6 +3784,7 @@ Everything but the renderer props is optional; the defaults draw every entity as
 | `schedule` | `"schedule": Array<ScheduledStep>` | The comparison's steps on the progress axis for the direction this transition presents (see `DirectionLatch`). Empty for extractions. |
 | `scope` | `"scope": ScopeView \| undefined` | The Changes scope, while the host shows a comparison's changes and their context (`changesScope`): its `shown` items, with the parts the person opened (`expand`). A list folds the rest (`useFolds`, `Fold`); a canvas that declares `MountOptions.scope` `subset` receives a `model` of only what is shown and lays that out. Nothing is faded: what is shown is drawn at full strength, and what isn't takes no room. Undefined while every item is shown. |
 | `selectedId` | `"selectedId": null \| string` | The selected item's ID (an entity row ID, or a part's `data-entity-id`), or `null` when nothing is selected. |
+| `setControl` | `"setControl": { (id: string, value: false \| number \| string \| true): void }` | Sets a declared control from the renderer's own content, as the person changed it there (a sortable column header): the host applies it as if they had set it in its settings, remembers it and sends it back in `controls`. The new value shows at once. |
 | `source` | `"source"?: unknown` | What `model` is a view of, when a renderer derives it (for example with groups expanded or collapsed): while a new model of the same document is laid out, the current layout stays on screen, and keyboard focus with it, instead of the loading state. |
 | `subtitle` | `"subtitle"?: undefined \| { (entity: Entity): string \| undefined }` | A few words under a card's label, such as what the entity is for: human text in sans, wrapped to the card on at most `subtitleMetrics.lines` lines and ending in an ellipsis when longer (the tooltip has it whole). The card grows a line for each line either revision needs; a changed one crossfades with the card's own step. Pass a stable function: a new one lays out again. |
 | `synthetic` | `"synthetic"?: undefined \| { (id: string): false \| true }` | Presentation-only cards and links that stand for no extracted entity or relationship, such as a summary of collapsed items: drawn and activated (through `onSelect`) like the others, but carrying no selection ID (`data-graph-synthetic` instead of `data-entity-id`), so hosts never see them. |
@@ -3845,6 +4077,7 @@ Everything a kit renderer component receives for one host state.
 | `schedule` | `"schedule": Array<ScheduledStep>` | The comparison's steps on the progress axis for the direction this transition presents (see `DirectionLatch`). Empty for extractions. |
 | `scope` | `"scope": ScopeView \| undefined` | The Changes scope, while the host shows a comparison's changes and their context (`changesScope`): its `shown` items, with the parts the person opened (`expand`). A list folds the rest (`useFolds`, `Fold`); a canvas that declares `MountOptions.scope` `subset` receives a `model` of only what is shown and lays that out. Nothing is faded: what is shown is drawn at full strength, and what isn't takes no room. Undefined while every item is shown. |
 | `selectedId` | `"selectedId": null \| string` | The selected item's ID (an entity row ID, or a part's `data-entity-id`), or `null` when nothing is selected. |
+| `setControl` | `"setControl": { (id: string, value: false \| number \| string \| true): void }` | Sets a declared control from the renderer's own content, as the person changed it there (a sortable column header): the host applies it as if they had set it in its settings, remembers it and sends it back in `controls`. The new value shows at once. |
 | `viewport` | `"viewport": undefined \| { "height": number; "width": number }` | The frame's width and the host window's height, CSS px, as the host last reported them; undefined until then. |
 
 ### `Stack`
@@ -3929,6 +4162,27 @@ SvgValueChange(__0: { "after": string; "anchor"?: "end" | "middle" | "start"; "b
 the old value struck through in the removed hue, an arrow, then the new
 value in the added hue. Pass identifier attributes (the SDK's
 `identifier`) for code values such as versions.
+
+### `TablePropsSource`
+
+```ts
+interface TablePropsSource
+```
+
+What `useTableProps` reads from a kit renderer's props.
+
+| Member | Signature | Description |
+|---|---|---|
+| `comparing` | `"comparing": false \| true` | Whether this is a comparison (`RendererProps.comparing`). |
+| `controls` | `"controls": { [key: string]: false \| number \| string \| true }` | The declared controls' values, the sort among them (`RendererProps.controls`). |
+| `diff` | `"diff": false \| true` | Whether the host shows the comparison in diff mode (`RendererProps.diff`). |
+| `emphasis` | `"emphasis": { (row: TableRow<unknown> & { "id"?: string }): number }` | A row's change emphasis (`RendererProps.emphasis`). |
+| `locale` | `"locale": string` | BCP 47 locale for numbers and comparing strings (`RendererProps.locale`). |
+| `onSelect` | `"onSelect": { (id: null \| string): void }` | Selects an item (`RendererProps.onSelect`). |
+| `progress` | `"progress": number` | The frame's progress, 0 (Before) to 1 (After) (`RendererProps.progress`). |
+| `scope` | `"scope"?: ChangesScope \| undefined` | The Changes scope, which the table folds by (`RendererProps.scope`). |
+| `selectedId` | `"selectedId": null \| string` | The host's selection (`RendererProps.selectedId`). |
+| `setControl` | `"setControl": { (id: string, value: false \| number \| string \| true): void }` | Sets a control from the content, as a heading does the sort (`RendererProps.setControl`). |
 
 ### `Text`
 
@@ -4156,6 +4410,17 @@ useSummaryNouns(declare: { (nouns: undefined | { (kind: string, collection: "ent
 Names the renderer's kinds in the host's summary bar (`RendererProps.declareNouns`): `{package: {singular:
 'workspace', plural: 'workspaces'}}`, `false` to leave a kind out. The kinds an object lists come first, in its
 order. Pass a stable value (memoize a function); `undefined` returns to `MountOptions.nouns`.
+
+### `useTableProps`
+
+```ts
+useTableProps(props: TablePropsSource, id?: string): { "changesFirst": false | true; "comparing": false | true; "diff": false | true; "emphasis": { (row: TableRow<unknown>): number }; "locale": string; "onSelect": { (id: string): void }; "onSortChange": { (next: { "column": string; "direction": "ascending" | "descending" }): void }; "progress": number; "scope": ChangesScope | undefined; "selectedId": null | string; "sort": null | { "column": string; "direction": "ascending" | "descending" } }
+```
+
+A `DataTable`'s props from a kit renderer's (`RendererProps`): the comparison, mode, progress, emphasis, selection,
+locale and Changes scope, and the sort held in the controls `tableSortControls` declares under `id` (`sort` by default), which a
+heading's activation sets through the host, so the host remembers it, shows it in its settings and lets agents read
+and set it. Spread them: `<DataTable {...useTableProps(props)} label columns rows />`.
 
 ### `ValueChange`
 

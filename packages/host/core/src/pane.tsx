@@ -3,6 +3,7 @@ import type {ReactNode} from 'react'
 import type {
   AnchorRect,
   AnnotationMark,
+  ControlValue,
   FilterPayload,
   RendererLegend,
   SummaryItem,
@@ -82,6 +83,8 @@ export interface RendererPaneProps {
   onSelect: (id: string | null, path?: string) => void
   /** The person activated an item's annotation marker. */
   onAnnotation?: (id: string) => void
+  /** The person set a declared control from the renderer's content; apply it as a change in the host's settings. */
+  onControl?: (id: string, value: ControlValue) => void
   onHover: (id: string | null) => void
   onOpen: (path: string, line?: number) => void
   onAnchor?: (id: string, rect: AnchorRect | null) => void
@@ -105,6 +108,8 @@ export function RendererPane(props: RendererPaneProps) {
   const container = useRef<HTMLDivElement>(null)
   const frame = useRef<RendererFrame | null>(null)
   const [state, setState] = useState<PaneState>(loadingPane)
+  // Counts the renderer's `control` messages, each answered with the options once the host has applied it.
+  const [controlAnswer, setControlAnswer] = useState(0)
   const callbacks = useRef(props)
   callbacks.current = props
   const options = props.options
@@ -166,6 +171,11 @@ export function RendererPane(props: RendererPaneProps) {
           break
         case 'annotation':
           current.onAnnotation?.(event.id)
+          break
+        case 'control':
+          current.onControl?.(event.id, event.value)
+          // Answer with the options as they stand once applied, so a value the host or its embedder declined is undone.
+          setControlAnswer(previous => previous + 1)
           break
         case 'legend': {
           const {type: _type, ...legend} = event
@@ -259,6 +269,9 @@ export function RendererPane(props: RendererPaneProps) {
   useEffect(() => {
     if (options) frame.current?.setOptions(options)
   }, [options])
+  useEffect(() => {
+    if (controlAnswer) frame.current?.setOptions(latest.current.options ?? {})
+  }, [controlAnswer])
   const filter = props.filter
   useEffect(() => {
     if (filter) frame.current?.filter(filter)

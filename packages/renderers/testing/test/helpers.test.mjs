@@ -106,6 +106,59 @@ const subject = {
   },
 }
 
+test('stable-layout compares two diffs once each frame has the height its renderer asked for', async () => {
+  // A new frame paints first at 320 px, then the host applies the renderer's 1217 px; a fitted drawing re-centres.
+  let height = 1217
+  let pending = 0
+  const sample = () => ({
+    key: 'a',
+    id: 'a',
+    box: [0, height === 320 ? 12 : 28.5, 10, 10],
+    opacity: 1,
+    paint: 'plain',
+    text: 'a',
+    parts: [],
+    categories: {},
+  })
+  const driver = {
+    async load(_subject, options) {
+      // Only the first load starts a frame; the second reuses it at its height.
+      height = options.highlighting === 1 ? 320 : 1217
+      pending = options.highlighting === 1 ? 3 : 0
+      return {
+        status: 'ready',
+        capabilities: {changeHighlighting: 'supported', comparisonModes: ['diff']},
+        progress: 1,
+        highlighting: 0,
+        direction: 1,
+        selection: null,
+        selections: [],
+        steps: [],
+        controls: [],
+        opened: [],
+        errors: [],
+        rejected: [],
+      }
+    },
+    async seek() {},
+    select() {},
+    hover() {},
+    state: () => ({selections: [], height: 1217}),
+    async measure(call) {
+      if (call === 'settle' && pending && !--pending) height = 1217
+      if (call === 'samples') return [sample()]
+      if (call === 'opening') return {viewport: {width: 1280, height}, canvases: []}
+      return []
+    },
+    async compare() {
+      return {protocolVersion: 0, changes: [], steps: []}
+    },
+    sleep: async () => {},
+  }
+  const [result] = await runChecks(driver, subject, {checks: ['stable-layout']})
+  assert.equal(result.status, 'pass', result.details.join('\n'))
+})
+
 test('checks run per declared comparison mode', async () => {
   const status = results => Object.fromEntries(results.map(result => [result.id, result.status]))
   const diffOnly = fakeDriver(['diff'])

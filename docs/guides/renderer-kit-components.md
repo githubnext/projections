@@ -274,6 +274,76 @@ stylesheet.
 - `Text`: Text with `size` (`xs`, `sm`, `md`, `lg`, `xl`), `weight` and a `tone`
   (`default`, `muted`, `subtle`).
 
+## Data tables
+
+`DataTable` draws items with comparable properties as a table: a row per item, a
+column per property. Use it rather than table markup of your own; it meets the
+checks as it is.
+
+```tsx
+import {tableSortControls} from '@githubnext/projections/kit'
+import {DataTable, useTableProps} from '@githubnext/projections/kit/react'
+import type {DataTableColumn, RendererProps, ViewOptions} from '@githubnext/projections/kit/react'
+import type {Entity} from '@githubnext/projections/schemas'
+
+const columns: DataTableColumn<Entity>[] = [
+  {id: 'name', label: 'Service', value: entity => entity.label ?? entity.id, font: 'code'},
+  {id: 'replicas', label: 'Replicas', value: entity => entity.data?.replicas as number, sort: 'number'},
+]
+export const options: ViewOptions = {
+  controls: tableSortControls({columns, default: {column: 'replicas', direction: 'descending'}}),
+}
+export function View(props: RendererProps) {
+  return <DataTable {...useTableProps(props)} label="Services" columns={columns} rows={props.model.entities} />
+}
+```
+
+- **Columns.** `value(item)` reads a cell from one version of a row: what the
+  column sorts by and, unless it has `render(item)`, shows (numbers in the
+  host's locale). `font: 'code'` sets identifiers and other symbols in the
+  monospace font; headings are words, in the UI font. `align` (`end` for a
+  numeric sort by default) and `width` (`fill` for the first column, `fit` for
+  the rest) shape it. A cell changed when its `value` differs between the row's
+  two versions, or as `changed(before, after)` says.
+- **Rows.** The kit model's rows (`model.entities`) or any rows like them
+  (`TableRow`: `id`, `before`, `after`, `status`). Each row is a ring unit with
+  `data-entity-id`; its first cell is the button that selects it.
+- **Sorting.** Every heading of a sortable column is a button (`aria-sort` on
+  the sorted one): activating it sorts by that column, then the other way.
+  `sort: 'number' | 'string' | (a, b) => number | false` says how; strings
+  compare naturally (`v2` before `v10`) and missing values go last in either
+  direction, with the row's label and ID breaking ties. The sort is a renderer
+  control: `tableSortControls({columns, default})` declares a "Sort by" choice
+  (each column both ways, or the rows' own order) and a "Changes first" toggle
+  in the host's settings, so the host remembers the sort and agents read and set
+  it like any control. `useTableProps(props)` reads them and passes a heading's
+  activation to the host (`RendererProps.setControl`), so the heading, the
+  settings menu and an agent all set the same value. Without `onSortChange`,
+  headings don't sort.
+- **Comparisons.** A row sorts by After's version (Before's for a removed row),
+  so the order is the same at every point of the transition and rows never move
+  while it plays. A status column says each change in words. In diff mode a
+  changed cell is a `ValueChange` (was, now) and an added or removed row is a
+  change region; a row around changed cells stays neutral (no nested change
+  colors). In the progress modes a row shows the version it has reached
+  (`rowProgress`, a staged timeline's `local`, for per-row steps), an entering
+  or leaving row fades in its slot, and a changed cell is a pill that takes its
+  side's hue as the change is emphasized and is plain text at the endpoints.
+- **Lines.** The rows draw the table's frame and every line in it, one per
+  boundary, and a row paints the same wherever the sort puts it. Where a gray
+  line and a change-colored one meet, the change's hue wins: a row whose lines
+  carry its hue (added, removed, renamed) sits above a row drawn neutral because
+  it holds changed cells, which sits above unchanged rows, the heading and the
+  frame, so the line between a changed row and any neighbour, and the frame's
+  edge beside it, is the change's. In a `Group` the table is the body: the group
+  draws no edge of its own and its header band joins the table's frame.
+- **Changes scope.** With `scope` (`RendererProps.scope`, which `useTableProps`
+  passes), each run of rows the scope doesn't show, in the sorted order, folds
+  into one `Fold` row ("12 unchanged languages", with `noun`) that opens in
+  place; its line is the table's, not a second one.
+- **Scrolling.** A table wider than the frame scrolls sideways in its own box,
+  its first column frozen (`frozen={false}` lets it scroll away).
+
 For an inline style these don't cover, `token` (re-exported from the SDK) writes
 a theme token as a CSS value, typed so a name that isn't a token doesn't
 compile: `token.space(2)`, `token.color('fg-muted')`, `token.fontSize('sm')`,

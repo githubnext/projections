@@ -5,7 +5,7 @@
 //! statuses come from here, and JavaScript hosts reach it through the
 //! `review` operation (`engine.review`).
 
-use crate::model::{Change, Correspondence, Status};
+use crate::model::{Correspondence, Status};
 use crate::parse::{choice, object};
 use crate::{Failure, pointer};
 use serde_json::{Value, json};
@@ -54,15 +54,6 @@ impl Review {
         self.identity += usize::from(is_identity_change(correspondence));
         self.reviewable += usize::from(is_reviewable(status, correspondence));
         self.variation += usize::from(is_variation(status, correspondence, varied));
-    }
-
-    /// The review of typed changes.
-    pub fn of<'a>(changes: impl IntoIterator<Item = &'a Change>) -> Self {
-        let mut review = Self::default();
-        for change in changes {
-            review.count(change.status, change.correspondence, !change.varied.is_empty());
-        }
-        review
     }
 
     /// `changed` when a change is reviewable, else `unchanged`.

@@ -486,6 +486,7 @@ test('a card that loses or gains its last relationship moves nothing else, and k
 
 test('a card with no relationships a little off a column in another layer moves onto it where it fits', async () => {
   const {alignColumns, columnReach} = await import('../dist/layout/unlinked-columns.js')
+  const {nodeSpacing} = await import('../dist/layout/placement.js')
   const axes = {flow: 'y', across: 'x', depth: 'height', breadth: 'width'}
   const span = (start, end) => ({start, end})
   // A card in the layer above, at 100; the unlinked card below it, at 100 + `offset`; perhaps a route beside it.
@@ -502,7 +503,7 @@ test('a card with no relationships a little off a column in another layer moves 
   assert.equal(align(-15).reach, 400, 'within the layout, it stays as wide')
   assert.equal(align(columnReach + 10).x, 100 + columnReach + 10, 'too far off a column to be a slip')
   assert.equal(align(15, 90).x, 115, 'a route beside the column keeps it off')
-  assert.equal(align(15, 60).x, 100, 'a route further off leaves room')
+  assert.equal(align(15, 100 - nodeSpacing - 10).x, 100, 'a route further off leaves room')
 })
 
 test('top to bottom, every card starts on a column line of one grid, in every layer of every scenario without boundaries', async () => {

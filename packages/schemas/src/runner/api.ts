@@ -191,20 +191,34 @@ export const runnerResponses = {
   document: {request: 'GET /api/document', schema: DocumentResponseSchema},
 } as const satisfies {[name: string]: {request: string; schema: TSchema}}
 
+/** The name of a decoded runner response, such as `explore`. */
 export type RunnerResponseName = keyof typeof runnerResponses
+/** The decoded type of the runner response `N`. */
 export type RunnerResponse<N extends RunnerResponseName> = Static<(typeof runnerResponses)[N]['schema']>
 
+/** A change a history sweep tries: a revision against the one before it. */
 export type SweepChange = Static<typeof SweepChangeSchema>
+/** A swept projection: `ready`, or skipped because it needs `--trust`, or failed to prepare. */
 export type SweepProjection = Static<typeof SweepProjectionSchema>
+/** One projection on one change of a history sweep. */
 export type SweepCell = Static<typeof SweepCellSchema>
+/** A history sweep (`GET /api/sweep`). */
 export type Sweep = Static<typeof SweepSchema>
+/** A projection `projections explore` proposes for this repository, as a trial definition. */
 export type ExploreCandidate = Static<typeof ExploreCandidateSchema>
+/** The explore candidates (`GET /api/explore`), and whether this is an explore session. */
 export type ExploreCandidates = Static<typeof ExploreResponseSchema>
+/** A file Adopt would write: its current content (`null` when absent) and new content. */
 export type OnboardingFile = Static<typeof OnboardingFileSchema>
+/** An Adopt preview or result (`POST /api/adopt`). */
 export type OnboardingWrite = Static<typeof AdoptResponseSchema>
+/** A Before → After pair the repository suggests. */
 export type Pair = Static<typeof PairSchema>
+/** What the runner offers as Before → After pairs (`GET /api/pairs`). */
 export type Pairs = Static<typeof PairsResponseSchema>
+/** What saving definition parts writes, or wrote (`POST /api/definition`). */
 export type DefinitionSave = Static<typeof DefinitionSaveResponseSchema>
+/** What changed in the working tree since a generation (`GET /api/changes`). */
 export type WorkspaceChanges = Static<typeof ChangesResponseSchema>
 
 /** The generated `internal/runner-api.json`: each response's schema as the `$defs` entry of its name. */

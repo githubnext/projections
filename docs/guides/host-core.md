@@ -289,6 +289,22 @@ below.
   a fact's.
 - `ProjectionFeatures`, `featureOn`, `offeredModes` and `rendererLabel` are the
   feature switches every UI takes.
+- `playButton(projection, beforeLabel, afterLabel)` is the one play button:
+  `{action, direction, label}`, where `action` is `pause` while playing, else
+  `play`, or `show` under reduced motion ("Show <after label>"). The icon is the
+  UI's.
+
+**Keyboard.** These take any keydown event (DOM, React or another framework's):
+
+- `handlePlaybackShortcut(event, projection, keeps?)`: Space plays and pauses
+  (`togglePlayback`) from the listening element (a toolbar, the stage's chrome)
+  or an element in it that doesn't use Space itself, once per press.
+  `spaceKeeping` lists the elements that keep Space (fields, buttons, radios,
+  tabs, menus, dialogs…); `keeps` adds a design system's custom elements. An
+  element that keeps Space but encloses the listener, such as a dialog around
+  the view, doesn't count. `isPlaybackShortcut` only tests.
+- `rovingIndex(key, index, count, orientation?)`: where an arrow, Home or End
+  key moves the choice in a radio group or tab list, wrapping at either end.
 
 The default scope is Changes (`changesOnly`, which a definition's
 `presentation.changesOnly: false` turns off).

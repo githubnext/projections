@@ -285,7 +285,7 @@ async function entities(frame: Frame) {
 for (const [story, noun] of [
   ['dependency-injection', 'registrations'],
   ['database', 'foreign keys'],
-])
+] as const)
   test(`${story}: a summary figure recedes what it leaves out once and moves nothing, in Changes and in All`, async ({
     page,
     theme,

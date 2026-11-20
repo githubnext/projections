@@ -78,7 +78,7 @@ The host draws these controls; set their starting values in the definition's
 | Measure | `measure` | `code` (Code), `comment` (Comments), `blank` (Blank), `lines` (All lines), `files` (Files); what each language row counts | `code` |
 | By language | `byLanguage` | `true` (one row per language), `false` (the code, comment and blank composition) | `true` |
 | Chart | `chart` | `bars` (Bars), `share` (Share), `table` (Table) | `bars` |
-| Sort by | `sort` | `none` (Original order), `<column>:ascending` or `<column>:descending` for `name`, `files`, `code`, `comment`, `blank` and `lines` (`value` for generic measurements); offered with the table | `code:descending` (`value:descending`) |
+| Sort by | `sort` | `none` (Original order), `<column>:ascending` or `<column>:descending` for `name`, `files`, `code`, `comment`, `blank` and `lines` (`value` and `unit` for generic measurements); offered with the table | `code:descending` (`value:descending`) |
 | Changes first | `sortChangesFirst` | `true`, `false`; offered with the table | `false` |
 
 ```json

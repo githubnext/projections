@@ -17,11 +17,17 @@ function count(id: StatisticsKey, label: string, scope: CodeStatisticsScope): Da
 
 /**
  * The table's columns: a language's name and every count (files, then its code, comment and blank lines and their
- * sum), or for generic measurements each one's name and value.
+ * sum), or for generic measurements each one's name, value and unit.
  */
 export function statisticsTableColumns(metrics: boolean, rows: string, scope: CodeStatisticsScope): DataTableColumn<Entity>[] {
   const first: DataTableColumn<Entity> = {id: 'name', label: sentenceCase(rows), value: name}
-  if (metrics) return [first, count('value', 'Value', 'all')]
+  // A measurement's unit is part of its meaning, and a unit that changes is a change of its own.
+  const unit: DataTableColumn<Entity> = {
+    id: 'unit',
+    label: 'Unit',
+    value: entity => (typeof entity.data?.unit === 'string' ? entity.data.unit : undefined),
+  }
+  if (metrics) return [first, count('value', 'Value', 'all'), unit]
   return [
     first,
     count('files', 'Files', scope),

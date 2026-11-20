@@ -125,7 +125,7 @@ export function ModeSwitch({
           size="sm"
           aria-label={name}
           title={name}
-          className="ph-mode-button pj:h-8 pj:shrink-0 pj:gap-0.5 pj:rounded-md pj:border pj:border-input pj:bg-background pj:pr-1 pj:pl-2 pj:shadow-xs pj:dark:bg-input/30 pj:hover:bg-accent pj:data-[state=open]:bg-accent pj:[&_svg]:size-4"
+          className="ph-mode-button pj:h-8 pj:shrink-0 pj:gap-0.5 pj:rounded-md pj:border pj:border-input pj:bg-background pj:pr-1 pj:pl-2 pj:shadow-xs pj:dark:bg-input/30 pj:hover:bg-accent pj:dark:hover:bg-accent pj:aria-expanded:bg-accent pj:data-[state=open]:bg-accent pj:[&_svg]:size-4"
         >
           <Icon aria-hidden="true" data-icon={iconName} />
           <ChevronDown aria-hidden="true" className="pj:size-3.5! pj:text-muted-foreground" />

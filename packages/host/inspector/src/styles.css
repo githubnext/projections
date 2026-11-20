@@ -249,8 +249,18 @@ body {
 }
 
 /*
+ * The agent viewer's header is a whole 35px band, hairline included, whatever its font: its height comes from no text
+ * (a cap height is a fraction of a pixel), so the toolbar and the stage below it start on whole pixels. Its items are
+ * centred in the 34px inside the hairline.
+ */
+.pi-viewer-header {
+  box-sizing: border-box;
+  height: 35px;
+}
+
+/*
  * The agent viewer's header text, centred by cap height: each item is trimmed to its cap height and baseline, so a
- * capital E has the header's padding above and below. The block padding keeps descenders and ascenders
+ * capital E has as much room above as below. The block padding keeps descenders and ascenders
  * inside the item's clip (it truncates with an ellipsis), and the matching negative margin keeps the row one cap high.
  * Engines without `text-box` take a line box one cap high, which centres the cap height to within the font's ascent and
  * descent difference.
@@ -340,10 +350,9 @@ body {
   background: transparent;
 }
 /*
- * The mark leads the header in place of the title's capital E: it overhangs the row's cap height equally above and
- * below, so the header keeps its height, and sits as far from the header's left edge as from its top and bottom.
+ * The mark leads the header in place of the title's capital E, centred in the 34px inside the hairline: 9px above and
+ * below it, and as far from the header's left edge, whole pixels.
  */
 .pi-viewer-header .pi-viewer-mark {
-  margin-block: calc(0.5cap - 8px);
-  margin-inline-start: calc(0.5cap - 8px);
+  margin-inline-start: -3px;
 }

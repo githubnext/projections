@@ -93,9 +93,13 @@ export interface PreparedFixture {
   presentation: PresentationSettings | undefined
 }
 
-/** The scenario's view subject, compared in the browser with its comparator, and the renderer for it. */
-export async function prepareFixture(item: Fixture, {engine, renderers}: Runtime): Promise<PreparedFixture> {
-  const [first, second] = extractionChoices(item)
+/**
+ * The scenario's view subject, compared in the browser with its comparator, and the renderer for it. `unchanged`
+ * compares its After with itself, a comparison without changes.
+ */
+export async function prepareFixture(item: Fixture, {engine, renderers}: Runtime, unchanged = false): Promise<PreparedFixture> {
+  const choices = extractionChoices(item)
+  const [first, second] = unchanged ? [choices.at(-1)!, choices.at(-1)!] : choices
   let subject: ViewSubject
   if (!second) subject = {mode: 'extraction', extraction: first!.document.extraction}
   else {

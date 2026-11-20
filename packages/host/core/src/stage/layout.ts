@@ -25,6 +25,14 @@ export interface PaneEdge {
 export const columnGapOf = (edge: PaneEdge) => (edge.between ? paneGeometry.ruleGap : paneGeometry.columnGap)
 
 /**
+ * The space between stacked panes with this edge, and the gutter beside them: panes that meet at a rule (`between`)
+ * meet at it stacked too, the after pane's top, full width and with no gutter (the connector runs over the panes' own
+ * stage inset); separate cards keep the row gap and the connector gutter.
+ */
+export const stackedGapsOf = (edge: PaneEdge) =>
+  edge.between ? {rowGap: paneGeometry.ruleGap, gutter: 0} : {rowGap: paneGeometry.rowGap, gutter: paneGeometry.gutter}
+
+/**
  * A pane of side by side or swipe: one card around its label band and its frame. Its edge is a border, drawn inside
  * its box like every edge the stage draws, and it clips band and frame to its corners, so band and frame share one
  * continuous outline whose sides can't drift apart.
@@ -90,7 +98,8 @@ export function stageLayout({
             ...paneStyle,
             ...paneCard(paneEdge),
             ...(bleed > 0 ? {overflow: 'visible'} : {}),
-            ...(side === 'after' && !stacked && paneEdge.between ? {borderLeft: paneEdge.between} : {}),
+            // Left and right panes meet at the rule on the after pane's left; stacked, at its top.
+            ...(side === 'after' && paneEdge.between ? (stacked ? {borderTop: paneEdge.between} : {borderLeft: paneEdge.between}) : {}),
           }
         : {position: 'relative', minWidth: 0, ...filled}
   const sectionClass = (side: Side) =>
@@ -115,8 +124,8 @@ export function stageLayout({
             display: 'grid',
             minWidth: 0,
             gridTemplateColumns: stacked ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))',
-            gap: stacked ? paneGeometry.rowGap : paneEdge.between ? 0 : paneGeometry.columnGap,
-            paddingLeft: stacked ? paneGeometry.gutter : 0,
+            gap: paneEdge.between ? 0 : stacked ? paneGeometry.rowGap : paneGeometry.columnGap,
+            paddingLeft: stacked ? stackedGapsOf(paneEdge).gutter : 0,
             ...fillBody,
           }
         : {position: 'relative', display: 'grid', minWidth: 0, ...fillBody}

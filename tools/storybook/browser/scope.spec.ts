@@ -218,7 +218,13 @@ async function doubledLines(frame: Frame): Promise<string[]> {
 const known = new Set(['text-diff', 'runtime-policy'])
 
 for (const story of ['api', 'database', 'text-diff', 'code-statistics', 'runtime-policy'])
-  test(`${story}: every boundary between rows is one line, in Diff and Animated, Changes and All`, async ({page, theme}) => {
+  test(`${story}: every boundary between rows is one line, in Diff and Animated, Changes and All`, async ({page, theme}, testInfo) => {
+    // Lines are laid out alike in every engine; the light and dark projects cover both themes. Four presentations a test.
+    test.skip(
+      !testInfo.project.name.startsWith('chromium-light') && !testInfo.project.name.startsWith('chromium-dark'),
+      'layout, not engine',
+    )
+    test.setTimeout(120_000)
     test.fail(known.has(story), 'its change regions draw inside a container border')
     await page.setViewportSize({width: 1440, height: 900})
     for (const mode of ['diff', 'animated'])

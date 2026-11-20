@@ -34,6 +34,7 @@ files reload live.
 | Default UI / Building blocks, Components | `TableView`, `TextView`, `DetailCard` (in the custom toolbar composition), `ComparisonModeControl`, `RendererControls`, and the scoped shadcn components |
 | Default UI / Icons, VS Code UI / Icons | Every SDK icon by meaning, badges then the others, drawn by the renderer kit at 14 to 64px, in a card's status and the summary bar, in the host's real themes; **In the renderers** shows them beside the renderers' own words |
 | Core / Projection stage | `useProjection` and `ProjectionStage` with a host's own plain controls |
+| Core / Custom host | A whole custom UI on the core alone, with plain elements and no UI package: the view model (`useViewChoice`, `viewControls`, `scopeChoice`), playback (`playButton`, the Space shortcut), roving choice, a table of `visibleRows` and the summary's filter toggles |
 | Harness / … | The pages the host's browser suites drive, on synthetic data with known IDs and query parameters (see their READMEs) |
 
 The toolbar's **Theme** (light or dark) applies to the UI and its renderer

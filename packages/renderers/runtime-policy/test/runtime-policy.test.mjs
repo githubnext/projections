@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs'
 import {createElement} from 'react'
 import {renderToStaticMarkup} from 'react-dom/server'
 import {createNativeEngine} from '@githubnext/projections-engine/native'
-import {comparisonModel, extractionModel, stepEmphasis} from '@githubnext/projections-renderer-kit'
+import {changesScope, comparisonModel, extractionModel, scopedModel, stepEmphasis} from '@githubnext/projections-renderer-kit'
 import {createRulesRuntime} from '@githubnext/projections-comparator-runtime'
 import {badgeIconNames} from '@githubnext/projections-renderer-sdk/protocol'
 import {plainProse} from '@githubnext/projections-schemas'
@@ -13,6 +13,7 @@ import {chipPrefix, conditionLines, effectProse, warnings} from '../node_modules
 import {findingLabels, interpretationIcons} from '../node_modules/.cache/test/model.js'
 
 import {RuntimePolicyView} from '../node_modules/.cache/test/view.js'
+import {runtimePolicyContext} from '../node_modules/.cache/test/scope.js'
 import {plain} from '../../kit/test/markup.mjs'
 
 const engine = createNativeEngine()
@@ -318,4 +319,48 @@ test('in the diff, changed rows marked the same way join into one change run, as
     markup,
     /<section class="rp-lane pk-region pk-region-run"[^>]*data-entity-id="hook:kprobe:sys_execve"[^>]*data-change="added" data-run-start="" data-run-end=""/,
   )
+})
+
+/** The diff in the Changes scope, as the shell narrows it: the changes, their context, each laid out whole. */
+function changesView(model, metadata) {
+  const scope = changesScope(model, {query: '', changesOnly: true, ids: null})
+  const shown = new Set([...scope.shown, ...runtimePolicyContext(model, scope.changes)])
+  return buildModel(scopedModel(model, shown, 'whole').model, 'diff', metadata)
+}
+
+const chipNames = items =>
+  Object.fromEntries(items.map(item => [item.entity.label, (item.scope ?? item.coveredBy).map(chip => chip.subject.entity.label)]))
+
+test("the Changes scope keeps what a changed policy's chips name, so an unchanged Applies to still reads", async () => {
+  // Only a rule changes: the policy's scope is the same in both revisions.
+  const edited = structuredClone(before)
+  const rule = edited.entities.find(entity => entity.kind === 'selector')
+  rule.data = {...rule.data, matchArgs: [{index: 0, operator: 'Prefix', values: ['/var/run/secrets/']}]}
+  const comparison = await interpreted(before, edited)
+  const model = comparisonModel(before, edited, comparison)
+  const full = changesView(model, comparison.metadata)
+  const all = buildModel(model, 'diff', comparison.metadata)
+  assert.ok(full.policies.length > 0)
+  const shown = chipNames(full.policies)
+  assert.deepEqual(shown, Object.fromEntries(Object.keys(shown).map(label => [label, chipNames(all.policies)[label]])))
+  assert.ok(
+    Object.values(shown).every(names => names.length > 0),
+    'no policy reads as applying to no workloads',
+  )
+})
+
+test('the Changes scope keeps the policies covering a changed workload', async () => {
+  // Only a covered workload changes: the policies covering it don't.
+  const a = fixture('deployment/before.expected.json')
+  const b = structuredClone(a)
+  const covered = new Set(b.relationships.filter(relationship => relationship.kind === 'covers').map(relationship => relationship.to))
+  const workload = b.entities.find(entity => entity.kind === 'workload' && covered.has(entity.id))
+  workload.data = {...workload.data, replicas: 7}
+  const comparison = await interpreted(a, b)
+  const model = comparisonModel(a, b, comparison)
+  const scoped = chipNames(changesView(model, comparison.metadata).workloads)
+  const all = chipNames(buildModel(model, 'diff', comparison.metadata).workloads)
+  assert.deepEqual(Object.keys(scoped), [workload.label])
+  assert.deepEqual(scoped[workload.label], all[workload.label])
+  assert.ok(scoped[workload.label].length > 0, 'the workload reads as covered')
 })

@@ -68,12 +68,12 @@ impl Policy<'_> {
         match family {
             "kprobe" | "fentry" => {
                 let call = text(item.get("call"), &format!("{path}.call"))?;
-                let syscall = flag(item.get("syscall"), true);
+                let syscall = flag(item.get("syscall"), true, &format!("{path}.syscall"))?;
                 for (target, via) in self.expand(call)? {
                     let mut data = base.clone();
                     data["target"] = json!(target);
                     data["syscall"] = json!(syscall);
-                    data["return"] = json!(flag(item.get("return"), false));
+                    data["return"] = json!(flag(item.get("return"), false, &format!("{path}.return"))?);
                     if let Some(via) = &via {
                         data["viaList"] = json!(via);
                     }
@@ -96,7 +96,7 @@ impl Policy<'_> {
                 let subsystem = text(item.get("subsystem"), &format!("{path}.subsystem"))?;
                 let event = text(item.get("event"), &format!("{path}.event"))?;
                 let target = format!("{subsystem}/{event}");
-                let raw = flag(item.get("raw"), false);
+                let raw = flag(item.get("raw"), false, &format!("{path}.raw"))?;
                 let mut data = base;
                 data["target"] = json!(target);
                 data["raw"] = json!(raw);
@@ -140,7 +140,7 @@ impl Policy<'_> {
                     let mut data = base.clone();
                     data["target"] = json!(target);
                     data["binary"] = json!(binary);
-                    data["return"] = json!(flag(item.get("return"), false));
+                    data["return"] = json!(flag(item.get("return"), false, &format!("{path}.return"))?);
                     probes.push(Probe {
                         hook: key(&["hook", family, &target]),
                         hook_label: target.clone(),

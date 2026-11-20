@@ -5,14 +5,18 @@ import type {FilterPayload} from '@githubnext/projections-renderer-sdk/protocol'
 import type {RendererClient} from '@githubnext/projections-renderer-sdk/client'
 import {afterPaint} from '@githubnext/projections-renderer-sdk/client'
 import {placedAttribute} from '../../focus.js'
+import {layoutFilter} from '../../scope-filter.js'
 
-/** The host's latest find and "changes only" settings, or undefined before it sends any. */
+/**
+ * What the host's latest filter lays out (`layoutFilter`), or undefined before it sends any: the same object while a
+ * summary figure or find changes only what recedes.
+ */
 export function useHostFilter(client: RendererClient | undefined): FilterPayload | undefined {
   const [filter, setFilter] = useState<FilterPayload>()
   useEffect(
     () =>
       client?.subscribe(message => {
-        if (message.type === 'filter') setFilter({query: message.query, changesOnly: message.changesOnly, ids: message.ids})
+        if (message.type === 'filter') setFilter(previous => layoutFilter(previous, message))
       }),
     [client],
   )

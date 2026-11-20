@@ -289,8 +289,8 @@ projection items. The core stores none of it. The
     "varied only" the same way.
   - `summaryFilter`: only the items of a summary figure's kinds, or only those
     with one change status (`summaryFilterOf(figure, status?)`,
-    `setSummaryFilter`; `null` shows every item). It excludes "changes only" and
-    "varied only" the same way.
+    `setSummaryFilter`; `null` shows every item). It narrows within the scope:
+    renderers recede what it leaves out and lay out the scope unchanged.
   - `search`: find an entity. Find, "changes only", "varied only" and
     "regenerated only" reach renderers with the `filter` capability as a
     `filter` message (the varied or regenerated items' IDs in `ids`, with

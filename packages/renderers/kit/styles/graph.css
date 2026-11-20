@@ -315,10 +315,10 @@
 }
 
 /*
- * Items outside the host's find or scope filter (`data-projections-filtered`) recede to `--pk-recede` (see
- * `scope.css`). On HTML boxes it is a filter, so it composes with the opacity renderers animate inline (a card fading
- * in or out); inside SVG, where WebKit applies no CSS filter functions, it is the opacity, which overrides the
- * presentation attribute renderers animate there.
+ * Items the host's summary filter or find leaves out (`data-projections-filtered`) recede to `--pk-recede`, in either
+ * scope (see `scope.css`). On HTML boxes it is a filter, so it composes with the opacity renderers animate inline (a
+ * card fading in or out); inside SVG, where WebKit applies no CSS filter functions, it is the opacity, which overrides
+ * the presentation attribute renderers animate there.
  */
 .pk [data-projections-filtered] {
   --pk-recede: 0.25;

@@ -100,6 +100,7 @@ export function useSelection(
   host: {selection: string | null; selectionVersion: number},
   root: RefObject<HTMLDivElement | null>,
   interactive: boolean,
+  partOf?: (id: string) => string | undefined,
 ): {selected: string | null; setSelection: (id: string | null) => void; onSelect: (id: string | null) => void} {
   const {selection, selectionVersion} = host
   const [selected, setSelected] = useState<string | null>(selection)
@@ -133,7 +134,7 @@ export function useSelection(
     [setSelection],
   )
   // Activating an annotation badge selects its item here too (and never clears it).
-  useInteractions(interactive ? client : undefined, root, selected, {select: setSelection})
+  useInteractions(interactive ? client : undefined, root, selected, {select: setSelection, ...(partOf ? {partOf} : {})})
   useEffect(
     () => (interactive && root.current ? selectionClicks(root.current, {handled, current, clicks}, setSelection) : undefined),
     [interactive, setSelection, root],

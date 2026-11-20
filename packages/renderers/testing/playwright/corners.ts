@@ -22,6 +22,7 @@ export interface CornerBox {
   borders: [number, number, number, number]
 }
 
+/** What `cornerReport` found: each corner's measures and, for a corner out of line, why. */
 export interface CornerReport {
   corners: CornerMeasure[]
   failures: string[]

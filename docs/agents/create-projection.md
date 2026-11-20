@@ -485,7 +485,16 @@ the machine's Python 3, including `python` or `py -3` on Windows.
 Set `"renderer"` in the definition (or `projections init <id> --renderer
 NAME`) to one of the renderers this CLI includes:
 
-This build of the CLI doesn't include the built-in renderers; `projections extractor list` names the renderer each built-in extractor uses.
+- `graph`: Graph (also named `graph-horizontal`, `dag`, `architecture`, `infrastructure`, `dependencies`)
+- `file-packing`: File packing (also named `treemap`)
+- `dependency-injection`: Dependency injection
+- `code-statistics`: Code statistics
+- `api`: API
+- `database`: Database (also named `schema`)
+- `runtime-policy`: Runtime security policies
+- `agentic-workflows`: Agentic workflows
+- `text-diff`: Text diff
+- `gallery`: Gallery
 
 Each presents the schemas the extractors above pair it with;
 `projections extractor list` shows every built-in extractor's schema and

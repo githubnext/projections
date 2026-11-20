@@ -108,10 +108,11 @@ To inspect an adopted projection interactively in the Projections viewer, run:
 projections view show -p workspace-dependencies --choice branch --open
 ```
 
-`--open` opens the viewer in a standalone browser (or, when driven by your
-coding agent, in the agent's in-app browser or Copilot canvas). You can also
-pass `--choice bookmark:<bookmark>` (`projections bookmark list` shows the
-bookmarks `adopt` saved).
+`--open` launches the viewer in your system browser. When a coding agent drives
+the viewer, omit `--open` so it can open the printed URL in its in-app browser
+(or in the Copilot canvas if you've installed it). You can also pass
+`--choice bookmark:<bookmark>` (`projections bookmark list` shows the bookmarks
+`adopt` saved).
 
 Want to see something no built-in projection shows, such as the services in your
 own configuration format? [Build your first projection](https://github.com/githubnext/projections/blob/main/docs/setup/first-projection.md): a

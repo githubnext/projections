@@ -80,10 +80,15 @@ document per projection at `projections/<id>.json`:
 A push's `subject` is
 `{"kind": "push", "ref": "refs/heads/main", "revision": "<sha>"}`. Statuses are
 those of the CLI's batch items: `changed` and `unchanged` (a saved comparison
-from `mergeBase` to `head`), `extracted` (a push's saved extraction),
-`head-only` and `base-only` (one side's saved extraction), and `error` (no
-document; bounded diagnostics). `sha256` is over the document file's bytes. At
-most 60 projections and 8 MiB per document.
+from `mergeBase` to `head`; `changed` exactly when the engine's
+[`review`](../contracts.md#one-implementation-native-and-browser) finds a
+reviewable change. CLIs 0.2.0 and earlier also called a comparison with only
+expected variation `changed`; hosts accept that label and show the engine's
+review of the rerun comparison, but never accept `unchanged` for a comparison
+with a reviewable change), `extracted` (a push's saved extraction), `head-only`
+and `base-only` (one side's saved extraction), and `error` (no document; bounded
+diagnostics). `sha256` is over the document file's bytes. At most 60 projections
+and 8 MiB per document.
 
 A hosted view accepts an artifact only when GitHub independently confirms it:
 the artifact belongs to the latest successful run of the right event for the

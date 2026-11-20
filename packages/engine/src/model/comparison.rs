@@ -79,13 +79,13 @@ impl Change {
     /// every difference is within. Such changes are listed, so variation
     /// stays visible, but belong to no step.
     pub fn is_variation(&self) -> bool {
-        self.status == Status::Unchanged && self.correspondence == Correspondence::Exact && !self.varied.is_empty()
+        crate::review::is_variation(self.status, self.correspondence, !self.varied.is_empty())
     }
 
     /// Whether the change is one a person reviews: its status, or its
     /// identity (a rename, split or merge), changed. Only these have context.
     pub fn is_scope_change(&self) -> bool {
-        self.status != Status::Unchanged || self.correspondence != Correspondence::Exact
+        crate::review::is_reviewable(self.status, self.correspondence)
     }
 
     /// The change's own IDs on one side.

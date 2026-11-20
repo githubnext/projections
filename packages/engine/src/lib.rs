@@ -8,6 +8,7 @@ mod data_rules;
 pub mod model;
 pub mod pairing;
 mod parse;
+pub mod review;
 mod validate;
 pub mod volatility;
 #[cfg(all(target_arch = "wasm32", feature = "abi"))]
@@ -27,6 +28,7 @@ pub use parse::{
 };
 /// The Engine's formally verified decisions (see `VERIFICATION.md`).
 pub use projections_engine_verified as verified;
+pub use review::{Review, review};
 pub use validate::{MAX_ENTITIES, MAX_EXTRACTION_BYTES, MAX_RELATIONSHIPS, SCHEMAS};
 
 /// The two collections, in the order every pass runs over them.

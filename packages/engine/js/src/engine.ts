@@ -3,6 +3,7 @@ import type {
   DefaultComparatorOptions,
   CanonicalExtraction,
   Comparison,
+  ComparisonReview,
   DefinitionPairing,
   EngineRequest,
   EngineResponse,
@@ -70,6 +71,12 @@ export function engine(
     canonicalize: extraction => result<CanonicalExtraction>({version: 0, operation: 'canonicalize', extraction}),
     validateComparison,
     vary: (before, after) => result<Variation>({version: 0, operation: 'vary', before, after}),
+    review: comparison =>
+      result<ComparisonReview>({
+        version: 0,
+        operation: 'review',
+        comparison: {changes: (comparison as Partial<Comparison> | undefined)?.changes},
+      }),
     pair: (before, after) =>
       result<DefinitionPairing>({version: 0, operation: 'pair', before: pairingSide(before), after: pairingSide(after)}),
     async compare(before, after, options: DefaultComparatorOptions = {}) {

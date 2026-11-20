@@ -51,6 +51,10 @@ fn execute(request: &Value) -> Result<Value, Failure> {
             fields(request, &["version", "operation", "before", "after"], "")?;
             crate::pairing(&request["before"], &request["after"]).map(|pairing| pairing.to_json())
         }
+        "review" => {
+            fields(request, &["version", "operation", "comparison"], "")?;
+            crate::review(&request["comparison"]).map(|review| review.to_json())
+        }
         "vary" => {
             fields(request, &["version", "operation", "before", "after"], "")?;
             vary(&request["before"], &request["after"]).map(|variation| variation.to_json())

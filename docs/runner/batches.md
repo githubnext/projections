@@ -9,11 +9,17 @@ the `definition` whenever it resolved. Item statuses are `extracted`, `changed`,
 `unchanged`, `error`, and for `compare --all`, `head-only` (or `base-only` with
 `--definition head`): a projection the definition revision doesn't define is
 shown at the other revision alone, with that revision's definition and a notice,
-rather than compared. Unknown selected IDs, trust denial and tool failures do
-not discard successful siblings. The CLI writes the complete bounded result then
-exits unsuccessfully if any item failed. Invalid authored definitions, duplicate
-selected IDs and cancellation fail the operation itself; abort stops further
-execution. Each item that needs a copy receives its own.
+rather than compared. A compared item is `changed` exactly when it has a
+reviewable change, one whose content (`added`, `removed`, `modified`) or
+identity (`declared`, `split`, `merge`) changed; expected variation alone
+(`unchanged` with `varied`) leaves it `unchanged`. It carries the engine's
+counts in `review`: `{reviewable, content, identity, variation}` (see the
+engine's [`review`](../contracts.md#one-implementation-native-and-browser)).
+Unknown selected IDs, trust denial and tool failures do not discard successful
+siblings. The CLI writes the complete bounded result then exits unsuccessfully
+if any item failed. Invalid authored definitions, duplicate selected IDs and
+cancellation fail the operation itself; abort stops further execution. Each item
+that needs a copy receives its own.
 
 The CLI explicitly injects the read-only `repository-map` and
 `workspace-dependencies` defaults only when a revision has no authored

@@ -393,6 +393,21 @@ export type DefinitionPairing =
   | {pairing: 'components'}
 
 /**
+ * What a comparison asks of its reviewer (`ProjectionEngine.review`): how many changes are reviewable (their content or
+ * identity changed), content changes (`added`, `removed`, `modified`), identity changes (`declared`, `split`,
+ * `merge`) and expected variation only (`unchanged`, `exact`, with `varied`). A renamed, modified item is both a
+ * content and an identity change. `status` is `changed` exactly when a change is reviewable: expected variation alone
+ * leaves a comparison `unchanged`. The CLI's batch and artifact statuses mean the same.
+ */
+export interface ComparisonReview {
+  status: 'changed' | 'unchanged'
+  reviewable: number
+  content: number
+  identity: number
+  variation: number
+}
+
+/**
  * One request to the engine, as every transport sends it as JSON: version `0` and one `operation` with its inputs.
  * `ProjectionEngine` builds them; call it rather than a transport directly.
  */
@@ -402,12 +417,13 @@ export type EngineRequest =
   | {version: 0; operation: 'validate-comparison'; before: unknown; after: unknown; comparison: unknown}
   | {version: 0; operation: 'vary'; before: unknown; after: unknown}
   | {version: 0; operation: 'pair'; before: unknown; after: unknown}
+  | {version: 0; operation: 'review'; comparison: unknown}
   | {version: 0; operation: 'decode'; json: string}
   | {version: 0; operation: 'parse-json'; json: string}
 
 /** The engine's reply to one request: the operation's `result`, or at least one error diagnostic. */
 export type EngineResponse =
-  | {ok: true; result: Extraction | CanonicalExtraction | Comparison | Variation | DefinitionPairing | Json}
+  | {ok: true; result: Extraction | CanonicalExtraction | Comparison | Variation | DefinitionPairing | ComparisonReview | Json}
   | {ok: false; diagnostics: Diagnostic[]}
 
 /**
@@ -443,6 +459,11 @@ export interface ProjectionEngine {
    * definition digest. The one rule every host and the CLI apply; decide it here, never by comparing fields yourself.
    */
   pair(before: PairingSide, after: PairingSide): Promise<DefinitionPairing>
+  /**
+   * What a validated comparison asks of its reviewer: whether it's `changed` and how many changes are of each kind.
+   * The one classification every host and the CLI use; read it here, never by counting `changes` yourself.
+   */
+  review(comparison: Pick<Comparison, 'changes'>): Promise<ComparisonReview>
   /** Runs the default comparator module and validates its result. */
   compare(before: unknown, after: unknown, options?: DefaultComparatorOptions): Promise<Comparison>
   /** Identity of the default comparator module this engine runs. */

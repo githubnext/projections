@@ -3,7 +3,6 @@ import type {CSSProperties} from 'react'
 import {Info} from 'lucide-react'
 import {useProjection} from '../projection.js'
 import type {ProjectionController} from '../projection.js'
-import {Prose} from './prose.js'
 import {ProjectionStage} from '../stage.js'
 import {TableView, TextView} from './views.js'
 import {SummaryBar} from './summary-bar.js'
@@ -21,6 +20,7 @@ import {RendererPaneStatus} from './view/pane-status.js'
 import type {ProjectionViewProps} from './view/props.js'
 import {ViewToolbar} from './view/toolbar.js'
 import {ScopeNotice} from './scope-notice.js'
+import {Notices} from './view/notices.js'
 
 /** A notice under the toolbar: a band of the raised surface, edge to edge, ruled off below by a hairline. */
 const band = 'pj:shrink-0 pj:rounded-none pj:border-0 pj:border-b pj:border-divider pj:bg-surface-raised pj:py-2'
@@ -132,13 +132,7 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
         <Alert role={undefined} className={band}>
           <Info className="pj:h-4 pj:w-4" />
           <AlertDescription>
-            <ul className="ph-notice ph-notices pj:flex pj:list-disc pj:flex-col pj:gap-1 pj:pl-4" aria-label="Notices">
-              {notices.map((notice, index) => (
-                <li key={index}>
-                  <Prose>{notice}</Prose>
-                </li>
-              ))}
-            </ul>
+            <Notices notices={notices} />
           </AlertDescription>
         </Alert>
       )}

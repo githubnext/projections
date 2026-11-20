@@ -16,7 +16,10 @@ export const SegmentedControl = forwardRef<
     <RadioGroupPrimitive.Root
       ref={ref}
       loop
-      className={cn('pj:inline-flex pj:h-8 pj:items-center pj:gap-0.5 pj:rounded-md pj:border pj:bg-muted pj:p-0.5', className)}
+      className={cn(
+        'pj:inline-flex pj:h-8 pj:items-center pj:gap-0.5 pj:rounded-md pj:border pj:border-input pj:bg-muted pj:p-0.5',
+        className,
+      )}
       {...props}
     />
   )

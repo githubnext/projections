@@ -130,8 +130,9 @@ test('mode icons never look like playback: Animated is a clapperboard, distinct 
   await expect(menu).toBeVisible()
   await expect(menu.locator('svg[data-icon]')).toHaveAttribute('data-icon', 'clapperboard')
   await expect(menu).toHaveAttribute('title', 'Comparison mode: Animated')
-  // Folded into a menu, the switch keeps the segmented control's box: its height, corners, fill and edge.
-  const [trigger, well] = await menu.evaluate(element => {
+  // Folded into a menu, the switch is a button among the toolbar's: an outline button's fill, and the segmented
+  // controls' height, corners and edge.
+  const [trigger, button, well] = await menu.evaluate(element => {
     const measure = (target: Element) => {
       const style = getComputedStyle(target)
       return {
@@ -141,14 +142,26 @@ test('mode icons never look like playback: Animated is a clapperboard, distinct 
         edge: `${style.borderTopWidth} ${style.borderTopStyle} ${style.borderTopColor}`,
       }
     }
-    // A segmented control's box, as `SegmentedControl` draws it, beside the trigger.
-    const reference = Object.assign(document.createElement('div'), {className: 'pj:inline-flex pj:h-8 pj:rounded-md pj:border pj:bg-muted'})
-    element.parentElement!.append(reference)
-    const result = [measure(element), measure(reference)]
-    reference.remove()
-    return result
+    const reference = (className: string) => {
+      const box = Object.assign(document.createElement('div'), {className})
+      element.parentElement!.append(box)
+      const measured = measure(box)
+      box.remove()
+      return measured
+    }
+    return [
+      measure(element),
+      // An outline button and a segmented control's track, as `Button` and `SegmentedControl` draw them.
+      reference('pj:inline-flex pj:h-8 pj:rounded-md pj:border pj:border-input pj:bg-background pj:dark:bg-input/30'),
+      reference('pj:inline-flex pj:h-8 pj:items-center pj:rounded-md pj:border pj:border-input pj:bg-muted pj:p-0.5'),
+    ]
   })
-  expect(trigger).toEqual(well)
+  expect(trigger.fill).toBe(button.fill)
+  expect({height: trigger.height, radius: trigger.radius, edge: trigger.edge}).toEqual({
+    height: well.height,
+    radius: well.radius,
+    edge: well.edge,
+  })
 })
 
 test('the mode region is centred while the row has room, then follows the pickers, with hysteresis', async ({page}) => {

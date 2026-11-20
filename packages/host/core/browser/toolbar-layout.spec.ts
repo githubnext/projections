@@ -1,5 +1,5 @@
 import {test, expect} from '@playwright/test'
-import type {Page} from '@playwright/test'
+import type {Locator, Page} from '@playwright/test'
 import {explorer, story} from './harness.js'
 import {reachableNames, toolbarGeometry} from './toolbar-geometry.js'
 
@@ -130,7 +130,63 @@ test('mode icons never look like playback: Animated is a clapperboard, distinct 
   await expect(menu).toBeVisible()
   await expect(menu.locator('svg[data-icon]')).toHaveAttribute('data-icon', 'clapperboard')
   await expect(menu).toHaveAttribute('title', 'Comparison mode: Animated')
+  // Folded into a menu, the switch is a button among the toolbar's: an outline button's fill, and the segmented
+  // controls' height, corners and edge, in either scheme, filled with the accent under the pointer.
+  for (const colorScheme of ['light', 'dark'] as const) {
+    await page.emulateMedia({colorScheme})
+    if (colorScheme === 'dark') await expect(page.locator('.pj-dark').first()).toBeAttached()
+    else await expect(page.locator('.pj-dark')).toHaveCount(0)
+    await page.mouse.move(0, 0)
+    await expectMenuLooksLikeAButton(menu)
+    await menu.hover()
+    const accent = await menu.evaluate(element => {
+      const box = Object.assign(document.createElement('div'), {className: 'pj:bg-accent'})
+      element.parentElement!.append(box)
+      const fill = getComputedStyle(box).backgroundColor
+      box.remove()
+      return fill
+    })
+    await expect.poll(() => menu.evaluate(element => getComputedStyle(element).backgroundColor)).toBe(accent)
+  }
 })
+
+/** The mode menu's button against an outline button's fill and a segmented control's height, corners and edge. */
+async function expectMenuLooksLikeAButton(menu: Locator) {
+  const compare = () =>
+    menu.evaluate(element => {
+      const measure = (target: Element) => {
+        const style = getComputedStyle(target)
+        return {
+          height: target.getBoundingClientRect().height,
+          radius: style.borderTopLeftRadius,
+          fill: style.backgroundColor,
+          edge: `${style.borderTopWidth} ${style.borderTopStyle} ${style.borderTopColor}`,
+        }
+      }
+      const reference = (className: string) => {
+        const box = Object.assign(document.createElement('div'), {className})
+        element.parentElement!.append(box)
+        const measured = measure(box)
+        box.remove()
+        return measured
+      }
+      const trigger = measure(element)
+      // An outline button and a segmented control's track, as `Button` and `SegmentedControl` draw them.
+      const button = reference('pj:inline-flex pj:h-8 pj:rounded-md pj:border pj:border-input pj:bg-background pj:dark:bg-input/30')
+      const well = reference('pj:inline-flex pj:h-8 pj:items-center pj:rounded-md pj:border pj:border-input pj:bg-muted pj:p-0.5')
+      return {
+        trigger: {fill: trigger.fill, height: trigger.height, radius: trigger.radius, edge: trigger.edge},
+        expected: {fill: button.fill, height: well.height, radius: well.radius, edge: well.edge},
+      }
+    })
+  // The fill and edge transition when the scheme or the pointer changes.
+  await expect
+    .poll(async () => {
+      const {trigger, expected} = await compare()
+      return JSON.stringify(trigger) === JSON.stringify(expected) || `${JSON.stringify(trigger)} != ${JSON.stringify(expected)}`
+    })
+    .toBe(true)
+}
 
 test('the mode region is centred while the row has room, then follows the pickers, with hysteresis', async ({page}) => {
   await open(page, 'before=v1&after=v3&mode=diff')

@@ -122,7 +122,8 @@ export function StageBody({
   const covers = useFrameCovers(
     container,
     frames,
-    `${mode}-${stacked}-${chips}-${utilityShown}-${layout}-${width}-${height}-${projection.panes.before.status}-${projection.panes.after.status}`,
+    // What overlays exist and where the frames are; sizes are followed by the hook's own observers.
+    `${mode}-${stacked}-${chips}-${utilityShown}-${layout}-${projection.panes.before.status}-${projection.panes.after.status}`,
     projection.reducedMotion,
   )
   // A held pane of side by side or swipe says so, so the renderer leaves out narration of the transition. The covers

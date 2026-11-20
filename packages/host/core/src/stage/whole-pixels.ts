@@ -30,10 +30,11 @@ export function useWholePixels(ref: RefObject<HTMLElement | null>): void {
     observer.observe(element)
     if (element.parentElement) observer.observe(element.parentElement)
     observer.observe(element.ownerDocument.documentElement)
-    addEventListener('scroll', later, {capture: true, passive: true})
+    const view = element.ownerDocument.defaultView
+    view?.addEventListener('scroll', later, {capture: true, passive: true})
     return () => {
       observer.disconnect()
-      removeEventListener('scroll', later, {capture: true})
+      view?.removeEventListener('scroll', later, {capture: true})
       cancelAnimationFrame(frame)
     }
   }, [ref])

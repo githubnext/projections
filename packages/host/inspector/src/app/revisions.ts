@@ -10,7 +10,7 @@ export function revisionKey(document: ExtractionDocument): string {
   const revision = document.provenance.revision
   return revision.kind === 'working-tree' ? workingTree : revision.commit
 }
-const shaPattern = /^[0-9a-f]{40}$|^[0-9a-f]{64}$/
+const shaPattern = /^[0-9a-f]{40}$|^[0-9a-f]{64}$/i
 /**
  * Whether `ref` names `commit` by its hash: in full, or abbreviated as `git rev-parse --short` gives it (7 to 39 hex
  * digits, `5c95b54e0d1b`). Shorter hex names are left as refs: a branch may well be called `cafe`.

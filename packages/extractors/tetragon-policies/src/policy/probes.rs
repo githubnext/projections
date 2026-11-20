@@ -69,11 +69,12 @@ impl Policy<'_> {
             "kprobe" | "fentry" => {
                 let call = text(item.get("call"), &format!("{path}.call"))?;
                 let syscall = flag(item.get("syscall"), true, &format!("{path}.syscall"))?;
+                let returns = flag(item.get("return"), false, &format!("{path}.return"))?;
                 for (target, via) in self.expand(call)? {
                     let mut data = base.clone();
                     data["target"] = json!(target);
                     data["syscall"] = json!(syscall);
-                    data["return"] = json!(flag(item.get("return"), false, &format!("{path}.return"))?);
+                    data["return"] = json!(returns);
                     if let Some(via) = &via {
                         data["viaList"] = json!(via);
                     }
@@ -122,6 +123,7 @@ impl Policy<'_> {
             }
             "uprobe" => {
                 let binary = text(item.get("path"), &format!("{path}.path"))?;
+                let returns = flag(item.get("return"), false, &format!("{path}.return"))?;
                 let mut targets: Vec<String> = scalars(item.get("symbols"), &format!("{path}.symbols"))?;
                 for (field, prefix) in [("offsets", "+"), ("addrs", "@")] {
                     for value in scalars(item.get(field), &format!("{path}.{field}"))? {
@@ -140,7 +142,7 @@ impl Policy<'_> {
                     let mut data = base.clone();
                     data["target"] = json!(target);
                     data["binary"] = json!(binary);
-                    data["return"] = json!(flag(item.get("return"), false, &format!("{path}.return"))?);
+                    data["return"] = json!(returns);
                     probes.push(Probe {
                         hook: key(&["hook", family, &target]),
                         hook_label: target.clone(),

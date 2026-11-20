@@ -295,6 +295,11 @@ fn a_supplied_boolean_must_be_true_or_false() {
             format!("{HEADER}  loader: {{enabled: true}}\n"),
             "spec.loader must be true or false",
         ),
+        // Read once per probe, even when its list expands to no targets.
+        (
+            format!("{HEADER}  lists: [{{name: empty, values: []}}]\n  kprobes:\n    - call: list:empty\n      return: \"false\"\n"),
+            "spec.kprobes[0].return must be true or false",
+        ),
     ] {
         let message = scratch.error(&policy, json!({}));
         assert!(message.contains(expected), "{policy}\n=> {message}");

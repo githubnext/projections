@@ -40,8 +40,8 @@ export const limits = Object.freeze({
  * (`invalid-module`, `forbidden-import`, `missing-export`, `invalid-export`), the input was (`invalid-input`,
  * `input-too-large`), it hit a bound (`out-of-fuel` and `table-limit` in the native runner, `deadline`,
  * `memory-limit`), it trapped (`trap`), its result was malformed (`invalid-return`, `output-too-large`,
- * `invalid-output`), it returned `{"error": message}` (`comparator-error`), or its Worker or runner process failed
- * (`worker`).
+ * `invalid-output`), it returned `{"error": message}` (`comparator-error`), its Worker or runner process failed
+ * (`worker`), or the caller's signal cancelled it (`cancelled`, the run stopped).
  */
 export type ComparatorErrorCode =
   | 'invalid-module'
@@ -60,6 +60,7 @@ export type ComparatorErrorCode =
   | 'invalid-output'
   | 'comparator-error'
   | 'worker'
+  | 'cancelled'
 
 /** A comparator module could not be loaded or run. Never falls back to another comparison. */
 export class ComparatorRuntimeError extends Error {
@@ -70,6 +71,35 @@ export class ComparatorRuntimeError extends Error {
   ) {
     super(message)
   }
+}
+
+/** The error for a run its caller's signal cancelled. */
+export function cancelled(signal: AbortSignal): ComparatorRuntimeError {
+  const reason = signal.reason instanceof Error ? `: ${signal.reason.message}` : ''
+  return new ComparatorRuntimeError('cancelled', `the comparator run was cancelled${reason}`)
+}
+
+/**
+ * `promise`, or a rejection with `cancelled` as soon as `signal` aborts: this caller stops waiting, and the work
+ * `promise` stands for, which other callers may share, carries on.
+ */
+export function abortable<T>(promise: Promise<T>, signal: AbortSignal | undefined): Promise<T> {
+  if (!signal) return promise
+  if (signal.aborted) return Promise.reject(cancelled(signal))
+  return new Promise<T>((resolve, reject) => {
+    const abort = () => reject(cancelled(signal))
+    signal.addEventListener('abort', abort, {once: true})
+    promise.then(
+      value => {
+        signal.removeEventListener('abort', abort)
+        resolve(value)
+      },
+      (error: unknown) => {
+        signal.removeEventListener('abort', abort)
+        reject(error)
+      },
+    )
+  })
 }
 
 export const fail = (code: ComparatorErrorCode, message: string): never => {

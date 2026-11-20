@@ -40,6 +40,12 @@ try {
   and `projections_compare` exports must match the ABI.
 - The deadline (default 30 s) is wall-clock time; when it passes the Worker is
   terminated and the call rejects with `deadline`.
+- `check` and `compare` also take `{signal}`: aborting it terminates the Worker
+  (or kills the native runner) and rejects with `cancelled`; an aborted signal
+  never starts one. A caller with an overall budget across several calls passes
+  `AbortSignal.timeout(remaining)` or its own controller, so no call outlives
+  it. `loadArtifact` passes `rules.signal` through when it reruns a comparator
+  file.
 - Memory is capped at `maxMemoryPages` (default 4096, 256 MiB). A module whose
   initial memory exceeds the cap is rejected; a module that declares a maximum
   within the cap is bounded natively; otherwise the memory size is checked after

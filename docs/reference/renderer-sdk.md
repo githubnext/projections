@@ -129,7 +129,7 @@ are rounded to hundredths of a pixel.
 | `height` | `"height"(px: number): void` | Requests a frame height in CSS pixels. The host clamps it. |
 | `hover` | `"hover"(id: null \| string): void` | Reports the entity under the pointer (capability `hover`). |
 | `legend` | `"legend"(legend: RendererLegend): void` | Asks the host to draw the renderer's legend once beside the frames, with the host's design system, instead of drawing one in each pane. Items use theme tokens (preferred) or CSS colors; an empty list clears it. Throws when the legend is invalid. |
-| `observeHeight` | `"observeHeight"(element: Element): { (): void }` | Requests the height of `element` whenever it resizes. Returns a function that stops observing. |
+| `observeHeight` | `"observeHeight"(element: Element): { (): void }` | Requests the height of `element` now and whenever it resizes. Returns a function that stops observing. |
 | `open` | `"open"(path: string, line?: number \| undefined): void` | Asks the host to open a repository file; the host decides whether to navigate. |
 | `rendered` | `"rendered"(progress: number): void` | Acknowledges that the frame for `progress` has been painted. |
 | `requestDocument` | `"requestDocument"(name: string): Promise<string>` | Asks the host for the document of the built-in renderer `name` (for example `graph`), to run in a frame nested in this one (`embedRenderer` does both). Resolves with its `index.html` text, as the host runs it; rejects with the host's reason when it supplies none (an unknown or custom renderer, or a host without documents), or after `rendererLimits.documentTimeoutMs` without an answer. Repeated requests for one name share one answer. |

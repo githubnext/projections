@@ -31,6 +31,7 @@ pub mod python;
 pub mod reference;
 pub mod render;
 pub mod renderer_builds;
+pub mod replace;
 pub mod runtime;
 pub mod scaffold;
 pub mod service;

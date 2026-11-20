@@ -119,7 +119,7 @@ export interface RendererClient {
   requestDocument(name: string): Promise<string>
   /** Observes every valid host message after the handlers run. Returns a function that stops observing. */
   subscribe(listener: (message: HostMessage) => void): () => void
-  /** Requests the height of `element` whenever it resizes. Returns a function that stops observing. */
+  /** Requests the height of `element` now and whenever it resizes. Returns a function that stops observing. */
   observeHeight(element: Element): () => void
   /** Stops listening for host messages. */
   dispose(): void
@@ -280,13 +280,17 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
     },
     observeHeight(element) {
       let last = -1
-      const observer = new ResizeObserver(() => {
+      const report = () => {
         const px = clamp(element.getBoundingClientRect().height)
         if (px !== last) {
           last = px
           client.height(px)
         }
-      })
+      }
+      // At once, not only at the first observation, which waits for the frame's next rendering opportunity: a paint
+      // acknowledged before then would otherwise reach the host before any height.
+      report()
+      const observer = new ResizeObserver(report)
       observer.observe(element)
       observers.add(observer)
       return () => {

@@ -108,10 +108,10 @@ pub(super) fn condition(
         }
         "matchPIDs" => {
             let mut terms = test(Terms::new().text("PID"), phrase, &values);
-            if flag(filter.get("isNamespacePID"), false) {
+            if flag(filter.get("isNamespacePID"), false, &format!("{path}.isNamespacePID"))? {
                 terms = terms.text(" (namespace PIDs)");
             }
-            if flag(filter.get("followForks"), false) {
+            if flag(filter.get("followForks"), false, &format!("{path}.followForks"))? {
                 condition["followForks"] = json!(true);
                 terms = terms.text(", and their children");
             }

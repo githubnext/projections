@@ -20,8 +20,13 @@ const npm = (args: string[], cwd: string, env = process.env) =>
     ? execFileSync(process.execPath, [npmCli, ...args], {cwd, env, stdio: 'pipe'})
     : execFileSync('npm', args, {cwd, env, stdio: 'pipe'})
 // The scaffold installs outside the workspace, with the workspace's registry (the committed .npmrc, or CI's
-// npm_config_registry) rather than npm's default.
-const registry = {...process.env, npm_config_registry: npm(['config', 'get', 'registry'], workspace).toString().trim()}
+// npm_config_registry) rather than npm's default. npm retries a request that fails on the network or with a 5xx, never
+// a missing version; a few more times here.
+const registry = {
+  ...process.env,
+  npm_config_registry: npm(['config', 'get', 'registry'], workspace).toString().trim(),
+  npm_config_fetch_retries: process.env.npm_config_fetch_retries ?? '5',
+}
 npm(['pack', '--workspace', 'packages/sdk', '--pack-destination', packages], workspace)
 // The long path: Vite's development server refuses a Windows 8.3 short name (RUNNER~1 in a runner's temporary
 // directory).
@@ -32,6 +37,19 @@ execFileSync(cli, ['init', 'service-map', '--language', 'node', '--renderer', 'c
   env: {...process.env, PROJECTIONS_RENDERER_PACKAGES: packages},
 })
 export const renderer = join(repository, '.github/projections/service-map/renderer')
+// With the versions this workspace's lockfile installed rather than whatever the registry newly lists for the
+// scaffold's ranges (a release its mirror hasn't caught up with fails the install: `ETARGET No matching version`).
+const scaffold = JSON.parse(readFileSync(join(renderer, 'package.json'), 'utf8'))
+for (const field of ['dependencies', 'devDependencies'])
+  for (const [name, range] of Object.entries<string>(scaffold[field] ?? {})) {
+    const installed = join(workspace, 'node_modules', name, 'package.json')
+    if (!/^[\^~]?\d/.test(range) || !existsSync(installed)) continue
+    const {version} = JSON.parse(readFileSync(installed, 'utf8'))
+    if (version.split('.')[0] !== range.replace(/^[\^~]/, '').split('.')[0])
+      throw new Error(`The scaffold asks for ${name}@${range}, but this workspace installs ${version}`)
+    scaffold[field][name] = version
+  }
+writeFileSync(join(renderer, 'package.json'), `${JSON.stringify(scaffold, null, 2)}\n`)
 npm(['install', '--no-audit', '--no-fund'], renderer, registry)
 npm(['run', 'build'], renderer)
 

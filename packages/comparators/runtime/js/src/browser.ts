@@ -1,10 +1,19 @@
+import {abortable} from './abi.js'
 import {run} from './browser-worker.js'
 import {settings, type RunComparatorOptions} from './host.js'
 import {cachedChecks, checkedRules, compareRequest, inspectRequest, loadRulesInterpreter, type RulesRuntime} from './rules.js'
 
 export {ComparatorRuntimeError, limits, type ComparatorErrorCode} from './abi.js'
 export type {RunComparatorOptions} from './host.js'
-export {RulesError, isComparatorFile, rulesComparatorDigest, type CheckedRules, type RulesDiagnostic, type RulesRuntime} from './rules.js'
+export {
+  RulesError,
+  isComparatorFile,
+  rulesComparatorDigest,
+  type CheckedRules,
+  type RulesCallOptions,
+  type RulesDiagnostic,
+  type RulesRuntime,
+} from './rules.js'
 
 /** The sandbox bounds for `createRulesRuntime` in a browser, and where its Worker script and interpreter are served. */
 export interface BrowserComparatorOptions extends RunComparatorOptions {
@@ -35,19 +44,21 @@ export function createRulesRuntime(options: BrowserComparatorOptions = {}): Rule
       return new Uint8Array(await response.arrayBuffer())
     })
   return {
-    check: cachedChecks(async rules => {
-      const loaded = await interpreter()
+    check: cachedChecks(async (rules, call) => {
+      // Waiting for the shared interpreter, a caller can still be cancelled; the load carries on for the others.
+      const loaded = await abortable(interpreter(), call?.signal)
       const report = await run(
         inspectRequest(loaded, rules, resolved.maxMemoryPages, resolved.maxOutputBytes),
         resolved.deadlineMs,
         options.workerUrl,
+        call?.signal,
       )
       return checkedRules(loaded, report)
     }),
-    async compare(rules, input) {
-      const loaded = await interpreter()
+    async compare(rules, input, call) {
+      const loaded = await abortable(interpreter(), call?.signal)
       const request = compareRequest(loaded, rules, input, resolved.maxInputBytes, resolved.maxMemoryPages, resolved.maxOutputBytes)
-      return run(request, resolved.deadlineMs, options.workerUrl)
+      return run(request, resolved.deadlineMs, options.workerUrl, call?.signal)
     },
   }
 }

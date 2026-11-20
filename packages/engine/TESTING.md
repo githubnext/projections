@@ -74,10 +74,13 @@ in the `verus` job, alongside the main check. Proofs are not part of
 
 ## CI
 
-The `Engine quality` workflow runs alongside the main check, so the normal test
-job stays fast. It enforces the coverage thresholds on every push and pull
-request, mutation tests the changed code of each pull request, and runs every
-mutant in four shards weekly and on manual dispatch.
+The Projections workflow enforces the coverage thresholds (`coverage`) on every
+push to `main`, nightly and on each pull request that reaches the Engine or the
+default comparator, and mutation tests the changed code of each pull request
+that changes a file `.cargo/mutants.toml` examines (`mutants-diff`), alongside
+the main check ([what CI runs](../../CONTRIBUTING.md#what-ci-runs)). The
+`Engine quality` workflow runs every mutant in four shards weekly and on manual
+dispatch.
 
 ## Exclusions
 

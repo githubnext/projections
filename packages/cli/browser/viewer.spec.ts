@@ -427,6 +427,36 @@ test('the toolbar, stage and summary bar lie flat, edge to edge, under the heade
   expect(summary.borderColor).toBe(toolbar.borderColor)
   expect(measured.frame.overflow).toBe('clip')
   expect(measured.frame.past).toBeGreaterThanOrEqual(1)
+
+  // The header and every toolbar row start and end on whole pixels, so the stage does too, in Diff and in Animated
+  // (with playback), at the canvas's width and narrower.
+  const edges = () =>
+    page.evaluate(() => {
+      const y = (element: Element) => [element.getBoundingClientRect().top, element.getBoundingClientRect().bottom]
+      const toolbar = document.querySelector('.ph-toolbar')!
+      return {
+        header: y(document.querySelector('.pi-viewer-header')!),
+        toolbar: y(toolbar),
+        rows: [...toolbar.querySelectorAll(':scope > .ph-toolbar-row')].map(y),
+        stage: y(document.querySelector('.ph-stage-body')!)[0]!,
+        playback: Boolean(toolbar.querySelector('[role="group"][aria-label="Comparison playback"]')),
+      }
+    })
+  for (const mode of ['diff', 'animated'] as const) {
+    expect((await control('control/show', {mode})).status).toBe(200)
+    await expect(page.locator('.ph')).toHaveAttribute('data-comparison-mode', mode)
+    for (const width of [canvas.width, 600]) {
+      await page.setViewportSize({...canvas, width})
+      const at = `${mode} at ${width}px`
+      await expect.poll(async () => (await edges()).playback, at).toBe(mode === 'animated')
+      const {header, toolbar: bar, rows, stage: top} = await edges()
+      expect(header, at).toEqual([0, 35])
+      expect(bar[0], at).toBe(35)
+      for (const edge of [...bar, ...rows.flat(), top])
+        expect(Number.isInteger(edge), `${at}: ${JSON.stringify({bar, rows, top})}`).toBe(true)
+    }
+    await page.setViewportSize(canvas)
+  }
 })
 
 test("in the Copilot app's canvas, the rules are the app's own divider, and the pane labels lie flat like the header", async ({page}) => {

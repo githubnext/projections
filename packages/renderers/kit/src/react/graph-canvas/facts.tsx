@@ -1,4 +1,5 @@
 // A card's facts drawn: its badges, in rows under its text, and its accent band along its leading edge.
+import {useId} from 'react'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import type {TransitionNode} from '../../graph-transition.js'
 import {cardFooterHeight} from '../../layout.js'
@@ -81,34 +82,62 @@ export function CardBadges({node, drawing}: {node: TransitionNode; drawing: Draw
   )
 }
 
-/** A card's accent band: the shown revision's, crossfading with the card's own step when it changes. */
+/**
+ * A card's accent band: the shown revision's, crossfading with the card's own step when it changes. It is cut to the
+ * card's own corners (`clipPath`s of the card's shape, their radii the theme's), so it follows them. Its rim covers the
+ * outer half of the card's border along it, so the band replaces the border there rather than drawing beside it; the
+ * rim gives way while the card is ringed, so the ring shows round the whole card. Both stay as narrow as the band, so
+ * the band never encloses what the card holds.
+ */
 export function CardAccentBand({node, drawing}: {node: TransitionNode; drawing: Drawing}) {
-  const {props, diff} = drawing
+  const {props, diff, stroke} = drawing
+  const id = useId().replace(/[^a-zA-Z0-9_-]/g, '')
   if (!props.accent) return null
   const [before, after] = [node.before, node.after].map(side => (side ? props.accent!(side) : undefined))
+  const [left, top, half] = [-node.width / 2, -node.height / 2, stroke / 2]
   const band = (accent: CardAccent | undefined, opacity: number, key: string) =>
     accent && opacity > 0.001 ? (
-      // The card's own shape, edged and filled in the accent and cut to the band's width: its corners are the card's,
-      // and its edge lies on the card's border there, so the band replaces the border rather than drawing beside it.
-      <rect
-        key={key}
-        className="node-accent"
-        x={-node.width / 2}
-        y={-node.height / 2}
-        width={node.width}
-        height={node.height}
-        style={{
-          fill: accent.paint,
-          stroke: accent.paint,
-          clipPath: `inset(0 calc(${node.width - badgeMetrics.accent}px + var(--stroke) / 2) 0 0)`,
-        }}
-        opacity={opacity}
-        {...(accent.category === undefined ? {} : {'data-projections-category': accent.category})}
-      />
+      <g key={key} opacity={opacity} {...(accent.category === undefined ? {} : {'data-projections-category': accent.category})}>
+        <rect
+          className="node-accent-rim"
+          x={left - half}
+          y={top - half}
+          width={badgeMetrics.accent + half}
+          height={node.height + stroke}
+          clipPath={`url(#${id}-outer)`}
+          style={{fill: accent.paint}}
+        />
+        <rect
+          className="node-accent"
+          x={left}
+          y={top}
+          width={badgeMetrics.accent}
+          height={node.height}
+          clipPath={`url(#${id}-inner)`}
+          style={{fill: accent.paint}}
+        />
+      </g>
     ) : null
-  if (diff || !node.before || !node.after || before?.paint === after?.paint) return band(after ?? before, 1, 'accent')
+  const shapes = (
+    <defs>
+      <clipPath id={`${id}-outer`}>
+        <rect className="node-accent-outer" x={left - half} y={top - half} width={node.width + stroke} height={node.height + stroke} />
+      </clipPath>
+      <clipPath id={`${id}-inner`}>
+        <rect className="node-accent-inner" x={left} y={top} width={node.width} height={node.height} />
+      </clipPath>
+    </defs>
+  )
+  if (diff || !node.before || !node.after || before?.paint === after?.paint)
+    return (
+      <>
+        {shapes}
+        {band(after ?? before, 1, 'accent')}
+      </>
+    )
   return (
     <>
+      {shapes}
       {band(before, 1 - node.local, 'before')}
       {band(after, node.local, 'after')}
     </>

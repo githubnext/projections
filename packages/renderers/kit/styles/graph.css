@@ -364,8 +364,19 @@
 .node-badge.removed .node-badge-text {
   text-decoration: line-through;
 }
-.node-accent {
-  stroke-width: var(--stroke);
-  rx: var(--projections-radius);
+.node-accent,
+.node-accent-rim {
   pointer-events: none;
+}
+/* The card's shape (its border's middle) and its outer edge, which cut its accent band to its corners. */
+.node-accent-inner {
+  rx: var(--projections-radius);
+}
+.node-accent-outer {
+  rx: calc(var(--projections-radius) + var(--stroke) / 2);
+}
+/* While the card is ringed, its band leaves the border's outer half to the ring. */
+.graph-node:is(:hover, :focus-visible, :has(:focus-visible), [data-projections-ring-hover], [data-projections-ring-selected])
+  .node-accent-rim {
+  visibility: hidden;
 }

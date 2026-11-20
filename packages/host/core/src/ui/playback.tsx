@@ -2,6 +2,8 @@ import {useId} from 'react'
 import type {KeyboardEvent, KeyboardEventHandler} from 'react'
 import {EllipsisVertical, Pause, Play, StepBack, StepForward} from 'lucide-react'
 import {progressForKey} from '../projection.js'
+import {handlePlaybackShortcut} from '../keyboard.js'
+import {playButton} from '../view-model.js'
 import type {ProjectionController} from '../projection.js'
 import {Button} from './components/button.js'
 import {Label} from './components/label.js'
@@ -9,70 +11,27 @@ import {Range} from './components/range.js'
 import {cn} from './lib/utils.js'
 import {ToolbarPopover} from './toolbar-popover.js'
 
-/** Elements whose own keyboard behavior includes Space (or that hold text), where Space keeps its meaning. */
-const spaceKeeping = [
-  'input:not([type="range"])',
-  'textarea',
-  'select',
-  'button',
-  'a[href]',
-  'summary',
-  'iframe',
-  '[contenteditable]:not([contenteditable="false"])',
-  '[role="dialog"]',
-  ...[
-    'button',
-    'checkbox',
-    'radio',
-    'switch',
-    'tab',
-    'menuitem',
-    'menuitemradio',
-    'menuitemcheckbox',
-    'option',
-    'combobox',
-    'textbox',
-    'searchbox',
-    'treeitem',
-    'gridcell',
-    'link',
-  ].map(role => `[role="${role}"]`),
-].join(', ')
-
 /**
  * A keydown handler for a toolbar or stage container: Space toggles playback (`togglePlayback`) while focus is on
  * the container itself or on an element that doesn't use Space, such as the Transition slider, and not in text
- * fields, buttons, radios, tabs, menus or open popovers. Held keys and modified Space are ignored.
+ * fields, buttons, radios, tabs, menus or open popovers. Held keys and modified Space are ignored
+ * (`handlePlaybackShortcut`).
  */
 export function spaceTogglesPlayback(p: Pick<ProjectionController, 'togglePlayback'>): KeyboardEventHandler<HTMLElement> {
   return event => {
-    if (event.key !== ' ' || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
-    const target = event.target
-    if (!(target instanceof Element)) return
-    // A Space-keeping element counts unless it encloses the container (say, the page puts the view in a dialog).
-    const keeper = target.closest(spaceKeeping)
-    if (keeper && !keeper.contains(event.currentTarget)) return
-    event.preventDefault()
-    if (!event.repeat) p.togglePlayback()
+    handlePlaybackShortcut(event, p)
   }
 }
 
 /** The icons playback draws (`data-icon` values), which no mode icon may match. */
 export const playbackIcons = ['play', 'pause', 'step-back', 'step-forward'] as const
 
-/**
- * The one play button's name: "Pause" while playing, else "Play forward" or "Play backward" by `nextDirection`; under
- * reduced motion, where playing shows the endpoint at once, "Show <after label>" or "Show <before label>".
- */
-export function playLabel(
+/** The one play button's name (`playButton`): "Pause", "Play forward", "Play backward", or "Show <label>" under reduced motion. */
+export const playLabel = (
   p: Pick<ProjectionController, 'playing' | 'nextDirection' | 'reducedMotion'>,
   beforeLabel: string,
   afterLabel: string,
-): string {
-  if (p.playing) return 'Pause'
-  if (p.reducedMotion) return `Show ${p.nextDirection === 1 ? afterLabel : beforeLabel}`
-  return p.nextDirection === 1 ? 'Play forward' : 'Play backward'
-}
+): string => playButton(p, beforeLabel, afterLabel).label
 
 /**
  * The round play/pause button (the lens, theme.css: its face takes the lens tint while playing). It calls

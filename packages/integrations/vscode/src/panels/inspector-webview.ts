@@ -281,8 +281,8 @@ export class InspectorWebview {
     this.closed = true
     this.bridge?.dispose()
     this.lease.dispose()
+    // The lifecycle stays running, closed: a command asked for after this fails at once.
     this.page.send({type: 'closed'})
-    this.page.stop()
     for (const disposable of this.disposables.splice(0)) disposable.dispose()
   }
 }

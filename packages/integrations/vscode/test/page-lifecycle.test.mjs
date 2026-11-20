@@ -8,8 +8,8 @@ import {failures, pageLifecycle} from '../src/panels/page-lifecycle.ts'
 
 const control = (id, timeoutMs = 30_000) => ({id, message: {op: 'refresh'}, timeoutMs})
 
-/** An actor on a page that is loading its first load, recording what it posts and settles. */
-function page() {
+/** An actor on a page that is loading its first load, recording what it posts and settles; stopped after the test. */
+function page(t) {
   const log = []
   const actor = createActor(pageLifecycle, {
     state: {kind: 'loading', page: 1, waiting: []},
@@ -20,11 +20,12 @@ function page() {
     },
   })
   actor.start()
+  t.after(() => actor.stop())
   return {actor, log}
 }
 
-test('a control asked for while the page loads is posted once it is ready, even when it loads again meanwhile', () => {
-  const {actor, log} = page()
+test('a control asked for while the page loads is posted once it is ready, even when it loads again meanwhile', t => {
+  const {actor, log} = page(t)
   actor.send({type: 'asked', control: control(1)})
   // The backend was replaced before the page was ready: the extension loads it again. The control used to wait on the
   // first load's ready, which never came.
@@ -35,8 +36,8 @@ test('a control asked for while the page loads is posted once it is ready, even 
   assert.deepEqual(log, ['post 1', 'resolve 1 ok'])
 })
 
-test("a ready from a load whose HTML was replaced isn't the page's", () => {
-  const {actor, log} = page()
+test("a ready from a load whose HTML was replaced isn't the page's", t => {
+  const {actor, log} = page(t)
   actor.send({type: 'asked', control: control(1)})
   actor.send({type: 'loaded', page: 2})
   actor.send({type: 'ready', page: 1})
@@ -46,7 +47,7 @@ test("a ready from a load whose HTML was replaced isn't the page's", () => {
 
 test('a page that never gets ready fails its controls when their time runs out, counted from when they were asked for', t => {
   t.mock.timers.enable({apis: ['setTimeout']})
-  const {actor, log} = page()
+  const {actor, log} = page(t)
   actor.send({type: 'asked', control: control(1, 1000)})
   t.mock.timers.tick(600)
   actor.send({type: 'loaded', page: 2})
@@ -55,16 +56,16 @@ test('a page that never gets ready fails its controls when their time runs out, 
   assert.deepEqual(actor.getState(), {kind: 'loading', page: 2, waiting: []})
 })
 
-test('closing fails the controls waiting for the page, and any asked for after', () => {
-  const {actor, log} = page()
+test('closing fails the controls waiting for the page, and any asked for after', t => {
+  const {actor, log} = page(t)
   actor.send({type: 'asked', control: control(1)})
   actor.send({type: 'closed'})
   actor.send({type: 'asked', control: control(2)})
   assert.deepEqual(log, [`reject 1 ${failures.closed}`, `reject 2 ${failures.closed}`])
 })
 
-test('a control posted to a page that reloads before answering fails at once', () => {
-  const {actor, log} = page()
+test('a control posted to a page that reloads before answering fails at once', t => {
+  const {actor, log} = page(t)
   actor.send({type: 'ready', page: 1})
   actor.send({type: 'asked', control: control(1)})
   // VS Code dropped the hidden tab's page and loaded it again.
@@ -74,7 +75,7 @@ test('a control posted to a page that reloads before answering fails at once', (
   assert.deepEqual(actor.getState(), {kind: 'loading', page: 1, waiting: []})
 })
 
-test('every control is posted once and settled once, whatever the page does', () => {
+test('every control is posted once and settled once, whatever the page does', t => {
   const ids = state => (state.kind === 'loading' ? state.waiting : state.kind === 'ready' ? state.sent : []).map(control => control.id)
   const posted = (effects, id) => effects.filter(effect => effect.type === 'post' && effect.control.id === id).length
   const settled = (effects, id) =>

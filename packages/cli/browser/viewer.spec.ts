@@ -439,7 +439,8 @@ test('the toolbar, stage and summary bar lie flat, edge to edge, under the heade
         toolbar: y(toolbar),
         rows: [...toolbar.querySelectorAll(':scope > .ph-toolbar-row')].map(y),
         stage: y(document.querySelector('.ph-stage-body')!)[0]!,
-        playback: Boolean(toolbar.querySelector('[role="group"][aria-label="Comparison playback"]')),
+        // Playback floats on the stage, in its utility area.
+        playback: Boolean(document.querySelector('.ph-utility [role="group"][aria-label="Comparison playback"]')),
       }
     })
   for (const mode of ['diff', 'animated'] as const) {
@@ -459,7 +460,7 @@ test('the toolbar, stage and summary bar lie flat, edge to edge, under the heade
   }
 })
 
-test("in the Copilot app's canvas, the rules are the app's own divider, and the pane labels lie flat like the header", async ({page}) => {
+test("in the Copilot app's canvas, the rules are the app's own divider, and the pane labels are chips edged in it", async ({page}) => {
   await openCanvas(page)
   expect((await control('control/show', {mode: 'side-by-side'})).status).toBe(200)
   await page.evaluate(() => {
@@ -469,12 +470,11 @@ test("in the Copilot app's canvas, the rules are the app's own divider, and the 
     document.head.prepend(style)
     document.documentElement.setAttribute('data-color-mode', 'dark')
   })
-  const band = page.locator('.ph-pane-label[data-pane-band=""]').first()
-  await expect(band).toBeVisible()
+  const chip = page.locator('[data-pane-chip]').first()
+  await expect(chip).toBeVisible()
   await expect(page.locator('.pi-viewer-header')).toHaveCSS('border-bottom-color', 'rgb(61, 68, 77)')
-  await expect(band).toHaveCSS('background-color', 'rgb(13, 17, 23)')
-  await expect(band).toHaveCSS('border-bottom-color', 'rgb(61, 68, 77)')
-  await expect(band).toHaveCSS('color', 'rgb(230, 237, 243)')
+  await expect(chip).toHaveCSS('border-bottom-color', 'rgb(61, 68, 77)')
+  await expect(chip).toHaveCSS('border-top-color', 'rgb(61, 68, 77)')
 })
 
 test("in the Copilot app's canvas, the renderer's stage, text and families are the app's, and follow its theme", async ({page}) => {

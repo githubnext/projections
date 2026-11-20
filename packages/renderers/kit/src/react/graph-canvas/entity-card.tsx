@@ -5,7 +5,6 @@ import {diffCardMetrics} from '../../diff-card/metrics.js'
 import {displayed, DiffCardLines} from './cards.js'
 import {CardChangeMarks} from './card-change.js'
 import {CardAccentBand, CardBadges} from './facts.js'
-import {CardWeightGauge} from './gauge.js'
 import {CardLines, cardLinesLayout} from './card-lines.js'
 import type {Drawing} from './drawing.js'
 import {CardSubtitle} from './subtitle.js'
@@ -74,7 +73,6 @@ export function EntityCard({node, drawing}: {node: TransitionNode; drawing: Draw
         inset={inset}
       />
       <CardAccentBand node={node} drawing={drawing} />
-      <CardWeightGauge node={node} drawing={drawing} />
       {fileNode && (
         <path
           className="node-file-icon"

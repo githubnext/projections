@@ -10,7 +10,6 @@ import type {FieldLine} from '../../diff/lines.js'
 import type {KindLineText} from '../../card-text.js'
 import type {GraphCanvasProps} from './props.js'
 import {badgeText} from '../../graph-canvas/badges.js'
-import type {WeightShare} from '../../graph-canvas/weight.js'
 
 export type LaidOutGraphProps = GraphCanvasProps & {
   transition: GraphTransition
@@ -23,8 +22,6 @@ export type LaidOutGraphProps = GraphCanvasProps & {
   badgeGrowth: ReadonlyMap<string, number> | undefined
   /** How much each card grows for its subtitle (see `GraphCanvasProps.subtitle`). */
   subtitleGrowth: ReadonlyMap<string, number> | undefined
-  /** Each weighed card's share of the heaviest weight, drawn as its gauge (see `GraphCanvasProps.weight`). */
-  weightShares: ReadonlyMap<string, WeightShare> | undefined
 }
 
 export interface Drawing {

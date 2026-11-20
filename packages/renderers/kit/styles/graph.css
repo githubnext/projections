@@ -365,10 +365,7 @@
   text-decoration: line-through;
 }
 .node-accent {
-  pointer-events: none;
-}
-/* A card's weight gauge (see GraphCanvas `weight`): its accent's paint (inline), or the muted ink without one. */
-.node-gauge {
-  fill: var(--muted);
+  stroke-width: var(--stroke);
+  rx: var(--projections-radius);
   pointer-events: none;
 }

@@ -3329,28 +3329,6 @@ variedWords(within: false | true): string
 
 How a varied value relates to its tolerance, in words: `within tolerance` or `beyond tolerance (volatile)`.
 
-### `WeightShare`
-
-```ts
-interface WeightShare
-```
-
-A row's weight as a share of the heaviest row's, by revision (see `weightShares`).
-
-| Member | Signature | Description |
-|---|---|---|
-| `after` | `"after"?: number` | The share in the After revision, between 0 and 1; none when it has no positive weight there. |
-| `before` | `"before"?: number` | The share in the Before revision, between 0 and 1; none when it has no positive weight there. |
-
-### `weightShares`
-
-```ts
-weightShares(rows: Array<EntityChange<Entity>>, weight: { (entity: Entity): number | undefined }): Map<string, WeightShare>
-```
-
-Each weighed row's weight in each revision as the square root of its share of the heaviest weight of either, so
-area-like differences read without the heaviest dwarfing the rest. Rows without a positive weight have none.
-
 ### `Window`
 
 ```ts
@@ -3791,7 +3769,6 @@ Everything but the renderer props is optional; the defaults draw every entity as
 | `syntheticAction` | `"syntheticAction"?: undefined \| { (entity: Entity): undefined \| { "expanded"?: false \| true; "label": string } }` | A synthetic card's accessible name and, for one that opens or closes a group of cards, whether that group is open (`aria-expanded`). Defaults to `Show` and the card's label. |
 | `viewport` | `"viewport": undefined \| { "height": number; "width": number }` | The frame's width and the host window's height, CSS px, as the host last reported them; undefined until then. |
 | `visibleIds` | `"visibleIds"?: ReadonlySet<string> \| undefined` | Entity rows to present, for example after a search; defaults to every row. |
-| `weight` | `"weight"?: undefined \| { (entity: Entity): number \| undefined }` | A card's weight, such as its lines of code: a gauge along the card's top edge from its leading corner, as long as the square root of its share of the heaviest row's weight (see `weightShares`), in its accent's paint, so the heavy parts of a graph stand out while every card keeps the graph's one width and the cards line up in columns. Rows without a positive weight have no gauge. Pass a stable function. |
 
 ### `graphEntityLimit`
 

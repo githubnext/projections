@@ -151,7 +151,7 @@ test('a numeric field sizes cards and a text field is their subtitle', () => {
   assert.equal(facts.weight(helper), undefined)
   // The number reads compact at the right of the kind line, and the legend says what the width means.
   assert.deepEqual([facts.detail(engineCard), facts.detail(host), facts.detail(helper)], ['23K', '900', undefined])
-  assert.deepEqual(facts.legend, {title: 'Cards', items: [{label: 'Top bar: code'}]})
+  assert.deepEqual(facts.legend, {title: 'Cards', items: [{label: 'Number on each card: code'}]})
 })
 
 test('labels are worded badges, before the code badges', () => {

@@ -81,15 +81,6 @@ export function CardBadges({node, drawing}: {node: TransitionNode; drawing: Draw
   )
 }
 
-/** A band along a card's leading edge, its corners rounded like the card's. */
-function accentBand(width: number, height: number, radius: number): string {
-  const x = -width / 2,
-    y = -height / 2,
-    w = badgeMetrics.accent,
-    r = Math.min(radius, height / 2)
-  return `M${x + r} ${y}H${x + w}V${y + height}H${x + r}A${r} ${r} 0 0 1 ${x} ${y + height - r}V${y + r}A${r} ${r} 0 0 1 ${x + r} ${y}Z`
-}
-
 /** A card's accent band: the shown revision's, crossfading with the card's own step when it changes. */
 export function CardAccentBand({node, drawing}: {node: TransitionNode; drawing: Drawing}) {
   const {props, diff} = drawing
@@ -97,11 +88,20 @@ export function CardAccentBand({node, drawing}: {node: TransitionNode; drawing: 
   const [before, after] = [node.before, node.after].map(side => (side ? props.accent!(side) : undefined))
   const band = (accent: CardAccent | undefined, opacity: number, key: string) =>
     accent && opacity > 0.001 ? (
-      <path
+      // The card's own shape, edged and filled in the accent and cut to the band's width: its corners are the card's,
+      // and its edge lies on the card's border there, so the band replaces the border rather than drawing beside it.
+      <rect
         key={key}
         className="node-accent"
-        d={accentBand(node.width, node.height, 6)}
-        style={{fill: accent.paint}}
+        x={-node.width / 2}
+        y={-node.height / 2}
+        width={node.width}
+        height={node.height}
+        style={{
+          fill: accent.paint,
+          stroke: accent.paint,
+          clipPath: `inset(0 calc(${node.width - badgeMetrics.accent}px + var(--stroke) / 2) 0 0)`,
+        }}
         opacity={opacity}
         {...(accent.category === undefined ? {} : {'data-projections-category': accent.category})}
       />

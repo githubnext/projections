@@ -344,12 +344,12 @@ Extractions are compared only when the engine pairs them (`pair`, see
 [One implementation](../contracts.md#one-implementation-native-and-browser)):
 one projection, recorded definitions that agree apart from `presentation`, and
 equal `definitionDigest` values. Otherwise the mismatch is reported, explaining
-whether the definition or its declared sources differ. By default a comparison applies the base revision's
-definition, with one version of its component code, to both revisions;
-`--definition head` uses the head revision's definition. A projection missing at
-the definition revision is an explicit error naming an option that works: the
-other revision's definition when it has one, else `--definition-revision` with
-the working tree (or `HEAD`).
+whether the definition or its declared sources differ. By default a comparison
+applies the base revision's definition, with one version of its component code,
+to both revisions; `--definition head` uses the head revision's definition. A
+projection missing at the definition revision is an explicit error naming an
+option that works: the other revision's definition when it has one, else
+`--definition-revision` with the working tree (or `HEAD`).
 
 Viewers rerun the comparator, which is deterministic, rather than trusting a
 saved comparison; the default comparator is always available. A comparison made

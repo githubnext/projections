@@ -23,6 +23,7 @@ import type {DiUnitFrame} from './transition.js'
 import type {DiUnit} from './model.js'
 import {
   LifetimeMark,
+  LinkOrigins,
   LinkView,
   diLegend,
   activate,
@@ -486,6 +487,7 @@ function TransitionView({
                 onSelect={onSelect}
               />
             ))}
+            <LinkOrigins links={links} routes={routes} />
           </svg>
         )}
       </div>

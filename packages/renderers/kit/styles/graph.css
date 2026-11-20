@@ -235,6 +235,13 @@
   fill: var(--edge);
   pointer-events: none;
 }
+/* A relationship's copy of its junction dot: clear until the relationship is ringed, then the ring's color. */
+.graph-junction-ring {
+  fill: transparent;
+  stroke: none;
+  stroke-width: 0;
+  pointer-events: none;
+}
 .edge-hit {
   stroke: transparent;
   stroke-width: var(--projections-space-4);

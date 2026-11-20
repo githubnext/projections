@@ -130,7 +130,7 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
               .map(node => (
                 <EntityCard key={node.id} node={node} drawing={draw} />
               ))}
-            <Arrowheads links={links} drawing={draw} />
+            <Arrowheads links={links} drawing={draw} junctions={frame.junctions} />
           </svg>
         )}
       </div>

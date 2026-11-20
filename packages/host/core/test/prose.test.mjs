@@ -42,3 +42,12 @@ test('the table and text views draw change and step summaries as prose with inli
     assert.ok(!markup.includes('`'), `${view.name} shows a code marker`)
   }
 })
+
+test('one notice is a sentence, and only several are a bulleted list', async () => {
+  const {Notices} = await import('../dist/ui/view/notices.js')
+  const one = renderToStaticMarkup(createElement(Notices, {notices: ['The comparator file `a.yaml` changed.']}))
+  assert.ok(one.startsWith('<p class="ph-notice ph-notices">'), one)
+  assert.ok(!one.includes('<li') && !one.includes('list-disc'), one)
+  const two = renderToStaticMarkup(createElement(Notices, {notices: ['One.', 'Two.']}))
+  assert.ok(two.startsWith('<ul') && two.includes('aria-label="Notices"') && two.match(/<li>/g).length === 2, two)
+})

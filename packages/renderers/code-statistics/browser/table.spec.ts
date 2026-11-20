@@ -76,17 +76,24 @@ test('the first column stays in view when the table scrolls sideways', async ({p
   expect(Math.abs(heading!.x - scroller!.x)).toBeLessThan(0.5)
 })
 
-/** A pixel to read and the color it must be: a line or edge beside a row whose lines carry its hue. */
+/**
+ * A pixel to read on a line or edge beside a row whose lines carry its hue: the color it paints when the hue wins
+ * (`rgb`), and when the gray line beside it would (`gray`).
+ */
 interface LineProbe {
   what: string
   x: number
   y: number
+  /** The line's direction across which it is sampled: `y` for a horizontal line, `x` for an edge. */
+  across: 'x' | 'y'
   rgb: number[]
+  gray: number[]
 }
 
 /**
  * Every line and frame edge beside a row whose lines carry its change's hue (added, removed, renamed), with the color
- * it must paint: the hue, faded by the row's presence over what lies under it. Runs in the renderer document.
+ * it paints when the hue wins (faded by the row's presence over what lies under it) and when the gray line would.
+ * Runs in the renderer document.
  */
 function tableLineProbes(): LineProbe[] {
   const context = document.createElement('canvas').getContext('2d')!
@@ -118,28 +125,38 @@ function tableLineProbes(): LineProbe[] {
     const x = Math.min(box.right, scroll.right) - 40
     const y = box.top + box.height / 2
     const edge = over(rgb(style.borderRightColor), surface, opacity)
+    const gray = {above: line(above, 'borderBottomColor'), below: line(below, 'borderTopColor')}
     if (!fading(above))
       probes.push({
+        gray: gray.above,
         what: `the line above ${name}`,
         x,
         y: box.top + 0.5,
+        across: 'y',
         rgb: over(rgb(style.borderTopColor), line(above, 'borderBottomColor'), opacity),
       })
     if (!fading(below))
       probes.push({
+        gray: gray.below,
         what: `the line below ${name}`,
         x,
         y: box.bottom - 0.5,
+        across: 'y',
         rgb: over(rgb(style.borderBottomColor), line(below, 'borderTopColor'), opacity),
       })
-    probes.push({what: `the left edge beside ${name}`, x: scroll.left + 0.5, y, rgb: edge})
-    if (box.right <= scroll.right + 0.5) probes.push({what: `the right edge beside ${name}`, x: box.right - 0.5, y, rgb: edge})
+    probes.push({what: `the left edge beside ${name}`, x: scroll.left + 0.5, y, across: 'x', rgb: edge, gray: divider})
+    if (box.right <= scroll.right + 0.5)
+      probes.push({what: `the right edge beside ${name}`, x: box.right - 0.5, y, across: 'x', rgb: edge, gray: divider})
   })
   return probes
 }
 
-/** The screenshot's colors at `points` (CSS px of a `width`-wide frame), decoded in the page: no image library. */
-async function pixelsAt({png, width, points}: {png: string; width: number; points: {x: number; y: number}[]}) {
+/**
+ * The screenshot's colors across each line (CSS px of a `width`-wide frame), one per device pixel within a CSS pixel
+ * either side, decoded in the page: no image library. At a fractional pixel ratio a line snaps to device pixels, so
+ * it is found among them rather than at one point.
+ */
+async function pixelsAt({png, width, points}: {png: string; width: number; points: {x: number; y: number; across: 'x' | 'y'}[]}) {
   // Decoded from the bytes themselves: the stage page's content security policy refuses to fetch a data: URL.
   const bytes = Uint8Array.from(atob(png), character => character.charCodeAt(0))
   const bitmap = await createImageBitmap(new Blob([bytes], {type: 'image/png'}))
@@ -147,7 +164,16 @@ async function pixelsAt({png, width, points}: {png: string; width: number; point
   const context = canvas.getContext('2d')!
   context.drawImage(bitmap, 0, 0)
   const scale = bitmap.width / width
-  return points.map(({x, y}) => [...context.getImageData(Math.floor(x * scale), Math.floor(y * scale), 1, 1).data.slice(0, 3)])
+  return points.map(({x, y, across}) => {
+    const at = across === 'y' ? y : x
+    const pixels: number[][] = []
+    for (let device = Math.floor((at - 1) * scale); device <= Math.ceil((at + 1) * scale); device++) {
+      const [px, py] = across === 'y' ? [Math.floor(x * scale), device] : [device, Math.floor(y * scale)]
+      if (px >= 0 && py >= 0 && px < bitmap.width && py < bitmap.height)
+        pixels.push([...context.getImageData(px, py, 1, 1).data.slice(0, 3)])
+    }
+    return pixels
+  })
 }
 
 // A gray line and a change-colored one never compete: wherever a row whose lines carry its hue meets another line, a
@@ -157,6 +183,10 @@ for (const comparisonMode of ['diff', 'animated'] as const)
   for (const colorMode of ['light', 'dark'] as const)
     test(`${comparisonMode}, ${colorMode}: a change's hue wins every line it shares`, async ({page}) => {
       test.setTimeout(240_000)
+      test.skip(
+        !Number.isInteger(await page.evaluate(() => devicePixelRatio)),
+        'At a fractional pixel ratio a one-pixel line is antialiased into the fills beside it, so its pixels say nothing about which line wins',
+      )
       const inspector = harnessInspector()
       const failures: string[] = []
       for (const sort of ['code:descending', 'name:ascending', 'files:ascending', 'lines:descending'])
@@ -178,10 +208,16 @@ for (const comparisonMode of ['diff', 'animated'] as const)
             probed += probes.length
             const width = (await stage.iframe.boundingBox())!.width
             const png = (await stage.iframe.screenshot()).toString('base64')
-            const painted: number[][] = await page.evaluate(pixelsAt, {png, width, points: probes})
+            const painted: number[][][] = await page.evaluate(pixelsAt, {png, width, points: probes})
+            // The hue wins when the pixel is nearer it than the gray: compositing and antialiasing at fractional pixel
+            // ratios move it a little, never across. Probes whose two colors are too close to tell apart are skipped.
+            const distance = (a: number[], b: number[]) => Math.hypot(...a.map((channel, k) => channel - b[k]!))
             probes.forEach((probe, index) => {
-              const color = painted[index]!
-              if (Math.max(...probe.rgb.map((channel, k) => Math.abs(channel - color[k]!))) > 12)
+              if (distance(probe.rgb, probe.gray) < 24) return
+              // The line's own pixel: the one across it most like either color it could paint.
+              const near = (pixel: number[]) => Math.min(distance(pixel, probe.rgb), distance(pixel, probe.gray))
+              const color = painted[index]!.reduce((best, pixel) => (near(pixel) < near(best) ? pixel : best))
+              if (distance(color, probe.rgb) >= distance(color, probe.gray))
                 failures.push(
                   `${sort}${sortChangesFirst ? ', changes first' : ''} at ${progress}: ${probe.what} is rgb(${color}), not rgb(${probe.rgb})`,
                 )

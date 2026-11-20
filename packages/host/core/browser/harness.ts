@@ -110,9 +110,18 @@ export async function modeGroup(scope: Scope): Promise<Locator> {
   await menu.waitFor()
   return menu.getByRole('radiogroup', {name: 'Comparison mode'})
 }
-/** Chooses a comparison mode (in the menu, choosing closes it). */
+/**
+ * Chooses a comparison mode. In the menu, choosing closes it, and this returns once the menu has given focus back to
+ * its button, which it does only as it leaves after its exit animation: a control the test focused before then would
+ * lose its focus, and the keys pressed next would go to the button.
+ */
 export async function chooseMode(scope: Scope, name: string) {
-  await (await modeGroup(scope)).getByRole('radio', {name, exact: true}).click()
+  const group = await modeGroup(scope)
+  const inMenu = (await group.locator('xpath=ancestor::*[@role="dialog"]').count()) > 0
+  await group.getByRole('radio', {name, exact: true}).click()
+  if (!inMenu) return
+  await settled(scope)
+  await expect(scope.getByRole('button', {name: /^Comparison mode: /}).first()).toBeFocused()
 }
 /** Asserts the checked mode, closing the menu again if it had to be opened. */
 export async function expectMode(scope: Scope, name: string) {

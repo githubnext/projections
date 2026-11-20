@@ -522,24 +522,13 @@ test('ports on a side divide it evenly (two routes enter at its thirds), clear o
       for (const [target, list] of into) {
         const point = layout.points.get(target),
           size = layout.sizes.get(target)
-        // In the order the routes come from: where their last run across the layers' flow starts, so a route that
-        // detours round a card arrives from the side it went round; a route straight down comes from its port.
-        const from = route => {
-          const flow = point => (axis.y ? point.y : point.x)
-          const port = across(route.at(-1))
-          let index = route.length - 1
-          while (index > 0 && Math.abs(across(route[index - 1]) - port) < 0.5) index--
-          if (index === 0) return port
-          // The run before the approach, its rounded turns included (they stay within a turn's radius of its level).
-          const level = flow(route[index - 1])
-          index--
-          while (index > 0 && Math.abs(flow(route[index - 1]) - level) < routeRadius) index--
-          return across(route[index])
-        }
-        const ordered = [...list].sort((a, b) => from(a.route) - from(b.route) || across(a.route[0]) - across(b.route[0]))
+        // In the order the routes come from: where they leave their sources.
+        const ordered = [...list].sort((a, b) => across(a.route[0]) - across(b.route[0]))
         const ports = ordered.map(({route}) => across(route.at(-1)))
         // Routes from one source share a port and may take either order.
-        const distinct = ordered.every((item, index) => !index || Math.abs(from(item.route) - from(ordered[index - 1].route)) > 0.5)
+        const distinct = ordered.every(
+          (item, index) => !index || Math.abs(across(item.route[0]) - across(ordered[index - 1].route[0])) > 0.5,
+        )
         const length = axis.y ? size.width : size.height
         const issues = portIssues(
           distinct ? ports : [...ports].sort((a, b) => a - b),

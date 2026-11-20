@@ -173,6 +173,42 @@ named as only one platform names them (`npm` without its `.cmd` shim,
 `python3`), native paths handled as POSIX ones and file text split as if it had
 no CRLF. An intended exception goes in `.portability.yaml` with its reason.
 
+#### What CI runs
+
+A pull request runs only the jobs its change reaches. The Projections workflow's
+first job, `changes`, runs `tools/scripts/ci-plan.mjs`
+(`tools/cli/src/lib/ci-plan.ts`), which maps the changed files to their
+workspaces and crates and everything depending on them, with the same graph as
+`npm run tools -- affected`. Its summary lists each job and why it runs.
+
+| Change                                                                                                                                                     | Runs                                                                                                                        |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Documentation alone (Markdown, `docs/`) that no generator reads or writes                                                                                  | `docs`: format, lint, file standards, boundaries, casing, READMEs and links, with no build                                  |
+| Anything else                                                                                                                                              | `public-product` on Linux: the full check, Node and Rust suites, generated documentation and the self-projection            |
+| Code that doesn't only run in a browser (not `packages/renderers`, `packages/host`, `tools/storybook` or `examples/renderers` alone), Rust or `action.yml` | `public-product` on macOS, `windows-node` and `windows-integration`                                                         |
+| Rust (`.rs`, `Cargo.toml`)                                                                                                                                 | `windows` (the Rust suites)                                                                                                 |
+| The Engine's crates                                                                                                                                        | `verus`                                                                                                                     |
+| What the Engine's coverage measures (`test:rust:coverage`)                                                                                                 | `coverage`                                                                                                                  |
+| A file `.cargo/mutants.toml` examines                                                                                                                      | `mutants-diff`                                                                                                              |
+| A browser suite, what it depends on or builds, or (for suites that run the CLI's backend) the CLI and what it depends on but the extractors                | That suite in `browser`, the large ones sharded; the rest together in `browser (rest)`                                      |
+| Renderers alone (not the kit, SDK or harness they share)                                                                                                   | The renderer harness, in `browser` and `browser-macos`, limited to those renderers' tests: a job a project for one renderer |
+| The SDK, the CLI or Rust                                                                                                                                   | `package`                                                                                                                   |
+| `dist-workspace.toml`, `.github/release-build-setup.yml` or a `Cargo.toml`                                                                                 | `release-config`, which also plans the release (pull requests don't run `release.yml`)                                      |
+
+Everything runs on pushes to `main`, nightly, on a manual run (**Run workflow**
+on the Projections workflow) and for any change to `.github/workflows/`,
+`.github/actions/`, `package.json`, `package-lock.json`, `Cargo.toml`,
+`Cargo.lock`, `rust-toolchain.toml`, `.node-version`, `.npmrc`, `.cargo/`,
+`tools/cli/` or `tools/scripts/`, or to a file outside every workspace and crate
+that the plan doesn't recognise. To run everything on a pull request, add the
+`ci:full` label, then push or re-run the workflow: the plan reads the labels
+when it runs.
+
+`ci-ok` is the one required check. It passes when `changes` succeeded and every
+other job passed or was left out by the plan; a failed, cancelled or timed-out
+job fails it. See what a branch would run with `node tools/scripts/ci-plan.mjs`
+(since `origin/main`, uncommitted changes included).
+
 ## Repository layout
 
 The repository is organized by domain component; language only determines what

@@ -4,8 +4,9 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  # Nightly, everything: what a pull request's plan left out still runs every day.
   schedule:
-    - cron: '17 6 * * 1'
+    - cron: '17 6 * * *'
 permissions:
   contents: read
 env:
@@ -20,14 +21,94 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# What runs (CONTRIBUTING.md#what-ci-runs): a pull request runs the jobs its change reaches, which `changes` works out
+# from the workspace and crate graph (tools/scripts/ci-plan.mjs). Pushes to main, the nightly run, a manual run, the
+# `ci:full` label and any change to CI itself, a toolchain, a lockfile, a root manifest or the repository's tooling run
+# everything. `ci-ok` is the one required check: it passes when every job passed or was left out.
 jobs:
+  changes:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      docs: ${{ steps.plan.outputs.docs }}
+      product: ${{ steps.plan.outputs.product }}
+      verus: ${{ steps.plan.outputs.verus }}
+      windows: ${{ steps.plan.outputs.windows }}
+      windows-node: ${{ steps.plan.outputs.windows_node }}
+      package: ${{ steps.plan.outputs.package }}
+      release: ${{ steps.plan.outputs.release }}
+      coverage: ${{ steps.plan.outputs.coverage }}
+      mutants: ${{ steps.plan.outputs.mutants }}
+      actions-lock: ${{ steps.plan.outputs.actions_lock }}
+      browser: ${{ steps.plan.outputs.browser }}
+      browser-macos: ${{ steps.plan.outputs.browser_macos }}
+    steps:
+      # A pull request checks out its merge commit: its first parent is the base branch, so the change is HEAD^1..HEAD.
+      - uses: actions/checkout@v6.1.0
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      # The plan needs Node alone: no install or build.
+      - uses: actions/setup-node@v6.5.0
+        with:
+          node-version-file: .node-version
+      - id: plan
+        shell: bash
+        env:
+          EVENT: ${{ github.event_name }}
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ "$EVENT" != pull_request ]; then
+            node tools/scripts/ci-plan.mjs --base HEAD --full "a $EVENT run"
+            exit
+          fi
+          # Read now, not from the event, so that adding the label and re-running the workflow runs everything.
+          full=$(gh api "repos/$REPO/issues/$PR/labels" --jq 'any(.[]; .name == "ci:full")')
+          if [ "$full" = true ]; then
+            node tools/scripts/ci-plan.mjs --base HEAD^1 --full 'the ci:full label'
+          else
+            node tools/scripts/ci-plan.mjs --base HEAD^1
+          fi
+  # A change to documentation alone: the checks that read it, without a build.
+  docs:
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    timeout-minutes: 20
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6.5.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - shell: bash
+        run: |
+          npm ci --no-audit --no-fund
+          node tools/scripts/considered.mjs install
+          npm run --silent check:considered
+          npm run --silent format:check
+          npm run --silent lint
+          npm run --silent check:boundaries
+          npm run --silent check:casing
+          npm run --silent check:readmes
+          npm run --silent check:links
   public-product:
-    if: github.event_name != 'schedule'
+    needs: changes
+    if: needs.changes.outputs.product != '[]'
     timeout-minutes: 70
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        # Linux for every change but documentation alone; macOS when the change isn't to browser code alone.
+        os: ${{ fromJson(needs.changes.outputs.product) }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6.1.0
@@ -63,8 +144,10 @@ jobs:
           fail-on-severity: high
   # The workflow dependency lockfile, .github/workflows/actions.lock (CONTRIBUTING.md#workflow-dependency-lockfile):
   # every action the workflows use, directly or through another action, is locked, and every locked commit still
-  # verifies upstream. Weekly too, so a release tag that moves upstream is noticed.
+  # verifies upstream. Nightly too, so a release tag that moves upstream is noticed.
   actions-lock:
+    needs: changes
+    if: needs.changes.outputs.actions-lock == 'true'
     timeout-minutes: 10
     runs-on: ubuntu-24.04
     steps:
@@ -82,7 +165,7 @@ jobs:
           gh extension install github/gh-actions-lock --pin v0.4.1
           gh actions-lock --verify --ignore-local-actions
   # Known advisories in what is already locked: OSV (GitHub's advisories for npm, RustSec's for crates) against the root
-  # package-lock.json and Cargo.lock, weekly and on main. Pull requests rely on dependency review above.
+  # package-lock.json and Cargo.lock, nightly and on main. Pull requests rely on dependency review above.
   advisories:
     if: github.event_name != 'pull_request'
     timeout-minutes: 10
@@ -96,9 +179,11 @@ jobs:
           node-version-file: .node-version
       - run: npm run --silent check:advisories
   # Verus proves the Engine's verified crate and the mutation check plants one bug per specification clause
-  # (packages/engine/VERIFICATION.md). It needs no npm install or build, so it runs alongside the other jobs; a required check.
+  # (packages/engine/VERIFICATION.md), when a change reaches the Engine's crates. It needs no npm install or build, so it
+  # runs alongside the other jobs.
   verus:
-    if: github.event_name != 'schedule'
+    needs: changes
+    if: needs.changes.outputs.verus == 'true'
     timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
@@ -106,36 +191,18 @@ jobs:
         with:
           persist-credentials: false
       - uses: $/.github/actions/verus
-  # The browser suites: native Chromium and WebKit, desktop and mobile. Linux WebKit is several times slower than a
-  # workstation, so the large suites are sharded across jobs and `rest` runs every other browser suite. Playwright
-  # shards by test count, not time, so the renderer harness, the largest, shards each project by its measured time
-  # (about 64, 72, 40 and 70 test-minutes on two workers), keeping each job near 20 minutes of tests after about 14 of
-  # setup: four shards over every project put all of WebKit desktop in one, which ran up to 58 minutes. The Inspector
-  # takes two (in `rest`, it took 26 of the job's 60 minutes, and the VS Code UI suite after it didn't finish).
+  # The browser suites: native Chromium and WebKit, desktop and mobile. The jobs, and how the large suites are sharded,
+  # are the plan's (tools/cli/src/lib/ci-browser.ts): each affected suite, and `rest` for every other affected browser
+  # suite. A change to one or two renderers alone runs only their tests in the renderer harness.
   browser:
-    if: github.event_name != 'schedule'
+    needs: changes
+    if: needs.changes.outputs.browser != '[]'
+    name: browser (${{ matrix.name }})
     timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
-        suite: [packages/host/core, tools/storybook]
-        shard: [1/3, 2/3, 3/3]
-        include:
-          - {suite: packages/renderers/harness, project: chromium-desktop, shard: 1/3}
-          - {suite: packages/renderers/harness, project: chromium-desktop, shard: 2/3}
-          - {suite: packages/renderers/harness, project: chromium-desktop, shard: 3/3}
-          - {suite: packages/renderers/harness, project: webkit-desktop, shard: 1/4}
-          - {suite: packages/renderers/harness, project: webkit-desktop, shard: 2/4}
-          - {suite: packages/renderers/harness, project: webkit-desktop, shard: 3/4}
-          - {suite: packages/renderers/harness, project: webkit-desktop, shard: 4/4}
-          - {suite: packages/renderers/harness, project: chromium-mobile, shard: 1/2}
-          - {suite: packages/renderers/harness, project: chromium-mobile, shard: 2/2}
-          - {suite: packages/renderers/harness, project: webkit-mobile, shard: 1/3}
-          - {suite: packages/renderers/harness, project: webkit-mobile, shard: 2/3}
-          - {suite: packages/renderers/harness, project: webkit-mobile, shard: 3/3}
-          - {suite: packages/host/inspector, shard: 1/2}
-          - {suite: packages/host/inspector, shard: 2/2}
-          - suite: rest
+        include: ${{ fromJson(needs.changes.outputs.browser) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.1.0
@@ -146,10 +213,12 @@ jobs:
           suite: ${{ matrix.suite }}
           project: ${{ matrix.project }}
           shard: ${{ matrix.shard }}
-          sharded: packages/host/core tools/storybook packages/renderers/harness packages/host/inspector
+          grep: ${{ matrix.grep }}
+          sharded: ${{ matrix.except }}
   # @githubnext/projections, the one npm package, as it would be published (docs/contracts/packages.md).
   package:
-    if: github.event_name != 'schedule'
+    needs: changes
+    if: needs.changes.outputs.package == 'true'
     timeout-minutes: 45
     runs-on: ubuntu-latest
     steps:
@@ -157,9 +226,11 @@ jobs:
         with:
           persist-credentials: false
       - uses: $/.github/actions/package
-  # The release workflow is generated by dist; it must match dist-workspace.toml.
+  # The release workflow is generated by dist; it must match dist-workspace.toml. Pull requests don't run it
+  # (pr-run-mode), so this also plans the release, as its first job would.
   release-config:
-    if: github.event_name != 'schedule'
+    needs: changes
+    if: needs.changes.outputs.release == 'true'
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     steps:
@@ -177,10 +248,14 @@ jobs:
       - name: Check the release workflow is what dist generates
         shell: bash
         run: node tools/scripts/dist.mjs --check
+      - name: Plan the release
+        shell: bash
+        run: dist plan
   # Native Windows: Job Object supervision, no-follow artifact I/O and the Rust suites
   # that don't run POSIX shell scripts (those are ignored on Windows with their reason).
   windows:
-    if: github.event_name != 'schedule'
+    needs: changes
+    if: needs.changes.outputs.windows == 'true'
     timeout-minutes: 60
     runs-on: windows-2025
     steps:
@@ -209,7 +284,8 @@ jobs:
   # checks that read only text (format, lint, types, considered, generated docs) give the same result everywhere and run
   # on Linux and macOS in public-product.
   windows-node:
-    if: github.event_name != 'schedule'
+    needs: changes
+    if: needs.changes.outputs.windows-node == 'true'
     timeout-minutes: 90
     runs-on: windows-2025
     steps:
@@ -256,7 +332,8 @@ jobs:
   # `browser`), the VS Code extension's smoke test in a downloaded VS Code, then the GitHub Action itself
   # (.github/actions/action-e2e), as public-product runs it on Linux and macOS.
   windows-integration:
-    if: github.event_name != 'schedule'
+    needs: changes
+    if: needs.changes.outputs.windows-node == 'true'
     timeout-minutes: 60
     runs-on: windows-2025
     steps:
@@ -319,14 +396,17 @@ jobs:
           retention-days: 7
   # WebKit on macOS, the platform Safari runs on: the renderer harness's desktop WebKit project, which runs on Linux
   # WebKit in `browser`. Its tests take 10 to 30 minutes on a macOS runner, whose speed varies, after a 15-minute
-  # build: two shards keep each job well inside its limit.
+  # build: two shards keep each job well inside its limit. Like `browser`, it runs only one renderer's tests for a
+  # change to that renderer alone.
   browser-macos:
-    if: github.event_name != 'schedule'
+    needs: changes
+    if: needs.changes.outputs.browser-macos != '[]'
+    name: browser-macos (${{ matrix.name }})
     timeout-minutes: 50
     strategy:
       fail-fast: false
       matrix:
-        shard: [1/2, 2/2]
+        include: ${{ fromJson(needs.changes.outputs.browser-macos) }}
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v6.1.0
@@ -334,6 +414,81 @@ jobs:
           persist-credentials: false
       - uses: $/.github/actions/browser
         with:
-          suite: packages/renderers/harness
-          project: webkit-desktop
+          suite: ${{ matrix.suite }}
+          project: ${{ matrix.project }}
           shard: ${{ matrix.shard }}
+          grep: ${{ matrix.grep }}
+  # The core Engine's and default comparator's coverage thresholds, when a change reaches them
+  # (packages/engine/TESTING.md).
+  coverage:
+    needs: changes
+    if: needs.changes.outputs.coverage == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6.1.0
+        with:
+          persist-credentials: false
+      - uses: $/.github/actions/rust-quality
+        with:
+          task: coverage
+  # Mutation testing of the pull request's diff, when it changes a file .cargo/mutants.toml examines, in 6 round-robin
+  # shards. Measured on a 674-mutant diff (one unsharded run, cancelled at its 60-minute timeout): mutants 460 and 518
+  # finished 43 and 52 minutes in, about 10 a minute with --jobs 2 and 7 in the slowest file, so the whole diff needs
+  # ~75 minutes. A shard of ~113 takes 12-17 minutes plus ~3 of setup and baseline, well inside its 60, and leaves room
+  # for diffs up to ~1,500 mutants; past that, raise the count here and in the matrix. Cost: 6 runners for ~20 minutes,
+  # ~120 runner-minutes a pull request push. The weekly full run is engine-quality.yml.
+  mutants-diff:
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.mutants == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v6.1.0
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: $/.github/actions/rust-quality
+        with:
+          task: mutants-diff
+          base-ref: ${{ github.base_ref }}
+          shard: ${{ matrix.shard }}/6
+          artifact: mutants-diff-${{ matrix.shard }}
+  # The one required check. It fails unless `changes` succeeded and every other job passed or was left out by the plan:
+  # a failed, cancelled or timed-out job fails it, and a skipped one doesn't.
+  ci-ok:
+    if: always()
+    needs:
+      - changes
+      - docs
+      - public-product
+      - dependency-review
+      - actions-lock
+      - advisories
+      - verus
+      - browser
+      - package
+      - release-config
+      - windows
+      - windows-node
+      - windows-integration
+      - browser-macos
+      - coverage
+      - mutants-diff
+    timeout-minutes: 5
+    runs-on: ubuntu-24.04
+    steps:
+      - shell: bash
+        env:
+          NEEDS: ${{ toJson(needs) }}
+        run: |
+          echo "$NEEDS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          failed=$(echo "$NEEDS" | jq -r '[to_entries[] | select(.value.result != "success" and (.key == "changes" or .value.result != "skipped")) | .key] | join(", ")')
+          if [ -n "$failed" ]; then
+            echo "::error::Failed, cancelled or not run: $failed"
+            exit 1
+          fi

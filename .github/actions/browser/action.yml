@@ -13,8 +13,11 @@ inputs:
   shard:
     description: Playwright shard of `suite` (of `project`, when set), such as 1/3; empty runs all of it
     default: ''
+  grep:
+    description: Playwright --grep of `suite`, such as one renderer's tests in the renderer harness; empty runs all of it
+    default: ''
   sharded:
-    description: With suite `rest`, the workspace directories whose browser suites run in their own jobs
+    description: With suite `rest`, the workspace directories whose browser suites it leaves out (they run in their own jobs, or the change doesn't reach them)
     default: ''
 runs:
   using: composite
@@ -45,6 +48,7 @@ runs:
         SUITE: ${{ inputs.suite }}
         PROJECT: ${{ inputs.project }}
         SHARD: ${{ inputs.shard }}
+        GREP: ${{ inputs.grep }}
         SHARDED: ${{ inputs.sharded }}
       run: |
         # Names this job's failure artifact.
@@ -58,7 +62,7 @@ runs:
         if [ "$SUITE" = rest ]; then
           npm run test:browser -- --except "$SHARDED"
         else
-          npm run test:browser --workspace "$SUITE" -- ${PROJECT:+"--project=$PROJECT"} ${SHARD:+"--shard=$SHARD"}
+          npm run test:browser --workspace "$SUITE" -- ${PROJECT:+"--project=$PROJECT"} ${SHARD:+"--shard=$SHARD"} ${GREP:+"--grep=$GREP" --pass-with-no-tests}
         fi
     - if: failure()
       uses: actions/upload-artifact@v7.0.2

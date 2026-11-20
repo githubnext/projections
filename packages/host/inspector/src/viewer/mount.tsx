@@ -22,6 +22,7 @@ import {openRendererDocuments} from './documents.js'
 import {markReady, pageId, pairKey, settle, unapplied} from './page.js'
 import type {ViewerPage} from './page.js'
 import {ViewerHeader, ViewerShown, createStore, mountWaiting} from './chrome.js'
+import {ViewerPane} from './pane.js'
 import {pageView} from './page-view.js'
 import {statusText} from './state.js'
 import type {MountedViewer, MountViewerOptions, ViewerState} from './state.js'
@@ -219,6 +220,7 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
       chrome: 'viewer',
       ...(options.assets ? {assets: options.assets} : {}),
       banner: <ViewerHeader store={store} end={options.headerEnd} onChoose={projection => void choose(projection)} />,
+      aside: <ViewerPane store={store} onChoose={projection => void choose(projection)} />,
       utilityArea: true,
       toolbarStart: <ViewerShown store={store} />,
       ...(first.definitionRevision ? {definitionRevision: first.definitionRevision} : {}),

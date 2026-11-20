@@ -7,7 +7,9 @@ import type {InspectorHost} from '../host.js'
 import {StartupShell} from '../mount.js'
 import type {SwitcherItem} from '../shell/switcher.js'
 import type {ViewerState} from './state.js'
+import {readPanePinned, setPanePinned, usePaneShown} from './pane.js'
 import {ViewerTitle} from './title.js'
+import {usePaneRoom} from '@githubnext/projections-host/ui'
 
 interface Snapshot {
   state: ViewerState | undefined
@@ -26,11 +28,22 @@ interface Snapshot {
   notice?: string | undefined
   /** The notice's details, in the status line's tooltip. */
   noticeDetail?: string | undefined
+  /** Whether the person pinned the projections pane (viewer/pane.tsx), remembered across reloads. */
+  pinned: boolean
+  /** Where focus goes once the pane opens or closes: into it, or back to the title's menu. */
+  paneFocus?: 'pane' | 'menu' | undefined
 }
 
 /** A tiny store the header reads. */
 export function createStore() {
-  let snapshot: Snapshot = {state: undefined, status: 'Connecting…', stopped: false, projections: [], colorMode: 'light'}
+  let snapshot: Snapshot = {
+    state: undefined,
+    status: 'Connecting…',
+    stopped: false,
+    projections: [],
+    colorMode: 'light',
+    pinned: readPanePinned(),
+  }
   const listeners = new Set<() => void>()
   return {
     get: () => snapshot,
@@ -56,7 +69,7 @@ export type Store = ReturnType<typeof createStore>
  * control (`end`) closes the row.
  */
 export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactNode; onChoose?: (projection: string) => void}) {
-  const {state, status, stopped, projections, colorMode, choosing, failed, notice, noticeDetail} = useSyncExternalStore(
+  const {state, status, stopped, projections, colorMode, choosing, failed, notice, noticeDetail, paneFocus} = useSyncExternalStore(
     store.subscribe,
     store.get,
     store.get,
@@ -71,6 +84,9 @@ export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactN
   const noticed = !failed && !status && Boolean(notice)
   // A surface that already names the revisions (`InspectorHost.revisionsNamed`) isn't told them again.
   const named = useInspectorHost().revisionsNamed === true
+  // With the projections pane pinned, the title is the title alone; the menu offers pinning where the pane fits.
+  const paneShown = usePaneShown(store)
+  const paneRoom = usePaneRoom()
   return (
     <header className="pi-viewer-header pj:relative pj:z-20 pj:flex pj:min-w-0 pj:shrink-0 pj:items-center pj:gap-3 pj:border-b pj:border-divider pj:bg-surface-header pj:px-3 pj:text-[13px]">
       <ProjectionsMark tone="two-tone" className="pi-viewer-mark pj:text-foreground" />
@@ -79,7 +95,10 @@ export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactN
         current={shown}
         projections={projections}
         colorMode={colorMode}
-        onChoose={stopped ? undefined : onChoose}
+        onChoose={stopped || paneShown ? undefined : onChoose}
+        onPin={paneRoom && !stopped ? () => setPanePinned(store, true) : undefined}
+        focus={paneFocus === 'menu'}
+        onFocused={() => store.set({paneFocus: undefined})}
       />
       {line && (
         <span

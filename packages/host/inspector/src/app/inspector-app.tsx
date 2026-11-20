@@ -50,6 +50,7 @@ export function InspectorApp({
   initial: openedInitially,
   chrome = 'workbench',
   banner,
+  aside,
   toolbarStart,
   utilityArea = false,
   refresh = 'auto',
@@ -474,7 +475,7 @@ export function InspectorApp({
   )
   if (bare)
     return (
-      <BareFrame colorMode={theme.colorMode} viewer={viewer} mode={mode} banner={banner}>
+      <BareFrame colorMode={theme.colorMode} viewer={viewer} mode={mode} banner={banner} aside={aside}>
         {body}
       </BareFrame>
     )

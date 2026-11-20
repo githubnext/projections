@@ -1,4 +1,4 @@
-import {useId, useRef, useState} from 'react'
+import {useEffect, useId, useRef, useState} from 'react'
 import {ChevronDown} from 'lucide-react'
 import {SwitcherPopup} from '../shell/switcher.js'
 import type {SwitcherItem} from '../shell/switcher.js'
@@ -8,8 +8,9 @@ import type {SwitcherItem} from '../shell/switcher.js'
  * page's viewer (`view/choose`), as if the agent had shown it. It reads as the title, not a button: no fill or border
  * at rest, a small chevron after the text, a faint wash on hover and while open, and the focus ring for the keyboard
  * (styles.css). It opens the Inspector's own projection switcher popup from its start (Enter, Space, Arrow Down or a
- * click): a search by title or ID over the list, the current one checked. With fewer than two projections, or while
- * the page has lost its server, it is the title alone.
+ * click): a search by title or ID over the list, the current one checked, then "Pin projections pane" (`onPin`),
+ * which turns the list into a pane beside the stage (viewer/pane.tsx). With fewer than two projections, the pane
+ * pinned, or while the page has lost its server, it is the title alone. `focus` moves focus to it once the pane closes.
  */
 export function ViewerTitle({
   title,
@@ -17,13 +18,21 @@ export function ViewerTitle({
   projections,
   colorMode,
   onChoose,
+  onPin,
+  focus = false,
+  onFocused,
 }: {
   title: string
   current: string | undefined
   projections: readonly SwitcherItem[]
   colorMode: 'light' | 'dark'
-  /** Shows another projection; absent while nothing can reach the server. */
+  /** Shows another projection; absent while nothing can reach the server, or while the pane lists them. */
   onChoose: ((id: string) => void) | undefined
+  /** Pins the projections pane; absent where it wouldn't fit. */
+  onPin?: (() => void) | undefined
+  /** Takes focus (once the pane closes), then says so (`onFocused`). */
+  focus?: boolean
+  onFocused?: () => void
 }) {
   const id = useId()
   const trigger = useRef<HTMLButtonElement>(null)
@@ -34,6 +43,14 @@ export function ViewerTitle({
     </span>
   )
   const menu = onChoose && current && projections.length > 1 ? {onChoose, current} : undefined
+  const hasMenu = Boolean(menu)
+  // A menu that goes away (the pane pinned again as the page widens) closes, so it doesn't reopen when it comes back.
+  if (!hasMenu && open) setOpen(false)
+  useEffect(() => {
+    if (!focus || !hasMenu) return
+    trigger.current?.focus()
+    onFocused?.()
+  }, [focus, hasMenu, onFocused])
   return (
     <>
       <h1 className="pj:m-0 pj:flex pj:min-w-0 pj:flex-1 pj:items-center pj:text-[13px] pj:font-normal">
@@ -70,6 +87,13 @@ export function ViewerTitle({
           trigger={trigger}
           colorMode={colorMode}
           align="start"
+          onPin={
+            onPin &&
+            (() => {
+              setOpen(false)
+              onPin()
+            })
+          }
           onClose={() => setOpen(false)}
           onChoose={chosen => {
             setOpen(false)

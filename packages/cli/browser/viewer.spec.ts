@@ -706,7 +706,8 @@ test('a named viewer is its own page, and the person switches its projection fro
   await page.keyboard.press('ArrowDown')
   const dialog = page.getByRole('dialog', {name: 'Switch projection'})
   await expect(dialog).toBeVisible()
-  await expect(dialog.getByRole('option')).toHaveCount(2)
+  await expect(dialog.locator('[data-projection]')).toHaveCount(2)
+  await expect(dialog.getByRole('option', {name: 'Pin projections pane'})).toBeVisible()
   await page.keyboard.press('Escape')
   await expect(dialog).toHaveCount(0)
   await expect(trigger).toBeFocused()
@@ -726,6 +727,56 @@ test('a named viewer is its own page, and the person switches its projection fro
   const main = (await state()).state
   expect([main.projection, main.chosenBy]).toEqual([before.projection, 'agent'])
   expect(await pathsIn(page)).toEqual([])
+})
+
+test('the person pins the projections pane from the title, and closes it back to the menu', async ({page}) => {
+  expect((await control('control/show', {viewer: 'pane', projection: 'packages', choice: 'now'})).status).toBe(200)
+  await page.setViewportSize({width: 1280, height: 800})
+  await page.goto(`${url}?viewer=pane`)
+  const header = page.locator('.pi-viewer-header')
+  const trigger = header.getByRole('button', {name: 'Package map, switch projection'})
+  await expect(trigger).toBeVisible({timeout: 30_000})
+
+  // The menu's last option, after its projections, pins the pane: the arrow keys reach it.
+  await trigger.focus()
+  await page.keyboard.press('ArrowDown')
+  const dialog = page.getByRole('dialog', {name: 'Switch projection'})
+  for (let step = 0; step < 3 && (await dialog.locator('[data-pin-pane][aria-selected="true"]').count()) === 0; step++)
+    await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
+
+  // A navigation landmark at the page's start, 240px wide, its current projection focused; the title is the title alone.
+  const pane = page.getByRole('navigation', {name: 'Projections'})
+  await expect(pane).toBeVisible()
+  expect((await pane.boundingBox())?.width).toBe(240)
+  await expect(pane.locator('[aria-current="page"]')).toBeFocused()
+  await expect(pane.locator('[aria-current="page"]')).toContainText('Package map')
+  await expect(trigger).toHaveCount(0)
+  const toolbar = await page.locator('.ph-toolbar').first().boundingBox()
+  expect(toolbar?.x).toBe(240)
+
+  // Choosing another shows it; the pane stays pinned across a reload, without taking focus.
+  await pane.getByRole('button', {name: /Broken map/}).click()
+  await expect(header.locator('.pi-viewer-title')).toHaveText('Broken map')
+  await expect(pane.locator('[aria-current="page"]')).toContainText('Broken map')
+  await page.reload()
+  await expect(pane).toBeVisible({timeout: 30_000})
+  await expect(pane.locator('[aria-current="page"]')).not.toBeFocused()
+
+  // Too narrow for it, the page falls back to the menu, which doesn't offer it.
+  await page.setViewportSize({width: 860, height: 800})
+  await expect(pane).toHaveCount(0)
+  const narrow = header.getByRole('button', {name: 'Broken map, switch projection'})
+  await narrow.click()
+  await expect(dialog.getByRole('option', {name: 'Pin projections pane'})).toHaveCount(0)
+  await page.keyboard.press('Escape')
+
+  // Closing it returns to the menu, focused, and forgets it.
+  await page.setViewportSize({width: 1280, height: 800})
+  await pane.getByRole('button', {name: 'Close projections pane'}).click()
+  await expect(pane).toHaveCount(0)
+  await expect(narrow).toBeFocused()
+  expect(await page.evaluate(() => localStorage.getItem('projections:pane-pinned:viewer'))).toBeNull()
 })
 
 test('a page that loses its server says so, takes no input, and reconnects when it answers again', async ({page}) => {

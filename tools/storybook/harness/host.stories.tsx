@@ -1,6 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite'
 import {CoreHarness} from './host/core.js'
 import {EmbedHarness} from './host/embed.js'
+import {FitPlanHarness} from './host/fit-plan.js'
 import {HostHarness} from './host/explorer.js'
 
 /**
@@ -21,3 +22,5 @@ export const Explorer: Story = {render: () => <HostHarness />}
 export const CoreOnly: Story = {name: 'Core only', render: () => <CoreHarness />}
 /** The scoped stylesheet in a page with deliberately hostile global styles. */
 export const HostileEmbedding: Story = {name: 'Hostile embedding', render: () => <EmbedHarness />}
+/** A bar planned by the headless `useFitPlan` alone, with plain controls; `?lock` keeps the plan while focus is in it. */
+export const FitPlan: Story = {name: 'Fit plan', render: () => <FitPlanHarness />}

@@ -23,6 +23,8 @@ function trunkOf(ctx: RoutingContext, segment: Segment): Segment[] {
  */
 export function swapTrunks(ctx: RoutingContext, a: Segment, b: Segment): boolean {
   const {along} = ctx
+  // Only routes that turn have runs to trade.
+  if (Number.isNaN(runAt(ctx, a)) || Number.isNaN(runAt(ctx, b))) return false
   const [trunkA, trunkB] = [trunkOf(ctx, a), trunkOf(ctx, b)]
   const moving = [...trunkA, ...trunkB]
   const count = () => moving.reduce((sum, segment) => sum + ctx.crossingsOf(segment), 0)

@@ -1,12 +1,12 @@
-// Large architectures: unchanged module boundaries collapse into one summary card each, with their relationships
-// joined to it.
+// Large architecture comparisons: unchanged module boundaries collapse into one summary card each, with their
+// relationships joined to it.
 import type {Entity, Relationship} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {compareIds, isChanged} from '@githubnext/projections-renderer-kit'
 import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
+import {collapseLimit} from './limits.js'
 
-/** Above this many components (cards that aren't boundaries), unchanged boundaries collapse. */
-export const collapseAbove = 40
+export {collapseAbove, oneRevisionCollapseAbove} from './limits.js'
 
 /** Summary cards, the cards that collapse an expanded boundary again, and their links: drawn, never selected. */
 export const summaryPrefix = 'boundary:'
@@ -54,7 +54,8 @@ const unchanged = <T extends {id: string}>(item: T): EntityChange<T> => ({
 
 /**
  * An architecture with every unchanged boundary collapsed into one summary card (the boundary's name and `data`, and how
- * many components it holds), when it has more than `collapseAbove` components. A boundary stays open when anything in it
+ * many components it holds), when it has more than `limit` components (`collapseAbove` for a comparison,
+ * `oneRevisionCollapseAbove` for one revision). A boundary stays open when anything in it
  * changed, when a changed relationship touches anything in it, when it holds a `pinned` entity (the selection, or what
  * the host asked to focus) or when the person expanded it; an expanded one that could collapse gets a card to collapse
  * it again. A boundary open for its changes shows its unchanged components (two or more) as one `rest` card beside
@@ -62,7 +63,12 @@ const unchanged = <T extends {id: string}>(item: T): EntityChange<T> => ({
  * boundaries collapse into their outermost collapsible one. Everything is ordered by ID, so the same documents always
  * present the same graph.
  */
-export function architectureView(model: ComparisonModel, expansion: Expansion, pinned: ReadonlySet<string>): ArchitectureView {
+export function architectureView(
+  model: ComparisonModel,
+  expansion: Expansion,
+  pinned: ReadonlySet<string>,
+  limit = collapseLimit(model.mode),
+): ArchitectureView {
   const children = new Map<string, string[]>()
   const parent = new Map<string, string>()
   for (const row of model.relationships) {
@@ -76,7 +82,7 @@ export function architectureView(model: ComparisonModel, expansion: Expansion, p
   const boundaries = new Set(
     model.entities.filter(row => shown(row).kind === 'module' && children.has(row.id) && !linked.has(row.id)).map(row => row.id),
   )
-  const collapsible = model.entities.filter(row => !boundaries.has(row.id)).length > collapseAbove
+  const collapsible = model.entities.filter(row => !boundaries.has(row.id)).length > limit
   const none: ArchitectureView = {model, collapsible, cards: new Map(), links: new Map(), hidden: new Map()}
   if (!collapsible || expansion === 'all') return none
 

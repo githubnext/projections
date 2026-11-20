@@ -4,6 +4,10 @@ import {defineConfig, devices} from '@playwright/test'
  * Runs every renderer package's browser suite: `packages/renderers/<package>/browser/*.spec.ts`.
  * Filter by path, for example `npm run test:browser -w @githubnext/projections-renderer-harness -- database/`.
  */
+// WebKit on macOS records no trace, even in CI: tracing it holds every context's IOSurfaces in wired memory, which can't be compressed or
+// swapped, until the runner's WebKit processes die or stop answering mid-test (githubnext/projections#94).
+const webkitTrace = process.platform === 'darwin' ? {trace: 'off' as const} : {}
+
 export default defineConfig({
   testDir: '..',
   testMatch: /[\\/]browser[\\/][^\\/]+\.spec\.ts$/,
@@ -22,8 +26,8 @@ export default defineConfig({
   outputDir: './test-results',
   projects: [
     {name: 'chromium-desktop', use: {...devices['Desktop Chrome']}},
-    {name: 'webkit-desktop', use: {...devices['Desktop Safari']}},
+    {name: 'webkit-desktop', use: {...devices['Desktop Safari'], ...webkitTrace}},
     {name: 'chromium-mobile', use: {...devices['Pixel 7']}},
-    {name: 'webkit-mobile', use: {...devices['iPhone 13']}},
+    {name: 'webkit-mobile', use: {...devices['iPhone 13'], ...webkitTrace}},
   ],
 })

@@ -31,6 +31,7 @@ mod websocket;
 use std::{
     path::Path,
     sync::{Arc, atomic::AtomicBool},
+    time::Duration,
 };
 
 pub use base64::{base64_decode, base64_encode};
@@ -68,6 +69,10 @@ pub struct LaunchOptions<'a> {
     pub height: u32,
     /// Device pixels per CSS pixel in every frame, including out-of-process ones (sandboxed renderer frames).
     pub scale: f64,
+    /// How long the browser may take to start and answer its DevTools connection: the caller's own budget. A cold
+    /// start (the first since boot, its files not yet cached or scanned) takes several times a warm one, and far longer
+    /// on a loaded machine; a browser that exits fails at once whatever this allows.
+    pub startup: Duration,
     /// Cancels waits (for example on Ctrl+C), so the browser is still stopped.
     pub cancel: Arc<AtomicBool>,
 }

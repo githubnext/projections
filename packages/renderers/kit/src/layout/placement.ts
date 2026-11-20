@@ -13,8 +13,21 @@ export const layerGap = routeTail + 2 * routeRadius + arrowHeadReach + 2
 export const layerGapGrowth = 60
 /** How many times a layout grows its layer gap: a grown gap can move routes so that they need a little more. */
 export const layerGapAttempts = 3
-/** Space between cards in a layer (ELK `spacing.nodeNode`), and between a card with no relationships and what it is placed beside (see `placeUnlinked`). */
+/** Space a route keeps from a card it passes (ELK `spacing.edgeNode`). */
+export const edgeNodeSpacing = 20
+/**
+ * Space ELK keeps between cards in a layer (ELK `spacing.nodeNode`), and between a card with no relationships and what
+ * it is placed beside (see `placeUnlinked`). ELK's placement at this spacing decides each card's layer, order and
+ * column; a graph on a grid then spreads its columns to `columnGap` (see `snapToGrid`), which leaves those decisions
+ * as they are.
+ */
 export const nodeSpacing = 24
+/**
+ * Space between columns on the grid a top-to-bottom layout's cards snap to (see `columnGrid`): a channel for a route between two cards, clear
+ * of both (`edgeNodeSpacing` each side), with room to spare, so columns read apart and a relationship can pass
+ * between them.
+ */
+export const columnGap = 2 * edgeNodeSpacing + 8
 /** The root's padding on every side. */
 export const rootPadding = 32
 
@@ -60,7 +73,7 @@ export function elkOptions(
     ...(hinted ? {'elk.layered.layering.strategy': 'INTERACTIVE', 'elk.layered.crossingMinimization.semiInteractive': 'true'} : {}),
     'elk.spacing.nodeNode': String(nodeSpacing),
     'elk.layered.spacing.nodeNodeBetweenLayers': String(gap),
-    'elk.spacing.edgeNode': '20',
+    'elk.spacing.edgeNode': String(edgeNodeSpacing),
     // A route around cards jogs at least a full turn (and, before its target, the arrowhead's lead-in) from each layer,
     // so every jog becomes an S with the standard radius in the gap, clear of the cards (see `smoothRoute`).
     'elk.spacing.edgeEdge': '14',

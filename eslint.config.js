@@ -3,6 +3,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import globals from 'globals'
 import {defineConfig} from 'eslint/config'
 import tseslint from 'typescript-eslint'
+import {engineContractsRule} from './tools/scripts/engine-contracts.mjs'
 
 export default defineConfig(
   {
@@ -37,6 +38,12 @@ export default defineConfig(
       'no-constant-condition': ['error', {checkLoops: false}],
       eqeqeq: ['error', 'always', {null: 'ignore'}],
     },
+  },
+  {
+    // Decisions the engine owns (tools/scripts/engine-contracts.mjs): the code outside it asks the engine.
+    files: ['**/src/**/*.{ts,tsx,js,mjs}', 'tools/**/*.{ts,tsx,js,mjs}'],
+    ignores: ['packages/engine/**', 'tools/scripts/engine-contracts.test.mjs'],
+    rules: {'no-restricted-syntax': engineContractsRule},
   },
   {
     files: [

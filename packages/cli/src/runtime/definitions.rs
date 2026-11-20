@@ -164,7 +164,7 @@ impl Runner {
     pub(super) fn definition_digest(&self, definition: &Value, revision: &Revision) -> Result<String> {
         let mut hasher = Sha256::new();
         hasher.update(
-            projections_engine::canonical(&artifact::semantic_definition(definition))
+            projections_engine::canonical(&projections_engine::extraction_definition(definition))
                 .map_err(|failure| anyhow!("Cannot canonicalize the definition: {}", failure[0]))?,
         );
         let project = crate::project::prefix();

@@ -125,6 +125,28 @@ export function sameSummaryFilter(a: SummaryFilter | null | undefined, b: Summar
 }
 
 /**
+ * A summary filter toggle: a figure's total (`status` omitted) or one of its change counts. `pressed` while its filter
+ * is the one applied; `next` is the filter pressing it applies, `null` (every item) when it is pressed.
+ */
+export function summaryToggle(
+  applied: SummaryFilter | null,
+  figure: SummaryFigure,
+  status?: SummaryDelta,
+): {pressed: boolean; next: SummaryFilter | null} {
+  const filter = summaryFilterOf(figure, status)
+  const pressed = sameSummaryFilter(applied, filter)
+  return {pressed, next: pressed ? null : filter}
+}
+
+/** What pressing a filter toggle does, as its tooltip: `Show every item` while it is pressed, else `Show only the tables`. */
+export const summaryToggleTitle = (figure: SummaryFigure, pressed: boolean): string =>
+  pressed ? 'Show every item' : `Show only the ${figure.noun.plural}`
+
+/** A fact's tooltip: its description, then, when it filters (`pressed` given), what pressing it does. */
+export const summaryFactTitle = (figure: SummaryFigure, pressed?: boolean): string | undefined =>
+  [figure.description, pressed === undefined ? undefined : summaryToggleTitle(figure, pressed)].filter(Boolean).join('\n') || undefined
+
+/**
  * The figures as the summary bar's one sentence (`12 workspaces +1 −1 · 18 dependencies +2 · 1 newly enforced`), for
  * text and labels: counts and facts alike, each with its changes in a comparison.
  */

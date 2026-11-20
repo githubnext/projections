@@ -1,7 +1,7 @@
 // The building blocks, one module per concern (features, toolbar, pickers, view controls, playback, settings, about,
 // full screen), gathered under their public names.
-export {featureOn, offeredModes, rendererLabel} from './features.js'
-export type {ProjectionFeatures, ViewKind} from './features.js'
+export {featureOn, offeredModes, rendererLabel} from '../view-model.js'
+export type {ProjectionFeatures, ViewKind} from '../view-model.js'
 export {MoreMenu, MoreSection, Toolbar, ToolbarRow} from './toolbar.js'
 export {PairPicker} from './pickers.js'
 export type {PairForm} from './pickers.js'

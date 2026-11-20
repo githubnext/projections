@@ -26,6 +26,7 @@ export interface VscodeComparisonExplorerProps
       | 'onSelectionChange'
       | 'onProgressChange'
       | 'initialView'
+      | 'playbackInViews'
       | 'progress'
       | 'playing'
       | 'onPlayingChange'
@@ -219,6 +220,7 @@ export function VscodeComparisonExplorer(props: VscodeComparisonExplorerProps) {
           swipePosition={props.swipePosition ?? swipe}
           onSwipePositionChange={changeSwipe}
           {...(props.initialView ? {initialView: props.initialView} : {})}
+          {...(props.playbackInViews ? {playbackInViews: props.playbackInViews} : {})}
         />
       )}
     </div>

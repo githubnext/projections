@@ -102,3 +102,5 @@ Projections is an early prototype, pre-1.0. Features are incomplete, breaking
 changes are basically guaranteed, and there's no way all the documentation is
 correct. Nonetheless, if you're so inclined, we'd really love for you to give it
 a try and let us know what you think!
+
+<!-- CI gate test -->

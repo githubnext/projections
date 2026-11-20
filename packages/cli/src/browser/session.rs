@@ -101,7 +101,7 @@ impl Browser {
         let mut retried = false;
         loop {
             let (mut browser, pending) = Self::spawn(&options)?;
-            match browser.connect(pending, options.transport) {
+            match browser.connect(pending, options.transport, options.startup) {
                 Ok(()) => return Ok(browser),
                 Err(_) if !retried && browser.aborted() => retried = true,
                 Err(error) if retried => return Err(error.context("The browser was started again after it aborted while starting")),
@@ -182,9 +182,9 @@ impl Browser {
         Ok((browser, Pending { pipes, sender }))
     }
 
-    /// Connects to the started browser and waits until it answers.
-    fn connect(&mut self, pending: Pending, transport: Transport) -> Result<()> {
-        let deadline = Instant::now() + Duration::from_secs(30);
+    /// Connects to the started browser and waits, at most `startup`, until it answers.
+    fn connect(&mut self, pending: Pending, transport: Transport, startup: Duration) -> Result<()> {
+        let deadline = Instant::now() + startup;
         let Pending { pipes, sender } = pending;
         #[cfg(not(unix))]
         let () = pipes;
@@ -202,7 +202,7 @@ impl Browser {
             #[cfg(not(unix))]
             Transport::Pipe => unreachable!(),
             Transport::Port => {
-                let endpoint = self.active_port(deadline)?;
+                let endpoint = self.active_port(deadline, startup)?;
                 let (stream, reader) = connect_socket(&endpoint)?;
                 let writer = Arc::new(Mutex::new(stream));
                 let pong = writer.clone();
@@ -211,8 +211,12 @@ impl Browser {
             }
         };
         *self.writer.lock().unwrap_or_else(|error| error.into_inner()) = Some(writer);
-        self.call("Browser.getVersion", json!({}), None, deadline)
-            .context("The browser did not answer on its DevTools connection")?;
+        self.call("Browser.getVersion", json!({}), None, deadline).with_context(|| {
+            format!(
+                "The browser did not answer on its DevTools connection within {} s",
+                startup.as_secs()
+            )
+        })?;
         Ok(())
     }
 
@@ -234,7 +238,7 @@ impl Browser {
     }
 
     /// The `ws://` endpoint the browser writes to `DevToolsActivePort`.
-    fn active_port(&mut self, deadline: Instant) -> Result<(u16, String)> {
+    fn active_port(&mut self, deadline: Instant, startup: Duration) -> Result<(u16, String)> {
         let file = self.profile.path().join("DevToolsActivePort");
         loop {
             if let Ok(text) = std::fs::read_to_string(&file) {
@@ -252,7 +256,8 @@ impl Browser {
             self.check_alive()?;
             ensure!(
                 Instant::now() < deadline,
-                "The browser did not open its DevTools endpoint{}",
+                "The browser did not open its DevTools endpoint within {} s{}",
+                startup.as_secs(),
                 self.diagnostics()
             );
             thread::sleep(Duration::from_millis(50));
@@ -302,7 +307,7 @@ impl Browser {
             }
             let now = Instant::now();
             if now >= deadline {
-                bail!("The browser did not answer {method} in time");
+                bail!("The browser did not answer {method} in time{}", self.diagnostics());
             }
             match self.messages.recv_timeout((deadline - now).min(Duration::from_millis(100))) {
                 Ok(Ok(value)) if value["id"] == id => {

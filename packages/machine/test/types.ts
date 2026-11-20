@@ -3,7 +3,7 @@ import {after, createActor, defineMachine, emit, ignore} from '../src/index.js'
 
 type State = {kind: 'idle'} | {kind: 'running'; job: string} | {kind: 'done'; result: number}
 type Event = {type: 'start'; job: string} | {type: 'finished'; result: number} | {type: 'reset'}
-type Effect = {type: 'log'; text: string}
+type Effect = {readonly type: 'log'; readonly text: string} | {readonly type: 'notify'; readonly count: number}
 type Activity = {type: 'poll'; key: string; job: string}
 
 const define = defineMachine<State, Event, Effect, Activity>()
@@ -15,7 +15,8 @@ export const complete = define({
       on: {
         start: ignore,
         // The handler sees its own state's data and its own event's.
-        finished: (state, event) => emit({kind: 'done', result: event.result}, {type: 'log', text: state.job}),
+        finished: (state, event) =>
+          emit({kind: 'done', result: event.result}, {type: 'log', text: state.job}, {type: 'notify', count: event.result}),
         reset: () => ({kind: 'idle'}),
       },
       activities: state => [{type: 'poll', key: state.job, job: state.job}, after('limit', 1000, {type: 'reset'})],
@@ -77,9 +78,10 @@ define({
 
 createActor(complete, {
   state: {kind: 'idle'},
-  effects: {log: effect => effect.text},
+  // Each runner sees its own effect's fields.
+  effects: {log: effect => effect.text, notify: effect => effect.count},
   activities: {poll: (activity, context) => context.send({type: 'finished', result: activity.job.length})},
 })
 
 // @ts-expect-error An actor without a runner for each effect and activity type.
-createActor(complete, {state: {kind: 'idle'}, effects: {log: () => undefined}})
+createActor(complete, {state: {kind: 'idle'}, effects: {log: () => undefined, notify: () => undefined}})

@@ -110,7 +110,7 @@ function describe(path: ExplorePath<MachineState, MachineEvent, unknown>): strin
 /** Walks the states `machine` reaches and checks `options`' invariants; throws an `ExplorationError` on a violation. */
 export function explore<S extends MachineState, E extends MachineEvent, F extends MachineEffect, A extends MachineActivity>(
   machine: Machine<S, E, F, A>,
-  options: ExploreOptions<NoInfer<S>, NoInfer<E>, NoInfer<F>>,
+  options: NoInfer<ExploreOptions<S, E, F>>,
 ): Exploration<S> {
   const {depth = 12, limit = 20_000, timers = true, invariants = {}, transitions = {}} = options
   const key = options.key ?? stableKey

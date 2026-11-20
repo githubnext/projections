@@ -80,7 +80,7 @@ function defaultReport(error: unknown) {
 /** Creates an actor for `machine`, stopped: call `start` to run it. */
 export function createActor<S extends MachineState, E extends MachineEvent, F extends MachineEffect, A extends MachineActivity>(
   machine: Machine<S, E, F, A>,
-  options: ActorOptions<NoInfer<S>, NoInfer<E>, NoInfer<F>, NoInfer<A>>,
+  options: NoInfer<ActorOptions<S, E, F, A>>,
 ): Actor<S, E> {
   let state = options.state
   let running = false

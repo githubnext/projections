@@ -17,7 +17,7 @@ type Runners = Record<string, (task: never, context: never) => unknown>
  */
 export function useMachine<S extends MachineState, E extends MachineEvent, F extends MachineEffect, A extends MachineActivity>(
   machine: Machine<S, E, F, A>,
-  options: ActorOptions<NoInfer<S>, NoInfer<E>, NoInfer<F>, NoInfer<A>>,
+  options: NoInfer<ActorOptions<S, E, F, A>>,
 ): readonly [S, (event: E) => void, Actor<S, E>] {
   const latest = useRef(options)
   latest.current = options

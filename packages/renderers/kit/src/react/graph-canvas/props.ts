@@ -113,13 +113,6 @@ export interface GraphCanvasProps extends RendererProps {
    * the diff shows the After revision's. Pass a stable function: a new one lays out again.
    */
   icon?: ((entity: Entity) => string | undefined) | undefined
-  /**
-   * A card's weight, such as its lines of code: a gauge along the card's top edge from its leading corner, as long as
-   * the square root of its share of the heaviest row's weight (see `weightShares`), in its accent's paint, so the heavy
-   * parts of a graph stand out while every card keeps the graph's one width and the cards line up in columns. Rows
-   * without a positive weight have no gauge. Pass a stable function.
-   */
-  weight?: ((entity: Entity) => number | undefined) | undefined
   /** A card's accent: a band in its paint along the card's leading edge, its meaning in the card's accessible name. */
   accent?: ((entity: Entity) => CardAccent | undefined) | undefined
   /** A relationship's paint while its change isn't emphasized, such as a color per relationship kind. */

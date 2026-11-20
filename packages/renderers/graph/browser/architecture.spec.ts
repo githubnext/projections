@@ -258,17 +258,16 @@ test('a definition can give cards a subtitle, size them by a number and add word
   // The subtitle wraps to the card's one width, a line per tspan.
   await expect(server.locator('.node-subtitle')).toContainText(/Serves the\s*server/)
   await expect(server.locator('.node-detail')).toHaveText('9K')
-  // Every card keeps one width; the heavier card's gauge along its top edge is longer.
+  // Every card keeps one width, and the number is its only mark of size: no bar along its top edge.
   const width = async (card: typeof server) => Number(await card.locator('.node-surface').getAttribute('width'))
   expect(await width(server)).toBe(await width(store))
-  const gauge = async (card: typeof server) => (await card.locator('.node-gauge').boundingBox())?.width ?? 0
-  expect(await gauge(server)).toBeGreaterThan(await gauge(store))
+  await expect(renderer.frame.locator('.node-gauge')).toHaveCount(0)
   // Labels are words, in sans; badges are code, in monospace; subtitles are sans.
   await expect(server.locator('.node-badge-text')).toHaveText(['property tests', 'network', 'filesystem'])
   await expect(server.locator('.node-badge-text').first()).not.toHaveAttribute('data-projections-identifier')
   await expect(server.locator('.node-badge-text').nth(1)).toHaveAttribute('data-projections-identifier', '')
   await expect(server.locator('.node-subtitle')).not.toHaveAttribute('data-projections-identifier')
-  await expect.poll(async () => (await renderer.state()).legend?.items.at(-1)).toEqual({label: 'Top bar: lines'})
+  await expect.poll(async () => (await renderer.state()).legend?.items.at(-1)).toEqual({label: 'Number on each card: lines'})
 })
 
 test("a field naming icons draws each before its card's kind, crossfades a changed one and ignores unknown names", async ({page}) => {

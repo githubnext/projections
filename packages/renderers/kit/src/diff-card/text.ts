@@ -5,7 +5,7 @@ import {cardIconRoom} from '../card-icons.js'
 import {svgStatusWidth} from '../svg-status.js'
 import {cardFooterHeight, cardHeight} from '../layout.js'
 import {wrapText} from '../wrap.js'
-import {nextLine, writeFields, writeKindLine} from './lines.js'
+import {nextLine, writeDetail, writeFields, writeKindLine} from './lines.js'
 import type {CardLines, KindLine} from './lines.js'
 import {diffCardMetrics} from './metrics.js'
 import type {DiffCardInput, DiffCardText} from './metrics.js'
@@ -108,6 +108,9 @@ export function diffCardText(input: DiffCardInput): DiffCardText {
       })
     })
   })
+  // A file has no kind line: its detail (a size, a version) takes a line of its own under its path.
+  const fileDetail = file ? kindLine(input) : undefined
+  if (fileDetail?.detail !== undefined) writeDetail(card, fileDetail, false)
   writeFields(card, input.fields ?? [])
   return {lines: card.lines, width: cardWidth, height: Math.max(cardHeight(entity.kind), card.y + m.bottom + cardFooterHeight)}
 }

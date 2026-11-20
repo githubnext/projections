@@ -15,7 +15,7 @@ This file guides you, a coding agent, to find the projections that apply to this
 7. Adopt what they chose: `projections adopt <id>... --dry-run`, then `projections adopt <id>...`. If they want something no built-in projection shows, build it: run `projections help agents create-projection` and follow what it prints.
 8. Show them each adopted projection yourself: `projections view show -p <id> --choice bookmark:<bookmark>` (or the `open_projection` tool) shows it in the Projections viewer on a pull request it changed on (`projections bookmark list` lists the ones adopt saved) and prints the viewer’s URL. When the person asks to “open it in the inspector” or to “show” a projection, they mean this viewer.
 9. Open that page for them the first time: in your own browser if you have one (Codex’s, for example), else in the system browser by adding `--open`. Give them the bare link only when you can open neither. Later `projections view show` calls change what the open page shows; to show several projections side by side, give each its own page with `--viewer <name>` (the `viewer` input), and open each. In the GitHub Copilot app, use the Projections canvas instead of a browser tab: run `projections canvas install` once, then open the `projections` canvas, which shows the same viewer in the app’s theme (one canvas per viewer name).
-10. Talk them through what each one shows, and remove the definitions of any they don’t want. People who use VS Code can also look in the Projections extension (**Projections: Explore Repository**, from Step 1 of the quick start below).
+10. Talk them through what each one shows, and remove the definitions of any they don’t want. People who want an editor-integrated experience closer to the code can also use the VS Code extension (**Projections: Explore Repository**, under “Alternate path: the VS Code extension” below).
 11. When they are happy, offer to add Projections to their CI: run `projections help agents ci` and follow what it prints. Commit only if they ask.
 
 Projections shows the systems in your code (dependencies, schemas,
@@ -27,39 +27,27 @@ something useful and add those to your CI.
 
 **Estimated time: 5 minutes.**
 
-Paste this into your coding agent, or follow the steps below yourself:
+The fastest way to get started is to let your coding agent run the `projections`
+CLI and open the results for you in the **Projections viewer**, a page it drives
+in your agent's in-app browser or a standalone browser while you watch. Paste
+this into your coding agent, or follow the CLI steps below yourself:
 
-Your agent works with the `projections` CLI and opens the projections for you in
-the Projections viewer, a page in your browser that it drives while you watch.
-Or follow the steps below to do it yourself in VS Code.
+Prefer to work right beside your code in an editor? See
+[Alternate path: the VS Code extension](#alternate-path-the-vs-code-extension)
+below.
 
 ## Prerequisites
 
 - **A Git repository** with some history: merged pull requests, or at least a
   few commits.
-- **[VS Code](https://code.visualstudio.com)**.
 - **[GitHub CLI](https://cli.github.com)** (`gh`), signed in (`gh auth status`),
   to download and verify the CLI.
 
-## Step 1: Install the VS Code extension
+## Step 1: Install the CLI
 
-The Projections extension is where you explore, inspect and adopt projections,
-beside your code. It isn't on the Visual Studio Marketplace yet; publishing it
-there comes later. Until then, every
-[GitHub release](https://github.com/githubnext/projections/releases) attaches it
-as a `.vsix` for each platform, `projections-vscode-<version>-<platform>.vsix`
-([which file](https://github.com/githubnext/projections/blob/main/docs/setup/install.md#the-vs-code-extension)): install it with **Extensions:
-Install from VSIX…** in the Command Palette (⇧⌘P / Ctrl+Shift+P), or
-`code --install-extension <file>.vsix`. To run the extension from source, build
-it from the repository: the
-[extension's README](https://github.com/githubnext/projections/blob/main/docs/maintainers/vscode-extension.md#develop-and-test) has
-the steps.
-
-The extension runs the `projections` CLI, which is also what your coding agent,
-the terminal and CI use. The release's `.vsix` for your platform bundles it;
-otherwise the extension uses `projections` on your `PATH`, or the executable the
-`projections.cliPath` setting names. Download the release asset for your
-platform, verify it, and put it on your `PATH`:
+Your coding agent, the terminal, and CI all use the same self-contained
+`projections` CLI. Download the release asset for your platform, verify its
+attestation, and put it on your `PATH`:
 
 ```sh
 gh release download --repo githubnext/projections --pattern 'gh-projections-darwin-arm64*'
@@ -69,41 +57,41 @@ projections --version
 ```
 
 [Install the CLI](https://github.com/githubnext/projections/blob/main/docs/setup/install.md) lists every platform's asset, the installer
-scripts, Windows instructions and how to use it as `gh projections`.
+scripts, Windows instructions, and how to use it as `gh projections`.
 
 ## Step 2: Explore your repository
 
-Open your repository in VS Code and run **Projections: Explore Repository** from
-the Command Palette.
+From your repository root, list the projections that apply:
+
+```sh
+projections explore
+```
 
 Explore looks at the files your repository holds and proposes the projections
 that apply, each with why: workspace dependencies when it finds package
 manifests, the database when it finds a Prisma schema or a Rails `db/schema.rb`,
 a Rails application's routes, the job graph of your Actions workflows, the file
-map, and so on. It writes nothing. The **Explore** view lists them and runs each
-projection on the last 20 merges into your branch (or your last commits, if you
-squash or rebase).
+map, and so on. It writes nothing.
 
-The grid shows, for every pull request, what each projection saw: how many
-changes, a small picture of its diff, and "No change" where it saw nothing. Each
-column says how often that projection changed and whether it looks noisy (it
-changes on nearly every pull request) or structural (it shows up for the pull
-requests that reshape something). Open a cell to see that pull request in the
-Inspector, where you can change the projection's renderer and options live.
+To see how each candidate performs on your repository's real history, sweep the
+last 20 merges into your branch (or your last commits, if you squash or rebase):
+
+```sh
+projections explore --sweep
+```
+
+The sweep summarizes, for each projection, how often it changed across those
+pull requests and whether it looks noisy (changing on nearly every pull request)
+or structural (showing up for pull requests that reshape something). Pass
+`--json` for structured output when working with scripts or tools.
 
 Projections whose extractors run your repository's code (some built-in ones use
-your toolchain) are listed but skipped until you trust the workspace (VS Code's
-Workspace Trust). Review what they run first.
-
-Prefer the terminal, or working with an agent? `projections explore` lists the
-candidates, `projections explore --sweep` prints the same results as the grid
-(`--trust` runs the ones that run repository code), and `--json` gives them to
-tools.
+your toolchain) are listed but skipped until you pass `--trust`. Review what
+they run before trusting them.
 
 ## Step 3: Adopt the useful ones
 
-Tick **Adopt** on the projections worth keeping in the Explore view, preview,
-and write (or run **Projections: Adopt…**). Or, in the terminal:
+Keep the projections worth having by passing their IDs to `adopt`:
 
 ```sh
 projections adopt prisma-schema workspace-dependencies
@@ -111,23 +99,61 @@ projections adopt prisma-schema workspace-dependencies
 
 Adopting writes each projection's definition to `.github/projections/` and
 bookmarks the pull requests it showed the most on, so your team can look at them
-again (`projections bookmark run`). It never replaces a file. Commit them.
+again (`projections bookmark run`). It never replaces an existing file. Commit
+them when you're ready.
+
+To inspect an adopted projection interactively in the Projections viewer, run:
+
+```sh
+projections view show -p workspace-dependencies --choice branch --open
+```
+
+`--open` opens the viewer in a standalone browser (or, when driven by your
+coding agent, in the agent's in-app browser or Copilot canvas). You can also
+pass `--choice bookmark:<bookmark>` (`projections bookmark list` shows the
+bookmarks `adopt` saved).
 
 Want to see something no built-in projection shows, such as the services in your
 own configuration format? [Build your first projection](https://github.com/githubnext/projections/blob/main/docs/setup/first-projection.md): a
-coding agent writes a small extractor for your codebase.
+coding agent writes a small extractor for your codebase and shows you the result
+in the viewer.
 
 ## Step 4: Add to CI
 
 One step in your CI, the Projections GitHub Action, runs your projections on
 every pull request and push. Where it belongs depends on your CI: usually it is
 a step in the job that already installs your dependencies and builds, so nothing
-is installed twice. **Add to CI…** in the Explore view (or **Projections: Add to
-CI…**) hands this prompt to your coding agent, which reads your workflows,
-proposes where the step fits and shows you the change before writing it:
+is installed twice. Give this prompt to your coding agent, which reads your
+workflows, proposes where the step fits, and shows you the change before writing
+it:
 
 Commit the change and open a pull request: when its run finishes, the run's
-summary tells how the pull request reshapes your systems, step by step, and its
-artifact opens in VS Code with **Projections: Open Artifact…**.
-[Add Projections to CI](https://github.com/githubnext/projections/blob/main/docs/setup/ci.md) shows where the step goes and covers reviewing
-the results, permissions, trust and snapshots.
+summary tells how the pull request reshapes your systems, step by step, and
+uploads the projection documents as an artifact. [Add Projections to CI](https://github.com/githubnext/projections/blob/main/docs/setup/ci.md)
+shows where the step goes and covers reviewing the results, permissions, trust,
+and snapshots.
+
+## Alternate path: the VS Code extension
+
+If you prefer an editor-integrated workflow closer to your code, the Projections
+VS Code extension offers an alternate experience alongside your files. It isn't
+on the Visual Studio Marketplace yet; each
+[GitHub release](https://github.com/githubnext/projections/releases) attaches a
+`.vsix` per platform, `projections-vscode-<version>-<platform>.vsix` (which
+bundles the `projections` CLI; see
+[which file](https://github.com/githubnext/projections/blob/main/docs/setup/install.md#the-vs-code-extension)). Install it with **Extensions:
+Install from VSIX…** in the Command Palette (⇧⌘P / Ctrl+Shift+P), or
+`code --install-extension <file>.vsix`. To build from source, see the
+[extension's README](https://github.com/githubnext/projections/blob/main/docs/maintainers/vscode-extension.md#develop-and-test).
+
+Once installed, open your repository in VS Code:
+
+- Run **Projections: Explore Repository** from the Command Palette to see the
+  sweep as a visual grid, inspect any pull request cell, and tick **Adopt** (or
+  run **Projections: Adopt…**). Projections that run repository code wait for VS
+  Code's Workspace Trust.
+- Click any projection in the **Projections** side bar to open it as a tab that
+  reflects your uncommitted edits.
+- Use **Add to CI…** in the Explore view (or **Projections: Add to CI…**) to
+  hand the CI prompt to your agent, and **Projections: Open Artifact…** to
+  inspect a CI run's downloaded artifact.

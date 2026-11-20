@@ -5,10 +5,14 @@ next one you're likely to need.
 
 ## Use Projections
 
-1. [Install the CLI](setup/install.md), then follow the
-   [quick start](setup/quick-start.md): it explores a repository, shows a
-   projection and compares two revisions. Before a release reaches you, install
-   from a clone: [early access (from source)](setup/early-access.md).
+1. Follow the [quick start](setup/quick-start.md): give your coding agent the
+   setup prompt to run the CLI, explore your repository, and open projections in
+   the Projections viewer (in your agent's in-app browser or a standalone
+   browser), or [install the CLI](setup/install.md) yourself. Before a release
+   reaches you, install from a clone:
+   [early access (from source)](setup/early-access.md). For an alternate
+   experience closer to your code, see
+   [the VS Code extension](setup/install.md#the-vs-code-extension).
 2. [Build your first projection](setup/first-projection.md) and
    [add Projections to CI](setup/ci.md) with the GitHub Action.
 3. [Run projections locally](runner.md): every CLI workflow (`explore`, `show`,

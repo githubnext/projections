@@ -280,3 +280,6 @@ pub fn extend(ids: &mut Vec<String>, more: impl IntoIterator<Item = String>) {
     ids.sort_by(|a, b| utf16_cmp(a, b));
     ids.dedup();
 }
+
+#[cfg(test)]
+mod tests;

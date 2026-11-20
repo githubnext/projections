@@ -33,9 +33,15 @@ pub fn directory_in(base: &Path) -> Result<PathBuf> {
     crate::cache::unpack(base, env!("CARGO_PKG_VERSION"), FILES)
 }
 
+/// The variable that keeps Python from writing bytecode next to the modules it imports.
+const NO_BYTECODE: &str = "PYTHONDONTWRITEBYTECODE";
+
 /// `environment`'s `PYTHONPATH` with `directory` first, before any `PYTHONPATH` it already has (one that
-/// `execution.environment` passes through), joined with `separator`.
+/// `execution.environment` passes through), joined with `separator`. Python is also kept from writing bytecode, unless
+/// the environment says otherwise: importing the module would add a `__pycache__` to its verified cache directory,
+/// which the next extraction then finds altered and replaces, moving the module away from under one running then.
 pub fn prepend(environment: &mut BTreeMap<String, String>, directory: &str, separator: char) {
+    environment.entry(NO_BYTECODE.into()).or_insert_with(|| "1".into());
     let value = match environment.get(VARIABLE).filter(|value| !value.is_empty()) {
         Some(existing) => format!("{directory}{separator}{existing}"),
         None => directory.to_owned(),
@@ -159,6 +165,30 @@ mod tests {
         environment.insert(VARIABLE.into(), "/mine".into());
         prepend(&mut environment, "/cache/python", ':');
         assert_eq!(environment[VARIABLE], "/cache/python:/mine");
+    }
+
+    #[test]
+    fn importing_the_module_leaves_its_cache_directory_as_it_was_unpacked() {
+        let Some(python) = find("python3") else { return };
+        let base = tempfile::tempdir().unwrap();
+        let directory = directory_in(base.path()).unwrap();
+        let mut environment: BTreeMap<String, String> = std::env::vars().filter(|(name, _)| name != NO_BYTECODE).collect();
+        prepend(&mut environment, directory.to_str().unwrap(), SEPARATOR);
+        // Where this Python keeps a module's bytecode: next to it, or under a prefix it is configured with.
+        let output = Command::new(&python[0])
+            .args(&python[1..])
+            .args([
+                "-c",
+                "import importlib.util, projections; print(importlib.util.cache_from_source(projections.__file__))",
+            ])
+            .env_clear()
+            .envs(&environment)
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
+        let bytecode = PathBuf::from(String::from_utf8(output.stdout).unwrap().trim());
+        assert!(!bytecode.exists(), "Python wrote {}", bytecode.display());
+        assert!(!directory.join("projections/__pycache__").exists());
     }
 
     #[test]

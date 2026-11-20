@@ -18,7 +18,7 @@ for (const engine of ['chromium', 'webkit']) {
           ? [json]
           : operation === 'validate-comparison'
             ? [before, after, comparison]
-            : operation === 'vary'
+            : operation === 'vary' || operation === 'pair'
               ? [before, after]
               : [extraction]
       let expected

@@ -245,3 +245,5 @@ export const test = base.extend<Record<never, never>, {projections: InspectorOpt
 export {expect}
 export {ringGeometry} from './rings/geometry.js'
 export * from './rings.js'
+export {opticalInsets} from './optical.js'
+export type {OpticalInsets} from './optical.js'

@@ -8,7 +8,6 @@ import {
   compatibleRenderers,
   computeComparison,
   describeChange,
-  explainDefinitionMismatch,
   resolveRenderer,
   subjectRows,
 } from '../dist/index.js'
@@ -174,6 +173,11 @@ test('a renderer that declares what it accepts is not given other extractions: t
 
 const engine = {
   calls: [],
+  /** The engine's answer to `pair`, which tests set: this fake never decides pairing itself. */
+  pairing: {pairing: 'same'},
+  async pair() {
+    return this.pairing
+  },
   async compare(b, a, options) {
     this.calls.push(['compare', options])
     return comparison
@@ -188,32 +192,29 @@ const engine = {
   },
 }
 
-test('comparisons require one projection and one definition digest, and explain a mismatch', async () => {
-  await assert.rejects(
-    computeComparison({
-      engine,
-      before: document(before),
-      after: {...document(after), projection: {id: 'q', title: 'Q', renderer: 'graph'}},
-      comparator: {kind: 'default'},
-    }),
-    error => error instanceof ComparisonError && error.code === 'projection-mismatch',
-  )
-  const head = document(after, {definitionDigest: 'sha256:2', definition: {...definition, inputs: {scope: 'head'}}})
-  await assert.rejects(
-    computeComparison({engine, before: document(before), after: head, comparator: {kind: 'default'}}),
-    error => error.code === 'definition-mismatch' && error.details.includes('The inputs differs.'),
-  )
-  assert.deepEqual(explainDefinitionMismatch(document(before), document(after, {definitionDigest: 'sha256:2'})), [
-    'The definitions are identical, so the content of their declared component sources differs.',
-  ])
-  // Presentation defaults don't affect the digest, so they never explain a mismatch.
-  assert.deepEqual(
-    explainDefinitionMismatch(
-      document(before),
-      document(after, {definitionDigest: 'sha256:2', definition: {...definition, presentation: {mode: 'swipe'}}}),
-    ),
-    ['The definitions are identical, so the content of their declared component sources differs.'],
-  )
+test('comparisons require the engine to pair the extractions, and explain a mismatch', async () => {
+  const compare = pairing => {
+    engine.pairing = pairing
+    return computeComparison({engine, before: document(before), after: document(after), comparator: {kind: 'default'}})
+  }
+  try {
+    await assert.rejects(
+      compare({pairing: 'projection'}),
+      error => error instanceof ComparisonError && error.code === 'projection-mismatch',
+    )
+    await assert.rejects(
+      compare({pairing: 'definition', differing: ['inputs', 'execution']}),
+      error => error.code === 'definition-mismatch' && error.details.join(' ') === 'The inputs differs. The execution settings differs.',
+    )
+    await assert.rejects(
+      compare({pairing: 'components'}),
+      error =>
+        error.code === 'definition-mismatch' &&
+        error.details[0] === 'The definitions are identical, so the content of their declared component sources differs.',
+    )
+  } finally {
+    engine.pairing = {pairing: 'same'}
+  }
 })
 
 test('the default comparator runs with the definition options; a module runs on the baseline and is validated', async () => {

@@ -16,7 +16,7 @@ pub use comparison::{
     missing_inputs, notices, pairing_mismatch, revision_name, run_custom_comparator, run_custom_comparator_with_coverage, set_notices,
     validate_comparison, validate_comparison_with,
 };
-pub use definition::{COMPARATOR_DOCS, definition_sources, scope, semantic_definition, validate_definition};
+pub use definition::{COMPARATOR_DOCS, definition_sources, scope, validate_definition};
 pub use execution::validate_execution;
 pub use extraction::{extractor_id, validate_extraction};
 pub use io::{MAX_ARTIFACT_BYTES, MAX_DOCUMENT_BYTES, base64, byte_sha256, read_artifact, read_document};

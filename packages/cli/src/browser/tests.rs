@@ -136,6 +136,7 @@ fn launch_fake(executable: &Path) -> anyhow::Result<Browser> {
         width: 100,
         height: 100,
         scale: 1.0,
+        startup: Duration::from_secs(30),
         cancel: Arc::new(AtomicBool::new(false)),
     })
 }
@@ -154,6 +155,26 @@ fn a_browser_ended_by_a_signal_while_starting_is_started_once_more() {
     let error = launch_fake(&exiting).err().expect("an exiting browser fails");
     assert!(!format!("{error:#}").contains("started again"), "{error:#}");
     assert_eq!(std::fs::read_to_string(&starts).unwrap().lines().count(), 1);
+}
+
+#[cfg(unix)]
+#[test]
+fn a_browser_that_never_answers_fails_after_the_callers_startup_budget_with_its_output() {
+    let directory = tempfile::tempdir().unwrap();
+    let (silent, _) = fake_browser(directory.path(), "echo 'still starting' >&2\nexec sleep 60");
+    let error = Browser::launch(LaunchOptions {
+        executable: &silent,
+        transport: Transport::Pipe,
+        width: 100,
+        height: 100,
+        scale: 1.0,
+        startup: Duration::from_secs(1),
+        cancel: Arc::new(AtomicBool::new(false)),
+    })
+    .err()
+    .expect("a silent browser fails");
+    let message = format!("{error:#}");
+    assert!(message.contains("within 1 s") && message.contains("still starting"), "{message}");
 }
 
 /// A stand-in browser that records each start, then answers every DevTools command on the pipe.
@@ -189,6 +210,7 @@ fn a_pool_reuses_a_browser_launched_the_same_way() {
         width,
         height: 100,
         scale: 1.0,
+        startup: Duration::from_secs(30),
         cancel: Arc::new(AtomicBool::new(false)),
     };
     let render = |pool: &Pool, width| {
@@ -223,6 +245,7 @@ fn one_worker_closes_a_kept_browser_once_it_is_idle() {
                 width: 100,
                 height: 100,
                 scale: 1.0,
+                startup: Duration::from_secs(30),
                 cancel: Arc::new(AtomicBool::new(false)),
             })
             .unwrap();

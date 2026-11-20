@@ -39,13 +39,13 @@ native range input styled like Slider, see `.pj-range` in `../theme.css`),
 has no toolbar, so `toolbar.tsx` styles the Radix Toolbar primitive
 (`@radix-ui/react-toolbar`) with the same tokens: one Tab stop, roving focus
 with the arrow keys, and `ToolbarButton asChild` to make a `Button`,
-`SelectTrigger` or input an item. `useFitPlan` (exported here from
-`../fit-plan.ts`) chooses among a bar's planned layouts by measuring the bar
-itself, with hysteresis; an optional `ceiling` skips a plan on a bar wider than
-it suits (the view toolbar uses it to avoid a second row whose first row is
-mostly empty). The default UI's view toolbar and the Inspector's title bar both
-use it. The host's default UI keeps native `<select>` and range inputs where
-embedders and tests rely on native form semantics.
+`SelectTrigger` or input an item. `useFitPlan` (the headless core's, from
+`../../fit-plan.ts`, exported here too) chooses among a bar's planned layouts by
+measuring the bar itself, with hysteresis; an optional `ceiling` skips a plan on
+a bar wider than it suits (the view toolbar uses it to avoid a second row whose
+first row is mostly empty). The default UI's view toolbar and the Inspector's
+title bar both use it. The host's default UI keeps native `<select>` and range
+inputs where embedders and tests rely on native form semantics.
 
 `index.ts` is the `@githubnext/projections-host/ui/components` export for
 Projections apps such as the Inspector; Tailwind also scans

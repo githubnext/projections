@@ -225,11 +225,13 @@ export class ExtractionCoordinator {
     // Whether the run is still this generation's: a replaced generation's run publishes nothing more.
     const current = () => this.#run === run
     try {
-      let job = await api.run(
-        {projectionId: item.runAs ?? item.projection, before: item.ref, definitionRevision: item.definition},
-        abort.signal,
-      )
-      if (!current()) return
+      // Not aborted with the generation: a cancellation asked for while the job starts needs its ID, even once the
+      // generation has ended.
+      let job = await api.run({projectionId: item.runAs ?? item.projection, before: item.ref, definitionRevision: item.definition})
+      if (!current()) {
+        if (run.cancel) await api.cancel(job.id).catch(() => undefined)
+        return
+      }
       run.job = job.id
       const started = job
       this.#publish({

@@ -121,6 +121,22 @@ test('a cancellation while a job starts cancels it once named, and what was queu
   )
 })
 
+test('a cancellation asked for while a job starts still reaches it after the generation ends', async () => {
+  const {api, calls} = controlledApi()
+  const {extractions} = coordinator()
+  extractions.connect(api)
+  extractions.extract('p', ['HEAD'], {definition: 'wt'})
+  await extractions.cancel()
+  extractions.disconnect()
+  assert.equal(extractions.getSnapshot().rows.p.HEAD.status, 'cancelled')
+  assert.equal(extractions.getSnapshot().queue.length, 0)
+
+  calls[0].resolve(job('j1', 'running'))
+  await settle()
+  assert.equal(calls[1].method, 'cancel')
+  assert.equal(calls[1].args[0], 'j1')
+})
+
 test('a completion arriving after its row was asked for again, or dropped, publishes nothing', async t => {
   t.mock.timers.enable({apis: ['setTimeout']})
   const {api, calls} = controlledApi()

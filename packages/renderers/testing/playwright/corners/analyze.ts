@@ -24,6 +24,7 @@ export interface CornerProbe {
   sides: [CornerSide, CornerSide]
 }
 
+/** One ray across a corner's curve, from its arc's centre outward: what crosses the border there. */
 export interface CornerRay {
   /** Degrees from the vertical side (0) to the horizontal one (90). */
   angle: number
@@ -35,6 +36,7 @@ export interface CornerRay {
   outside: number
 }
 
+/** A corner's border measured in pixels, on its two sides and along rays around its curve. */
 export interface CornerMeasure {
   name: string
   /** The border's thickness on the vertical and horizontal side (null where it is too faint to measure). */

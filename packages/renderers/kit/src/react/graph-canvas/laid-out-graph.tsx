@@ -1,6 +1,6 @@
 // The graph drawn for one laid-out transition.
 import {useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react'
-import type {RefObject} from 'react'
+import type {CSSProperties, RefObject} from 'react'
 import {entityLabels} from '@githubnext/projections-renderer-sdk/presentation'
 import {emphasisInset} from '../../border.js'
 import {graphEntityLimit} from './props.js'
@@ -71,7 +71,16 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
   const shown = props.scope?.shown
   const area = useMemo(() => focusArea(transition, diff, props.model, request, shown), [transition, diff, props.model, request, shown])
   const drawn = nodes.map(node => ({x: node.x - node.width / 2, y: node.y - node.height / 2, width: node.width, height: node.height}))
-  const {zoom, scale, borders, keep} = useGraphZoom(scroller, framing, bounds, props.onAction, {area, request}, orientation, drawn, hold)
+  const {zoom, scale, borders, keep, top} = useGraphZoom(
+    scroller,
+    framing,
+    bounds,
+    props.onAction,
+    {area, request},
+    orientation,
+    drawn,
+    hold,
+  )
   drawnScale.current = scale
   useAnchoredScroll(scroller, change, transition, target, bounds, scale, keep)
   const draw = drawing(props, diff, emphasisInset(borders))
@@ -92,6 +101,7 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
         tabIndex={0}
         ref={scroller}
         data-zoom={zoom}
+        style={{'--pk-fit-top': `${top}px`} as CSSProperties}
       >
         {!nodes.length ? (
           <div className="empty-state" role="status">

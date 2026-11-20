@@ -16,6 +16,7 @@ import {
   CardChangeMarks,
   cardCornerRadius,
   useBorderWidths,
+  useCoveredPadding,
   useFitScale,
   useLegend,
   useOpeningFloor,
@@ -392,7 +393,7 @@ export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, o
   // Opens fitted, everything in view, unless that would draw its text below the kit's opening floor: then it opens at
   // the floor on its top row's leftmost card (from the layout alone, never the frame's momentary size) and scrolls.
   const floor = useOpeningFloor(scroller, diff)
-  const padding = useDiPadding()
+  const padding = useCoveredPadding(scroller, bounds, useDiPadding())
   // Zoomed in, a content-sized stage grows to the drawn scale (see `FitOptions.drawnScale`).
   const [drawnScale, setDrawnScale] = useState(0)
   const fit = useFitScale(scroller, bounds, {padding, floor, drawnScale})
@@ -410,6 +411,7 @@ export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, o
       <div
         className="di-scroll pk-dot-grid"
         ref={scroller}
+        style={{'--pk-fit-top': `${padding.top}px`} as CSSProperties}
         data-projections-scroll="dependency-injection"
         role="region"
         aria-label="Scrollable dependency composition"

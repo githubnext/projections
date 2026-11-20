@@ -6,7 +6,8 @@ import type {GraphTransition} from '../../graph-transition.js'
 import {contentStart, openingZoom} from '../../zoom.js'
 import {useBorderWidths} from '../border.js'
 import {useFitScale} from '../fit.js'
-import {useFrameSizing, useStageInset, useStageInsetTop} from '../shell/frame.js'
+import {useCoveredPadding} from '../covered-padding.js'
+import {useFrameSizing, useStageCover, useStageInset, useStageInsetTop} from '../shell/frame.js'
 import {useOpeningFloor, useStageZoom} from '../zoom.js'
 import type {ContentBox, ScrollStart} from '../../zoom.js'
 import type {LaidOutGraphProps} from './drawing.js'
@@ -21,11 +22,13 @@ const strokeRoom = 12
  * The space around a fitted graph, CSS px: `graphPadding`, or across the host's `stage-inset` (`styles/graph.css`
  * pads the drawing the same), where the drawing's sides then reach exactly to the outermost cards and routes (see
  * `useFraming`), so they line up with the host's column; and above it the host's `stage-inset-top`, where it sends
- * one, so the graph opens below what the host overlays on the frame's top.
+ * one, so the graph opens below what the host overlays on the frame's top. A host that says exactly what it overlays
+ * (`stage-cover`) leaves the top to `useCoveredPadding`, which moves it down only where the fitted graph would reach.
  */
 export function useGraphPadding(): GraphPadding {
   const x = useStageInset() ?? graphPadding
-  const top = useStageInsetTop() ?? graphPadding
+  const insetTop = useStageInsetTop()
+  const top = useStageCover() ? graphPadding : (insetTop ?? graphPadding)
   return useMemo(() => ({x, y: graphPadding, top}), [x, top])
 }
 
@@ -105,7 +108,7 @@ export function useGraphZoom(
 ) {
   const {area, request} = focus
   const floor = useOpeningFloor(scroller, framing)
-  const padding = useGraphPadding()
+  const padding = useCoveredPadding(scroller, bounds, useGraphPadding())
   const flush = useStageInset() !== undefined
   // The scale drawn last: zoomed in, a content-sized stage grows to it (see `FitOptions.drawnScale`).
   const [drawnScale, setDrawnScale] = useState(0)
@@ -151,7 +154,7 @@ export function useGraphZoom(
   )
   const zoom = useStageZoom(scroller, onAction, fit.scale, {floor, start, ...(opening ? {opening} : {}), ...(hold ? {hold} : {})})
   useLayoutEffect(() => setDrawnScale(zoom.scale), [zoom.scale])
-  return {...zoom, borders}
+  return {...zoom, borders, top: padding.top}
 }
 
 /** The opening view on a focus (see `useGraphZoom`), or undefined for the default one. */

@@ -1,4 +1,4 @@
-import {useEffect, useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
+import {useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
 import type {CSSProperties, ReactNode} from 'react'
 import {connectorBetween, connectorPath, twoPaneMode} from '../modes.js'
 import type {Connector, Side} from '../modes.js'
@@ -7,17 +7,28 @@ import type {PaneState} from '../pane.js'
 import type {ProjectionController} from '../projection.js'
 import {paneArrangement, paneGeometry, useSize} from './arrangement.js'
 import type {PaneArrangement} from './arrangement.js'
-import {PaneBand, PaneChip, paneChipClearance} from './labels.js'
+import {PaneBand, PaneChip} from './labels.js'
 import {accent, columnGapOf, stackedGapsOf, paneBleed, stageLayout} from './layout.js'
 import type {PaneEdge, PaneLabels} from './layout.js'
 import {DefaultStatus} from './status.js'
+import {useFrameCovers} from './cover.js'
+import type {FrameCover} from './cover.js'
+import {UtilityArea} from './utility.js'
 import {SwipeHandle} from './swipe-handle.js'
 
 /** What a pane shows while its renderer loads or after it fails, if anything: `ProjectionStage`'s `renderStatus`. */
 export type RenderStatus = ((pane: PaneState, side: Side | 'main') => ReactNode) | null | undefined
 
-/** How far a pane chip sits from its pane's edge when the stage doesn't bleed: about where renderers start their content. */
-const chipInset = 8
+/**
+ * How far a pane chip sits from its pane's edge when the stage doesn't bleed: where renderers start their content, the
+ * renderer kit's stage padding (`pk-stage`, `ContentView`) without a host `stage-inset`, so the chip's edge lines up
+ * with the tables and cards under it.
+ */
+const chipInset = 12
+
+/** The widest a swipe chip is, CSS px: half the stage less its inset and a gap at the middle, in whole pixels. */
+const swipeChipWidth = (width: number, inset: number) =>
+  Number.isFinite(width) ? Math.max(0, Math.floor(width / 2) - inset - 4) : undefined
 
 /** The panes of `ProjectionStage` for the mode: one frame, side by side's two cards, or swipe's two layers. */
 export function StageBody({
@@ -30,6 +41,7 @@ export function StageBody({
   paneEdge,
   bleed = 0,
   paneLabels = 'visible',
+  utility,
 }: {
   projection: ProjectionController
   beforeLabel: ReactNode
@@ -40,6 +52,7 @@ export function StageBody({
   paneEdge: PaneEdge
   bleed?: number
   paneLabels?: PaneLabels
+  utility?: ReactNode
 }) {
   const container = useRef<HTMLDivElement>(null)
   const id = useId()
@@ -97,17 +110,35 @@ export function StageBody({
     )
   }, [stage.anchors, stage.frames, selectedId, layout, stacked, mode, projection.connector])
 
-  // A held pane of side by side or swipe says so, so the renderer leaves out narration of the transition. A pane its
-  // chip overlays is told how much of its top the chip takes (`stage-inset-top`), so its content starts below it.
+  // What the stage overlays on each frame (the chips, the utility area) is measured in the frame's own coordinates and
+  // sent as its `stage-cover`, with the band it takes at the top as its `stage-inset-top`, so a renderer that honours
+  // them keeps its content clear of the cover (a fitted canvas only where it would reach it) and shows under it.
   const chips = paneLabels === 'chips'
+  const utilityShown = Boolean(utility) && !twoPanes
+  const frames = useCallback(
+    () => ({before: stage.frames.current.before?.iframe, after: stage.frames.current.after?.iframe}),
+    [stage.frames],
+  )
+  const covers = useFrameCovers(
+    container,
+    frames,
+    `${mode}-${stacked}-${chips}-${utilityShown}-${layout}-${width}-${height}-${projection.panes.before.status}-${projection.panes.after.status}`,
+    projection.reducedMotion,
+  )
+  // A held pane of side by side or swipe says so, so the renderer leaves out narration of the transition. The covers
+  // are measured before the frames first load, so a renderer opens with them; `covers` keeps its identity until they
+  // change.
   const paneEnvironment = useMemo(() => {
     const {theme} = stage.environment
-    const held = chips ? {...theme, tokens: {...theme.tokens, 'stage-inset-top': `${paneChipClearance}px`}} : theme
+    const covered = (cover: FrameCover | undefined) =>
+      cover ? {...theme, tokens: {...theme.tokens, 'stage-inset-top': `${cover.insetTop}px`, 'stage-cover': cover.cover}} : theme
+    const afterTheme = covered(covers.after)
     return {
-      before: {...stage.environment, theme: held, pane: 'before' as const},
-      after: {...stage.environment, theme: held, pane: 'after' as const},
+      before: {...stage.environment, theme: twoPanes ? covered(covers.before) : theme, pane: 'before' as const},
+      after: {...stage.environment, theme: afterTheme, pane: 'after' as const},
+      main: afterTheme === theme ? stage.environment : {...stage.environment, theme: afterTheme},
     }
-  }, [stage.environment, chips])
+  }, [stage.environment, covers, twoPanes])
   const status = (pane: PaneState, side: Side | 'main') =>
     renderStatus === null ? null : renderStatus ? (
       renderStatus(pane, side)
@@ -122,7 +153,7 @@ export function StageBody({
       {...(twoPanes ? {label: `${side} revision`} : {})}
       init={stage.init}
       progress={mode === 'diff' ? stage.diffProgress : twoPanes ? stage.endpoints[side] : stage.progressPayload}
-      environment={twoPanes ? paneEnvironment[side] : stage.environment}
+      environment={twoPanes ? paneEnvironment[side] : paneEnvironment.main}
       options={stage.options}
       action={stage.action}
       filter={stage.filter}
@@ -147,9 +178,11 @@ export function StageBody({
   )
   // Each pane's label is a header band above it, inside its section, or a chip overlaid on its frame's top corner. In
   // swipe each label lives in its own clipped layer (the before label at the left, the after label at the right), so
-  // the divider reveals and hides it exactly with the area it names.
+  // the divider reveals and hides it exactly with the area it names. Side by side's chips do the same in columns: the
+  // left pane's at its left, the right pane's at its right.
   const label = (side: Side) => {
-    const align = mode === 'swipe' && side === 'after' ? 'right' : 'left'
+    const outer = mode === 'swipe' || (chips && mode === 'side-by-side' && !stacked)
+    const align = outer && side === 'after' ? 'right' : 'left'
     const common = {
       side,
       id: `${id}-${side}`,
@@ -160,8 +193,9 @@ export function StageBody({
     if (chips) {
       // The chip starts where the renderer's content does: the stage inset the frame is given, less how far it bleeds.
       const edge = paneBleed(mode, stacked, side, bleed)[align === 'left' ? 'start' : 'end']
+      const inset = bleed > 0 ? bleed - edge : chipInset
       return (
-        <PaneChip key="label" {...common} inset={bleed > 0 ? bleed - edge : chipInset}>
+        <PaneChip key="label" {...common} inset={inset} maxWidth={mode === 'swipe' ? swipeChipWidth(width, inset) : undefined}>
           {side === 'before' ? beforeLabel : afterLabel}
         </PaneChip>
       )
@@ -213,6 +247,8 @@ export function StageBody({
         data-pane-card={twoPanes ? '' : undefined}
         style={sectionStyle('after')}
       >
+        {/* First, so keyboard focus reaches the stage's controls before the frame they float over. */}
+        {utilityShown && <UtilityArea key="utility">{utility}</UtilityArea>}
         {twoPanes && label('after')}
         {pane('after')}
       </section>

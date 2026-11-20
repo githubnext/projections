@@ -5,7 +5,8 @@ import {useProjection} from '../projection.js'
 import type {ProjectionController} from '../projection.js'
 import {Prose} from './prose.js'
 import {ProjectionStage} from '../stage.js'
-import {TableView, TextView} from './views.js'
+import {useUtilityPlayback} from './view/utility.js'
+import {HostViews} from './view/host-views.js'
 import {SummaryBar} from './summary-bar.js'
 import {DetailCard} from './detail-card.js'
 import {ComparatorLine, featureOn, offeredModes, rendererLabel, spaceTogglesPlayback, zoomGroup} from './blocks.js'
@@ -74,12 +75,22 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
   const notices = p.notices.slice(props.rendererNotice ? 1 : 0)
   const workspace = useRef<HTMLDivElement>(null)
   const space = showPlayback ? spaceTogglesPlayback(p) : undefined
+  // With a utility area, playback floats over the stage (or the table or text view) instead of taking a toolbar row.
+  const utility = props.utilityArea === true
+  const {panel, floating, scrollTop, toolbarPlayback, paneLabels, rootStyle} = useUtilityPlayback({
+    projection: p,
+    utility,
+    showPlayback,
+    view,
+    beforeLabel,
+    afterLabel,
+  })
   return (
     <ScopedRoot
       ref={root}
       colorMode={p.colorMode}
       className={cn('ph', props.className)}
-      style={p.themeStyle as CSSProperties}
+      style={{...(p.themeStyle as CSSProperties), ...rootStyle}}
       data-mode={subject.mode}
       data-view={view}
       data-progress={p.progress}
@@ -89,6 +100,7 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
       data-renderer-status={p.rendererStatus}
       data-rendered-progress={mode === 'animated' ? (p.renderedProgress ?? '') : ''}
       data-fill={fill || undefined}
+      data-utility-area={utility || undefined}
     >
       {on('title') && <h2 className="pj:sr-only">{p.projection.title}</h2>}
       {/*
@@ -105,7 +117,7 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
         root={root}
         modes={modes}
         showModes={showModes}
-        showPlayback={showPlayback}
+        showPlayback={toolbarPlayback}
         showZoom={showZoom}
         showVaried={showVaried}
         beforeLabel={beforeLabel}
@@ -162,7 +174,7 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
           fill && 'pj:flex-1',
         )}
       >
-        <div className="ph-panel pj:flex pj:min-h-0 pj:min-w-0 pj:flex-1 pj:flex-col">
+        <div ref={panel} className="ph-panel pj:relative pj:flex pj:min-h-0 pj:min-w-0 pj:flex-1 pj:flex-col">
           {/* The stage's chrome takes focus when clicked, so Space there toggles playback like in the toolbar. */}
           {renderer && (
             <div
@@ -175,6 +187,8 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
                 hidden={view !== 'renderer'}
                 labels={{before: beforeLabel, after: afterLabel}}
                 fill={fill}
+                paneLabels={paneLabels}
+                utility={view === 'renderer' && floating}
                 renderStatus={pane => (
                   <RendererPaneStatus
                     pane={pane}
@@ -189,33 +203,16 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
               />
             </div>
           )}
-          {view === 'table' && (
-            <div className={cn('ph-scroll pj:min-w-0 pj:bg-surface-canvas pj:p-3', fill && 'pj:min-h-0 pj:flex-1 pj:overflow-auto')}>
-              <TableView
-                subject={subject}
-                rows={p.visibleRows}
-                total={p.rows.length}
-                progress={p.progress}
-                selectedId={p.selectedId}
-                onSelect={p.select}
-                annotations={marks}
-                onAnnotationActivate={p.activateAnnotation}
-              />
-            </div>
-          )}
-          {view === 'text' && (
-            <div className={cn('ph-scroll pj:min-w-0 pj:bg-surface-canvas pj:p-3', fill && 'pj:min-h-0 pj:flex-1 pj:overflow-auto')}>
-              <TextView
-                subject={subject}
-                rows={p.visibleRows}
-                progress={p.progress}
-                selectedId={p.selectedId}
-                onSelect={p.select}
-                annotations={marks}
-                onAnnotationActivate={p.activateAnnotation}
-                summary={on('summary') ? p.summary : undefined}
-              />
-            </div>
+          {view !== 'renderer' && (
+            <HostViews
+              projection={p}
+              view={view}
+              fill={fill}
+              marks={marks}
+              summary={on('summary')}
+              floating={floating}
+              scrollTop={scrollTop}
+            />
           )}
         </div>
         {/* Without the summary bar, which says what the scope hides, a pill over the stage says it. */}

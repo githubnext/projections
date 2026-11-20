@@ -7,6 +7,7 @@ import {placedAttribute} from '../focus.js'
 import {clampZoom, dotGrid, maxZoom, openingZoom, zoomLimits} from '../zoom.js'
 import type {ScrollStart, StageZoom, StageZoomOptions} from '../zoom.js'
 import {pageWheel, useDragPan} from './drag-pan.js'
+import {useStageCover, useStageInsetTop} from './shell/frame.js'
 import {useControlActions} from './shell/mount.js'
 import type {RendererProps} from './shell/props.js'
 
@@ -32,11 +33,16 @@ export function useScrollAnchor(
   // Whether the person has scrolled: only their own input counts, never a scroll the browser makes (clamping the
   // offset when the frame resizes) or the view's own placement.
   const moved = useRef(false)
-  const current = useRef({scale, opening, start, onMove})
-  current.current = {scale, opening, start, onMove}
+  // Under a host's cover, a view that opens scrolled keeps the band the cover takes clear (`stage-inset-top`), so its
+  // first row opens below the cover rather than under it; it still pans under it.
+  const cover = useStageCover()
+  const insetTop = useStageInsetTop()
+  const clear = cover?.length ? (insetTop ?? 0) : 0
+  const current = useRef({scale, opening, start, onMove, clear})
+  current.current = {scale, opening, start, onMove, clear}
   // Places the view: at its start while it opens, else around the middle it had.
   const place = useRef((element: HTMLElement, recentre: boolean) => {
-    const {scale, opening, start} = current.current
+    const {scale, opening, start, clear} = current.current
     if (!scale) return
     if (opening && !moved.current) {
       const width = element.scrollWidth - element.clientWidth,
@@ -44,7 +50,7 @@ export function useScrollAnchor(
       if (typeof start === 'function') {
         const {left, top} = start({scale, width: element.clientWidth, height: element.clientHeight})
         element.scrollLeft = Math.max(0, Math.min(width, left))
-        element.scrollTop = Math.max(0, Math.min(height, top))
+        element.scrollTop = Math.max(0, Math.min(height, top - clear))
       } else {
         element.scrollLeft = start.x * width
         element.scrollTop = start.y * height
@@ -87,7 +93,7 @@ export function useScrollAnchor(
   useLayoutEffect(() => {
     const element = scroller.current
     if (element) place(element, true)
-  }, [scroller, scale, opening, start, place])
+  }, [scroller, scale, opening, start, clear, place])
   // The view as it is now is the one to keep: after its owner moves it, a later change keeps that middle.
   return useRef(() => {
     const element = scroller.current

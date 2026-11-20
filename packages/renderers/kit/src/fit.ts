@@ -90,3 +90,72 @@ export function contentHeightCap(token: string | undefined, viewport: {height: n
   if (match[2] === 'px') return Math.max(contentMinimumCap, Math.round(value))
   return viewport && viewport.height > 0 ? Math.max(contentMinimumCap, Math.round((viewport.height * value) / 100)) : undefined
 }
+
+/** A rectangle of the frame the host overlays (its `stage-cover` theme token), CSS px from the frame's top left. */
+export interface CoverRect {
+  /** Its left edge, CSS px from the frame's left. */
+  x: number
+  /** Its top edge, CSS px from the frame's top. */
+  y: number
+  /** Its width, CSS px. */
+  width: number
+  /** Its height, CSS px. */
+  height: number
+}
+
+/**
+ * The host's `stage-cover` theme token as rectangles: `x y width height` in CSS px, separated by commas. Undefined when
+ * the host sends none (the renderer keeps to `stage-inset-top`, if any); empty when it sends one that covers nothing.
+ */
+export function parseStageCover(token: string | undefined): CoverRect[] | undefined {
+  if (token === undefined) return undefined
+  const rects: CoverRect[] = []
+  for (const part of token.split(',')) {
+    const numbers = part.trim().split(/\s+/).map(Number)
+    if (numbers.length !== 4 || numbers.some(value => !Number.isFinite(value))) continue
+    const [x, y, width, height] = numbers as [number, number, number, number]
+    if (width > 0 && height > 0) rects.push({x, y, width, height})
+  }
+  return rects
+}
+
+/** The space kept between a fitted drawing and a cover above it, CSS px. */
+export const coverGap = 8
+
+/**
+ * The space a fitted drawing keeps above it, CSS px, so it never opens under what the host overlays (`cover`): the
+ * drawing is fitted with `padding` and centred in a stage of `view` whose top left is `origin` in the frame, as
+ * `useFitScale` and a `margin: auto` drawing place it. Where that leaves it clear of every rectangle (a flat graph
+ * centred well below a chip), the padding's own top; else the top that clears the lowest rectangle it reaches, by
+ * `coverGap`. Decided from the drawing's fit without the cover, never from the result, so it can't oscillate. The
+ * drawing still pans under the cover once zoomed.
+ */
+export function coveredTop({
+  cover,
+  view,
+  origin = {x: 0, y: 0},
+  size,
+  padding = 16,
+  maxScale = 1,
+}: {
+  cover: readonly CoverRect[]
+  view: {width: number; height: number}
+  origin?: {x: number; y: number}
+  size: {width: number; height: number}
+  padding?: number | FitPadding
+  maxScale?: number
+}): number {
+  const {x, y, top = y} = fitPadding(padding)
+  if (!cover.length || view.width <= 0 || view.height <= 0 || size.width <= 0 || size.height <= 0) return top
+  const {scale} = fitScale(size, view, {padding, maxScale})
+  const width = size.width * scale,
+    height = size.height * scale
+  const left = origin.x + Math.max(x, (view.width - width) / 2)
+  const contentTop = origin.y + Math.max(0, (view.height - (height + top + y)) / 2) + top
+  const reached = cover.filter(
+    rect => rect.x < left + width && rect.x + rect.width > left && rect.y < contentTop + height && rect.y + rect.height > origin.y,
+  )
+  if (!reached.length) return top
+  const bottom = Math.max(...reached.map(rect => rect.y + rect.height)) + coverGap
+  return bottom <= contentTop ? top : Math.max(top, Math.ceil(bottom - origin.y))
+}

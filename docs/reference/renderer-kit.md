@@ -712,6 +712,42 @@ countText(count: number, singular: string, plural?: string, locale?: string | un
 
 `count` and its noun, in the locale's digits: `1 package`, `3 packages`.
 
+### `coveredTop`
+
+```ts
+coveredTop(__0: { "cover": Array<CoverRect>; "maxScale"?: number; "origin"?: { "x": number; "y": number }; "padding"?: FitPadding | number; "size": { "height": number; "width": number }; "view": { "height": number; "width": number } }): number
+```
+
+The space a fitted drawing keeps above it, CSS px, so it never opens under what the host overlays (`cover`): the
+drawing is fitted with `padding` and centred in a stage of `view` whose top left is `origin` in the frame, as
+`useFitScale` and a `margin: auto` drawing place it. Where that leaves it clear of every rectangle (a flat graph
+centred well below a chip), the padding's own top; else the top that clears the lowest rectangle it reaches, by
+`coverGap`. Decided from the drawing's fit without the cover, never from the result, so it can't oscillate. The
+drawing still pans under the cover once zoomed.
+
+### `coverGap`
+
+```ts
+coverGap: 8
+```
+
+The space kept between a fitted drawing and a cover above it, CSS px.
+
+### `CoverRect`
+
+```ts
+interface CoverRect
+```
+
+A rectangle of the frame the host overlays (its `stage-cover` theme token), CSS px from the frame's top left.
+
+| Member | Signature | Description |
+|---|---|---|
+| `height` | `"height": number` | Its height, CSS px. |
+| `width` | `"width": number` | Its width, CSS px. |
+| `x` | `"x": number` | Its left edge, CSS px from the frame's left. |
+| `y` | `"y": number` | Its top edge, CSS px from the frame's top. |
+
 ### `createGraphTransition`
 
 ```ts
@@ -2072,6 +2108,15 @@ How `categoryPalette` assigns colors beyond its defaults.
 |---|---|---|
 | `distinct` | `"distinct"?: false \| true` | Choose each free slot to be as far as possible from every color already used (OKLab, in both themes), rather than by its preferred slot: for categories with no conventional color, such as entity kinds, so no two look alike. |
 | `pinned` | `"pinned"?: ReadonlyMap<string, "border-width" \| "border-width-thick" \| "chart-1" \| "chart-10" \| "chart-11" \| "chart-12" \| "chart-13" \| "chart-14" \| "chart-15" \| "chart-16" \| "chart-2" \| "chart-3" \| "chart-4" \| "chart-5" \| "chart-6" \| "chart-7" \| "chart-8" \| "chart-9" \| "color-accent" \| "color-accent-emphasis" \| "color-accent-muted" \| "color-added" \| "color-added-border" \| "color-added-emphasis" \| "color-added-highlight" \| "color-added-muted" \| "color-bg" \| "color-bg-inset" \| "color-bg-overlay" \| "color-bg-subtle" \| "color-border" \| "color-border-emphasis" \| "color-border-muted" \| "color-divider" \| "color-fg" \| "color-fg-muted" \| "color-fg-on-emphasis" \| "color-fg-subtle" \| "color-focus" \| "color-highlight" \| "color-modified" \| "color-modified-border" \| "color-modified-emphasis" \| "color-modified-highlight" \| "color-modified-muted" \| "color-moved" \| "color-moved-border" \| "color-moved-emphasis" \| "color-moved-highlight" \| "color-moved-muted" \| "color-removed" \| "color-removed-border" \| "color-removed-emphasis" \| "color-removed-highlight" \| "color-removed-muted" \| "color-surface-canvas" \| "color-surface-header" \| "color-surface-inset" \| "color-surface-raised" \| "control-height" \| "control-height-lg" \| "control-height-sm" \| "focus-ring-offset" \| "focus-ring-width" \| "font-family" \| "font-family-mono" \| "font-size" \| "font-size-lg" \| "font-size-sm" \| "font-size-xl" \| "font-size-xs" \| "font-weight-bold" \| "font-weight-medium" \| "font-weight-normal" \| "font-weight-semibold" \| "icon-added" \| "icon-additive" \| "icon-agent" \| "icon-application" \| "icon-blocked" \| "icon-breaking" \| "icon-bytecode" \| "icon-changed" \| "icon-collapse" \| "icon-comparator" \| "icon-compatible" \| "icon-credential" \| "icon-downgraded" \| "icon-enforced" \| "icon-error" \| "icon-exclude" \| "icon-expand" \| "icon-extractor" \| "icon-file" \| "icon-generated" \| "icon-hidden" \| "icon-host" \| "icon-import" \| "icon-include" \| "icon-info" \| "icon-modified" \| "icon-module" \| "icon-moved" \| "icon-namespace" \| "icon-network" \| "icon-other" \| "icon-policy" \| "icon-process" \| "icon-read" \| "icon-redeploy" \| "icon-removed" \| "icon-renamed" \| "icon-renderer" \| "icon-replace" \| "icon-rescoped" \| "icon-settings" \| "icon-unenforced" \| "icon-unknown" \| "icon-upgraded" \| "icon-varied" \| "icon-visible" \| "icon-warning" \| "icon-workload" \| "label-font-size" \| "label-font-weight" \| "label-height" \| "label-padding-x" \| "label-radius" \| "line-height" \| "line-height-relaxed" \| "line-height-tight" \| "radius" \| "radius-full" \| "radius-lg" \| "radius-sm" \| "shadow-lg" \| "shadow-md" \| "shadow-sm" \| "space-1" \| "space-2" \| "space-3" \| "space-4" \| "space-5" \| "space-6" \| "space-7" \| "space-8">` | Categories whose color is set (a definition's kind colors), by key: they keep it, and the rest keep clear of it. |
+
+### `parseStageCover`
+
+```ts
+parseStageCover(token: string | undefined): Array<CoverRect> | undefined
+```
+
+The host's `stage-cover` theme token as rectangles: `x y width height` in CSS px, separated by commas. Undefined when
+the host sends none (the renderer keeps to `stage-inset-top`, if any); empty when it sends one that covers nothing.
 
 ### `parseTableSort`
 
@@ -4241,6 +4286,18 @@ useControlActions(onAction: { (listener: { (id: string): void }): { (): void } }
 Runs `handlers[id]` when the host activates the declared action control
 `id`, for as long as the component is mounted.
 
+### `useCoveredPadding`
+
+```ts
+useCoveredPadding<P extends FitPadding>(stage: RefObject<HTMLElement | null>, size: undefined | { "height": number; "width": number }, padding: P, maxScale?: number): P
+```
+
+`padding` for content of `size` fitted to the stage element `stage` (as `useFitScale` fits it), with its top moved
+down only where the host's cover (`useStageCover`) would otherwise lie over the fitted drawing (see `coveredTop`):
+a flat graph centred below a pane's chips keeps its own top, a tall one opens below them. Without a cover,
+`padding` as it is. Pass the result to `useFitScale` and pad the drawing's top by its `top` (the kit's
+`--pk-fit-top`, which graph.css reads). The stage is measured in the frame on every resize.
+
 ### `useDomainIndex`
 
 ```ts
@@ -4371,6 +4428,16 @@ default its top left, where reading begins) rather than cut through the middle.
 `onMove` is called when the person first scrolls, drags, taps or presses a
 scroll key in content that overflows: the moment they start to pan.
 Returns a function that keeps the view where its caller just scrolled it.
+
+### `useStageCover`
+
+```ts
+useStageCover(): Array<CoverRect> | undefined
+```
+
+The rectangles of the frame the host overlays (its `stage-cover` theme token, see `parseStageCover`), CSS px from
+the frame's top left, or undefined when it sends none. A fitted canvas keeps clear of them only where its drawing
+would reach them (`useCoveredPadding`); content that scrolls pads by `stage-inset-top` instead.
 
 ### `useStageHeightCap`
 

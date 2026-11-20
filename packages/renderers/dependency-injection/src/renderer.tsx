@@ -1,18 +1,19 @@
 import {useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
-import type {ReactNode} from 'react'
+import type {CSSProperties, ReactNode} from 'react'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import {cardBorderOutset, emphasisInset, classifyChange, contentStart, describeChange} from '@githubnext/projections-renderer-kit'
 import type {ScrollStart} from '@githubnext/projections-renderer-kit'
 import {
-  EdgeArrowMarker,
   CardChangeMarks,
-  EmptyDomain,
   cardCornerRadius,
+  EdgeArrowMarker,
+  EmptyDomain,
   useBorderWidths,
+  useCoveredPadding,
   useFitScale,
+  useLegend,
   useOpeningFloor,
   useStageZoom,
-  useLegend,
 } from '@githubnext/projections-renderer-kit/react'
 import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
 import {unitParts} from './model.js'
@@ -408,7 +409,7 @@ function TransitionView({
   // its text below the kit's opening floor: then it opens at the floor, on its root, and scrolls. Zoom enlarges it,
   // keeping the middle (the spine) in view. Both endpoints share the framing and the floor.
   const floor = useOpeningFloor(scroller, transition)
-  const padding = useDiPadding()
+  const padding = useCoveredPadding(scroller, bounds, useDiPadding())
   // Zoomed in, a content-sized stage grows to the drawn scale (see `FitOptions.drawnScale`).
   const [drawnScale, setDrawnScale] = useState(0)
   const fit = useFitScale(scroller, bounds, {padding, floor, drawnScale})
@@ -445,6 +446,7 @@ function TransitionView({
       <div
         className="di-scroll pk-dot-grid"
         ref={scroller}
+        style={{'--pk-fit-top': `${padding.top}px`} as CSSProperties}
         data-projections-scroll="dependency-injection"
         role="region"
         aria-label="Scrollable dependency composition"

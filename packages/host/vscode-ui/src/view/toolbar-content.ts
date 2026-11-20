@@ -8,7 +8,7 @@ import type {VscodeProjectionViewProps} from './props.js'
 
 export interface ViewToolbarProps {
   projection: ProjectionController
-  props: Pick<VscodeProjectionViewProps, 'toolbarStart' | 'actions' | 'comparator' | 'diagnostics'>
+  props: Pick<VscodeProjectionViewProps, 'toolbarStart' | 'centreModes' | 'actions' | 'comparator' | 'diagnostics'>
   features: VscodeProjectionFeatures
   /** The modes the features offer that the renderer supports. */
   modes: readonly ComparisonMode[]

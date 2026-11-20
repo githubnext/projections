@@ -225,6 +225,7 @@ export function Toolbar({
   const attributes = layout
     ? {
         'data-rows': layout.rows,
+        'data-cluster': layout.cluster,
         'data-pickers': layout.pickers,
         'data-modes': layout.modes,
         'data-step': layout.step,

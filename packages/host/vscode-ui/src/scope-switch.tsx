@@ -11,67 +11,79 @@ const scopeNames: Record<ViewScope, {label: string; title: string}> = {
 
 /**
  * The scope, beside the mode switch and like it a radio group (arrows move and choose, the checked one is in the tab
- * order): Changes and All with their counts ("Changes 4", "All 82"), and Noise while it is the scope. Hidden unless comparing.
+ * order): Changes and All with their counts ("Changes 4", "All 82"), and Noise while it is the scope. When the Changes
+ * scope hides nothing, a note says so instead ("Changes 2 · nothing hidden"), in the same room. Hidden unless comparing.
  */
 export function ScopeSwitch({projection: p}: {projection: ProjectionController}) {
   const group = useRef<HTMLDivElement>(null)
   if (!p.comparing) return null
   // Every item is a change or gives one context: Changes and All show the same, so there is nothing to switch.
-  if (!p.scopeCounts.hidden && p.scope !== 'noise')
-    return (
-      <span className="phv-scope-note" title={nothingHiddenTitle} data-scope="none">
-        <span className="phv-scope-note-name">Changes</span>
-        <span className="phv-scope-count">{p.scopeCounts.changes.toLocaleString()}</span>
-        <span aria-hidden="true">·</span>
-        nothing hidden
-      </span>
-    )
+  const nothingHidden = !p.scopeCounts.hidden && p.scope !== 'noise'
   const scopes: ViewScope[] = p.scope === 'noise' ? ['changes', 'all', 'noise'] : ['changes', 'all']
   const index = Math.max(0, scopes.indexOf(p.scope))
+  // Every count takes the widest one's digits, so the switch (centred in the toolbar) keeps its width as counts change.
+  const digits = Math.max(...scopes.map(scope => p.scopeCounts[scope].toLocaleString().length))
   const choose = (next: number) => {
     const scope = scopes[(next + scopes.length) % scopes.length]!
     flushSync(() => p.setScope(scope))
     group.current?.querySelector<HTMLButtonElement>(`[data-scope="${scope}"]`)?.focus()
   }
+  // Both forms share one cell, the other one invisible, so the slot keeps its width when the form changes.
   return (
-    <div
-      ref={group}
-      role="radiogroup"
-      aria-label="Scope"
-      className="phv-scope-switch"
-      onKeyDown={event => {
-        const step =
-          event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0
-        const edge = event.key === 'Home' ? 0 : event.key === 'End' ? scopes.length - 1 : undefined
-        if (!step && edge === undefined) return
-        event.preventDefault()
-        choose(edge ?? index + step)
-      }}
-    >
-      {scopes.map((scope, position) => {
-        const count = p.scopeCounts[scope].toLocaleString()
-        const {label, title} = scopeNames[scope]
-        return (
-          <button
-            key={scope}
-            type="button"
-            role="radio"
-            aria-checked={p.scope === scope}
-            aria-label={`${label}, ${count}`}
-            title={`${title} (${count})`}
-            tabIndex={position === index ? 0 : -1}
-            className="phv-scope"
-            data-scope={scope}
-            onClick={() => p.setScope(scope)}
-          >
-            {label}
-            <span aria-hidden="true" className="phv-scope-count">
-              {count}
-            </span>
-          </button>
-        )
-      })}
-    </div>
+    <span className="phv-scope-slot">
+      <span
+        className="phv-scope-note"
+        title={nothingHiddenTitle}
+        data-scope="none"
+        data-inactive={!nothingHidden || undefined}
+        aria-hidden={!nothingHidden || undefined}
+      >
+        <span className="phv-scope-note-name">Changes</span>
+        <span className="phv-scope-count">{p.scopeCounts.changes.toLocaleString()}</span>
+        <span aria-hidden="true">·</span>
+        nothing hidden
+      </span>
+      <div
+        ref={group}
+        role="radiogroup"
+        aria-label="Scope"
+        data-inactive={nothingHidden || undefined}
+        aria-hidden={nothingHidden || undefined}
+        className="phv-scope-switch"
+        onKeyDown={event => {
+          const step =
+            event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0
+          const edge = event.key === 'Home' ? 0 : event.key === 'End' ? scopes.length - 1 : undefined
+          if (!step && edge === undefined) return
+          event.preventDefault()
+          choose(edge ?? index + step)
+        }}
+      >
+        {scopes.map((scope, position) => {
+          const count = p.scopeCounts[scope].toLocaleString()
+          const {label, title} = scopeNames[scope]
+          return (
+            <button
+              key={scope}
+              type="button"
+              role="radio"
+              aria-checked={p.scope === scope}
+              aria-label={`${label}, ${count}`}
+              title={`${title} (${count})`}
+              tabIndex={position === index ? 0 : -1}
+              className="phv-scope"
+              data-scope={scope}
+              onClick={() => p.setScope(scope)}
+            >
+              {label}
+              <span aria-hidden="true" className="phv-scope-count" style={{minWidth: `${digits}ch`}}>
+                {count}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </span>
   )
 }
 

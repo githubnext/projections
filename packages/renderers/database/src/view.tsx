@@ -25,9 +25,6 @@ import type {SchemaFrame} from './frame.js'
 import {morphSchemaFrame} from './morph.js'
 import {useNaturalHeight, useViewSize} from './view-size.js'
 
-/** The document's identity while the host hasn't said what it shows. */
-const provisional = Symbol('provisional')
-
 /** How long cards, rows and links move to a new layout of the schema. */
 const moveMs = 320
 
@@ -100,7 +97,9 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
         : undefined,
     [diff, model, available, links, text.measure, text.chrome],
   )
-  // Before the host's filter, every table is drawn provisionally: the first scope it chooses is drawn at once.
+  // Before the host's filter, every table is drawn provisionally, as a document of its own for each model: the first
+  // scope the host chooses is drawn at once, and so is every new model while no filter comes (a host without one).
+  const provisional = useMemo(() => ({provisional: model}), [model])
   const document = props.filtered === false ? provisional : (props.scope?.all ?? model)
   const [frame, moving] = useFrameMorph(union ? union.frame : transition!(progress), model, document, props.reducedMotion)
   const tagSource = union ?? transition!

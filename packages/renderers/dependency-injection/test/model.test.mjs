@@ -128,6 +128,7 @@ test("a rewired dependency's old route leaves with the card it pointed to, empha
   const route = links(middle).get(`${retiredLink}:before`)
   assert.equal(route.status, 'removed')
   assert.ok(route.opacity > 0 && route.opacity < 1, 'it fades out in the step that removes the card')
+  assert.equal(route.opacity, byId(middle).get(removed).opacity, 'once, with the card, not twice')
 })
 
 test('units and links follow the comparison steps, with identity only from the comparison', async () => {

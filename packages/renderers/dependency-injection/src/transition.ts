@@ -149,8 +149,8 @@ export function createDiTransition(
           from: {x: from.x, y: from.y + height / 2},
           to: {x: to.x, y: to.y - height / 2},
           status: side === 'both' ? (relationshipStatus.get(link.id) ?? 'unchanged') : side === 'before' ? 'removed' : 'added',
-          // A relationship never outlives, or precedes, either of its cards.
-          opacity: (side === 'both' ? 1 : side === 'before' ? 1 - local : local) * Math.min(from.opacity, to.opacity),
+          // A relationship never outlives, or precedes, either of its cards, and one leaving with its card fades once, with it.
+          opacity: Math.min(side === 'both' ? 1 : side === 'before' ? 1 - local : local, from.opacity, to.opacity),
           parameter: link.parameter,
           collection: link.collection,
           optional: link.optional,

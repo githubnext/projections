@@ -200,3 +200,40 @@ test('a shown entity brings the items containing it, though the context that nam
   const scope = changeContext(contextRows, {before, after}, ['tool:listen'])
   assert.deepEqual([...scope.context].sort(), ['tool:check', 'tool:check/path', 'tool:check>tool:check/path'])
 })
+
+test('a containment relationship one revision brings has its endpoints in both', () => {
+  const node = id => ({id, kind: 'module', label: id})
+  const graph = relationships => ({
+    protocolVersion: 0,
+    schema: 'graph/v0',
+    entities: ['p', 'q', 'other', 'leaf', 'x'].map(node),
+    relationships,
+  })
+  // `r` moves from q → other to p → leaf; a rule gives `x` the context `leaf`.
+  const old = graph([{id: 'r', kind: 'contains', from: 'q', to: 'other'}])
+  const current = graph([{id: 'r', kind: 'contains', from: 'p', to: 'leaf'}])
+  const rows = scopeRows(
+    presentComparison(
+      old,
+      {...current, entities: current.entities.map(entity => (entity.id === 'x' ? {...entity, label: 'X'} : entity))},
+      {
+        protocolVersion: 0,
+        changes: [
+          {
+            id: 'x',
+            collection: 'entities',
+            before: ['x'],
+            after: ['x'],
+            status: 'modified',
+            correspondence: 'exact',
+            context: {before: [], after: ['leaf']},
+          },
+          {id: 'r', collection: 'relationships', before: ['r'], after: ['r'], status: 'modified', correspondence: 'exact'},
+        ],
+        steps: [{changes: ['x', 'r']}],
+      },
+    ),
+  )
+  const scope = changeContext(rows, {before: old, after: current}, ['x'])
+  assert.deepEqual([...scope.context].sort(), ['leaf', 'other', 'p', 'q', 'r'])
+})

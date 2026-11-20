@@ -28,8 +28,16 @@ export function structureOf(revision: ContainmentSource): Structure {
 /**
  * Adds a row's structural context in one revision, as item IDs, to `found`: what the Engine's core context holds, with
  * the row's own items. Items already in `found` aren't traversed again, so several rows can share one traversal.
+ * Returns the IDs it added.
  */
-export function traverse(structure: Structure, row: ScopeRow, side: Side, found: Set<string>): void {
+export function traverse(structure: Structure, row: ScopeRow, side: Side, found: Set<string>): string[] {
+  const added: string[] = []
+  const add = (id: string) => {
+    if (!found.has(id)) {
+      found.add(id)
+      added.push(id)
+    }
+  }
   const stack: string[] = []
   for (const id of row[side]) {
     if (row.collection === 'entities') stack.push(id)
@@ -42,12 +50,13 @@ export function traverse(structure: Structure, row: ScopeRow, side: Side, found:
   while (stack.length) {
     const id = stack.pop()!
     if (found.has(id)) continue
-    found.add(id)
+    add(id)
     for (const {parent, relationship} of structure.parents.get(id) ?? []) {
-      found.add(relationship)
+      add(relationship)
       stack.push(parent)
     }
   }
+  return added
 }
 
 /** A row's structural context in one revision, as item IDs, without the row's own. */

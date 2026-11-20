@@ -149,15 +149,24 @@ export function changeContext(rows: readonly ScopeRow[], revisions: Revisions, c
   // A comparison saved without context derives it here: the structure around the changes is the core's context.
   const rowOf: Record<Side, Map<string, string>> = {before: new Map(), after: new Map()}
   for (const row of rows) for (const side of sides) for (const id of row[side]) rowOf[side].set(id, row.id)
-  const placed = new Set(shown)
-  for (const side of sides) {
-    const structure = structureOf(revisions[side])
-    const reached = new Set<string>()
-    for (const row of rows) if (placed.has(row.id)) traverse(structure, row, side, reached)
-    for (const id of reached) {
-      const rowId = rowOf[side].get(id)
-      if (rowId !== undefined) shown.add(rowId)
-    }
+  const byId = new Map(rows.map(row => [row.id, row]))
+  const structure = {before: structureOf(revisions.before), after: structureOf(revisions.after)}
+  const reached: Record<Side, Set<string>> = {before: new Set(), after: new Set()}
+  // Until nothing new is shown: a row one revision brings is placed in both (a moved containment relationship's
+  // endpoints differ between them).
+  let pending = [...shown]
+  while (pending.length) {
+    const next: string[] = []
+    for (const side of sides)
+      for (const rowId of pending)
+        for (const id of traverse(structure[side], byId.get(rowId)!, side, reached[side])) {
+          const found = rowOf[side].get(id)
+          if (found !== undefined && !shown.has(found)) {
+            shown.add(found)
+            next.push(found)
+          }
+        }
+    pending = next
   }
   return {changes: changed, context: new Set([...shown].filter(id => !changed.has(id))), shown}
 }

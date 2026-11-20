@@ -1,7 +1,8 @@
 import {Prose} from '../prose.js'
 
-/** A view's notices beside their icon: one is a sentence, and only several are a bulleted list. */
+/** A view's notices beside their icon: none draws nothing, one is a sentence, and only several are a bulleted list. */
 export function Notices({notices}: {notices: readonly string[]}) {
+  if (notices.length === 0) return null
   if (notices.length === 1)
     return (
       <p className="ph-notice ph-notices">

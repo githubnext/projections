@@ -215,8 +215,8 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
       chrome: 'viewer',
       ...(options.assets ? {assets: options.assets} : {}),
       banner: <ViewerHeader store={store} end={options.headerEnd} onChoose={projection => void choose(projection)} />,
-      toolbarStart: <ViewerShown store={store} />,
       utilityArea: true,
+      toolbarStart: <ViewerShown store={store} />,
       ...(first.definitionRevision ? {definitionRevision: first.definitionRevision} : {}),
       ...(first.projection && !first.scenario
         ? {

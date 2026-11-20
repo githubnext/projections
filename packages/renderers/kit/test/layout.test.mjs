@@ -611,6 +611,33 @@ test("a fitted drawing keeps clear of the host's cover only where its fit would 
   assert.equal(coveredTop({cover: [bar], view, origin: {x: 0, y: 40}, size: {width: 400, height: 1000}, padding}), 18)
 })
 
+test("a fitted drawing keeps clear of a cover at the stage's foot only where its fit would reach it", async () => {
+  const {coveredBottom, coveredTop} = await import('../dist/index.js')
+  const padding = {x: 16, y: 16}
+  const view = {width: 1000, height: 600}
+  // A floating foot 12px above the stage's bottom: 61px tall, centred, 600px wide.
+  const foot = {x: 200, y: 527, width: 600, height: 61}
+  // A flat drawing centred well above it keeps its own bottom; a tall one opens above it, by 8px.
+  assert.equal(coveredBottom({cover: [foot], view, size: {width: 1000, height: 200}, padding}), 16)
+  assert.equal(coveredBottom({cover: [foot], view, size: {width: 400, height: 1000}, padding}), 81, '600 − (527 − 8)')
+  // It never moves the top, and a cover at the top never moves the bottom.
+  assert.equal(coveredTop({cover: [foot], view, size: {width: 400, height: 1000}, padding}), 16)
+  assert.equal(coveredBottom({cover: [{x: 220, y: 8, width: 560, height: 42}], view, size: {width: 400, height: 1000}, padding}), 16)
+})
+
+test('a fitted drawing between a top cover and a foot clears both once refitted', async () => {
+  const {coveredPadding} = await import('../dist/index.js')
+  const bar = {x: 220, y: 12, width: 560, height: 42}
+  const foot = {x: 200, y: 527, width: 600, height: 61}
+  const view = {width: 1000, height: 600}
+  // Raising the bottom alone for the foot (81) would recentre this drawing up under the bar.
+  const {top, y} = coveredPadding({cover: [bar, foot], view, size: {width: 400, height: 450}, padding: {x: 16, y: 16}})
+  const free = view.height - 450 - top - y
+  const drawnTop = top + Math.max(0, free) / 2
+  assert.ok(drawnTop >= bar.y + bar.height + 8, `top at ${drawnTop}`)
+  assert.ok(drawnTop + 450 <= foot.y - 8 || free < 0, `bottom at ${drawnTop + 450}`)
+})
+
 test('fitting centres content, never magnifies it, and always fits both dimensions, however small', async () => {
   const {fitScale} = await import('../dist/index.js')
   const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} ≈ ${expected}`)

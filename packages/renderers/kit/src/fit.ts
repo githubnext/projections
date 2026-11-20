@@ -122,40 +122,93 @@ export function parseStageCover(token: string | undefined): CoverRect[] | undefi
 /** The space kept between a fitted drawing and a cover above it, CSS px. */
 export const coverGap = 8
 
-/**
- * The space a fitted drawing keeps above it, CSS px, so it never opens under what the host overlays (`cover`): the
- * drawing is fitted with `padding` and centred in a stage of `view` whose top left is `origin` in the frame, as
- * `useFitScale` and a `margin: auto` drawing place it. Where that leaves it clear of every rectangle (a flat graph
- * centred well below a chip), the padding's own top; else the top that clears the lowest rectangle it reaches, by
- * `coverGap`. Decided from the drawing's fit without the cover, never from the result, so it can't oscillate. The
- * drawing still pans under the cover once zoomed.
- */
-export function coveredTop({
-  cover,
-  view,
-  origin = {x: 0, y: 0},
-  size,
-  padding = 16,
-  maxScale = 1,
-}: {
+/** Where a fitted drawing lies before any cover moves it, and the cover's rectangles above and below its stage's middle. */
+function uncoveredFit({cover, view, origin = {x: 0, y: 0}, size, padding = 16, maxScale = 1}: CoveredFitInput): {
+  left: number
+  width: number
+  top: number
+  bottom: number
+  above: CoverRect[]
+  below: CoverRect[]
+} {
+  const {x, y, top = y} = fitPadding(padding)
+  const {scale} = fitScale(size, view, {padding, maxScale})
+  const width = size.width * scale,
+    height = size.height * scale
+  const left = origin.x + Math.max(x, (view.width - width) / 2)
+  const contentTop = origin.y + Math.max(0, (view.height - (height + top + y)) / 2) + top
+  const middle = origin.y + view.height / 2
+  const across = cover.filter(rect => rect.x < left + width && rect.x + rect.width > left)
+  return {
+    left,
+    width,
+    top: contentTop,
+    bottom: contentTop + height,
+    above: across.filter(rect => rect.y + rect.height / 2 <= middle),
+    below: across.filter(rect => rect.y + rect.height / 2 > middle),
+  }
+}
+
+/** What `coveredTop` and `coveredBottom` fit: the cover, the stage `view` at `origin` in the frame, and the drawing. */
+interface CoveredFitInput {
   cover: readonly CoverRect[]
   view: {width: number; height: number}
   origin?: {x: number; y: number}
   size: {width: number; height: number}
   padding?: number | FitPadding
   maxScale?: number
-}): number {
-  const {x, y, top = y} = fitPadding(padding)
-  if (!cover.length || view.width <= 0 || view.height <= 0 || size.width <= 0 || size.height <= 0) return top
-  const {scale} = fitScale(size, view, {padding, maxScale})
-  const width = size.width * scale,
-    height = size.height * scale
-  const left = origin.x + Math.max(x, (view.width - width) / 2)
-  const contentTop = origin.y + Math.max(0, (view.height - (height + top + y)) / 2) + top
-  const reached = cover.filter(
-    rect => rect.x < left + width && rect.x + rect.width > left && rect.y < contentTop + height && rect.y + rect.height > origin.y,
-  )
+}
+
+const fitsNothing = ({cover, view, size}: CoveredFitInput) =>
+  !cover.length || view.width <= 0 || view.height <= 0 || size.width <= 0 || size.height <= 0
+
+/**
+ * The space a fitted drawing keeps above it, CSS px, so it never opens under what the host overlays at the stage's
+ * top (`cover`, the rectangles above its middle): the drawing is fitted with `padding` and centred in a stage of
+ * `view` whose top left is `origin` in the frame, as `useFitScale` and a `margin: auto` drawing place it. Where that
+ * leaves it clear of every rectangle (a flat graph centred well below a chip), the padding's own top; else the top
+ * that clears the lowest rectangle it reaches, by `coverGap`. Decided from the drawing's fit without the cover, never
+ * from the result, so it can't oscillate. The drawing still pans under the cover once zoomed.
+ */
+export function coveredTop(input: CoveredFitInput): number {
+  const {y, top = y} = fitPadding(input.padding)
+  if (fitsNothing(input)) return top
+  const origin = input.origin ?? {x: 0, y: 0}
+  const fit = uncoveredFit(input)
+  const reached = fit.above.filter(rect => rect.y < fit.bottom && rect.y + rect.height > origin.y)
   if (!reached.length) return top
   const bottom = Math.max(...reached.map(rect => rect.y + rect.height)) + coverGap
-  return bottom <= contentTop ? top : Math.max(top, Math.ceil(bottom - origin.y))
+  return bottom <= fit.top ? top : Math.max(top, Math.ceil(bottom - origin.y))
+}
+
+/**
+ * The space a fitted drawing keeps below it, CSS px, as `coveredTop` keeps above: clear of what the host overlays at
+ * the stage's foot (the rectangles below its middle, such as a floating legend and summary), only where the fitted
+ * drawing would reach them; else the padding's own bottom (`y`).
+ */
+export function coveredBottom(input: CoveredFitInput): number {
+  const {y} = fitPadding(input.padding)
+  if (fitsNothing(input)) return y
+  const origin = input.origin ?? {x: 0, y: 0}
+  const fit = uncoveredFit(input)
+  const reached = fit.below.filter(rect => rect.y + rect.height > fit.top && rect.y < origin.y + input.view.height)
+  if (!reached.length) return y
+  const edge = Math.min(...reached.map(rect => rect.y)) - coverGap
+  return edge >= fit.bottom ? y : Math.max(y, Math.ceil(origin.y + input.view.height - edge))
+}
+
+/**
+ * The top and bottom (`y`) a fitted drawing keeps from the host's covers at both ends (`coveredTop`, `coveredBottom`),
+ * resolved together: moving one edge refits and recentres the drawing, which can then reach the other end's cover, so
+ * each is raised until the fit clears both (only ever raised, so it settles in a few steps).
+ */
+export function coveredPadding(input: CoveredFitInput): {top: number; y: number} {
+  const base = fitPadding(input.padding)
+  let padding = {...base, top: base.top ?? base.y}
+  for (let step = 0; step < 4; step++) {
+    const next = {...padding, top: coveredTop({...input, padding}), y: coveredBottom({...input, padding})}
+    if (next.top === padding.top && next.y === padding.y) break
+    padding = next
+  }
+  return {top: padding.top, y: padding.y}
 }

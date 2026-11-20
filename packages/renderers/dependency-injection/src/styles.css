@@ -23,8 +23,10 @@
   flex: none;
   margin: auto;
   box-sizing: content-box;
-  /* `diPadding`, and above it the host's top inset (`useDiPadding`), or as much as clears its cover (`--pk-fit-top`). */
-  padding: var(--pk-fit-top, var(--projections-stage-inset-top, 16px)) 16px 16px;
+  /* `diPadding`, and above it the host's top inset (`useDiPadding`), or as much as clears its cover above and below
+     (`--pk-fit-top`, `--pk-fit-bottom`). */
+  padding: var(--pk-fit-top, var(--projections-stage-inset-top, 16px)) 16px
+    var(--pk-fit-bottom, var(--projections-stage-inset-bottom, 16px));
 }
 .di-card {
   cursor: pointer;

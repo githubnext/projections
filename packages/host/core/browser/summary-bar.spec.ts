@@ -19,15 +19,19 @@ async function open(page: Page, id: string) {
 
 test.use({viewport: {width: 1280, height: 800}})
 
-test('one revision: the bar sits along the bottom and counts each kind in the renderer words, with no changes', async ({page}) => {
+test('one revision: the bar floats at the stage foot and counts each kind in the renderer words, with no changes', async ({page}) => {
   await open(page, 'summary-bar-extraction')
   await expect(bar(page)).toHaveAttribute('data-sentence', /^3 workspaces · \d+ packages · \d+ dependencies/)
   await expect(bar(page).locator('[data-summary-delta]')).toHaveCount(0)
-  // The last thing in the view: below the stage, flush with its bottom (the portal container takes no gap after it).
-  const [root, strip] = await Promise.all([view(page).boundingBox(), bar(page).boundingBox()])
-  expect(Math.abs(root!.y + root!.height - (strip!.y + strip!.height))).toBeLessThanOrEqual(1)
-  // A 28px band under its 1px hairline.
-  expect(strip!.height).toBeCloseTo(29, 0)
+  // The last row of the stage's foot, which floats 12px above the view's bottom inside its 1px edge.
+  const foot = page.locator('.ph-stage-foot')
+  await expect(foot.locator('> [data-summary-bar]')).toHaveCount(1)
+  const [root, box, strip] = await Promise.all([view(page).boundingBox(), foot.boundingBox(), bar(page).boundingBox()])
+  expect(root!.y + root!.height - (box!.y + box!.height)).toBeCloseTo(12, 0)
+  expect(box!.y + box!.height - (strip!.y + strip!.height)).toBeCloseTo(1, 0)
+  // 28px, under the legend's rule when the renderer has a legend.
+  expect(strip!.height).toBeGreaterThanOrEqual(28)
+  expect(strip!.height).toBeLessThanOrEqual(29)
 })
 
 test('a comparison: totals with their changes in the change colors, then the upgrades as facts, and no row over the graph', async ({
@@ -181,6 +185,15 @@ test('at a narrow width the figures that do not fit move into a popover', async 
   await more.click()
   const popover = page.getByRole('dialog', {name: 'More of the summary'})
   await expect(popover.locator('[data-summary-figure]')).toHaveCount(total - shown)
+  // Each figure is a row as wide as the popover's list, so its highlight takes its counts too, and the counts of each
+  // kind of change line up down the rows.
+  const rows = await popover.locator('ul').evaluate(list => ({
+    list: list.getBoundingClientRect().width,
+    rows: [...list.querySelectorAll(':scope > [data-summary-figure]')].map(row => row.getBoundingClientRect().width),
+    added: [...list.querySelectorAll('[data-summary-delta="added"]')].map(delta => Math.round(delta.getBoundingClientRect().left)),
+  }))
+  for (const row of rows.rows) expect(row).toBeCloseTo(rows.list, 0)
+  expect(new Set(rows.added).size).toBeLessThanOrEqual(1)
   await popover.locator('[data-summary-total]').first().click()
   await expect(popover.locator('[data-summary-total]').first()).toHaveAttribute('aria-pressed', 'true')
 })

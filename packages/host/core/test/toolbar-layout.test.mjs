@@ -10,25 +10,19 @@ const rowOne = plans => [
   ...new Set(plans.map(plan => `${plan.cluster === 'centre' ? 'centre ' : ''}${plan.pair}:${plan.mode}:${plan.more.join('+') || '-'}`)),
 ]
 
-test('with playback every plan has two rows, the mode region first centred in its fullest forms', () => {
+test('with playback every plan has two rows, the mode region never centred: it leads the row after the start region', () => {
   const plans = toolbarPlans(all)
   assert.ok(plans.every(plan => plan.rows === 2))
-  assert.deepEqual(plans.slice(0, 6).map(show), [
-    'centre 2:full:icons:full:-',
-    'centre 2:full:icons:compact:-',
-    'centre 2:full:icons:minimal:-',
-    '2:full:icons:full:-',
-    '2:full:icons:compact:-',
-    '2:full:icons:minimal:-',
-  ])
-  // No other plan centres it, and without a mode region none does.
-  assert.equal(plans.filter(plan => plan.cluster === 'centre').length, 3)
-  assert.equal(toolbarPlans({...all, modes: false}).filter(plan => plan.cluster === 'centre').length, 0)
+  assert.deepEqual(plans.slice(0, 3).map(show), ['2:full:icons:full:-', '2:full:icons:compact:-', '2:full:icons:minimal:-'])
+  assert.ok(plans.every(plan => plan.cluster === 'start'))
+  assert.ok(
+    toolbarPlans({...all, pair: false, playback: false}).every(plan => plan.cluster === 'start'),
+    'nor with no start region',
+  )
 })
 
 test('row 1 collapses in priority order, actions into More one at a time, the pickers merged last', () => {
   assert.deepEqual(rowOne(toolbarPlans(all)), [
-    'centre full:icons:-',
     'full:icons:-',
     'short:icons:-',
     'short:menu:-',
@@ -49,7 +43,6 @@ test('the varied count is the first action into More, before zoom', () => {
 test('without playback, one row collapses in the same order and ends with the merged pickers', () => {
   const plans = toolbarPlans({...all, playback: false, actions: ['filter', 'info']}).map(show)
   assert.deepEqual(plans, [
-    'centre 1:full:icons:full:-',
     '1:full:icons:full:-',
     '1:short:icons:full:-',
     '1:short:menu:full:-',
@@ -62,4 +55,13 @@ test('without playback, one row collapses in the same order and ends with the me
 test('regions a toolbar lacks drop out of the order', () => {
   const plans = toolbarPlans({pair: false, modes: false, playback: true, actions: []}).map(show)
   assert.deepEqual(plans, ['2:full:labels:full:-', '2:full:labels:compact:-', '2:full:labels:minimal:-'])
+})
+
+test('the sides layout: one row, the mode region never centred, collapsing in the same order', () => {
+  const plans = toolbarPlans({...all, sides: true})
+  assert.ok(
+    plans.every(plan => plan.rows === 1 && plan.cluster === 'start'),
+    'playback is on the stage, the modes at the start',
+  )
+  assert.deepEqual(rowOne(plans), rowOne(toolbarPlans({...all, playback: false})))
 })

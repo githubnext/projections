@@ -1,4 +1,4 @@
-import type {CSSProperties} from 'react'
+import type {CSSProperties, ReactNode, RefObject} from 'react'
 import {useRef} from 'react'
 import {Activity, Ellipsis, Sparkle} from 'lucide-react'
 import {summaryCountText, summaryDeltas, summaryDeltaText, summaryDeltaWords} from '@githubnext/projections-renderer-sdk/presentation'
@@ -7,7 +7,7 @@ import {iconMaskStyle} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ProjectionController} from '../projection.js'
 import {figuresSentence, sameSummaryFilter, summaryFilterable, summaryFilterOf, useSummaryFit} from '../summary.js'
 import type {SummaryFigure} from '../summary.js'
-import {Popover, PopoverContent, PopoverTrigger} from './components/popover.js'
+import {Popover, PopoverAnchor, PopoverContent, PopoverTrigger} from './components/popover.js'
 import {scopeHiddenShort, scopeHiddenText} from '../scope.js'
 import {cn} from './lib/utils.js'
 
@@ -21,8 +21,43 @@ const deltaTone: Record<SummaryDelta, string> = {
 const Separator = () => <span aria-hidden="true" className="ph-summary-separator" />
 
 /** A figure's button. Pressed (a filter on) and keyboard focus are drawn by projector.css (`.ph-summary-button`). */
-const figureButton =
-  'ph-summary-button pj:inline-flex pj:h-5 pj:shrink-0 pj:items-center pj:rounded-sm pj:px-1 pj:whitespace-nowrap pj:transition-colors pj:hover:bg-accent pj:hover:text-foreground pj:focus-visible:outline-hidden'
+const figureButtonBase =
+  'ph-summary-button pj:inline-flex pj:h-5 pj:shrink-0 pj:items-center pj:rounded-sm pj:px-1 pj:whitespace-nowrap pj:transition-colors pj:focus-visible:outline-hidden'
+const figureButton = `${figureButtonBase} pj:hover:bg-accent pj:hover:text-foreground`
+
+/**
+ * A figure's row: inline in the bar, or in the "…" popover (`menu`) a full-width row of its grid, highlighted as a
+ * whole on hover, its total in the first column and its change counts in one column each, aligned down the rows.
+ */
+const rowClass = (menu: boolean | undefined) =>
+  menu
+    ? 'ph-summary-figure ph-summary-row pj:col-span-full pj:grid pj:grid-cols-subgrid pj:items-center pj:rounded-sm pj:pr-1 pj:transition-colors pj:hover:bg-accent pj:hover:text-foreground'
+    : 'ph-summary-figure pj:flex pj:shrink-0 pj:items-center'
+/** In the popover, its buttons leave the hover to their row. */
+const buttonClass = (menu: boolean | undefined) => (menu ? `${figureButtonBase} pj:justify-self-start` : figureButton)
+
+/**
+ * Where the band's "…" popover opens: above its "…", and above the legend's band too when that sits right over the
+ * summary bar, so the popover never covers the legend.
+ */
+function bandAnchor(bar: HTMLElement | null): DOMRect {
+  const more = bar?.querySelector('.ph-summary-more')?.getBoundingClientRect()
+  if (!bar || !more) return new DOMRect()
+  const top = bar.getBoundingClientRect().top
+  const legend = bar.closest('.ph')?.querySelector('.ph-legend')?.getBoundingClientRect()
+  const over = legend && Math.abs(legend.bottom - top) < 2 ? legend.top : top
+  return new DOMRect(more.left, over, more.width, more.bottom - over)
+}
+
+/**
+ * A figure's change counts: those that happened, inline; in the popover (`menu`) one cell for each kind of change,
+ * empty where none happened, so the counts line up in columns.
+ */
+function deltaCells(figure: SummaryFigure, menu: boolean | undefined, cell: (delta: SummaryDelta) => ReactNode): ReactNode {
+  return summaryDeltas
+    .filter(delta => menu || figure[delta] > 0)
+    .map(delta => (figure[delta] > 0 ? cell(delta) : <span key={delta} aria-hidden="true" />))
+}
 
 /**
  * A fact's icon: its theme icon token drawn in the text color, a badge (`badgeIconNames`: a change kind, a planned
@@ -51,11 +86,13 @@ function Fact({
   figure,
   first,
   measure,
+  menu,
 }: {
   projection: ProjectionController
   figure: SummaryFigure
   first: boolean
   measure?: boolean
+  menu?: boolean
 }) {
   const filter = summaryFilterOf(figure)
   const pressed = sameSummaryFilter(p.summaryFilter, filter)
@@ -68,17 +105,12 @@ function Fact({
   )
   const filterable = summaryFilterable(figure)
   return (
-    <li
-      className="ph-summary-figure pj:flex pj:shrink-0 pj:items-center"
-      data-summary-figure=""
-      data-summary-key={figure.key}
-      data-summary-fact=""
-    >
+    <li className={rowClass(menu)} data-summary-figure="" data-summary-key={figure.key} data-summary-fact="">
       {!first && <Separator />}
       {filterable ? (
         <button
           type="button"
-          className={cn(figureButton, 'pj:gap-1', tone)}
+          className={cn(buttonClass(menu), 'pj:gap-1', tone)}
           aria-pressed={pressed}
           aria-description={figure.description}
           title={factTitle(figure, pressed)}
@@ -101,20 +133,18 @@ function Fact({
         </span>
       )}
       {p.comparing &&
-        summaryDeltas
-          .filter(delta => figure[delta] > 0)
-          .map(delta => (
-            <span
-              key={delta}
-              className={cn('pj:inline-flex pj:h-5 pj:items-center pj:px-0.5 pj:whitespace-nowrap pj:tabular-nums', deltaTone[delta])}
-              data-summary-delta={delta}
-            >
-              <span aria-hidden="true" className="ph-cap">
-                {summaryDeltaText(delta, figure[delta])}
-              </span>
-              <span className="pj:sr-only">{summaryDeltaWords(delta, figure[delta])}</span>
+        deltaCells(figure, menu, delta => (
+          <span
+            key={delta}
+            className={cn('pj:inline-flex pj:h-5 pj:items-center pj:px-0.5 pj:whitespace-nowrap pj:tabular-nums', deltaTone[delta])}
+            data-summary-delta={delta}
+          >
+            <span aria-hidden="true" className="ph-cap">
+              {summaryDeltaText(delta, figure[delta])}
             </span>
-          ))}
+            <span className="pj:sr-only">{summaryDeltaWords(delta, figure[delta])}</span>
+          </span>
+        ))}
     </li>
   )
 }
@@ -125,13 +155,17 @@ function Figure({
   figure,
   first,
   measure,
+  menu,
 }: {
   projection: ProjectionController
   figure: SummaryFigure
   first: boolean
   measure?: boolean
+  /** In the "…" popover: a full-width row, its counts in columns (`rowClass`). */
+  menu?: boolean
 }) {
-  if (figure.type === 'fact') return <Fact projection={p} figure={figure} first={first} {...(measure ? {measure} : {})} />
+  if (figure.type === 'fact')
+    return <Fact projection={p} figure={figure} first={first} {...(measure ? {measure} : {})} {...(menu ? {menu} : {})} />
   const toggle = (status?: SummaryDelta) => {
     const next = summaryFilterOf(figure, status)
     p.setSummaryFilter(sameSummaryFilter(p.summaryFilter, next) ? null : next)
@@ -141,7 +175,7 @@ function Figure({
   const tab = measure ? -1 : undefined
   return (
     <li
-      className="ph-summary-figure pj:flex pj:shrink-0 pj:items-center"
+      className={rowClass(menu)}
       data-summary-figure=""
       data-summary-key={figure.key}
       data-kinds={figure.kinds.map(kind => kind.kind).join(' ')}
@@ -149,7 +183,7 @@ function Figure({
       {!first && <Separator />}
       <button
         type="button"
-        className={figureButton}
+        className={buttonClass(menu)}
         aria-pressed={pressed()}
         title={pressed() ? 'Show every item' : `Show only the ${figure.noun.plural}`}
         data-summary-total={figure.count}
@@ -159,23 +193,21 @@ function Figure({
         <span className="ph-cap">{total}</span>
       </button>
       {p.comparing &&
-        summaryDeltas
-          .filter(delta => figure[delta] > 0)
-          .map(delta => (
-            <button
-              key={delta}
-              type="button"
-              className={cn(figureButton, 'pj:px-0.5 pj:tabular-nums', deltaTone[delta])}
-              aria-pressed={pressed(delta)}
-              aria-label={`${summaryCountText(figure[delta], figure.noun)} ${delta}`}
-              title={pressed(delta) ? 'Show every item' : `Show only the ${figure.noun.plural} ${delta}`}
-              data-summary-delta={delta}
-              tabIndex={tab}
-              onClick={() => toggle(delta)}
-            >
-              <span className="ph-cap">{summaryDeltaText(delta, figure[delta])}</span>
-            </button>
-          ))}
+        deltaCells(figure, menu, delta => (
+          <button
+            key={delta}
+            type="button"
+            className={cn(buttonClass(menu), 'pj:px-0.5 pj:tabular-nums', deltaTone[delta])}
+            aria-pressed={pressed(delta)}
+            aria-label={`${summaryCountText(figure[delta], figure.noun)} ${delta}`}
+            title={pressed(delta) ? 'Show every item' : `Show only the ${figure.noun.plural} ${delta}`}
+            data-summary-delta={delta}
+            tabIndex={tab}
+            onClick={() => toggle(delta)}
+          >
+            <span className="ph-cap">{summaryDeltaText(delta, figure[delta])}</span>
+          </button>
+        ))}
     </li>
   )
 }
@@ -210,7 +242,19 @@ function ScopeHiddenFigure({projection: p}: {projection: ProjectionController}) 
  * regenerated from the same inputs ("N regenerated"), after what the Changes scope hides ("57 unchanged tables hidden ·
  * Show all"). Figures that don't fit move into a "…" popover.
  */
-export function SummaryBar({projection: p, className}: {projection: ProjectionController; className?: string}) {
+export function SummaryBar({
+  projection: p,
+  className,
+  room,
+  anchor,
+}: {
+  projection: ProjectionController
+  className?: string
+  /** The element whose width the bar may take, when the bar is as wide as its content (`StageFoot`). */
+  room?: RefObject<HTMLElement | null>
+  /** What the "…" popover opens against (`StageFoot`'s whole foot), instead of above the "…" and the legend's band. */
+  anchor?: RefObject<HTMLElement | null>
+}) {
   const bar = useRef<HTMLDivElement>(null)
   const figures = p.summary
   const within = p.comparing ? (p.variation?.within ?? 0) : 0
@@ -220,6 +264,7 @@ export function SummaryBar({projection: p, className}: {projection: ProjectionCo
     bar,
     figures.length,
     `${sentence}|${within}|${regenerated}|${p.comparing}|${p.scope === 'changes' ? (scopeHiddenShort(p.scopeHidden) ?? '') : ''}`,
+    room,
   )
   const hidden = figures.slice(shown)
   return (
@@ -258,6 +303,7 @@ export function SummaryBar({projection: p, className}: {projection: ProjectionCo
         </ul>
         {hidden.length > 0 && (
           <Popover>
+            <PopoverAnchor virtualRef={anchor ?? {current: {getBoundingClientRect: () => bandAnchor(bar.current)}}} />
             <PopoverTrigger asChild>
               <button
                 type="button"
@@ -269,15 +315,15 @@ export function SummaryBar({projection: p, className}: {projection: ProjectionCo
               </button>
             </PopoverTrigger>
             <PopoverContent
-              align="start"
+              align={anchor ? 'center' : 'start'}
               side="top"
               collisionPadding={8}
               aria-label="More of the summary"
-              className="ph-summary-popover pj:[--pj-summary-surface:var(--pj-popover)] pj:w-auto pj:max-w-[calc(100vw-1rem)] pj:gap-1 pj:p-2 pj:text-xs pj:text-muted-foreground"
+              className="ph-summary-popover pj:[--pj-summary-surface:var(--pj-popover)] pj:w-auto pj:max-w-[calc(100vw-1rem)] pj:gap-1 pj:p-1 pj:text-xs pj:text-muted-foreground"
             >
-              <ul className="pj:flex pj:flex-col pj:gap-1">
+              <ul className="pj:grid pj:grid-cols-[1fr_repeat(3,auto)] pj:gap-y-0.5">
                 {hidden.map(figure => (
-                  <Figure key={figure.key} projection={p} figure={figure} first />
+                  <Figure key={figure.key} projection={p} figure={figure} first menu />
                 ))}
               </ul>
             </PopoverContent>
@@ -286,7 +332,14 @@ export function SummaryBar({projection: p, className}: {projection: ProjectionCo
       </span>
       {/* As wide as the lead spacer, so the figures stay centred; the fixed content sits at its end, on one line, never
           narrower than it. */}
-      <span className="ph-summary-trail pj:flex pj:flex-1 pj:items-center pj:justify-end pj:gap-1 pj:whitespace-nowrap">
+      <span
+        className={cn(
+          'ph-summary-trail pj:flex pj:flex-1 pj:items-center pj:justify-end pj:gap-1 pj:whitespace-nowrap pj:has-[*]:ps-2',
+          // As wide as its content (in the stage's foot), the bar keeps as much after its end as the lead's gap before
+          // the figures, so it sits evenly around them.
+          room && 'pj:has-[*]:pe-1',
+        )}
+      >
         <ScopeHiddenFigure projection={p} />
         {regenerated > 0 && (
           <span data-summary-fixed="" className="pj:flex pj:shrink-0">

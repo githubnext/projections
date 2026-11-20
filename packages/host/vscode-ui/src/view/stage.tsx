@@ -2,7 +2,7 @@ import {ProjectionStage} from '@githubnext/projections-host'
 import type {PaneEdge, PaneState, ProjectionController, RendererEntry} from '@githubnext/projections-host'
 import {Notice} from '../notice.js'
 import {LoadingStatus} from '../loading.js'
-import {handlePlaybackKey} from '../blocks.js'
+import {Playback, handlePlaybackKey} from '../blocks.js'
 import type {ViewKind} from '../blocks.js'
 import {VscodeLegend} from '../views/legend.js'
 
@@ -56,8 +56,14 @@ export function RendererBox({
   fill,
   recoverView,
   setView,
+  utilityArea = false,
+  playback = false,
 }: {
   projection: ProjectionController
+  /** Playback in the stage's utility area, and chips for the panes' labels (`VscodeProjectionViewProps.utilityArea`). */
+  utilityArea?: boolean
+  /** Whether the view shows playback now (a comparison, in Animated, with the feature on): only then the area has it. */
+  playback?: boolean
   renderer: RendererEntry
   view: ViewKind
   beforeLabel: string
@@ -78,6 +84,17 @@ export function RendererBox({
           fill={fill}
           legend={false}
           paneEdge={paneEdge}
+          {...(utilityArea ? {paneLabels: 'chips' as const} : {})}
+          {...(utilityArea && playback
+            ? {
+                utility: (
+                  // As wide as it needs, up to 560px, and at most the stage less its insets and edge.
+                  <div className="phv-utility-playback" style={{width: 'min(560px, calc(100vw - 26px))', padding: '4px 8px 4px 4px'}}>
+                    <Playback projection={p} beforeLabel={beforeLabel} afterLabel={afterLabel} />
+                  </div>
+                ),
+              }
+            : {})}
           renderStatus={pane => (
             <PaneStatus
               pane={pane}

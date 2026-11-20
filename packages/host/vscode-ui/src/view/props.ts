@@ -127,6 +127,12 @@ export interface VscodeProjectionViewProps {
    */
   centreModes?: boolean
   /**
+   * Animated playback floats over the stage's top edge in its utility area (`ProjectionStage`'s `utility`), and side by
+   * side and swipe label their panes with chips on the stage, instead of a playback group in the toolbar and header
+   * bands. The table and text views keep playback in the toolbar. Default false.
+   */
+  utilityArea?: boolean
+  /**
    * A notice floating over the stage, not a tool: a `StageNotice`, such as a VS Code tab's "Out of date · 3 files
    * changed · Refresh". Drawn at the stage's top centre, 12px in (12px below the panes' header bands in side by side
    * and swipe), over every view (renderer, table or text); it takes no layout space, so framing is unchanged, and stays

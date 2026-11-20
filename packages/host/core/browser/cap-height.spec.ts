@@ -157,11 +157,14 @@ for (const fallback of [false, true])
     expectCentred(await capGaps(page, bar(page), total), 'bar', true)
     const centres = await bar(page).evaluate(element => {
       const box = element.getBoundingClientRect()
-      // The figures and, when some don't fit, their "…": what the bar centres.
+      // The figures (and, when some don't fit, their "…") and what the bar keeps at its end: the bar, as wide as they
+      // need in the stage's foot, sits evenly around them.
       const figures = element.querySelector('.ph-summary-centre')!.getBoundingClientRect()
-      return {bar: box.left + box.width / 2, figures: figures.left + figures.width / 2}
+      const ends = [...element.querySelectorAll('.ph-summary-trail > *')].map(item => item.getBoundingClientRect().right)
+      const end = Math.max(figures.right, ...ends)
+      return {start: figures.left - box.left, end: box.right - end}
     })
-    expect(Math.abs(centres.bar - centres.figures), JSON.stringify(centres)).toBeLessThanOrEqual(1)
+    expect(Math.abs(centres.start - centres.end), JSON.stringify(centres)).toBeLessThanOrEqual(1)
     // The pill is drawn on hover.
     await total.hover()
     expectCentred(await capGaps(page, total, total), 'pill')

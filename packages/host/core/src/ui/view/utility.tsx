@@ -1,10 +1,11 @@
-import {useRef} from 'react'
+import {useRef, useState} from 'react'
 import type {CSSProperties} from 'react'
 import type {ProjectionController} from '../../projection.js'
 import {useSize} from '../../stage/arrangement.js'
 import {utilityInset, utilitySide} from '../../stage/utility.js'
 import type {ViewKind} from '../blocks.js'
 import {Playback} from '../playback.js'
+import {glassSupported, overlaySurface} from './glass.js'
 
 /** The utility area's playback bar's height, CSS px: a 40px row (the 32px lens and its ring) inside a 1px edge. */
 export const utilityBarHeight = 42
@@ -51,17 +52,19 @@ export function UtilityPlayback({
 }
 
 /**
- * The utility area's look in the default view: its floating bar takes the toolbar's own surface and divider, solid so
- * the content passing under it stays legible (the chips keep their own, on the stage's canvas).
+ * The look of the stage's overlays in the default view (the utility area's bar and chips, the foot, "Updating…"): the
+ * toolbar's surface and divider, as glass where it is supported (`overlaySurface`) and solid elsewhere, so the content
+ * passing under them stays legible.
  */
-const utilityTheme = {
-  '--ph-utility-fg': 'var(--pj-foreground)',
-  // The bar's own muted text (its percent), which the stage's chips draw their names in.
-  '--ph-utility-muted': 'var(--pj-muted-foreground)',
-  '--ph-utility-bg': 'var(--pj-surface-header)',
-  '--ph-utility-border': '1px solid var(--pj-divider)',
-  '--ph-utility-radius': 'var(--radius-md)',
-} as CSSProperties
+const overlayTheme = (glass: boolean) =>
+  ({
+    '--ph-utility-fg': 'var(--pj-foreground)',
+    // The bar's own muted text (its percent), which the stage's chips draw their names in.
+    '--ph-utility-muted': 'var(--pj-muted-foreground)',
+    ...overlaySurface(glass),
+    '--ph-utility-border': '1px solid var(--pj-divider)',
+    '--ph-utility-radius': 'var(--pj-radius-md)',
+  }) as CSSProperties
 
 /**
  * The default view's floating playback, with a `utility` area while it shows playback: the bar for the panel `panel` measures, and the top padding a view
@@ -84,6 +87,7 @@ export function useUtilityPlayback({
 }) {
   const panel = useRef<HTMLDivElement>(null)
   const {width} = useSize(panel)
+  const [glass] = useState(glassSupported)
   const floating =
     utility && showPlayback ? (
       <UtilityPlayback
@@ -102,6 +106,6 @@ export function useUtilityPlayback({
     /** Whether the toolbar still plans a playback row: only without a utility area. */
     toolbarPlayback: showPlayback && !utility,
     paneLabels: utility ? ('chips' as const) : ('visible' as const),
-    rootStyle: utility ? utilityTheme : undefined,
+    rootStyle: overlayTheme(glass),
   }
 }

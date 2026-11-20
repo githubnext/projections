@@ -547,8 +547,8 @@ edges on all four sides, in every host: the stage padding, `--pk-stage-padding`,
 which is the host's `stage-inset` theme token, else 12 px. `ContentView` pads by
 it; a renderer with a content root of its own gives that root the class
 `pk-stage` (which also paints it with `--stage`) instead of padding it, and
-gives its outer cards no margins. Where the host overlays the frame's top (a
-pane's label chip, `stage-inset-top`), the top is the larger of the two
-(`--pk-stage-padding-top`). A renderer that fits a drawing to its frame reads
-the same insets in script with `useStageInset()` and `useStageInsetTop()`. The
+gives its outer cards no margins. Where the host overlays the frame's top or
+foot (`stage-inset-top`, `-bottom`), that edge is the larger of the two
+(`--pk-stage-padding-top`, `-bottom`). A fitted drawing reads them in script
+(`useStageInset()`, `useStageInsetTop()`, `useCoveredPadding`). The
 `stage-insets` check holds document-style renderers to it.

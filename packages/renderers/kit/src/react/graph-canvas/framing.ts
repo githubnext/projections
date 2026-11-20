@@ -159,7 +159,7 @@ export function useGraphZoom(
   )
   const zoom = useStageZoom(scroller, onAction, fit.scale, {floor, start, ...(opening ? {opening} : {}), ...(hold ? {hold} : {})})
   useLayoutEffect(() => setDrawnScale(zoom.scale), [zoom.scale])
-  return {...zoom, borders, top: drawnPadding.top}
+  return {...zoom, borders, top: drawnPadding.top, bottom: drawnPadding.y}
 }
 
 /** The opening view on a focus (see `useGraphZoom`), or undefined for the default one. */

@@ -1,0 +1,556 @@
+{
+  "protocolVersion": 0,
+  "schema": "database/v0",
+  "entities": [
+    {
+      "id": "table:Customers",
+      "kind": "table",
+      "label": "Customers",
+      "evidence": [
+        {
+          "kind": "migration",
+          "source": "Migrations/Customers.cs",
+          "location": {
+            "line": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "column:Customers.Id",
+      "kind": "column",
+      "label": "Id",
+      "data": {
+        "type": "uuid",
+        "nullable": false
+      }
+    },
+    {
+      "id": "column:Customers.Name",
+      "kind": "column",
+      "label": "Name",
+      "data": {
+        "type": "character varying(200)",
+        "nullable": false
+      }
+    },
+    {
+      "id": "column:Customers.BillingEmail",
+      "kind": "column",
+      "label": "BillingEmail",
+      "data": {
+        "type": "character varying(320)",
+        "nullable": true
+      }
+    },
+    {
+      "id": "key:PK_Customers",
+      "kind": "primary-key",
+      "label": "PK_Customers",
+      "data": {
+        "columns": [
+          "Id"
+        ]
+      }
+    },
+    {
+      "id": "table:Invoices",
+      "kind": "table",
+      "label": "Invoices",
+      "evidence": [
+        {
+          "kind": "migration",
+          "source": "Migrations/Invoices.cs",
+          "location": {
+            "line": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "column:Invoices.Id",
+      "kind": "column",
+      "label": "Id",
+      "data": {
+        "type": "uuid",
+        "nullable": false
+      }
+    },
+    {
+      "id": "column:Invoices.Number",
+      "kind": "column",
+      "label": "Number",
+      "data": {
+        "type": "character varying(32)",
+        "nullable": false
+      }
+    },
+    {
+      "id": "column:Invoices.CustomerId",
+      "kind": "column",
+      "label": "CustomerId",
+      "data": {
+        "type": "uuid",
+        "nullable": false
+      }
+    },
+    {
+      "id": "column:Invoices.IssuedOn",
+      "kind": "column",
+      "label": "IssuedOn",
+      "data": {
+        "type": "date",
+        "nullable": false
+      }
+    },
+    {
+      "id": "column:Invoices.DueOn",
+      "kind": "column",
+      "label": "DueOn",
+      "data": {
+        "type": "date",
+        "nullable": false
+      }
+    },
+    {
+      "id": "column:Invoices.Status",
+      "kind": "column",
+      "label": "Status",
+      "data": {
+        "type": "character varying(16)",
+        "nullable": false
+      }
+    },
+    {
+      "id": "key:PK_Invoices",
+      "kind": "primary-key",
+      "label": "PK_Invoices",
+      "data": {
+        "columns": [
+          "Id"
+        ]
+      }
+    },
+    {
+      "id": "index:IX_Invoices_CustomerId",
+      "kind": "index",
+      "label": "IX_Invoices_CustomerId",
+      "data": {
+        "columns": [
+          "CustomerId"
+        ]
+      }
+    },
+    {
+      "id": "index:IX_Invoices_Number",
+      "kind": "index",
+      "label": "IX_Invoices_Number",
+      "data": {
+        "columns": [
+          "Number"
+        ]
+      }
+    },
+    {
+      "id": "table:InvoiceLines",
+      "kind": "table",
+      "label": "InvoiceLines",
+      "evidence": [
+        {
+          "kind": "migration",
+          "source": "Migrations/InvoiceLines.cs",
+          "location": {
+            "line": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "column:InvoiceLines.Id",
+      "kind": "column",
+      "label": "Id",
+      "data": {
+        "type": "uuid",
+        "nullable": false
+      }
+    },
+    {
+      "id": "column:InvoiceLines.InvoiceId",
+      "kind": "column",
+      "label": "InvoiceId",
+      "data": {
+        "type": "uuid",
+        "nullable": false
+      }
+    },
+    {
+      "id": "column:InvoiceLines.Description",
+      "kind": "column",
+      "label": "Description",
+      "data": {
+        "type": "character varying(500)",
+        "nullable": false
+      }
+    },
+    {
+      "id": "column:InvoiceLines.Quantity",
+      "kind": "column",
+      "label": "Quantity",
+      "data": {
+        "type": "integer",
+        "nullable": false
+      }
+    },
+    {
+      "id": "column:InvoiceLines.UnitPrice",
+      "kind": "column",
+      "label": "UnitPrice",
+      "data": {
+        "type": "numeric(12,2)",
+        "nullable": false
+      }
+    },
+    {
+      "id": "key:PK_InvoiceLines",
+      "kind": "primary-key",
+      "label": "PK_InvoiceLines",
+      "data": {
+        "columns": [
+          "Id"
+        ]
+      }
+    },
+    {
+      "id": "index:IX_InvoiceLines_InvoiceId",
+      "kind": "index",
+      "label": "IX_InvoiceLines_InvoiceId",
+      "data": {
+        "columns": [
+          "InvoiceId"
+        ]
+      }
+    },
+    {
+      "id": "table:Users",
+      "kind": "table",
+      "label": "Users",
+      "evidence": [
+        {
+          "kind": "migration",
+          "source": "Migrations/Users.cs",
+          "location": {
+            "line": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "column:Users.Id",
+      "kind": "column",
+      "label": "Id",
+      "data": {
+        "type": "uuid",
+        "nullable": false
+      }
+    },
+    {
+      "id": "column:Users.Email",
+      "kind": "column",
+      "label": "Email",
+      "data": {
+        "type": "character varying(320)",
+        "nullable": false
+      }
+    },
+    {
+      "id": "column:Users.DisplayName",
+      "kind": "column",
+      "label": "DisplayName",
+      "data": {
+        "type": "character varying(120)",
+        "nullable": false
+      }
+    },
+    {
+      "id": "column:Users.CreatedAt",
+      "kind": "column",
+      "label": "CreatedAt",
+      "data": {
+        "type": "timestamp with time zone",
+        "nullable": false
+      }
+    },
+    {
+      "id": "key:PK_Users",
+      "kind": "primary-key",
+      "label": "PK_Users",
+      "data": {
+        "columns": [
+          "Id"
+        ]
+      }
+    },
+    {
+      "id": "index:IX_Users_Email",
+      "kind": "index",
+      "label": "IX_Users_Email",
+      "data": {
+        "columns": [
+          "Email"
+        ]
+      }
+    },
+    {
+      "id": "extension:pgcrypto",
+      "kind": "extension",
+      "label": "pgcrypto",
+      "data": {
+        "version": "1.3"
+      }
+    },
+    {
+      "id": "extension:citext",
+      "kind": "extension",
+      "label": "citext",
+      "data": {
+        "version": "1.6"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "contains:Customers.Id",
+      "kind": "contains",
+      "from": "table:Customers",
+      "to": "column:Customers.Id"
+    },
+    {
+      "id": "contains:Customers.Name",
+      "kind": "contains",
+      "from": "table:Customers",
+      "to": "column:Customers.Name"
+    },
+    {
+      "id": "contains:Customers.BillingEmail",
+      "kind": "contains",
+      "from": "table:Customers",
+      "to": "column:Customers.BillingEmail"
+    },
+    {
+      "id": "constraint:PK_Customers",
+      "kind": "constraint",
+      "from": "table:Customers",
+      "to": "key:PK_Customers"
+    },
+    {
+      "id": "key-column:PK_Customers.Id",
+      "kind": "key-column",
+      "from": "key:PK_Customers",
+      "to": "column:Customers.Id"
+    },
+    {
+      "id": "contains:Invoices.Id",
+      "kind": "contains",
+      "from": "table:Invoices",
+      "to": "column:Invoices.Id"
+    },
+    {
+      "id": "contains:Invoices.Number",
+      "kind": "contains",
+      "from": "table:Invoices",
+      "to": "column:Invoices.Number"
+    },
+    {
+      "id": "contains:Invoices.CustomerId",
+      "kind": "contains",
+      "from": "table:Invoices",
+      "to": "column:Invoices.CustomerId"
+    },
+    {
+      "id": "contains:Invoices.IssuedOn",
+      "kind": "contains",
+      "from": "table:Invoices",
+      "to": "column:Invoices.IssuedOn"
+    },
+    {
+      "id": "contains:Invoices.DueOn",
+      "kind": "contains",
+      "from": "table:Invoices",
+      "to": "column:Invoices.DueOn"
+    },
+    {
+      "id": "contains:Invoices.Status",
+      "kind": "contains",
+      "from": "table:Invoices",
+      "to": "column:Invoices.Status"
+    },
+    {
+      "id": "constraint:PK_Invoices",
+      "kind": "constraint",
+      "from": "table:Invoices",
+      "to": "key:PK_Invoices"
+    },
+    {
+      "id": "key-column:PK_Invoices.Id",
+      "kind": "key-column",
+      "from": "key:PK_Invoices",
+      "to": "column:Invoices.Id"
+    },
+    {
+      "id": "index:index:IX_Invoices_CustomerId",
+      "kind": "index",
+      "from": "table:Invoices",
+      "to": "index:IX_Invoices_CustomerId"
+    },
+    {
+      "id": "index-column:index:IX_Invoices_CustomerId",
+      "kind": "index-column",
+      "from": "index:IX_Invoices_CustomerId",
+      "to": "column:Invoices.CustomerId"
+    },
+    {
+      "id": "index:index:IX_Invoices_Number",
+      "kind": "index",
+      "from": "table:Invoices",
+      "to": "index:IX_Invoices_Number"
+    },
+    {
+      "id": "index-column:index:IX_Invoices_Number",
+      "kind": "index-column",
+      "from": "index:IX_Invoices_Number",
+      "to": "column:Invoices.Number"
+    },
+    {
+      "id": "relation:FK_Invoices_Customers_CustomerId",
+      "kind": "relation",
+      "from": "table:Invoices",
+      "to": "table:Customers",
+      "data": {
+        "columns": [
+          "CustomerId"
+        ],
+        "principalColumns": [
+          "Id"
+        ],
+        "name": "FK_Invoices_Customers_CustomerId"
+      }
+    },
+    {
+      "id": "contains:InvoiceLines.Id",
+      "kind": "contains",
+      "from": "table:InvoiceLines",
+      "to": "column:InvoiceLines.Id"
+    },
+    {
+      "id": "contains:InvoiceLines.InvoiceId",
+      "kind": "contains",
+      "from": "table:InvoiceLines",
+      "to": "column:InvoiceLines.InvoiceId"
+    },
+    {
+      "id": "contains:InvoiceLines.Description",
+      "kind": "contains",
+      "from": "table:InvoiceLines",
+      "to": "column:InvoiceLines.Description"
+    },
+    {
+      "id": "contains:InvoiceLines.Quantity",
+      "kind": "contains",
+      "from": "table:InvoiceLines",
+      "to": "column:InvoiceLines.Quantity"
+    },
+    {
+      "id": "contains:InvoiceLines.UnitPrice",
+      "kind": "contains",
+      "from": "table:InvoiceLines",
+      "to": "column:InvoiceLines.UnitPrice"
+    },
+    {
+      "id": "constraint:PK_InvoiceLines",
+      "kind": "constraint",
+      "from": "table:InvoiceLines",
+      "to": "key:PK_InvoiceLines"
+    },
+    {
+      "id": "key-column:PK_InvoiceLines.Id",
+      "kind": "key-column",
+      "from": "key:PK_InvoiceLines",
+      "to": "column:InvoiceLines.Id"
+    },
+    {
+      "id": "index:index:IX_InvoiceLines_InvoiceId",
+      "kind": "index",
+      "from": "table:InvoiceLines",
+      "to": "index:IX_InvoiceLines_InvoiceId"
+    },
+    {
+      "id": "index-column:index:IX_InvoiceLines_InvoiceId",
+      "kind": "index-column",
+      "from": "index:IX_InvoiceLines_InvoiceId",
+      "to": "column:InvoiceLines.InvoiceId"
+    },
+    {
+      "id": "relation:FK_InvoiceLines_Invoices_InvoiceId",
+      "kind": "relation",
+      "from": "table:InvoiceLines",
+      "to": "table:Invoices",
+      "data": {
+        "columns": [
+          "InvoiceId"
+        ],
+        "principalColumns": [
+          "Id"
+        ],
+        "name": "FK_InvoiceLines_Invoices_InvoiceId"
+      }
+    },
+    {
+      "id": "contains:Users.Id",
+      "kind": "contains",
+      "from": "table:Users",
+      "to": "column:Users.Id"
+    },
+    {
+      "id": "contains:Users.Email",
+      "kind": "contains",
+      "from": "table:Users",
+      "to": "column:Users.Email"
+    },
+    {
+      "id": "contains:Users.DisplayName",
+      "kind": "contains",
+      "from": "table:Users",
+      "to": "column:Users.DisplayName"
+    },
+    {
+      "id": "contains:Users.CreatedAt",
+      "kind": "contains",
+      "from": "table:Users",
+      "to": "column:Users.CreatedAt"
+    },
+    {
+      "id": "constraint:PK_Users",
+      "kind": "constraint",
+      "from": "table:Users",
+      "to": "key:PK_Users"
+    },
+    {
+      "id": "key-column:PK_Users.Id",
+      "kind": "key-column",
+      "from": "key:PK_Users",
+      "to": "column:Users.Id"
+    },
+    {
+      "id": "index:index:IX_Users_Email",
+      "kind": "index",
+      "from": "table:Users",
+      "to": "index:IX_Users_Email"
+    },
+    {
+      "id": "index-column:index:IX_Users_Email",
+      "kind": "index-column",
+      "from": "index:IX_Users_Email",
+      "to": "column:Users.Email"
+    }
+  ]
+}

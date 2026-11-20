@@ -19,6 +19,20 @@
       "after": "fixtures/django-library-after.json"
     },
     {
+      "id": "prisma-licensing",
+      "title": "Prisma: tables that reference each other",
+      "description": "Users, licenses and stores reference each other (a user's current license and the license's user, a store's owner and the user's home store), as licensing schemas often do; a refunds table arrives. Every link still runs between ranks or in the left lanes, never behind a card.",
+      "before": "fixtures/prisma-licensing-before.json",
+      "after": "fixtures/prisma-licensing-after.json"
+    },
+    {
+      "id": "extensions",
+      "title": "Postgres extensions beside the tables",
+      "description": "Extensions are entities of their own, drawn as tags below the tables: citext is upgraded and pg_trgm arrives.",
+      "before": "fixtures/extensions-before.json",
+      "after": "fixtures/extensions-after.json"
+    },
+    {
       "id": "organizations",
       "title": "Organizations arrive",
       "description": "A new Organizations table that four tables reference: each foreign-key column arrives in its own step and moves into the key group once its principal table exists.",

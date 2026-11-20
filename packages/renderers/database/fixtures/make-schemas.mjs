@@ -1,10 +1,11 @@
 // Regenerates the Prisma and Django database fixtures from the small projects beside this script:
-// `prisma-shop/{before,after}` (a Prisma schema) and `django-library/{before,after}` (a Django
+// `prisma-shop/{before,after}` and `prisma-licensing/{before,after}` (Prisma schemas, the second with tables that
+// reference each other) and `django-library/{before,after}` (a Django
 // project) are each committed to a scratch Git repository, and the prisma-schema and
 // django-schema extractors read both revisions with the Projections CLI into
 // `<project>-{before,after}.json`.
 //
-//   node renderers/database/fixtures/make-schemas.mjs [--cli path/to/projections] [--python path/to/python]
+//   node renderers/database/fixtures/make-schemas.mjs [--cli path/to/projections] [--python path/to/python] [--only <project>]
 //
 // Without --cli the debug CLI is built with Cargo. django-schema runs the project's Django, so
 // --python (or PROJECTIONS_DJANGO_PYTHON) names an interpreter with Django installed (the
@@ -18,7 +19,7 @@ import {parseArgs} from 'node:util'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const workspace = path.resolve(here, '../../..')
-const {values} = parseArgs({options: {cli: {type: 'string'}, python: {type: 'string'}}})
+const {values} = parseArgs({options: {cli: {type: 'string'}, python: {type: 'string'}, only: {type: 'string'}}})
 let cli = values.cli && path.resolve(values.cli)
 if (!cli) {
   execFileSync('cargo', ['build', '-q', '-p', 'projections-cli'], {cwd: workspace, stdio: 'inherit'})
@@ -28,6 +29,7 @@ const python = values.python ?? process.env.PROJECTIONS_DJANGO_PYTHON ?? 'python
 
 const projects = [
   {name: 'prisma-shop', definition: {id: 'database', title: 'Database', extractor: 'prisma-schema', renderer: 'database'}, trust: false},
+  {name: 'prisma-licensing', definition: {id: 'database', title: 'Database', extractor: 'prisma-schema', renderer: 'database'}, trust: false},
   {
     name: 'django-library',
     definition: {
@@ -42,7 +44,7 @@ const projects = [
   },
 ]
 
-for (const {name, definition, trust} of projects) {
+for (const {name, definition, trust} of projects.filter(project => !values.only || project.name === values.only)) {
   const repository = mkdtempSync(path.join(tmpdir(), `projections-${name}-`))
   const git = (...args) =>
     execFileSync('git', ['-c', 'user.name=Fixtures', '-c', 'user.email=fixtures@example.com', ...args], {cwd: repository})

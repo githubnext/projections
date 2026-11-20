@@ -1,7 +1,9 @@
-// Regenerates `large-architecture-before.json` and `-after.json`: a synthetic architecture of about 200 components in
+// Regenerates `large-architecture-before.json` and `-after.json`, and `module-architecture.json`: a synthetic architecture of about 200 components in
 // a dozen module boundaries, with shared hubs many components depend on and long-span relationships from the apps to
 // the shared libraries, as a real monorepo's topology has. The after revision changes one module only: a component
 // arrives with its dependencies, one leaves and one moves to another hub, so most boundaries are unchanged.
+// `module-architecture.json` is one revision of four of its modules, 42 components: past the 40 above which a
+// comparison collapses its unchanged boundaries, small enough to open quickly.
 //
 //   node renderers/graph/fixtures/make-architecture.mjs
 import {writeFileSync} from 'node:fs'
@@ -89,3 +91,13 @@ const format = extraction =>
   `{\n  "protocolVersion": 0,\n  "schema": "architecture/v0",\n  "entities": [\n${extraction.entities.map(row => `    ${JSON.stringify(row)}`).join(',\n')}\n  ],\n  "relationships": [\n${extraction.relationships.map(row => `    ${JSON.stringify(row)}`).join(',\n')}\n  ]\n}\n`
 writeFileSync(path.join(here, 'large-architecture-before.json'), format(sorted(before)))
 writeFileSync(path.join(here, 'large-architecture-after.json'), format(sorted(after)))
+const modules = ['apps', 'gateway', 'identity', 'shared']
+const kept = extraction => {
+  const ids = new Set(extraction.entities.map(entity => entity.id).filter(id => modules.includes(id.split('/')[0])))
+  return {
+    ...extraction,
+    entities: extraction.entities.filter(entity => ids.has(entity.id)),
+    relationships: extraction.relationships.filter(row => ids.has(row.from) && ids.has(row.to)),
+  }
+}
+writeFileSync(path.join(here, 'module-architecture.json'), format(sorted(kept(before))))

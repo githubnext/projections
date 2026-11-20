@@ -1,0 +1,77 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Tables that reference each other, as an app's licensing and store tables often do: a user's current license and
+// the license's user, a store's owner and the user's home store.
+
+model User {
+  id               Int        @id @default(autoincrement())
+  email            String     @unique
+  currentLicenseId Int?       @unique
+  homeStoreId      Int?
+  currentLicense   License?   @relation("CurrentLicense", fields: [currentLicenseId], references: [id])
+  homeStore        Store?     @relation("HomeStore", fields: [homeStoreId], references: [id])
+  licenses         License[]  @relation("Licenses")
+  purchases        Purchase[]
+  ownedStores      Store[]    @relation("StoreOwner")
+  approvedRefunds  Refund[]   @relation("RefundApprover")
+}
+
+model Store {
+  id        Int        @id @default(autoincrement())
+  name      String
+  ownerId   Int
+  owner     User       @relation("StoreOwner", fields: [ownerId], references: [id])
+  products  Product[]
+  purchases Purchase[]
+  shoppers  User[]     @relation("HomeStore")
+}
+
+model Product {
+  id         Int       @id @default(autoincrement())
+  storeId    Int
+  sku        String    @unique
+  priceCents Int
+  store      Store     @relation(fields: [storeId], references: [id])
+  licenses   License[]
+}
+
+model License {
+  id        Int        @id @default(autoincrement())
+  userId    Int
+  productId Int
+  key       String     @unique
+  expiresAt DateTime?
+  user      User       @relation("Licenses", fields: [userId], references: [id])
+  product   Product    @relation(fields: [productId], references: [id])
+  current   User?      @relation("CurrentLicense")
+  purchases Purchase[]
+}
+
+model Purchase {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  storeId     Int
+  licenseId   Int
+  amountCents Int
+  purchasedAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  store       Store    @relation(fields: [storeId], references: [id])
+  license     License  @relation(fields: [licenseId], references: [id])
+  refunds     Refund[]
+}
+
+model Refund {
+  id          Int      @id @default(autoincrement())
+  purchaseId  Int
+  approvedById Int
+  amountCents Int
+  purchase    Purchase @relation(fields: [purchaseId], references: [id])
+  approvedBy  User     @relation("RefundApprover", fields: [approvedById], references: [id])
+}

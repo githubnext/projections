@@ -27,17 +27,19 @@ export function StageFoot({projection: p, summary, legend}: {projection: Project
   const room = useRef<HTMLDivElement>(null)
   const foot = useRef<HTMLDivElement>(null)
   useWholePixels(foot, {width: true})
-  if (!summary && !(legend && p.legend?.items.length)) return null
+  // Mounted even while empty (hidden), so a legend that arrives later is measured and sent as a cover at once.
+  const empty = !summary && !(legend && p.legend?.items.length)
   return (
     <div
       ref={room}
+      hidden={empty}
       className="ph-stage-foot-room"
       style={{
         position: 'absolute',
         insetInline: utilitySide,
         bottom: utilitySide,
         zIndex: 3,
-        display: 'flex',
+        display: empty ? 'none' : 'flex',
         justifyContent: 'center',
         pointerEvents: 'none',
       }}

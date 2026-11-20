@@ -220,8 +220,9 @@ function ScopeHiddenFigure({projection: p}: {projection: ProjectionController}) 
   const short = p.comparing && p.scope === 'changes' ? scopeHiddenShort(p.scopeHidden) : undefined
   if (!short) return null
   return (
-    <span data-summary-fixed="" data-scope-hidden="" className="pj:flex pj:shrink-0 pj:items-center pj:gap-1">
-      <span className="ph-cap" title={scopeHiddenText(p.scopeHidden)}>
+    // Narrower than its words, it cuts them with an ellipsis (the whole sentence is its tooltip), never the figures' "…".
+    <span data-summary-fixed="" data-scope-hidden="" className="pj:flex pj:min-w-0 pj:items-center pj:gap-1">
+      <span className="ph-cap pj:min-w-0 pj:truncate" title={scopeHiddenText(p.scopeHidden)}>
         {short}
       </span>
       <button type="button" className={cn(figureButton, 'ph-scope-show-all pj:text-foreground')} onClick={() => p.setScope('all')}>
@@ -295,7 +296,7 @@ export function SummaryBar({
       {/* With the trailing spacer, centres the figures and their "…" in the bar (the toggles stay at its end); it gives
           way first where the end needs more room. */}
       <span aria-hidden="true" className="ph-summary-lead pj:min-w-0 pj:flex-1" />
-      <span className="ph-summary-centre pj:flex pj:min-w-0 pj:items-center pj:gap-1">
+      <span className="ph-summary-centre pj:flex pj:min-w-0 pj:items-center pj:gap-1 pj:in-data-tight:shrink-0">
         <ul className="ph-summary-figures pj:flex pj:min-w-0 pj:items-center" aria-label={sentence}>
           {figures.slice(0, shown).map((figure, index) => (
             <Figure key={figure.key} projection={p} figure={figure} first={index === 0} />
@@ -334,7 +335,7 @@ export function SummaryBar({
           narrower than it. */}
       <span
         className={cn(
-          'ph-summary-trail pj:flex pj:flex-1 pj:items-center pj:justify-end pj:gap-1 pj:whitespace-nowrap pj:has-[*]:ps-2',
+          'ph-summary-trail pj:flex pj:flex-1 pj:items-center pj:justify-end pj:gap-1 pj:whitespace-nowrap pj:has-[*]:ps-2 pj:in-data-tight:min-w-0',
           // As wide as its content (in the stage's foot), the bar keeps as much after its end as the lead's gap before
           // the figures, so it sits evenly around them.
           room && 'pj:has-[*]:pe-1',

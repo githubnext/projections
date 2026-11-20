@@ -44,7 +44,7 @@ export interface ToolbarContent {
   actions?: boolean | readonly ToolbarAction[]
   /** Anything else that changes the regions' widths, for example the revision labels or the chip. */
   key?: string
-  /** The mode region may be centred (default true); `VscodeProjectionViewProps.centreModes`. */
+  /** The mode region may be centred (default false: it leads the row); `VscodeProjectionViewProps.centreModes`. */
   centre?: boolean
 }
 
@@ -107,7 +107,7 @@ const centredSteps = {
 export function toolbarSteps(content: ToolbarContent): readonly ToolbarLayout[] {
   const actions = content.actions === true ? actionCollapseOrder : content.actions || []
   const seen = new Set<string>()
-  const centred = content.modes && content.centre !== false ? centredSteps[content.playback ? 'animated' : 'still'] : []
+  const centred = content.modes && content.centre === true ? centredSteps[content.playback ? 'animated' : 'still'] : []
   return [...centred, ...(content.playback ? animatedSteps : stillSteps)]
     .map(layout => {
       const moreActions = layout.moreActions.filter(action => actions.includes(action))

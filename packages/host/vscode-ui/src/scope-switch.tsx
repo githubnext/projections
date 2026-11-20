@@ -31,7 +31,7 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
     <span className="phv-scope-slot">
       <span
         className="phv-scope-note"
-        title={nothingHiddenTitle}
+        title={`${nothingHiddenTitle} (${p.scopeCounts.changes.toLocaleString()})`}
         data-scope="none"
         data-inactive={!nothingHidden || undefined}
         aria-hidden={!nothingHidden || undefined}

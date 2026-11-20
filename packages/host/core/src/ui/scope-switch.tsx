@@ -29,7 +29,7 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
           'ph-scope ph-scope-note pj:inline-flex pj:h-8 pj:shrink-0 pj:items-center pj:gap-1.5 pj:px-2 pj:text-sm pj:text-muted-foreground',
           form(nothingHidden),
         )}
-        title={nothingHiddenTitle}
+        title={`${nothingHiddenTitle} (${p.scopeCounts.changes.toLocaleString()})`}
         data-scope="none"
         aria-hidden={!nothingHidden || undefined}
       >

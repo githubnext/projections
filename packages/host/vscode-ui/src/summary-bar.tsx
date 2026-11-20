@@ -11,6 +11,7 @@ import {
   summaryFactTitle,
   summaryToggle,
   summaryToggleTitle,
+  useRunningIndicator,
   useSummaryFit,
   scopeHiddenShort,
   scopeHiddenText,
@@ -19,7 +20,7 @@ import type {ProjectionController, SummaryDelta, SummaryFigure} from '@githubnex
 import {uiCodicons} from './codicons.js'
 import {regeneratedLabel} from './view-controls.js'
 import {Overlay} from './overlay/overlay.js'
-import {runningIndicator, runningText} from './running.js'
+import {runningText} from './running.js'
 import type {Running} from './running.js'
 
 /**
@@ -154,19 +155,6 @@ function Figure({
   )
 }
 
-/** A job as the bar shows it: only once it has run a moment, then for at least a moment (`runningIndicator`). */
-function useShownRunning(running: Running | undefined): Running | undefined {
-  const [, changed] = useReducer((count: number) => count + 1, 0)
-  const [indicator] = useState(() => runningIndicator(changed))
-  useEffect(() => {
-    const before = indicator.current
-    indicator.set(running)
-    if (indicator.current !== before) changed()
-  }, [indicator, running])
-  useEffect(() => () => indicator.dispose(), [indicator])
-  return indicator.current
-}
-
 /**
  * The summary bar along the bottom of every projection view, drawn like VS Code's status bar: 22px of small
  * description-foreground text over the side bar's background, under a hairline. A figure per kind in the renderer's
@@ -187,7 +175,7 @@ export function SummaryBar({
   running?: Running | null | undefined
   className?: string
 }) {
-  const shownRunning = useShownRunning(running ?? undefined)
+  const shownRunning = useRunningIndicator(running ?? undefined)
   const bar = useRef<HTMLDivElement>(null)
   const more = useRef<HTMLButtonElement>(null)
   const [open, setOpen] = useState(false)

@@ -17,6 +17,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./running": {
+      "types": "./dist/running.d.ts",
+      "import": "./dist/running.js"
+    },
     "./styles.css": "./dist/ui.css",
     "./build": {
       "types": "./build/collect-renderers.d.mts",

@@ -1,6 +1,6 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {isPlaybackShortcut, playButton, rovingIndex} from '../dist/index.js'
+import {handlePlaybackShortcut, isPlaybackShortcut, playButton, rovingIndex} from '../dist/index.js'
 
 // Just enough DOM for the shortcut's containment rules: `keeps` marks an element that uses Space itself.
 class FakeElement {
@@ -50,6 +50,24 @@ test('Space stays with fields and controls that use it, unless one encloses the 
   assert.equal(isPlaybackShortcut(space(toolbar, toolbar)), true)
   const portaled = new FakeElement(null)
   assert.equal(isPlaybackShortcut(space(portaled, toolbar)), false)
+})
+
+test('the shortcut toggles once per press, preventing the default of every Space it takes and of nothing else', () => {
+  const toolbar = new FakeElement(null)
+  const field = new FakeElement(toolbar, true)
+  let toggles = 0
+  const projection = {togglePlayback: () => toggles++}
+  const press = (target, repeat) => {
+    let prevented = false
+    const event = {...space(target, toolbar), repeat, preventDefault: () => (prevented = true)}
+    return {handled: handlePlaybackShortcut(event, projection), prevented}
+  }
+  assert.deepEqual(press(toolbar, false), {handled: true, prevented: true})
+  assert.deepEqual(press(toolbar, true), {handled: true, prevented: true})
+  assert.deepEqual(press(toolbar, true), {handled: true, prevented: true})
+  assert.equal(toggles, 1)
+  assert.deepEqual(press(field, false), {handled: false, prevented: false})
+  assert.equal(toggles, 1)
 })
 
 test('roving choice wraps, keeps to its axis, and ignores other keys', () => {

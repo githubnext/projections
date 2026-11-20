@@ -33,6 +33,7 @@ import type {DiDependencyChange, DiDiff, DiDiffUnit} from './diff-model.js'
 import type {DiFacetChange} from './facets.js'
 import {
   LifetimeMark,
+  LinkOrigins,
   LinkView,
   activate,
   diLegend,
@@ -449,6 +450,7 @@ export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, o
               diff
             />
           ))}
+          <LinkOrigins links={links} routes={routes} />
         </svg>
       </div>
     </div>

@@ -480,7 +480,7 @@ function TransitionView({
                 link={link}
                 route={routes.get(link.key)!}
                 markerId={markerId}
-                emphasis={emphasize(link)}
+                emphasis={emphasize(link, transition.linkStepRow(link.key))}
                 labelled={selectedUnits.has(link.fromId) || selectedUnits.has(link.toId)}
                 selectedId={selectedId}
                 onSelect={onSelect}

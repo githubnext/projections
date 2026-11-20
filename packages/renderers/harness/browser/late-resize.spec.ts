@@ -51,6 +51,38 @@ for (const delay of [1500, 10_000])
     expect(result!.status).toBe('pass')
   })
 
+/**
+ * A renderer frame that is slow to reach a rendering opportunity (a loaded machine) observes resizes late, while its
+ * paint acknowledgement falls back to a timer (see `afterPaint`). Here every `ResizeObserver` callback in the renderer's
+ * frame comes `delay` ms late.
+ */
+async function delayResizeObservations(page: Page, delay: number): Promise<void> {
+  await page.addInitScript(delay => {
+    if (window === window.top) return
+    const Observer = window.ResizeObserver
+    window.ResizeObserver = class extends Observer {
+      constructor(callback: ResizeObserverCallback) {
+        super((entries, observer) => setTimeout(() => callback(entries, observer), delay))
+      }
+    }
+  }, delay)
+}
+
+test('a content-sized renderer asks for its height before it acknowledges its first paint, however late it observes resizes', async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== 'chromium-desktop', 'One host timing case, in desktop Chromium.')
+  await delayResizeObservations(page, 5000)
+  const stage = await openStage(page, harnessInspector(), {scenario: 'graph/npm-react-update', comparisonMode: 'diff'})
+  // A load resolves at the first acknowledged paint: the height must be known by then, or a check measures the frame
+  // at the height it has before the renderer asks for one (and `Stage.arrived` has nothing to wait for).
+  const {height} = await stage.state()
+  expect(height).toBeGreaterThan(0)
+  await stage.measure('settle')
+  const {height: inner} = await stage.measure<{height: number}>('viewport')
+  expect(Math.abs(inner - height!)).toBeLessThanOrEqual(1)
+})
+
 test('a measurement waits for the frame to arrive at its height however late, never measuring it at the height before', async ({
   page,
 }, info) => {

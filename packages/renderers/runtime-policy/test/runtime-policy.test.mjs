@@ -364,3 +364,38 @@ test('the Changes scope keeps the policies covering a changed workload', async (
   assert.deepEqual(scoped[workload.label], all[workload.label])
   assert.ok(scoped[workload.label].length > 0, 'the workload reads as covered')
 })
+
+test("the Changes scope keeps a changed rule's matched and excluded subjects, so its binaries still read", async () => {
+  // Two rules change their conditions only: one matches binaries under a prefix, one excludes a binary.
+  const edited = structuredClone(library)
+  const ruled = new Set(edited.relationships.filter(item => ['matches', 'excludes'].includes(item.kind)).map(item => item.from))
+  assert.equal(ruled.size, 2)
+  for (const rule of edited.entities.filter(entity => ruled.has(entity.id)))
+    rule.data = {
+      ...rule.data,
+      conditions: [
+        ...(rule.data.conditions ?? []),
+        {display: '`arg1` (`int`) = `4`', filter: 'matchArgs', index: 1, operator: 'Equal', values: ['4']},
+      ],
+    }
+  const comparison = await interpreted(library, edited)
+  const model = comparisonModel(library, edited, comparison)
+  const rules = view =>
+    new Map(
+      view.categories.flatMap(category =>
+        category.hooks.flatMap(hook =>
+          hook.probes.flatMap(probe =>
+            probe.selectors.map(rule => [rule.row.id, rule.chips.map(chip => [chip.kind, chip.subject.entity.label])]),
+          ),
+        ),
+      ),
+    )
+  const scoped = rules(changesView(model, comparison.metadata))
+  const all = rules(buildModel(model, 'diff', comparison.metadata))
+  const changed = [...ruled].map(id => model.entityRow.after.get(id))
+  for (const id of changed) {
+    assert.ok(scoped.get(id)?.length, `${id} shows its binaries`)
+    assert.deepEqual(scoped.get(id), all.get(id), id)
+  }
+  assert.deepEqual(new Set(changed.flatMap(id => scoped.get(id).map(([kind]) => kind))), new Set(['matches', 'excludes']))
+})

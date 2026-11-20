@@ -53,7 +53,8 @@ export async function runModuleInWorkerForTests(
   moduleBytes: Uint8Array,
   input: unknown,
   options: RunComparatorOptions = {},
+  signal?: AbortSignal,
 ): Promise<unknown> {
   const resolved = settings(options)
-  return run(await prepare(moduleBytes, input, resolved), resolved.deadlineMs)
+  return run(await prepare(moduleBytes, input, resolved), resolved.deadlineMs, signal)
 }

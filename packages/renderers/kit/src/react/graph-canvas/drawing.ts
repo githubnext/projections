@@ -10,7 +10,6 @@ import type {FieldLine} from '../../diff/lines.js'
 import type {KindLineText} from '../../card-text.js'
 import type {GraphCanvasProps} from './props.js'
 import {badgeText} from '../../graph-canvas/badges.js'
-import type {WeightShare} from '../../graph-canvas/weight.js'
 
 export type LaidOutGraphProps = GraphCanvasProps & {
   transition: GraphTransition
@@ -23,8 +22,6 @@ export type LaidOutGraphProps = GraphCanvasProps & {
   badgeGrowth: ReadonlyMap<string, number> | undefined
   /** How much each card grows for its subtitle (see `GraphCanvasProps.subtitle`). */
   subtitleGrowth: ReadonlyMap<string, number> | undefined
-  /** Each weighed card's share of the heaviest weight, drawn as its gauge (see `GraphCanvasProps.weight`). */
-  weightShares: ReadonlyMap<string, WeightShare> | undefined
 }
 
 export interface Drawing {
@@ -33,6 +30,8 @@ export interface Drawing {
   diff: boolean
   /** How far a change border is inset into its card (see `emphasisInset`). */
   inset: number
+  /** A plain card's border width, `--stroke`, in layout units. */
+  stroke: number
   kindOf(entity: Entity): KindLineText | undefined
   statusOf(node: TransitionNode): StatusPart[] | undefined
   /** A card's or boundary's accessible name. */
@@ -45,7 +44,7 @@ export interface Drawing {
   receded(id: string): boolean
 }
 
-export function drawing(props: LaidOutGraphProps, diff: boolean, inset: number): Drawing {
+export function drawing(props: LaidOutGraphProps, diff: boolean, inset: number, stroke = 1): Drawing {
   const {onSelect, comparing} = props
   const kindOf = (entity: Entity) => props.kindLine?.(entity)
   const statusOf = (node: TransitionNode) => props.describeStatus?.(node)
@@ -80,7 +79,7 @@ export function drawing(props: LaidOutGraphProps, diff: boolean, inset: number):
   }
   const mark = (change: ChangeClassification | TransitionNode, emphasis: number) =>
     diff ? {...changeMark(change), style: {'--emphasis': emphasis} as CSSProperties} : {}
-  return {props, diff, inset, kindOf, statusOf, label, mark, select, receded}
+  return {props, diff, inset, stroke, kindOf, statusOf, label, mark, select, receded}
 }
 
 /** A relationship's change in its accessible name: which endpoints a rewired one's route has. */

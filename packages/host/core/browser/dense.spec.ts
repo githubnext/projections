@@ -21,7 +21,7 @@ import {toolbarGeometry} from './toolbar-geometry.js'
 /**
  * The default UI's dense layout: a planned toolbar above a stage that takes the rest of the view, on desktop and on
  * a phone. Narrower toolbars collapse in priority order rather than wrapping; animated playback takes a planned
- * second row on a phone, and on desktop, where the mode region is centred (toolbar-layout.spec.ts sweeps the widths).
+ * second row on a phone and on desktop (toolbar-layout.spec.ts sweeps the widths).
  */
 const view = (page: Page) => page.locator('.ph')
 const toolbar = (page: Page) => page.getByRole('group', {name: 'Projection toolbar'})
@@ -52,8 +52,7 @@ for (const [name, size] of [
     ['side by side', 'mode=side-by-side&before=v1&after=v3'],
     ['swipe', 'mode=swipe&before=v1&after=v3'],
   ] as const) {
-    // Animated playback takes a second row with a full-width slider: on a phone, and on desktop below the centred mode
-    // region. Otherwise one row.
+    // Animated playback takes a second row with a full-width slider, on a phone and on desktop. Otherwise one row.
     const rows = mode === 'animated' ? 2 : 1
     test(`at ${name} the ${mode} toolbar has ${rows} planned row${rows > 1 ? 's' : ''} and the stage takes at least 80% of the view's height`, async ({
       page,

@@ -4,9 +4,10 @@ import {Info} from 'lucide-react'
 import {useProjection} from '../projection.js'
 import type {ProjectionController} from '../projection.js'
 import {ProjectionStage} from '../stage.js'
+import {UpdatingChip} from './updating-chip.js'
 import {useUtilityPlayback} from './view/utility.js'
+import {StageFoot} from './view/stage-foot.js'
 import {HostViews} from './view/host-views.js'
-import {SummaryBar} from './summary-bar.js'
 import {DetailCard} from './detail-card.js'
 import {ComparatorLine, featureOn, offeredModes, rendererLabel, spaceTogglesPlayback, zoomGroup} from './blocks.js'
 import type {ProjectionFeatures, ViewKind} from './blocks.js'
@@ -183,6 +184,8 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
                 labels={{before: beforeLabel, after: afterLabel}}
                 fill={fill}
                 paneLabels={paneLabels}
+                legend={false}
+                foot={<StageFoot projection={p} summary={on('summary')} legend />}
                 utility={view === 'renderer' && floating}
                 renderStatus={pane => (
                   <RendererPaneStatus
@@ -210,6 +213,7 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
             />
           )}
         </div>
+        <UpdatingChip projection={p} running={props.running} />
         {/* Without the summary bar, which says what the scope hides, a pill over the stage says it. */}
         {on('changesOnly') && !on('summary') && <ScopeNotice projection={p} />}
         {props.details !== 'none' && (
@@ -226,7 +230,6 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
           />
         )}
       </div>
-      {on('summary') && <SummaryBar projection={p} />}
     </ScopedRoot>
   )
 }

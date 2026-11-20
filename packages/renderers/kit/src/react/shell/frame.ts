@@ -77,6 +77,17 @@ export function useStageInsetTop(): number | undefined {
   return useContext(StageInsetTop)
 }
 
+export const StageInsetBottom = createContext<number | undefined>(undefined)
+
+/**
+ * The host's `stage-inset-bottom` theme token in CSS px (the space between the content and the frame's bottom edge,
+ * where the host overlays the frame's foot, for example with a floating legend and summary), or undefined when it
+ * sends none. CSS reads it through the kit's stage padding (`--pk-stage-padding-bottom`).
+ */
+export function useStageInsetBottom(): number | undefined {
+  return useContext(StageInsetBottom)
+}
+
 export const StageCover = createContext<readonly CoverRect[] | undefined>(undefined)
 
 /**
@@ -102,7 +113,7 @@ export function useStageHeightCap(): number | undefined {
 /** The `stage-inset` token's value (or `name`'s, another length token) in CSS px, if it is one. */
 export function stageInsetOf(
   tokens: {[name: string]: string} | undefined,
-  name: 'stage-inset' | 'stage-inset-top' = 'stage-inset',
+  name: 'stage-inset' | 'stage-inset-top' | 'stage-inset-bottom' = 'stage-inset',
 ): number | undefined {
   const match = /^\s*(\d+(?:\.\d+)?)(px)?\s*$/.exec(tokens?.[name] ?? '')
   return match ? Number(match[1]) : undefined

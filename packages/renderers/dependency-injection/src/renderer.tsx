@@ -475,7 +475,7 @@ function TransitionView({
       <div
         className="di-scroll pk-dot-grid"
         ref={scroller}
-        style={{'--pk-fit-top': `${drawnPadding.top}px`} as CSSProperties}
+        style={{'--pk-fit-top': `${drawnPadding.top}px`, '--pk-fit-bottom': `${drawnPadding.y}px`} as CSSProperties}
         data-projections-scroll="dependency-injection"
         role="region"
         aria-label="Scrollable dependency composition"

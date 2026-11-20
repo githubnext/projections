@@ -8,7 +8,7 @@ import type {VscodeProjectionViewProps} from './props.js'
 
 export interface ViewToolbarProps {
   projection: ProjectionController
-  props: Pick<VscodeProjectionViewProps, 'toolbarStart' | 'centreModes' | 'actions' | 'comparator' | 'diagnostics'>
+  props: Pick<VscodeProjectionViewProps, 'toolbarStart' | 'centreModes' | 'actions' | 'comparator' | 'diagnostics' | 'utilityArea'>
   features: VscodeProjectionFeatures
   /** The modes the features offer that the renderer supports. */
   modes: readonly ComparisonMode[]
@@ -22,7 +22,7 @@ export interface ViewToolbarProps {
 }
 
 /** What the toolbar shows: the mode switch, playback, and the actions that collapse into More in order. */
-export function toolbarContent({projection: p, features, modes, view}: ViewToolbarProps) {
+export function toolbarContent({projection: p, props, features, modes, view}: ViewToolbarProps) {
   const on = featureOn(features)
   const {comparing, mode} = p
   const showZoom = on('zoom') && on('rendererControls') && view === 'renderer' && p.controls.some(control => control.group === zoomGroup)
@@ -39,7 +39,8 @@ export function toolbarContent({projection: p, features, modes, view}: ViewToolb
   return {
     on,
     showModeSwitch: features.modes !== false && comparing && modes.length > 1 && view === 'renderer',
-    showPlayback: on('playback') && comparing && mode === 'animated',
+    // With a utility area the renderer view's playback floats on the stage.
+    showPlayback: on('playback') && comparing && mode === 'animated' && !(props.utilityArea && view === 'renderer'),
     showZoom,
     zoomControls,
     showVaried,

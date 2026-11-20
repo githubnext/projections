@@ -13,12 +13,13 @@ Both accept the core's controlled and uncontrolled settings.
 
 The views give the projection the space: **a planned toolbar** (one row, or two
 where playback needs them) above a stage that takes the rest, at full width.
-Their chrome lies flat, edge to edge, in every host: the toolbar and the summary
-bar are bands of the header surface (`surface-header`), each ruled off from the
-stage by one `divider` hairline, with no card, border or corners; the stage (the
-single frame and each comparison pane) runs to both edges, and a renderer's
-legend is a band of the same surface between the stage and the summary bar.
-Notices sit between the toolbar and the stage as bands too. The toolbar's 4px
+Their chrome lies flat, edge to edge, in every host: the toolbar is a band of
+the header surface (`surface-header`), ruled off from the stage by one `divider`
+hairline, with no card, border or corners; the stage (the single frame and each
+comparison pane) runs to both edges. A renderer's legend and the summary bar
+float over the stage's foot as one centred overlay in the stage's glass (see
+[the utility area](../design/utility-area.md#the-stages-foot-the-legend-and-summary)).
+Notices sit between the toolbar and the stage as bands. The toolbar's 4px
 padding is the space around every 32px control, at its ends as at its top and
 bottom. In order, it holds three regions:
 
@@ -81,15 +82,12 @@ percent move into the group's overflow ("More playback controls"), or into More,
 only when the row needs it to keep the slider's span. So choosing Animated, or
 leaving it, never moves the controls in row 1.
 
-**The mode region is centred first.** While row 1 has room, the mode switch and
-the scope switch (Changes · All) sit together at the centre of the toolbar's
-whole width, the pickers at its start and the actions at its end, all in their
-fullest forms (`ToolbarRow`'s `centred` grid: the regions beside it get equal
-halves of what it leaves). It keeps 24px from them; with less room it moves to
-follow the pickers, still in its fullest forms. The scope's counts keep the
-widest count's digits, and its two forms (the switch, and the note when the
-Changes scope hides nothing) share one slot, so the region keeps its width as
-they change.
+**The mode region leads the row.** The mode switch and the scope switch (Changes
+· All) follow the pickers at the row's start (or start it, at its left inset,
+when a host puts nothing there), and the actions sit at its end; the row's free
+space lies between them. They are never centred. The scope switch's two forms
+(the switch, and the note when the Changes scope hides nothing) share one slot,
+so the region keeps its width as they change.
 
 Narrower still, row 1 collapses in priority order:
 
@@ -150,9 +148,10 @@ page. `features` turns off blocks and views (`playback`, `modes`,
 
 ### The summary bar
 
-A thin band along the bottom of every view (`SummaryBar`, `[data-summary-bar]`,
-named "Summary", 28px under its hairline), under the renderer, table and text
-alike, like an editor's status bar: small muted text, a figure per kind in the
+A thin row at the bottom of every view (`SummaryBar`, `[data-summary-bar]`,
+named "Summary", 28px), floating over the renderer, table and text alike in the
+stage's foot (`StageFoot`, under the renderer's legend, one rule between them),
+like an editor's status bar: small muted text, a figure per kind in the
 renderer's words (`12 workspaces · 18 dependencies`), and in a comparison each
 figure's changes after it (`12 workspaces +1 −1`), only the change figures in
 their change colors. Every figure is a toggle for `summaryFilter`: the total
@@ -168,14 +167,16 @@ its changes after it in their change colors, as a count's, but not filters
 classified it) is its tooltip and accessible description. Renderers draw no
 summary line of their own: the bar is their summary in every view, and the text
 view opens with the same sentence (`Summary: …`, `figuresSentence`; the
-`summary` prop of `TextView`). Figures that don't fit collapse from the end into
-a "…" popover (`useSummaryFit`, `fitSummary`). The count of items that varied
-within tolerance sits at the bar's end (below). Its text, like the toolbar's
-mode, varied and Show as labels, is centred by its cap height rather than its
-line box (`text-box: trim-both cap alphabetic`, with a line box one cap high
-where `text-box` is unsupported): a capital E has the same space above, below
-and to its left in the bar (its inline padding is computed from the font's cap
-height) and in a figure's pill.
+`summary` prop of `TextView`). Figures that don't fit the room the foot may grow
+to collapse from the end into a "…" at the row's end (`useSummaryFit`,
+`fitSummary`), whose popover opens above the foot: each figure a full-width row,
+highlighted with its counts, the counts of each kind of change in one column.
+The count of items that varied within tolerance sits at the bar's end (below).
+Its text, like the toolbar's mode, varied and Show as labels, is centred by its
+cap height rather than its line box (`text-box: trim-both cap alphabetic`, with
+a line box one cap high where `text-box` is unsupported): a capital E has the
+same space above, below and to its left in the bar (its inline padding is
+computed from the font's cap height) and in a figure's pill.
 
 **Volatile variation.** When a comparison has items that varied only within
 tolerance, the summary bar's end shows their count, "3 varied within tolerance"

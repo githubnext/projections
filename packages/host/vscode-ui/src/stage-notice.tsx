@@ -49,7 +49,8 @@ const inset = 12
 /**
  * Where the view draws its `stageNotice`: across the top of the stage it sits in (its parent, the workspace, which
  * doesn't scroll), 12px in, and
- * when the panes have header bands at the stage's top (side by side and swipe), 12px below the lowest of them. Placed
+ * when the panes have header bands at the stage's top (side by side and swipe), or the stage's utility area covers
+ * it, 12px below the lowest of them. Placed
  * again as the stage resizes or its panes change (another mode, columns or stacked).
  */
 export function StageNoticeSlot({children}: {children: ReactNode}) {
@@ -62,7 +63,8 @@ export function StageNoticeSlot({children}: {children: ReactNode}) {
     const place = () => {
       frame = 0
       const top = workspace.getBoundingClientRect().top
-      const bands = [...workspace.querySelectorAll(':is(.ph-panes, .ph-swipe) [data-pane-band]')]
+      // Pane bands, and what the stage's utility area overlays (its chips and playback bar).
+      const bands = [...workspace.querySelectorAll(':is(.ph-panes, .ph-swipe) [data-pane-band], .ph-stage [data-stage-cover]')]
         .map(band => band.getBoundingClientRect())
         .filter(box => box.height > 0)
       // The bands along the stage's top: both in columns and swipe, the before pane's alone when stacked.

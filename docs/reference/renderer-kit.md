@@ -754,18 +754,38 @@ countText(count: number, singular: string, plural?: string, locale?: string | un
 
 `count` and its noun, in the locale's digits: `1 package`, `3 packages`.
 
+### `coveredBottom`
+
+```ts
+coveredBottom(input: { "cover": Array<CoverRect>; "maxScale"?: number; "origin"?: { "x": number; "y": number }; "padding"?: FitPadding | number; "size": { "height": number; "width": number }; "view": { "height": number; "width": number } }): number
+```
+
+The space a fitted drawing keeps below it, CSS px, as `coveredTop` keeps above: clear of what the host overlays at
+the stage's foot (the rectangles below its middle, such as a floating legend and summary), only where the fitted
+drawing would reach them; else the padding's own bottom (`y`).
+
+### `coveredPadding`
+
+```ts
+coveredPadding(input: { "cover": Array<CoverRect>; "maxScale"?: number; "origin"?: { "x": number; "y": number }; "padding"?: FitPadding | number; "size": { "height": number; "width": number }; "view": { "height": number; "width": number } }): { "top": number; "y": number }
+```
+
+The top and bottom (`y`) a fitted drawing keeps from the host's covers at both ends (`coveredTop`, `coveredBottom`),
+resolved together: moving one edge refits and recentres the drawing, which can then reach the other end's cover, so
+each is raised until the fit clears both (only ever raised, so it settles in a few steps).
+
 ### `coveredTop`
 
 ```ts
-coveredTop(__0: { "cover": Array<CoverRect>; "maxScale"?: number; "origin"?: { "x": number; "y": number }; "padding"?: FitPadding | number; "size": { "height": number; "width": number }; "view": { "height": number; "width": number } }): number
+coveredTop(input: { "cover": Array<CoverRect>; "maxScale"?: number; "origin"?: { "x": number; "y": number }; "padding"?: FitPadding | number; "size": { "height": number; "width": number }; "view": { "height": number; "width": number } }): number
 ```
 
-The space a fitted drawing keeps above it, CSS px, so it never opens under what the host overlays (`cover`): the
-drawing is fitted with `padding` and centred in a stage of `view` whose top left is `origin` in the frame, as
-`useFitScale` and a `margin: auto` drawing place it. Where that leaves it clear of every rectangle (a flat graph
-centred well below a chip), the padding's own top; else the top that clears the lowest rectangle it reaches, by
-`coverGap`. Decided from the drawing's fit without the cover, never from the result, so it can't oscillate. The
-drawing still pans under the cover once zoomed.
+The space a fitted drawing keeps above it, CSS px, so it never opens under what the host overlays at the stage's
+top (`cover`, the rectangles above its middle): the drawing is fitted with `padding` and centred in a stage of
+`view` whose top left is `origin` in the frame, as `useFitScale` and a `margin: auto` drawing place it. Where that
+leaves it clear of every rectangle (a flat graph centred well below a chip), the padding's own top; else the top
+that clears the lowest rectangle it reaches, by `coverGap`. Decided from the drawing's fit without the cover, never
+from the result, so it can't oscillate. The drawing still pans under the cover once zoomed.
 
 ### `coverGap`
 
@@ -2657,18 +2677,6 @@ to show more of it.
 | `expand` | `"expand"(ids: Iterable<string, any, any>): void` | Shows these items too, or opens these folds (`isFold`), until the host's scope changes. A canvas lays them out with the rest; an open fold stays, as the way to fold its parts again. |
 | `shown` | `"shown": ReadonlySet<string>` | Both: every row the scope shows. |
 
-### `scrolledPadding`
-
-```ts
-scrolledPadding(__0: { "height": number; "inset": { "bottom": number; "top": number }; "own": { "top": number; "y": number }; "view": number }): { "top": number; "y": number }
-```
-
-The top and bottom (`y`) padding of a drawing drawn larger than its fit, CSS px, so it clears bands of `inset.top`
-and `inset.bottom` at the ends of a stage `view` px tall: `height` is the drawing's own height at the drawn scale.
-While it still fits the stage's height it sits centred (`margin: auto`) and keeps `own` where that leaves it clear,
-else just enough more at the end it reaches to clear the band; once that padding no longer fits, the drawing scrolls
-and each end is padded at least its band, so its first and last rows can scroll clear.
-
 ### `ScrollStart`
 
 ```ts
@@ -4380,10 +4388,11 @@ useCoveredPadding<P extends FitPadding>(stage: RefObject<HTMLElement | null>, si
 ```
 
 `padding` for content of `size` fitted to the stage element `stage` (as `useFitScale` fits it), with its top moved
-down only where the host's cover (`useStageCover`) would otherwise lie over the fitted drawing (see `coveredTop`):
-a flat graph centred below a pane's chips keeps its own top, a tall one opens below them. Without a cover,
-`padding` as it is. Pass the result to `useFitScale` and pad the drawing's top by its `top` (the kit's
-`--pk-fit-top`, which graph.css reads). The stage is measured in the frame on every resize.
+down and its bottom (`y`) up only where the host's cover (`useStageCover`) would otherwise lie over the fitted
+drawing (see `coveredTop` and `coveredBottom`): a flat graph centred below a pane's chips and above a floating
+summary keeps its own padding, a tall one opens between them. Without a cover, `padding` as it is. Pass the result
+to `useFitScale` and pad the drawing's top by its `top` and its bottom by its `y` (the kit's `--pk-fit-top` and
+`--pk-fit-bottom`, which graph.css reads). The stage is measured in the frame on every resize.
 
 ### `useDomainIndex`
 
@@ -4519,16 +4528,14 @@ Returns a function that keeps the view where its caller just scrolled it.
 ### `useScrolledPadding`
 
 ```ts
-useScrolledPadding<P extends FitPadding>(padding: P, drawnScale: number, fitScale: number, height?: undefined | { "content": number; "view": number }): P
+useScrolledPadding<P extends FitPadding>(padding: P, drawnScale: number, fitScale: number): P
 ```
 
-The padding a fitted drawing is drawn with (its `--pk-fit-top`): `padding` while it is drawn at its fitted scale
-(`fitScale`), and once it is drawn larger and scrolls down (opened at the text floor, or zoomed in: `drawnScale`), a
-top of at least the host's `stage-inset-top` under a cover, so its first row can open, and scroll back, clear of what
-the host overlays at the frame's top. `height` is the content's height (content units) and the stage's inner height
-(`Fit.height`): a drawing drawn larger that still fits the stage's height (a flat graph zoomed in) keeps its padding
-where, centred, it clears the band, and takes just enough more where it doesn't (`scrolledPadding`), so it moves no
-more than it must as it zooms. The fit never reads it.
+The padding a fitted drawing is drawn with (its `--pk-fit-top` and `--pk-fit-bottom`): `padding` while it is drawn
+at its fitted scale (`fitScale`), and once it is drawn larger and scrolls (opened at the text floor, or zoomed in:
+`drawnScale`), under a cover a top of at least the host's `stage-inset-top` and a bottom (`y`) of at least its
+`stage-inset-bottom`, so its first row opens, and its last row scrolls, clear of what the host overlays at the
+frame's top and foot. The fit never reads it.
 
 ### `useStageCover`
 
@@ -4560,6 +4567,16 @@ The host's `stage-inset` theme token in CSS px (the space between the frame's ed
 on every side), or undefined when the host sends none and the renderer keeps its own. CSS reads it through the kit's
 stage padding (`pk-stage`, `--pk-stage-padding`); this is for layout computed in script, such as a fitted canvas's
 padding.
+
+### `useStageInsetBottom`
+
+```ts
+useStageInsetBottom(): number | undefined
+```
+
+The host's `stage-inset-bottom` theme token in CSS px (the space between the content and the frame's bottom edge,
+where the host overlays the frame's foot, for example with a floating legend and summary), or undefined when it
+sends none. CSS reads it through the kit's stage padding (`--pk-stage-padding-bottom`).
 
 ### `useStageInsetTop`
 

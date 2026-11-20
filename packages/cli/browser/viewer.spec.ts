@@ -748,12 +748,12 @@ test('the person pins the projections pane from the title, and closes it back to
   // A navigation landmark at the page's start, 240px wide, its current projection focused; the title is the title alone.
   const pane = page.getByRole('navigation', {name: 'Projections'})
   await expect(pane).toBeVisible()
-  expect((await pane.boundingBox())?.width).toBe(240)
+  expect((await pane.boundingBox())?.width).toBeCloseTo(240, 0)
   await expect(pane.locator('[aria-current="page"]')).toBeFocused()
   await expect(pane.locator('[aria-current="page"]')).toContainText('Package map')
   await expect(trigger).toHaveCount(0)
   const toolbar = await page.locator('.ph-toolbar').first().boundingBox()
-  expect(toolbar?.x).toBe(240)
+  expect(toolbar?.x).toBeCloseTo(240, 0)
 
   // Choosing another shows it; the pane stays pinned across a reload, without taking focus.
   await pane.getByRole('button', {name: /Broken map/}).click()

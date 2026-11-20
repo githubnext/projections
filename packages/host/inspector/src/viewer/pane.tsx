@@ -26,10 +26,12 @@ export function setPanePinned(store: Store, pinned: boolean): void {
   }
 }
 
-/** Whether the viewer shows its pane: pinned, with more than one projection, room for it, and its server answering. */
-export function usePaneShown(store: Store): boolean {
+/**
+ * Whether the viewer shows its pane: pinned, with more than one projection, `room` for it (`usePaneRoom`, measured
+ * once by the caller), and its server answering.
+ */
+export function usePaneShown(store: Store, room: boolean): boolean {
   const {pinned, projections, stopped} = useSyncExternalStore(store.subscribe, store.get, store.get)
-  const room = usePaneRoom()
   return pinned && room && projections.length > 1 && !stopped
 }
 
@@ -40,7 +42,7 @@ export function usePaneShown(store: Store): boolean {
  */
 export function ViewerPane({store, onChoose}: {store: Store; onChoose: (projection: string) => void}) {
   const {state, choosing, projections, paneFocus} = useSyncExternalStore(store.subscribe, store.get, store.get)
-  const shown = usePaneShown(store)
+  const shown = usePaneShown(store, usePaneRoom())
   // The pane takes focus once, when pinned: not again when it comes back as the page widens.
   useEffect(() => {
     if (shown && paneFocus === 'pane') store.set({paneFocus: undefined})

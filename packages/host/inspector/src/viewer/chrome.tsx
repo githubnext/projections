@@ -85,8 +85,8 @@ export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactN
   // A surface that already names the revisions (`InspectorHost.revisionsNamed`) isn't told them again.
   const named = useInspectorHost().revisionsNamed === true
   // With the projections pane pinned, the title is the title alone; the menu offers pinning where the pane fits.
-  const paneShown = usePaneShown(store)
   const paneRoom = usePaneRoom()
+  const paneShown = usePaneShown(store, paneRoom)
   return (
     <header className="pi-viewer-header pj:relative pj:z-20 pj:flex pj:min-w-0 pj:shrink-0 pj:items-center pj:gap-3 pj:border-b pj:border-divider pj:bg-surface-header pj:px-3 pj:text-[13px]">
       <ProjectionsMark tone="two-tone" className="pi-viewer-mark pj:text-foreground" />

@@ -45,7 +45,9 @@ export function ViewerTitle({
   const menu = onChoose && current && projections.length > 1 ? {onChoose, current} : undefined
   const hasMenu = Boolean(menu)
   // A menu that goes away (the pane pinned again as the page widens) closes, so it doesn't reopen when it comes back.
-  if (!hasMenu && open) setOpen(false)
+  useEffect(() => {
+    if (!hasMenu) setOpen(false)
+  }, [hasMenu])
   useEffect(() => {
     if (!focus || !hasMenu) return
     trigger.current?.focus()

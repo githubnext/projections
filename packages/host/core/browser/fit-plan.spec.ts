@@ -45,6 +45,12 @@ test('focus follows a control that a new plan remounts, or the overflow it moves
   await expect(bar(page)).toHaveAttribute('data-plan', 'wide')
   await expect(bar(page).locator('[data-marked]')).toHaveCount(0)
   await expect.poll(() => focused(page)).toBe('apply')
+
+  // Focus moved out of the bar on purpose stays out when a new plan remounts the control it left.
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+  await setWidth(page, 400)
+  await expect(bar(page)).toHaveAttribute('data-plan', 'narrow')
+  expect(await focused(page)).toBeNull()
 })
 
 test('a press is not replanned away before its click, and the bar replans once it is released', async ({page}) => {

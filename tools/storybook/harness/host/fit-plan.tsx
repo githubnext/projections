@@ -30,11 +30,11 @@ export function FitPlanHarness() {
             Apply
           </button>
           {plan === 'wide' ? (
-            <button type="button" data-focus-id="zoom" style={button}>
+            <button key="zoom" type="button" data-focus-id="zoom" style={button}>
               Zoom
             </button>
           ) : (
-            <button type="button" data-focus-id="more" style={button}>
+            <button key="more" type="button" data-focus-id="more" style={button}>
               More
             </button>
           )}

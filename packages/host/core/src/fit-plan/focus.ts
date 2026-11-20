@@ -18,8 +18,21 @@ export function useFocusRetention(bar: RefObject<HTMLElement | null>, fallbacks:
       const target = event.target instanceof Element ? event.target.closest('[data-focus-id]') : null
       focus.current = target && element.contains(target) ? {element: target, id: target.getAttribute('data-focus-id')!} : null
     }
+    // Focus that leaves while its control stays mounted was moved on purpose: forget the control. A remount's loss is
+    // told apart once the render that removed the control (and restored focus) is done.
+    const leave = () => {
+      const left = focus.current
+      queueMicrotask(() => {
+        if (focus.current === left && left?.element.isConnected && !element.contains(element.ownerDocument.activeElement))
+          focus.current = null
+      })
+    }
     element.addEventListener('focusin', track)
-    return () => element.removeEventListener('focusin', track)
+    element.addEventListener('focusout', leave)
+    return () => {
+      element.removeEventListener('focusin', track)
+      element.removeEventListener('focusout', leave)
+    }
   }, [bar])
 
   // After every render: any render can remount the focused control.

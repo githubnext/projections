@@ -61,11 +61,21 @@ export type CiPlan = {
   browserMacos: BrowserJob[]
 }
 
+/** Whether a change to `units` reaches the CLI. */
+function reachesCli(facts: RepoFacts, units: readonly string[]): boolean {
+  return units.includes(CLI) || dependantsOf(facts.units, units).includes(CLI)
+}
+
 /** Each browser suite reached by `changed`: through its own graph, a workspace its script builds, or the CLI backend. */
 function affectedSuites(facts: RepoFacts, changed: readonly string[]): Set<string> {
   const reached = new Set([...changed, ...dependantsOf(facts.units, changed)])
-  const cli = (units: readonly string[]) => units.includes(CLI) || dependantsOf(facts.units, units).includes(CLI)
-  const backend = {all: cli(changed), fixtures: cli(changed.filter(path => !path.startsWith('packages/extractors/')))}
+  const backend = {
+    all: reachesCli(facts, changed),
+    fixtures: reachesCli(
+      facts,
+      changed.filter(path => !path.startsWith('packages/extractors/')),
+    ),
+  }
   return new Set(
     facts.browserSuites
       .filter(
@@ -140,7 +150,18 @@ export function ciPlan(facts: RepoFacts, paths: readonly string[], reasons: read
       verus: engine,
       windows: rust,
       windowsNode: platform,
-      package: all || rust || reached.has(SDK) || changed.includes(CLI),
+      // The SDK's package check scaffolds a renderer with the CLI and runs its checks in the Inspector: the CLI and what
+      // it serves count, but not one built-in renderer or an extractor.
+      package:
+        all ||
+        rust ||
+        reached.has(SDK) ||
+        reachesCli(
+          facts,
+          built.filter(
+            path => !path.startsWith('packages/extractors/') && !facts.harnessRenderers.some(name => path === `packages/renderers/${name}`),
+          ),
+        ),
       release,
       coverage: all || facts.coverage.some(path => reached.has(path)),
       mutants: all || paths.some(path => matches(path, facts.mutants.examine) && !matches(path, facts.mutants.exclude)),

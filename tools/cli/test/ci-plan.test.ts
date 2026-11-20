@@ -166,6 +166,11 @@ test("a crate a workspace's build compiles is its dependency, though its manifes
   assert.ok(rules.browser.some(job => job.suite === 'rest' && !job.except.split(',').includes('packages/comparators/runtime/js')))
 })
 
+test('the package check runs for the CLI and what it serves, not for one built-in renderer', () => {
+  assert.equal(ciPlan(facts, ['packages/host/inspector/src/app/app.tsx']).jobs.package, true)
+  assert.equal(ciPlan(facts, ['packages/renderers/database/src/styles.css']).jobs.package, false)
+})
+
 test('release configuration runs the release check', () => {
   const plan = ciPlan(facts, ['dist-workspace.toml'])
   assert.deepEqual(plan.full, [])

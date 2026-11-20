@@ -77,7 +77,7 @@ export function usePaneRoom(element?: RefObject<HTMLElement | null>): boolean {
  * The projections list as a durable pane at the page's start (`usePinnedPane`), instead of the projection menu: a
  * "Projections" navigation landmark, its header's close button (`onClose`, which returns to the menu), and each
  * projection as a button, the current one marked `aria-current="page"`, and an optional `footer`. Focus moves to the
- * current item when it opens with `autoFocus` (the person pinned it, not a reload). It draws its own edge at its end,
+ * current item when it opens with `autoFocus` (the person pinned it, not a reload), or when `autoFocus` turns on later. It draws its own edge at its end,
  * `paneWidth` wide, on the toolbar's surface; its header is `paneHeaderHeight` tall, the toolbar's row.
  */
 export function ProjectionsPane({
@@ -96,14 +96,13 @@ export function ProjectionsPane({
   onChoose?: ((id: string) => void) | undefined
   onClose: () => void
   label?: string
-  /** Moves focus to the current projection when the pane opens: when the person pinned it. */
+  /** Moves focus to the current projection when the pane opens with it (the person pinned it), or when it turns on. */
   autoFocus?: boolean
   /** What follows the list, at the pane's foot (a surface's own command, such as its collection details). */
   footer?: ReactNode
   className?: string
 }) {
   const list = useRef<HTMLUListElement>(null)
-  const focus = useRef(autoFocus)
   useLayoutEffect(() => {
     const scroller = list.current
     const item = scroller?.querySelector<HTMLElement>('[aria-current="page"]')
@@ -113,8 +112,11 @@ export function ProjectionsPane({
       row = item.getBoundingClientRect()
     if (row.bottom > box.bottom) scroller.scrollTop += row.bottom - box.bottom
     else if (row.top < box.top) scroller.scrollTop -= box.top - row.top
-    if (focus.current) item.focus({preventScroll: true})
   }, [])
+  // Focus on the current projection whenever `autoFocus` turns on: when it opens with it, or once it is shown.
+  useLayoutEffect(() => {
+    if (autoFocus) list.current?.querySelector<HTMLElement>('[aria-current="page"]')?.focus({preventScroll: true})
+  }, [autoFocus])
   return (
     <nav
       aria-label={label}

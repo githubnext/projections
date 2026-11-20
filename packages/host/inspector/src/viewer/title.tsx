@@ -1,4 +1,4 @@
-import {useEffect, useId, useRef, useState} from 'react'
+import {useEffect, useId, useLayoutEffect, useRef, useState} from 'react'
 import {ChevronDown} from 'lucide-react'
 import {SwitcherPopup} from '../shell/switcher.js'
 import type {SwitcherItem} from '../shell/switcher.js'
@@ -10,7 +10,8 @@ import type {SwitcherItem} from '../shell/switcher.js'
  * (styles.css). It opens the Inspector's own projection switcher popup from its start (Enter, Space, Arrow Down or a
  * click): a search by title or ID over the list, the current one checked, then "Pin projections pane" (`onPin`),
  * which turns the list into a pane beside the stage (viewer/pane.tsx). With fewer than two projections, the pane
- * pinned, or while the page has lost its server, it is the title alone. `focus` moves focus to it once the pane closes.
+ * pinned, or while the page has lost its server, it is the title alone. `focus` moves focus to it once the pane closes;
+ * a menu that goes away while it holds focus (the pane pinned again as the page widens) says so (`onFocusLost`).
  */
 export function ViewerTitle({
   title,
@@ -21,6 +22,7 @@ export function ViewerTitle({
   onPin,
   focus = false,
   onFocused,
+  onFocusLost,
 }: {
   title: string
   current: string | undefined
@@ -33,6 +35,8 @@ export function ViewerTitle({
   /** Takes focus (once the pane closes), then says so (`onFocused`). */
   focus?: boolean
   onFocused?: () => void
+  /** The menu went away while it (its trigger or popup) held focus, leaving focus on the page. */
+  onFocusLost?: (() => void) | undefined
 }) {
   const id = useId()
   const trigger = useRef<HTMLButtonElement>(null)
@@ -48,13 +52,26 @@ export function ViewerTitle({
   useEffect(() => {
     if (!hasMenu) setOpen(false)
   }, [hasMenu])
+  const slot = useRef<HTMLDivElement>(null)
+  const held = useRef(false)
+  useLayoutEffect(() => {
+    if (hasMenu || !held.current) return
+    held.current = false
+    if (!document.activeElement || document.activeElement === document.body) onFocusLost?.()
+  }, [hasMenu, onFocusLost])
   useEffect(() => {
     if (!focus || !hasMenu) return
     trigger.current?.focus()
     onFocused?.()
   }, [focus, hasMenu, onFocused])
   return (
-    <>
+    // Whether the menu holds focus, so that if it goes away with focus (which leaves it on the page) it says so.
+    <div
+      ref={slot}
+      className="pi-viewer-title-slot pj:contents"
+      onFocus={() => (held.current = true)}
+      onBlur={event => (held.current = slot.current?.contains(event.relatedTarget as Node | null) ?? false)}
+    >
       <h1 className="pj:m-0 pj:flex pj:min-w-0 pj:flex-1 pj:items-center pj:text-[13px] pj:font-normal">
         {menu ? (
           <button
@@ -103,6 +120,6 @@ export function ViewerTitle({
           }}
         />
       )}
-    </>
+    </div>
   )
 }

@@ -99,6 +99,8 @@ export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactN
         onPin={paneRoom && !stopped ? () => setPanePinned(store, true) : undefined}
         focus={paneFocus === 'menu'}
         onFocused={() => store.set({paneFocus: undefined})}
+        // The pane that replaces the menu takes the focus the menu held.
+        onFocusLost={paneShown ? () => store.set({paneFocus: 'pane'}) : undefined}
       />
       {line && (
         <span

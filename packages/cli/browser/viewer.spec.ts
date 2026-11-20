@@ -773,8 +773,12 @@ test('the person pins the projections pane from the title, and closes it back to
   await expect(dialog.getByRole('option', {name: 'Pin projections pane'})).toHaveCount(0)
   await page.keyboard.press('Escape')
 
-  // Closing it returns to the menu, focused, and forgets it.
+  // Wide enough again, the pane comes back and takes the focus the menu held.
+  await expect(narrow).toBeFocused()
   await page.setViewportSize({width: 1280, height: 800})
+  await expect(pane.locator('[aria-current="page"]')).toBeFocused()
+
+  // Closing it returns to the menu, focused, and forgets it.
   await pane.getByRole('button', {name: 'Close projections pane'}).click()
   await expect(pane).toHaveCount(0)
   await expect(narrow).toBeFocused()

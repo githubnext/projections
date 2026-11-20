@@ -4,7 +4,7 @@ use std::fs;
 
 use projections_cli::scaffold;
 
-use crate::common::Fixture;
+use crate::{common::Fixture, conformance::conforms};
 
 #[tokio::test]
 async fn working_tree_changes_name_the_projection_parts_that_changed() {
@@ -14,6 +14,7 @@ async fn working_tree_changes_name_the_projection_parts_that_changed() {
     // Generations start at 1, so this answers at once with the current one.
     let first = fixture.request("GET", "/api/changes?since=0", fixture.auth(), b"").await;
     assert_eq!(first.status, 200);
+    conforms("changes", &first.json());
     let start = first.json()["generation"].as_u64().unwrap();
     // The watcher's first state was taken when the server started, so the edit
     // is a change whenever the next poll runs. Long-poll until every expected
@@ -30,6 +31,7 @@ async fn working_tree_changes_name_the_projection_parts_that_changed() {
             .request("GET", &format!("/api/changes?since={since}"), fixture.auth(), b"")
             .await
             .json();
+        conforms("changes", &changed);
         assert_eq!(changed["complete"], true);
         let generation = changed["generation"].as_u64().unwrap();
         assert!(generation >= since);

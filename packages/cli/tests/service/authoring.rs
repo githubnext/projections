@@ -4,7 +4,10 @@ use std::{fs, path::Path};
 
 use serde_json::{Value, json};
 
-use crate::common::{Fixture, post};
+use crate::{
+    common::{Fixture, post},
+    conformance::conforms,
+};
 
 #[tokio::test]
 async fn saving_parts_previews_then_writes_the_definition_with_trust() {
@@ -18,6 +21,7 @@ async fn saving_parts_previews_then_writes_the_definition_with_trust() {
     .await;
     assert_eq!(preview.status, 200);
     let preview = preview.json();
+    conforms("definitionSave", &preview);
     assert_eq!(preview["path"], ".projections/example.json");
     assert_eq!(preview["written"], false);
     assert_eq!(preview["before"], original.as_str());
@@ -43,6 +47,7 @@ async fn saving_parts_previews_then_writes_the_definition_with_trust() {
     )
     .await;
     assert_eq!(saved.status, 200);
+    conforms("definitionSave", &saved.json());
     assert_eq!(saved.json()["written"], true);
     assert_eq!(fs::read_to_string(&file).unwrap(), preview["after"].as_str().unwrap());
     let definitions = fixture.get("/api/definitions?ref=working-tree").await.json();
@@ -95,6 +100,7 @@ async fn adopting_previews_then_writes_with_trust() {
     };
     // The fixture repository's files suggest the file map, among others.
     let candidates = fixture.get("/api/explore").await.json();
+    conforms("explore", &candidates);
     assert_eq!(candidates["session"], false);
     assert!(
         candidates["candidates"]
@@ -106,6 +112,7 @@ async fn adopting_previews_then_writes_with_trust() {
     let preview = write("/api/adopt", json!({"projections": ["repository-map"], "dryRun": true})).await;
     assert_eq!(preview.status, 200);
     let preview = preview.json();
+    conforms("adopt", &preview);
     // The definitions directory the repository already uses.
     assert_eq!(preview["files"][0]["path"], ".projections/repository-map.json");
     assert!(!repo.join(".projections/repository-map.json").exists());
@@ -118,8 +125,10 @@ async fn adopting_previews_then_writes_with_trust() {
     )
     .await;
     assert_eq!(written.status, 200);
+    conforms("adopt", &written.json());
     assert!(repo.join(".projections/repository-map.json").is_file());
     let candidates = fixture.get("/api/explore").await.json();
+    conforms("explore", &candidates);
     let map = candidates["candidates"]
         .as_array()
         .unwrap()

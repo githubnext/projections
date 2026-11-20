@@ -5,6 +5,7 @@ mod api;
 mod authoring;
 mod changes;
 mod common;
+mod conformance;
 mod fixtures;
 mod history;
 mod jobs;

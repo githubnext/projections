@@ -1,4 +1,4 @@
-import {useMemo} from 'react'
+import {useCallback, useMemo} from 'react'
 import {changeContext, isScopeChange, regenerated, variedWithinTolerance} from '@githubnext/projections-renderer-sdk/presentation'
 import type {ViewScope} from '@githubnext/projections-renderer-sdk/presentation'
 import {humanizeKind} from '@githubnext/projections-renderer-sdk/presentation'
@@ -55,9 +55,11 @@ function inScope(row: Row, scope: ViewScope, variedOnly: boolean, regeneratedOnl
 }
 
 /**
- * The rows the scope and filters keep, the filter payload renderers apply, and each scope's count. The Changes scope
- * keeps the changes that pass the summary filter and find, and the unchanged items that give them context
- * (`changeContext`), so renderers show those at full strength and fold or recede the rest. The counts are of the kinds
+ * The rows the scope and filters keep, the filter payload renderers apply, and each scope's count. The scope decides
+ * what renderers lay out: the Changes scope is the changes and the unchanged items that give them context
+ * (`changeContext`), and renderers fold or leave out the rest. The summary filter and find narrow within it
+ * (`visibleRows`) without removing anything from the layout: renderers recede what they leave out (the filter's
+ * `ids`), in either scope. The counts are of the kinds
  * the summary bar's count figures name (so a table's structural relationships aren't counted beside its columns), else
  * of every row: its changes, and every item of both revisions, so All is more than Changes whenever Changes hides any.
  */
@@ -67,27 +69,30 @@ export function useRowFilter(rows: readonly Row[], subject: ViewSubject, state: 
   // A comparison without changes has nothing to scope to: it shows every item (and the view says there are none).
   const unchanged = useMemo(() => !rows.some(isScopeChange), [rows])
   const scope = state.scope === 'changes' && unchanged ? 'all' : state.scope
-  const visibleRows = useMemo(() => {
-    const kept = rows.filter(
-      row =>
-        inScope(row, scope, variedOnly, regeneratedOnly) && (!summaryFilter || rowInSummary(row, summaryFilter)) && matches(row, query),
-    )
+  // What the scope lays out: in Changes, the changes and their context, whatever the summary filter and find.
+  const scopedRows = useMemo(() => {
+    const kept = rows.filter(row => inScope(row, scope, variedOnly, regeneratedOnly))
     if (scope !== 'changes' || subject.mode !== 'comparison') return kept
-    const {shown} = changeContext(
-      rows,
-      subject,
-      kept.map(row => row.id),
-    )
+    const {shown} = changeContext(rows, subject)
     return rows.filter(row => shown.has(row.id))
-  }, [rows, subject, scope, variedOnly, regeneratedOnly, summaryFilter, query])
+  }, [rows, subject, scope, variedOnly, regeneratedOnly])
+  const kept = useCallback(
+    (row: Row) => (!summaryFilter || rowInSummary(row, summaryFilter)) && matches(row, query),
+    [summaryFilter, query],
+  )
+  const visibleRows = useMemo(() => scopedRows.filter(kept), [scopedRows, kept])
   const filter = useMemo<FilterPayload>(() => {
-    const active = Boolean(query) || scope !== 'all' || Boolean(summaryFilter)
+    const ids = (list: readonly Row[]) => (list.length <= rendererLimits.filterIds ? list.map(row => row.id) : null)
+    // What is at full strength: what the summary filter and find keep of every item (the Changes scope lays out what it
+    // shows, `scope`, and draws some items between them besides), or of the noise, which is a filter too.
+    const narrowed = Boolean(query) || Boolean(summaryFilter) || scope === 'noise'
     return {
       query: search,
       changesOnly: scope === 'changes',
-      ids: active && visibleRows.length <= rendererLimits.filterIds ? visibleRows.map(row => row.id) : null,
+      ids: narrowed ? ids(scope === 'noise' ? visibleRows : rows.filter(kept)) : null,
+      scope: scope === 'changes' ? ids(scopedRows) : null,
     }
-  }, [query, search, scope, summaryFilter, visibleRows])
+  }, [query, search, scope, summaryFilter, rows, kept, visibleRows, scopedRows])
   // What the Changes scope leaves out, whatever the scope shown now: the scope switch and the view say so.
   const hiddenRows = useMemo(() => {
     if (subject.mode !== 'comparison' || unchanged) return []

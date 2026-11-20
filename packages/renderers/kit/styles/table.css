@@ -8,8 +8,10 @@
  *
  * Where two lines meet, a change's hue wins over gray: rows are layered by what their lines say. A changed row whose
  * lines carry its hue (`pk-region` with `data-change`: added, removed, renamed, or modified with no changed cells)
- * sits above everything; a row drawn neutral because it holds changed cells (nesting.css) above the unchanged rows,
- * the heading and the foot; a ringed row above all of them while ringed. Every hue is mixed with its line's neutral
+ * sits above the other rows; a row drawn neutral because it holds changed cells (nesting.css) above the unchanged rows
+ * and the foot. The heading is the frame's: its lines, the rule under it included, are the frame's color and sit above
+ * every row at rest, so a changed row under it keeps its hue on its own edges but never on the heading's. A ringed row
+ * sits above everything while ringed, since its ring replaces its own edge. Every hue is mixed with its line's neutral
  * color by `--emphasis`, so nothing looks changed at the endpoints. The database renderer's rows follow the same rule.
  */
 .pk .pk-table-scroll {
@@ -51,7 +53,6 @@
 /* The heading row: a quiet band, the frame's top edge and corners, its divider over the first row's line. */
 .pk .pk-table > .pk-table-head {
   --pk-table-line: var(--divider);
-  z-index: 1;
   border-radius: var(--projections-radius) var(--projections-radius) 0 0;
   background: color-mix(in srgb, var(--band) 45%, var(--raised));
 }
@@ -88,17 +89,34 @@
   --pk-table-fill: color-mix(in srgb, var(--pk-region-fill) var(--pk-region-amount), transparent);
   --pk-table-line: color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--border));
   --pk-table-edge: color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--divider));
-  z-index: 3;
   box-shadow: none;
 }
-/* A row drawn neutral because it holds changed cells: its gray lines give way to any hue beside them. */
-.pk .pk-table > .pk-table-row.pk-region[data-change]:has([data-change]) {
+/*
+ * The layers (see above), each rule of the same specificity, so their order alone decides: a hued row, then a row
+ * neutral because it holds changed cells (it matches both), then the heading, which is the frame's, then a ringed row,
+ * whose ring replaces its own edge, the heading's rule included, while it shows.
+ */
+.pk .pk-table > :where(.pk-table-row.pk-region[data-change]) {
+  z-index: 3;
+}
+.pk .pk-table > :where(.pk-table-row.pk-region[data-change]:has([data-change])) {
   z-index: 2;
+}
+.pk .pk-table > :where(.pk-table-head) {
+  z-index: 5;
 }
 .pk
   .pk-table
-  > .pk-table-row:is(:hover, [data-projections-ring-hover], [data-projections-ring-selected], :focus-visible, :has(:focus-visible)) {
-  z-index: 4;
+  > :where(
+    .pk-table-row:not(.pk-table-head):is(
+        :hover,
+        [data-projections-ring-hover],
+        [data-projections-ring-selected],
+        :focus-visible,
+        :has(:focus-visible)
+      )
+  ) {
+  z-index: 6;
 }
 /*
  * A fold (the Changes scope's `Fold`) is a row like the others: one cell across the table, its line the row's top line,

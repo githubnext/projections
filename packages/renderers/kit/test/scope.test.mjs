@@ -1,6 +1,16 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {changesScope, comparisonModel, extractionModel, foldList, followContext, isFold, scopedModel} from '../dist/index.js'
+import {
+  changesScope,
+  comparisonModel,
+  extractionModel,
+  foldList,
+  followContext,
+  isFold,
+  layoutFilter,
+  partOwners,
+  scopedModel,
+} from '../dist/index.js'
 
 const ids = items => items.map(entry => (entry.type === 'fold' ? `[${entry.items.join(' ')}]` : entry.item))
 
@@ -36,6 +46,17 @@ test("the Changes scope is the host's shown IDs, split into changes and context"
   const scope = changesScope(model, {query: '', changesOnly: true, ids: ['tool', 'tool/viewer', 'c']})
   assert.deepEqual([...scope.changes].sort(), ['c', 'tool/viewer'])
   assert.deepEqual([...scope.context], ['tool'])
+})
+
+test("the summary filter and find narrow only what is at full strength: the host's `scope` is what is laid out", () => {
+  const scope = changesScope(model, {query: '', changesOnly: true, ids: ['c'], scope: ['tool', 'tool/viewer', 'c']})
+  assert.deepEqual([...scope.shown].sort(), ['c', 'tool', 'tool/viewer'])
+  // Past the limit, the scope is derived again, whatever the matches.
+  assert.deepEqual([...changesScope(model, {query: 'c', changesOnly: true, ids: ['c'], scope: null}).shown].sort(), [
+    'c',
+    'tool',
+    'tool/viewer',
+  ])
 })
 
 test('past the filter ID limit the kit derives the same scope, and there is none while every item shows', () => {
@@ -158,4 +179,30 @@ test("a renderer's context follows the relationships it names: a changed package
   // Only the kinds named, and in the direction named.
   assert.deepEqual([...followContext(model, new Set(['b']), {outgoing: () => true})], [])
   assert.deepEqual([...followContext(model, new Set(['b']), {incoming: kind => kind === 'contains'})], [])
+})
+
+test('a summary figure or find lays nothing out again: the layout filter stays while the scope does', () => {
+  const first = layoutFilter(undefined, {query: '', changesOnly: true, ids: null, scope: ['a', 'b']})
+  assert.deepEqual(first, {query: '', changesOnly: true, ids: ['a', 'b'], scope: ['a', 'b']})
+  assert.equal(layoutFilter(first, {query: 'a', changesOnly: true, ids: ['a'], scope: ['a', 'b']}), first)
+  assert.notEqual(layoutFilter(first, {query: '', changesOnly: true, ids: null, scope: ['a']}), first)
+  assert.notEqual(layoutFilter(first, {query: '', changesOnly: false, ids: null, scope: null}), first)
+  // A host before `scope` sent the scope in `ids`: that is what is laid out.
+  assert.deepEqual(layoutFilter(undefined, {query: '', changesOnly: true, ids: ['a']}).scope, ['a'])
+})
+
+test("a split's further parts are kept and receded with the change the host's filter names", () => {
+  const split = comparisonModel(api([entity('handler')]), api([entity('read'), entity('write')]), {
+    protocolVersion: 0,
+    changes: [
+      {id: 'handler', collection: 'entities', before: ['handler'], after: ['read', 'write'], status: 'modified', correspondence: 'split'},
+    ],
+    steps: [{changes: ['handler']}],
+  })
+  const owners = partOwners(split)
+  const parts = split.changeRows.get('handler').filter(row => row !== 'handler')
+  assert.ok(parts.length > 0)
+  for (const part of parts) assert.equal(owners.get(part), 'handler')
+  assert.equal(owners.has('handler'), false)
+  assert.equal(partOwners(undefined).size, 0)
 })

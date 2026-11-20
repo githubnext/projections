@@ -160,8 +160,9 @@ export type ProjectionOptions = {
    */
   Controllable<'regeneratedOnly', boolean> &
   /**
-   * The summary bar's filter: show only the items of a figure's kinds, or only those with one change status (`null`,
-   * every item). It narrows within the scope: in the Changes scope, those changes and their context.
+   * The summary bar's filter: emphasize only the items of a figure's kinds, or only those with one change status
+   * (`null`, every item). It narrows within the scope and never changes what is laid out: renderers recede the rest of
+   * the scope, in Changes as in All.
    */
   Controllable<'summaryFilter', SummaryFilter | null> &
   /** Whether side by side draws a connector between the selected item in both panes. Off unless a host opts in. */
@@ -210,7 +211,7 @@ export interface ProjectionController {
   projection: {id: string; title: string; renderer?: string}
   /** Every row (entities, relationships, changes) for table and text views. */
   rows: readonly Row[]
-  /** Rows the scope, summary filter and `search` keep: in the Changes scope, the changes they keep and their context. */
+  /** Rows the scope, summary filter and `search` keep: in the Changes scope, those of its changes and their context. */
   visibleRows: readonly Row[]
   selectedRow: Row | undefined
   /** The renderer notice and informational notices, in display order. */

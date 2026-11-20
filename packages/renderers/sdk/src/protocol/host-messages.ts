@@ -10,6 +10,7 @@ import type {HostMessage, RendererOptions} from './messages.js'
 import {scrollPosition} from './positions.js'
 import {controlIdPattern, envelopeKeys, finite, isEnvelope, isPropertyPath, record} from './validation.js'
 import {document} from './document-message.js'
+import {filter} from './filter-message.js'
 
 type Fields = Record<string, unknown>
 
@@ -48,14 +49,6 @@ function init(message: Fields): HostMessage | undefined {
   )
     return {...payload, before: withData(message.before), after: withData(message.after)} as unknown as HostMessage
   return undefined
-}
-
-function filter(message: Fields): HostMessage | undefined {
-  const {query, changesOnly, ids} = message
-  if (typeof query !== 'string' || query.length > rendererLimits.textLength || typeof changesOnly !== 'boolean') return undefined
-  if (ids !== null && !(Array.isArray(ids) && ids.length <= rendererLimits.filterIds && ids.every(id => typeof id === 'string')))
-    return undefined
-  return {type: 'filter', query, changesOnly, ids: ids === null ? null : [...(ids as string[])]}
 }
 
 /** The parser of each message a host may send, by type. */

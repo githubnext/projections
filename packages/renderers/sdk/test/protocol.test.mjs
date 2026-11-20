@@ -155,6 +155,15 @@ test('parseRendererMessage validates hover, anchor and viewport strictly', () =>
     assert.equal(parseRendererMessage(envelope(message), channel), undefined, JSON.stringify(message).slice(0, 120))
 })
 
+test("parseHostMessage keeps the filter's Changes scope apart from its matches, and older hosts' filters without it", () => {
+  const filter = {type: 'filter', query: '', changesOnly: true, ids: ['a']}
+  assert.deepEqual(parseHostMessage(envelope(filter), channel), filter)
+  assert.deepEqual(parseHostMessage(envelope({...filter, scope: ['a', 'b']}), channel), {...filter, scope: ['a', 'b']})
+  assert.deepEqual(parseHostMessage(envelope({...filter, scope: null}), channel), {...filter, scope: null})
+  for (const scope of [4, ['a', 4], Array.from({length: rendererLimits.filterIds + 1}, (_, index) => `${index}`)])
+    assert.equal(parseHostMessage(envelope({...filter, scope}), channel), undefined, String(scope).slice(0, 20))
+})
+
 test('parseHostMessage validates hover and scroll', () => {
   assert.deepEqual(parseHostMessage(envelope({type: 'hover', id: 'entity:a'}), channel), {type: 'hover', id: 'entity:a'})
   assert.deepEqual(parseHostMessage(envelope({type: 'hover', id: null}), channel), {type: 'hover', id: null})

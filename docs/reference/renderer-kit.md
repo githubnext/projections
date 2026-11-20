@@ -468,9 +468,11 @@ changesScope(model: ComparisonModel<Extraction> | undefined, filter: FilterPaylo
 ```
 
 The Changes scope a renderer presents, or undefined when the host shows every item (or this is one extraction). The
-host's filter `ids` are what it shows, its changes and their context, each change with every row presenting it (a
-split's parts); past the filter's ID limit, or before the host says, the kit reads the same from the comparison's
-change context, or derives it from the structure for a comparison saved without context (`changeContext`).
+host's filter `scope` is what it shows, its changes and their context, each change with every row presenting it (a
+split's parts): the summary filter and find recede what they leave out (`ids`), never narrowing what is laid out. A
+host before `scope` sent it in `ids`. Past the filter's ID limit, or before the host says, the kit reads the same
+from the comparison's change context, or derives it from the structure for a comparison saved without context
+(`changeContext`).
 
 ### `ChangesScope`
 
@@ -1829,6 +1831,16 @@ A relationship to lay out (see `layoutGraph`). One with an endpoint missing from
 | `kind` | `"kind": string` | The relationship's kind: a `contains` edge from a compound boundary draws as the boundary, with no route. |
 | `to` | `"to": string` | The target node's ID. |
 
+### `layoutFilter`
+
+```ts
+layoutFilter(previous: FilterPayload | undefined, message: FilterPayload): FilterPayload
+```
+
+What a host's `filter` lays out: whether it shows the Changes scope, and that scope's IDs (`scope`, or a host before
+it's `ids`), as both `scope` and `ids`. `previous` while those are the same, so a summary figure or find, which only
+recede what they leave out, lays nothing out again.
+
 ### `layoutGraph`
 
 ```ts
@@ -2081,6 +2093,15 @@ parseTableSort(value: false | number | string | true | undefined): null | { "col
 ```
 
 The sort a sort control's value names; `null` for `none` or anything else.
+
+### `partOwners`
+
+```ts
+partOwners(model: ComparisonModel<Extraction> | undefined): ReadonlyMap<string, string>
+```
+
+The change each further part of a split or merge presents, by its row's ID: the host's filter names the change, and
+the part is kept with it (`InteractionOptions.partOf`).
 
 ### `placeBadges`
 

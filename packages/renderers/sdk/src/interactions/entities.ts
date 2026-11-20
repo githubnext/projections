@@ -22,13 +22,29 @@ export function elementsOf({root, attribute, excluded}: Entities, id: string): E
   return [...root.querySelectorAll<Element>(`[${attribute}="${CSS.escape(id)}"]`)].filter(element => !excluded(element))
 }
 
-/** Marks the elements the filter excludes (`isVisible`) and those annotated (`isAnnotated`). */
+/**
+ * Marks the elements the filter excludes (`isVisible`) and those annotated (`isAnnotated`), each item receding once:
+ * - An element holding one the filter keeps isn't marked, as receding it would recede what it holds: only the parts it
+ *   leaves out recede (a card whose registration a summary figure names stays, and its other lines recede).
+ * - Inside a marked element, nothing is: it recedes with it (a table's columns with the table), not twice.
+ */
 export function markFiltered(entities: Entities, isVisible: (id: string) => boolean, isAnnotated: (id: string) => boolean) {
   const {root, attribute, excluded} = entities
-  for (const element of root.querySelectorAll(`[${attribute}]`)) {
-    if (excluded(element)) continue
+  const elements = [...root.querySelectorAll(`[${attribute}]`)].filter(element => !excluded(element))
+  const holding = new Set<Element>()
+  for (const element of elements) {
+    if (!isVisible(element.getAttribute(attribute) ?? '')) continue
+    for (let parent = element.parentElement; parent && parent !== root && !holding.has(parent); parent = parent.parentElement)
+      holding.add(parent)
+  }
+  // Elements in document order, so each one's enclosing entity is decided before it.
+  const receding = new Set<Element>()
+  for (const element of elements) {
     const id = element.getAttribute(attribute) ?? ''
-    toggle(element, filteredAttribute, !isVisible(id))
+    const enclosing = element.parentElement?.closest(`[${attribute}]`)
+    const within = !!enclosing && receding.has(enclosing)
+    if (within || (!isVisible(id) && !holding.has(element))) receding.add(element)
+    toggle(element, filteredAttribute, !within && receding.has(element))
     toggle(element, annotatedAttribute, isAnnotated(id))
   }
 }

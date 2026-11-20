@@ -87,7 +87,12 @@ module.exports = async function customRenderer({folder, tests, api}) {
     await until('the Renderer row says built', async () => /· built$/.test((await rendererRow())?.description ?? '') || undefined)
     // A failed build: the Renderer row says so with its error, and Problems has it.
     await saveSource('FAIL\n')
-    await until('the build failed', async () => (cardsBuild()?.state.phase === 'failed' ? true : undefined))
+    // Vite prints a header ("Transform failed with 1 error:") before the located error, and a pipe may deliver
+    // them apart: the build has failed at the header, and has its error once the located line is read.
+    await until('the build failed with its located error', async () => {
+      const {state} = cardsBuild() ?? {}
+      return state?.phase === 'failed' && state.located ? true : undefined
+    })
     assert.equal(cardsBuild().state.error, 'main.tsx:1:1: The source says FAIL')
     await vscode.commands.executeCommand('projections.openProjection', folder, 'cards', {preview: false})
     const failedRow = await until('the Renderer row says it failed', async () => {

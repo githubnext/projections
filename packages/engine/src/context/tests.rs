@@ -34,3 +34,11 @@ fn a_budget_spends_ids_that_exactly_fit_it() {
     assert!(!Budget { ids: 1, bytes: 5 }.spend(&ids));
     assert!(!Budget { ids: 2, bytes: 4 }.spend(&ids));
 }
+
+#[test]
+fn a_budget_spends_bytes_that_exactly_fit_it() {
+    let mut budget = Budget { ids: 0, bytes: 5 };
+    assert!(budget.spend_bytes(5));
+    assert_eq!(budget.bytes, 0);
+    assert!(!budget.spend_bytes(1));
+}

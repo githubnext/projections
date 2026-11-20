@@ -160,3 +160,26 @@ context:
         json!({"before": [], "after": ["other0000", "other0001"], "rules": ["everything"]})
     );
 }
+
+#[test]
+fn the_names_of_the_rules_that_add_context_are_within_the_limit_too() {
+    // 200 changed entities, each given the one other: few IDs, but a 100 KB rule name on each, past 16 MiB.
+    let side = |label: &str| {
+        let mut entities = vec![node("other", "other", "other")];
+        entities.extend((0..200).map(|index| node(&format!("changed{index:03}"), "changed", label)));
+        json!({"protocolVersion": 0, "schema": "graph/v0", "entities": entities, "relationships": []})
+    };
+    let rules = |name: &str| {
+        format!(
+            "format: projections.comparator\nversion: 0\ncontext:\n  - name: {name}\n    where: \"change.after[0] != 'other'\"\n    after: \"['other', 'other']\"\n"
+        )
+    };
+    let error = compare(&rules(&"n".repeat(100_000)), &side("a"), &side("b")).unwrap_err();
+    assert!(error.contains("context-limit"), "{}", &error[..error.len().min(300)]);
+    // A short name fits, and the duplicate is listed once.
+    let comparison = compare(&rules("other"), &side("a"), &side("b")).unwrap();
+    assert_eq!(
+        change(&comparison, "changed000")["context"],
+        json!({"before": [], "after": ["other"], "rules": ["other"]})
+    );
+}

@@ -71,8 +71,11 @@ fn spend(budget: &mut Budget, context: Option<&projections_engine::Context>, had
         let old: HashSet<&str> = old.into_iter().flatten().map(String::as_str).collect();
         ids.iter().filter(|id| !old.contains(id.as_str())).cloned().collect()
     };
+    // A rule that added context is named on the change: its name's bytes are spent too.
+    let named: usize = context.rules[had.map_or(0, |had| had.rules.len())..].iter().map(String::len).sum();
     budget.spend(&new(&context.before, had.map(|had| had.before.as_slice())))
         && budget.spend(&new(&context.after, had.map(|had| had.after.as_slice())))
+        && budget.spend_bytes(named)
 }
 
 /// Adds what one rule says to a change's context, when its `where` selects
@@ -125,7 +128,8 @@ fn context_ids(value: &Cel, expression: &Expression, index: &Index, side: Side, 
     };
     let at = usize::from(side == Side::After);
     let own: HashSet<&str> = change.side(side).iter().map(String::as_str).collect();
-    let mut ids = Vec::with_capacity(values.len());
+    let mut ids = Vec::new();
+    let mut seen: HashSet<&str> = HashSet::new();
     for value in values.iter() {
         let Cel::String(id) = value else {
             return Err(expression.fail("rules-evaluation", "Expected a list of IDs"));
@@ -140,7 +144,8 @@ fn context_ids(value: &Cel, expression: &Expression, index: &Index, side: Side, 
                 &format!("{id:?} is no item {}, so it can't be context of {}", side.name(), change.id),
             ));
         }
-        if !own.contains(id.as_str()) {
+        // Each distinct ID is copied once, however often the list names it.
+        if !own.contains(id.as_str()) && seen.insert(id.as_str()) {
             ids.push(id.clone());
         }
     }

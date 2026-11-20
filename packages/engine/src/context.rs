@@ -31,6 +31,16 @@ impl Budget {
         bytes: MAX_CONTEXT_BYTES,
     };
 
+    /// Spends `bytes` alone (such as the names of the rules that added
+    /// context); false, spending nothing, when they don't fit.
+    pub fn spend_bytes(&mut self, bytes: usize) -> bool {
+        if bytes > self.bytes {
+            return false;
+        }
+        self.bytes -= bytes;
+        true
+    }
+
     /// Spends `ids`; false, spending nothing, when they don't fit.
     pub fn spend(&mut self, ids: &[String]) -> bool {
         let bytes: usize = ids.iter().map(String::len).sum();

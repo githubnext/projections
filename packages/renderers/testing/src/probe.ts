@@ -15,6 +15,7 @@ import {
   focusFailures,
   entityTexts,
   identifierFonts,
+  linkRoutes,
   entitySamples,
   hoveredEntities,
   horizontalOverflow,
@@ -57,6 +58,7 @@ const calls: Record<ProbeCall, (args: unknown) => unknown> = {
   stageInsets: () => stageInsets(),
   viewport: () => ({width: innerWidth, height: innerHeight}),
   accents: () => nestedAccents(),
+  routes: () => linkRoutes(),
 }
 
 addEventListener('message', event => {

@@ -2,7 +2,7 @@ import {useMemo} from 'react'
 import type {CSSProperties, KeyboardEvent} from 'react'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import {
-  boxEdge,
+  routeBoxEdge,
   cardBorderOutset,
   routeTracks,
   spreadPorts,
@@ -13,7 +13,7 @@ import {
   edgePaint,
 } from '@githubnext/projections-renderer-kit'
 import {EdgeArrowMarker, useStageInsetTop} from '@githubnext/projections-renderer-kit/react'
-import type {Point, RendererLegend} from '@githubnext/projections-renderer-kit'
+import type {BoxEdge, Point, RendererLegend} from '@githubnext/projections-renderer-kit'
 import {lifetimeNames} from './facets.js'
 import type {DiUnit, Lifetime} from './model.js'
 import type {DiLinkFrame} from './transition.js'
@@ -110,15 +110,23 @@ export interface CardBox {
 }
 
 /**
+ * A link's route: `crossing` names the cards it crosses when no route around them exists, so it is drawn the way that
+ * overlaps them least and marked (`data-projections-route="crossing"`) for the renderer checks to report.
+ */
+export type LinkRoute = BoxEdge & {crossing?: string[]}
+
+/**
  * Routes every link around every card but its own two. A card with one
  * outgoing (or incoming) link below it keeps that link at its centred port.
+ * When no route clears the cards, the link takes the route that overlaps them
+ * least, with the cards it crosses in `crossing`.
  */
 export function routeLinks(
   cards: ReadonlyMap<string, CardBox>,
   links: readonly DiLinkFrame[],
   /** How far each head's tip stays outside its target card (see the kit's `cardBorderOutset`). */
   outset = cardBorderOutset(),
-): Map<string, ReturnType<typeof boxEdge>> {
+): Map<string, LinkRoute> {
   // A card's arrows down to cards below leave from the middle of its bottom, as one trunk, and arrive spread evenly
   // over a band centred on the top of the card they reach, in the order they come from (see the kit's `spreadPorts`).
   const downward = (link: DiLinkFrame) => cards.get(link.toId)!.y > cards.get(link.fromId)!.y
@@ -138,12 +146,17 @@ export function routeLinks(
       to = cards.get(link.toId)!
     const ports = portsOf(link)
     if (ports.end) ports.end = {x: ports.end.x, y: link.to.y}
-    const obstacles = [...cards].filter(([id]) => id !== link.fromId && id !== link.toId).map(([, box]) => box)
-    try {
-      return boxEdge(from, to, obstacles, 'curved', ports, outset, tracks)
-    } catch {
-      return boxEdge(from, to, [], 'curved', ports, outset, tracks)
-    }
+    const others = [...cards].filter(([id]) => id !== link.fromId && id !== link.toId)
+    const routed = routeBoxEdge(
+      from,
+      to,
+      others.map(([, box]) => box),
+      'curved',
+      ports,
+      outset,
+      tracks,
+    )
+    return 'blocked' in routed ? {...routed.least, crossing: routed.crossed.map(index => others[index]![0])} : routed
   }
   // Every S the arrows turn on, then again with the runs that share a gap on separate tracks (see the kit's `routeTracks`).
   const first = links.map(link => ({link, turns: route(link).turns ?? []}))
@@ -219,7 +232,7 @@ export function LinkView({
   diff = false,
 }: {
   link: DiLinkFrame
-  route: ReturnType<typeof boxEdge>
+  route: LinkRoute
   markerId: string
   emphasis: number
   labelled: boolean
@@ -241,6 +254,8 @@ export function LinkView({
       data-from-id={link.fromId}
       data-to-id={link.toId}
       data-edge-key={link.key}
+      data-projections-route={route.crossing ? 'crossing' : 'around'}
+      {...(route.crossing ? {'data-projections-route-crosses': route.crossing.join(' ')} : {})}
       data-projections-annotation-anchor="bottom-right"
       {...(diff ? {...changeMark(link), style: {'--emphasis': emphasis} as CSSProperties} : {})}
     >

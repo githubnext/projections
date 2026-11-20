@@ -29,9 +29,66 @@ import {finishArrow, roundedRoute} from './paths.js'
  * @param outset - How far outside the target's box the head's tip stops.
  * @returns The path `d` (from `start` to the head's `base`), the endpoints with `end` at the head's tip, and the
  *   S turns a downward route takes, for `routeTracks`.
- * @throws `Error` when no route between, or around, the cards can be found.
+ * @throws `NoRouteError` when no route around the cards can be found (see `routeBoxEdge`, which returns that case),
+ *   and `RangeError` for boxes that can't be joined at all, such as ones with non-finite coordinates.
  */
 export function boxEdge(
+  from: ArrowBox,
+  target: ArrowBox,
+  obstacles: ArrowBox[] = [],
+  style: 'curved' | 'orthogonal' = 'curved',
+  ports: {start?: Point; end?: Point} = {},
+  outset = cardBorderOutset(),
+  tracks: readonly number[] = [],
+): BoxEdge {
+  const routed = routeBoxEdge(from, target, obstacles, style, ports, outset, tracks)
+  if ('blocked' in routed) throw new NoRouteError(routed)
+  return routed
+}
+
+/** A `boxEdge` arrow: its path `d`, endpoints, and the S turns a downward route takes. */
+export interface BoxEdge {
+  /** The SVG path, from `start` to the head's `base`. */
+  d: string
+  /** Where the arrow leaves its source card. */
+  start: Point
+  /** The base of the arrowhead, where the path ends. */
+  base: Point
+  /** The head's tip, `outset` outside the target card. */
+  end: Point
+  /** The S turns a downward route takes, for `routeTracks`. */
+  turns?: EdgeTurn[]
+}
+
+/**
+ * No route around the cards exists (`routeBoxEdge`): `least` is the candidate that overlaps the obstacles least
+ * (fewest cards crossed, then the shortest stretch inside them), and `crossed` the indices in `obstacles` it crosses.
+ * Whether to draw it is the caller's policy, and drawing it should be reported.
+ */
+export interface BlockedBoxEdge {
+  /** No route clears the cards. */
+  blocked: true
+  /** The candidate route that overlaps the obstacles least. */
+  least: BoxEdge
+  /** The indices in `obstacles` of the cards `least` crosses. */
+  crossed: number[]
+}
+
+/** `boxEdge` found no route around the cards; `blocked` says which least-overlapping route there is. */
+export class NoRouteError extends Error {
+  /** `NoRouteError`. */
+  override name = 'NoRouteError'
+  constructor(readonly blocked: BlockedBoxEdge) {
+    super('Cannot route an arrow around the cards.')
+  }
+}
+
+/**
+ * `boxEdge`, with no route around the cards as a result rather than an error: a `BlockedBoxEdge` with the
+ * least-overlapping route, for the caller to draw and report or to refuse. Boxes that can't be joined at all still
+ * throw a `RangeError`.
+ */
+export function routeBoxEdge(
   from: ArrowBox,
   target: ArrowBox,
   obstacles: ArrowBox[] = [],
@@ -43,7 +100,10 @@ export function boxEdge(
    * one per S it turns on (`turns` of the result), in order from its source.
    */
   tracks: readonly number[] = [],
-): {d: string; start: Point; base: Point; end: Point; turns?: EdgeTurn[]} {
+): BoxEdge | BlockedBoxEdge {
+  for (const box of [from, target, ...obstacles])
+    if (![box.x, box.y, box.width, box.height].every(Number.isFinite) || box.width < 0 || box.height < 0)
+      throw new RangeError(`Cannot route an arrow with the card box ${JSON.stringify(box)}: boxes need finite coordinates and sizes.`)
   const to = {x: target.x - outset, y: target.y - outset, width: target.width + 2 * outset, height: target.height + 2 * outset}
   if (ports.end) {
     const [nx, ny] = outward(target, ports.end.x, ports.end.y)
@@ -55,7 +115,7 @@ export function boxEdge(
     padEnd: 0,
   })
   if (sx === undefined || sy === undefined || ex === undefined || ey === undefined || ![sx, sy, ex, ey].every(Number.isFinite)) {
-    throw new Error('Cannot route an arrow between these cards.')
+    throw new RangeError('Cannot join these cards with an arrow: their boxes have no finite edge points.')
   }
   const [sourceX, sourceY] = outward(from, sx, sy)
   const [targetX, targetY] = outward(to, ex, ey)
@@ -160,5 +220,25 @@ export function boxEdge(
       }
     }
   }
-  throw new Error('Cannot route an arrow around the cards.')
+  // Nothing clears the cards: offer the direct arrow, or one from another side, whichever overlaps them least.
+  const candidates = [{route: direct, samples: s ? sampleSpline(s, 4) : sampleSpline([start, control1, control2, end], 4)}]
+  for (const target of targetContacts)
+    for (const source of sourceContacts) {
+      const reach = Math.min(64, Math.max(18, Math.hypot(target.point.x - source.point.x, target.point.y - source.point.y) * 0.35))
+      const c1 = {x: source.point.x + source.direction.x * reach, y: source.point.y + source.direction.y * reach}
+      const c2 = {x: target.point.x + target.direction.x * reach, y: target.point.y + target.direction.y * reach}
+      candidates.push({
+        route: finishArrow(source.point, c1, c2, target.point),
+        samples: sampleSpline([source.point, c1, c2, target.point], 4),
+      })
+    }
+  const scored = candidates.map(({route, samples}) => {
+    const crossed = obstacles.flatMap((box, index) => (samples.some(point => contains(box, point)) ? [index] : []))
+    const inside = samples.filter(point => obstacles.some(box => contains(box, point))).length
+    return {route, crossed, inside}
+  })
+  const least = scored.reduce((best, next) =>
+    next.crossed.length < best.crossed.length || (next.crossed.length === best.crossed.length && next.inside < best.inside) ? next : best,
+  )
+  return {blocked: true, least: least.route, crossed: least.crossed}
 }

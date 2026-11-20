@@ -194,6 +194,20 @@ boundaryKinds(compound: Array<string> | false | true | undefined): Array<string>
 
 The entity kinds a `compound` option lets become boundaries.
 
+### `boundaryNouns`
+
+```ts
+boundaryNouns(model: ComparisonModel<Extraction>, compound: Array<string> | false | true): { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined } | { readonly [key: string]: SummaryNoun | false }
+```
+
+Nouns that leave grouping boundaries out of the summary: each of the boundary kinds `compound` names (see
+`boundaryKinds`) whose every entity is drawn as a boundary round others (see `moduleGroups`) in each revision and,
+in a comparison, in the union of both the canvas lays out for the diff and the steps between (see `unionGraph`),
+maps to `false`. Such a box only groups the cards it holds, which the summary counts, so it is no figure beside them;
+a kind some of whose entities are drawn as cards anywhere (a module others depend on, or one two parents hold across
+the revisions) is counted whole, as the protocol counts kinds. Spread it into a renderer's nouns:
+`{contains: false, ...boundaryNouns(model, true)}`.
+
 ### `boundedLegend`
 
 ```ts
@@ -4079,15 +4093,24 @@ StatusTab(__0: { "change": { "renamed"?: false | true | undefined; "status": "ad
 ```
 
 A pill's or chip's status as a tab hanging off its bottom edge: the icon and
-word per part, filled and edged in the status hue, joined flush to the pill
-and rounded on its free corners. Render it inside the pill (positioned:
+word per part, filled and edged in the status hue, joined to the pill and
+rounded on its free corners. Render it inside the pill (positioned:
 `position: relative` or otherwise), which keeps its single-line box; the
 pill's container reserves `--pk-tab-height` below every pill, so nothing
-moves when status appears, but an unchanged pill draws nothing there. It
-fades with `emphasis` and is absent at 0. `measure` draws it at full
-strength, for measuring the room a pill needs (`.pk-status-tab` width plus
-twice `--projections-radius`). The pill's accessible name carries the
-status, so the tab is hidden from assistive technology.
+moves when status appears, but an unchanged pill draws nothing there. The
+tab joins the pill at its left, its left side on the pill's left border and
+the pill's bottom-left corner squared; the pill's content is centred. Where
+the pill is too narrow to keep its bottom-right corner radius clear of the
+tab, the tab spans the pill's full width, its sides on the pill's borders,
+and both the pill's bottom corners are squared, so pill and tab read as one
+shape. The squared corners and the hidden bottom edge follow the pill's
+`--emphasis`, so they fade with the tab; the pill's corners are expected to
+be `--projections-radius`. A pill must
+be at least as wide as its tab: `measure` draws the tab at full strength
+and its natural width, for measuring the room a pill needs (the wider of its
+content and `.pk-status-tab`). It fades with `emphasis` and is absent at 0.
+The pill's accessible name carries the status, so the tab is hidden from
+assistive technology.
 
 ### `SvgChangeStatus`
 

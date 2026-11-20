@@ -531,9 +531,11 @@ test('every name, type, key and value shows whole in every scenario and mode (an
               // Text a card or row holds stays inside it.
               if (![...element.childNodes].some(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())) continue
               const box = element.getBoundingClientRect()
+              // A tag's status tab hangs off its pill, in the room its slot reserves below it.
+              const tab = element.closest('.pk-status-tab-room')
               for (const holder of [
                 element.closest('.database-slot, .database-column, header'),
-                element.closest('.database-table, .database-tag'),
+                tab ? element.closest('.database-tag-slot') : element.closest('.database-table, .database-tag'),
               ]) {
                 if (!holder) continue
                 const outer = holder.getBoundingClientRect()

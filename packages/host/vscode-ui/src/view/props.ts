@@ -122,6 +122,11 @@ export interface VscodeProjectionViewProps {
    */
   toolbarStart?: ReactNode | ((compact: boolean, form: PairForm) => ReactNode)
   /**
+   * Centre the mode and scope switches on the toolbar while it has room (default true). A VS Code tab, whose start holds
+   * only notices, passes false: its switches lead the row, as in VS Code's own editor toolbars.
+   */
+  centreModes?: boolean
+  /**
    * A notice floating over the stage, not a tool: a `StageNotice`, such as a VS Code tab's "Out of date · 3 files
    * changed · Refresh". Drawn at the stage's top centre, 12px in (12px below the panes' header bands in side by side
    * and swipe), over every view (renderer, table or text); it takes no layout space, so framing is unchanged, and stays

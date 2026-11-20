@@ -1,8 +1,7 @@
 /*
  * Change regions: a tinted area always has a defining edge in the same hue, never a fill alone. Mark the region with
  * `pk-region` and `data-change` (added, removed, modified, renamed or moved); both fill and edge scale with
- * `--emphasis` (0 at the endpoints, so the region is plain there). `pk-region-run` draws only the left edge, for a run
- * of rows; `data-run-start` and `data-run-end` add its top and bottom edges.
+ * `--emphasis` (0 at the endpoints, so the region is plain there).
  */
 .pk .pk-region[data-change] {
   --pk-region-amount: calc(var(--emphasis, 1) * 100%);
@@ -26,34 +25,49 @@
   --pk-region-fill: var(--violet-soft);
   --pk-region-edge: var(--violet-border);
 }
+/*
+ * A run of rows (`pk-region-run`, in a list or table whose rows meet edge to edge): a strong left edge and a right
+ * edge, with `data-run-start` and `data-run-end` adding its top and bottom. Its edges lie on the lines around it, not
+ * inside them: each is drawn one stroke outside the run, over the neighbouring line (a row's, a header's, its
+ * container's edge), so every boundary is one line, in the change's hue. It paints over what comes before it in the
+ * document (rows above it, its container's edge); a neighbour after it paints over its edge there, so a renderer
+ * gives that neighbour's line the hue, or draws the edge inside the run instead (`--pk-run-end: inset 0 calc(-1 *
+ * var(--stroke)) 0 0 var(--pk-region-edge-color)`). Where two runs meet, the later one's top edge is the boundary.
+ * The container must leave that stroke visible (a group's edge is; a scrolling container needs room for it). A row
+ * with a line of its own on a side gives that line the hue instead (`--pk-region-line`, which fades to `--pk-line`,
+ * the divider by default) and sets that side's variable to a transparent shadow.
+ */
 .pk .pk-region.pk-region-run[data-change] {
-  box-shadow:
-    inset var(--stroke-strong) 0 0 var(--pk-region-edge-color),
-    inset calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color);
+  --pk-region-line: color-mix(in srgb, var(--pk-region-edge) var(--pk-region-amount), var(--pk-line, var(--divider)));
+  --pk-run-left:
+    calc(-1 * var(--stroke)) 0 0 0 var(--pk-region-edge-color),
+    inset calc(var(--stroke-strong) - var(--stroke)) 0 0 0 var(--pk-region-edge-color);
+  --pk-run-right: var(--stroke) 0 0 0 var(--pk-region-edge-color);
+  --pk-run-start: 0 0 0 0 transparent;
+  --pk-run-end: 0 0 0 0 transparent;
+  box-shadow: var(--pk-run-left), var(--pk-run-right), var(--pk-run-start), var(--pk-run-end);
 }
+/* The corners too: each end is two copies, shifted out at both corners, so the frame meets the lines it crosses. */
 .pk .pk-region.pk-region-run[data-change][data-run-start] {
-  box-shadow:
-    inset var(--stroke-strong) 0 0 var(--pk-region-edge-color),
-    inset calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color),
-    inset 0 var(--stroke) 0 var(--pk-region-edge-color);
+  --pk-run-start:
+    calc(-1 * var(--stroke)) calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color),
+    var(--stroke) calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color);
 }
 .pk .pk-region.pk-region-run[data-change][data-run-end] {
-  box-shadow:
-    inset var(--stroke-strong) 0 0 var(--pk-region-edge-color),
-    inset calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color),
-    inset 0 calc(-1 * var(--stroke)) 0 var(--pk-region-edge-color);
+  --pk-run-end:
+    calc(-1 * var(--stroke)) var(--stroke) 0 0 var(--pk-region-edge-color), var(--stroke) var(--stroke) 0 0 var(--pk-region-edge-color);
 }
-.pk .pk-region.pk-region-run[data-change][data-run-start][data-run-end] {
-  box-shadow:
-    inset var(--stroke-strong) 0 0 var(--pk-region-edge-color),
-    inset calc(-1 * var(--stroke)) 0 0 var(--pk-region-edge-color),
-    inset 0 var(--stroke) 0 var(--pk-region-edge-color),
-    inset 0 calc(-1 * var(--stroke)) 0 var(--pk-region-edge-color);
+/* As specific as a run's end alone, so a renderer's own bottom edge (cells side by side, not stacked) still wins. */
+.pk .pk-region.pk-region-run[data-change][data-run-end]:where(:has(+ .pk-region-run[data-change][data-run-start])) {
+  --pk-run-end: 0 0 0 0 transparent;
 }
 /*
  * A status tab (`StatusTab`) hangs off a pill's bottom edge: its room is reserved under every pill, and a changed pill
- * fills it with a tab joined flush to the pill (no top edge, overlapping the pill's border) and rounded on its free
- * corners, inset from the pill's corner radius.
+ * fills it with a tab joined to the pill (no top edge, overlapping the pill's border) at its left, the tab's left side
+ * drawn on the pill's left border and the pill's bottom-left corner squared, rounded on the tab's free corners. A pill
+ * too narrow to keep its bottom-right corner radius clear of the tab (`data-flush`) has the tab span its whole width,
+ * both sides on the pill's borders, and both its bottom corners squared, so the two are one shape. The pill's content
+ * is centred, so a pill widened for its status reads as balanced.
  */
 .pk {
   --pk-tab-height: calc(var(--projections-font-size-xs) * 1.5);
@@ -61,13 +75,36 @@
 .pk-status-tab-room {
   position: absolute;
   top: 100%;
-  left: 0;
+  left: calc(-1 * var(--projections-border-width));
   right: 0;
   z-index: 1;
   display: flex;
+  justify-content: flex-start;
   height: var(--pk-tab-height);
-  padding-inline: calc(var(--projections-radius) - var(--projections-border-width));
   pointer-events: none;
+}
+.pk-status-tab-room[data-flush] {
+  right: calc(-1 * var(--projections-border-width));
+}
+.pk .pk-status-tab-room[data-flush] > .pk-status-tab {
+  flex: 1;
+  justify-content: center;
+}
+.pk :has(> .pk-status-tab-room) {
+  text-align: center;
+}
+/*
+ * Where the tab joins, the pill's corners square and (flush) its bottom edge, which lies under the tab, clears, so no
+ * line crosses where a translucent tab joins. Both follow the pill's emphasis, as the tab's opacity does, so a fading
+ * tab hands back a neutral corner and edge rather than leaving the pill open.
+ */
+.pk :has(> .pk-status-tab-room > .pk-status-tab) {
+  --pk-tab-corner: calc(var(--projections-radius) * (1 - var(--emphasis, 1)));
+  border-end-start-radius: var(--pk-tab-corner);
+}
+.pk :has(> .pk-status-tab-room[data-flush] > .pk-status-tab) {
+  border-end-end-radius: var(--pk-tab-corner);
+  border-bottom-color: color-mix(in srgb, transparent calc(var(--emphasis, 1) * 100%), var(--divider));
 }
 .pk .pk-status-tab.pk-region[data-change] {
   --emphasis: 1;

@@ -351,7 +351,8 @@
 }
 /*
  * A slot is the pill with its status tab's room reserved below it (kit `StatusTab`, drawn inside the pill and hanging
- * off its bottom edge), at a fixed place for the whole comparison.
+ * off its bottom edge), at a fixed place for the whole comparison. The room is the tab's height, not spacing, so it is
+ * a block of that height rather than padding.
  */
 .database-tag-slot {
   position: absolute;
@@ -360,7 +361,11 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding-bottom: calc(var(--pk-tab-height) - var(--projections-border-width));
+}
+.database-tag-slot::after {
+  content: '';
+  flex: none;
+  height: calc(var(--pk-tab-height) - var(--projections-border-width));
 }
 /* The pill: one line, the same height and padding on every tag; status hangs off it as a tab. */
 .database-tag {
@@ -377,7 +382,6 @@
   color: var(--text);
   font: inherit;
   font-size: var(--projections-font-size-xs);
-  text-align: left;
   white-space: normal;
   cursor: pointer;
 }

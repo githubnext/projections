@@ -54,17 +54,21 @@ async function layOutFitting(
   edges: readonly LayoutEdge[],
   options: GraphLayoutOptions,
 ): Promise<GraphLayout> {
-  if (options.layerGap !== undefined) return (await layOut(nodes, edges, options, options.layerGap)).layout
+  if (options.layerGap !== undefined) return (await layOut(nodes, edges, options, options.layerGap)).layout!
+  const widest = layerGap + layerGapGrowth
   let gap = layerGap
-  let laid = await layOut(nodes, edges, options, gap)
   // Each try grows the gap by what the last one lacked, until the runs fit or the growth reaches its limit, keeping
   // the first try's order and alignment (one ELK run each). Large graphs with boundaries, whose dense routes rarely all
   // fit and whose every layout is costly, grow once; smaller ones grow as others do, so routes converging on a hub
   // each keep a track of their own rather than one shared run.
   const attempts = boundaryKinds(options.compound).length && nodes.length > compoundGrowthLimit ? 1 : layerGapAttempts
-  for (let attempt = 0; attempt < attempts && laid.crowding > 0.5 && gap < layerGap + layerGapGrowth; attempt++) {
-    gap = Math.min(layerGap + layerGapGrowth, gap + Math.ceil(laid.crowding / 2) * 2)
-    laid = await layOut(nodes, edges, options, gap, {...laid.plan, alignment: laid.layout.alignment})
+  // A first try crowded enough to grow the gap to its widest is redone at that width whatever else its routing finds,
+  // so its routing stops there (a hub's converging routes cost most in the steps after).
+  let laid = await layOut(nodes, edges, options, gap, undefined, widest - gap)
+  for (let attempt = 0; attempt < attempts && laid.crowding > 0.5 && gap < widest; attempt++) {
+    gap = Math.min(widest, gap + Math.ceil(laid.crowding / 2) * 2)
+    laid = await layOut(nodes, edges, options, gap, {...laid.plan, alignment: laid.alignment})
   }
+  if (!laid.layout) throw new Error('Graph layout stopped routing without growing its layer gap.')
   return laid.layout
 }

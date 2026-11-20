@@ -48,11 +48,15 @@ export function useStageBinding(input: StageBindingInput): StageBinding {
         before: (id, rect) => setAnchors(previous => ({...previous, before: {...previous.before, [id]: rect}})),
         after: (id, rect) => setAnchors(previous => ({...previous, after: {...previous.after, [id]: rect}})),
       },
+      // A side's anchors belong to its frame's renderer: a new frame (or none) reports its own, so the old ones go. A
+      // frame that persists across a mode change keeps them, since its renderer only reports anchors that move.
       onFrame: {
         before: frame => {
+          if (frames.current.before !== frame) setAnchors(previous => ({...previous, before: {}}))
           frames.current.before = frame
         },
         after: frame => {
+          if (frames.current.after !== frame) setAnchors(previous => ({...previous, after: {}}))
           frames.current.after = frame
         },
       },

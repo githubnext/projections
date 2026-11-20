@@ -112,6 +112,13 @@ test('scenario layouts route every relationship around the cards, between the fa
   }
 })
 
+test('a graph whose routes into one card include some with their ends in line, which have no run to trade, lays out', async () => {
+  // 43 modules and 84 imports where crossing routes into one card were swapped with trunks that included straight routes.
+  const extraction = JSON.parse(await readFile(new URL('fixtures/in-line-trunks.json', import.meta.url), 'utf8'))
+  const layout = await layoutGraph(await sizedNodes(extraction.entities), extraction.relationships, {})
+  assert.equal(layout.routes.size, extraction.relationships.length)
+})
+
 test('layout is deterministic: the same graph in any input order produces the same geometry', async () => {
   for (const graph of await scenarioGraphs()) {
     const shuffled = {

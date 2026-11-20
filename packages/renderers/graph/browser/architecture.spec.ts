@@ -27,10 +27,11 @@ test('module containment is a boundary around its resources, not arrows', async 
     expect(outside).toEqual([])
     await expect(renderer.frame.locator('.graph-link[data-from="root"]')).toHaveCount(0)
   })
-  // The host's summary bar counts the components by kind; containment is the boundary, no figure. No legend lists them.
+  // The host's summary bar counts the components by kind; containment and the module that is only a boundary round
+  // them are no figures. No legend lists them.
   await expect
     .poll(async () => ((await renderer.state()).summary ?? []).map(item => (item.type === 'fact' ? item.id : item.kind)))
-    .toEqual(['resource', 'module', 'references'])
+    .toEqual(['resource', 'references'])
   expect((await renderer.state()).legend?.items ?? []).toEqual([])
   await expect(renderer.frame.getByRole('list', {name: 'Component kinds'})).toHaveCount(0)
 })

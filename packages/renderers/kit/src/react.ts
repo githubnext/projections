@@ -16,6 +16,7 @@ export {
   usePaintHold,
 } from './react/shell/frame.js'
 export * from './react/components.js'
+export * from './react/status-tab.js'
 export * from './react/generated.js'
 export * from './react/diff-components.js'
 export * from './react/icons.js'

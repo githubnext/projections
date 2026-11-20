@@ -134,7 +134,10 @@ test('under reduced motion the schema jumps to its new layout', async ({page, th
   expect(samples.at(-1)!.links.every(link => link.opacity > 0.99 && link.attached)).toBe(true)
 })
 
-/** A horizontal line an element paints: a border, an inset shadow's top or bottom edge, or an inset outline's. */
+/**
+ * A horizontal line an element paints: a border, an inset shadow's top or bottom edge, an inset outline's, or the strip
+ * an outer shadow without blur shows above or below the element (a change run's edges, drawn over its neighbours' lines).
+ */
 interface Line {
   y: number
   /** Its thickness. */
@@ -164,13 +167,13 @@ async function doubledLines(frame: Frame): Promise<string[]> {
       let top = -Infinity,
         bottom = Infinity
       for (let parent = element.parentElement; parent; parent = parent.parentElement)
-        if (getComputedStyle(parent).overflow !== 'visible') {
+        if (getComputedStyle(parent).overflow !== 'visible' || getComputedStyle(parent).clipPath.startsWith('inset(')) {
           const clip = parent.getBoundingClientRect()
           top = Math.max(top, clip.top)
           bottom = Math.min(bottom, clip.bottom)
         }
-      const add = (y: number, width: number) => {
-        if (y >= top && y < bottom) lines.push({y, width, left: box.left, right: box.right, by: name(element)})
+      const add = (y: number, width: number, left = box.left, right = box.right) => {
+        if (y >= top && y < bottom) lines.push({y, width, left, right, by: name(element)})
       }
       for (const side of ['Top', 'Bottom'] as const) {
         const width = parseFloat(style.getPropertyValue(`border-${side.toLowerCase()}-width`))
@@ -181,13 +184,19 @@ async function doubledLines(frame: Frame): Promise<string[]> {
         )
           add(side === 'Top' ? box.top : box.bottom - width, width)
       }
-      // An inset shadow with only a vertical offset, or a spread, draws a top or bottom edge.
+      // An inset shadow with only a vertical offset, or a spread, draws a top or bottom edge. An outer shadow without blur
+      // draws the element's box moved by its offset and grown by its spread: what shows above or below the box is a line.
       for (const shadow of style.boxShadow === 'none' ? [] : style.boxShadow.split(/,(?![^(]*\))/)) {
-        if (!shadow.includes('inset')) continue
         const color = shadow.match(/(rgba?|color)\([^)]*\)/)?.[0] ?? ''
         if (!drawn(color)) continue
-        const [x = 0, y = 0, , spread = 0] = (shadow.replace(color, '').match(/-?[\d.]+px/g) ?? []).map(parseFloat)
-        if (spread > 0) {
+        const [x = 0, y = 0, blur = 0, spread = 0] = (shadow.replace(color, '').match(/-?[\d.]+px/g) ?? []).map(parseFloat)
+        if (!shadow.includes('inset')) {
+          if (blur > 0) continue
+          const [above, below] = [box.top + y - spread, box.bottom + y + spread]
+          const [left, right] = [box.left + x - spread, box.right + x + spread]
+          if (above < box.top) add(above, box.top - above, left, right)
+          if (below > box.bottom) add(box.bottom, below - box.bottom, left, right)
+        } else if (spread > 0) {
           add(box.top + parseFloat(style.borderTopWidth), spread)
           add(box.bottom - parseFloat(style.borderBottomWidth) - spread, spread)
         } else if (x === 0 && y > 0) add(box.top + parseFloat(style.borderTopWidth), y)
@@ -211,15 +220,25 @@ async function doubledLines(frame: Frame): Promise<string[]> {
   })
 }
 
-/**
- * Renderers whose change regions still draw their edge inside a container's border (a text diff's output, a policy
- * panel), so the two lines run side by side: known, until those containers let a change's hue replace their edge.
- */
-const known = new Set(['text-diff', 'runtime-policy'])
+test('the measure finds a change edge drawn beside the line it should cover', async ({page}, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium-light', 'a measurement, not a layout')
+  // A row's bottom line, then a row whose outer top edge (as a change run draws it) lies on that line, or a pixel below.
+  const rows = (offset: number) =>
+    `<div style="width: 300px"><div style="height: 20px; border-bottom: 1px solid #888"></div><div style="height: 20px; margin-top: ${offset}px; box-shadow: -1px -1px 0 0 #1a7f37, 1px -1px 0 0 #1a7f37"></div></div>`
+  await page.setContent(rows(0))
+  expect(await doubledLines(page.mainFrame()), 'on the line').toEqual([])
+  await page.setContent(rows(1))
+  expect(await doubledLines(page.mainFrame()), 'beside it').not.toEqual([])
+})
 
-for (const story of ['api', 'database', 'text-diff', 'code-statistics', 'runtime-policy'])
-  test(`${story}: every boundary between rows is one line, in Diff and Animated, Changes and All`, async ({page, theme}) => {
-    test.fail(known.has(story), 'its change regions draw inside a container border')
+for (const story of ['api', 'database', 'text-diff', 'text-diff-one-column', 'code-statistics', 'runtime-policy'])
+  test(`${story}: every boundary between rows is one line, in Diff and Animated, Changes and All`, async ({page, theme}, testInfo) => {
+    // Lines are laid out alike in every engine; the light and dark projects cover both themes. Four presentations a test.
+    test.skip(
+      !testInfo.project.name.startsWith('chromium-light') && !testInfo.project.name.startsWith('chromium-dark'),
+      'layout, not engine',
+    )
+    test.setTimeout(120_000)
     await page.setViewportSize({width: 1440, height: 900})
     for (const mode of ['diff', 'animated'])
       for (const changesOnly of [true, false]) {

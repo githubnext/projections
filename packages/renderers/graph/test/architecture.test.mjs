@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import {createNativeEngine} from '@githubnext/projections-engine/native'
 import {comparisonModel, createGraphTransition, extractionModel, scheduleSteps} from '@githubnext/projections-renderer-kit'
-import {architectureView, collapseAbove} from '../node_modules/.cache/test/architecture/collapse.js'
+import {architectureView, collapseAbove, oneRevisionCollapseAbove} from '../node_modules/.cache/test/architecture/collapse.js'
 
 const engine = createNativeEngine()
 const fixture = name => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -59,6 +59,17 @@ test('an expanded boundary shows its components with a card to collapse it again
   const closer = view.cards.get('boundary-collapse:search')
   assert.deepEqual(closer, {boundary: 'search', count: 16, open: true})
   assert.equal(architectureView(model, 'all', new Set()).model, model)
+})
+
+test('one revision draws every component up to its own limit, past the one at which a comparison collapses', async () => {
+  const modules = fixture('module-architecture')
+  const components = modules.entities.filter(entity => entity.kind !== 'module').length
+  assert.ok(components > collapseAbove && components <= oneRevisionCollapseAbove)
+  const view = architectureView(extractionModel(modules), new Set(), new Set())
+  assert.equal(view.collapsible, false)
+  assert.equal(view.model.entities.length, modules.entities.length)
+  const compared = architectureView(comparisonModel(modules, modules, await engine.compare(modules, modules)), new Set(), new Set())
+  assert.ok(compared.collapsible && cards(compared).length, 'a comparison of the same size collapses its unchanged boundaries')
 })
 
 test('a small architecture, or one revision of a large one, collapses as its size says', async () => {

@@ -127,7 +127,7 @@ export const checkDescriptions: Record<CheckId, string> = {
   palette:
     "Every painted color (text, backgrounds, borders, outlines, shadows, SVG fills and strokes) is a theme color token in both light and dark mode: the token itself, the token faded toward transparent, or one mix of two tokens in the same proportion in both modes. Parts marked data-projections-category follow the category palette instead. A hard-coded color can't match the theme in both modes.",
   'stage-surface':
-    "The field the renderer paints behind its content, sampled just inside the frame's edges at full width in light and dark mode, is the stage (`color-surface-canvas`, the kit's `--stage`), or left transparent so the host frame's stage shows: never a lighter page such as `color-bg`. Cards and panels stand on it in `color-surface-raised`.",
+    "The field the renderer paints behind its content, sampled just inside the frame's edges at full width in light and dark mode (beneath any entity drawn there, as a canvas opened zoomed reaches the edges), is the stage (`color-surface-canvas`, the kit's `--stage`), or left transparent so the host frame's stage shows: never a lighter page such as `color-bg`. Cards and panels stand on it in `color-surface-raised`.",
   'type-scale':
     "Text uses the theme's type: a font-size token (or the 11px floor, never smaller), the text or monospace font family, and a font-weight token.",
   spacing:

@@ -65,13 +65,11 @@ function useSlotSizes(tags: readonly Tag[], room: RefObject<HTMLDivElement | nul
         const box = element.getBoundingClientRect()
         return {width: box.width / unit, height: box.height / unit}
       }
-      // A slot is as wide as its widest name, or its status tab inset by the pill's corner radius, whichever is wider.
-      const corner = parseFloat(getComputedStyle(container).getPropertyValue('--projections-radius')) || 0
+      // A slot is as wide as its widest name or its status tab, whichever is wider (see the kit's `StatusTab`).
       setSizes({
         widths: items.map(item => {
           const status = item.querySelector<HTMLElement>('.pk-status-tab')
-          const tab = status ? size(status).width : 0
-          return Math.ceil(Math.max(size(item).width, tab ? tab + 2 * corner : 0))
+          return Math.ceil(Math.max(size(item).width, status ? size(status).width : 0))
         }),
         height: Math.max(0, ...items.map(item => Math.ceil(size(item).height))),
         columnGap: parseFloat(style.columnGap) || 0,
@@ -170,7 +168,9 @@ function TagPill({tag, slot, props, diff}: {tag: FrameTag; slot: TagSlot | undef
       ? tag.change.before.label
       : undefined
   const fade = renamed ? easeWithin(tag.label.mix, 0.1, 0.9) : 0
-  const geometry: CSSProperties = slot ? {transform: `translate(${slot.x}px, ${slot.y}px)`, width: slot.width} : {visibility: 'hidden'}
+  // Placed by its offsets, not a transform: WebKit keeps a transformed slot's old place in the block's scrollable
+  // overflow after the slots move (to a narrower width), so the block would still scroll to where it was.
+  const geometry: CSSProperties = slot ? {left: slot.x, top: slot.y, width: slot.width} : {visibility: 'hidden'}
   const status = emphasis > 0.01 && isChanged(tag.change) ? `, ${describeChange(tag.change)}` : ''
   return (
     <div

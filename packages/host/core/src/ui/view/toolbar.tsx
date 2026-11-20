@@ -25,10 +25,7 @@ import {useToolbarLayout, type ToolbarAction} from '../toolbar-layout.js'
 import {cn} from '../lib/utils.js'
 import type {ProjectionViewProps} from './props.js'
 import {ToolbarMore} from './toolbar-more.js'
-
-/** The expanded filter field's width (`pj:w-56`) and the button it replaces. */
-const filterFieldWidth = 224
-const filterButtonWidth = 32
+import {filterFitsRow} from './toolbar-room.js'
 
 export interface ViewToolbarProps {
   projection: ProjectionController
@@ -52,7 +49,7 @@ export interface ViewToolbarProps {
 
 /**
  * The default view's toolbar. It is planned, never wrapped (toolbar-layout.ts): one row whose regions collapse in
- * priority order, or two rows, with playback and a full-width slider in the second.
+ * priority order, and with playback a second row, playback's alone, with a full-width slider.
  */
 export function ViewToolbar({
   projection: p,
@@ -92,15 +89,8 @@ export function ViewToolbar({
     },
     `${comparing}-${mode}-${view}-${views.join()}-${showPlayback}-${showZoom}-${p.controls.length}-${p.stepEnds.length > 0}-${Boolean(props.actions)}-${p.availableModes.join()}-${p.variation?.within ?? 0}-${p.variation?.regenerated ?? 0}-${showScope && p.scope}`,
   )
-  // The filter expands in the row only when the row's flexible room (the spacer and the slider beyond its minimum) can
-  // take the field, so opening it never makes the row re-plan and move the Filter block while it is in use.
-  const filterFits = () => {
-    const element = row.current
-    if (!element || plan.rows !== 1) return false
-    const width = (selector: string) => element.querySelector(selector)?.getBoundingClientRect().width ?? 0
-    const spare = width('[data-fit-min="0"]') + Math.max(0, width('.ph-progress') - sliderMin)
-    return spare >= filterFieldWidth - filterButtonWidth
-  }
+  const centred = plan.cluster === 'centre'
+  const filterFits = () => Boolean(row.current && filterFitsRow(row.current, {centred, sliderMin}))
   const inMore = (action: ToolbarAction) => plan.more.includes(action)
   const hasMore = plan.more.length > 0 || (showPlayback && plan.playback === 'minimal')
   const start = typeof props.toolbarStart === 'function' ? props.toolbarStart(plan.pair !== 'full', plan.pair) : props.toolbarStart
@@ -136,21 +126,32 @@ export function ViewToolbar({
   )
   return (
     <Toolbar ref={row} rows onKeyDown={space} className={cn(plan.rows === 2 && 'ph-toolbar-two-rows')}>
-      <ToolbarRow>
-        {start && (
-          <div data-toolbar-region="start" className="ph-toolbar-start pj:flex pj:min-w-0 pj:shrink-0">
+      {/* The mode region is centred on the row while the row has room for it there, else it follows the start region. */}
+      <ToolbarRow centred={centred}>
+        {start ? (
+          <div data-toolbar-region="start" className="ph-toolbar-start pj:flex pj:min-w-0 pj:shrink-0 pj:justify-self-start">
             {start}
           </div>
+        ) : (
+          // Nothing at the start: an empty first cell, measured as nothing (it stretches across its half).
+          centred && <span aria-hidden="true" data-fit-min="0" />
         )}
         {(showModes || showScope) && (
-          <div data-toolbar-region="mode" className="ph-toolbar-mode pj:flex pj:shrink-0 pj:items-center pj:gap-1.5 pj:empty:hidden">
+          <div
+            data-toolbar-region="mode"
+            className={cn(
+              'ph-toolbar-mode pj:flex pj:shrink-0 pj:items-center pj:gap-1.5 pj:empty:hidden',
+              // Centred, it keeps 24px (with the row's 6px gap) from the regions beside it, and the plan changes first.
+              centred && 'pj:justify-self-center pj:px-[18px]',
+            )}
+          >
             {showModes && <ModeSwitch projection={p} modes={modes} form={plan.mode} />}
             {/* A row short enough to fold the mode into a menu leaves the scope to Settings' "Show". */}
             {showScope && plan.mode !== 'menu' && <ScopeSwitch projection={p} />}
           </div>
         )}
-        {showPlayback && plan.rows === 1 ? playback : <span aria-hidden="true" data-fit-min="0" className="pj:flex-1" />}
-        <div data-toolbar-region="end" className="ph-toolbar-end pj:flex pj:shrink-0 pj:items-center pj:gap-1.5">
+        {!centred && <span aria-hidden="true" data-fit-min="0" className="pj:flex-1" />}
+        <div data-toolbar-region="end" className="ph-toolbar-end pj:flex pj:shrink-0 pj:items-center pj:gap-1.5 pj:justify-self-end">
           {showVaried && !inMore('varied') && (
             <>
               <RegeneratedToggle projection={p} />
@@ -161,13 +162,7 @@ export function ViewToolbar({
           {showZoom && !inMore('zoom') && <ZoomControls projection={p} />}
           <div className="pj:flex pj:items-center pj:gap-0.5">
             {on('search') && !inMore('filter') && (
-              <FilterButton
-                projection={p}
-                popover={plan.rows === 2}
-                open={filterOpen}
-                onOpenChange={setFilterOpen}
-                canExpand={filterFits}
-              />
+              <FilterButton projection={p} open={filterOpen} onOpenChange={setFilterOpen} canExpand={filterFits} />
             )}
             {settings}
             {!inMore('info') && info}
@@ -188,7 +183,10 @@ export function ViewToolbar({
           </div>
         </div>
       </ToolbarRow>
-      {showPlayback && plan.rows === 2 && <ToolbarRow className="ph-toolbar-playback-row pj:pr-1.5">{playback}</ToolbarRow>}
+      {/* Ending in the slider (`minimal`), the row insets it so its thumb clears the border; a percent or button ends it at the edge inset. */}
+      {showPlayback && plan.rows === 2 && (
+        <ToolbarRow className={cn('ph-toolbar-playback-row', plan.playback === 'minimal' && 'pj:pr-1.5')}>{playback}</ToolbarRow>
+      )}
     </Toolbar>
   )
 }

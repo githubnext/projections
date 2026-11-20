@@ -10,6 +10,7 @@ import {
   extractionModel,
   inflections,
   layoutGraph,
+  columnGap,
   nodeSpacing,
   sampleSpline,
   scheduleSteps,
@@ -421,7 +422,9 @@ test('a card with no relationships takes free room beside the roots rather than 
       z = box(layout, 'z')
     assert.equal(z[flowStart], root[flowStart], `${orientation}: in the roots' layer`)
     const gap = Math.max(z[acrossStart] - root[acrossEnd], root[acrossStart] - z[acrossEnd])
-    assert.ok(Math.abs(gap - nodeSpacing) < 0.5, `${orientation}: next to the root (${gap})`)
+    // On the layout's grid: a column apart, top to bottom; left to right, rows keep ELK's spacing.
+    const apart = orientation === 'horizontal' ? nodeSpacing : columnGap
+    assert.ok(Math.abs(gap - apart) < 0.5, `${orientation}: next to the root (${gap})`)
   }
 })
 
@@ -511,7 +514,7 @@ test('top to bottom, every card starts on a column line of one grid, in every la
     const layout = await layoutOf(graph)
     const cards = [...layout.points.keys()].map(id => box(layout, id))
     const widths = cards.map(card => card.right - card.left).sort((a, b) => a - b)
-    const pitch = widths[Math.floor(widths.length / 2)] + nodeSpacing
+    const pitch = widths[Math.floor(widths.length / 2)] + columnGap
     for (const card of cards) {
       const column = (card.left - 32) / pitch
       assert.ok(Math.abs(column - Math.round(column)) < 1e-6, `${graph.name}: a card at ${card.left} is off the ${pitch} grid`)
@@ -553,7 +556,8 @@ test('cards with no relationships share the first layer, beside its cards, and n
     assert.ok(Math.abs(box(graph, 'x')[flowStart] - box(graph, 'b')[flowStart]) < 0.5, `${name}: x is on the first layer`)
     const [x, b] = [box(graph, 'x'), box(graph, 'b')]
     const apart = Math.max(x[acrossStart] - b[acrossEnd], b[acrossStart] - x[acrossEnd])
-    assert.ok(Math.abs(apart - nodeSpacing) < 0.5, `${name}: x is beside b, ${apart} from it`)
+    const spacing = orientation === 'horizontal' ? nodeSpacing : columnGap
+    assert.ok(Math.abs(apart - spacing) < 0.5, `${name}: x is beside b, ${spacing} apart (${apart})`)
     for (const id of linked) assert.deepEqual(box(graph, id), box(alone, id), `${name}: ${id} stays where it was`)
     assert.deepEqual([graph.width, graph.height], [alone.width, alone.height], `${name}: the drawing keeps its size`)
   }

@@ -1,6 +1,6 @@
 // Cards on a grid: one pitch across the flow, and every card's leading edge on a column line in every layer.
 import type {Point} from '../edge-arrows.js'
-import {median, nodeSpacing, rootPadding} from './placement.js'
+import {columnGap, median, nodeSpacing, rootPadding} from './placement.js'
 import type {ElkInput} from './elk-input.js'
 import type {Box} from './unlinked.js'
 
@@ -8,11 +8,13 @@ import type {Box} from './unlinked.js'
 export interface Grid {
   origin: number
   pitch: number
+  /** The pitch of ELK's placement (its cards `nodeSpacing` apart), by which a card's column is read. */
+  laid: number
 }
 
 /**
- * The grid a layout's cards snap to (see `snapToGrid`): column lines `nodeSpacing` apart beyond the cards' usual
- * breadth across the flow, from the root's padding. A graph with boundaries keeps ELK's placement, which their padding
+ * The grid a layout's cards snap to (see `snapToGrid`): column lines `columnGap` apart beyond the cards' usual breadth
+ * across the flow (rows `nodeSpacing` apart, left to right), from the root's padding. A graph with boundaries keeps ELK's placement, which their padding
  * and nesting shape, as does a left-to-right graph whose cards differ in height.
  */
 export function columnGrid(input: ElkInput, boxes: ReadonlyMap<string, Box>): Grid | undefined {
@@ -27,12 +29,17 @@ export function columnGrid(input: ElkInput, boxes: ReadonlyMap<string, Box>): Gr
   // Left to right, cards of different heights (their text, their changes) would leave rows half empty: they keep
   // ELK's placement.
   if (direction === 'RIGHT' && Math.max(...breadths) - Math.min(...breadths) > 0.5) return undefined
-  return {origin: rootPadding, pitch: median(breadths) + nodeSpacing}
+  // Top to bottom, columns spread to a route channel apart; left to right, rows keep ELK's spacing.
+  const gap = direction === 'DOWN' ? columnGap : nodeSpacing
+  return {origin: rootPadding, pitch: median(breadths) + gap, laid: median(breadths) + nodeSpacing}
 }
 
-/** How many columns a card of `breadth` spans: one, or more for a card wider than the pitch (a hub, say). */
+/**
+ * How many columns a card of `breadth` spans: one, or more for a card wider than the pitch (a hub, say), counted as
+ * ELK placed it, so it spans as many wider columns.
+ */
 export function columnSpan(grid: Grid, breadth: number): number {
-  return Math.max(1, Math.ceil((breadth + nodeSpacing) / grid.pitch - 1e-6))
+  return Math.max(1, Math.ceil((breadth + nodeSpacing) / grid.laid - 1e-6))
 }
 
 /** The column line at or after `value` (`up`), or at or before it. */
@@ -44,7 +51,8 @@ export function columnLine(grid: Grid, value: number, up: boolean): number {
 /**
  * Moves the cards ELK laid out onto `grid`'s column lines, layer by layer, keeping their order in each layer and moving
  * them as little as possible (a card ELK lined up with another in the next layer, so the relationship between them runs
- * straight, lands in the same column as it), never closer than a column apart. Junctions move to the middle of the
+ * straight, lands in the same column as it), never closer than a column apart. A card's column is read at ELK's
+ * pitch (`grid.laid`), so spreading the columns to `columnGap` keeps every card's column. Junctions move to the middle of the
  * cards they join. Returns, for every ELK edge, a course around the cards for routes that no S or corridor between
  * cards can take (see `routeEdges`), as ELK's own courses no longer fit the moved cards; and its reach, a line from
  * its source's port to its target's whose span (the room between them, where its route runs straight, turns or finds a
@@ -71,7 +79,7 @@ export function snapToGrid(
   for (const layer of layers) {
     layer.sort((a, b) => a[across] - b[across])
     const columns = placeInColumns(
-      layer.map(box => (box[across] - grid.origin) / grid.pitch),
+      layer.map(box => (box[across] - grid.origin) / grid.laid),
       layer.map(box => columnSpan(grid, box[breadth])),
     )
     layer.forEach((box, index) => (box[across] = grid.origin + columns[index]! * grid.pitch))
@@ -86,8 +94,8 @@ export function snapToGrid(
   // across the gap before the target into it.
   const all = [...boxes.values()]
   const lanes = [
-    Math.min(...all.map(box => box[across])) - nodeSpacing / 2,
-    Math.max(...all.map(box => box[across] + box[breadth])) + nodeSpacing / 2,
+    Math.min(...all.map(box => box[across])) - (grid.pitch - grid.laid + nodeSpacing) / 2,
+    Math.max(...all.map(box => box[across] + box[breadth])) + (grid.pitch - grid.laid + nodeSpacing) / 2,
   ]
   const at = (along: number, side: number): Point => (direction === 'DOWN' ? {x: side, y: along} : {x: along, y: side})
   const courses = new Map<string, Point[]>(),

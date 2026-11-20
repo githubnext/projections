@@ -70,7 +70,7 @@ export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactN
   const line = failed ?? (status || notice)
   const noticed = !failed && !status && Boolean(notice)
   return (
-    <header className="pi-viewer-header pj:relative pj:z-20 pj:flex pj:min-w-0 pj:shrink-0 pj:items-center pj:gap-3 pj:border-b pj:border-divider pj:bg-surface-header pj:p-3 pj:text-[13px]">
+    <header className="pi-viewer-header pj:relative pj:z-20 pj:flex pj:min-w-0 pj:shrink-0 pj:items-center pj:gap-3 pj:border-b pj:border-divider pj:bg-surface-header pj:px-3 pj:text-[13px]">
       <ProjectionsMark tone="two-tone" className="pi-viewer-mark pj:text-foreground" />
       <ViewerTitle
         title={title}

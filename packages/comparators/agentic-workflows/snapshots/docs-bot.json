@@ -19,6 +19,13 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot-digest.md",
+          "group:docs-bot"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "workflow:.github/workflows/docs-bot-digest.md",
       "status": "added",
@@ -32,6 +39,16 @@
         "workflow:.github/workflows/docs-bot-examples.md"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot-examples.md",
+          "group:docs-bot"
+        ],
+        "before": [
+          "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot-examples.md",
+          "group:docs-bot"
+        ]
+      },
       "correspondence": "exact",
       "id": "workflow:.github/workflows/docs-bot-examples.md",
       "status": "modified",
@@ -45,6 +62,16 @@
         "workflow:.github/workflows/docs-bot-links.md"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot-links.md",
+          "group:docs-bot"
+        ],
+        "before": [
+          "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot-links.md",
+          "group:docs-bot"
+        ]
+      },
       "correspondence": "exact",
       "id": "workflow:.github/workflows/docs-bot-links.md",
       "status": "modified",
@@ -58,6 +85,16 @@
         "workflow:.github/workflows/docs-bot.md"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot.md",
+          "group:docs-bot"
+        ],
+        "before": [
+          "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot.md",
+          "group:docs-bot"
+        ]
+      },
       "correspondence": "exact",
       "id": "workflow:.github/workflows/docs-bot.md",
       "status": "modified",
@@ -82,6 +119,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "group:docs-bot",
+          "workflow:.github/workflows/docs-bot-digest.md"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot-digest.md",
       "status": "added"
@@ -92,6 +136,16 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot-digest.md",
+          "contains:group%3Adocs-bot:workflow%3A.github%2Fworkflows%2Fdocs-bot.md",
+          "group:docs-bot",
+          "workflow:.github/workflows/docs-bot-digest.md",
+          "workflow:.github/workflows/docs-bot.md"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "dispatches:workflow%3A.github%2Fworkflows%2Fdocs-bot.md:workflow%3A.github%2Fworkflows%2Fdocs-bot-digest.md",
       "status": "added"

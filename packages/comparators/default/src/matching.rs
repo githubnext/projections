@@ -56,6 +56,7 @@ impl Change {
             correspondence: self.correspondence,
             varied: self.varied.clone(),
             summary: None,
+            context: None,
         }
     }
 

@@ -10,11 +10,12 @@ use serde_json::{Map, Value, json};
 use std::collections::HashMap;
 
 impl Comparator {
-    /// Classifies the matched changes, then makes the steps and metadata and
-    /// assembles the comparison.
+    /// Classifies the matched changes, gives them context, then makes the
+    /// steps and metadata and assembles the comparison.
     pub(super) fn finish(
         &self,
         scope: &Context,
+        typed: [&projections_engine::Extraction; 2],
         sides: [&Value; 2],
         changes: &mut [Change],
         pairs: Cel,
@@ -25,8 +26,6 @@ impl Comparator {
             Some(classify) => self.classify(classify, scope, sides, changes, &pairs, &change_of)?,
             None => Vec::new(),
         };
-        let listed: Vec<projections_engine::Change> = changes.iter().map(Change::to_change).collect();
-        let json_changes: Vec<Value> = listed.iter().map(projections_engine::Change::to_json).collect();
         let annotations_by_id: HashMap<String, Cel> = annotations.iter().cloned().collect();
         let stage = Vars::new([
             (
@@ -43,6 +42,9 @@ impl Comparator {
         ]);
         let mut staged = scope.new_inner_scope();
         staged.set_variable_resolver(&stage);
+        self.context(typed, &staged, sides, changes, &annotations_by_id)?;
+        let listed: Vec<projections_engine::Change> = changes.iter().map(Change::to_change).collect();
+        let json_changes: Vec<Value> = listed.iter().map(projections_engine::Change::to_json).collect();
         let steps = self.steps(&staged, changes, &annotations_by_id, baseline.steps)?;
         let metadata = self.metadata(&staged, baseline.metadata)?;
         let variation = projections_engine::volatility::variation(&listed);

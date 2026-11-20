@@ -126,7 +126,23 @@
               "correspondence": {"enum": ["exact", "declared", "split", "merge", "none"]},
               "summary": {"description": "Exact text; `null` expects none.", "type": ["string", "null"]},
               "before": {"type": "array", "items": {"$ref": "#/$defs/id"}},
-              "after": {"type": "array", "items": {"$ref": "#/$defs/id"}}
+              "after": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+              "context": {
+                "description": "The change's context: each listed field exactly (`before` and `after` in UTF-16 order, `rules` in the comparator's order); null expects none.",
+                "oneOf": [
+                  {"type": "null"},
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "before": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+                      "after": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+                      "rules": {"type": "array", "items": {"$ref": "#/$defs/id"}}
+                    },
+                    "minProperties": 1
+                  }
+                ]
+              }
             },
             "oneOf": [{"required": ["item"]}, {"required": ["id"]}],
             "anyOf": [
@@ -134,7 +150,8 @@
               {"required": ["correspondence"]},
               {"required": ["summary"]},
               {"required": ["before"]},
-              {"required": ["after"]}
+              {"required": ["after"]},
+              {"required": ["context"]}
             ]
           }
         },

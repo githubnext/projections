@@ -214,6 +214,12 @@ export interface RendererCapabilities {
   scrollSync?: boolean
   /** Whether the renderer honors the host's `filter`. */
   filter?: boolean
+  /**
+   * Whether the renderer reads the comparison's change `context` (`Change.context`). Hosts strip `context` from the
+   * comparison a renderer without it is sent, so a renderer that checks comparisons against an older schema, which
+   * closes `Change`, keeps working. Kit renderers declare it.
+   */
+  context?: boolean
   /** Whether the renderer draws the host's `annotations` and reports `annotation` when one is activated. */
   annotations?: boolean
   /** Whether the renderer draws item properties and may report them as `select` with a `path`. */

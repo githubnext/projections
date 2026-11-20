@@ -3,6 +3,7 @@
 
 mod canonical;
 mod comparison;
+pub mod context;
 mod data_rules;
 pub mod model;
 mod parse;
@@ -15,8 +16,8 @@ use std::cmp::Ordering;
 
 pub use data_rules::{DATA_RULES, DataRule, Field, FieldType, Record, VOCABULARIES};
 pub use model::{
-    Change, Collection, Comparison, Correspondence, Counts, Datum, Entity, Extraction, Fields, ItemRef, Number, Relationship, Reverse,
-    Side, Status, Step, StepKind,
+    Change, Collection, Comparison, Context, Correspondence, Counts, Datum, Entity, Extraction, Fields, ItemRef, Number, Relationship,
+    Reverse, Side, Status, Step, StepKind,
 };
 pub use parse::{
     canonical, canonicalize, check_comparison, content, content_value, diagnostic_response, handle, normalize, parse_json, semantic,

@@ -6,6 +6,13 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJob:ts-api%253A%252540acme%25252Fqueue%253A.%253AJob%3Ainstance%3AcreatedAt",
+          "ts-api:%40acme%2Fqueue:.:Job"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AJob:instance:createdAt",
       "status": "added",
@@ -19,6 +26,16 @@
         "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:delay"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AJobOptions%3Ainstance%3Adelay",
+          "ts-api:%40acme%2Fqueue:.:JobOptions"
+        ],
+        "before": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AJobOptions%3Ainstance%3Adelay",
+          "ts-api:%40acme%2Fqueue:.:JobOptions"
+        ]
+      },
       "correspondence": "exact",
       "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:delay",
       "status": "modified",
@@ -32,6 +49,16 @@
         "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:priority"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AJobOptions%3Ainstance%3Apriority",
+          "ts-api:%40acme%2Fqueue:.:JobOptions"
+        ],
+        "before": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AJobOptions%3Ainstance%3Apriority",
+          "ts-api:%40acme%2Fqueue:.:JobOptions"
+        ]
+      },
       "correspondence": "exact",
       "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:priority",
       "status": "modified",
@@ -43,6 +70,13 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AJobOptions%3Ainstance%3Atimeout",
+          "ts-api:%40acme%2Fqueue:.:JobOptions"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:timeout",
       "status": "added",
@@ -56,6 +90,16 @@
         "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:constructor"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Aconstructor",
+          "ts-api:%40acme%2Fqueue:.:Queue"
+        ],
+        "before": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Aconstructor",
+          "ts-api:%40acme%2Fqueue:.:Queue"
+        ]
+      },
       "correspondence": "exact",
       "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:constructor",
       "status": "modified",
@@ -69,6 +113,16 @@
         "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:add"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aadd",
+          "ts-api:%40acme%2Fqueue:.:Queue"
+        ],
+        "before": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aadd",
+          "ts-api:%40acme%2Fqueue:.:Queue"
+        ]
+      },
       "correspondence": "exact",
       "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:add",
       "status": "modified",
@@ -80,6 +134,13 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Adrain",
+          "ts-api:%40acme%2Fqueue:.:Queue"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:drain",
       "status": "added",
@@ -93,6 +154,16 @@
         "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:get"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aget",
+          "ts-api:%40acme%2Fqueue:.:Queue"
+        ],
+        "before": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aget",
+          "ts-api:%40acme%2Fqueue:.:Queue"
+        ]
+      },
       "correspondence": "exact",
       "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:get",
       "status": "modified",
@@ -104,6 +175,13 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aoptions",
+          "ts-api:%40acme%2Fqueue:.:Queue"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:options",
       "status": "added",
@@ -115,6 +193,13 @@
         "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:remove"
       ],
       "collection": "entities",
+      "context": {
+        "after": [],
+        "before": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aremove",
+          "ts-api:%40acme%2Fqueue:.:Queue"
+        ]
+      },
       "correspondence": "none",
       "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:remove",
       "status": "removed",
@@ -126,6 +211,13 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueueOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueueOptions%3Ainstance%3Aconcurrency",
+          "ts-api:%40acme%2Fqueue:.:QueueOptions"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "ts-api%3A%2540acme%252Fqueue%3A.%3AQueueOptions:instance:concurrency",
       "status": "added",
@@ -198,6 +290,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "ts-api%3A%2540acme%252Fqueue%3A.%3AJob:instance:createdAt",
+          "ts-api:%40acme%2Fqueue:.:Job"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJob:ts-api%253A%252540acme%25252Fqueue%253A.%253AJob%3Ainstance%3AcreatedAt",
       "status": "added"
@@ -208,6 +307,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:instance:timeout",
+          "ts-api:%40acme%2Fqueue:.:JobOptions"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AJobOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AJobOptions%3Ainstance%3Atimeout",
       "status": "added"
@@ -218,6 +324,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:drain",
+          "ts-api:%40acme%2Fqueue:.:Queue"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Adrain",
       "status": "added"
@@ -228,6 +341,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:options",
+          "ts-api:%40acme%2Fqueue:.:Queue"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aoptions",
       "status": "added"
@@ -238,6 +358,13 @@
         "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aremove"
       ],
       "collection": "relationships",
+      "context": {
+        "after": [],
+        "before": [
+          "ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:instance:remove",
+          "ts-api:%40acme%2Fqueue:.:Queue"
+        ]
+      },
       "correspondence": "none",
       "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueue:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueue%3Ainstance%3Aremove",
       "status": "removed"
@@ -248,6 +375,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "ts-api%3A%2540acme%252Fqueue%3A.%3AQueueOptions:instance:concurrency",
+          "ts-api:%40acme%2Fqueue:.:QueueOptions"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:ts-api%3A%2540acme%252Fqueue%3A.%3AQueueOptions:ts-api%253A%252540acme%25252Fqueue%253A.%253AQueueOptions%3Ainstance%3Aconcurrency",
       "status": "added"

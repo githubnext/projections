@@ -61,7 +61,7 @@ mirrors scrolling between them.
   items, replacing any earlier ones (capability `annotations`)
 
 - `ready`:
-  `capabilities {changeHighlighting: 'supported' | 'none', toggleableRelationships?, drawsRelationships?, ownTimeline?, hover?, anchors?, scrollSync?, filter?, annotations?, properties?, comparisonModes?, pace?, controls?}`
+  `capabilities {changeHighlighting: 'supported' | 'none', toggleableRelationships?, drawsRelationships?, ownTimeline?, hover?, anchors?, scrollSync?, filter?, context?, annotations?, properties?, comparisonModes?, pace?, controls?}`
   (flags are booleans)
 - `rendered`: `progress` whose frame was painted
 - `select`: `id` or `null`, optional `path` (only with an `id`): the person
@@ -244,6 +244,7 @@ and then `annotation` with its ID; the host decides what to open.
 | `anchors` | It reports `anchor` for the selected and hovered entities |
 | `scrollSync` | It reports `viewport` and follows `scroll` |
 | `filter` | It de-emphasizes or hides items outside the host's `filter` |
+| `context` | It reads a change's `context` in the comparison; without it the host strips `context` from `init`. Kit renderers declare it |
 | `annotations` | It draws the host's `annotations` on visible items, reports `annotation` when one is activated, and reports anchors for visible annotated items |
 | `properties` | It draws item properties and may report `select` with a `path` |
 | `controls` | The controls the host draws for it (see [Controls](../../packages/renderers/sdk/README.md#controls)) |

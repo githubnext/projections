@@ -1,5 +1,5 @@
 use super::{Checker, Scope, concrete, inputs, numeric};
-use crate::rules::{Classify, Expression, Match, NewStep, Pass, Rules, Steps, Variable};
+use crate::rules::{Classify, ContextRule, Expression, Match, NewStep, Pass, Rules, Steps, Variable};
 use crate::types::{self, Ty, assignable, list, map};
 
 pub(super) fn run(mut checker: Checker, rules: &Rules) -> Checker {
@@ -27,6 +27,9 @@ pub(super) fn run(mut checker: Checker, rules: &Rules) -> Checker {
     }
     let annotation = checker.annotation.clone();
     let stage = stage.with("annotations", map(Ty::String, annotation.clone()));
+    for rule in &rules.context {
+        checker.context(rule, &stage);
+    }
     match &rules.steps {
         Some(Steps::Value(variables, value)) => checker.steps_value(variables, value, &stage),
         Some(Steps::Plan {
@@ -85,15 +88,7 @@ impl Checker {
 
     /// Checks `classify`, recording the annotation's type.
     fn classify(&mut self, classify: &Classify, stage: &Scope) {
-        let mut scope = stage
-            .clone()
-            .with("change", Ty::Object("Change"))
-            .with("origin", Ty::String)
-            .with("item", Ty::Object("Item"))
-            .with("beforeItem", Ty::Object("Item"))
-            .with("afterItem", Ty::Object("Item"))
-            .with("befores", list(Ty::Object("Item")))
-            .with("afters", list(Ty::Object("Item")));
+        let mut scope = per_change(stage);
         if let Some(when) = &classify.when {
             self.condition(when, &scope);
         }
@@ -103,6 +98,23 @@ impl Checker {
         }
         if let Some(annotation) = &classify.annotation {
             self.annotation = self.check(annotation, &scope);
+        }
+    }
+
+    /// Checks a `context` rule: its condition, and its `before` and `after`
+    /// lists of IDs.
+    fn context(&mut self, rule: &ContextRule, stage: &Scope) {
+        let mut scope = per_change(stage).with("annotation", self.annotation.clone());
+        if let Some(when) = &rule.when {
+            self.condition(when, &scope);
+        }
+        self.variables(&mut scope, &rule.variables);
+        for ids in [&rule.before, &rule.after].into_iter().flatten() {
+            let ty = self.check(ids, &scope);
+            if !assignable(&ty, &list(Ty::String)) {
+                self.diagnostics
+                    .push(ids.at("invalid-rules", ids.parsed.id, &format!("Context must be a list of IDs, not {ty}")));
+            }
         }
     }
 
@@ -167,4 +179,18 @@ impl Checker {
             );
         }
     }
+}
+
+/// What an expression evaluated per change sees: the change, the pass that
+/// matched it and its items.
+fn per_change(stage: &Scope) -> Scope {
+    stage
+        .clone()
+        .with("change", Ty::Object("Change"))
+        .with("origin", Ty::String)
+        .with("item", Ty::Object("Item"))
+        .with("beforeItem", Ty::Object("Item"))
+        .with("afterItem", Ty::Object("Item"))
+        .with("befores", list(Ty::Object("Item")))
+        .with("afters", list(Ty::Object("Item")))
 }

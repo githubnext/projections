@@ -51,7 +51,7 @@ pub struct ChangeExpectation {
     pub selector: Selector,
     /// Narrows the selection to one collection.
     pub collection: Option<String>,
-    /// The fields checked: `status`, `correspondence`, `summary`, `before`, `after`.
+    /// The fields checked: `status`, `correspondence`, `summary`, `before`, `after`, `context`.
     pub fields: Map<String, Value>,
 }
 

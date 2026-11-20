@@ -45,6 +45,16 @@ export interface ComparatorNewStep {
   summary?: string
 }
 
+/** A `context` rule: per change it selects, the other items of each revision a person needs to read it. */
+export interface ComparatorContextRule {
+  name: string
+  description?: string
+  where?: string
+  before?: string
+  after?: string
+  variables?: ComparatorVariable[]
+}
+
 /** Declarative step operations, or `value`, one expression for the whole list. */
 export type ComparatorSteps =
   | string
@@ -69,6 +79,7 @@ export interface ComparatorFile {
   functions?: {[name: string]: ComparatorFunction}
   identity?: ComparatorIdentityPass[]
   classify?: {where?: string; summary?: string; annotation?: string; variables?: ComparatorVariable[]}
+  context?: ComparatorContextRule[]
   steps?: ComparatorSteps
   metadata?: {values: {[key: string]: string}; variables?: ComparatorVariable[]}
 }
@@ -249,6 +260,42 @@ export const ComparatorFileSchema = Type.Unsafe<ComparatorFile>({
         },
         variables: {
           $ref: '#/$defs/variables',
+        },
+      },
+    },
+    context: {
+      description:
+        "Context rules, in order, each evaluated after `classify` per change whose status or identity changed, seeing what `classify` sees and `annotation`. Each adds to the change's context, the other items a person needs to read it; context only grows from the core's and never hides a change.",
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['name'],
+        anyOf: [{required: ['before']}, {required: ['after']}],
+        properties: {
+          name: {
+            description: 'Unique among the context rules; the comparison names it in the context it added to.',
+            $ref: '#/$defs/identifier',
+          },
+          description: {
+            type: 'string',
+          },
+          where: {
+            description: 'Skips the change unless true.',
+            $ref: '#/$defs/cel',
+          },
+          before: {
+            description:
+              "A `list<string>` of before item IDs (entities or relationships): a removal's context, or what the change needs before. The change's own items are left out.",
+            $ref: '#/$defs/cel',
+          },
+          after: {
+            description: "A `list<string>` of after item IDs (entities or relationships). The change's own items are left out.",
+            $ref: '#/$defs/cel',
+          },
+          variables: {
+            $ref: '#/$defs/variables',
+          },
         },
       },
     },

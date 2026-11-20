@@ -50,7 +50,7 @@ in range, at most 64 KiB, at most 240 per second. The renderer speaks first with
   `document-request` (see nested renderers, below)
 
 - `ready`:
-  `capabilities {changeHighlighting: "supported" | "none", toggleableRelationships?, drawsRelationships?, ownTimeline?, hover?, anchors?, scrollSync?, filter?, annotations?, properties?, controls?}`
+  `capabilities {changeHighlighting: "supported" | "none", toggleableRelationships?, drawsRelationships?, ownTimeline?, hover?, anchors?, scrollSync?, filter?, context?, annotations?, properties?, controls?}`
 - `controls`: `controls`: replaces the declared controls
 - `control`: `id`, `value`: the person set a declared control from the
   renderer's content; the host applies it as a settings change
@@ -181,12 +181,14 @@ to renderers declaring `filter`, and `annotations` only to renderers declaring
 `annotations`. Renderers send `anchor` only when they declare `anchors` (for the
 selected, hovered and annotated items), and `annotation` only when they declare
 `annotations`. Without these capabilities, comparison modes still share
-selection and simply omit hover sync, the connector and scroll mirroring.
-Selection and hover IDs are comparison row IDs: a change's ID, or an unchanged
-item's own ID. The same entity therefore has the same ID in the before and after
-frames, and an item present in only one revision has no counterpart. A scroll
-`key` is the scrolled element's `data-projections-scroll` value or a structural
-path; it is omitted for the document.
+selection and simply omit hover sync, the connector and scroll mirroring. A host
+sends a comparison's change `context` (in `init`) only to renderers declaring
+`context`, and strips it for others, which may check comparisons against an
+older, closed schema. Selection and hover IDs are comparison row IDs: a change's
+ID, or an unchanged item's own ID. The same entity therefore has the same ID in
+the before and after frames, and an item present in only one revision has no
+counterpart. A scroll `key` is the scrolled element's `data-projections-scroll`
+value or a structural path; it is omitted for the document.
 
 **Targets.** Hosts translate selection IDs to and from _targets_,
 `{kind: "entity" | "relationship", id, side: "before" | "after", path?}`, which

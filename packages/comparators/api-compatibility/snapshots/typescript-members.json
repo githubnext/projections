@@ -60,6 +60,16 @@
         "ts:kit:.:Job:code"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts:kit:.:Job>ts:kit:.:Job:code",
+          "ts:kit:.:Job"
+        ],
+        "before": [
+          "contains:ts:kit:.:Job>ts:kit:.:Job:code",
+          "ts:kit:.:Job"
+        ]
+      },
       "correspondence": "exact",
       "id": "ts:kit:.:Job:code",
       "status": "modified",
@@ -73,6 +83,16 @@
         "ts:kit:.:Job:data"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts:kit:.:Job>ts:kit:.:Job:data",
+          "ts:kit:.:Job"
+        ],
+        "before": [
+          "contains:ts:kit:.:Job>ts:kit:.:Job:data",
+          "ts:kit:.:Job"
+        ]
+      },
       "correspondence": "exact",
       "id": "ts:kit:.:Job:data",
       "status": "modified",
@@ -86,6 +106,16 @@
         "ts:kit:.:Job:id"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts:kit:.:Job>ts:kit:.:Job:id",
+          "ts:kit:.:Job"
+        ],
+        "before": [
+          "contains:ts:kit:.:Job>ts:kit:.:Job:id",
+          "ts:kit:.:Job"
+        ]
+      },
       "correspondence": "exact",
       "id": "ts:kit:.:Job:id",
       "status": "modified",
@@ -99,6 +129,16 @@
         "ts:kit:.:Job:kind"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts:kit:.:Job>ts:kit:.:Job:kind",
+          "ts:kit:.:Job"
+        ],
+        "before": [
+          "contains:ts:kit:.:Job>ts:kit:.:Job:kind",
+          "ts:kit:.:Job"
+        ]
+      },
       "correspondence": "exact",
       "id": "ts:kit:.:Job:kind",
       "status": "modified",
@@ -112,6 +152,16 @@
         "ts:kit:.:Job:name"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts:kit:.:Job>ts:kit:.:Job:name",
+          "ts:kit:.:Job"
+        ],
+        "before": [
+          "contains:ts:kit:.:Job>ts:kit:.:Job:name",
+          "ts:kit:.:Job"
+        ]
+      },
       "correspondence": "exact",
       "id": "ts:kit:.:Job:name",
       "status": "modified",
@@ -125,6 +175,16 @@
         "ts:kit:.:Job:note"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts:kit:.:Job>ts:kit:.:Job:note",
+          "ts:kit:.:Job"
+        ],
+        "before": [
+          "contains:ts:kit:.:Job>ts:kit:.:Job:note",
+          "ts:kit:.:Job"
+        ]
+      },
       "correspondence": "exact",
       "id": "ts:kit:.:Job:note",
       "status": "modified",
@@ -138,6 +198,16 @@
         "ts:kit:.:Job:tag"
       ],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts:kit:.:Job>ts:kit:.:Job:tag",
+          "ts:kit:.:Job"
+        ],
+        "before": [
+          "contains:ts:kit:.:Job>ts:kit:.:Job:tag",
+          "ts:kit:.:Job"
+        ]
+      },
       "correspondence": "exact",
       "id": "ts:kit:.:Job:tag",
       "status": "modified",
@@ -162,6 +232,13 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts:kit:.:Options>ts:kit:.:Options:call",
+          "ts:kit:.:Options"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "ts:kit:.:Options:call",
       "status": "added",
@@ -173,6 +250,13 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts:kit:.:Options>ts:kit:.:Options:index",
+          "ts:kit:.:Options"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "ts:kit:.:Options:index",
       "status": "added",
@@ -184,6 +268,13 @@
       ],
       "before": [],
       "collection": "entities",
+      "context": {
+        "after": [
+          "contains:ts:kit:.:Options>ts:kit:.:Options:new",
+          "ts:kit:.:Options"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "ts:kit:.:Options:new",
       "status": "added",
@@ -351,6 +442,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "ts:kit:.:Options",
+          "ts:kit:.:Options:call"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:ts:kit:.:Options>ts:kit:.:Options:call",
       "status": "added"
@@ -361,6 +459,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "ts:kit:.:Options",
+          "ts:kit:.:Options:index"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:ts:kit:.:Options>ts:kit:.:Options:index",
       "status": "added"
@@ -371,6 +476,13 @@
       ],
       "before": [],
       "collection": "relationships",
+      "context": {
+        "after": [
+          "ts:kit:.:Options",
+          "ts:kit:.:Options:new"
+        ],
+        "before": []
+      },
       "correspondence": "none",
       "id": "contains:ts:kit:.:Options>ts:kit:.:Options:new",
       "status": "added"

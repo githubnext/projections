@@ -27,7 +27,9 @@ import {useSummaryReport} from './summary.js'
 export function KitRenderer({component: Renderer, options}: {component: ComponentType<RendererProps>; options: MountOptions}) {
   const interactive = options.interactions !== false
   const listeners = useRef(new Set<(id: string) => void>())
+  // The kit reads a change's context (`changesScope`), so its renderers are sent it.
   const capabilities = {
+    context: true,
     ...(interactive ? interactionCapabilities : {}),
     ...options.capabilities,
     ...(options.controls ? {controls: [...options.controls]} : {}),

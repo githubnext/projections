@@ -1,8 +1,10 @@
 //! Interpreting a rules file over two extractions: the baseline, the inputs
 //! the rules read, the library, the checks and the matching (here); then
-//! classification ([`classify`]) and the steps and metadata ([`finish`]).
+//! classification ([`classify`]), context ([`context`]) and the steps and
+//! metadata ([`finish`]).
 
 mod classify;
+mod context;
 mod finish;
 
 use crate::core::{Change, RulesPass, lookup, pairs_value};
@@ -37,7 +39,7 @@ impl Comparator {
         let (base_matched, base_steps) = projections_comparator_default::baseline_plan(typed[0], typed[1])?;
         let json = typed.map(Extraction::to_json);
         let [before, after] = [&json[0], &json[1]];
-        let inputs = self.inputs(before, after, options, &base_matched, &base_steps);
+        let inputs = self.inputs(typed, [before, after], options, &base_matched, &base_steps);
         let mut root = Context::with_env(self.env.clone());
         root.set_variable_resolver(&inputs);
         let residual: Residual = Arc::default();
@@ -66,13 +68,20 @@ impl Comparator {
                 .collect(),
         );
         let pairs = if self.uses("pairs") { pairs_value(&pairs) } else { Cel::Null };
-        self.finish(&file, [before, after], &mut changes, pairs, base)
+        self.finish(&file, typed, [before, after], &mut changes, pairs, base)
     }
 
     /// The inputs the rules read, converted for CEL: `options` (the file's
     /// `defaults` with the given options over them) always, and
     /// `before`, `after`, `baseline` and `lookup` when used.
-    fn inputs(&self, before: &Value, after: &Value, options: &Value, base_matched: &Matched, base_steps: &[Step]) -> Vars {
+    fn inputs(
+        &self,
+        typed: [&Extraction; 2],
+        [before, after]: [&Value; 2],
+        options: &Value,
+        base_matched: &Matched,
+        base_steps: &[Step],
+    ) -> Vars {
         let mut effective = self.rules.defaults.clone();
         effective.extend(
             options
@@ -88,7 +97,8 @@ impl Comparator {
             }
         }
         if self.uses("baseline") {
-            let mut baseline = projections_comparator_default::to_comparison(&base_matched.changes, base_steps.to_vec()).to_json();
+            let mut baseline =
+                projections_comparator_default::to_comparison(typed[0], typed[1], &base_matched.changes, base_steps.to_vec()).to_json();
             // As for `changes`, a change's `varied` is always a list.
             for change in baseline["changes"].as_array_mut().unwrap() {
                 change.as_object_mut().unwrap().entry("varied").or_insert(json!([]));

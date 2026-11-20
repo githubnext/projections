@@ -41,6 +41,37 @@ pub struct Change {
     pub correspondence: Correspondence,
     pub varied: Vec<Varied>,
     pub summary: Option<String>,
+    /// The other items a person needs to read the change; none when it has
+    /// none.
+    pub context: Option<Context>,
+}
+
+/// A change's `context`: the IDs of the other items, in each revision, that
+/// a person needs to read it (the containers of what changed, the entities a
+/// changed relationship connects), in UTF-16 order, with the names of the
+/// comparator rules that added to it. A removal's context is in `before`.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct Context {
+    pub before: Vec<String>,
+    pub after: Vec<String>,
+    /// The comparator `context` rules that added IDs, in the file's order;
+    /// empty when the core's context is all of it.
+    pub rules: Vec<String>,
+}
+
+impl Context {
+    /// Whether it names no item.
+    pub fn is_empty(&self) -> bool {
+        self.before.is_empty() && self.after.is_empty()
+    }
+
+    /// One revision's IDs.
+    pub fn side(&self, side: super::Side) -> &[String] {
+        match side {
+            super::Side::Before => &self.before,
+            super::Side::After => &self.after,
+        }
+    }
 }
 
 impl Change {
@@ -49,6 +80,20 @@ impl Change {
     /// stays visible, but belong to no step.
     pub fn is_variation(&self) -> bool {
         self.status == Status::Unchanged && self.correspondence == Correspondence::Exact && !self.varied.is_empty()
+    }
+
+    /// Whether the change is one a person reviews: its status, or its
+    /// identity (a rename, split or merge), changed. Only these have context.
+    pub fn is_scope_change(&self) -> bool {
+        self.status != Status::Unchanged || self.correspondence != Correspondence::Exact
+    }
+
+    /// The change's own IDs on one side.
+    pub fn side(&self, side: super::Side) -> &[String] {
+        match side {
+            super::Side::Before => &self.before,
+            super::Side::After => &self.after,
+        }
     }
 }
 

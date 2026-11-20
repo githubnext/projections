@@ -5,7 +5,8 @@
 use super::encode::to_value;
 use super::fields::{array, choice, fields, name, object, optional, text, version_zero};
 use crate::comparison::{Inconsistent, Integrity, reverse_steps};
-use crate::model::{Change, Collection, Correspondence, Extraction, Reverse, Side, Status, StepKind};
+use crate::context::MAX_CONTEXT;
+use crate::model::{Change, Collection, Context, Correspondence, Extraction, Reverse, Side, Status, StepKind};
 use crate::volatility::Varied;
 use crate::{Failure, fail, pointer, utf16_cmp};
 use serde_json::Value;
@@ -86,6 +87,7 @@ fn claim(integrity: &mut Integrity, change: &Value, path: String) -> Result<(), 
             "correspondence",
             "varied",
             "summary",
+            "context",
         ],
         &path,
     )?;
@@ -121,19 +123,74 @@ fn claim(integrity: &mut Integrity, change: &Value, path: String) -> Result<(), 
     .unwrap_or_default();
     let before = references(integrity, change, &path, collection, Side::Before)?;
     let after = references(integrity, change, &path, collection, Side::After)?;
-    integrity.record(
-        Change {
-            id,
-            collection,
-            before,
-            after,
-            status,
-            correspondence,
-            varied,
-            summary,
-        },
-        path,
-    )
+    let mut claimed = Change {
+        id,
+        collection,
+        before,
+        after,
+        status,
+        correspondence,
+        varied,
+        summary,
+        context: None,
+    };
+    if let Some(context) = change_context(change, &path)? {
+        integrity.context(&claimed, &context, &pointer(&path, "context"))?;
+        claimed.context = Some(context);
+    }
+    integrity.record(claimed, path)
+}
+
+/// A change's `context`, when it has one: each revision's IDs, distinct,
+/// nonblank and in UTF-16 order within the bound, and the rules that added
+/// to it.
+fn change_context(change: &Value, path: &str) -> Result<Option<Context>, Failure> {
+    optional(change, "context", path, |value, path| {
+        fields(value, &["before", "after", "rules"], path)?;
+        let side = |name: &str| -> Result<Vec<String>, Failure> {
+            let path = pointer(path, name);
+            let members = array(&value[name], &path)?;
+            if members.len() > MAX_CONTEXT {
+                return Err(fail(
+                    "context-limit",
+                    &path,
+                    &format!("A change has at most {MAX_CONTEXT} context IDs in each revision"),
+                ));
+            }
+            let mut ids: Vec<String> = Vec::with_capacity(members.len());
+            for (position, id) in members.iter().enumerate() {
+                let member_path = pointer(&path, &position.to_string());
+                let id = text(id, &member_path, true)?;
+                if ids.last().is_some_and(|last| utf16_cmp(last, id) != std::cmp::Ordering::Less) {
+                    return Err(fail("invalid-context", &member_path, "Context IDs are unique and sorted"));
+                }
+                ids.push(id.to_owned());
+            }
+            Ok(ids)
+        };
+        let (before, after) = (side("before")?, side("after")?);
+        let rules = optional(value, "rules", path, |rules, path| {
+            let names = array(rules, path)?;
+            if names.is_empty() {
+                return Err(fail("invalid-type", path, "Expected at least one rule; omit rules otherwise"));
+            }
+            let mut seen = HashSet::new();
+            names
+                .iter()
+                .enumerate()
+                .map(|(position, rule)| {
+                    let path = pointer(path, &position.to_string());
+                    let rule = name(rule, &path)?;
+                    if !seen.insert(rule.clone()) {
+                        return Err(fail("invalid-context", &path, "Context rules are named once"));
+                    }
+                    Ok(rule)
+                })
+                .collect()
+        })?
+        .unwrap_or_default();
+        Ok(Context { before, after, rules })
+    })
 }
 
 /// The IDs a change references on one side, read and claimed.

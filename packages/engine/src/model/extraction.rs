@@ -137,6 +137,11 @@ impl Extraction {
         self.schema
     }
 
+    /// The vocabularies it declares.
+    pub fn vocabularies(&self) -> &[&'static str] {
+        &self.vocabularies
+    }
+
     /// The volatile declarations, normalized and sorted.
     pub fn volatile(&self) -> &[Declaration] {
         &self.volatile

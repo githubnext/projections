@@ -14,7 +14,7 @@ import type {
 } from '@githubnext/projections-renderer-sdk/protocol'
 import {HeightRequests, MessageGate} from './frame/admission.js'
 import {ProgressFlow} from './frame/progress-flow.js'
-import {replay, selectMessage} from './frame/replay.js'
+import {initMessage, replay, selectMessage} from './frame/replay.js'
 import {fillStyle, frameElement, frameUrl, nonce, observeViewport, viewportOf} from './frame/element.js'
 import {FrameLifecycle} from './frame/lifecycle.js'
 import {OpenedDocument} from './frame/opened.js'
@@ -115,7 +115,7 @@ export class RendererFrame {
     this.flow.reset()
     this.renderedProgress = undefined
     if (this.status !== 'ready') return
-    this.send({type: 'init', ...init})
+    this.send(initMessage(init, this.capabilities))
     if (progress) this.setProgress(progress)
   }
 

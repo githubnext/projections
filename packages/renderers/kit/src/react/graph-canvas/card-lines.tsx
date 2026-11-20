@@ -54,11 +54,13 @@ export function cardLinesLayout(node: TransitionNode, entity: Entity, drawing: D
   const labelY = top + (fileNode ? cardTextMetrics.firstBaseline : cardTextMetrics.labelBaseline)
   const prose = props.prose?.(entity) ?? false
   const labelFont = prose ? {} : identifier
-  // Text longer than the card holds ends in an ellipsis, and the card's tooltip has it whole.
-  const labelRoom = Math.floor((textRight - textLeft) / cardTextWidth('x', prose ? 'label' : 'mono', textScale))
   const details = [node.before, node.after].map(side => (side ? props.detail?.(side) : undefined))
   const shownDetails = details.map(text => (text ? detailText(text) : undefined))
   const detailWidth = Math.max(0, ...shownDetails.map(text => (text ? cardTextWidth(text, 'mono', textScale) : 0)))
+  // Text longer than the card holds ends in an ellipsis, and the card's tooltip has it whole. A file has no kind line,
+  // so its detail sits at the right of its path, which leaves it room.
+  const besideLabel = fileNode && detailWidth ? cardTextMetrics.detailGap + detailWidth : 0
+  const labelRoom = Math.floor((textRight - textLeft - besideLabel) / cardTextWidth('x', prose ? 'label' : 'mono', textScale))
   const kindLine = kindOf(entity) ?? entityKindLine(entity.kind)
   const note = kindNote(kindOf(entity), entity.confidence === 'inferred')
   const kindRoom =
@@ -100,7 +102,7 @@ export function CardLines({node, text}: {node: TransitionNode; text: CardLinesLa
   return (
     <>
       {!fileNode && <KindLine kind={kindLine} text={kindShown} note={note} x={kindLeft} y={kindY} />}
-      {!fileNode && <CardDetail node={node} text={text} />}
+      <CardDetail node={node} text={text} />
       {relabeled ? (
         // The old name rises out as the new one rises in.
         [node.before!, node.after!].map((item, index) => (
@@ -124,7 +126,7 @@ export function CardLines({node, text}: {node: TransitionNode; text: CardLinesLa
   )
 }
 
-/** The detail at the right of a card's kind line; when it differs between revisions, the two crossfade. */
+/** The detail at the right of a card's kind line (a file's path line); when it differs between revisions, the two crossfade. */
 function CardDetail({node, text}: {node: TransitionNode; text: CardLinesLayout}) {
   const {textRight, kindY, details, shownDetails} = text
   return details[0] !== details[1] && node.before && node.after

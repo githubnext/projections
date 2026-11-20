@@ -32,7 +32,7 @@ export interface CopilotCanvasTheme {
 /**
  * Renderer theme token overrides from the app's canvas variables (`appThemeTokens`): the stage is
  * `--background-color-default`, text and muted text `--text-color-default` and `--text-color-muted`, rules
- * `--border-color-default`, the accent and focus ring `--color-focus-outline` (else `--true-color-blue`), and the
+ * `--border-color-default` as the app draws it (its links and controls keep 3:1), the accent and focus ring `--color-focus-outline` (else `--true-color-blue`), and the
  * families `--font-sans` and `--font-mono`. Without `--background-color-default` there is no app theme, and no
  * overrides.
  */
@@ -50,6 +50,8 @@ export function copilotCanvasThemeTokens(variables: CopilotCanvasVariables, colo
       mono: variables['--font-mono'],
     },
     colorMode,
+    // The canvas's rules and card edges are the app's own divider, as its panes draw it; links and controls keep 3:1.
+    'app',
   )
 }
 

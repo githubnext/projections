@@ -25,6 +25,8 @@ export interface ScenarioArgs {
   annotations?: boolean
   /** Render a consumer's content in the detail card (`renderDetails`). */
   details?: boolean
+  /** Compare the scenario's After with itself: a comparison without changes. */
+  unchanged?: boolean
 }
 
 /** Storybook `argTypes` for `ScenarioArgs`, offering `options` (default: every scenario) in the scenario select. */
@@ -61,7 +63,7 @@ export const runtimeLoader = async (): Promise<{runtime: Runtime}> => ({runtime:
 /** Loads the runtime and the scenario's computed view subject. */
 export const preparedLoader = async ({args}: {args: Partial<ScenarioArgs>}): Promise<{runtime: Runtime; prepared: PreparedFixture}> => {
   const runtime = await loadRuntime()
-  return {runtime, prepared: await prepareFixture(scenarioFixture(args), runtime)}
+  return {runtime, prepared: await prepareFixture(scenarioFixture(args), runtime, args.unchanged)}
 }
 
 /** Loaded data, as Storybook passes it to `render`. */

@@ -186,6 +186,10 @@
     --pj-legend-border-color: var(--pj-divider);
     --pj-legend-surface: var(--pj-surface-header);
     --pj-legend-chip-border: color-mix(in oklab, var(--pj-foreground) 20%, transparent);
+    /* So are the pane labels above each pane in side by side and swipe (stage/labels.tsx's PaneBand). */
+    --pj-pane-band-bg: var(--pj-surface-header);
+    --pj-pane-band-fg: var(--pj-foreground);
+    --pj-pane-band-rule: var(--pj-divider);
   }
   .pj-root.ph[data-fill],
   .pj-root.ph-explorer[data-fill] {

@@ -1,5 +1,6 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
+import {optionalThemeTokenNames} from '@githubnext/projections-renderer-sdk/protocol'
 import {
   composite,
   contrast,
@@ -61,7 +62,7 @@ for (const colorMode of ['dark', 'light']) {
 
   test(`${colorMode}: overrides are known tokens the protocol accepts, and keep the token set's contrast`, () => {
     for (const [name, value] of Object.entries(tokens)) {
-      assert.ok(themeTokenNames.includes(name), name)
+      assert.ok(themeTokenNames.includes(name) || optionalThemeTokenNames.includes(name), name)
       assert.ok(value.length <= rendererLimits.tokenLength, name)
       if (name.startsWith('color-') || name.startsWith('chart-')) assert.ok(parseColor(value), `${name} is a color: ${value}`)
     }
@@ -72,7 +73,8 @@ for (const colorMode of ['dark', 'light']) {
       assert.ok(ratio('color-fg', surface) >= 4.5, `fg on ${surface}`)
       assert.ok(ratio('color-fg-muted', surface) >= 4.5, `fg-muted on ${surface}`)
       assert.ok(ratio('color-fg-subtle', surface) >= 3, `fg-subtle on ${surface}`)
-      assert.ok(ratio('color-divider', surface) >= 3, `divider on ${surface}`)
+      // Rules are the app's own divider, as its panes draw them; lines that carry meaning keep 3:1.
+      assert.ok(ratio('color-connector', surface) >= 3, `connector on ${surface}`)
     }
     for (const surface of ['color-surface-canvas', 'color-surface-raised']) {
       assert.ok(ratio('color-accent', surface) >= 4.5, `accent on ${surface}`)

@@ -143,7 +143,8 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
         </Alert>
       )}
       {comparing && p.scope === 'changes' && p.scopeCounts.changes === 0 && on('changesOnly') && (
-        <Alert role="status" className={cn('ph-no-changes', band)}>
+        // The icon labels the row of text and its 28px button: centred on that row, not pinned to a text line's top.
+        <Alert role="status" className={cn('ph-no-changes', band, 'pj:*:[svg]:row-span-1 pj:*:[svg]:translate-y-0 pj:*:[svg]:self-center')}>
           <Info className="pj:h-4 pj:w-4" />
           <AlertDescription className="pj:flex pj:flex-wrap pj:items-center pj:gap-x-3 pj:gap-y-1">
             <span>No changes: both revisions present the same items.</span>

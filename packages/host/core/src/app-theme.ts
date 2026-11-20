@@ -28,8 +28,8 @@ export interface AppThemeColors {
 
 /**
  * How an app theme draws its rules and card edges: `contrast` (the default) lifts the app's border to 3:1 against
- * every surface, as the token set's divider promises; `app` draws them in the app's own border, as given (an app such
- * as Claude Code whose rules are quiet), and sends lines that carry meaning (`color-connector`) at 3:1 instead.
+ * every surface, as the token set's divider promises; `app` draws them in the app's own border, as given (the Copilot
+ * canvas and theme seeds, whose apps' rules are quiet), and sends lines that carry meaning (`color-connector`) at 3:1 instead.
  */
 export type AppThemeRules = 'contrast' | 'app'
 

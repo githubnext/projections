@@ -429,6 +429,24 @@ test('the toolbar, stage and summary bar lie flat, edge to edge, under the heade
   expect(measured.frame.past).toBeGreaterThanOrEqual(1)
 })
 
+test("in the Copilot app's canvas, the rules are the app's own divider, and the pane labels lie flat like the header", async ({page}) => {
+  await openCanvas(page)
+  expect((await control('control/show', {mode: 'side-by-side'})).status).toBe(200)
+  await page.evaluate(() => {
+    const style = document.createElement('style')
+    style.textContent =
+      ':root { --background-color-default: #0d1117; --border-color-default: #3d444d; --text-color-default: #e6edf3; --text-color-muted: #9198a1; --color-focus-outline: #1f6feb; }'
+    document.head.prepend(style)
+    document.documentElement.setAttribute('data-color-mode', 'dark')
+  })
+  const band = page.locator('.ph-pane-label[data-pane-band=""]').first()
+  await expect(band).toBeVisible()
+  await expect(page.locator('.pi-viewer-header')).toHaveCSS('border-bottom-color', 'rgb(61, 68, 77)')
+  await expect(band).toHaveCSS('background-color', 'rgb(13, 17, 23)')
+  await expect(band).toHaveCSS('border-bottom-color', 'rgb(61, 68, 77)')
+  await expect(band).toHaveCSS('color', 'rgb(230, 237, 243)')
+})
+
 test("in the Copilot app's canvas, the renderer's stage, text and families are the app's, and follow its theme", async ({page}) => {
   await openCanvas(page)
   /** The shown renderer frame's stage, text and font, as it paints them. */

@@ -286,8 +286,8 @@ for (const colorMode of ['light', 'dark'] as const)
     // The sorts put both an unchanged or neutral row and a changed one under the heading.
     expect([...firsts].some(change => change === 'removed' || change === 'added')).toBe(true)
 
-    // A focused heading over a hovered row, unchanged, neutral or changed: the heading still wins. Read the line's
-    // exact pixel, as the hovered row's ring is drawn beside it.
+    // A focused heading over a row at rest, unchanged, neutral or changed: the heading still wins. (A ringed row's ring
+    // replaces its own edge while it shows, the heading's rule included; the ring-pixels suite holds that.)
     for (const [sort, expected] of [
       ['comment:ascending', 'unchanged'],
       ['code:descending', 'modified'],
@@ -302,7 +302,7 @@ for (const colorMode of ['light', 'dark'] as const)
       await stage.measure('settle')
       await page.keyboard.press('Shift')
       await stage.frame.getByRole('button', {name: 'Language'}).focus()
-      await stage.frame.locator('.pk-table > [data-entity-id]').first().hover()
+      await page.mouse.move(0, 0)
       await stage.measure('settle')
       const {first, points} = await stage.frame.locator('body').evaluate(headingLines)
       expect(first, sort).toBe(expected)
@@ -313,6 +313,6 @@ for (const colorMode of ['light', 'dark'] as const)
         const at = points[index]!.across === 'y' ? points[index]!.y : points[index]!.x
         return line[Math.floor(at * scale) - Math.floor((at - 1) * scale)]
       })
-      expect(exact[0], `${sort}: a focused heading's rule over a hovered ${first} row`).toEqual(exact[2])
+      expect(exact[0], `${sort}: a focused heading's rule over a ${first} row`).toEqual(exact[2])
     }
   })

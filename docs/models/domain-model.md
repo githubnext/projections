@@ -1,31 +1,30 @@
 # Domain model and vocabulary plan
 
-Status: **adopted**. These decisions are implemented by protocol version 0, the
-native CLI, the built-in and WebAssembly comparators, the sandboxed renderer
-host and the built-in renderers. The [guide](../guides/how-it-works.md) is the
-user-facing account;
+Status: **adopted**. These decisions are implemented across protocol version 0,
+the native CLI, the built-in and WebAssembly comparators, the sandboxed renderer
+host, and the built-in renderers. For a user-facing overview, start with the
+[guide](../guides/how-it-works.md). See
 [mapping from the previous implementation](#mapping-from-the-current-implementation)
-records how the earlier vocabulary was replaced, and
-[remaining bounded questions](#remaining-bounded-questions) lists open work.
+for how earlier terms were renamed, and
+[remaining bounded questions](#remaining-bounded-questions) for open items.
 
 ## Goals
 
-The open-source product needs a domain model that is precise enough for external
-implementers and plain enough for users who only choose a view on a pull
-request. Each term should have one meaning, avoid strong collisions with common
-developer tools, and describe a responsibility rather than a particular
-presentation. In particular, nothing in the model may assume a visual
-presentation: every result must be presentable to people who don't rely on
-vision or motion.
+Projections needs a vocabulary precise enough for people building custom
+extractors or renderers, yet plain enough for someone just picking a view on a
+pull request. Every term should have a single clear meaning, steer clear of
+names already overloaded in everyday dev tools, and describe a responsibility
+rather than a visual format — nothing in the model should assume sight or
+motion.
 
 ## Core decisions
 
 ### Showing one revision is a complete use
 
-Viewing a single revision, such as the current state of the default branch, is a
-complete and valuable use of Projections. Comparing two revisions is a core
-feature built on top of that, not a prerequisite. Documentation, CLI design and
-renderer contracts lead with the single-revision case.
+Inspecting a single revision — like the current state of your default branch —
+is a complete, useful workflow on its own. Comparing two revisions builds on top
+of it rather than being a prerequisite, so our docs, CLI, and renderer contracts
+all lead with the single-revision case.
 
 ```
   revision ──▶ extractor ──▶ extraction ──▶ renderer
@@ -54,13 +53,13 @@ renderer contracts lead with the single-revision case.
 | **Engine** | The shared Rust core that validates, normalizes, canonicalizes and checks documents in native and Wasm builds. |
 | **Inspector** | The tool for developing and debugging extractors, comparators and renderers, hosted by the VS Code extension. |
 
-The program names describe the job; the document names describe the result.
-`extractor → extraction` and `comparator → comparison` follow the same pattern.
+Program names describe the job, and document names describe the output —
+`extractor → extraction` and `comparator → comparison` follow the same pairing.
 
-Schemas are an ordinary technical concept, not a domain concept. The system has
-an **extraction schema** and a **comparison schema**, each published as JSON
-Schema. An extraction's `schema` field selects the domain schema, such as
-`graph/v0` or `api/v0`, whose additional rules apply to its contents.
+Schemas stay ordinary technical infrastructure rather than domain jargon. The
+system publishes an **extraction schema** and a **comparison schema** as JSON
+Schema. An extraction's `schema` field picks a domain schema (like `graph/v0` or
+`api/v0`) whose extra rules validate its contents.
 
 ### Rejected names
 
@@ -82,17 +81,17 @@ Schema. An extraction's `schema` field selects the domain schema, such as
 | Reconciler | Collides with React's reconciler, and renderers are React components today. |
 | Transition | Strongest alternative for the comparison document, but suggests animation. |
 
-[Extension points](domain-model/extension-points.md) covers what customers can
-replace (any of a projection's three components) and the rules every component
-follows: first-party components get no privileges, and determinism and
-authority.
+See [Extension points](domain-model/extension-points.md) for which components
+teams can replace and the rules every component obeys (no special privileges for
+first-party components, plus determinism and authority).
 
 ## Comparisons
 
 ### What a comparator decides
 
-Explaining a change has four parts. The first three are shared meaning and
-belong to the comparator; the last is presentation and belongs to renderers.
+Explaining a change involves four concerns. The first three carry shared meaning
+and belong to the comparator; the fourth is presentation and belongs to
+renderers.
 
 | Concern        | Example                                              | Owner      |
 | -------------- | ---------------------------------------------------- | ---------- |
@@ -101,112 +100,109 @@ belong to the comparator; the last is presentation and belongs to renderers.
 | Ordering       | Present the most widely used package first           | Comparator |
 | Interpolation  | Node movement, edge routing, fades                   | Renderer   |
 
-Every renderer presents the same comparison, so a graph, a table and a text
-summary always agree on what changed. A comparison never contains positions,
-colors or timing.
+Because every renderer consumes the same comparison, a graph, table, and text
+summary always agree on what changed. Comparisons never store coordinates,
+colors, or animation timing.
 
-The ordering behavior in the prototype's `Sequencer` becomes part of the default
-comparator rather than a separate component.
+The ordering logic from the earlier `Sequencer` prototype folds into the default
+comparator instead of living as a separate component.
 
 ### Relationship to infrastructure planning
 
-Comparisons resemble Terraform plans and ARM what-if results: match resources by
-identity, classify changes and order them. The analogy is useful in
-documentation, with one important difference. Infrastructure plans are
-prescriptive: their order must be correct for execution to succeed. A comparison
-is explanatory: it describes a change that has already happened, and its order
-exists only for comprehension. A poorly ordered comparison is confusing, never
-destructive. This is why comparators can be customer code.
+Comparisons look a lot like Terraform plans or ARM what-if results: match
+resources by identity, classify each change, and put them in order. The analogy
+helps when explaining the model, with one big difference. Infrastructure plans
+are prescriptive — get the order wrong and the deployment breaks. A comparison
+is purely explanatory — it describes a change that already happened, and its
+order only serves human understanding. A bad order is confusing, never
+destructive, which is why comparators can safely be user-supplied.
 
-Borrow the concepts: stable addresses, explicit moves (`previousIds`), action
-categories and dependency ordering. Don't borrow the vocabulary: "plan" and
-"apply" imply execution.
+We borrow the useful ideas (stable addresses, explicit moves via `previousIds`,
+action categories, dependency ordering) without borrowing words like "plan" or
+"apply" that imply execution.
 
 ### Comparisons are computed at viewing time
 
-Users choose which two extractions to compare while viewing: the base and the
-latest push, only the changes since the push they last reviewed, two commits in
-a branch's history, or two saved extractions in the Inspector. The number of
-possible pairs grows quadratically, so comparisons can't be precomputed in CI.
+Reviewers choose which pair of revisions to compare on the fly: base vs. head,
+changes since their last review, any two commits on a branch, or two saved
+extractions in the Inspector. Since the number of pairs grows quadratically, CI
+can't precompute them all.
 
-**Decision: extractions are produced ahead of time by the runner; comparisons
-are computed on demand wherever they are viewed.** Extractors need repository
-access and ecosystem toolchains, so they run in CI or locally. A comparator only
-needs two JSON documents, so it can run anywhere.
+**Extractions are produced ahead of time by the runner; comparisons are computed
+on demand wherever they are viewed.** Extractors need the repo and its
+toolchains, so they run in CI or locally. Comparators only need two JSON
+documents, so they can run anywhere.
 
 ### Comparators are data, interpreted in a sandbox
 
 A comparator is a pure function: two extractions in, one comparison out. A
-custom comparator is a **comparator file** (`<name>.comparator.yaml`): YAML
-identity passes, classifications, step operations and metadata written in CEL,
-layered over the default comparator. Comparator files are data, not programs:
-the rules interpreter, `rules.wasm`, a WebAssembly module with no imports, runs
-them with no files, network, clock or randomness, under a deterministic cost
-budget. The Rust CLI and servers run it in an embedded WebAssembly interpreter
-(wasmi); browsers run it in a worker. Neither requires Node.
+custom comparator is a **comparator file** (`<name>.comparator.yaml`) — YAML
+identity passes, classifications, step operations, and metadata written in CEL,
+layered over the default comparator. Comparator files are data rather than
+arbitrary code: the rules interpreter (`rules.wasm`, a zero-import WebAssembly
+module) runs them with no filesystem, network, clock, or randomness under a
+fixed cost budget. The Rust CLI and servers execute it in an embedded Wasm
+interpreter (wasmi), while browsers run it in a worker — neither needs Node.
 
-**Comparator files only.** Declarative comparator files are the only custom
-comparators; the JavaScript and WebAssembly comparators were removed once they
-landed, because comparators must run in production contexts (client and server)
-that show pull requests. A program from a repository can't run there; data an
-interpreter checks and bounds can. See
-[Custom comparators](../design/declarative-comparators.md#comparator-files-only).
+**Comparator files only.** Declarative comparator files are the only supported
+custom comparator format. Once they landed, we removed JavaScript and Wasm
+custom comparators because comparators must run safely in production client and
+server contexts displaying pull requests — untrusted repo code can't run there,
+whereas bounded, validated data can (see
+[Custom comparators](../design/declarative-comparators.md#comparator-files-only)).
 
-- **The default comparator runs in the same sandbox.** It is the Engine's
-  existing comparison compiled to `default-comparator.wasm`, which every host,
-  the CLI included, runs in the comparator runtime. A comparator file adjusts
-  its result: it pairs what it left unmatched, classifies changes and reorders
-  steps.
-- **Running a comparator never requires trust.** It can't read files or reach
-  the network, so even a comparator defined by an untrusted revision is safe to
-  run. Only the question of whose explanation to use remains; see
-  [one projection definition, two revisions](#one-projection-definition-two-revisions).
-- **Comparisons are verifiable.** Comparators are deterministic, so a viewer can
-  rerun the comparator rather than trusting a saved comparison's claims, which
-  preserves a property the current artifacts already have.
-- **Execution is bounded.** The host limits memory and execution steps in both
-  the CLI and the browser, and reports a comparator that exceeds them as a
-  failure rather than falling back to another comparison.
-- **Authoring.** A custom comparator is one file, with nothing to build or
-  install, checked against declared types when it loads, with every problem at
-  its line and column. Logic that needs a compiler belongs in the extractor, as
-  facts in `data`; a generic operation comparator rules can't express belongs in
-  the interpreter's standard library. A custom comparator's digest covers its
-  meaning (not its comments or layout) and the interpreter's language.
+- **The default comparator uses the same sandbox.** It is the Engine's
+  comparison compiled to `default-comparator.wasm`, run inside the comparator
+  runtime by every host including the CLI. Custom comparator files refine its
+  output by pairing unmatched items, classifying changes, and reordering steps.
+- **No trust required.** Because a comparator can't touch files or the network,
+  even one from an untrusted revision is safe to run. The only policy question
+  is whose explanation to display (see
+  [one projection definition, two revisions](#one-projection-definition-two-revisions)).
+- **Verifiable by rerunning.** Since comparators are deterministic, any viewer
+  can recompute a comparison to verify a saved artifact rather than taking its
+  claims on faith.
+- **Bounded execution.** Hosts enforce memory and step limits in both the CLI
+  and browsers, surfacing a limit breach as an explicit failure rather than
+  silently falling back.
+- **Lightweight authoring.** A custom comparator is a single file with no build
+  or install step, type-checked on load with line-and-column diagnostics. Logic
+  that needs a compiler belongs in the extractor (as facts in `data`); reusable
+  generic operations belong in the interpreter's standard library. A
+  comparator's digest hashes its semantics (ignoring comments and formatting)
+  plus the interpreter language version.
 
 ### Integrity
 
-- The Engine validates every comparison against both extractions: references
-  must exist, every change appears in exactly one step, and statuses must be
-  consistent with the data.
-- A comparison records both extractions and the comparator's digest.
-- Extractions compared with each other must come from the same projection
-  definition; see below.
+- The Engine validates every comparison against both extractions: every
+  referenced entity must exist, every change must appear in exactly one step,
+  and statuses must match the underlying data.
+- Each comparison records both extraction digests and the comparator's digest.
+- Two extractions can only be compared if they came from the same projection
+  definition (see below).
 
 ### API design work, not blockers
 
-- **Reverse order.** A comparator may supply one order, which the runtime
-  reverses when the comparison is played backward. Advanced comparators may
-  declare an ordering strategy or supply an explicit reverse order.
-- **Splits and merges.** The comparison schema needs many-to-many
-  correspondence, beyond today's one-to-one `previousIds`.
+- **Reverse order.** By default, playing a comparison backward reverses the
+  comparator's step order. Later, advanced comparators may declare an ordering
+  strategy or an explicit reverse order.
+- **Splits and merges.** The comparison schema will eventually support
+  many-to-many correspondence beyond today's one-to-one `previousIds`.
 
 ## One projection definition, two revisions
 
-A pull request can change a projection's definition, the code of its custom
-components, or whether the projection exists at all. If each revision used its
-own definition, a comparison would mix changes in the code with changes in the
-projection, and the single comparator invocation would have no well-defined
-version.
+A pull request can edit a projection's definition, its custom component code, or
+add a brand-new projection. If each side used its own definition, the diff would
+blur code changes with projection changes, and there wouldn't be one clear
+comparator version to run.
 
-**Decision: a comparison applies one projection definition, with one version of
-its component code, to two revisions.** Because users choose pairs
-interactively, each extraction records the digest of the definition and
-component code that produced it. Projections only compares extractions with
-matching digests and explains any mismatch rather than comparing them. The
-extractor request already separates the program from the code it examines
-(`request.repository.root`), so an extractor from one revision can examine
-another.
+**A comparison always applies one projection definition — and one version of its
+component code — to both revisions.** Because users pick pairs interactively,
+each extraction records the digest of the definition and component code that
+produced it. Projections only compares extractions whose digests match, and
+explains any mismatch instead of forcing a misleading diff. The extractor
+request already separates the extractor program from the repo root it inspects
+(`request.repository.root`), so one revision's extractor can inspect another.
 
 <!-- prettier-ignore -->
 | Definition source | Benefit | Drawback |
@@ -215,40 +211,40 @@ another.
 | Head | Shows the projection as changed by the pull request | The author controls the explanation of their own change |
 | Each side's own | Simple | Mixes code changes with projection changes |
 
-Using the base matches how GitHub evaluates other review policy, such as
-`CODEOWNERS`, branch protection and `pull_request_target`.
+Defaulting to the base matches how GitHub evaluates `CODEOWNERS`, branch
+protection, and `pull_request_target`.
 
-Consequences:
+A few things follow from this:
 
-- When a pull request changes a projection definition or its component code,
-  Projections says so explicitly and offers a head-defined comparison, which
-  requires trusting the head.
-- Custom components declare their source paths. Projections can't infer which
-  files a program imports, and declared paths are needed both to detect changes
-  and to record provenance.
-- For extractors, trust becomes two questions: is the extractor's code trusted,
-  and does running it execute the code being examined? A trusted base extractor
-  that only reads `package.json` can safely examine an untrusted fork's pull
-  request. An extractor that imports a Django application still executes that
-  code. Comparators are sandboxed, so for them only the question of whose
-  explanation to use remains.
-- A projection added by a pull request has no base definition. Show the head
-  extraction alone, or compare using an explicitly trusted head definition.
-- Developing an extractor becomes the mirror image of reviewing a pull request:
-  keep the revision fixed and compare two versions of the projection definition.
+- When a PR modifies a projection definition or component code, Projections
+  calls it out explicitly and offers a head-defined comparison (which requires
+  trusting the head).
+- Custom components must declare their source paths, since Projections can't
+  reliably infer imports, and those paths are needed for both change detection
+  and provenance.
+- Extractor trust splits into two separate questions: is the extractor code
+  trusted, and does running it execute the target repo's code? A trusted base
+  extractor that only parses `package.json` can safely inspect an untrusted fork
+  PR, whereas one that imports a Django app still executes untrusted code.
+  Comparators are sandboxed, so only the choice of whose explanation to show
+  remains.
+- A projection introduced in a PR has no base definition; show the head
+  extraction alone, or compare with an explicitly trusted head definition.
+- Developing an extractor is the mirror image of reviewing a PR: hold the code
+  revision constant and compare two versions of the projection definition.
 
-Open: whether the local CLI also defaults to the base definition (recommended,
-for one consistent rule) or to the working tree's definition.
+Still open: whether the local CLI should default to the base definition
+(recommended for consistency) or to the working tree's definition.
 
 ## Renderers
 
-Renderers contain substantial, carefully iterated logic: layout, edge routing,
-staged motion and responsive behavior. Declarative renderers are not sufficient.
+Good renderers need real code for layout, edge routing, staged motion, and
+responsive sizing — declarative specs aren't enough.
 
-**Decision: custom renderers run as sandboxed frames that communicate with the
-host over a narrow message protocol**, similar to Azure DevOps extensions. The
-current renderer props are already a narrow interface, so the protocol is
-largely those props sent as messages.
+**Custom renderers run inside sandboxed frames that talk to the host over a
+narrow message protocol**, much like Azure DevOps extensions. Because existing
+renderer props are already narrow, the protocol essentially serializes those
+props as messages.
 
 <!-- prettier-ignore -->
 | Direction | Messages |
@@ -256,94 +252,83 @@ largely those props sent as messages.
 | Host to renderer | Extraction, or both extractions and the comparison; progress; change highlighting; selection; theme tokens and color mode; reduced-motion preference; locale; viewport size |
 | Renderer to host | Ready; requested height; selection changed; step boundaries; request to open a file or line; acknowledgement of rendered progress; errors |
 
-Stricter than Azure DevOps:
+We enforce stricter rules than Azure DevOps:
 
-- **No network access by default.** Extractions can describe private code. Use a
-  separate origin, `sandbox="allow-scripts"` and a content security policy with
+- **No network access by default.** Extractions can describe private code, so
+  renderers run on a separate origin with `sandbox="allow-scripts"` and
   `connect-src 'none'`.
-- **Host-owned alternatives are always available.** A sandboxed renderer can't
-  steal data, but it can be wrong or misleading. The built-in table and text
-  presentations remain available beside any custom renderer, which also keeps
-  every projection accessible. The host labels which renderer is active.
-- **Renderer source is policy.** Renderers in the repository just work; a
-  renderer that only a pull request's head supplies needs the same explicit
-  trust as head extractors. The sandbox stops network access but not a frame
-  navigating itself, which could carry data out in a URL. Without trust, the
-  host shows the built-in renderer for the schema, or its table and text views,
-  with a notice. Installed packages and organization allow-lists remain open.
+- **Host-owned fallbacks are always available.** A sandboxed renderer can't
+  exfiltrate data, but it could still be buggy or misleading. Built-in table and
+  text views remain available alongside every custom renderer (keeping every
+  projection accessible), and the host always labels which renderer is active.
+- **Renderer provenance is policy.** Renderers already in the repo just work; a
+  renderer introduced only on a PR's head requires explicit trust, just like
+  head extractors — a sandbox blocks fetch calls, but not top-level navigation
+  that could leak data in a URL. Without trust, the host falls back to the
+  built-in renderer or table/text views with a notice. Installed packages and
+  org allow-lists remain open.
 
-Consequences:
+This design has three practical consequences:
 
-- Built-in renderers implement the same protocol and nothing else: each is a
-  static bundle built with the public renderer SDK (and the public renderer
-  kit), served with the same content security policy into the same
-  `sandbox="allow-scripts"` frame, receiving the same messages, and held to the
-  same checks through the public `@githubnext/projections/testing`. There is no
-  in-process adapter. This proves the protocol is sufficient and prevents
-  first-party renderers from relying on privileges third-party renderers lack.
-  What differs is provenance, not capability: a built-in ships with the host, so
-  it needs no trust, can be the fallback for a schema, and is the only kind a
-  hosted view shows, since it never runs code from artifacts.
-- Rendering becomes asynchronous. Progress messages are small and extractions
-  are sent once, so scrubbing stays practical, but tests wait for the renderer's
-  acknowledgement of rendered progress.
-- Focus and tab order across the frame boundary need deliberate design.
+- Built-in renderers use the exact same protocol and nothing else. Each ships as
+  a static bundle built with the public renderer SDK and kit, loads into the
+  same `sandbox="allow-scripts"` frame under the same CSP, receives the same
+  messages, and is tested via `@githubnext/projections/testing` — no in-process
+  shortcuts. The only difference is provenance: a built-in ships with the host,
+  so it needs no trust, can serve as a schema fallback, and is the only kind
+  hosted views run (since hosted views never execute code from artifacts).
+- Rendering is asynchronous. Progress updates are tiny and extractions are sent
+  once so scrubbing stays smooth, while tests wait for the renderer to
+  acknowledge rendered progress.
+- Focus management and tab order across the frame boundary require deliberate
+  handling.
 
 ## Runtime requirements
 
-Projections is a single standalone executable. It never requires Node.
+Projections ships as a single standalone executable and never requires Node.
 
-**Decision: every built-in extractor requires only the Projections executable
-and the toolchain the examined project already uses.** An Entity Framework Core
-extractor may require .NET, a Django extractor Python and a Go extractor Go,
-because those projects already need them. Node is required only for projects
-that are already Node projects, and then only the project's own installation.
-Custom extractors follow the same principle naturally, since customers choose
-their language.
+**Every built-in extractor needs only the Projections binary and the toolchain
+the inspected project already uses.** An EF Core extractor can expect .NET,
+Django can expect Python, and Go can expect Go, because those projects already
+have them. Node is only needed for Node projects, using the project's own
+installation. Custom extractors follow the same pattern since authors pick their
+own language.
 
-Helpers that run inside an ecosystem's toolchain ship with the executable as
-self-contained files. They are never packages that customers must install
-separately, and they don't download dependencies while extracting. They stay
-small by using the versions the user already has installed (the SDK's compiler,
-the application's own libraries) rather than bundling their own copies, because
-those versions are what the project actually builds with.
+Ecosystem helpers ship embedded in the executable as self-contained files — no
+separate packages to install and no downloads during extraction. They stay small
+by using the user's already-installed compiler and libraries rather than
+bundling their own copies, ensuring results match what the project actually
+builds with.
 
-Extractors are not network or filesystem sandboxed. An extractor, the ecosystem
-tools it runs and the repository code those tools execute (build targets, source
-generators, application startup) run with the user's privileges. `--trust` is
-the control: native extraction runs only when the user explicitly trusts the
-repository.
+Extractors are not filesystem- or network-sandboxed. An extractor, the tools it
+invokes, and any repo code those tools run (build targets, source generators,
+app startup) execute with the user's privileges. `--trust` is the gate: native
+extraction only runs when the user explicitly trusts the repository.
 
-How the built-in extractors meet this:
+Here is what each built-in extractor needs:
 
-- Repository map, workspace dependencies, code statistics, an existing SCIP
-  index, GitHub Actions jobs, Prisma schemas, Rails schemas and routes,
-  pre-exported Cargo/NuGet/Terraform/schema data: The Projections executable
-  only. Projections parses Prisma Schema Language itself, a deliberate exception
-  because Prisma has no stable public schema API, and reads Rails'
-  `db/schema.rb` and routing DSL statically, so history needs no revision's
-  gems.
-- TypeScript public API: Node and the repository's own `typescript`
-  installation, through one self-contained helper script shipped with the
-  executable.
-- Go interfaces: Go 1.24 or later; the helper uses only the Go standard library,
-  so building it needs no network access.
-- .NET API, dependency injection and EF Core: The project's .NET SDK 8.0.100+.
-  The helper ships prebuilt as about 110 KB of first-party code: it replays the
-  project's own compiler invocation with the SDK's Roslyn and reads dependency
-  injection and EF Core from the application's build, so nothing is bundled or
-  restored for it at extraction time. Application restores follow the
-  repository's NuGet configuration and otherwise reuse the user's NuGet global
-  packages folder.
-- Cargo, Terraform, Django without pre-exported input: Cargo, Terraform or
-  Python.
-- SCIP file references: The project's own SCIP indexer, such as
-  `scip-typescript` or `rust-analyzer`.
-- Command output: Whatever the configured commands run.
+- **Projections binary only:** repository map, workspace dependencies, code
+  statistics, existing SCIP indexes, GitHub Actions jobs, Prisma schemas, Rails
+  schemas and routes, and pre-exported Cargo/NuGet/Terraform/schema data. We
+  parse Prisma Schema Language natively (since Prisma has no stable public
+  schema API) and read Rails `db/schema.rb` and routing DSL statically so
+  historical commits don't need old gems installed.
+- **TypeScript public API:** Node and the repository's own `typescript`
+  installation, driven by a single self-contained helper embedded in the binary.
+- **Go interfaces:** Go 1.24 or later, using a helper built purely on the Go
+  standard library so no network access is needed.
+- **.NET API, DI, and EF Core:** the project's .NET SDK 8.0.100+. The prebuilt
+  helper is roughly 110 KB of first-party code that replays the project's
+  compiler invocation with the SDK's Roslyn and reads DI/EF Core from the app
+  build, requiring no extra bundles or restores at extraction time (app restores
+  follow the repo's NuGet config and reuse the user's global NuGet cache).
+- **Cargo, Terraform, Django (live):** Cargo, Terraform, or Python.
+- **SCIP file references:** the project's own SCIP indexer (such as
+  `scip-typescript` or `rust-analyzer`).
+- **Command output:** whatever commands the definition configures.
 
-Renderers are browser code. Built-in renderers are compiled into the
-executable's embedded assets; custom renderers are static files. Neither needs
-Node at run time.
+Renderers are browser code — built-ins are embedded in the binary and custom
+renderers are static bundles — so neither needs Node at runtime.
 
 ## CLI
 
@@ -356,37 +341,39 @@ Node at run time.
 | `projections compare <base>[..<head>] -p <projection>` | Run the extractor on both revisions, run the comparator and present the comparison. With one revision, compare it with the working tree. |
 | `projections serve --stdio` | The Inspector's backend, which the VS Code extension starts: a live preview of the working tree, a saved document (`--document`), or scenario fixtures (`--fixtures`) when developing renderers and comparators. |
 
-Verbs describe the user's goal, not the component: `extract` was rejected as a
-CLI verb, and `diff` was removed once the comparison noun was chosen. The
-projection is an option (`-p`), so positionals are always revisions, as in Git.
-Nouns that group actions are singular (`extractor list`, `bookmark run`), as in
-`gh`. Every command works from any directory in a checkout, and `-C DIR` names
-another. The full surface is in
-[the runner documentation](../runner/commands.md).
+CLI verbs match user intent rather than internal components — we rejected
+`extract` as a verb and dropped `diff` once we settled on "comparison." Passing
+the projection as an option (`-p`) keeps positional arguments purely for
+revisions, just like Git. Grouping nouns are singular (`extractor list`,
+`bookmark run`), matching `gh`. Commands work from any subdirectory in a
+checkout, and `-C DIR` targets another directory. See
+[the runner documentation](../runner/commands.md) for the full CLI surface.
 
 ## Documents and fields
 
-- Extractions use `entities` and `relationships`, matching the prose, instead of
-  `nodes` and `edges`.
-- The database domain schema is `database/v0`, avoiding `"schema": "schema/v0"`.
-- Saved extractions carry runner-added provenance. Extractors never write
-  provenance. A working-tree extraction records its base commit and is marked as
-  modified; hosted views that require a verifiable commit reject it.
+- Extractions use `entities` and `relationships` rather than `nodes` and
+  `edges`, matching the prose.
+- The database schema is named `database/v0` to avoid awkward strings like
+  `"schema": "schema/v0"`.
+- Runner-added provenance lives on saved extractions; extractors never emit
+  provenance themselves. Working-tree extractions record their base commit and
+  are flagged as modified so hosted views requiring a verifiable commit reject
+  them.
 - A comparison's `changes` lists only entities and relationships that were
-  added, removed, modified or renamed. `steps` groups change IDs in presentation
-  order.
+  added, removed, modified, or renamed, while `steps` groups change IDs in
+  presentation order.
 
-Renaming wire fields and schema values is a protocol change. It requires an
-explicit version and compatibility decision, as [the contracts](../contracts.md)
-already require for any wire-format change.
+Any rename to wire fields or schema values is a protocol change requiring an
+explicit version and compatibility decision, per
+[the contracts](../contracts.md).
 
 ## Hosted model
 
-A repository's own CI produces its projections; the Action reports them in the
-run's job summary (and, optionally, a pull request comment) and uploads them as
-an artifact, which **Projections: Open Artifact…** in VS Code opens. A hosted
-app (a separate service, not part of this repository) is a viewer of those
-documents. It has no extractor, runner or collection step of its own.
+Each repository's CI produces its own projections. The GitHub Action summarizes
+them in the job summary (and optionally a PR comment) and uploads them as an
+artifact, which you can open locally via **Projections: Open Artifact…** in VS
+Code. A hosted app (a separate service outside this repo) simply views those
+artifacts — it has no extractor, runner, or collection pipeline of its own.
 
 ```
   pull_request / push ──▶ GitHub Action (repository CI) ──▶ `projections` Actions artifact
@@ -394,34 +381,35 @@ documents. It has no extractor, runner or collection step of its own.
   signed-in person ──▶ hosted app ──▶ Actions API (user's token) ──┘ ──▶ verify ──▶ view
 ```
 
-- **Producer.** The GitHub Action runs the CLI in the repository's own workflow:
-  `compare --all <merge base>..<head> --definition base` for a pull request,
-  `show --all <commit>` for a push. Trust is the workflow author's decision
-  (`trust: true`), exactly as `--trust` locally. The artifact holds one saved
-  extraction or comparison per projection and a manifest
-  ([CI artifacts](../contracts/saved-documents.md#ci-artifacts)).
-- **Transport.** Actions artifacts, read through the Actions API with the
-  signed-in person's own token, so it reads only what they can read. Retention
-  is the repository's; an expired artifact is an explicit state, not an error or
-  an empty result. Nothing is uploaded to, stored by or cached in the hosted
-  app.
-- **Verification.** Before display: GitHub's run and pull request facts bind the
-  artifact (repository, event, head commit, run, merge base), byte digests bind
-  the files, and the shared Engine loader verifies every document. Any mismatch
-  rejects the artifact as a whole.
-- **Presentation.** Every projection, with the built-in renderers in sandboxed
-  frames and the host's table and text views. Artifact-named renderers are never
-  loaded. Failed projections show their diagnostics.
-- **Local documents.** Local, unpublished documents belong in the Inspector (in
-  VS Code, **Projections: Open Artifact…**), not the hosted app.
+- **Producer.** The GitHub Action invokes the CLI inside the repo's workflow:
+  `compare --all <merge base>..<head> --definition base` for pull requests and
+  `show --all <commit>` for pushes. Workflow authors opt into trust via
+  `trust: true`, mirroring `--trust` locally. The uploaded artifact contains one
+  saved extraction or comparison per projection plus a manifest (see
+  [CI artifacts](../contracts/saved-documents.md#ci-artifacts)).
+- **Transport.** The hosted app fetches Actions artifacts through the Actions
+  API using the viewer's own token, so people only see what they already have
+  access to. Retention follows the repository's settings (an expired artifact
+  renders as an explicit state, not an error or empty diff), and nothing is
+  stored or cached by the hosted app.
+- **Verification.** Before rendering anything, GitHub's run and PR metadata bind
+  the artifact (repo, event, head commit, run, merge base), byte digests bind
+  the files, and the shared Engine loader validates every document. Any mismatch
+  rejects the whole artifact.
+- **Presentation.** Every projection renders with built-in renderers in
+  sandboxed frames alongside host table and text views. Artifact-supplied
+  renderers are never executed, and failed projections display their
+  diagnostics.
+- **Local documents.** Unpublished local documents belong in the Inspector
+  (**Projections: Open Artifact…** in VS Code), not the hosted app.
 
 ## Repository structure
 
-The repository is organized by domain component first; language only determines
-what is inside each directory. Built-in components are laid out exactly as a
-custom component would be, so they double as examples. Everything that ships, or
-that something shipped depends on, is in `packages/`; the repository's own
-tooling (its command line, scripts and Storybook) is in `tools/`.
+The repo is grouped by domain component first, with language details inside each
+folder. Built-in components follow the exact same layout as custom ones so they
+double as examples. Everything that ships (or that a shipped package depends on)
+lives under `packages/`; repo tooling (CLI, scripts, Storybook) lives under
+`tools/`.
 
 ```
 packages/
@@ -445,23 +433,22 @@ tools/            the repository's command line, scripts and Storybook
 examples/  docs/
 ```
 
-Decisions:
+Key architectural rules:
 
-- **One crate per built-in extractor.** This mirrors one package per renderer
-  and keeps each extractor's code, helper, fixtures and documentation together.
+- **One crate per built-in extractor,** mirroring one package per renderer and
+  keeping each extractor's code, helper, fixtures, and docs together.
 - **No TypeScript embedding API.** `@githubnext/projections-runner` and the CLI
-  package's `runCli` export are deleted. The native CLI is the only
-  orchestration implementation; other programs invoke it or consume its
-  documents.
-- **Self-contained public root.** Nothing in the repository may depend on
-  anything outside it. Code outside may depend on Projections, never the
-  reverse. A check rejects any path or import that escapes the public root.
-- Dependencies point inward (paths relative to `packages/`): `schemas` ←
-  `engine` ← `extractors/sdk` ← `extractors` and `comparators` ← `cli`; the CLI
-  reaches extractors only through their process entrypoint, and the default
-  comparator and comparator files only in the comparator runtime; renderers
-  depend only on `renderers/sdk` and `renderers/kit`; `host` depends on the
-  renderer protocol, never on a specific renderer.
+  package's `runCli` export are gone; the native CLI is the sole orchestrator,
+  and other tools either shell out to it or read its documents.
+- **Self-contained public root.** Nothing in this repo may depend on anything
+  outside it (external code may depend on Projections, never the reverse), and a
+  boundary check rejects any escaping path or import.
+- **Inward dependencies** (paths relative to `packages/`): `schemas` ← `engine`
+  ← `extractors/sdk` ← `extractors` and `comparators` ← `cli`. The CLI talks to
+  extractors only via their process entrypoint and runs comparators only inside
+  the comparator runtime. Renderers depend solely on `renderers/sdk` and
+  `renderers/kit`, and `host` depends on the renderer protocol rather than any
+  specific renderer.
 
 ## Mapping from the current implementation
 
@@ -484,36 +471,36 @@ Decisions:
 
 ## Deferred
 
-- **Static sites.** v0 has no static site export: the `projections site`
-  command, `projections pr --directory` and the `projections.site` and
-  `projections.review-site` catalogs were removed. Reviewers use the Inspector,
-  a hosted view or a saved extraction or comparison opened with the VS Code
-  extension's **Projections: Open Artifact…**. A static export may return after
-  v0 as a published review.
+- **Static sites.** v0 intentionally drops static site export
+  (`projections site`, `projections pr --directory`, and the `projections.site`
+  and `projections.review-site` catalogs were removed). Reviewers use the
+  Inspector, a hosted view, or saved documents opened with **Projections: Open
+  Artifact…** in VS Code. Static export may return after v0 as a published
+  review format.
 
 ## Remaining bounded questions
 
 - Durable hosted history beyond Actions artifact retention.
 - Ordering strategies and explicit reverse order in the comparison schema.
 - Many-to-many correspondence for splits and merges.
-- Local CLI default for the definition source; handling projections added by a
-  pull request.
+- Local CLI default for the definition source and handling projections added by
+  a PR.
 - How custom components declare source paths and accepted schemas.
-- Separate trust settings for component code and for executing examined code.
+- Separate trust settings for component code vs. executing examined repo code.
 - Configuration options for the default comparator.
-- The renderer message protocol, sandbox policy and allowed renderer sources.
-- Final CLI flags, file layout and provenance fields.
+- The renderer message protocol, sandbox policy, and allowed renderer sources.
+- Final CLI flags, file layout, and provenance fields.
 - Protocol versioning and migration for renamed fields.
 
 ## Next steps
 
-1. Reorganize the codebase around the extractor, comparator and renderer
+1. Reorganize the codebase around the extractor, comparator, and renderer
    boundaries.
-2. Specify the comparison schema, including ordering and correspondence, and the
-   comparator interface. Expose the Engine's comparison as the default
+2. Specify the comparison schema (including ordering and correspondence) and the
+   comparator interface, and expose the Engine's comparison as the default
    comparator module.
-3. Specify the renderer frame protocol and move a built-in renderer onto it.
-4. Rename public APIs, CLI commands and documentation, with a protocol version
-   change for wire fields.
-5. Close the runtime gaps so no built-in extractor requires Projections' own npm
-   packages.
+3. Specify the renderer frame protocol and migrate a built-in renderer onto it.
+4. Rename public APIs, CLI commands, and docs alongside a protocol version bump
+   for wire fields.
+5. Close remaining runtime gaps so no built-in extractor requires Projections'
+   own npm packages.

@@ -2,19 +2,19 @@
 
 Status: **adopted** for `api/v0`. Implemented by the
 [`api-compatibility` comparator](../../packages/comparators/api-compatibility),
-the `contract` facts the `dotnet-public-api`, `typescript-public-api`,
-`rust-public-api`, `go-public-api` and `swift-public-api` extractors write
-(Swift's own rules aren't modeled yet; its changes get the rules every ecosystem
-shares), and the [`api` renderer](../../packages/renderers/api).
+the `contract` facts produced by `dotnet-public-api`, `typescript-public-api`,
+`rust-public-api`, `go-public-api`, and `swift-public-api` (Swift's
+language-specific rules aren't modeled yet, so its changes use the shared
+rules), and the [`api` renderer](../../packages/renderers/api).
 
-A reviewer looking at an API projection wants one answer before any other:
-**does this change break the people who use the API?** This document decides
-where that answer is computed, what it may say, and how honest it is about what
-it can't know.
+When reviewing an API projection, there is one question you want answered first:
+**does this change break anyone using the API?** This document explains where
+that answer is computed, what it reports, and where it draws the line on what it
+can't know.
 
 ## The answer: a classification per change
 
-Every changed declaration gets one **compatibility level**:
+Every changed declaration receives one **compatibility level**:
 
 <!-- prettier-ignore -->
 | Level | Meaning | Typical version bump |
@@ -24,24 +24,24 @@ Every changed declaration gets one **compatibility level**:
 | `compatible` | A change that neither breaks consumers nor adds surface (a narrowed return type, a nullability annotation) | Patch |
 | `unknown` | The rules can't decide; a person has to look | — |
 
-A breaking classification names **how** it breaks when that is meaningful:
-`binary` (code compiled against the old revision fails against the new one
-without recompiling) and `source` (code fails to compile, or compiles with a
-different meaning). Only .NET has a binary compatibility boundary that differs
-from its source boundary; TypeScript, Rust and Go consumers are always
-recompiled from source, so their breaks carry no sub-kind.
+When relevant, a breaking classification also says **how** it breaks: `binary`
+(code compiled against the old revision fails against the new one without
+recompiling) or `source` (code fails to compile or compiles with a different
+meaning). Only .NET has a binary compatibility boundary distinct from source;
+TypeScript, Rust, and Go consumers recompile from source, so their breaks carry
+no sub-kind.
 
-Every classification carries a short **reason** in plain language ("Return type
-changed from `string` to `int`"), and names the **rule** that produced it: an
-official diagnostic ID (`CP0002`), a section of an official compatibility
-reference (`enum-variant-new`) or, where no official name exists, our own
+Each classification includes a plain-language **reason** ("Return type changed
+from `string` to `int`") and the **rule** behind it — an official diagnostic ID
+(`CP0002`), an anchor from an official compatibility reference
+(`enum-variant-new`), or our own rule name when none exists
 (`required-parameter-added`).
 
 ## Where it is computed
 
 ### The official tools need both revisions at once
 
-Each ecosystem has an official or de facto compatibility checker:
+Most ecosystems have an official or de facto compatibility checker:
 
 <!-- prettier-ignore -->
 | Ecosystem | Tool | What it compares |
@@ -51,25 +51,25 @@ Each ecosystem has an official or de facto compatibility checker:
 | Rust | cargo-semver-checks, implementing the [Cargo SemVer reference](https://doc.rust-lang.org/cargo/reference/semver.html) | Two rustdoc JSON documents |
 | Go | `golang.org/x/exp/apidiff`, the Go team's tool | Two package export data sets |
 
-Every one of them is a **two-revision** program that runs natively. Projections
-deliberately has no place for such a program:
+Every one of these tools is a native **two-revision** program, and Projections
+intentionally has no slot for that:
 
-- **Extractors** see exactly one revision. That is what makes an extraction
-  deterministic, cacheable and reusable in any pairing: users pick the pair
-  while viewing (base and head, or the two most recent pushes), so the number of
-  pairs grows quadratically and can't be precomputed.
-- **Comparators** see both extractions, but are rules the engine interprets in a
-  sandbox, with no files, processes or network. They can't invoke `dotnet`,
-  `cargo` or `go`.
+- **Extractors** see only one revision at a time. That's what keeps extractions
+  deterministic, cacheable, and reusable in any pairing — reviewers pick which
+  two revisions to compare at viewing time (base vs. head, or the last two
+  pushes), and precomputing every pair doesn't scale.
+- **Comparators** see both extractions, but run as sandboxed rules with no
+  filesystem, process, or network access. They can't invoke `dotnet`, `cargo`,
+  or `go`.
 
-Running the tools would need a third component kind, a native, trusted,
-two-revision step computed ahead of time for a fixed pair. That contradicts
-viewing-time comparison and can't be verified by rerunning, so it was rejected.
+Supporting those tools directly would require a third component kind — a native,
+trusted, two-revision step precomputed for a fixed pair. That breaks
+viewing-time comparisons and can't be verified by rerunning, so we ruled it out.
 
 ### The decision: compiler facts per revision, official rules per comparison
 
-Classification is a **comparison-level** fact, so it belongs to a comparator.
-The work splits along the existing boundary:
+Because compatibility is a **comparison-level** judgment, it belongs in a
+comparator, split along the existing architecture:
 
 ```
   revision ──▶ extractor (the ecosystem's own compiler) ──▶ declarations + contract facts ─┐
@@ -77,61 +77,59 @@ The work splits along the existing boundary:
   revision ──▶ extractor (the ecosystem's own compiler) ──▶ declarations + contract facts ─┘
 ```
 
-1. **Extractors stay per-revision and deterministic.** Each `*-public-api`
-   extractor already asks the ecosystem's own compiler (Roslyn, the repository's
-   `tsc`, rustdoc, `go/types`) what the public API is. It now also writes each
-   declaration's **contract**: the facts the official tool's rules inspect, such
-   as accessibility, `virtual`, the full base-type chain, parameter names,
-   whether an interface member has a default implementation, whether a Rust enum
-   is `#[non_exhaustive]`, a Go struct's comparability or an interface's
-   unexported methods. These are facts about one revision, read from the
-   compiler, not inferred from text.
-2. **The comparator reproduces the official rules** over two revisions'
-   contracts. `api-compatibility` is an ordinary comparator file,
-   [`api-compatibility.comparator.yaml`](../../packages/comparators/api-compatibility/api-compatibility.comparator.yaml),
-   loaded exactly like a third party's; it has no privileges. It starts from the
-   default baseline (so correspondence and order are unchanged) and adds the
-   classification.
+1. **Extractors stay single-revision and deterministic.** Each `*-public-api`
+   extractor already asks the ecosystem's compiler (Roslyn, the repo's `tsc`,
+   rustdoc, `go/types`) for the public API. It also records each declaration's
+   **contract** — the compiler facts official compatibility rules inspect, like
+   accessibility, `virtual`, the full base-type chain, parameter names, default
+   interface implementations, Rust's `#[non_exhaustive]`, Go struct
+   comparability, or unexported interface methods. Everything comes from the
+   compiler for that single revision, never guessed from text.
+2. **The comparator applies the official rules** across the two contracts.
+   `api-compatibility` is a regular comparator file
+   ([`api-compatibility.comparator.yaml`](../../packages/comparators/api-compatibility/api-compatibility.comparator.yaml))
+   loaded with no special privileges. It layers classifications onto the default
+   baseline without altering correspondence or ordering.
 
-Why not per-declaration **fingerprints** (hashes of the binary-relevant and
-source-relevant shape) instead of facts? A hash says _that_ something changed,
-never _whether the change is safe_: adding an optional parameter and removing a
-required one change the same hash. The comparator needs the facts.
+Why not hash each declaration into binary- and source-relevant **fingerprints**?
+A hash only tells you _that_ something changed, never _whether it's safe_:
+adding an optional parameter and removing a required one both change the hash.
+The comparator needs the underlying facts.
 
-Why not have extractors embed the tool's per-revision input (a reference
-assembly, rustdoc JSON, apidiff export data) as extraction metadata? The
-comparator still couldn't run the tool over it, the inputs are large, and the
-rules would still have to be reimplemented.
+Why not embed raw tool inputs (reference assemblies, rustdoc JSON, apidiff
+export data) in extraction metadata? The sandboxed comparator still couldn't run
+the native tool, the blobs are huge, and we'd still have to reimplement the
+rules anyway.
 
-What this costs, honestly:
+Here are the tradeoffs, candidly:
 
-- The rules are **reproduced, not invoked**. Each ecosystem section below lists
-  exactly which official rules are reproduced and which are not. Where a change
-  falls outside them, the answer is `unknown`, never a guess.
-- **Hosted views** classify too: they run the comparator file from the pull
-  request's base in the sandboxed rules interpreter, so a pull request can't
-  change how it is judged.
-- A user can still run the official tool in CI beside Projections; nothing here
-  replaces it as a release gate.
+- The rules are **reproduced, not invoked**. Each ecosystem section below spells
+  out which official rules are covered and which aren't. Anything outside them
+  is marked `unknown`, never guessed.
+- **Hosted views** classify changes too, running the comparator file from the
+  PR's base revision in the sandboxed interpreter so a PR can't rewrite its own
+  compatibility rules.
+- Teams can still run the official tool in CI alongside Projections; this
+  doesn't replace it as a release gate.
 
 ## Model (`api/v0`)
 
 ### Declaration contract
 
-An `api/v0` entity may carry `data.contract`, an object of facts about the
-declaration. It is part of the entity's content: a contract change makes the
-declaration `modified` even when its displayed signature is unchanged, because
-the API did change (a base class gained a base, an interface lost its only
-unexported method). Extractors write only facts their compiler reports.
+An `api/v0` entity can carry a `data.contract` object of compiler facts. Because
+it is part of the entity's content, a contract change marks the declaration
+`modified` even if its printed signature looks identical (for example, when a
+base class gains a new base or an interface drops its only unexported method).
+Extractors only emit facts their compiler actually reports.
 
-The facts describe declarations, not languages: one model every ecosystem fills,
-defined in the [schema reference](../reference/schemas/api.md#contract) and
-checked by the Engine (a fact of the wrong type, or an unknown one, fails at its
-path). Each contract names its kind of declaration twice: `declaration`, one of
-the kinds every ecosystem shares (`class`, `interface`, `function`, `method`,
-`property`, `field`, `variant`, `constant` and so on), and `term`, the
-ecosystem's own word for it (Rust's `trait-method`, Go's `func`, .NET's
-`record class`); a change of `term` is a change of kind. The other shared facts:
+The contract describes declarations in language-neutral terms defined in the
+[schema reference](../reference/schemas/api.md#contract) and validated by the
+Engine (wrong types or unknown fields fail at their path). Every contract names
+its kind twice: `declaration` is the shared cross-language kind (`class`,
+`interface`, `function`, `method`, `property`, `field`, `variant`, `constant`,
+and so on), while `term` is the ecosystem's native word (Rust's `trait-method`,
+Go's `func`, .NET's `record class`). Changing `term` counts as a kind change.
+The remaining shared facts are:
 
 <!-- prettier-ignore -->
 | Fact | Meaning |
@@ -147,25 +145,24 @@ ecosystem's own word for it (Rust's `trait-method`, Go's `func`, .NET's
 | `supertypes` | What it derives from (`extends`) or implements (`implements`) |
 | `attributes` | Attributes or annotations as written; parameters and return values have their own |
 
-A type where values flow (`type`, a parameter's, `returns`) is `{text, union?}`:
-the language's text, and, when the extractor resolves them, its union
-constituents. Facts only one ecosystem's rules read are in `native`, an open
-object documented with each extractor below; no other ecosystem's rules read it.
-Booleans that are false and lists that are empty are left out.
+Types where values flow (`type`, parameter types, `returns`) take the shape
+`{text, union?}` — the language's rendered type text plus resolved union
+constituents when available. Facts needed by only one ecosystem live under
+`native` (documented per ecosystem below) and are ignored by other ecosystems'
+rules. False booleans and empty lists are omitted.
 
-The extraction's `metadata.ecosystem` names the rule set: `dotnet`,
-`typescript`, `rust` or `go`. Without it (or without contracts) the comparator
-applies only the rules every ecosystem shares and says so. A missing fact makes
-the rules that need it answer `unknown`. How each ecosystem fills the contract
-is documented below.
+The extraction's `metadata.ecosystem` selects the rule set (`dotnet`,
+`typescript`, `rust`, or `go`). If it or the contracts are absent, the
+comparator falls back to the shared rules and notes that in `notices`. Missing
+facts cause rules that depend on them to return `unknown`.
 
 ### Comparison metadata
 
-The comparator returns the baseline comparison with:
+The comparator returns the baseline comparison enriched with two additions:
 
-- each entity change's `summary` set to its classification as one sentence, so
-  hosts' table and text views state it without the renderer;
-- `metadata.compatibility`:
+- Each entity change's `summary` holds a single-sentence classification so table
+  and text views display it even without the `api` renderer.
+- `metadata.compatibility` records the full structured breakdown:
 
 ```json
 {
@@ -188,13 +185,13 @@ The comparator returns the baseline comparison with:
 }
 ```
 
-`changes` is keyed by comparison change ID and covers every entity change.
-Relationship changes aren't classified: `contains` relationships only mirror
-declarations. A change's `level` is its most severe finding (`breaking`, then
-`unknown`, `additive`, `compatible`); `kinds` is the union of its breaking
-findings' kinds; `reason` joins the most severe findings' reasons. `notices`
-holds at most 20 sentences about the classification as a whole (missing
-contracts, an unknown ecosystem).
+`changes` is keyed by comparison change ID and covers every entity change
+(relationship changes aren't classified because `contains` edges just mirror
+declarations). Each change's `level` is its most severe finding (`breaking`,
+then `unknown`, `additive`, `compatible`), `kinds` unions the kinds of its
+breaking findings, and `reason` joins the most severe findings' reasons.
+`notices` holds up to 20 sentences about the classification as a whole, such as
+missing contracts or an unrecognized ecosystem.
 
 ### Rules every ecosystem shares
 
@@ -208,14 +205,14 @@ contracts, an unknown ecosystem).
 
 ## .NET: ApiCompat's default mode, reproduced
 
-ApiCompat isn't invoked: it needs both assemblies, and nothing in the comparator
-can run it. The comparator reproduces the rules of the SDK's
-`Microsoft.DotNet.ApiCompatibility` (the engine behind package validation and
-`Microsoft.DotNet.ApiCompat.Tool`) in their **default, non-strict mode with its
+Because ApiCompat requires both compiled assemblies and can't run inside a
+sandboxed comparator, we reproduce the rules of
+`Microsoft.DotNet.ApiCompatibility` (the engine behind SDK package validation
+and `Microsoft.DotNet.ApiCompat.Tool`) in its **default, non-strict mode with
 two opt-in rules enabled** (`ApiCompatEnableRuleCannotChangeParameterName` and
-`ApiCompatEnableRuleAttributesMustMatch`), because renamed parameters break
-named arguments and attributes change behavior. The facts come from Roslyn after
-replaying the project's own build. Rule IDs are the
+`ApiCompatEnableRuleAttributesMustMatch`), since renamed parameters break named
+arguments and attributes alter runtime behavior. Facts come from Roslyn after
+replaying the project's build, and rule IDs match the
 [package validation diagnostic IDs](https://learn.microsoft.com/dotnet/fundamentals/apicompat/diagnostic-ids).
 
 Contract (`dotnet`):
@@ -238,9 +235,9 @@ Contract (`dotnet`):
 | `attributes` | all, parameters, return values (`returnAttributes`) | Each attribute as Roslyn writes it |
 | `native.virtual`, `native.override`, `native.sealed` | members (`sealed` on types too) | The modifiers, which CP0012, CP0013, CP0018, CP0021 and CP0009's reason distinguish |
 
-Nullable reference annotations are kept in `data.signature` but left out of
-types and parameters: changing them produces warnings, not errors, and ApiCompat
-ignores them too.
+Nullable reference annotations stay in `data.signature` for display but are
+stripped from types and parameters: changing them only causes compiler warnings,
+and ApiCompat ignores them too.
 
 <!-- prettier-ignore -->
 | Rule | Change | Level |
@@ -262,9 +259,9 @@ ignores them too.
 | CP0021 | A generic constraint is added, or removed outside a sealed type or non-virtual method | `breaking` (binary, source); removed on a sealed type or non-virtual method: `compatible` |
 | CP0013, CP0016, CP0020 | `virtual` added, attribute added, visibility expanded: reported only in strict mode | `compatible` |
 
-Beyond ApiCompat (from the
-[.NET breaking change rules](https://github.com/dotnet/runtime/blob/main/docs/coding-guidelines/breaking-change-rules.md)),
-with the rule name in parentheses:
+Additional rules come from the
+[.NET breaking change rules](https://github.com/dotnet/runtime/blob/main/docs/coding-guidelines/breaking-change-rules.md)
+(rule names in parentheses):
 
 <!-- prettier-ignore -->
 | Change | Level |
@@ -280,20 +277,21 @@ with the rule name in parentheses:
 | Only nullable annotations or formatting change (`annotations`) | `compatible` |
 
 Not reproduced: assembly identity (CP0003) and package-level checks (PKV), which
-aren't API declarations; members moved to a base class (ApiCompat accepts them,
-the comparator reports removal); and comparisons across target frameworks.
+aren't API declarations; members moved up to a base class (ApiCompat accepts
+them, whereas the comparator reports removal); and cross-target-framework
+comparisons.
 
 ## TypeScript: assignability over the checker's types
 
-TypeScript has no official breaking-change standard. The rigorous question is
-assignability (`checker.isTypeAssignableTo`), but the checker answers it only
-for two types in one program, and an extractor sees one revision. So the
-extractor records each declaration's types **as the repository's own checker
-resolves them**: every parameter and return type as its union constituents, each
-with the primitive a literal widens to. The comparator then decides
-assignability over those constituents and answers `unknown` whenever the
-question needs more than that (two different object types, generics, conditional
-or mapped types).
+TypeScript has no official breaking-change standard. The right theoretical test
+is type assignability (`checker.isTypeAssignableTo`), but the checker only
+evaluates two types inside the same program while an extractor only sees one
+revision. Instead, the extractor records each declaration's types **as the
+repository's own checker resolves them**: parameter and return types broken into
+union constituents, with each literal noting the primitive it widens to. The
+comparator checks assignability over those constituents and returns `unknown`
+whenever deeper structural reasoning is needed (distinct object types, generics,
+conditional or mapped types).
 
 Contract (`typescript`):
 
@@ -308,15 +306,15 @@ Contract (`typescript`):
 | `supertypes` | classes, interfaces | The heritage clauses' types, as `extends` or `implements` |
 | `native.nominalBrand`, `native.staticNominalBrand` | classes | It has private instance (static) members, so TypeScript compares it nominally |
 
-Every type is `{text, union: [{text, primitive?}]}`: the checker's canonical
-text, and its union constituents (one when it isn't a union), where a literal
-constituent names the primitive it widens to.
+Every type is shaped as `{text, union: [{text, primitive?}]}` — the checker's
+canonical text plus its union constituents (a single entry for non-unions), with
+literal constituents recording the primitive they widen to.
 
-`S ⊑ T` (a value of type `S` is assignable to `T`) holds when the texts are
-equal, `T` contains `any` or `unknown`, `S` is `never`, or every constituent of
-`S` equals a constituent of `T` or is a literal of a primitive in `T`. It fails
-**provably** when a constituent of `S` is a primitive or literal and every
-constituent of `T` is too, with none accepting it. Otherwise it is undecided.
+Assignability (`S ⊑ T`) holds when the texts match, `T` contains `any` or
+`unknown`, `S` is `never`, or every constituent of `S` either matches a
+constituent of `T` or is a literal of a primitive in `T`. It fails **provably**
+when a constituent of `S` is a primitive or literal and every constituent of `T`
+is too, with none accepting it. Everything else stays undecided.
 
 <!-- prettier-ignore -->
 | Rule | Change | Level |
@@ -339,18 +337,17 @@ constituent of `T` is too, with none accepting it. Otherwise it is undecided.
 | `abstract`, `static`, `protected` | A class becomes abstract, a member changes static-ness or becomes protected | `breaking` |
 | `heritage` | A base or implemented type is removed; added: `additive` | `breaking` |
 
-Not reproduced: structural comparison of two different object types, generic
-instantiation, conditional, mapped and template literal types, and overload
-resolution beyond pairwise matching. These are `unknown`.
+Not reproduced: structural comparison between two different object types,
+generic instantiation, conditional/mapped/template-literal types, and overload
+resolution beyond pairwise matching. Those all report `unknown`.
 
 ## Rust: the Cargo SemVer reference
 
-cargo-semver-checks isn't invoked: it is a native two-revision tool, so it can't
-run in a comparator, and Projections never installs or bundles it. The
-comparator reproduces the rules of the
-[Cargo SemVer reference](https://doc.rust-lang.org/cargo/reference/semver.html),
-which cargo-semver-checks' lints implement, over facts from rustdoc's JSON
-output. Rules are named by the reference's section anchors.
+cargo-semver-checks is a native two-revision tool, so Projections never installs
+or invokes it. Instead, the comparator reproduces the rules from the
+[Cargo SemVer reference](https://doc.rust-lang.org/cargo/reference/semver.html)
+(the same specification cargo-semver-checks implements) using facts extracted
+from rustdoc JSON. Rule names match the reference's section anchors.
 
 Contract (`rust`):
 
@@ -402,17 +399,17 @@ Contract (`rust`):
 | `fn-generic-new` | A generic parameter is added to a function | `unknown`: the Cargo reference calls it possibly breaking (callers that name the parameters fail) |
 | `item-new` | Any other public item is added | `additive` |
 
-Not reproduced: generic bound tightening and loosening (`unknown` when bounds
-change), type layout beyond `repr`, and Cargo features.
+Not reproduced: tightening or loosening generic bounds (reported as `unknown`),
+type layout beyond `repr`, and Cargo features.
 
 ## Go: apidiff's rules
 
-apidiff isn't invoked: it compares two package export data sets, and a
-comparator can't run Go. The extractor's helper uses only the standard library's
-`go/types` (so it never downloads `golang.org/x/exp`) and the comparator
+Because apidiff compares two package export data sets natively, a comparator
+can't invoke it. The Go extractor's helper relies strictly on the standard
+library's `go/types` (never downloading `golang.org/x/exp`), and the comparator
 reproduces apidiff's documented rules
 ([README](https://github.com/golang/exp/blob/master/apidiff/README.md)), which
-are based on the Go 1 compatibility guarantee.
+follow the Go 1 compatibility guarantee.
 
 Contract (`go`):
 
@@ -450,48 +447,50 @@ Contract (`go`):
 | `implements` | A type stops implementing an exported interface | `breaking` |
 | `added` | An exported name, field or method is added | `additive` |
 
-Not reproduced: correspondence of renamed unexported types (apidiff accepts
-`var V u1` becoming `var V u2`; the comparator reports a type change), and
-module-level comparison of packages renamed relative to the module root.
+Not reproduced: tracking renamed unexported types (apidiff accepts `var V u1`
+becoming `var V u2`, while the comparator reports a type change) and
+module-level comparisons when packages are renamed relative to the module root.
 Packages under `internal/` and `main` packages aren't importable, so they aren't
-API.
+part of the API.
 
 ## Renderer
 
-The `api` renderer reads `metadata.compatibility` when present:
+When `metadata.compatibility` is present, the `api` renderer surfaces it in four
+ways:
 
-- facts in the host's summary bar
-  (`⚠ 2 breaking changes · ⊕ 5 additive changes · = 1 compatible change`), every
-  nonzero level with its glyph and words, breaking first, each filtering to its
-  changes, with the rules that classified them as its tooltip; the
-  classification's notices stay above the declarations;
-- a breaking declaration's reserved footer reads `⚠ Breaking` after its change
-  status, with the reason as its tooltip and, in the diff, in a reserved line
-  under the signature; additive, compatible and unknown changes read
-  `⊕ Additive`, `= Compatible` and `? Unknown` the same way. Levels fade with
-  change emphasis, like change status, and use no change color;
-- breaking declarations sort first in the diff, then the rest in ID order;
-- a **Breaking only** control filters the list to breaking changes.
+- **Summary bar:** shows each nonzero level with its glyph and label, breaking
+  first (`⚠ 2 breaking changes · ⊕ 5 additive changes · = 1 compatible change`).
+  Clicking a count filters to those changes, hovering shows the rules that
+  fired, and any top-level notices appear above the declarations.
+- **Row badges and reasons:** each changed declaration's footer displays
+  `⚠ Breaking`, `⊕ Additive`, `= Compatible`, or `? Unknown` after its change
+  status, with the reason in its tooltip and (in diff view) on a dedicated line
+  beneath the signature. Levels fade alongside change emphasis without adding
+  extra diff colors.
+- **Ordering:** breaking declarations sort to the top of the diff, followed by
+  the rest in ID order.
+- **Filtering:** a **Breaking only** toggle narrows the list to breaking
+  changes.
 
-Without a classification (the default comparator), the renderer shows nothing
-extra and its rows are unchanged.
+When no classification is present (such as with the default comparator), the
+renderer renders ordinary rows with no extra chrome.
 
 ## Testing
 
-- The comparator's rules are unit tested per ecosystem with small before and
-  after declarations, and through both comparator runtimes.
-- Each extractor's native test extracts a real before and after project with the
-  real toolchain and checks the comparator's classification of every change; the
-  same projects are the api renderer's Compatibility scenarios.
-- Where the official tool can run, the native tests also run it on the same
-  pair:
-  - cargo-semver-checks (0.51.0, when installed; checked as a minor release)
-    reports 7 lints, and every item it names is `breaking` here;
-  - apidiff (pinned in `packages/cli/tests/native_tools/go.rs`, downloaded by
-    `go run` only with `PROJECTIONS_APIDIFF=1`) reports exactly the 8 changes
-    classified `breaking` as incompatible and exactly the other 4 as compatible.
-  - ApiCompat (`Microsoft.DotNet.ApiCompat.Tool` 10.0.403, installed into a
-    scratch tool path only with `PROJECTIONS_APICOMPAT=1`, with the two opt-in
-    rules) reports exactly the changes classified `breaking`, except two: a
-    constant's value, which is beyond ApiCompat, and an enum member's value
-    (CP0011), which is documented but which this version doesn't report.
+- Each ecosystem's comparator rules are unit-tested on small before/after
+  declarations across both comparator runtimes.
+- Every extractor's native test runs the real toolchain on a before/after
+  project and asserts the comparator's classification on every change; those
+  same projects drive the `api` renderer's Compatibility scenarios.
+- Where the official tool can run locally, native tests cross-check our results
+  against it on the exact same pair:
+  - cargo-semver-checks (0.51.0, when installed, checked as a minor release)
+    emits 7 lints, and every item it flags is classified `breaking` here.
+  - apidiff (pinned in `packages/cli/tests/native_tools/go.rs`, invoked via
+    `go run` when `PROJECTIONS_APIDIFF=1` is set) flags the exact same 8
+    `breaking` changes as incompatible and the other 4 as compatible.
+  - ApiCompat (`Microsoft.DotNet.ApiCompat.Tool` 10.0.403, installed to a
+    scratch tool path when `PROJECTIONS_APICOMPAT=1` is set, with the two opt-in
+    rules enabled) matches every `breaking` classification except two: a
+    constant's value (which is outside ApiCompat's scope) and an enum member's
+    value (CP0011, which is documented but not emitted by this version).

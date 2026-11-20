@@ -608,6 +608,48 @@ fn a_fork_pull_request_run_is_never_the_repository_ci() {
 }
 
 #[test]
+fn a_workflow_github_cannot_read_is_an_error_not_an_ineligible_workflow() {
+    let (repository, first, _, _published) = published();
+    let runs = format!("{{\"workflow_runs\":[{}]}}", workflow_run(4242, "push", "acme/demo"));
+    let lookup = |workflow: &str| {
+        let bin = tempfile::tempdir().unwrap();
+        let gh = fake_gh(
+            bin.path(),
+            &[
+                (&format!("*\"actions/runs?head_sha={first}\"*"), &format!("printf '%s' '{runs}'")),
+                ("*\"contents/.github/workflows/ci.yml\"*", workflow),
+            ],
+        );
+        let shown = with_gh(&repository, &gh)
+            .with_cache_base(tempfile::tempdir().unwrap().path())
+            .with_artifacts(Vec::new(), true)
+            .show("probe", &first, None);
+        let calls = fs::read_to_string(bin.path().join("calls.log")).unwrap();
+        assert!(!calls.contains("artifacts"), "{calls}");
+        shown
+    };
+    // Absent on the default branch, or not running the Action: not CI's
+    // output, so the commit is extracted.
+    for ineligible in ["echo 'gh: Not Found (HTTP 404)' >&2; exit 1", "printf 'jobs: {}\\n'"] {
+        let document = lookup(ineligible).unwrap();
+        assert!(repository.probe_ran(), "{ineligible}");
+        assert_ne!(document["provenance"]["execution"]["source"], "ci");
+    }
+    // A rate limit or failed authentication says nothing about the workflow.
+    for unreadable in [
+        "echo 'gh: API rate limit exceeded for user ID 1. (HTTP 403)' >&2; exit 1",
+        "echo 'gh: Bad credentials (HTTP 401)' >&2; exit 1",
+    ] {
+        let error = format!("{:#}", lookup(unreadable).unwrap_err());
+        assert!(
+            error.contains("couldn't read .github/workflows/ci.yml on the default branch of acme/demo"),
+            "{error}"
+        );
+        assert!(!repository.probe_ran(), "{unreadable}");
+    }
+}
+
+#[test]
 fn an_imported_artifact_is_official_only_when_its_attestation_verifies() {
     let (repository, first, _, published) = published();
     let certificate = json!([{"verificationResult": {"signature": {"certificate": {

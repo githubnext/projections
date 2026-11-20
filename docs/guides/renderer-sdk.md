@@ -85,8 +85,8 @@ mirrors scrolling between them.
 - `controls`: `controls`: replaces the declared controls (see
   [Controls](../../packages/renderers/sdk/README.md#controls))
 - `control`: `id`, `value`: the person set a declared control from the
-  renderer's content (a sortable column heading); the host applies it as if
-  they had set it in its settings and answers with `options`. Post it with
+  renderer's content (a sortable column heading); the host applies it as if they
+  had set it in its settings and answers with `options`. Post it with
   `client.setControl(id, value)`
 - `annotation`: `id` (non-empty): the person activated the annotation marker on
   that item, after selecting it

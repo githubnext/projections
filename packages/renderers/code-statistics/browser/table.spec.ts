@@ -156,7 +156,7 @@ async function pixelsAt({png, width, points}: {png: string; width: number; point
 for (const comparisonMode of ['diff', 'animated'] as const)
   for (const colorMode of ['light', 'dark'] as const)
     test(`${comparisonMode}, ${colorMode}: a change's hue wins every line it shares`, async ({page}) => {
-      test.setTimeout(120_000)
+      test.setTimeout(240_000)
       const inspector = harnessInspector()
       const failures: string[] = []
       for (const sort of ['code:descending', 'name:ascending', 'files:ascending', 'lines:descending'])
@@ -167,19 +167,27 @@ for (const comparisonMode of ['diff', 'animated'] as const)
             colorMode,
             options: {chart: 'table', sort, sortChangesFirst},
           })
-          if (comparisonMode === 'animated') await stage.seek(0.5)
-          await stage.measure('settle')
-          await page.mouse.move(0, 0)
-          const probes: LineProbe[] = await stage.frame.locator('body').evaluate(tableLineProbes)
-          const width = (await stage.iframe.boundingBox())!.width
-          const png = (await stage.iframe.screenshot()).toString('base64')
-          const painted: number[][] = await page.evaluate(pixelsAt, {png, width, points: probes})
-          probes.forEach((probe, index) => {
-            const color = painted[index]!
-            if (Math.max(...probe.rgb.map((channel, k) => Math.abs(channel - color[k]!))) > 12)
-              failures.push(`${sort}${sortChangesFirst ? ', changes first' : ''}: ${probe.what} is rgb(${color}), not rgb(${probe.rgb})`)
-          })
-          expect(probes.length, `${sort}: probes`).toBeGreaterThan(0)
+          // Animated: through the transition, where each language's own step emphasizes it in turn.
+          let probed = 0
+          for (const progress of comparisonMode === 'animated' ? [0.15, 0.3, 0.45, 0.6, 0.75, 0.9] : [1]) {
+            if (comparisonMode === 'animated') await stage.seek(progress)
+            await stage.measure('settle')
+            await page.mouse.move(0, 0)
+            const probes: LineProbe[] = await stage.frame.locator('body').evaluate(tableLineProbes)
+            if (!probes.length) continue
+            probed += probes.length
+            const width = (await stage.iframe.boundingBox())!.width
+            const png = (await stage.iframe.screenshot()).toString('base64')
+            const painted: number[][] = await page.evaluate(pixelsAt, {png, width, points: probes})
+            probes.forEach((probe, index) => {
+              const color = painted[index]!
+              if (Math.max(...probe.rgb.map((channel, k) => Math.abs(channel - color[k]!))) > 12)
+                failures.push(
+                  `${sort}${sortChangesFirst ? ', changes first' : ''} at ${progress}: ${probe.what} is rgb(${color}), not rgb(${probe.rgb})`,
+                )
+            })
+          }
+          expect(probed, `${sort}: probes`).toBeGreaterThan(0)
         }
       expect(failures).toEqual([])
     })

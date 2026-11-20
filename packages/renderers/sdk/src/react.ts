@@ -216,11 +216,14 @@ export function useInteractions(
   const attribute = options.attribute
   const select = useRef(options.select)
   select.current = options.select
+  const partOf = useRef(options.partOf)
+  partOf.current = options.partOf
   useEffect(() => {
     if (!client || !root.current) return
     const created = connectInteractions(client, root.current, {
       ...(attribute ? {attribute} : {}),
       select: id => (select.current ? select.current(id) : client.select(id)),
+      partOf: id => partOf.current?.(id),
     })
     controller.current = created
     return () => {
@@ -231,6 +234,8 @@ export function useInteractions(
   useEffect(() => {
     controller.current?.setSelected(selected)
   }, [selected, client])
+  // A new `partOf` (a new document) marks the filter again.
+  useEffect(() => controller.current?.refresh(), [options.partOf])
 }
 
 /**

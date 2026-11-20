@@ -256,16 +256,27 @@ export interface RendererPace {
 }
 
 /**
- * The host's find and "changes only" settings, as `filter` carries them. Renderers that declare `filter` de-emphasize
- * or hide the items `ids` leaves out; `query` and `changesOnly` are for describing the state, not for matching again.
+ * The host's scope, summary filter and find, as `filter` carries them. The scope decides what a renderer lays out: in
+ * the Changes scope, `scope` (the changes and their context). The summary filter and find never remove or move
+ * anything: renderers that declare `filter` recede what is laid out that `ids` leaves out. `query` and `changesOnly`
+ * are for describing the state, not for matching again.
  */
 export interface FilterPayload {
   /** The find query as typed, or an empty string. */
   query: string
-  /** Whether the person asked to see only changed items; `ids` already reflects it. */
+  /** Whether the person asked to see only changed items, the Changes scope: `scope` and `ids` already reflect it. */
   changesOnly: boolean
-  /** Matching selection IDs, or `null` when every item is shown or more than `rendererLimits.filterIds` match. */
+  /**
+   * The selection IDs the summary filter and find match, of every item (in the Noise scope, of its items): what is at
+   * full strength. `null` when nothing recedes or more than `rendererLimits.filterIds` match.
+   */
   ids: string[] | null
+  /**
+   * The selection IDs the Changes scope shows, its changes and their context: what a renderer lays out. `null` outside
+   * the Changes scope or past `rendererLimits.filterIds`. Absent from hosts before it, which sent the Changes scope,
+   * narrowed by the summary filter and find, in `ids`.
+   */
+  scope?: string[] | null
 }
 
 /** A rectangle in the renderer document's viewport, in CSS px. */

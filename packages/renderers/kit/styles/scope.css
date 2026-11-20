@@ -1,12 +1,9 @@
 /*
  * The Changes scope (`data-scope="changes"` on the root, see `RendererProps.scope`). A list folds each run of items it
- * doesn't show into a `Fold` row; a canvas lays out only what it shows. Nothing is faded: whatever is drawn is at full
- * strength, so an item the host's filter leaves out that a renderer still draws (an unchanged relationship between
- * shown items) doesn't recede either.
+ * doesn't show into a `Fold` row; a canvas lays out only what it shows. The scope alone fades nothing: what a renderer
+ * draws besides (an unchanged relationship between shown items) is at full strength. The summary filter and find
+ * recede what they leave out, as in All (`graph.css`), and move nothing.
  */
-.pk[data-scope='changes'] [data-projections-filtered] {
-  --pk-recede: 1;
-}
 
 /* A fold: a quiet band across its list, its count in muted text beside the expand icon, the whole band a button. */
 .pk-fold {

@@ -33,11 +33,14 @@ export const linuxLayout: Record<string, Record<string, number>> = {
 export const macosLayout: Record<string, Record<string, number>> = {[HARNESS]: {'webkit-desktop': 2}}
 
 /**
- * Matches renderers' own specs (by their path) and the harness tests named for them or their scenarios. Inverted, it
- * leaves out other renderers' tests and keeps every test that names none, such as the harness's own.
+ * Matches renderers' own specs (by their path) and the harness tests whose title starts with one of their names or
+ * scenario keys (`graph: …`, `graph/service-platform: …`), which exercise only that renderer. Inverted, it leaves those
+ * out and keeps every other test, including those that span renderers (`graph diffs at 1440px` also draws
+ * dependency-injection's scenarios).
  */
 export function rendererGrep(renderers: readonly string[]): string {
-  return `(^|[^\\w-])(${renderers.join('|')})([/: ]|$)`
+  const names = renderers.join('|')
+  return `(^|[\\s/])(${names})/browser/|\\.spec\\.ts (${names})[/:]`
 }
 
 function shards(

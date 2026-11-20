@@ -73,14 +73,23 @@ test("one renderer's change runs that renderer's harness tests, on Linux only", 
     )
 })
 
-test('a renderer grep matches its specs and scenarios; inverted, it keeps tests that name no renderer', () => {
+test('a renderer grep matches its specs and the tests titled for it alone; inverted, it keeps the rest', () => {
+  // Playwright matches --grep-invert against the project, file and title, joined by spaces.
   const grep = new RegExp(rendererGrep(['graph']))
-  assert.ok(grep.test('graph/browser/dag.spec.ts dag layout'))
-  assert.ok(grep.test('harness/browser/checks.spec.ts graph/service-platform: built-in renderer checks pass'))
-  assert.ok(grep.test('harness/browser/fill.spec.ts graph zoom enlarges the opening view'))
-  assert.ok(!grep.test('database/browser/diff.spec.ts the graph-free diff'))
-  assert.ok(!grep.test('harness/browser/harness.spec.ts the harness runs a bundle in the real host frame'))
-  assert.ok(!grep.test('harness/browser/gallery.spec.ts the gallery has every built-in scenario'))
+  assert.ok(grep.test('chromium-desktop graph/browser/dag.spec.ts dag layout'))
+  assert.ok(grep.test('chromium-desktop harness/browser/checks.spec.ts graph/service-platform: built-in renderer checks pass'))
+  assert.ok(grep.test('chromium-desktop harness/browser/identifiers.spec.ts graph: identifiers are marked'))
+  // Tests that span renderers, or name none, stay.
+  assert.ok(!grep.test('chromium-desktop harness/browser/diff.spec.ts graph diffs at 1440px: data whole, opening fitted'))
+  assert.ok(!grep.test('chromium-desktop harness/browser/annotations.spec.ts annotation badges stay clear (graph/service-platform)'))
+  assert.ok(!grep.test('chromium-desktop database/browser/diff.spec.ts the graph-free diff'))
+  assert.ok(!grep.test('chromium-desktop harness/browser/harness.spec.ts the harness runs a bundle in the real host frame'))
+})
+
+test("a scenario's extraction or comparator is its renderer's change", () => {
+  const plan = ciPlan(facts, ['packages/extractors/tetragon-policies/tests/fixtures/credentials/after.expected.json'])
+  assert.deepEqual(plan.flags.renderers, ['runtime-policy'])
+  assert.ok(plan.browser.some(job => job.suite === 'packages/renderers/harness'))
 })
 
 test('a change to the kit every renderer uses runs the whole harness', () => {
@@ -124,7 +133,7 @@ test('CI, toolchain, lockfile and tooling changes, and any reason given, run eve
 
 test("files a crate's sources read by path are that crate's change, though no manifest says so", () => {
   // The Engine's and default comparator's tests embed the conformance corpus; the Engine's read the generated schemas.
-  for (const path of ['packages/schemas/fixtures/conformance.json', 'packages/schemas/src/domains.ts']) {
+  for (const path of ['packages/schemas/fixtures/conformance.json', 'packages/schemas/schemas/api/v0.json']) {
     const plan = ciPlan(facts, [path])
     assert.ok(plan.changed.includes('packages/engine'), path)
     assert.equal(plan.jobs.coverage && plan.jobs.windows, true, path)

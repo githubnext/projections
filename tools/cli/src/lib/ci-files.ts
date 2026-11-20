@@ -1,6 +1,6 @@
 // Sorts a change's files for the CI plan (ci-plan.ts): the workspaces and crates they belong to or which read them,
 // documentation, configuration only the checks read, release and action files, and what runs everything.
-import {crateConsumers, type RepoFacts} from './ci-facts.ts'
+import {readersOf, type RepoFacts} from './ci-facts.ts'
 import {ownerOf} from './packages.ts'
 import {matches} from './repo.ts'
 
@@ -55,12 +55,12 @@ export function sortChanges(facts: RepoFacts, paths: readonly string[], generato
   for (const path of paths) {
     const generated = facts.generators.filter(generator => matches(path, generator.inputs) || matches(path, generator.outputs))
     for (const generator of generated) generators.add(generator.name)
-    const readers = crateConsumers(facts, path)
+    const readers = readersOf(facts, path)
     for (const crate of readers.build) sorted.units.add(crate)
     for (const crate of readers.test) sorted.tested.add(crate)
     const read = generated.length || readers.build.length || readers.test.length
-    if (!read && path.endsWith('.md') && !notDocumentation.test(path)) sorted.docs.push(path)
-    else if (matches(path, everything)) sorted.everything.push(path)
+    if (matches(path, everything)) sorted.everything.push(path)
+    else if (!read && path.endsWith('.md') && !notDocumentation.test(path)) sorted.docs.push(path)
     else if (ownerOf(facts.units, path)) sorted.units.add(ownerOf(facts.units, path)?.path as string)
     else if (read) continue
     else if (matches(path, documentation) && !notDocumentation.test(path)) sorted.docs.push(path)

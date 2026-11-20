@@ -17,6 +17,7 @@ import {createDatabaseTransition} from './transition.js'
 import {createDatabaseDiff} from './diff.js'
 import {useTextMeasure} from './measure.js'
 import {DatabaseTags, tagLimit} from './tags.js'
+import {changesStart} from './diff-start.js'
 import {Link, LinkHead} from './links-view.js'
 import {linkNamer} from './link-names.js'
 import {Table} from './table.js'
@@ -111,10 +112,13 @@ export function DatabaseRenderer(props: RendererProps<typeof accepts>) {
   // first paint, not the height the frame has before the host answers.
   const room = stage && {width: stage.width, height: sizing === 'content' ? rendererLimits.maxHeight - stage.padding : stage.height}
   const fit = room && natural && room.width > 0 && room.height > 0 ? fitScale({width, height: natural}, room, {padding: 0}).scale : 1
-  // Unless fitting would draw its smallest text below the kit's opening floor: then it opens at that, at its top left,
-  // and scrolls.
+  // Unless fitting would draw its smallest text below the kit's opening floor: then it opens at that, at its top left
+  // (a diff on its first change), and scrolls.
   const floor = useOpeningFloor(content, tagSource)
-  const {zoom, scale} = useStageZoom(view, props.onAction, fit, {floor})
+  // A diff opens on its first change: a schema whose changes are far down (a new tag below the tables) still shows one.
+  // Another comparison in the same frame is a new start, so the view opens on its changes, not where the last one was.
+  const start = useMemo(() => (diff && tagSource ? changesStart(view, content) : undefined), [diff, tagSource])
+  const {zoom, scale} = useStageZoom(view, props.onAction, fit, {floor, ...(start ? {start} : {})})
   // A content-sized host gets the schema's own height; zoomed in, the height it is drawn at, up to the room the host
   // allows (its stage-max-height, else the protocol's maximum), so the stage grows into the page before it pans.
   const cap = useStageHeightCap()

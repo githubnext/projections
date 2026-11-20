@@ -1,5 +1,5 @@
 import {useMemo, useState} from 'react'
-import {countText, entityKindLine} from '@githubnext/projections-renderer-kit'
+import {boundaryNouns, countText, entityKindLine} from '@githubnext/projections-renderer-kit'
 import {useSummaryNouns} from '@githubnext/projections-renderer-kit/react'
 import type {SummaryNouns} from '@githubnext/projections-renderer-kit'
 import type {GraphAnchor, RendererProps} from '@githubnext/projections-renderer-kit/react'
@@ -10,8 +10,11 @@ import {drawnKinds, withRelationships} from '../facts.js'
 import {architectureView, isSynthetic} from './collapse.js'
 import {replacement} from './replacement.js'
 
-/** Containment is drawn as boundaries, so it is no figure of the summary bar, which counts the components by kind. */
-const architectureNouns: SummaryNouns = {contains: false}
+/**
+ * Containment is drawn as boundaries, so it is no figure of the summary bar, which counts the components by kind; nor
+ * are modules that are only boundaries round them (see `boundaryNouns`).
+ */
+const architectureNouns = (model: RendererProps['model']): SummaryNouns => ({contains: false, ...boundaryNouns(model, true)})
 
 /** For an architecture large enough to collapse its unchanged boundaries, whether to show them all. */
 const componentsControls = defineControls([
@@ -27,14 +30,18 @@ const componentsControls = defineControls([
 ])
 
 /**
- * Module boundaries around their components. A large architecture (see `architectureView`) collapses each unchanged
+ * Module boundaries around their components. A large comparison (see `architectureView`) collapses each unchanged
  * boundary into a summary card that names it and counts its components, and the unchanged components of a changed one
  * into a card beside its changes; activating the card expands it, and a card in its place collapses it again. Selecting a hidden component, or a link joined to a summary card, expands what it
- * belongs to.
+ * belongs to. One revision draws every component up to `oneRevisionCollapseAbove`, and the canvas opens at the readable
+ * text floor on the start of a large one.
  */
 export function ArchitectureRenderer(props: RendererProps) {
   const {model, selectedId, onSelect, locale} = props
-  useSummaryNouns(props.declareNouns, architectureNouns)
+  useSummaryNouns(
+    props.declareNouns,
+    useMemo(() => architectureNouns(model), [model]),
+  )
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
   // The card activated last, which the next view keeps in place (see `GraphAnchor`).
   const [anchor, setAnchor] = useState<GraphAnchor>()

@@ -86,8 +86,9 @@ function corridorAttempt(ctx: RoutingContext, segment: Segment, own: readonly st
     // Clear of rounding: only an attempt certain to lose is dropped.
     const loses = (count: number) => count * 1e6 + base > beat + 1
     let crossings = 0
-    for (const other of others) {
+    for (let index = 0; index < others.length; index++) {
       if (loses(crossings)) return undefined
+      const other = others[index]!
       if (
         quickCross(
           route,
@@ -95,8 +96,12 @@ function corridorAttempt(ctx: RoutingContext, segment: Segment, own: readonly st
           [end, other.end!, ...(other.from === segment.from ? [start] : [])],
           other.from === segment.from ? 6 : 3,
         )
-      )
+      ) {
         crossings++
+        // The next attempts, a corridor or turn away, most likely cross it too: tested first, they reach a count certain
+        // to lose sooner. Order changes nothing else, as an attempt is dropped only when no order could save it.
+        if (index) others.unshift(...others.splice(index, 1))
+      }
     }
     if (loses(crossings)) return undefined
     const score =

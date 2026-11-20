@@ -18,19 +18,34 @@ interface Placement {
   waypoints: Waypoints
 }
 
-/** Where a link's route stands in the rank before this one: its slot there, or the principal row it leaves from. */
-const previousY = ({geometry, tables, waypoints}: Placement, link: SchemaLink, rank: number) =>
-  waypoints.get(link.key)?.find(point => point.rank === rank - 1)?.y ??
-  anchor(geometry, tables.get(link.principal)!, link.principal, link.principalColumn)
+/**
+ * Where a link's route stands in the rank before this one: its slot there, or the row it comes from in an earlier
+ * rank, the principal's (or the dependent's, for a link running back to a later rank, see `layerDepths`).
+ */
+const previousY = ({model, geometry, tables, waypoints}: Placement, link: SchemaLink, rank: number) => {
+  const slot = waypoints.get(link.key)?.find(point => point.rank === rank - 1)?.y
+  if (slot !== undefined) return slot
+  return model.rank.get(link.principal)! < rank
+    ? anchor(geometry, tables.get(link.principal)!, link.principal, link.principalColumn)
+    : anchor(geometry, tables.get(link.dependent)!, link.dependent, link.dependentColumn)
+}
+
+const origin: SchemaBox = {x: 0, y: 0, width: 0, height: 0}
 
 /** Places one rank's cards near the rows they reference, in that order, without overlapping; returns the runs they take. */
 function placeRank(placement: Placement, cards: readonly string[], rank: number): [number, number][] {
   const {model, geometry, cardWidth, later, tables} = placement
   const {rankGap, tableGap, clearance} = schemaMetrics
   const placed = cards.map(table => {
-    const pulls = model.links
-      .filter(link => link.dependent === table && model.rank.get(link.principal)! < rank)
-      .map(link => previousY(placement, link, rank) - anchor(geometry, {x: 0, y: 0, width: 0, height: 0}, table, link.dependentColumn))
+    // A card's rows reach toward the rows they link in earlier ranks: as a dependent, or as the principal of a link
+    // running back.
+    const pulls = model.links.flatMap(link =>
+      link.dependent === table && model.rank.get(link.principal)! < rank
+        ? [previousY(placement, link, rank) - anchor(geometry, origin, table, link.dependentColumn)]
+        : link.principal === table && link.dependent !== table && model.rank.get(link.dependent)! < rank
+          ? [previousY(placement, link, rank) - anchor(geometry, origin, table, link.principalColumn)]
+          : [],
+    )
     return {
       id: table,
       height: cardHeight(model, table, geometry),
@@ -88,12 +103,12 @@ export function columnsLayout(model: SchemaModel, cardWidth: number, sizer: Text
   for (const table of model.tables) model.columns.get(table)!.forEach((column, index) => rows.set(column, index))
   const routes = new Map<string, SchemaPoint[]>()
   const waypoints: Waypoints = new Map()
-  // Long links reserve a slot in every rank they cross, so they never pass through a card.
+  // Long links reserve a slot in every rank they cross, so they never pass through a card: from the dependent's rank to
+  // the principal's, which is usually earlier, but later for a link running back (see `layerDepths`).
   const crossings: {link: SchemaLink; rank: number}[] = []
   for (const link of model.links) {
-    const from = model.rank.get(link.dependent)!
-    const to = model.rank.get(link.principal)!
-    for (let rank = from - 1; rank > to; rank--) crossings.push({link, rank})
+    const [from, to] = [model.rank.get(link.dependent)!, model.rank.get(link.principal)!]
+    for (let rank = Math.min(from, to) + 1; rank < Math.max(from, to); rank++) crossings.push({link, rank})
   }
   const placement: Placement = {model, geometry, cardWidth, later, tables, waypoints}
   for (let rank = 0; rank < ranks.length; rank++) {
@@ -105,13 +120,18 @@ export function columnsLayout(model: SchemaModel, cardWidth: number, sizer: Text
   const top = Math.min(0, ...[...tables.values()].map(box => box.y), ...[...waypoints.values()].flat().map(point => point.y - waypoint / 2))
   for (const box of tables.values()) box.y -= top
   for (const points of waypoints.values()) for (const point of points) point.y -= top
+  // Each crossing in the order the link travels: leftward from the dependent, or rightward when it runs back.
   for (const link of model.links) {
+    const back = model.rank.get(link.principal)! > model.rank.get(link.dependent)!
     const points = (waypoints.get(link.key) ?? [])
-      .sort((a, b) => b.rank - a.rank)
-      .flatMap(point => [
-        {x: x(point.rank) + cardWidth, y: point.y},
-        {x: x(point.rank), y: point.y},
-      ])
+      .sort((a, b) => (back ? a.rank - b.rank : b.rank - a.rank))
+      .flatMap(point => {
+        const [left, right] = [
+          {x: x(point.rank), y: point.y},
+          {x: x(point.rank) + cardWidth, y: point.y},
+        ]
+        return back ? [left, right] : [right, left]
+      })
     routes.set(link.key, points)
   }
   const boxes = [...tables.values()]

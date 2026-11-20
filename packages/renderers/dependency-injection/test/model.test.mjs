@@ -106,6 +106,31 @@ const links = frame => new Map(frame.links.map(link => [link.key, link]))
 const arrivedLink = 'dependsOn:OrderService:prices'
 const retiredLink = 'dependsOn:OrderService:pricing'
 
+test("a rewired dependency's old route leaves with the card it pointed to, emphasized as removed", async () => {
+  // OrderService's pricing dependency moves from the removed IPricing to IPriceCalculator: one relationship, rewired.
+  const rewired = {
+    ...after,
+    relationships: after.relationships.map(row => (row.id === arrivedLink ? {...row, id: retiredLink} : row)),
+  }
+  const {comparison} = await compared(before, rewired)
+  // IPricing's removal first, the rewiring later, as a comparison may order them.
+  const {model} = await compared(before, rewired, prioritize(comparison, [removed]))
+  const {schedule, transition} = staged(model)
+  const stepOf = id => schedule.findIndex(step => [...step.entities, ...step.relationships].includes(id))
+  assert.ok(stepOf(transition.stepRow(removed)) < stepOf(retiredLink), 'the card leaves before the rewiring step')
+  // The old route follows the card's step, and the new one the step that brings it.
+  assert.equal(transition.linkStepRow(`${retiredLink}:before`), transition.stepRow(removed))
+  const newRow = transition.linkStepRow(`${retiredLink}:after`)
+  assert.ok(stepOf(newRow) >= stepOf(retiredLink), 'the new route comes no earlier than the rewiring')
+  // While the card leaves (after its step's reading lead), its old route is drawn removed and fades with it.
+  const window = schedule[stepOf(transition.stepRow(removed))]
+  const middle = transition(window.time + window.radius * 0.7)
+  const route = links(middle).get(`${retiredLink}:before`)
+  assert.equal(route.status, 'removed')
+  assert.ok(route.opacity > 0 && route.opacity < 1, 'it fades out in the step that removes the card')
+  assert.equal(route.opacity, byId(middle).get(removed).opacity, 'once, with the card, not twice')
+})
+
 test('units and links follow the comparison steps, with identity only from the comparison', async () => {
   const {model} = await compared(before, after)
   const {transition, ends} = staged(model)

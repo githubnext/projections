@@ -87,20 +87,26 @@ most 60 projections and 8 MiB per document.
 
 A hosted view accepts an artifact only when GitHub independently confirms it:
 the artifact belongs to the latest successful run of the right event for the
-exact head commit, in the same repository; the manifest names that repository,
-run, pull request number and head (or pushed commit); every file is listed with
-a matching SHA-256 and no other file exists; every document passes the shared
-loader (extraction digests recomputed, saved comparisons rerun by the default
-comparator); every document describes exactly the manifest's clean commits; and
-GitHub's merge base of `base` and `head` is `mergeBase`. A mismatch in the
-envelope (the archive, the manifest, its repository, run, subject or merge base,
-duplicate IDs or paths, or a file the manifest doesn't list) rejects the whole
-artifact. A document that fails its own checks (its file's SHA-256, the loader
-or its commits) makes only that projection unverified: it is listed without its
-document and the others are shown. A comparison by a custom comparator, whose
-extractions and commits verify, is listed as such when the view can't rerun it.
-A hosted view never runs extractors or imports artifact-supplied code, and
-authorizes the signed-in user for every read.
+exact head commit, in the same repository; that run's head repository is the
+same repository too, never a fork's (a fork's pull request runs the fork's own
+workflow files, which can upload anything, so its artifacts are never read); the
+run is of the Projections workflow, a workflow file of the repository whose
+content on the default branch uses `githubnext/projections` (as with
+[`--ci`](../runner/caches.md#ci-artifacts-as-a-source), without its per-user
+`ciWorkflows`); the manifest names that repository, run, pull request number and
+head (or pushed commit); every file is listed with a matching SHA-256 and no
+other file exists; every document passes the shared loader (extraction digests
+recomputed, saved comparisons rerun by the default comparator); every document
+describes exactly the manifest's clean commits; and GitHub's merge base of
+`base` and `head` is `mergeBase`. A mismatch in the envelope (the archive, the
+manifest, its repository, run, subject or merge base, duplicate IDs or paths, or
+a file the manifest doesn't list) rejects the whole artifact. A document that
+fails its own checks (its file's SHA-256, the loader or its commits) makes only
+that projection unverified: it is listed without its document and the others are
+shown. A comparison by a custom comparator, whose extractions and commits
+verify, is listed as such when the view can't rerun it. A hosted view never runs
+extractors or imports artifact-supplied code, and authorizes the signed-in user
+for every read.
 
 With the Action's `snapshots` input, PNG snapshots go to a separate artifact,
 `projections-snapshots` (`<artifact-name>-snapshots`), never into `projections`,

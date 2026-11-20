@@ -15,21 +15,21 @@ export interface Applied {
 
 /** What a viewer page has of the view state, and what it has applied of it. */
 export interface ViewerPage {
+  /** The page's ID, which its reports carry. */
+  id: string
   state: ViewerState | undefined
   handle: InspectorHandle | null
   /** What this page has applied of the state: its pair, scenario and refresh. */
   shown: {key: string; refresh: number} | undefined
   applied: Applied
-  /**
-   * The selection and mode this page last reported, at the state's generation then. The next generation with them is
-   * its own report's echo, which must not undo what the person has done since (a mode clicked before the echo arrives).
-   */
-  reported: {generation: number; selection: string | null; mode?: string} | undefined
 }
 
-/** Whether the state is the echo of the page's own last report. */
-export const echoes = (page: ViewerPage, state: ViewerState) =>
-  page.reported !== undefined && state.generation === page.reported.generation + 1
+/**
+ * Whether the state is the echo of one of the page's own reports, as the server says. Its selection and mode are what
+ * the page already showed, and applying them would undo what the person has done since (a mode clicked before the echo
+ * arrived).
+ */
+export const echoes = (page: ViewerPage, state: ViewerState) => state.reportedBy === page.id
 
 export const pairKey = (value: ViewerState) =>
   JSON.stringify([value.projection, value.before ?? null, value.after ?? null, value.scenario ?? null])

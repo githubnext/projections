@@ -56,6 +56,8 @@ pub struct ViewState {
     pub definition_revision: Option<String>,
     /// Who chose the projection shown.
     pub chosen_by: Chooser,
+    /// The page whose report made this generation, so that page knows the generation is its own report's echo.
+    pub reported_by: Option<String>,
 }
 
 /// What `open_projection` asks the viewer to show, resolved to revisions and words.
@@ -99,6 +101,7 @@ impl ViewState {
             "refresh": self.refresh,
             "definitionRevision": self.definition_revision,
             "chosenBy": self.projection.as_ref().map(|_| self.chosen_by.name()),
+            "reportedBy": self.reported_by,
         })
     }
 
@@ -107,6 +110,7 @@ impl ViewState {
     pub fn show(&mut self, shown: Shown) {
         let same = self.projection.as_deref() == Some(shown.projection.as_str());
         self.generation += 1;
+        self.reported_by = None;
         self.projection = Some(shown.projection);
         self.title = Some(shown.title);
         self.choice = shown.choice;
@@ -124,13 +128,15 @@ impl ViewState {
     /// Extracts the shown pair again.
     pub fn refresh(&mut self) {
         self.generation += 1;
+        self.reported_by = None;
         self.refresh += 1;
     }
 
     /// A page's report of the person's selection and mode. Applied only when the
     /// page shows the current generation, so a page that hasn't caught up with
-    /// the agent's last change never undoes it. Returns whether it changed.
-    pub fn report(&mut self, generation: u64, selection: Option<&str>, mode: Option<&str>) -> bool {
+    /// the agent's last change never undoes it. The generation it makes names
+    /// the page (`reportedBy`). Returns whether it changed.
+    pub fn report(&mut self, page: &str, generation: u64, selection: Option<&str>, mode: Option<&str>) -> bool {
         if generation != self.generation || self.projection.is_none() {
             return false;
         }
@@ -145,6 +151,7 @@ impl ViewState {
             self.mode = mode;
         }
         self.generation += 1;
+        self.reported_by = Some(page.to_owned());
         true
     }
 }
@@ -330,18 +337,34 @@ mod tests {
     #[test]
     fn reports_apply_only_at_the_current_generation() {
         let mut state = ViewState::default();
-        assert!(!state.report(0, Some("a"), None), "nothing is shown yet");
+        assert!(!state.report("p", 0, Some("a"), None), "nothing is shown yet");
         state.show(shown("map"));
-        assert!(!state.report(0, Some("a"), None), "a page behind the agent");
-        assert!(state.report(1, Some("a"), Some("swipe")));
+        assert!(!state.report("p", 0, Some("a"), None), "a page behind the agent");
+        assert!(state.report("p", 1, Some("a"), Some("swipe")));
         assert_eq!(state.selection.as_deref(), Some("a"));
         assert_eq!(state.mode.as_deref(), Some("swipe"));
         assert_eq!(state.generation, 2);
-        assert!(!state.report(2, Some("a"), Some("swipe")), "unchanged");
-        assert!(!state.report(2, Some("a"), Some("sideways")), "not a mode");
-        assert!(state.report(2, None, None), "cleared");
+        assert!(!state.report("q", 2, Some("a"), Some("swipe")), "unchanged");
+        assert!(!state.report("q", 2, Some("a"), Some("sideways")), "not a mode");
+        assert!(state.report("q", 2, None, None), "cleared");
         assert_eq!(state.selection, None);
         assert_eq!(state.mode.as_deref(), Some("swipe"));
+    }
+
+    #[test]
+    fn a_generation_a_report_made_names_its_page_until_the_next_change() {
+        let mut state = ViewState::default();
+        state.show(shown("map"));
+        assert!(state.json()["reportedBy"].is_null(), "the agent's change");
+        assert!(state.report("p", 1, Some("a"), None));
+        assert_eq!(state.json()["reportedBy"], "p");
+        assert!(
+            !state.report("q", 1, Some("b"), None),
+            "another page's report of the generation before"
+        );
+        assert_eq!(state.json()["reportedBy"], "p");
+        state.refresh();
+        assert!(state.json()["reportedBy"].is_null());
     }
 
     #[test]

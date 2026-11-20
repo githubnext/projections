@@ -114,6 +114,8 @@ export function useFitPlan<T>(
     needs: new Map<string, number>(),
     ceilings: new Map<string, number>(),
     stale: false,
+    fresh: false,
+    regionWidths: new Map<Element, number>(),
     steps: 0,
     burst: '',
   })
@@ -127,7 +129,7 @@ export function useFitPlan<T>(
   useLayoutEffect(() => {
     const element = bar.current
     if (!element) return
-    const {sign, find, lock: lockOf, ceiling, measure, hysteresis, shift, carry, need, pending} = latest.current
+    const {sign, find, lock: lockOf, ceiling, measure, hysteresis, shift, carry, need, pending, regions} = latest.current
     const m = memo.current
     if (m.key !== key) {
       m.key = key
@@ -160,6 +162,7 @@ export function useFitPlan<T>(
       void later.then(() => {
         if (memo.current.key !== key || memo.current.plans !== plans) return
         if (shift) memo.current.stale = true
+        memo.current.fresh = true
         send({type: 'rendered'})
       })
     if (ceiling) m.ceilings.set(sign(plan), ceiling(element, plan))
@@ -175,19 +178,24 @@ export function useFitPlan<T>(
       allowed: lock,
     })
     // Trying an unmeasured plan always adds information. Switching between measured plans could only repeat if
-    // measurements disagreed from one render to the next, so a burst of those settles; it never settles on a plan
-    // known not to fit while one that fits is known.
+    // measurements disagreed from one render to the next, so a burst of those switches settles; it never settles on a
+    // plan known not to fit while one that fits is known. A change from outside (a region resized since the bar settled,
+    // content that finished rendering) starts a new burst.
     const fits = (candidate: T) => (needOf(candidate) ?? Infinity) <= width + 0.5
     const burst = `${key}:${Math.round(width)}`
-    if (m.burst !== burst) {
+    if (m.burst !== burst || m.fresh) {
       m.burst = burst
       m.steps = 0
+      m.fresh = false
     }
     const known = needOf(plans[target]!) !== undefined
-    const switches = known ? ++m.steps : m.steps
+    const switches = known && target !== index ? ++m.steps : m.steps
     if (target !== index && (!known || switches <= 4 || (!fits(plan) && switches <= 4 + plans.length)))
       send({type: 'tried', plan: plans[target]!})
-    else send({type: 'fitted', plan, locked: Boolean(lock)})
+    else {
+      m.regionWidths = new Map([...element.querySelectorAll(regions)].map(region => [region, region.getBoundingClientRect().width]))
+      send({type: 'fitted', plan, locked: Boolean(lock)})
+    }
   }, [bar, send, actor, plans, plan, index, key, state.width, state.run])
 
   // Once a plan settles, the bar says at what width, so a test can wait for it.
@@ -204,8 +212,13 @@ export function useFitPlan<T>(
     const element = bar.current
     if (!element) return
     const resize = new ResizeObserver(entries => {
-      // A region that resized changed what the shown plan needs.
-      if (latest.current.shift && entries.some(entry => entry.target !== element)) memo.current.stale = true
+      // A region that resized changed what the shown plan needs; one that isn't as wide as when the bar settled changed
+      // from outside, not as part of the plan it settled on.
+      const m = memo.current
+      const regions = entries.filter(entry => entry.target !== element)
+      if (latest.current.shift && regions.length) m.stale = true
+      if (regions.some(({target}) => Math.abs(target.getBoundingClientRect().width - (m.regionWidths.get(target) ?? NaN)) >= 0.5))
+        m.fresh = true
       send({type: 'observed'})
     })
     observer.current = resize

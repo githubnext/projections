@@ -105,6 +105,45 @@ test("a link's source dot takes its line's color while the link is hovered or se
   }
 })
 
+test("a link's origin dot shows its ring color where later links leave the same point", async ({page}) => {
+  const renderer = await openRenderer(page, {renderer: 'dependency-injection', extraction: after})
+  // A link whose origin a later link shares: the later link's dot is drawn after it.
+  const shared = await renderer.frame.locator('.di-link-origins').evaluate(layer => {
+    const copies = [...layer.querySelectorAll<SVGCircleElement>('.di-link-origin-ring')]
+    const at = (copy: SVGCircleElement) => `${copy.getAttribute('cx')},${copy.getAttribute('cy')}`
+    const first = copies.find((copy, index) => copies.slice(index + 1).some(later => at(later) === at(copy)))
+    return first?.getAttribute('data-projections-ring-with') ?? null
+  })
+  expect(shared, 'the fixture has links leaving a card at one point').not.toBeNull()
+  await renderer.hover(shared)
+  const ring = renderer.frame.locator(`.di-link-origin-ring[data-projections-ring-with="${shared}"]`)
+  const read = () => ring.evaluate(dot => getComputedStyle(dot).fill)
+  await expect.poll(read, 'the hovered link takes the ring').not.toBe('rgba(0, 0, 0, 0)')
+  const fill = await read()
+  // The painted pixel at the dot's centre, from a screenshot: what a person sees, not what the style says.
+  const box = (await ring.boundingBox())!
+  const shot = await page.screenshot({clip: {x: box.x + box.width / 2, y: box.y + box.height / 2, width: 1, height: 1}})
+  const pixel = await page.evaluate(async data => {
+    const image = new Image()
+    image.src = `data:image/png;base64,${data}`
+    await image.decode()
+    const canvas = document.createElement('canvas')
+    canvas.width = image.width
+    canvas.height = image.height
+    const context = canvas.getContext('2d')!
+    context.drawImage(image, 0, 0)
+    return [...context.getImageData(0, 0, 1, 1).data.slice(0, 3)]
+  }, shot.toString('base64'))
+  const expected = fill
+    .match(/\d+(\.\d+)?/g)!
+    .slice(0, 3)
+    .map(Number)
+  expect(
+    pixel.every((channel, index) => Math.abs(channel - expected[index]!) <= 8),
+    `the dot is painted ${pixel.join(',')}, the ring is ${expected.join(',')}`,
+  ).toBe(true)
+})
+
 /** The link's source end, with room around it. */
 async function clipAround(ring: Locator) {
   const dot = (await ring.boundingBox())!

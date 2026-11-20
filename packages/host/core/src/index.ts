@@ -122,6 +122,8 @@ export type {ProjectionStageProps} from './stage.js'
 export type {PaneArrangement} from './stage/arrangement.js'
 export type {PaneEdge, PaneLabels} from './stage/layout.js'
 export {useComparisonPair} from './pair.js'
+export {comparisonSessionDefaults, useComparisonSession} from './comparison-session.js'
+export type {ComparisonSessionOptions, ComparisonSessionSettings} from './comparison-session.js'
 export type {ComparisonPair, ComparisonPairOptions, ExtractionChoice, PairOutcome} from './pair.js'
 export {
   clampMode,

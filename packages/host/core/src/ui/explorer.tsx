@@ -1,4 +1,3 @@
-import {useCallback, useRef, useState} from 'react'
 import {CircleAlert} from 'lucide-react'
 import {ComparisonError} from '../compare.js'
 import {useComparisonPair} from '../pair.js'
@@ -6,8 +5,7 @@ import type {ComparisonPairOptions} from '../pair.js'
 import {LoadingStatus} from '../loading.js'
 import {ProjectionView} from './view.js'
 import type {ProjectionViewProps} from './view/props.js'
-import type {ComparisonMode} from '../modes.js'
-import type {Highlighting} from '../projection.js'
+import {useComparisonSession} from '../comparison-session.js'
 import {Alert, AlertDescription, AlertTitle} from './components/alert.js'
 import {Button} from './components/button.js'
 import {ScopedRoot} from './components/scoped-root.js'
@@ -72,7 +70,10 @@ export interface ComparisonExplorerProps
       | 'utility'
       | 'fill'
       | 'className'
-    > {}
+    > {
+  /** The scope the explorer starts in: the definition's `presentation.changesOnly`, else Changes (`useComparisonSession`). */
+  initialChangesOnly?: boolean
+}
 
 /**
  * The default pair picker: lets a user choose any two extractions from a set
@@ -83,41 +84,9 @@ export interface ComparisonExplorerProps
  */
 export function ComparisonExplorer(props: ComparisonExplorerProps) {
   const pair = useComparisonPair(props)
-  const callbacks = useRef(props)
-  callbacks.current = props
   const colorMode = useColorMode(props.colorMode)
-  // The view unmounts while a new pair is computed, so the explorer keeps the uncontrolled mode and divider.
-  // Undefined until chosen: the renderer's default mode applies.
-  const [mode, setMode] = useState<ComparisonMode | undefined>(props.initialMode ?? pair.presentation?.mode)
-  const [swipe, setSwipe] = useState(0.5)
-  const [highlighting, setHighlighting] = useState<Highlighting>(pair.presentation?.highlighting ?? 'animated')
-  const [changesOnly, setChangesOnly] = useState(pair.presentation?.changesOnly ?? true)
-  const [search, setSearch] = useState('')
-  const settings = {
-    highlighting: props.highlighting ?? highlighting,
-    onHighlightingChange: (value: Highlighting) => {
-      setHighlighting(value)
-      callbacks.current.onHighlightingChange?.(value)
-    },
-    changesOnly: props.changesOnly ?? changesOnly,
-    onChangesOnlyChange: (value: boolean) => {
-      setChangesOnly(value)
-      callbacks.current.onChangesOnlyChange?.(value)
-    },
-    search: props.search ?? search,
-    onSearchChange: (value: string) => {
-      setSearch(value)
-      callbacks.current.onSearchChange?.(value)
-    },
-  }
-  const changeMode = useCallback((value: ComparisonMode) => {
-    setMode(value)
-    callbacks.current.onModeChange?.(value)
-  }, [])
-  const changeSwipe = useCallback((value: number) => {
-    setSwipe(value)
-    callbacks.current.onSwipePositionChange?.(value)
-  }, [])
+  // The view remounts while a new pair is computed, so the session above it keeps the settings across pairs.
+  const session = useComparisonSession({...props, presentation: pair.presentation})
   const {after, outcome, subject, document, resolution} = pair
   const fill = props.fill !== false
   if (!after || !document)
@@ -202,17 +171,11 @@ export function ComparisonExplorer(props: ComparisonExplorerProps) {
           {...(props.progress !== undefined ? {progress: props.progress} : {})}
           {...(props.playing !== undefined ? {playing: props.playing} : {})}
           {...(props.onPlayingChange ? {onPlayingChange: props.onPlayingChange} : {})}
-          {...(props.loop !== undefined ? {loop: props.loop} : {})}
-          {...(props.initialLoop !== undefined ? {initialLoop: props.initialLoop} : {})}
-          {...(props.onLoopChange ? {onLoopChange: props.onLoopChange} : {})}
           {...(props.initialHolds ? {initialHolds: props.initialHolds} : {})}
-          {...(props.connector !== undefined ? {connector: props.connector} : {})}
-          {...(props.initialConnector !== undefined ? {initialConnector: props.initialConnector} : {})}
-          {...(props.onConnectorChange ? {onConnectorChange: props.onConnectorChange} : {})}
+          {...session}
           renderers={pair.renderers}
           rendererDocuments={pair.rendererDocuments}
           presentation={pair.presentation}
-          {...settings}
           toolbarStart={picker}
           fill={fill}
           {...(comparator ? {comparator} : {})}
@@ -229,10 +192,6 @@ export function ComparisonExplorer(props: ComparisonExplorerProps) {
           {...(props.details ? {details: props.details} : {})}
           {...(props.evidenceLink ? {evidenceLink: props.evidenceLink} : {})}
           {...(props.controllerRef ? {controllerRef: props.controllerRef} : {})}
-          {...((props.mode ?? mode) ? {mode: (props.mode ?? mode)!} : {})}
-          onModeChange={changeMode}
-          swipePosition={props.swipePosition ?? swipe}
-          onSwipePositionChange={changeSwipe}
           {...(props.initialView ? {initialView: props.initialView} : {})}
           {...(props.playbackInViews ? {playbackInViews: props.playbackInViews} : {})}
         />

@@ -203,6 +203,19 @@ need only be ringed. Use them for a renderer's own pixel tests; the harness runs
 them for every built-in renderer and an adversarial fixture, and checks that a
 ring inside or outside its item is still named.
 
+## Optical alignment
+
+`opticalInsets(page, {surface, ink})` measures how far a label's text (`ink`)
+sits from the painted edge of the pill or chip behind it (`surface`, which may
+match several elements painted as one, such as a fill and a hover tint), on each
+side, in CSS px, from rendered pixels rather than box metrics: pictures with and
+without the text give its glyphs' bounds, and without the surface's paint too,
+the surface's; antialiased edges count for the part of them that is covered. To
+align a pill optically, give it a label that starts with a capital E and ends
+with a capital H and check that the space above the E, below it, left of its
+stem and right of the H's right stem match. Take it at a device scale of 2 or
+more, and divide by the drawing's own scale when it is zoomed or fitted.
+
 ## Your own assertions
 
 ```ts

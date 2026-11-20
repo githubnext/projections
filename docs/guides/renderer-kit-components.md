@@ -333,10 +333,12 @@ export function View(props: RendererProps) {
   boundary, and a row paints the same wherever the sort puts it. Where a gray
   line and a change-colored one meet, the change's hue wins: a row whose lines
   carry its hue (added, removed, renamed) sits above a row drawn neutral because
-  it holds changed cells, which sits above unchanged rows, the heading and the
-  frame, so the line between a changed row and any neighbour, and the frame's
-  edge beside it, is the change's. In a `Group` the table is the body: the group
-  draws no edge of its own and its header band joins the table's frame.
+  it holds changed cells, which sits above unchanged rows and the frame, so the
+  line between a changed row and any neighbour, and the frame's edge beside it,
+  is the change's. The heading is the frame's: its rule is the frame's color and
+  wins over any row under it, changed or not. In a `Group` the table is the
+  body: the group draws no edge of its own and its header band joins the table's
+  frame.
 - **Changes scope.** With `scope` (`RendererProps.scope`, which `useTableProps`
   passes), each run of rows the scope doesn't show, in the sorted order, folds
   into one `Fold` row ("12 unchanged languages", with `noun`) that opens in

@@ -8,8 +8,10 @@
  *
  * Where two lines meet, a change's hue wins over gray: rows are layered by what their lines say. A changed row whose
  * lines carry its hue (`pk-region` with `data-change`: added, removed, renamed, or modified with no changed cells)
- * sits above everything; a row drawn neutral because it holds changed cells (nesting.css) above the unchanged rows,
- * the heading and the foot; a ringed row above all of them while ringed. Every hue is mixed with its line's neutral
+ * sits above the other rows; a row drawn neutral because it holds changed cells (nesting.css) above the unchanged rows
+ * and the foot; a ringed row above all rows while ringed. The heading is the frame's: its lines, the rule under it
+ * included, are the frame's color and sit above every row, so a changed row under it keeps its hue on its own edges
+ * but never on the heading's. Every hue is mixed with its line's neutral
  * color by `--emphasis`, so nothing looks changed at the endpoints. The database renderer's rows follow the same rule.
  */
 .pk .pk-table-scroll {
@@ -51,7 +53,7 @@
 /* The heading row: a quiet band, the frame's top edge and corners, its divider over the first row's line. */
 .pk .pk-table > .pk-table-head {
   --pk-table-line: var(--divider);
-  z-index: 1;
+  z-index: 5;
   border-radius: var(--projections-radius) var(--projections-radius) 0 0;
   background: color-mix(in srgb, var(--band) 45%, var(--raised));
 }

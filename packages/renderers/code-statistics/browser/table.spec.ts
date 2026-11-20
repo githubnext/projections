@@ -126,7 +126,8 @@ function tableLineProbes(): LineProbe[] {
     const y = box.top + box.height / 2
     const edge = over(rgb(style.borderRightColor), surface, opacity)
     const gray = {above: line(above, 'borderBottomColor'), below: line(below, 'borderTopColor')}
-    if (!fading(above))
+    // The rule under the heading is the heading's, the frame's color (checked on its own below).
+    if (!fading(above) && !above?.matches('.pk-table-head'))
       probes.push({
         gray: gray.above,
         what: `the line above ${name}`,
@@ -227,3 +228,61 @@ for (const comparisonMode of ['diff', 'animated'] as const)
         }
       expect(failures).toEqual([])
     })
+
+/**
+ * The heading's lines, in the renderer document: the rule under it and the frame's top and left edges beside it, each
+ * a CSS pixel either side, for `pixelsAt`.
+ */
+function headingLines() {
+  const head = document.querySelector('.pk-table-head')!.getBoundingClientRect()
+  const scroll = document.querySelector('.pk-table-scroll')!.getBoundingClientRect()
+  const x = head.left + Math.min(300, head.width / 2)
+  return {
+    first: document.querySelector('.pk-table > [data-entity-id]')?.getAttribute('data-change') ?? 'unchanged',
+    points: [
+      {x, y: head.bottom - 0.5, across: 'y' as const},
+      {x, y: head.top + 0.5, across: 'y' as const},
+      {x: scroll.left + 0.5, y: head.top + head.height / 2, across: 'x' as const},
+    ],
+  }
+}
+
+// The heading is the frame's: the rule under it is the frame's color, never a row's, whichever row the sort puts under
+// it, changed or not.
+for (const colorMode of ['light', 'dark'] as const)
+  test(`${colorMode}: the rule under the heading is the frame's color`, async ({page}) => {
+    test.setTimeout(120_000)
+    test.skip(
+      !Number.isInteger(await page.evaluate(() => devicePixelRatio)),
+      'At a fractional pixel ratio a one-pixel line is antialiased into the fills beside it',
+    )
+    const inspector = harnessInspector()
+    const firsts = new Set<string>()
+    for (const sort of ['none', 'code:descending', 'name:ascending', 'files:ascending'])
+      for (const sortChangesFirst of [false, true]) {
+        const stage = await openStage(page, inspector, {
+          scenario: 'code-statistics/gateway',
+          comparisonMode: 'diff',
+          colorMode,
+          options: {chart: 'table', sort, sortChangesFirst},
+        })
+        await stage.measure('settle')
+        await page.mouse.move(0, 0)
+        const {first, points} = await stage.frame.locator('body').evaluate(headingLines)
+        firsts.add(first)
+        const width = (await stage.iframe.boundingBox())!.width
+        const png = (await stage.iframe.screenshot()).toString('base64')
+        const [rule, top, side] = (await page.evaluate(pixelsAt, {png, width, points})).map(line => {
+          // The line's own pixel: the darkest in light, the lightest in dark, against the band beside it.
+          const weight = (pixel: number[]) => pixel.reduce((sum, channel) => sum + channel, 0)
+          return line.reduce((best, pixel) =>
+            (colorMode === 'light' ? weight(pixel) < weight(best) : weight(pixel) > weight(best)) ? pixel : best,
+          )
+        })
+        const where = `${sort}${sortChangesFirst ? ', changes first' : ''} (${first} row under the heading)`
+        expect(rule, `${where}: the rule under the heading against the frame's left edge`).toEqual(side)
+        expect(top, `${where}: the frame's top edge against its left edge`).toEqual(side)
+      }
+    // The sorts put both an unchanged or neutral row and a changed one under the heading.
+    expect([...firsts].some(change => change === 'removed' || change === 'added')).toBe(true)
+  })

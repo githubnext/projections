@@ -1,39 +1,41 @@
 # Proposal: distributing Projections' agent skills
 
-Status: **proposal**. Nothing here is implemented beyond what [Today](#today)
-describes.
+Status: **proposal**. Nothing here is implemented yet beyond what
+[Today](#today) describes.
 
-Agent skills are part of the product, like the CLI and the npm package: a coding
-agent in someone else's repository needs the authoring guide that matches the
-Projections they have installed, without cloning this repository. This page
-compares the ways skills reach people and recommends one plan.
+Agent skills are part of the product, just like the CLI and the npm package. A
+coding agent working in someone else's repository needs an authoring guide that
+matches the version of Projections they have installed, without having to clone
+this repository. This proposal compares the distribution channels available and
+recommends a plan.
 
 ## Today
 
 - **One consumer skill, shipped in the CLI.** `projections init` writes
-  `projections/SKILL.md` in `.agents/skills/` (or the skills directory that
-  already holds it, an existing `.claude/skills/` or `.github/skills/`, or
-  `--skills-dir`), `--claude` links or copies it into `.claude/skills/` for
-  Claude Code, and `projections help authoring` prints the same guide. Its
-  template is
-  [`packages/cli/templates/SKILL.md`](../../../packages/cli/templates/SKILL.md);
-  the CLI fills in the schemas, vocabularies and built-in renderers it actually
-  supports, so the skill always matches the binary. The skill records the CLI's
-  version in `metadata.projections-version`; every run of `init` updates a skill
-  that has it, and `projections doctor` warns when it is from another version.
-  [Agent skills](../../setup/agent-skills.md) has the details and which agents
-  read which directory, from their vendors' documentation.
-  [Create a projection](../../agents/create-projection.md) is generated from it.
-- **Contributor skills** for working on Projections itself live in
-  [`.agents/skills/`](../../../.agents/skills/) (today,
-  `design-projection-animation`), marked `metadata.internal: "true"` so the
-  `skills` CLI doesn't offer them to consumers. The repository's command line,
-  [`tools`](../../../tools/cli/README.md#agents), generates skills for its own
+  `projections/SKILL.md` into `.agents/skills/` (or reuses an existing
+  `.claude/skills/` or `.github/skills/` directory, or whatever `--skills-dir`
+  specifies). Passing `--claude` links or copies it into `.claude/skills/` for
+  Claude Code, and `projections help authoring` prints the exact same guide. The
+  template lives at
+  [`packages/cli/templates/SKILL.md`](../../../packages/cli/templates/SKILL.md),
+  and the CLI fills in the schemas, vocabularies, and built-in renderers it
+  actually supports so the skill always matches the binary. The skill records
+  that version in `metadata.projections-version`: every `init` run refreshes a
+  skill carrying that field, and `projections doctor` warns if it drifts from
+  the installed CLI. See [Agent skills](../../setup/agent-skills.md) for the
+  full vendor directory table;
+  [Create a projection](../../agents/create-projection.md) is generated from the
+  same template.
+- **Contributor skills.** Skills for working on Projections itself live in
+  [`.agents/skills/`](../../../.agents/skills/) (currently
+  `design-projection-animation`) and are marked `metadata.internal: "true"` so
+  the `skills` CLI won't offer them to consumers. The repo's own
+  [`tools`](../../../tools/cli/README.md#agents) CLI generates skills for its
   commands (`npm run tools -- skills add`) and registers its MCP server
-  (`mcp add`); that serves contributors, not consumers.
-- **Gaps.** People can't get the skill before they install the CLI, and the
-  skill (about 570 lines) is over the open standard's advice to keep `SKILL.md`
-  under 500 lines and move detail to referenced files
+  (`mcp add`), both aimed at contributors rather than consumers.
+- **Gaps.** Right now, people can't install the skill before installing the CLI.
+  At about 570 lines, `SKILL.md` also exceeds the open standard's guidance to
+  keep it under 500 lines and move detail into referenced files
   ([specification](https://agentskills.io/specification#progressive-disclosure)).
 
 ## The channels
@@ -49,75 +51,79 @@ compares the ways skills reach people and recommends one plan.
 | **MCP-served docs**                                                                                                                                                                  | `projections mcp` already sends `instructions` and the tools. MCP also defines [resources](https://modelcontextprotocol.io/specification/2025-06-18/server/resources) and [prompts](https://modelcontextprotocol.io/specification/2025-06-18/server/prompts)                                                                                                                                                                                                       | Exact: served by the binary                                                                                                                                                                                                                                                                                                            | Next: cheap, and reaches agents with no skill support                |
 | **[Agent Skills standard](https://agentskills.io/specification)**                                                                                                                    | `name` matches the directory; `description` ≤ 1024 characters; optional `license`, `compatibility`, `metadata` (string map); `references/` loaded on demand                                                                                                                                                                                                                                                                                                        | `metadata` can carry a version                                                                                                                                                                                                                                                                                                         | The format every channel above reads                                 |
 
-`gh skill` and `npx skills` both find a skill at `skills/<name>/SKILL.md` in a
-public repository. `gh skill` skips hidden directories; the `skills` CLI also
-reads `.agents/skills/` and `.claude/skills/` but skips skills marked
-`metadata.internal`, so contributor skills stay out of consumers' installs.
+Both `gh skill` and `npx skills` look for `skills/<name>/SKILL.md` in a public
+repository. `gh skill` ignores hidden directories, while the `skills` CLI also
+scans `.agents/skills/` and `.claude/skills/` but skips anything marked
+`metadata.internal`, keeping contributor skills out of consumer installs.
 
 ## Recommendation
 
-**The CLI stays the source of truth; the public repository publishes the same
-skill, generated, where skill managers look.**
+**Keep the CLI as the source of truth, and publish the same generated skill in
+the public repository where skill managers look for it.**
 
-1. **Where skills live.** The consumer skill is generated into
-   `skills/projections/SKILL.md` at the repository root from
-   `projections help authoring` by `npm run docs:generate`, and
-   `npm run docs:check` fails when it is stale, as for
-   [Create a projection](../../agents/create-projection.md). The template stays
-   in `packages/cli/templates/`. Contributor skills stay in `.agents/skills/`,
-   marked internal.
-2. **What consumers run.** Normally nothing new: `projections init` writes the
-   skill. Before installing the CLI, or to manage skills with other tools:
-   `gh skill install githubnext/projections projections` or
-   `npx skills add githubnext/projections`. Both work from the layout in step 1.
-3. **Versions stay in sync** because the published copy is generated from the
-   CLI at the same commit, and release tags are CLI releases, so `gh skill`'s
-   default (latest release) matches the latest CLI. The skill records its
-   version in `metadata.projections-version`, and its first step tells the agent
-   to prefer `projections help authoring` when the installed CLI is another
-   version.
-4. **Updates reach consumers** through `projections doctor`, which warns when a
-   project's skill was written by another CLI version and names the command that
-   refreshes it (`projections init --skill`, or a `projections skills update`);
-   people who installed with `gh skill` or `npx skills` use those tools'
-   `update`.
+1. **Where skills live.** `npm run docs:generate` generates the consumer skill
+   into `skills/projections/SKILL.md` at the repository root from
+   `projections help authoring`, and `npm run docs:check` fails if it falls out
+   of date (just like [Create a projection](../../agents/create-projection.md)).
+   The template stays in `packages/cli/templates/`, and contributor skills stay
+   in `.agents/skills/` marked internal.
+2. **What consumers run.** Most people don't need to do anything new:
+   `projections init` already writes the skill. If they want the skill before
+   installing the CLI — or prefer to manage skills with a dedicated tool — they
+   can run `gh skill install githubnext/projections projections` or
+   `npx skills add githubnext/projections`, both of which work automatically
+   with the layout above.
+3. **Keeping versions in sync.** Because the published copy is generated from
+   the CLI at the same commit and release tags correspond to CLI releases,
+   `gh skill`'s default (latest release) tracks the latest CLI. The skill stores
+   its version in `metadata.projections-version`, and its first step tells the
+   agent to prefer `projections help authoring` whenever the installed CLI is a
+   different version.
+4. **Delivering updates.** `projections doctor` warns when a project's skill
+   comes from a different CLI version and prints the refresh command
+   (`projections init --skill`, or a future `projections skills update`). Users
+   who installed via `gh skill` or `npx skills` can run those tools' own
+   `update` commands.
 
 ### Now
 
-Done: `implement-projection` folded into the `projections` skill,
-`design-projection-animation` moved here as a contributor skill, and `init`
-writes to `.agents/skills/` by default, records the skill's version, keeps it up
-to date and adds it for Claude Code with `--claude`.
+Already done: `implement-projection` has been folded into the `projections`
+skill, `design-projection-animation` lives here as a contributor skill, and
+`init` writes to `.agents/skills/` by default, stamps the skill's version, keeps
+it refreshed, and supports `--claude` for Claude Code.
 
-Next, before the repository is public:
+Next, before making the repository public:
 
-- Generate `skills/projections/SKILL.md` and gate it with `docs:check`.
-- Document the three install routes on
+- Generate `skills/projections/SKILL.md` and gate it in CI with `docs:check`.
+- Document all three install paths on
   [Build your first projection](../../setup/first-projection.md).
 
 ### Later
 
-- Serve the authoring guide and agent prompts from `projections mcp` as
-  resources and prompts.
-- Split the skill to fit the standard: a short `SKILL.md` that routes to
-  `references/` (extractor, renderer, comparator), so `init` writes a directory.
-- Publish an Agent Plugins 1.0 plugin (the skill plus an `mcp.json` running
-  `projections mcp`) and list it in a marketplace once the CLI installs
-  publicly.
-- Ship a renderer-authoring skill in `@githubnext/projections` when npm skill
-  sync is stable.
+- Expose the authoring guide and agent prompts as MCP resources and prompts from
+  `projections mcp`.
+- Trim `SKILL.md` to fit the standard by turning it into a short router that
+  points to `references/` (extractor, renderer, comparator), with `init` writing
+  the directory.
+- Publish an Agent Plugins 1.0 plugin (bundling the skill with an `mcp.json`
+  that runs `projections mcp`) and list it in a marketplace once the CLI is
+  publicly installable.
+- Ship a renderer-authoring skill inside `@githubnext/projections` once npm
+  skill sync stabilizes.
 
 ## Open questions
 
-1. ~~**Default location for `init`.**~~ Decided: `.agents/skills/`, which
-   Copilot, Codex, Cursor and Gemini CLI read, with `--claude` for Claude Code
+1. ~~**Default location for `init`.**~~ Decided: `.agents/skills/` (read by
+   Copilot, Codex, Cursor, and Gemini CLI), with `--claude` for Claude Code
    ([agent skills](../../setup/agent-skills.md)).
-2. **One skill or several.** One `projections` entry point routing to
-   references, or separate skills (set up, extractor, renderer, comparator) that
-   trigger more precisely but cost more description tokens each session?
-3. **A `projections skills` command,** or only `init --skill` and `doctor`?
-4. **Marketplaces at launch.** List a plugin in GitHub's and Anthropic's
-   marketplaces at launch, or wait for demand?
-5. **Telemetry.** skills.sh ranks by the `skills` CLI's install telemetry, which
-   we don't control. Is that acceptable as the public signal, or should install
-   docs lead with `gh skill`?
+2. **One skill or several.** Should we keep a single `projections` entry point
+   that routes to reference files, or split it into separate skills (setup,
+   extractor, renderer, comparator) that trigger more accurately at the cost of
+   more description tokens per session?
+3. **A `projections skills` command.** Do we need a dedicated subcommand, or are
+   `init --skill` and `doctor` enough?
+4. **Marketplaces at launch.** Should we list a plugin in GitHub's and
+   Anthropic's marketplaces on day one, or wait for demand?
+5. **Telemetry.** skills.sh ranks packages using the `skills` CLI's install
+   telemetry, which we don't control. Is that acceptable as a public signal, or
+   should our install docs lead with `gh skill`?

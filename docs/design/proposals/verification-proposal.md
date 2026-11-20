@@ -1,10 +1,12 @@
 # Proposal: structural verification
 
-Status: **proposal**. Nothing here is implemented. It records the premise, its
-limits and a phased plan for letting users assert things about extractions.
+Status: **proposal**. Nothing here is implemented yet. This document lays out
+the premise, boundaries, and phased plan for letting teams write assertions over
+extractions.
 
-An extraction is a deterministic, schema-typed model of a system at one
-revision. That makes it something users can check, not just look at:
+Because an extraction is a deterministic, schema-typed model of a system at a
+single revision, you can do more than look at it — you can check rules against
+it:
 
 - "`@acme/ui` never depends on `@acme/db`, directly or transitively."
 - "Every scoped service in `payments` is resolved through an interface."
@@ -12,97 +14,97 @@ revision. That makes it something users can check, not just look at:
 - "No Tetragon policy becomes enforcing in a pull request without an owner
   label."
 
-These checks are not test automation, static analysis or formal verification.
-This document calls them **structural verification**: checking the shape a
-system assembles into, not how it behaves.
+These aren't unit tests, source linters, or formal proofs. Here we call them
+**structural verification**: checking the shape a system assembles into rather
+than how it behaves at runtime.
 
 ## What it is, and isn't
 
-- **Not test automation.** Tests execute _behavior_: they drive paths through
-  the code and check outputs. Verification evaluates assertions over a model and
-  runs no repository code while doing so.
-- **Not static analysis of source.** Rules reason over the extraction, not the
-  syntax that produced it. The same rule works whether the model came from a
-  parser, a compiler API or a constructed container.
-- **Not formal verification.** There are no semantics and no proofs; the result
-  is only as strong as the model it inspects (see
+- **Not test automation.** Tests exercise _behavior_ by running code paths and
+  checking outputs. Verification evaluates assertions over an extracted model
+  without executing any repository code.
+- **Not static analysis of source.** Rules inspect the extracted model rather
+  than raw syntax, so the same rule works whether the model came from a parser,
+  a compiler API, or an assembled container.
+- **Not formal verification.** There are no formal semantics or mathematical
+  proofs; a verdict is only as strong as the underlying model (see
   [Soundness](#soundness-completeness-and-scope)).
 
-Extraction itself may execute code. The dependency-injection extractors
-construct the real container, `efcore-schema` runs application startup,
-`spring-di` builds the application context and `terraform-infrastructure` runs
-`terraform plan`. That execution is _assembly_: it bootstraps the system far
-enough to observe its structure, then stops. Verification inherits whatever the
-extraction observed, including its dependence on execution inputs.
+Extraction itself can still run code — DI extractors build the real container,
+`efcore-schema` runs application startup, `spring-di` builds the application
+context, and `terraform-infrastructure` runs `terraform plan`. That execution is
+just _assembly_: bootstrapping the system far enough to inspect its structure,
+then stopping. Verification inherits whatever that assembly observed, including
+its dependence on execution inputs.
 
 ### Prior art
 
-Architecture conformance checking and "architectural fitness functions" are
-established ideas: dependency-cruiser, Nx module boundaries,
-eslint-plugin-boundaries, ArchUnit, import-linter, deptrac and jQAssistant. The
-closest analogue is **policy as code over structured models**, such as
-OPA/Conftest evaluating Terraform plans. Each of those is tied to one ecosystem
-or one kind of model.
+Architecture conformance checks and "architectural fitness functions" are well
+established: dependency-cruiser, Nx module boundaries, eslint-plugin-boundaries,
+ArchUnit, import-linter, deptrac, and jQAssistant. The closest relative is
+**policy as code over structured models**, such as OPA/Conftest checking
+Terraform plans. Each of those tools, however, is tied to one ecosystem or one
+model format.
 
 ## Why Projections is a good home for it
 
-1. **One model across ecosystems.** A rule written against `graph/v0`
-   `depends-on` relationships applies to npm workspaces, Cargo, NuGet and any
-   custom extractor that emits the same schema. The schema families are the
-   portable vocabulary.
-2. **Rules about change, not only state.** Projections already computes identity
-   and correspondence between revisions. Rules can therefore target the
-   _transition_ a pull request makes ("no _added_ edge from `ui` to `db`"), not
-   just the end state. Existing tools mostly check the current state.
-3. **Violations drawn on the projection.** A failing rule can mark the offending
-   entities and relationships in the renderer, the same way change emphasis
-   does, instead of printing a line of text.
-4. **Safe, deterministic evaluation.** Rules are evaluated by the Engine (a
-   pure, sandboxed core) over documents that may come from CI artifacts.
-   Evaluation needs no trust and gives the same verdict for the same inputs.
+1. **One model across ecosystems.** A rule written over `graph/v0` `depends-on`
+   relationships works across npm workspaces, Cargo, NuGet, and any custom
+   extractor emitting that schema. The schema families give you a portable
+   vocabulary.
+2. **Rules about change, not just state.** Projections already computes identity
+   and correspondence between revisions, so rules can target the _transition_ a
+   pull request introduces ("no _added_ edge from `ui` to `db`") rather than
+   only the final state. Most existing tools only inspect the current state.
+3. **Violations drawn right on the projection.** Instead of printing a wall of
+   text, a failing rule can highlight the offending entities and relationships
+   inside the renderer using the same visual channels as change emphasis.
+4. **Safe, deterministic evaluation.** The Engine — a pure, sandboxed core —
+   evaluates rules over documents that may come from CI artifacts. Evaluation
+   requires no trust and produces the same verdict for the same inputs.
 
 ## Soundness: completeness and scope
 
-The premise is sound only if the result reports what the model can and can't
-support.
+Structural verification is only trustworthy if it is honest about what the model
+can and cannot prove.
 
 ### Positive and negative claims
 
 - **Positive** assertions ("A depends on B", "table `orders` exists") are as
   reliable as the extractor's _precision_.
 - **Negative and universal** assertions ("no path from A to B", "every service
-  has an owner") additionally require the extraction to be _complete_ for the
-  relationship kinds involved. They make a closed-world assumption. Dynamic
-  imports, reflection, code generation and configuration-time wiring can all
-  hide edges from a parser.
+  has an owner") also require the extraction to be _complete_ for the relevant
+  relationship kinds, because they make a closed-world assumption. Dynamic
+  imports, reflection, code generation, and runtime wiring can easily hide edges
+  from a static parser.
 
-A pass must mean "absent from a model that is complete for this relationship
-kind", not "not observed". Otherwise the feature gives false assurance, which is
-worse than none.
+A pass has to mean "absent from a model known to be complete for this
+relationship kind", not merely "we didn't spot it." Otherwise the check offers
+false confidence, which is worse than no check at all.
 
-**Requirement:** extractors declare completeness per entity and relationship
-kind (for example `complete`, `partial` with stated limitations, or `unknown`),
-alongside the existing per-item `confidence` (`authoritative`, `derived`,
-`inferred`) and provenance `limitations`. A negative or universal assertion over
-anything not declared complete yields **inconclusive**, never pass.
+**Requirement:** extractors must declare completeness per entity and
+relationship kind (such as `complete`, `partial` with stated limitations, or
+`unknown`), alongside existing per-item `confidence` (`authoritative`,
+`derived`, `inferred`) and provenance `limitations`. Any negative or universal
+assertion over data not declared complete returns **inconclusive**, never pass.
 
-Execution-based extraction usually helps here. A constructed container is the
-ground truth of what is registered, including reflective, conditional and
-convention-based registrations a parser would miss, so a DI extractor can often
-declare its registrations complete where a source scanner can't.
+Execution-based extraction helps here. A constructed container is the ground
+truth of what is registered — including reflective, conditional, and
+convention-based registrations that a static scanner would miss — so a DI
+extractor can often declare its registrations complete where a parser cannot.
 
 ### Scope: inputs
 
-Execution makes the model depend on its inputs: profiles, environment variables,
-configuration files, feature flags and selected targets. A verdict is therefore
-true **for a given set of extraction inputs**. "Holds under the `production`
-profile" and "holds under `development`" are different claims. Determinism is
-preserved (the same pinned inputs give the same verdict), but every verdict
-reports the inputs and provenance it was evaluated against.
+When extraction runs code, the model depends on its inputs: profiles,
+environment variables, config files, feature flags, and selected targets. A
+verdict therefore holds **for a specific set of extraction inputs**. "Holds
+under the `production` profile" and "holds under `development`" are separate
+claims. Determinism still holds (the same pinned inputs yield the same verdict),
+and every verdict records the inputs and provenance it evaluated against.
 
 ### Outcomes
 
-Every assertion produces one of:
+Every assertion resolves to one of four outcomes:
 
 | Outcome        | Meaning                                                                                                          |
 | -------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -111,106 +113,108 @@ Every assertion produces one of:
 | `inconclusive` | The claim needs completeness or data the extraction doesn't declare. The result says what's missing.             |
 | `error`        | The rule is invalid for this schema, for example an unknown kind or a type mismatch.                             |
 
-A failure's counterexample is always concrete, because it was observed. A pass
-on a negative claim is only as strong as the declared completeness.
+A failure always comes with a concrete counterexample because it was actually
+observed. A pass on a negative claim is only as strong as the extractor's
+declared completeness.
 
 ## Shape of the feature
 
 ### Where rules live
 
-Rules are declarative and live with the projection definition, either as a
-`verify` section in `.github/projections/<id>.json` or as a sibling
-`<id>.rules.json`. They are versioned with the code and read from the base
+Rules are declarative and live beside the projection definition, either inside a
+`verify` section of `.github/projections/<id>.json` or in a sibling
+`<id>.rules.json`. They are versioned with the repository and read from the base
 revision under the same definition policy as everything else, so a pull request
-can't weaken the rules that judge it without that change being visible.
+cannot quietly weaken the rules judging it.
 
 ### Rule vocabulary (first version)
 
-A small built-in vocabulary that covers the common shapes, with no general query
-language at first:
+Version one starts with a small built-in vocabulary covering the most common
+checks, without introducing a general query language yet:
 
-- **Forbidden / required relationship** between selectors (kind, ID pattern,
-  `data` predicates), optionally **transitive** (reachability over chosen
+- **Forbidden or required relationships** between selectors (kind, ID pattern,
+  and `data` predicates), optionally **transitive** (reachability across chosen
   relationship kinds).
-- **Cardinality**, e.g. at most one entity of a kind matching a predicate.
-- **Attribute constraints** on entities or relationships
-  (`data.lifetime != "transient"` for kind `registration` in scope X).
-- **Change rules** over a comparison: constraints on _added_, _removed_ or
+- **Cardinality**, such as at most one entity of a given kind matching a
+  predicate.
+- **Attribute constraints** on entities or relationships (for example,
+  `data.lifetime != "transient"` for kind `registration` in scope X).
+- **Change rules** over a comparison: constraints on _added_, _removed_, or
   _modified_ items (no added `depends-on` from `ui/*` to `db/*`; no removed
   public API without the `breaking-ok` label).
 
-Selectors match IDs and kinds exactly or by glob, never by fuzzy labels, as in
-the rest of the protocol.
+Selectors match IDs and kinds by exact string or glob — never fuzzy labels —
+consistent with the rest of the protocol.
 
 ### Evaluation
 
-The Engine evaluates rules Datalog-style. Transitive reachability, joins between
-entities and relationships, and change rules over a comparison's classified
-items are natural there. CodeQL uses the same approach for code. Evaluation is
-bounded (time, memory, result size), deterministic and pure.
+The Engine evaluates rules in a Datalog-style model, which fits transitive
+reachability, joins between entities and relationships, and change rules over
+classified comparison items (similar to CodeQL). Evaluation is bounded in time,
+memory, and result size, and stays pure and deterministic.
 
-Later, if the vocabulary proves too small, an escape hatch is one of:
+If the built-in vocabulary later turns out to be too narrow, we can pick an
+escape hatch from:
 
-- **CEL** (Common Expression Language): small, sandboxed, and already familiar
-  to Kubernetes and Tetragon users. Good for predicates.
-- **Rego** (OPA): known to platform and security teams, good for policy over
+- **CEL** (Common Expression Language): compact, sandboxed, familiar to
+  Kubernetes and Tetragon users, and well suited to predicates.
+- **Rego** (OPA): familiar to platform and security teams for policy over
   structured documents.
-- **GQL / Cypher**: graph-native, ISO-standardized (GQL), the most expressive
-  for path queries.
-- A **Wasm verifier module** under the same sandbox contract as comparators, for
-  teams that want arbitrary logic.
+- **GQL / Cypher**: graph-native and ISO-standardized (GQL), giving the richest
+  path queries.
+- A **Wasm verifier module** running under the same sandbox contract as
+  comparators, for teams that need arbitrary logic.
 
-The recommendation is to ship the built-in vocabulary first and choose an escape
-hatch from real demand.
+We recommend shipping the built-in vocabulary first and letting real usage tell
+us which escape hatch is needed.
 
 ### Surfaces
 
-- **CLI:** `projections check` (and a focused `projections verify`) evaluates
-  the rules for a revision or a comparison. It exits nonzero on `fail`, and
-  optionally on `inconclusive` with a strict flag, with human output by default
-  and `--json` for tools.
-- **Action and CI:** rules run against the same extractions the artifact
-  carries, and the results go into the artifact as a `verification` document
-  next to the comparison. A pull-request check summarizes the outcomes.
-- **Inspector and hosted view:** a verification panel lists the rules. A failing
-  rule highlights its counterexample in the renderer through the existing
-  annotation and emphasis channels, and an inconclusive rule explains what's
-  missing.
-- **Agents:** the authoring skill teaches agents to add rules alongside a custom
-  projection, and `check` reports rule outcomes with structured errors.
+- **CLI:** `projections check` (and a focused `projections verify`) runs the
+  rules for a revision or comparison, exiting nonzero on `fail` (and optionally
+  on `inconclusive` under a strict flag), with human-readable output by default
+  and `--json` for tooling.
+- **Action and CI:** rules run against the same extractions already in the
+  artifact, writing a `verification` document beside the comparison and
+  summarizing results in a pull-request check.
+- **Inspector and hosted view:** a verification panel lists each rule; clicking
+  a failing rule highlights its counterexample in the renderer via the existing
+  annotation and emphasis channels, while an inconclusive rule explains what
+  completeness or data is missing.
+- **Agents:** the authoring skill teaches agents to write rules alongside custom
+  projections, and `check` returns structured errors for rule outcomes.
 
 ## Plan
 
 1. **Completeness metadata.** Add per-kind completeness to the extraction
-   contract and schemas, and have the built-in extractors declare it honestly
-   (DI containers: registrations complete; dependency graphs from lockfiles:
-   complete for resolved packages; convention-based samples: partial). This is
-   useful on its own: renderers and the Inspector can show coverage.
+   contract and schemas, and update built-in extractors to declare it honestly
+   (DI containers: complete for registrations; lockfile dependency graphs:
+   complete for resolved packages; convention-based samples: partial). This pays
+   off immediately because renderers and the Inspector can display coverage.
 2. **Rule format and evaluator.** Define the rule schema (selectors,
-   relationship and path constraints, cardinality, attributes, change rules) and
-   implement evaluation in the Engine, with the four outcomes and concrete
-   counterexamples. Add conformance vectors in the style of the existing Engine
+   relationship and path constraints, cardinality, attributes, change rules),
+   build evaluation into the Engine with the four outcomes and concrete
+   counterexamples, and add conformance vectors matching the existing Engine
    test vectors.
-3. **CLI and CI.** `check`/`verify`, the `verification` document in artifacts,
-   and the Action reporting results.
-4. **Presentation.** A verification panel and counterexample highlighting in the
-   Inspector and hosted view.
-5. **Escape hatch.** Choose CEL, Rego, GQL or Wasm verifiers from real rules
-   users couldn't express.
+3. **CLI and CI.** Wire up `check`/`verify`, add the `verification` document to
+   artifacts, and report outcomes from the Action.
+4. **Presentation.** Add the verification panel and counterexample highlighting
+   to the Inspector and hosted view.
+5. **Escape hatch.** Choose CEL, Rego, GQL, or Wasm verifiers based on real
+   rules users couldn't express with the built-in vocabulary.
 
 ## Open questions
 
-- **Naming.** "Structural verification", "invariants and rules", "fitness
-  functions", or something else?
-- **Strictness.** Is `inconclusive` a failure in CI by default? Probably not
-  locally and configurable in CI, so incomplete extractors don't make every
-  pipeline red.
-- **Rule location and trust.** Rules come from the base revision, like
-  definitions. Should a pull request be able to _add_ rules that apply to
-  itself, and do head-only rules run when trusted?
-- **Cross-projection rules.** Some useful claims span projections ("every
+- **Naming.** Should we call this "structural verification", "invariants and
+  rules", "fitness functions", or something else?
+- **Strictness.** Should `inconclusive` fail CI by default? Probably not locally
+  and configurable in CI, so partial extractors don't turn every pipeline red.
+- **Rule location and trust.** Rules come from the base revision like
+  definitions. Should a pull request be allowed to _add_ rules that apply to
+  itself, and should head-only rules run when trusted?
+- **Cross-projection rules.** Some valuable checks span projections ("every
   service in the architecture projection has a database in the schema
-  projection"). Is that in scope, and how is identity joined across schemas?
+  projection"). Is that in scope, and how would identity join across schemas?
 - **Inputs as part of the claim.** Should a rule be able to require specific
-  extraction inputs (profiles, targets), so "verified under `production`" is
+  extraction inputs (profiles, targets) so "verified under `production`" is
   enforced rather than incidental?

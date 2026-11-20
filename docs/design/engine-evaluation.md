@@ -1,39 +1,42 @@
 # Projection engine evaluation
 
-Status: adopted from the measured evidence below.
+Status: adopted, based on the measurements below.
 
 ## Decision
 
-Adopt one Rust semantic core compiled to a native executable and browser Wasm.
-The same `EngineRequest`/`EngineResponse` ABI performs raw JSON decoding,
-normalization/validation, explicit matching, canonicalization and comparison. No
-JavaScript semantic implementation or success-shaped fallback is required.
+We will use a single Rust semantic core compiled to both a native executable and
+browser Wasm. The same `EngineRequest`/`EngineResponse` ABI handles raw JSON
+decoding, normalization and validation, explicit matching, canonicalization, and
+comparison. That means we don't need a separate JavaScript semantic
+implementation or a fake success-shaped fallback.
 
-This recommendation follows actual native/browser output agreement and runtime
-measurements, not just toolchain availability. Production/release readiness
-remains a separate gate.
+This decision rests on verified agreement between native and browser outputs and
+on measured runtime performance, not just on whether the toolchain compiles.
+Production and release readiness are still gated separately.
 
 ## Pre-rename adoption measurements
 
-The measurements in this section were recorded before the public Engine naming
-change. They remain the qualified adoption-time evidence, not measurements of
-the renamed artifacts. The renamed implementation preserves the same semantics,
-wire operations, bounds and tests.
+We recorded these numbers before the public Engine rename. They serve as the
+evidence that justified adoption, not as benchmarks for the renamed artifacts.
+The renamed implementation keeps the same semantics, wire operations, bounds,
+and tests.
 
-Measured 2026-11-03 on macOS arm64, Apple M5 Max, Node 26.12.1, Rust 1.97.1,
-actual headless Chromium 156.0.8078.4. The reproducible driver is
+All runs took place on 2026-11-03 on macOS arm64 (Apple M5 Max, Node 26.12.1,
+Rust 1.97.1, headless Chromium 156.0.8078.4) using
 `npm run measure --workspace @githubnext/projections-engine`.
 
-The initial slice's release native executable is 583,952 bytes. Its browser Wasm
-is 348,568 bytes, 130,456 bytes gzip. Browser module import, local HTTP fetch,
-compilation and instantiation took 8.4 ms in this run. These figures are
-build/host-specific; network latency and a cold public deployment are not
-measured.
+In that initial slice, the release native executable came in at 583,952 bytes.
+The browser Wasm binary was 348,568 bytes uncompressed and 130,456 bytes
+gzipped. Importing the browser module, fetching it over local HTTP, compiling
+it, and instantiating it took 8.4 ms. Keep in mind that these numbers are
+specific to this build and host; they don't include network latency or a cold
+public deployment.
 
-The representative cyclic graph contains 1,000 service nodes and 5,000
-relationships, including nested data and per-node source evidence. Its compact
-input is 524,541 bytes. The comparison renames and modifies a node, updating its
-incident endpoints without falsely modifying the relationships.
+For a representative workload, we used a cyclic graph with 1,000 service nodes
+and 5,000 relationships, including nested data and per-node source evidence
+(524,541 bytes of compact input). The comparison renames and modifies a node,
+updating its incident endpoints without falsely marking the relationships as
+modified.
 
 | Operation              | Native median | Browser Wasm median | Result JSON bytes |
 | ---------------------- | ------------: | ------------------: | ----------------: |
@@ -42,16 +45,16 @@ incident endpoints without falsely modifying the relationships.
 | Canonicalize + SHA-256 |       36.2 ms |             29.2 ms |           623,753 |
 | Compare                |       89.3 ms |             73.5 ms |         2,025,236 |
 
-Medians are five sequential samples. Native timings include process startup,
-request serialization, stdin/stdout transfer and response parsing. Browser
-timings include request serialization, Wasm input/output copies and response
-parsing, but exclude Playwright's cross-process transfer. Therefore these are
-practical binding measurements, not isolated core CPU benchmarks or an
-apples-to-apples language ranking. Browser output and native output deeply agree
-on every sample.
+Each median comes from five sequential samples. Native times include process
+startup, request serialization, stdin/stdout transfer, and response parsing.
+Browser times include request serialization, Wasm input/output copies, and
+response parsing, but not Playwright's cross-process transfer. Treat these as
+practical end-to-end binding numbers rather than isolated CPU benchmarks or a
+direct language comparison. Native and browser outputs matched deeply on every
+sample.
 
-A limit-sized graph (10,000 nodes, 50,000 edges; input 5,274,741 bytes) was also
-executed through all four real bindings:
+We also ran a limit-sized graph (10,000 nodes and 50,000 edges; 5,274,741 bytes
+of input) through all four bindings:
 
 | Operation              |   Native | Browser Wasm | Result JSON bytes |
 | ---------------------- | -------: | -----------: | ----------------: |
@@ -60,98 +63,102 @@ executed through all four real bindings:
 | Canonicalize + SHA-256 | 345.4 ms |     331.6 ms |         6,255,953 |
 | Compare                | 978.3 ms |   1,341.8 ms |        20,309,637 |
 
-This is one stress sample, not a distribution or universal performance
-guarantee. All outputs agree. Comparison payloads intentionally retain both
-entities and explanations and can substantially exceed input size. The measured
-limit-sized comparison fits the 64 MiB response limit and Wasm's 512 MiB memory
-ceiling.
+That is a single stress sample, not a statistical distribution or a universal
+guarantee, and all outputs agreed. Comparison payloads intentionally keep both
+entities and their explanations, so they can grow much larger than the input.
+Even so, the limit-sized comparison stayed inside the 64 MiB response limit and
+Wasm's 512 MiB memory ceiling.
 
-The pre-rename follow-up was remeasured after adding strict artifact parsing,
-normalized-output size checks and Worker support: Wasm 349,035 bytes (130,644
-gzip), native 583,952 bytes; representative compare medians 97.5 ms native /
-83.5 ms Wasm. Its single maximum graph sample is 971.6 ms native / 1,682.9 ms
-Wasm. The earlier tables are retained as the adoption-time evidence, not
-silently presented as timings of later code.
+After adding strict artifact parsing, normalized-output size checks, and Worker
+support, we remeasured the pre-rename follow-up. Wasm grew slightly to 349,035
+bytes (130,644 gzipped) while native stayed at 583,952 bytes. Representative
+compare medians were 97.5 ms native and 83.5 ms Wasm, and the single
+maximum-graph sample took 971.6 ms native and 1,682.9 ms Wasm. We kept the
+original tables above intact as adoption-time evidence instead of quietly
+swapping in numbers from later code.
 
-The six initial shared protocol corpus cases also agree through native and real
-Chromium **and WebKit**, covering canonical bytes, explicit renames, duplicate
-identity, missing endpoints, duplicate raw JSON keys and unsafe raw integers.
-Additional engine tests exercise all seven domain validators, reverse renamed +
-modified entities/relationships, ambiguity, strict fields, cycles, bounds,
-evidence exclusion, Unicode ordering and ECMAScript number spelling.
+The six initial shared protocol corpus cases also agreed across native, real
+Chromium, **and WebKit**. They cover canonical bytes, explicit renames,
+duplicate identity, missing endpoints, duplicate raw JSON keys, and unsafe raw
+integers. Additional engine tests cover all seven domain validators, reverse
+renamed-and-modified entities and relationships, ambiguity, strict fields,
+cycles, bounds, evidence exclusion, Unicode ordering, and ECMAScript number
+spelling.
 
 ## Renamed Engine verification
 
-The renamed native/Wasm/Worker entries and artifacts were rebuilt and
-remeasured. `engine-measurements.json` records those new measurements: native
-583,952 bytes; Wasm 348,971 bytes (130,633 gzip); browser startup 6.8 ms.
-Representative five-run compare medians are 112.4 ms native / 86.4 ms Wasm. The
-single maximum-graph sample is 1,194.6 ms native / 1,765.8 ms Wasm. Timing
-variation on a shared host is not evidence of a semantic change or a latency
-guarantee.
+After renaming the native, Wasm, and Worker entry points and artifacts, we
+rebuilt and remeasured everything, recording the results in
+`engine-measurements.json`. Native stayed at 583,952 bytes, Wasm came in at
+348,971 bytes (130,633 gzipped), and browser startup took 6.8 ms. Five-run
+representative compare medians were 112.4 ms native and 86.4 ms Wasm, while the
+single maximum-graph sample took 1,194.6 ms native and 1,765.8 ms Wasm. Small
+timing swings on a shared host don't indicate a semantic change or establish a
+latency guarantee.
 
-The current suite has 13 Rust tests, 142 Node tests, and 61 shared-plus-engine
-native/browser ABI cases **per browser engine**, covering valid and invalid
-inputs in every standard IR. Boundary tests exercise exactly 32 MiB raw JSON,
-exactly 8 MiB extractor JSON, 50/64-level depth distinctions, oversized values
-and normalized-output expansion. Clean tarball verification also compiles a
-fresh consumer's TypeScript imports and runs its native/Wasm methods with Rust
-tools absent from PATH.
+The test suite now has 13 Rust tests, 142 Node tests, and 61 shared-plus-engine
+native/browser ABI cases **per browser engine**, covering both valid and invalid
+inputs across every standard IR. Boundary tests check the exact 32 MiB raw JSON
+limit, the exact 8 MiB extractor JSON limit, 50- and 64-level depth
+distinctions, oversized values, and normalized-output expansion. Clean tarball
+verification also compiles a fresh consumer's TypeScript imports and runs its
+native and Wasm methods with no Rust tools on PATH.
 
 ## Consequences and limitations
 
-The Wasm artifact is small enough for a practical browser slice and the
-representative browser comparison was below 100 ms in the recorded runs. The
-largest supported graphs should run inside an application-owned Worker: promises
-alone do not prevent a synchronous 1.34-second Wasm call from blocking the UI.
+The Wasm binary is small enough for practical browser use, and representative
+comparisons stayed under 100 ms in our runs. For the largest supported graphs,
+however, the host application should run Wasm inside a Worker: wrapping a
+synchronous 1.34-second Wasm call in a promise still blocks the main thread.
 
-The follow-up `/worker` package entry now supplies that Worker lifecycle, with
-explicit disposal and failure of all pending operations on timeout/crash. Actual
-Chromium and WebKit execute a 10,000-node/50,000-edge comparison in the Worker
-with native output agreement while the main thread continues ticking 10-ms UI
-timers (127 and 55 ticks respectively in the recorded run). This is
-responsiveness evidence, not a frame-rate guarantee: input serialization and
-result parsing still occur on the caller. The Worker does not add another
-engine.
+The follow-up `/worker` package entry now provides that Worker lifecycle,
+including explicit disposal and failing all pending operations on a timeout or
+crash. Both Chromium and WebKit ran a 10,000-node, 50,000-edge comparison inside
+the Worker with full native output agreement while the main thread kept ticking
+10-ms UI timers (127 ticks in Chromium and 55 in WebKit). That shows the UI
+stays responsive, though it isn't a frame-rate guarantee because input
+serialization and result parsing still happen on the caller. The Worker runs the
+exact same engine, not a separate one.
 
-Clean tarball tests install protocol and engine into a fresh consumer directory
-and execute both native and Wasm without workspace links or a Rust build in that
-consumer. Failure tests cover spawn, malformed JSON/response, nonzero exits,
-signals, timeout, stdout/stderr overflow, invalid Wasm, disposal and rejected
-pending requests. Packaging retains MIT and dependency license notices.
+Clean tarball tests install the protocol and engine packages into a fresh
+consumer directory and run both native and Wasm paths without workspace links or
+a local Rust build. Failure tests verify spawn errors, malformed JSON or
+responses, nonzero exits, signals, timeouts, stdout/stderr overflow, invalid
+Wasm, disposal, and rejected pending requests. The published packages preserve
+MIT and dependency license notices.
 
-The strict `parse-json` follow-up was also exercised on a 30,859,072-byte
-comparison-shaped envelope containing the two limit-sized states and the real
-native comparison. JSON-string wrapping makes its request 37,139,176 bytes,
-above the original 32 MiB transport cap. Both Chromium and WebKit Workers now
-deeply agree with native on the parsed envelope. The raw artifact limit remains
-32 MiB while transport is separately bounded to 128 MiB; oversized raw artifacts
-still fail. A quote-heavy regression independently covers double encoding.
+We also tested the strict `parse-json` follow-up on a 30,859,072-byte
+comparison-shaped envelope holding two limit-sized states and the real native
+comparison. Wrapping it as a JSON string pushes the request to 37,139,176 bytes,
+past the original 32 MiB transport cap. Both Chromium and WebKit Workers now
+match native output on that parsed envelope. The raw artifact limit stays at 32
+MiB while transport has a separate 128 MiB ceiling, so oversized raw artifacts
+still fail. A quote-heavy regression test independently covers double encoding.
 
-Native JSON RPC is intentionally per-operation and bounded. Persistent workers
-could reduce startup overhead later, but are not needed to demonstrate this
-shared engine or to expose the package ABI. No extractor, Git, process, clock,
-network, filesystem or DOM API exists in the semantic library.
+Native JSON RPC runs per operation with strict bounds. Persistent worker
+processes could cut startup overhead later, but we don't need them to prove out
+the shared engine or expose the package ABI. The semantic library itself has no
+extractor, Git, process, clock, network, filesystem, or DOM APIs.
 
-No float formatter was improvised: RFC 8785 canonicalization delegates to
-`serde_jcs` 0.2.0 and `ryu-js` 0.2.2, locked in Cargo. This is reuse of
-established implementations, not a claim of an independent security audit.
-Diagnostics and parsing remain native/Rust so duplicate keys and unsafe integers
-can be rejected before an ordinary host parser erases them.
+We didn't write a custom float formatter. RFC 8785 canonicalization delegates to
+`serde_jcs` 0.2.0 and `ryu-js` 0.2.2, both locked in Cargo. That gives us
+established implementations, though it is not an independent security audit.
+Parsing and diagnostics stay in native Rust so duplicate keys and unsafe
+integers get caught before a host parser can silently erase them.
 
-Only the measured macOS arm64 native artifact is execution-verified. Linux and
-Windows packaging remain unverified. Memory exhaustion is an explicit trap or
-process failure, not a fabricated empty state. There is no claim of byte/hash
-compatibility with earlier prototypes, and no dependency on them.
+So far, only the macOS arm64 native artifact has been execution-verified; Linux
+and Windows packaging still need verification. Memory exhaustion surfaces as an
+explicit trap or process failure rather than a fabricated empty state. We make
+no claim of byte or hash compatibility with earlier prototypes and have no
+dependency on them.
 
 ## The default comparator in the CLI's comparator runtime
 
-The CLI runs the default comparator as `default-comparator.wasm` in the
-comparator runtime (the `wasmi` interpreter, default limits), the sandbox
-comparator files run in, rather than linking its Rust code. Measured on macOS
-arm64 with optimized builds, comparing two generated `graph/v0` extractions
-whose every relationship changed (the worst case for the comparator's work),
-excluding Engine validation:
+Rather than linking the default comparator's Rust code directly, the CLI runs it
+as `default-comparator.wasm` inside the same `wasmi` interpreter sandbox (with
+default limits) used for comparator files. On macOS arm64 with optimized builds,
+we measured worst-case comparisons of two generated `graph/v0` extractions where
+every relationship changed (excluding Engine validation):
 
 | Entities / relationships                |  Input | Changes | Native Rust | `default-comparator.wasm` in `wasmi` |
 | --------------------------------------- | -----: | ------: | ----------: | -----------------------------------: |
@@ -159,7 +166,8 @@ excluding Engine validation:
 | 5,000 / 25,000                          | 4.4 MB |  50,052 |      358 ms |                             2,168 ms |
 | 10,000 / 50,000 (the extraction limits) | 8.8 MB | 100,104 |      661 ms |                             4,495 ms |
 
-Loading the module takes about 6 ms. The interpreter is about seven times slower
-than native code, and every limit-sized run stays well inside the default fuel
-budget and memory cap. Both produce identical comparisons. Typical pull request
-comparisons, with hundreds of changes, take milliseconds either way.
+Loading the module takes about 6 ms. The interpreter runs roughly seven times
+slower than native code, yet even a limit-sized run stays comfortably inside the
+default fuel budget and memory cap, and both produce identical comparisons.
+Typical pull request comparisons have hundreds of changes and finish in
+milliseconds either way.

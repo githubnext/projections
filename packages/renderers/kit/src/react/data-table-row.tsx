@@ -95,14 +95,15 @@ export function Row<T>({
             </span>
           )
         else content = <span className={join('pk-table-text', struck && 'pk-diff-text')}>{read(item)}</span>
-        // Outside the diff a changed cell shows one version at a time; the other is laid out under it, unseen, so the
-        // column keeps one width for the whole transition and nothing moves when the value switches.
-        if (differs && !diff)
+        // Outside the diff a cell shows one version at a time; the other is laid out under it, unseen, so the column
+        // keeps one width for the whole transition and nothing moves when the value switches. Every cell has the same
+        // structure, changed or not.
+        if (!diff)
           content = (
             <span className="pk-table-reserve">
               {content}
               <span className="pk-table-reserve-other" aria-hidden="true">
-                {read(side === 'before' ? row.after! : row.before!)}
+                {read((side === 'before' ? row.after : row.before) ?? item)}
               </span>
             </span>
           )

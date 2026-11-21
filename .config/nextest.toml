@@ -1,0 +1,10 @@
+# cargo-nextest (https://nexte.st), which CI runs the Rust suites with (`npm run test:rust:nextest`): each test in its
+# own process, in parallel across the workspace's test binaries.
+
+[test-groups]
+# The .NET suites publish the prebuilt helper once per process, to one directory: one at a time.
+dotnet-helper = { max-threads = 1 }
+
+[[profile.default.overrides]]
+filter = 'binary(native_tools) & test(/^dotnet::/)'
+test-group = 'dotnet-helper'

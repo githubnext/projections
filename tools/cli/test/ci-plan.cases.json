@@ -103,7 +103,7 @@
       "expect": {
         "full": false,
         "jobs": {
-          "public-product": ["ubuntu-latest", "macos-latest"],
+          "public-product": ["ubuntu-latest", "macos-latest, Rust", "macos-latest, Node"],
           "windows": true,
           "windows-node": true,
           "verus": true,
@@ -251,7 +251,7 @@
       "files": ["action.yml"],
       "expect": {
         "jobs": {
-          "public-product": ["ubuntu-latest", "macos-latest"],
+          "public-product": ["ubuntu-latest", "macos-latest, Rust", "macos-latest, Node"],
           "windows-node": true,
           "windows-integration": true
         }
@@ -298,7 +298,7 @@
         "Cargo.lock"
       ],
       "expect": {
-        "productIncludes": ["macos-latest"]
+        "productIncludes": ["macos-latest, Rust", "macos-latest, Node"]
       }
     },
     {

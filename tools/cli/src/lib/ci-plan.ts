@@ -30,8 +30,10 @@ export type CiPlan = {
   generators: string[]
   /** Each condition of the rules file, and whether it holds. */
   conditions: Record<string, boolean>
-  /** Each job the rules gate: whether it runs, or a matrix job's values. */
+  /** Each job the rules gate: whether it runs, or the names of a matrix job's entries. */
   jobs: Record<string, boolean | string[]>
+  /** A matrix job's entries, as the workflow's `matrix.include`. */
+  matrices: Record<string, Record<string, string>[]>
   /** Why each job that runs does: the descriptions of the rules that hold. */
   why: Record<string, string[]>
   /** The affected browser suites. */
@@ -107,15 +109,17 @@ export function ciPlan(facts: RepoFacts, rules: CiRules, change: Change): CiPlan
   }
   const jobs: CiPlan['jobs'] = {}
   const why: CiPlan['why'] = {}
+  const matrices: CiPlan['matrices'] = {}
   for (const [name, job] of Object.entries(rules.jobs)) {
     if ('when' in job) {
       jobs[name] = holds(job.when, context)
       // A predicate on files or units gives no reason of its own: the job's description says what it checks.
       if (jobs[name]) why[name] = reasons(job.when, context).length ? reasons(job.when, context) : [job.description]
     } else {
-      const values = job.matrix.filter(item => holds(item.when, context))
-      jobs[name] = values.map(item => item.value)
-      if (values.length) why[name] = values.map(item => `${item.value}: ${item.description}`)
+      const entries = job.matrix.filter(item => holds(item.when, context))
+      jobs[name] = entries.map(item => item.name)
+      matrices[name] = entries.map(item => ({name: item.name, ...item.with}))
+      if (entries.length) why[name] = entries.map(item => `${item.name}: ${item.description}`)
     }
   }
   const suites = affectedSuites(context)
@@ -135,10 +139,29 @@ export function ciPlan(facts: RepoFacts, rules: CiRules, change: Change): CiPlan
     generators: [...sorted.generators].sort(),
     conditions: Object.fromEntries(Object.entries(rules.conditions).map(([name, {when}]) => [name, holds(when, context)])),
     jobs,
+    matrices,
     why,
     suites,
     renderers: narrow?.kept ?? [],
     browser: browser.linux,
     browserMacos: browser.macos,
+  }
+}
+
+/** The `changes` job's step outputs: each job's decision by ID (a matrix job's as its `matrix.include`), and the rest. */
+export function planOutputs(plan: CiPlan): Record<string, string> {
+  const jobs = Object.entries(plan.jobs).map(([name, value]) => [
+    name,
+    Array.isArray(value) ? JSON.stringify(plan.matrices[name]) : String(value),
+  ])
+  return {
+    full: String(plan.full.length > 0),
+    'docs-only': String(plan.docsOnly),
+    ...Object.fromEntries(Object.entries(plan.conditions).map(([name, value]) => [`if-${name}`, String(value)])),
+    ...Object.fromEntries(jobs),
+    suites: JSON.stringify(plan.suites),
+    renderers: plan.renderers.join(','),
+    browser: JSON.stringify(plan.browser),
+    'browser-macos': JSON.stringify(plan.browserMacos),
   }
 }

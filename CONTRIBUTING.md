@@ -153,13 +153,18 @@ Checks include independent import/dependency boundaries, TypeScript, the
 existing correctness-focused ESLint rules, actual native-engine artifact tests,
 and explicit Rust/browser commands. Generated output is not linted as authored
 code. CI uses the same public composite action on Linux and macOS; local macOS
-results do not imply those remote matrix jobs have passed. The browser suites
-run on Linux in their own jobs, the large ones sharded. Linux also enables all
-optional native extractor suites and the real Docker policy/digest-parity check
-described in [runner coverage](docs/maintainers/runner-coverage.md). Windows has
-three jobs: `windows` runs the Rust suites natively, including Job Object
-supervision of extractor process trees; `windows-node` runs every Node suite,
-the installed-package proof and the checks that read the file system; and
+results do not imply those remote matrix jobs have passed. On macOS it runs as
+two jobs in parallel, the Rust suites and everything else. CI runs the Rust
+suites with [cargo-nextest](https://nexte.st), each test in its own process
+(`npm run test:rust:nextest`; `.config/nextest.toml` keeps the .NET suites,
+which share a published helper, one at a time), and restores the dependencies'
+build output from a cache that pushes to `main` save. The browser suites run on
+Linux in their own jobs, the large ones sharded. Linux also enables all optional
+native extractor suites and the real Docker policy/digest-parity check described
+in [runner coverage](docs/maintainers/runner-coverage.md). Windows has three
+jobs: `windows` runs the Rust suites natively, including Job Object supervision
+of extractor process trees; `windows-node` runs every Node suite, the
+installed-package proof and the checks that read the file system; and
 `windows-integration` runs the CLI's browser suite, a renderer smoke test, the
 VS Code extension in VS Code and the GitHub Action end to end. macOS also runs
 the renderers in WebKit. Tests that can't run on a platform are skipped or

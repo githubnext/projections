@@ -101,16 +101,19 @@ everywhere and runs on Linux and macOS.
 | VS Code extension                                          | unit suites; release proof installs it | the same                   | unit suites; smoke test in VS Code (`test:vscode`)  |
 | GitHub Action end to end (`.github/actions/action-e2e`)    | `public-product`                       | `public-product`           | `windows-integration`                               |
 
-This is what pushes to `main` and the nightly run cover; a pull request runs the
-jobs its change reaches ([what CI runs](../../CONTRIBUTING.md#what-ci-runs)).
-The browser suites run in full on Linux, sharded. On Windows the CLI's own
-browser suite runs in full, since it exercises the CLI's server and processes,
-and one renderer's suite runs as a smoke test: a renderer draws the same on
-every operating system, so the rest would cost Windows build time without new
-coverage. A test that can't run on a platform says why in its skip or `ignore`
-reason; for example, the Rust suites that run `/bin/sh` extractors or stand-ins
-for `gh` and Git are ignored on Windows, and `tests/windows.rs` covers what they
-cover there (Job Object supervision, output bounds, export and validation).
+`public-product` runs as one job on Linux and as two on macOS, in parallel:
+`macos-latest, Rust` (the build and the Rust suites) and `macos-latest, Node`
+(everything else). This is what pushes to `main` and the nightly run cover; a
+pull request runs the jobs its change reaches
+([what CI runs](../../CONTRIBUTING.md#what-ci-runs)). The browser suites run in
+full on Linux, sharded. On Windows the CLI's own browser suite runs in full,
+since it exercises the CLI's server and processes, and one renderer's suite runs
+as a smoke test: a renderer draws the same on every operating system, so the
+rest would cost Windows build time without new coverage. A test that can't run
+on a platform says why in its skip or `ignore` reason; for example, the Rust
+suites that run `/bin/sh` extractors or stand-ins for `gh` and Git are ignored
+on Windows, and `tests/windows.rs` covers what they cover there (Job Object
+supervision, output bounds, export and validation).
 
 Known gap: on Windows, the .NET extractors' `dotnet` fails in the environment
 extractors get (`PATH`, `SystemRoot` and its own variables) with "An issue was

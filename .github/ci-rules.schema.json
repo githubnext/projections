@@ -364,14 +364,16 @@
                   "items": {
                     "type": "object",
                     "required": [
-                      "value",
+                      "name",
                       "description",
-                      "when"
+                      "when",
+                      "with"
                     ],
                     "properties": {
-                      "value": {
+                      "name": {
                         "type": "string",
-                        "minLength": 1
+                        "minLength": 1,
+                        "description": "The entry's name: the check is `<job> (<name>)`"
                       },
                       "description": {
                         "type": "string",
@@ -380,6 +382,15 @@
                       },
                       "when": {
                         "$ref": "#/$defs/When"
+                      },
+                      "with": {
+                        "type": "object",
+                        "patternProperties": {
+                          "^.*$": {
+                            "type": "string"
+                          }
+                        },
+                        "description": "The matrix values the job reads, such as `os`"
                       }
                     },
                     "additionalProperties": false
@@ -388,7 +399,7 @@
                 }
               },
               "additionalProperties": false,
-              "description": "A matrix job: the values whose `when` holds, as a JSON array"
+              "description": "A matrix job: the entries whose `when` holds, as `include` objects of `name` and `with`"
             }
           ]
         }

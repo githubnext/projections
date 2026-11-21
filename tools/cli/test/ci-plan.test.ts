@@ -6,7 +6,7 @@ import test from 'node:test'
 import {Value} from 'typebox/value'
 import {repoFacts, tomlStrings} from '../src/lib/ci-facts.ts'
 import {rendererGrep} from '../src/lib/ci-browser.ts'
-import {ciPlan, type CiPlan} from '../src/lib/ci-plan.ts'
+import {ciPlan, planOutputs, type CiPlan} from '../src/lib/ci-plan.ts'
 import {ruleProblems} from '../src/lib/ci-rules-check.ts'
 import {FULL, loadCiRules, type CiRules} from '../src/lib/ci-rules.ts'
 import {CiRules as Schema} from '../src/lib/ci-rules.schema.ts'
@@ -99,6 +99,22 @@ test('the workflow gates each job on the rules decision of the same name', () =>
   assert.deepEqual([...gated].sort(), [...outputs].sort())
   assert.deepEqual([...mapped].sort(), [...outputs].sort())
   for (const job of Object.keys(rules.jobs)) assert.match(workflow, new RegExp(`^  ${job}:$`, 'm'), job)
+})
+
+test("public-product's output is the workflow's matrix.include: each chosen entry's name, runner and part", () => {
+  const include = (paths: string[], event = 'pull_request') =>
+    JSON.parse(planOutputs(ciPlan(facts, rules, {paths, event}))['public-product'] as string) as unknown
+  const linux = {name: 'ubuntu-latest', os: 'ubuntu-latest', part: 'all'}
+  const macos = [
+    {name: 'macos-latest, Rust', os: 'macos-latest', part: 'rust'},
+    {name: 'macos-latest, Node', os: 'macos-latest', part: 'node'},
+  ]
+  assert.deepEqual(include(['README.md']), [])
+  assert.deepEqual(include(['packages/renderers/database/src/styles.css']), [linux])
+  assert.deepEqual(include(['packages/engine/src/lib.rs']), [linux, ...macos])
+  assert.deepEqual(include([], 'schedule'), [linux, ...macos])
+  // A job's decision is a string GitHub Actions compares with 'true'.
+  assert.equal(planOutputs(ciPlan(facts, rules, {paths: ['README.md']})).docs, 'true')
 })
 
 test('the facts come from the repository', () => {

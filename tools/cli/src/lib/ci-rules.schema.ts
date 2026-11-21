@@ -141,11 +141,20 @@ const Job = Type.Union([
   Type.Object(
     {
       description: Description,
-      matrix: Type.Array(Type.Object({value: Type.String({minLength: 1}), description: Description, when: When}, Strict), {
-        minItems: 1,
-      }),
+      matrix: Type.Array(
+        Type.Object(
+          {
+            name: Type.String({minLength: 1, description: "The entry's name: the check is `<job> (<name>)`"}),
+            description: Description,
+            when: When,
+            with: Type.Record(Type.String({minLength: 1}), Type.String(), {description: 'The matrix values the job reads, such as `os`'}),
+          },
+          Strict,
+        ),
+        {minItems: 1},
+      ),
     },
-    {...Strict, description: 'A matrix job: the values whose `when` holds, as a JSON array'},
+    {...Strict, description: 'A matrix job: the entries whose `when` holds, as `include` objects of `name` and `with`'},
   ),
 ])
 

@@ -102,12 +102,14 @@ jobs:
   public-product:
     needs: changes
     if: needs.changes.outputs.public-product != '[]'
+    name: public-product (${{ matrix.name }})
     timeout-minutes: 70
     strategy:
       fail-fast: false
       matrix:
-        # The runners the rules choose: public-product's matrix in .github/ci-rules.json.
-        os: ${{ fromJson(needs.changes.outputs.public-product) }}
+        # The entries the rules choose: public-product's matrix in .github/ci-rules.json. Each names its runner (os)
+        # and the part of the check it runs: all on Linux; on macOS, the Rust suites and the rest in parallel.
+        include: ${{ fromJson(needs.changes.outputs.public-product) }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6.1.0
@@ -117,11 +119,14 @@ jobs:
         with:
           native: ${{ runner.os == 'Linux' }}
           reference-docs: ${{ runner.os == 'Linux' }}
+          part: ${{ matrix.part }}
       # The GitHub Action itself, with the CLI the check built: a pull request in a small repository.
-      - uses: $/.github/actions/action-e2e
+      - if: matrix.part != 'rust'
+        uses: $/.github/actions/action-e2e
       # The repository's own CLI (tools/cli/README.md) keeps working, and every workspace and crate README
       # keeps the front matter description it reads.
       - name: tools doctor and README descriptions
+        if: matrix.part != 'rust'
         shell: bash
         run: |
           npm run --silent tools -- doctor

@@ -1,4 +1,4 @@
-import {useMemo, useRef, useState} from 'react'
+import {useMemo, useReducer, useRef, useState} from 'react'
 import type {AnnotationMark} from '@githubnext/projections-renderer-sdk/protocol'
 import type {RendererFrame} from '../frame.js'
 import {twoPaneMode} from '../modes.js'
@@ -20,8 +20,8 @@ import {usePlaybackControl} from './playback-control.js'
 import {usePlaybackPosition} from './playback-position.js'
 import {useRendererPayloads} from './payloads.js'
 import {rendererState, useComparisonModes, useRendererControls} from './renderer-state.js'
+import {initialInteraction, interaction} from './interaction.js'
 import {useSelection} from './selection.js'
-import type {Anchors} from './selection.js'
 import {useStageBinding} from './stage-binding.js'
 import {paintState, useStatusEvents} from './paint.js'
 
@@ -54,7 +54,7 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
   const renderers = options.renderers ?? []
   const rendererName = value('rendererName')
   const renderer = renderers.find(entry => entry.name === rendererName) ?? renderers[0]
-  const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [pointed, sendInteraction] = useReducer(interaction, initialInteraction)
   const [panes, setPanes] = useState<Record<PaneKey, PaneState>>({main: loadingPane, before: loadingPane, after: loadingPane})
   const {availableModes, modesKnown, mode, paneKeys} = useComparisonModes({request, comparing, renderer, chosenMode, panes})
 
@@ -81,7 +81,6 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
     direction: options.direction,
   })
   const {direction, seek} = playback
-  const [anchors, setAnchors] = useState<Anchors>({before: {}, after: {}})
   const frames = useRef<Record<Side, RendererFrame | null>>({before: null, after: null})
 
   const rows = useMemo(() => subjectRows(subject), [subject])
@@ -100,16 +99,14 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
   const status = rendererState(renderer, panes, paneKeys)
   useStatusEvents({latest, status: status.status, paint, playing, mode, progress})
 
-  const selection = useSelection({latest, request, subject, rows, selectedId, placed, anchors, frames})
+  const selection = useSelection({latest, request, subject, rows, selectedId, placed, interaction: pointed, send: sendInteraction, frames})
 
   // A new subject starts over, before the next commit.
   const [shownSubject, setShownSubject] = useState(subject)
   if (shownSubject !== subject) {
     setShownSubject(subject)
     setInternal(previous => restartedSettings(previous, options, toPosition))
-    setHoveredId(null)
-    setAnchors({before: {}, after: {}})
-    selection.setPinned(null)
+    sendInteraction({type: 'restarted'})
   }
 
   const stage = useStageBinding({
@@ -117,10 +114,10 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
     stableValues: controls.stableValues,
     action: controls.action,
     filter,
-    anchors,
+    anchors: pointed.anchors,
     frames,
     setPanes,
-    setAnchors,
+    sendInteraction,
     selectFrom: selection.selectFrom,
     activateAnnotation: selection.activateAnnotation,
     selectedPath: selection.selectedPath,
@@ -178,7 +175,7 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
     search: filters.search,
     selectedId,
     selection: selection.selection,
-    hoveredId,
+    hoveredId: pointed.hoveredId,
     annotationMarks,
     annotationsFor: rowId => placed.byRow.get(rowId) ?? [],
     unplacedAnnotations: placed.unplaced,
@@ -213,7 +210,7 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
     resolveTarget: selection.resolve,
     activateAnnotation: selection.activateAnnotation,
     anchorFor: selection.anchorFor,
-    hover: id => setHoveredId(id),
+    hover: id => sendInteraction({type: 'hovered', rowId: id}),
     setRenderer: name => {
       if (renderers.some(entry => entry.name === name)) request('rendererName', name)
     },

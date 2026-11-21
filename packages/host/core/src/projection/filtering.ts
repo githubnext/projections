@@ -1,4 +1,4 @@
-import {useCallback, useMemo} from 'react'
+import {useState} from 'react'
 import {changeContext, isScopeChange, regenerated, variedWithinTolerance} from '@githubnext/projections-renderer-sdk/presentation'
 import type {ViewScope} from '@githubnext/projections-renderer-sdk/presentation'
 import {humanizeKind} from '@githubnext/projections-renderer-sdk/presentation'
@@ -8,6 +8,7 @@ import type {Row, ViewSubject} from '../model.js'
 import {rowInSummary} from '../summary.js'
 import type {SummaryFigure} from '../summary.js'
 import type {RequestChange, ValueOf} from './controllable.js'
+import {memo} from './memo.js'
 import type {ProjectionController} from './types.js'
 
 function matches(row: Row, query: string): boolean {
@@ -54,61 +55,105 @@ function inScope(row: Row, scope: ViewScope, variedOnly: boolean, regeneratedOnl
   return true
 }
 
+/** What the scope and filters keep (see `createRowFilter`). */
+export interface RowFilter {
+  visibleRows: readonly Row[]
+  filter: FilterPayload
+  counts: ScopeCounts
+  hidden: ScopeHidden[]
+}
+
 /**
- * The rows the scope and filters keep, the filter payload renderers apply, and each scope's count. The scope decides
- * what renderers lay out: the Changes scope is the changes and the unchanged items that give them context
- * (`changeContext`), and renderers fold or leave out the rest. The summary filter and find narrow within it
- * (`visibleRows`) without removing anything from the layout: renderers recede what they leave out (the filter's
- * `ids`), in either scope. The counts are of the kinds
- * the summary bar's count figures name (so a table's structural relationships aren't counted beside its columns), else
- * of every row: its changes, and every item of both revisions, so All is more than Changes whenever Changes hides any.
+ * The rows the scope and filters keep, the filter payload renderers apply, and each scope's count, as a selector that
+ * recomputes each part only when its inputs change. The scope decides what renderers lay out: the Changes scope is the
+ * changes and the unchanged items that give them context (`changeContext`), and renderers fold or leave out the rest.
+ * The summary filter and find narrow within it (`visibleRows`) without removing anything from the layout: renderers
+ * recede what they leave out (the filter's `ids`), in either scope. The counts are of the kinds the summary bar's count
+ * figures name (so a table's structural relationships aren't counted beside its columns), else of every row: its
+ * changes, and every item of both revisions, so All is more than Changes whenever Changes hides any.
  */
-export function useRowFilter(rows: readonly Row[], subject: ViewSubject, state: FilterState, summary: readonly SummaryFigure[]) {
-  const {variedOnly, regeneratedOnly, summaryFilter, search} = state
-  const query = search.trim().toLocaleLowerCase()
+export function createRowFilter(): (
+  rows: readonly Row[],
+  subject: ViewSubject,
+  state: FilterState,
+  summary: readonly SummaryFigure[],
+) => RowFilter {
   // A comparison without changes has nothing to scope to: it shows every item (and the view says there are none).
-  const unchanged = useMemo(() => !rows.some(isScopeChange), [rows])
-  const scope = state.scope === 'changes' && unchanged ? 'all' : state.scope
+  const unchangedOf = memo((rows: readonly Row[]) => !rows.some(isScopeChange))
   // What the scope lays out: in Changes, the changes and their context, whatever the summary filter and find.
-  const scopedRows = useMemo(() => {
+  const scopedOf = memo((rows: readonly Row[], subject: ViewSubject, scope: ViewScope, variedOnly: boolean, regeneratedOnly: boolean) => {
     const kept = rows.filter(row => inScope(row, scope, variedOnly, regeneratedOnly))
     if (scope !== 'changes' || subject.mode !== 'comparison') return kept
     const {shown} = changeContext(rows, subject)
     return rows.filter(row => shown.has(row.id))
-  }, [rows, subject, scope, variedOnly, regeneratedOnly])
-  const kept = useCallback(
-    (row: Row) => (!summaryFilter || rowInSummary(row, summaryFilter)) && matches(row, query),
-    [summaryFilter, query],
+  })
+  const keptOf = memo(
+    (summaryFilter: FilterState['summaryFilter'], query: string) => (row: Row) =>
+      (!summaryFilter || rowInSummary(row, summaryFilter)) && matches(row, query),
   )
-  const visibleRows = useMemo(() => scopedRows.filter(kept), [scopedRows, kept])
-  const filter = useMemo<FilterPayload>(() => {
-    const ids = (list: readonly Row[]) => (list.length <= rendererLimits.filterIds ? list.map(row => row.id) : null)
-    // What is at full strength: what the summary filter and find keep of every item (the Changes scope lays out what it
-    // shows, `scope`, and draws some items between them besides), or of the noise, which is a filter too.
-    const narrowed = Boolean(query) || Boolean(summaryFilter) || scope === 'noise'
-    return {
-      query: search,
-      changesOnly: scope === 'changes',
-      ids: narrowed ? ids(scope === 'noise' ? visibleRows : rows.filter(kept)) : null,
-      scope: scope === 'changes' ? ids(scopedRows) : null,
-    }
-  }, [query, search, scope, summaryFilter, rows, kept, visibleRows, scopedRows])
+  const visibleOf = memo((scoped: readonly Row[], kept: (row: Row) => boolean) => scoped.filter(kept))
+  const filterOf = memo(
+    (
+      query: string,
+      search: string,
+      scope: ViewScope,
+      summaryFilter: FilterState['summaryFilter'],
+      rows: readonly Row[],
+      kept: (row: Row) => boolean,
+      visibleRows: readonly Row[],
+      scopedRows: readonly Row[],
+    ): FilterPayload => {
+      const ids = (list: readonly Row[]) => (list.length <= rendererLimits.filterIds ? list.map(row => row.id) : null)
+      // What is at full strength: what the summary filter and find keep of every item (the Changes scope lays out what
+      // it shows, `scope`, and draws some items between them besides), or of the noise, which is a filter too.
+      const narrowed = Boolean(query) || Boolean(summaryFilter) || scope === 'noise'
+      return {
+        query: search,
+        changesOnly: scope === 'changes',
+        ids: narrowed ? ids(scope === 'noise' ? visibleRows : rows.filter(kept)) : null,
+        scope: scope === 'changes' ? ids(scopedRows) : null,
+      }
+    },
+  )
   // What the Changes scope leaves out, whatever the scope shown now: the scope switch and the view say so.
-  const hiddenRows = useMemo(() => {
+  const hiddenRowsOf = memo((rows: readonly Row[], subject: ViewSubject, unchanged: boolean) => {
     if (subject.mode !== 'comparison' || unchanged) return []
     const {shown} = changeContext(rows, subject)
     return rows.filter(row => !shown.has(row.id))
-  }, [rows, subject, unchanged])
-  const hidden = useMemo(() => scopeHidden(hiddenRows, summary), [hiddenRows, summary])
-  const counts = useMemo<ScopeCounts>(() => {
+  })
+  const hiddenOf = memo(scopeHidden)
+  const countsOf = memo((rows: readonly Row[], summary: readonly SummaryFigure[], hidden: ScopeHidden[]): ScopeCounts => {
     const noise = rows.filter(row => variedWithinTolerance(row) || regenerated(row)).length
     const left = hidden.reduce((total, item) => total + item.count, 0)
     // Both over the same items, the union of the revisions, so All counts what Changes leaves out besides its changes.
     const figures = summary.filter(figure => figure.type === 'count')
     const counted = figures.length ? rows.filter(row => figures.some(figure => rowInSummary(row, {kinds: figure.kinds}))) : rows
     return {changes: counted.filter(isScopeChange).length, all: counted.length, noise, hidden: left}
-  }, [rows, summary, hidden])
-  return {visibleRows, filter, counts, hidden}
+  })
+  const resultOf = memo((visibleRows: readonly Row[], filter: FilterPayload, counts: ScopeCounts, hidden: ScopeHidden[]): RowFilter => ({
+    visibleRows,
+    filter,
+    counts,
+    hidden,
+  }))
+  return (rows, subject, state, summary) => {
+    const {variedOnly, regeneratedOnly, summaryFilter, search} = state
+    const query = search.trim().toLocaleLowerCase()
+    const unchanged = unchangedOf(rows)
+    const scope = state.scope === 'changes' && unchanged ? 'all' : state.scope
+    const scopedRows = scopedOf(rows, subject, scope, variedOnly, regeneratedOnly)
+    const kept = keptOf(summaryFilter, query)
+    const visibleRows = visibleOf(scopedRows, kept)
+    const filter = filterOf(query, search, scope, summaryFilter, rows, kept, visibleRows, scopedRows)
+    const hidden = hiddenOf(hiddenRowsOf(rows, subject, unchanged), summary)
+    return resultOf(visibleRows, filter, countsOf(rows, summary, hidden), hidden)
+  }
+}
+
+/** `createRowFilter` for a component's lifetime. */
+export function useRowFilter(rows: readonly Row[], subject: ViewSubject, state: FilterState, summary: readonly SummaryFigure[]): RowFilter {
+  const [select] = useState(createRowFilter)
+  return select(rows, subject, state, summary)
 }
 
 /**

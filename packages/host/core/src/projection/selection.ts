@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {useCallback, useEffect, useMemo, useState} from 'react'
 import type {AnchorRect} from '@githubnext/projections-renderer-sdk/protocol'
 import type {RendererFrame} from '../frame.js'
 import type {Side} from '../modes.js'
@@ -7,9 +7,8 @@ import {resolveTarget, rowTargets} from '../targets/target.js'
 import type {placeAnnotations} from '../targets/annotations.js'
 import type {ProjectionSelection, ProjectionTarget} from '../targets/target.js'
 import type {Controllable} from './controllable.js'
+import type {Interaction, InteractionEvent, Pinned} from './interaction.js'
 import type {PaneKey, ProjectionAnchor, ProjectionController} from './types.js'
-
-export type Anchors = Record<Side, {[id: string]: AnchorRect | null}>
 
 /** Where a renderer's anchor for an item shows on screen, clipped to its frame, or `null` when it doesn't show. */
 function visibleAnchor(rect: AnchorRect, iframe: HTMLIFrameElement, side: Side): ProjectionAnchor | null {
@@ -25,12 +24,87 @@ function visibleAnchor(rect: AnchorRect, iframe: HTMLIFrameElement, side: Side):
   return {x, y, width: right - x, height: bottom - y, side}
 }
 
+/** The selection: the selected row, its targets and the target chosen for it, if it is still the pinned row's. */
+export function selectionOf(
+  selectedId: string | null,
+  rows: readonly Row[],
+  subject: ViewSubject,
+  pinned: Pinned,
+): ProjectionSelection | null {
+  if (selectedId === null) return null
+  const row = rows.find(candidate => candidate.id === selectedId)
+  return {
+    rowId: selectedId,
+    targets: row ? rowTargets(row, subject) : [],
+    ...(pinned?.rowId === selectedId ? {target: pinned.target} : {}),
+  }
+}
+
+/** The path each pane shows selected: the chosen target's, on its side. */
+export function selectedPaths(selection: ProjectionSelection | null): Record<PaneKey, string | undefined> {
+  const target = selection?.target
+  const path = target?.path
+  return {main: path, before: target?.side === 'before' ? path : undefined, after: target?.side === 'after' ? path : undefined}
+}
+
+/**
+ * The target a renderer's selection chooses: with a path, the row's target on the pane's side (the after side for the
+ * main pane), else its first, at that path; without one, none.
+ */
+export function selectedTarget(
+  pane: PaneKey,
+  rowId: string | null,
+  path: string | undefined,
+  rows: readonly Row[],
+  subject: ViewSubject,
+): ProjectionTarget | undefined {
+  if (rowId === null || path === undefined) return undefined
+  const row = rows.find(candidate => candidate.id === rowId)
+  const targets = row ? rowTargets(row, subject) : []
+  const preferred = pane === 'before' ? 'before' : 'after'
+  const target = targets.find(item => item.side === preferred) ?? targets[0]
+  return target ? {...target, path} : undefined
+}
+
+/**
+ * What selecting a target selects, by how it resolves: the target itself when present, its row without the path when
+ * only the row is, else nothing.
+ */
+export function targetSelection(
+  target: ProjectionTarget,
+  resolution: ReturnType<typeof resolveTarget>,
+): {rowId: string; target: ProjectionTarget} | undefined {
+  if (resolution.status === 'present') return {rowId: resolution.rowId, target}
+  if (resolution.rowId === undefined) return undefined
+  const {path: _path, ...item} = target
+  return {rowId: resolution.rowId, target: item}
+}
+
+/**
+ * Reports selection changes, compared by value, from the first selection on: returns the selection to report, or
+ * `undefined` when there is nothing new.
+ */
+export function createSelectionReport(): (selection: ProjectionSelection | null) => ProjectionSelection | null | undefined {
+  let reported: string | undefined
+  return selection => {
+    const key = JSON.stringify(selection)
+    if (reported === undefined && selection === null) {
+      reported = key
+      return undefined
+    }
+    if (reported === key) return undefined
+    reported = key
+    return JSON.parse(key) as ProjectionSelection | null
+  }
+}
+
 export type SelectionInput = Pick<Controllable, 'latest' | 'request'> & {
   subject: ViewSubject
   rows: readonly Row[]
   selectedId: string | null
   placed: ReturnType<typeof placeAnnotations>
-  anchors: Anchors
+  interaction: Interaction
+  send: (event: InteractionEvent) => void
   frames: {readonly current: Record<Side, RendererFrame | null>}
 }
 
@@ -38,54 +112,29 @@ export type SelectionInput = Pick<Controllable, 'latest' | 'request'> & {
  * The selection: the selected row, the specific target chosen for it (a property, or one the host selected), and
  * selecting from renderers, annotations and targets; reports changes and anchors the selection on screen.
  */
-export function useSelection({latest, request, subject, rows, selectedId, placed, anchors, frames}: SelectionInput) {
-  // The specific target chosen for the selected row (a property, or one the host selected).
-  const [pinned, setPinned] = useState<{rowId: string; target: ProjectionTarget} | null>(null)
-  const selection = useMemo<ProjectionSelection | null>(() => {
-    if (selectedId === null) return null
-    const row = rows.find(candidate => candidate.id === selectedId)
-    return {
-      rowId: selectedId,
-      targets: row ? rowTargets(row, subject) : [],
-      ...(pinned?.rowId === selectedId ? {target: pinned.target} : {}),
-    }
-  }, [selectedId, rows, subject, pinned])
+export function useSelection({latest, request, subject, rows, selectedId, placed, interaction, send, frames}: SelectionInput) {
+  const {pinned, anchors} = interaction
+  const selection = useMemo(() => selectionOf(selectedId, rows, subject, pinned), [selectedId, rows, subject, pinned])
 
   useEffect(() => {
     if (latest.current.selectedId === undefined) latest.current.onSelectedIdChange?.(selectedId)
   }, [selectedId, latest])
-  const selectionKey = JSON.stringify(selection)
-  const reportedSelection = useRef<string | undefined>(undefined)
+  const [report] = useState(createSelectionReport)
   useEffect(() => {
-    if (reportedSelection.current === undefined && selection === null) {
-      reportedSelection.current = selectionKey
-      return
-    }
-    if (reportedSelection.current === selectionKey) return
-    reportedSelection.current = selectionKey
-    latest.current.onSelectionChange?.(JSON.parse(selectionKey) as ProjectionSelection | null)
-  }, [selectionKey, selection, latest])
+    const reported = report(selection)
+    if (reported !== undefined) latest.current.onSelectionChange?.(reported)
+  }, [selection, report, latest])
 
   const selectRow = useCallback(
     (id: string | null, target?: ProjectionTarget) => {
-      setPinned(id !== null && target ? {rowId: id, target} : null)
+      send({type: 'selected', rowId: id, target})
       request('selectedId', id)
     },
-    [request],
+    [request, send],
   )
   const resolve = useCallback((target: ProjectionTarget) => resolveTarget(subject, rows, target), [subject, rows])
   const selectFrom = useCallback(
-    (pane: PaneKey, id: string | null, path?: string) => {
-      if (id === null || path === undefined) {
-        selectRow(id)
-        return
-      }
-      const row = rows.find(candidate => candidate.id === id)
-      const targets = row ? rowTargets(row, subject) : []
-      const preferred = pane === 'before' ? 'before' : 'after'
-      const target = targets.find(item => item.side === preferred) ?? targets[0]
-      selectRow(id, target ? {...target, path} : undefined)
-    },
+    (pane: PaneKey, id: string | null, path?: string) => selectRow(id, selectedTarget(pane, id, path, rows, subject)),
     [rows, subject, selectRow],
   )
   const activateAnnotation = useCallback(
@@ -100,11 +149,7 @@ export function useSelection({latest, request, subject, rows, selectedId, placed
     },
     [rows, subject, placed, selectRow, latest],
   )
-  const selectedPath = useMemo<Record<PaneKey, string | undefined>>(() => {
-    const target = selection?.target
-    const path = target?.path
-    return {main: path, before: target?.side === 'before' ? path : undefined, after: target?.side === 'after' ? path : undefined}
-  }, [selection])
+  const selectedPath = useMemo(() => selectedPaths(selection), [selection])
   const anchorFor = useCallback(
     (rowId: string | null = selectedId, side?: Side): ProjectionAnchor | null => {
       if (rowId === null) return null
@@ -123,12 +168,9 @@ export function useSelection({latest, request, subject, rows, selectedId, placed
   )
   const selectTarget: ProjectionController['selectTarget'] = target => {
     const resolution = resolve(target)
-    if (resolution.status === 'present') selectRow(resolution.rowId, target)
-    else if (resolution.rowId !== undefined) {
-      const {path: _path, ...item} = target
-      selectRow(resolution.rowId, item)
-    }
+    const chosen = targetSelection(target, resolution)
+    if (chosen) selectRow(chosen.rowId, chosen.target)
     return resolution
   }
-  return {setPinned, selection, selectRow, resolve, selectFrom, activateAnnotation, selectedPath, anchorFor, selectTarget}
+  return {selection, selectRow, resolve, selectFrom, activateAnnotation, selectedPath, anchorFor, selectTarget}
 }

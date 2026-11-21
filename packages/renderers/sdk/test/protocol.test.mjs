@@ -505,13 +505,10 @@ test('observeHeight requests the height at once, before any resize is observed, 
   const fake = fakeWindow()
   const observers = []
   const Observer = globalThis.ResizeObserver
-  globalThis.ResizeObserver = class {
-    constructor(callback) {
-      this.callback = callback
-      observers.push(this)
-    }
-    observe() {}
-    disconnect() {}
+  globalThis.ResizeObserver = function (callback) {
+    const observer = {callback, observe() {}, disconnect() {}}
+    observers.push(observer)
+    return observer
   }
   try {
     const client = connectRenderer({}, {capabilities: {changeHighlighting: 'none'}, window: fake.view})

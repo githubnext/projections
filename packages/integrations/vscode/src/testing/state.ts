@@ -50,6 +50,18 @@ export function range(location: TestLocation): vscode.Range {
   return new vscode.Range(position, position)
 }
 
+/** An outcome's message as the Testing view shows it: a diff when it has an expected or actual value. */
+export function testMessage(folder: vscode.WorkspaceFolder, outcome: OutcomeMessage): vscode.TestMessage {
+  const message =
+    outcome.expected !== undefined || outcome.actual !== undefined
+      ? vscode.TestMessage.diff(outcome.message, outcome.expected ?? '', outcome.actual ?? '')
+      : new vscode.TestMessage(outcome.message)
+  if (outcome.location) {
+    message.location = new vscode.Location(vscode.Uri.joinPath(folder.uri, ...outcome.location.path.split('/')), range(outcome.location))
+  }
+  return message
+}
+
 /** The Testing view's state: its controller, what each item stands for, the watched folders and the last outcomes. */
 export class TestState {
   readonly data = new WeakMap<vscode.TestItem, ItemData>()
@@ -62,17 +74,6 @@ export class TestState {
     const all: [string, vscode.TestItem][] = []
     this.controller.items.forEach(item => all.push([item.id, item]))
     return all
-  }
-
-  message(folder: vscode.WorkspaceFolder, outcome: OutcomeMessage): vscode.TestMessage {
-    const message =
-      outcome.expected !== undefined || outcome.actual !== undefined
-        ? vscode.TestMessage.diff(outcome.message, outcome.expected ?? '', outcome.actual ?? '')
-        : new vscode.TestMessage(outcome.message)
-    if (outcome.location) {
-      message.location = new vscode.Location(vscode.Uri.joinPath(folder.uri, ...outcome.location.path.split('/')), range(outcome.location))
-    }
-    return message
   }
 
   /** The key an item's outcome is recorded under: `packages/check:extract`, `packages/case:<path>#<case>`, `<path>#<case>`. */

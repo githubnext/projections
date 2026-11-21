@@ -114,10 +114,9 @@ test('progress is acknowledged by the renderer after painting and flow-controlle
   await expect(view(page)).toHaveAttribute('data-rendered-progress', '1')
   // 31 slider positions, 10 ms apart, set in the page so the pace doesn't depend on the test driver.
   const elapsed = await page.getByRole('slider', {name: 'Transition'}).evaluate(async (input: HTMLInputElement) => {
-    const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!
     const start = performance.now()
     for (let value = 0; value <= 60; value += 2) {
-      setValue.call(input, String(value))
+      Reflect.set(HTMLInputElement.prototype, 'value', String(value), input)
       input.dispatchEvent(new Event('input', {bubbles: true}))
       await new Promise(resolve => setTimeout(resolve, 10))
     }

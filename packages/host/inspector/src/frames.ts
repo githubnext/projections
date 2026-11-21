@@ -6,7 +6,7 @@
  * protocol's channel). Built-in renderers are made Blob documents up front in the same way. Returns a function that stops relaying.
  */
 export function relayRendererFrames(prefix: string, open: (url: URL) => Promise<string>, frame = globalThis.HTMLIFrameElement): () => void {
-  const descriptor = Object.getOwnPropertyDescriptor(frame.prototype, 'src')
+  const descriptor: TypedPropertyDescriptor<string> | undefined = Object.getOwnPropertyDescriptor(frame.prototype, 'src')
   if (!descriptor?.set || !descriptor.get) return () => {}
   const {get, set} = descriptor
   Object.defineProperty(frame.prototype, 'src', {

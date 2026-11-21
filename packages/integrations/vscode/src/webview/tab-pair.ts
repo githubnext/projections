@@ -13,7 +13,7 @@ let labels: TabPairLabels | undefined
 const listeners = new Set<() => void>()
 const store = {
   get: () => labels,
-  subscribe(listener: () => void) {
+  subscribe: (listener: () => void) => {
     listeners.add(listener)
     return () => listeners.delete(listener)
   },

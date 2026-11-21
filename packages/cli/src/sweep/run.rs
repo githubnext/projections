@@ -227,7 +227,7 @@ impl Sweep<'_> {
 fn compared(mut value: Value, comparison: Value) -> Cell {
     let changes = comparison["comparison"]["changes"].as_array().map_or(0, Vec::len);
     let steps = comparison["comparison"]["steps"].as_array().map_or(0, Vec::len);
-    value["status"] = json!(if changes > 0 { "changed" } else { "unchanged" });
+    value["status"] = json!(crate::runtime::changed(&comparison));
     value["changes"] = json!(changes);
     value["steps"] = json!(steps);
     value["counts"] = counts(&comparison);

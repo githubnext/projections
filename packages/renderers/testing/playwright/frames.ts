@@ -10,6 +10,12 @@ import type {Frame, Page} from '@playwright/test'
  */
 export const framesPerStagePage = 8
 
+/**
+ * The built-in checks `checkScenario` runs in one request in WebKit: they start their frames inside the page, two to
+ * five each, where the stage page can't start over, so it starts over before each batch that follows any frame.
+ */
+export const checksPerStageRequest = 3
+
 /** The page events `framesSinceNavigation` follows, and what it reads from the page. */
 export type FramePage = Pick<Page, 'on' | 'mainFrame' | 'context'>
 
@@ -37,7 +43,10 @@ export function keepsRemovedFrames(page: FramePage): boolean {
   return page.context().browser()?.browserType().name() === 'webkit'
 }
 
-/** Whether the stage in `page` should start over in a fresh document before it starts another renderer frame. */
-export function stageNeedsFreshPage(page: FramePage): boolean {
-  return framesSinceNavigation(page) >= framesPerStagePage && keepsRemovedFrames(page)
+/**
+ * Whether the stage in `page` should start over in a fresh document before it starts more renderer frames: once it
+ * has started `limit` since it navigated.
+ */
+export function stageNeedsFreshPage(page: FramePage, limit = framesPerStagePage): boolean {
+  return framesSinceNavigation(page) >= Math.max(1, limit) && keepsRemovedFrames(page)
 }

@@ -695,6 +695,10 @@ test('a WebKit stage page starts over once it has started framesPerStagePage fra
   webkit.emit('framenavigated', webkit.main)
   assert.equal(framesSinceNavigation(webkit), 0)
   assert.equal(stageNeedsFreshPage(webkit), false)
+  // Between check batches, any frame is one too many.
+  assert.equal(stageNeedsFreshPage(webkit, 1), false)
+  webkit.emit('frameattached', {})
+  assert.equal(stageNeedsFreshPage(webkit, 1), true)
 
   const chromium = fakePage('chromium')
   framesSinceNavigation(chromium)

@@ -84,11 +84,44 @@ test('the payloads keep their identity while what they are made of does; the env
 
 test('a static diff gets a progress only once highlighting was turned off in it', () => {
   const select = createRendererPayloads()
-  assert.equal(select(input({mode: 'diff'})).diffProgress, undefined)
-  assert.deepEqual(select(input({mode: 'diff', highlighting: 'off'})).diffProgress, {progress: 1, highlighting: 0, direction: 1})
-  assert.deepEqual(select(input({mode: 'diff'})).diffProgress, {progress: 1, highlighting: 1, direction: 1})
-  select(input({mode: 'animated'}))
-  assert.equal(select(input({mode: 'diff'})).diffProgress, undefined)
+  // A host commits each read it shows.
+  const shown = change => {
+    const payloads = select(input(change))
+    select.commit()
+    return payloads
+  }
+  assert.equal(shown({mode: 'diff'}).diffProgress, undefined)
+  assert.deepEqual(shown({mode: 'diff', highlighting: 'off'}).diffProgress, {progress: 1, highlighting: 0, direction: 1})
+  assert.deepEqual(shown({mode: 'diff'}).diffProgress, {progress: 1, highlighting: 1, direction: 1})
+  shown({mode: 'animated'})
+  assert.equal(shown({mode: 'diff'}).diffProgress, undefined)
+})
+
+test('a computation that is never committed costs the committed results nothing', () => {
+  const select = createRendererPayloads()
+  const shown = select(input())
+  select.commit()
+  // A render for another subject, thrown away.
+  select(input({options: options({subject: {mode: 'extraction', extraction: after}})}))
+  assert.equal(select(input()).init, shown.init)
+  const filter = createRowFilter()
+  const kept = filter(rows, subject, filters(), summary)
+  filter.commit()
+  filter(rows, subject, filters({search: 'web'}), summary)
+  assert.equal(filter(rows, subject, filters(), summary), kept)
+})
+
+test('a focus the host changes in place is a new init, and the init holds a copy of it', () => {
+  const select = createRendererPayloads()
+  const focus = {on: 'changes'}
+  const first = select(input({options: options({focus})})).init
+  select.commit()
+  focus.on = 'all'
+  const second = select(input({options: options({focus})})).init
+  assert.notEqual(second, first)
+  assert.deepEqual(first.focus, {on: 'changes'})
+  assert.deepEqual(second.focus, {on: 'all'})
+  assert.notEqual(second.focus, focus)
 })
 
 test('the interaction keeps its state when an event changes nothing, and a restart clears it', () => {

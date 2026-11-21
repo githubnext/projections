@@ -164,9 +164,11 @@ panel opens, it checks the Testing view: the **Projections** controller lists
 the projection with its checks, and the demo repository's comparator tests
 (`tools/first.comparator.test.yaml`, used by no projection) at their lines;
 running them reports one pass and one failure at the line of the expectation
-that failed, and running the projection reports its checks.
-`scripts/screenshots/capture-themes.mjs` records the `--vscode-*` variables real
-VS Code injects for several color themes
+that failed, and running the projection reports its checks. It drives the
+Inspector as on a desktop: on a GitHub-hosted Windows runner, whose display is
+1024×768 with animations off, `test/smoke/run.mjs` first sets a 1920×1080
+display and turns animations on. `scripts/screenshots/capture-themes.mjs`
+records the `--vscode-*` variables real VS Code injects for several color themes
 (`packages/host/vscode-ui/fixtures/themes/`), and
 `scripts/screenshots/screenshots.mjs` takes the Inspector with the VS Code UI in
 VS Code's dark, light and high contrast themes and compares each with the

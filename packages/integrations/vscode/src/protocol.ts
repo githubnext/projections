@@ -81,7 +81,7 @@ export type HostMessage =
   /** The Explore view's Add to CI: the extension hands its own prompt to the coding agent (never the page's text). */
   | {tag: typeof hostTag; op: 'addToCi'}
   /** The Inspector has started and its handle is ready for control messages; a projection tab says its pinned pair. */
-  | {tag: typeof hostTag; op: 'ready'; pinned?: TabPair | null; committed?: string | null}
+  | {tag: typeof hostTag; op: 'ready'; page?: number; pinned?: TabPair | null; committed?: string | null}
   | {tag: typeof hostTag; op: 'controlResult'; id: number; result?: unknown; error?: string}
   /** A custom renderer bundle file (`/custom-renderers/…`), which the page opens as a Blob document. */
   | {tag: typeof hostTag; op: 'rendererFile'; id: number; path: string}
@@ -179,6 +179,8 @@ export interface WebviewConfig {
   engineWorker: string
   comparatorWorker: string
   nonce: string
+  /** Which of its panel's loads this page is, which it says when it's ready. */
+  page?: number
   /** `explore` opens the Explore view; otherwise the Inspector. */
   view?: 'explore' | 'inspect'
   /** A projection tab: the projection it presents, with no Inspector shell (`chrome: 'none'`), on the folder's choice's pair. */

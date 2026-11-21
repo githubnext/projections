@@ -178,12 +178,9 @@ export class ProjectionTab extends InspectorWebview {
   private restore() {
     this.loads++
     count('page.restore')
-    // VS Code reloaded the page (it dropped it while the tab was hidden): commands wait for it to be ready again. A
-    // load the extension started already has a pending ready, which callers may be waiting on.
-    if (this.isReady) {
-      this.isReady = false
-      this.ready = new Promise(resolve => (this.markReady = resolve))
-    }
+    // VS Code reloaded the page (it dropped it while the tab was hidden): commands wait for it to be ready again. A load
+    // the extension started is already loading.
+    this.page.send({type: 'dropped'})
     const pair = this.shownPair()
     const definitionRevision = this.revisionFor(pair)
     const editsKey = this.model.editKeys.get(this.projection)

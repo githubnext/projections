@@ -1540,7 +1540,8 @@
   },
   "dependencies": {
     "@githubnext/projections-host-vscode": "0.2.0",
-    "@githubnext/projections-inspector": "0.2.0"
+    "@githubnext/projections-inspector": "0.2.0",
+    "@githubnext/projections-machine": "0.2.0"
   },
   "devDependencies": {
     "@types/react": "^19.1.0",

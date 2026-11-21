@@ -174,7 +174,7 @@ function runNative(executable: string, interpreter: string, request: unknown, de
       if (settled) return
       let response: {ok?: unknown; result?: unknown; error?: {code?: unknown; message?: unknown}}
       try {
-        response = JSON.parse(Buffer.concat(chunks).toString('utf8'))
+        response = JSON.parse(Buffer.concat(chunks).toString('utf8')) as typeof response
       } catch {
         finish(new ComparatorRuntimeError('worker', 'the rules runner exited without a response'))
         return

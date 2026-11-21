@@ -32,6 +32,13 @@ export const native = (fileName: string): string => path.resolve(fileName)
 export const id = (...parts: string[]): string => parts.map(encodeURIComponent).join(':')
 export const sort = <T extends {id: string}>(items: T[]): T[] => items.sort((a, b) => compareIds(a.id, b.id))
 export const inputs = (context: ExtractorContext): Record<string, Json> => context.input.projection.definition.inputs ?? {}
+/** `value` as a nonempty array of nonempty strings, or an error naming the input `label`. */
+export function strings(value: unknown, label: string): string[] {
+  if (!Array.isArray(value) || !value.length || value.some(item => typeof item !== 'string' || !item.trim())) {
+    throw new Error(`${code(label)} must be a nonempty array of nonempty strings`)
+  }
+  return value as string[]
+}
 
 /** Whether a filesystem error means the path does not exist. */
 export const absent = (error: unknown): boolean =>

@@ -41,7 +41,14 @@ function shapeSchema(shape: Shape, schema: DomainSchema): TSchema {
       }
       return records.get(key)!
     }
-    default:
+    case 'text':
+    case 'string':
+    case 'number':
+    case 'nonnegative':
+    case 'boolean':
+    case 'nullable-string':
+    case 'strings':
+    case 'object':
       return primitiveSchemas[shape.type]() as TSchema
   }
 }

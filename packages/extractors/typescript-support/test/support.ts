@@ -52,10 +52,10 @@ export async function runHelper(
   const child = spawn(node, [...args, helper, id, checkout], {stdio: ['pipe', 'pipe', 'pipe']})
   let stdout = ''
   let stderr = ''
-  child.stdout.setEncoding('utf8').on('data', chunk => {
+  child.stdout.setEncoding('utf8').on('data', (chunk: string) => {
     stdout += chunk
   })
-  child.stderr.setEncoding('utf8').on('data', chunk => {
+  child.stderr.setEncoding('utf8').on('data', (chunk: string) => {
     stderr += chunk
   })
   child.stdin.end(JSON.stringify(input))

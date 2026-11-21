@@ -160,7 +160,12 @@ export async function checkedRules(interpreter: RulesInterpreter, report: unknow
 /** One diagnostic from the interpreter's report. */
 export function diagnostic(value: unknown): RulesDiagnostic {
   const item = value as {code?: unknown; path?: unknown; message?: unknown} | null
-  return {code: String(item?.code ?? 'invalid-rules'), path: String(item?.path ?? ''), message: String(item?.message ?? '')}
+  return {code: text(item?.code, 'invalid-rules'), path: text(item?.path, ''), message: text(item?.message, '')}
+}
+
+function text(value: unknown, missing: string) {
+  if (value === undefined || value === null) return missing
+  return typeof value === 'string' ? value : JSON.stringify(value)
 }
 
 /**

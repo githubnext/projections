@@ -23,7 +23,8 @@ export function exportedExtraction(value: unknown): Extraction {
   ) {
     throw new Error('Exported extraction must have protocolVersion 0, schema, entities and relationships')
   }
-  for (const entity of [...extraction.entities, ...extraction.relationships]) {
+  const items: unknown[] = [extraction.entities, extraction.relationships].flat()
+  for (const entity of items) {
     const item = record(entity, 'Exported item')
     if (
       typeof item.id !== 'string' ||

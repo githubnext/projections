@@ -6,7 +6,7 @@ import {test, type TestContext} from 'node:test'
 import {collectTypeScript, installToolchain, type HelperContext} from './support.ts'
 import {canonicalize, compareExtractions} from './support.ts'
 import type {WorkerExtractorId} from '../src/ids.js'
-import type {Json} from '../src/types.js'
+import type {Entity, Json} from '../src/types.js'
 type Repository = HelperContext['input']['repository']
 /** A fixture's invocation, its repository on disk at `root`. */
 type Fixture = HelperContext & {input: HelperContext['input'] & {repository: Repository & {root: string}}}
@@ -37,6 +37,12 @@ async function fixture(
     },
   }
 }
+/** An entity's `data[name]`, which the extractor writes as a string. */
+function stringData(entity: Entity | undefined, name: string): string {
+  const value = entity?.data?.[name]
+  assert(typeof value === 'string', `Expected a string ${name}`)
+  return value
+}
 test('public API resolves barrel aliases, overloads, classes, methods, generics and internal return shapes', async t => {
   const context = await fixture(
     t,
@@ -49,12 +55,33 @@ test('public API resolves barrel aliases, overloads, classes, methods, generics 
   const state = await collectTypeScript(context)
   assert.equal(state.schema, 'api/v0')
   assert.match(
-    String(state.entities.find(node => node.label === 'select')?.data?.signature),
+    stringData(
+      state.entities.find(node => node.label === 'select'),
+      'signature',
+    ),
     /select\(input: string\): string; select\(input: number\): number/,
   )
-  assert.match(String(state.entities.find(node => node.label === 'Box')?.data?.signature), /<T extends string = string>/)
-  assert.match(String(state.entities.find(node => node.label === 'result')?.data?.signature), /"count": number; "name": string/)
-  assert.match(String(state.entities.find(node => node.label === 'run')?.data?.signature), /"run"\(input: number\): number/)
+  assert.match(
+    stringData(
+      state.entities.find(node => node.label === 'Box'),
+      'signature',
+    ),
+    /<T extends string = string>/,
+  )
+  assert.match(
+    stringData(
+      state.entities.find(node => node.label === 'result'),
+      'signature',
+    ),
+    /"count": number; "name": string/,
+  )
+  assert.match(
+    stringData(
+      state.entities.find(node => node.label === 'run'),
+      'signature',
+    ),
+    /"run"\(input: number\): number/,
+  )
   assert(!state.entities.some(node => node.label === 'secret'))
   assert(state.entities.every(node => typeof node.data?.signature === 'string'))
   assert(state.entities.every(node => node.evidence?.[0]?.source && !path.isAbsolute(node.evidence[0].source)))
@@ -99,8 +126,8 @@ test('overlapping overload swaps change the exported signature and checker-selec
   const chooseAfter = right.entities.find(node => node.label === 'choose')!
   assert.equal(chooseBefore.id, chooseAfter.id)
   assert.notEqual(chooseBefore.data?.signature, chooseAfter.data?.signature)
-  assert.match(String(chooseBefore.data?.signature), /^choose\(x: any\): "wide"; choose\(x: string\): "narrow"$/)
-  assert.match(String(chooseAfter.data?.signature), /^choose\(x: string\): "narrow"; choose\(x: any\): "wide"$/)
+  assert.match(stringData(chooseBefore, 'signature'), /^choose\(x: any\): "wide"; choose\(x: string\): "narrow"$/)
+  assert.match(stringData(chooseAfter, 'signature'), /^choose\(x: string\): "narrow"; choose\(x: any\): "wide"$/)
   assert.equal(left.entities.find(node => node.label === 'selected')?.data?.signature, 'selected: "wide"')
   assert.equal(right.entities.find(node => node.label === 'selected')?.data?.signature, 'selected: "narrow"')
   assert.equal((await compareExtractions(left, right)).changes.find(change => change.id === chooseBefore.id)?.status, 'modified')
@@ -203,8 +230,18 @@ test('callable interfaces, predicates and computed members have stable, observab
     'typescript-public-api',
   )
   const state = await collectTypeScript(before)
-  assert(state.entities.some(node => node.label === 'call' && String(node.data?.signature).includes('(value: string): number')))
-  assert.match(String(state.entities.find(node => node.label === 'isText')?.data?.signature), /value is string/)
+  assert(
+    state.entities.some(
+      node => node.label === 'call' && typeof node.data?.signature === 'string' && node.data.signature.includes('(value: string): number'),
+    ),
+  )
+  assert.match(
+    stringData(
+      state.entities.find(node => node.label === 'isText'),
+      'signature',
+    ),
+    /value is string/,
+  )
   assert.equal(await canonicalize(state), await canonicalize(await collectTypeScript(moved)))
   const changed = await fixture(
     t,
@@ -230,7 +267,7 @@ test('conditional package exports, wildcard subpaths and types are explicit stab
   assert.deepEqual(
     state.entities
       .filter(node => node.kind !== 'member')
-      .map(node => node.data?.subpath)
+      .map(node => stringData(node, 'subpath'))
       .sort(),
     ['.', './features/one'],
   )
@@ -303,7 +340,7 @@ test('untracked installed declarations are read through guarded module resolutio
   )
   context.files = context.files.filter(file => !file.startsWith('node_modules/'))
   const state = await collectTypeScript(context)
-  assert.match(String(state.entities[0]?.data?.signature), /Thing/)
+  assert.match(stringData(state.entities[0], 'signature'), /Thing/)
 })
 test('tsconfig default ambient type discovery respects installed @types packages', async t => {
   const context = await fixture(
@@ -318,7 +355,7 @@ test('tsconfig default ambient type discovery respects installed @types packages
     'typescript-public-api',
   )
   context.files = context.files.filter(file => !file.startsWith('node_modules/'))
-  assert.match(String((await collectTypeScript(context)).entities[0]?.data?.signature), /value: number/)
+  assert.match(stringData((await collectTypeScript(context)).entities[0], 'signature'), /value: number/)
 })
 test('actionable diagnostics and missing config/entrypoints fail instead of empty success', async t => {
   await assert.rejects(

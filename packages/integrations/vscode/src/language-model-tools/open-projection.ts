@@ -87,7 +87,7 @@ export function openProjectionTool(
   return async (input: ToolInput): Promise<string> => {
     const folder = toolFolder(input.folder)
     if (typeof input.projection !== 'string') {
-      throw new Error('Name a projection: no projection tab is open to take it from (list_projections lists them)')
+      throw new TypeError('Name a projection: no projection tab is open to take it from (list_projections lists them)')
     }
     const id = input.projection
     const model = sidebar.model(folder)

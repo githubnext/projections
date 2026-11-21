@@ -118,5 +118,5 @@ export function provenanceBadge(document: unknown): ProvenanceBadge | undefined 
     'local-workspace': `in a ${typeof execution.strategy === 'string' ? execution.strategy : ''} workspace`,
     'local-materialized': 'in a temporary copy',
   }
-  return {label: 'Local', detail: `Extracted on this machine ${where[execution.source] ?? ''}${at}.`.replace(/\s+/g, ' ')}
+  return {label: 'Local', detail: `Extracted on this machine ${where[execution.source] ?? ''}${at}.`.replaceAll(/\s+/g, ' ')}
 }

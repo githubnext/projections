@@ -14,7 +14,7 @@ export function pickItems(model: FolderModel, top: readonly Node[], present: (no
     const shown = present(node)
     // Every item has an icon (blank for none) so the labels line up under the check.
     items.push({
-      label: `$(${shown.icon ?? 'blank'}) ${shown.label.replace(/\$\(/g, '\\$(')}`,
+      label: `$(${shown.icon ?? 'blank'}) ${shown.label.replaceAll('$(', '\\$(')}`,
       ...(shown.description ? {description: shown.description} : {}),
       ...(shown.command ? {command: shown.command} : {}),
       ...(shown.selected ? {current: true} : {}),

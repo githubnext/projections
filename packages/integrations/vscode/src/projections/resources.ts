@@ -5,7 +5,7 @@
  */
 export function projectionPath(folderName: string, title: string): string {
   // eslint-disable-next-line no-control-regex
-  const clean = (text: string) => text.replace(/[/\\]/g, '∕').replace(/[\u0000-\u001f]/g, '') || 'projection'
+  const clean = (text: string) => text.replaceAll(/[/\\]/g, '∕').replaceAll(/[\u0000-\u001f]/g, '') || 'projection'
   return `/${clean(folderName)}/${clean(title)}`
 }
 

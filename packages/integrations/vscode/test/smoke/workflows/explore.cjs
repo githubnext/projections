@@ -13,7 +13,7 @@ module.exports = async function explore({folder}) {
     const found = await elements('[data-candidate]', 'data-candidate')
     return found.length ? found.map(item => item.value) : undefined
   })
-  assert.ok(candidates.includes('repository-map'), candidates.join())
+  assert.ok(candidates.includes('repository-map'), candidates.join(','))
   // A sweep of the recent changes, and a candidate's cell opened in the Inspector on that change.
   await control({op: 'click', selector: 'section[aria-labelledby="pi-sweep-title"] form button[type="submit"]'})
   const cell = 'td.pi-sweep-cell[data-projection="repository-map"] a'

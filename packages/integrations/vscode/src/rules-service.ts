@@ -215,7 +215,7 @@ export class RulesService {
       worker.postMessage({id, request} satisfies WorkerRequest)
     }).then(value => {
       const error = (value as {error?: unknown} | null)?.error
-      if (typeof error === 'string') throw new Error(error)
+      if (typeof error === 'string') throw new TypeError(error)
       return value
     })
   }

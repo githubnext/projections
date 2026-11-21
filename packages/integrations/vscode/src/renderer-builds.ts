@@ -116,13 +116,13 @@ export class RendererBuilds implements vscode.Disposable {
     // again, and one saved while the workspace wasn't trusted builds now.
     const stopListening = lease.onDidChange(runner => {
       subscribe(runner)
-      const waiting = [...entry.builds].filter(([, build]) => build.state.phase === 'untrusted').map(([projection]) => projection)
+      const waiting = new Set([...entry.builds].filter(([, build]) => build.state.phase === 'untrusted').map(([projection]) => projection))
       for (const build of entry.builds.values()) build.terminal?.end(null)
       entry.builds.clear()
       this.changed.fire()
       for (const definition of this.host.projections(folder)) {
         if (this.host.hasTab(folder, definition.id) && rendererPackage(definition)) {
-          void this.send(folder, definition.id, waiting.includes(definition.id) ? 'saved' : 'opened')
+          void this.send(folder, definition.id, waiting.has(definition.id) ? 'saved' : 'opened')
         }
       }
     })
@@ -208,7 +208,7 @@ export class RendererBuilds implements vscode.Disposable {
   private async saved(uri: vscode.Uri) {
     const folder = vscode.workspace.getWorkspaceFolder(uri)
     if (!folder || uri.scheme !== 'file') return
-    const path = vscode.workspace.asRelativePath(uri, false).replace(/\\/g, '/')
+    const path = vscode.workspace.asRelativePath(uri, false).replaceAll('\\', '/')
     for (const definition of this.host.projections(folder)) {
       if (!isRendererSource(definition, path) || !this.host.hasTab(folder, definition.id)) continue
       await this.send(folder, definition.id, 'saved')

@@ -216,8 +216,8 @@ export const runnerOrigin = 'http://stdio.invalid'
 /** A repository-relative path the webview may ask to open: no absolute paths, drive letters or `..` segments. */
 export function relativePath(path: unknown): string | undefined {
   if (typeof path !== 'string' || !path || path.length > 1024 || path.includes('\0')) return undefined
-  const normalized = path.replace(/\\/g, '/').replace(/^\.\//, '')
-  if (normalized.startsWith('/') || /^[A-Za-z]:/.test(normalized) || normalized.split('/').some(part => part === '..')) return undefined
+  const normalized = path.replaceAll('\\', '/').replace(/^\.\//, '')
+  if (normalized.startsWith('/') || /^[A-Za-z]:/.test(normalized) || normalized.split('/').includes('..')) return undefined
   return normalized
 }
 

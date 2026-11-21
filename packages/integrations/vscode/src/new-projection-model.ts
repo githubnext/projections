@@ -46,7 +46,7 @@ const text = (value: unknown) => (typeof value === 'string' ? value : '')
 /** The built-in extractors in `projections extractor list --json`'s catalog. */
 export function parseExtractors(value: unknown): BuiltinExtractor[] {
   const list = (value as {extractors?: unknown} | null)?.extractors
-  if (!Array.isArray(list)) throw new Error('projections extractor list --json returned no extractors')
+  if (!Array.isArray(list)) throw new TypeError('projections extractor list --json returned no extractors')
   return list.flatMap(item => {
     const entry = item as Record<string, unknown> | null
     if (!entry || typeof entry.id !== 'string' || !entry.id) return []
@@ -66,7 +66,7 @@ export function parseExtractors(value: unknown): BuiltinExtractor[] {
 /** The built-in renderers in the backend's `GET /api/renderers` answer. */
 export function parseRenderers(value: unknown): BuiltinRenderer[] {
   const list = (value as {renderers?: unknown} | null)?.renderers
-  if (!Array.isArray(list)) throw new Error('The Projections backend listed no renderers')
+  if (!Array.isArray(list)) throw new TypeError('The Projections backend listed no renderers')
   return list.flatMap(item => {
     const entry = item as Record<string, unknown> | null
     if (!entry || typeof entry.name !== 'string' || !entry.name) return []
@@ -249,7 +249,7 @@ export function identifierPattern(schema: unknown): RegExp {
   const document = schema as {properties?: {id?: {$ref?: string; pattern?: string}}; $defs?: Record<string, {pattern?: string}>}
   const id = document?.properties?.id
   const pattern = id?.$ref?.startsWith('#/$defs/') ? document.$defs?.[id.$ref.slice('#/$defs/'.length)]?.pattern : id?.pattern
-  if (typeof pattern !== 'string') throw new Error('The definition schema has no projection ID pattern')
+  if (typeof pattern !== 'string') throw new TypeError('The definition schema has no projection ID pattern')
   return new RegExp(pattern, 'u')
 }
 

@@ -407,7 +407,9 @@ test('scenarios schema rejects unknown fields, mixed forms, misplaced comparator
   )
 })
 
-test('every renderer package scenarios file and the extraction files it references are valid', () => {
+// DollarLint (.dollarlint.toml) validates each scenarios.json and the extractions it references against the schemas;
+// this checks what a schema can't: unique IDs, and references that resolve to files.
+test('every renderer package scenarios file has unique scenario IDs and references files that exist', () => {
   const renderers = new URL('../../renderers/', import.meta.url)
   const packages = readdirSync(renderers)
     .filter(name => existsSync(new URL(`${name}/scenarios.json`, renderers)))
@@ -416,15 +418,12 @@ test('every renderer package scenarios file and the extraction files it referenc
   for (const name of packages) {
     const file = new URL(`${name}/scenarios.json`, renderers)
     const document = JSON.parse(readFileSync(file, 'utf8'))
-    assert.equal(validate('scenarios', document), true, `${name}: ${JSON.stringify(ajv.getSchema(id('scenarios')).errors)}`)
     const ids = document.scenarios.map(scenario => scenario.id)
     assert.equal(new Set(ids).size, ids.length, `${name}: duplicate scenario IDs`)
     for (const scenario of document.scenarios) {
       for (const side of ['before', 'after', 'extraction']) {
-        if (typeof scenario[side] !== 'string') continue
-        const value = JSON.parse(readFileSync(new URL(scenario[side], file), 'utf8'))
-        const referenced = value.format === 'projections.extraction' ? value.extraction : value
-        assert.equal(validate('extraction', referenced), true, `${name}/${scenario.id}: ${scenario[side]}`)
+        if (typeof scenario[side] === 'string')
+          assert.ok(existsSync(new URL(scenario[side], file)), `${name}/${scenario.id}: ${scenario[side]}`)
       }
     }
   }

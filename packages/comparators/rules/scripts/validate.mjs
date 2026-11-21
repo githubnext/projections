@@ -1,10 +1,13 @@
-// Validates every comparator file (`*.comparator.yaml`) in the repository, the interpreter's own test rules, and
-// every comparator example in the docs (a YAML block whose first line names a `.comparator.yaml` file), against the published schema (packages/schemas/schemas/comparator/v0.json), as an
-// editor's YAML language server would, then checks each with the built rules interpreter and fails on any
-// diagnostic or lint warning (such as a chain of three conditionals): npm run check:comparators, after npm run build.
-// Every comparator test file (`*.comparator.test.yaml`), and every docs example naming one, is validated against
-// packages/schemas/schemas/comparator-tests/v0.json; the CLI runs them (cargo test -p projections-cli --test comparator_tests).
-// Directories given as arguments are validated instead, the same way (for comparator files kept outside this workspace).
+// Checks every comparator file (`*.comparator.yaml`) in the repository and the interpreter's own test rules with the
+// built rules interpreter, failing on any diagnostic or lint warning (such as a chain of three conditionals): npm run
+// check:comparators, after npm run build. DollarLint (.dollarlint.toml) validates those files, and every comparator test
+// file (`*.comparator.test.yaml`), against the published schemas; the CLI runs the tests (cargo test -p projections-cli
+// --test comparator_tests).
+// Every comparator example in the docs (a YAML block whose first line names a `.comparator.yaml` or
+// `.comparator.test.yaml` file), which DollarLint can't see, is also validated against the published schema
+// (packages/schemas/schemas/comparator/v0.json or comparator-tests/v0.json), as an editor's YAML language server would.
+// Directories given as arguments are checked instead, schema included (for comparator files kept outside this
+// workspace).
 import {readFileSync, readdirSync, statSync} from 'node:fs'
 import {join, relative, resolve} from 'node:path'
 import {fileURLToPath} from 'node:url'
@@ -33,8 +36,9 @@ const walk = dir => {
 const only = process.argv.slice(2).map(dir => resolve(dir))
 for (const dir of only.length ? only : ['packages/comparators', 'examples', 'packages/cli/templates'].map(dir => join(root, dir))) walk(dir)
 const display = path => relative(only.length ? process.cwd() : root, path)
-const documents = files.sort().map(path => [display(path), readFileSync(path, 'utf8')])
-const testDocuments = tests.sort().map(path => [display(path), readFileSync(path, 'utf8')])
+// Repository files have their schemas checked by DollarLint; directories given as arguments don't.
+const documents = files.sort().map(path => [display(path), readFileSync(path, 'utf8'), Boolean(only.length)])
+const testDocuments = only.length ? tests.sort().map(path => [display(path), readFileSync(path, 'utf8')]) : []
 const docs = []
 const walkDocs = dir => {
   for (const name of readdirSync(dir)) {
@@ -49,7 +53,7 @@ for (const path of only.length ? [] : [...docs.sort(), join(root, 'packages/cli/
   for (const match of text.matchAll(/```yaml\n(# [^\n]*\.comparator\.ya?ml\n[\s\S]*?)```/g)) {
     // Excerpts (`...`) aren't whole files.
     if (!match[1].includes('\n...') && !match[1].includes(': ...')) {
-      documents.push([`${path.slice(root.length)} (${match[1].split('\n')[0].slice(2)})`, match[1]])
+      documents.push([`${path.slice(root.length)} (${match[1].split('\n')[0].slice(2)})`, match[1], true])
     }
   }
   for (const match of text.matchAll(/```yaml\n(# [^\n]*\.comparator\.test\.ya?ml\n[\s\S]*?)```/g)) {
@@ -68,8 +72,8 @@ for (const [name, text] of testDocuments) {
     console.error(`invalid ${name}: ${JSON.stringify(validateTests.errors, null, 2)}`)
   }
 }
-for (const [name, text] of documents) {
-  if (!validate(parse(text))) {
+for (const [name, text, schema] of documents) {
+  if (schema && !validate(parse(text))) {
     failed = true
     console.error(`invalid ${name}: ${JSON.stringify(validate.errors, null, 2)}`)
     continue

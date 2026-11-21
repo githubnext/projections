@@ -22,6 +22,8 @@ export function ViewerTitle({
   onPin,
   focus = false,
   onFocused,
+  menuFocused = false,
+  onMenuFocus,
   onFocusLost,
 }: {
   title: string
@@ -35,7 +37,11 @@ export function ViewerTitle({
   /** Takes focus (once the pane closes), then says so (`onFocused`). */
   focus?: boolean
   onFocused?: () => void
-  /** The menu went away while it (its trigger or popup) held focus, leaving focus on the page. */
+  /** Whether the menu (its trigger or popup) holds focus, as `onMenuFocus` last said. */
+  menuFocused?: boolean
+  /** Focus came into the menu (`true`) or left it (`false`). */
+  onMenuFocus?: ((inside: boolean) => void) | undefined
+  /** The menu went away while it held focus, leaving focus on the page. */
   onFocusLost?: (() => void) | undefined
 }) {
   const id = useId()
@@ -53,12 +59,11 @@ export function ViewerTitle({
     if (!hasMenu) setOpen(false)
   }, [hasMenu])
   const slot = useRef<HTMLDivElement>(null)
-  const held = useRef(false)
   useLayoutEffect(() => {
-    if (hasMenu || !held.current) return
-    held.current = false
+    if (hasMenu || !menuFocused) return
+    onMenuFocus?.(false)
     if (!document.activeElement || document.activeElement === document.body) onFocusLost?.()
-  }, [hasMenu, onFocusLost])
+  }, [hasMenu, menuFocused, onMenuFocus, onFocusLost])
   useEffect(() => {
     if (!focus || !hasMenu) return
     trigger.current?.focus()
@@ -69,8 +74,12 @@ export function ViewerTitle({
     <div
       ref={slot}
       className="pi-viewer-title-slot pj:contents"
-      onFocus={() => (held.current = true)}
-      onBlur={event => (held.current = slot.current?.contains(event.relatedTarget as Node | null) ?? false)}
+      onFocus={() => {
+        if (!menuFocused) onMenuFocus?.(true)
+      }}
+      onBlur={event => {
+        if (!slot.current?.contains(event.relatedTarget as Node | null)) onMenuFocus?.(false)
+      }}
     >
       <h1 className="pj:m-0 pj:flex pj:min-w-0 pj:flex-1 pj:items-center pj:text-[13px] pj:font-normal">
         {menu ? (

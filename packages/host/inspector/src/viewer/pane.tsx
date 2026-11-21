@@ -42,7 +42,7 @@ export function usePaneShown(store: Store, room: boolean): boolean {
  * menu does; closing it returns to the menu.
  */
 export function ViewerPane({store, onChoose}: {store: Store; onChoose: (projection: string) => void}) {
-  const {state, choosing, projections, paneFocus} = useSyncExternalStore(store.subscribe, store.get, store.get)
+  const {state, choosing, projections, paneFocus, focusWithin} = useSyncExternalStore(store.subscribe, store.get, store.get)
   const shown = usePaneShown(store, usePaneRoom())
   // The pane takes focus once, when pinned: not again when it comes back as the page widens.
   useEffect(() => {
@@ -51,20 +51,21 @@ export function ViewerPane({store, onChoose}: {store: Store; onChoose: (projecti
   // A pane that goes away while it holds focus (the page narrowing below its room) hands focus to the title's menu,
   // which takes its place, rather than leaving it on the page.
   const pane = useRef<HTMLDivElement>(null)
-  const focused = useRef(false)
   useLayoutEffect(() => {
-    if (!shown && focused.current) {
-      focused.current = false
-      if (!document.activeElement || document.activeElement === document.body) store.set({paneFocus: 'menu'})
-    }
-  }, [shown, store])
+    if (shown || focusWithin !== 'pane') return
+    const lost = !document.activeElement || document.activeElement === document.body
+    store.set({focusWithin: undefined, ...(lost ? {paneFocus: 'menu' as const} : {})})
+  }, [shown, focusWithin, store])
   if (!shown) return null
   return (
     <div
       ref={pane}
       className="pi-viewer-pane-slot pj:contents"
-      onFocus={() => (focused.current = true)}
-      onBlur={event => (focused.current = pane.current?.contains(event.relatedTarget as Node | null) ?? false)}
+      onFocus={() => store.set({focusWithin: 'pane'})}
+      onBlur={event => {
+        if (!pane.current?.contains(event.relatedTarget as Node | null) && store.get().focusWithin === 'pane')
+          store.set({focusWithin: undefined})
+      }}
     >
       <ProjectionsPane
         className="pi-viewer-pane"

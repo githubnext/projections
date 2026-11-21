@@ -32,6 +32,8 @@ interface Snapshot {
   pinned: boolean
   /** Where focus goes once the pane opens or closes: into it, or back to the title's menu. */
   paneFocus?: 'pane' | 'menu' | undefined
+  /** Which of the two holds focus, if either, so the one that replaces it can take focus when it goes away. */
+  focusWithin?: 'pane' | 'menu' | undefined
 }
 
 /** A tiny store the header reads. */
@@ -69,11 +71,8 @@ export type Store = ReturnType<typeof createStore>
  * control (`end`) closes the row.
  */
 export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactNode; onChoose?: (projection: string) => void}) {
-  const {state, status, stopped, projections, colorMode, choosing, failed, notice, noticeDetail, paneFocus} = useSyncExternalStore(
-    store.subscribe,
-    store.get,
-    store.get,
-  )
+  const {state, status, stopped, projections, colorMode, choosing, failed, notice, noticeDetail, paneFocus, focusWithin} =
+    useSyncExternalStore(store.subscribe, store.get, store.get)
   const shown = choosing ?? state?.projection ?? undefined
   const title = shown
     ? choosing
@@ -99,6 +98,11 @@ export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactN
         onPin={paneRoom && !stopped ? () => setPanePinned(store, true) : undefined}
         focus={paneFocus === 'menu'}
         onFocused={() => store.set({paneFocus: undefined})}
+        menuFocused={focusWithin === 'menu'}
+        onMenuFocus={inside => {
+          if (inside) store.set({focusWithin: 'menu'})
+          else if (store.get().focusWithin === 'menu') store.set({focusWithin: undefined})
+        }}
         // The pane that replaces the menu takes the focus the menu held.
         onFocusLost={paneShown ? () => store.set({paneFocus: 'pane'}) : undefined}
       />

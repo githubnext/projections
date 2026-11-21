@@ -17,6 +17,17 @@ export interface ProjectionsPaneItem {
   status?: ReactNode
 }
 
+/** Scrolls `scroller` (the pane's list) so its current row is in view, and returns that row. */
+function revealCurrent(scroller: HTMLElement | null): HTMLElement | undefined {
+  const item = scroller?.querySelector<HTMLElement>('[aria-current="page"]')
+  if (!scroller || !item) return undefined
+  const box = scroller.getBoundingClientRect(),
+    row = item.getBoundingClientRect()
+  if (row.bottom > box.bottom) scroller.scrollTop += row.bottom - box.bottom
+  else if (row.top < box.top) scroller.scrollTop -= box.top - row.top
+  return item
+}
+
 /**
  * The projections list as a durable pane at the page's start (`usePinnedPane`), instead of the projection menu: a
  * "Projections" navigation landmark, its header's close button (`onClose`, which returns to the menu), and each
@@ -47,19 +58,12 @@ export function ProjectionsPane({
   className?: string
 }) {
   const list = useRef<HTMLUListElement>(null)
+  // The current projection in view in the list, however long, without scrolling the page: when the pane opens, and
+  // again whenever `autoFocus` turns on (the person may have scrolled the list, or the current one changed), before it
+  // takes focus.
   useLayoutEffect(() => {
-    const scroller = list.current
-    const item = scroller?.querySelector<HTMLElement>('[aria-current="page"]')
-    if (!scroller || !item) return
-    // The current projection in view in the list, however long, without scrolling the page; then focus, if asked.
-    const box = scroller.getBoundingClientRect(),
-      row = item.getBoundingClientRect()
-    if (row.bottom > box.bottom) scroller.scrollTop += row.bottom - box.bottom
-    else if (row.top < box.top) scroller.scrollTop -= box.top - row.top
-  }, [])
-  // Focus on the current projection whenever `autoFocus` turns on: when it opens with it, or once it is shown.
-  useLayoutEffect(() => {
-    if (autoFocus) list.current?.querySelector<HTMLElement>('[aria-current="page"]')?.focus({preventScroll: true})
+    const item = revealCurrent(list.current)
+    if (autoFocus) item?.focus({preventScroll: true})
   }, [autoFocus])
   return (
     <nav

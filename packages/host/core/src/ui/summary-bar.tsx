@@ -44,7 +44,8 @@ function bandAnchor(bar: HTMLElement | null): DOMRect {
   const more = bar?.querySelector('.ph-summary-more')?.getBoundingClientRect()
   if (!bar || !more) return new DOMRect()
   const top = bar.getBoundingClientRect().top
-  const legend = bar.closest('.ph')?.querySelector('.ph-legend')?.getBoundingClientRect()
+  // The stage's root, or the scoped root of a host that composes the bar itself (a snapshot's page).
+  const legend = (bar.closest('.ph') ?? bar.closest('.pj-root'))?.querySelector('.ph-legend')?.getBoundingClientRect()
   const over = legend && Math.abs(legend.bottom - top) < 2 ? legend.top : top
   return new DOMRect(more.left, over, more.width, more.bottom - over)
 }
@@ -336,6 +337,7 @@ export function SummaryBar({
       {/* As wide as the lead spacer, so the figures stay centred; the fixed content sits at its end, on one line, never
           narrower than it. */}
       <span
+        data-summary-trail=""
         className={cn(
           'ph-summary-trail pj:flex pj:flex-1 pj:items-center pj:justify-end pj:gap-1 pj:whitespace-nowrap pj:has-[*]:ps-2 pj:in-data-tight:min-w-0',
           // As wide as its content (in the stage's foot), the bar keeps as much after its end as the lead's gap before

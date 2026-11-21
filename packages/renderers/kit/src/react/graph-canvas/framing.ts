@@ -7,7 +7,7 @@ import {contentStart, openingZoom} from '../../zoom.js'
 import {useBorderWidths} from '../border.js'
 import {useFitScale} from '../fit.js'
 import {useCoveredPadding, useScrolledPadding} from '../covered-padding.js'
-import {useFrameSizing, useStageCover, useStageInset, useStageInsetTop} from '../shell/frame.js'
+import {useFrameSizing, useStageCover, useStageInset, useStageInsetBottom, useStageInsetTop} from '../shell/frame.js'
 import {useOpeningFloor, useStageZoom} from '../zoom.js'
 import type {ContentBox, ScrollStart} from '../../zoom.js'
 import type {LaidOutGraphProps} from './drawing.js'
@@ -28,8 +28,13 @@ const strokeRoom = 12
 export function useGraphPadding(): GraphPadding {
   const x = useStageInset() ?? graphPadding
   const insetTop = useStageInsetTop()
-  const top = useStageCover() ? graphPadding : (insetTop ?? graphPadding)
-  return useMemo(() => ({x, y: graphPadding, top}), [x, top])
+  const insetBottom = useStageInsetBottom()
+  // A host that says exactly what it overlays (`stage-cover`) leaves both ends to `useCoveredPadding`; one that gives
+  // only bands keeps clear of them.
+  const covered = Boolean(useStageCover())
+  const top = covered ? graphPadding : (insetTop ?? graphPadding)
+  const y = covered ? graphPadding : Math.max(graphPadding, insetBottom ?? 0)
+  return useMemo(() => ({x, y, top}), [x, y, top])
 }
 
 /** The space around a fitted graph, CSS px: across, below, and above it (`useGraphPadding`). */

@@ -235,10 +235,7 @@ impl GenerationStore {
         let mut staged = tempfile::Builder::new().prefix(".staging-").tempfile_in(&self.directory)?;
         staged.write_all(text.as_bytes())?;
         staged.as_file().sync_all()?;
-        staged
-            .persist(&self.file)
-            .map_err(|error| error.error)
-            .with_context(|| format!("Cannot save the generation store {}", self.file.display()))?;
+        crate::replace::replace(staged, &self.file).with_context(|| format!("Cannot save the generation store {}", self.file.display()))?;
         self.evict();
         Ok(())
     }

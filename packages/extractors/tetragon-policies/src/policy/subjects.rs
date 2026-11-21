@@ -23,6 +23,7 @@ impl Policy<'_> {
                     "NotPostfix" => (true, "suffix"),
                     other => bail!("{filter_path}.operator {other} is not a binary operator"),
                 };
+                let follow = flag(binary.get("followChildren"), false, &format!("{filter_path}.followChildren"))?;
                 for value in scalars(binary.get("values"), &format!("{filter_path}.values"))? {
                     let subject = key(&["subject", "binary", matching, &value]);
                     model.subjects.entry(subject.clone()).or_insert_with(
@@ -32,7 +33,7 @@ impl Policy<'_> {
                     model.relationships.push(json!({
                         "id":format!("binary:{}/{role}/{matching}/{}", rest(id), percent(&value)),
                         "kind":if negated {"excludes"} else {"matches"},"from":id,"to":subject,
-                        "data":{"operator":operator,"parent":parent,"followChildren":flag(binary.get("followChildren"), false)},
+                        "data":{"operator":operator,"parent":parent,"followChildren":follow},
                         "confidence":"authoritative"
                     }));
                 }

@@ -3,7 +3,7 @@
 `npm run check:advisories` checks the root `package-lock.json` and `Cargo.lock`
 against [OSV](https://osv.dev), which carries GitHub's advisories for npm and
 RustSec's for crates. It sends only package names and versions to `api.osv.dev`
-and never calls npm's audit endpoint. CI runs it weekly and on `main` (the
+and never calls npm's audit endpoint. CI runs it nightly and on `main` (the
 `advisories` job in `.github/workflows/ci.yml`); pull requests rely on
 dependency review (see
 [Vulnerabilities in dependencies](../../CONTRIBUTING.md#vulnerabilities-in-dependencies)).

@@ -62,7 +62,7 @@ try {
   await mkdir(bin)
   const binary = path.join(bin, `projections${exe}`)
   await cp(path.join(source, 'packages/cli/dist', `projections${exe}`), binary)
-  const names = ['schemas', 'engine', 'comparator-runtime', 'renderer-sdk', 'renderer-testing', 'host', 'inspector']
+  const names = ['schemas', 'machine', 'engine', 'comparator-runtime', 'renderer-sdk', 'renderer-testing', 'host', 'inspector']
   const packed = JSON.parse(
     invoke(
       'npm',

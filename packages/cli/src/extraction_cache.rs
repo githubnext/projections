@@ -85,10 +85,7 @@ impl ExtractionCache {
         let mut staged = tempfile::Builder::new().prefix(".staging-").tempfile_in(parent)?;
         staged.write_all(&serde_json::to_vec(document)?)?;
         staged.as_file().sync_all()?;
-        staged
-            .persist(&path)
-            .map_err(|error| error.error)
-            .with_context(|| format!("Cannot save the cache entry {}", path.display()))?;
+        crate::replace::replace(staged, &path).with_context(|| format!("Cannot save the cache entry {}", path.display()))?;
         self.evict();
         Ok(())
     }

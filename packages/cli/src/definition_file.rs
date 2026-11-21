@@ -91,7 +91,7 @@ pub fn save(root: &Path, id: &str, parts: &Value, expected: Option<&str>, dry_ru
     let directory = path.parent().context("The definition file has no directory")?;
     let mut file = tempfile::NamedTempFile::new_in(directory)?;
     std::io::Write::write_all(&mut file, after.as_bytes())?;
-    file.persist(&path).map_err(|error| error.error)?;
+    crate::replace::replace(file, &path)?;
     result["written"] = json!(true);
     Ok(result)
 }

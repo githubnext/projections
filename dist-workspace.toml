@@ -17,6 +17,8 @@ targets = [
   "aarch64-pc-windows-msvc",
 ]
 precise-builds = true
+# Pull requests run no release jobs: ci.yml plans the release when a change can affect it (release-config).
+pr-run-mode = "skip"
 # Required: the default would publish a tarball of the whole repository.
 source-tarball = false
 installers = ["shell", "powershell"]

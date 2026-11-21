@@ -30,8 +30,15 @@ export type Vocabulary = (typeof vocabularyNames)[number]
 export type Json = null | boolean | number | string | Json[] | {[key: string]: Json}
 
 /**
- * The ways a host can show a comparison, in the order hosts list them: a diff, the two sides side by side, an
- * animation from one to the other, and a swipe between them. A renderer manifest's `comparisonModes` names some.
+ * How a host presents a comparison with a renderer:
+ *
+ * - `animated`: one frame, driven through `progress` from before to after.
+ * - `side-by-side`: two frames, one held at progress 0 and one at 1.
+ * - `swipe`: the same two frames stacked, with a divider between them.
+ * - `diff`: one frame and no `progress` at all; the renderer draws its own
+ *   static comparison of both subjects (`init.comparisonMode` is `'diff'`).
+ *
+ * In the order hosts list them. A renderer manifest's `comparisonModes` names those it supports.
  */
 export const comparisonModes = ['diff', 'side-by-side', 'animated', 'swipe'] as const
 /**

@@ -67,4 +67,4 @@ geometry puts it, its bounding box's centre within a quarter of a CSS pixel of
 the geometry's (the disc's centre for every glyph but `redeploy`, whose ring is
 concentric with the disc instead), and every glyph is cut at the same stroke,
 the stroke matching its cut's area against its own geometry drawn at a range of
-widths. `npm run typecheck` checks both files (`tsconfig.browser.json`).
+widths. `npm run typecheck` checks both files (`browser/tsconfig.json`).

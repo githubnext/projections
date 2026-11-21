@@ -64,7 +64,7 @@ launcher's absolute path.
 | `docs search <words>`, `docs read <path or title>` | Local Markdown search and reading, by section |
 | `doctor` | Toolchains, the npm registry, installed dependencies, stale builds, Playwright browsers, memory |
 | `affected` | Changed workspaces and crates, their dependants, generated files to regenerate |
-| `check [--affected] [--fast] [--only …]` | boundaries, casing, portability, icons, considered, lockfile, readmes, links, versions, format, lint, cargo-fmt, build, comparators, typecheck, docs (and clippy, cargo-check); `--fast` runs only the cheap ones over what changed, with `cargo check` and typecheck of just the changed crates and workspaces |
+| `check [--affected] [--fast] [--only …]` | boundaries, casing, portability, icons, considered, lockfile, readmes, links, versions, format, cargo-fmt, build, comparators, typecheck, lint, docs (and clippy, cargo-check); `--fast` runs only the cheap ones over what changed, with `cargo check`, typecheck and lint of just the changed crates, workspaces and files |
 | `build [target] [--affected] [--force] [--dry-run]` | Builds a workspace (or the changed ones) and the workspaces it depends on, rebuilding a dependency only when it is unbuilt, its src or build configuration and scripts changed, an output went missing, or its dependencies are newer, as make would; a rebuild whose outputs come out the same keeps their times, so nothing above it rebuilds |
 | `test [target] [--affected] [--rust] [--browser <project>] [--filter <name>]` | Unit and Rust tests; one browser project at a time, at most 2 workers; `--filter` runs only the tests whose name matches |
 | `generated [check]` | The generated files, their generators, and whether they are current |

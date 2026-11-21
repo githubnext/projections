@@ -42,7 +42,7 @@
     "test:rust:coverage": "cargo llvm-cov --locked -p projections-engine -p projections-comparator-default --fail-under-lines 98 --fail-under-regions 98 --show-missing-lines -- --skip module_has_zero_imports_and_the_comparator_abi_exports",
     "test:rust:mutants": "cargo mutants",
     "typecheck": "node tools/scripts/workspaces.mjs typecheck",
-    "lint": "eslint . --quiet",
+    "lint": "node tools/scripts/lint.mjs --quiet",
     "icons": "node tools/scripts/product-icons.mjs",
     "format": "oxfmt",
     "format:check": "oxfmt --check",

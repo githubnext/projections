@@ -5,7 +5,18 @@ import {useRenderer} from '@githubnext/projections-renderer-sdk/react'
 import {RendererBoundary} from '../components.js'
 import {LegendContext} from '../legend-context.js'
 import {useDocumentModel, useTimeline} from './document.js'
-import {ContentAspect, FrameFill, FrameSizing, FrameViewport, PaintGate, StageInset, StageMaxHeight, stageInsetOf} from './frame.js'
+import {
+  ContentAspect,
+  FrameFill,
+  FrameSizing,
+  FrameViewport,
+  PaintGate,
+  StageCover,
+  StageInset,
+  StageMaxHeight,
+  stageInsetOf,
+} from './frame.js'
+import {useStageCoverOf} from './cover.js'
 import {StageInsetTop} from './frame.js'
 import type {MountOptions, RendererProps} from './props.js'
 import {
@@ -84,6 +95,7 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
   const stageInset = stageInsetOf(tokens)
   const stageInsetTop = stageInsetOf(tokens, 'stage-inset-top')
   const stageMaxHeight = tokens?.['stage-max-height']
+  const stageCover = useStageCoverOf(tokens?.['stage-cover'])
   const automatic = (options.steps ?? 'schedule') === 'schedule'
   const filter = useHostFilter(client)
   const {scope, document} = useScopeView(resolved, filter, model, options.scope, init?.projection.renderer)
@@ -116,49 +128,51 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
           <FrameSizing.Provider value={sizing}>
             <FrameViewport.Provider value={renderer.viewport}>
               <StageInset.Provider value={stageInset}>
-                <StageMaxHeight.Provider value={stageMaxHeight}>
-                  <PaintGate.Provider value={hold}>
-                    <RendererBoundary resetKey={init} onError={onError}>
-                      <LegendContext.Provider value={reportLegend}>
-                        <Renderer
-                          init={init}
-                          model={document!.model as ComparisonModel}
-                          comparing={comparing}
-                          diff={diff}
-                          comparisonMode={init.mode === 'comparison' ? init.comparisonMode : undefined}
-                          pane={pane}
-                          focusRequest={focus}
-                          scope={scope}
-                          filtered={filter !== undefined}
-                          progress={position.progress}
-                          highlighting={highlighting}
-                          emphasis={emphasis}
-                          direction={position.direction}
-                          schedule={schedule}
-                          rendererName={init.projection.renderer}
-                          selectedId={selected}
-                          hoveredId={renderer.hovered}
-                          onSelect={onSelect}
-                          onOpen={onOpen}
-                          reportSteps={reportSteps}
-                          controls={controls}
-                          declareControls={declareControls}
-                          setControl={setControl}
-                          onAction={onAction}
-                          reportLegend={reportLegend}
-                          declareNouns={declareNouns}
-                          options={renderer.options}
-                          viewport={renderer.viewport}
-                          reducedMotion={renderer.environment?.reducedMotion ?? init.reducedMotion}
-                          locale={renderer.environment?.locale ?? init.locale}
-                          colorMode={renderer.environment?.theme.colorMode ?? init.theme.colorMode}
-                          environment={environment!}
-                          requestDocument={requestDocument}
-                        />
-                      </LegendContext.Provider>
-                    </RendererBoundary>
-                  </PaintGate.Provider>
-                </StageMaxHeight.Provider>
+                <StageCover.Provider value={stageCover}>
+                  <StageMaxHeight.Provider value={stageMaxHeight}>
+                    <PaintGate.Provider value={hold}>
+                      <RendererBoundary resetKey={init} onError={onError}>
+                        <LegendContext.Provider value={reportLegend}>
+                          <Renderer
+                            init={init}
+                            model={document!.model as ComparisonModel}
+                            comparing={comparing}
+                            diff={diff}
+                            comparisonMode={init.mode === 'comparison' ? init.comparisonMode : undefined}
+                            pane={pane}
+                            focusRequest={focus}
+                            scope={scope}
+                            filtered={filter !== undefined}
+                            progress={position.progress}
+                            highlighting={highlighting}
+                            emphasis={emphasis}
+                            direction={position.direction}
+                            schedule={schedule}
+                            rendererName={init.projection.renderer}
+                            selectedId={selected}
+                            hoveredId={renderer.hovered}
+                            onSelect={onSelect}
+                            onOpen={onOpen}
+                            reportSteps={reportSteps}
+                            controls={controls}
+                            declareControls={declareControls}
+                            setControl={setControl}
+                            onAction={onAction}
+                            reportLegend={reportLegend}
+                            declareNouns={declareNouns}
+                            options={renderer.options}
+                            viewport={renderer.viewport}
+                            reducedMotion={renderer.environment?.reducedMotion ?? init.reducedMotion}
+                            locale={renderer.environment?.locale ?? init.locale}
+                            colorMode={renderer.environment?.theme.colorMode ?? init.theme.colorMode}
+                            environment={environment!}
+                            requestDocument={requestDocument}
+                          />
+                        </LegendContext.Provider>
+                      </RendererBoundary>
+                    </PaintGate.Provider>
+                  </StageMaxHeight.Provider>
+                </StageCover.Provider>
               </StageInset.Provider>
             </FrameViewport.Provider>
           </FrameSizing.Provider>

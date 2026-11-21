@@ -286,6 +286,11 @@ test('choices are named for people: the ref, the commit subject and age, never a
   assert.equal(choiceLabel(commit, document('commit'), revisions, now), 'e6e30acc · "Set up the workspaces" · 9 days ago')
   assert.equal(choiceLabel('main', document('commit'), revisions, now), 'main · "Set up the workspaces" · 9 days ago')
   assert.equal(choiceLabel('main', document('commit'), [], now), 'main · e6e30acc')
+  // An abbreviated hash names the commit, once: never `e6e30accaaaa · e6e30acc`.
+  assert.equal(choiceLabel(commit.slice(0, 12), document('commit'), [], now), 'e6e30acc')
+  assert.equal(choiceLabel('e6e30acc', document('commit'), revisions, now), 'e6e30acc · "Set up the workspaces" · 9 days ago')
+  // A short hex name is a ref, even one that prefixes the commit.
+  assert.equal(choiceLabel('e6e3', document('commit'), [], now), 'e6e3 · e6e30acc')
   assert.equal(choiceLabel('working-tree', document('working-tree'), revisions, now), 'Working tree · uncommitted changes')
   // The working tree's entry shares HEAD's commit but not its subject; HEAD is named by its own.
   const withWorkingTree = [{ref: 'working-tree', kind: 'working-tree', commit, title: 'Working tree'}, ...revisions]

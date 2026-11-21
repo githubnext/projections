@@ -1,6 +1,9 @@
+import {useRef} from 'react'
 import type {CSSProperties, ReactNode} from 'react'
 import type {Side} from '../modes.js'
 import {paneGeometry} from './arrangement.js'
+import {ChipText} from './chip-text.js'
+import {useWholePixels} from './whole-pixels.js'
 
 const srOnly: CSSProperties = {
   position: 'absolute',
@@ -106,14 +109,19 @@ const titleOf = (label: ReactNode) => (typeof label === 'string' ? {title: label
 
 /**
  * A revision's label as a chip overlaid on its pane's frame (`ProjectionStage`'s `paneLabels: 'chips'`): it sits on
- * the renderer's own stage, over the frame's top corner, and takes no height from it, so it reads as a quiet tag on
- * the content rather than a header. `inset` lines it up with where the renderer's content starts (or ends, for a
- * right-hand chip); the stage sends the frame `paneChipClearance` as its `stage-inset-top`, so a renderer that honours
- * it starts its content below the chip. It ignores the pointer, so the renderer underneath stays clickable.
+ * the renderer's own stage, over the frame's top corner, and takes no height from it. `inset` lines it up with where
+ * the renderer's content starts (or ends, for a right-hand chip), and it sits as far below the frame's top; the stage
+ * measures it over the frame and sends it as the frame's `stage-cover`, with the band it takes (`paneChipClearance`)
+ * as its `stage-inset-top`, so a renderer that honours them keeps its content clear of the chip. It takes the pointer,
+ * as the playback bar does, so hovering it shows its whole label (`title`: a cut subject and the revision's age); the
+ * renderer's content is kept clear of it, and the stage around it still reaches the frame.
  *
- * Quiet by default: small, muted text on the stage's surface, slightly translucent so the stage shows through, behind
- * a hairline. A host restyles it with `--ph-pane-chip-bg`, `--ph-pane-chip-fg`, `--ph-pane-chip-border` and
- * `--ph-pane-chip-weight`.
+ * A solid box in the stage's playback bar's own surface, edge and corners (`UtilityArea`'s `--ph-utility-bg`,
+ * `--ph-utility-border` and `--ph-utility-radius`), 28px tall with 10px of padding, and its text: the revision's name
+ * in mono at regular weight in the bar's muted text colour (`--ph-utility-muted`), then its commit subject in the text
+ * face (`ChipText`). Its text is centred by cap height.
+ * A host restyles the chip alone with `--ph-pane-chip-bg`, `--ph-pane-chip-border`, `--ph-pane-chip-radius`,
+ * `--ph-pane-chip-fg` (the subject) and `--ph-pane-chip-name`.
  */
 export function PaneChip({
   side,
@@ -121,6 +129,7 @@ export function PaneChip({
   id,
   align,
   inset,
+  maxWidth,
   as: Element = 'span',
   className,
 }: {
@@ -129,50 +138,61 @@ export function PaneChip({
   id: string
   align: 'left' | 'right'
   inset: number
+  /** The widest it may be, CSS px (swipe's chips keep to their halves, so they never meet); by default its pane less its insets. */
+  maxWidth?: number | undefined
   as?: 'span' | 'h3'
   className: string
 }) {
+  // A pane under a host's header can rest at a fractional offset: the chip keeps its edges on whole pixels.
+  const chip = useRef<HTMLHeadingElement & HTMLSpanElement>(null)
+  useWholePixels(chip)
   return (
     <Element
+      ref={chip}
       id={id}
       className={className}
       data-side={side}
       data-pane-chip=""
+      data-stage-cover=""
       style={{
         position: 'absolute',
         top: chipTop,
         ...(align === 'left' ? {left: inset} : {right: inset}),
         zIndex: 1,
         boxSizing: 'border-box',
-        display: 'block',
-        maxWidth: `calc(100% - ${2 * inset}px)`,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        maxWidth: maxWidth ?? `calc(100% - ${2 * inset}px)`,
         height: chipHeight,
         margin: 0,
-        padding: '0 6px',
+        padding: '0 10px',
         overflow: 'hidden',
-        textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
         fontSize: 'var(--projections-font-size-xs, 12px)',
-        lineHeight: `${chipHeight - 2}px`,
-        borderRadius: 'var(--projections-radius-sm, 6px)',
-        pointerEvents: 'none',
-        background: 'var(--ph-pane-chip-bg, color-mix(in srgb, var(--projections-color-surface-canvas, #ffffff) 85%, transparent))',
-        color: 'var(--ph-pane-chip-fg, var(--projections-color-fg-muted, #59636e))',
-        border: 'var(--ph-pane-chip-border, 1px solid var(--projections-color-border-muted, #d1d9e0b3))',
-        fontWeight: 'var(--ph-pane-chip-weight, 400)' as CSSProperties['fontWeight'],
+        fontWeight: 400,
+        lineHeight: 1,
+        borderRadius: 'var(--ph-pane-chip-radius, var(--ph-utility-radius, var(--projections-radius, 8px)))',
+        pointerEvents: 'auto',
+        cursor: 'default',
+        // The playback bar's look (`UtilityArea`'s `--ph-utility-*`), so the stage's chips and bar read as one family.
+        background: 'var(--ph-pane-chip-bg, var(--ph-utility-bg, var(--projections-color-surface-header, #f6f8fa)))',
+        color: 'var(--ph-pane-chip-fg, var(--projections-color-fg-subtle, #818b98))',
+        border: 'var(--ph-pane-chip-border, var(--ph-utility-border, 1px solid var(--projections-color-divider, #d1d9e0)))',
       }}
       {...titleOf(children)}
     >
-      <RevisionHeading side={side} label={children} />
+      <span style={srOnly}>{side === 'before' ? 'Before revision: ' : 'After revision: '}</span>
+      <ChipText label={children} words={typeof children === 'string' && genericLabels.has(children.trim())} hidden={srOnly} />
     </Element>
   )
 }
-/** The chip's height and its gap below the frame's top edge, CSS px. */
-const chipHeight = 18
-const chipTop = 6
+/** The chip's height and its gap below the frame's top edge, CSS px: as much as its inset at the side. */
+const chipHeight = 28
+const chipTop = 12
 /**
- * The space a pane chip takes at the top of its frame, CSS px: its gap, its height and as much again below it. The
- * stage sends it to the frames chips overlay as their `stage-inset-top` theme token.
+ * The space a pane chip takes at the top of its frame, CSS px: its gap, its height and as much again below it, which
+ * the stage measures and sends to the frames chips overlay as their `stage-inset-top` theme token.
  */
 export const paneChipClearance = chipTop + chipHeight + chipTop
 

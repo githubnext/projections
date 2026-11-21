@@ -21,6 +21,15 @@ export interface ProjectionStageProps {
    * assistive technology.
    */
   paneLabels?: PaneLabels
+  /**
+   * The stage's utility area in animated and diff, its one-frame modes: controls (such as the playback slider) in a bar
+   * floating over the stage's top edge, inset from its sides and as wide as they need, instead of a toolbar row above
+   * it. Side by side and swipe have their pane labels there instead (with `paneLabels: 'chips'`). The stage measures
+   * what it overlays on each frame and sends it as the frame's `stage-cover` and `stage-inset-top` theme tokens, so a
+   * renderer keeps its content clear of the bar (a fitted canvas only where its drawing would reach it) and shows
+   * under it as it pans or scrolls. A new cover is fitted to at once, never eased.
+   */
+  utility?: ReactNode
   /** Hides the stage while keeping its renderer frames loaded, for example while a table view is shown. */
   hidden?: boolean
   /** Below this width (CSS px) side-by-side panes stack. Default 640. */
@@ -84,6 +93,7 @@ export function ProjectionStage({
   fill = false,
   paneEdge = defaultPaneEdge,
   bleed = 0,
+  utility,
   className,
   style,
 }: ProjectionStageProps) {
@@ -111,6 +121,7 @@ export function ProjectionStage({
         paneEdge={paneEdge}
         bleed={bleed}
         paneLabels={paneLabels}
+        utility={utility}
       />
       {legend && projection.legend && <ProjectionLegend projection={projection} />}
     </div>

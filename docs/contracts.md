@@ -109,6 +109,42 @@ and the catalog entry for them would be:
 and for their tests, `comparator-tests/v0.json`, matching
 `*.comparator.test.yaml` and `*.comparator.test.yml`.
 
+### Schema-owned contracts
+
+TypeBox, in `packages/schemas`, is the one schema system for the contracts this
+repository owns: each schema provides the JSON Schema, the TypeScript type and
+the runtime validator, so a hand-written type never stands in for a checked one.
+
+- **Published contracts**, `src/typebox`: the versioned documents above, with
+  their `$id`s and reference pages.
+- **The local runner's API**, `src/runner`, exported as
+  `@githubnext/projections-schemas/runner`: the responses of the Inspector
+  service (`projections view` and [`serve --stdio`](runner/stdio-backend.md))
+  that its clients decode. It is internal and unversioned, never published: the
+  runner and its clients ship from the same commit. Its generated schema is
+  `packages/schemas/internal/runner-api.json`, outside the published set.
+  `decodeRunnerResponse(name, value)` checks a response whole, nested entries
+  included, and returns it typed, or throws a `RunnerResponseError` that names
+  the request and the JSON pointer of the value that doesn't match. It uses
+  TypeBox's interpreting checker, which needs no `eval` and so runs under the
+  Inspector's content security policy. Clients accept properties a schema
+  doesn't declare, so a runner can add a field without breaking them.
+- **Documents another boundary validates** are opaque in the runner API, which
+  checks only the envelope its clients read: a saved document's `format` and
+  `version` (the CLI validated the document when it loaded it), and an explore
+  candidate's trial definition.
+
+**Rust conformance.** The Rust service has no generated types. Instead, its
+tests (`packages/cli/tests/service/conformance.rs`) check every runner API
+response they receive against `internal/runner-api.json`, more strictly than the
+clients: a property the schema doesn't declare fails. Changing a response
+therefore starts in the TypeBox source; regenerate the schema, and the service
+tests then hold the Rust side to it.
+
+Host-to-renderer and renderer-to-host frame validation is asymmetric on purpose
+(see [renderer frames](contracts/renderer-frames.md)) and stays outside this
+rule.
+
 ## Pages
 
 Each page specifies one family of documents; the rules that apply to all of them

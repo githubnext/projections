@@ -1,4 +1,3 @@
-import type {ComparisonDocument, ExtractionDocument} from '@githubnext/projections-schemas'
 import type {InspectorJob, InspectorRevisionList, InspectorScenarioList} from '../types.js'
 import {record} from './guards.js'
 
@@ -11,11 +10,6 @@ export function assertJob(value: unknown): asserts value is InspectorJob {
     !Array.isArray(value.diagnostics)
   )
     throw new Error('The local runner returned an invalid job response')
-}
-export function assertDocument(value: unknown): asserts value is ExtractionDocument | ComparisonDocument {
-  if (!record(value) || !['projections.extraction', 'projections.comparison'].includes(String(value.format)) || value.version !== 0) {
-    throw new Error('The local runner returned an unsupported document')
-  }
 }
 function extractionDocument(value: unknown): boolean {
   return record(value) && value.format === 'projections.extraction' && record(value.projection) && record(value.extraction)

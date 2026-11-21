@@ -101,22 +101,22 @@ export interface StagedTimeline {
   /** Each scheduled step's windows (see `stepWindows`), in order: `windows[k]` moves `stages[k]` to `stages[k + 1]`. */
   windows: StepWindows[]
   /** The two stages a frame interpolates between, and how far. */
-  at(progress: number): {from: number; to: number; mix: number}
+  at: (progress: number) => {from: number; to: number; mix: number}
   /** Opacity of an entity row: entering and leaving rows fade in their step's window. */
-  presence(id: string, progress: number): number
+  presence: (id: string, progress: number) => number
   /** Progress through a row's own step, 0 before it starts and 1 after it ends; always 0 for a row no step changes. */
-  local(id: string, progress: number): number
+  local: (id: string, progress: number) => number
   /**
    * Presence of an entity row in a list: `size` is the share of its slot it
    * occupies, `opacity` its visibility. A removal fades, then its slot closes
    * during the step's move window; an addition's slot opens, then it fades in.
    * Both are 1 for survivors and 0 for rows absent at this point.
    */
-  rowPresence(id: string, progress: number): {size: number; opacity: number}
+  rowPresence: (id: string, progress: number) => {size: number; opacity: number}
   /** The version of a row a stage shows. */
-  version<T>(row: EntityChange<T>, stage: Stage): T
+  version: <T>(row: EntityChange<T>, stage: Stage) => T
   /** Relationships present in a stage, resolved to entity row endpoints. */
-  relationships(stage: Stage): {row: EntityChange<Relationship>; from: string; to: string}[]
+  relationships: (stage: Stage) => {row: EntityChange<Relationship>; from: string; to: string}[]
 }
 
 /**

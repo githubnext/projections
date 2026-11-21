@@ -90,7 +90,7 @@ export class FolderModel implements vscode.Disposable {
     if (memento.get(this.stateKey) !== undefined) void memento.update(this.stateKey, undefined)
     const choice = memento.get<unknown>(this.choiceKey)
     this.remembered = isChoice(choice) ? choice : undefined
-    const subscribe = (runner: {onNotification(listener: (method: string, params: unknown) => void): () => void}) => {
+    const subscribe = (runner: {onNotification: (listener: (method: string, params: unknown) => void) => () => void}) => {
       this.unsubscribe?.()
       this.unsubscribe = runner.onNotification((method, params) => {
         if (method !== 'changes') return

@@ -19,7 +19,7 @@ export interface Wrapper {
   scope?: number
   durable?: boolean
   isAlias?: boolean
-  isDependencyTreeStatic(): boolean
+  isDependencyTreeStatic: () => boolean
 }
 export interface NestModule {
   id: string
@@ -42,7 +42,7 @@ export interface Graph {
   metadata?: unknown
 }
 export interface SerializedGraph {
-  toJSON(): Graph
+  toJSON: () => Graph
 }
 export interface Dependency {
   injection: 'constructor' | 'property' | 'factory'

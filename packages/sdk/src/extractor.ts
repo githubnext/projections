@@ -90,9 +90,9 @@ export interface Generations {
   /** How many values the snapshot holds. */
   readonly size: number
   /** The stored value for a declaration's `path` (its pattern, `*` segments and all) and a basis, if any. */
-  get(path: string, basis: Basis): Json | undefined
+  get: (path: string, basis: Basis) => Json | undefined
   /** The stored value when there is one; otherwise `produce()`'s, generated now. */
-  generate<Value extends Json>(path: string, basis: Basis, produce: () => Value | Promise<Value>): Promise<Value>
+  generate: <Value extends Json>(path: string, basis: Basis, produce: () => Value | Promise<Value>) => Promise<Value>
 }
 
 const key = (path: string, digest: string) => `${path}\u0000${digest}`

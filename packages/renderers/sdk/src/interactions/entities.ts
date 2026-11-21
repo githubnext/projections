@@ -8,7 +8,7 @@ import {visibleRect} from './geometry.js'
 export interface Entities {
   root: HTMLElement
   attribute: string
-  excluded(node: Node | null): boolean
+  excluded: (node: Node | null) => boolean
 }
 
 /** The item an event target belongs to in the renderer, if any. */

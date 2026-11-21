@@ -95,24 +95,24 @@ export interface StageHandle {
   iframe: Locator
   subject: StageSubject
   /** Sends a progress and resolves after the renderer acknowledges painting exactly that progress. */
-  seek(progress: number, options?: StageSeek): Promise<StageState>
+  seek: (progress: number, options?: StageSeek) => Promise<StageState>
   /** Seeks to every value in order and runs `check` at each painted frame. Direction follows the travel unless given. */
-  scrub(progresses: readonly number[], check: (progress: number) => Promise<void>, options?: StageSeek): Promise<void>
+  scrub: (progresses: readonly number[], check: (progress: number) => Promise<void>, options?: StageSeek) => Promise<void>
   /** Host-side selection, as a host's own table or details panel would send it. */
-  select(id: string | null): Promise<void>
-  setOptions(options: RendererOptions): Promise<void>
+  select: (id: string | null) => Promise<void>
+  setOptions: (options: RendererOptions) => Promise<void>
   /** Activates one of the renderer's declared action controls, as a host's button would. */
-  action(id: string): Promise<void>
+  action: (id: string) => Promise<void>
   /** Host-side hover, as another pane or the host's table would send it. */
-  hover(id: string | null): Promise<void>
+  hover: (id: string | null) => Promise<void>
   /** The host's scope, summary filter and find (a `filter` message). */
-  filter(payload: FilterPayload): Promise<void>
-  setEnvironment(environment: StageEnvironment): Promise<void>
+  filter: (payload: FilterPayload) => Promise<void>
+  setEnvironment: (environment: StageEnvironment) => Promise<void>
   /** Resizes the frame (`null`: the page width) and resolves once the renderer has painted again. */
-  setWidth(width: number | null): Promise<void>
+  setWidth: (width: number | null) => Promise<void>
   /** Runs a check-probe measurement inside the renderer document. */
-  measure<T = unknown>(call: ProbeCall, args?: unknown): Promise<T>
-  state(): Promise<StageState>
+  measure: <T = unknown>(call: ProbeCall, args?: unknown) => Promise<T>
+  state: () => Promise<StageState>
 }
 
 /** A request of the stage page, bounded (see `bounded`) and named `what` in a failure. */

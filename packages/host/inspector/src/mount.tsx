@@ -62,7 +62,7 @@ export interface InspectorAssets {
   engine: Pick<WorkerEngineOptions, 'workerUrl' | 'wasm' | 'comparator'>
   comparator: {workerUrl: URL | string; rulesInterpreterUrl: URL | string}
   /** The built-in renderer bundles; without any, the host's table and text views still present everything. */
-  renderers(): Promise<RendererEntry[]>
+  renderers: () => Promise<RendererEntry[]>
 }
 
 /** The assets as the Inspector's build lays them out under `base` (by default, beside the page). */
@@ -142,8 +142,8 @@ export interface MountInspectorOptions {
 /** What `mountInspector` returns: the Inspector's handle once it has started, and `unmount` to remove it. */
 export interface MountedInspector {
   /** The handle, once the Inspector has started and shows a repository or artifact. */
-  handle(): Promise<InspectorHandle>
-  unmount(): void
+  handle: () => Promise<InspectorHandle>
+  unmount: () => void
 }
 
 /** Root attributes the browser checks read: `data-projections-stage="failed"` when startup couldn't continue. */

@@ -7,9 +7,9 @@ import type {CoverRect} from '../../fit.js'
 export const PaintGate = createContext<() => () => void>(() => () => {})
 export interface FrameFillControl {
   /** Starts filling the frame; the returned function stops. */
-  start(): () => void
+  start: () => () => void
   /** The content height to report while filling, once known. */
-  prefer(height: number | undefined): void
+  prefer: (height: number | undefined) => void
 }
 export const FrameFill = createContext<FrameFillControl>({start: () => () => {}, prefer: () => {}})
 

@@ -92,7 +92,7 @@ function kind(root: string, path: string): 'file' | 'directory' | undefined {
 }
 
 interface Pages {
-  anchors(path: string): Set<string>
+  anchors: (path: string) => Set<string>
 }
 
 /** Reads and caches each page's anchors. */

@@ -30,13 +30,13 @@ export interface InspectorTransport {
    */
   readonly origin: string
   /** Sends one request. Resolves with the parsed JSON body; rejects with `InspectorRequestError` when the runner refuses. */
-  request(request: InspectorTransportRequest): Promise<unknown>
+  request: (request: InspectorTransportRequest) => Promise<unknown>
   /**
    * The change subscription: resolves with the channel's next notification after generation `since` (or the
    * runner's unchanged notification after its wait), as `GET /api/changes?since=` returns it. Without it the client
    * long-polls through `request`, which is what the HTTP transport does.
    */
-  next?(channel: InspectorChangeChannel, since: number, signal?: AbortSignal): Promise<unknown>
+  next?: (channel: InspectorChangeChannel, since: number, signal?: AbortSignal) => Promise<unknown>
 }
 
 /** A request the runner refused or failed, with the HTTP `status` it answered with. */

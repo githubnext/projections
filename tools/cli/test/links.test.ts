@@ -5,7 +5,7 @@ import {dirname, join} from 'node:path'
 import test from 'node:test'
 import {anchors, linkProblems, links, slug} from '../src/lib/links.ts'
 
-function repository(files: Record<string, string>): {root: string; paths: string[]; [Symbol.dispose](): void} {
+function repository(files: Record<string, string>): {root: string; paths: string[]; [Symbol.dispose]: () => void} {
   const root = mkdtempSync(join(tmpdir(), 'tools-links-'))
   for (const [path, text] of Object.entries(files)) {
     mkdirSync(dirname(join(root, path)), {recursive: true})

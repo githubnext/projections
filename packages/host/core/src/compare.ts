@@ -22,8 +22,8 @@ export type ComparatorSource = {kind: 'default'} | {kind: 'rules'; id: string; b
  * runs one comparison.
  */
 export interface RulesRuntime {
-  check(rules: Uint8Array): Promise<{digest: string}>
-  compare(rules: Uint8Array, input: unknown): Promise<unknown>
+  check: (rules: Uint8Array) => Promise<{digest: string}>
+  compare: (rules: Uint8Array, input: unknown) => Promise<unknown>
 }
 
 /**

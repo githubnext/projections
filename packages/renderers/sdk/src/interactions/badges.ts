@@ -23,24 +23,24 @@ export interface BadgeOverlayOptions {
   /** The host's marks, by item; the badges follow them on `update`. */
   marks: ReadonlyMap<string, AnnotationMark>
   /** The renderer's elements for an item, in document order. */
-  elementsOf(id: string): Element[]
+  elementsOf: (id: string) => Element[]
   /** The item an event target belongs to in the renderer, if any. */
-  entityOf(target: EventTarget | null): string | null
+  entityOf: (target: EventTarget | null) => string | null
   /** The person activated the badge of an annotated item. */
-  activate(id: string): void
+  activate: (id: string) => void
   /** The person points at or focuses a badge (its item's ID), or leaves the badges and items (`null`). */
-  hover(id: string | null): void
+  hover: (id: string | null) => void
 }
 
 export interface BadgeOverlay {
   /** Whether a node is the overlay or inside it. */
-  contains(node: Node | null): boolean
+  contains: (node: Node | null) => boolean
   /** Adds, updates and removes badges to match the marks. */
-  update(): void
+  update: () => void
   /** Shows the badges of the items visible at `annotated`, positioned on them, and hides the rest. */
-  place(annotated: Map<string, AnchorRect>): void
+  place: (annotated: Map<string, AnchorRect>) => void
   /** Releases the overlay, its listeners' targets and its stylesheet. */
-  dispose(): void
+  dispose: () => void
 }
 
 /** Where a badge goes: straddling `corner` of the item at `rect`, kept inside `bounds`. */

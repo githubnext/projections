@@ -178,8 +178,8 @@ export interface RulesCallOptions {
 
 /** Checks and runs comparator files sandboxed, each call in its own Worker or runner process; see `RulesCallOptions`. */
 export interface RulesRuntime {
-  check(rules: Uint8Array, options?: RulesCallOptions): Promise<CheckedRules>
-  compare(rules: Uint8Array, input: unknown, options?: RulesCallOptions): Promise<unknown>
+  check: (rules: Uint8Array, options?: RulesCallOptions) => Promise<CheckedRules>
+  compare: (rules: Uint8Array, input: unknown, options?: RulesCallOptions) => Promise<unknown>
 }
 
 /**

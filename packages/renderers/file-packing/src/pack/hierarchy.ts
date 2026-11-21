@@ -5,16 +5,16 @@ import {compareIds} from '@githubnext/projections-renderer-kit'
 /** One state of the hierarchy to pack: the rows present, the version each shows, and its containment links. */
 export interface Snapshot {
   active: ReadonlySet<string>
-  entity(id: string): Entity
+  entity: (id: string) => Entity
   /** Parent to child links between active rows. */
   links: readonly {from: string; to: string}[]
 }
 
 export interface PackSettings {
   /** A leaf's weight (bytes, lines or value). */
-  weight(entity: Entity): number
+  weight: (entity: Entity) => number
   /** A leaf's color category. */
-  category(entity: Entity): string
+  category: (entity: Entity) => string
   /** Deepest level drawn (top-level items are depth 1); deeper folders become one filled circle. */
   maxDepth: number
 }

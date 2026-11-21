@@ -45,19 +45,19 @@ export interface EmbeddedRenderer {
   /** Resolves with the nested renderer's capabilities once it is ready; rejects when it fails. */
   readonly ready: Promise<RendererCapabilities>
   /** Replaces what it presents (a new `init`), and optionally the position. */
-  setInit(init: InitPayload, progress?: ProgressPayload): void
+  setInit: (init: InitPayload, progress?: ProgressPayload) => void
   /** Sends a new position to draw. */
-  setProgress(progress: ProgressPayload): void
+  setProgress: (progress: ProgressPayload) => void
   /** Selects an item, by the nested renderer's own selection ID, or clears the selection (`null`). */
-  select(id: string | null): void
+  select: (id: string | null) => void
   /** Sent only when the nested renderer declares `hover`. */
-  hover(id: string | null): void
+  hover: (id: string | null) => void
   /** Sends a new theme, motion preference, locale or pane; `sizing` stays `fill` unless it says otherwise. */
-  setEnvironment(environment: RendererEnvironment): void
+  setEnvironment: (environment: RendererEnvironment) => void
   /** Replaces its settings. */
-  setOptions(options: RendererOptions): void
+  setOptions: (options: RendererOptions) => void
   /** Stops listening and removes the frame. */
-  dispose(): void
+  dispose: () => void
 }
 
 function nonce(view: Window): string {

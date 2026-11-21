@@ -60,74 +60,74 @@ export interface RendererClient {
    * acknowledgement is deferred (after a paint, say), so that a paint of a document the host has since replaced isn't
    * taken for the new one; without it, the latest `init` is assumed.
    */
-  rendered(progress: number, init?: InitPayload): void
+  rendered: (progress: number, init?: InitPayload) => void
   /**
    * Reports the renderer's selection, or `null` when it clears it. `path`, an
    * RFC 6901 pointer such as `/data/owner`, selects a property of the item
    * (capability `properties`); it is ignored with a `null` ID and throws if invalid.
    */
-  select(id: string | null, path?: string): void
+  select: (id: string | null, path?: string) => void
   /** Reports that the person activated the annotation marker on an item (capability `annotations`); call `select(id)` first. */
-  annotation(id: string): void
+  annotation: (id: string) => void
   /**
    * Asks the host to draw the renderer's legend once beside the frames, with
    * the host's design system, instead of drawing one in each pane. Items use
    * theme tokens (preferred) or CSS colors; an empty list clears it. Throws
    * when the legend is invalid.
    */
-  legend(legend: RendererLegend): void
+  legend: (legend: RendererLegend) => void
   /**
    * Gives the host the words for its summary bar: a figure per extraction kind in the renderer's vocabulary
    * (`SummaryItem`), in display order; an empty list returns the bar to the host's own words. Throws when the summary
    * is invalid.
    */
-  summary(summary: RendererSummary): void
+  summary: (summary: RendererSummary) => void
   /** Requests a frame height in CSS pixels. The host clamps it. */
-  height(px: number): void
+  height: (px: number) => void
   /**
    * Reports the shape (width / height) of the content the renderer fits to its stage, over the whole transition, so
    * a host can arrange held panes for the larger fitted scale. Clamped to `rendererLimits.aspect`.
    */
-  aspect(ratio: number): void
+  aspect: (ratio: number) => void
   /**
    * Declares progress values at which the host may hold during playback, and optionally how many step slots the
    * presentation spans (`timelineSlots`), for the host's default pace.
    */
-  steps(ends: readonly number[], slots?: number): void
+  steps: (ends: readonly number[], slots?: number) => void
   /** Asks the host to open a repository file; the host decides whether to navigate. */
-  open(path: string, line?: number): void
+  open: (path: string, line?: number) => void
   /** Reports a rendering failure. The host shows it and keeps its own views available. */
-  error(message: string): void
+  error: (message: string) => void
   /** Reports the entity under the pointer (capability `hover`). */
-  hover(id: string | null): void
+  hover: (id: string | null) => void
   /** Reports where an entity is drawn, in this document's viewport, or `null` when it isn't visible (capability `anchors`). */
-  anchor(id: string, rect: AnchorRect | null): void
+  anchor: (id: string, rect: AnchorRect | null) => void
   /** Reports that the person scrolled a container (capability `scrollSync`). */
-  viewport(position: ScrollPosition): void
+  viewport: (position: ScrollPosition) => void
   /**
    * Replaces the controls the host draws for this renderer (initially those in
    * `capabilities.controls`). Throws if a declaration is invalid.
    */
-  declareOptions(controls: readonly RendererControl[]): void
+  declareOptions: (controls: readonly RendererControl[]) => void
   /**
    * Sets a declared control's value from the renderer's own content, as the person changed it there (a sortable
    * column header, say). The host applies it as if they had set it in its settings and answers with `options`; it
    * ignores a value the control doesn't accept.
    */
-  setControl(id: string, value: ControlValue): void
+  setControl: (id: string, value: ControlValue) => void
   /**
    * Asks the host for the document of the built-in renderer `name` (for example `graph`), to run in a frame nested in
    * this one (`embedRenderer` does both). Resolves with its `index.html` text, as the host runs it; rejects with the
    * host's reason when it supplies none (an unknown or custom renderer, or a host without documents), or after
    * `rendererLimits.documentTimeoutMs` without an answer. Repeated requests for one name share one answer.
    */
-  requestDocument(name: string): Promise<string>
+  requestDocument: (name: string) => Promise<string>
   /** Observes every valid host message after the handlers run. Returns a function that stops observing. */
-  subscribe(listener: (message: HostMessage) => void): () => void
+  subscribe: (listener: (message: HostMessage) => void) => () => void
   /** Requests the height of `element` now and whenever it resizes. Returns a function that stops observing. */
-  observeHeight(element: Element): () => void
+  observeHeight: (element: Element) => () => void
   /** Stops listening for host messages. */
-  dispose(): void
+  dispose: () => void
 }
 
 /**

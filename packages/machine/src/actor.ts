@@ -8,7 +8,7 @@ import type {After, Machine, MachineActivity, MachineEffect, MachineEvent, Machi
 /** What an effect or activity runner is given: how to send events, and a signal aborted when its generation ends. */
 export interface ActorContext<E> {
   /** Sends an event to the actor; dropped once this generation has ended. */
-  send(event: E): void
+  send: (event: E) => void
   /** Aborted when this generation ends: superseded, no longer listed by the state, or the actor stopped. */
   readonly signal: AbortSignal
 }
@@ -41,18 +41,18 @@ export type ActorOptions<S, E, F extends MachineEffect, A extends MachineActivit
 /** A running machine. */
 export interface Actor<S, E> {
   /** The current state. */
-  getState(): S
+  getState: () => S
   /**
    * Sends an event. Events are taken one at a time, in order: one sent while another is being handled (by an effect, a
    * listener or an activity) waits for it. Before `start` and after `stop` events wait for the next `start`.
    */
-  send(event: E): void
+  send: (event: E) => void
   /** Calls `listener` with the state after each batch of events that changed it; returns the unsubscribe function. */
-  subscribe(listener: (state: S) => void): () => void
+  subscribe: (listener: (state: S) => void) => () => void
   /** Starts the current state's activities and takes waiting events. Starting a running actor does nothing. */
-  start(): void
+  start: () => void
   /** Ends every effect and activity generation. The state is kept, and `start` resumes from it. */
-  stop(): void
+  stop: () => void
   /** Whether the actor is started. */
   readonly running: boolean
 }
@@ -64,8 +64,8 @@ interface Generation<E> {
   /** Whether it hasn't ended: its events are taken only while it lasts, also those already waiting. */
   readonly live: boolean
   /** Takes what a runner returned: a cleanup to run at the end, or a promise whose rejection to report. */
-  settle(result: unknown): void
-  end(): void
+  settle: (result: unknown) => void
+  end: () => void
 }
 
 const timer: Runner = ((activity: After<MachineEvent>, context: ActorContext<MachineEvent>) => {

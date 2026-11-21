@@ -2,7 +2,7 @@
 // extension wrote into the page, and messages both ways.
 import type {HostMessage, WebviewConfig} from '../protocol.js'
 
-declare function acquireVsCodeApi(): {postMessage(message: unknown): void; getState(): unknown; setState(state: unknown): void}
+declare function acquireVsCodeApi(): {postMessage: (message: unknown) => void; getState: () => unknown; setState: (state: unknown) => void}
 
 export const vscode = acquireVsCodeApi()
 

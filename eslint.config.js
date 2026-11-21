@@ -235,7 +235,6 @@ export default defineConfig(
         '@typescript-eslint/class-methods-use-this',
         '@typescript-eslint/consistent-return',
         '@typescript-eslint/default-param-last',
-        '@typescript-eslint/method-signature-style',
         '@typescript-eslint/no-base-to-string',
         '@typescript-eslint/no-confusing-void-expression',
         '@typescript-eslint/no-deprecated',

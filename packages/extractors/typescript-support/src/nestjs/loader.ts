@@ -40,7 +40,7 @@ export function compilerOptions(root: string, configured: string | undefined, di
 
 interface ModuleClass {
   _resolveFilename: (request: string, parent: unknown, isMain: boolean, options?: unknown) => string
-  _extensions: Record<string, (module: {_compile(code: string, file: string): void}, file: string) => void>
+  _extensions: Record<string, (module: {_compile: (code: string, file: string) => void}, file: string) => void>
   _nodeModulePaths: (directory: string) => string[]
   isBuiltin: (request: string) => boolean
 }

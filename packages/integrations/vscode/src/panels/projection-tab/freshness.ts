@@ -24,15 +24,15 @@ type Results = NonNullable<TabSummary['results']>
 export interface FreshnessHost {
   readonly folder: {readonly uri: {readonly fsPath: string}}
   readonly projection: string
-  model(): FolderModel
+  model: () => FolderModel
   /** The revision whose definition the tab applies to the pair it shows now. */
-  applies(): 'working-tree' | 'HEAD'
+  applies: () => 'working-tree' | 'HEAD'
   /** Whether the choice moved with the refs: a pair the tab shows once refreshed. */
-  pending(): boolean
+  pending: () => boolean
   /** Whether the result is out of date changed. */
-  staleChanged(stale: TabStale | undefined): void
+  staleChanged: (stale: TabStale | undefined) => void
   /** An observation's age grew. */
-  aged(): void
+  aged: () => void
 }
 
 /** The refs of a summary's complete, successful result: both sides extracted. */

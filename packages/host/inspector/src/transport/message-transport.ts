@@ -22,7 +22,7 @@ export function createMessageTransport({
   origin?: string
   /** The bridge answers `next` messages from the runner's change notifications, so changes aren't long-polled. */
   subscriptions?: boolean
-}): InspectorTransport & {dispose(): void} {
+}): InspectorTransport & {dispose: () => void} {
   let nextId = 1
   const pending = new Map<number, {resolve: (value: unknown) => void; reject: (error: Error) => void; blob: boolean}>()
   const stop = listen(value => {

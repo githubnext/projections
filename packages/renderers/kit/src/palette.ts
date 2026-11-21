@@ -161,9 +161,9 @@ export interface Palette {
   /** Categories by weight (heaviest first), with their colors. */
   ranked: PaletteEntry[]
   /** The paint of a category key; "other" for an unknown one. */
-  paintOf(key: string): string
+  paintOf: (key: string) => string
   /** The entry of a category key, or undefined for a key the palette wasn't given. */
-  entry(key: string): PaletteEntry | undefined
+  entry: (key: string) => PaletteEntry | undefined
 }
 
 /**

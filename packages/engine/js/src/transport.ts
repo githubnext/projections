@@ -50,7 +50,7 @@ export class EngineTransportError extends Error {
 
 export interface DefaultComparator {
   /** Runs one comparator module call on UTF-8 JSON input bytes. */
-  call(input: Uint8Array): Promise<Uint8Array>
+  call: (input: Uint8Array) => Promise<Uint8Array>
   /** `sha256:` digest of the comparator module bytes. */
   digest: string
 }

@@ -30,8 +30,8 @@ async function open(page: Page, query: string) {
 
 declare global {
   interface Window {
-    ring(id: string | null, state?: 'hover' | 'selected' | 'focus'): Promise<void>
-    probe<T = unknown>(call: string, args?: unknown): Promise<T>
+    ring: (id: string | null, state?: 'hover' | 'selected' | 'focus') => Promise<void>
+    probe: <T = unknown>(call: string, args?: unknown) => Promise<T>
   }
 }
 

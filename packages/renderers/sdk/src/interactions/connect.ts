@@ -34,13 +34,13 @@ export interface InteractionOptions {
 /** The running interactions of one root (`connectInteractions`). */
 export interface InteractionController {
   /** The renderer's current selection, whose position is reported as an anchor. */
-  setSelected(id: string | null): void
+  setSelected: (id: string | null) => void
   /** The latest selection, from `setSelected`, the host's `select` (with its property `path`) or an annotation badge. */
   readonly selection: {id: string | null; path?: string}
   /** Re-measures anchors and badges, for layout changes the controller can't observe. */
-  refresh(): void
+  refresh: () => void
   /** Stops listening and observing, removes badges and annotation marks, and releases the document's rings. */
-  dispose(): void
+  dispose: () => void
 }
 
 /** Capabilities a renderer using `connectInteractions` can declare. */

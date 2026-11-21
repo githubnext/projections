@@ -3,11 +3,11 @@ import type {Readable, Writable} from 'node:stream'
 
 /** A JSON-RPC 2.0 client over newline-delimited JSON: requests with ids, cancellation and notifications. */
 export interface RpcClient {
-  call(method: string, params?: unknown, signal?: AbortSignal): Promise<{result: unknown; size: number}>
-  notify(method: string, params?: unknown): void
-  onNotification(listener: (method: string, params: unknown) => void): () => void
+  call: (method: string, params?: unknown, signal?: AbortSignal) => Promise<{result: unknown; size: number}>
+  notify: (method: string, params?: unknown) => void
+  onNotification: (listener: (method: string, params: unknown) => void) => () => void
   /** Fails every pending call; later calls fail at once. */
-  close(reason: string): void
+  close: (reason: string) => void
 }
 
 /** A JSON-RPC error the backend answered with, such as `-32800` (cancelled). */

@@ -23,30 +23,30 @@ export interface InspectorHostTheme {
  */
 export interface InspectorHost {
   /** Opens a repository file, at a 1-based line and column, in the host's editor. Evidence and part source paths use it. */
-  openFile?(path: string, line?: number, column?: number): void
+  openFile?: (path: string, line?: number, column?: number) => void
   /** Shows a revision (a commit, branch, tag or `working-tree`) in the host's source control view. */
-  revealInScm?(ref: string): void
+  revealInScm?: (ref: string) => void
   /** Writes text to the clipboard where the page's own clipboard is unavailable, as in some webviews. */
-  copyText?(text: string): Promise<void>
+  copyText?: (text: string) => Promise<void>
   /** Opens an external `https:` or `http:` URL outside the Inspector. */
-  openExternal?(url: string): void
+  openExternal?: (url: string) => void
   /**
    * Hands adding Projections to the repository's CI to the host's coding agent, with the Add to CI prompt. Without it
    * the Explore view offers the prompt to copy, and the guide.
    */
-  addToCi?(): void
+  addToCi?: () => void
   /** Follows the host's theme instead of the system's when the person's theme choice is System. */
   theme?: {
-    get(): InspectorHostTheme
-    subscribe(listener: () => void): () => void
+    get: () => InspectorHostTheme
+    subscribe: (listener: () => void) => () => void
   }
   /**
    * Revisions named for people by the host, by ref (`main · "Add auth package" · 2 days ago`), so the panes, slider
    * and pickers read as the host's own pickers do. Refs it doesn't name get the Inspector's own label.
    */
   revisionLabels?: {
-    get(): Record<string, string> | undefined
-    subscribe(listener: () => void): () => void
+    get: () => Record<string, string> | undefined
+    subscribe: (listener: () => void) => () => void
   }
   /**
    * The host's own surface already says exactly what is compared (a pull request page names its base and head), so the

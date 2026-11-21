@@ -68,13 +68,13 @@ export interface RingTargets {
 /** Marks the hovered and selected entities' units for the ring stylesheet (`connectRings`). */
 export interface RingController {
   /** Updates the hovered or selected entity; omitted fields keep their value. */
-  set(targets: RingTargets): void
+  set: (targets: RingTargets) => void
   /** Re-marks now. */
-  refresh(): void
+  refresh: () => void
   /** The attribute that carries an element's selection ID. */
   attribute: string
   /** Stops observing the document, removes the ring stylesheet and every ring attribute the SDK set. */
-  dispose(): void
+  dispose: () => void
 }
 
 /** How `connectRings` finds entities. */
@@ -258,7 +258,7 @@ const shared = new WeakMap<Window, {controller: RingController; users: number}>(
  * (`connectRenderer` and `connectInteractions` feed it). Returns `null` where
  * there is no DOM.
  */
-export function documentRings(view: Window): {controller: RingController; release(): void} | null {
+export function documentRings(view: Window): {controller: RingController; release: () => void} | null {
   if (!view.document?.documentElement || typeof (view as Window & typeof globalThis).MutationObserver !== 'function') return null
   let entry = shared.get(view)
   if (!entry) {

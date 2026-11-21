@@ -81,11 +81,11 @@ export function changedParts(definition: Definition, saved: Definition): Record<
 
 /** Saving parts through the local runner: a preview of the file edit, then the write. */
 export interface DefinitionWriter {
-  preview(parts: Record<string, unknown>): Promise<{path: string; before: string; after: string; digest: string}>
+  preview: (parts: Record<string, unknown>) => Promise<{path: string; before: string; after: string; digest: string}>
   /** Writes exactly the preview with this digest; rejects when the file changed since. */
-  save(parts: Record<string, unknown>, digest: string): Promise<void>
+  save: (parts: Record<string, unknown>, digest: string) => Promise<void>
   /** Why saving isn't possible here (the Inspector wasn't started with --trust), if it isn't. */
   disabled?: string | undefined
   /** After a save: the overrides are now the definition. */
-  onSaved(): void
+  onSaved: () => void
 }

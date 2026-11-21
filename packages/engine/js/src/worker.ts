@@ -23,12 +23,12 @@ export interface WorkerEngineOptions {
 /** The engine running in a dedicated Worker, which `dispose` terminates. */
 export interface WorkerEngine extends ProjectionEngine {
   /** Idempotent. Rejects every pending request and prevents future calls. */
-  dispose(): void
+  dispose: () => void
 }
 
 interface Pending {
-  resolve(bytes: Uint8Array): void
-  reject(error: Error): void
+  resolve: (bytes: Uint8Array) => void
+  reject: (error: Error) => void
   timer: ReturnType<typeof setTimeout>
 }
 

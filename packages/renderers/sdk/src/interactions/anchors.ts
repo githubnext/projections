@@ -14,17 +14,17 @@ export interface AnchorReport {
   /** The selected and hovered items, reported whenever they move. */
   primary: Set<string>
   /** Where a primary item is visible, or `null`. */
-  rectOf(id: string): AnchorRect | null
+  rectOf: (id: string) => AnchorRect | null
   /** Where each visible annotated item is, in document order. */
   annotated: Map<string, AnchorRect>
   /** Whether an item is annotated. */
-  isAnnotated(id: string): boolean
+  isAnnotated: (id: string) => boolean
 }
 
 export interface AnchorReporter {
   /** Reports the anchors that changed since the last report; retries what the rate deferred with `schedule`. */
-  report(report: AnchorReport): void
-  dispose(): void
+  report: (report: AnchorReport) => void
+  dispose: () => void
 }
 
 /** Reports anchors to `client`, calling `schedule` to measure again when it had to defer some. */

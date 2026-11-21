@@ -1,6 +1,17 @@
 import {isKind} from '@githubnext/projections-schemas'
-import type {DependencyInjectionExtraction, Entity} from '@githubnext/projections-schemas'
+import type {DependencyInjectionExtraction} from '@githubnext/projections-schemas'
 import {compareIds} from '@githubnext/projections-renderer-kit'
+import {
+  conventionalName,
+  distinguishLookalikes,
+  indexComposition,
+  lifetimeOf,
+  resolveLinks,
+  scopeOf,
+  shortName,
+  text,
+  typeOf,
+} from './composition.js'
 
 export type Lifetime = 'singleton' | 'scoped' | 'transient' | 'unknown'
 
@@ -52,68 +63,13 @@ export interface DiModel {
   links: DiLink[]
 }
 
-function shortName(value: string): string {
-  const withoutGenerics = value.replace(/`\d+$/, '')
-  return withoutGenerics.split('.').at(-1) ?? withoutGenerics
-}
-
-function lifetimeOf(value: unknown): Lifetime {
-  const text = String(value ?? '').toLowerCase()
-  return text === 'singleton' || text === 'scoped' || text === 'transient' ? text : 'unknown'
-}
-
-function typeOf(entity: Entity | undefined): string | undefined {
-  const type = entity?.data?.type
-  return typeof type === 'string' ? type : entity?.label
-}
-
-const text = (value: unknown): string | undefined => (typeof value === 'string' && value ? value : undefined)
-
-/** The container's own scope name, when it is more specific than the lifetime it maps to. */
-function scopeOf(value: unknown, lifetime: Lifetime): string | undefined {
-  const scope = text(value)
-  const name = scope?.toLowerCase()
-  return scope && name !== lifetime && name !== 'default' ? scope : undefined
-}
-
-/** The name a container derives from a type by default (`OrdersService` → `ordersService`). */
-const conventionalName = (type: string | undefined): string | undefined => (type ? type.charAt(0).toLowerCase() + type.slice(1) : undefined)
-
 /**
  * Composition is derived from endpoint kinds rather than relationship kinds so
  * an extractor that labels its relationships differently still resolves.
  * IDs are the extraction's own entity and relationship IDs.
  */
 export function buildDiModel(state: Pick<DependencyInjectionExtraction, 'entities' | 'relationships'>): DiModel {
-  const nodes = new Map(state.entities.map(node => [node.id, node]))
-  const registrations = new Map<string, string[]>()
-  const implementations = new Map<string, string>()
-  const aliases = new Map<string, {id: string; to: string}>()
-  const dependencies: DiLink[] = []
-  for (const edge of state.relationships) {
-    const from = nodes.get(edge.from)
-    const to = nodes.get(edge.to)
-    if (!from || !to) continue
-    if (from.kind === 'service' && to.kind === 'registration') {
-      registrations.set(from.id, [...(registrations.get(from.id) ?? []), to.id])
-    } else if (from.kind === 'registration' && to.kind === 'implementation') {
-      implementations.set(from.id, to.id)
-    } else if (from.kind === 'registration' && to.kind === 'service') {
-      aliases.set(from.id, {id: edge.id, to: to.id})
-    } else if (from.kind === 'implementation' && to.kind === 'service') {
-      dependencies.push({
-        id: edge.id,
-        from: from.id,
-        to: to.id,
-        parameter: typeof edge.data?.parameter === 'string' ? edge.data.parameter : undefined,
-        collection: edge.data?.collection === true,
-        optional: edge.data?.optional === true,
-        resolution: edge.kind === 'resolves',
-        alias: false,
-      })
-    }
-  }
-
+  const {nodes, registrations, implementations, aliases, dependencies} = indexComposition(state)
   const units: DiUnit[] = []
   const unitOfImplementation = new Map<string, string>()
   const claimed = new Set<string>()
@@ -196,30 +152,8 @@ export function buildDiModel(state: Pick<DependencyInjectionExtraction, 'entitie
     })
   }
 
-  // Two cards that would read the same are told apart by their container names.
-  const lookalikes = new Map<string, DiUnit[]>()
-  for (const unit of units) {
-    const look = `${unit.contract ?? ''}|${unit.implementation}`
-    lookalikes.set(look, [...(lookalikes.get(look) ?? []), unit])
-  }
-  for (const group of lookalikes.values()) {
-    if (group.length < 2) continue
-    for (const unit of group) {
-      const name = text(nodes.get(unit.serviceId ?? '')?.data?.name)
-      if (name) unit.note = name
-    }
-  }
-
-  const ids = new Set(units.map(unit => unit.id))
-  const seen = new Set<string>()
-  const links: DiLink[] = []
-  for (const dependency of dependencies) {
-    const from = dependency.alias ? dependency.from : unitOfImplementation.get(dependency.from)
-    const to = ids.has(dependency.to) ? dependency.to : undefined
-    if (!from || !to || from === to || !ids.has(from) || seen.has(dependency.id)) continue
-    seen.add(dependency.id)
-    links.push({...dependency, from, to})
-  }
+  distinguishLookalikes(units, nodes)
+  const links = resolveLinks(dependencies, units, unitOfImplementation)
   units.sort((a, b) => compareIds(a.id, b.id))
   links.sort((a, b) => compareIds(a.id, b.id))
   return {units, links}

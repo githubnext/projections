@@ -128,6 +128,37 @@ jobs:
           npm run --silent tools -- doctor
           npm run --silent tools -- --llms > /dev/null
           npm run --silent check:readmes
+  # Every JSON, YAML and TOML file against its schema (.dollarlint.toml, CONTRIBUTING.md#schemas-for-data-files), on
+  # every change: it takes seconds and needs no build. Findings go to code scanning too, except from forks, whose token
+  # can't upload them.
+  dollarlint:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v6.1.0
+        with:
+          persist-credentials: false
+      # .oxfmtrc.json's schema is the one in the installed oxfmt package.
+      - uses: actions/setup-node@v6.5.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      # Remote schemas (SchemaStore and the others .dollarlint.toml allows), fetched at most once a day.
+      - id: day
+        run: echo "day=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6.1.0
+        with:
+          path: ~/.cache/dollarlint
+          key: dollarlint-schemas-${{ steps.day.outputs.day }}
+          restore-keys: dollarlint-schemas-
+      - uses: dollarlint/dollarlint@v0.1.27
+        with:
+          upload-sarif: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
   # The vulnerability gate: a pull request may not add a dependency with a known high or critical advisory (npm, Cargo
   # and the other manifests GitHub's dependency graph reads). It uses the dependency graph, not an npm audit endpoint;
   # Dependabot (.github/dependabot.yml) covers what is already locked.
@@ -456,6 +487,7 @@ jobs:
       - changes
       - docs
       - public-product
+      - dollarlint
       - dependency-review
       - actions-lock
       - advisories

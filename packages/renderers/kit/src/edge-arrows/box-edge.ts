@@ -12,6 +12,9 @@ import {flowingRoute} from './flowing.js'
 import {routeAroundCards} from './grid.js'
 import {finishArrow, roundedRoute} from './paths.js'
 
+/** How far apart a blocked route's candidates are sampled to tell which cards they cross, in px along the curve. */
+const overlapSpacing = 2
+
 /**
  * An arrow from one card to another, around `obstacles`, ending at the base
  * of the kit's arrowhead (draw it with `EdgeArrowMarker`). Facing sides are
@@ -201,35 +204,45 @@ export function routeBoxEdge(
     {point: {x: to.x + to.width, y: to.y + to.height / 2}, direction: {x: 1, y: 0}},
   ]
   const boxes = [from, to, ...obstacles]
-  for (const target of targetContacts) {
-    for (const source of sourceContacts) {
-      const route = routeAroundCards(source.point, target.point, source.direction, target.direction, boxes)
+  for (const targetContact of targetContacts) {
+    for (const sourceContact of sourceContacts) {
+      const route = routeAroundCards(sourceContact.point, targetContact.point, sourceContact.direction, targetContact.direction, boxes)
       if (!route) continue
       const base = {
-        x: target.point.x + target.direction.x * edgeArrowHeadLength,
-        y: target.point.y + target.direction.y * edgeArrowHeadLength,
+        x: targetContact.point.x + targetContact.direction.x * edgeArrowHeadLength,
+        y: targetContact.point.y + targetContact.direction.y * edgeArrowHeadLength,
       }
       return {
         d:
           style === 'orthogonal'
             ? roundedRoute(route, base, 8)
-            : (flowingRoute(route, base, source.direction, target.direction, obstacles) ?? roundedRoute(route, base)),
-        start: source.point,
-        end: target.point,
+            : (flowingRoute(route, base, sourceContact.direction, targetContact.direction, obstacles) ?? roundedRoute(route, base)),
+        start: sourceContact.point,
+        end: targetContact.point,
         base,
       }
     }
   }
-  // Nothing clears the cards: offer the direct arrow, or one from another side, whichever overlaps them least.
-  const candidates = [{route: direct, samples: s ? sampleSpline(s, 4) : sampleSpline([start, control1, control2, end], 4)}]
-  for (const target of targetContacts)
-    for (const source of sourceContacts) {
-      const reach = Math.min(64, Math.max(18, Math.hypot(target.point.x - source.point.x, target.point.y - source.point.y) * 0.35))
-      const c1 = {x: source.point.x + source.direction.x * reach, y: source.point.y + source.direction.y * reach}
-      const c2 = {x: target.point.x + target.direction.x * reach, y: target.point.y + target.direction.y * reach}
+  // Nothing clears the cards: offer the direct arrow, or one from another side, whichever overlaps them least. Each
+  // is sampled every `overlapSpacing` px along its curve, so no card it crosses falls between two samples.
+  const candidates = [{route: direct, samples: sampleSpline(s ?? [start, control1, control2, end], overlapSpacing)}]
+  for (const targetContact of targetContacts)
+    for (const sourceContact of sourceContacts) {
+      const reach = Math.min(
+        64,
+        Math.max(18, Math.hypot(targetContact.point.x - sourceContact.point.x, targetContact.point.y - sourceContact.point.y) * 0.35),
+      )
+      const c1 = {
+        x: sourceContact.point.x + sourceContact.direction.x * reach,
+        y: sourceContact.point.y + sourceContact.direction.y * reach,
+      }
+      const c2 = {
+        x: targetContact.point.x + targetContact.direction.x * reach,
+        y: targetContact.point.y + targetContact.direction.y * reach,
+      }
       candidates.push({
-        route: finishArrow(source.point, c1, c2, target.point),
-        samples: sampleSpline([source.point, c1, c2, target.point], 4),
+        route: finishArrow(sourceContact.point, c1, c2, targetContact.point),
+        samples: sampleSpline([sourceContact.point, c1, c2, targetContact.point], overlapSpacing),
       })
     }
   const scored = candidates.map(({route, samples}) => {

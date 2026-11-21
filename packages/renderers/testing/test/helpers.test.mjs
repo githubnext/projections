@@ -623,6 +623,10 @@ test('link-routes reports a link drawn across cards, and skips a renderer that r
   assert.match(crossing.details[0], /^In the diff, no route around the cards exists for orders->payments: it is drawn across cache, audit/)
   const [none] = await runChecks(routesDriver({count: 0, crossing: []}), subject, {checks: ['link-routes']})
   assert.equal(none.status, 'skip')
+  // A probe without the routes call skips, rather than failing the run.
+  const [unmeasured] = await runChecks(routesDriver(undefined), subject, {checks: ['link-routes']})
+  assert.equal(unmeasured.status, 'skip')
+  assert.match(unmeasured.details.join('\n'), /doesn't measure link routes/)
 })
 
 test('nested-accents measures the animation in animated mode, after the diff', async () => {

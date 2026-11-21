@@ -17,7 +17,8 @@ export const routeChecks: Pick<Checks, 'link-routes'> = {
     for (const {where, options} of views) {
       await driver.load(subject, options)
       await driver.measure('settle')
-      const measured = await driver.measure<RouteMeasurement>('routes')
+      const measured = await driver.measure<RouteMeasurement | undefined>('routes')
+      if (!measured) throw new Skip("The probe doesn't measure link routes (the 'routes' call).")
       count += measured.count
       for (const link of measured.crossing)
         failures.push(

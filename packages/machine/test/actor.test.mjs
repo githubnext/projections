@@ -227,3 +227,79 @@ test('every listener hears a batch before the events listeners send are taken', 
   actor.send({type: 'add', by: 1})
   assert.deepEqual(heard, [1, 2])
 })
+
+test("a transition's effects run after the activities it ends stop, and before the activities it starts", () => {
+  const log = []
+  const phases = defineMachine()({
+    states: {
+      paused: {
+        on: {play: () => emit({kind: 'playing'}, {type: 'shift'}), pause: ignore},
+        activities: () => [{type: 'watch', key: 'paused'}],
+      },
+      playing: {on: {play: ignore, pause: () => ({kind: 'paused'})}, activities: () => [{type: 'watch', key: 'playing'}]},
+    },
+  })
+  const actor = createActor(phases, {
+    state: {kind: 'paused'},
+    effects: {shift: () => log.push('effect')},
+    activities: {
+      watch: ({key}) => {
+        log.push(`start ${key}`)
+        return () => log.push(`stop ${key}`)
+      },
+    },
+  })
+  actor.start()
+  actor.send({type: 'play'})
+  assert.deepEqual(log, ['start paused', 'stop paused', 'effect', 'start playing'])
+  actor.stop()
+})
+
+test('an effect that stops the actor leaves the new state’s activities to the next start', () => {
+  const started = []
+  let actor
+  const phases = defineMachine()({
+    states: {
+      idle: {on: {go: () => emit({kind: 'busy'}, {type: 'halt'})}},
+      busy: {on: {go: ignore}, activities: () => [{type: 'work', key: 'work'}]},
+    },
+  })
+  actor = createActor(phases, {
+    state: {kind: 'idle'},
+    effects: {halt: () => actor.stop()},
+    activities: {work: () => void started.push('work')},
+  })
+  actor.start()
+  actor.send({type: 'go'})
+  assert.deepEqual(started, [])
+  actor.start()
+  assert.deepEqual(started, ['work'])
+  actor.stop()
+})
+
+test('a send from a callback that leaves the state ends its own activity before it returns', () => {
+  const seen = []
+  let later
+  const once = defineMachine()({
+    states: {
+      ticking: {on: {tick: () => ({kind: 'done'})}, activities: () => [{type: 'loop', key: 'loop'}]},
+      done: {on: {tick: ignore}},
+    },
+  })
+  const actor = createActor(once, {
+    state: {kind: 'ticking'},
+    activities: {
+      loop: (_, {send, signal}) => {
+        signal.addEventListener('abort', () => seen.push('cleanup'))
+        // A frame or timer callback, after the actor has finished handling events.
+        later = () => {
+          send({type: 'tick'})
+          seen.push(signal.aborted ? 'aborted' : 'live')
+        }
+      },
+    },
+  })
+  actor.start()
+  later()
+  assert.deepEqual(seen, ['cleanup', 'aborted'])
+})

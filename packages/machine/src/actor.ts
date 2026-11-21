@@ -162,7 +162,8 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
     invoke(effectRunners, effect, into)
   }
 
-  const syncActivities = () => {
+  /** The activities the current state lists, by key; ends those it no longer lists. */
+  const endUnlisted = () => {
     const wanted = new Map<string, A | After<E>>()
     for (const activity of machine.activities(state)) {
       if (wanted.has(activity.key)) throw new TypeError(`State "${state.kind}" lists two activities keyed "${activity.key}"`)
@@ -173,6 +174,10 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
         activities.delete(key)
         current.end()
       }
+    return wanted
+  }
+  /** Starts the listed activities that aren't running. */
+  const startListed = (wanted: ReadonlyMap<string, A | After<E>>) => {
     for (const [key, activity] of wanted)
       if (!activities.has(key)) {
         const into = generation()
@@ -193,11 +198,16 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
           // An event from a generation that ended while it waited is as stale as one sent after.
           if (from && !from.live) continue
           const {state: next, effects} = machine.transition(state, event)
+          // The state's activities that end, end first; its new ones start once the transition's effects have run, so
+          // they see what the effects did (a clock shifted, a request sent).
+          let wanted: ReadonlyMap<string, A | After<E>> | undefined
           if (next !== state) {
             state = next
-            syncActivities()
+            wanted = endUnlisted()
           }
           for (const effect of effects) runEffect(effect)
+          // An effect may have stopped the actor; `start` starts them then.
+          if (wanted && running) startListed(wanted)
         }
         if (state !== before) for (const listener of [...listeners]) listener(state)
       }
@@ -225,7 +235,7 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
       run = generation()
       draining = true
       try {
-        syncActivities()
+        startListed(endUnlisted())
       } finally {
         draining = false
       }

@@ -172,3 +172,28 @@ test('every state playback reaches is consistent, and every request leaves it wh
   })
   assert.equal(result.truncated, false)
 })
+
+test('playback that stops at its end has no frames running when it asks the view to stop', async () => {
+  const {createActor} = await import('@githubnext/projections-machine')
+  const log = []
+  let tick
+  const actor = createActor(playbackLifecycle, {
+    state: {kind: 'playing', position: 0.9, direction: 1, travelled: true, run: {progress: 0.9, direction: 1, holdMs: 0}},
+    effects: {
+      requestPlaying: ({playing}) => log.push(`playing ${playing}`),
+      requestPosition: ({position}) => log.push(`position ${position}`),
+    },
+    activities: {
+      frames: (_, {send, signal}) => {
+        tick = () => send({type: 'tick', elapsedMs: 1000, plan})
+        log.push('frames')
+        signal.addEventListener('abort', () => log.push('frames end'))
+      },
+    },
+  })
+  actor.start()
+  tick()
+  assert.deepEqual(log, ['frames', 'frames end', 'position 1', 'playing false'])
+  assert.equal(actor.getState().kind, 'paused')
+  actor.stop()
+})

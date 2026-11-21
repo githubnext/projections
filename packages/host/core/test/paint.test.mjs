@@ -35,3 +35,12 @@ test('an acknowledgement of an earlier init does not count until the frame catch
   assert.equal(paintState(state({mode: 'diff', panes: panes(acknowledged(animated, 0.5)), stage: {init: diff}})), 'painting')
   assert.equal(paintState(state({mode: 'diff', panes: panes(acknowledged(diff, 1)), stage: {init: diff}})), 'painted')
 })
+
+test('a ProjectionView reports the renderer status and painting to its embedder', async () => {
+  const {viewOptions} = await import('../dist/ui/view/options.js')
+  const onRendererStatusChange = () => {}
+  const onPainted = () => {}
+  const options = viewOptions({subject: undefined, projection: undefined, onRendererStatusChange, onPainted}, 'light', {})
+  assert.equal(options.onRendererStatusChange, onRendererStatusChange)
+  assert.equal(options.onPainted, onPainted)
+})

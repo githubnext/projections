@@ -141,7 +141,7 @@ export function ciPlan(facts: RepoFacts, rules: CiRules, change: Change): CiPlan
   const matrices: CiPlan['matrices'] = {}
   for (const [name, job] of Object.entries(rules.jobs)) {
     if ('when' in job) {
-      jobs[name] = decide(job.when)
+      jobs[name] = (!job.events || job.events.includes(event)) && decide(job.when)
       // A predicate on files or units gives no reason of its own: the job's description says what it checks.
       if (jobs[name]) why[name] = all ? [FULL] : reasons(job.when, state).length ? reasons(job.when, state) : [job.description]
     } else {
@@ -193,13 +193,20 @@ export function executions(plan: CiPlan, rules: CiRules): Execution[] {
     ...Object.entries(plan.jobs).flatMap(([job, value]): Execution[] =>
       Array.isArray(value)
         ? (plan.matrices[job] ?? []).map(({name, ...values}) => ({check: `${job} (${name})`, job, with: values}))
-        : value
-          ? [{check: job, job}]
-          : [],
+        : !value
+          ? []
+          : shardsOf(rules, job).map(shard => (shard === undefined ? {check: job, job} : {check: `${job} (${shard})`, job, shard})),
     ),
     ...plan.browser.map(item => browser('browser', item)),
     ...plan.browserMacos.map(item => browser('browser-macos', item)),
   ]
+}
+
+/** A job's workflow shards (`0` to `N-1`), or one unsharded check. */
+function shardsOf(rules: CiRules, job: string): (string | undefined)[] {
+  const definition = rules.jobs[job]
+  const count = definition && 'shards' in definition ? definition.shards : undefined
+  return count ? Array.from({length: count}, (_, index) => String(index)) : [undefined]
 }
 
 /** The `changes` job's step outputs: each job's decision by ID (a matrix job's as its `matrix.include`), and the rest. */

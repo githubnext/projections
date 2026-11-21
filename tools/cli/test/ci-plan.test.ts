@@ -208,3 +208,27 @@ test('the execution plan names each check with the suites, projects, shards and 
   )
   assert.equal(run.filter(item => item.job === 'browser').length, plan.browser.length)
 })
+
+test("a job the workflow shards is one check per shard, and a job limited to some events doesn't run for others", () => {
+  const workflow = readFileSync(new URL('../../../.github/workflows/ci.yml', import.meta.url), 'utf8')
+  for (const [job, definition] of Object.entries(rules.jobs)) {
+    if (!('shards' in definition) || !definition.shards) continue
+    const block = new RegExp(`^  ${job}:\\n([\\s\\S]*?)\\n  \\S`, 'm').exec(workflow)?.[1] ?? ''
+    const shards = /shard: \[([\d, ]+)\]/.exec(block)?.[1]?.split(',').map(Number)
+    assert.deepEqual(
+      shards,
+      Array.from({length: definition.shards}, (_, index) => index),
+      `${job}'s matrix`,
+    )
+    assert.match(block, new RegExp(`shard: \\$\\{\\{ matrix\\.shard \\}\\}/${definition.shards}`), `${job}'s shard argument`)
+  }
+  const engine = ciPlan(facts, rules, {paths: ['packages/engine/src/lib.rs']})
+  assert.deepEqual(
+    executions(engine, rules)
+      .filter(item => item.job === 'mutants-diff')
+      .map(item => item.check),
+    ['mutants-diff (0)', 'mutants-diff (1)', 'mutants-diff (2)', 'mutants-diff (3)', 'mutants-diff (4)', 'mutants-diff (5)'],
+  )
+  assert.equal(ciPlan(facts, rules, {paths: [], event: 'push'}).jobs['mutants-diff'], false)
+  assert.equal(ciPlan(facts, rules, {paths: ['README.md'], labels: ['ci:full']}).jobs['mutants-diff'], true)
+})

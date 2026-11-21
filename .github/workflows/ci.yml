@@ -458,14 +458,15 @@ jobs:
         with:
           task: coverage
   # Mutation testing of the pull request's diff, when it changes a file .cargo/mutants.toml examines, in 6 round-robin
-  # shards. Measured on a 674-mutant diff (one unsharded run, cancelled at its 60-minute timeout): mutants 460 and 518
-  # finished 43 and 52 minutes in, about 10 a minute with --jobs 2 and 7 in the slowest file, so the whole diff needs
-  # ~75 minutes. A shard of ~113 takes 12-17 minutes plus ~3 of setup and baseline, well inside its 60, and leaves room
-  # for diffs up to ~1,500 mutants; past that, raise the count here and in the matrix. Cost: 6 runners for ~20 minutes,
-  # ~120 runner-minutes a pull request push. The weekly full run is engine-quality.yml.
+  # shards; the plan runs it on pull requests alone and lists its shards (mutants-diff in .github/ci-rules.json).
+  # Measured on a 674-mutant diff (one unsharded run, cancelled at its 60-minute timeout): mutants 460 and 518 finished
+  # 43 and 52 minutes in, about 10 a minute with --jobs 2 and 7 in the slowest file, so the whole diff needs ~75
+  # minutes. A shard of ~113 takes 12-17 minutes plus ~3 of setup and baseline, well inside its 60, and leaves room for
+  # diffs up to ~1,500 mutants; past that, raise the count here, in the matrix and in the rules. Cost: 6 runners for
+  # ~20 minutes, ~120 runner-minutes a pull request push. The weekly full run is engine-quality.yml.
   mutants-diff:
     needs: changes
-    if: github.event_name == 'pull_request' && needs.changes.outputs.mutants-diff == 'true'
+    if: needs.changes.outputs.mutants-diff == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:

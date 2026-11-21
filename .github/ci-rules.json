@@ -240,12 +240,14 @@
       }
     },
     "mutants-diff": {
-      "description": "Mutation testing of the changed files .cargo/mutants.toml examines",
+      "description": "Mutation testing of the changed files .cargo/mutants.toml examines, on pull requests (it diffs against the base branch), in 6 shards",
       "when": {
         "changes": {
           "facts": "mutants"
         }
-      }
+      },
+      "shards": 6,
+      "events": ["pull_request"]
     },
     "actions-lock": {
       "description": "The workflow dependency lockfile verifies upstream: in full runs only",

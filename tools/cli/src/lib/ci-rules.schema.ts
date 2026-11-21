@@ -116,12 +116,31 @@ const Suite = Type.Object(
   {
     ...Strict,
     description:
-      'A browser suite runs when the change reaches it or a workspace its test:browser script builds, and when its own `when` holds',
+      'A browser suite runs when the change reaches it or a workspace its test:browser script builds, or when its own `when` holds',
   },
 )
 
 const Job = Type.Union([
-  Type.Object({description: Description, when: When}, Strict),
+  Type.Object(
+    {
+      description: Description,
+      when: When,
+      shards: Type.Optional(
+        Type.Integer({
+          minimum: 2,
+          description:
+            'The workflow runs the job as this many checks, `<job> (0)` to `<job> (N-1)`, its matrix `shard` (the planner lists each; a test keeps it the workflow’s)',
+        }),
+      ),
+      events: Type.Optional(
+        Type.Array(Type.String({minLength: 1}), {
+          minItems: 1,
+          description: 'The GitHub Actions events the job runs for, full runs included; without it, every event',
+        }),
+      ),
+    },
+    Strict,
+  ),
   Type.Object(
     {
       description: Description,

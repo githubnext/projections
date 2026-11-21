@@ -289,6 +289,20 @@
                 },
                 "when": {
                   "$ref": "#/$defs/When"
+                },
+                "shards": {
+                  "type": "integer",
+                  "minimum": 2,
+                  "description": "The workflow runs the job as this many checks, `<job> (0)` to `<job> (N-1)`, its matrix `shard` (the planner lists each; a test keeps it the workflow’s)"
+                },
+                "events": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1,
+                  "description": "The GitHub Actions events the job runs for, full runs included; without it, every event"
                 }
               },
               "additionalProperties": false
@@ -431,7 +445,7 @@
                 }
               },
               "additionalProperties": false,
-              "description": "A browser suite runs when the change reaches it or a workspace its test:browser script builds, and when its own `when` holds"
+              "description": "A browser suite runs when the change reaches it or a workspace its test:browser script builds, or when its own `when` holds"
             }
           },
           "description": "Browser suites by workspace directory; those without `shards` run together in `browser (rest)`"

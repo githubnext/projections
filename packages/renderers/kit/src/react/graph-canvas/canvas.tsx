@@ -207,6 +207,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
         textScale,
         badgeGrowth: badgeRows,
         subtitleGrowth: subtitleRows,
+        stale: !ready,
       }
     : last
   drawn.current = shown
@@ -222,6 +223,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
       textScale={shown.textScale}
       badgeGrowth={shown.badgeGrowth}
       subtitleGrowth={shown.subtitleGrowth}
+      stale={shown.stale}
     />
   ) : (
     <div className="graph-container">
@@ -246,4 +248,6 @@ interface Drawn {
   textScale: number
   badgeGrowth: ReadonlyMap<string, number> | undefined
   subtitleGrowth: ReadonlyMap<string, number> | undefined
+  /** Whether `transition` was laid out for earlier props than `props` (see `LaidOutGraphProps.stale`). */
+  stale: boolean
 }

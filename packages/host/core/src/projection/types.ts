@@ -24,6 +24,7 @@ import type {Holds} from '../playback.js'
 import type {ProjectionSelection, ProjectionTarget, TargetAnnotation, TargetResolution} from '../targets/target.js'
 import type {SummaryFigure, SummaryFilter} from '../summary.js'
 import type {ScopeCounts, ScopeHidden} from './filtering.js'
+import type {PaintState, Painted} from './paint.js'
 
 /**
  * Change highlighting: `animated` fades emphasis in and out with progress
@@ -81,6 +82,17 @@ export type ProjectionOptions = {
   onAction?: (id: string) => void
   /** Called whenever the selection changes, with the selected row and the targets it presents (`null` when nothing is selected). */
   onSelectionChange?: (selection: ProjectionSelection | null) => void
+  /**
+   * Called with the renderer status (`rendererStatus`) whenever it changes, and with the first: for a host that waits on
+   * the renderer, say to swap a poster image for the live view once it is `ready`, or to keep the poster if it `failed`.
+   */
+  onRendererStatusChange?: (status: RendererStatus) => void
+  /**
+   * Called when the frames settle on what is shown while paused (`paint` becomes `painted`): once each time, after a
+   * load, a mode change, a seek or the end of playback. For a host that captures or reveals the projection only once it
+   * is drawn.
+   */
+  onPainted?: (painted: Painted) => void
   /**
    * Markers on targets, for example how many comments each has. Renderers
    * with the `annotations` capability and the host's views draw one marker
@@ -233,6 +245,8 @@ export interface ProjectionController {
   panes: Readonly<Record<PaneKey, PaneState>>
   /** The progress the animated frame last acknowledged painting. */
   renderedProgress: number | undefined
+  /** Whether the frames show what is asked (`PaintState`): `painted` once every shown pane acknowledged painting it. */
+  paint: PaintState
 
   /** The transition slider's position (see `ProjectionOptions.position`). */
   position: number

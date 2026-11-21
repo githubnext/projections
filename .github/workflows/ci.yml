@@ -94,6 +94,9 @@ jobs:
           node tools/scripts/considered.mjs install
           npm run --silent check:considered
           npm run --silent format:check
+          # The example sources under docs/ (no workspace's declarations needed, so no build); the rest lints after the
+          # build in public-product.
+          npx eslint --quiet docs
           npm run --silent check:boundaries
           npm run --silent check:casing
           npm run --silent check:readmes

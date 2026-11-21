@@ -15,7 +15,8 @@ if (typeof module_.registerHooks === 'function') {
   module_.registerHooks({
     resolve: (request, context, nextResolve) => (request === specifier ? {url, shortCircuit: true} : nextResolve(request, context)),
   })
-} else if (typeof module_.register === 'function') {
-  // Before Node 22.15, hooks run off the main thread (hooks.mjs).
+} else if (typeof module_.register === 'function' && (!process.permission || process.permission.has('worker'))) {
+  // Before Node 22.15, hooks run off the main thread (hooks.mjs), which the permission model allows only with
+  // --allow-worker; without it the extractor runs as it would without the runner, and the import resolves as usual.
   module_.register(pathToFileURL(join(__dirname, 'hooks.mjs')), {data: {specifier, url}})
 }

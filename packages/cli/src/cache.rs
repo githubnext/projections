@@ -8,6 +8,9 @@
 //! verifies the directory before using it: exactly the embedded files, byte for byte
 //! (SHA-256), with no other entries, no symlinks and, on Unix, only owner-writable
 //! directories owned by the current user. Anything else is replaced, never trusted.
+//! On Unix a set's directories and files are readable by anyone who reaches them
+//! (mode 755 and 644, whatever the umask), so a rootless container engine's mapped
+//! user can read a set mounted into a container; the base and `helpers` stay private.
 
 use anyhow::{Context, Result, bail, ensure};
 use sha2::{Digest, Sha256};
@@ -83,13 +86,7 @@ pub fn unpack(base: &Path, version: &str, files: &[Entry]) -> Result<PathBuf> {
         .prefix(".staging-")
         .tempdir_in(&helpers)
         .context("Cannot create a staging directory for the extractor helpers")?;
-    // A helper set is readable by anyone who reaches it (the base and `helpers` stay private): a container engine
-    // whose user namespace maps the container's user away from the owner, as rootless Podman's does, mounts it.
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        fs::set_permissions(staging.path(), fs::Permissions::from_mode(0o755))?;
-    }
+    readable(staging.path(), true)?;
     for (path, bytes) in files {
         write(staging.path(), path, bytes)?;
     }
@@ -216,9 +213,10 @@ fn write(root: &Path, path: &str, bytes: &[u8]) -> Result<()> {
             #[cfg(unix)]
             {
                 use std::os::unix::fs::DirBuilderExt;
-                builder.mode(0o755);
+                builder.mode(0o700);
             }
             builder.create(&parent)?;
+            readable(&parent, true)?;
         }
     }
     let mut options = fs::OpenOptions::new();
@@ -226,13 +224,49 @@ fn write(root: &Path, path: &str, bytes: &[u8]) -> Result<()> {
     #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt;
-        options.mode(0o644);
+        options.mode(0o600);
     }
     let mut file = options
         .open(&destination)
         .with_context(|| format!("Cannot write {}", destination.display()))?;
     file.write_all(bytes)?;
     file.sync_all()?;
+    readable(&destination, false)
+}
+
+/// The modes a helper set's directories and files have, whatever the umask: anyone who reaches them may read them
+/// (the cache base and `helpers` stay private), because a container engine whose user namespace maps the container's
+/// user away from the owner, as rootless Podman's does, mounts a set into the container.
+#[cfg(unix)]
+const MODES: (u32, u32) = (0o755, 0o644);
+
+#[cfg(unix)]
+fn readable(path: &Path, directory: bool) -> Result<()> {
+    use std::os::unix::fs::PermissionsExt;
+    fs::set_permissions(path, fs::Permissions::from_mode(if directory { MODES.0 } else { MODES.1 }))
+        .with_context(|| format!("Cannot set the mode of {}", path.display()))
+}
+
+#[cfg(not(unix))]
+fn readable(_: &Path, _: bool) -> Result<()> {
+    Ok(())
+}
+
+/// Whether a set's entry has its [`MODES`], so a set unpacked without them is replaced.
+#[cfg(unix)]
+fn has_mode(path: &Path, metadata: &fs::Metadata) -> Result<()> {
+    use std::os::unix::fs::PermissionsExt;
+    let wanted = if metadata.is_dir() { MODES.0 } else { MODES.1 };
+    ensure!(
+        metadata.permissions().mode() & 0o777 == wanted,
+        "{} must have mode {wanted:o}",
+        path.display()
+    );
+    Ok(())
+}
+
+#[cfg(not(unix))]
+fn has_mode(_: &Path, _: &fs::Metadata) -> Result<()> {
     Ok(())
 }
 
@@ -241,6 +275,7 @@ fn verify(root: &Path, expected: &Expected) -> Result<()> {
     let metadata = fs::symlink_metadata(root)?;
     ensure!(metadata.is_dir() && !metadata.is_symlink(), "{} is not a directory", root.display());
     owner_only(root, &metadata)?;
+    has_mode(root, &metadata)?;
     let mut found = BTreeSet::new();
     let mut pending = vec![PathBuf::new()];
     while let Some(relative) = pending.pop() {
@@ -251,6 +286,7 @@ fn verify(root: &Path, expected: &Expected) -> Result<()> {
             if metadata.is_dir() && !metadata.is_symlink() {
                 ensure!(expected.directories.contains(&path), "Unexpected directory {}", path.display());
                 owner_only(&entry.path(), &metadata)?;
+                has_mode(&entry.path(), &metadata)?;
                 pending.push(path);
             } else {
                 let digest = expected
@@ -262,6 +298,7 @@ fn verify(root: &Path, expected: &Expected) -> Result<()> {
                     "{} is not a regular file",
                     path.display()
                 );
+                has_mode(&entry.path(), &metadata)?;
                 ensure!(
                     &file_digest(&entry.path())? == digest,
                     "{} does not match the embedded helper",
@@ -353,6 +390,17 @@ mod tests {
             Box::new(|| {
                 fs::remove_file(&main).unwrap();
                 std::os::unix::fs::symlink(directory.join("helpers/go/go.mod"), &main).unwrap();
+            }),
+            // Unpacked under a private umask: a container's mapped user couldn't read it.
+            #[cfg(unix)]
+            Box::new(|| {
+                use std::os::unix::fs::PermissionsExt;
+                fs::set_permissions(&main, fs::Permissions::from_mode(0o600)).unwrap();
+            }),
+            #[cfg(unix)]
+            Box::new(|| {
+                use std::os::unix::fs::PermissionsExt;
+                fs::set_permissions(directory.join("helpers/go"), fs::Permissions::from_mode(0o700)).unwrap();
             }),
         ];
         for alter in alterations {

@@ -102,6 +102,17 @@ export const generators: Generator[] = [
     fix: true,
   },
   {
+    name: 'node-extractor-module',
+    description:
+      'packages/cli/node/extractor.mjs: @githubnext/projections/extractor bundled into one module, which the CLI gives extractors run with node',
+    outputs: ['packages/cli/node/extractor.mjs'],
+    inputs: ['packages/sdk/src/extractor.ts', 'packages/sdk/src/extractor/**', 'packages/sdk/scripts/extractor-module.mjs'],
+    generate: [npm('run', 'generate:extractor', '--workspace', '@githubnext/projections')],
+    check: {mode: 'script', commands: [node('packages/sdk/scripts/extractor-module.mjs', '--check')]},
+    needs: [],
+    fix: true,
+  },
+  {
     name: 'product-icons',
     description: "The Projections mark and the parts' icons: brand/parts SVGs, the VS Code icon font and the SDK's default icon tokens",
     outputs: [

@@ -143,14 +143,16 @@ A custom extractor whose program is the bare name `node` gets the same helpers
 for JavaScript and TypeScript: the runner adds `--require` and the path of a
 preload script, also unpacked into its cache, before the command's own arguments
 (and, when they turn on Node's permission model with `--permission`, read access
-to that directory). The script registers a resolve hook for one specifier,
-`@githubnext/projections/extractor`, which then loads the module this runner
-ships, ahead of any installed copy; every other import resolves as usual. ES
-modules don't search `NODE_PATH`, so an extractor in `.mjs`, `.js` or `.ts`
-imports `{request, result}` from it with nothing installed. Installing the
-`@githubnext/projections` package adds its types, and lets other programs, such
-as `npx tsx`, import it. `projections __node-require` prints the script's path,
-to run an extractor by hand. Both modules behave alike, with the same messages:
+to that directory; before Node 22.15 the hook also needs `--allow-worker` there,
+and without it the import resolves as usual). The script registers a resolve
+hook for one specifier, `@githubnext/projections/extractor`, which then loads
+the module this runner ships, ahead of any installed copy; every other import
+resolves as usual. ES modules don't search `NODE_PATH`, so an extractor in
+`.mjs`, `.js` or `.ts` imports `{request, result}` from it with nothing
+installed. Installing the `@githubnext/projections` package adds its types, and
+lets other programs, such as `npx tsx`, import it. `projections __node-require`
+prints the script's path, to run an extractor by hand. Both modules behave
+alike, with the same messages:
 `packages/schemas/fixtures/extractor-helpers.json` holds both to it.
 
 A command whose program is the bare name `python3` or `python` runs this

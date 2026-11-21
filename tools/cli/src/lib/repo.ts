@@ -39,7 +39,7 @@ export function readText(root: string, path: string): string | undefined {
   }
 }
 
-export function readJson<T = any>(root: string, path: string): T | undefined {
+export function readJson<T = unknown>(root: string, path: string): T | undefined {
   const text = readText(root, path)
   return text === undefined ? undefined : (JSON.parse(text) as T)
 }

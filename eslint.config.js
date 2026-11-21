@@ -28,6 +28,13 @@ export default defineConfig(
       // Generated from packages/sdk/src/extractor.ts, which is linted.
       'packages/cli/node/extractor.mjs',
       '**/playwright-report/**',
+      // Build and test output, as the .gitignore files list it.
+      '**/pkg/**',
+      'packages/engine/js/artifacts/**',
+      'packages/sdk/vendor/**',
+      'packages/integrations/vscode/.package/**',
+      'packages/extractors/typescript-support/.runtime-*/**',
+      'tools/storybook/screenshots/**',
     ],
   },
   js.configs.recommended,

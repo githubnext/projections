@@ -47,9 +47,29 @@ export const loadingLifecycle: PaneLifecycleState = {kind: 'loading', reports: n
 
 type Reporting = Exclude<PaneLifecycleState, {kind: 'failed'}>
 
-/** The same state with its reports changed, or the state itself when they don't. */
-const reporting = <S extends PaneLifecycleState>(state: S, reports: PaneReports): S =>
-  reports === state.reports ? state : {...state, reports}
+/** Whether two reported values are equal: the renderer's reports arrive as new copies of plain data. */
+function same(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null || Array.isArray(a) !== Array.isArray(b)) return false
+  const keys = Object.keys(a)
+  if (keys.length !== Object.keys(b).length) return false
+  return keys.every(key => Object.hasOwn(b, key) && same((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]))
+}
+
+/**
+ * The same state with its reports changed, or the state itself when they don't. The painted init is compared by
+ * identity: which document a pane painted, not what it contains.
+ */
+function reporting<S extends PaneLifecycleState>(state: S, reports: PaneReports): S {
+  const before = state.reports
+  const keys = Object.keys(reports) as (keyof PaneReports)[]
+  const unchanged =
+    keys.length === Object.keys(before).length &&
+    keys.every(
+      key => Object.hasOwn(before, key) && (key === 'renderedInit' ? before[key] === reports[key] : same(before[key], reports[key])),
+    )
+  return unchanged ? state : {...state, reports}
+}
 
 /** How a running renderer's reports change what the pane knows, in loading and ready alike. */
 const reports = {

@@ -61,6 +61,7 @@ export function snapshotReadiness(state: SnapshotState): {failure: string} | 'wa
   if (unavailable) return {failure: unavailable}
   // The renderer's capabilities may still move the stage to its own default mode.
   if (comparing && !projection.availableModes.includes(projection.mode)) return 'waiting'
-  // Every shown pane has painted what it was asked, for the document it has now (`paintState`).
-  return paintState(projection) === 'painted' ? 'painted' : 'waiting'
+  // Every shown pane has painted what it was asked, for the document it has now (`paintState`). Animated waits for the
+  // exact progress requested, not the controller's, which a step can snap to its end.
+  return paintState({...projection, progress: state.settings.progress ?? 1}) === 'painted' ? 'painted' : 'waiting'
 }

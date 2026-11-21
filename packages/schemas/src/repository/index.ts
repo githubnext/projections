@@ -66,7 +66,7 @@ export const repositorySchemas: RepositorySchema[] = [
 ]
 
 /** `schema` as an internal JSON Schema document. */
-export function repositorySchemaDocument({title, files, schema}: RepositorySchema): {[key: string]: unknown} {
+export function repositorySchemaDocument({title, files, schema}: RepositorySchema): Record<string, unknown> {
   const {description, ...json} = JSON.parse(JSON.stringify(schema)) as {description?: string; [key: string]: unknown}
   return {
     $schema: 'https://json-schema.org/draft/2020-12/schema',

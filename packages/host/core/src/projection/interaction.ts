@@ -4,7 +4,7 @@ import type {AnchorRect} from '@githubnext/projections-renderer-sdk/protocol'
 import type {Side} from '../modes.js'
 import type {ProjectionTarget} from '../targets/target.js'
 
-export type Anchors = Record<Side, {[id: string]: AnchorRect | null}>
+export type Anchors = Record<Side, Record<string, AnchorRect | null>>
 
 /** The specific target chosen for a row: a property, or one the host selected. */
 export type Pinned = {rowId: string; target: ProjectionTarget} | null

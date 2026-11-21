@@ -96,11 +96,13 @@ export function createPlaybackController(
       const last = shown
       // A copy, so a host that updates one view object and shows it again still has its changes noticed.
       shown = {...view}
-      if (last && last.subject !== view.subject)
+      if (last && last.subject !== view.subject) {
         actor.send({type: 'subjectChanged', position: view.position, stops: !view.playingControlled})
+      }
       if (actor.getState().position !== view.position) actor.send({type: 'positionShown', position: view.position})
-      if (view.direction !== undefined && actor.getState().direction !== view.direction)
+      if (view.direction !== undefined && actor.getState().direction !== view.direction) {
         actor.send({type: 'directionShown', direction: view.direction})
+      }
       if (last && last.mode !== view.mode) actor.send({type: 'modeChanged'})
       if (last && last.reducedMotion !== view.reducedMotion) actor.send({type: 'motionShown', reduced: view.reducedMotion})
       actor.send({type: 'playingShown', playing: view.playing, plan: host.plan(), reducedMotion: view.reducedMotion})

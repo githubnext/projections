@@ -523,8 +523,9 @@ test('the bookmarks schema follows what the CLI accepts: identifiers, nonempty r
     {...valid, bookmarks: [{...bookmark, after: 'x'.repeat(1025)}]},
     {...valid, bookmarks: [{...bookmark, title: undefined}]},
     {...valid, bookmarks: Array.from({length: 101}, (_, index) => ({...bookmark, id: `b${index}`}))},
-  ])
+  ]) {
     assert.equal(validate('bookmarks', JSON.parse(JSON.stringify(invalid))), false, JSON.stringify(invalid))
+  }
 })
 
 test('the renderer manifest schema follows parseRendererManifest: names, handles, distinct modes and known accepts', () => {
@@ -553,6 +554,7 @@ test('the renderer manifest schema follows parseRendererManifest: names, handles
     {...valid, accepts: [{schema: 'graph/v9'}]},
     {...valid, accepts: [{schema: 'graph/v0', vocabulary: 'unknown/v0'}]},
     {...valid, accepts: [{schema: 'graph/v0'}, {schema: 'graph/v0'}]},
-  ])
+  ]) {
     assert.equal(validate('renderer', invalid), false, JSON.stringify(invalid))
+  }
 })

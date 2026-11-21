@@ -232,7 +232,7 @@ function onEmphasis(bg: Rgba, accent: Rgba): Rgba {
 
 /** A font family list safe to send as a token: plain names and quoted names, no functions, braces or semicolons. */
 export function fontList(value: string | undefined): string | undefined {
-  const text = value?.trim().replace(/\s+/g, ' ')
+  const text = value?.trim().replaceAll(/\s+/g, ' ')
   if (!text || text.length > rendererLimits.tokenLength) return undefined
   return isFontList(text) ? text : undefined
 }

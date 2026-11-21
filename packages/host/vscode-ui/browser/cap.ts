@@ -34,16 +34,14 @@ export async function capGaps(page: Page, container: Locator, label: Locator, af
       range.selectNodeContents(label as Element)
       const text = range.getBoundingClientRect()
       const style = getComputedStyle(element)
-      const border = (side: string) => parseFloat(style.getPropertyValue(`border-${side}-width`)) || 0
+      const border = (side: string) => Number.parseFloat(style.getPropertyValue(`border-${side}-width`)) || 0
       return {
-        ...{
-          left: rect.left,
-          top: rect.top,
-          right: rect.right,
-          bottom: rect.bottom,
-          textLeft: text.left,
-          textRight: text.right,
-        },
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        textLeft: text.left,
+        textRight: text.right,
         borders: {
           left: border('left'),
           top: border('top'),
@@ -169,7 +167,7 @@ export interface RowInsets {
 export const toolbarInsets = (toolbar: Locator, options: {wrappers: string; secondRow?: string; rows?: string}) =>
   toolbar.evaluate((element, {wrappers, secondRow, rows}) => {
     const style = getComputedStyle(element)
-    const border = (side: string) => parseFloat(style.getPropertyValue(`border-${side}-width`)) || 0
+    const border = (side: string) => Number.parseFloat(style.getPropertyValue(`border-${side}-width`)) || 0
     const box = element.getBoundingClientRect()
     const inner = {
       left: box.left + border('left'),
@@ -184,7 +182,8 @@ export const toolbarInsets = (toolbar: Locator, options: {wrappers: string; seco
       const own = getComputedStyle(node)
       const filled = !/^(transparent|rgba\(0, 0, 0, 0\))$/.test(own.backgroundColor)
       const bordered = ['top', 'right', 'bottom', 'left'].some(
-        side => parseFloat(own.getPropertyValue(`border-${side}-width`)) > 0 && own.getPropertyValue(`border-${side}-style`) !== 'none',
+        side =>
+          Number.parseFloat(own.getPropertyValue(`border-${side}-width`)) > 0 && own.getPropertyValue(`border-${side}-style`) !== 'none',
       )
       return filled || bordered
     }
@@ -264,7 +263,7 @@ export const toolbarInsets = (toolbar: Locator, options: {wrappers: string; seco
       bottom: two ? second.getBoundingClientRect().top : inner.bottom,
     })
     if (!two) return {main}
-    const top = second.getBoundingClientRect().top + (parseFloat(getComputedStyle(second).borderTopWidth) || 0)
+    const top = second.getBoundingClientRect().top + (Number.parseFloat(getComputedStyle(second).borderTopWidth) || 0)
     return {main, playback: row(controls(second, null), {...inner, top})}
   }, options)
 

@@ -3,7 +3,7 @@ export function readPointer(value: unknown, pointer: string): unknown {
   if (pointer === '') return value
   let current = value
   for (const raw of pointer.slice(1).split('/')) {
-    const token = raw.replace(/~1/g, '/').replace(/~0/g, '~')
+    const token = raw.replaceAll('~1', '/').replaceAll('~0', '~')
     if (Array.isArray(current)) {
       if (!/^(0|[1-9][0-9]*)$/.test(token)) return undefined
       current = current[Number(token)]
@@ -19,5 +19,5 @@ export function readPointer(value: unknown, pointer: string): unknown {
 
 /** Builds an RFC 6901 pointer from property names and array indexes. */
 export function propertyPath(...segments: (string | number)[]): string {
-  return segments.map(segment => `/${String(segment).replace(/~/g, '~0').replace(/\//g, '~1')}`).join('')
+  return segments.map(segment => `/${String(segment).replaceAll('~', '~0').replaceAll('/', '~1')}`).join('')
 }

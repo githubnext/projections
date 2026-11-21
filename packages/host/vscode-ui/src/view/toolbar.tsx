@@ -43,10 +43,10 @@ export function ViewToolbar(toolbarProps: ViewToolbarProps) {
     playback: showPlayback,
     actions: collapsible,
     key: [
-      views.join(),
+      views.join(','),
       view,
       p.mode,
-      zoomControls.map(control => `${control.id}:${control.type}`).join(),
+      zoomControls.map(control => `${control.id}:${control.type}`).join(','),
       p.stepEnds.length > 0,
       beforeLabel,
       afterLabel,

@@ -43,7 +43,7 @@ export const toolbarGeometry = (page: Page) =>
       const bar = box(toolbar)
       const rows = [...toolbar.querySelectorAll(':scope > .ph-toolbar-row')].map(row => {
         const rect = box(row)
-        const gap = parseFloat(getComputedStyle(row).columnGap) || 0
+        const gap = Number.parseFloat(getComputedStyle(row).columnGap) || 0
         const items = [...row.children].filter(child => !child.matches('[data-fit-min="0"]') && shown(child))
         const used = items.reduce((sum, item) => sum + box(item).width, 0) + gap * Math.max(0, items.length - 1)
         return {
@@ -79,7 +79,7 @@ export const toolbarGeometry = (page: Page) =>
         if (!element) return undefined
         const rect = box(element)
         const style = getComputedStyle(element)
-        return {left: rect.left + parseFloat(style.paddingLeft), right: rect.right - parseFloat(style.paddingRight)}
+        return {left: rect.left + Number.parseFloat(style.paddingLeft), right: rect.right - Number.parseFloat(style.paddingRight)}
       }
       const mode = content(region('mode'))
       const cluster: ClusterGeometry | undefined =

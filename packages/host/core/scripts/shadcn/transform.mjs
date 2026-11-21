@@ -11,7 +11,7 @@ import {applyEdits, parse} from './source.mjs'
 const oxfmtConfig = new URL('../../../../../.oxfmtrc.json', import.meta.url)
 
 const iconLibraries = new Set(['lucide', 'tabler', 'hugeicons', 'phosphor', 'remixicon'])
-const kebab = name => name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
+const kebab = name => name.replaceAll(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
 
 // Replaces `<IconPlaceholder lucide="CheckIcon" tabler=… />` with `<CheckIcon />` (keeping its other attributes) and
 // returns the lucide icons used.

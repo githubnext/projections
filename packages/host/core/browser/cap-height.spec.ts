@@ -36,16 +36,14 @@ async function capGaps(page: Page, container: Locator, label: Locator, afterIcon
       range.selectNodeContents(label as Element)
       const text = range.getBoundingClientRect()
       const style = getComputedStyle(element)
-      const border = (side: string) => parseFloat(style.getPropertyValue(`border-${side}-width`)) || 0
+      const border = (side: string) => Number.parseFloat(style.getPropertyValue(`border-${side}-width`)) || 0
       return {
-        ...{
-          left: rect.left,
-          top: rect.top,
-          right: rect.right,
-          bottom: rect.bottom,
-          textLeft: text.left,
-          textRight: text.right,
-        },
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        textLeft: text.left,
+        textRight: text.right,
         borders: {
           left: border('left'),
           top: border('top'),

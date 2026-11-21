@@ -31,7 +31,7 @@ async function panes(page: Page) {
         side: section.getAttribute('data-side'),
         borders: [style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth].join(' '),
         radius: style.borderTopLeftRadius,
-        pane: {...box(section), inner: section.getBoundingClientRect().left + parseFloat(style.borderLeftWidth)},
+        pane: {...box(section), inner: section.getBoundingClientRect().left + Number.parseFloat(style.borderLeftWidth)},
         band: box(section.querySelector('[data-pane-band]')),
         frame: box(section.querySelector('iframe.ph-frame')),
       }
@@ -102,8 +102,8 @@ async function footClearance(page: Page) {
           view: document.documentElement.clientHeight,
           top: box.top,
           bottom: box.bottom,
-          padding: parseFloat(getComputedStyle(graph).paddingBottom),
-          inset: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--projections-stage-inset-bottom')),
+          padding: Number.parseFloat(getComputedStyle(graph).paddingBottom),
+          inset: Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--projections-stage-inset-bottom')),
         }
       }),
   ])

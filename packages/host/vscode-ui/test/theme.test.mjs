@@ -74,8 +74,8 @@ for (const fixture of fixtures) {
     if (surfaces.every(name => contrast(parseColor(foreground), color(tokens, name)) >= (hc ? 7 : 4.5))) {
       assert.equal(tokens['color-fg'], same(foreground))
     }
-    assert.equal(tokens['font-family'], v['--vscode-font-family'].trim().replace(/\s+/g, ' '))
-    assert.equal(tokens['font-family-mono'], v['--vscode-editor-font-family'].trim().replace(/\s+/g, ' '))
+    assert.equal(tokens['font-family'], v['--vscode-font-family'].trim().replaceAll(/\s+/g, ' '))
+    assert.equal(tokens['font-family-mono'], v['--vscode-editor-font-family'].trim().replaceAll(/\s+/g, ' '))
     for (const [hue, variable] of [
       ['added', '--vscode-gitDecoration-addedResourceForeground'],
       ['removed', '--vscode-gitDecoration-deletedResourceForeground'],

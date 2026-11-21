@@ -36,11 +36,11 @@ function oklchToSrgb(value) {
   return linear.map(v => Math.min(1, Math.max(0, v))).map(v => (v <= 0.0031308 ? 12.92 * v : 1.055 * v ** (1 / 2.4) - 0.055))
 }
 
-const hexToSrgb = value => [1, 3, 5].map(index => parseInt(value.slice(index, index + 2), 16) / 255)
+const hexToSrgb = value => [1, 3, 5].map(index => Number.parseInt(value.slice(index, index + 2), 16) / 255)
 /** sRGB channels of a theme.css color: `oklch(L C H)`, or `#rrggbb[aa]` painted over `under` when translucent. */
 const srgb = (value, under) => {
   if (!value.startsWith('#')) return oklchToSrgb(value)
-  const alpha = value.length > 7 ? parseInt(value.slice(7, 9), 16) / 255 : 1
+  const alpha = value.length > 7 ? Number.parseInt(value.slice(7, 9), 16) / 255 : 1
   assert.ok(alpha === 1 || under, `${value} is painted over a surface`)
   return hexToSrgb(value).map((channel, index) => (alpha === 1 ? channel : channel * alpha + under[index] * (1 - alpha)))
 }
@@ -149,11 +149,13 @@ test('renderer tokens are sRGB, follow the Projector palette and keep annotation
       Object.fromEntries(Object.entries(defaultThemeTokens(mode)).filter(([name]) => name.startsWith('color-'))),
     )
     // Attention badges use the accent (the lens), which must not read as a change.
-    const changes = ['added', 'removed', 'modified', 'moved'].flatMap(change =>
-      ['', '-muted', '-emphasis', '-highlight'].map(suffix => tokens[`color-${change}${suffix}`]),
+    const changes = new Set(
+      ['added', 'removed', 'modified', 'moved'].flatMap(change =>
+        ['', '-muted', '-emphasis', '-highlight'].map(suffix => tokens[`color-${change}${suffix}`]),
+      ),
     )
     for (const tone of ['color-accent', 'color-accent-emphasis', 'color-accent-muted', 'color-bg-subtle', 'color-fg-muted']) {
-      assert.ok(!changes.includes(tokens[tone]), `${mode} ${tone}`)
+      assert.ok(!changes.has(tokens[tone]), `${mode} ${tone}`)
     }
     // The accent is the lens: the same hue as the UI's, and AA as text on the canvas.
     assert.ok(contrast(hexToSrgb(tokens['color-accent']), hexToSrgb(tokens['color-bg'])) >= text, `${mode} accent on bg`)

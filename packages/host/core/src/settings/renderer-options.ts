@@ -7,7 +7,7 @@ export const maxRendererSubmenus = 2
 
 /** A group ID as words, for a group that declares no label: `exclude-files` is "Exclude files". */
 const humanize = (id: string) => {
-  const words = id.replace(/[-_.]+/g, ' ').trim()
+  const words = id.replaceAll(/[-_.]+/g, ' ').trim()
   return words ? words[0]!.toUpperCase() + words.slice(1) : id
 }
 

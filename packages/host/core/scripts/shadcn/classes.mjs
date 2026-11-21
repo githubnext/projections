@@ -5,12 +5,12 @@ import {applyEdits, parse} from './source.mjs'
 /** Rewrites one Tailwind class list: `pj:` before every class except shadcn's `cn-*` hooks, `--x` → `--pj-x` (as in
  * the variables a `style` prop sets). */
 export function prefixClasses(classes) {
-  return classes.replace(/\S+/g, token => (token.startsWith('cn-') ? token : `pj:${renameVariables(token)}`))
+  return classes.replaceAll(/\S+/g, token => (token.startsWith('cn-') ? token : `pj:${renameVariables(token)}`))
 }
 
 // Theme and component variables are renamed; Radix's own (`--radix-*`) and Tailwind functions (`--spacing(4)`) are not.
 function renameVariables(token) {
-  return token.replace(/--(?!pj-|radix-|tw-)([a-zA-Z][\w-]*)(?![\w-]*\()/g, '--pj-$1')
+  return token.replaceAll(/--(?!pj-|radix-|tw-)([a-zA-Z][\w-]*)(?![\w-]*\()/g, '--pj-$1')
 }
 
 const isCall = (node, name) => ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === name

@@ -438,7 +438,7 @@ test('Cancel pressed just as the next extraction starts cancels it, and nothing 
   // coordinator requests the job as soon as it is queued, before the page has drawn it, so the request waits for the
   // Cancel button the page draws for it, and is sent once that has been pressed.
   await page.addInitScript(() => {
-    const request = window.fetch
+    const request = globalThis.fetch
     let pressed = false
     const cancelButton = () =>
       new Promise<HTMLButtonElement>((resolve, reject) => {
@@ -453,7 +453,7 @@ test('Cancel pressed just as the next extraction starts cancels it, and nothing 
         }
         find()
       })
-    window.fetch = async (input, init) => {
+    globalThis.fetch = async (input, init) => {
       if (!pressed && input === '/api/jobs' && init?.method === 'POST' && String(init.body).includes('"projectionId":"slow"')) {
         pressed = true
         ;(await cancelButton()).click()
@@ -1188,8 +1188,8 @@ test('every title-bar control moves its content, never its box, while pressed; r
       const hold = (event: Event) => {
         if ((event.target as Element | null)?.closest?.('[aria-haspopup]')) event.stopImmediatePropagation()
       }
-      ;(window as unknown as {__hold?: typeof hold}).__hold = hold
-      window.addEventListener('pointerdown', hold, true)
+      ;(globalThis as unknown as {__hold?: typeof hold}).__hold = hold
+      globalThis.addEventListener('pointerdown', hold, true)
     })
     const seen: string[] = []
     for (const control of await toolbar.locator('button, [role="combobox"], input[type="file"]').filter({visible: true}).all()) {
@@ -1221,8 +1221,8 @@ test('every title-bar control moves its content, never its box, while pressed; r
       }
     }
     await page.evaluate(() => {
-      const hold = (window as unknown as {__hold?: (event: Event) => void}).__hold
-      if (hold) window.removeEventListener('pointerdown', hold, true)
+      const hold = (globalThis as unknown as {__hold?: (event: Event) => void}).__hold
+      if (hold) globalThis.removeEventListener('pointerdown', hold, true)
     })
     return seen
   }

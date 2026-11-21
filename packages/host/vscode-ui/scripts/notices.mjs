@@ -42,7 +42,7 @@ for (const [name, path] of await runtimeDependencies(manifest)) {
       '```text',
       (await readFile(join(directory, file), 'utf8'))
         .replace(/^\uFEFF/, '')
-        .replace(/\r\n?/g, '\n')
+        .replaceAll(/\r\n?/g, '\n')
         .trimEnd(),
       '```',
     )

@@ -1,4 +1,4 @@
-const px = (value: string) => parseFloat(value) || 0
+const px = (value: string) => Number.parseFloat(value) || 0
 
 /**
  * The width an element needs at its minimums. `data-fit-min` elements (the slider, spacers) need that many pixels;

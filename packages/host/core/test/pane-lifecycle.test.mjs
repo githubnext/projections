@@ -30,7 +30,7 @@ test('a pane is loading until revealed, fails for good, and starts over only wit
     events,
     // Reports accumulate, so identity by stage and the reports' shape keeps the walk finite.
     key: state =>
-      `${state.kind}|${Object.keys(state.reports).sort().join()}|${state.reports.rendererErrors.length}|${state.reports.rejected > 0}`,
+      `${state.kind}|${Object.keys(state.reports).sort().join(',')}|${state.reports.rendererErrors.length}|${state.reports.rejected > 0}`,
     invariants: {
       'only a failed pane has a message': state => (state.kind === 'failed') === 'message' in state,
       'a pane keeps at most five errors': state => state.reports.rendererErrors.length <= 5,

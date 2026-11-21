@@ -10,7 +10,7 @@ export async function watchFrames(page: Page): Promise<void> {
   await page.evaluate(() => {
     const state = {violations: [] as string[], created: 0, samples: 0}
     const seen = new WeakSet<Element>()
-    ;(window as unknown as {__frames: typeof state}).__frames = state
+    ;(globalThis as unknown as {__frames: typeof state}).__frames = state
     const tick = () => {
       state.samples++
       for (const frame of document.querySelectorAll<HTMLIFrameElement>('iframe.ph-frame')) {
@@ -31,13 +31,13 @@ export async function watchFrames(page: Page): Promise<void> {
 }
 
 export async function frameReport(page: Page): Promise<{violations: string[]; created: number; samples: number}> {
-  return page.evaluate(() => (window as unknown as {__frames: {violations: string[]; created: number; samples: number}}).__frames)
+  return page.evaluate(() => (globalThis as unknown as {__frames: {violations: string[]; created: number; samples: number}}).__frames)
 }
 
 /** Resets the created-frame count, for example before one mode switch. */
 export async function resetCreated(page: Page): Promise<void> {
   await page.evaluate(() => {
-    ;(window as unknown as {__frames: {created: number}}).__frames.created = 0
+    ;(globalThis as unknown as {__frames: {created: number}}).__frames.created = 0
   })
 }
 

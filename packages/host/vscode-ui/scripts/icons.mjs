@@ -85,7 +85,7 @@ ${lines.join('\n')}
 
 /** The codicon each outline renderer icon is drawn with (\`part:<name>\` is the projection part's own icon, brand/parts); the badge icons are the SDK's badge glyphs. */
 export const codiconNames: Record<string, string> = ${JSON.stringify(map, null, 2)
-    .replace(/"([a-z-]+)":/g, (_, key) => (/-/.test(key) ? `'${key}':` : `${key}:`))
+    .replaceAll(/"([a-z-]+)":/g, (_, key) => (/-/.test(key) ? `'${key}':` : `${key}:`))
     .replaceAll('"', "'")}
 `,
 )

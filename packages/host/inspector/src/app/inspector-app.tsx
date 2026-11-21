@@ -213,9 +213,7 @@ export function InspectorApp({
   const failedSides = showing === 'live' ? sides.filter(item => projectionRows[item.ref]?.status === 'failed') : []
   const diagnostics = useMemo(() => [...(job?.diagnostics ?? []), ...limitations(choices)], [job, choices])
   const labelOf = (key: string | undefined) => choices.find(choice => choice.key === key)?.label
-  const lastTiming = Object.values(projectionRows)
-    .filter(state => state.status === 'done' && state.ms)
-    .at(-1)?.ms
+  const lastTiming = Object.values(projectionRows).findLast(state => state.status === 'done' && state.ms)?.ms
 
   const statusOf = (id: string) => projectionStatus(marks, rows, id)
   const running = pairRunning(Boolean(showing === 'live' && projection && (switching || statusOf(projection)?.kind === 'extracting')), pair)

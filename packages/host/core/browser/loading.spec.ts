@@ -19,13 +19,13 @@ async function expectCentered(status: Locator, area: Locator) {
       status.evaluate((element, area) => {
         const style = getComputedStyle(area!)
         const outer = area!.getBoundingClientRect()
-        const top = outer.top + parseFloat(style.borderTopWidth) + parseFloat(style.paddingTop)
+        const top = outer.top + Number.parseFloat(style.borderTopWidth) + Number.parseFloat(style.paddingTop)
         const height =
           outer.height -
-          parseFloat(style.borderTopWidth) -
-          parseFloat(style.borderBottomWidth) -
-          parseFloat(style.paddingTop) -
-          parseFloat(style.paddingBottom)
+          Number.parseFloat(style.borderTopWidth) -
+          Number.parseFloat(style.borderBottomWidth) -
+          Number.parseFloat(style.paddingTop) -
+          Number.parseFloat(style.paddingBottom)
         const content = element.querySelector('.ph-loading-content')!.getBoundingClientRect()
         const x = Math.abs(content.left + content.width / 2 - (outer.left + outer.width / 2))
         const y = Math.abs(content.top + content.height / 2 - (top + height / 2))

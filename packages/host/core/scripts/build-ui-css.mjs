@@ -46,7 +46,7 @@ function embeddingSafe() {
           initial = declaration.value
         })
         rule.walkDecls('syntax', declaration => {
-          syntax = declaration.value.replace(/["']/g, '')
+          syntax = declaration.value.replaceAll(/["']/g, '')
         })
         // A registered zero keeps its type (minification writes `0px` as `0`); unregistered, `calc(1px + 0)` is invalid.
         if (initial === '0') {
@@ -127,7 +127,10 @@ function embeddingSafe() {
 
       css.walkDecls(declaration => {
         if (declaration.value.includes('rem')) {
-          declaration.value = declaration.value.replace(/(-?\d*\.?\d+)rem\b/g, (_, value) => `${Number((Number(value) * 16).toFixed(4))}px`)
+          declaration.value = declaration.value.replaceAll(
+            /(-?\d*\.?\d+)rem\b/g,
+            (_, value) => `${Number((Number(value) * 16).toFixed(4))}px`,
+          )
         }
       })
     },

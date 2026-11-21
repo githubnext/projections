@@ -7,7 +7,7 @@ import type {ProjectionTarget} from './target.js'
  * path percent-encoded.
  */
 export function encodeTarget(target: ProjectionTarget): string {
-  const encode = (text: string) => encodeURIComponent(text).replace(/\./g, '%2E')
+  const encode = (text: string) => encodeURIComponent(text).replaceAll('.', '%2E')
   return [target.kind, target.side, encode(target.id), ...(target.path === undefined ? [] : [encode(target.path)])].join('.')
 }
 

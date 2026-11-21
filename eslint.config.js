@@ -36,7 +36,7 @@ export default defineConfig(
     languageOptions: {globals: {...globals.node, ...globals.browser}},
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/consistent-type-imports': ['error', {fixStyle: 'inline-type-imports'}],
       'no-constant-condition': ['error', {checkLoops: false}],
       eqeqeq: ['error', 'always', {null: 'ignore'}],

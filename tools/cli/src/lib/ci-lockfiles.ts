@@ -111,12 +111,14 @@ function cargoGraph(text: string | undefined, units: readonly Unit[]): Graph {
     graph.entries.set(key(item), item.text)
     const crate = item.source ? undefined : crates.get(item.name)
     if (crate) graph.members.set(key(item), crate)
-    // `name`, `name version` or `name version (source)`: the one package that matches.
+    // `name`, `name version` or `name version (source)`: the package that matches all it gives.
     graph.edges.set(
       key(item),
       item.dependencies.flatMap(dependency => {
-        const [name, version] = dependency.split(' ')
-        const found = packages.find(other => other.name === name && (!version || other.version === version))
+        const [, name, version, source] = /^(\S+)(?: (\S+))?(?: \((.+)\))?$/.exec(dependency) ?? []
+        const found = packages.find(
+          other => other.name === name && (!version || other.version === version) && (!source || other.source === source),
+        )
         return found ? [key(found)] : []
       }),
     )

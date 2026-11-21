@@ -107,6 +107,39 @@ test('Cargo.lock blocks parse to names, versions, sources and dependencies', () 
   )
 })
 
+test('a Cargo dependency with a source resolves to the package from that source, not another of the same version', () => {
+  const git = 'git+https://example.com/dep#abc'
+  const lock = (gitChecksum: string) => `version = 4
+
+[[package]]
+name = "app"
+version = "0.1.0"
+dependencies = [
+ "dep 1.0.0 (${git})",
+]
+
+[[package]]
+name = "core"
+version = "0.1.0"
+dependencies = [
+ "dep 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "dep"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "registry"
+
+[[package]]
+name = "dep"
+version = "1.0.0"
+source = "${git}"
+checksum = "${gitChecksum}"
+`
+  assert.deepEqual(cargoLockfileReach(lock('a'), lock('b'), units).units, ['crates/app'])
+})
+
 test('a Cargo.lock change reaches the crates whose resolved dependencies changed', () => {
   assert.deepEqual(cargoLockfileReach(cargo(), cargo('1.0.1'), units), {units: ['crates/app'], root: false})
   // core's dependency on serde changes with it, so core's block changes too; app reaches it through the unit graph.

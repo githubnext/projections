@@ -1,6 +1,6 @@
 import {useId, useRef, useState} from 'react'
 import type {KeyboardEvent} from 'react'
-import {progressForKey} from '@githubnext/projections-host'
+import {handlePlaybackShortcut, playButton, progressForKey} from '@githubnext/projections-host'
 import type {ProjectionController} from '@githubnext/projections-host'
 import type {VscodeToolbarButton} from '@vscode-elements/elements/dist/vscode-toolbar-button/vscode-toolbar-button.js'
 import {RangeInput} from './controls.js'
@@ -9,47 +9,46 @@ import {Menu} from './overlay/menu.js'
 import {uiCodicons} from './codicons.js'
 
 /**
- * The one play button's name, codicon and icon name (`data-icon`): "Pause" while playing, else "Play forward" or "Play
- * backward" in `nextDirection` (forward at the start, backward at the end, otherwise the way it last went). With
- * reduced motion it shows a revision instead: "Show <after>" or "Show <before>".
+ * The one play button's name, codicon and icon name (`data-icon`), by `playButton`: "Pause" while playing, else "Play
+ * forward" or "Play backward" in `nextDirection`; under reduced motion "Show <after>" or "Show <before>".
  */
 export function playButtonState(
   p: Pick<ProjectionController, 'playing' | 'nextDirection' | 'reducedMotion'>,
   beforeLabel: string,
   afterLabel: string,
 ): {label: string; icon: string; iconName: 'play' | 'play-backward' | 'pause'} {
-  const forward = {icon: uiCodicons.play, iconName: 'play'} as const
-  const backward = {icon: uiCodicons.playBackward, iconName: 'play-backward'} as const
-  if (p.reducedMotion)
-    return p.nextDirection === 1 ? {label: `Show ${afterLabel}`, ...forward} : {label: `Show ${beforeLabel}`, ...backward}
-  if (p.playing) return {label: 'Pause', icon: uiCodicons.pause, iconName: 'pause'}
-  return p.nextDirection === 1 ? {label: 'Play forward', ...forward} : {label: 'Play backward', ...backward}
+  const {action, direction, label} = playButton(p, beforeLabel, afterLabel)
+  if (action === 'pause') return {label, icon: uiCodicons.pause, iconName: 'pause'}
+  return direction === 1
+    ? {label, icon: uiCodicons.play, iconName: 'play'}
+    : {label, icon: uiCodicons.playBackward, iconName: 'play-backward'}
 }
 
-/** Elements whose own keyboard behavior uses Space, which the playback shortcut leaves alone. */
-const usesSpace =
-  'input:not([type=range]), textarea, select, button, a[href], summary, [contenteditable]:not([contenteditable=false]), ' +
-  '[role=button], [role=checkbox], [role=radio], [role=switch], [role=tab], [role^=menuitem], [role=option], [role=combobox], [role=textbox], [role=searchbox], [role=link], ' +
-  '[role=dialog], [role=menu], [role=listbox], vscode-toolbar-button, vscode-button, vscode-single-select, vscode-textfield, vscode-checkbox, vscode-radio, vscode-tab-header'
+/** VSCode Elements' controls that use Space, which the playback shortcut leaves to them (with `spaceKeeping`). */
+const vscodeSpaceKeeping = [
+  'vscode-toolbar-button',
+  'vscode-button',
+  'vscode-single-select',
+  'vscode-textfield',
+  'vscode-checkbox',
+  'vscode-radio',
+  'vscode-tab-header',
+]
 
 /**
- * Space toggles playback (`togglePlayback`) from the element whose `onKeyDown` calls this, for example a toolbar or the
- * stage's chrome: not from text fields or controls that use Space themselves (VSCode Elements included), and not from
- * overlays portaled out of it. Returns whether it handled the key. Does nothing unless comparing in animated mode, or
- * with `always` (playback beside the table and text views in every mode, `playbackInViews: 'always'`).
+ * Space toggles playback (`handlePlaybackShortcut`) from the element whose `onKeyDown` calls this, for example a
+ * toolbar or the stage's chrome: not from text fields or controls that use Space themselves (VSCode Elements
+ * included), and not from overlays portaled out of it. Returns whether it handled the key. Does nothing unless
+ * comparing in animated mode, or with `always` (playback beside the table and text views in every mode,
+ * `playbackInViews: 'always'`).
  */
 export function handlePlaybackKey(
   event: KeyboardEvent<HTMLElement>,
   p: Pick<ProjectionController, 'comparing' | 'mode' | 'togglePlayback'>,
   always = false,
 ): boolean {
-  if (event.key !== ' ' || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return false
   if (!p.comparing || (!always && p.mode !== 'animated')) return false
-  const target = event.target
-  if (!(target instanceof Element) || !event.currentTarget.contains(target) || target.closest(usesSpace)) return false
-  event.preventDefault()
-  p.togglePlayback()
-  return true
+  return handlePlaybackShortcut(event, p, vscodeSpaceKeeping)
 }
 
 /**

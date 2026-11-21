@@ -61,10 +61,15 @@ impl Policy<'_> {
         }
         let mut binaries = vec![];
         for (field, parent) in [("matchBinaries", false), ("matchParentBinaries", true)] {
-            for binary in list(selector.get(field), field)? {
+            for (index, binary) in list(selector.get(field), field)?.iter().enumerate() {
+                let follow = flag(
+                    binary.get("followChildren"),
+                    false,
+                    &format!("{path}.{field}[{index}].followChildren"),
+                )?;
                 binaries.push(json!({
                     "operator":binary["operator"],"values":scalars(binary.get("values"), field)?,
-                    "followChildren":flag(binary.get("followChildren"), false),"parent":parent
+                    "followChildren":follow,"parent":parent
                 }));
             }
         }

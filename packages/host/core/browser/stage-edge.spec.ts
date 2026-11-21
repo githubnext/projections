@@ -56,12 +56,15 @@ for (const mode of ['diff', 'animated', 'side-by-side', 'swipe'] as const)
     const body = await pageBox(page.locator('.ph-stage-body'))
     // Centred on the edge: half over the stage, half below it.
     expect(Math.abs((box.top + box.bottom) / 2 - body.bottom)).toBeLessThanOrEqual(1)
-    // Each frame keeps clear of the part over it, and only that part.
+    // Each frame keeps clear of the band from its bottom to the highest cover there: the summary's foot floating above
+    // the edge content, or the edge content's half over the stage; its half below the stage adds nothing.
+    const foot = page.locator('.ph-stage-foot')
+    const top = (await foot.isVisible()) ? Math.min(box.top, (await pageBox(foot)).top) : box.top
     for (const iframe of await page.locator('iframe.ph-frame').all()) {
       const frame = await pageBox(iframe)
       if (frame.bottom <= box.top || frame.right <= box.left || frame.left >= box.right) continue
       const html = iframe.contentFrame().locator('html')
-      const half = frame.bottom - box.top
+      const half = frame.bottom - top
       await expect
         .poll(async () =>
           Math.abs(
@@ -75,7 +78,6 @@ for (const mode of ['diff', 'animated', 'side-by-side', 'swipe'] as const)
     const inner = {...box, bottom: Math.min(box.bottom, body.bottom)}
     await expect.poll(async () => (await nodeBoxes(page)).filter(node => intersects(node, inner)).length).toBe(0)
     // The summary's foot floats above it, apart: not around it, and not over it.
-    const foot = page.locator('.ph-stage-foot')
     if (await foot.isVisible()) {
       expect(await foot.locator('.demo-edge-caption').count()).toBe(0)
       expect((await pageBox(foot)).bottom).toBeLessThanOrEqual(box.top - 7.5)

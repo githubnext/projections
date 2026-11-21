@@ -50,6 +50,8 @@ export class Stage {
   private reusable = false
   /** The open frame fills a fixed height (`StageLoad.height`) rather than taking the height its renderer asks for. */
   private filling = false
+  /** Whether the open frame was last sent a filter: a reused load without one clears it. */
+  private filtered = false
   /** The control values last sent, which a renderer's `control` message updates as a host's settings would. */
   private options: RendererOptions = {}
   private readonly probe = new StageProbe(() => (this.current.status === 'ready' ? this.frame?.iframe.contentWindow : undefined))
@@ -176,7 +178,11 @@ export class Stage {
       open.hover(null)
       open.setEnvironment(this.frameEnvironment())
       open.setInit(init, progress)
+      // A reused frame keeps the filter it was sent, so a load without one clears it rather than narrowing the new
+      // documents to the last ones' scope. A frame never filtered stays unfiltered, as a host's frame opens.
       if (request.filter) open.filter(request.filter)
+      else if (this.filtered) open.filter({query: '', changesOnly: false, ids: null, scope: null})
+      this.filtered = Boolean(request.filter)
       return first
     }
     this.reset()
@@ -203,6 +209,7 @@ export class Stage {
     })
     // Kept by the frame and sent right after `init` once the renderer is ready, as a host's scope is.
     if (request.filter) this.frame.filter(request.filter)
+    this.filtered = Boolean(request.filter)
     await ready
     return first
   }
@@ -264,6 +271,7 @@ export class Stage {
 
   filter(payload: FilterPayload): void {
     this.frame?.filter(payload)
+    this.filtered = Boolean(this.frame)
   }
 
   setEnvironment(next: StageEnvironment): void {

@@ -169,5 +169,10 @@ export interface ProjectionViewProps {
    * first and the playback under it, one rule between them. Side by side and swipe have their pane chips there instead.
    */
   utility?: ReactNode
+  /**
+   * When playback shows (`ViewControlsOptions.playbackInViews`): `animated` (the default), in the Animated mode only,
+   * beside every view; `always`, also beside the table and text views in every other mode.
+   */
+  playbackInViews?: 'animated' | 'always'
   className?: string
 }

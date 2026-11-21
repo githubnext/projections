@@ -1,12 +1,11 @@
 import {useEffect, useImperativeHandle, useMemo, useRef, useState} from 'react'
 import type {CSSProperties} from 'react'
-import {useFullscreen, useProjection} from '@githubnext/projections-host'
+import {useFullscreen, useProjection, useViewChoice, viewControls} from '@githubnext/projections-host'
 import type {ProjectionController, ProjectionSelection} from '@githubnext/projections-host'
 import {OverlayLayer} from './overlay/overlay.js'
 import {StageNoticeSlot} from './stage-notice.js'
 import {ScopeNotice} from './scope-switch.js'
-import {fullscreenFallbackClass, offeredModes} from './blocks.js'
-import type {ViewKind} from './blocks.js'
+import {fullscreenFallbackClass} from './blocks.js'
 import {VscodeTableView} from './views/table.js'
 import {VscodeTextView} from './views/text.js'
 import {SummaryBar} from './summary-bar.js'
@@ -38,23 +37,6 @@ export function VscodeProjectionView(props: VscodeProjectionViewProps) {
   return <VscodeView projection={projection} props={props} root={root} kind={vscode.kind} />
 }
 
-/** The views offered (the renderer's, then the built-in ones turned on), the one chosen, and how to change it. */
-function useViewChoice(p: ProjectionController, on: ReturnType<typeof featureOn>, initialView: ViewKind | undefined) {
-  const renderer = p.renderer
-  const builtIn: ViewKind[] = [...(on('table') ? ['table' as const] : []), ...(on('text') ? ['text' as const] : [])]
-  const views: ViewKind[] = [...(renderer ? ['renderer' as const] : []), ...(builtIn.length || renderer ? builtIn : ['table' as const])]
-  const fallback: ViewKind = views.find(kind => kind !== 'renderer') ?? 'table'
-  const [chosen, setView] = useState<ViewKind>(initialView ?? (renderer ? 'renderer' : fallback))
-  const [shownRenderer, setShownRenderer] = useState(renderer)
-  if (shownRenderer !== renderer) {
-    setShownRenderer(renderer)
-    if (renderer && !shownRenderer) setView('renderer')
-  }
-  const view: ViewKind = views.includes(chosen) ? chosen : renderer ? 'renderer' : fallback
-  const recoverView = views.includes('table') ? ('table' as const) : views.includes('text') ? ('text' as const) : undefined
-  return {views, view, setView, recoverView}
-}
-
 function VscodeView({
   projection: p,
   props,
@@ -69,8 +51,10 @@ function VscodeView({
   const {subject, comparing, renderer, mode} = p
   const features = props.features ?? {}
   const on = featureOn(features)
+  const {views, view, setView, recoverView} = useViewChoice(p, features, props.initialView)
+  const controls = viewControls(p, {features, view, ...(props.playbackInViews ? {playbackInViews: props.playbackInViews} : {})})
   // The modes the features offer that the renderer supports, in the renderer's order.
-  const modes = p.availableModes.filter(option => offeredModes(features).includes(option))
+  const {modes} = controls
   const beforeLabel = props.beforeLabel ?? 'Before'
   const afterLabel = props.afterLabel ?? 'After'
   // One full-screen state for the view: its control moves between the toolbar and More as the layout collapses.
@@ -84,7 +68,6 @@ function VscodeView({
     if (comparing && p.modesKnown && features.modes !== undefined && modes.length && !modes.includes(mode)) setMode(modes[0]!)
   }, [comparing, p.modesKnown, features.modes, modes, mode, setMode])
 
-  const {views, view, setView, recoverView} = useViewChoice(p, on, props.initialView)
   const fill = props.fill !== false
   const annotated = on('annotations')
   const marks = useMemo(() => new Map(p.annotationMarks.map(mark => [mark.id, mark])), [p.annotationMarks])
@@ -142,7 +125,7 @@ function VscodeView({
                 recoverView={recoverView}
                 setView={setView}
                 utilityArea={props.utilityArea === true}
-                playback={on('playback') && p.comparing && p.mode === 'animated'}
+                playback={controls.playback && mode === 'animated'}
               />
             )}
             {view === 'table' && <VscodeTableView {...rows} total={p.rows.length} />}

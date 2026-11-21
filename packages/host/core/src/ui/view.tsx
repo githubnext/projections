@@ -1,4 +1,4 @@
-import {useImperativeHandle, useMemo, useRef, useState} from 'react'
+import {useImperativeHandle, useMemo, useRef} from 'react'
 import type {CSSProperties} from 'react'
 import {Info} from 'lucide-react'
 import {useProjection} from '../projection.js'
@@ -9,8 +9,10 @@ import {stageUtility, useUtilityPlayback} from './view/utility.js'
 import {StageFoot} from './view/stage-foot.js'
 import {HostViews} from './view/host-views.js'
 import {DetailCard} from './detail-card.js'
-import {ComparatorLine, featureOn, offeredModes, rendererLabel, spaceTogglesPlayback, zoomGroup} from './blocks.js'
-import type {ProjectionFeatures, ViewKind} from './blocks.js'
+import {ComparatorLine, featureOn, spaceTogglesPlayback} from './blocks.js'
+import type {ProjectionFeatures} from './blocks.js'
+import {useViewChoice} from '../view-choice.js'
+import {viewControls, viewLabel, viewNotices} from '../view-model.js'
 import {Alert, AlertDescription} from './components/alert.js'
 import {Button} from './components/button.js'
 import {ScopedRoot} from './components/scoped-root.js'
@@ -50,29 +52,11 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
   const afterLabel = props.afterLabel ?? 'After'
   const fill = props.fill !== false
   const root = useRef<HTMLDivElement>(null)
-  const views: ViewKind[] = [
-    ...(renderer ? ['renderer' as const] : []),
-    ...(on('table') ? ['table' as const] : []),
-    ...(on('text') ? ['text' as const] : []),
-  ]
-  if (!views.length) views.push('table')
-  const initial = props.initialView && views.includes(props.initialView) ? props.initialView : views[0]!
-  const [chosen, setView] = useState<ViewKind>(initial)
-  const [shownRenderer, setShownRenderer] = useState(renderer)
-  if (shownRenderer !== renderer) {
-    setShownRenderer(renderer)
-    if (renderer && !shownRenderer) setView('renderer')
-  }
-  const view = views.includes(chosen) ? chosen : views[0]!
-  const active = view === 'renderer' && renderer ? rendererLabel(p) : view === 'table' ? 'Built-in table view' : 'Built-in text view'
-  const modes = features?.modes === false ? [] : offeredModes(features)
-  const showModes = view === 'renderer' && Boolean(renderer) && modes.length > 0
-  // The table and text views present progress in every mode.
-  const showPlayback = on('playback') && comparing && (mode === 'animated' || view !== 'renderer')
-  const showZoom = on('zoom') && view === 'renderer' && p.controls.some(control => control.group === zoomGroup)
-  // The varied toggle is the summary bar's, unless the view has none.
-  const showVaried = comparing && ((p.variation?.within ?? 0) > 0 || (p.variation?.regenerated ?? 0) > 0) && !on('summary')
-  const notices = p.notices.slice(props.rendererNotice ? 1 : 0)
+  const {views, view, setView} = useViewChoice(p, features, props.initialView)
+  const active = viewLabel(p, view)
+  const controls = viewControls(p, {features, view, ...(props.playbackInViews ? {playbackInViews: props.playbackInViews} : {})})
+  const showPlayback = controls.playback
+  const notices = viewNotices(p, Boolean(props.rendererNotice))
   const workspace = useRef<HTMLDivElement>(null)
   const space = showPlayback ? spaceTogglesPlayback(p) : undefined
   // With a utility area, playback floats over the stage (or the table or text view) instead of taking a toolbar row.
@@ -115,11 +99,11 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
         views={views}
         onViewChange={setView}
         root={root}
-        modes={modes}
-        showModes={showModes}
+        modes={controls.modes}
+        showModes={controls.modeSwitch}
         showPlayback={toolbarPlayback}
-        showZoom={showZoom}
-        showVaried={showVaried}
+        showZoom={controls.zoom}
+        showVaried={controls.varied}
         beforeLabel={beforeLabel}
         afterLabel={afterLabel}
         space={space}

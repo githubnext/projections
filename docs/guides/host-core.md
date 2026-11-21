@@ -252,6 +252,47 @@ calling `close`, or clicking outside the card (inside `container` or outside
 `view`, while toolbar clicks and popovers keep it open) dismisses it and
 restores focus, leaving the item selected until a new selection reopens it.
 
+## The view model
+
+A host UI decides which views it offers and which controls show. The core makes
+those decisions once, so every UI (the default UI, the VS Code UI and yours)
+shares the same defaults, and a host changes them only through the options
+below.
+
+- `offeredViews(projection, features)`: the renderer's view when there is one,
+  then the table and text views the features keep; never empty.
+  `useViewChoice(projection, features, initialView)` is the stateful part:
+  `{views, view, setView, recoverView}`. It shows `initialView` when offered,
+  else the first view, and shows the renderer's view when a renderer arrives
+  where there was none. `recoverView` is the built-in view to offer when the
+  renderer fails. `viewLabel` names a view ("Built-in table view").
+- `viewControls(projection, {features, view, playbackInViews?})` says what
+  shows:
+  - `modes` and `modeSwitch`: the modes the features offer that the renderer
+    supports, in its order; the switch shows comparing, in the renderer's view,
+    with more than one;
+  - `scope`: comparing, with `changesOnly` on;
+  - `playback`: comparing, with `playback` on, **in the Animated mode only, in
+    every view**. `playbackInViews: 'always'` also shows it beside the table and
+    text views in the other modes, which present the transition's progress too;
+  - `zoom` and `zoomControls`: the renderer's `zoom` group, with both `zoom` and
+    `rendererControls` on, in the renderer's view; no controls to draw while the
+    renderer has failed;
+  - `varied`: the varied toggle belongs in the toolbar only when something
+    varied and there is no summary bar.
+- `scopeChoice(projection)`: what a scope switch offers. `options` are Changes
+  and All, and Noise while it is the scope, each with its `label` and a `title`
+  ending in its count; `nothingHidden` says to show the note "Changes · nothing
+  hidden" instead, with `noteTitle`.
+- `summaryToggle(applied, figure, status?)` is a summary figure's filter toggle
+  (`{pressed, next}`), `summaryToggleTitle` its tooltip, and `summaryFactTitle`
+  a fact's.
+- `ProjectionFeatures`, `featureOn`, `offeredModes` and `rendererLabel` are the
+  feature switches every UI takes.
+
+The default scope is Changes (`changesOnly`, which a definition's
+`presentation.changesOnly: false` turns off).
+
 ## Targets, annotations and anchors
 
 These primitives let you attach application data—like pull request comments—to

@@ -32,9 +32,11 @@ The toolbar is organized into three regions from start to end:
   `toolbarStart`).
 - **Center:** the comparison mode switch (showing `availableModes`, hidden when
   only one mode exists; Animated uses a clapperboard icon so no mode icon looks
-  like a play, pause, or step button), plus playback controls in animated mode
-  and alongside table/text views—**one round play button**, compact step
-  buttons, a flexible "Transition" slider, and a fixed-width percentage readout.
+  like a play, pause, or step button), plus playback controls in animated mode,
+  beside every view (`playbackInViews: 'always'` also shows them beside the
+  table and text views in the other modes)—**one round play button**, compact
+  step buttons, a flexible "Transition" slider, and a fixed-width percentage
+  readout.
 - **End:**
   1. When viewing Table or Text, a one-click return chip ("Table ×", labeled
      "Showing table; show the Graph renderer", or simply what is shown when no
@@ -144,7 +146,9 @@ so mouse wheels continue scrolling the page. Use `features` to disable
 individual blocks (`playback`, `modes`, `highlighting`, `changesOnly`, `search`,
 `rendererChoice`, `speed`, `rendererControls`, `zoom`, `table`, `text`, `info`,
 `fullscreen`, `title`, `annotations`, `summary`), and `actions` to inject custom
-toolbar items.
+toolbar items. Which views and controls show follows the core's view model
+(`viewControls`, in [the core guide](host-core.md#the-view-model)), the same in
+the VS Code UI.
 
 ### The summary bar
 

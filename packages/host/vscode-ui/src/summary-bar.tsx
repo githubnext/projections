@@ -3,13 +3,14 @@ import {useEffect, useReducer, useRef, useState} from 'react'
 import {
   figuresSentence,
   iconMaskStyle,
-  sameSummaryFilter,
   summaryCountText,
   summaryDeltas,
   summaryDeltaText,
   summaryDeltaWords,
   summaryFilterable,
-  summaryFilterOf,
+  summaryFactTitle,
+  summaryToggle,
+  summaryToggleTitle,
   useSummaryFit,
   scopeHiddenShort,
   scopeHiddenText,
@@ -33,12 +34,6 @@ const factIcon = (icon: string): CSSProperties => ({
   ...iconMaskStyle(icon),
 })
 
-/** A fact's tooltip: its description, then what activating it does when it filters. */
-const factTitle = (figure: SummaryFigure, pressed: boolean | undefined) =>
-  [figure.description, pressed === undefined ? undefined : pressed ? 'Show every item' : `Show only the ${figure.noun.plural}`]
-    .filter(Boolean)
-    .join('\n') || undefined
-
 /** Between two figures: a small muted dot, drawn by controls.css (`.phv-summary-separator`), not part of either. */
 const Separator = () => <span aria-hidden="true" className="phv-summary-separator" />
 
@@ -57,8 +52,7 @@ function Fact({
   first: boolean
   measure?: boolean
 }) {
-  const filter = summaryFilterOf(figure)
-  const pressed = sameSummaryFilter(p.summaryFilter, filter)
+  const {pressed, next} = summaryToggle(p.summaryFilter, figure)
   const content = (
     <>
       {figure.icon && <span aria-hidden="true" data-icon={figure.icon} style={factIcon(figure.icon)} />}
@@ -74,16 +68,16 @@ function Fact({
           className={'phv-summary-button phv-summary-fact'}
           aria-pressed={pressed}
           aria-description={figure.description}
-          title={factTitle(figure, pressed)}
+          title={summaryFactTitle(figure, pressed)}
           data-summary-total={figure.count}
           data-tone={figure.tone}
           tabIndex={measure ? -1 : undefined}
-          onClick={() => p.setSummaryFilter(pressed ? null : filter)}
+          onClick={() => p.setSummaryFilter(next)}
         >
           {content}
         </button>
       ) : (
-        <span className={'phv-summary-fact'} title={factTitle(figure, undefined)} data-summary-total={figure.count} data-tone={figure.tone}>
+        <span className={'phv-summary-fact'} title={summaryFactTitle(figure)} data-summary-total={figure.count} data-tone={figure.tone}>
           {content}
           {figure.description && <span className="phv-visually-hidden">, {figure.description}</span>}
         </span>
@@ -116,9 +110,8 @@ function Figure({
   measure?: boolean
 }) {
   if (figure.type === 'fact') return <Fact projection={p} figure={figure} first={first} {...(measure ? {measure} : {})} />
-  const filter = (status?: SummaryDelta) => summaryFilterOf(figure, status)
-  const pressed = (status?: SummaryDelta) => sameSummaryFilter(p.summaryFilter, filter(status))
-  const toggle = (status?: SummaryDelta) => p.setSummaryFilter(pressed(status) ? null : filter(status))
+  const pressed = (status?: SummaryDelta) => summaryToggle(p.summaryFilter, figure, status).pressed
+  const toggle = (status?: SummaryDelta) => p.setSummaryFilter(summaryToggle(p.summaryFilter, figure, status).next)
   const tab = measure ? -1 : undefined
   return (
     <li
@@ -132,7 +125,7 @@ function Figure({
         type="button"
         className="phv-summary-button"
         aria-pressed={pressed()}
-        title={pressed() ? 'Show every item' : `Show only the ${figure.noun.plural}`}
+        title={summaryToggleTitle(figure, pressed())}
         data-summary-total={figure.count}
         tabIndex={tab}
         onClick={() => toggle()}

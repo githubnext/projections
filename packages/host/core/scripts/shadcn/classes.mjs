@@ -10,7 +10,7 @@ export function prefixClasses(classes) {
 
 // Theme and component variables are renamed; Radix's own (`--radix-*`) and Tailwind functions (`--spacing(4)`) are not.
 function renameVariables(token) {
-  return token.replace(/--(?!pj-|radix-|tw-)([a-zA-Z][\w-]*)(?![\w-]*\()/gu, '--pj-$1')
+  return token.replace(/--(?!pj-|radix-|tw-)([a-zA-Z][\w-]*)(?![\w(-])/gu, '--pj-$1')
 }
 
 const isCall = (node, name) => ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === name

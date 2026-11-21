@@ -14,7 +14,11 @@ module.exports = async function agentTools({folder, api, invoke}) {
   assert.match(await invoke('projections_list_projections', {}), /- packages: Packages\. Extractor workspace-dependencies/u)
   const compared = await invoke('projections_compare', {projection: 'packages', before: 'main', after: 'HEAD'})
   assert.match(compared, /\d+ changes in \d+ steps?: /u)
-  const entity = /Added entity [^\n]*\[([^\]]*auth)\]$/mu.exec(compared)?.[1]
+  const entity = compared
+    .split('\n')
+    .filter(line => line.includes('Added entity '))
+    .map(line => /\[([^[\]]*auth)\]$/u.exec(line)?.[1])
+    .find(Boolean)
   assert.ok(entity, compared)
   // The editor action: the projection's tab, pinned to the pair, with the entity selected.
   const opened = await invoke('projections_open_projection', {projection: 'packages', before: 'main', after: 'HEAD', entity, pin: true})

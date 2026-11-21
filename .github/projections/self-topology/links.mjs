@@ -43,8 +43,8 @@ export function linkUnits({units, unitByPackage, unitByCrateIdent, unitFiles, li
       }
 
       for (const item of values) {
-        const match = /(^|[/@])([a-z0-9-]+\.wasm)$/u.exec(item.value)
-        const module = match && wasmModules.get(match[2])
+        const match = /(?:^|[/@])([a-z0-9-]+\.wasm)$/u.exec(item.value)
+        const module = match && wasmModules.get(match[1])
         if (!module || units.get(module).data.crate === unit.data.package) continue
         relate(entry.role === 'build' ? 'bundles' : 'loads', unit.id, module, `${item.value}`, evidence(item.line), 'derived')
       }

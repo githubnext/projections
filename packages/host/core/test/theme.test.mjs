@@ -11,7 +11,7 @@ async function themeTokens() {
     const start = css.indexOf(`${selector} {\n    --pj-background`)
     assert.ok(start >= 0, `theme.css defines ${selector}`)
     const body = css.slice(start, css.indexOf('\n  }', start))
-    return Object.fromEntries([...body.matchAll(/--pj-([\w-]+):\s*([^;]+);/gu)].map(([, name, value]) => [name, value.trim()]))
+    return Object.fromEntries([...body.matchAll(/--pj-([\w-]+):([^;]+);/gu)].map(([, name, value]) => [name, value.trim()]))
   }
   return {light: block('.pj-root'), dark: block('.pj-root.pj-dark')}
 }

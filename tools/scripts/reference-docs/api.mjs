@@ -85,8 +85,8 @@ function docText(text, language) {
         return fenced && /^\s*\x60\x60\x60\s*$/u.test(line) ? line.replace('```', `\`\`\`${language}`) : line
       }
       if (fenced) return line
-      const heading = /^#{1,6}\s+(.*)$/u.exec(line)
-      if (heading) return `**${heading[1]}**`
+      const heading = /^#{1,6}\s(.*)$/u.exec(line)
+      if (heading) return `**${heading[1].trimStart()}**`
       // Intra-doc links (rustdoc's [`Name`]) have no target on this page.
       return line.replace(/\[(\x60[^\x60\]]+\x60)\](?![([])/gu, '$1')
     })

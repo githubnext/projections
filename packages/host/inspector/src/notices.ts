@@ -119,6 +119,6 @@ export function failureMessage(message: string): string {
   const line = reported(message.replace(/^(?:[A-Za-z]:)?[\\/]\S*\s+exited with [^:]+: [^:]+(?::\s+|$)/u, ''))
   if (line !== undefined) return line
   // Nothing after the prefix: the process said nothing, so say which one by its name.
-  const program = /^(?:[A-Za-z]:)?[\\/]\S*?([^\\/\s]+)\s+(exited with [^:]+: [^:]+)(?::\s+|$)/u.exec(message)
+  const program = /^(?:[A-Za-z]:)?[\\/](?:\S*[\\/])?([^\\/\s]+)\s+(exited with [^:]+: [^:]+)(?::\s+|$)/u.exec(message)
   return program ? `${program[1]} ${program[2]}` : message.trim()
 }

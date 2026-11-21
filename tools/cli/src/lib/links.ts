@@ -59,7 +59,8 @@ export function links(markdown: string): Link[] {
   const text = blankCode(markdown)
   const lineAt = (offset: number) => text.slice(0, offset).split('\n').length
   const found: Link[] = []
-  const inline = /\]\(\s*(<[^>\n]*>|[^\s()<>]*(?:\([^\s()]*\)[^\s()<>]*)*)(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/gu
+  const inline =
+    /\]\(\s*(<[^>\n]*>|[^\s()<>]+(?:\([^\s()]*\)[^\s()<>]*)*|(?:\([^\s()]*\)[^\s()<>]*)+)(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/gu
   const definition = /^ {0,3}\[[^\]\n]+\]:[ \t]*(<[^>\n]*>|\S+)/gmu
   const html = /<(?:a|img|source|link)\b[^>]*?\s(?:href|src|srcset)=["']([^"']+)["']/giu
   for (const pattern of [inline, definition, html]) {

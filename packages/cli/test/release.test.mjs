@@ -40,7 +40,7 @@ const vsceTargets = {
 function setting(toml, key) {
   const section = toml.split(/^\[/mu).find(part => part.startsWith('dist]'))
   const joined = section.replace(
-    /\[\s*\n([^\]]*)\]/gu,
+    /\[[^\S\n]*\n([^\]]*)\]/gu,
     (_, items) =>
       `[${items
         .split('\n')

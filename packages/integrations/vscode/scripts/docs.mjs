@@ -80,7 +80,7 @@ export function rewriteLinks(text, file, bundled) {
         if (rewritten === undefined) return whole
         return image ? `[${label || posix.basename(href)}](${rewritten}${title})` : `${bang}[${label}](${rewritten}${title})`
       })
-      .replace(/^(\s*\[[^\]]+\]:\s*)(\S+)(.*)$/gmu, (whole, start, href, rest) => {
+      .replace(/^(\s*\[[^\]]+\]:\s*)(\S+)((?:\s.*)?)$/gmu, (whole, start, href, rest) => {
         const rewritten = target(href, false)
         return rewritten === undefined ? whole : `${start}${rewritten}${rest}`
       })
@@ -123,7 +123,7 @@ function withoutTags(text) {
 export function anchors(text) {
   const found = new Set()
   const seen = new Map()
-  for (const match of withoutCode(text).matchAll(/^#{1,6} +(.+?)[ \t]*(?:#+[ \t]*)?$/gmu)) {
+  for (const match of withoutCode(text).matchAll(/^#{1,6} .+$/gmu)) {
     const heading = text
       .slice(match.index, match.index + match[0].length)
       .replace(/^#{1,6} +/u, '')

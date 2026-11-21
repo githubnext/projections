@@ -103,7 +103,14 @@ export async function builtRenderers() {
 }
 
 const ignoreMarker = '<!-- prettier-ignore -->'
-const delimiterRow = /^\s*(?:\|\s*)?:?-+:?\s*(?:\|\s*:?-+:?\s*)*\|?\s*$/u
+/** A Markdown table's delimiter row: cells of dashes, optionally colon-aligned, between optional outer pipes. */
+const isDelimiterRow = line =>
+  line
+    .trim()
+    .replace(/^\|/u, '')
+    .replace(/\|$/u, '')
+    .split('|')
+    .every(cell => /^:?-+:?$/u.test(cell.trim()))
 const tableCells = line =>
   line
     .trim()
@@ -123,7 +130,7 @@ export function markWideTables(text) {
   for (let index = 0; index < lines.length;) {
     const line = lines[index]
     if (/^\s*(?:\x60\x60\x60|~~~)/u.test(line)) fenced = !fenced
-    if (fenced || !line.trimStart().startsWith('|') || !delimiterRow.test(lines[index + 1] ?? '')) {
+    if (fenced || !line.trimStart().startsWith('|') || !isDelimiterRow(lines[index + 1] ?? '')) {
       out.push(line)
       index++
       continue

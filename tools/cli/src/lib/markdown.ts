@@ -15,7 +15,7 @@ export function parseFrontMatter(text: string): FrontMatter {
   const data: Record<string, string> = {}
   let key: string | undefined
   for (const line of (match[1] ?? '').split('\n')) {
-    const pair = /^([A-Za-z][\w-]*):\s*(.*)$/u.exec(line)
+    const pair = /^([A-Za-z][\w-]*):(.*)$/u.exec(line)
     if (pair) {
       key = pair[1]!
       data[key] = unquote((pair[2] ?? '').trim())
@@ -85,9 +85,16 @@ export function firstParagraph(markdown: string): string | undefined {
   return plain(paragraph.join(' ')) || undefined
 }
 
+/** A heading's text after its `#`s and a space: without the spaces around it, or a closing run of `#`s. */
+function headingText(rest: string): string {
+  const text = rest.trim()
+  const open = text.replace(/#+$/u, '').trimEnd()
+  return open || text.slice(0, 1)
+}
+
 /** The first `# ` heading, as plain text. */
 export function title(markdown: string): string | undefined {
-  const match = /^# +(.+)$/mu.exec(parseFrontMatter(markdown).body)
+  const match = /^# +(\S.*)$/mu.exec(parseFrontMatter(markdown).body)
   return match ? plain(match[1]!) || undefined : undefined
 }
 
@@ -106,8 +113,8 @@ export function headings(markdown: string): Heading[] {
     .split('\n')
     .forEach((line, index) => {
       if (/^\s*(?:\x60\x60\x60|~~~)/u.test(line)) fenced = !fenced
-      const match = !fenced && /^(#{1,6}) +(.+?)\s*(?:#+\s*)?$/u.exec(line)
-      if (match) found.push({level: match[1]!.length, text: plain(match[2]!), line: index + 1})
+      const match = !fenced && /^(#{1,6}) (.+)$/u.exec(line)
+      if (match) found.push({level: match[1]!.length, text: plain(headingText(match[2]!)), line: index + 1})
     })
   return found
 }

@@ -49,8 +49,13 @@ export function pairChoiceId(pair: Pair): string {
 
 /** The pair a `pair:<before>..<after>` identity names. */
 export const pairOf = (id: string): Pair | undefined => {
-  const match = /^pair:(.*)\.\.(.+)$/u.exec(id)
-  return match ? {...(match[1] ? {before: match[1]} : {}), after: match[2]!} : undefined
+  if (!id.startsWith('pair:') || /[\n\r\u2028\u2029]/u.test(id)) return undefined
+  const names = id.slice('pair:'.length)
+  // The last `..` that leaves a nonempty after.
+  const at = names.length < 3 ? -1 : names.lastIndexOf('..', names.length - 3)
+  if (at < 0) return undefined
+  const before = names.slice(0, at)
+  return {...(before ? {before} : {}), after: names.slice(at + 2)}
 }
 
 /** Whether two choices are the same choice (a custom pair or a pull request also by its pair). */
@@ -67,7 +72,7 @@ export function isChoice(value: unknown): value is Choice {
     ['now', 'uncommitted', 'branch', 'last-commit', 'release', 'custom'].includes(choice.id) ||
     /^pr:\d+$/u.test(choice.id) ||
     /^bookmark:.+$/u.test(choice.id) ||
-    /^pair:.*\.\..+$/u.test(choice.id)
+    pairOf(choice.id) !== undefined
   const pair = choice.pair as Partial<Pair> | undefined
   const pairOk = pair === undefined || (typeof pair.after === 'string' && (pair.before === undefined || typeof pair.before === 'string'))
   return known && pairOk && (choice.id === 'custom' || choice.id.startsWith('pr:') ? Boolean(pair) : true)

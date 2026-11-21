@@ -2,6 +2,19 @@
 // test, node:test, the repository's check scripts, and a generic `path:line` fallback.
 import {posix} from './repo.ts'
 
+/** Text that YAML may have quoted in single quotes, without them. */
+const unquoted = (text: string) => text.replace(/^'/u, '').replace(/'$/u, '')
+
+/** An ESLint stylish error line, `  12:5  error  message  rule`: the message ends where the last run of 2+ spaces starts. */
+function stylishError(line: string): {line: number; message: string; rule: string} | undefined {
+  const row = /^\s+(\d+):\d+\s+error\s(.*)$/u.exec(line)
+  if (!row) return undefined
+  const rest = (row[2] ?? '').trimStart()
+  const tail = /\s{2,}([\w@/-]+)$/u.exec(rest)
+  if (!tail || tail.index === 0) return undefined
+  return {line: Number(row[1]), message: rest.slice(0, tail.index), rule: tail[1] ?? ''}
+}
+
 export interface Problem {
   file: string | undefined
   line: number | undefined
@@ -67,9 +80,9 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
       }
     }
     // clippy/rustc --message-format short: path:line:col: error: message
-    match = /^([\w./-]+\.rs):(\d+):\d+: (error|warning)(\[[^\]]+\])?: (.+)$/u.exec(line)
+    match = /^([\w./-]+\.rs):(\d+):\d+: (error|warning)(?:\[[^\]]+\])?: (.+)$/u.exec(line)
     if (match) {
-      push(problems, seen, {file: normalizePath(match[1]!, root), line: Number(match[2]), message: `${match[3]}: ${match[5]}`})
+      push(problems, seen, {file: normalizePath(match[1]!, root), line: Number(match[2]), message: `${match[3]}: ${match[4]}`})
       continue
     }
     // rustfmt --check: Diff in /abs/path.rs:12: (or "at line 12:")
@@ -99,8 +112,11 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
       const end = block.findIndex(next => /^\s*(?:not )?ok \d+ /u.test(next))
       const body = end >= 0 ? block.slice(0, end) : block
       const location = body.map(next => /location: '(.+?):(\d+):\d+'/u.exec(next)).find(Boolean)
-      const error = body.map(next => /^\s+error: [|>]?-?\s*'?(.*?)'?$/u.exec(next)).find(Boolean)
-      const errorText = error?.[1] || body.find((next, at) => at > 0 && /^\s+error:/u.test(body[at - 1] ?? ''))?.trim() || 'failed'
+      const error = body.map(next => /^\s+error: [|>]?-?(.*)$/u.exec(next)?.[1]).find(text => text !== undefined)
+      const errorText =
+        (error === undefined ? undefined : unquoted(error.trimStart())) ||
+        body.find((next, at) => at > 0 && /^\s+error:/u.test(body[at - 1] ?? ''))?.trim() ||
+        'failed'
       if (location && !/^\s*#/u.test(match[1]!)) {
         push(problems, seen, {
           file: normalizePath(location[1]!, root),
@@ -123,7 +139,7 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
           .find(next => next.trim() && !/^\s+at /u.test(next))
           ?.trim()
           .replace(/^\w*Error \[\w+\]: /u, '') ?? 'failed'
-      const frame = body.map(next => /^\s+at .*?\(?(?:file:\/\/)?(\/[^():]+):(\d+):\d+\)?$/u.exec(next)).find(Boolean)
+      const frame = body.map(next => (/^\s+at /u.test(next) ? /(?:file:\/\/)?(\/[^():]+):(\d+):\d+\)?$/u.exec(next) : null)).find(Boolean)
       push(problems, seen, {
         file: frame ? normalizePath(frame[1]!, root) : normalizePath(match[1]!, root, directory),
         line: Number(frame ? frame[2] : match[2]),
@@ -136,9 +152,9 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
       eslintFile = normalizePath(line, root, directory)
       continue
     }
-    match = /^\s+(\d+):\d+\s+error\s+(.+?)\s{2,}([\w@/-]+)$/u.exec(line)
-    if (match && eslintFile) {
-      push(problems, seen, {file: eslintFile, line: Number(match[1]), message: `${match[2]} (${match[3]})`})
+    const stylish = eslintFile && stylishError(line)
+    if (stylish) {
+      push(problems, seen, {file: eslintFile, line: stylish.line, message: `${stylish.message} (${stylish.rule})`})
       continue
     }
     // check-boundaries and similar: path:line: message, or path: message

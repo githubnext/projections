@@ -2,7 +2,7 @@
 // detail, and a pair → the choice it is; loaded from source with Node's type stripping.
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {isChoice, pairChoiceId, sameChoice} from '../src/choices/model.ts'
+import {isChoice, pairChoiceId, pairOf, sameChoice} from '../src/choices/model.ts'
 import {automaticChoice, effectiveChoice, identifyPair, isAhead, resolveChoice, unavailableReason} from '../src/choices/resolve.ts'
 import {branchDetail, choiceDetail, choiceIcon, choiceName, choiceText} from '../src/choices/names.ts'
 import {visibleChoices} from '../src/choices/listing.ts'
@@ -145,6 +145,15 @@ test('remembered choices are checked before use', () => {
   assert.equal(isChoice({id: 'pr:x', pair: {after: 'b'}}), false)
   assert.equal(isChoice({id: 'something-else'}), false)
   assert.equal(isChoice(null), false)
+})
+
+test('a pair identity splits at its last `..` that leaves an after', () => {
+  assert.deepEqual(pairOf('pair:main..HEAD'), {before: 'main', after: 'HEAD'})
+  assert.deepEqual(pairOf('pair:..HEAD'), {after: 'HEAD'})
+  assert.deepEqual(pairOf('pair:a..b..c'), {before: 'a..b', after: 'c'})
+  assert.deepEqual(pairOf('pair:a..b..'), {before: 'a', after: 'b..'})
+  for (const id of ['pair:a..', 'pair:..', 'pair:ab', 'pr:1']) assert.equal(pairOf(id), undefined, id)
+  assert.equal(isChoice({id: 'pair:a..'}), false)
 })
 
 test('a row on Now says whether it was extracted, not how much changed', () => {

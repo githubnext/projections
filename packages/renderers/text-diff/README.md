@@ -17,7 +17,7 @@ It handles the `text-diff` definition renderer name.
 |---|---|
 | `label` | Shown in the output's header, for example the command: in the monospace font for `formatted` output, in the text font (as a title) for `prose` |
 | `data.text` | The captured text (required string) |
-| `data.presentation` | `formatted` (default: monospace, never wraps, scrolls sideways) or `prose` (wraps) |
+| `data.presentation` | `formatted` (default: monospace) or `prose` (the text font, at a readable measure); both wrap long lines |
 
 Anything else (another kind, a non-string `text`, an unknown presentation, a
 relationship, another schema) is reported as an error. Outputs keep extraction
@@ -55,8 +55,8 @@ plain numbered lines, exactly as in the extraction alone.
   within their column and the two cells of a row share its height. An added or
   removed output fills one column and leaves the other blank.
 - **One column**: a unified diff with old and new line numbers; within each
-  change, removed lines come before added ones. Formatted text never wraps and
-  scrolls sideways inside its output.
+  change, removed lines come before added ones. Long lines wrap, as in two
+  columns, with their markers and line numbers at their first line.
 
 Removed lines are tinted and marked `−`, added lines tinted and marked `+`. When
 a removed line pairs with an added one, the words they don't share are tinted

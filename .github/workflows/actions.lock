@@ -15,6 +15,7 @@ workflows:
         - 'actions/setup-python@v7.0.0'
         - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         - 'actions/upload-artifact@v7.0.2'
+        - 'dollarlint/dollarlint@v0.1.28'
         - 'gradle/actions@v6.4.1'
         - 'hashicorp/setup-terraform@v4.0.1'
         - 'swatinem/rust-cache@v2.9.3'
@@ -129,6 +130,18 @@ dependencies:
         commit: 'sha1-a641126d1b8aa4d1fa005f4f92df94a3a4c4c906'
         owner_id: 6844498
         repo_id: 210798615
+    'dollarlint/dollarlint@v0.1.28':
+        ref: 'v0.1.28'
+        commit: 'sha1-75893c37cbef69863295ba35970da9f37405ac6f'
+        owner_id: 283041597
+        repo_id: 1231499217
+        uses:
+            - 'github/codeql-action@v4.39.3'
+    'github/codeql-action@v4.39.3':
+        ref: 'v4.39.3'
+        commit: 'sha1-33d7b85da1a04171e211befe2c739303b9a4c066'
+        owner_id: 9919
+        repo_id: 259445878
     'gradle/actions@v6.4.1':
         ref: 'v6.4.1'
         commit: 'sha1-8da46b539cd8fe6ab27ca75128919a18d757604c'

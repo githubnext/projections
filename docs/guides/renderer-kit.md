@@ -425,8 +425,8 @@ Spatial renderers use the whole frame either way:
   below the overlay while the stage's background reaches under it; CSS outside
   the kit reads it as
   `max(var(--projections-stage-inset, 12px), var(--projections-stage-inset-top, 0px))`.
-  The graph canvas keeps it above its fitted drawing (`padding`'s `top`, beside
-  `x` and `y`).
+  Fitted, the graph canvas keeps clear of a `stage-cover` only where it reaches
+  ([`useCoveredPadding`](../design/utility-area.md)), else of this band.
 - `useStageZoom(scroller, onAction, fit, {floor, start})` → `{zoom, scale}`:
   zoom for content fitted at `fit`, as a multiple of it (`zoomLimits`): 1 is
   fitted and the minimum, so zooming out always reaches "everything in view" and

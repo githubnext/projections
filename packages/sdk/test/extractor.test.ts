@@ -82,7 +82,7 @@ test('without a snapshot, or with an unreadable one, every value is generated', 
 
 test('an extraction fills in the protocol and sorts its items by ID, as the Engine does', () => {
   const document = extraction({
-    entities: {'team:b': {kind: 'team', label: 'B'}, 'team:a': {id: 'team:a', kind: 'team', label: 'A'}},
+    entities: {'team:b': {id: undefined, kind: 'team', label: 'B'}, 'team:a': {id: 'team:a', kind: 'team', label: 'A'}},
     relationships: new Map([['owns', {kind: 'owns', from: 'team:a', to: 'team:b'}]]),
     metadata: {authority: 'declared'},
     volatile: undefined,
@@ -110,8 +110,8 @@ test('an extraction fills in the protocol and sorts its items by ID, as the Engi
 test('an extraction explains what is wrong with its items', () => {
   const entity = {id: 'a', kind: 'k', label: 'A'}
   const cases: [() => unknown, RegExp][] = [
-    [() => extraction({entities: 'a' as never}), /list of objects/],
-    [() => extraction({entities: [['a']] as never}), /entities\[0\] is not an object/],
+    [() => extraction({entities: 'a' as never}), /array of objects/],
+    [() => extraction({entities: [['a']] as never}), /entities\[0\] is an array, not an object/],
     [() => extraction({entities: [{kind: 'k'}] as never}), /entities\[0\] has no id/],
     [() => extraction({entities: {a: {id: 'b', kind: 'k', label: 'A'}}}), /has the id "b"/],
     [() => extraction({entities: [{id: 'a', kind: 'k'}] as never}), /entity "a" needs label/],

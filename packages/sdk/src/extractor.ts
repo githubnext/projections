@@ -1,13 +1,19 @@
-// Helpers for extractors. `result()` writes the extraction to stdout (`extraction()` builds it), with the protocol's
-// fields filled in, and `readRequest()` reads the request, so an extractor handles none of the protocol's JSON. For
+// Helpers for extractors, so an extractor handles none of the protocol's JSON: `request` is the request on stdin
+// (`readRequest()` reads it), with accessors such as `request.root` and `request.inputs`, and `result()` writes the
+// extraction to stdout (`extraction()` builds it), with the protocol's fields filled in and its items sorted. For
 // extractors that write generated values (see docs/design/generated-values.md), `basis()` records what a value was
 // generated from, `basisDigest()` names it, and `generations()` reuses a value the runner's generation store already
 // holds for the same declared path and basis, so equal inputs give byte-identical text. Node only.
+//
+// The runner gives a custom extractor run with `node` this module under `@githubnext/projections/extractor`, so it
+// needs nothing installed (packages/cli/node); installing the package adds its types.
 import {createHash} from 'node:crypto'
 import {readFile} from 'node:fs/promises'
 
 export {DEFAULT_SCHEMA, PROTOCOL_VERSION, extraction, result} from './extractor/result.ts'
 export type {ExtractionFields, Items} from './extractor/result.ts'
+export {Request, readRequest, request} from './extractor/request.ts'
+export type {ExtractorRequest} from '@githubnext/projections-schemas'
 
 /** A generated value's basis: named parts, each a nonempty string of at most 256 UTF-8 bytes. */
 export type Basis = Readonly<Record<string, string>>
@@ -77,19 +83,6 @@ export function basisDigest(basis: Basis): string {
   return sha256(canonicalJson(basis))
 }
 
-/** The extractor request, as far as these helpers read it. */
-export interface ExtractorRequest {
-  readonly generations?: {readonly file: string} | undefined
-  readonly [key: string]: unknown
-}
-
-/** Reads the extractor request from stdin. */
-export async function readRequest<Request extends ExtractorRequest = ExtractorRequest>(): Promise<Request> {
-  const chunks: Buffer[] = []
-  for await (const chunk of process.stdin) chunks.push(chunk as Buffer)
-  return JSON.parse(Buffer.concat(chunks).toString('utf8')) as Request
-}
-
 /** Earlier generated values, by declared path and basis. */
 export interface Generations {
   /** How many values the snapshot holds. */
@@ -107,7 +100,7 @@ const key = (path: string, digest: string) => `${path}\u0000${digest}`
  * value}`), or an empty one: the first run, `--regenerate`, or a runner that keeps no store. Never fails a run over
  * the store: an unreadable snapshot is empty.
  */
-export async function generations(request: ExtractorRequest): Promise<Generations> {
+export async function generations(request: {readonly generations?: {readonly file: string} | undefined}): Promise<Generations> {
   const values = new Map<string, Json>()
   const file = request.generations?.file
   if (file) {

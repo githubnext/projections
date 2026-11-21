@@ -67,8 +67,9 @@
   flex: none;
   margin: auto;
   box-sizing: content-box;
-  /* `graphPadding` (framing.ts), or across the host's stage inset and above it its top inset (`useGraphPadding`). */
-  padding: var(--projections-stage-inset-top, 16px) var(--projections-stage-inset, 16px) 16px;
+  /* `graphPadding` (framing.ts), or across the host's stage inset and above it its top inset, or as much as clears the
+     host's cover (`--pk-fit-top`, set on the scroller from `useCoveredPadding`). */
+  padding: var(--pk-fit-top, var(--projections-stage-inset-top, 16px)) var(--projections-stage-inset, 16px) 16px;
 }
 /* Cards are controls: clicking one (twice, too) activates it rather than selecting its text. */
 .graph-node {

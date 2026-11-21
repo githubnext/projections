@@ -126,6 +126,7 @@ export function PresentedView({
   controllers,
   running,
   toolbarStart,
+  utilityArea,
 }: {
   View: ComponentType<ComponentProps<typeof ProjectionView> & {running?: InspectorRunning | null}>
   subject: ViewSubject
@@ -149,6 +150,8 @@ export function PresentedView({
   running?: InspectorRunning | null
   /** What a one-revision view shows, at its toolbar's start (`InspectorAppProps.toolbarStart`); a comparison has its modes there. */
   toolbarStart?: ReactNode
+  /** The stage's utility area (`ProjectionViewProps.utilityArea`). */
+  utilityArea?: boolean
 }) {
   return (
     <div
@@ -186,6 +189,7 @@ export function PresentedView({
         controllerRef={controllers.set}
         {...(running !== undefined ? {running} : {})}
         {...(toolbarStart && subject.mode !== 'comparison' ? {toolbarStart} : {})}
+        {...(utilityArea ? {utilityArea} : {})}
       />
     </div>
   )

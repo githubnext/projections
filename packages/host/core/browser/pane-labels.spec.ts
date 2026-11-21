@@ -82,10 +82,10 @@ test('animated shows no transition caption: the footer strip takes no room witho
   await expect(frame.locator('.graph-footer')).toHaveCount(0)
 })
 
-/** How far a chip sits from its frame's side without a bleeding stage (`chipInset`, stage/body.tsx), CSS px. */
-const chipInset = 8
+/** How far a chip sits from its frame's side without a bleeding stage (`chipInset`, stage/body.tsx): the kit's stage padding. */
+const chipInset = 12
 /** The space a chip takes at its frame's top, which the stage sends as `stage-inset-top` (`paneChipClearance`). */
-const chipClearance = 30
+const chipClearance = 52
 
 for (const mode of ['side-by-side', 'swipe'] as const)
   for (const fill of [false, true])
@@ -111,27 +111,99 @@ for (const mode of ['side-by-side', 'swipe'] as const)
           box = (await chip.boundingBox())!
         expect(Math.abs(frame.y - pane.y), `${side}: the frame starts at its pane's top`).toBeLessThanOrEqual(1)
         expect(box.y, `${side}: the chip is over the frame`).toBeGreaterThan(frame.y)
+        expect([box.x % 1, box.y % 1], `${side}: the chip is on whole pixels`).toEqual([0, 0])
         expect(box.y + box.height).toBeLessThan(frame.y + chipClearance)
-        // Swipe's after chip is at the top right, every other chip at its pane's top left.
-        if (mode === 'swipe' && side === 'after')
-          expect(Math.abs(frame.x + frame.width - chipInset - (box.x + box.width))).toBeLessThanOrEqual(1)
+        // The after chip is at its pane's top right (in swipe, and side by side in columns), every other chip at the left.
+        const stacked = (await page.locator('.ph-panes[data-stacked]').count()) > 0
+        if (side === 'after' && !stacked) expect(Math.abs(frame.x + frame.width - chipInset - (box.x + box.width))).toBeLessThanOrEqual(1)
         else expect(Math.abs(box.x - (frame.x + chipInset))).toBeLessThanOrEqual(1)
-        // Quiet: normal weight, muted, and it never takes the pointer from the renderer under it.
+        // Its own text is normal weight, and it takes the pointer, so hovering it shows its whole label.
         const style = await chip.evaluate(element => {
           const computed = getComputedStyle(element)
           return {weight: computed.fontWeight, pointer: computed.pointerEvents}
         })
-        expect(style).toMatchObject({weight: '400', pointer: 'none'})
+        expect(style).toMatchObject({weight: '400', pointer: 'auto'})
         // The renderer is told how much of its top the chip takes, and starts its content below it.
         const inset = await iframe
           .contentFrame()
           .locator('html')
           .evaluate(html => getComputedStyle(html).getPropertyValue('--projections-stage-inset-top').trim())
         expect(inset).toBe(`${chipClearance}px`)
+        // And exactly what covers it, in its own coordinates: its own chip, and in swipe the other side's too.
+        const cover = await iframe
+          .contentFrame()
+          .locator('html')
+          .evaluate(html => getComputedStyle(html).getPropertyValue('--projections-stage-cover').trim())
+        const rects = cover.split(',').map(rect => rect.trim().split(' ').map(Number))
+        expect(rects, cover).toHaveLength(mode === 'swipe' ? 2 : 1)
+        expect(rects).toContainEqual([
+          Math.round(box.x - frame.x),
+          Math.round(box.y - frame.y),
+          Math.round(box.width),
+          Math.round(box.height),
+        ])
         const chipBox = {left: box.x, top: box.y, right: box.x + box.width, bottom: box.y + box.height}
         for (const node of await nodeBoxes(page, iframe)) expect(intersects(chipBox, node), JSON.stringify({chipBox, node})).toBe(false)
       }
     })
+
+for (const fill of [false, true])
+  test(`animated${fill ? ', filling,' : ''} with a utility area: the bar floats inset over the stage's top, and the frame keeps clear of it`, async ({
+    page,
+  }) => {
+    await page.goto(story('harness-default-ui--core-only', `mode=animated&utility${fill ? '&fill' : ''}`))
+    await expect(page.getByLabel('Custom status')).toHaveText('ready')
+    const iframe = page.locator('iframe.ph-frame')
+    await expect(iframe).toHaveCount(1)
+    await expect(iframe.contentFrame().locator('.node-surface').first()).toBeVisible()
+    const bar = page.locator('.ph-utility')
+    const frame = (await iframe.boundingBox())!,
+      box = (await bar.boundingBox())!
+    // Inset 12px from the stage's top, centred on whole pixels, as wide as its content and its 1px edge.
+    expect(Math.round(box.y - frame.y)).toBe(12)
+    expect(box.width).toBe(322)
+    expect(Math.abs(box.x + box.width / 2 - (frame.x + frame.width / 2))).toBeLessThanOrEqual(1)
+    expect(box.x % 1, 'whole pixels').toBe(0)
+    const tokens = await iframe
+      .contentFrame()
+      .locator('html')
+      .evaluate(html => {
+        const style = getComputedStyle(html)
+        return {
+          cover: style.getPropertyValue('--projections-stage-cover').trim(),
+          top: style.getPropertyValue('--projections-stage-inset-top').trim(),
+        }
+      })
+    expect(tokens).toEqual({cover: `${Math.round(box.x - frame.x)} 12 322 42`, top: '66px'})
+    const barBox = {left: box.x, top: box.y, right: box.x + box.width, bottom: box.y + box.height}
+    for (const node of await nodeBoxes(page, iframe)) expect(intersects(barBox, node), JSON.stringify({barBox, node})).toBe(false)
+  })
+
+test('in a stage laid out in its page, the bar sticks while the page scrolls, on whole pixels, and stops at the stage end', async ({
+  page,
+}) => {
+  await page.setViewportSize({width: 1000, height: 360})
+  await page.goto(story('harness-default-ui--core-only', 'mode=animated&utility'))
+  await expect(page.getByLabel('Custom status')).toHaveText('ready')
+  const bar = page.locator('.ph-utility')
+  const stage = page.locator('.ph-stage-body')
+  await expect(page.locator('iframe.ph-frame').contentFrame().locator('.node-surface').first()).toBeVisible()
+  const rest = (await bar.boundingBox())!
+  const body = (await stage.boundingBox())!
+  // Scrolled partway down the stage, the bar is stuck 12px below the viewport's top (no host toolbar), on whole pixels.
+  await page.evaluate(top => scrollTo(0, top), Math.round(body.y + 80) + 0.5)
+  await expect.poll(async () => (await bar.boundingBox())!.y).toBe(12)
+  const stuck = (await bar.boundingBox())!
+  expect(stuck.x % 1, 'whole pixels across').toBe(0)
+  expect(stuck.x).toBe(rest.x)
+  // Past the stage's end it scrolls away with the stage, never overhanging it (room below lets the page scroll there).
+  await page.evaluate(() => document.body.append(Object.assign(document.createElement('div'), {style: 'height: 1000px'})))
+  await page.evaluate(top => scrollTo(0, top), Math.round(body.y + body.height - 20))
+  expect(await page.evaluate(() => scrollY)).toBe(Math.round(body.y + body.height - 20))
+  const end = (await bar.boundingBox())!
+  const after = (await stage.boundingBox())!
+  expect(end.y + end.height).toBeLessThanOrEqual(after.y + after.height + 0.5)
+})
 
 test('without chips the frames get no top inset', async ({page}) => {
   await page.goto(story('harness-default-ui--core-only'))

@@ -189,7 +189,10 @@ export const submenuItem = (menu: Locator, name: string) =>
 export async function openSettingsSubmenu(scope: Scope, name: string): Promise<Locator> {
   const menu = openMenu(scope, name)
   if (await menu.isVisible()) return menu
-  await submenuItem(await openSettings(scope), name).click()
+  // By keyboard: where a submenu opens to the left, the menu reads the pointer's jump into it as moving away from it (its
+  // first move in the menu always reads as rightward), so the submenu closes as the pointer leaves its item, and a click
+  // on one of its items lands only while it fades out; on a slow runner it falls through to whatever is behind.
+  await submenuItem(await openSettings(scope), name).press('ArrowRight')
   await menu.waitFor()
   return menu
 }
@@ -202,10 +205,10 @@ export const menuItem = (menu: Locator, name: string) => {
     .or(menu.getByRole('menuitemcheckbox', {name: label}))
     .or(menu.getByRole('menuitem', {name: label}))
 }
-/** Chooses an item in Settings, or in one of its submenus (`submenu`); choosing closes the menu. */
+/** Chooses an item in Settings, or in one of its submenus (`submenu`), by keyboard (see `openSettingsSubmenu`); choosing closes the menu. */
 export async function chooseSetting(scope: Scope, name: string, submenu?: string) {
   const menu = submenu ? await openSettingsSubmenu(scope, submenu) : await openSettings(scope)
-  await menuItem(menu, name).click()
+  await menuItem(menu, name).press('Enter')
   await closeMenus(scope)
 }
 /** Shows every item: the All scope, from Settings' "Show" (the toolbar's scope switch leaves narrow rows). */

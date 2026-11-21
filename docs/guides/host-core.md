@@ -174,6 +174,15 @@ is the headless pair picker. It returns:
   `presentation` defaults;
 - actions: `setBefore`, `setAfter`, `swap` and `retry`.
 
+**Revision labels.** An `ExtractionChoice`'s `label` names its revision in one
+line, `main · "Add auth" · 2 days ago`: the name (an identifier, which pane
+chips set in the monospace face), a detail (the commit's subject in quotes, or
+the short commit beside a named ref) and its age. `formatRevisionLabel(parts)`
+writes one, `parseRevisionLabel(label)` reads it back
+(`{name, detail?, subject?, when?}`; any text is all `name`),
+`revisionLabelName` is the name a compact picker shows, and `revisionAge(date)`
+is the age (`5 minutes ago`).
+
 `useComparisonSession(options)` keeps what the person chooses while they move
 between pairs: the mode, the swipe divider, highlighting, the scope, find, the
 connector and loop. A pair picker's view remounts for each new comparison, so

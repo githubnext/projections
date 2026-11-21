@@ -30,40 +30,40 @@ const Selector = Type.Union(
 
 const Strict = {additionalProperties: false}
 
-/** When a job, matrix value, browser suite or condition applies. */
+/**
+ * When a job, matrix entry, browser suite or condition runs, for a pull request that follows its change. A full run
+ * runs everything, whatever `when` says.
+ */
 export const When = Type.Cyclic(
   {
     When: Type.Union([
-      Type.Literal('always', {description: 'Every run, whatever changed: for jobs that check the whole repository cheaply'}),
-      Type.Literal('full', {description: 'The run is a full one: an event, a label or a file rule asked for everything'}),
-      Type.Literal('docsOnly', {description: 'Every changed file is documentation, and no generator reads or writes one'}),
-      Type.Literal('reachesSuite', {
-        description: 'Browser suites only: the change reaches the suite, or a workspace its test:browser script builds',
-      }),
+      Type.Literal('always', {description: 'Every pull request, whatever changed: for jobs that check the whole repository cheaply'}),
+      Type.Literal('never', {description: 'Only in full runs'}),
+      Type.Literal('docsOnly', {description: 'Every changed file is documentation'}),
       Type.Object({if: Name}, {...Strict, description: 'A named condition holds'}),
       Type.Object(
         {changes: Type.Union([Globs, Type.Object({facts: Type.Literal('mutants')}, Strict)])},
-        {...Strict, description: `A changed file matches; {"facts": "mutants"}: ${Facts.mutants}`},
-      ),
-      Type.Object({tag: Name}, {...Strict, description: 'A changed file has the tag'}),
-      Type.Object(
-        {generator: Type.String({minLength: 1})},
-        {...Strict, description: 'A changed file is an input or output of the generator'},
+        {
+          ...Strict,
+          description: `A changed file's path matches, whatever its class; {"facts": "mutants"}: ${Facts.mutants}`,
+        },
       ),
       Type.Object(
-        {changed: Name},
-        {...Strict, description: 'A workspace or crate in the group contains, builds in or reads a changed file (its tests included)'},
+        {touches: Name},
+        {
+          ...Strict,
+          description: 'A workspace or crate in the group is touched: it contains, builds in or reads (tests included) a changed file',
+        },
       ),
       Type.Object(
-        {reaches: Name, from: Type.Optional(Name)},
+        {reaches: Name},
         {
           ...Strict,
           description:
-            "A workspace or crate in the group contains or builds in a changed file, or depends on one that does (tests that read a file don't count); with `from`, counting only changes to that group",
+            'A workspace or crate in the group is reached: touched, or depending on one that contains or builds in a changed file (a crate whose tests alone read a file is touched, but its dependants are not reached through it)',
         },
       ),
       Type.Object({any: Type.Array(Type.Ref('When'), {minItems: 1})}, {...Strict, description: 'Any of these holds'}),
-      Type.Object({all: Type.Array(Type.Ref('When'), {minItems: 1})}, {...Strict, description: 'All of these hold'}),
       Type.Object({not: Type.Ref('When')}, {...Strict, description: 'This does not hold'}),
     ]),
   },
@@ -73,39 +73,19 @@ export const When = Type.Cyclic(
 const FileRule = Type.Object(
   {
     description: Description,
-    paths: Type.Optional(Globs),
+    paths: Globs,
     except: Type.Optional(Globs),
-    owned: Type.Optional(Type.Boolean({description: 'Whether the file is (true) or isn’t (false) inside a workspace or crate'})),
-    read: Type.Optional(
-      Type.Boolean({
-        description: 'Whether a crate reads the file by path or a generator reads or writes it (true), or nothing does (false)',
-      }),
-    ),
-    effect: Type.Union(
-      [
-        Type.Literal('full'),
-        Type.Literal('docs'),
-        Type.Literal('checks'),
-        Type.Literal('owner'),
-        Type.Literal('readers'),
-        Type.Literal('lockfile'),
-      ],
+    class: Type.Union(
+      [Type.Literal('lockfile'), Type.Literal('full'), Type.Literal('docs'), Type.Literal('checks'), Type.Literal('code')],
       {
         description: [
+          'lockfile (package-lock.json, Cargo.lock): code for the workspaces and crates whose resolved dependencies changed; full when the root package’s own dependencies changed, or there is no earlier version to compare.',
           'full: run everything.',
-          'docs: documentation only.',
-          "checks: the Linux checks only, which run every crate's tests and generator's check, without counting it a change to what reads it.",
-          'owner: a change to the workspace or crate containing the file.',
-          'readers: a change only to what reads it (the crates and generators found for every file); with none, the Linux checks still run.',
-          'lockfile (package-lock.json, Cargo.lock): a change to the workspaces and crates whose resolved dependencies changed; with no earlier version to compare, everything runs.',
+          'docs: documentation; checks instead when a crate or generator reads it.',
+          "checks: the Linux checks alone, which run every crate's tests and generator's check.",
+          'code: touches the workspace or crate containing the file and those reading it by path; with none, the Linux checks alone.',
         ].join(' '),
       },
-    ),
-    root: Type.Optional(
-      Type.Union([Type.Literal('full'), Type.Literal('readers')], {
-        description:
-          "For a lockfile rule, when the root package's own dependencies (the repository's tooling) changed: run everything (full), or count only the workspaces and crates the change reaches (readers)",
-      }),
     ),
   },
   Strict,
@@ -133,11 +113,34 @@ const Suite = Type.Object(
       ),
     ),
   },
-  Strict,
+  {
+    ...Strict,
+    description:
+      'A browser suite runs when the change reaches it or a workspace its test:browser script builds, or when its own `when` holds',
+  },
 )
 
 const Job = Type.Union([
-  Type.Object({description: Description, when: When}, Strict),
+  Type.Object(
+    {
+      description: Description,
+      when: When,
+      shards: Type.Optional(
+        Type.Integer({
+          minimum: 2,
+          description:
+            'The workflow runs the job as this many checks, `<job> (0)` to `<job> (N-1)`, its matrix `shard` (the planner lists each; a test keeps it the workflow’s)',
+        }),
+      ),
+      events: Type.Optional(
+        Type.Array(Type.String({minLength: 1}), {
+          minItems: 1,
+          description: 'The GitHub Actions events the job runs for, full runs included; without it, every event',
+        }),
+      ),
+    },
+    Strict,
+  ),
   Type.Object(
     {
       description: Description,
@@ -170,9 +173,10 @@ export const CiRules = Type.Object(
       },
       Strict,
     ),
-    files: Type.Array(FileRule, {minItems: 1, description: 'How each changed file counts: the first rule that matches it decides'}),
-    tags: Type.Record(Name, Type.Object({description: Description, paths: Globs}, Strict), {
-      description: 'Tags every changed file matching the paths gets, whichever file rule decided it',
+    files: Type.Array(FileRule, {
+      minItems: 1,
+      description:
+        'Each changed file’s class: the first rule whose paths match it, or, when none does, code if a workspace or crate contains it or anything reads it, and full otherwise',
     }),
     groups: Type.Record(
       Name,
@@ -183,13 +187,12 @@ export const CiRules = Type.Object(
       {description: 'Named sets of workspaces and crates'},
     ),
     conditions: Type.Record(Name, Type.Object({description: Description, when: When}, Strict), {
-      description: 'Named conditions, which `{"if": name}` refers to; the `changes` job also outputs each',
+      description: 'Named conditions, which `{"if": name}` refers to',
     }),
     jobs: Type.Record(Name, Job, {description: 'The jobs of .github/workflows/ci.yml the plan gates, by job ID'}),
     browser: Type.Object(
       {
         description: Description,
-        default: Type.Object({description: Description, when: When}, {...Strict, description: 'When a suite without its own `when` runs'}),
         suites: Type.Record(Type.String({minLength: 1}), Suite, {
           description: 'Browser suites by workspace directory; those without `shards` run together in `browser (rest)`',
         }),

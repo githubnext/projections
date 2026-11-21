@@ -157,6 +157,30 @@
                   "type": "string",
                   "minLength": 1
                 }
+              },
+              "classes": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "const": "full"
+                    },
+                    {
+                      "type": "string",
+                      "const": "docs"
+                    },
+                    {
+                      "type": "string",
+                      "const": "checks"
+                    },
+                    {
+                      "type": "string",
+                      "const": "code"
+                    }
+                  ]
+                },
+                "description": "Each changed file's class, in order"
               }
             },
             "additionalProperties": false

@@ -91,7 +91,7 @@ export function placeUnlinked(
   for (const [index, id] of [...hinted, ...rest].entries()) {
     const card = sizes.get(id)!
     const best = grid
-      ? gridPlace(input, axes, slots, placed, rest, index, grid, card)
+      ? gridPlace(axes, slots, placed, rest, index, grid, columns)
       : bestPlace(input, axes, slots, blocks, extent, card, target(id), columns)
     const box = {...card, [flow]: best.flow, [across]: best.across} as Box
     placed.set(id, box)
@@ -154,20 +154,23 @@ function bestPlace(
   return best!
 }
 
-/** A card's place in the grid of a layout with nothing else: its layer, and after the card before it in its layer. */
+/**
+ * A card's place in the grid of a layout with nothing else: its layer, and after the card before it in its layer, on
+ * the next of the layout's column lines (`grid`, a pitch apart) when it has them.
+ */
 function gridPlace(
-  input: ElkInput,
   {across, breadth}: Axes,
   slots: readonly Span[],
   placed: ReadonlyMap<string, Box>,
   ids: readonly string[],
   index: number,
-  columns: number,
-  card: {width: number; height: number},
+  layers: number,
+  grid?: Grid,
 ): Place {
-  const layer = index % columns
-  const previous = index >= columns ? placed.get(ids[index - columns]!) : undefined
-  return {flow: slots[layer]!.start, across: previous ? previous[across] + previous[breadth] + nodeSpacing : rootPadding, cost: []}
+  const layer = index % layers
+  const previous = index >= layers ? placed.get(ids[index - layers]!) : undefined
+  const after = previous ? previous[across] + previous[breadth] + nodeSpacing : rootPadding
+  return {flow: slots[layer]!.start, across: grid ? columnLine(grid, after, true) : after, cost: []}
 }
 
 /** Gives the places `ids` took to them again in ID order, read along the flow then across, among cards of one size. */

@@ -68,8 +68,15 @@ ends.
    opts out with `presentation.changesOnly: false`, the field keeping its name
    and now meaning Changes rather than All.
 6. Scope filters nest: the summary bar's figures and find narrow within the
-   scope ("+1 workspaces" in Changes is that change and its context), and
-   renderer controls apply on top. They used to exclude each other.
+   scope, and renderer controls apply on top. They used to exclude each other.
+   The scope decides what is laid out; figures and find never remove or move
+   anything. They recede what they leave out to `--pk-recede` (0.25), in Changes
+   as in All, so pressing "9 registrations" in Changes dims the services and
+   implementations shown as context and keeps the Changes layout. The filter
+   message carries the two apart: `scope`, what the Changes scope lays out, and
+   `ids`, what the figure and find match (`null` when neither is on, so the
+   scope alone recedes nothing). An item holding one they match, such as a card
+   with a matching line, stays at full strength.
 7. The toolbar shows the scope beside the mode, its counts in the tooltip only,
    since in the switch they distracted. Noise stays reachable from Settings
    ("Show") and the summary bar's variation figures, and joins the switch while

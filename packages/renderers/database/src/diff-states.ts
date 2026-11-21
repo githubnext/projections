@@ -5,7 +5,7 @@ import type {ComparisonModel} from '@githubnext/projections-renderer-kit'
 import {buildModel} from './schema-model.js'
 import {enumValues, isEnum} from './vocabulary.js'
 import type {SchemaModel, SchemaState} from './schema.js'
-import {columnChanges, keyChanges, both} from './change-lines.js'
+import {columnChanges, keyChanges, markerChanges, both} from './change-lines.js'
 import type {ChangeLine} from './change-lines.js'
 
 /** An enum's values in both revisions: After's order, each removed value after the value it followed in Before. */
@@ -104,6 +104,14 @@ export function analyse(model: ComparisonModel): Analysis {
       const found = kind === 'key' ? keyChanges(row) : columnChanges(row)
       if (found.length) lines.set(id, found)
     }
-  for (const [column, marker] of union.markers) if (marker.key && owner.has(column)) owner.set(marker.key, owner.get(column)!)
+  for (const [column, marker] of union.markers) {
+    if (!marker.key || !owner.has(column)) continue
+    owner.set(marker.key, owner.get(column)!)
+    // The key the marker stands for has no row of its own: its changes are said under its column, named for that key
+    // (its PK or FK label; the marker's title names every role the column has).
+    const key = rows.get(marker.key)
+    const found = key && both(key) ? markerChanges(key, marker.label === 'PK' ? 'Primary key' : 'Foreign key') : []
+    if (found.length) lines.set(column, [...(lines.get(column) ?? []), ...found])
+  }
   return {rows, before, after, union, state: states.union, owner, lines}
 }

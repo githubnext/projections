@@ -36,11 +36,13 @@ export function useFitScale(
   // The latest measurement, and the paint acknowledgement held until it is drawn.
   const latest = useRef<Measured>(undefined)
   const held = useRef<() => void>(undefined)
+  const remeasure = useRef<() => void>(undefined)
   // The stage mounts with the content, so measuring starts once there is content.
   const hasContent = size !== undefined
   useLayoutEffect(() => {
     const element = stage.current
     if (!element) return
+    let observedFill: Element | undefined
     const measure = () => {
       const width = element.clientWidth,
         height = element.clientHeight
@@ -48,6 +50,7 @@ export function useFitScale(
       // its frame (`useFrameFill`); before that the stage is only as tall as its content, which hasn't been drawn at
       // a measured scale yet, and a height reported from it would be far too tall.
       const fill = element.closest<HTMLElement>('[data-fill]')
+      if (fill && fill !== observedFill) observer.observe((observedFill = fill))
       const chrome = fill ? chromeAround(element, fill) : undefined
       const previous = latest.current
       if (previous && previous.width === width && previous.height === height && previous.chrome === chrome) return
@@ -56,14 +59,24 @@ export function useFitScale(
       latest.current = {width, height, chrome}
       setMeasured(latest.current)
     }
-    measure()
     const observer = new ResizeObserver(measure)
     observer.observe(element)
     observer.observe(element.ownerDocument.documentElement)
-    const fill = element.closest('[data-fill]')
-    if (fill) observer.observe(fill)
-    return () => observer.disconnect()
+    measure()
+    remeasure.current = measure
+    return () => {
+      observer.disconnect()
+      remeasure.current = undefined
+    }
   }, [stage, hasContent, hold])
+  // The renderer starts filling its frame (`useFrameFill`, below) in the commit after the first measurement: measured
+  // again as that commits, before paint, the height is reported before the paint is acknowledged. Left to the resize
+  // observer, it waits for the frame's next rendering opportunity, which on a loaded machine can come after the
+  // acknowledgement has gone out on its timer (see `afterPaint`): a host would measure the frame before the renderer
+  // had asked for any height.
+  useLayoutEffect(() => {
+    if (latest.current && latest.current.chrome === undefined) remeasure.current?.()
+  })
   useLayoutEffect(() => {
     if (measured !== latest.current || !held.current) return
     held.current()

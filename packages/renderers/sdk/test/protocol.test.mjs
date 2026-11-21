@@ -155,6 +155,15 @@ test('parseRendererMessage validates hover, anchor and viewport strictly', () =>
     assert.equal(parseRendererMessage(envelope(message), channel), undefined, JSON.stringify(message).slice(0, 120))
 })
 
+test("parseHostMessage keeps the filter's Changes scope apart from its matches, and older hosts' filters without it", () => {
+  const filter = {type: 'filter', query: '', changesOnly: true, ids: ['a']}
+  assert.deepEqual(parseHostMessage(envelope(filter), channel), filter)
+  assert.deepEqual(parseHostMessage(envelope({...filter, scope: ['a', 'b']}), channel), {...filter, scope: ['a', 'b']})
+  assert.deepEqual(parseHostMessage(envelope({...filter, scope: null}), channel), {...filter, scope: null})
+  for (const scope of [4, ['a', 4], Array.from({length: rendererLimits.filterIds + 1}, (_, index) => `${index}`)])
+    assert.equal(parseHostMessage(envelope({...filter, scope}), channel), undefined, String(scope).slice(0, 20))
+})
+
 test('parseHostMessage validates hover and scroll', () => {
   assert.deepEqual(parseHostMessage(envelope({type: 'hover', id: 'entity:a'}), channel), {type: 'hover', id: 'entity:a'})
   assert.deepEqual(parseHostMessage(envelope({type: 'hover', id: null}), channel), {type: 'hover', id: null})
@@ -472,6 +481,37 @@ test('connectRenderer posts ready to the host origin with the channel envelope',
   assert.equal(fake.listeners.size, 0)
   client.select('b')
   assert.equal(fake.posted.length, 7, 'nothing is posted after dispose')
+})
+
+test('observeHeight requests the height at once, before any resize is observed, then each new one', () => {
+  const fake = fakeWindow()
+  const observers = []
+  const Observer = globalThis.ResizeObserver
+  globalThis.ResizeObserver = class {
+    constructor(callback) {
+      this.callback = callback
+      observers.push(this)
+    }
+    observe() {}
+    disconnect() {}
+  }
+  try {
+    const client = connectRenderer({}, {capabilities: {changeHighlighting: 'none'}, window: fake.view})
+    let height = 320.4
+    client.observeHeight({getBoundingClientRect: () => ({height})})
+    const heights = () => fake.posted.map(({data}) => parseRendererMessage(data, channel)).filter(message => message.type === 'height')
+    assert.deepEqual(heights(), [{type: 'height', px: 321}])
+    observers[0].callback([])
+    assert.equal(heights().length, 1, 'the same height is not requested again')
+    height = 500
+    observers[0].callback([])
+    assert.deepEqual(heights(), [
+      {type: 'height', px: 321},
+      {type: 'height', px: 500},
+    ])
+  } finally {
+    globalThis.ResizeObserver = Observer
+  }
 })
 
 test('connectRenderer dispatches valid host messages and ignores foreign ones', () => {

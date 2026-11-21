@@ -104,7 +104,12 @@ export function dispatch(handlers: RendererHandlers, message: HostMessage) {
       handlers.action?.({id: message.id})
       break
     case 'filter':
-      handlers.filter?.({query: message.query, changesOnly: message.changesOnly, ids: message.ids})
+      handlers.filter?.({
+        query: message.query,
+        changesOnly: message.changesOnly,
+        ids: message.ids,
+        ...(message.scope === undefined ? {} : {scope: message.scope}),
+      })
       break
   }
 }

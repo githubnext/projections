@@ -75,7 +75,8 @@ separate inspector to start.
   when none runs and gives its URL.
 - **Open the page for them** yourself the first time (the result says when no
   page is open yet): in your own browser if you have one (Codex's built-in
-  browser, for example), else in the system browser by adding `--open` to
+  browser, for example, with `--theme chatgpt` on `projections view show` so it
+  matches the app), else in the system browser by adding `--open` to
   `projections view show` (over MCP, run `projections view show --open` with
   the same options in the repository: it finds the MCP server's viewer). Give
   them the bare link only when you can open neither. Later calls change what

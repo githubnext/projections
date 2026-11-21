@@ -94,7 +94,7 @@ pages, including the Copilot app's canvas, reconnect to the trusted viewer.
 ### 2. The server owns the view state
 
 The **view state** is
-`{projection, choice or before/after, mode, selection, scenario, chosenBy, generation}`,
+`{projection, choice or before/after, mode, selection, scenario, chosenBy, reportedBy, generation}`,
 one for each named viewer (below). The server holds it; pages render it. Pages
 long-poll it (`GET TOKEN/view/state?since=N`), as the Inspector long-polls
 working-tree changes, and report the person's interactions with
@@ -104,7 +104,11 @@ long poll plus POST is simpler than Server-Sent Events or a WebSocket here: the
 state changes rarely, the reports are small, and it needs no new dependency.
 
 Several open pages mirror one another: a report that changes the selection or
-mode becomes the state, and every page receives it. The newest report wins.
+mode becomes the state, and every page receives it. The newest report wins. The
+state names the page whose report made it (`reportedBy`), so that page takes it
+for its own report's echo and doesn't undo what the person did since. Every
+other page applies it. A page sends one report at a time: the latest waits for
+the one in flight, so an older report never arrives after a newer one.
 
 **Which pages count as open.** A page counts while it asks for its viewer's
 state: each page makes a random ID (with `crypto.getRandomValues`, not
@@ -263,14 +267,15 @@ the canvas's variables are; host core's `parseThemeSeed` accepts only colors
 lives only in its link, never in the viewer's state or on the machine, so a page
 opened elsewhere (the Copilot canvas on the same viewer) keeps its own theme.
 Per page, a seed wins over the app's theme, which wins over the default; a mode
-the seed leaves out keeps the page's own. One seed is built in, by name:
-`--theme claude`, Claude Code's Preview pane, matched in both modes to the app's
-own panes beside it (Files, Terminal): their surface, rules, text and link blue.
-The pane's 6 px backdrop either side of the page is the app's chrome. A seed is
-an app's own look, so, as in the Copilot canvas, its rules and card edges are
-its `border` as given, even below the 3:1 the default divider keeps; lines that
-carry meaning (a graph's links) keep 3:1 as the optional `color-connector`
-token. The format and how an agent finds its app's colors are in
+the seed leaves out keeps the page's own. Two seeds are built in, by name:
+`--theme chatgpt`, the ChatGPT and Codex desktop apps, and `--theme claude`,
+Claude Code's Preview pane, matched in both modes to the app's own panes beside
+it (Files, Terminal): their surface, rules, text and link blue. The pane's 6 px
+backdrop either side of the page is the app's chrome. A seed is an app's own
+look, so, as in the Copilot canvas, its rules and card edges are its `border` as
+given, even below the 3:1 the default divider keeps; lines that carry meaning (a
+graph's links) keep 3:1 as the optional `color-connector` token. The format and
+how an agent finds its app's colors are in
 [the agent tools](../runner/agent-tools.md#a-theme-seed-for-another-apps-browser-pane).
 
 ### 4. One tool catalog, answered by whichever surface shows the view

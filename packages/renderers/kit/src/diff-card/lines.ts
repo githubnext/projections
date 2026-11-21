@@ -85,7 +85,8 @@ export function writeKindLine(card: CardLines, kind: KindLine): void {
   if (kind.detail !== undefined) writeDetail(card, kind, detailBeside)
 }
 
-function writeDetail(card: CardLines, kind: KindLine, beside: boolean): void {
+/** Writes a kind line's detail: beside the kind's last line, or on lines of its own under what is written so far. */
+export function writeDetail(card: CardLines, kind: KindLine, beside: boolean): void {
   const detailLine = (spans: DiffCardSpan[], beside: boolean) =>
     card.lines.push({
       x: beside ? card.cardWidth - diffCardMetrics.textInset - card.reserve : card.left,

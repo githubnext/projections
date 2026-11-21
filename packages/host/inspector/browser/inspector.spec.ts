@@ -434,17 +434,29 @@ test('actual slow extractor is cancellable and untrusted startup cannot execute'
 })
 
 test('Cancel pressed just as the next extraction starts cancels it, and nothing queued runs', async ({page, app}) => {
-  // Presses Cancel the moment the Slow extractor's first job is requested: the extraction before it has finished (or
-  // none ran) and this one is starting, but the page hasn't rendered it as running yet.
+  // Presses Cancel while the Slow extractor's first job is being started: the runner hasn't named the job yet. The
+  // coordinator requests the job as soon as it is queued, before the page has drawn it, so the request waits for the
+  // Cancel button the page draws for it, and is sent once that has been pressed.
   await page.addInitScript(() => {
     const request = window.fetch
     let pressed = false
-    window.fetch = (input, init) => {
+    const cancelButton = () =>
+      new Promise<HTMLButtonElement>((resolve, reject) => {
+        const deadline = Date.now() + 5_000
+        const find = () => {
+          const cancel = [...document.querySelectorAll<HTMLButtonElement>('.pi-empty button')].find(
+            button => button.textContent === 'Cancel',
+          )
+          if (cancel) resolve(cancel)
+          else if (Date.now() > deadline) reject(new Error('No Cancel button as the extraction starts'))
+          else setTimeout(find, 10)
+        }
+        find()
+      })
+    window.fetch = async (input, init) => {
       if (!pressed && input === '/api/jobs' && init?.method === 'POST' && String(init.body).includes('"projectionId":"slow"')) {
         pressed = true
-        const cancel = [...document.querySelectorAll<HTMLButtonElement>('.pi-empty button')].find(button => button.textContent === 'Cancel')
-        if (!cancel) throw new Error('No Cancel button as the extraction starts')
-        cancel.click()
+        ;(await cancelButton()).click()
       }
       return request(input, init)
     }

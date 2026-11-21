@@ -1,7 +1,7 @@
 import {useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
 import type {ReactNode} from 'react'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
-import {cardBorderOutset, emphasisInset, classifyChange, contentStart, describeChange} from '@githubnext/projections-renderer-kit'
+import {cardBorderOutset, emphasisInset, classifyChange, contentStart, describeChange, textPill} from '@githubnext/projections-renderer-kit'
 import type {ScrollStart} from '@githubnext/projections-renderer-kit'
 import {
   EdgeArrowMarker,
@@ -46,6 +46,7 @@ import {
   unitDescription,
 } from './card.js'
 import {DiffView, unitStatusParts} from './diff.js'
+import {LifetimePill, useTextAdvances} from './lifetime-pill.js'
 import {unitFacets} from './facets.js'
 import type {accepts} from './accepts.js'
 
@@ -200,6 +201,20 @@ function Card({
     implementationZone,
   ]
   const scoped = sides.some(side => side.scope)
+  // The pill is as wide as the label shown, and between the two while they crossfade. The labels drawn (both, or one
+  // endpoint's) are measured whenever they change, so a seek straight from one endpoint to the other measures the new one.
+  const labels = useRef<SVGGElement>(null)
+  const crossfading = lifetimes[0] !== lifetimes[1] && frame.local > 0 && frame.local < 1
+  const drawn = crossfading ? 'both' : frame.local <= 0 ? 'before' : 'after'
+  const advanceOf = useTextAdvances(
+    labels,
+    '.di-lifetime-label',
+    `${lifetimes.join('\n')}\n${drawn}`,
+    label => label.length * (sides.find(side => lifetimeLabelOf(side, side.lifetime) === label)?.scope ? advance.key : advance.lifetime),
+  )
+  const labelAdvance = crossfading
+    ? advanceOf(lifetimes[0]) + (advanceOf(lifetimes[1]) - advanceOf(lifetimes[0])) * frame.local
+    : advanceOf(lifetimes[frame.local <= 0 ? 0 : 1])
   // A modified card says what changed about it, as its diff card does: "Lifetime changed".
   const status =
     frame.before && frame.after ? unitStatusParts({...frame, facets: unitFacets(frame.before, frame.after), dependencies: []}) : undefined
@@ -243,10 +258,18 @@ function Card({
       />
       {/* Parts are tinted, never outlined: hover and focus lightly, selection more, under the text and inside the card's shape. */}
       <g clipPath={`url(#${clipId})`} className="di-tints">
-        {tinted.map(zone => (
-          <path key={zone} className={`di-tint di-tint-${zone}`} d={tints[zone]} />
-        ))}
-        {selectedZone && <path className="di-zone-highlight" d={tints[selectedZone]} />}
+        {tinted
+          .filter(zone => zone !== 'registration')
+          .map(zone => (
+            <path key={zone} className={`di-tint di-tint-${zone}`} d={tints[zone]} />
+          ))}
+        {selectedZone && selectedZone !== 'registration' && <path className="di-zone-highlight" d={tints[selectedZone]} />}
+        {/* The registration's tints are the lifetime pill's own shape. */}
+        <LifetimePill
+          box={textPill(rightX, top + kindBaseline, labelAdvance, 'end')}
+          tint={unit.registrationId ? 'di-tint-registration' : undefined}
+          selected={selectedZone === 'registration'}
+        />
       </g>
 
       {unit.contract ? (
@@ -259,23 +282,26 @@ function Card({
         </text>
       )}
       <LifetimeMark lifetime={frame.lifetime} top={top + markSpan.top} bottom={top + markSpan.bottom} dash={frame.dash} />
-      <Crossfade
-        values={lifetimes}
-        local={frame.local}
-        render={(label, _, opacity) => (
-          <text
-            key={label}
-            className={`node-detail di-lifetime-label ${frame.lifetime}`}
-            x={rightX}
-            y={top + kindBaseline}
-            textAnchor="end"
-            opacity={opacity}
-            {...(sides.find(side => lifetimeLabelOf(side, side.lifetime) === label)?.scope ? identifier : {})}
-          >
-            {label}
-          </text>
-        )}
-      />
+      <g ref={labels}>
+        <Crossfade
+          values={lifetimes}
+          local={frame.local}
+          render={(label, _, opacity) => (
+            <text
+              key={label}
+              className={`node-detail di-lifetime-label ${frame.lifetime}`}
+              data-label={label}
+              x={rightX}
+              y={top + kindBaseline}
+              textAnchor="end"
+              opacity={opacity}
+              {...(sides.find(side => lifetimeLabelOf(side, side.lifetime) === label)?.scope ? identifier : {})}
+            >
+              {label}
+            </text>
+          )}
+        />
+      </g>
       <Crossfade
         values={[sides[0].implementation, sides[1].implementation]}
         local={frame.local}
@@ -481,7 +507,7 @@ function TransitionView({
                 link={link}
                 route={routes.get(link.key)!}
                 markerId={markerId}
-                emphasis={emphasize(link)}
+                emphasis={emphasize(link, transition.linkStepRow(link.key))}
                 labelled={selectedUnits.has(link.fromId) || selectedUnits.has(link.toId)}
                 selectedId={selectedId}
                 onSelect={onSelect}

@@ -4,14 +4,17 @@ use std::{fs, time::Duration};
 
 use serde_json::{Value, json};
 
-use crate::common::{Fixture, commit, git};
+use crate::{
+    common::{Fixture, commit, git},
+    conformance::conforms,
+};
 
 #[tokio::test]
 async fn pairs_list_history_and_choose_a_default_with_changes() {
     let fixture = Fixture::new(true, false, false).await;
     let repo = fixture.root.join("repo");
     // One commit: nothing to compare, so the default is HEAD alone.
-    let first = fixture.get("/api/pairs?projection=example").await.json();
+    let first = pairs(&fixture).await;
     assert_eq!(first["default"]["after"], "HEAD");
     assert!(first["default"].get("before").is_none());
 
@@ -21,7 +24,7 @@ async fn pairs_list_history_and_choose_a_default_with_changes() {
     commit(&repo, "Add data");
     git(&repo, &["tag", "v2"]);
     // HEAD is tagged: the previous tag to it.
-    let tagged = fixture.get("/api/pairs?projection=example").await.json();
+    let tagged = pairs(&fixture).await;
     assert_eq!(tagged["default"]["source"], "tag");
     assert_eq!(
         (tagged["default"]["before"].as_str(), tagged["default"]["after"].as_str()),
@@ -38,7 +41,7 @@ async fn pairs_list_history_and_choose_a_default_with_changes() {
 
     // A commit that changes no file: its pairs would compare identical sides.
     commit(&repo, "Empty");
-    let empty = fixture.get("/api/pairs?projection=example").await.json();
+    let empty = pairs(&fixture).await;
     assert!(
         empty["suggestions"]
             .as_array()
@@ -55,7 +58,7 @@ async fn pairs_list_history_and_choose_a_default_with_changes() {
     fs::write(repo.join("data.txt"), "b\n").unwrap();
     git(&repo, &["add", "data.txt"]);
     commit(&repo, "Change data");
-    let feature = fixture.get("/api/pairs?projection=example").await.json();
+    let feature = pairs(&fixture).await;
     assert_eq!(feature["head"]["branch"], "feature");
     assert_eq!(feature["defaultBranch"], "master");
     assert_eq!(feature["default"]["source"], "merge-base");
@@ -81,7 +84,7 @@ async fn pairs_list_history_and_choose_a_default_with_changes() {
         .unwrap(),
     )
     .unwrap();
-    let bookmarked = fixture.get("/api/pairs?projection=example").await.json();
+    let bookmarked = pairs(&fixture).await;
     assert_eq!(bookmarked["bookmarks"].as_array().unwrap().len(), 3);
     assert_eq!(bookmarked["default"]["bookmark"], "release");
     assert_eq!(bookmarked["default"]["label"], "v1 → v2");
@@ -104,7 +107,7 @@ async fn pairs_list_history_and_choose_a_default_with_changes() {
         .unwrap(),
     )
     .unwrap();
-    let reversed = fixture.get("/api/pairs?projection=example").await.json();
+    let reversed = pairs(&fixture).await;
     let listed = reversed["suggestions"]
         .as_array()
         .unwrap()
@@ -130,15 +133,25 @@ async fn pairs_list_history_and_choose_a_default_with_changes() {
     assert_eq!(offline.get("/api/pairs").await.status, 403);
 }
 
+/// `GET /api/pairs?projection=example`, which must conform.
+async fn pairs(fixture: &Fixture) -> Value {
+    let pairs = fixture.get("/api/pairs?projection=example").await.json();
+    conforms("pairs", &pairs);
+    pairs
+}
+
 async fn finished_sweep(fixture: &Fixture, body: Value) -> Value {
     let started = fixture
         .request("POST", "/api/sweep", fixture.auth(), &serde_json::to_vec(&body).unwrap())
         .await;
     assert_eq!(started.status, 202);
+    conforms("sweepStart", &started.json());
     let id = started.json()["id"].as_str().unwrap().to_owned();
     let deadline = std::time::Instant::now() + Duration::from_secs(60);
     loop {
-        let sweep = fixture.get("/api/sweep").await.json()["sweep"].clone();
+        let response = fixture.get("/api/sweep").await.json();
+        conforms("sweep", &response);
+        let sweep = response["sweep"].clone();
         assert_eq!(sweep["id"], id.as_str());
         if sweep["status"] != "running" {
             return sweep;
@@ -151,7 +164,9 @@ async fn finished_sweep(fixture: &Fixture, body: Value) -> Value {
 #[tokio::test]
 async fn sweeps_run_projections_across_recent_commits() {
     let fixture = Fixture::new(true, false, false).await;
-    assert_eq!(fixture.get("/api/sweep").await.json()["sweep"], Value::Null);
+    let none = fixture.get("/api/sweep").await.json();
+    conforms("sweep", &none);
+    assert_eq!(none["sweep"], Value::Null);
     let repo = fixture.root.join("repo");
     for (index, message) in ["Add data", "Change data (#4)"].into_iter().enumerate() {
         fs::write(repo.join("data.txt"), format!("{index}\n")).unwrap();
@@ -225,6 +240,7 @@ async fn sweeps_take_pairs_and_stop_when_asked() {
         )
         .await;
     assert_eq!(cancelled.status, 202);
+    conforms("sweep", &cancelled.json());
     assert_eq!(cancelled.json()["sweep"]["id"], sweep["id"]);
     for body in [json!({"pairs": [{"before": "HEAD"}]}), json!({"last": 0}), json!({"pairs": "HEAD"})] {
         let refused = fixture

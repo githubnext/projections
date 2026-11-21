@@ -257,12 +257,13 @@ change colors) as it does from the Copilot app's.
   draws its own, even when that is quieter than the default theme's 3:1 edges;
   lines that carry meaning, such as a graph's links, keep 3:1.
 - `projections view --theme SEED` and `projections view show --theme SEED` take
-  it as a built-in seed's name (`claude`, for Claude Code's Preview pane),
-  inline JSON or a JSON file's path, check it (an invalid seed fails with what
-  is wrong) and put it in the link they print and open, as `?theme=` with the
-  seed's compact JSON, percent-encoded. With `projections mcp`, add `?theme=` to
-  the URL `open_projection` gives (`encodeURIComponent(JSON.stringify(seed))`; a
-  `#` must be `%23`).
+  it as a built-in seed's name (`claude`, for Claude Code's Preview pane;
+  `chatgpt`, for the ChatGPT and Codex apps' browser panes), inline JSON or a
+  JSON file's path, check it (an invalid seed fails with what is wrong) and put
+  it in the link they print and open, as `?theme=` with the seed's compact JSON,
+  percent-encoded. With `projections mcp`, add `?theme=` to the URL
+  `open_projection` gives (`encodeURIComponent(JSON.stringify(seed))`; a `#`
+  must be `%23`).
 - The seed lives only in that link, not in the viewer: a page opened from
   another link (the Copilot app's canvas on the same viewer, another browser)
   keeps its own theme. Reloading and reconnecting keep it. A page whose seed
@@ -273,14 +274,16 @@ change colors) as it does from the Copilot app's.
 
 The seed belongs to the app, not to the repository or the machine (one machine
 may run several apps, the Copilot app among them), so Projections keeps no
-default seed. Its only built-in seed is `claude`, Claude Code's Preview pane,
-matched to the Claude app's own panes beside it (Files, Terminal) in both modes.
-The agent finds the colors from the app itself: its own CSS or source when the
-agent can read them, a screenshot of itself sampled for its surface, text and
-rule colors, or by asking the person. It keeps the seed in the app's own agent
-instructions (its custom instructions or `AGENTS.md`) and passes it every time
-it opens the page. In the Copilot app and VS Code, which theme the viewer
-themselves, it passes none. For example, an instruction for a harness:
+default seed. Its built-in seeds are `claude`, Claude Code's Preview pane,
+matched to the Claude app's own panes beside it (Files, Terminal), and
+`chatgpt`, the ChatGPT and Codex desktop apps (their surfaces, text, hairline
+rules and selection blue), both in light and dark. The agent finds the colors
+from the app itself: its own CSS or source when the agent can read them, a
+screenshot of itself sampled for its surface, text and rule colors, or by asking
+the person. It keeps the seed in the app's own agent instructions (its custom
+instructions or `AGENTS.md`) and passes it every time it opens the page. In the
+Copilot app and VS Code, which theme the viewer themselves, it passes none. For
+example, an instruction for a harness:
 
 ```md
 When you show a Projections viewer in this app's browser pane, open it with

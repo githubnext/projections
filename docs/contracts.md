@@ -109,6 +109,42 @@ and the catalog entry for them would be:
 and for their tests, `comparator-tests/v0.json`, matching
 `*.comparator.test.yaml` and `*.comparator.test.yml`.
 
+### Schema-owned contracts
+
+TypeBox, in `packages/schemas`, is the one schema system for the contracts this
+repository owns: each schema provides the JSON Schema, the TypeScript type and
+the runtime validator, so a hand-written type never stands in for a checked one.
+
+- **Published contracts**, `src/typebox`: the versioned documents above, with
+  their `$id`s and reference pages.
+- **The local runner's API**, `src/runner`, exported as
+  `@githubnext/projections-schemas/runner`: the responses of the Inspector
+  service (`projections view` and [`serve --stdio`](runner/stdio-backend.md))
+  that its clients decode. It is internal and unversioned, never published: the
+  runner and its clients ship from the same commit. Its generated schema is
+  `packages/schemas/internal/runner-api.json`, outside the published set.
+  `decodeRunnerResponse(name, value)` checks a response whole, nested entries
+  included, and returns it typed, or throws a `RunnerResponseError` that names
+  the request and the JSON pointer of the value that doesn't match. It uses
+  TypeBox's interpreting checker, which needs no `eval` and so runs under the
+  Inspector's content security policy. Clients accept properties a schema
+  doesn't declare, so a runner can add a field without breaking them.
+- **Documents another boundary validates** are opaque in the runner API, which
+  checks only the envelope its clients read: a saved document's `format` and
+  `version` (the CLI validated the document when it loaded it), and an explore
+  candidate's trial definition.
+
+**Rust conformance.** The Rust service has no generated types. Instead, its
+tests (`packages/cli/tests/service/conformance.rs`) check every runner API
+response they receive against `internal/runner-api.json`, more strictly than the
+clients: a property the schema doesn't declare fails. Changing a response
+therefore starts in the TypeBox source; regenerate the schema, and the service
+tests then hold the Rust side to it.
+
+Host-to-renderer and renderer-to-host frame validation is asymmetric on purpose
+(see [renderer frames](contracts/renderer-frames.md)) and stays outside this
+rule.
+
 ## Pages
 
 Each page specifies one family of documents; the rules that apply to all of them
@@ -200,12 +236,24 @@ artifact-supplied renderers.
 
 The native and browser Engines implement the same request and response contract
 (engine ABI version 0). Operations are `parse-json`, `decode`, `normalize`,
-`canonicalize`, `validate-comparison` and `vary`. `vary` (`{before, after}`)
-compares two extractions of the same revision, such as a rerun, item by item by
-ID with no matching, and returns `{equal, within, beyond}`: `equal` when the
-canonical bytes are identical; `within`, each
-`{collection, id, path, generated?}` whose volatile value varied within
-tolerance (a generated value reworded from an equal basis has
+`canonicalize`, `validate-comparison`, `vary` and `pair`. `pair`
+(`{before, after}`, each reading only `projection.id`, `provenance.definition`
+and `provenance.definitionDigest` of an extraction document) decides whether two
+extractions can be compared and returns `{pairing}`: `same`; `projection` for
+different projections; `definition`, with the `differing` top-level fields, when
+the recorded definitions differ apart from `presentation` (whatever their
+digests say); or `components` when the definitions agree but the digests differ,
+because the declared sources' bytes do. It is the one implementation of that
+rule: the CLI calls `projections_engine::pairing`, JavaScript hosts
+`engine.pair(before, after)`, and the shared conformance corpus
+(`packages/schemas/fixtures/conformance.json`) runs it natively and in Wasm.
+Code outside the engine doesn't compare digests or definitions itself; the
+`no-restricted-syntax` entries in `tools/scripts/engine-contracts.mjs` flag it.
+`vary` (`{before, after}`) compares two extractions of the same revision, such
+as a rerun, item by item by ID with no matching, and returns
+`{equal, within, beyond}`: `equal` when the canonical bytes are identical;
+`within`, each `{collection, id, path, generated?}` whose volatile value varied
+within tolerance (a generated value reworded from an equal basis has
 `generated: true`); `beyond`, everything else that differs, each with a
 `reason`: volatile values beyond tolerance (a generated value whose basis moved
 has `generated` and `because`, and a reason such as "Regenerated because the

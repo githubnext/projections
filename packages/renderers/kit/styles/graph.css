@@ -315,10 +315,10 @@
 }
 
 /*
- * Items outside the host's find or scope filter (`data-projections-filtered`) recede to `--pk-recede` (see
- * `scope.css`). On HTML boxes it is a filter, so it composes with the opacity renderers animate inline (a card fading
- * in or out); inside SVG, where WebKit applies no CSS filter functions, it is the opacity, which overrides the
- * presentation attribute renderers animate there.
+ * Items the host's summary filter or find leaves out (`data-projections-filtered`) recede to `--pk-recede`, in either
+ * scope (see `scope.css`). On HTML boxes it is a filter, so it composes with the opacity renderers animate inline (a
+ * card fading in or out); inside SVG, where WebKit applies no CSS filter functions, it is the opacity, which overrides
+ * the presentation attribute renderers animate there.
  */
 .pk [data-projections-filtered] {
   --pk-recede: 0.25;
@@ -371,11 +371,19 @@
 .node-badge.removed .node-badge-text {
   text-decoration: line-through;
 }
-.node-accent {
+.node-accent,
+.node-accent-rim {
   pointer-events: none;
 }
-/* A card's weight gauge (see GraphCanvas `weight`): its accent's paint (inline), or the muted ink without one. */
-.node-gauge {
-  fill: var(--muted);
-  pointer-events: none;
+/* The card's shape (its border's middle) and its outer edge, which cut its accent band to its corners. */
+.node-accent-inner {
+  rx: var(--projections-radius);
+}
+.node-accent-outer {
+  rx: calc(var(--projections-radius) + var(--stroke) / 2);
+}
+/* While the card is ringed, its band leaves the border's outer half to the ring. */
+.graph-node:is(:hover, :focus-visible, :has(:focus-visible), [data-projections-ring-hover], [data-projections-ring-selected])
+  .node-accent-rim {
+  visibility: hidden;
 }

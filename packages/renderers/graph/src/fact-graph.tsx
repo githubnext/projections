@@ -67,7 +67,6 @@ export function FactGraph(
       accent={facts.accent}
       subtitle={facts.subtitle}
       icon={facts.icon}
-      weight={facts.weight}
       detail={facts.detail ?? canvas.detail}
       relationshipColor={facts.relationshipColor}
     />

@@ -4,6 +4,36 @@ import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentati
 import {cardTextMetrics, cardTextWidth, cardWidthRange, cutText} from '../card-text.js'
 
 /**
+ * A pill around one line of card text at the type scale's default size (12), aligned optically rather than by its box:
+ * the space above a capital E's top, below its baseline, left of its stem and right of a last capital H's right stem is
+ * about the same (to within a card unit: the pill is a whole number of them wide), with every edge on a whole card unit. The text's baseline is `baseline` under the
+ * pill's top: the sans fonts' cap height is about 8.6 card units, which leaves about 4.4 above it and 4 below. Its
+ * `padding` beyond the text's advance on each side is 3, which the glyphs' own side bearings (about 1 card unit) make
+ * about 4 to their stems. Measured from rendered pixels with the renderer testing package's `opticalInsets`. See
+ * `textPill`.
+ */
+export const pillMetrics = {height: 17, baseline: 13, padding: 3} as const
+
+/**
+ * The box of a pill (see `pillMetrics`) around one line of text `advance` card units wide, its baseline at `baseline`,
+ * starting at `x` or, anchored at its `end`, ending there. The pill is a whole number of card units wide.
+ */
+export function textPill(
+  x: number,
+  baseline: number,
+  advance: number,
+  anchor: 'start' | 'end' = 'start',
+): {x: number; y: number; width: number; height: number} {
+  const width = Math.round(advance + 2 * pillMetrics.padding)
+  return {
+    x: anchor === 'end' ? x + pillMetrics.padding - width : x - pillMetrics.padding,
+    y: baseline - pillMetrics.baseline,
+    width,
+    height: pillMetrics.height,
+  }
+}
+
+/**
  * Badge geometry: a pill's height, its text's inset, the gap between pills and the pitch of their rows; a highlight's
  * icon and the space after it; and the gap between quiet tags.
  */

@@ -1,0 +1,376 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Projections local runner API responses (internal)",
+  "description": "Generated from packages/schemas/src/runner/api.ts; internal and unversioned, never published. Each $defs entry is one response, and x-request names the request it answers.",
+  "$defs": {
+    "adopt": {
+      "x-request": "POST /api/adopt",
+      "type": "object",
+      "required": ["files", "digest", "written"],
+      "properties": {
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "before", "after", "created", "changed"],
+            "properties": {
+              "path": {"type": "string"},
+              "before": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+              "after": {"type": "string"},
+              "created": {"type": "boolean"},
+              "changed": {"type": "boolean"}
+            }
+          }
+        },
+        "digest": {
+          "type": "string",
+          "description": "The files' current contents, which writing must still find."
+        },
+        "written": {"type": "boolean"},
+        "adopted": {"type": "array", "items": {"type": "string"}},
+        "bookmarked": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "projection", "change"],
+            "properties": {
+              "id": {"type": "string"},
+              "projection": {"type": "string"},
+              "change": {
+                "type": "object",
+                "required": ["before", "after", "title", "number", "kind", "date"],
+                "properties": {
+                  "before": {"type": "string"},
+                  "after": {"type": "string"},
+                  "title": {"type": "string"},
+                  "number": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "description": "The pull request number its message names, if any."
+                      },
+                      {"type": "null"}
+                    ]
+                  },
+                  "kind": {"enum": ["merge", "commit", "pair"]},
+                  "date": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "explore": {
+      "x-request": "GET /api/explore",
+      "type": "object",
+      "required": ["session", "candidates"],
+      "properties": {
+        "session": {
+          "type": "boolean",
+          "description": "Whether this Inspector is an explore session (no projections yet), whose candidates every revision defines."
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "title",
+              "description",
+              "extractor",
+              "schema",
+              "renderer",
+              "requiresTrust",
+              "basis",
+              "adopted",
+              "definition"
+            ],
+            "properties": {
+              "id": {"type": "string", "description": "The trial definition's ID: the built-in extractor's."},
+              "title": {"type": "string"},
+              "description": {"type": "string"},
+              "extractor": {"type": "string"},
+              "schema": {"type": "string"},
+              "renderer": {"type": "string"},
+              "requiresTrust": {"type": "boolean"},
+              "basis": {
+                "type": "object",
+                "required": ["pattern", "count", "examples"],
+                "properties": {
+                  "pattern": {"type": "string"},
+                  "count": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+                  "examples": {"type": "array", "items": {"type": "string"}},
+                  "skipped": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+                  "file": {
+                    "type": "string",
+                    "description": "The one file a per-file candidate reads, such as a workflow."
+                  }
+                },
+                "description": "Why it was proposed: the detection pattern that matched, how many files and the first few."
+              },
+              "adopted": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "The authored definition that already uses it, if any."
+                  },
+                  {"type": "null"}
+                ]
+              },
+              "definition": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true,
+                "description": "The trial definition, which the runner loads and validates as it does any definition."
+              }
+            }
+          }
+        }
+      }
+    },
+    "sweepStart": {
+      "x-request": "POST /api/sweep",
+      "type": "object",
+      "required": ["id", "status"],
+      "properties": {"id": {"type": "string"}, "status": {"type": "string", "const": "running"}}
+    },
+    "sweep": {
+      "x-request": "GET /api/sweep",
+      "type": "object",
+      "required": ["sweep"],
+      "properties": {
+        "sweep": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": ["id", "status", "error", "changes", "projections", "cells"],
+              "properties": {
+                "id": {"type": "string"},
+                "status": {"enum": ["running", "completed", "failed", "cancelled"]},
+                "error": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                "changes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["before", "after", "title", "number", "kind", "date"],
+                    "properties": {
+                      "before": {"type": "string"},
+                      "after": {"type": "string"},
+                      "title": {"type": "string"},
+                      "number": {
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "description": "The pull request number its message names, if any."
+                          },
+                          {"type": "null"}
+                        ]
+                      },
+                      "kind": {"enum": ["merge", "commit", "pair"]},
+                      "date": {"type": "string"}
+                    }
+                  }
+                },
+                "projections": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["projection", "status"],
+                    "properties": {
+                      "projection": {"type": "string"},
+                      "status": {"enum": ["ready", "trust", "failed"]},
+                      "requiresTrust": {"type": "boolean"},
+                      "error": {"type": "string"}
+                    }
+                  }
+                },
+                "cells": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["projection", "before", "after", "status"],
+                    "properties": {
+                      "projection": {"type": "string"},
+                      "before": {"type": "string"},
+                      "after": {"type": "string"},
+                      "status": {"enum": ["changed", "unchanged", "failed"]},
+                      "changes": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+                      "steps": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+                      "counts": {
+                        "type": "object",
+                        "description": "Changes by status (`added`, `removed`, `modified`, …).",
+                        "additionalProperties": {"type": "integer", "minimum": 0, "maximum": 9007199254740991}
+                      },
+                      "error": {"type": "string"},
+                      "stderr": {"type": "string", "description": "The end of a failed extractor's stderr."}
+                    }
+                  }
+                }
+              }
+            },
+            {"type": "null"}
+          ]
+        }
+      }
+    },
+    "pairs": {
+      "x-request": "GET /api/pairs",
+      "type": "object",
+      "required": ["head", "defaultBranch", "mergeBase", "bookmarks", "tags", "branches", "suggestions", "default"],
+      "properties": {
+        "head": {
+          "type": "object",
+          "required": ["commit", "branch", "dirty"],
+          "properties": {
+            "commit": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+            "branch": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+            "dirty": {"type": "boolean"}
+          }
+        },
+        "defaultBranch": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+        "mergeBase": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+        "bookmarks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "projectionId", "before", "after"],
+            "properties": {
+              "id": {"type": "string"},
+              "title": {"type": "string"},
+              "projectionId": {"type": "string"},
+              "before": {"type": "string"},
+              "after": {"type": "string"}
+            }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "commit", "date"],
+            "properties": {"name": {"type": "string"}, "commit": {"type": "string"}, "date": {"type": "string"}}
+          }
+        },
+        "branches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "commit", "date", "current"],
+            "properties": {
+              "name": {"type": "string"},
+              "commit": {"type": "string"},
+              "date": {"type": "string"},
+              "current": {"type": "boolean"}
+            }
+          }
+        },
+        "suggestions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["after", "label", "source"],
+            "properties": {
+              "before": {"type": "string", "description": "Absent for one revision alone."},
+              "after": {"type": "string"},
+              "label": {"type": "string"},
+              "source": {"enum": ["bookmark", "merge-base", "tag", "parent", "working-tree", "head"]},
+              "bookmark": {"type": "string", "description": "The bookmark's ID, for `source: 'bookmark'`."},
+              "identical": {
+                "type": "boolean",
+                "description": "Both sides hold the same files, so the comparison is empty."
+              },
+              "backwards": {
+                "type": "boolean",
+                "description": "A bookmark whose After is older than its Before; it's never the default."
+              },
+              "error": {
+                "type": "string",
+                "description": "Why it can't be compared here, for example a ref that doesn't exist."
+              }
+            }
+          }
+        },
+        "default": {
+          "type": "object",
+          "required": ["after", "label", "source"],
+          "properties": {
+            "before": {"type": "string", "description": "Absent for one revision alone."},
+            "after": {"type": "string"},
+            "label": {"type": "string"},
+            "source": {"enum": ["bookmark", "merge-base", "tag", "parent", "working-tree", "head"]},
+            "bookmark": {"type": "string", "description": "The bookmark's ID, for `source: 'bookmark'`."},
+            "identical": {
+              "type": "boolean",
+              "description": "Both sides hold the same files, so the comparison is empty."
+            },
+            "backwards": {
+              "type": "boolean",
+              "description": "A bookmark whose After is older than its Before; it's never the default."
+            },
+            "error": {
+              "type": "string",
+              "description": "Why it can't be compared here, for example a ref that doesn't exist."
+            }
+          }
+        },
+        "bookmarksError": {"type": "string"}
+      }
+    },
+    "definitionSave": {
+      "x-request": "POST /api/definition",
+      "type": "object",
+      "required": ["path", "before", "after", "digest", "changed", "written"],
+      "properties": {
+        "path": {"type": "string", "description": "The definition file, relative to the repository."},
+        "before": {"type": "string"},
+        "after": {"type": "string"},
+        "digest": {
+          "type": "string",
+          "description": "The file's digest before saving; pass it back to save exactly this preview."
+        },
+        "changed": {"type": "boolean"},
+        "written": {"type": "boolean"}
+      }
+    },
+    "changes": {
+      "x-request": "GET /api/changes",
+      "type": "object",
+      "required": ["generation", "changes", "complete"],
+      "properties": {
+        "generation": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+        "changes": {"type": "array", "items": {"type": "string"}},
+        "complete": {"type": "boolean"},
+        "tree": {"type": "string", "description": "The working tree's identity at `generation`."}
+      }
+    },
+    "fixturesChanges": {
+      "x-request": "GET /api/fixtures/changes",
+      "type": "object",
+      "required": ["generation"],
+      "properties": {"generation": {"type": "integer", "minimum": 0, "maximum": 9007199254740991}}
+    },
+    "document": {
+      "x-request": "GET /api/document",
+      "type": "object",
+      "required": ["document"],
+      "properties": {
+        "document": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": ["format", "version"],
+              "properties": {
+                "format": {"enum": ["projections.extraction", "projections.comparison"]},
+                "version": {"type": "number", "const": 0}
+              },
+              "additionalProperties": true,
+              "description": "A saved document, which the runner validated when it loaded it."
+            },
+            {"type": "null"}
+          ]
+        }
+      }
+    }
+  }
+}

@@ -24,6 +24,7 @@ import {basename, join, relative, resolve} from 'node:path'
 import {fileURLToPath} from 'node:url'
 import {checkFrameworkFree} from './framework-free.mjs'
 import {packPublished} from './manifest.mjs'
+import {pinToWorkspace} from './pin-to-workspace.mjs'
 
 const options = new Set()
 let given
@@ -44,7 +45,12 @@ const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
 const npmCli = process.env.npm_execpath
 // Scratch installs use the registry this workspace uses, wherever they are.
 const registry = /^registry=(.+)$/m.exec(readFileSync(join(workspace, '.npmrc'), 'utf8'))?.[1]
-const env = {...process.env, ...(registry && !process.env.npm_config_registry ? {npm_config_registry: registry} : {})}
+// npm retries a request that fails on the network or with a 5xx, never a missing version; a few more times here.
+const env = {
+  ...process.env,
+  ...(registry && !process.env.npm_config_registry ? {npm_config_registry: registry} : {}),
+  npm_config_fetch_retries: process.env.npm_config_fetch_retries ?? '5',
+}
 const npm = (args, cwd, extra = {}) =>
   execFileSync(npmCli ? process.execPath : 'npm', npmCli ? [npmCli, ...args] : args, {
     cwd,
@@ -257,6 +263,7 @@ export const build: RendererBuildOptions = {entry: 'src/main.ts', name: 'x', tit
       for (const file of sources.split('\n').filter(Boolean)) {
         if (internal.test(readFileSync(join(repository, file), 'utf8'))) fail(`The scaffold's ${file} names an internal workspace`)
       }
+      pinToWorkspace(join(renderer, 'package.json'), workspace)
       npm(['install', '--no-audit', '--no-fund'], renderer)
       // The browser the scaffold's Playwright drives; a no-op once installed.
       execFileSync(process.execPath, [join(renderer, 'node_modules/@playwright/test/cli.js'), 'install', 'chromium'], {

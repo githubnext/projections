@@ -3,6 +3,8 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import globals from 'globals'
 import {defineConfig} from 'eslint/config'
 import tseslint from 'typescript-eslint'
+import {engineContractsRule} from './tools/scripts/engine-contracts.mjs'
+import {lifecycleFiles, machinesPlugin} from './tools/scripts/check-machines/lifecycle-rule.mjs'
 
 export default defineConfig(
   {
@@ -39,8 +41,14 @@ export default defineConfig(
     },
   },
   {
+    // Decisions the engine owns (tools/scripts/engine-contracts.mjs): the code outside it asks the engine.
+    files: ['**/src/**/*.{ts,tsx,js,mjs}', 'tools/**/*.{ts,tsx,js,mjs}'],
+    ignores: ['packages/engine/**', 'tools/scripts/engine-contracts.test.mjs'],
+    rules: {'no-restricted-syntax': engineContractsRule},
+  },
+  {
     files: [
-      'packages/{schemas,cli,integrations/vscode}/src/**/*.{ts,tsx}',
+      'packages/{schemas,machine,cli,integrations/vscode}/src/**/*.{ts,tsx}',
       'packages/host/{core,vscode-ui,inspector}/src/**/*.{ts,tsx}',
       'packages/{engine,renderers,extractors}/*/src/**/*.{ts,tsx}',
       'examples/renderers/*/src/**/*.{ts,tsx}',
@@ -51,5 +59,12 @@ export default defineConfig(
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'error',
     },
+  },
+  {
+    // Lifecycles are explicit state machines (docs/guides/state-machines.md). A warning here; npm run check:machines
+    // fails when a file gains one over tools/scripts/check-machines/baseline.json.
+    files: lifecycleFiles,
+    plugins: {machines: machinesPlugin},
+    rules: {'machines/lifecycle': 'warn'},
   },
 )

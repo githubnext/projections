@@ -14,7 +14,10 @@ use serde_json::{Value, json};
 use tokio::time::{sleep, timeout};
 use uuid::Uuid;
 
-use crate::common::{Fixture, HttpResponse, assets};
+use crate::{
+    common::{Fixture, HttpResponse, assets},
+    conformance::conforms,
+};
 
 const PROBE: &str = "globalThis.projectionsProbe = 0;";
 
@@ -161,9 +164,12 @@ async fn fixtures_mode_serves_scenarios_and_renderers_without_a_repository() {
     let renderers = fixture.get("/api/renderers").await.json();
     assert_eq!(renderers["renderers"][0]["name"], "basic");
     assert_eq!(renderers["customRendererBase"], Value::Null);
-    assert_eq!(fixture.get("/api/document").await.json()["document"], Value::Null);
+    let document = fixture.get("/api/document").await.json();
+    conforms("document", &document);
+    assert_eq!(document["document"], Value::Null);
     let started = std::time::Instant::now();
     let changes = fixture.get("/api/fixtures/changes?since=0").await;
+    conforms("fixturesChanges", &changes.json());
     assert_eq!(changes.json(), json!({"generation": 1}));
     assert!(started.elapsed() < Duration::from_secs(2));
     assert_eq!(fixture.get("/api/fixtures/changes").await.status, 400);

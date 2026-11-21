@@ -28,6 +28,8 @@ export interface ViewerState {
   chosenBy?: 'agent' | 'person' | null
   /** The viewer's name, in the long poll's answers: `default`, or the one an agent named. */
   viewer?: string
+  /** The page whose report made this generation: for that page, the generation is its own report's echo. */
+  reportedBy?: string | null
 }
 
 /** The options of `mountViewer`: where the viewer is and how to reach it, and what the embedding host offers. */

@@ -468,9 +468,11 @@ changesScope(model: ComparisonModel<Extraction> | undefined, filter: FilterPaylo
 ```
 
 The Changes scope a renderer presents, or undefined when the host shows every item (or this is one extraction). The
-host's filter `ids` are what it shows, its changes and their context, each change with every row presenting it (a
-split's parts); past the filter's ID limit, or before the host says, the kit reads the same from the comparison's
-change context, or derives it from the structure for a comparison saved without context (`changeContext`).
+host's filter `scope` is what it shows, its changes and their context, each change with every row presenting it (a
+split's parts): the summary filter and find recede what they leave out (`ids`), never narrowing what is laid out. A
+host before `scope` sent it in `ids`. Past the filter's ID limit, or before the host says, the kit reads the same
+from the comparison's change context, or derives it from the structure for a comparison saved without context
+(`changeContext`).
 
 ### `ChangesScope`
 
@@ -555,6 +557,16 @@ type ColorTokenName = "accent" | "accent-emphasis" | "accent-muted" | "added" | 
 ```
 
 Color token names without `color-`, such as `fg-muted` or `added-border`.
+
+### `columnGap`
+
+```ts
+columnGap: number
+```
+
+Space between columns on the grid a top-to-bottom layout's cards snap to (see `columnGrid`): a channel for a route between two cards, clear
+of both (`edgeNodeSpacing` each side), with room to spare, so columns read apart and a relationship can pass
+between them.
 
 ### `ColumnSort`
 
@@ -1819,6 +1831,16 @@ A relationship to lay out (see `layoutGraph`). One with an endpoint missing from
 | `kind` | `"kind": string` | The relationship's kind: a `contains` edge from a compound boundary draws as the boundary, with no route. |
 | `to` | `"to": string` | The target node's ID. |
 
+### `layoutFilter`
+
+```ts
+layoutFilter(previous: FilterPayload | undefined, message: FilterPayload): FilterPayload
+```
+
+What a host's `filter` lays out: whether it shows the Changes scope, and that scope's IDs (`scope`, or a host before
+it's `ids`), as both `scope` and `ids`. `previous` while those are the same, so a summary figure or find, which only
+recede what they leave out, lays nothing out again.
+
 ### `layoutGraph`
 
 ```ts
@@ -1962,7 +1984,10 @@ The sort a heading's activation asks for: the other direction for the sorted col
 nodeSpacing: 24
 ```
 
-Space between cards in a layer (ELK `spacing.nodeNode`), and between a card with no relationships and what it is placed beside (see `placeUnlinked`).
+Space ELK keeps between cards in a layer (ELK `spacing.nodeNode`), and between a card with no relationships and what
+it is placed beside (see `placeUnlinked`). ELK's placement at this spacing decides each card's layer, order and
+column; a graph on a grid then spreads its columns to `columnGap` (see `snapToGrid`), which leaves those decisions
+as they are.
 
 ### `numericValue`
 
@@ -2068,6 +2093,29 @@ parseTableSort(value: false | number | string | true | undefined): null | { "col
 ```
 
 The sort a sort control's value names; `null` for `none` or anything else.
+
+### `partOwners`
+
+```ts
+partOwners(model: ComparisonModel<Extraction> | undefined): ReadonlyMap<string, string>
+```
+
+The change each further part of a split or merge presents, by its row's ID: the host's filter names the change, and
+the part is kept with it (`InteractionOptions.partOf`).
+
+### `pillMetrics`
+
+```ts
+pillMetrics: { "baseline": 13; "height": 17; "padding": 3 }
+```
+
+A pill around one line of card text at the type scale's default size (12), aligned optically rather than by its box:
+the space above a capital E's top, below its baseline, left of its stem and right of a last capital H's right stem is
+about the same (to within a card unit: the pill is a whole number of them wide), with every edge on a whole card unit. The text's baseline is `baseline` under the
+pill's top: the sans fonts' cap height is about 8.6 card units, which leaves about 4.4 above it and 4 below. Its
+`padding` beyond the text's advance on each side is 3, which the glyphs' own side bearings (about 1 card unit) make
+about 4 to their stems. Measured from rendered pixels with the renderer testing package's `opticalInsets`. See
+`textPill`.
 
 ### `placeBadges`
 
@@ -3121,6 +3169,15 @@ type TableValue = false | null | number | string | true | undefined
 
 A cell's value, as a column reads it from one version of a row: what it sorts by and, by default, shows.
 
+### `textPill`
+
+```ts
+textPill(x: number, baseline: number, advance: number, anchor?: "end" | "start"): { "height": number; "width": number; "x": number; "y": number }
+```
+
+The box of a pill (see `pillMetrics`) around one line of text `advance` card units wide, its baseline at `baseline`,
+starting at `x` or, anchored at its `end`, ending there. The pill is a whole number of card units wide.
+
 ### `tidyRoute`
 
 ```ts
@@ -3328,28 +3385,6 @@ variedWords(within: false | true): string
 ```
 
 How a varied value relates to its tolerance, in words: `within tolerance` or `beyond tolerance (volatile)`.
-
-### `WeightShare`
-
-```ts
-interface WeightShare
-```
-
-A row's weight as a share of the heaviest row's, by revision (see `weightShares`).
-
-| Member | Signature | Description |
-|---|---|---|
-| `after` | `"after"?: number` | The share in the After revision, between 0 and 1; none when it has no positive weight there. |
-| `before` | `"before"?: number` | The share in the Before revision, between 0 and 1; none when it has no positive weight there. |
-
-### `weightShares`
-
-```ts
-weightShares(rows: Array<EntityChange<Entity>>, weight: { (entity: Entity): number | undefined }): Map<string, WeightShare>
-```
-
-Each weighed row's weight in each revision as the square root of its share of the heaviest weight of either, so
-area-like differences read without the heaviest dwarfing the rest. Rows without a positive weight have none.
 
 ### `Window`
 
@@ -3791,7 +3826,6 @@ Everything but the renderer props is optional; the defaults draw every entity as
 | `syntheticAction` | `"syntheticAction"?: undefined \| { (entity: Entity): undefined \| { "expanded"?: false \| true; "label": string } }` | A synthetic card's accessible name and, for one that opens or closes a group of cards, whether that group is open (`aria-expanded`). Defaults to `Show` and the card's label. |
 | `viewport` | `"viewport": undefined \| { "height": number; "width": number }` | The frame's width and the host window's height, CSS px, as the host last reported them; undefined until then. |
 | `visibleIds` | `"visibleIds"?: ReadonlySet<string> \| undefined` | Entity rows to present, for example after a search; defaults to every row. |
-| `weight` | `"weight"?: undefined \| { (entity: Entity): number \| undefined }` | A card's weight, such as its lines of code: a gauge along the card's top edge from its leading corner, as long as the square root of its share of the heaviest row's weight (see `weightShares`), in its accent's paint, so the heavy parts of a graph stand out while every card keeps the graph's one width and the cards line up in columns. Rows without a positive weight have no gauge. Pass a stable function. |
 
 ### `graphEntityLimit`
 

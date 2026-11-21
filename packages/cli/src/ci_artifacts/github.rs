@@ -10,7 +10,10 @@
 //! whose file on the default branch uses `githubnext/projections`.
 
 use super::Origin;
-use crate::{artifact, runtime::Runner};
+use crate::{
+    artifact,
+    runtime::{ProcessFailure, Runner},
+};
 use anyhow::{Context, Result};
 use serde_json::{Value, json};
 use std::{
@@ -89,37 +92,45 @@ impl<'a> GitHub<'a> {
 
     /// The workflow file of `run` (an Actions run from GitHub's API) when its
     /// artifact is this repository's own CI output, with the basis it was
-    /// accepted on ([`Basis`]), else `None`.
-    pub fn accepted(&self, run: &Value) -> Option<(String, Basis)> {
-        let workflow = candidate(run, &self.repository)?;
+    /// accepted on ([`Basis`]), else `None`. It fails when GitHub can't say
+    /// whether the workflow uses the Action, rather than calling it ineligible.
+    pub fn accepted(&self, run: &Value) -> Result<Option<(String, Basis)>> {
+        let Some(workflow) = candidate(run, &self.repository) else {
+            return Ok(None);
+        };
         let basis = if self.workflows.is_empty() {
-            self.runs_action(&workflow).then_some(Basis::UsesAction)
+            self.runs_action(&workflow)?.then_some(Basis::UsesAction)
         } else {
             names(self.workflows, &workflow).then_some(Basis::Configured)
         };
-        basis.map(|basis| (workflow, basis))
+        Ok(basis.map(|basis| (workflow, basis)))
     }
 
     /// Whether the workflow file at `path` on the default branch uses the
-    /// Projections Action.
-    fn runs_action(&self, path: &str) -> bool {
+    /// Projections Action: not when it's absent there (GitHub's 404), and an
+    /// error when it can't be read (authentication, rate limits, transport).
+    fn runs_action(&self, path: &str) -> Result<bool> {
         if let Some(known) = self.uses_action.borrow().get(path) {
-            return *known;
+            return Ok(*known);
         }
         let action = regex::Regex::new(r#"(?m)^\s*(?:-\s+)?uses:\s*["']?githubnext/projections@"#).expect("pattern");
         // Without a ref, the contents API reads the default branch.
-        let uses = self
-            .gh(&[
-                "api",
-                "--hostname",
-                &self.host,
-                "-H",
-                "Accept: application/vnd.github.raw+json",
-                &format!("repos/{}/contents/{path}", self.repository),
-            ])
-            .is_ok_and(|text| action.is_match(&text));
+        let uses = match self.gh(&[
+            "api",
+            "--hostname",
+            &self.host,
+            "-H",
+            "Accept: application/vnd.github.raw+json",
+            &format!("repos/{}/contents/{path}", self.repository),
+        ]) {
+            Ok(text) => action.is_match(&text),
+            Err(error) if not_found(&error) => false,
+            Err(error) => {
+                return Err(error.context(format!("couldn't read {path} on the default branch of {}", self.repository)));
+            }
+        };
         self.uses_action.borrow_mut().insert(path.to_owned(), uses);
-        uses
+        Ok(uses)
     }
 
     /// Downloads into `base/<run>` the `name` artifact of the newest
@@ -134,7 +145,7 @@ impl<'a> GitHub<'a> {
             let Some(id) = run["id"].as_u64().filter(|id| *id > 0) else {
                 continue;
             };
-            let Some((workflow, basis)) = self.accepted(run) else {
+            let Some((workflow, basis)) = self.accepted(run)? else {
                 continue;
             };
             let artifacts = self.api(&format!("repos/{}/actions/runs/{id}/artifacts?name=projections", self.repository))?;
@@ -223,7 +234,7 @@ impl<'a> GitHub<'a> {
         let run = self.api(&format!("repos/{}/actions/runs/{id}", self.repository))?;
         anyhow::ensure!(run["conclusion"] == "success", "run {id} didn't succeed");
         let (workflow, _) = self
-            .accepted(&run)
+            .accepted(&run)?
             .with_context(|| format!("run {id} isn't this repository's own Projections workflow"))?;
         anyhow::ensure!(signed.contains(&workflow), "run {id}'s attestation names another workflow");
         Ok(Origin {
@@ -259,6 +270,15 @@ impl Basis {
             _ => None,
         }
     }
+}
+
+/// Whether a failed `gh api` call was GitHub's 404: what it answers for a file
+/// absent on the branch it reads.
+fn not_found(error: &anyhow::Error) -> bool {
+    error
+        .chain()
+        .find_map(|cause| cause.downcast_ref::<ProcessFailure>())
+        .is_some_and(|failure| !failure.timed_out() && failure.stderr().contains("(HTTP 404)"))
 }
 
 /// Whether `workflows` (paths or file names) names the workflow file `workflow`.

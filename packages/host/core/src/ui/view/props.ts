@@ -38,7 +38,8 @@ export interface ProjectionViewProps {
   banner?: ReactNode
   /**
    * What the embedder's job for the shown pair is doing, `null` while none runs: a renderer pane still loading meanwhile
-   * says so ("Extracting…", "Comparing…") rather than that it is loading the renderer.
+   * says so ("Extracting…", "Comparing…") rather than that it is loading the renderer, and a stage still showing the
+   * last drawing floats "Updating…" at its top right.
    */
   running?: 'extracting' | 'comparing' | null
   /** Defaults for host and renderer settings from the projection definition. */

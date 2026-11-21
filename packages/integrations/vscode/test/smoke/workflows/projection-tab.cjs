@@ -130,11 +130,11 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
     assert.ok(Math.abs(probe.strip.height - (toolbar.bottom - toolbar.top)) <= 0.5, JSON.stringify({strip: probe.strip, toolbar}))
   }
   assert.equal((await api.control('packages', {op: 'elements', selector: '.tp-picker'})).length, 0, 'no Before and After pickers')
-  // Side by side labels its panes as the pickers name the revisions, never a bare commit.
+  // Side by side labels its panes (chips on the stage) as the pickers name the revisions, never a bare commit.
   await api.control('packages', {op: 'view', action: 'setMode', value: 'side-by-side'})
   const named = text => text.replace(/^(Before|After) revision: /, '')
   await until('the side by side pane labels, named for people', async () => {
-    const found = await api.control('packages', {op: 'elements', selector: '[data-pane-band]'})
+    const found = await api.control('packages', {op: 'elements', selector: '[data-pane-chip]'})
     return found.length === 2 && found.every(band => band.text && !/^[0-9a-f]{8}$/.test(named(band.text))) ? found : undefined
   })
   // The panes fill the stage edge to edge: no margin, no gap, no rounded card; one 1px divider between them.

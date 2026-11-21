@@ -30,6 +30,12 @@ export interface ProjectionStageProps {
    * under it as it pans or scrolls. A new cover is fitted to at once, never eased.
    */
   utility?: ReactNode
+  /**
+   * What floats at the stage's foot, over every mode's frames (the default view's legend and summary, `StageFoot`):
+   * positioned by the caller against the stage's body, marked `data-stage-cover`. The stage sends what it covers as
+   * the frames' `stage-cover` and `stage-inset-bottom`, so renderers keep clear of it as they do of the utility area.
+   */
+  foot?: ReactNode
   /** Hides the stage while keeping its renderer frames loaded, for example while a table view is shown. */
   hidden?: boolean
   /** Below this width (CSS px) side-by-side panes stack. Default 640. */
@@ -94,6 +100,7 @@ export function ProjectionStage({
   paneEdge = defaultPaneEdge,
   bleed = 0,
   utility,
+  foot,
   className,
   style,
 }: ProjectionStageProps) {
@@ -122,6 +129,7 @@ export function ProjectionStage({
         bleed={bleed}
         paneLabels={paneLabels}
         utility={utility}
+        foot={foot}
       />
       {legend && projection.legend && <ProjectionLegend projection={projection} />}
     </div>

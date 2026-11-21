@@ -374,7 +374,7 @@ test('at a canvas width, the header text is whole and centred', async ({page}) =
   }
 })
 
-test('the toolbar, stage and summary bar lie flat, edge to edge, under the header', async ({page}) => {
+test('the toolbar and stage lie flat, edge to edge, under the header, and the summary floats at the foot', async ({page}) => {
   await openCanvas(page)
   expect((await control('control/show', {mode: 'diff'})).status).toBe(200)
   await expect(page.locator('.ph')).toHaveAttribute('data-comparison-mode', 'diff')
@@ -400,7 +400,7 @@ test('the toolbar, stage and summary bar lie flat, edge to edge, under the heade
       header: read('.pi-viewer-header'),
       toolbar: read('.ph-toolbar'),
       stage: read('.ph-single'),
-      summary: read('.ph-summary-bar'),
+      summary: read('.ph-stage-foot'),
       frame: {
         overflow: getComputedStyle(host).overflowY,
         past: frame.getBoundingClientRect().bottom - host.getBoundingClientRect().bottom,
@@ -408,23 +408,23 @@ test('the toolbar, stage and summary bar lie flat, edge to edge, under the heade
     }
   })
   const {header, toolbar, stage, summary} = measured
-  for (const [name, edges] of Object.entries({toolbar, stage, summary})) {
+  for (const [name, edges] of Object.entries({toolbar, stage})) {
     expect(edges.left, `${name} left`).toBeCloseTo(0, 0)
     expect(edges.right, `${name} right`).toBeCloseTo(canvas.width, 0)
     expect(edges.radius, `${name} corners`).toBe('0px')
   }
-  // Toolbar and summary bar are bands of the header's colour, a hairline from the stage, which has no border.
+  // The toolbar is a band of the header's colour, a hairline from the stage, which has no border.
   expect(toolbar.top).toBeCloseTo(header.bottom, 0)
   expect(toolbar.borders).toBe('0px 0px 1px 0px')
   expect(toolbar.background).toBe(header.background)
   expect(stage.borders).toBe('0px 0px 0px 0px')
   expect(stage.top).toBeGreaterThanOrEqual(toolbar.bottom - 0.5)
-  expect(summary.borders).toBe('1px 0px 0px 0px')
-  expect(summary.background).toBe(header.background)
-  expect(summary.bottom).toBeCloseTo(canvas.height, 0)
-  // Every boundary is one hairline in the divider colour, and the frame runs past its clipped host, so the fraction
-  // of a pixel a frame's whole pixels would leave never shows as a strip above the bar: a second line.
+  // The summary floats in the stage's foot, 12px above the canvas's bottom, edged in the same divider colour.
+  expect(summary.borders).toBe('1px 1px 1px 1px')
+  expect(summary.bottom).toBeCloseTo(canvas.height - 12, 0)
   expect(summary.borderColor).toBe(toolbar.borderColor)
+  // The frame runs past its clipped host, so the fraction of a pixel a frame's whole pixels would leave never shows
+  // as a strip at the stage's bottom.
   expect(measured.frame.overflow).toBe('clip')
   expect(measured.frame.past).toBeGreaterThanOrEqual(1)
 

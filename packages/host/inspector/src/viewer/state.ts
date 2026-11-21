@@ -79,7 +79,8 @@ export function statusText(state: ViewerState | undefined, summary: InspectorSum
   if (build === 'building') return 'Building renderer…'
   if (build === 'failed') return "The renderer didn't build. The agent has the details."
   if (!summary) return 'Starting…'
-  if (summary.status === 'extracting') return 'Extracting…'
+  // An extraction says so in the stage: its loading state, or "Updating…" over the last drawing (`UpdatingChip`).
+  if (summary.status === 'extracting') return ''
   if (summary.status === 'failed') return "The extractor didn't run. The agent has the details."
   if (summary.status === 'trust') return 'Needs trust'
   if (summary.error) return 'Something went wrong. The agent has the details.'

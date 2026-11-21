@@ -10,6 +10,7 @@ export {
   useFrameViewport,
   useStageInset,
   useStageInsetTop,
+  useStageInsetBottom,
   useStageCover,
   useStageHeightCap,
   useContentAspect,

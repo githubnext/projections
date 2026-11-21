@@ -4,9 +4,10 @@ import {Info} from 'lucide-react'
 import {useProjection} from '../projection.js'
 import type {ProjectionController} from '../projection.js'
 import {ProjectionStage} from '../stage.js'
+import {UpdatingChip} from './updating-chip.js'
 import {useUtilityPlayback} from './view/utility.js'
+import {StageFoot} from './view/stage-foot.js'
 import {HostViews} from './view/host-views.js'
-import {SummaryBar} from './summary-bar.js'
 import {DetailCard} from './detail-card.js'
 import {ComparatorLine, featureOn, offeredModes, rendererLabel, spaceTogglesPlayback, zoomGroup} from './blocks.js'
 import type {ProjectionFeatures, ViewKind} from './blocks.js'
@@ -20,7 +21,6 @@ import {viewOptions} from './view/options.js'
 import {RendererPaneStatus} from './view/pane-status.js'
 import type {ProjectionViewProps} from './view/props.js'
 import {ViewToolbar} from './view/toolbar.js'
-import {ScopeNotice} from './scope-notice.js'
 import {Notices} from './view/notices.js'
 
 /** A notice under the toolbar: a band of the raised surface, edge to edge, ruled off below by a hairline. */
@@ -183,6 +183,8 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
                 labels={{before: beforeLabel, after: afterLabel}}
                 fill={fill}
                 paneLabels={paneLabels}
+                legend={false}
+                foot={<StageFoot projection={p} summary={on('summary')} legend scope={on('changesOnly')} />}
                 utility={view === 'renderer' && floating}
                 renderStatus={pane => (
                   <RendererPaneStatus
@@ -205,13 +207,13 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
               fill={fill}
               marks={marks}
               summary={on('summary')}
+              scope={on('changesOnly')}
               floating={floating}
               scrollTop={scrollTop}
             />
           )}
         </div>
-        {/* Without the summary bar, which says what the scope hides, a pill over the stage says it. */}
-        {on('changesOnly') && !on('summary') && <ScopeNotice projection={p} />}
+        <UpdatingChip projection={p} running={props.running} rendererShown={view === 'renderer'} />
         {props.details !== 'none' && (
           <DetailCard
             projection={p}
@@ -226,7 +228,6 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
           />
         )}
       </div>
-      {on('summary') && <SummaryBar projection={p} />}
     </ScopedRoot>
   )
 }

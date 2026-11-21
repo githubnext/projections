@@ -53,7 +53,6 @@ for (const [mode, query, expected] of [
   test(`the ${mode} toolbar keeps its layout rules from 1600px to 320px`, async ({page}) => {
     test.slow()
     await open(page, query)
-    const seen = new Set<string>()
     for (let width = 1600; width >= 320; width -= 20) {
       await setWidth(page, width)
       const at = `at ${width}px`
@@ -66,13 +65,8 @@ for (const [mode, query, expected] of [
         expect(geometry.rows[1]!.playbackOnly, at).toBe(true)
         expect(geometry.slider!, at).toBeGreaterThanOrEqual(0.8 * geometry.rows[1]!.width)
       }
-      // A centred mode region sits at the row's centre, 24px or more from the regions beside it.
-      if (geometry.rows[0]!.centred) {
-        expect(Math.abs(geometry.cluster!.offset), at).toBeLessThanOrEqual(1)
-        expect(geometry.cluster!.clearance, at).toBeGreaterThanOrEqual(24)
-        expect(geometry.rows[0]!.collapsed, at).toBe(false)
-      }
-      seen.add(`centred ${geometry.rows[0]!.centred}`)
+      // The mode region is never centred: it follows the pickers at the row's start.
+      expect(geometry.rows[0]!.centred, at).toBe(false)
       // Every control a person aims at is as tall as the others.
       expect(new Set(geometry.heights.map(control => control.height)), `${at}: ${JSON.stringify(geometry.heights)}`).toEqual(new Set([32]))
       // The content below starts right under the toolbar's hairline: the chrome is flat, with no gutter between them.
@@ -107,9 +101,6 @@ for (const [mode, query, expected] of [
         at,
       ).toBe(true)
     }
-    // Each centres the mode region (in the table view, the scope alone) on a wide toolbar and moves it after the
-    // pickers on a narrow one.
-    expect([...seen].sort()).toEqual(['centred false', 'centred true'])
   })
 
 test('mode icons never look like playback: Animated is a clapperboard, distinct from the play, pause and step icons', async ({page}) => {
@@ -188,36 +179,6 @@ async function expectMenuLooksLikeAButton(menu: Locator) {
     .toBe(true)
 }
 
-test('the mode region is centred while the row has room, then follows the pickers, with hysteresis', async ({page}) => {
-  await open(page, 'before=v1&after=v3&mode=diff')
-  const centred = () =>
-    page
-      .locator('.ph-toolbar-row')
-      .first()
-      .evaluate(row => row.hasAttribute('data-centred'))
-  let width = 1600
-  await setWidth(page, width)
-  expect(await centred()).toBe(true)
-  // Narrowing from a centred row, it stays centred exactly while it fits, so the boundary is found coarsely and then
-  // in 4px steps from just above it, narrowing from a centred row again (widening would need the hysteresis).
-  while ((await centred()) && width > 320) await setWidth(page, (width -= 20))
-  await setWidth(page, 1600)
-  width += 20
-  await setWidth(page, width)
-  expect(await centred()).toBe(true)
-  while ((await centred()) && width > 320) await setWidth(page, (width -= 4))
-  const geometry = await toolbarGeometry(page)
-  // It gives up the centre before it would come within 24px of the pickers or the actions: next to the pickers, in
-  // its fullest forms.
-  expect(geometry.rows[0]!.collapsed).toBe(false)
-  expect(geometry.cluster!.clearance).toBeLessThan(24)
-  // Growing within the 24px hysteresis keeps it there; past it, it is centred again.
-  await setWidth(page, width + 12)
-  expect(await centred()).toBe(false)
-  await setWidth(page, width + 4 + 24 + 4)
-  expect(await centred()).toBe(true)
-})
-
 test('choosing Animated keeps the mode switch where it is: playback takes a second row', async ({page}) => {
   for (const width of [1400, 1000]) {
     await open(page, 'before=v1&after=v3&mode=diff')
@@ -233,30 +194,24 @@ test('choosing Animated keeps the mode switch where it is: playback takes a seco
   }
 })
 
-test('with nothing at its start, the mode region is centred in every mode, and returns to the centre as the toolbar widens', async ({
-  page,
-}) => {
-  // A view with no toolbarStart (as the CLI viewer and the Copilot canvas show a comparison): the row's first cell is empty.
+test('with nothing at its start, the mode region leads the row at its left inset in every mode, at any width', async ({page}) => {
+  // A view with no toolbarStart (as the CLI viewer, the Copilot canvas and a gallery show a comparison).
   await page.setViewportSize({width: 1400, height: 800})
   await page.goto(story('default-ui-projection-view--comparison'))
   await expect(page.locator('.ph[data-renderer-status="ready"]')).toBeVisible()
   const placement = async () => {
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
     const geometry = await toolbarGeometry(page)
-    return {centred: geometry.rows[0]!.centred, offset: Math.abs(geometry.cluster!.offset), rows: geometry.rows.length}
+    return {centred: geometry.rows[0]!.centred, inset: geometry.cluster!.left - geometry.left}
   }
-  for (const [mode, rows] of [
-    ['Diff', 1],
-    ['Animated', 2],
-  ] as const) {
+  for (const mode of ['Diff', 'Animated'] as const) {
     await page.getByRole('radio', {name: mode}).first().click()
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
-    await page.setViewportSize({width: 1400, height: 800})
-    expect(await placement(), mode).toEqual({centred: true, offset: expect.any(Number), rows})
-    expect((await placement()).offset, mode).toBeLessThanOrEqual(1)
-    await page.setViewportSize({width: 700, height: 800})
-    expect((await placement()).centred, `${mode} at 700px`).toBe(false)
-    await page.setViewportSize({width: 1400, height: 800})
-    expect((await placement()).centred, `${mode} back at 1400px`).toBe(true)
+    for (const width of [1400, 700]) {
+      await page.setViewportSize({width, height: 800})
+      const {centred, inset} = await placement()
+      expect(centred, `${mode} at ${width}px`).toBe(false)
+      expect(inset, `${mode} at ${width}px`).toBeLessThanOrEqual(8)
+    }
   }
 })

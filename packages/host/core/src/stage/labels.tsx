@@ -145,7 +145,7 @@ export function PaneChip({
 }) {
   // A pane under a host's header can rest at a fractional offset: the chip keeps its edges on whole pixels.
   const chip = useRef<HTMLHeadingElement & HTMLSpanElement>(null)
-  useWholePixels(chip)
+  useWholePixels(chip, {width: true})
   return (
     <Element
       ref={chip}
@@ -179,6 +179,8 @@ export function PaneChip({
         background: 'var(--ph-pane-chip-bg, var(--ph-utility-bg, var(--projections-color-surface-header, #f6f8fa)))',
         color: 'var(--ph-pane-chip-fg, var(--projections-color-fg-subtle, #818b98))',
         border: 'var(--ph-pane-chip-border, var(--ph-utility-border, 1px solid var(--projections-color-divider, #d1d9e0)))',
+        backdropFilter: 'var(--ph-utility-backdrop, none)',
+        WebkitBackdropFilter: 'var(--ph-utility-backdrop, none)',
       }}
       {...titleOf(children)}
     >

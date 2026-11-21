@@ -42,6 +42,11 @@ export interface ToolbarContent {
   playback: boolean
   /** The actions present, which can move into More one at a time. */
   actions: readonly ToolbarAction[]
+  /**
+   * The sides layout: one row, the mode region always at its start (after the start content) and the actions at its
+   * end, never centred, and playback never in the toolbar (it floats on the stage).
+   */
+  sides?: boolean
 }
 
 // The mode switch is icons only (each mode's name is its tooltip and accessible name) until it collapses to a menu.
@@ -58,9 +63,8 @@ export const signature = (plan: ToolbarPlan) =>
 /**
  * The plans the toolbar tries, most spacious first. With playback (animated mode, or the table and text views), the
  * playback group always has a second row to itself, with a slider spanning at least 80% of it, so choosing Animated
- * never moves the controls above it. Row 1 holds the start region, the mode region and the actions. With a mode region,
- * it is first centred on the row in its fullest forms, then follows the start region; then the row collapses in
- * priority order: the pickers become compact triggers, the mode switch (icons only) a dropdown, the actions move into
+ * never moves the controls above it. Row 1 holds the start region, the mode region after it (at the row's start when
+ * there is no start region) and the actions at its end; the row collapses in priority order: the pickers become compact triggers, the mode switch (icons only) a dropdown, the actions move into
  * More one at a time (`actionCollapseOrder`), and finally the pickers merge into one compare button. Row 2
  * independently keeps the steps and percent inline, in the group's overflow, or in More, whichever keeps its slider at
  * 80%. Without playback the single row follows the same order.
@@ -78,14 +82,14 @@ export function toolbarPlans(content: ToolbarContent): ToolbarPlan[] {
   const plans: ToolbarPlan[] = []
   const playbacks = ['full', 'compact', 'minimal'] as const
   const cluster = 'start' as const
-  const centred = {cluster: 'centre', pair: 'full', mode: 'icons', more: []} as const
-  if (content.playback) {
+  if (content.sides) {
+    // The sides layout: one row, the mode region at its start, collapsing in the same order.
+    for (const config of row) plans.push({rows: 1, cluster, ...config, playback: 'full'})
+  } else if (content.playback) {
     // Playback always has row 2 to itself. Row 1 is tried in each form with each playback form before it collapses
-    // further: first the mode region centred, then after the start region.
-    if (content.modes) plans.push(...playbacks.map(playback => ({rows: 2 as const, ...centred, playback})))
+    // further.
     plans.push(...row.flatMap(config => playbacks.map(playback => ({rows: 2 as const, cluster, ...config, playback}))))
   } else {
-    if (content.modes) plans.push({rows: 1, ...centred, playback: 'full'})
     for (const config of row) plans.push({rows: 1, cluster, ...config, playback: 'full'})
   }
   const seen = new Set<string>()

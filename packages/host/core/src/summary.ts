@@ -156,9 +156,18 @@ export function fitSummary(widths: readonly number[], available: number, more: n
  * Follows how many summary figures fit in a bar (`fitSummary`) as it resizes. The bar draws every figure once more in
  * a hidden measuring row: elements marked `data-summary-measure` holding one `data-summary-figure` per figure, in
  * order, and a `data-summary-more` button. Content marked `data-summary-fixed` (such as the varied toggle) always
- * stays in the bar and takes its room first, at the end and as much again at the start, so the figures stay centred. `key` changes whenever the figures' text does.
+ * stays in the bar and takes its room first, at the end and as much again at the start, so the figures stay centred,
+ * with the padding of the element marked `data-summary-trail` that holds it and the gaps between the bar's own items;
+ * the "…" itself, when it is one of them, is marked `data-summary-overflow`.
+ * `key` changes whenever the figures' text does.
+ * `room` is the element whose width the bar may take, for a bar sized to its content.
  */
-export function useSummaryFit(bar: RefObject<HTMLElement | null>, count: number, key: string): number {
+export function useSummaryFit(
+  bar: RefObject<HTMLElement | null>,
+  count: number,
+  key: string,
+  room?: RefObject<HTMLElement | null>,
+): number {
   const [shown, setShown] = useState(count)
   useLayoutEffect(() => {
     const element = bar.current
@@ -170,12 +179,36 @@ export function useSummaryFit(bar: RefObject<HTMLElement | null>, count: number,
       const style = element.ownerDocument.defaultView?.getComputedStyle(element)
       const padding = style ? parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) : 0
       const gap = style ? parseFloat(style.columnGap) || 0 : 0
+      // The fixed content at its full width: measured with the bar out of its tight form (below).
+      element.removeAttribute('data-tight')
       const fixed = [...element.querySelectorAll<HTMLElement>('[data-summary-fixed]')].reduce(
         (sum, item) => sum + item.getBoundingClientRect().width + gap,
         0,
       )
       // The figures sit centred: the room the fixed content takes at the end is kept free at the start too.
-      const available = element.clientWidth - padding - 2 * fixed
+      // A bar as wide as its content (in a floating foot) fits to the room it may grow to (`room`), not to itself, and
+      // keeps no room at its start: it grows to fit its figures, so they are centred anyway.
+      const holder = element.parentElement
+      // The bar's own width unrounded (`clientWidth` rounds): a bar as wide as its content fits it exactly.
+      const borders = style ? parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth) : 0
+      const width = room?.current
+        ? room.current.clientWidth - (holder ? holder.offsetWidth - holder.clientWidth : 0)
+        : element.getBoundingClientRect().width - borders
+      const view = element.ownerDocument.defaultView
+      const trail = element.querySelector<HTMLElement>('[data-summary-trail]')
+      const trailStyle = trail && view?.getComputedStyle(trail)
+      const trailPadding = trailStyle ? parseFloat(trailStyle.paddingLeft) + parseFloat(trailStyle.paddingRight) : 0
+      // The gaps between the bar's items in its row: not the measuring row (out of it), the fixed content or the "…"
+      // (`data-summary-overflow`), whose gaps are counted with them.
+      const items = [...element.children].filter(
+        child => view?.getComputedStyle(child).position !== 'absolute' && !child.matches('[data-summary-fixed], [data-summary-overflow]'),
+      ).length
+      const gaps = gap * Math.max(0, items - 1)
+      // A hair to spare: fractional widths summed can land a little past an exact fit.
+      const available = width - padding - gaps - (room?.current ? 1 : 2) * (fixed + trailPadding) + 0.5
+      // Too narrow for even the "…" beside the fixed content: the bar is tight, and the fixed content's words give way
+      // (summary-bar.tsx cuts them with an ellipsis) so nothing overlaps the "…".
+      if (available < more + gap) element.setAttribute('data-tight', '')
       setShown(
         fitSummary(
           figures.map(figure => figure.getBoundingClientRect().width),
@@ -187,7 +220,8 @@ export function useSummaryFit(bar: RefObject<HTMLElement | null>, count: number,
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(element)
+    if (room?.current) observer.observe(room.current)
     return () => observer.disconnect()
-  }, [bar, count, key])
+  }, [bar, count, key, room])
   return Math.min(shown, count)
 }

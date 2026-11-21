@@ -466,3 +466,15 @@
 .phv-info[data-active]::after {
   background: var(--vscode-errorForeground, #f85149);
 }
+/* Playback in the stage's utility area (`utilityArea`): the group spans its bar, and the slider takes what's left. */
+.phv-utility-playback {
+  box-sizing: border-box;
+  display: flex;
+  min-width: 0;
+}
+.phv-utility-playback .phv-playback {
+  flex: 1 1 auto;
+}
+.phv-utility-playback .phv-playback .phv-progress {
+  min-width: 64px;
+}

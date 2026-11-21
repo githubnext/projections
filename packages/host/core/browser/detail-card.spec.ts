@@ -18,13 +18,17 @@ async function open(page: Page, query: string) {
   await view(page).scrollIntoViewIfNeeded()
 }
 
-/** Bounding boxes of the stage, toolbar and frames, rounded to whole pixels. */
+/**
+ * Bounding boxes of the stage, toolbar and frames, rounded to whole pixels, from the view's top: the story's evidence
+ * above the view (the selection and its anchor) can wrap onto more lines as it changes, which moves the view with it.
+ */
 async function layout(page: Page) {
+  const origin = (await view(page).boundingBox())!.y
   const boxes = async (locator: Locator) =>
     Promise.all(
       (await locator.all()).map(async element => {
         const box = await element.boundingBox()
-        return box && [box.x, box.y, box.width, box.height].map(Math.round).join(',')
+        return box && [box.x, box.y - origin, box.width, box.height].map(Math.round).join(',')
       }),
     )
   return {

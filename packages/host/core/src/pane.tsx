@@ -31,6 +31,8 @@ export interface PaneState {
   capabilities?: RendererCapabilities
   /** The progress the renderer last acknowledged painting. */
   rendered?: number
+  /** The `init` that acknowledgement answers: until the pane catches up with a new one, `rendered` is the old one's. */
+  renderedInit?: InitPayload
   steps: number[]
   /** How many step slots the renderer's presentation spans, when it reports more than its steps. */
   stepSlots?: number
@@ -124,6 +126,8 @@ export function RendererPane(props: RendererPaneProps) {
     onState(state)
   }, [state, onState])
 
+  // The init the frame was last given, so an acknowledgement records the one it answers.
+  const initialized = useRef(init)
   const url = renderer.url
   const title = props.label ? `${renderer.title} renderer, ${props.label}` : `${renderer.title} renderer`
   const titleRef = useRef(title)
@@ -148,7 +152,7 @@ export function RendererPane(props: RendererPaneProps) {
           setState(previous => ({...previous, status: 'failed', message: event.message}))
           break
         case 'rendered':
-          setState(previous => ({...previous, rendered: event.progress}))
+          setState(previous => ({...previous, rendered: event.progress, renderedInit: initialized.current}))
           break
         case 'steps':
           setState(({stepSlots: _slots, ...previous}) => ({
@@ -244,11 +248,10 @@ export function RendererPane(props: RendererPaneProps) {
   useEffect(() => {
     frame.current?.setFill(fill)
   }, [fill])
-  const initialized = useRef(init)
   useEffect(() => {
     if (initialized.current === init) return
     initialized.current = init
-    setState(({rendered: _rendered, stepSlots: _slots, ...previous}) => ({...previous, steps: []}))
+    setState(({rendered: _rendered, renderedInit: _init, stepSlots: _slots, ...previous}) => ({...previous, steps: []}))
     frame.current?.setInit(init, latest.current.progress)
   }, [init])
   useEffect(() => {

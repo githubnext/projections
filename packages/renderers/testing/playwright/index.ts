@@ -13,6 +13,7 @@ import type {FilterPayload, RendererOptions} from '@githubnext/projections-rende
 import type {FixturesInspector, InspectorOptions} from './server.js'
 import {startInspector} from './server.js'
 import {bounded, StageRecord} from './bounded.js'
+import {framesSinceNavigation, stageNeedsFreshPage} from './frames.js'
 import type {
   CheckId,
   CheckResult,
@@ -52,7 +53,11 @@ export function scenarioKeys(path: string): string[] {
 
 async function stagePage(page: Page, inspector: FixturesInspector): Promise<void> {
   if (!page.url().startsWith(inspector.page({view: 'stage'}).split('#')[0]!)) {
+    framesSinceNavigation(page)
     await page.goto(inspector.page({view: 'stage'}))
+  } else if (stageNeedsFreshPage(page)) {
+    // A fresh document releases the frames WebKit kept (see `framesPerStagePage`).
+    await page.reload()
   }
   await page.waitForFunction(
     () => document.documentElement.dataset.projectionsStage === 'ready' || document.documentElement.dataset.projectionsStage === 'failed',

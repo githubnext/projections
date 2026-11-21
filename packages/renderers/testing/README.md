@@ -275,7 +275,10 @@ test('cards never overlap while scrubbing', async ({page, inspector}) => {
   `'after'`: one held pane of side by side or swipe, as a host presents it at
   progress 0 or 1), `width`, and `height` (a fixed frame height the frame fills,
   as a tab or pane gives one; by default the frame follows the height the
-  renderer asks for). It resolves once the renderer has painted.
+  renderer asks for). It resolves once the renderer has painted. In WebKit,
+  which keeps every removed frame until its page navigates, it reloads the stage
+  page after it has started 8 frames, so a spec that loads many scenarios in one
+  page stays bounded in memory; page state from before is gone.
 - The handle: `frame` (the renderer document), `iframe`, `subject`,
   `seek(progress, options?)` (resolves after the renderer acknowledges that
   exact progress), `scrub(progresses, check)`, `select(id)`, `hover(id)`,

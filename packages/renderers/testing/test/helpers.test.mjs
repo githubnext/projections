@@ -668,3 +668,36 @@ test('a stage request the page never answers fails, naming it, the scenario and 
       /status ready, renderer graph, diff, progress 1, painted 1, asked for 1217px; it last answered state/.test(error.message),
   )
 })
+
+/** A page that emits Playwright's frame events, in an engine named `engine`. */
+function fakePage(engine) {
+  const listeners = {frameattached: [], framenavigated: []}
+  const main = {name: 'main'}
+  return {
+    main,
+    on: (event, listener) => listeners[event].push(listener),
+    mainFrame: () => main,
+    context: () => ({browser: () => ({browserType: () => ({name: () => engine})})}),
+    emit: (event, frame) => listeners[event].forEach(listener => listener(frame)),
+  }
+}
+
+test('a WebKit stage page starts over once it has started framesPerStagePage frames since it navigated', async () => {
+  const {framesPerStagePage, framesSinceNavigation, stageNeedsFreshPage} = await import('../dist/playwright/frames.js')
+  const webkit = fakePage('webkit')
+  assert.equal(framesSinceNavigation(webkit), 0)
+  for (let index = 0; index < framesPerStagePage - 1; index++) webkit.emit('frameattached', {})
+  // A renderer frame navigating (to its opened document) is not the page navigating.
+  webkit.emit('framenavigated', {})
+  assert.equal(stageNeedsFreshPage(webkit), false)
+  webkit.emit('frameattached', {})
+  assert.equal(stageNeedsFreshPage(webkit), true)
+  webkit.emit('framenavigated', webkit.main)
+  assert.equal(framesSinceNavigation(webkit), 0)
+  assert.equal(stageNeedsFreshPage(webkit), false)
+
+  const chromium = fakePage('chromium')
+  framesSinceNavigation(chromium)
+  for (let index = 0; index < framesPerStagePage * 4; index++) chromium.emit('frameattached', {})
+  assert.equal(stageNeedsFreshPage(chromium), false)
+})

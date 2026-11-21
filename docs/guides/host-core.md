@@ -60,6 +60,22 @@ three groups of fields:
   `setChangesOnly`, `setVariedOnly`, `setRegeneratedOnly`, `setSearch`,
   `select`, `hover`, `setRenderer`, `setControl`, `runAction`, and `openSource`.
 
+**Status events.** A host that waits on the renderer listens to the core instead
+of observing the view's DOM:
+
+- `onRendererStatusChange(status)` is called with `rendererStatus` whenever it
+  changes, and with the first (`none`, `loading`, `ready` or `failed`): say, to
+  swap a poster image for the live view once it is `ready`, or keep the poster
+  when it `failed`.
+- `paint` (`PaintState`, the pure `paintState(controller)`) says whether the
+  frames show what is asked: `painting` until every shown pane has acknowledged
+  painting it (in two-pane modes the before pane its start and the after pane
+  its end, in Animated the current progress), then `painted`.
+- `onPainted({mode, progress})` is called once each time the frames settle on
+  what is shown while paused: after a load, a mode change, a seek or the end of
+  playback. For a host that captures the projection, or reveals it, only once it
+  is drawn.
+
 `ProjectionStage({projection, labels?, paneLabels?, hidden?, stackBelow?, renderStatus?, legend?, fill?})`
 mounts and coordinates the sandboxed frames for the active comparison mode:
 

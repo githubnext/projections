@@ -370,8 +370,9 @@ transition and the bar, default `toolbarHysteresis`, 24px), a plan's identity
 which plans keep a control in use mounted (`lock`) and the widest bar a plan
 suits (`ceiling`).
 
-The core owns the lifecycle: needs measured as rendered, before paint, cached
-until `key` changes; a ResizeObserver on the bar and on its
+The core owns the lifecycle, an explicit machine (`fitPlanLifecycle`, see
+[State machines](state-machines.md)): needs measured as rendered, before paint,
+cached until `key` changes; a ResizeObserver on the bar and on its
 `data-toolbar-region` elements, so a growing block replans; `data-fit-settled`
 on the bar once a plan settles, at that width in whole pixels; no replanning
 between a pointer's press and its click, so the pressed control isn't remounted;

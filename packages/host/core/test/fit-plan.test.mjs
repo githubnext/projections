@@ -1,6 +1,8 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
+import {explore} from '@githubnext/projections-machine/testing'
 import {chooseFitPlan, toolbarHysteresis} from '../dist/index.js'
+import {fitPlanLifecycle} from '../dist/fit-plan/lifecycle.js'
 
 const plans = ['full', 'compact', 'minimal']
 const needs = {full: 600, compact: 450, minimal: 300}
@@ -79,4 +81,70 @@ test('a growing label replans: its plan stops fitting and a narrower one is trie
   assert.equal(settle(), 'compact')
   bar.width = 524
   assert.equal(settle(), 'full')
+})
+
+/** Sends events in order to the bar's lifecycle. */
+function run(state, ...events) {
+  for (const event of events) state = fitPlanLifecycle.transition(state, event).state
+  return state
+}
+const fresh = {kind: 'planning', plan: 'wide', settled: 'wide', width: 0, run: 0, hand: 'free', frame: false}
+
+test('a press is not replanned away before its click: focus that moves during it replans once it is released', () => {
+  const locked = run(fresh, {type: 'resized', width: 800}, {type: 'fitted', plan: 'narrow', locked: true})
+  assert.equal(locked.kind, 'settled')
+  // As WebKit does, the press moves focus out of the bar: the replan waits for the release.
+  const held = run(locked, {type: 'pressed'}, {type: 'moved'})
+  assert.equal(held.kind, 'held')
+  assert.equal(fitPlanLifecycle.activities(held).length, 0)
+  const released = run(held, {type: 'released'})
+  assert.equal(released.kind, 'releasing')
+  assert.deepEqual(fitPlanLifecycle.activities(released), [{type: 'machine.after', key: 'replan', ms: 0, event: {type: 'replan'}}])
+  // Released, it measures again (a new run) with the plan it kept.
+  assert.deepEqual(run(released, {type: 'replan'}), {...released, kind: 'planning', run: locked.run + 1})
+  // Without a lock, focus moving plans nothing.
+  const free = run(fresh, {type: 'fitted', plan: 'wide', locked: false})
+  assert.equal(run(free, {type: 'moved'}), free)
+})
+
+test('a resize waits for the next frame, and the bar is measured again at its width there', () => {
+  const settled = run(fresh, {type: 'resized', width: 800}, {type: 'fitted', plan: 'wide', locked: false})
+  const observed = run(settled, {type: 'observed'})
+  assert.deepEqual(fitPlanLifecycle.activities(observed), [{type: 'frame', key: 'frame'}])
+  assert.equal(run(observed, {type: 'observed'}), observed)
+  const {locked: _, ...planned} = settled
+  assert.deepEqual(run(observed, {type: 'frame', width: 400}), {...planned, kind: 'planning', width: 400, run: 1, frame: false})
+})
+
+test("every state of the bar's lifecycle", () => {
+  explore(fitPlanLifecycle, {
+    from: fresh,
+    events: [
+      {type: 'resized', width: 400},
+      {type: 'tried', plan: 'narrow'},
+      {type: 'fitted', plan: 'wide', locked: true},
+      {type: 'fitted', plan: 'narrow', locked: false},
+      {type: 'observed'},
+      {type: 'frame', width: 800},
+      {type: 'moved'},
+      {type: 'pressed'},
+      {type: 'released'},
+    ],
+    // The runs count up without bound: a state is the same with any count.
+    key: state => JSON.stringify({...state, run: undefined}),
+    depth: 8,
+    invariants: {
+      'a replan waits while a pointer is pressed': state => state.kind !== 'releasing' || state.hand === 'free',
+      'a held replan waits for a press': state => state.kind !== 'held' || state.hand === 'pressing',
+      'a frame is asked for only after a resize': state =>
+        fitPlanLifecycle.activities(state).some(activity => activity.type === 'frame') === state.frame,
+    },
+    transitions: {
+      'a plan changes only by planning': ({from, to}) => from.plan === to.plan || to.kind === 'planning' || to.plan === to.settled,
+      'a press never starts a replan': ({event, to, from}) =>
+        event.type !== 'pressed' || to.kind !== 'planning' || from.kind === 'planning',
+      'measuring again counts a run': ({event, from, to}) => !['frame', 'replan'].includes(event.type) || to.run === from.run + 1,
+    },
+    complete: true,
+  })
 })

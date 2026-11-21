@@ -1,12 +1,14 @@
 // A bar's planned layout, headless: the bar's UI owns its plans, how they are measured and its policy; this owns the
 // measurement cache, the observation, the settled marker, the interaction lock and focus retention.
 
-import {useEffect, useLayoutEffect, useRef, useState} from 'react'
+import {useEffect, useLayoutEffect, useRef} from 'react'
+import {useMachine} from '@githubnext/projections-machine/react'
 import type {RefObject} from 'react'
 import {flushSync} from 'react-dom'
 import {chooseFitPlan, toolbarHysteresis} from './fit-plan/choose.js'
 import {fitWidth} from './fit-plan/fit-width.js'
 import {useFocusRetention} from './fit-plan/focus.js'
+import {fitPlanLifecycle} from './fit-plan/lifecycle.js'
 
 export {chooseFitPlan, toolbarHysteresis} from './fit-plan/choose.js'
 export type {FitChoice, FitHysteresis} from './fit-plan/choose.js'
@@ -65,17 +67,22 @@ export function useFitPlan<T>(
       const index = list.findIndex(item => sign(item) === sign(plan))
       return index < 0 ? 0 : index
     })
-  const [state, setState] = useState<{plan: T; width: number; tick: number}>(() => ({plan: plans[0]!, width: 0, tick: 0}))
-  const memo = useRef({
-    key,
-    needs: new Map<string, number>(),
-    ceilings: new Map<string, number>(),
-    settled: plans[0]!,
-    locked: false,
-    steps: 0,
-    burst: '',
+  const memo = useRef({key, needs: new Map<string, number>(), ceilings: new Map<string, number>(), steps: 0, burst: ''})
+  const [state, send, actor] = useMachine(fitPlanLifecycle, {
+    state: {kind: 'planning', plan: plans[0]!, settled: plans[0]!, width: 0, run: 0, hand: 'free', frame: false},
+    activities: {
+      // Replanning inside the observer's callback would resize observed elements mid-delivery (a ResizeObserver loop),
+      // so it waits for the next frame, and renders synchronously there, before that frame's layout and paint.
+      frame: (_activity, {send}) => {
+        const handle = requestAnimationFrame(() => {
+          const element = bar.current
+          if (element) flushSync(() => send({type: 'frame', width: Math.round(element.getBoundingClientRect().width)}))
+        })
+        return () => cancelAnimationFrame(handle)
+      },
+    },
   })
-  const index = find(plans, state.plan)
+  const index = find(plans, state.plan as T)
   const plan = plans[index]!
   const {lock, ceiling, measure = fitWidth, hysteresis = toolbarHysteresis} = options
   const latest = useRef({sign, find, lock, ceiling, measure, hysteresis})
@@ -94,18 +101,16 @@ export function useFitPlan<T>(
     const width = element.getBoundingClientRect().width
     if (Math.round(width) !== state.width) {
       // What a plan needs may depend on the width (say, a slider's minimum): render with it before measuring.
-      delete element.dataset.fitSettled
-      setState(previous => ({...previous, width: Math.round(width)}))
+      send({type: 'resized', width: Math.round(width)})
       return
     }
     m.needs.set(sign(plan), Math.ceil(measure(element, plan)))
     if (ceiling) m.ceilings.set(sign(plan), ceiling(element, plan))
     const lock = lockOf?.(element, plan)
-    m.locked = Boolean(lock)
     const target = chooseFitPlan({
       plans,
       width,
-      settled: find(plans, m.settled),
+      settled: find(plans, actor.getState().settled as T),
       need: candidate => m.needs.get(sign(candidate)),
       ceiling: candidate => m.ceilings.get(sign(candidate)),
       hysteresis: typeof hysteresis === 'number' ? hysteresis : (from, to) => hysteresis(from, to, element),
@@ -122,41 +127,33 @@ export function useFitPlan<T>(
     }
     const known = m.needs.has(sign(plans[target]!))
     const switches = known ? ++m.steps : m.steps
-    if (target !== index && (!known || switches <= 4 || (!fits(plan) && switches <= 4 + plans.length))) {
-      delete element.dataset.fitSettled
-      setState(previous => ({...previous, plan: plans[target]!}))
-    } else {
-      m.settled = plan
-      element.dataset.fitSettled = String(Math.round(width))
-    }
-  }, [bar, plans, plan, index, key, state.width, state.tick])
+    if (target !== index && (!known || switches <= 4 || (!fits(plan) && switches <= 4 + plans.length)))
+      send({type: 'tried', plan: plans[target]!})
+    else send({type: 'fitted', plan, locked: Boolean(lock)})
+  }, [bar, send, actor, plans, plan, index, key, state.width, state.run])
+
+  // Once a plan settles, the bar says at what width, so a test can wait for it.
+  useLayoutEffect(() => {
+    const element = bar.current
+    if (!element) return
+    if (state.kind === 'planning') delete element.dataset.fitSettled
+    else element.dataset.fitSettled = String(state.width)
+  }, [bar, state.kind, state.width])
 
   // Replan when the bar or one of its regions changes size.
   const observer = useRef<ResizeObserver | undefined>(undefined)
   useLayoutEffect(() => {
     const element = bar.current
     if (!element) return
-    // Replanning inside the observer's callback would resize observed elements mid-delivery (a ResizeObserver loop),
-    // so it waits for the next frame, and renders synchronously there, before that frame's layout and paint.
-    let frame = 0
-    const resize = new ResizeObserver(() => {
-      if (frame) return
-      frame = requestAnimationFrame(() => {
-        frame = 0
-        flushSync(() =>
-          setState(previous => ({...previous, width: Math.round(element.getBoundingClientRect().width), tick: previous.tick + 1})),
-        )
-      })
-    })
+    const resize = new ResizeObserver(() => send({type: 'observed'}))
     observer.current = resize
     resize.observe(element)
     return () => {
-      cancelAnimationFrame(frame)
       resize.disconnect()
       observer.current = undefined
       observed.current = new Set()
     }
-  }, [bar])
+  }, [bar, send])
   const observed = useRef(new Set<Element>())
   useLayoutEffect(() => {
     const resize = observer.current
@@ -168,47 +165,26 @@ export function useFitPlan<T>(
     observed.current = regions
   })
 
-  // Once focus leaves a control kept in use, plan again, but not between a pointer's press and its click: trying
-  // other plans then would remount the control being clicked (WebKit moves focus away on press).
+  // Focus moving and a pointer's press and release, for the lock (`fitPlanLifecycle`).
   useEffect(() => {
     const document = bar.current?.ownerDocument
     if (!document) return
-    let timer: ReturnType<typeof setTimeout> | undefined
-    let pressed = false
-    let pending = false
-    const replan = () => {
-      clearTimeout(timer)
-      timer = setTimeout(() => setState(previous => ({...previous, tick: previous.tick + 1})), 0)
-    }
-    const moved = () => {
-      if (!memo.current.locked) return
-      if (pressed) pending = true
-      else replan()
-    }
-    const press = () => {
-      pressed = true
-    }
-    const release = () => {
-      pressed = false
-      if (pending) {
-        pending = false
-        replan()
-      }
-    }
+    const moved = () => send({type: 'moved'})
+    const press = () => send({type: 'pressed'})
+    const release = () => send({type: 'released'})
     document.addEventListener('focusin', moved)
     document.addEventListener('focusout', moved)
     document.addEventListener('pointerdown', press, true)
     document.addEventListener('pointerup', release, true)
     document.addEventListener('pointercancel', release, true)
     return () => {
-      clearTimeout(timer)
       document.removeEventListener('focusin', moved)
       document.removeEventListener('focusout', moved)
       document.removeEventListener('pointerdown', press, true)
       document.removeEventListener('pointerup', release, true)
       document.removeEventListener('pointercancel', release, true)
     }
-  }, [bar])
+  }, [bar, send])
 
   useFocusRetention(bar, options.focusFallbacks)
 

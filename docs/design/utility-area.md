@@ -72,6 +72,13 @@ keep clear of it with no new measuring. With the floating playback as well, the
 two share the bar, the host's content first. Side by side and swipe keep their
 pane chips there, as they do without it.
 
+The foot takes a host's content as well, through the view's `foot`: the foot's
+first row, over the legend and the summary, in the same overlay with one rule
+between them. A caption there sits where the eye ends up, next to the legend
+that explains the drawing, rather than over its top. It covers the frames like
+the rest of the foot, in every mode, so renderers keep clear of it through
+`stage-inset-bottom`.
+
 ## The toolbar around it: the sides layout
 
 With playback on the stage, the toolbar keeps one row in a fixed order: at its

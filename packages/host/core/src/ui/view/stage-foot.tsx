@@ -1,5 +1,5 @@
 import {useRef} from 'react'
-import type {CSSProperties} from 'react'
+import type {CSSProperties, ReactNode} from 'react'
 import type {ProjectionController} from '../../projection.js'
 import {ProjectionLegend} from '../../stage/legend.js'
 import {utilitySide} from '../../stage/utility.js'
@@ -53,18 +53,21 @@ export function StageFoot({
   summary,
   legend,
   scope = false,
+  host,
 }: {
   projection: ProjectionController
   summary: boolean
   legend: boolean
   scope?: boolean
+  /** The host's own content (`ProjectionViewProps.foot`), the foot's first row, a rule under it when more follows. */
+  host?: ReactNode
 }) {
   const room = useRef<HTMLDivElement>(null)
   const foot = useRef<HTMLDivElement>(null)
   useWholePixels(foot, {width: true})
   // Mounted even while empty (hidden), so a legend that arrives later is measured and sent as a cover at once.
   const scoped = scope && !summary ? scopeNoticeText(p) : undefined
-  const empty = !summary && !scoped && !(legend && p.legend?.items.length)
+  const empty = !host && !summary && !scoped && !(legend && p.legend?.items.length)
   return (
     <div
       ref={room}
@@ -99,6 +102,7 @@ export function StageFoot({
           WebkitBackdropFilter: 'var(--ph-utility-backdrop, none)',
         }}
       >
+        {host && <div className="ph-stage-foot-host pj:min-w-0 pj:border-b pj:border-divider pj:last:border-b-0">{host}</div>}
         {legend && <ProjectionLegend projection={p} style={legendInFoot} />}
         {summary && <SummaryBar projection={p} room={room} anchor={foot} className="pj:bg-transparent pj:first:h-7 pj:first:border-t-0" />}
         {scoped && <ScopeRow projection={p} text={scoped} />}

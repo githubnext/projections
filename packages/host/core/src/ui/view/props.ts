@@ -170,6 +170,13 @@ export interface ProjectionViewProps {
    */
   utility?: ReactNode
   /**
+   * The host's own content at the stage's foot (`ProjectionStageProps.foot`), over the renderer's frames in every mode:
+   * a caption, say. It is the foot's first row, over the legend and the summary, in the same overlay with one rule
+   * between them; alone, it is the whole foot. It covers the frames like the legend does, so renderers keep clear of it
+   * (`stage-inset-bottom`). The table and text views, which pad their end for the summary's row, don't show it.
+   */
+  foot?: ReactNode
+  /**
    * When playback shows (`ViewControlsOptions.playbackInViews`): `animated` (the default), in the Animated mode only,
    * beside every view; `always`, also beside the table and text views in every other mode.
    */

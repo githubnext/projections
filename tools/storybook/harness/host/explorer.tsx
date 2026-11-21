@@ -39,6 +39,14 @@ const caption = (
   </div>
 )
 
+/** `?footCaption`: a host's own content at the stage's foot (`ProjectionViewProps.foot`), over the legend. */
+const footCaption = (
+  <div className="demo-foot-caption" style={{padding: '6px 12px', lineHeight: '20px'}}>
+    <strong style={{display: 'block', fontSize: 14}}>Checkout gains a payments queue</strong>
+    <span style={{display: 'block', fontSize: 12, opacity: 0.75}}>A host’s caption at the stage’s foot</span>
+  </div>
+)
+
 export function HostHarness() {
   usePageStyles(styles)
   const [schema, setSchema] = useState<DomainSchema>(domainSchemas.find(value => value === params.get('schema')) ?? 'graph/v0')
@@ -194,6 +202,7 @@ export function HostHarness() {
             colorMode={colorMode}
             {...explorerOptions()}
             {...(params.has('caption') ? {utility: caption} : {})}
+            {...(params.has('footCaption') ? {foot: footCaption} : {})}
             onOpen={(path, line) => setOpened(`${path}${line ? `:${line}` : ''}`)}
             {...(params.get('details') === 'none' ? {details: 'none' as const} : {})}
             {...(params.has('evidenceLinks') ? {evidenceLink} : {})}

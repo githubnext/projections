@@ -68,6 +68,7 @@ export interface ComparisonExplorerProps
       | 'actions'
       | 'utilityArea'
       | 'utility'
+      | 'foot'
       | 'fill'
       | 'className'
     > {
@@ -183,6 +184,7 @@ export function ComparisonExplorer(props: ComparisonExplorerProps) {
           {...(props.actions ? {actions: props.actions} : {})}
           {...(props.utilityArea !== undefined ? {utilityArea: props.utilityArea} : {})}
           {...(props.utility ? {utility: props.utility} : {})}
+          {...(props.foot ? {foot: props.foot} : {})}
           {...(props.controlValues ? {controlValues: props.controlValues} : {})}
           {...(props.onControlChange ? {onControlChange: props.onControlChange} : {})}
           {...(props.onAction ? {onAction: props.onAction} : {})}

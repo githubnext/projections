@@ -168,7 +168,7 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
                 fill={fill}
                 paneLabels={paneLabels}
                 legend={false}
-                foot={<StageFoot projection={p} summary={on('summary')} legend scope={on('changesOnly')} />}
+                foot={<StageFoot projection={p} summary={on('summary')} legend scope={on('changesOnly')} host={props.foot} />}
                 utility={view === 'renderer' ? stageUtility(props.utility, floating) : undefined}
                 renderStatus={pane => (
                   <RendererPaneStatus

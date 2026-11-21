@@ -58,58 +58,65 @@ interface Reading {
   smallest: number
 }
 
-/** Every entity's bounds against the stage: the scroll container's client area, within the frame's viewport. */
-const read = (frame: Frame) =>
-  frame.evaluate((): Reading => {
-    const scroller = document.querySelector<HTMLElement>('[data-projections-scroll]')!
-    const rect = scroller.getBoundingClientRect()
-    const left = Math.max(0, rect.left + scroller.clientLeft),
-      top = Math.max(0, rect.top + scroller.clientTop)
-    const right = Math.min(innerWidth, rect.left + scroller.clientLeft + scroller.clientWidth)
-    const bottom = Math.min(innerHeight, rect.top + scroller.clientTop + scroller.clientHeight)
-    const entities = [...document.querySelectorAll<Element>('[data-entity-id]')].filter(element => {
-      const box = element.getBoundingClientRect()
-      return (box.width > 0 || box.height > 0) && getComputedStyle(element).visibility !== 'hidden'
-    })
-    const outside = entities
-      .filter(element => {
+/**
+ * Every entity's bounds against the stage: the scroll container's client area, within the frame's viewport. A graph
+ * shows "Laying out the graph…" without a stage until its layout lands, which can be after the renderer is ready: wait
+ * for the stage, and measure it in the same task that finds it (`waitForFunction` resolves only on a reading).
+ */
+const read = async (frame: Frame): Promise<Reading> =>
+  (
+    await frame.waitForFunction((): Reading | null => {
+      const scroller = document.querySelector<HTMLElement>('[data-projections-scroll]')
+      if (!scroller) return null
+      const rect = scroller.getBoundingClientRect()
+      const left = Math.max(0, rect.left + scroller.clientLeft),
+        top = Math.max(0, rect.top + scroller.clientTop)
+      const right = Math.min(innerWidth, rect.left + scroller.clientLeft + scroller.clientWidth)
+      const bottom = Math.min(innerHeight, rect.top + scroller.clientTop + scroller.clientHeight)
+      const entities = [...document.querySelectorAll<Element>('[data-entity-id]')].filter(element => {
         const box = element.getBoundingClientRect()
-        return box.left < left - 1 || box.top < top - 1 || box.right > right + 1 || box.bottom > bottom + 1
+        return (box.width > 0 || box.height > 0) && getComputedStyle(element).visibility !== 'hidden'
       })
-      .map(element => {
-        const box = element.getBoundingClientRect()
-        return `${element.getAttribute('data-entity-id')} [${[box.left, box.top, box.right, box.bottom].map(Math.round)}] in [${[left, top, right, bottom].map(Math.round)}]`
-      })
-    let smallest = Infinity
-    const walker = document.createTreeWalker(scroller, NodeFilter.SHOW_TEXT)
-    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-      const element = node.parentElement
-      if (!element || !node.textContent?.trim() || !element.getClientRects().length) continue
-      let scale = 1
-      if (element instanceof SVGGraphicsElement) {
-        const matrix = element.getScreenCTM()
-        if (!matrix) continue
-        scale = Math.hypot(matrix.a, matrix.b)
-      } else if (element instanceof HTMLElement && !element.closest('svg')) {
-        if (element.offsetWidth <= 1 || element.offsetHeight <= 1) continue
-        for (let above: Element | null = element; above; above = above.parentElement) {
-          const transform = getComputedStyle(above).transform
-          if (transform && transform !== 'none') {
-            const matrix = new DOMMatrix(transform)
-            scale *= Math.hypot(matrix.a, matrix.b)
+      const outside = entities
+        .filter(element => {
+          const box = element.getBoundingClientRect()
+          return box.left < left - 1 || box.top < top - 1 || box.right > right + 1 || box.bottom > bottom + 1
+        })
+        .map(element => {
+          const box = element.getBoundingClientRect()
+          return `${element.getAttribute('data-entity-id')} [${[box.left, box.top, box.right, box.bottom].map(Math.round)}] in [${[left, top, right, bottom].map(Math.round)}]`
+        })
+      let smallest = Infinity
+      const walker = document.createTreeWalker(scroller, NodeFilter.SHOW_TEXT)
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const element = node.parentElement
+        if (!element || !node.textContent?.trim() || !element.getClientRects().length) continue
+        let scale = 1
+        if (element instanceof SVGGraphicsElement) {
+          const matrix = element.getScreenCTM()
+          if (!matrix) continue
+          scale = Math.hypot(matrix.a, matrix.b)
+        } else if (element instanceof HTMLElement && !element.closest('svg')) {
+          if (element.offsetWidth <= 1 || element.offsetHeight <= 1) continue
+          for (let above: Element | null = element; above; above = above.parentElement) {
+            const transform = getComputedStyle(above).transform
+            if (transform && transform !== 'none') {
+              const matrix = new DOMMatrix(transform)
+              scale *= Math.hypot(matrix.a, matrix.b)
+            }
           }
-        }
-      } else continue
-      smallest = Math.min(smallest, parseFloat(getComputedStyle(element).fontSize) * scale)
-    }
-    return {
-      smallest: Math.round(smallest * 100) / 100,
-      zoom: scroller.getAttribute('data-zoom'),
-      scale: document.querySelector('[data-scale]')?.getAttribute('data-scale') ?? null,
-      entities: entities.length,
-      outside,
-    }
-  })
+        } else continue
+        smallest = Math.min(smallest, parseFloat(getComputedStyle(element).fontSize) * scale)
+      }
+      return {
+        smallest: Math.round(smallest * 100) / 100,
+        zoom: scroller.getAttribute('data-zoom'),
+        scale: document.querySelector('[data-scale]')?.getAttribute('data-scale') ?? null,
+        entities: entities.length,
+        outside,
+      }
+    })
+  ).jsonValue() as Promise<Reading>
 
 /** Readings of every shown frame once two consecutive ones agree (resizes and refits settle). */
 async function settled(page: Page) {

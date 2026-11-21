@@ -12,7 +12,7 @@ import {harnessInspector} from '@githubnext/projections-renderer-harness/playwri
  * the frame at its old height anyway.
  */
 async function delayResizes(page: Page, delay: number): Promise<void> {
-  await page.addInitScript(delay => {
+  await page.addInitScript(lateMs => {
     const style = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'style')!
     const proxies = new WeakMap<CSSStyleDeclaration, CSSStyleDeclaration>()
     Object.defineProperty(HTMLElement.prototype, 'style', {
@@ -28,7 +28,7 @@ async function delayResizes(page: Page, delay: number): Promise<void> {
               return typeof value === 'function' ? value.bind(target) : value
             },
             set: (target, key, value) => {
-              if (key === 'height' && /^\d+px$/.test(String(value))) setTimeout(() => Reflect.set(target, key, value, target), delay)
+              if (key === 'height' && /^\d+px$/.test(String(value))) setTimeout(() => Reflect.set(target, key, value, target), lateMs)
               else Reflect.set(target, key, value, target)
               return true
             },
@@ -58,12 +58,12 @@ for (const delay of [1500, 10_000]) {
  * frame comes `delay` ms late.
  */
 async function delayResizeObservations(page: Page, delay: number): Promise<void> {
-  await page.addInitScript(delay => {
+  await page.addInitScript(lateMs => {
     if (window === window.top) return
     const Observer = window.ResizeObserver
     window.ResizeObserver = class extends Observer {
       constructor(callback: ResizeObserverCallback) {
-        super((entries, observer) => setTimeout(() => callback(entries, observer), delay))
+        super((entries, observer) => setTimeout(() => callback(entries, observer), lateMs))
       }
     }
   }, delay)

@@ -28,7 +28,7 @@ export interface Language {
 export const linguistRelease = release
 
 const cache = new Map<number, Language>()
-function language(index: number | undefined): Language | undefined {
+function languageAt(index: number | undefined): Language | undefined {
   if (index === undefined) return undefined
   const known = cache.get(index)
   if (known) return known
@@ -49,13 +49,13 @@ const own = (record: Readonly<Record<string, number>>, key: string) => (Object.h
 export function languageOfPath(path: string): Language | undefined {
   const name = path.slice(path.lastIndexOf('/') + 1)
   const byName = own(filenames, name) ?? own(filenames, name.toLowerCase())
-  if (byName !== undefined) return language(byName)
+  if (byName !== undefined) return languageAt(byName)
   const lower = name.toLowerCase()
   for (let dot = lower.indexOf('.', 1); dot >= 0; dot = lower.indexOf('.', dot + 1)) {
     const found = own(extensions, lower.slice(dot + 1))
-    if (found !== undefined) return language(found)
+    if (found !== undefined) return languageAt(found)
   }
-  return lower.startsWith('.') ? language(own(extensions, lower.slice(1))) : undefined
+  return lower.startsWith('.') ? languageAt(own(extensions, lower.slice(1))) : undefined
 }
 
 /** Names other tools use for languages Linguist names differently (tokei's, as code-statistics reports them). */
@@ -75,7 +75,7 @@ const otherNames: Record<string, string> = {
 export function languageNamed(name: string): Language | undefined {
   const key = name.trim().toLowerCase()
   const index = own(aliases, key) ?? own(aliases, otherNames[key]?.toLowerCase() ?? '')
-  return language(index)
+  return languageAt(index)
 }
 
 /**

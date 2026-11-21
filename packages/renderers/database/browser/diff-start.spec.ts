@@ -25,8 +25,8 @@ test('a diff whose only change is a relationship opens on the row the link leave
   const key = 'relation:FK_InvoiceLines_Invoices_InvoiceId'
   const before = {...invoicing, relationships: invoicing.relationships.filter(row => row.id !== key)}
   const renderer = await openDiff(page, before, invoicing)
-  const shown = await renderer.frame.locator('.database-view').evaluate((view, key) => {
-    const link = view.querySelector<SVGPathElement>(`[data-entity-id="${CSS.escape(key)}"][data-change] path.database-link`)!
+  const shown = await renderer.frame.locator('.database-view').evaluate((view, id) => {
+    const link = view.querySelector<SVGPathElement>(`[data-entity-id="${CSS.escape(id)}"][data-change] path.database-link`)!
     const start = new DOMPoint(link.getPointAtLength(0).x, link.getPointAtLength(0).y).matrixTransform(link.getScreenCTM()!)
     const area = view.getBoundingClientRect()
     return start.x >= area.left && start.x <= area.right && start.y >= area.top && start.y <= area.bottom

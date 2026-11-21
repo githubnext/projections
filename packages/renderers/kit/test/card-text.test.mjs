@@ -149,7 +149,7 @@ test("a card's kind line makes room for its icon, and only a known icon takes ro
   assert.equal(graphCardWidth(one(), {kindLine, icon: () => 'no-such-icon'}), plain)
   // Either revision's icon keeps the room, so the card never resizes while scrubbing.
   const row = {before: {id: 'a', kind: 'service', label: 'api'}, after: {id: 'a', kind: 'service', label: 'api', data: {icon: 'cpu'}}}
-  const icon = entity => entity.data?.icon
+  const icon = revision => revision.data?.icon
   assert.equal(graphCardWidth(row, {kindLine, icon}), graphCardWidth(one(), {kindLine, icon: () => 'cpu'}))
   // In the diff, the kind line starts after the icon.
   const card = diffCardText({after: row.after, kind: {text: 'Service'}, icon: true})

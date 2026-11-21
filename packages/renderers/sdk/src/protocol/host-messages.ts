@@ -2,7 +2,6 @@
 import {parseAnnotations} from './annotation-marks.js'
 import {comparisonModes} from './comparison-modes.js'
 import type {ComparisonMode} from './comparison-modes.js'
-import {rendererLimits} from './frame.js'
 import type {RendererTheme} from './frame.js'
 import {focus, parseKinds} from './init-fields.js'
 import {environment} from './environment.js'

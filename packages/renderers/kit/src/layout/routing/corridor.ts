@@ -78,8 +78,8 @@ function corridorAttempt(ctx: RoutingContext, segment: Segment, own: readonly st
   const route = (value: number, jog: number, turn: number, beat = Infinity): Attempt | undefined => {
     if (turn - jog < 2 * routeRadius) return undefined
     const course = [start, at(jog, across(start)), at(jog, value), at(turn, value), at(turn, across(end)), end]
-    const route = smoothRoute(course, axis, {lead: segment.lead})
-    if (!route || !clear(route, own)) return undefined
+    const smoothed = smoothRoute(course, axis, {lead: segment.lead})
+    if (!smoothed || !clear(smoothed, own)) return undefined
     const close = crowded(jog, across(start), value) + crowded(turn, value, across(end))
     const base =
       close * 1e3 + Math.abs(value - across(start)) + Math.abs(value - across(end)) + Math.abs(jog - first) + Math.abs(turn - last)
@@ -91,7 +91,7 @@ function corridorAttempt(ctx: RoutingContext, segment: Segment, own: readonly st
       const other = others[index]!
       if (
         quickCross(
-          route,
+          smoothed,
           other.route!,
           [end, other.end!, ...(other.from === segment.from ? [start] : [])],
           other.from === segment.from ? 6 : 3,
@@ -111,7 +111,7 @@ function corridorAttempt(ctx: RoutingContext, segment: Segment, own: readonly st
       Math.abs(value - across(end)) +
       Math.abs(jog - first) +
       Math.abs(turn - last)
-    return {route, score, close, value, crossings}
+    return {route: smoothed, score, close, value, crossings}
   }
   return {route, crowded}
 }

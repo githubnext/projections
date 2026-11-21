@@ -1,7 +1,6 @@
 import type {Entity, Relationship} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import type {ComparisonModel} from './model.js'
-import {entityPresence} from './emphasis.js'
 
 /**
  * A comparison indexed for domain renderers (from `useDomainIndex`): rows keyed by identity, and relationship rows

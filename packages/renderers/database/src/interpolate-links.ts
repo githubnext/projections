@@ -4,7 +4,6 @@ import {lerp, redrawPresence, smooth, VISIBLE} from './fading.js'
 import type {FrameLink, FrameTable} from './frame.js'
 import {selfLoop, sideX, turnRoom} from './links.js'
 import type {LinkShape} from './links.js'
-import type {fades} from './stages.js'
 import {nearest} from './interpolate.js'
 import type {Placed, Stage, Staged} from './interpolate.js'
 

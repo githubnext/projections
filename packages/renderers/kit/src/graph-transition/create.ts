@@ -110,7 +110,7 @@ export async function createGraphTransition(
 
   const frame = transitionFrame({entities, timing, stages, events, axis})
   const diff = union ? diffFrame(union, entities, edgeAliases) : frame(1)
-  return Object.assign(frame, {layouts: stages.filter((layout, index) => stages.indexOf(layout) === index), diff})
+  return Object.assign(frame, {layouts: stages.filter((stage, index) => stages.indexOf(stage) === index), diff})
 }
 
 /**

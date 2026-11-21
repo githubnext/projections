@@ -134,7 +134,7 @@ test("the definition's nouns (presentation.kinds) word its kinds over the render
 test('modules drawn only as boundaries round others are no summary figure; a kind with a card among them still is', async () => {
   const {boundaryNouns, comparisonModel, extractionModel} = await import('../dist/index.js')
   const {compare} = await import('./engine.mjs')
-  const model = async (before, after) => comparisonModel(before, after, await compare(before, after))
+  const model = async (from, to) => comparisonModel(from, to, await compare(from, to))
   const grouped = extraction(
     [
       {id: 'core', label: 'core', kind: 'module'},
@@ -163,8 +163,12 @@ test('a module each revision draws as a boundary but the diff union draws as a c
   // graph/storage-module: db and blobs move from the app module into a new storage module. Each revision draws every
   // module as a boundary, but in the union db and blobs have two parents, so app and storage are cards there.
   const scenarios = JSON.parse(await readFile(new URL('../../graph/scenarios.json', import.meta.url), 'utf8')).scenarios
-  const {before, after} = scenarios.find(scenario => scenario.id === 'storage-module')
-  const model = comparisonModel(before, after, await compare(before, after))
-  assert.deepEqual(boundaryNouns({...model, mode: 'extraction', before, after: before}, true), {module: false}, 'one revision')
+  const storage = scenarios.find(scenario => scenario.id === 'storage-module')
+  const model = comparisonModel(storage.before, storage.after, await compare(storage.before, storage.after))
+  assert.deepEqual(
+    boundaryNouns({...model, mode: 'extraction', before: storage.before, after: storage.before}, true),
+    {module: false},
+    'one revision',
+  )
   assert.deepEqual(boundaryNouns(model, true), {})
 })

@@ -18,7 +18,7 @@ import {
 import {cardWidths, compare, entity, extraction, relationship, sizedNodes} from './engine.mjs'
 
 const renderers = new URL('../../', import.meta.url)
-const options = {
+const rendererOptions = {
   graph: {},
   'graph-horizontal': {orientation: 'horizontal'},
   dag: {},
@@ -42,10 +42,15 @@ async function scenarioGraphs() {
       if (renderer === 'dependencies') continue
       for (const side of ['before', 'after', 'extraction']) {
         if (!scenario[side]) continue
-        const extraction = await load(scenario[side])
-        const junctions =
-          side === 'extraction' && extraction.schema === 'dag/v0' && extraction.entities.every(entity => entity.kind === 'job')
-        graphs.push({name: `${bundle}/${scenario.id} ${side}`, scenario, renderer, extraction, options: {...options[renderer], junctions}})
+        const revision = await load(scenario[side])
+        const junctions = side === 'extraction' && revision.schema === 'dag/v0' && revision.entities.every(node => node.kind === 'job')
+        graphs.push({
+          name: `${bundle}/${scenario.id} ${side}`,
+          scenario,
+          renderer,
+          extraction: revision,
+          options: {...rendererOptions[renderer], junctions},
+        })
       }
     }
   }
@@ -53,7 +58,8 @@ async function scenarioGraphs() {
 }
 
 /** A scenario as the renderers lay it out: cards as wide as the graph's text needs (see `graphCardsWidth`). */
-const layoutOf = async ({extraction, options}) => layoutGraph(await sizedNodes(extraction.entities), extraction.relationships, options)
+const layoutOf = async ({extraction: revision, options}) =>
+  layoutGraph(await sizedNodes(revision.entities), revision.relationships, options)
 const box = (layout, id) => {
   const point = layout.points.get(id),
     size = layout.sizes.get(id)
@@ -116,9 +122,9 @@ test('scenario layouts route every relationship around the cards, between the fa
 
 test('a graph whose routes into one card include some with their ends in line, which have no run to trade, lays out', async () => {
   // 43 modules and 84 imports where crossing routes into one card were swapped with trunks that included straight routes.
-  const extraction = JSON.parse(await readFile(new URL('fixtures/in-line-trunks.json', import.meta.url), 'utf8'))
-  const layout = await layoutGraph(await sizedNodes(extraction.entities), extraction.relationships, {})
-  assert.equal(layout.routes.size, extraction.relationships.length)
+  const trunks = JSON.parse(await readFile(new URL('fixtures/in-line-trunks.json', import.meta.url), 'utf8'))
+  const layout = await layoutGraph(await sizedNodes(trunks.entities), trunks.relationships, {})
+  assert.equal(layout.routes.size, trunks.relationships.length)
 })
 
 test('layout is deterministic: the same graph in any input order produces the same geometry', async () => {
@@ -138,7 +144,7 @@ test('layout is deterministic: the same graph in any input order produces the sa
 })
 
 test('service platform: the gateway sits over one of its children, so that relationship runs straight down', async () => {
-  for (const graph of (await scenarioGraphs()).filter(graph => graph.name.startsWith('graph/service-platform '))) {
+  for (const graph of (await scenarioGraphs()).filter(candidate => candidate.name.startsWith('graph/service-platform '))) {
     const layout = await layoutOf(graph)
     const gateway = layout.points.get('gateway')
     const below = graph.extraction.relationships.filter(edge => edge.from === 'gateway')
@@ -160,7 +166,7 @@ const flowSpan = (layout, id, orientation) => {
 }
 
 test('every layer has one baseline: cards side by side in a layer share their top (their left, left to right)', async () => {
-  for (const graph of (await scenarioGraphs()).filter(graph => !graph.options.compound)) {
+  for (const graph of (await scenarioGraphs()).filter(candidate => !candidate.options.compound)) {
     const layout = await layoutOf(graph)
     const orientation = graph.options.orientation ?? 'vertical'
     const cards = [...layout.points.keys()]
@@ -268,7 +274,7 @@ test('feature flags: level rows, each team over its flag with a straight route, 
 })
 
 test("a pipeline's shared prerequisites join and split at one point", async () => {
-  const graph = (await scenarioGraphs()).find(graph => graph.name === 'graph/release-workflow extraction')
+  const graph = (await scenarioGraphs()).find(candidate => candidate.name === 'graph/release-workflow extraction')
   const layout = await layoutOf(graph)
   assert.ok(layout.junctions.length > 0, 'the release workflow has a complete shared-prerequisite stage')
   for (const id of layout.shared) {
@@ -281,15 +287,19 @@ test("a pipeline's shared prerequisites join and split at one point", async () =
 })
 
 test('comparison layouts keep each relationship around the cards at Before, at After and while holding between steps', async () => {
-  for (const graph of (await scenarioGraphs()).filter(graph => graph.name.endsWith(' before'))) {
+  for (const graph of (await scenarioGraphs()).filter(candidate => candidate.name.endsWith(' before'))) {
     const after = (await scenarioGraphs()).find(other => other.name === graph.name.replace(/ before$/, ' after'))
     const model = comparisonModel(graph.extraction, after.extraction, await compare(graph.extraction, after.extraction))
     const transition = await createGraphTransition(model, scheduleSteps(model), graph.options)
     for (const [index, layout] of transition.layouts.entries()) {
       const edges = [...layout.routes.keys()].map(id => {
-        const relationship = model.relationships.find(row => row.id === id.replace(/:(before|after)$/, ''))
-        const side = id.endsWith(':before') ? relationship.before : (relationship.after ?? relationship.before)
-        const rows = id.endsWith(':before') ? model.entityRow.before : relationship.after ? model.entityRow.after : model.entityRow.before
+        const relationshipRow = model.relationships.find(candidate => candidate.id === id.replace(/:(before|after)$/, ''))
+        const side = id.endsWith(':before') ? relationshipRow.before : (relationshipRow.after ?? relationshipRow.before)
+        const rows = id.endsWith(':before')
+          ? model.entityRow.before
+          : relationshipRow.after
+            ? model.entityRow.after
+            : model.entityRow.before
         return {id, from: rows.get(side.from), to: rows.get(side.to)}
       })
       assert.deepEqual(layoutIssues(layout, edges, graph.options.orientation ?? 'vertical'), [], `${graph.name} layout ${index}`)
@@ -298,7 +308,7 @@ test('comparison layouts keep each relationship around the cards at Before, at A
 })
 
 test('extractions lay out once and never move', async () => {
-  const graph = (await scenarioGraphs()).find(graph => graph.name === 'graph/snapshot extraction')
+  const graph = (await scenarioGraphs()).find(candidate => candidate.name === 'graph/snapshot extraction')
   const model = extractionModel(graph.extraction)
   const transition = await createGraphTransition(model, [])
   assert.equal(transition.layouts.length, 1)
@@ -307,7 +317,7 @@ test('extractions lay out once and never move', async () => {
 
 test('while scrubbing, no visible relationship passes through a visible card, in either direction', async () => {
   const graphs = await scenarioGraphs()
-  for (const graph of graphs.filter(graph => graph.name.endsWith(' before'))) {
+  for (const graph of graphs.filter(candidate => candidate.name.endsWith(' before'))) {
     const after = graphs.find(other => other.name === graph.name.replace(/ before$/, ' after'))
     for (const [from, to] of [
       [graph.extraction, after.extraction],
@@ -322,7 +332,7 @@ test('while scrubbing, no visible relationship passes through a visible card, in
       for (let index = 0; index <= 400; index++) {
         const frame = transition(index / 400)
         const cards = frame.nodes.filter(node => !node.group && node.opacity > 0.5)
-        for (const edge of frame.edges.filter(edge => !edge.containment && edge.opacity > 0.5)) {
+        for (const edge of frame.edges.filter(candidate => !candidate.containment && candidate.opacity > 0.5)) {
           const points = sampleSpline(edge.points, 3)
           for (const card of cards) {
             if (card.id === edge.fromId || card.id === edge.toId) continue
@@ -474,7 +484,7 @@ test('a card that loses or gains its last relationship moves nothing else, and k
   for (const orientation of ['horizontal', 'vertical']) {
     for (const unlinking of [true, false]) {
       const name = `${orientation}, ${unlinking ? 'unlinking' : 'linking'}`
-      const ends = (other, then) => (unlinking ? [linked, other] : [other, linked])
+      const ends = other => (unlinking ? [linked, other] : [other, linked])
       // The rest moves no more than it would if the card were removed rather than left without relationships.
       const isolated = await places(...ends(graph([])), orientation)
       const removed = await places(...ends(graph([], ['x'])), orientation)
@@ -505,11 +515,11 @@ test('a card with no relationships a little off a column in another layer moves 
   // A card in the layer above, at 100; the unlinked card below it, at 100 + `offset`; perhaps a route beside it.
   const align = (offset, route) => {
     const above = {flow: span(0, 56), across: span(100, 300), card: true}
-    const box = {x: 100 + offset, y: 120, width: 200, height: 56}
-    const own = {flow: span(120, 176), across: span(box.x, box.x + 200), card: true}
+    const placed = {x: 100 + offset, y: 120, width: 200, height: 56}
+    const own = {flow: span(120, 176), across: span(placed.x, placed.x + 200), card: true}
     const blocks = [above, own, ...(route === undefined ? [] : [{flow: span(60, 300), across: span(route, route), card: false}])]
-    const reach = alignColumns(['u'], new Map([['u', box]]), new Map([['u', own]]), blocks, axes, 400)
-    return {x: box.x, reach}
+    const reach = alignColumns(['u'], new Map([['u', placed]]), new Map([['u', own]]), blocks, axes, 400)
+    return {x: placed.x, reach}
   }
   assert.equal(align(15).x, 100, 'moves left onto the column')
   assert.equal(align(-15).x, 100, 'moves right onto the column')
@@ -520,7 +530,7 @@ test('a card with no relationships a little off a column in another layer moves 
 })
 
 test('top to bottom, every card starts on a column line of one grid, in every layer of every scenario without boundaries', async () => {
-  for (const graph of (await scenarioGraphs()).filter(graph => !graph.options.compound && !graph.options.orientation)) {
+  for (const graph of (await scenarioGraphs()).filter(candidate => !candidate.options.compound && !candidate.options.orientation)) {
     const layout = await layoutOf(graph)
     const cards = [...layout.points.keys()].map(id => box(layout, id))
     const widths = cards.map(card => card.right - card.left).sort((a, b) => a - b)
@@ -584,7 +594,7 @@ test('a card with no relationships keeps its place while another arrives beside 
     const transition = await createGraphTransition(model, scheduleSteps(model), {orientation: 'horizontal'})
     const places = new Set()
     for (let index = 0; index <= 100; index++) {
-      const node = transition(index / 100).nodes.find(node => node.id === 'x')
+      const node = transition(index / 100).nodes.find(candidate => candidate.id === 'x')
       places.add(`${node.x},${node.y}`)
     }
     assert.equal(places.size, 1, `x stays put (${[...places]})`)
@@ -881,12 +891,14 @@ test('every arrowhead points into its target card, and its shaft arrives the sam
   const failures = []
   const check = (frame, label) => {
     const nodes = new Map(frame.nodes.map(node => [node.id, node]))
-    for (const edge of frame.edges.filter(edge => !edge.containment && nodes.has(edge.fromId) && nodes.has(edge.toId))) {
+    for (const edge of frame.edges.filter(
+      candidate => !candidate.containment && nodes.has(candidate.fromId) && nodes.has(candidate.toId),
+    )) {
       const from = nodes.get(edge.fromId),
         to = nodes.get(edge.toId)
       const arrow = drawnEdge(edge, from, to)
-      const box = cardBox(to)
-      const normal = inwardNormal(arrow.tip, box)
+      const target = cardBox(to)
+      const normal = inwardNormal(arrow.tip, target)
       // Head: from the middle of its flat base to its tip (its inner outline's corners are a corner radius inside).
       const [tip] = [...arrow.head.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map(match => ({
         x: Number(match[1]),
@@ -902,10 +914,10 @@ test('every arrowhead points into its target card, and its shaft arrives the sam
       const shaft = ((end.x - control.x) * normal.x + (end.y - control.y) * normal.y) / tangent
       const onFace =
         Math.min(
-          Math.abs(arrow.tip.y - box.y),
-          Math.abs(arrow.tip.y - box.y - box.height),
-          Math.abs(arrow.tip.x - box.x),
-          Math.abs(arrow.tip.x - box.x - box.width),
+          Math.abs(arrow.tip.y - target.y),
+          Math.abs(arrow.tip.y - target.y - target.height),
+          Math.abs(arrow.tip.x - target.x),
+          Math.abs(arrow.tip.x - target.x - target.width),
         ) < 0.75
       if (!(head > 0.9) || !(shaft > 0.999) || !onFace || Math.hypot(end.x - base.x, end.y - base.y) > 0.05) {
         failures.push(`${label} ${edge.key}: head ${head.toFixed(2)}, shaft ${shaft.toFixed(2)}, on face ${onFace}`)
@@ -935,7 +947,7 @@ test('every arrowhead points into its target card, and its shaft arrives the sam
 test('layout moves start and stop softly and span most of their step', async () => {
   const {motionWindow, stepWindows} = await import('../dist/index.js')
   const graphs = await scenarioGraphs()
-  for (const graph of graphs.filter(graph => graph.name.endsWith(' before'))) {
+  for (const graph of graphs.filter(candidate => candidate.name.endsWith(' before'))) {
     const after = graphs.find(other => other.name === graph.name.replace(/ before$/, ' after'))
     const model = comparisonModel(graph.extraction, after.extraction, await compare(graph.extraction, after.extraction))
     const schedule = scheduleSteps(model)

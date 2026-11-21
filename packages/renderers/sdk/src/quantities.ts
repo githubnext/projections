@@ -80,7 +80,7 @@ export function quantityGeometry(value: number | undefined, domain: QuantityDoma
  */
 export function quantityShares(values: readonly (number | undefined)[]): number[] | undefined {
   if (values.some(value => value === undefined || !Number.isFinite(value) || value < 0)) return undefined
-  const maximum = values.reduce<number>((maximum, value) => Math.max(maximum, value ?? 0), 0)
+  const maximum = values.reduce<number>((largest, value) => Math.max(largest, value ?? 0), 0)
   if (!maximum) return values.map(() => 0)
   const normalized = values.map(value => value! / maximum)
   const total = normalized.reduce((sum, value) => sum + value, 0)

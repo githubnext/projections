@@ -18,7 +18,7 @@ const engine = createNativeEngine()
 const fixture = name => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
 const compare = async (before, after) => comparisonModel(before, after, await engine.compare(before, after))
 const ids = view => view.model.entities.map(row => row.id)
-const row = (view, id) => view.model.entities.find(item => item.id === id)
+const viewRow = (view, id) => view.model.entities.find(item => item.id === id)
 const summaries = view => view.model.entities.filter(item => item.id.startsWith('transitive:'))
 const ownerOf = summary => summary.id.slice('transitive:'.length)
 
@@ -29,7 +29,7 @@ test('one revision shows the roots and their direct dependencies, with transitiv
   for (const id of ['package:express', 'package:zod', 'package:react', 'package:react-dom']) assert.ok(view.direct.has(id), id)
   assert.ok(!view.direct.has('workspace:@shop/web'), 'a workspace member stays a root')
   assert.ok(!ids(view).includes('package:body-parser'))
-  const express = row(view, 'transitive:package:express')
+  const express = viewRow(view, 'transitive:package:express')
   assert.match(express.after.label, /^\d+ more packages$/)
   assert.equal(express.status, 'unchanged')
   // Every installed package is either a card or counted in exactly one summary.
@@ -42,8 +42,8 @@ test('one revision shows the roots and their direct dependencies, with transitiv
   // Each summary hangs off the package that owns it.
   assert.ok(view.model.relationships.some(edge => edge.after?.from === 'package:express' && edge.after.to === 'transitive:package:express'))
   // Cards name workspaces and packages, not the extractor's kinds.
-  assert.equal(row(view, 'workspace:@shop/api').after.kind, 'workspace')
-  assert.equal(row(view, 'package:express').after.kind, 'package')
+  assert.equal(viewRow(view, 'workspace:@shop/api').after.kind, 'workspace')
+  assert.equal(viewRow(view, 'package:express').after.kind, 'package')
   // The same documents always present the same graph.
   assert.equal(
     JSON.stringify(dependencyView(extractionModel(extraction), [], new Set()).model.entities),
@@ -57,8 +57,8 @@ test('expanding a package shows what it pulls in; all shows every package and no
   const expanded = dependencyView(model, [], new Set(['package:express']))
   for (const id of ['package:body-parser', 'package:router', 'package:send']) assert.ok(ids(expanded).includes(id), id)
   // The summary's card stays, with the same ID and edge, to collapse what it counted.
-  const summary = row(closed, 'transitive:package:express').after
-  const collapse = row(expanded, 'transitive:package:express').after
+  const summary = viewRow(closed, 'transitive:package:express').after
+  const collapse = viewRow(expanded, 'transitive:package:express').after
   assert.equal(collapse.label, `Collapse ${summary.data.count} packages`)
   assert.deepEqual(collapse.data, {count: summary.data.count, expanded: true})
   assert.ok(expanded.model.relationships.some(edge => edge.after?.from === 'package:express' && edge.after.to === collapse.id))
@@ -77,11 +77,11 @@ test('collapsing an expanded package hides what it showed, and expanding it agai
   const nested = dependencyView(model, [], new Set(['package:express', 'package:body-parser']))
   const inner = ids(nested).find(id => id.startsWith('package:') && !ids(express).includes(id))
   assert.ok(inner, 'an expanded package inside an expanded one shows its packages')
-  assert.match(row(nested, 'transitive:package:body-parser').after.label, /^Collapse \d+ packages?$/)
+  assert.match(viewRow(nested, 'transitive:package:body-parser').after.label, /^Collapse \d+ packages?$/)
   // Collapsing express hides body-parser and everything it showed, back to express's summary.
   const collapsed = dependencyView(model, [], new Set(['package:body-parser']))
   assert.deepEqual(ids(collapsed), ids(closed))
-  assert.equal(row(collapsed, 'transitive:package:express').after.label, row(closed, 'transitive:package:express').after.label)
+  assert.equal(viewRow(collapsed, 'transitive:package:express').after.label, viewRow(closed, 'transitive:package:express').after.label)
   // Re-expanding express brings body-parser back expanded.
   assert.deepEqual(ids(dependencyView(model, [], new Set(['package:body-parser', 'package:express']))), ids(nested))
 })
@@ -183,7 +183,7 @@ function crossings(transition, progresses) {
   for (const progress of progresses) {
     const frame = transition(progress)
     const cards = frame.nodes.filter(node => !node.group && node.opacity > 0.5)
-    for (const edge of frame.edges.filter(edge => !edge.containment && edge.opacity > 0.5)) {
+    for (const edge of frame.edges.filter(candidate => !candidate.containment && candidate.opacity > 0.5)) {
       const points = sampleSpline(edge.points, 3)
       for (const card of cards) {
         if (card.id === edge.fromId || card.id === edge.toId) continue
@@ -226,12 +226,12 @@ test('while scrubbing a dependency graph, no visible relationship passes through
 })
 
 test('primary paths: each package keeps the edge that pulls it in and every added or removed dependency; the rest are counted on its card', async () => {
-  for (const [from, to] of [
+  for (const [beforeFixture, afterFixture] of [
     ['npm-workspace-v1', 'npm-workspace-v2'],
     ['npm-workspace-v2', 'npm-workspace-v3'],
     ['nuget-before', 'nuget-after'],
   ]) {
-    const model = await compare(fixture(from), fixture(to))
+    const model = await compare(fixture(beforeFixture), fixture(afterFixture))
     const every = dependencyView(model, scheduleSteps(model), new Set(), 'all')
     const primary = dependencyView(model, scheduleSteps(model), new Set(), 'primary')
     // The same packages: only edges are left out.

@@ -119,7 +119,10 @@ export function DependencyGraph(props: RendererProps) {
   )
 }
 
-const shows = (view: DependencyView, id: string) =>
-  view.model.entities.some(row => row.id === id) || view.model.relationships.some(row => row.id === id)
+function shows(view: DependencyView, id: string) {
+  return view.model.entities.some(row => row.id === id) || view.model.relationships.some(row => row.id === id)
+}
 
-const bumpStatus = (change: Parameters<typeof versionStatus>[0]) => versionStatus(change, {bump: true})
+function bumpStatus(change: Parameters<typeof versionStatus>[0]) {
+  return versionStatus(change, {bump: true})
+}

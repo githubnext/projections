@@ -5,7 +5,7 @@ const extraction = (entities, relationships) => ({protocolVersion: 0, schema: 'd
 export function invoicing({organizations}) {
   const entities = [],
     relationships = []
-  const table = (name, columns, {indexes = [], keys = ['Id'], references = []} = {}) => {
+  const table = (name, columns, {indexes: indexed = [], keys = ['Id'], references = []} = {}) => {
     const id = `table:${name}`
     entities.push({id, kind: 'table', label: name, evidence: [{kind: 'migration', source: `Migrations/${name}.cs`, location: {line: 12}}]})
     for (const [column, type, nullable = false] of columns) {
@@ -18,7 +18,7 @@ export function invoicing({organizations}) {
     for (const column of keys) {
       relationships.push({id: `key-column:PK_${name}.${column}`, kind: 'key-column', from: key, to: `column:${name}.${column}`})
     }
-    for (const column of indexes) {
+    for (const column of indexed) {
       const index = `index:IX_${name}_${column}`
       entities.push({id: index, kind: 'index', label: `IX_${name}_${column}`, data: {columns: [column]}})
       relationships.push({id: `index:${index}`, kind: 'index', from: id, to: index})

@@ -7,7 +7,6 @@ import type {SectionId, SectionSpec, Value} from './sections.js'
 
 /** Which revision a frame shows: `diff` draws both at once; a side-by-side pane or a single extraction shows one. */
 export type Side = 'diff' | 'before' | 'after'
-type Revision = 'before' | 'after'
 
 /** How an entry differs from the other revision: arrived, left, changed in place, or not at all. */
 export type Mark = 'added' | 'removed' | 'modified' | 'unchanged'
@@ -220,7 +219,7 @@ function categories(workflows: readonly WorkflowItem[], side: Side): MatrixCateg
 }
 
 /** A column's heading: the entry's name alone, without what an entry says about it. */
-const columnLabel = (value: Value) => {
+function columnLabel(value: Value) {
   const name = value.key.slice(value.key.indexOf(':') + 1)
   return value.key.startsWith('toolset:') ? `toolset \`${name}\`` : `\`${name}\``
 }

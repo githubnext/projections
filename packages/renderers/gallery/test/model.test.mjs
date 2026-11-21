@@ -81,7 +81,12 @@ test('nested renderers load a few at a time, each freeing its slot once', async 
   const {loadQueue} = await import('../node_modules/.cache/test/stage.js')
   const queue = loadQueue(2)
   const started = []
-  const slots = [0, 1, 2, 3].map(index => queue.acquire().then(free => (started.push(index), free)))
+  const slots = [0, 1, 2, 3].map(index =>
+    queue.acquire().then(free => {
+      started.push(index)
+      return free
+    }),
+  )
   await new Promise(setImmediate)
   assert.deepEqual(started, [0, 1])
   const first = await slots[0]

@@ -91,12 +91,12 @@ async function measure(target: Page, cells: BadgeCell[], density: number): Promi
       ),
     Object.values(tokens).filter(value => value.startsWith('url(')),
   )
-  await target.evaluate(cells => window.showBadges(cells), cells)
+  await target.evaluate(shown => window.showBadges(shown), cells)
   await expect(target.locator('.pk-svg-icon rect')).toHaveCount(cells.filter(cell => cell.kind === 'svg-icon').length)
   await target.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
   const boxes = await target.evaluate(
-    cells =>
-      cells.map(cell => {
+    shown =>
+      shown.map(cell => {
         const candidates =
           cell.kind === 'icon'
             ? document.querySelectorAll(`div > [data-icon="${cell.name}"]`)
@@ -109,7 +109,7 @@ async function measure(target: Page, cells: BadgeCell[], density: number): Promi
   )
   const shot = await target.screenshot({scale: 'device', fullPage: true})
   return target.evaluate(
-    async ([url, cells, boxes, glyphs, unit, discRadius, scale]) => {
+    async ([url, shownCells, shownBoxes, glyphPaths, unit, radius, scale]) => {
       const image = new Image()
       image.src = url
       await image.decode()
@@ -127,7 +127,8 @@ async function measure(target: Page, cells: BadgeCell[], density: number): Promi
       // A glyph's ink area, in square units, with its strokes drawn `width` wide: its own geometry, finely rasterised.
       const resolution = 24
       const reference = document.createElement('canvas')
-      reference.width = reference.height = unit * resolution
+      reference.width = unit * resolution
+      reference.height = unit * resolution
       const drawing = reference.getContext('2d', {willReadFrequently: true})!
       const inkArea = (paths: string[], width: number) => {
         drawing.setTransform(1, 0, 0, 1, 0, 0)
@@ -164,7 +165,7 @@ async function measure(target: Page, cells: BadgeCell[], density: number): Promi
       }
       // The stroke each glyph's ink area comes from, from half its drawn stroke to twice it.
       const strokeOf = new Map<string, (area: number) => number>()
-      for (const [name, {paths, stroke}] of Object.entries(glyphs)) {
+      for (const [name, {paths, stroke}] of Object.entries(glyphPaths)) {
         const widths = Array.from({length: 31}, (_, index) => stroke * (0.5 + index * 0.05))
         const areas = widths.map(width => inkArea(paths, width))
         strokeOf.set(name, area => {
@@ -174,14 +175,14 @@ async function measure(target: Page, cells: BadgeCell[], density: number): Promi
           return widths[index - 1]! + t * (widths[index]! - widths[index - 1]!)
         })
       }
-      return cells.map((cell, index) => {
-        const {x, y, size} = boxes[index]!
+      return shownCells.map((cell, index) => {
+        const {x, y, size} = shownBoxes[index]!
         const k = (size * scale) / unit
         const left = x * scale
         const top = y * scale
         const centre = {x: left + (size * scale) / 2, y: top + (size * scale) / 2}
         // Clear of the disc's own antialiased edge.
-        const inner = discRadius * k - 0.6
+        const inner = radius * k - 0.6
         let area = 0
         // The cut's darkest pixel in each column and row: an edge pixel's coverage places the edge within it.
         const columns = new Map<number, number>()
@@ -192,7 +193,7 @@ async function measure(target: Page, cells: BadgeCell[], density: number): Promi
             const cut = cutAt(column, row)
             area += cut
             // The box is taken further in, clear of the disc's edge as an SVG mask's resampled image blurs it at 1x.
-            if (Math.hypot(column + 0.5 - centre.x, row + 0.5 - centre.y) >= discRadius * k - 1.5) continue
+            if (Math.hypot(column + 0.5 - centre.x, row + 0.5 - centre.y) >= radius * k - 1.5) continue
             columns.set(column, Math.max(columns.get(column) ?? 0, cut))
             rows.set(row, Math.max(rows.get(row) ?? 0, cut))
           }
@@ -204,7 +205,7 @@ async function measure(target: Page, cells: BadgeCell[], density: number): Promi
           const [last, lastCut] = inked.at(-1)!
           return (first + 1 - firstCut + last + lastCut) / 2
         }
-        const {paths, stroke} = glyphs[cell.name]!
+        const {paths, stroke} = glyphPaths[cell.name]!
         return {
           name: cell.name,
           kind: cell.kind,

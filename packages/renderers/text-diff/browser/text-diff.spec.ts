@@ -133,13 +133,13 @@ test('with highlighting off the diff keeps every line, marker and box but loses 
   expect(off.tinted).toBe(0)
   expect(off.markers).toBeGreaterThan(0)
   expect(off.status).toBe(0)
-  const lines = await sides(renderer.frame)
+  const unhighlighted = await sides(renderer.frame)
   await renderer.seek(1, {highlighting: 1})
   const on = await decoration(renderer.frame)
   expect(on.tinted).toBe(off.markers)
   expect(on.status).toBe(4)
   expect(on.boxes, 'status words appear without moving anything').toEqual(off.boxes)
-  expect(await sides(renderer.frame)).toEqual(lines)
+  expect(await sides(renderer.frame)).toEqual(unhighlighted)
 })
 
 test('two columns keep unchanged lines aligned, and a narrow frame reads as one column', async ({page}, info) => {

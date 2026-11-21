@@ -86,16 +86,16 @@ export function layoutDiModel(model: DiModel, height: number = diMetrics.height)
   // Infinity minus Infinity is NaN, which a comparator must never return.
   const byBarycenter = (left: number, right: number) => (left === right ? 0 : left - right)
   for (let pass = 0; pass < 2; pass++) {
-    let index = indexOf()
+    const downward = indexOf()
     for (let depth = 1; depth < layers.length; depth++) {
       layers[depth]!.sort(
-        (a, b) => byBarycenter(barycenter(a, parents, index), barycenter(b, parents, index)) || order.get(a)! - order.get(b)!,
+        (a, b) => byBarycenter(barycenter(a, parents, downward), barycenter(b, parents, downward)) || order.get(a)! - order.get(b)!,
       )
     }
-    index = indexOf()
+    const upward = indexOf()
     for (let depth = layers.length - 2; depth >= 0; depth--) {
       layers[depth]!.sort(
-        (a, b) => byBarycenter(barycenter(a, children, index), barycenter(b, children, index)) || order.get(a)! - order.get(b)!,
+        (a, b) => byBarycenter(barycenter(a, children, upward), barycenter(b, children, upward)) || order.get(a)! - order.get(b)!,
       )
     }
   }

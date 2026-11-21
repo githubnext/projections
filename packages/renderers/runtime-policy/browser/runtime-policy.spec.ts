@@ -189,9 +189,9 @@ test('a policy library is a coverage map grouped by what each hook observes', as
 
 test('deployment facts: agent, kernels, warnings and the policies covering each workload', async ({page}) => {
   const deployment = (name: string) => fixture(`deployment/${name}.expected.json`)
-  const [before, after] = [deployment('before'), deployment('after')]
-  const comparison = await compareWithComparator(before, after, comparator)
-  const renderer = await open(page, {before, after, comparison, mode: 'diff'})
+  const [deploymentBefore, deploymentAfter] = [deployment('before'), deployment('after')]
+  const comparison = await compareWithComparator(deploymentBefore, deploymentAfter, comparator)
+  const renderer = await open(page, {before: deploymentBefore, after: deploymentAfter, comparison, mode: 'diff'})
   await layout(renderer)
   const frame = renderer.frame
   await expect(frame.locator('.pk-group-title')).toContainText(['Agent and kernels', 'Policies', 'Workloads'])
@@ -201,8 +201,8 @@ test('deployment facts: agent, kernels, warnings and the policies covering each 
   await expect(agent.locator('del.rp-old')).toHaveText('policy filter on')
   await expect(agent.locator('ins.rp-new')).toHaveText('policy filter off')
   await expect(agent.locator('.rp-status')).toContainText('Configuration changed')
-  const guard = frame.locator('[data-entity-id="policy:tetragon:TracingPolicyNamespaced:payments:shell-guard"]')
-  await expect(guard.locator('.rp-warning').first()).toContainText("The repository's CRD rejects this policy")
+  const shellGuard = frame.locator('[data-entity-id="policy:tetragon:TracingPolicyNamespaced:payments:shell-guard"]')
+  await expect(shellGuard.locator('.rp-warning').first()).toContainText("The repository's CRD rejects this policy")
   await expect(frame.locator('[data-entity-id="hook:kprobe:tcp_connect"] .rp-warning')).toHaveText(
     /Unavailable on general: tcp_connect is not a kernel symbol there\./,
   )

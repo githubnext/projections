@@ -29,7 +29,7 @@ export function moduleGroups(
       .map(node => node.id),
   )
   const parents = new Map<string, Set<string>>()
-  for (const edge of edges.filter(edge => edge.kind === 'contains')) {
+  for (const edge of edges.filter(candidate => candidate.kind === 'contains')) {
     const incoming = parents.get(edge.to) ?? new Set<string>()
     incoming.add(edge.from)
     parents.set(edge.to, incoming)

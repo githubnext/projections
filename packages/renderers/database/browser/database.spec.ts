@@ -229,7 +229,7 @@ test('keys and indexes are rows of their own tables, single-column keys are colu
     const {tags, cards} = await read()
     expect(tags, `nothing floats free of its table at ${progress}`).toBe(0)
     for (const card of cards) {
-      for (const row of card.rows.filter(row => row.visible)) {
+      for (const row of card.rows.filter(settled => settled.visible)) {
         expect(
           row.top >= card.box.top - 0.5 && row.bottom <= card.box.bottom + 0.5,
           `${card.id}'s settled rows stay inside it at ${progress}`,
@@ -316,12 +316,12 @@ test('table, column, type and key names are monospace; status stays whole in its
     ],
     relationships: columns.map(({id}) => ({id: `contains:${id}`, kind: 'contains', from: 'table:Ledger', to: id})),
   })
-  const before = schema([
+  const ledgerBefore = schema([
     {id: 'column:Ledger.Id', label: 'Id', type: 'uuid'},
     {id: 'column:Ledger.Reference', label: reference, type: 'character varying(64)'},
     {id: 'column:Ledger.Amount', label: 'Amount', type: 'numeric(12,2)'},
   ])
-  const after = schema([
+  const ledgerAfter = schema([
     {id: 'column:Ledger.Id', label: 'Id', type: 'uuid'},
     {id: 'column:Ledger.Reference', label: reference, type: 'character varying(128)'},
     {
@@ -331,7 +331,7 @@ test('table, column, type and key names are monospace; status stays whole in its
       previousIds: ['column:Ledger.Amount'],
     },
   ])
-  const renderer = await openRenderer(page, {renderer: 'database', before, after, progress: 0})
+  const renderer = await openRenderer(page, {renderer: 'database', before: ledgerBefore, after: ledgerAfter, progress: 0})
   let stated = 0
   await renderer.scrub(samples(20), async progress => {
     const rows = await renderer.frame.locator('.database-table').evaluate(table => {

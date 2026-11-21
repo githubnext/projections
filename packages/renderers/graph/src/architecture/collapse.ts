@@ -139,7 +139,8 @@ export function architectureView(
     extra.push(unchanged({id: card, kind: 'unchanged', label: components(members.length), data: {count: members.length, collapsed: true}}))
   }
   // A collapse card closes what the person opened: a whole boundary, or an open one's unchanged components.
-  for (const [id, total] of [...opened.map(id => [id, count(id)] as const), ...reopened.map(id => [id, rests.get(id)!.length] as const)]) {
+  const closing = [...opened.map(id => [id, count(id)] as const), ...reopened.map(id => [id, rests.get(id)!.length] as const)]
+  for (const [id, total] of closing) {
     const card = `${collapsePrefix}${id}`
     cards.set(card, {boundary: id, count: total, open: true, ...(rests.has(id) ? {rest: true} : {})})
     extra.push(unchanged({id: card, kind: 'collapse', label: `Collapse ${components(total)}`, data: {count: total, expanded: true}}))
@@ -203,7 +204,9 @@ export function architectureView(
   }
 }
 
-const components = (count: number) => `${count} ${count === 1 ? 'component' : 'components'}`
+function components(count: number) {
+  return `${count} ${count === 1 ? 'component' : 'components'}`
+}
 
 /** The rows a relationship row joins (its source, then its target), from whichever revision has it. */
 function ends(model: ComparisonModel, row: EntityChange<Relationship>): [string | undefined, string | undefined] {

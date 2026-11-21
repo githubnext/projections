@@ -47,7 +47,7 @@ export function statisticsMotion(
   }
 }
 
-export function signed(value: number, format: (value: number) => string = value => value.toLocaleString()): string {
+export function signed(value: number, format: (value: number) => string = amount => amount.toLocaleString()): string {
   return `${value > 0 ? '+' : value < 0 ? '−' : ''}${format(Math.abs(value))}`
 }
 

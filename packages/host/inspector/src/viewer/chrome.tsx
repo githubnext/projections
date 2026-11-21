@@ -2,7 +2,7 @@ import {useSyncExternalStore} from 'react'
 import type {ReactNode} from 'react'
 import {createRoot} from 'react-dom/client'
 import {ProjectionsMark, cn} from '@githubnext/projections-host/ui/components'
-import {InspectorHostProvider} from '../host.js'
+import {InspectorHostProvider, useInspectorHost} from '../host.js'
 import type {InspectorHost} from '../host.js'
 import {StartupShell} from '../mount.js'
 import type {SwitcherItem} from '../shell/switcher.js'
@@ -49,7 +49,7 @@ export type Store = ReturnType<typeof createStore>
 
 /**
  * The one-line header: the Projections mark and the projection's title, then at its end the status line and what is
- * compared. The mark takes no more height than the text's cap (styles.css), so the header keeps its height. What is
+ * compared (unless the host's own surface already says, `InspectorHost.revisionsNamed`). The mark takes no more height than the text's cap (styles.css), so the header keeps its height. What is
  * compared, an outline pill (two for named revisions), keeps its words up to about half the row, each pill shortening
  * with an ellipsis and saying its name in full on hover; the title takes the rest, and shortens first. Its text is centred by cap height
  * (styles.css). The title is also the menu of the repository's projections (`onChoose`, title.tsx). A host's own
@@ -69,6 +69,8 @@ export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactN
     : 'Projections'
   const line = failed ?? (status || notice)
   const noticed = !failed && !status && Boolean(notice)
+  // A surface that already names the revisions (`InspectorHost.revisionsNamed`) isn't told them again.
+  const named = useInspectorHost().revisionsNamed === true
   return (
     <header className="pi-viewer-header pj:relative pj:z-20 pj:flex pj:min-w-0 pj:shrink-0 pj:items-center pj:gap-3 pj:border-b pj:border-divider pj:bg-surface-header pj:px-3 pj:text-[13px]">
       <ProjectionsMark tone="two-tone" className="pi-viewer-mark pj:text-foreground" />
@@ -92,7 +94,7 @@ export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactN
           {line}
         </span>
       )}
-      {state?.projection && <Compared state={state} />}
+      {state?.projection && !named && <Compared state={state} />}
       {end}
       {stopped && <Stopped className="pj:absolute pj:inset-x-0 pj:top-full pj:h-dvh" />}
     </header>

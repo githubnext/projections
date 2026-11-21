@@ -22,9 +22,10 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # What runs (CONTRIBUTING.md#what-ci-runs): a pull request runs the jobs its change reaches, which `changes` works out
-# from the workspace and crate graph (tools/scripts/ci-plan.mjs). Pushes to main, the nightly run, a manual run, the
-# `ci:full` label and any change to CI itself, a toolchain, a lockfile, a root manifest or the repository's tooling run
-# everything. `ci-ok` is the one required check: it passes when every job passed or was left out.
+# by applying the rules in .github/ci-rules.json to the workspace and crate graph (tools/scripts/ci-plan.mjs). Pushes to
+# main, the nightly run, a manual run, the `ci:full` label and any change to CI itself, a toolchain, a lockfile, a root
+# manifest or the repository's tooling run everything. `ci-ok` is the one required check: it passes when every job
+# passed or was left out.
 jobs:
   changes:
     timeout-minutes: 10
@@ -32,19 +33,21 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
+    # By job ID, the rules' decision for each job (.github/ci-rules.json); public-product's is its matrix of runners.
     outputs:
       docs: ${{ steps.plan.outputs.docs }}
-      product: ${{ steps.plan.outputs.product }}
+      public-product: ${{ steps.plan.outputs.public-product }}
       verus: ${{ steps.plan.outputs.verus }}
       windows: ${{ steps.plan.outputs.windows }}
-      windows-node: ${{ steps.plan.outputs.windows_node }}
+      windows-node: ${{ steps.plan.outputs.windows-node }}
+      windows-integration: ${{ steps.plan.outputs.windows-integration }}
       package: ${{ steps.plan.outputs.package }}
-      release: ${{ steps.plan.outputs.release }}
+      release-config: ${{ steps.plan.outputs.release-config }}
       coverage: ${{ steps.plan.outputs.coverage }}
-      mutants: ${{ steps.plan.outputs.mutants }}
-      actions-lock: ${{ steps.plan.outputs.actions_lock }}
+      mutants-diff: ${{ steps.plan.outputs.mutants-diff }}
+      actions-lock: ${{ steps.plan.outputs.actions-lock }}
       browser: ${{ steps.plan.outputs.browser }}
-      browser-macos: ${{ steps.plan.outputs.browser_macos }}
+      browser-macos: ${{ steps.plan.outputs.browser-macos }}
     steps:
       # A pull request checks out its merge commit: its first parent is the base branch, so the change is HEAD^1..HEAD.
       - uses: actions/checkout@v6.1.0
@@ -64,16 +67,12 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           if [ "$EVENT" != pull_request ]; then
-            node tools/scripts/ci-plan.mjs --base HEAD --full "a $EVENT run"
+            node tools/scripts/ci-plan.mjs --base HEAD --event "$EVENT"
             exit
           fi
-          # Read now, not from the event, so that adding the label and re-running the workflow runs everything.
-          full=$(gh api "repos/$REPO/issues/$PR/labels" --jq 'any(.[]; .name == "ci:full")')
-          if [ "$full" = true ]; then
-            node tools/scripts/ci-plan.mjs --base HEAD^1 --full 'the ci:full label'
-          else
-            node tools/scripts/ci-plan.mjs --base HEAD^1
-          fi
+          # Read now, not from the event, so that adding a label and re-running the workflow takes effect.
+          labels=$(gh api "repos/$REPO/issues/$PR/labels" --jq 'map(.name) | join(",")')
+          node tools/scripts/ci-plan.mjs --base HEAD^1 --labels "$labels"
   # A change to documentation alone: the checks that read it, without a build.
   docs:
     needs: changes
@@ -102,13 +101,13 @@ jobs:
           npm run --silent check:links
   public-product:
     needs: changes
-    if: needs.changes.outputs.product != '[]'
+    if: needs.changes.outputs.public-product != '[]'
     timeout-minutes: 70
     strategy:
       fail-fast: false
       matrix:
-        # Linux for every change but documentation alone; macOS when the change isn't to browser code alone.
-        os: ${{ fromJson(needs.changes.outputs.product) }}
+        # The runners the rules choose: public-product's matrix in .github/ci-rules.json.
+        os: ${{ fromJson(needs.changes.outputs.public-product) }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6.1.0
@@ -230,7 +229,7 @@ jobs:
   # (pr-run-mode), so this also plans the release, as its first job would.
   release-config:
     needs: changes
-    if: needs.changes.outputs.release == 'true'
+    if: needs.changes.outputs.release-config == 'true'
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     steps:
@@ -334,7 +333,7 @@ jobs:
   # (.github/actions/action-e2e), as public-product runs it on Linux and macOS.
   windows-integration:
     needs: changes
-    if: needs.changes.outputs.windows-node == 'true'
+    if: needs.changes.outputs.windows-integration == 'true'
     timeout-minutes: 60
     runs-on: windows-2025
     steps:
@@ -430,7 +429,7 @@ jobs:
   # ~120 runner-minutes a pull request push. The weekly full run is engine-quality.yml.
   mutants-diff:
     needs: changes
-    if: github.event_name == 'pull_request' && needs.changes.outputs.mutants == 'true'
+    if: github.event_name == 'pull_request' && needs.changes.outputs.mutants-diff == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:

@@ -10,8 +10,8 @@ import type {PaneArrangement} from './arrangement.js'
 import {PaneBand, PaneChip} from './labels.js'
 import {accent, columnGapOf, stackedGapsOf, paneBleed, stageLayout} from './layout.js'
 import type {PaneEdge, PaneLabels} from './layout.js'
-import {DefaultStatus} from './status.js'
-import {useFrameCovers} from './cover.js'
+import {bothPanesLoading, DefaultStatus, StageStatus} from './status.js'
+import {coverTokens, useFrameCovers} from './cover.js'
 import type {FrameCover} from './cover.js'
 import {UtilityArea} from './utility.js'
 import {SwipeHandle} from './swipe-handle.js'
@@ -42,6 +42,7 @@ export function StageBody({
   bleed = 0,
   paneLabels = 'visible',
   utility,
+  foot,
 }: {
   projection: ProjectionController
   beforeLabel: ReactNode
@@ -53,6 +54,7 @@ export function StageBody({
   bleed?: number
   paneLabels?: PaneLabels
   utility?: ReactNode
+  foot?: ReactNode
 }) {
   const container = useRef<HTMLDivElement>(null)
   const id = useId()
@@ -124,7 +126,7 @@ export function StageBody({
     frames,
     // What overlays exist, where the frames are, and the stage's size: a frame that mounts after the hook subscribed is
     // only observed from the next run, which a size or status change brings.
-    `${mode}-${stacked}-${chips}-${utilityShown}-${layout}-${width}-${height}-${projection.panes.before.status}-${projection.panes.after.status}`,
+    `${mode}-${stacked}-${chips}-${utilityShown}-${Boolean(foot)}-${layout}-${width}-${height}-${projection.panes.before.status}-${projection.panes.after.status}`,
     projection.reducedMotion,
   )
   // A held pane of side by side or swipe says so, so the renderer leaves out narration of the transition. The covers
@@ -132,8 +134,7 @@ export function StageBody({
   // change.
   const paneEnvironment = useMemo(() => {
     const {theme} = stage.environment
-    const covered = (cover: FrameCover | undefined) =>
-      cover ? {...theme, tokens: {...theme.tokens, 'stage-inset-top': `${cover.insetTop}px`, 'stage-cover': cover.cover}} : theme
+    const covered = (cover: FrameCover | undefined) => (cover ? {...theme, tokens: {...theme.tokens, ...coverTokens(cover)}} : theme)
     const afterTheme = covered(covers.after)
     return {
       before: {...stage.environment, theme: twoPanes ? covered(covers.before) : theme, pane: 'before' as const},
@@ -141,12 +142,15 @@ export function StageBody({
       main: afterTheme === theme ? stage.environment : {...stage.environment, theme: afterTheme},
     }
   }, [stage.environment, covers, twoPanes])
-  const status = (pane: PaneState, side: Side | 'main') =>
+  const paneStatus = (pane: PaneState, side: Side | 'main') =>
     renderStatus === null ? null : renderStatus ? (
       renderStatus(pane, side)
     ) : (
       <DefaultStatus pane={pane} title={renderer.title} reducedMotion={projection.reducedMotion} />
     )
+  // While both panes load, one status says so, centred on the stage (`StageStatus`), not one centred in each pane.
+  const bothLoading = bothPanesLoading(projection.panes, twoPanes)
+  const status = bothLoading ? () => null : paneStatus
   const pane = (side: Side) => (
     <RendererPane
       key="frame"
@@ -273,6 +277,9 @@ export function StageBody({
           <circle cx={connector.x2} cy={connector.y2} r="4" fill={accent} data-end="after" />
         </svg>
       )}
+      {foot}
+      {/* The stage's status speaks for both panes, so it names neither: `main`, as one frame's does. */}
+      {bothLoading && <StageStatus>{paneStatus(projection.panes.after, 'main')}</StageStatus>}
       {mode === 'swipe' && (
         <SwipeHandle
           key="handle"

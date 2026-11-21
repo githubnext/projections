@@ -1,13 +1,15 @@
 import type {CSSProperties, ReactNode} from 'react'
 import type {AnnotationMark} from '@githubnext/projections-renderer-sdk/protocol'
 import type {ProjectionController} from '../../projection.js'
-import {UtilityArea} from '../../stage/utility.js'
+import {UtilityArea, utilityInset} from '../../stage/utility.js'
+import {StageFoot, scopeNoticeText, summaryFootHeight} from './stage-foot.js'
 import {cn} from '../lib/utils.js'
 import {TableView, TextView} from '../views.js'
 
 /**
  * The default view's own table or text view, scrolling in the panel, with the floating playback over it (`floating`,
- * see `useUtilityPlayback`) and its top padded clear of it (`scrollTop`), when the view has a utility area.
+ * see `useUtilityPlayback`) and its top padded clear of it (`scrollTop`), when the view has a utility area, and the
+ * summary floating at its foot (`StageFoot`), its end padded clear of that.
  */
 export function HostViews({
   projection: p,
@@ -15,6 +17,7 @@ export function HostViews({
   fill,
   marks,
   summary,
+  scope,
   floating,
   scrollTop,
 }: {
@@ -23,16 +26,19 @@ export function HostViews({
   fill: boolean
   marks: ReadonlyMap<string, AnnotationMark>
   summary: boolean
+  /** Without the summary, the foot says what the Changes scope hides (`StageFoot`'s `scope`). */
+  scope: boolean
   floating: ReactNode
   scrollTop: CSSProperties | undefined
 }) {
   const {subject} = p
+  const footed = summary || (scope && Boolean(scopeNoticeText(p)))
   return (
     <>
       {floating && <UtilityArea>{floating}</UtilityArea>}
       <div
         className={cn('ph-scroll pj:min-w-0 pj:bg-surface-canvas pj:p-3', fill && 'pj:min-h-0 pj:flex-1 pj:overflow-auto')}
-        style={scrollTop}
+        style={footed ? {...scrollTop, paddingBottom: utilityInset + summaryFootHeight + 12} : scrollTop}
       >
         {view === 'table' ? (
           <TableView
@@ -58,6 +64,7 @@ export function HostViews({
           />
         )}
       </div>
+      <StageFoot projection={p} summary={summary} legend={false} scope={scope} />
     </>
   )
 }

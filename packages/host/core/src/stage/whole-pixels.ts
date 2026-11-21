@@ -7,12 +7,19 @@ import type {RefObject} from 'react'
  * would otherwise draw its edges between pixels. It nudges the element by the fraction (`translate`), measured again as
  * it, its parent or the page resizes, and as the page scrolls.
  */
-export function useWholePixels(ref: RefObject<HTMLElement | null>): void {
+export function useWholePixels(ref: RefObject<HTMLElement | null>, {width: round = false}: {width?: boolean} = {}): void {
   useLayoutEffect(() => {
     const element = ref.current
     if (!element) return
     const align = () => {
       element.style.translate = ''
+      // A width its text decides can be fractional, which leaves one edge between pixels however it's nudged: `width`
+      // takes the next whole pixel, for an element whose size only its text changes (a chip), measured again when it does.
+      if (round) {
+        element.style.width = ''
+        const width = element.getBoundingClientRect().width
+        if (Math.abs(Math.ceil(width) - width) > 0.01) element.style.width = `${Math.ceil(width)}px`
+      }
       const {left, top} = element.getBoundingClientRect()
       const x = Math.round(left) - left,
         y = Math.round(top) - top
@@ -25,11 +32,14 @@ export function useWholePixels(ref: RefObject<HTMLElement | null>): void {
     observer.observe(element)
     if (element.parentElement) observer.observe(element.parentElement)
     observer.observe(element.ownerDocument.documentElement)
+    const text = new MutationObserver(align)
+    if (round) text.observe(element, {subtree: true, childList: true, characterData: true})
     const view = element.ownerDocument.defaultView
     view?.addEventListener('scroll', align, {capture: true, passive: true})
     return () => {
       observer.disconnect()
+      text.disconnect()
       view?.removeEventListener('scroll', align, {capture: true})
     }
-  }, [ref])
+  }, [ref, round])
 }

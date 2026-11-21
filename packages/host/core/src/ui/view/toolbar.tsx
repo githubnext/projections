@@ -26,6 +26,7 @@ import {cn} from '../lib/utils.js'
 import type {ProjectionViewProps} from './props.js'
 import {ToolbarMore} from './toolbar-more.js'
 import {filterFitsRow} from './toolbar-room.js'
+import {SidesToolbar, sidesOf} from './toolbar-sides.js'
 
 export interface ViewToolbarProps {
   projection: ProjectionController
@@ -79,6 +80,7 @@ export function ViewToolbar({
       pair: typeof props.toolbarStart === 'function',
       modes: (showModes && comparing && p.availableModes.filter(value => modes.includes(value)).length > 1) || showScope,
       playback: Boolean(showPlayback),
+      sides: sidesOf(props),
       actions: [
         ...(showVaried ? (['varied'] as const) : []),
         ...(showZoom ? (['zoom'] as const) : []),
@@ -124,6 +126,54 @@ export function ViewToolbar({
       />
     </div>
   )
+  const modeBlock = (showModes || showScope) && (
+    <div
+      data-toolbar-region="mode"
+      className={cn(
+        'ph-toolbar-mode pj:flex pj:shrink-0 pj:items-center pj:gap-1.5 pj:empty:hidden',
+        // Centred, it keeps 24px (with the row's 6px gap) from the regions beside it, and the plan changes first.
+        centred && 'pj:justify-self-center pj:px-[18px]',
+      )}
+    >
+      {showModes && <ModeSwitch projection={p} modes={modes} form={plan.mode} />}
+      {/* A row short enough to fold the mode into a menu leaves the scope to Settings' "Show". */}
+      {showScope && plan.mode !== 'menu' && <ScopeSwitch projection={p} />}
+    </div>
+  )
+  const endBlock = (
+    <div data-toolbar-region="end" className="ph-toolbar-end pj:flex pj:shrink-0 pj:items-center pj:gap-1.5 pj:justify-self-end">
+      {showVaried && !inMore('varied') && (
+        <>
+          <RegeneratedToggle projection={p} />
+          <VariedToggle projection={p} />
+        </>
+      )}
+      {chip}
+      {showZoom && !inMore('zoom') && <ZoomControls projection={p} />}
+      <div className="pj:flex pj:items-center pj:gap-0.5">
+        {on('search') && !inMore('filter') && (
+          <FilterButton projection={p} open={filterOpen} onOpenChange={setFilterOpen} canExpand={filterFits} />
+        )}
+        {settings}
+        {!inMore('info') && info}
+        {props.actions && <div className="ph-actions pj:flex pj:items-center pj:gap-1">{props.actions}</div>}
+        {!inMore('fullscreen') && fullscreen}
+        {hasMore && (
+          <ToolbarMore
+            projection={p}
+            view={view}
+            playback={showPlayback && plan.playback === 'minimal'}
+            varied={showVaried && inMore('varied')}
+            zoom={showZoom && inMore('zoom')}
+            filter={on('search') && inMore('filter')}
+            info={inMore('info') && info}
+            fullscreen={inMore('fullscreen') && fullscreen}
+          />
+        )}
+      </div>
+    </div>
+  )
+  if (props.utilityArea) return <SidesToolbar toolbar={row} space={space} start={start} mode={modeBlock} end={endBlock} />
   return (
     <Toolbar ref={row} rows onKeyDown={space} className={cn(plan.rows === 2 && 'ph-toolbar-two-rows')}>
       {/* The mode region is centred on the row while the row has room for it there, else it follows the start region. */}
@@ -136,52 +186,9 @@ export function ViewToolbar({
           // Nothing at the start: an empty first cell, measured as nothing (it stretches across its half).
           centred && <span aria-hidden="true" data-fit-min="0" />
         )}
-        {(showModes || showScope) && (
-          <div
-            data-toolbar-region="mode"
-            className={cn(
-              'ph-toolbar-mode pj:flex pj:shrink-0 pj:items-center pj:gap-1.5 pj:empty:hidden',
-              // Centred, it keeps 24px (with the row's 6px gap) from the regions beside it, and the plan changes first.
-              centred && 'pj:justify-self-center pj:px-[18px]',
-            )}
-          >
-            {showModes && <ModeSwitch projection={p} modes={modes} form={plan.mode} />}
-            {/* A row short enough to fold the mode into a menu leaves the scope to Settings' "Show". */}
-            {showScope && plan.mode !== 'menu' && <ScopeSwitch projection={p} />}
-          </div>
-        )}
+        {modeBlock}
         {!centred && <span aria-hidden="true" data-fit-min="0" className="pj:flex-1" />}
-        <div data-toolbar-region="end" className="ph-toolbar-end pj:flex pj:shrink-0 pj:items-center pj:gap-1.5 pj:justify-self-end">
-          {showVaried && !inMore('varied') && (
-            <>
-              <RegeneratedToggle projection={p} />
-              <VariedToggle projection={p} />
-            </>
-          )}
-          {chip}
-          {showZoom && !inMore('zoom') && <ZoomControls projection={p} />}
-          <div className="pj:flex pj:items-center pj:gap-0.5">
-            {on('search') && !inMore('filter') && (
-              <FilterButton projection={p} open={filterOpen} onOpenChange={setFilterOpen} canExpand={filterFits} />
-            )}
-            {settings}
-            {!inMore('info') && info}
-            {props.actions && <div className="ph-actions pj:flex pj:items-center pj:gap-1">{props.actions}</div>}
-            {!inMore('fullscreen') && fullscreen}
-            {hasMore && (
-              <ToolbarMore
-                projection={p}
-                view={view}
-                playback={showPlayback && plan.playback === 'minimal'}
-                varied={showVaried && inMore('varied')}
-                zoom={showZoom && inMore('zoom')}
-                filter={on('search') && inMore('filter')}
-                info={inMore('info') && info}
-                fullscreen={inMore('fullscreen') && fullscreen}
-              />
-            )}
-          </div>
-        </div>
+        {endBlock}
       </ToolbarRow>
       {/* Ending in the slider (`minimal`), the row insets it so its thumb clears the border; a percent or button ends it at the edge inset. */}
       {showPlayback && plan.rows === 2 && (

@@ -17,7 +17,7 @@ import {
   stageInsetOf,
 } from './frame.js'
 import {useStageCoverOf} from './cover.js'
-import {StageInsetTop} from './frame.js'
+import {StageInsetBottom, StageInsetTop} from './frame.js'
 import type {MountOptions, RendererProps} from './props.js'
 import {
   useAspectReport,
@@ -94,6 +94,7 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
   const tokens = (renderer.environment ?? init)?.theme.tokens
   const stageInset = stageInsetOf(tokens)
   const stageInsetTop = stageInsetOf(tokens, 'stage-inset-top')
+  const stageInsetBottom = stageInsetOf(tokens, 'stage-inset-bottom')
   const stageMaxHeight = tokens?.['stage-max-height']
   const stageCover = useStageCoverOf(tokens?.['stage-cover'])
   const automatic = (options.steps ?? 'schedule') === 'schedule'
@@ -194,7 +195,9 @@ export function KitRenderer({component: Renderer, options}: {component: Componen
       data-reduced-motion={renderer.environment?.reducedMotion ? 'true' : undefined}
       onKeyDown={onKeyDown}
     >
-      <StageInsetTop.Provider value={stageInsetTop}>{content()}</StageInsetTop.Provider>
+      <StageInsetTop.Provider value={stageInsetTop}>
+        <StageInsetBottom.Provider value={stageInsetBottom}>{content()}</StageInsetBottom.Provider>
+      </StageInsetTop.Provider>
     </div>
   )
 }

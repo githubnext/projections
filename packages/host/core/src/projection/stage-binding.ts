@@ -1,96 +1,42 @@
-import {useMemo} from 'react'
 import type {AnnotationMark, ControlValue, FilterPayload} from '@githubnext/projections-renderer-sdk/protocol'
-import type {RendererFrame} from '../frame.js'
-import type {Side} from '../modes.js'
-import type {PaneState} from '../pane.js'
+import type {Anchors} from './interaction.js'
+import type {Memos} from './memo.js'
 import type {RendererPayloads} from './payloads.js'
-import type {Anchors, InteractionEvent} from './interaction.js'
 import type {PaneKey, StageBinding} from './types.js'
 
-export type StageBindingInput = {
-  payloads: RendererPayloads
-  stableValues: {[id: string]: ControlValue}
-  action: StageBinding['action']
-  filter: FilterPayload
-  anchors: Anchors
-  frames: {current: Record<Side, RendererFrame | null>}
-  setPanes: (update: (previous: Record<PaneKey, PaneState>) => Record<PaneKey, PaneState>) => void
-  /** Sends the renderers' anchors and frame replacements to the interaction. */
-  sendInteraction: (event: InteractionEvent) => void
-  selectFrom: (pane: PaneKey, id: string | null, path?: string) => void
-  activateAnnotation: (rowId: string) => void
-  selectedPath: Record<PaneKey, string | undefined>
-  annotationMarks: AnnotationMark[]
-}
+/** The stage's handlers: the same functions for a projection's lifetime, acting on what it shows now. */
+export type StageHandlers = Pick<
+  StageBinding,
+  'frames' | 'onPaneState' | 'onAnchor' | 'onFrame' | 'onViewport' | 'onSelect' | 'onAnnotation'
+>
 
-/** What `ProjectionStage` binds its renderer frames to: the payloads they are sent and the handlers for their messages. */
-export function useStageBinding(input: StageBindingInput): StageBinding {
-  const {payloads, stableValues, action, filter, anchors, frames, setPanes, sendInteraction} = input
-  const {selectFrom, activateAnnotation, selectedPath, annotationMarks} = input
-  const {init, environment, progressPayload, endpoints, diffProgress} = payloads
-  return useMemo<StageBinding>(
-    () => ({
-      init,
-      environment,
-      progressPayload,
-      endpoints,
-      diffProgress,
-      options: stableValues,
+/**
+ * What `ProjectionStage` binds its renderer frames to: the payloads they are sent and the handlers for their messages,
+ * a new binding only when something in it changed.
+ */
+export function createStageBinding({memo}: Memos, handlers: StageHandlers) {
+  return memo(
+    (
+      payloads: RendererPayloads,
+      options: {[id: string]: ControlValue},
+      action: StageBinding['action'],
+      filter: FilterPayload,
+      anchors: Anchors,
+      selectedPath: Record<PaneKey, string | undefined>,
+      annotations: AnnotationMark[],
+    ): StageBinding => ({
+      init: payloads.init,
+      environment: payloads.environment,
+      progressPayload: payloads.progressPayload,
+      endpoints: payloads.endpoints,
+      diffProgress: payloads.diffProgress,
+      options,
       action,
       filter,
       anchors,
-      frames,
-      onPaneState: {
-        main: state => setPanes(previous => ({...previous, main: state})),
-        before: state => setPanes(previous => ({...previous, before: state})),
-        after: state => setPanes(previous => ({...previous, after: state})),
-      },
-      onAnchor: {
-        before: (rowId, rect) => sendInteraction({type: 'anchored', side: 'before', rowId, rect}),
-        after: (rowId, rect) => sendInteraction({type: 'anchored', side: 'after', rowId, rect}),
-      },
-      // A side's anchors belong to its frame's renderer: a new frame (or none) reports its own (see `frameReplaced`).
-      onFrame: {
-        before: frame => {
-          if (frames.current.before !== frame) sendInteraction({type: 'frameReplaced', side: 'before'})
-          frames.current.before = frame
-        },
-        after: frame => {
-          if (frames.current.after !== frame) sendInteraction({type: 'frameReplaced', side: 'after'})
-          frames.current.after = frame
-        },
-      },
-      // In swipe, scrolling one layer scrolls the other; the SDK suppresses the echo.
-      onViewport: {
-        before: position => frames.current.after?.scroll(position),
-        after: position => frames.current.before?.scroll(position),
-      },
-      onSelect: {
-        main: (id, path) => selectFrom('main', id, path),
-        before: (id, path) => selectFrom('before', id, path),
-        after: (id, path) => selectFrom('after', id, path),
-      },
-      onAnnotation: activateAnnotation,
+      ...handlers,
       selectedPath,
-      annotations: annotationMarks,
+      annotations,
     }),
-    [
-      init,
-      environment,
-      progressPayload,
-      endpoints,
-      diffProgress,
-      stableValues,
-      action,
-      filter,
-      anchors,
-      selectFrom,
-      activateAnnotation,
-      selectedPath,
-      annotationMarks,
-      frames,
-      setPanes,
-      sendInteraction,
-    ],
   )
 }

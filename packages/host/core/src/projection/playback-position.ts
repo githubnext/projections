@@ -1,4 +1,3 @@
-import {useCallback, useMemo} from 'react'
 import type {ComparisonMode} from '../modes.js'
 import type {PaneState} from '../pane.js'
 import {
@@ -12,6 +11,7 @@ import {
 } from '../playback.js'
 import type {Holds, PlaybackTimeline} from '../playback.js'
 import {unit} from './controllable.js'
+import type {Memos} from './memo.js'
 import type {PaneKey, ProjectionOptions} from './types.js'
 import {playbackDuration} from './timing.js'
 
@@ -26,68 +26,67 @@ export type PlaybackPositionInput = {
   internalPosition: number
 }
 
+const stops = (key: string) => (key ? key.split(',').map(Number) : [])
+
 /**
  * The playback timeline (the renderer's steps, the travel time and the holds), the slider position and the
  * presentation progress it shows, and the steps either side of it.
  */
-export function usePlaybackPosition({options, comparing, mode, panes, holds, speed, internalPosition}: PlaybackPositionInput) {
-  const {subject} = options
-  const stepEnds = mode === 'animated' ? panes.main.steps : []
-  const stepCount =
-    panes.main.stepSlots ?? (panes.main.steps.length || (subject.mode === 'comparison' ? subject.comparison.steps.length : 0))
-  const pace = panes.main.capabilities?.pace ?? panes.after.capabilities?.pace ?? panes.before.capabilities?.pace
-  const baseDurationMs = playbackDuration({
-    durationMs: options.durationMs,
-    presentationDurationMs: options.presentation?.durationMs,
-    paceStepMs: pace?.stepMs,
-    steps: stepCount,
-  })
-  const durationMs = baseDurationMs / speed
-  const stepsKey = stepEnds.join(',')
-  const timeline = useMemo<PlaybackTimeline | undefined>(
-    () =>
-      holds === 'pause'
-        ? undefined
-        : {stops: stepsKey ? stepsKey.split(',').map(Number) : [], travelMs: baseDurationMs, stepHoldMs, endpointHoldMs},
-    [holds, stepsKey, baseDurationMs],
+export function createPlaybackPosition({memo}: Memos) {
+  const timelineOf = memo((holds: Holds, stepsKey: string, baseDurationMs: number): PlaybackTimeline | undefined =>
+    holds === 'pause' ? undefined : {stops: stops(stepsKey), travelMs: baseDurationMs, stepHoldMs, endpointHoldMs},
   )
-  const toProgress = useCallback((at: number) => (timeline ? presentationProgress(at, timeline) : unit(at)), [timeline])
-  const toPosition = useCallback((at: number) => (timeline ? timelinePosition(at, timeline) : unit(at)), [timeline])
-  const position = !comparing
-    ? 1
-    : options.position !== undefined
-      ? unit(options.position)
-      : // A controlled progress keeps the slider where it is while that position still shows it, for example across a hold.
-        options.progress !== undefined
-        ? Math.abs(toProgress(internalPosition) - unit(options.progress)) < 1e-9
-          ? internalPosition
-          : toPosition(unit(options.progress))
-        : unit(internalPosition)
-  const progress = comparing ? toProgress(position) : 1
-  const stepPositions = useMemo(
-    () => (timeline ? timelineStepPositions(timeline) : [...stepEnds]),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [timeline, stepsKey],
+  const convertersOf = memo((timeline: PlaybackTimeline | undefined) => ({
+    toProgress: (at: number) => (timeline ? presentationProgress(at, timeline) : unit(at)),
+    toPosition: (at: number) => (timeline ? timelinePosition(at, timeline) : unit(at)),
+  }))
+  const stepPositionsOf = memo((timeline: PlaybackTimeline | undefined, stepsKey: string) =>
+    timeline ? timelineStepPositions(timeline) : stops(stepsKey),
   )
   // Step navigation stops at both ends too; a step's hold counts as that step.
-  const stops = useMemo(
-    () => stepStops(mode === 'animated' ? stepEnds : [], timeline),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [stepsKey, timeline, mode],
+  const stopsOf = memo((stepsKey: string, timeline: PlaybackTimeline | undefined, mode: ComparisonMode) =>
+    stepStops(mode === 'animated' ? stops(stepsKey) : [], timeline),
   )
-  return {
-    stepEnds,
-    baseDurationMs,
-    durationMs,
-    timeline,
-    toProgress,
-    toPosition,
-    position,
-    progress,
-    stepPositions,
-    nextStep: comparing ? adjacentStop(stops, position, 1) : undefined,
-    previousStep: comparing ? adjacentStop(stops, position, -1) : undefined,
+  return ({options, comparing, mode, panes, holds, speed, internalPosition}: PlaybackPositionInput) => {
+    const {subject} = options
+    const stepEnds = mode === 'animated' ? panes.main.steps : []
+    const stepCount =
+      panes.main.stepSlots ?? (panes.main.steps.length || (subject.mode === 'comparison' ? subject.comparison.steps.length : 0))
+    const pace = panes.main.capabilities?.pace ?? panes.after.capabilities?.pace ?? panes.before.capabilities?.pace
+    const baseDurationMs = playbackDuration({
+      durationMs: options.durationMs,
+      presentationDurationMs: options.presentation?.durationMs,
+      paceStepMs: pace?.stepMs,
+      steps: stepCount,
+    })
+    const stepsKey = stepEnds.join(',')
+    const timeline = timelineOf(holds, stepsKey, baseDurationMs)
+    const {toProgress, toPosition} = convertersOf(timeline)
+    const position = !comparing
+      ? 1
+      : options.position !== undefined
+        ? unit(options.position)
+        : // A controlled progress keeps the slider where it is while that position still shows it, for example across a hold.
+          options.progress !== undefined
+          ? Math.abs(toProgress(internalPosition) - unit(options.progress)) < 1e-9
+            ? internalPosition
+            : toPosition(unit(options.progress))
+          : unit(internalPosition)
+    const navigation = stopsOf(stepsKey, timeline, mode)
+    return {
+      stepEnds,
+      baseDurationMs,
+      durationMs: baseDurationMs / speed,
+      timeline,
+      toProgress,
+      toPosition,
+      position,
+      progress: comparing ? toProgress(position) : 1,
+      stepPositions: stepPositionsOf(timeline, stepsKey),
+      nextStep: comparing ? adjacentStop(navigation, position, 1) : undefined,
+      previousStep: comparing ? adjacentStop(navigation, position, -1) : undefined,
+    }
   }
 }
 
-export type PlaybackPosition = ReturnType<typeof usePlaybackPosition>
+export type PlaybackPosition = ReturnType<ReturnType<typeof createPlaybackPosition>>

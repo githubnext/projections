@@ -1,4 +1,3 @@
-import {useEffect, useState} from 'react'
 import {changeContext, isScopeChange, regenerated, variedWithinTolerance} from '@githubnext/projections-renderer-sdk/presentation'
 import type {ViewScope} from '@githubnext/projections-renderer-sdk/presentation'
 import {humanizeKind} from '@githubnext/projections-renderer-sdk/presentation'
@@ -149,14 +148,6 @@ export function createRowFilter(): Selector<
       return resultOf(visibleRows, filter, countsOf(rows, summary, hidden), hidden)
     }
   })
-}
-
-/** `createRowFilter` for a component's lifetime. */
-export function useRowFilter(rows: readonly Row[], subject: ViewSubject, state: FilterState, summary: readonly SummaryFigure[]): RowFilter {
-  const [select] = useState(createRowFilter)
-  // Only a committed render's rows are what later renders compare with first.
-  useEffect(() => select.commit())
-  return select(rows, subject, state, summary)
 }
 
 /**

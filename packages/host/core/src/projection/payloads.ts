@@ -1,4 +1,3 @@
-import {useEffect, useState} from 'react'
 import {diffEmphasis} from '@githubnext/projections-renderer-sdk/presentation'
 import type {
   InitPayload,
@@ -132,12 +131,4 @@ export function createRendererPayloads(): Selector<[RendererPayloadsInput], Rend
       )
     }
   })
-}
-
-/** `createRendererPayloads` for a component's lifetime. */
-export function useRendererPayloads(input: RendererPayloadsInput): RendererPayloads {
-  const [select] = useState(createRendererPayloads)
-  // Only a committed render's payloads are what later renders compare with first.
-  useEffect(() => select.commit())
-  return select(input)
 }

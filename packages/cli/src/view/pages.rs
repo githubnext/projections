@@ -67,7 +67,8 @@ pub(super) fn report(shared: &Shared, view: &NamedView, body: Value) {
     let generation = body["generation"].as_u64().unwrap_or(u64::MAX);
     let selection = body["selection"].as_str();
     let mode = body["mode"].as_str();
-    view.state.send_if_modified(|state| state.report(generation, selection, mode));
+    view.state
+        .send_if_modified(|state| state.report(&page, generation, selection, mode));
     shared.touch();
     let brief = json!({"page": page, "generation": body["generation"], "selection": body["selection"], "mode": body["mode"]});
     view.pages

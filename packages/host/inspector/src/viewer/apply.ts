@@ -42,16 +42,15 @@ function shows(view: View | null, state: ViewerState, summary: InspectorSummary)
   )
 }
 
-function applyMode(applied: Applied, state: ViewerState, view: View, echo: ViewerPage['reported']) {
+function applyMode(applied: Applied, state: ViewerState, view: View, echo: boolean) {
   const mode = state.mode
-  if (mode && mode !== echo?.mode && view.comparing && view.availableModes.includes(mode as never) && view.mode !== mode)
-    view.setMode(mode as never)
+  if (mode && !echo && view.comparing && view.availableModes.includes(mode as never) && view.mode !== mode) view.setMode(mode as never)
   applied.mode = true
 }
 
-function applySelection(applied: Applied, state: ViewerState, handle: InspectorHandle, view: View, echo: ViewerPage['reported']) {
+function applySelection(applied: Applied, state: ViewerState, handle: InspectorHandle, view: View, echo: boolean) {
   const selection = state.selection ?? null
-  if (echo && echo.selection === selection) applied.selection = true
+  if (echo) applied.selection = true
   else if ((view.selectedRow?.id ?? null) === selection || handle.selectEntity(selection)) applied.selection = applied.found = true
   // An entity the view doesn't present yet is selected once it does; one it never presents stays unselected.
   else if (view.rows.length) applied.selection = true
@@ -72,7 +71,7 @@ export function apply(page: ViewerPage) {
   const view = handle.view()
   if (!shows(view, state, summary)) return
   // The echo of the page's own report says what the page already shows, or showed before the person changed it again.
-  const echo = echoes(page, state) ? page.reported : undefined
+  const echo = echoes(page, state)
   if (!applied.mode) applyMode(applied, state, view, echo)
   if (!applied.selection) applySelection(applied, state, handle, view, echo)
 }

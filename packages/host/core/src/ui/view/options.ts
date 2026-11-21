@@ -49,5 +49,7 @@ export function viewOptions(props: ProjectionViewProps, colorMode: ColorMode, th
     ...(props.controlValues ? {controlValues: props.controlValues} : {}),
     ...(props.onControlChange ? {onControlChange: props.onControlChange} : {}),
     ...(props.onAction ? {onAction: props.onAction} : {}),
+    ...(props.onRendererStatusChange ? {onRendererStatusChange: props.onRendererStatusChange} : {}),
+    ...(props.onPainted ? {onPainted: props.onPainted} : {}),
   }
 }

@@ -1,7 +1,8 @@
 import type {ReactNode, Ref} from 'react'
 import type {Diagnostic} from '@githubnext/projections-schemas'
 import type {ColorMode, ControlValue} from '@githubnext/projections-renderer-sdk/protocol'
-import type {AnnotationActivation, Highlighting, PresentationDefaults, ProjectionController} from '../../projection.js'
+import type {AnnotationActivation, Highlighting, PresentationDefaults, ProjectionController, RendererStatus} from '../../projection.js'
+import type {Painted} from '../../projection/paint.js'
 import type {Holds} from '../../playback.js'
 import type {ProjectionSelection, TargetAnnotation} from '../../targets/target.js'
 import type {ComparisonMode} from '../../modes.js'
@@ -84,6 +85,10 @@ export interface ProjectionViewProps {
   onAnnotationActivate?: (activation: AnnotationActivation) => void
   /** Embedder content at the end of the detail card (in a `.ph-details-slot` element). */
   renderDetails?: (selection: ProjectionSelection, projection: ProjectionController) => ReactNode
+  /** Called with the renderer status whenever it changes, and with the first (see `ProjectionOptions.onRendererStatusChange`). */
+  onRendererStatusChange?: (status: RendererStatus) => void
+  /** Called when the frames settle on what is shown while paused (see `ProjectionOptions.onPainted`). */
+  onPainted?: (painted: Painted) => void
   /** Receives the view's controller, for example to call `selectTarget` or `anchorFor`; `null` once unmounted. */
   controllerRef?: Ref<ProjectionController | null>
   /**

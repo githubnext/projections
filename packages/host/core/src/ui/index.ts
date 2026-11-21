@@ -52,7 +52,7 @@ export {
 } from './blocks.js'
 export {PaneLabel} from '../stage/labels.js'
 export {LoadingStatus} from '../loading.js'
-export {ProjectionsPane, paneHeaderHeight, paneMinWidth, paneWidth, usePaneRoom, usePinnedPane} from './projections-pane.js'
+export {ProjectionsPane, paneHeaderHeight, paneWidth} from './projections-pane.js'
 export type {ProjectionsPaneItem} from './projections-pane.js'
 export type {LoadingStatusProps} from '../loading.js'
 export {ScopedRoot} from './components/scoped-root.js'

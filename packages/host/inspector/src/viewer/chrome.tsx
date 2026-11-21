@@ -9,7 +9,7 @@ import type {SwitcherItem} from '../shell/switcher.js'
 import type {ViewerState} from './state.js'
 import {readPanePinned, setPanePinned, usePaneShown} from './pane.js'
 import {ViewerTitle} from './title.js'
-import {usePaneRoom} from '@githubnext/projections-host/ui'
+import {usePaneRoom} from '@githubnext/projections-host'
 
 interface Snapshot {
   state: ViewerState | undefined

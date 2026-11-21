@@ -1,17 +1,13 @@
-import {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react'
-import type {ReactNode, RefObject} from 'react'
+import {useLayoutEffect, useRef} from 'react'
+import type {ReactNode} from 'react'
 import {X} from 'lucide-react'
 import {Button} from './components/button.js'
 import {cn} from './lib/utils.js'
 
-/** The narrowest a page offers the projections pane at, CSS px: narrower, a pinned pane would crush the stage. */
-export const paneMinWidth = 900
 /** The pane's width, CSS px. */
 export const paneWidth = 240
 /** Its header's height, CSS px, with its bottom edge: the toolbar's row, so the two read as one band. */
 export const paneHeaderHeight = 41
-/** How much wider than `paneMinWidth` the page must grow before a pane it dropped comes back, CSS px: the toolbar's. */
-const paneHysteresis = 32
 
 /** A projection the pane lists: its ID, its title, a short secondary line (a change count, an ID) and a status mark. */
 export interface ProjectionsPaneItem {
@@ -19,58 +15,6 @@ export interface ProjectionsPaneItem {
   title: string
   detail?: ReactNode
   status?: ReactNode
-}
-
-/**
- * Whether a surface's projections pane is pinned, kept in `localStorage` under `key` (one per surface, say
- * `projections:pane-pinned:viewer`) so it survives reloads. Storage that throws (a sandboxed frame) keeps it in memory.
- */
-export function usePinnedPane(key: string): [boolean, (pinned: boolean) => void] {
-  const [pinned, setPinned] = useState(() => {
-    try {
-      return globalThis.localStorage?.getItem(key) === 'true'
-    } catch {
-      return false
-    }
-  })
-  const set = useCallback(
-    (value: boolean) => {
-      setPinned(value)
-      try {
-        if (value) globalThis.localStorage?.setItem(key, 'true')
-        else globalThis.localStorage?.removeItem(key)
-      } catch {
-        // Kept for this page only.
-      }
-    },
-    [key],
-  )
-  return [pinned, set]
-}
-
-const widthOf = (element: RefObject<HTMLElement | null> | undefined) =>
-  element?.current?.getBoundingClientRect().width ?? (typeof innerWidth === 'number' ? innerWidth : paneMinWidth)
-
-/**
- * Whether there is room for the projections pane (`paneMinWidth`): in `element`, when given (a tab that is narrower
- * than the page), else in the page, with hysteresis so a width at the boundary doesn't flicker between the pane and
- * the dropdown.
- */
-export function usePaneRoom(element?: RefObject<HTMLElement | null>): boolean {
-  const [room, setRoom] = useState(() => widthOf(element) >= paneMinWidth)
-  useEffect(() => {
-    const resize = () => setRoom(previous => widthOf(element) >= paneMinWidth + (previous ? 0 : paneHysteresis))
-    resize()
-    const target = element?.current
-    const observer = target ? new ResizeObserver(resize) : undefined
-    if (target) observer?.observe(target)
-    else addEventListener('resize', resize)
-    return () => {
-      observer?.disconnect()
-      removeEventListener('resize', resize)
-    }
-  }, [element])
-  return room
 }
 
 /**

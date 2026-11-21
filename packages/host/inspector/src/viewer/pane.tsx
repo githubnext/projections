@@ -1,5 +1,6 @@
 import {useEffect, useLayoutEffect, useRef, useSyncExternalStore} from 'react'
-import {ProjectionsPane, usePaneRoom} from '@githubnext/projections-host/ui'
+import {usePaneRoom} from '@githubnext/projections-host'
+import {ProjectionsPane} from '@githubnext/projections-host/ui'
 import {StatusDot} from '../shell/switcher.js'
 import type {Store} from './chrome.js'
 

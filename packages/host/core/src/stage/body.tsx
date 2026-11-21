@@ -278,7 +278,8 @@ export function StageBody({
         </svg>
       )}
       {foot}
-      {bothLoading && <StageStatus>{paneStatus(projection.panes.after, 'after')}</StageStatus>}
+      {/* The stage's status speaks for both panes, so it names neither: `main`, as one frame's does. */}
+      {bothLoading && <StageStatus>{paneStatus(projection.panes.after, 'main')}</StageStatus>}
       {mode === 'swipe' && (
         <SwipeHandle
           key="handle"

@@ -150,7 +150,9 @@ keeps clear of it and shows under it as it pans or scrolls. The default UI's
 [the design note](../design/utility-area.md)). `renderStatus` renders a pane's
 loading or failure state; pass `null` to show `rendererStatus` and
 `rendererErrors` yourself. While a pane loads, its status covers the frame's
-area and is centered in it.
+area and is centered in it; while both panes of side by side or swipe load, one
+status covers the stage instead, rendered for side `main` since it speaks for
+both.
 
 `LoadingStatus({label, description?, reducedMotion?, fill?})` is the loading
 state every UI shows (renderer frames, the explorer's comparison, engine

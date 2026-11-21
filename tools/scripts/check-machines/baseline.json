@@ -19,7 +19,6 @@
   "packages/host/inspector/src/snapshot/page.tsx": 1,
   "packages/host/inspector/src/sweep/grid.tsx": 5,
   "packages/host/inspector/src/sweep/thumbnails.tsx": 2,
-  "packages/host/vscode-ui/src/layout/use-toolbar-layout.ts": 1,
   "packages/host/vscode-ui/src/loading.tsx": 2,
   "packages/host/vscode-ui/src/stage-notice.tsx": 1
 }

@@ -14,7 +14,10 @@ type Planned = {
   readonly settled: unknown
   /** The bar's width the plan is measured at, in whole pixels. */
   readonly width: number
-  /** Counts the replans asked for from outside (a frame after a resize, focus leaving a locked bar): each measures again. */
+  /**
+   * Counts the replans asked for from outside (a frame after a resize, content that settled, focus leaving a locked
+   * bar): each measures again.
+   */
   readonly run: number
   readonly hand: FitPlanHand
   /** Whether a resize was observed: the bar is planned again on the next frame. */
@@ -44,6 +47,8 @@ export type FitPlanEvent =
   | {readonly type: 'observed'}
   /** The frame after a resize: the bar is `width` wide. */
   | {readonly type: 'frame'; readonly width: number}
+  /** Content that was still rendering (`pending`) has settled: measure again. */
+  | {readonly type: 'rendered'}
   /** Focus moved in the document. */
   | {readonly type: 'moved'}
   | {readonly type: 'pressed'}
@@ -84,6 +89,7 @@ export const fitPlanLifecycle = defineMachine<FitPlanState, FitPlanEvent, never,
       on: {
         ...always,
         fitted: (state, {plan, locked}) => ({...planned(state), kind: 'settled', plan, settled: plan, locked}),
+        rendered: state => ({...state, run: state.run + 1}),
         // The planning under way reads the lock afresh.
         moved: ignore,
         replan: ignore,
@@ -99,6 +105,7 @@ export const fitPlanLifecycle = defineMachine<FitPlanState, FitPlanEvent, never,
         // press and its click, since another plan would remount the control being clicked (WebKit moves focus on press).
         moved: state =>
           !state.locked ? state : state.hand === 'pressing' ? {...planned(state), kind: 'held'} : {...planned(state), kind: 'releasing'},
+        rendered: state => ({...planned(state), kind: 'planning', run: state.run + 1}),
         replan: ignore,
       },
       activities: frames,
@@ -107,6 +114,8 @@ export const fitPlanLifecycle = defineMachine<FitPlanState, FitPlanEvent, never,
       on: {
         ...always,
         fitted: keeping,
+        // The release replans, and measures again then.
+        rendered: ignore,
         moved: ignore,
         pressed: ignore,
         released: state => ({...planned(state), kind: 'releasing', hand: 'free'}),
@@ -118,6 +127,7 @@ export const fitPlanLifecycle = defineMachine<FitPlanState, FitPlanEvent, never,
       on: {
         ...always,
         fitted: keeping,
+        rendered: ignore,
         moved: ignore,
         released: ignore,
         pressed: state => ({...planned(state), kind: 'held', hand: 'pressing'}),

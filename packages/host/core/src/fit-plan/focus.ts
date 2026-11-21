@@ -4,12 +4,16 @@ import type {RefObject} from 'react'
 /**
  * Keeps focus on a bar's control that changes form: it tracks the focused control's `data-focus-id`, and when that
  * control leaves the document with nothing else focused, focuses the control with the same ID in its new form, else the
- * first of its `fallbacks` the bar holds (for example the overflow that now holds it).
+ * first of its `fallbacks` the bar holds (for example the overflow that now holds it), with `focusControl`.
  */
-export function useFocusRetention(bar: RefObject<HTMLElement | null>, fallbacks: Readonly<Record<string, readonly string[]>> = {}) {
+export function useFocusRetention(
+  bar: RefObject<HTMLElement | null>,
+  fallbacks: Readonly<Record<string, readonly string[]>> = {},
+  focusControl: (control: HTMLElement) => void = control => control.focus(),
+) {
   const focus = useRef<{element: Element; id: string} | null>(null)
-  const latest = useRef(fallbacks)
-  latest.current = fallbacks
+  const latest = useRef({fallbacks, focusControl})
+  latest.current = {fallbacks, focusControl}
 
   useLayoutEffect(() => {
     const element = bar.current
@@ -43,10 +47,11 @@ export function useFocusRetention(bar: RefObject<HTMLElement | null>, fallbacks:
     const document = element.ownerDocument
     const active = document.activeElement
     if (active && active !== document.body && document.contains(active)) return
-    for (const id of [last.id, ...(latest.current[last.id] ?? [])]) {
+    const {fallbacks, focusControl} = latest.current
+    for (const id of [last.id, ...(fallbacks[last.id] ?? [])]) {
       const target = element.querySelector<HTMLElement>(`[data-focus-id="${CSS.escape(id)}"]`)
       if (target) {
-        target.focus()
+        focusControl(target)
         return
       }
     }

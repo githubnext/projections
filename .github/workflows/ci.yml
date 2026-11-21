@@ -94,7 +94,6 @@ jobs:
           node tools/scripts/considered.mjs install
           npm run --silent check:considered
           npm run --silent format:check
-          npm run --silent lint
           npm run --silent check:boundaries
           npm run --silent check:casing
           npm run --silent check:readmes

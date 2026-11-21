@@ -3,13 +3,13 @@ import {mkdir, readFile, rm, symlink, writeFile} from 'node:fs/promises'
 import path from 'node:path'
 import {randomUUID} from 'node:crypto'
 import {test, type TestContext} from 'node:test'
-import {collectTypeScript, installToolchain} from './support.mjs'
-import {canonicalize, compareExtractions} from './support.mjs'
+import {collectTypeScript, installToolchain, type HelperContext} from './support.ts'
+import {canonicalize, compareExtractions} from './support.ts'
 import type {WorkerExtractorId} from '../src/ids.js'
 import type {Json} from '../src/types.js'
-import type {ExtractorContext} from '../src/shared.js'
-/** A helper invocation; `checkout` is the repository checkout holding its installed packages. */
-type HelperContext = Omit<ExtractorContext, 'toolchain'> & {checkout?: string}
+type Repository = HelperContext['input']['repository']
+/** A fixture's invocation, its repository on disk at `root`. */
+type Fixture = HelperContext & {input: HelperContext['input'] & {repository: Repository & {root: string}}}
 const fixtureDirectory = path.resolve('test/fixtures/typescript')
 const api = await readFile(path.join(fixtureDirectory, 'api.txt'), 'utf8')
 async function fixture(
@@ -17,7 +17,7 @@ async function fixture(
   files: Record<string, string>,
   collector: WorkerExtractorId,
   inputs: Record<string, Json> = {},
-): Promise<HelperContext> {
+): Promise<Fixture> {
   const root = path.join(fixtureDirectory, `.run-${randomUUID()}`)
   await mkdir(root, {recursive: true})
   t.after(() => rm(root, {recursive: true, force: true}))
@@ -32,7 +32,7 @@ async function fixture(
     input: {
       protocolVersion: 0,
       projection: {id: 'test', definition: {id: 'test', extractor: collector, renderer: 'graph', inputs}},
-      repository: {root, revision: {kind: 'working-tree', ref: 'WORKTREE', commit: 'fixture', dirty: false}},
+      repository: {root, mode: 'materialized', revision: {kind: 'working-tree', ref: 'WORKTREE', commit: 'fixture', dirty: false}},
       capabilities: {trusted: false, network: false},
     },
   }
@@ -505,6 +505,7 @@ test('missing dependencies cannot be downgraded to success-shaped any public API
 test('contract facts record checker-resolved types for API compatibility', async t => {
   const root = path.resolve('test/fixtures/compatibility/before')
   const state = await collectTypeScript({
+    extractor: 'typescript-public-api',
     files: ['package.json', 'tsconfig.json', 'index.ts'],
     input: {
       protocolVersion: 0,
@@ -512,7 +513,7 @@ test('contract facts record checker-resolved types for API compatibility', async
         id: 'api',
         definition: {id: 'api', extractor: 'typescript-public-api', renderer: 'api', inputs: {tsconfig: 'tsconfig.json'}},
       },
-      repository: {root, revision: {kind: 'working-tree', ref: 'WORKTREE', commit: 'fixture', dirty: false}},
+      repository: {root, mode: 'materialized', revision: {kind: 'working-tree', ref: 'WORKTREE', commit: 'fixture', dirty: false}},
       capabilities: {trusted: false, network: false},
     },
   })

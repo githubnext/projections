@@ -57,7 +57,7 @@
     "icons": "node scripts/icons.mjs",
     "notices": "node scripts/notices.mjs",
     "test": "node --test test/*.test.mjs",
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.browser.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p browser/tsconfig.json",
     "test:browser": "npm run build --workspace @githubnext/projections-storybook && playwright test"
   }
 }

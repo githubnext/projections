@@ -5,6 +5,12 @@ import {createRequire} from 'node:module'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
 import {createNativeEngine} from '@githubnext/projections-engine/native'
+import type {Comparison} from '@githubnext/projections-engine'
+import type {ExtractorContext} from '../src/shared.ts'
+import type {Extraction} from '../src/types.ts'
+
+/** A helper invocation; `checkout` is the repository checkout holding its installed packages. */
+export type HelperContext = Omit<ExtractorContext, 'toolchain'> & {checkout?: string}
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url))
 export const helper = path.join(packageRoot, 'dist/extractor.mjs')
@@ -15,7 +21,7 @@ const engine = createNativeEngine()
  * Installs the workspace's lockfile-pinned `typescript` into a repository checkout,
  * as the project's own package manager would.
  */
-export async function installToolchain(checkout) {
+export async function installToolchain(checkout: string): Promise<string> {
   await mkdir(path.join(checkout, 'node_modules'), {recursive: true})
   const source = path.dirname(require.resolve('typescript/package.json'))
   await cp(source, path.join(checkout, 'node_modules/typescript'), {recursive: true})
@@ -24,9 +30,9 @@ export async function installToolchain(checkout) {
 
 // Test files run in separate processes, so each process installs its own checkout.
 const sharedCheckout = path.join(packageRoot, `test/fixtures/.toolchain-${process.pid}`)
-let prepared
+let prepared: Promise<string> | undefined
 /** One repository checkout with the project's packages installed, shared by every test in a run. */
-export function toolchain() {
+export function toolchain(): Promise<string> {
   prepared ??= (async () => {
     await rm(sharedCheckout, {recursive: true, force: true})
     await installToolchain(sharedCheckout)
@@ -37,7 +43,12 @@ export function toolchain() {
 }
 
 /** Runs the bundled helper as the native CLI does: request on stdin, extraction on stdout. */
-export async function runHelper(id, input, checkout, {node = process.execPath, args = []} = {}) {
+export async function runHelper(
+  id: string,
+  input: unknown,
+  checkout: string,
+  {node = process.execPath, args = []}: {node?: string; args?: string[]} = {},
+): Promise<{status: number | null; stdout: string; stderr: string}> {
   const child = spawn(node, [...args, helper, id, checkout], {stdio: ['pipe', 'pipe', 'pipe']})
   let stdout = ''
   let stderr = ''
@@ -48,32 +59,33 @@ export async function runHelper(id, input, checkout, {node = process.execPath, a
     stderr += chunk
   })
   child.stdin.end(JSON.stringify(input))
-  const status = await new Promise((resolve, reject) => {
+  const status = await new Promise<number | null>((resolve, reject) => {
     child.once('error', reject)
     child.once('close', resolve)
   })
   return {status, stdout, stderr}
 }
 
-const collect = async context => {
+const collect = async (context: HelperContext): Promise<Extraction> => {
   const checkout = context.checkout ?? (await toolchain())
   const input = context.input
   const {definition} = input.projection
+  if (typeof definition.extractor !== 'string') throw new Error('The helper runs a built-in extractor, by id')
   const result = await runHelper(definition.extractor, input, checkout)
   if (result.status !== 0) throw new Error(result.stderr.trim() || `Helper exited with ${result.status}`)
-  const extraction = JSON.parse(result.stdout)
+  const extraction = JSON.parse(result.stdout) as Extraction
   await engine.normalize(extraction)
   return extraction
 }
 export const collectTypeScript = collect
-export const canonicalize = async extraction => (await engine.canonicalize(extraction)).canonical
+export const canonicalize = async (extraction: Extraction): Promise<string> => (await engine.canonicalize(extraction)).canonical
 /** Runs the default comparator; `changed` is true when any change is reported. */
-export const compareExtractions = async (before, after) => {
+export const compareExtractions = async (before: Extraction, after: Extraction): Promise<Comparison & {changed: boolean}> => {
   const comparison = await engine.compare(before, after)
   return {...comparison, changed: comparison.changes.length > 0}
 }
 /** Labels of after-side entities the comparison reports as modified. */
-export const modifiedLabels = (comparison, after) =>
+export const modifiedLabels = (comparison: Comparison, after: Extraction): Set<string | undefined> =>
   new Set(
     comparison.changes
       .filter(change => change.collection === 'entities' && change.status === 'modified')
@@ -85,22 +97,22 @@ export const modifiedLabels = (comparison, after) =>
  * flat `node_modules`, as the project's own package manager would, so nothing
  * resolves from the workspace above the checkout.
  */
-export async function installPackages(checkout, names) {
-  const pending = names.map(name => [name, packageRoot])
-  const installed = new Set()
+export async function installPackages(checkout: string, names: string[]): Promise<string> {
+  const pending: [name: string, from: string][] = names.map(name => [name, packageRoot])
+  const installed = new Set<string>()
   while (pending.length) {
-    const [name, from] = pending.shift()
+    const [name, from] = pending.shift() as [string, string]
     if (installed.has(name)) continue
     installed.add(name)
     // Not every package exports its manifest, so it is found the way Node walks `node_modules`.
     const manifest = createRequire(path.join(from, 'package.json'))
       .resolve.paths(name)
-      .map(directory => path.join(directory, name, 'package.json'))
+      ?.map(directory => path.join(directory, name, 'package.json'))
       .find(file => existsSync(file))
     if (!manifest) throw new Error(`${name} is not installed in the workspace`)
     const source = path.dirname(manifest)
     await cp(source, path.join(checkout, 'node_modules', name), {recursive: true, dereference: true})
-    const {dependencies = {}} = JSON.parse(await readFile(manifest, 'utf8'))
+    const {dependencies = {}} = JSON.parse(await readFile(manifest, 'utf8')) as {dependencies?: Record<string, string>}
     for (const dependency of Object.keys(dependencies)) pending.push([dependency, source])
   }
   return checkout

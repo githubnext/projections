@@ -12,7 +12,8 @@
     "test:gh": "node test/installed.mjs --gh-extension",
     "test:container": "node test/container-native.mjs",
     "test:binary": "node test/binary.mjs",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "typecheck": "tsc -p browser/tsconfig.json"
   },
   "devDependencies": {
     "@githubnext/projections": "0.2.0",

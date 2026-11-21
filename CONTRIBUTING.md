@@ -86,7 +86,9 @@ them, so leave them unapproved—this repository intentionally configures no
 
 Formatting uses [oxfmt](https://oxc.rs/docs/guide/usage/formatter)
 (`.oxfmtrc.json`). Run `npm run format` before committing; `npm run check` runs
-`format:check`, and ESLint remains the only linter.
+`format:check`, and ESLint remains the only linter: strict and type-aware, run a
+workspace at a time after the build (see
+[linting](docs/maintainers/linting.md)).
 
 Even though installs go through the committed `.npmrc` proxy (see
 [Package sources](#package-sources)), lockfiles must always record canonical
@@ -161,7 +163,7 @@ when).
 
 ### Continuous integration
 
-CI verifies import and dependency boundaries, TypeScript, correctness-focused
+CI verifies import and dependency boundaries, TypeScript, strict type-aware
 ESLint rules, real native-engine artifact tests, and explicit Rust and browser
 suites. Generated files are never linted as authored code. CI runs the same
 public composite action on both Linux and macOS, so passing locally on macOS

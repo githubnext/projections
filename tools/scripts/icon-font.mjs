@@ -50,10 +50,10 @@ function tokenize(d) {
 }
 
 /** An elliptical arc (SVG endpoint form) as quadratic segments of at most 45°: `[control, end]` pairs. */
-function arc([x0, y0], rx, ry, rotation, large, sweep, [x, y]) {
+function arc([x0, y0], radiusX, radiusY, rotation, large, sweep, [x, y]) {
   if (x0 === x && y0 === y) return []
-  rx = Math.abs(rx)
-  ry = Math.abs(ry)
+  let rx = Math.abs(radiusX)
+  let ry = Math.abs(radiusY)
   if (!rx || !ry) {
     return [
       [
@@ -155,7 +155,9 @@ export function pathContours(d) {
   }
   for (const {command, values} of tokenize(d)) {
     const relative = command !== command.toUpperCase()
-    const at = (x, y) => (relative ? [current[0] + x, current[1] + y] : [x, y])
+    // Each command's relative coordinates are from where the previous one ended.
+    const origin = current
+    const at = (x, y) => (relative ? [origin[0] + x, origin[1] + y] : [x, y])
     switch (command.toUpperCase()) {
       case 'M':
         close()

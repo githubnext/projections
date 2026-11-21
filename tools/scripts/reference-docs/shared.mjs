@@ -110,7 +110,7 @@ const tableCells = line =>
     .replace(/^\|/, '')
     .replace(/(?<!\\)\|$/, '')
     .split(/(?<!\\)\|/)
-    .map(cell => cell.trim())
+    .map(text => text.trim())
 
 /**
  * Marks each table whose aligned form would be wider than 140 columns so the formatter keeps it compact, as the

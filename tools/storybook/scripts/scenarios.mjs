@@ -64,10 +64,10 @@ export async function loadScenarios() {
         fixture.after = await extraction(scenario.after)
       }
       // A string or an object with `file` names a comparator file; an object without `file` is the default comparator.
-      const file = typeof scenario.comparator === 'string' ? scenario.comparator : scenario.comparator?.file
-      if (file) {
-        const served = comparatorAsset(file)
-        const path = resolve(directory, file)
+      const comparatorFile = typeof scenario.comparator === 'string' ? scenario.comparator : scenario.comparator?.file
+      if (comparatorFile) {
+        const served = comparatorAsset(comparatorFile)
+        const path = resolve(directory, comparatorFile)
         if (comparators.has(served) && comparators.get(served) !== path) throw new Error(`Two comparator files are named ${served}`)
         comparators.set(served, path)
         fixture.comparator = {file: served, ...(scenario.comparator.options ? {options: scenario.comparator.options} : {})}

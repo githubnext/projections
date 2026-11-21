@@ -68,13 +68,13 @@ export function directoryProblems(manifest, directory = notices) {
     }
     const present = readdirSync(join(directory, entry.directory)).sort()
     const listed = Object.keys(entry.files).sort()
-    for (const file of present.filter(file => !listed.includes(file))) {
+    for (const file of present.filter(candidate => !listed.includes(candidate))) {
       problems.push(`notices/${entry.directory}/${file} isn't in its notices/notices.json entry's files`)
     }
-    for (const file of listed.filter(file => !present.includes(file))) {
+    for (const file of listed.filter(candidate => !present.includes(candidate))) {
       problems.push(`notices/notices.json lists notices/${entry.directory}/${file}, which doesn't exist`)
     }
-    for (const file of listed.filter(file => !license(file))) {
+    for (const file of listed.filter(candidate => !license(candidate))) {
       problems.push(`notices/${entry.directory}/${file} isn't named as a license file (LICENSE*, LICENCE*, COPYING*, NOTICE*)`)
     }
   }

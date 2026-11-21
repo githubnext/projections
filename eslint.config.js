@@ -1,5 +1,7 @@
-import {readdirSync} from 'node:fs'
+import {readFileSync, readdirSync} from 'node:fs'
 import js from '@eslint/js'
+import {createTypeScriptImportResolver} from 'eslint-import-resolver-typescript'
+import importX from 'eslint-plugin-import-x'
 import reactHooks from 'eslint-plugin-react-hooks'
 import globals from 'globals'
 import {defineConfig} from 'eslint/config'
@@ -13,6 +15,9 @@ const shadcn = 'packages/host/core/src/ui/components'
 const vendored = readdirSync(`${import.meta.dirname}/${shadcn}/upstream`)
   .filter(file => file.endsWith('.json') && file !== 'manifest.json')
   .map(file => `${shadcn}/${file.replace(/\.json$/, '.tsx')}`)
+
+// Workspace directories (a single trailing `/*` level is a glob, as in tools/scripts/lint.mjs).
+const {workspaces} = JSON.parse(readFileSync(`${import.meta.dirname}/package.json`, 'utf8'))
 
 export default defineConfig(
   {
@@ -217,6 +222,57 @@ export default defineConfig(
     rules: {
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'error',
+    },
+  },
+  {
+    // Imports between modules and packages: cycles, duplicate and redundant imports, and packages a workspace uses
+    // without declaring. TypeScript already reports imports that don't resolve, so no rule here repeats that.
+    plugins: {'import-x': importX},
+    settings: {
+      'import-x/extensions': ['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs'],
+      'import-x/parsers': {'@typescript-eslint/parser': ['.ts', '.tsx', '.mts', '.cts']},
+      'import-x/resolver-next': [
+        createTypeScriptImportResolver({
+          // Each workspace's tsconfig.json and its browser/ and test/ ones; a file resolves through the one including it.
+          project: workspaces.flatMap(workspace => [`${workspace}/tsconfig.json`, `${workspace}/{browser,test}/tsconfig.json`]),
+          noWarnOnMultipleProjects: true,
+        }),
+      ],
+      // The VS Code host provides it to the extension at run time.
+      'import-x/core-modules': ['vscode'],
+    },
+    rules: {
+      // Type-only imports don't count: they're erased, so they can't make modules evaluate in the wrong order.
+      'import-x/no-cycle': ['error', {ignoreExternal: true}],
+      'import-x/no-self-import': 'error',
+      'import-x/no-duplicates': ['error', {'prefer-inline': true}],
+      'import-x/no-useless-path-segments': 'error',
+      'import-x/no-mutable-exports': 'error',
+      'import-x/first': 'error',
+      'import-x/no-extraneous-dependencies': 'error',
+    },
+  },
+  {
+    // What ships imports only its dependencies and peer dependencies; tests, specs, scripts and configuration may also
+    // use development ones. Workspaces that bundle their build declare what they bundle as development dependencies:
+    // the SDK bundles the internal workspaces, the VS Code extension everything but `vscode`, and the TypeScript helper
+    // replaces `typescript` with the examined repository's own installation.
+    files: ['packages/**/src/**'],
+    ignores: ['packages/sdk/**', 'packages/integrations/vscode/**', 'packages/extractors/typescript-support/**'],
+    rules: {'import-x/no-extraneous-dependencies': ['error', {devDependencies: false}]},
+  },
+  {
+    // The renderers' and the kit's browser suites run in the renderer harness, so they import it and what it declares
+    // (as npm run check:boundaries allows).
+    files: ['packages/renderers/*/browser/**'],
+    rules: {
+      'import-x/no-extraneous-dependencies': [
+        'error',
+        {
+          packageDir: [`${import.meta.dirname}/packages/renderers/harness`],
+          whitelist: ['@githubnext/projections-renderer-harness'],
+        },
+      ],
     },
   },
   {

@@ -157,7 +157,12 @@ test('npm run check and tools check run the same gates: each step of the check s
   const {gates} = await import('../src/lib/gates.ts')
   const {workspaceRoot} = await import('../src/lib/repo.ts')
   const scripts = JSON.parse(readFileSync(join(workspaceRoot, 'package.json'), 'utf8')).scripts as Record<string, string>
-  const steps = scripts.check!.split('&&').map(step => step.trim().replace(/^npm (run )?/, ''))
+  const split = (script: string): string[] =>
+    script
+      .split('&&')
+      .map(step => step.trim().replace(/^npm (run )?/, ''))
+      .flatMap(step => (step === 'check:no-test' ? split(scripts[step] as string) : [step]))
+  const steps = split(scripts.check!)
   // `npm test` runs the unit suites, which `tools test` covers rather than `tools check`.
   const gateOf = (step: string) => (step === 'test' ? undefined : step.replace(/^check:/, '').replace(/^format:check$/, 'format'))
   const names = new Set(gates.map(gate => gate.name))

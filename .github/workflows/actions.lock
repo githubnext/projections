@@ -17,6 +17,7 @@ workflows:
         - 'actions/upload-artifact@v7.0.2'
         - 'gradle/actions@v6.4.1'
         - 'hashicorp/setup-terraform@v4.0.1'
+        - 'swatinem/rust-cache@v2.9.3'
         - 'taiki-e/install-action@v2.90.0'
     '.github/workflows/copilot-setup-steps.yml':
         - 'actions/checkout@v6.1.0'
@@ -138,6 +139,11 @@ dependencies:
         commit: 'sha1-dfe3c3f87815947d99a8997f908cb6525fc44e9e'
         owner_id: 761456
         repo_id: 258271226
+    'swatinem/rust-cache@v2.9.3':
+        ref: 'v2.9.3'
+        commit: 'sha1-d1527c8f67ef9af357290475d4af4b0fab8f12e0'
+        owner_id: 580492
+        repo_id: 298565987
     'taiki-e/install-action@v2.90.0':
         ref: 'v2.90.0'
         commit: 'sha1-b80e2bb2635f28eb98b9fce1e2f0887e1535c6b2'

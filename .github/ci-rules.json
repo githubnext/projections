@@ -26,6 +26,7 @@
         ".node-version",
         ".npmrc",
         ".cargo/**",
+        ".config/nextest.toml",
         "tools/cli/**",
         "tools/scripts/**"
       ],
@@ -266,20 +267,39 @@
       "when": "docsOnly"
     },
     "public-product": {
-      "description": "The full check, Node and Rust suites, generated documentation and the self-projection",
+      "description": "The full check, Node and Rust suites, generated documentation and the self-projection. On macOS, the Rust suites and the rest run as two jobs in parallel.",
       "matrix": [
         {
-          "value": "ubuntu-latest",
+          "name": "ubuntu-latest",
           "description": "Every change but documentation alone",
           "when": {
             "not": "docsOnly"
+          },
+          "with": {
+            "os": "ubuntu-latest",
+            "part": "all"
           }
         },
         {
-          "value": "macos-latest",
-          "description": "Rust, the GitHub Action or the CLI's packaging scripts",
+          "name": "macos-latest, Rust",
+          "description": "Rust, the GitHub Action or the CLI's packaging scripts: the build and the Rust suites",
           "when": {
             "if": "os-specific"
+          },
+          "with": {
+            "os": "macos-latest",
+            "part": "rust"
+          }
+        },
+        {
+          "name": "macos-latest, Node",
+          "description": "Rust, the GitHub Action or the CLI's packaging scripts: the checks, the Node suites and the installed CLI",
+          "when": {
+            "if": "os-specific"
+          },
+          "with": {
+            "os": "macos-latest",
+            "part": "node"
           }
         }
       ]

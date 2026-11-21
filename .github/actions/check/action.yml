@@ -10,6 +10,12 @@ inputs:
   reference-docs:
     description: Check that the generated reference pages in docs/reference match their sources (needs a pinned nightly)
     default: 'false'
+  part:
+    description: >-
+      all: every check and suite. rust: the build and the Rust suites (cargo-nextest, doctests, rules coverage, rustfmt,
+      Clippy). node: everything else (the static checks, the build, types, lint, the Node suites and the installed CLI
+      proofs). The two parts run as parallel jobs where one job would take too long.
+    default: all
 runs:
   using: composite
   steps:
@@ -37,11 +43,29 @@ runs:
     # The file standards in .considered.yaml, early because they need no install or build. tools/scripts/considered.mjs
     # downloads the pinned Considered release from GitHub and verifies its checksum; npm run check runs it again.
     - name: Considered
+      if: inputs.part != 'rust'
       shell: bash
       working-directory: ${{ inputs.workspace }}
       run: |
         node tools/scripts/considered.mjs install
         node tools/scripts/considered.mjs check
+    # The toolchain rust-toolchain.toml pins, then the build cache: the dependencies' build output (not the workspace's own
+    # crates), keyed on the toolchain, Cargo.lock and the job's part. Only pushes to main save it; pull requests restore
+    # main's.
+    - shell: bash
+      working-directory: ${{ inputs.workspace }}
+      run: |
+        rustc --version
+        cargo --version
+    - uses: Swatinem/rust-cache@v2.9.3
+      with:
+        workspaces: ${{ inputs.workspace }} -> target
+        key: ${{ inputs.part }}
+        save-if: ${{ github.ref == 'refs/heads/main' }}
+    - if: inputs.part != 'node'
+      uses: taiki-e/install-action@v2.90.0
+      with:
+        tool: cargo-nextest@0.9.152
     - if: inputs.native == 'true'
       uses: actions/setup-dotnet@v6.0.0
       with:
@@ -75,9 +99,8 @@ runs:
       working-directory: ${{ inputs.workspace }}
       env:
         PROJECTIONS_CHECK_NATIVE: ${{ inputs.native }}
+        PART: ${{ inputs.part }}
       run: |
-        rustc --version
-        cargo --version
         if [ "$PROJECTIONS_CHECK_NATIVE" = true ]; then
           python -m venv "$RUNNER_TEMP/projections-public-django"
           "$RUNNER_TEMP/projections-public-django/bin/python" -m pip install \
@@ -97,8 +120,15 @@ runs:
           export PATH="$RUNNER_TEMP/$maven/bin:$PATH"
         fi
         npm ci
-        # Includes the Storybook build (tools/storybook/), which fails on any story or config error.
-        npm run check
+        if [ "$PART" = rust ]; then
+          npm run build
+        else
+          # Includes the Storybook build (tools/storybook/), which fails on any story or config error.
+          npm run check:no-test
+          # The Node suites. packages/cli's test script also runs the CLI's Rust suites, which run below with the rest.
+          npm test -- --except packages/cli
+          (cd packages/cli && node --test test/*.test.mjs)
+        fi
         # The opt-in native tool suites (packages/cli/tests/native_tools/) run once, with the Rust tests.
         if [ "$PROJECTIONS_CHECK_NATIVE" = true ]; then
           export PROJECTIONS_DJANGO_PYTHON="$RUNNER_TEMP/projections-public-django/bin/python"
@@ -106,12 +136,16 @@ runs:
           export PROJECTIONS_SCIP_TYPESCRIPT="$RUNNER_TEMP/projections-scip/node_modules/.bin/scip-typescript"
           export RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}" CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
         fi
-        npm run test:rust
-        npm run test:gh
-        npm run test:packed
+        if [ "$PART" != node ]; then
+          npm run test:rust:nextest
+        fi
+        if [ "$PART" != rust ]; then
+          npm run test:gh
+          npm run test:packed
+        fi
     # The repository's own projection (.github/projections/self-topology): its extractor's tests, then the CLI's
     # check of it end to end (extraction, determinism, scope, comparator tests and the renderer's checks in Chrome).
-    - if: runner.os == 'Linux'
+    - if: runner.os == 'Linux' && inputs.part == 'all'
       name: Self-projection
       shell: bash
       working-directory: ${{ inputs.workspace }}

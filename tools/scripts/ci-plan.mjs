@@ -51,7 +51,9 @@ const outputs = {
   full: plan.full.length > 0,
   'docs-only': plan.docsOnly,
   ...Object.fromEntries(Object.entries(plan.conditions).map(([name, value]) => [`if-${name}`, value])),
-  ...Object.fromEntries(Object.entries(plan.jobs).map(([name, value]) => [name, Array.isArray(value) ? JSON.stringify(value) : value])),
+  ...Object.fromEntries(
+    Object.entries(plan.jobs).map(([name, value]) => [name, Array.isArray(value) ? JSON.stringify(plan.matrices[name]) : value]),
+  ),
   suites: JSON.stringify(plan.suites),
   renderers: plan.renderers.join(','),
   browser: JSON.stringify(plan.browser),

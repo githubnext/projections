@@ -11,7 +11,7 @@
 //
 // In GitHub Actions it writes each job's decision (by job ID), each condition, the affected suites and the browser
 // matrices to the step's outputs, and the jobs with their reasons to its summary; elsewhere it prints the plan as JSON.
-import {appendFileSync} from 'node:fs'
+import {appendFileSync, readFileSync} from 'node:fs'
 import {fileURLToPath} from 'node:url'
 import {parseArgs} from 'node:util'
 import {repoFacts} from '../cli/src/lib/ci-facts.ts'
@@ -34,7 +34,18 @@ const commit = git(root, ['merge-base', 'HEAD', values.base])
 if (commit === undefined) throw new Error(`No merge base with ${values.base}; fetch it, or pass --base`)
 const paths = changedFiles(root, {ref: values.base, commit, reason: '--base'}).map(change => change.path)
 const labels = values.labels.split(',').filter(Boolean)
-const plan = ciPlan(repoFacts(root), loadCiRules(root), {paths, event: values.event, labels})
+// The lockfile rules compare a lockfile with its version at the merge base.
+const contents = {
+  before: path => git(root, ['show', `${commit}:${path}`]),
+  after: path => {
+    try {
+      return readFileSync(new URL(path, `file://${root}`), 'utf8')
+    } catch {
+      return undefined
+    }
+  },
+}
+const plan = ciPlan(repoFacts(root), loadCiRules(root), {paths, event: values.event, labels, contents})
 
 const outputs = {
   full: plan.full.length > 0,

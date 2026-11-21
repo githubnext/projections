@@ -82,11 +82,30 @@ const FileRule = Type.Object(
       }),
     ),
     effect: Type.Union(
-      [Type.Literal('full'), Type.Literal('docs'), Type.Literal('checks'), Type.Literal('owner'), Type.Literal('readers')],
+      [
+        Type.Literal('full'),
+        Type.Literal('docs'),
+        Type.Literal('checks'),
+        Type.Literal('owner'),
+        Type.Literal('readers'),
+        Type.Literal('lockfile'),
+      ],
       {
-        description:
-          "full: run everything. docs: documentation only. checks: the Linux checks only, which run every crate's tests and generator's check, without counting it a change to what reads it. owner: a change to the workspace or crate containing the file. readers: a change only to what reads it (the crates and generators found for every file); with none, the Linux checks still run",
+        description: [
+          'full: run everything.',
+          'docs: documentation only.',
+          "checks: the Linux checks only, which run every crate's tests and generator's check, without counting it a change to what reads it.",
+          'owner: a change to the workspace or crate containing the file.',
+          'readers: a change only to what reads it (the crates and generators found for every file); with none, the Linux checks still run.',
+          'lockfile (package-lock.json, Cargo.lock): a change to the workspaces and crates whose resolved dependencies changed; with no earlier version to compare, everything runs.',
+        ].join(' '),
       },
+    ),
+    root: Type.Optional(
+      Type.Union([Type.Literal('full'), Type.Literal('readers')], {
+        description:
+          "For a lockfile rule, when the root package's own dependencies (the repository's tooling) changed: run everything (full), or count only the workspaces and crates the change reaches (readers)",
+      }),
     ),
   },
   Strict,

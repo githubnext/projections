@@ -8,16 +8,20 @@
   },
   "files": [
     {
-      "description": "CI itself, a toolchain, a lockfile or root manifest, or the repository's tooling: run everything",
+      "description": "A lockfile: a change to the workspaces and crates whose resolved dependencies changed, and everything when the root's own tooling (TypeScript, ESLint, oxfmt) did",
+      "paths": ["package-lock.json", "Cargo.lock"],
+      "effect": "lockfile",
+      "root": "full"
+    },
+    {
+      "description": "CI itself, a toolchain, a root manifest, or the repository's tooling: run everything",
       "paths": [
         ".github/workflows/**",
         ".github/actions/**",
         ".github/ci-rules.json",
         ".github/ci-rules.schema.json",
         "package.json",
-        "package-lock.json",
         "Cargo.toml",
-        "Cargo.lock",
         "rust-toolchain.toml",
         ".node-version",
         ".npmrc",

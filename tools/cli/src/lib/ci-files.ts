@@ -3,6 +3,7 @@
 // crate's change, or is a change only to what reads it. But for `checks`, the crates that read a file by path count;
 // whatever the rule, the generators that read or write it count, and it gets every tag whose paths it matches.
 import {readersOf, type RepoFacts} from './ci-facts.ts'
+import {lockfileReach} from './ci-lockfiles.ts'
 import type {CiRules} from './ci-rules.ts'
 import {ownerOf} from './packages.ts'
 import {matches} from './repo.ts'
@@ -22,6 +23,9 @@ export type Sorted = {
 
 type FileRule = CiRules['files'][number]
 
+/** A changed file's contents before and after the change, for the rules that compare them (lockfiles). */
+export type Contents = {before: (path: string) => string | undefined; after: (path: string) => string | undefined}
+
 function applies(rule: FileRule, path: string, owned: boolean, read: boolean): boolean {
   if (rule.paths && !matches(path, rule.paths)) return false
   if (rule.except && matches(path, rule.except)) return false
@@ -29,7 +33,17 @@ function applies(rule: FileRule, path: string, owned: boolean, read: boolean): b
   return rule.read === undefined || rule.read === read
 }
 
-export function sortChanges(facts: RepoFacts, rules: CiRules, paths: readonly string[]): Sorted {
+/** A lockfile's change: the workspaces and crates it reaches, or why everything runs. */
+function lockfile(facts: RepoFacts, rule: FileRule, path: string, contents: Contents | undefined, sorted: Sorted) {
+  const before = contents?.before(path)
+  const reach = before === undefined ? undefined : lockfileReach(path, before, contents?.after(path), facts.units)
+  if (!reach) sorted.everything.push({path, rule: `${rule.description}; there is no earlier version to compare`})
+  else if (reach.root && rule.root !== 'readers')
+    sorted.everything.push({path, rule: `${rule.description}; the root's own dependencies changed`})
+  else for (const unit of reach.units) sorted.units.add(unit)
+}
+
+export function sortChanges(facts: RepoFacts, rules: CiRules, paths: readonly string[], contents?: Contents): Sorted {
   const sorted: Sorted = {units: new Set(), tested: new Set(), everything: [], docsOnly: true, tags: new Set(), generators: new Set()}
   for (const path of paths) {
     const generated = facts.generators.filter(generator => matches(path, generator.inputs) || matches(path, generator.outputs))
@@ -47,6 +61,7 @@ export function sortChanges(facts: RepoFacts, rules: CiRules, paths: readonly st
     if (rule.effect !== 'docs') sorted.docsOnly = false
     if (rule.effect === 'full') sorted.everything.push({path, rule: rule.description})
     if (rule.effect === 'owner' && owner) sorted.units.add(owner.path)
+    if (rule.effect === 'lockfile') lockfile(facts, rule, path, contents, sorted)
   }
   if (sorted.generators.size) sorted.docsOnly = false
   return sorted

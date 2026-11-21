@@ -135,9 +135,11 @@ So a new activity sees what the effects did: a clock an effect shifted, or a
 request an effect sent.
 
 **A `send` can end its own runner.** A `send` from a callback (a frame, a timer,
-a response) is handled before it returns. The event can end the very activity or
-effect that sent it (its state stops listing it), running its cleanup before
-`send` returns. A runner that does more work after sending must request that
+a response) is handled before it returns. The event can end the very runner that
+sent it, running its cleanup before `send` returns: an activity whose state
+stops listing it, or a keyed effect whose transition asks for another effect
+with its key. (A state change doesn't end effects; an unkeyed effect lasts until
+the actor stops.) A runner that does more work after sending must request that
 work first, so the cleanup cancels it, or check `signal.aborted` after sending.
 For example, a frame loop should request the next frame before sending its tick.
 

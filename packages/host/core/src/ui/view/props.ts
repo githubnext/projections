@@ -157,5 +157,10 @@ export interface ProjectionViewProps {
    * keeps one row, and the stage keeps its height; renderers keep clear of what the area covers. Default false.
    */
   utilityArea?: boolean
+  /**
+   * When playback shows (`ViewControlsOptions.playbackInViews`): `animated` (the default), in the Animated mode only,
+   * beside every view; `always`, also beside the table and text views in every other mode.
+   */
+  playbackInViews?: 'animated' | 'always'
   className?: string
 }

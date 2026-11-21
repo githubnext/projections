@@ -26,9 +26,11 @@ bottom. In order, it holds three regions:
 - **start:** the pair picker (`ComparisonExplorer`, or `toolbarStart`);
 - **center:** the comparison mode (the renderer's `availableModes`, hidden when
   there is one; Animated is a clapperboard, and no mode icon looks like a play,
-  pause or step glyph), then playback (animated mode, and beside the table and
-  text views): **one round play button**, small step buttons, the "Transition"
-  slider, which takes all remaining space, and its percent at a fixed width;
+  pause or step glyph), then playback (in the Animated mode, beside every view;
+  `playbackInViews: 'always'` also shows it beside the table and text views in
+  the other modes): **one round play button**, small step buttons, the
+  "Transition" slider, which takes all remaining space, and its percent at a
+  fixed width;
 - **end:**
   1. while the table or text view is shown, a chip ("Table ×") that returns to
      the renderer in one click (named "Showing table; show the Graph renderer";
@@ -144,7 +146,9 @@ pan and zoom at that height; they then pan by dragging, so the wheel scrolls the
 page. `features` turns off blocks and views (`playback`, `modes`,
 `highlighting`, `changesOnly`, `search`, `rendererChoice`, `speed`,
 `rendererControls`, `zoom`, `table`, `text`, `info`, `fullscreen`, `title`,
-`annotations`, `summary`); `actions` adds host content to the row.
+`annotations`, `summary`); `actions` adds host content to the row. Which views
+and controls show follows the core's view model (`viewControls`, in
+[the core guide](host-core.md#the-view-model)), the same in the VS Code UI.
 
 ### The summary bar
 

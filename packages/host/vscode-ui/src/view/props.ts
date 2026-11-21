@@ -133,6 +133,11 @@ export interface VscodeProjectionViewProps {
    */
   utilityArea?: boolean
   /**
+   * When playback shows (`ViewControlsOptions.playbackInViews`): `animated` (the default), in the Animated mode only,
+   * beside every view; `always`, also beside the table and text views in every other mode.
+   */
+  playbackInViews?: 'animated' | 'always'
+  /**
    * A notice floating over the stage, not a tool: a `StageNotice`, such as a VS Code tab's "Out of date · 3 files
    * changed · Refresh". Drawn at the stage's top centre, 12px in (12px below the panes' header bands in side by side
    * and swipe), over every view (renderer, table or text); it takes no layout space, so framing is unchanged, and stays

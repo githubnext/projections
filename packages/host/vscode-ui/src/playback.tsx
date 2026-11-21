@@ -35,14 +35,16 @@ const usesSpace =
 /**
  * Space toggles playback (`togglePlayback`) from the element whose `onKeyDown` calls this, for example a toolbar or the
  * stage's chrome: not from text fields or controls that use Space themselves (VSCode Elements included), and not from
- * overlays portaled out of it. Returns whether it handled the key. Does nothing unless comparing in animated mode.
+ * overlays portaled out of it. Returns whether it handled the key. Does nothing unless comparing in animated mode, or
+ * with `always` (playback beside the table and text views in every mode, `playbackInViews: 'always'`).
  */
 export function handlePlaybackKey(
   event: KeyboardEvent<HTMLElement>,
   p: Pick<ProjectionController, 'comparing' | 'mode' | 'togglePlayback'>,
+  always = false,
 ): boolean {
   if (event.key !== ' ' || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return false
-  if (!p.comparing || p.mode !== 'animated') return false
+  if (!p.comparing || (!always && p.mode !== 'animated')) return false
   const target = event.target
   if (!(target instanceof Element) || !event.currentTarget.contains(target) || target.closest(usesSpace)) return false
   event.preventDefault()
@@ -54,7 +56,8 @@ export function handlePlaybackKey(
  * Play, step and scrub an animated comparison, drawn like VS Code's debug toolbar: the play button in the debug
  * continue color (pause in the pause color), the steps as step back and step over, the "Transition" slider (Home and
  * End show either revision, Space on it plays and pauses; it takes the room the group has) and the percentage.
- * Renders nothing unless comparing in animated mode. `ends` shows the revision names at the slider's ends. `overflow`
+ * Renders nothing unless comparing in animated mode, or with `always` (beside the table and text views in every mode,
+ * `playbackInViews: 'always'`). `ends` shows the revision names at the slider's ends. `overflow`
  * moves the steps and the percentage into a "More playback controls" menu, keeping the play button and slider.
  */
 export function Playback({
@@ -63,17 +66,19 @@ export function Playback({
   afterLabel,
   ends = true,
   overflow = false,
+  always = false,
 }: {
   projection: ProjectionController
   beforeLabel: string
   afterLabel: string
   ends?: boolean
   overflow?: boolean
+  always?: boolean
 }) {
   const id = useId()
   const [open, setOpen] = useState(false)
   const more = useRef<VscodeToolbarButton>(null)
-  if (!p.comparing || p.mode !== 'animated') return null
+  if (!p.comparing || (!always && p.mode !== 'animated')) return null
   const percent = Math.round(p.position * 100)
   const play = playButtonState(p, beforeLabel, afterLabel)
   const steps = p.stepEnds.length > 0

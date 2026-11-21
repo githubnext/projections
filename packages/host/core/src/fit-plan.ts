@@ -69,6 +69,12 @@ export interface FitPlanOptions<T> {
   focusControl?: (control: HTMLElement) => void
 }
 
+/** The options the planning effect reads, with their defaults. */
+function planning<T>(options: FitPlanOptions<T>) {
+  const {lock, ceiling, measure = fitWidth, hysteresis = toolbarHysteresis, shiftNeeds: shift = false, carry, need, pending} = options
+  return {lock, ceiling, measure, hysteresis, shift, carry, need, pending}
+}
+
 /**
  * Chooses the most spacious of `plans` (ordered most spacious first) that fits the element's width, from a
  * ResizeObserver on the element itself (not the viewport, since bars are embedded at any width). Each plan is
@@ -85,11 +91,11 @@ export function useFitPlan<T>(
   plans: readonly T[],
   options: FitPlanOptions<T>,
 ): {plan: T; index: number; width: number} {
-  const sign = options.signature ?? ((plan: T) => JSON.stringify(plan))
-  const find =
+  const signature = options.signature ?? ((plan: T) => JSON.stringify(plan))
+  const locate =
     options.locate ??
     ((list: readonly T[], plan: T) => {
-      const index = list.findIndex(item => sign(item) === sign(plan))
+      const index = list.findIndex(item => signature(item) === signature(plan))
       return index < 0 ? 0 : index
     })
   const [state, send, actor] = useMachine(fitPlanLifecycle, {
@@ -97,10 +103,10 @@ export function useFitPlan<T>(
     activities: {
       // Replanning inside the observer's callback would resize observed elements mid-delivery (a ResizeObserver loop),
       // so it waits for the next frame, and renders synchronously there, before that frame's layout and paint.
-      frame: (_activity, {send}) => {
+      frame: (_activity, context) => {
         const handle = requestAnimationFrame(() => {
           const element = bar.current
-          if (element) flushSync(() => send({type: 'frame', width: Math.round(element.getBoundingClientRect().width)}))
+          if (element) flushSync(() => context.send({type: 'frame', width: Math.round(element.getBoundingClientRect().width)}))
         })
         return () => cancelAnimationFrame(handle)
       },
@@ -119,12 +125,11 @@ export function useFitPlan<T>(
     steps: 0,
     burst: '',
   })
-  const index = find(plans, state.plan as T)
+  const index = locate(plans, state.plan as T)
   const plan = plans[index]!
-  const {lock, ceiling, measure = fitWidth, hysteresis = toolbarHysteresis, shiftNeeds: shift = false, carry, need, pending} = options
-  const regions = options.regions ?? '[data-toolbar-region]'
-  const latest = useRef({sign, find, lock, ceiling, measure, hysteresis, shift, carry, need, pending, regions})
-  latest.current = {sign, find, lock, ceiling, measure, hysteresis, shift, carry, need, pending, regions}
+  const current = {sign: signature, find: locate, ...planning(options), regions: options.regions ?? '[data-toolbar-region]'}
+  const latest = useRef(current)
+  latest.current = current
 
   useLayoutEffect(() => {
     const element = bar.current
@@ -209,6 +214,7 @@ export function useFitPlan<T>(
 
   // Replan when the bar or one of its regions changes size.
   const observer = useRef<ResizeObserver | undefined>(undefined)
+  const observed = useRef(new Set<Element>())
   useLayoutEffect(() => {
     const element = bar.current
     if (!element) return
@@ -231,7 +237,6 @@ export function useFitPlan<T>(
       observed.current = new Set()
     }
   }, [bar, send])
-  const observed = useRef(new Set<Element>())
   useLayoutEffect(() => {
     const resize = observer.current
     const element = bar.current

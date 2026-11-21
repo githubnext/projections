@@ -212,7 +212,14 @@ test('including asks GET /api/definitions to list an opened candidate, and leave
   const seen = []
   const next = async () => ({generation: 1, changes: [], complete: true})
   const transport = including(
-    {origin: 'http://stdio.invalid', request: async request => (seen.push(request.path), {}), next},
+    {
+      origin: 'http://stdio.invalid',
+      request: async request => {
+        seen.push(request.path)
+        return {}
+      },
+      next,
+    },
     'repository-map',
   )
   await transport.request({method: 'GET', path: '/api/definitions?ref=working-tree'})

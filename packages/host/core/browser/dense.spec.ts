@@ -38,9 +38,9 @@ async function open(page: Page, query: string, size?: {width: number; height: nu
 /** The stage's share of the view's height, and of its box. */
 const stageShare = (page: Page) =>
   page.evaluate(() => {
-    const view = document.querySelector('.ph')!.getBoundingClientRect()
+    const hostBox = document.querySelector('.ph')!.getBoundingClientRect()
     const stage = document.querySelector('.ph-stage-body')!.getBoundingClientRect()
-    return {height: stage.height / view.height, area: (stage.width * stage.height) / (view.width * view.height)}
+    return {height: stage.height / hostBox.height, area: (stage.width * stage.height) / (hostBox.width * hostBox.height)}
   })
 
 for (const [name, size] of [

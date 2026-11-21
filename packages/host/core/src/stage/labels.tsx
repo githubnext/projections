@@ -107,7 +107,13 @@ export function PaneLabel({
 }
 
 /** A long revision name is cut to fit; the whole name shows on hover. */
-const titleOf = (label: ReactNode) => (typeof label === 'string' ? {title: label} : {})
+function titleOf(label: ReactNode) {
+  return typeof label === 'string' ? {title: label} : {}
+}
+
+/** The chip's height and its gap below the frame's top edge, CSS px: as much as its inset at the side. */
+const chipHeight = 28
+const chipTop = 12
 
 /**
  * A revision's label as a chip overlaid on its pane's frame (`ProjectionStage`'s `paneLabels: 'chips'`): it sits on
@@ -191,9 +197,7 @@ export function PaneChip({
     </Element>
   )
 }
-/** The chip's height and its gap below the frame's top edge, CSS px: as much as its inset at the side. */
-const chipHeight = 28
-const chipTop = 12
+
 /**
  * The space a pane chip takes at the top of its frame, CSS px: its gap, its height and as much again below it, which
  * the stage measures and sends to the frames chips overlay as their `stage-inset-top` theme token.

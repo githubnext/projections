@@ -1,6 +1,6 @@
 import {test as base, expect, type Locator, type Page} from '@playwright/test'
 import {execFileSync} from 'node:child_process'
-import {mkdtemp, mkdir, readFile, rename, writeFile, rm} from 'node:fs/promises'
+import {mkdtemp, mkdir, rename, writeFile, rm} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {cli, startHarness, type Harness} from './harness.js'
@@ -172,18 +172,6 @@ async function mark(page: Page, ref: string, side: 'Before' | 'After') {
   const button = page.getByRole('button', {name: `Set ${ref} as ${side}`, exact: true})
   if ((await button.getAttribute('aria-pressed')) !== 'true') await button.click()
   await expect(button).toHaveAttribute('aria-pressed', 'true')
-}
-
-/** Extracts a revision from the History (adding it as a ref when it isn't listed) and waits for it. */
-async function extractRevision(page: Page, ref: string) {
-  await sidebar(page)
-  const row = page.locator(`[data-revision="${ref}"]`)
-  if (await row.count()) await row.getByRole('button', {name: /^Extract /}).click()
-  else {
-    await page.getByLabel('Any ref', {exact: true}).fill(ref)
-    await page.getByLabel('Any ref', {exact: true}).press('Enter')
-  }
-  await expect(row).toHaveAttribute('data-status', 'done')
 }
 
 /** The title bar's projection switcher: the current projection's title, its document title. */
@@ -681,14 +669,14 @@ test('a projection is three parts: override the renderer and the comparator for 
   await expect(page.locator('[data-active-view="renderer"]')).toContainText('Graph renderer')
   // Save to definition shows the definition file's diff and offers its JSON (the API can't write it).
   await parts.getByRole('button', {name: 'Save to definition…'}).click()
-  const save = page.getByRole('dialog', {name: 'Save to definition'})
+  const saveDialog = page.getByRole('dialog', {name: 'Save to definition'})
   // Once the runner previews the edit, the diff is its exact edit of the file: the fixture's one-line JSON, rewritten pretty.
-  await expect(save.getByRole('button', {name: /^Save to .*architecture\.json$/})).toBeEnabled()
-  await expect(save.locator('[data-kind="removed"]').filter({hasText: '"renderer":"architecture"'})).toHaveCount(1)
-  await expect(save.locator('[data-kind="added"]').filter({hasText: '"renderer": "graph"'})).toHaveCount(1)
-  await expect(save.getByRole('button', {name: 'Copy definition JSON'})).toBeVisible()
+  await expect(saveDialog.getByRole('button', {name: /^Save to .*architecture\.json$/})).toBeEnabled()
+  await expect(saveDialog.locator('[data-kind="removed"]').filter({hasText: '"renderer":"architecture"'})).toHaveCount(1)
+  await expect(saveDialog.locator('[data-kind="added"]').filter({hasText: '"renderer": "graph"'})).toHaveCount(1)
+  await expect(saveDialog.getByRole('button', {name: 'Copy definition JSON'})).toBeVisible()
   await page.keyboard.press('Escape')
-  await expect(save).toHaveCount(0)
+  await expect(saveDialog).toHaveCount(0)
   // The comparator: the default one's ordering is changed in place; only the comparison runs again, in the browser.
   await sidebar(page)
   const jobs = await page.locator('[data-revision] [aria-label="Extracting"]').count()
@@ -1326,8 +1314,8 @@ test('the title bar is a planned toolbar: no overlap, nothing clipped or truncat
 
 /** Text left edges inside the Explorer (section labels, Parts and Compare row titles, sublabels), relative to the card. */
 const textColumns = (page: Page) =>
-  page.getByRole('complementary', {name: 'Explorer'}).evaluate(panel => {
-    const left = panel.getBoundingClientRect().left
+  page.getByRole('complementary', {name: 'Explorer'}).evaluate(explorer => {
+    const left = explorer.getBoundingClientRect().left
     const start = (element: Element | null) => {
       if (!element) return undefined
       const range = document.createRange()
@@ -1335,10 +1323,10 @@ const textColumns = (page: Page) =>
       return Math.round(range.getBoundingClientRect().left - left)
     }
     return {
-      headers: [...panel.querySelectorAll('.pi-x-header .pi-x-title')].map(start),
-      rows: [...panel.querySelectorAll('.pi-x-row .pi-x-title')].map(start),
-      sublabels: [...panel.querySelectorAll('.pi-x-sublabel h3')].map(start),
-      fills: [...panel.querySelectorAll('.pi-x-row[aria-pressed="true"]')].map(row => {
+      headers: [...explorer.querySelectorAll('.pi-x-header .pi-x-title')].map(start),
+      rows: [...explorer.querySelectorAll('.pi-x-row .pi-x-title')].map(start),
+      sublabels: [...explorer.querySelectorAll('.pi-x-sublabel h3')].map(start),
+      fills: [...explorer.querySelectorAll('.pi-x-row[aria-pressed="true"]')].map(row => {
         const box = row.getBoundingClientRect(),
           body = row.closest('.pi-x-body')!.getBoundingClientRect()
         return {left: Math.round(box.left - body.left), right: Math.round(body.right - box.right), height: Math.round(box.height)}

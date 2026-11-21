@@ -52,8 +52,8 @@ export interface RowInsets {
  * text runs), not the layout regions (`wrappers`) holding them; a text run's or slider's top and bottom are the row's
  * tallest control's, since text is centred by its cap height instead.
  */
-export const toolbarInsets = (toolbar: Locator, options: {wrappers: string; secondRow?: string; rows?: string}) =>
-  toolbar.evaluate((element, {wrappers, secondRow, rows}) => {
+export function toolbarInsets(toolbar: Locator, options: {wrappers: string; secondRow?: string; rows?: string}) {
+  return toolbar.evaluate((element, {wrappers, secondRow, rows}) => {
     const style = getComputedStyle(element)
     const border = (side: string) => parseFloat(style.getPropertyValue(`border-${side}-width`)) || 0
     const box = element.getBoundingClientRect()
@@ -153,6 +153,7 @@ export const toolbarInsets = (toolbar: Locator, options: {wrappers: string; seco
     const top = second.getBoundingClientRect().top + (parseFloat(getComputedStyle(second).borderTopWidth) || 0)
     return {main, playback: row(controls(second, null), {...inner, top})}
   }, options)
+}
 
 /** Each edge control's side inset equals its top and bottom insets, within half a pixel (a slider's end is not checked). */
 export function expectEdgeInsets(insets: {main: RowInsets; playback?: RowInsets}, what: string) {

@@ -40,15 +40,17 @@ test('one revision without its declared inputs says the projection has nothing t
 
 test("the failure panel shows the extractor's message once, never the runner executable's absolute path", () => {
   const binary = '/opt/checkouts/projections/opensource/packages/cli/dist/projections'
-  const reported = `Extractor prisma-schema: ${schema} is not a file of the examined revision`
-  assert.equal(failureMessage(`${binary} exited with exit status: 1: ${reported}\n${reported}\n`), reported)
+  const extractorMessage = `Extractor prisma-schema: ${schema} is not a file of the examined revision`
+  assert.equal(failureMessage(`${binary} exited with exit status: 1: ${extractorMessage}\n${extractorMessage}\n`), extractorMessage)
   assert.equal(failureMessage(`${binary} exited with exit status: 1`), 'projections exited with exit status: 1')
-  assert.equal(failureMessage(reported), reported)
+  assert.equal(failureMessage(extractorMessage), extractorMessage)
   const job = {
     id: 'job',
     status: 'failed',
-    diagnostics: [{severity: 'error', code: 'RUNNER_ERROR', path: '', message: `${binary} exited with exit status: 1: ${reported}\n`}],
-    outputs: [{stdout: '', stderr: `${reported}\n`}],
+    diagnostics: [
+      {severity: 'error', code: 'RUNNER_ERROR', path: '', message: `${binary} exited with exit status: 1: ${extractorMessage}\n`},
+    ],
+    outputs: [{stdout: '', stderr: `${extractorMessage}\n`}],
   }
   const html = renderToStaticMarkup(
     createElement(FailureCard, {

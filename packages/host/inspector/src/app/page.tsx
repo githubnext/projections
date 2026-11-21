@@ -15,6 +15,8 @@ import {TrustPrompt} from './cards.js'
 import {partPath} from './definitions.js'
 import {refName} from './revisions.js'
 
+const pathStart = /(?:^|[\s("'\x60])(?:\/|~\/|\.{1,2}\/|[A-Za-z]:\\)/
+
 /**
  * Whether a message names a file or directory: an absolute or relative path, or a file name with an extension. The
  * viewer leaves such messages to the agent rather than showing them.
@@ -23,7 +25,6 @@ export function mentionsPath(text: string): boolean {
   return pathStart.test(text) || nestedPath(text) || fileName(text)
 }
 
-const pathStart = /(?:^|[\s("'\x60])(?:\/|~\/|\.{1,2}\/|[A-Za-z]:\\)/
 const fileExtension = /^(?:json|ya?ml|[cm]?[jt]sx?|py|go|rs|cs|java|rb|toml|lock|md|html|css|sh)$/
 const wordCharacter = /\w/
 

@@ -101,7 +101,11 @@
                   "pattern": {"type": "string"},
                   "count": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
                   "examples": {"type": "array", "items": {"type": "string"}},
-                  "skipped": {"type": "integer", "minimum": 0, "maximum": 9007199254740991}
+                  "skipped": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+                  "file": {
+                    "type": "string",
+                    "description": "The one file a per-file candidate reads, such as a workflow."
+                  }
                 },
                 "description": "Why it was proposed: the detection pattern that matched, how many files and the first few."
               },

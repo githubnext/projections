@@ -87,6 +87,23 @@ async fn saving_parts_previews_then_writes_the_definition_with_trust() {
 }
 
 #[tokio::test]
+async fn exploring_proposes_a_conforming_candidate_per_workflow() {
+    let fixture = Fixture::new(true, false, false).await;
+    let workflows = fixture.root.join("repo/.github/workflows");
+    fs::create_dir_all(&workflows).unwrap();
+    fs::write(workflows.join("ci.yml"), "on: push\njobs: {}\n").unwrap();
+    let candidates = fixture.get("/api/explore").await.json();
+    conforms("explore", &candidates);
+    let workflow = candidates["candidates"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|candidate| candidate["extractor"] == "github-actions-jobs")
+        .expect("a candidate for the workflow");
+    assert_eq!(workflow["basis"]["file"], ".github/workflows/ci.yml");
+}
+
+#[tokio::test]
 async fn adopting_previews_then_writes_with_trust() {
     let fixture = Fixture::new(true, false, false).await;
     let repo = fixture.root.join("repo");

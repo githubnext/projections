@@ -73,6 +73,7 @@ export const ExploreCandidateSchema = Type.Object({
       count: Count,
       examples: Type.Array(Type.String()),
       skipped: Type.Optional(Count),
+      file: Type.Optional(Type.String({description: 'The one file a per-file candidate reads, such as a workflow.'})),
     },
     {description: 'Why it was proposed: the detection pattern that matched, how many files and the first few.'},
   ),

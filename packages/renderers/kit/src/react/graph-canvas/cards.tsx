@@ -34,12 +34,6 @@ export function groupHeading(given: KindLineText | undefined, fallback: string, 
   )
 }
 
-/** A card's status footer band: its full width from `top` to the card's `bottom`, rounded on the bottom corners like the card. */
-export function footerBand(x: number, top: number, width: number, bottom: number, radius: number): string {
-  const r = Math.min(radius, bottom - top, width / 2)
-  return `M${x} ${top}H${x + width}V${bottom - r}A${r} ${r} 0 0 1 ${x + width - r} ${bottom}H${x + r}A${r} ${r} 0 0 1 ${x} ${bottom - r}Z`
-}
-
 /** A diff card's text, laid out whole by `diffCardText`: each line in its own style, values struck or added. */
 export function DiffCardLines({card, top, left}: {card: DiffCardText; top: number; left: number}) {
   const tones = {was: 'pk-svg-was', now: 'pk-svg-now', arrow: 'pk-svg-arrow', note: 'node-note'} as const

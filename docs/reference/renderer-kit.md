@@ -2811,7 +2811,7 @@ Where `useStageZoom` opens the view; by default fitted, or at the text floor whe
 |---|---|---|
 | `floor` | `"floor"?: number` | The scale at which the smallest text reaches `openingFloorPx` (see `useOpeningFloor`): content whose fit is smaller opens at it instead and scrolls. Measure it over everything the stage frames (both endpoints of a transition), so it never changes while scrubbing. |
 | `hold` | `"hold"?: { "key": unknown; "scale": number }` | A drawn scale (CSS px per content unit) to keep: whenever `key` changes, the zoom becomes the multiple of the fit that draws at `scale` (within the zoom range), as though the person had zoomed there, so a view that changes its content's size, and with it the fit, keeps its zoom. |
-| `opening` | `"opening"?: { "centred"?: boolean; "start": { "x": number; "y": number } \| { (view: { "height": number; "scale": number; "width": number }): { "left": number; "top": number } }; "zoom": number }` | An opening view chosen by the caller instead, for example on a focus (see `RendererFocus`): its zoom multiple of the fit (clamped to the zoom range) and where it starts. Like the default, it holds until the person zooms or pans. `centred`: the start centres a focus in the view, so it isn't moved clear of a stage cover as a reading start is. |
+| `opening` | `"opening"?: { "centred"?: false \| true; "start": { "x": number; "y": number } \| { (view: { "height": number; "scale": number; "width": number }): { "left": number; "top": number } }; "zoom": number }` | An opening view chosen by the caller instead, for example on a focus (see `RendererFocus`): its zoom multiple of the fit (clamped to the zoom range) and where it starts. Like the default, it holds until the person zooms or pans. `centred`: the start centres a focus in the view, so it isn't moved clear of a stage cover as a reading start is. |
 | `start` | `"start"?: { "x": number; "y": number } \| { (view: { "height": number; "scale": number; "width": number }): { "left": number; "top": number } }` | Where content that overflows the opening view starts (default the top left; see `ScrollStart`). |
 
 ### `statusGlyphs`
@@ -4431,7 +4431,7 @@ returns to release. Outside a kit renderer it holds nothing.
 ### `useScrollAnchor`
 
 ```ts
-useScrollAnchor(scroller: RefObject<HTMLElement | null>, scale: number, opening?: false | true, start?: { "x": number; "y": number } | { (view: { "height": number; "scale": number; "width": number }): { "left": number; "top": number } }, onMove?: undefined | { (): void }): { (): void }
+useScrollAnchor(scroller: RefObject<HTMLElement | null>, scale: number, opening?: false | true, start?: { "x": number; "y": number } | { (view: { "height": number; "scale": number; "width": number }): { "left": number; "top": number } }, onMove?: undefined | { (): void }, clearCover?: false | true): { (): void }
 ```
 
 Keeps the point at the middle of a scroll container in the middle when the

@@ -63,7 +63,7 @@ export function fromInvocation(path: string): string {
 /** Whether `directory` is on `PATH`. */
 export function onPathList(directory: string, path = process.env.PATH ?? ''): boolean {
   const wanted = canonical(directory)
-  return path.split(delimiter).some(entry => entry && canonical(entry) === wanted)
+  return path.split(delimiter).some(entry => entry !== '' && canonical(entry) === wanted)
 }
 
 /**

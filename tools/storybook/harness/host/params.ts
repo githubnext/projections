@@ -27,7 +27,7 @@ export const annotations = demoAnnotations()
 
 /** `?evidenceLinks`: where a review app would link evidence, for example a file at a commit. */
 export const evidenceLink: EvidenceLink = (location, side) =>
-  `https://example.test/${side}/${location.path}${location.line ? `#L${location.line}` : ''}`
+  `https://example.test/${side}/${location.path}${location.line !== undefined && location.line !== 0 ? `#L${location.line}` : ''}`
 
 export type RendererChoice = 'auto' | 'minimal' | 'none' | 'hostile'
 

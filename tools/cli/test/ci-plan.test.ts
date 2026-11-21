@@ -85,7 +85,7 @@ test('the committed JSON Schemas are the ones their TypeBox sources generate', (
 })
 
 test('the rules checks catch references to groups, conditions and suites that do not exist', () => {
-  const broken = structuredClone(rules) as CiRules
+  const broken = structuredClone<CiRules>(rules)
   broken.jobs.verus = {description: 'x', when: {any: [{if: 'nope'}, {reaches: 'nobody'}, {not: {touches: 'none'}}]}}
   broken.browser.suites['packages/nothing'] = {description: 'x'}
   assert.deepEqual(ruleProblems(broken, suites), [
@@ -201,7 +201,7 @@ test('the execution plan names each check with the suites, projects, shards and 
   const rest = run.find(item => item.check === 'browser (rest)')
   assert.deepEqual(
     rest?.suites,
-    plan.suites.filter(suite => !rules.browser.suites[suite]?.shards),
+    plan.suites.filter(suite => rules.browser.suites[suite]?.shards === undefined),
   )
   const harness = run.filter(item => item.suites?.includes('packages/renderers/harness'))
   assert.ok(harness.length > 0 && harness.every(item => item.grepInvert && item.project))

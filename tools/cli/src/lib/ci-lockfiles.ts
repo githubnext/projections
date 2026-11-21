@@ -51,7 +51,7 @@ const dependencyFields = ['dependencies', 'devDependencies', 'optionalDependenci
 /** Where `name` resolves from the package at `from`: its own node_modules, then each enclosing one, as Node looks. */
 function resolveNpm(packages: Record<string, NpmEntry>, from: string, name: string): string | undefined {
   let directory = from
-  while (true) {
+  for (;;) {
     const candidate = directory ? `${directory}/node_modules/${name}` : `node_modules/${name}`
     if (candidate in packages) return candidate
     if (!directory) return undefined

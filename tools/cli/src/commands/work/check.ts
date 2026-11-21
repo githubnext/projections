@@ -16,7 +16,7 @@ export async function checkReport(root: string, options: CheckOptions, progress?
   const unknown = only.filter(name => !gates.some(gate => gate.name === name))
   if (unknown.length) throw new UsageError(`Unknown gate ${unknown.join(', ')}`, `Gates: ${gates.map(gate => gate.name).join(', ')}`)
   const fast = Boolean(options.fast)
-  const scoped = fast || options.affected || options.since !== undefined
+  const scoped = fast || options.affected === true || options.since !== undefined
   const set = changeSet(root, options.since)
   const context: GateContext = {
     root,
@@ -82,7 +82,7 @@ export async function checkReport(root: string, options: CheckOptions, progress?
       gate: result.gate,
       commands: result.commands ?? [],
       problems: result.problems ?? [],
-      ...(result.moreProblems ? {moreProblems: result.moreProblems} : {}),
+      ...(result.moreProblems !== undefined && result.moreProblems !== 0 ? {moreProblems: result.moreProblems} : {}),
       ...(result.tail ? {tail: result.tail} : {}),
       ...(result.fix ? {fix: result.fix} : {}),
     })),

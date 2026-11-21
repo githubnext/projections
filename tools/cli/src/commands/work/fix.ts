@@ -38,7 +38,7 @@ export function fixPlan(
   options: {only?: string[] | undefined; affected?: boolean | undefined; since?: string | undefined},
 ): FixStep[] {
   const only = split(options.only)
-  const scoped = options.affected || options.since !== undefined
+  const scoped = options.affected === true || options.since !== undefined
   const set = scoped ? changeSet(root, options.since) : undefined
   const files = set?.changes.filter(change => change.status !== 'deleted').map(change => change.path) ?? []
   const steps: FixStep[] = []

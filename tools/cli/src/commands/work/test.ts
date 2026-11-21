@@ -138,7 +138,7 @@ export function testPlan(root: string, options: TestOptions): {runs: Run[]; note
       })
     }
     // A crate-only target, or any crate when Rust is asked for or affected.
-    const rust = options.rust || !unit.kinds.includes('npm') || options.affected || options.since !== undefined
+    const rust = options.rust === true || !unit.kinds.includes('npm') || options.affected === true || options.since !== undefined
     if (unit.kinds.includes('crate') && rust) crates.push(unit.names.at(-1)!)
   }
   if (crates.length) {

@@ -205,7 +205,7 @@ export function doctorReport(root: string) {
     : findings.some(finding => finding.status === 'warn')
       ? 'warn'
       : 'ok'
-  const fixes = findings.filter(finding => finding.status === 'fail' && finding.fix).map(finding => finding.fix!)
+  const fixes = findings.filter(finding => finding.status === 'fail' && !!finding.fix).map(finding => finding.fix!)
   return {status, findings, next: fixes.length ? fixes : [`${TOOLS} context`]}
 }
 

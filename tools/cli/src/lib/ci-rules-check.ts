@@ -28,7 +28,7 @@ export function ruleProblems(rules: CiRules, suites: readonly string[]): string[
   }
   for (const [suite, definition] of Object.entries(rules.browser.suites)) {
     if (!suites.includes(suite)) problems.push(`browser.suites: ${suite} has no test:browser script`)
-    if (definition.when) visit(definition.when, `browser.suites.${suite}`)
+    if (definition.when !== undefined) visit(definition.when, `browser.suites.${suite}`)
     if (definition.narrow) name('group', rules.groups, definition.narrow.group, `browser.suites.${suite}.narrow`)
   }
   return problems

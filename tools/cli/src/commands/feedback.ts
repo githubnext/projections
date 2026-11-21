@@ -23,7 +23,7 @@ export function feedbackRepository(root: string): string {
 
 function gh(root: string, args: string[]): {ok: boolean; stdout: string; stderr: string} {
   const result = spawnSync('gh', args, {cwd: root, encoding: 'utf8', timeout: 60_000})
-  return {ok: result.status === 0, stdout: result.stdout ?? '', stderr: result.stderr ?? ''}
+  return {ok: result.status === 0, stdout: text(result.stdout), stderr: text(result.stderr)}
 }
 
 export type FeedbackOptions = FeedbackInput & {submit?: boolean | undefined; comment?: number | undefined}
@@ -137,4 +137,9 @@ export function feedbackReport(root: string, options: FeedbackOptions) {
     }
   }
   return {status: 'filed' as const, repository, url: created.stdout.trim(), ...(note ? {note} : {}), next: [`${TOOLS} context`]}
+}
+
+/** A spawned process's output: null, whatever Node's types say, when it couldn't start. */
+function text(output: string | null): string {
+  return output ?? ''
 }

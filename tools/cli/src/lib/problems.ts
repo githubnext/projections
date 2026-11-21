@@ -56,7 +56,7 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
     match = /^(error|warning)(\[[^\]]+\])?: (.+)$/.exec(line)
     if (match && !/^(error|warning): (could not compile|aborting|build failed|\d+ warnings? emitted|unused manifest key)/.test(line)) {
       const location = lines.slice(index + 1, index + 4).find(next => /^\s+--> /.test(next))
-      const at = location && /--> (.+?):(\d+):\d+/.exec(location)
+      const at = location ? /--> (.+?):(\d+):\d+/.exec(location) : null
       if (at) {
         push(problems, seen, {
           file: normalizePath(at[1]!, root),
@@ -87,7 +87,7 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
     if (match) {
       const message = lines
         .slice(index + 1, index + 4)
-        .filter(next => next && !next.startsWith('note:') && !next.startsWith('stack backtrace'))
+        .filter(next => next !== '' && !next.startsWith('note:') && !next.startsWith('stack backtrace'))
         .join(' ')
       push(problems, seen, {file: normalizePath(match[2]!, root), line: Number(match[3]), message: `${match[1]}: ${message}`})
       continue
@@ -100,7 +100,8 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
       const body = end >= 0 ? block.slice(0, end) : block
       const location = body.map(next => /location: '(.+?):(\d+):\d+'/.exec(next)).find(Boolean)
       const error = body.map(next => /^\s+error: [|>]?-?\s*'?(.*?)'?$/.exec(next)).find(Boolean)
-      const errorText = error?.[1] || body.find((next, at) => at > 0 && /^\s+error:/.test(body[at - 1] ?? ''))?.trim() || 'failed'
+      const errorText =
+        (error?.[1] ?? '') || (body.find((next, at) => at > 0 && /^\s+error:/.test(body[at - 1] ?? ''))?.trim() ?? '') || 'failed'
       if (location && !/^\s*#/.test(match[1]!)) {
         push(problems, seen, {
           file: normalizePath(location[1]!, root),
@@ -120,7 +121,7 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
       const body = end >= 0 ? block.slice(0, end) : block
       const error =
         body
-          .find(next => next.trim() && !/^\s+at /.test(next))
+          .find(next => next.trim() !== '' && !/^\s+at /.test(next))
           ?.trim()
           .replace(/^\w*Error \[\w+\]: /, '') ?? 'failed'
       const frame = body.map(next => /^\s+at .*?\(?(?:file:\/\/)?(\/[^():]+?):(\d+):\d+\)?$/.exec(next)).find(Boolean)

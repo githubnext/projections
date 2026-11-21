@@ -106,7 +106,7 @@ export function headings(markdown: string): Heading[] {
     .split('\n')
     .forEach((line, index) => {
       if (/^\s*(\x60\x60\x60|~~~)/.test(line)) fenced = !fenced
-      const match = !fenced && /^(#{1,6}) +(.+?)\s*#*\s*$/.exec(line)
+      const match = fenced ? null : /^(#{1,6}) +(.+?)\s*#*\s*$/.exec(line)
       if (match) found.push({level: match[1]!.length, text: plain(match[2]!), line: index + 1})
     })
   return found

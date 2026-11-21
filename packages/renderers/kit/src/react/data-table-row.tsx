@@ -62,7 +62,7 @@ export function Row<T>({
       data-projections-unit=""
       {...(marked ? changeMark(row) : {})}
       {...(absent ? {inert: true, 'aria-hidden': true} : {})}
-      style={style as CSSProperties}
+      style={style}
     >
       {columns.map((column, index) => {
         const read = (version: T) => {

@@ -364,7 +364,7 @@ export class ProjectionTab extends InspectorWebview {
     if (!this.switches.current((summary as TabSummary).generation)) return
     const applied = this.last?.definitionRevision
     const running = this.last?.running
-    this.last = summary as TabSummary
+    this.last = summary
     void this.freshness.stampResult(this.last)
     if (this.last.definitionRevision !== applied) this.postPair()
     this.following.report(this.last)

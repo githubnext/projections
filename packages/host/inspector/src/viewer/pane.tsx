@@ -64,7 +64,7 @@ export function ViewerPane({store, onChoose}: {store: Store; onChoose: (projecti
       className="pi-viewer-pane-slot pj:contents"
       onFocus={() => store.focus({type: 'entered', place: 'pane'})}
       onBlur={event => {
-        if (!pane.current?.contains(event.relatedTarget as Node | null)) store.focus({type: 'left', place: 'pane'})
+        if (!pane.current?.contains(event.relatedTarget)) store.focus({type: 'left', place: 'pane'})
       }}
     >
       <ProjectionsPane

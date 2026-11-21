@@ -915,7 +915,7 @@ test('human text is sentence case: nothing in the workbench is uppercased by sty
   const uppercased = await page.evaluate(() =>
     [...document.querySelectorAll('body *')]
       .filter(element => getComputedStyle(element).textTransform === 'uppercase' && element.textContent?.trim())
-      .map(element => element.textContent!.trim().slice(0, 40)),
+      .map(element => element.textContent.trim().slice(0, 40)),
   )
   expect(uppercased).toEqual([])
 })

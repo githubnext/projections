@@ -14,7 +14,7 @@ interface Sample {
 async function schema(page: Page): Promise<Frame> {
   const element = page.locator('.ph iframe').first()
   await expect(element).toBeVisible()
-  const frame = await (await element.elementHandle())!.contentFrame()
+  const frame = await (await element.elementHandle()).contentFrame()
   await expect(frame!.locator('.database-table').first()).toBeVisible()
   return frame!
 }
@@ -254,7 +254,7 @@ for (const story of ['api', 'database', 'text-diff', 'text-diff-one-column', 'co
         )
         await expect(page.locator('.ph[data-renderer-status="ready"]').first()).toBeVisible({timeout: 30_000})
         const element = page.locator('.ph iframe').first()
-        const frame = (await (await element.elementHandle())!.contentFrame())!
+        const frame = (await (await element.elementHandle()).contentFrame())!
         await page.waitForTimeout(800)
         expect(await doubledLines(frame), `${story}, ${mode}, ${changesOnly ? 'Changes' : 'All'}`).toEqual([])
       }
@@ -309,7 +309,7 @@ for (const [story, noun] of [
       ).href,
     )
     await expect(page.locator('.ph[data-renderer-status="ready"]').first()).toBeVisible({timeout: 30_000})
-    const frame = (await (await page.locator('.ph iframe').first().elementHandle())!.contentFrame())!
+    const frame = (await (await page.locator('.ph iframe').first().elementHandle()).contentFrame())!
     const figure = page
       .getByRole('group', {name: 'Summary'})
       .locator('.ph-summary-figures > [data-summary-figure]')

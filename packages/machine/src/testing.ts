@@ -135,7 +135,7 @@ export function explore<S extends MachineState, E extends MachineEvent, F extend
     return new Set([...fired, ...(timer === undefined ? [] : [timer])].filter(key => listed.has(key)))
   }
   const fail = (check: string, what: string, path: ExplorePath<S, E, F>): never => {
-    throw new ExplorationError(check, `${check} fails ${what}: ${describe(path)}`, path as ExplorePath<unknown, unknown, unknown>)
+    throw new ExplorationError(check, `${check} fails ${what}: ${describe(path)}`, path)
   }
 
   const states = new Map<string, S>()

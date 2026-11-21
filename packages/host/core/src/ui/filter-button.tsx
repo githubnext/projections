@@ -139,7 +139,7 @@ export function FilterButton({
             else collapse(true)
           }}
           onBlur={event => {
-            if (full || p.search.trim() || event.currentTarget.parentElement?.contains(event.relatedTarget as Node | null)) return
+            if (full || p.search.trim() || event.currentTarget.parentElement?.contains(event.relatedTarget)) return
             // Collapse once the click that moved focus away has landed: the row can rewrap when the field collapses.
             setTimeout(() => {
               if (document.activeElement !== input.current) collapse(false)

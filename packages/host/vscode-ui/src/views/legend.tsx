@@ -22,7 +22,7 @@ export function VscodeLegend({legend, tokens, className}: VscodeLegendProps) {
       {legend.title && <span className="ph-legend-title phv-legend-title">{legend.title}</span>}
       <ul className="phv-legend-items">
         {legend.items.map((item, index) => {
-          const color = item.token ? tokens?.[item.token as ThemeTokenName] : item.color
+          const color = item.token ? tokens?.[item.token] : item.color
           if (!color) {
             return (
               <li key={index} className="ph-legend-item phv-legend-item" data-shape="label">

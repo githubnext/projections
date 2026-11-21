@@ -21,7 +21,7 @@ async function nodeBoxes(page: Page, frames = page.locator('iframe.ph-frame')): 
   for (const iframe of await frames.all()) {
     const offset = (await iframe.boundingBox())!
     const inner = await iframe
-      .contentFrame()!
+      .contentFrame()
       .locator('.node-surface')
       .evaluateAll(nodes =>
         nodes.map(node => {
@@ -57,9 +57,9 @@ for (const [mode, label] of [
       const frames = page.locator('iframe.ph-frame')
       await expect(frames).toHaveCount(2)
       for (const frame of await frames.all()) {
-        await expect(frame.contentFrame()!.locator('.node-surface').first()).toBeVisible()
-        await expect(frame.contentFrame()!.locator('html')).toHaveAttribute('data-pane', /^(before|after)$/)
-        await expect(frame.contentFrame()!.getByText('Identity connects the two states')).toHaveCount(0)
+        await expect(frame.contentFrame().locator('.node-surface').first()).toBeVisible()
+        await expect(frame.contentFrame().locator('html')).toHaveAttribute('data-pane', /^(before|after)$/)
+        await expect(frame.contentFrame().getByText('Identity connects the two states')).toHaveCount(0)
       }
       const labels = await page.locator(label).evaluateAll(elements =>
         elements.map(element => {
@@ -85,7 +85,7 @@ for (const [mode, label] of [
 test('animated shows no transition caption: the footer strip takes no room without a focus', async ({page}) => {
   await page.goto(explorer('before=v1&after=v3&mode=animated'))
   await expect(page.locator('.ph')).toHaveAttribute('data-renderer-status', 'ready')
-  const frame = page.locator('iframe.ph-frame').contentFrame()!
+  const frame = page.locator('iframe.ph-frame').contentFrame()
   await expect(frame.getByText('Identity connects the two states')).toHaveCount(0)
   await expect(frame.locator('.graph-footer')).toHaveCount(0)
 })

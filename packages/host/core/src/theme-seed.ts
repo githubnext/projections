@@ -101,7 +101,7 @@ export function formatThemeSeed(seed: ThemeSeed): string {
   for (const mode of colorModes) {
     const colors = seed[mode] as Record<string, string | undefined> | undefined
     if (!colors) continue
-    ordered[mode] = Object.fromEntries(themeSeedKeys.flatMap(key => (colors[key] === undefined ? [] : [[key, colors[key]!]])))
+    ordered[mode] = Object.fromEntries(themeSeedKeys.flatMap(key => (colors[key] === undefined ? [] : [[key, colors[key]]])))
   }
   return JSON.stringify(ordered)
 }

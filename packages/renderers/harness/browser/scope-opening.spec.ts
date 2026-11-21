@@ -50,7 +50,7 @@ function changesScope(subject: StageSubject): string[] {
 }
 
 async function rendererFrame(page: Page): Promise<Frame> {
-  const frame = await (await page.locator('#stage-frame iframe').elementHandle())!.contentFrame()
+  const frame = await (await page.locator('#stage-frame iframe').elementHandle()).contentFrame()
   if (!frame) throw new Error('no renderer frame')
   return frame
 }

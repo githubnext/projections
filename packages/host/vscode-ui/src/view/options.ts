@@ -54,7 +54,7 @@ type PassedThrough = {[Name in (typeof passedThrough)[number]]?: Exclude<VscodeP
 function given(props: VscodeProjectionViewProps): PassedThrough {
   const options: Record<string, unknown> = {}
   for (const name of passedThrough) if (props[name] !== undefined) options[name] = props[name]
-  return options as PassedThrough
+  return options
 }
 
 /**

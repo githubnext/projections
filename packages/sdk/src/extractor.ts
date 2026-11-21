@@ -112,7 +112,7 @@ export async function generations(request: {readonly generations?: {readonly fil
       try {
         const entry = JSON.parse(line) as {path?: unknown; basis?: unknown; value?: Json}
         if (typeof entry.path === 'string' && typeof entry.basis === 'string' && 'value' in entry) {
-          values.set(key(entry.path, entry.basis), entry.value as Json)
+          values.set(key(entry.path, entry.basis), entry.value)
         }
       } catch {
         // A damaged line is skipped: the value is generated again.

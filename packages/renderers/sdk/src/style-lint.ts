@@ -94,7 +94,7 @@ export function lintRendererStyles(css: string, file = 'styles'): StyleLintResul
   const line = (offset: number) => source.slice(0, offset).split('\n').length
   for (const match of source.matchAll(/var\(\s*--projections-([a-z0-9-]+)/gi)) {
     if (!known.has(match[1]!)) {
-      errors.push(`${file}:${line(match.index!)}: --projections-${match[1]} is not a theme token, so its fallback always applies`)
+      errors.push(`${file}:${line(match.index)}: --projections-${match[1]} is not a theme token, so its fallback always applies`)
     }
   }
   // Declarations, with the selector of the block they are in.
@@ -105,7 +105,7 @@ export function lintRendererStyles(css: string, file = 'styles'): StyleLintResul
       const property = declaration[1]!.toLowerCase()
       const value = declaration[2]!.trim()
       if (property.startsWith('--')) continue
-      const where = `${file}:${line(bodyStart + declaration.index!)}: ${selector} { ${property}: ${value} }`
+      const where = `${file}:${line(bodyStart + declaration.index)}: ${selector} { ${property}: ${value} }`
       // Turning motion off for reduced motion is what `!important` is for.
       if (/!important/i.test(value) && !/^(?:transition|animation)(?:-|$)/.test(property)) {
         warnings.push(`${where}: !important; order rules instead`)

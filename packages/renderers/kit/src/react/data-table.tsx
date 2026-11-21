@@ -224,7 +224,7 @@ export function useTableProps(props: TablePropsSource, id = 'sort') {
     comparing: props.comparing,
     diff: props.diff,
     progress: props.progress,
-    emphasis: emphasis as (row: TableRow<unknown>) => number,
+    emphasis,
     selectedId: props.selectedId,
     onSelect: onSelect as (id: string) => void,
     locale: props.locale,

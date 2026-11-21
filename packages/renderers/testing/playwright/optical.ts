@@ -35,7 +35,7 @@ const hiddenPaint: Record<(typeof surfacePaint)[number], string> = {
 async function restyle(locator: Locator, slot: string, properties: Record<string, string> | null): Promise<void> {
   await locator.evaluateAll(
     (elements, [slot, properties]) => {
-      for (const element of elements as (HTMLElement | SVGElement)[]) {
+      for (const element of elements) {
         if (properties) {
           // A JSON string, or `null` for no style attribute at all.
           element.dataset[slot] = JSON.stringify(element.getAttribute('style'))

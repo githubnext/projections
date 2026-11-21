@@ -68,10 +68,10 @@ interface Generation<E> {
   end(): void
 }
 
-const timer: Runner = ((activity: After<MachineEvent>, context: ActorContext<MachineEvent>) => {
+const timer: Runner = (activity: After<MachineEvent>, context: ActorContext<MachineEvent>) => {
   const id = setTimeout(() => context.send(activity.event), activity.ms)
   return () => clearTimeout(id)
-}) as Runner
+}
 
 /** Reports an error with `reportError`, else `console.error`: where an actor's errors go by default. */
 export function defaultReport(error: unknown) {
@@ -147,7 +147,7 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
       return
     }
     try {
-      into.settle(runner(task as never, into.context as ActorContext<never>))
+      into.settle(runner(task as never, into.context))
     } catch (error) {
       report(error)
     }

@@ -2,7 +2,7 @@ import {parameterNames} from './parameters.js'
 import {getMetadata, type Dependency, type NestModule, type Token, type Wrapper} from './model.js'
 
 export function tokenOf(value: unknown): Token {
-  if (value && typeof value === 'object' && 'forwardRef' in value && typeof (value as {forwardRef: unknown}).forwardRef === 'function') {
+  if (value && typeof value === 'object' && 'forwardRef' in value && typeof value.forwardRef === 'function') {
     return (value as {forwardRef: () => unknown}).forwardRef()
   }
   return value
@@ -87,6 +87,6 @@ export function declaredImportsOf(module: NestModule): Set<unknown> {
   return new Set(
     ((getMetadata('imports', module.metatype) as unknown[] | undefined) ?? [])
       .map(item => tokenOf(item))
-      .map(item => (item && typeof item === 'object' && 'module' in item ? (item as {module: unknown}).module : item)),
+      .map(item => (item && typeof item === 'object' && 'module' in item ? item.module : item)),
   )
 }

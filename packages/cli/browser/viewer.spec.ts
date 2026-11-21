@@ -484,7 +484,7 @@ test("in the Copilot app's canvas, the renderer's stage, text and families are t
   await openCanvas(page)
   /** The shown renderer frame's stage, text and font, as it paints them. */
   const painted = async () => {
-    const frame = await (await page.locator('.ph iframe').first().elementHandle())!.contentFrame()
+    const frame = await (await page.locator('.ph iframe').first().elementHandle()).contentFrame()
     return frame!.evaluate(() => {
       const root = getComputedStyle(document.querySelector('.pk') ?? document.body)
       return {stage: getComputedStyle(document.body).backgroundColor, text: root.color, font: root.fontFamily.split(',')[0]}
@@ -526,7 +526,7 @@ test("a theme seed in the link colors the stage and chrome in each mode it has, 
   await openCanvas(page, themed(harness))
   /** The renderer frame's stage and text, and the chrome's header, rules and border variable, as they paint. */
   const painted = async () => {
-    const frame = await (await page.locator('.ph iframe').first().elementHandle())!.contentFrame()
+    const frame = await (await page.locator('.ph iframe').first().elementHandle()).contentFrame()
     const stage = await frame!.evaluate(() => ({
       stage: getComputedStyle(document.body).backgroundColor,
       text: getComputedStyle(document.querySelector('.pk') ?? document.body).color,
@@ -630,7 +630,7 @@ test("a one-revision view says what it shows once, at the header's end, and its 
 
 /** The shown renderer frame's zoom, as the graph kit marks its scroller. */
 async function zoom(page: Page) {
-  const frame = await (await page.locator('.ph iframe').first().elementHandle())!.contentFrame()
+  const frame = await (await page.locator('.ph iframe').first().elementHandle()).contentFrame()
   return frame!.evaluate(() => document.querySelector('[data-projections-scroll]')?.getAttribute('data-zoom') ?? null)
 }
 

@@ -46,7 +46,7 @@ export function modifiers(symbol: ts.Symbol): string {
 }
 
 export function memberName(symbol: ts.Symbol): string {
-  const name = (symbol.declarations?.[0] as ts.NamedDeclaration | undefined)?.name
+  const name = ts.getNameOfDeclaration(symbol.declarations?.[0])
   if (!name || !ts.isComputedPropertyName(name) || !symbol.name.startsWith('__@')) return symbol.name
   const printed = ts.createPrinter({removeComments: true}).printNode(ts.EmitHint.Unspecified, name, name.getSourceFile())
   const scanner = ts.createScanner(ts.ScriptTarget.Latest, true, ts.LanguageVariant.Standard, printed)

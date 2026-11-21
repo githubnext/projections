@@ -64,7 +64,7 @@ export function rendererState(renderer: RendererEntry | undefined, panes: Record
         : 'ready'
   const errors = paneKeys.flatMap(key => [
     ...panes[key].rendererErrors,
-    ...(panes[key].status === 'failed' && panes[key].message ? [panes[key].message!] : []),
+    ...(panes[key].status === 'failed' && panes[key].message ? [panes[key].message] : []),
   ])
   return {status, errors}
 }

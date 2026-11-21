@@ -11,7 +11,7 @@ const url = () => story('harness-default-ui--hostile-embedding')
 type Mode = 'light' | 'dark'
 
 const css = (locator: Locator, property: string, pseudo?: string) =>
-  locator.evaluate((element, [name, pseudoElement]) => getComputedStyle(element, pseudoElement).getPropertyValue(name!), [
+  locator.evaluate((element, [name, pseudoElement]) => getComputedStyle(element, pseudoElement).getPropertyValue(name), [
     property,
     pseudo,
   ] as const)
@@ -166,7 +166,7 @@ test('the dark root uses the dark tokens, and both match tokens.ts', async ({pag
           reference.remove()
           return result
         }),
-      {...shadcnPalette, ...projectorSurfaces} as unknown as Record<string, readonly [string, string]>,
+      {...shadcnPalette, ...projectorSurfaces},
     )
     for (const [name, token, reference] of resolved) expect(token, `${mode} --pj-${name}`).toBe(reference)
   }

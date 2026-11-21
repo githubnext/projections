@@ -68,12 +68,12 @@ export function parseFactItem(item: Fields, facts: ReadonlySet<string>): Summary
   return {
     type: 'fact',
     id,
-    ...(icon === undefined ? {} : {icon: icon as string}),
+    ...(icon === undefined ? {} : {icon}),
     count: item.count,
     noun,
     ...(tone === undefined ? {} : {tone: tone as SummaryFactTone}),
     ...(ids === undefined ? {} : {ids: [...(ids as string[])]}),
     ...deltas,
-    ...(description === undefined ? {} : {description: description as string}),
+    ...(description === undefined ? {} : {description}),
   }
 }

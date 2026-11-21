@@ -271,7 +271,7 @@ export function RelationshipItem({
       data-entity-id={id}
       data-projections-unit=""
       {...(mark !== undefined ? changeMark(mark) : {})}
-      style={style as CSSProperties}
+      style={style}
     >
       <button type="button" aria-pressed={selected} onClick={() => onSelect(id)}>
         <span className={mark !== undefined ? 'pk-diff-text' : undefined}>{children}</span>

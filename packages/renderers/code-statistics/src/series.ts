@@ -96,7 +96,7 @@ export function languageSeries({tracked, motions, measure, scope, diff, palette,
         presence: motion.opacity,
         emphasis: change.status === 'added' ? motion.mix : 1,
         color: '',
-        swatch: {token: compositionTokens[0]} as Series['swatch'],
+        swatch: {token: compositionTokens[0]},
       }
     })
     .sort(
@@ -122,8 +122,8 @@ export function compositionSeries({tracked, motions, scope}: Pick<SeriesInput, '
       label: part.label,
       before,
       after,
-      status: (before === after ? 'unchanged' : 'modified') as Status,
-      change: (before === after ? 'unchanged' : 'modified') as ChangeClassification,
+      status: before === after ? 'unchanged' : 'modified',
+      change: before === after ? 'unchanged' : 'modified',
       // Each language contributes its own step's count, so the composition follows the steps too.
       value: tracked.reduce((sum, change) => sum + interpolated(change, part.id, scope, motions.get(change.id)!), 0),
       entity: false,

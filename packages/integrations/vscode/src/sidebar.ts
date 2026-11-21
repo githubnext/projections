@@ -253,8 +253,8 @@ export class Sidebar implements vscode.Disposable {
     if (model.error && !model.definitions) return [{kind: 'message', label: model.error, icon: 'error'}]
     // The repository's choice is the Choice view's control above, not a row: the rows count the changes in it.
     return [
-      ...model.projections.map(definition => ({kind: 'projection', model, definition}) as Node),
-      ...model.invalid.map(invalid => ({kind: 'invalid', model, invalid}) as Node),
+      ...model.projections.map((definition): Node => ({kind: 'projection', model, definition})),
+      ...model.invalid.map((invalid): Node => ({kind: 'invalid', model, invalid})),
     ]
   }
 
@@ -264,7 +264,7 @@ export class Sidebar implements vscode.Disposable {
     const models = this.folders()
     await Promise.all(models.map(model => model.load()))
     const suggesting = models.filter(model => this.candidateRows(model).length)
-    if (models.length > 1) return suggesting.map(model => ({kind: 'folder', model}) as Node)
+    if (models.length > 1) return suggesting.map(model => ({kind: 'folder', model}))
     return models[0] ? this.candidateRows(models[0]) : []
   }
 

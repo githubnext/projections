@@ -114,7 +114,7 @@ function Chip({reducedMotion}: {reducedMotion: boolean}) {
         className={reducedMotion ? undefined : 'pj:animate-spin pj:motion-reduce:animate-none'}
         style={{width: 12, height: 12, flex: 'none'}}
       />
-      <span style={{display: 'block', textBox: 'trim-both cap alphabetic'} as CSSProperties}>Updating…</span>
+      <span style={{display: 'block', textBox: 'trim-both cap alphabetic'}}>Updating…</span>
     </div>
   )
 }

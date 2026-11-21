@@ -15,16 +15,15 @@ const subjectColour = 'var(--ph-pane-chip-fg, var(--ph-utility-muted, var(--proj
  * Text trimmed to its capitals and baseline (`text-box`), so the chip's box centres it by cap height: a capital E has
  * as much space above it as below. `grow` lets it shrink and end in an ellipsis.
  */
-const trimmed = (style: CSSProperties, grow = false): CSSProperties =>
-  ({
-    display: 'block',
-    flex: grow ? '0 1 auto' : 'none',
-    minWidth: 0,
-    whiteSpace: 'nowrap',
-    ...(grow ? {overflowX: 'clip', overflowY: 'visible', textOverflow: 'ellipsis'} : {}),
-    textBox: 'trim-both cap alphabetic',
-    ...style,
-  }) as CSSProperties
+const trimmed = (style: CSSProperties, grow = false): CSSProperties => ({
+  display: 'block',
+  flex: grow ? '0 1 auto' : 'none',
+  minWidth: 0,
+  whiteSpace: 'nowrap',
+  ...(grow ? {overflowX: 'clip', overflowY: 'visible', textOverflow: 'ellipsis'} : {}),
+  textBox: 'trim-both cap alphabetic',
+  ...style,
+})
 
 /**
  * A pane chip's text, as the playback bar draws its text (`--ph-utility-muted`, regular weight): the revision's name

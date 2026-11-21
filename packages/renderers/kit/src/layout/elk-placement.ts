@@ -52,7 +52,7 @@ export function placeCards(
       median(placedNodes.filter(node => Math.abs(Math.round(node.start) - start) < 1).map(node => node.middle)),
     )
     const layered = new Map<string, LayeredNode>(placedNodes.map(node => [node.id, {layer: layerOf(node.start), across: node.across}]))
-    const sections = new Map((result.edges ?? []).map(edge => [edge.id, (edge as ElkExtendedEdge).sections ?? []]))
+    const sections = new Map((result.edges ?? []).map(edge => [edge.id, edge.sections ?? []]))
     const lines: LayeredEdge[] = elkEdges.map(edge => {
       const [from, to] = [edge.sources[0]!, edge.targets[0]!]
       const chain = (sections.get(edge.id) ?? []).flatMap(section => [section.startPoint, ...(section.bendPoints ?? []), section.endPoint])

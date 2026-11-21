@@ -30,7 +30,7 @@ for (const directory of [...new Set(scenarios.map(item => item.directory))]) {
     const failures: string[] = []
     for (const {key} of scenarios.filter(item => item.directory === directory && !item.customComparator).slice(0, scenariosPerRenderer)) {
       const stage = await openStage(page, inspector, {scenario: key, progress: 1})
-      const frame = await (await stage.iframe.elementHandle())!.contentFrame()
+      const frame = await (await stage.iframe.elementHandle()).contentFrame()
       if (!frame) throw new Error('no renderer frame')
       for (const id of (await stage.measure<string[]>('entities')).slice(0, perScenario)) {
         const element = stage.frame.locator(`[data-entity-id="${id.replaceAll('"', '\\"')}"]`).first()
@@ -99,7 +99,7 @@ for (const {scenario, diff} of [
   test(`${scenario}${diff ? ' (diff)' : ''}: rings stay on their items through scroll and zoom`, async ({page}) => {
     test.slow()
     const stage = await openStage(page, harnessInspector(), {scenario, progress: 1, ...(diff ? {comparisonMode: 'diff' as const} : {})})
-    const frame = (await (await stage.iframe.elementHandle())!.contentFrame())!
+    const frame = (await (await stage.iframe.elementHandle()).contentFrame())!
     const ids = await stage.measure<string[]>('entities')
     // Cards (not lines) far along the diagram, so the stage has to scroll to them.
     const cards = await stage.frame.locator('body').evaluate(

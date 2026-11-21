@@ -39,7 +39,7 @@ export function createBridge(
   function settle(id: number, abort: AbortController, message: Relayed) {
     if (inflight.get(id) !== abort) return
     inflight.delete(id)
-    reply({tag: transportTag, id, ...message} as TransportReply)
+    reply({tag: transportTag, id, ...message})
   }
   function relay(id: number, abort: AbortController, method: 'GET' | 'POST', path: string, body: unknown, blob: boolean) {
     runner.request({method, path, ...(body === undefined ? {} : {body})}, abort.signal).then(

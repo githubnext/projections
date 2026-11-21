@@ -28,9 +28,9 @@ const records = new Map<string, TSchema>()
 function shapeSchema(shape: Shape, schema: DomainSchema): TSchema {
   switch (shape.type) {
     case 'enum':
-      return {enum: [...shape.values]} as unknown as TSchema
+      return {enum: [...shape.values]}
     case 'array':
-      return {type: 'array', items: shapeSchema(shape.items, schema)} as unknown as TSchema
+      return {type: 'array', items: shapeSchema(shape.items, schema)}
     case 'record': {
       const key = `${schema}#${shape.name}`
       if (!records.has(key)) {
@@ -42,7 +42,7 @@ function shapeSchema(shape: Shape, schema: DomainSchema): TSchema {
       return records.get(key)!
     }
     default:
-      return primitiveSchemas[shape.type]() as TSchema
+      return primitiveSchemas[shape.type]()
   }
 }
 

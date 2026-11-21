@@ -236,9 +236,9 @@ export function activate(context: vscode.ExtensionContext) {
     sources,
     docs,
     picks,
-    definitionView: () => definitionView!,
-    viewingView: () => viewingView!,
-    statusBar: () => statusBar!,
+    definitionView: () => definitionView,
+    viewingView: () => viewingView,
+    statusBar: () => statusBar,
   })
 }
 

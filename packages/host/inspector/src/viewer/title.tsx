@@ -77,7 +77,7 @@ export function ViewerTitle({
         if (!menuFocused) onMenuFocus?.(true)
       }}
       onBlur={event => {
-        if (!slot.current?.contains(event.relatedTarget as Node | null)) onMenuFocus?.(false)
+        if (!slot.current?.contains(event.relatedTarget)) onMenuFocus?.(false)
       }}
     >
       <h1 className="pj:m-0 pj:flex pj:min-w-0 pj:flex-1 pj:items-center pj:text-[13px] pj:font-normal">

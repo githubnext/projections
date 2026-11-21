@@ -80,7 +80,7 @@ function VscodeView({
     <div
       ref={root}
       className={`ph phv-root ${props.className ?? ''}`}
-      style={p.themeStyle as CSSProperties}
+      style={p.themeStyle}
       data-vscode-theme-kind={kind}
       data-host-ui="vscode"
       data-mode={subject.mode}

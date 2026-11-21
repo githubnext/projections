@@ -60,8 +60,7 @@ export function registerNewProjection(host: NewProjectionHost) {
       candidate => candidate.title,
       candidate => candidate.id,
     )
-    const start = (await host.pick(startItems(suggestions.length), {title, placeHolder: 'How do you want to start the projection?'}))
-      ?.start as Start | undefined
+    const start = (await host.pick(startItems(suggestions.length), {title, placeHolder: 'How do you want to start the projection?'}))?.start
     if (!start) return undefined
     const target = {folder, directory: repository(wizard, folder).directory}
     try {

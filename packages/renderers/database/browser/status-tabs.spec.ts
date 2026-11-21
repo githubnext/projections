@@ -24,9 +24,7 @@ const after = {
 
 for (const colorMode of ['light', 'dark'] as const) {
   test(`status tabs join their tag at its left, and are flush with a tag no wider than them (${colorMode})`, async ({page}, info) => {
-    const renderer = await openRenderer(page, {renderer: 'database', before, after, comparisonMode: 'diff', colorMode} as Parameters<
-      typeof openRenderer
-    >[1])
+    const renderer = await openRenderer(page, {renderer: 'database', before, after, comparisonMode: 'diff', colorMode})
     await renderer.measure('settle')
     const tag = (name: string) => renderer.frame.locator(`.database-tags .database-tag[data-entity-id="extension:${name}"]`)
     const geometry = (name: string) =>

@@ -93,7 +93,7 @@ function useMergedRef<T>(own: RefObject<T | null>, other: Ref<T> | undefined) {
     (element: T | null) => {
       own.current = element
       if (typeof other === 'function') other(element)
-      else if (other) (other as RefObject<T | null>).current = element
+      else if (other) other.current = element
     },
     [own, other],
   )

@@ -4649,7 +4649,7 @@ order. Pass a stable value (memoize a function); `undefined` returns to `MountOp
 ### `useTableProps`
 
 ```ts
-useTableProps(props: TablePropsSource, id?: string): { "changesFirst": false | true; "comparing": false | true; "diff": false | true; "emphasis": { (row: TableRow<unknown>): number }; "locale": string; "onSelect": { (id: string): void }; "onSortChange": { (next: { "column": string; "direction": "ascending" | "descending" }): void }; "progress": number; "scope": ChangesScope | undefined; "selectedId": null | string; "sort": null | { "column": string; "direction": "ascending" | "descending" } }
+useTableProps(props: TablePropsSource, id?: string): { "changesFirst": false | true; "comparing": false | true; "diff": false | true; "emphasis": { (row: TableRow<unknown> & { "id"?: string }): number }; "locale": string; "onSelect": { (id: string): void }; "onSortChange": { (next: { "column": string; "direction": "ascending" | "descending" }): void }; "progress": number; "scope": ChangesScope | undefined; "selectedId": null | string; "sort": null | { "column": string; "direction": "ascending" | "descending" } }
 ```
 
 A `DataTable`'s props from a kit renderer's (`RendererProps`): the comparison, mode, progress, emphasis, selection,

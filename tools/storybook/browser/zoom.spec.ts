@@ -43,7 +43,7 @@ async function visibleFrames(page: Page): Promise<{frame: Frame; element: Locato
     const element = elements.nth(index)
     const box = await element.boundingBox()
     if (!box || box.width < 2 || box.height < 2 || !(await element.isVisible())) continue
-    const frame = await (await element.elementHandle())!.contentFrame()
+    const frame = await (await element.elementHandle()).contentFrame()
     if (frame) frames.push({frame, element})
   }
   return frames

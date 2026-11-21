@@ -32,15 +32,12 @@ const scoped = (noun: SummaryNoun, scope: CodeStatisticsScope): SummaryNoun =>
  * composition), in After, with its net change since Before in a comparison (`39,882 lines of code +2,056`).
  */
 export function codeStatisticsFacts({init, model, controls}: SummaryFactContext): SummaryFactItem[] {
-  const entities = model.entities.flatMap(row => [row.before as Entity | undefined, row.after as Entity | undefined])
+  const entities = model.entities.flatMap(row => [row.before, row.after])
   if (genericMetrics(entities)) return metricFacts(init, model, entities)
   const {measure, byLanguage, scope} = codeStatisticsOptions(controls)
   const parts = byLanguage ? [measure] : composition
   const total = (side: 'before' | 'after') =>
-    model.entities.reduce(
-      (sum, row) => sum + parts.reduce((part, key) => part + (statisticsCount(row[side] as Entity | undefined, key, scope) ?? 0), 0),
-      0,
-    )
+    model.entities.reduce((sum, row) => sum + parts.reduce((part, key) => part + (statisticsCount(row[side], key, scope) ?? 0), 0), 0)
   const now = total('after')
   return [
     {
@@ -64,8 +61,7 @@ function metricFacts(
 ): SummaryFactItem[] {
   const unit = sharedUnit(entities)
   if (!unit) return []
-  const total = (side: 'before' | 'after') =>
-    model.entities.reduce((sum, row) => sum + (statisticsCount(row[side] as Entity | undefined, 'value') ?? 0), 0)
+  const total = (side: 'before' | 'after') => model.entities.reduce((sum, row) => sum + (statisticsCount(row[side], 'value') ?? 0), 0)
   const now = total('after')
   return [
     {

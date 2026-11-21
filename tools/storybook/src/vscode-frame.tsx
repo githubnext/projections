@@ -26,7 +26,7 @@ export function VscodeThemeFrame({theme, className, children}: {theme: VscodeThe
   return (
     <div
       className={`sb-vscode-frame ${theme.bodyClasses.join(' ')} ${className ?? ''}`}
-      style={theme.variables as CSSProperties}
+      style={theme.variables}
       data-vscode-theme={theme.id}
       data-vscode-theme-kind={theme.bodyClasses.at(-1)}
     >

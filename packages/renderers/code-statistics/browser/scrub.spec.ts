@@ -282,7 +282,7 @@ test('a single revision fits the frame with no steps and no change decoration', 
 
 test('the gateway migration scrubs a dozen languages without jumps, remounts or recolouring', async ({page}, testInfo) => {
   test.setTimeout(60_000)
-  const {before, after} = loadPair('gateway') as {before: Extraction; after: Extraction}
+  const {before, after} = loadPair('gateway')
   const renderer = await openRenderer(page, {renderer: 'code-statistics', before, after, progress: 0, locale: 'en-US'})
   const measure = () => renderer.frame.locator('body').evaluate(measureRenderedFrame) as Promise<Measured>
   const rowHeight = Math.max(...(await measure()).slots.map(slot => slot.height))

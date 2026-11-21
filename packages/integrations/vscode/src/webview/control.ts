@@ -116,7 +116,7 @@ export function listenForControl(ready: Ready) {
     try {
       const op = message.op
       if (op === undefined || !Object.hasOwn(operation, op)) throw new Error('Unknown control')
-      const result = await (operation[op] as Operation<Op>)(message as MessageOf<Op>, ready)
+      const result = await (operation[op] as Operation<Op>)(message, ready)
       post({tag: hostTag, op: 'controlResult', id, ...(result === undefined ? {} : {result})})
     } catch (error) {
       post({tag: hostTag, op: 'controlResult', id, error: error instanceof Error ? error.message : String(error)})

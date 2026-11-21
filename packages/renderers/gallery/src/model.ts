@@ -41,10 +41,7 @@ const text = (value: unknown) => (typeof value === 'string' && value.trim() ? va
 const records = (value: unknown) => Array.isArray(value) && value.every(record)
 /** A comparison whose changes and steps a renderer can read; anything less reads as no subject. */
 const comparisonOf = (value: unknown): Comparison | undefined =>
-  record(value) &&
-  records(value.steps) &&
-  records(value.changes) &&
-  (value.changes as Record<string, unknown>[]).every(change => typeof change.status === 'string')
+  record(value) && records(value.steps) && records(value.changes) && value.changes.every(change => typeof change.status === 'string')
     ? (value as unknown as Comparison)
     : undefined
 

@@ -17,7 +17,7 @@ const texts = {
 function sides(frame: FrameLocator) {
   return frame.locator('.text-diff-view').evaluate(root =>
     [...root.querySelectorAll('.text-diff-command')].map(section => {
-      const text = (cell: Element) => cell.querySelector('.td-text')!.textContent!
+      const text = (cell: Element) => cell.querySelector('.td-text')!.textContent
       const split = section.querySelector('.td-split')
       if (split) {
         return {
@@ -336,7 +336,7 @@ test('at 1280 px a long line wraps, in one column, in two and in one revision, i
     await expect(body).toHaveAttribute('data-layout', layout)
     const read = await body.evaluate(element => {
       const line = [...element.querySelectorAll<HTMLElement>('.td-row, .td-cell')]
-        .filter(row => row.textContent!.includes('/var/spool'))
+        .filter(row => row.textContent.includes('/var/spool'))
         .at(-1)!
       const text = line.querySelector<HTMLElement>('.td-text')!
       const top = (selector: string) => [...line.querySelectorAll<HTMLElement>(selector)].map(item => item.getBoundingClientRect().top)

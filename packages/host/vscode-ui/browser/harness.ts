@@ -31,10 +31,7 @@ export const focused = (page: Page) =>
   page.evaluate(() => {
     let active = document.activeElement
     while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
-    const host =
-      (active?.getRootNode() as ShadowRoot | Document) instanceof ShadowRoot
-        ? ((active!.getRootNode() as ShadowRoot).host as Element)
-        : null
+    const host = (active?.getRootNode() as ShadowRoot | Document) instanceof ShadowRoot ? (active!.getRootNode() as ShadowRoot).host : null
     return {
       tag: active?.tagName.toLowerCase(),
       host: host?.tagName.toLowerCase(),
@@ -77,11 +74,7 @@ export const colors = (locator: Locator) =>
       return {r: parts[0]!, g: parts[1]!, b: parts[2]!, a: value.startsWith('rgba') ? parts[3]! : 1}
     }
     const layers: ReturnType<typeof parse>[] = []
-    for (
-      let node: Element | null = element;
-      node;
-      node = node.parentElement ?? ((node.getRootNode() as ShadowRoot).host as Element | undefined) ?? null
-    ) {
+    for (let node: Element | null = element; node; node = node.parentElement ?? (node.getRootNode() as ShadowRoot).host ?? null) {
       const layer = parse(getComputedStyle(node).backgroundColor)
       if (layer.a > 0) layers.push(layer)
       if (layer.a >= 1) break

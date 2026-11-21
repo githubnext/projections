@@ -21,7 +21,7 @@ function annotationMark(item: unknown): AnnotationMark | undefined {
   return {
     id: item.id,
     ...(count === undefined ? {} : {count: count as number}),
-    ...(label === undefined ? {} : {label: label as string}),
+    ...(label === undefined ? {} : {label}),
     ...(tone === undefined ? {} : {tone: tone as AnnotationTone}),
   }
 }

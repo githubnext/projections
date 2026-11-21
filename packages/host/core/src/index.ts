@@ -1,5 +1,5 @@
 // Headless core: state, renderer frames and data. Default UI: `@githubnext/projections-host/ui`.
-export {useProjection, highlightingModes} from './projection.js'
+export {createProjection, useProjection, highlightingModes} from './projection.js'
 export {defaultDuration, minimumDurationMs, playbackDuration, progressForKey, stepDurationMs} from './projection.js'
 export {
   adjacentStop,
@@ -37,6 +37,7 @@ export type {
   PresentationDefaults,
   ProjectionController,
   ProjectionOptions,
+  ProjectionStore,
   RendererStatus,
   ScopeCounts,
   ScopeHidden,

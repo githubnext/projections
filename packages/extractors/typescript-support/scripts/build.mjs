@@ -29,7 +29,8 @@ const result = await build({
       name: 'repository-typescript',
       setup(context) {
         // Every compiler call goes through the repository's installation, loaded at run time.
-        context.onResolve({filter: /^typescript$/u}, () => ({path: compiler}))
+        // eslint-disable-next-line regexp/require-unicode-regexp -- esbuild runs plugin filters in Go's regexp engine, which has no u flag.
+        context.onResolve({filter: /^typescript$/}, () => ({path: compiler}))
       },
     },
   ],

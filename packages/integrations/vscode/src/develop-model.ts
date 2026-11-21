@@ -51,7 +51,7 @@ export function addBookmark(
   }
   const bookmarks = file.bookmarks as {id?: unknown}[]
   const ids = new Set(bookmarks.map(item => String(item.id)))
-  const base = `${bookmark.projectionId}-${short(bookmark.after)}`.replace(/[^\w.-]/giu, '-').slice(0, 90)
+  const base = `${bookmark.projectionId}-${short(bookmark.after)}`.replace(/[^\w.-]/gu, '-').slice(0, 90)
   let id = base
   for (let index = 2; ids.has(id); index++) id = `${base}-${index}`
   const next = [

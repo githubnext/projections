@@ -311,11 +311,13 @@ export function rendererDevServerPlugin(options: Omit<RendererBuildOptions, 'out
             {
               name: 'projections-raw',
               setup(build) {
-                build.onResolve({filter: /\?raw$/u}, async args => {
+                // eslint-disable-next-line regexp/require-unicode-regexp -- esbuild runs plugin filters in Go's regexp engine, which has no u flag.
+                build.onResolve({filter: /\?raw$/}, async args => {
                   const resolved = await build.resolve(args.path.slice(0, -'?raw'.length), {kind: args.kind, resolveDir: args.resolveDir})
                   return resolved.errors.length ? {errors: resolved.errors} : {path: resolved.path, namespace: 'projections-raw'}
                 })
-                build.onLoad({filter: /.*/u, namespace: 'projections-raw'}, args => ({
+                // eslint-disable-next-line regexp/require-unicode-regexp -- esbuild runs plugin filters in Go's regexp engine, which has no u flag.
+                build.onLoad({filter: /.*/, namespace: 'projections-raw'}, args => ({
                   contents: readText(args.path),
                   loader: 'text',
                 }))

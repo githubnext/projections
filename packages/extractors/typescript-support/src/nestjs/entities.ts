@@ -35,11 +35,15 @@ export class ArchitectureItems {
   readonly entities: Entity[] = []
   readonly relationships: Relationship[] = []
 
-  constructor(
-    private readonly classes: Map<unknown, string>,
-    private readonly moduleKeys: Map<NestModule, string>,
-    private readonly tokens: TokenIdentities,
-  ) {}
+  private readonly classes: Map<unknown, string>
+  private readonly moduleKeys: Map<NestModule, string>
+  private readonly tokens: TokenIdentities
+
+  constructor(classes: Map<unknown, string>, moduleKeys: Map<NestModule, string>, tokens: TokenIdentities) {
+    this.classes = classes
+    this.moduleKeys = moduleKeys
+    this.tokens = tokens
+  }
 
   evidence(value: unknown): {evidence: Evidence[]} | Record<string, never> {
     const file = this.classes.get(value)

@@ -44,11 +44,14 @@ export interface RulesDiagnostic {
 
 /** The rules file failed its load-time checks. */
 export class RulesError extends ComparatorRuntimeError {
-  constructor(readonly diagnostics: RulesDiagnostic[]) {
+  readonly diagnostics: RulesDiagnostic[]
+
+  constructor(diagnostics: RulesDiagnostic[]) {
     super(
       'invalid-module',
       `invalid rules file:\n${diagnostics.map(item => `${item.code} at ${item.path || '/'}: ${item.message}`).join('\n')}`,
     )
+    this.diagnostics = diagnostics
   }
 }
 

@@ -12,10 +12,13 @@ export class DefinitionRevision {
    */
   private committedKey: string | undefined
 
-  constructor(
-    private readonly model: () => FolderModel,
-    private readonly projection: string,
-  ) {}
+  private readonly model: () => FolderModel
+  private readonly projection: string
+
+  constructor(model: () => FolderModel, projection: string) {
+    this.model = model
+    this.projection = projection
+  }
 
   /** The projection's current edits (`editKey`), if it has any. */
   private get editsKey(): string | undefined {

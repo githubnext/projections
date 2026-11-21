@@ -65,11 +65,11 @@ export type ComparatorErrorCode =
 /** A comparator module could not be loaded or run. Never falls back to another comparison. */
 export class ComparatorRuntimeError extends Error {
   override name = 'ComparatorRuntimeError'
-  constructor(
-    readonly code: ComparatorErrorCode,
-    message: string,
-  ) {
+  readonly code: ComparatorErrorCode
+
+  constructor(code: ComparatorErrorCode, message: string) {
     super(message)
+    this.code = code
   }
 }
 

@@ -20,10 +20,13 @@ export class Following {
   private pendingPair: Pair | undefined
   private pendingPin: Pin | undefined
 
-  constructor(
-    private readonly model: () => FolderModel,
-    private readonly projection: string,
-  ) {}
+  private readonly model: () => FolderModel
+  private readonly projection: string
+
+  constructor(model: () => FolderModel, projection: string) {
+    this.model = model
+    this.projection = projection
+  }
 
   /** Whether the choice moved to a pair the tab shows once refreshed. */
   get pending(): boolean {

@@ -71,11 +71,14 @@ export class DefinitionView implements vscode.TreeDataProvider<Node>, vscode.Dis
   private readonly disposables: vscode.Disposable[] = []
   private timer: ReturnType<typeof setTimeout> | undefined
 
-  constructor(
-    private readonly host: DefinitionHost,
-    private readonly sidebar: Sidebar,
-    private readonly output: vscode.LogOutputChannel,
-  ) {
+  private readonly host: DefinitionHost
+  private readonly sidebar: Sidebar
+  private readonly output: vscode.LogOutputChannel
+
+  constructor(host: DefinitionHost, sidebar: Sidebar, output: vscode.LogOutputChannel) {
+    this.host = host
+    this.sidebar = sidebar
+    this.output = output
     this.view = vscode.window.createTreeView('projections.definition', {treeDataProvider: this})
     const watchers = ['**/scenarios.json', '**/*.comparator.test.{yaml,yml}', '**/environment.json'].map(glob =>
       vscode.workspace.createFileSystemWatcher(glob),

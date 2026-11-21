@@ -52,12 +52,13 @@ export type ComparisonErrorCode =
 
 /** An explicit comparison failure. Hosts show it; they never substitute another comparison. */
 export class ComparisonError extends Error {
-  constructor(
-    readonly code: ComparisonErrorCode,
-    message: string,
-    readonly details: string[] = [],
-  ) {
+  readonly code: ComparisonErrorCode
+  readonly details: string[]
+
+  constructor(code: ComparisonErrorCode, message: string, details: string[] = []) {
     super(message)
+    this.code = code
+    this.details = details
     this.name = 'ComparisonError'
   }
 }

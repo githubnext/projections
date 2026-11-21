@@ -81,7 +81,11 @@ export class Freshness {
    */
   private readonly jobStarts = new Map<string, Start>()
 
-  constructor(private readonly host: FreshnessHost) {}
+  private readonly host: FreshnessHost
+
+  constructor(host: FreshnessHost) {
+    this.host = host
+  }
 
   /** The page started a new extraction job: the next result counts from now, unless an earlier job of it started. */
   jobStarted() {

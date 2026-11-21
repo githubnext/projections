@@ -38,11 +38,14 @@ export class ProjectionTests implements vscode.Disposable {
   private applying: ReturnType<typeof setTimeout> | undefined
   private readonly watched: Map<string, Watched>
 
-  constructor(
-    private readonly lease: (folder: vscode.WorkspaceFolder) => Lease,
-    private readonly source: ProjectionSource,
-    private readonly output: vscode.LogOutputChannel,
-  ) {
+  private readonly lease: (folder: vscode.WorkspaceFolder) => Lease
+  private readonly source: ProjectionSource
+  private readonly output: vscode.LogOutputChannel
+
+  constructor(lease: (folder: vscode.WorkspaceFolder) => Lease, source: ProjectionSource, output: vscode.LogOutputChannel) {
+    this.lease = lease
+    this.source = source
+    this.output = output
     this.controller = vscode.tests.createTestController('projections', 'Projections')
     this.state = new TestState(this.controller)
     this.watched = this.state.watched

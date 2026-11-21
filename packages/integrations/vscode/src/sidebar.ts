@@ -57,11 +57,14 @@ export class Sidebar implements vscode.Disposable {
   readonly projectionsView: vscode.TreeView<Node>
   readonly suggestedView: vscode.TreeView<Node>
 
-  constructor(
-    private readonly lease: (folder: vscode.WorkspaceFolder) => Lease,
-    private readonly output: vscode.LogOutputChannel,
-    private readonly memento: vscode.Memento,
-  ) {
+  private readonly lease: (folder: vscode.WorkspaceFolder) => Lease
+  private readonly output: vscode.LogOutputChannel
+  private readonly memento: vscode.Memento
+
+  constructor(lease: (folder: vscode.WorkspaceFolder) => Lease, output: vscode.LogOutputChannel, memento: vscode.Memento) {
+    this.lease = lease
+    this.output = output
+    this.memento = memento
     const projections: vscode.TreeDataProvider<Node> = {
       onDidChangeTreeData: this.projectionsChanged.event,
       getTreeItem: node => this.item(node),

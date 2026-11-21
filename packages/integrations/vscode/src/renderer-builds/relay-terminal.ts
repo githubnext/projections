@@ -15,7 +15,11 @@ export class RelayTerminal implements vscode.Pseudoterminal {
   private readonly pending: string[] = []
   private exit: number | null | undefined
 
-  constructor(private readonly stopped: () => void) {}
+  private readonly stopped: () => void
+
+  constructor(stopped: () => void) {
+    this.stopped = stopped
+  }
 
   open() {
     this.opened = true

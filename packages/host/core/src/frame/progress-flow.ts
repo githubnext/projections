@@ -9,11 +9,15 @@ export class ProgressFlow {
   private pending: ProgressPayload | undefined
   private timer: number | undefined
 
-  constructor(
-    private readonly view: Window,
-    private readonly timeoutMs: number,
-    private readonly post: (progress: ProgressPayload) => void,
-  ) {}
+  private readonly view: Window
+  private readonly timeoutMs: number
+  private readonly post: (progress: ProgressPayload) => void
+
+  constructor(view: Window, timeoutMs: number, post: (progress: ProgressPayload) => void) {
+    this.view = view
+    this.timeoutMs = timeoutMs
+    this.post = post
+  }
 
   /** Forgets the unacknowledged and pending values, for new documents. */
   reset(): void {

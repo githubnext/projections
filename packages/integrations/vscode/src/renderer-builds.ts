@@ -74,10 +74,12 @@ export class RendererBuilds implements vscode.Disposable {
   readonly onDidChange = this.changed.event
   private readonly disposables: vscode.Disposable[] = []
 
-  constructor(
-    private readonly host: RendererBuildHost,
-    private readonly output: vscode.LogOutputChannel,
-  ) {
+  private readonly host: RendererBuildHost
+  private readonly output: vscode.LogOutputChannel
+
+  constructor(host: RendererBuildHost, output: vscode.LogOutputChannel) {
+    this.host = host
+    this.output = output
     this.disposables.push(
       this.changed,
       vscode.workspace.onDidSaveTextDocument(document => void this.saved(document.uri)),

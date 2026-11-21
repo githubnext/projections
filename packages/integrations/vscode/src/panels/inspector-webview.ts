@@ -51,14 +51,23 @@ export class InspectorWebview {
   boundAt: number | undefined
   protected readonly disposables: vscode.Disposable[] = []
 
+  protected readonly services: Services
+  readonly source: PanelSource
+  readonly panel: vscode.WebviewPanel
+  protected view: 'explore' | 'inspect'
+
   /** `firstPage`: the document a projection tab's editor showed first, before its page (for tests). */
   constructor(
-    protected readonly services: Services,
-    readonly source: PanelSource,
-    readonly panel: vscode.WebviewPanel,
-    protected view: 'explore' | 'inspect',
+    services: Services,
+    source: PanelSource,
+    panel: vscode.WebviewPanel,
+    view: 'explore' | 'inspect',
     firstPage?: {html: string; at: number},
   ) {
+    this.services = services
+    this.source = source
+    this.panel = panel
+    this.view = view
     this.context = services.context
     this.output = services.output
     this.firstPage = firstPage

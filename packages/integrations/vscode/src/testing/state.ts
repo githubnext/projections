@@ -68,7 +68,11 @@ export class TestState {
   readonly watched = new Map<string, Watched>()
   readonly recorded = new Map<string, RecordedOutcome>()
 
-  constructor(readonly controller: vscode.TestController) {}
+  readonly controller: vscode.TestController
+
+  constructor(controller: vscode.TestController) {
+    this.controller = controller
+  }
 
   items(): [string, vscode.TestItem][] {
     const all: [string, vscode.TestItem][] = []

@@ -7,8 +7,11 @@ import type {CheckDriver} from './catalog.js'
 export class Skip extends Error {}
 /** A pass with details to report, such as the subtrees a styling check exempted. */
 export class Passed extends Error {
-  constructor(readonly details: string[]) {
+  readonly details: string[]
+
+  constructor(details: string[]) {
     super('passed')
+    this.details = details
   }
 }
 

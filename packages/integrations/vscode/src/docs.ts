@@ -40,10 +40,12 @@ export class BundledDocs implements vscode.Disposable {
   readonly reads: string[] = []
   private readonly disposables: vscode.Disposable[]
 
-  constructor(
-    private readonly root: vscode.Uri,
-    private readonly output: vscode.LogOutputChannel,
-  ) {
+  private readonly root: vscode.Uri
+  private readonly output: vscode.LogOutputChannel
+
+  constructor(root: vscode.Uri, output: vscode.LogOutputChannel) {
+    this.root = root
+    this.output = output
     bundleRoot = root
     this.disposables = [
       vscode.commands.registerCommand('projections.openDocumentation', (page?: unknown) =>

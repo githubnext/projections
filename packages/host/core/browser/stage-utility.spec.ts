@@ -73,6 +73,21 @@ test('animated with floating playback: the host content and the playback share o
   await expect.poll(async () => (await nodeBoxes(page)).filter(node => intersects(node, covered)).length).toBe(0)
 })
 
+test("switching between diff and animated keeps the host's content mounted, its state and focus with it", async ({page}) => {
+  await ready(page, 'mode=diff&utilityArea&caption=stateful')
+  const note = page.locator('.ph-utility .demo-caption-note')
+  await note.fill('kept')
+  await note.evaluate(input => ((input as HTMLInputElement & {kept?: true}).kept = true))
+  await page.locator('.ph-mode [data-mode="animated"]').click()
+  await expect(page.locator('.ph-utility .ph-utility-playback')).toBeVisible()
+  await note.focus()
+  await page.locator('.ph-mode [data-mode="diff"]').evaluate(button => (button as HTMLElement).click())
+  await expect(page.locator('.ph-utility .ph-utility-playback')).toHaveCount(0)
+  await expect(note).toHaveValue('kept')
+  await expect(note).toBeFocused()
+  expect(await note.evaluate(input => (input as HTMLInputElement & {kept?: true}).kept)).toBe(true)
+})
+
 test('side by side keeps its pane chips at the top: the host content waits for a one-frame mode', async ({page}) => {
   await ready(page, 'mode=side-by-side&utilityArea&caption')
   await expect(page.locator('.demo-caption')).toHaveCount(0)

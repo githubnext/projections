@@ -74,11 +74,12 @@ const overlayTheme = (glass: boolean) =>
 export function stageUtility(host: ReactNode, playback: ReactNode): ReactNode {
   // The stage shows a bar whenever its `utility` is truthy, so nothing here is `undefined`, not an empty element.
   if (!host) return playback || undefined
-  if (!playback) return host
+  // The host's content keeps one place whether or not the playback shows, so React keeps it mounted, with its state
+  // and focus, across a switch between diff and animated.
   return (
     <div className="ph-utility-stack pj:flex pj:min-w-0 pj:flex-col">
       {host}
-      <div className="pj:border-t pj:border-divider">{playback}</div>
+      {playback ? <div className="pj:border-t pj:border-divider">{playback}</div> : null}
     </div>
   )
 }

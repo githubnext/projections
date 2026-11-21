@@ -363,7 +363,6 @@
       "from": "package:is-even",
       "id": "dependency:[\"package:is-even\",\"dependencies\",\"is-odd\"]",
       "kind": "dependencies",
-      "label": null,
       "to": "package:is-odd@0.1"
     },
     {
@@ -380,7 +379,6 @@
       "from": "package:is-number@3",
       "id": "dependency:[\"package:is-number@3\",\"dependencies\",\"kind-of\"]",
       "kind": "dependencies",
-      "label": null,
       "to": "package:kind-of"
     },
     {
@@ -397,7 +395,6 @@
       "from": "package:is-odd@0.1",
       "id": "dependency:[\"package:is-odd@0.1\",\"dependencies\",\"is-number\"]",
       "kind": "dependencies",
-      "label": null,
       "to": "package:is-number@3"
     },
     {
@@ -414,7 +411,6 @@
       "from": "package:is-odd@3",
       "id": "dependency:[\"package:is-odd@3\",\"dependencies\",\"is-number\"]",
       "kind": "dependencies",
-      "label": null,
       "to": "package:is-number@6"
     },
     {
@@ -431,7 +427,6 @@
       "from": "package:kind-of",
       "id": "dependency:[\"package:kind-of\",\"dependencies\",\"is-buffer\"]",
       "kind": "dependencies",
-      "label": null,
       "to": "package:is-buffer"
     }
   ],

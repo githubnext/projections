@@ -1,4 +1,6 @@
 {
+ "protocolVersion": 0,
+ "schema": "database/v0",
  "entities": [
   {
    "id": "table:analytics/events",

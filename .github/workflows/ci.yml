@@ -128,6 +128,44 @@ jobs:
           npm run --silent tools -- doctor
           npm run --silent tools -- --llms > /dev/null
           npm run --silent check:readmes
+  # Every JSON, YAML and TOML file against its schema (.dollarlint.toml, CONTRIBUTING.md#schemas-for-data-files), on
+  # every change: it takes seconds and needs no build. Findings go to code scanning too, except from forks, whose token
+  # can't upload them.
+  dollarlint:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v6.1.0
+        with:
+          persist-credentials: false
+      # .oxfmtrc.json's schema is the one in the installed oxfmt package.
+      - uses: actions/setup-node@v6.5.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      # Remote schemas (SchemaStore and the others .dollarlint.toml allows), fetched at most once a day.
+      - id: day
+        run: echo "day=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6.1.0
+        with:
+          path: ~/.cache/dollarlint
+          key: dollarlint-schemas-${{ steps.day.outputs.day }}
+          restore-keys: dollarlint-schemas-
+      # TEMPORARY, until DollarLint releases [[schemas.mappings]] (dollarlint/dollarlint#237): built from that pull
+      # request's head, without SARIF. The release replaces these two steps with `dollarlint/dollarlint@<release>` and
+      # `upload-sarif`.
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version: '1.26'
+          cache: false
+      - run: |
+          go install github.com/dollarlint/dollarlint/cmd/dollarlint@12b2520481e9066174cf92d7fc2cc000cf78b9b9
+          dollarlint validate .
   # The vulnerability gate: a pull request may not add a dependency with a known high or critical advisory (npm, Cargo
   # and the other manifests GitHub's dependency graph reads). It uses the dependency graph, not an npm audit endpoint;
   # Dependabot (.github/dependabot.yml) covers what is already locked.
@@ -456,6 +494,7 @@ jobs:
       - changes
       - docs
       - public-product
+      - dollarlint
       - dependency-review
       - actions-lock
       - advisories

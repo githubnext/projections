@@ -4,7 +4,6 @@
   "packages/host/core/src/fullscreen.ts": 2,
   "packages/host/core/src/pair.ts": 1,
   "packages/host/core/src/projection/payloads.ts": 1,
-  "packages/host/core/src/ui/fit-plan.ts": 4,
   "packages/host/core/src/ui/view-controls.tsx": 1,
   "packages/host/inspector/src/app/cards.tsx": 2,
   "packages/host/inspector/src/app/use-live-changes.ts": 1,
@@ -20,7 +19,6 @@
   "packages/host/inspector/src/snapshot/page.tsx": 1,
   "packages/host/inspector/src/sweep/grid.tsx": 5,
   "packages/host/inspector/src/sweep/thumbnails.tsx": 2,
-  "packages/host/vscode-ui/src/layout/use-toolbar-layout.ts": 1,
   "packages/host/vscode-ui/src/loading.tsx": 2,
   "packages/host/vscode-ui/src/stage-notice.tsx": 1
 }

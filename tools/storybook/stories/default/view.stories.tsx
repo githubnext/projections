@@ -14,7 +14,19 @@ interface ViewArgs extends ScenarioArgs {
   loop?: boolean
   /** Where playback holds at step ends: still stretches of the slider (the default) or pauses of the slider. */
   holds?: 'timeline' | 'pause'
+  /** Playback floats over the stage in its utility area instead of taking a toolbar row. */
+  utilityArea?: boolean
+  /** A host's own caption in the stage's utility area (`utility`). */
+  caption?: boolean
 }
+
+/** A host's caption, as a page might name what the stage shows. */
+const caption = (
+  <div style={{padding: '6px 12px', lineHeight: '20px'}}>
+    <strong style={{display: 'block', fontSize: 14}}>The worker moves to its own queue</strong>
+    <span style={{display: 'block', fontSize: 12, opacity: 0.75}}>Platform architecture · #128</span>
+  </div>
+)
 
 /**
  * `ProjectionView`, the default UI's view of one subject (a comparison or one extraction): renderer, table and
@@ -31,6 +43,8 @@ const meta = {
     notices: {control: 'boolean'},
     loop: {control: 'boolean'},
     holds: {control: 'inline-radio', options: ['timeline', 'pause']},
+    utilityArea: {control: 'boolean'},
+    caption: {control: 'boolean'},
   },
   render: function Render(args, {globals, loaded}) {
     const {runtime, prepared} = loaded as Required<Loaded>
@@ -69,6 +83,8 @@ const meta = {
         {...(args.initialView ? {initialView: args.initialView} : {})}
         {...(args.annotations ? {annotations: sampleAnnotations(item)} : {})}
         {...(args.details ? {renderDetails} : {})}
+        {...(args.utilityArea ? {utilityArea: true} : {})}
+        {...(args.caption ? {utility: caption} : {})}
       />
     )
   },
@@ -116,3 +132,8 @@ export const NotLooping: Story = {name: 'Playback stops at the end', args: {loop
 export const HoldsOnTimeline: Story = {name: 'Holds on the slider', args: {holds: 'timeline'}}
 export const HoldsPause: Story = {name: 'Holds pause playback', args: {holds: 'pause'}}
 export const Mobile: Story = {globals: mobile, args: {initialView: 'table'}}
+export const HostUtility: Story = {name: 'Host content in the utility area', args: {caption: true, initialMode: 'diff'}}
+export const HostUtilityWithPlayback: Story = {
+  name: 'Host content with floating playback',
+  args: {caption: true, utilityArea: true, initialMode: 'animated'},
+}

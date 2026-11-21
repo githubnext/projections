@@ -1,5 +1,5 @@
 import {useRef, useState} from 'react'
-import type {CSSProperties} from 'react'
+import type {CSSProperties, ReactNode} from 'react'
 import type {ProjectionController} from '../../projection.js'
 import {useSize} from '../../stage/arrangement.js'
 import {utilityInset, utilitySide} from '../../stage/utility.js'
@@ -65,6 +65,24 @@ const overlayTheme = (glass: boolean) =>
     '--ph-utility-border': '1px solid var(--pj-divider)',
     '--ph-utility-radius': 'var(--pj-radius-md)',
   }) as CSSProperties
+
+/**
+ * What the default view puts in the stage's utility area: the host's own content (`ProjectionViewProps.utility`), the
+ * floating playback, or both in one bar, the host's first and the playback under it, one rule between them. Nothing
+ * when there's neither, so the stage shows no bar.
+ */
+export function stageUtility(host: ReactNode, playback: ReactNode): ReactNode {
+  // The stage shows a bar whenever its `utility` is truthy, so nothing here is `undefined`, not an empty element.
+  if (!host) return playback || undefined
+  // The host's content keeps one place whether or not the playback shows, so React keeps it mounted, with its state
+  // and focus, across a switch between diff and animated.
+  return (
+    <div className="ph-utility-stack pj:flex pj:min-w-0 pj:flex-col">
+      {host}
+      {playback ? <div className="pj:border-t pj:border-divider">{playback}</div> : null}
+    </div>
+  )
+}
 
 /**
  * The default view's floating playback, with a `utility` area while it shows playback: the bar for the panel `panel` measures, and the top padding a view

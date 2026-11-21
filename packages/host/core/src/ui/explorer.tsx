@@ -67,6 +67,8 @@ export interface ComparisonExplorerProps
       | 'onAction'
       | 'features'
       | 'actions'
+      | 'utilityArea'
+      | 'utility'
       | 'fill'
       | 'className'
     > {}
@@ -215,6 +217,8 @@ export function ComparisonExplorer(props: ComparisonExplorerProps) {
           {...(comparator ? {comparator} : {})}
           {...(props.features ? {features: props.features} : {})}
           {...(props.actions ? {actions: props.actions} : {})}
+          {...(props.utilityArea !== undefined ? {utilityArea: props.utilityArea} : {})}
+          {...(props.utility ? {utility: props.utility} : {})}
           {...(props.controlValues ? {controlValues: props.controlValues} : {})}
           {...(props.onControlChange ? {onControlChange: props.onControlChange} : {})}
           {...(props.onAction ? {onAction: props.onAction} : {})}

@@ -63,6 +63,8 @@ export {
   useSummaryFit,
 } from './summary.js'
 export type {SummaryFigure, SummaryFilter, SummaryKind} from './summary.js'
+export {chooseFitPlan, fitWidth, toolbarHysteresis, useFitPlan} from './fit-plan.js'
+export type {FitChoice, FitHysteresis, FitPlanOptions} from './fit-plan.js'
 export {rowDetails} from './details.js'
 export {changeContextItems} from './context-items.js'
 export type {ContextItems} from './context-items.js'

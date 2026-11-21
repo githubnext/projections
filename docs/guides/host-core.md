@@ -155,11 +155,13 @@ instead of adding a toolbar row above the stage. The stage measures whatever it
 overlays (bar or chips) and sends the same two tokens so the frame clears it
 while still panning or scrolling underneath; the default UI's `utilityArea` uses
 this for playback with chips for labels (see
-[the design note](../design/utility-area.md)). Pass `renderStatus` to customize
-loading and error states (or `null` to render `rendererStatus` and
-`rendererErrors` yourself). While one pane loads, its status centers over that
-frame; while both panes of side by side or swipe load, a single status covers
-the whole stage (rendered for side `main`).
+[the design note](../design/utility-area.md)). The default view's own `utility`
+prop puts your content there too (a caption, for example), in the same bar and
+look and clear of the drawing in the same way; with floating playback, both
+share the bar. Pass `renderStatus` to customize loading and error states (or
+`null` to render `rendererStatus` and `rendererErrors` yourself). While one pane
+loads, its status centers over that frame; while both panes of side by side or
+swipe load, a single status covers the whole stage (rendered for side `main`).
 
 `LoadingStatus({label, description?, reducedMotion?, fill?})` is the shared
 loading indicator across frames, explorer comparisons, and engine startup: a
@@ -372,3 +374,27 @@ renderer-specific controls—unified into one menu model:
   as initial values that viewers can still override. `rendererOptions` are
   validated against declared controls, ignoring unknown IDs or invalid values
   with a notice.
+
+## Planned bars
+
+A bar that never wraps chooses among layouts its UI plans, most spacious first,
+by measuring itself: `useFitPlan(bar, plans, options)` returns the plan to
+render, its index and the bar's width. Each UI owns its plans and their order,
+and through `options` how a plan is measured (`measure`, default `fitWidth`:
+`data-fit-min` for flexible parts, `data-fit` for measured rows), the room a
+fuller plan needs to spare (`hysteresis`, a number or a function of the
+transition and the bar, default `toolbarHysteresis`, 24px), a plan's identity
+(`signature`), where a previous plan lands when the plans change (`locate`),
+which plans keep a control in use mounted (`lock`) and the widest bar a plan
+suits (`ceiling`).
+
+The core owns the lifecycle, an explicit machine (`fitPlanLifecycle`, see
+[State machines](state-machines.md)): needs measured as rendered, before paint,
+cached until `key` changes; a ResizeObserver on the bar and on its
+`data-toolbar-region` elements, so a growing block replans; `data-fit-settled`
+on the bar once a plan settles, at that width in whole pixels; no replanning
+between a pointer's press and its click, so the pressed control isn't remounted;
+and focus kept on a control marked `data-focus-id` when a plan remounts it, else
+moved to the first of its `focusFallbacks` the bar holds. `chooseFitPlan` is the
+choice alone, without a DOM: a plan collapses as soon as it stops fitting and a
+fuller one returns only with its hysteresis to spare.

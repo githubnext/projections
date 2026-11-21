@@ -95,7 +95,8 @@ pickers, the mode menu, the varied count, zoom, About, full screen and Filter
 into the toolbar's "…" (More Actions) one at a time, and merged pickers. Row 2
 drops the slider's revision names, then moves its steps into its own "…" menu.
 The toolbar's `data-rows`, `data-cluster`, `data-pickers`, `data-modes`,
-`data-step` and `data-more-actions` say which layout applies.
+`data-step` and `data-more-actions` say which layout applies. The host core's
+`useFitPlan` plans it, with this UI's steps, measurement and 32px hysteresis.
 
 - Toolbar actions: A view title bar's action bar: icon-only codicon buttons with
   VS Code's hover, active and focus states. The toolbar's edge controls sit as

@@ -1,7 +1,8 @@
 import type {ReactNode, Ref} from 'react'
 import type {Diagnostic} from '@githubnext/projections-schemas'
 import type {ColorMode, ControlValue} from '@githubnext/projections-renderer-sdk/protocol'
-import type {AnnotationActivation, Highlighting, PresentationDefaults, ProjectionController} from '../../projection.js'
+import type {AnnotationActivation, Highlighting, PresentationDefaults, ProjectionController, RendererStatus} from '../../projection.js'
+import type {Painted} from '../../projection/paint.js'
 import type {Holds} from '../../playback.js'
 import type {ProjectionSelection, TargetAnnotation} from '../../targets/target.js'
 import type {ComparisonMode} from '../../modes.js'
@@ -84,6 +85,10 @@ export interface ProjectionViewProps {
   onAnnotationActivate?: (activation: AnnotationActivation) => void
   /** Embedder content at the end of the detail card (in a `.ph-details-slot` element). */
   renderDetails?: (selection: ProjectionSelection, projection: ProjectionController) => ReactNode
+  /** Called with the renderer status whenever it changes, and with the first (see `ProjectionOptions.onRendererStatusChange`). */
+  onRendererStatusChange?: (status: RendererStatus) => void
+  /** Called when the frames settle on what is shown while paused (see `ProjectionOptions.onPainted`). */
+  onPainted?: (painted: Painted) => void
   /** Receives the view's controller, for example to call `selectTarget` or `anchorFor`; `null` once unmounted. */
   controllerRef?: Ref<ProjectionController | null>
   /**
@@ -157,5 +162,12 @@ export interface ProjectionViewProps {
    * keeps one row, and the stage keeps its height; renderers keep clear of what the area covers. Default false.
    */
   utilityArea?: boolean
+  /**
+   * The host's own content in the stage's utility area (`ProjectionStageProps.utility`), over the stage's top edge in
+   * its one-frame modes (animated, diff): a caption, say, or controls. It covers the frames like the floating playback
+   * does, so renderers keep clear of it. With `utilityArea`'s floating playback too, the two share one bar, this content
+   * first and the playback under it, one rule between them. Side by side and swipe have their pane chips there instead.
+   */
+  utility?: ReactNode
   className?: string
 }

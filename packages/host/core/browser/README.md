@@ -64,3 +64,6 @@ The browser suite runs on Chromium and WebKit, desktop and mobile. It checks:
   (`animated` or `swipe`) and `paneLabels` (`chips` or `hidden`)), pane bands
   and chips (`pane-labels.spec.ts`), and no style leakage in either direction
   for an embedded default UI (`embed.spec.ts`).
+- The headless fit plan's interaction lifecycle (`fit-plan.spec.ts`, on the Fit
+  plan story, which takes `lock`): focus following a control a new plan remounts
+  or moves into an overflow, and no replanning between a press and its click.

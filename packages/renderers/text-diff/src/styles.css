@@ -50,8 +50,11 @@
   font-size: var(--projections-font-size);
   --td-line-height: calc(1em * var(--projections-line-height));
 }
-/* Formatted text in one column never wraps; the output scrolls sideways inside its own frame. */
-.td-body[data-presentation='formatted']:not([data-layout='split']) .td-lines {
+/*
+ * A single revision's formatted text never wraps: the output scrolls sideways inside its own frame. A diff's lines wrap
+ * in either layout, so a long changed line reads whole beside its markers and line numbers, which stay at its top.
+ */
+.td-body[data-presentation='formatted'][data-layout='plain'] .td-lines {
   width: max-content;
   min-width: 100%;
 }
@@ -71,7 +74,7 @@
   white-space: pre;
 }
 .td-body[data-presentation='prose'] .td-text,
-.td-split .td-text {
+.td-diff .td-text {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }

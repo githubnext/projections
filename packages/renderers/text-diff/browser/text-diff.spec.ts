@@ -294,3 +294,39 @@ test('the line-number gutter runs unbroken from the strip or header to the card 
     expect(Math.abs(gap.bottom), `${gap.id}: gutter reaches the card bottom`).toBeLessThan(0.5)
   }
 })
+
+test('at 1280 px a long line wraps in one column as in two, its markers and line numbers on its first line', async ({page}) => {
+  const long = `PKG-111  Dallas      late: ${'address verification needed, the recipient could not be matched to a delivery route; '.repeat(3)}/var/spool/parcel/${'x'.repeat(120)}`
+  const output = (text: string) => extraction('graph/v0', [{id: 'log', kind: 'output', label: 'parcel report', data: {text}}])
+  await page.setViewportSize({width: 1280, height: 900})
+  for (const layout of ['unified', 'split'] as const) {
+    const renderer = await openRenderer(page, {
+      renderer: 'text-diff',
+      before: output('ID       City        Status\n'),
+      after: output(`ID       City        Status\n${long}\n`),
+      comparisonMode: 'diff',
+      options: {textDiffLayout: layout},
+    })
+    await renderer.setWidth(1280)
+    const body = renderer.frame.locator('[data-entity-id="log"] .td-body').first()
+    await expect(body).toHaveAttribute('data-layout', layout)
+    const read = await body.evaluate(element => {
+      const line = [...element.querySelectorAll<HTMLElement>('.td-insert')].find(row => row.textContent!.includes('/var/spool'))!
+      const text = line.querySelector<HTMLElement>('.td-text')!
+      const top = (selector: string) => [...line.querySelectorAll<HTMLElement>(selector)].map(item => item.getBoundingClientRect().top)
+      const height = parseFloat(getComputedStyle(text).lineHeight)
+      return {
+        overflow: element.scrollWidth - element.clientWidth,
+        lines: Math.round(text.getBoundingClientRect().height / height),
+        wrapped: text.scrollWidth <= text.clientWidth + 0.5,
+        tops: [...top('.td-num'), ...top('.td-mark')].map(value => value - text.getBoundingClientRect().top),
+      }
+    })
+    expect(read.overflow, `${layout}: the output doesn't scroll sideways`).toBeLessThanOrEqual(0)
+    expect(read.wrapped, `${layout}: the line's text fits its cell`).toBe(true)
+    expect(read.lines, `${layout}: the long line wraps`).toBeGreaterThan(1)
+    expect(read.tops.length, `${layout}: line numbers and marker`).toBeGreaterThan(1)
+    for (const top of read.tops) expect(Math.abs(top), `${layout}: on the line's first line`).toBeLessThan(1)
+    expect((await decoration(renderer.frame)).overflow).toBeLessThanOrEqual(0)
+  }
+})

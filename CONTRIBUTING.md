@@ -175,40 +175,51 @@ no CRLF. An intended exception goes in `.portability.yaml` with its reason.
 
 #### What CI runs
 
-A pull request runs only the jobs its change reaches. The Projections workflow's
-first job, `changes`, runs `tools/scripts/ci-plan.mjs`
-(`tools/cli/src/lib/ci-plan.ts`), which maps the changed files to their
-workspaces and crates and everything depending on them, with the same graph as
-`npm run tools -- affected`, plus what no manifest declares: the files crates
-read by path (`include_str!`, `CARGO_MANIFEST_DIR`), the crates and packages a
-workspace's `build` script compiles or builds (`cargo build -p`), the
-extractions and comparators renderers' `scenarios.json` files name, and the
-renderers under the harness's `testDir`. A file only a crate's tests read runs
-that crate's suites without changing its dependants. Its summary lists each job
-and why it runs.
+A pull request runs only the jobs its change reaches. The rules that decide it
+are [`.github/ci-rules.json`](.github/ci-rules.json), with a description on
+every rule; its schema is `.github/ci-rules.schema.json`, generated from
+`tools/cli/src/lib/ci-rules.schema.ts`. The Projections workflow's first job,
+`changes`, runs `tools/scripts/ci-plan.mjs`, which applies the rules to the
+changed files and their place in the graph, and its summary lists each job with
+the descriptions of the rules that made it run.
 
-| Change                                                                                                                                                                            | Runs                                                                                                                                                                               |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Documentation alone (Markdown, `docs/`) that no generator or crate reads, outside fixtures, tests and templates                                                                   | `docs`: format, lint, file standards, boundaries, casing, READMEs and links, with no build                                                                                         |
-| Anything else                                                                                                                                                                     | `public-product` on Linux: the full check, Node and Rust suites, generated documentation and the self-projection                                                                   |
-| Code that doesn't only run in a browser (not `packages/renderers`, `packages/host`, `tools/storybook` or `examples/renderers` alone), Rust or `action.yml`                        | `public-product` on macOS, `windows-node` and `windows-integration`                                                                                                                |
-| Rust (`.rs`, `Cargo.toml`) or any other file of a crate                                                                                                                           | `windows` (the Rust suites)                                                                                                                                                        |
-| The Engine's crates                                                                                                                                                               | `verus`                                                                                                                                                                            |
-| What the Engine's coverage measures (`test:rust:coverage`)                                                                                                                        | `coverage`                                                                                                                                                                         |
-| A file `.cargo/mutants.toml` examines                                                                                                                                             | `mutants-diff`                                                                                                                                                                     |
-| A browser suite, what it depends on or builds, or, for suites that run the CLI's backend, the CLI and what it depends on (but the extractors, for the suites that serve fixtures) | That suite in `browser`, the large ones sharded; the rest together in `browser (rest)`                                                                                             |
-| Renderers alone (not the kit, SDK or harness they share)                                                                                                                          | The renderer harness, in `browser` and `browser-macos`, without the other renderers' specs and the tests titled for them alone (`--grep-invert`): a job a project for one renderer |
-| The SDK, Rust, or the CLI and what it serves (not one built-in renderer or an extractor)                                                                                          | `package`                                                                                                                                                                          |
-| `dist-workspace.toml`, `.github/release-build-setup.yml` or a `Cargo.toml`                                                                                                        | `release-config`, which also plans the release (pull requests don't run `release.yml`)                                                                                             |
+The rules file holds every decision; the code holds none:
 
-Everything runs on pushes to `main`, nightly, on a manual run (**Run workflow**
-on the Projections workflow) and for any change to `.github/workflows/`,
-`.github/actions/`, `package.json`, `package-lock.json`, `Cargo.toml`,
-`Cargo.lock`, `rust-toolchain.toml`, `.node-version`, `.npmrc`, `.cargo/`,
-`tools/cli/` or `tools/scripts/`, or to a file outside every workspace and crate
-that the plan doesn't recognise. To run everything on a pull request, add the
-`ci:full` label, then push or re-run the workflow: the plan reads the labels
-when it runs.
+- `files`: how each changed file counts, by the first rule that matches it:
+  everything runs, documentation alone, a change to the workspace or crate
+  containing it, or a change only to what reads it.
+- `tags`: labels a file gets by its path, whichever rule decided it, such as
+  `release` for dist's configuration.
+- `groups`: named sets of workspaces and crates.
+- `conditions`: named predicates, such as `rust` and `platform`.
+- `jobs`: when each job of `ci.yml` runs, by job ID (`public-product`'s by
+  runner).
+- `browser`: when each browser suite runs, how the large ones are sharded, and
+  which narrow to the renderers a change touches.
+
+A `when` is `"full"`, `"docsOnly"`, `{"if": condition}`, `{"changes": globs}`,
+`{"tag": tag}`, `{"generator": name}`, `{"changed": group}` (a member contains,
+builds in or reads a changed file, tests included), `{"reaches": group}` (a
+member contains or builds in a changed file, or depends on one that does,
+optionally counting only changes `from` another group), or `any`, `all` and
+`not` of these.
+
+The graph is the code's: `ci-facts.ts` reads it as `npm run tools -- affected`
+does, plus what no manifest declares: the files crates read by path
+(`include_str!`, `CARGO_MANIFEST_DIR`), the crates and packages a workspace's
+`build` script compiles or builds (`cargo build -p`), the extractions and
+comparators renderers' `scenarios.json` files name, and the renderers under the
+harness's `testDir`.
+
+To change what runs, edit the rules file and add a case to
+`tools/cli/test/ci-plan.cases.json`; `npm run tools -- test tools/cli` checks
+the file against its schema, that every group, condition, tag and suite it names
+exists, that `ci.yml` gates each job on the decision of the same name, and every
+case. A change to the rules file runs everything.
+
+Everything also runs on pushes to `main`, nightly, on a manual run (**Run
+workflow** on the Projections workflow), and with the `ci:full` label: add it,
+then push or re-run the workflow, since the plan reads the labels when it runs.
 
 `ci-ok` is the one required check. It passes when `changes` succeeded and every
 other job passed or was left out by the plan; a failed, cancelled or timed-out

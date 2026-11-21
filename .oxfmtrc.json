@@ -28,6 +28,7 @@
     "**/dist/**",
     "**/target/**",
     ".github/workflows/release.yml",
+    ".github/ci-rules.schema.json",
     "**/.vscode-test/**",
     "packages/comparators/rules/language.json",
     "docs/reference/**",

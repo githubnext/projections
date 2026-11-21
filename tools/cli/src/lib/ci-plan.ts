@@ -1,172 +1,140 @@
-// What CI runs for a change (CONTRIBUTING.md#what-ci-runs): the changed files' workspaces and crates and everything
-// depending on them (affected.ts's graph), mapped to the jobs that test them. Pull requests run what their change
-// reaches; pushes to main, the nightly run, a manual run and the `ci:full` label run everything, as does a change to
-// CI itself, a toolchain, a lockfile or root manifest, or the repository's tooling.
-import {kindsOf} from './affected.ts'
-import {browserJobs, HARNESS, type BrowserJob} from './ci-browser.ts'
+// What CI runs for a change (CONTRIBUTING.md#what-ci-runs): the rules of .github/ci-rules.json applied to the changed
+// files' workspaces and crates and everything depending on them (ci-facts.ts reads the graph). This module holds no
+// rule of its own: which files run everything, which jobs and suites run for what, and how suites are sharded are
+// all in the rules file.
+import {browserJobs, type BrowserJob, type Layout} from './ci-browser.ts'
 import type {RepoFacts} from './ci-facts.ts'
 import {sortChanges} from './ci-files.ts'
+import {ruleProblems} from './ci-rules-check.ts'
+import {holds, reasons, resolveGroups, RULES, type CiRules, type Context} from './ci-rules.ts'
 import {dependantsOf} from './packages.ts'
-import {matches} from './repo.ts'
 
-/** Workspaces whose code runs only in a browser: a change to these alone needs no macOS or Windows run. */
-const browserOnly = ['packages/renderers/**', 'packages/host/**', 'tools/storybook', 'examples/renderers/**']
-/**
- * The suites whose tests run the native CLI's backend (`projections serve`). The Inspector's also explores and extracts
- * from repositories; the others serve fixtures, so they run no extractor and an extractor's change doesn't reach them.
- */
-export const nativeBackend = {all: ['packages/host/inspector'], fixtures: [HARNESS, 'examples/renderers/minimal']}
-const CLI = 'packages/cli'
-const SDK = 'packages/sdk'
-const ENGINE = ['packages/engine', 'packages/engine/verified']
+export type Change = {
+  paths: readonly string[]
+  /** The GitHub Actions event; `pull_request` (the default) follows the change. */
+  event?: string
+  /** The pull request's labels. */
+  labels?: readonly string[]
+}
 
 export type CiPlan = {
   /** Why everything runs; empty when the plan follows the change. */
   full: string[]
   files: number
+  docsOnly: boolean
   /** Changed workspaces and crates, and those depending on them. */
   changed: string[]
   dependants: string[]
-  /** Changed files outside every workspace and crate that run everything. */
-  unattributed: string[]
   generators: string[]
-  flags: {
-    docsOnly: boolean
-    rust: boolean
-    engine: boolean
-    /** The renderers the harness is limited to; empty when it runs all or none. */
-    renderers: string[]
-    host: boolean
-    inspector: boolean
-    storybook: boolean
-    cli: boolean
-    action: boolean
-    windows: boolean
-    release: boolean
-    workflows: boolean
-  }
-  jobs: {
-    docs: boolean
-    product: string[]
-    verus: boolean
-    windows: boolean
-    windowsNode: boolean
-    package: boolean
-    release: boolean
-    coverage: boolean
-    mutants: boolean
-    actionsLock: boolean
-  }
+  /** Each condition of the rules file, and whether it holds. */
+  conditions: Record<string, boolean>
+  /** Each job the rules gate: whether it runs, or a matrix job's values. */
+  jobs: Record<string, boolean | string[]>
+  /** Why each job that runs does: the descriptions of the rules that hold. */
+  why: Record<string, string[]>
+  /** The affected browser suites. */
+  suites: string[]
+  /** The renderers the harness is limited to; empty when it runs all or none. */
+  renderers: string[]
   browser: BrowserJob[]
   browserMacos: BrowserJob[]
 }
 
-/** Whether a change to `units` reaches the CLI. */
-function reachesCli(facts: RepoFacts, units: readonly string[]): boolean {
-  return units.includes(CLI) || dependantsOf(facts.units, units).includes(CLI)
-}
-
-/** Each browser suite reached by `changed`: through its own graph, a workspace its script builds, or the CLI backend. */
-function affectedSuites(facts: RepoFacts, changed: readonly string[]): Set<string> {
-  const reached = new Set([...changed, ...dependantsOf(facts.units, changed)])
-  const backend = {
-    all: reachesCli(facts, changed),
-    fixtures: reachesCli(
-      facts,
-      changed.filter(path => !path.startsWith('packages/extractors/')),
-    ),
+function layouts(rules: CiRules): {linux: Layout; macos: Layout} {
+  const linux: Layout = {}
+  const macos: Layout = {}
+  for (const [suite, {shards, macos: projects}] of Object.entries(rules.browser.suites)) {
+    if (shards !== undefined) linux[suite] = typeof shards === 'number' ? {'': shards} : shards
+    if (projects) macos[suite] = projects
   }
-  return new Set(
-    facts.browserSuites
-      .filter(
-        suite =>
-          reached.has(suite.path) ||
-          suite.uses.some(path => reached.has(path)) ||
-          (nativeBackend.all.includes(suite.path) && backend.all) ||
-          (nativeBackend.fixtures.includes(suite.path) && backend.fixtures),
-      )
-      .map(suite => suite.path),
+  return {linux, macos}
+}
+
+function affectedSuites(context: Context): string[] {
+  return context.facts.browserSuites
+    .filter(suite => holds(context.rules.browser.suites[suite.path]?.when ?? context.rules.browser.default.when, {...context, suite}))
+    .map(suite => suite.path)
+}
+
+/** A suite to narrow: one that runs only because of changes to some (not all) members of its `narrow` group. */
+function narrowed(context: Context, affected: readonly string[]): {suite: string; kept: string[]; others: string[]} | undefined {
+  for (const [path, suite] of Object.entries(context.rules.browser.suites)) {
+    if (!suite.narrow || !affected.includes(path)) continue
+    const members = context.groups.get(suite.narrow.group) ?? new Set<string>()
+    const kept = context.built.filter(unit => members.has(unit))
+    if (!kept.length || kept.length === members.size) continue
+    const rest = context.built.filter(unit => !kept.includes(unit))
+    const facts = context.facts.browserSuites.find(item => item.path === path)
+    const others: Context = {...context, built: rest, changed: rest}
+    if (facts) others.suite = facts
+    if (holds(suite.when ?? context.rules.browser.default.when, others)) continue
+    const name = (unit: string) => unit.slice(unit.lastIndexOf('/') + 1)
+    return {suite: path, kept: kept.map(name), others: [...members].filter(unit => !kept.includes(unit)).map(name)}
+  }
+  return undefined
+}
+
+export function ciPlan(facts: RepoFacts, rules: CiRules, change: Change): CiPlan {
+  const {paths, event = 'pull_request', labels = []} = change
+  const problems = ruleProblems(
+    rules,
+    facts.browserSuites.map(suite => suite.path),
   )
-}
-
-/** The renderers to limit the harness to: when the harness runs only because of changes to renderers it tests. */
-function harnessRenderers(facts: RepoFacts, changed: readonly string[], suites: ReadonlySet<string>): string[] {
-  if (!suites.has(HARNESS)) return []
-  const renderers = changed
-    .flatMap(path => /^packages\/renderers\/([^/]+)$/.exec(path)?.[1] ?? [])
-    .filter(name => facts.harnessRenderers.includes(name))
-  const others = changed.filter(path => !renderers.some(name => path === `packages/renderers/${name}`))
-  if (!renderers.length || renderers.length === facts.harnessRenderers.length || affectedSuites(facts, others).has(HARNESS)) return []
-  return renderers
-}
-
-export function ciPlan(facts: RepoFacts, paths: readonly string[], reasons: readonly string[] = []): CiPlan {
-  const generators = new Set<string>()
-  const sorted = sortChanges(facts, paths, generators)
-  const full = [...reasons, ...sorted.everything.map(path => `changed ${path}`)]
-  const all = full.length > 0
+  if (problems.length) throw new Error(`${RULES}:\n${problems.join('\n')}`)
+  const sorted = sortChanges(facts, rules, paths)
+  const full = [
+    ...(rules.full.events.includes(event) ? [`a ${event} run`] : []),
+    ...labels.filter(label => rules.full.labels.includes(label)).map(label => `the ${label} label`),
+    ...Object.entries(Object.groupBy(sorted.everything, ({rule}) => rule)).map(
+      ([rule, files]) => `${rule} (${(files ?? []).map(({path}) => path).join(', ')})`,
+    ),
+  ]
   const built = [...sorted.units].sort()
   const changed = [...new Set([...built, ...sorted.tested])].sort()
-  const dependants = dependantsOf(facts.units, built).filter(path => !changed.includes(path))
-  const reached = new Set([...changed, ...dependants])
-  const crates = new Set(facts.units.filter(unit => unit.kinds.includes('crate')).map(unit => unit.path))
-  const rust = all || kindsOf(paths).includes('rust') || changed.some(path => crates.has(path))
-  const engine = all || changed.some(path => ENGINE.includes(path))
-  const action = all || sorted.action.length > 0
-  const platform = all || rust || action || changed.some(path => !matches(path, browserOnly))
-  const release = all || sorted.release.length > 0 || generators.has('release-workflow')
-  const docsOnly = !all && !changed.length && !generators.size && !sorted.checks.length && !sorted.release.length && !sorted.action.length
-  const suites = all ? new Set(facts.browserSuites.map(suite => suite.path)) : affectedSuites(facts, built)
-  const renderers = all ? [] : harnessRenderers(facts, built, suites)
+  const context: Context = {
+    rules,
+    facts,
+    groups: resolveGroups(rules, facts),
+    full,
+    docsOnly: !full.length && sorted.docsOnly,
+    paths,
+    tags: sorted.tags,
+    generators: sorted.generators,
+    built,
+    changed,
+  }
+  const jobs: CiPlan['jobs'] = {}
+  const why: CiPlan['why'] = {}
+  for (const [name, job] of Object.entries(rules.jobs)) {
+    if ('when' in job) {
+      jobs[name] = holds(job.when, context)
+      if (jobs[name]) why[name] = reasons(job.when, context)
+    } else {
+      const values = job.matrix.filter(item => holds(item.when, context))
+      jobs[name] = values.map(item => item.value)
+      if (values.length) why[name] = values.map(item => `${item.value}: ${item.description}`)
+    }
+  }
+  const suites = affectedSuites(context)
+  const narrow = narrowed(context, suites)
   const browser = browserJobs(
     facts.browserSuites.map(suite => suite.path),
-    suites,
-    renderers.length ? {kept: renderers, others: facts.harnessRenderers.filter(name => !renderers.includes(name))} : undefined,
+    new Set(suites),
+    layouts(rules),
+    narrow,
   )
   return {
     full,
     files: paths.length,
+    docsOnly: context.docsOnly,
     changed,
-    dependants,
-    unattributed: sorted.everything,
-    generators: [...generators].sort(),
-    flags: {
-      docsOnly,
-      rust,
-      engine,
-      renderers,
-      host: suites.has('packages/host/core'),
-      inspector: suites.has('packages/host/inspector'),
-      storybook: suites.has('tools/storybook'),
-      cli: all || reached.has(CLI),
-      action,
-      windows: platform,
-      release,
-      workflows: paths.some(path => matches(path, ['.github/workflows/**', '.github/actions/**'])),
-    },
-    jobs: {
-      docs: docsOnly,
-      product: docsOnly ? [] : ['ubuntu-latest', ...(platform ? ['macos-latest'] : [])],
-      verus: engine,
-      windows: rust,
-      windowsNode: platform,
-      // The SDK's package check scaffolds a renderer with the CLI and runs its checks in the Inspector: the CLI and what
-      // it serves count, but not one built-in renderer or an extractor.
-      package:
-        all ||
-        rust ||
-        reached.has(SDK) ||
-        reachesCli(
-          facts,
-          built.filter(
-            path => !path.startsWith('packages/extractors/') && !facts.harnessRenderers.some(name => path === `packages/renderers/${name}`),
-          ),
-        ),
-      release,
-      coverage: all || facts.coverage.some(path => reached.has(path)),
-      mutants: all || paths.some(path => matches(path, facts.mutants.examine) && !matches(path, facts.mutants.exclude)),
-      actionsLock: all,
-    },
+    dependants: dependantsOf(facts.units, built).filter(path => !changed.includes(path)),
+    generators: [...sorted.generators].sort(),
+    conditions: Object.fromEntries(Object.entries(rules.conditions).map(([name, {when}]) => [name, holds(when, context)])),
+    jobs,
+    why,
+    suites,
+    renderers: narrow?.kept ?? [],
     browser: browser.linux,
     browserMacos: browser.macos,
   }

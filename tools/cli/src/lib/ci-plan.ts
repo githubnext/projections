@@ -147,3 +147,21 @@ export function ciPlan(facts: RepoFacts, rules: CiRules, change: Change): CiPlan
     browserMacos: browser.macos,
   }
 }
+
+/** The `changes` job's step outputs: each job's decision by ID (a matrix job's as its `matrix.include`), and the rest. */
+export function planOutputs(plan: CiPlan): Record<string, string> {
+  const jobs = Object.entries(plan.jobs).map(([name, value]) => [
+    name,
+    Array.isArray(value) ? JSON.stringify(plan.matrices[name]) : String(value),
+  ])
+  return {
+    full: String(plan.full.length > 0),
+    'docs-only': String(plan.docsOnly),
+    ...Object.fromEntries(Object.entries(plan.conditions).map(([name, value]) => [`if-${name}`, String(value)])),
+    ...Object.fromEntries(jobs),
+    suites: JSON.stringify(plan.suites),
+    renderers: plan.renderers.join(','),
+    browser: JSON.stringify(plan.browser),
+    'browser-macos': JSON.stringify(plan.browserMacos),
+  }
+}

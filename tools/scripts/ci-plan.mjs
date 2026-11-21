@@ -15,7 +15,7 @@ import {appendFileSync, readFileSync} from 'node:fs'
 import {fileURLToPath} from 'node:url'
 import {parseArgs} from 'node:util'
 import {repoFacts} from '../cli/src/lib/ci-facts.ts'
-import {ciPlan} from '../cli/src/lib/ci-plan.ts'
+import {ciPlan, planOutputs} from '../cli/src/lib/ci-plan.ts'
 import {loadCiRules} from '../cli/src/lib/ci-rules.ts'
 import {changedFiles} from '../cli/src/lib/git.ts'
 import {git} from '../cli/src/lib/repo.ts'
@@ -47,18 +47,7 @@ const contents = {
 }
 const plan = ciPlan(repoFacts(root), loadCiRules(root), {paths, event: values.event, labels, contents})
 
-const outputs = {
-  full: plan.full.length > 0,
-  'docs-only': plan.docsOnly,
-  ...Object.fromEntries(Object.entries(plan.conditions).map(([name, value]) => [`if-${name}`, value])),
-  ...Object.fromEntries(
-    Object.entries(plan.jobs).map(([name, value]) => [name, Array.isArray(value) ? JSON.stringify(plan.matrices[name]) : value]),
-  ),
-  suites: JSON.stringify(plan.suites),
-  renderers: plan.renderers.join(','),
-  browser: JSON.stringify(plan.browser),
-  'browser-macos': JSON.stringify(plan.browserMacos),
-}
+const outputs = planOutputs(plan)
 
 const list = items => (items.length ? items.map(item => `\`${item}\``).join(', ') : 'none')
 const runs = value => (Array.isArray(value) ? list(value) : value ? 'yes' : 'no')

@@ -202,11 +202,11 @@ summary bar float together over the stage's foot as a single overlay (see
 [the utility area](utility-area.md)). Each boundary in the stack (header,
 toolbar, stage) is a single 1px divider hairline, and each renderer frame
 extends 1px past its clipped container so fractional heights never create a
-double-line seam. The toolbar spans full width in every state,
-and nothing repeats: for a single committed revision (anything other than the
-working tree), the toolbar simply shows its short commit hash where the
-comparison mode switch would sit. While extraction is running, loading panes say
-"Extracting…" instead of "Loading renderer".
+double-line seam. The toolbar spans full width in every state, and nothing
+repeats: for a single committed revision (anything other than the working tree),
+the toolbar simply shows its short commit hash where the comparison mode switch
+would sit. While extraction is running, loading panes say "Extracting…" instead
+of "Loading renderer".
 
 **Handling a stopped server.** If the viewer exits or the machine sleeps, the
 status line and a stage overlay display "Viewer stopped" and advise asking the

@@ -101,8 +101,8 @@ run on Linux and macOS.
 | VS Code extension                                          | unit suites; release proof installs it | the same                   | unit suites; smoke test in VS Code (`test:vscode`)  |
 | GitHub Action end to end (`.github/actions/action-e2e`)    | `public-product`                       | `public-product`           | `windows-integration`                               |
 
-`public-product` runs as a single job on Linux and as two parallel jobs on macOS:
-`macos-latest, Rust` (the build and Rust suites) and `macos-latest, Node`
+`public-product` runs as a single job on Linux and as two parallel jobs on
+macOS: `macos-latest, Rust` (the build and Rust suites) and `macos-latest, Node`
 (everything else). This table describes what pushes to `main` and the nightly
 run cover; pull requests run only the jobs their changes reach
 ([what CI runs](../../CONTRIBUTING.md#what-ci-runs)). Browser suites run in full

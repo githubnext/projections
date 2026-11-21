@@ -1,18 +1,12 @@
-import {useCallback, useEffect, useLayoutEffect, useMemo, useRef} from 'react'
-import {useMachine} from '@githubnext/projections-machine/react'
+import {useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react'
 import {endpointHoldMs, holdDuration, stepHoldMs} from '../playback.js'
 import type {ComparisonMode} from '../modes.js'
 import {unit} from './controllable.js'
 import type {Controllable} from './controllable.js'
-import {nextDirection, playbackLifecycle} from './playback-lifecycle.js'
+import {createPlaybackController} from './playback-controller.js'
+import {nextDirection} from './playback-lifecycle.js'
 import type {PlaybackRun} from './playback-lifecycle.js'
 import type {PlaybackPosition} from './playback-position.js'
-
-/** The plan and reduced motion of the latest render, for an action called after it. */
-const now = (current: {current: {plan: PlaybackRun; reducedMotion: boolean}}) => ({
-  plan: current.current.plan,
-  reducedMotion: current.current.reducedMotion,
-})
 
 export type PlaybackControlInput = Pick<Controllable, 'latest' | 'setInternal' | 'request'> &
   Pick<PlaybackPosition, 'position' | 'progress' | 'stepEnds' | 'durationMs' | 'timeline' | 'toProgress' | 'toPosition'> & {
@@ -28,7 +22,7 @@ export type PlaybackControlInput = Pick<Controllable, 'latest' | 'setInternal' |
   }
 
 /**
- * Seeking, playing and pausing, and the frame loop, run by `playbackLifecycle`. The view's values (playing, the
+ * Seeking, playing and pausing, and the frame loop, run by `playbackLifecycle` through `createPlaybackController`. The view's values (playing, the
  * position, the mode, reduced motion, the subject) reach the lifecycle as events when they change; its requests for
  * playing and the position go to the core or the embedder, whichever controls them.
  */
@@ -43,50 +37,51 @@ export function usePlaybackControl(input: PlaybackControlInput) {
     timeline,
     speed: input.speed,
   }
-  const current = useRef({plan, reducedMotion, toProgress})
-  current.current = {plan, reducedMotion, toProgress}
-  const [state, send, actor] = useMachine(playbackLifecycle, {
-    state: {kind: 'paused', position, direction: input.direction ?? 1, travelled: false, armed: null, stopping: false},
-    effects: {
-      requestPlaying: ({playing: next}) => request('playing', next),
-      // A slider position: `onPositionChange`, and `onProgressChange` when the embedder controls progress.
-      requestPosition: ({position: next}) => {
-        const clamped = unit(next)
-        const options = latest.current
-        if (options.position === undefined)
-          setInternal(previous => (previous.position === clamped ? previous : {...previous, position: clamped}))
-        options.onPositionChange?.(clamped)
-        if (options.progress !== undefined) options.onProgressChange?.(current.current.toProgress(clamped))
+  const current = useRef({plan, reducedMotion, toProgress, request})
+  current.current = {plan, reducedMotion, toProgress, request}
+  const [controller] = useState(() =>
+    createPlaybackController(
+      {position, direction: input.direction},
+      {
+        plan: () => current.current.plan,
+        reducedMotion: () => current.current.reducedMotion,
+        requestPlaying: next => current.current.request('playing', next),
+        // A slider position: `onPositionChange`, and `onProgressChange` when the embedder controls progress.
+        requestPosition: next => {
+          const clamped = unit(next)
+          const options = latest.current
+          if (options.position === undefined)
+            setInternal(previous => (previous.position === clamped ? previous : {...previous, position: clamped}))
+          options.onPositionChange?.(clamped)
+          if (options.progress !== undefined) options.onProgressChange?.(current.current.toProgress(clamped))
+        },
       },
-    },
-    activities: {
-      frames: (_activity, {send: tick, signal}) => {
-        let last: number | undefined
-        let handle = requestAnimationFrame(function frame(time) {
-          if (last !== undefined) tick({type: 'tick', elapsedMs: time - last, plan: current.current.plan})
-          if (signal.aborted) return
-          last = time
-          handle = requestAnimationFrame(frame)
-        })
-        return () => cancelAnimationFrame(handle)
-      },
-    },
-  })
-
-  // After every render, the lifecycle is reconciled with what the view shows: the subject, the mode and reduced motion
-  // when they change; the position, a controlled direction and whether it plays when they differ from the lifecycle's,
-  // so a request an embedder declined (or hasn't applied yet) never leaves the two apart.
-  const shown = useRef({reducedMotion, mode, subject})
+    ),
+  )
+  const {actor} = controller
+  const [state, setState] = useState(actor.getState)
+  // Started before paint, so the frame loop and a state an event changes there render before paint too.
   useLayoutEffect(() => {
-    const last = shown.current
-    shown.current = {reducedMotion, mode, subject}
-    if (last.subject !== subject) send({type: 'subjectChanged', position, stops: latest.current.playing === undefined})
-    if (actor.getState().position !== position) send({type: 'positionShown', position})
-    if (input.direction !== undefined && actor.getState().direction !== input.direction)
-      send({type: 'directionShown', direction: input.direction})
-    if (last.mode !== mode) send({type: 'modeChanged'})
-    if (last.reducedMotion !== reducedMotion) send({type: 'motionShown', reduced: reducedMotion})
-    send({type: 'playingShown', playing, plan: current.current.plan, reducedMotion})
+    const unsubscribe = actor.subscribe(setState)
+    actor.start()
+    setState(actor.getState())
+    return () => {
+      unsubscribe()
+      actor.stop()
+    }
+  }, [actor])
+
+  // After every render, the lifecycle is reconciled with what the view shows.
+  useLayoutEffect(() => {
+    controller.show({
+      subject,
+      mode,
+      reducedMotion,
+      position,
+      playing,
+      direction: input.direction,
+      playingControlled: latest.current.playing !== undefined,
+    })
   })
 
   // Uncontrolled progress reports every change, including resets.
@@ -105,22 +100,17 @@ export function usePlaybackControl(input: PlaybackControlInput) {
       setInternal(previous => ({...previous, position: toPosition(before.progress)}))
   }, [timeline, progress, toPosition, toProgress, latest, setInternal, still, position])
 
-  const seek = useCallback((to: number) => send({type: 'seek', to}), [send])
-  const play = useCallback((direction: 1 | -1 = 1) => send({type: 'play', direction, ...now(current)}), [send])
-  const pause = useCallback(() => send({type: 'pause'}), [send])
-  const toggle = useCallback((direction: 1 | -1 = 1) => send({type: 'toggle', direction, ...now(current)}), [send])
-  const togglePlayback = useCallback(() => send({type: 'togglePlayback', ...now(current)}), [send])
   const direction = input.direction ?? state.direction
   return useMemo(
     () => ({
       direction,
       nextDirection: nextDirection({...state, direction}, reducedMotion),
-      seek,
-      play,
-      pause,
-      toggle,
-      togglePlayback,
+      seek: controller.seek,
+      play: controller.play,
+      pause: controller.pause,
+      toggle: controller.toggle,
+      togglePlayback: controller.togglePlayback,
     }),
-    [state, direction, reducedMotion, seek, play, pause, toggle, togglePlayback],
+    [state, direction, reducedMotion, controller],
   )
 }

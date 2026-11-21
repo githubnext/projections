@@ -50,8 +50,9 @@ function boundedFacts(facts: readonly SummaryFactItem[], counted: number): Summa
       (found, fact, index) => ((fact.ids?.length ?? 0) > (bounded[found]?.ids?.length ?? 0) ? index : found),
       0,
     )
-    if (!bounded[largest]?.ids?.length) break
-    bounded[largest] = withoutIds(bounded[largest])
+    const fact = bounded[largest]
+    if (fact?.ids === undefined || fact.ids.length === 0) break
+    bounded[largest] = withoutIds(fact)
   }
   return bounded
 }
@@ -79,7 +80,7 @@ export function withDefinitionNouns(items: SummaryCountItem[], kinds: RendererPr
  */
 export function rendererSummary(init: InitPayload, nouns?: SummaryNouns, facts: readonly SummaryFactItem[] = []): RendererSummary {
   // Tolerates a payload without `projection`, as tests and older hosts may build one.
-  const counts = withDefinitionNouns(summaryItems(init, nouns), init.projection?.kinds)
+  const counts = withDefinitionNouns(summaryItems(init, nouns), (init.projection as InitPayload['projection'] | undefined)?.kinds)
   const stated = boundedFacts(facts, JSON.stringify(counts).length)
   return {items: [...counts.slice(0, Math.max(0, rendererLimits.summaryItems - stated.length)), ...stated]}
 }
@@ -131,7 +132,7 @@ function unionGraph(model: ComparisonModel): {nodes: LayoutNode[]; edges: Layout
     const old = ends('before'),
       next = ends('after')
     if ((change.before && !old) || (change.after && !next)) continue
-    if (old && next && old.from === next.from && old.to === next.to) edges.push({id: change.id, kind: change.after!.kind, ...next})
+    if (old && old.from === next?.from && old.to === next.to) edges.push({id: change.id, kind: change.after!.kind, ...next})
     else {
       if (old) edges.push({id: `${change.id}:before`, kind: change.before!.kind, ...old})
       if (next) edges.push({id: `${change.id}:after`, kind: change.after!.kind, ...next})

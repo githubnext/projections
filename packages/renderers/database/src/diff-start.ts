@@ -15,7 +15,7 @@ const margin = 16
 export function changesStart(view: RefObject<HTMLElement | null>, content: RefObject<HTMLElement | null>): ScrollStart {
   return ({scale}) => {
     const [scroller, drawn] = [view.current, content.current]
-    if (!scroller || !drawn || !drawn.offsetWidth) return {left: 0, top: 0}
+    if (!scroller || !drawn || drawn.offsetWidth === 0) return {left: 0, top: 0}
     const box = drawn.getBoundingClientRect()
     const unit = box.width / drawn.offsetWidth
     const marked = [...drawn.querySelectorAll('[data-change]')].filter(element => !element.closest('.database-tags-measure'))

@@ -123,7 +123,7 @@ const clearance = 0.06
 /** The theme token a definition's kind color paints with (`presentation.kinds.<kind>.color`). */
 export function kindColorToken(color: KindColor): ThemeTokenName {
   if (color === 'neutral') return otherToken
-  const slot = (kindHues as readonly string[]).indexOf(toneHues[color as Exclude<KindTone, 'neutral'>] ?? color) + 1
+  const slot = (kindHues as readonly string[]).indexOf((toneHues as Partial<Record<KindColor, KindHue>>)[color] ?? color) + 1
   return `chart-${slot || 1}` as ThemeTokenName
 }
 /** The hue each meaning takes: danger red, warning amber, success green, info blue. */
@@ -287,15 +287,15 @@ const distinctClearance = 0.09
  */
 export function paletteLegend(palette: Palette, title: string, limit = 14, shape: LegendItem['shape'] = 'circle'): RendererLegend {
   if (!palette.ranked.length) return {items: []}
-  const named = palette.ranked.filter(entry => entry.pinned || !('token' in entry.swatch && entry.swatch.token === otherToken))
+  const named = palette.ranked.filter(entry => entry.pinned === true || !('token' in entry.swatch && entry.swatch.token === otherToken))
   const shown = named.slice(0, limit)
   const rest = palette.ranked.length - shown.length
-  const items: LegendItem[] = shown.map(entry => ({label: entry.category.label, ...entry.swatch, ...(shape ? {shape} : {})}))
+  const items: LegendItem[] = shown.map(entry => ({label: entry.category.label, ...entry.swatch, shape}))
   if (rest > 0) {
     items.push({
       label: `${rest.toLocaleString('en-US')} other ${rest === 1 ? 'type' : 'types'}`,
       token: otherToken,
-      ...(shape ? {shape} : {}),
+      shape,
     })
   }
   return {title, items}

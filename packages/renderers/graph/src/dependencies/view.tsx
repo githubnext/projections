@@ -82,7 +82,9 @@ export function DependencyGraph(props: RendererProps) {
   const kindLine = useMemo(
     () => (entity: Entity) => {
       const others = view.otherDependents.get(entity.id)?.length
-      return others ? {...entityKindLine(entity.kind), note: `+${countText(others, 'dependent', 'dependents', locale)}`} : undefined
+      return others !== undefined && others !== 0
+        ? {...entityKindLine(entity.kind), note: `+${countText(others, 'dependent', 'dependents', locale)}`}
+        : undefined
     },
     [view.otherDependents, locale],
   )

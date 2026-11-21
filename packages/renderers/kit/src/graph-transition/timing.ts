@@ -82,7 +82,7 @@ function edgeAlias(
   const next = change.after && {from: model.entityRow.after.get(change.after.from)!, to: model.entityRow.after.get(change.after.to)!}
   const included = (edge?: Ends) => !edge || (rows.has(edge.from) && rows.has(edge.to))
   if (!included(old) || !included(next)) return []
-  const same = Boolean(old && next && old.from === next.from && old.to === next.to)
+  const same = Boolean(old && old.from === next?.from && old.to === next.to)
   const oldWindow = !old
     ? undefined
     : entry

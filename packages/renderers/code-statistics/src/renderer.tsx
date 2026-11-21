@@ -113,7 +113,7 @@ export function CodeStatisticsRenderer(props: RendererProps<typeof accepts>) {
       ? shown.map(item => {
           const change = item.entity ? tracked.find(entry => entry.id === item.id) : undefined
           const entity = change && (change.after ?? change.before)
-          return {label: entity ? (entity.label ?? entity.id) : item.label, ...item.swatch}
+          return {label: entity ? entity.label : item.label, ...item.swatch}
         })
       : []
   const legend: RendererLegend | undefined = legendKey.length

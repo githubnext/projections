@@ -49,13 +49,14 @@ test('a link never runs behind a card: in every scenario, layout (ranks, stacked
   const {scenarios} = (await read('scenarios.json')) as {scenarios: {id: string; before?: unknown; after?: unknown; extraction?: unknown}[]}
   let checked = 0
   for (const scenario of scenarios) {
-    const subject = scenario.extraction
-      ? {extraction: await load(scenario.extraction)}
-      : {before: await load(scenario.before), after: await load(scenario.after)}
+    const subject =
+      scenario.extraction !== undefined
+        ? {extraction: await load(scenario.extraction)}
+        : {before: await load(scenario.before), after: await load(scenario.after)}
     // Side by side in ranks, the narrowest ranks, stacked in one column with lanes at the left, and a phone.
     for (const width of [1440, 1000, 640, 390]) {
       await page.setViewportSize({width: width + 80, height: 1000})
-      for (const comparisonMode of scenario.extraction ? [undefined] : [undefined, 'diff' as const]) {
+      for (const comparisonMode of scenario.extraction !== undefined ? [undefined] : [undefined, 'diff' as const]) {
         const renderer = await openRenderer(page, {
           renderer: 'database',
           ...subject,
@@ -63,7 +64,7 @@ test('a link never runs behind a card: in every scenario, layout (ranks, stacked
           width,
           ...(comparisonMode ? {comparisonMode} : {}),
         } as Parameters<typeof openRenderer>[1])
-        const progresses = comparisonMode || scenario.extraction ? [1] : samples(24)
+        const progresses = comparisonMode !== undefined || scenario.extraction !== undefined ? [1] : samples(24)
         for (const progress of progresses) {
           if (comparisonMode) await renderer.measure('settle')
           else await renderer.seek(progress)

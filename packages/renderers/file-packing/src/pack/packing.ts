@@ -70,7 +70,8 @@ function packTree(node: TreeNode, smallest: number, previous?: ReadonlyMap<strin
   const circles = kids.map(kid => ({x: 0, y: 0, r: kid.r, key: kid.node.id}))
   const gap = (node.children.some(child => child.children) ? folderGap : fileGap) * mean(circles)
   arrange(circles, 1, gap, previous)
-  const enclosing = packEnclose(circles) ?? {x: 0, y: 0, r: 0}
+  // d3 encloses no circles in undefined, whatever its types say.
+  const enclosing = (packEnclose(circles) as ReturnType<typeof packEnclose> | undefined) ?? {x: 0, y: 0, r: 0}
   kids.forEach((kid, index) => {
     kid.x = circles[index]!.x - enclosing.x
     kid.y = circles[index]!.y - enclosing.y

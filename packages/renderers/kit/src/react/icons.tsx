@@ -14,7 +14,7 @@ export function Icon({name, className}: {name: IconName; className?: string}) {
 /** The image layers `icons.css` masks an icon with, resolved in the document: its glyph, then its badge disc if it is a badge. */
 const resolvedLayers = new Map<string, string[]>()
 function iconLayers(name: IconName): string[] {
-  if (typeof document === 'undefined' || !document.body) return []
+  if (typeof document === 'undefined' || !(document.body as HTMLElement | null)) return []
   // Tokens change only when the host's environment does, which rewrites the root's style.
   const key = `${name}\n${document.documentElement.getAttribute('style') ?? ''}`
   const cached = resolvedLayers.get(key)

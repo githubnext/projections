@@ -152,7 +152,7 @@ export function current<T>(change: EntityChange<T>, progress: number): T {
 /** Linear presence for renderers without staged timing: arrivals fade in, departures out. */
 export function entityPresence(change: EntityChange<unknown>, progress: number): number {
   const t = unitProgress(progress)
-  return change.before ? (change.after ? 1 : 1 - t) : t
+  return change.before !== undefined ? (change.after !== undefined ? 1 : 1 - t) : t
 }
 
 /** A numeric `data` field interpolated between versions; a missing side counts as 0. */

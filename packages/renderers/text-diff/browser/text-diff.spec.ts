@@ -45,7 +45,8 @@ function decoration(frame: FrameLocator) {
     tinted: [...root.querySelectorAll('.td-delete, .td-insert')].filter(
       line => !/^(transparent|rgba\(0, 0, 0, 0\)|color\(srgb [\d. ]+ \/ 0\))$/.test(getComputedStyle(line).backgroundColor),
     ).length,
-    markers: [...root.querySelectorAll('.td-mark')].filter(mark => mark.getBoundingClientRect().width > 0.5 && mark.textContent).length,
+    markers: [...root.querySelectorAll('.td-mark')].filter(mark => mark.getBoundingClientRect().width > 0.5 && mark.textContent !== '')
+      .length,
     cells: root.querySelectorAll('header .pk-group-status').length,
     status: [...root.querySelectorAll<HTMLElement>('header .pk-group-status')].filter(cell =>
       /^(Added|Removed|Modified|Renamed)/.test(cell.innerText.replace(/\s/g, '')),
@@ -60,8 +61,8 @@ function decoration(frame: FrameLocator) {
 
 const expected = (id: string) => ({
   id,
-  before: lines(texts.before[id as keyof typeof texts.before] ?? ''),
-  after: lines(texts.after[id as keyof typeof texts.after] ?? ''),
+  before: lines((texts.before as Partial<Record<string, string>>)[id] ?? ''),
+  after: lines((texts.after as Partial<Record<string, string>>)[id] ?? ''),
 })
 
 test('the renderer declares only the diff comparison mode', async ({page}) => {

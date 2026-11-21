@@ -19,7 +19,7 @@ export function keyColumnNames(entity: Entity): string[] {
     ? fields.flatMap(field =>
         typeof field === 'string'
           ? [field]
-          : field && typeof field === 'object' && !Array.isArray(field) && typeof field.name === 'string'
+          : typeof field === 'object' && field !== null && !Array.isArray(field) && typeof field.name === 'string'
             ? [field.name]
             : [],
       )
@@ -56,7 +56,7 @@ export function enumValues(entity: Entity): string[] {
     ? values.flatMap(value =>
         typeof value === 'string'
           ? [value]
-          : value && typeof value === 'object' && !Array.isArray(value) && typeof value.name === 'string'
+          : typeof value === 'object' && value !== null && !Array.isArray(value) && typeof value.name === 'string'
             ? [value.name]
             : [],
       )

@@ -96,7 +96,10 @@ export function refusal(accepts: readonly RendererAccepts[] | undefined, init: I
   const sides = init.mode === 'extraction' ? [init.extraction] : [init.before, init.after]
   const refused = sides.find(side => !acceptsExtraction(accepts, side))
   if (!refused || !accepts) return undefined
-  const vocabularies = refused.vocabularies?.length ? ` with ${refused.vocabularies.map(name => `\`${name}\``).join(', ')}` : ''
+  const vocabularies =
+    refused.vocabularies?.length !== undefined && refused.vocabularies.length > 0
+      ? ` with ${refused.vocabularies.map(name => `\`${name}\``).join(', ')}`
+      : ''
   return `This renderer presents ${describeAccepts(accepts)}; this extraction is \`${refused.schema}\`${vocabularies}.`
 }
 

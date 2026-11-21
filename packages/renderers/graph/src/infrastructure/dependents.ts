@@ -11,7 +11,7 @@ export function dependents(model: ComparisonModel, id: string): Set<string> {
       ['before', row.before],
       ['after', row.after],
     ] as const) {
-      if (!relationship || relationship.kind !== 'references') continue
+      if (relationship?.kind !== 'references') continue
       const from = model.entityRow[side].get(relationship.from)
       const to = model.entityRow[side].get(relationship.to)
       if (!from || !to || from === to) continue

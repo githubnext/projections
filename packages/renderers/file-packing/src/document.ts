@@ -180,7 +180,7 @@ export function drawCircle(circle: Circle, {doc, decorations, emphasisOf, palett
     ? []
     : flagsOf(entity).map(key => ({key, label: palette.entry(key)?.category.label ?? key, paint: palette.paintOf(key)}))
   const flagText = flags.length ? `, flagged ${listWords(flags.map(flag => flag.label))}` : ''
-  const label = `${folder || collapsedFolder ? 'Folder' : 'File'} ${path || name}, ${sizes.now}${flagText}${statusText}${changeText}`
+  const label = `${folder || collapsedFolder ? 'Folder' : 'File'} ${(path ?? '') || name}, ${sizes.now}${flagText}${statusText}${changeText}`
   const ground = circle.parent === undefined ? 'stage' : 'folder'
   return {
     circle,

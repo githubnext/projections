@@ -53,7 +53,7 @@ async function lineStarts(renderer: RendererHandle) {
           range.setStart(node, index)
           range.setEnd(node, index + 1)
           const box = range.getClientRects()[0]
-          if (!box || !box.width) continue
+          if (!box || box.width === 0) continue
           // A character on a new line sits wholly below the one before it; characters of one line overlap.
           if (bottom === undefined || box.top >= bottom - 0.5) starts.push(`${text[index]}${text.slice(index + 1, index + 12)}`)
           bottom = box.bottom
@@ -70,7 +70,7 @@ async function facts(renderer: RendererHandle) {
   return sent.flatMap(item =>
     item.type === 'fact'
       ? [
-          `${item.count} ${item.count === 1 ? item.noun.singular : item.noun.plural}${item.added ? ` +${item.added}` : ''}${item.removed ? ` −${item.removed}` : ''}`,
+          `${item.count} ${item.count === 1 ? item.noun.singular : item.noun.plural}${item.added !== undefined && item.added !== 0 ? ` +${item.added}` : ''}${item.removed !== undefined && item.removed !== 0 ? ` −${item.removed}` : ''}`,
         ]
       : [],
   )
@@ -309,8 +309,8 @@ test('each section is a titled panel: its title in the UI font in a band inside 
   expect(read.panels.map(panel => panel.title)).toEqual(['Policies', 'Credentials', 'Network', 'Kernel modules', 'User space', 'Other'])
   expect(read.panels.map(panel => panel.icon[0])).toEqual(['policy', 'credential', 'network', 'module', 'application', 'other'])
   for (const panel of read.panels) {
-    expect(panel, panel.title ?? '').toMatchObject({banded: true, table: true, font: true, muted: true})
-    expect(panel.icon.slice(1), panel.title ?? '').toEqual(['true', true])
+    expect(panel, panel.title).toMatchObject({banded: true, table: true, font: true, muted: true})
+    expect(panel.icon.slice(1), panel.title).toEqual(['true', true])
     expect(panel.centred, `${panel.title} icon centred on its capitals`).toBeLessThan(0.75)
     expect(panel.inset, `${panel.title} icon at the band's inset`).toBeLessThan(0.5)
   }

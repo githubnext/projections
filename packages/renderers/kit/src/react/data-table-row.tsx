@@ -46,10 +46,17 @@ export function Row<T>({
   const changed = isChanged(row)
   // The diff marks every change, its hue following emphasis; the progress modes mark one only while it is emphasized.
   const marked = changed && (diff || emphasis > 0)
-  const side = row.before && row.after ? (progress < 0.5 ? 'before' : 'after') : row.after ? 'after' : 'before'
+  const side =
+    row.before !== undefined && row.after !== undefined
+      ? progress < 0.5
+        ? 'before'
+        : 'after'
+      : row.after !== undefined
+        ? 'after'
+        : 'before'
   const item = diff ? sortedVersion(row) : (row[side] ?? sortedVersion(row))
   // An entering or leaving row keeps its slot, fading in or out with its step.
-  const presence = diff || (row.before && row.after) ? 1 : row.after ? progress : 1 - progress
+  const presence = diff || (row.before !== undefined && row.after !== undefined) ? 1 : row.after !== undefined ? progress : 1 - progress
   const struck = marked && row.status === 'removed'
   const style = {'--emphasis': emphasis, ...(presence < 1 ? {opacity: Math.max(0, presence)} : {})}
   // A row absent from the revision shown keeps its slot but is out of the tab order and the accessibility tree.

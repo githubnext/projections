@@ -10,7 +10,7 @@ export function effectProse(entity: Entity | undefined): string {
   const actions = Array.isArray(data.actions) ? (data.actions as {display?: unknown; action?: unknown}[]) : []
   const listed = actions
     .map(action => proseOf(action.display, text(action.action)))
-    .filter(prose => prose && plainProse(prose) !== 'Observe')
+    .filter(prose => !!prose && plainProse(prose) !== 'Observe')
   const effect = text(data.effect)
   const words: Record<string, string> = {observe: 'Observe', track: 'Track', silent: 'Silent', respond: 'Respond', enforce: 'Enforce'}
   const result = listed.length ? listed.join(', ') : ((effect && words[effect]) ?? 'Unknown effect')

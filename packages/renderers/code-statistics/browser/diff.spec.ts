@@ -38,7 +38,7 @@ for (const scenario of ['gateway', 'languages']) {
           .toBe(true)
         const summary = (await stage.state()).summary ?? []
         const total = summary.find(item => item.type === 'fact' && item.id === 'total')
-        expect(total && total.type === 'fact' && (total.added ?? 0) + (total.removed ?? 0)).toBeGreaterThan(0)
+        expect(total?.type === 'fact' && (total.added ?? 0) + (total.removed ?? 0)).toBeGreaterThan(0)
         if (form !== 'composition') {
           const languages = summary.find(item => item.type !== 'fact' && item.kind === 'language')
           expect(languages && languages.type !== 'fact' && [languages.added, languages.removed]).toEqual([

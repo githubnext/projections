@@ -71,7 +71,7 @@ export function collapse(graph: DependencyGraph, expansion: Expansion) {
       const rest = new Set(expansion)
       rest.delete(by)
       const members = membersBy(ownership(reveal(rest))).get(by)
-      if (members?.length) opened.set(by, members)
+      if (members?.length !== undefined && members.length > 0) opened.set(by, members)
     }
   }
   return {visible, owner, owned, opened}

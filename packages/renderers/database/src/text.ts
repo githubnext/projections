@@ -220,7 +220,9 @@ export function createTextSizer(
   const statusOf = (text: CardText) =>
     (text.status ?? []).reduce((sum, word, index) => sum + (index ? chrome.statusGap : 0) + chrome.statusIcon + width('status', word), 0)
   const status = (card: string) =>
-    Math.ceil(Math.max(0, ...cards(card).map(statusOf)) + (cards(card).some(text => text.status?.length) ? textMetrics.slack : 0))
+    Math.ceil(
+      Math.max(0, ...cards(card).map(statusOf)) + (cards(card).some(text => (text.status?.length ?? 0) > 0) ? textMetrics.slack : 0),
+    )
   const pill = (text: string) => width('type', text) + chrome.pillPad
   const arrow = () => width('kind', '→') + 2 * chrome.valueGap
   const headerText = (card: CardText, cell: number) =>

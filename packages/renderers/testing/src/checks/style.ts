@@ -37,7 +37,7 @@ async function stylesAt(
     progress: view.progress,
     colorMode,
     reuse: true,
-    ...(width ? {width} : {}),
+    ...(width !== undefined && width !== 0 ? {width} : {}),
     ...(view.comparisonMode ? {comparisonMode: view.comparisonMode} : {}),
   })
   await driver.measure('settle')
@@ -272,7 +272,13 @@ export const styleChecks: Pick<Checks, 'palette' | 'stage-surface' | 'type-scale
         const light = await stylesAt(driver, subject, view, width, 'light')
         const dark = await stylesAt(driver, subject, view, width, 'dark')
         measured.push(light, dark)
-        paletteFailures(themeColors(light.tokens, dark.tokens), light, dark, `${view.where}${width ? ` at ${width}px` : ''}`, findings)
+        paletteFailures(
+          themeColors(light.tokens, dark.tokens),
+          light,
+          dark,
+          `${view.where}${width !== undefined && width !== 0 ? ` at ${width}px` : ''}`,
+          findings,
+        )
       }
     }
     return withExemptions(findings, measured)
@@ -300,7 +306,7 @@ export const styleChecks: Pick<Checks, 'palette' | 'stage-surface' | 'type-scale
       for (const width of [undefined, phoneWidth]) {
         const styles = await stylesAt(driver, subject, view, width, 'light')
         measured.push(styles)
-        typeFailures(styles, `${view.where}${width ? ` at ${width}px` : ''}`, findings)
+        typeFailures(styles, `${view.where}${width !== undefined && width !== 0 ? ` at ${width}px` : ''}`, findings)
       }
     }
     return withExemptions(findings, measured)
@@ -312,7 +318,7 @@ export const styleChecks: Pick<Checks, 'palette' | 'stage-surface' | 'type-scale
       for (const width of [undefined, phoneWidth]) {
         const styles = await stylesAt(driver, subject, view, width, 'light')
         measured.push(styles)
-        spacingFailures(styles, `${view.where}${width ? ` at ${width}px` : ''}`, findings)
+        spacingFailures(styles, `${view.where}${width !== undefined && width !== 0 ? ` at ${width}px` : ''}`, findings)
       }
     }
     return withExemptions(findings, measured)

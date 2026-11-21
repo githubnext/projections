@@ -166,7 +166,7 @@ export function embedRenderer(
     options.onFailure?.(message)
   }
   const timer = view.setTimeout(
-    () => capabilities || fail(`The ${options.renderer} renderer did not become ready`),
+    () => capabilities ?? fail(`The ${options.renderer} renderer did not become ready`),
     rendererLimits.readyTimeoutMs + rendererLimits.documentTimeoutMs,
   )
   // The frame's size, as a host reports it on load and whenever it changes.

@@ -149,9 +149,8 @@ function handle(page: Page, subject: StageSubject, record: StageRecord): StageHa
       call('setEnvironment', () => page.evaluate(environment => window.projectionsStage.setEnvironment(environment), environment)),
     setWidth: width => call(`setWidth(${width})`, () => page.evaluate(width => window.projectionsStage.setWidth(width), width)),
     measure: <T>(probe: ProbeCall, args?: unknown) =>
-      call(
-        `measure(${probe})`,
-        () => page.evaluate(([probe, args]) => window.projectionsStage.measure(probe, args), [probe, args] as const) as Promise<T>,
+      call(`measure(${probe})`, () =>
+        page.evaluate(([probe, args]) => window.projectionsStage.measure<T>(probe, args), [probe, args] as const),
       ),
     state: () => call('state', () => page.evaluate(() => window.projectionsStage.state())),
   }

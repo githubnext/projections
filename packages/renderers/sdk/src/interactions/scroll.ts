@@ -24,7 +24,7 @@ export function scrollTarget(document: Document, key: string | undefined): Eleme
   if (key === undefined) return document.scrollingElement
   const named = document.querySelector(`[${scrollAttribute}="${CSS.escape(key)}"]`)
   if (named) return named
-  let element: Element | null = document.body
+  let element: Element | null = bodyOf(document)
   for (const step of key.split('>')) {
     const [tag, index] = step.split(':')
     const child: Element | undefined = element?.children[Number(index)]
@@ -100,4 +100,9 @@ export function reveal(view: Window, element: Element, applied: AppliedScrolls) 
     }
     if (isDocument) break
   }
+}
+
+/** A document's body, which a document still loading hasn't got, whatever its type says. */
+function bodyOf(document: Document): HTMLElement | null {
+  return document.body
 }

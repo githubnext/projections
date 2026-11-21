@@ -49,7 +49,7 @@ for (const directory of [...new Set(scenarios.map(item => item.directory))]) {
           }
           const hide = async () => {
             await stage.select(null)
-            await element.evaluate(() => (document.activeElement as HTMLElement | null)?.blur?.())
+            await element.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
             await stage.measure('settle')
           }
           // The neutral picture: the same state, with the SDK's ring stylesheet off (and focus left, so the kit's own

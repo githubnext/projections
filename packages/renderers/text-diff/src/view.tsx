@@ -271,7 +271,7 @@ function OutputSection({
   const emphasis = props.emphasis(row)
   const selected = selectedId === row.id
   let body: ReactNode
-  if (!comparing || (before && after && before.text === after.text)) {
+  if (!comparing || (before && before.text === after?.text)) {
     body = <PlainLines text={output.text} presentation={output.presentation} />
   } else {
     let diff = diffs.get(row.id)

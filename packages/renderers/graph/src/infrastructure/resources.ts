@@ -57,10 +57,12 @@ export function infrastructureStatus(node: Pick<TransitionNode, 'status' | 'rena
   const parts: StatusPart[] = []
   if (node.renamed) parts.push({status: 'renamed', glyph: '→', icon: 'moved', label: 'Moved'})
   const action = plannedAction(node.after)
-  if (node.status === 'added') parts.push((action === 'import' && actionPart(action)) || actionPart('create')!)
+  if (node.status === 'added') parts.push((action === 'import' ? actionPart(action) : undefined) ?? actionPart('create')!)
   else if (node.status === 'removed') parts.push(actionPart('delete')!)
   else if (node.status === 'modified') {
-    parts.push((action && actionPart(action, node.after)) || {status: 'modified', glyph: '~', icon: 'modified', label: 'Modified'})
+    parts.push(
+      (action ? actionPart(action, node.after) : undefined) ?? {status: 'modified', glyph: '~', icon: 'modified', label: 'Modified'},
+    )
   }
   return parts
 }

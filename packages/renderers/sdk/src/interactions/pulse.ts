@@ -25,7 +25,8 @@ export function createPulse(view: Window, root: HTMLElement, elementsOf: (id: st
   let frame = 0
   let timer = 0
   const reducedMotion = () =>
-    document.documentElement.dataset.reducedMotion === 'true' || view.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    document.documentElement.dataset.reducedMotion === 'true' ||
+    ('matchMedia' in view && view.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const stop = () => {
     view.cancelAnimationFrame(frame)
     view.clearTimeout(timer)

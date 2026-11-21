@@ -64,7 +64,7 @@ export function fieldLines(
   if (options.object) {
     const of = (entity: Entity) => {
       const value = entity.data?.[options.object!]
-      return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
+      return typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
     }
     return leafChanges(of(before), of(after), '')
       .filter(change => !exclude.has(change.key.split(/[.[]/)[0]!))

@@ -297,7 +297,7 @@ export function LinkView({
           strokeDasharray={dashed ? '5 3' : undefined}
         />
       </g>
-      {labelled && (link.parameter || link.resolution || link.alias) && (
+      {labelled && (!!link.parameter || link.resolution || link.alias) && (
         <text
           x={(start.x + end.x) / 2}
           y={(start.y + end.y) / 2}

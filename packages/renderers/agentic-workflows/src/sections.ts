@@ -27,7 +27,7 @@ export interface SectionSpec {
 type Data = Record<string, unknown>
 
 const list = (value: unknown): unknown[] => (Array.isArray(value) ? value : [])
-const record = (value: unknown): Data => (value && typeof value === 'object' && !Array.isArray(value) ? (value as Data) : {})
+const record = (value: unknown): Data => (typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Data) : {})
 const text = (value: unknown): string =>
   typeof value === 'string' ? value : value === undefined || value === null ? '' : JSON.stringify(value)
 const code = (value: unknown) => codeSpan(text(value))
@@ -101,7 +101,7 @@ function network(data: Data): Value[] {
 function permissions(data: Data): Value[] {
   const declared = data.permissions
   // `permissions: {}` grants nothing, unlike inheriting GitHub's defaults (no `permissions`).
-  if (declared && typeof declared === 'object' && !Array.isArray(declared) && !Object.keys(declared).length) {
+  if (typeof declared === 'object' && declared !== null && !Array.isArray(declared) && !Object.keys(declared).length) {
     return [{key: 'permissions:none', text: 'none (`permissions: {}`)'}]
   }
   return Object.entries(record(declared))

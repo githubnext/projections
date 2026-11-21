@@ -327,7 +327,7 @@ export function NameLine({children, badges, className}: {children: ReactNode; ba
   return (
     <span className={`pk-name-line${className ? ` ${className}` : ''}`}>
       <span className="pk-name">{children}</span>
-      {badges && <span className="pk-badges">{badges}</span>}
+      {Boolean(badges) && <span className="pk-badges">{badges}</span>}
     </span>
   )
 }

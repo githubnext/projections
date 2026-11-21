@@ -93,7 +93,7 @@ export async function ringFocusFailures(id: string): Promise<string[]> {
   const focusable = '[tabindex]:not([tabindex="-1"]), button:not([disabled]), a[href], input, select, textarea, summary'
   const target = (element.matches(focusable) ? element : element.querySelector(focusable)) as (HTMLElement | SVGElement) | null
   if (!target) return []
-  ;(document.activeElement as HTMLElement | null)?.blur?.()
+  ;(document.activeElement as HTMLElement | null)?.blur()
   await ringNeutral(id)
   target.focus({preventScroll: true, focusVisible: true} as FocusOptions)
   try {

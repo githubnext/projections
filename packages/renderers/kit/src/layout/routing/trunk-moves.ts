@@ -20,7 +20,7 @@ interface Neighbour {
 export function moveTrunksOff(ctx: RoutingContext, all: readonly Segment[], runs: ReadonlyMap<Segment, Run>): void {
   const {along, across} = ctx
   const fixed: Neighbour[] = all
-    .filter(segment => !segment.band && segment.route)
+    .filter(segment => !segment.band && !!segment.route)
     .flatMap(segment =>
       straightRuns(segment.route!)
         .filter(run => Math.abs(along(run.to) - along(run.from)) < 0.01)

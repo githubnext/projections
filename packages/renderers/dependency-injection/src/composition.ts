@@ -50,13 +50,15 @@ export function indexComposition(state: Pick<DependencyInjectionExtraction, 'ent
     } else if (from.kind === 'registration' && to.kind === 'service') {
       aliases.set(from.id, {id: edge.id, to: to.id})
     } else if (from.kind === 'implementation' && to.kind === 'service') {
+      // A link straight from an extractor, before the engine fills in `data`, may have none.
+      const data = edge.data as Partial<typeof edge.data> | undefined
       dependencies.push({
         id: edge.id,
         from: from.id,
         to: to.id,
-        parameter: typeof edge.data?.parameter === 'string' ? edge.data.parameter : undefined,
-        collection: edge.data?.collection === true,
-        optional: edge.data?.optional === true,
+        parameter: typeof data?.parameter === 'string' ? data.parameter : undefined,
+        collection: data?.collection === true,
+        optional: data?.optional === true,
         resolution: edge.kind === 'resolves',
         alias: false,
       })

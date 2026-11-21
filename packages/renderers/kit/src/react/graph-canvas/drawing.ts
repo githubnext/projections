@@ -65,9 +65,10 @@ export function drawing(props: LaidOutGraphProps, diff: boolean, inset: number, 
     const kind = kindOf(entity)?.text
     const was = diff && node.before && node.after && node.before.label !== node.after.label ? `, was ${node.before.label}` : ''
     const lines = props.fields?.get(node.id)
-    const changed = lines?.length
-      ? `, ${lines.map(line => (line.summary ? line.key : `${line.key} ${line.before} to ${line.after}`)).join(', ')}`
-      : ''
+    const changed =
+      lines?.length !== undefined && lines.length > 0
+        ? `, ${lines.map(line => (line.summary ? line.key : `${line.key} ${line.before} to ${line.after}`)).join(', ')}`
+        : ''
     const facts = [props.subtitle?.(entity), props.accent?.(entity)?.label, ...(props.badges?.(entity) ?? []).map(badgeText)].filter(
       Boolean,
     )

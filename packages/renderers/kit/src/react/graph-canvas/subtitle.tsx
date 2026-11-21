@@ -45,7 +45,8 @@ export function subtitleGrowth(
  */
 export function CardSubtitle({node, drawing, baseline}: {node: TransitionNode; drawing: Drawing; baseline: number}) {
   const {props, diff} = drawing
-  if (!props.subtitle || !props.subtitleGrowth?.get(node.id)) return null
+  const growth = props.subtitleGrowth?.get(node.id)
+  if (!props.subtitle || growth === undefined || growth === 0) return null
   const left = -node.width / 2 + cardTextMetrics.inset
   const lines = (entity: Entity | undefined) => subtitleOf(entity, props.subtitle!, node.width, props.textScale)
   const block = (entity: Entity | undefined, opacity: number, key: string) =>

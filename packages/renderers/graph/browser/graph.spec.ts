@@ -138,7 +138,7 @@ test('a graph too small to read fitted opens at the 8 px text floor, keeps one f
       let smallest = Infinity
       for (const text of svg.querySelectorAll<SVGTextContentElement>('text, tspan')) {
         const matrix = text.getScreenCTM()
-        if (matrix && text.textContent?.trim()) {
+        if (matrix && text.textContent.trim()) {
           smallest = Math.min(smallest, parseFloat(getComputedStyle(text).fontSize) * Math.hypot(matrix.a, matrix.b))
         }
       }

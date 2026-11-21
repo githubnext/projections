@@ -120,7 +120,7 @@ export function badgeCardWidth(
   let widest = 0
   for (const row of rows) {
     for (const side of [row.before, row.after]) {
-      for (const value of (side && badges?.(side)) || []) {
+      for (const value of (side ? badges?.(side) : undefined) ?? []) {
         widest = Math.max(widest, cardTextWidth(badgeText(value), badgeStyle(value), textScale) + badgeChrome(value))
       }
     }

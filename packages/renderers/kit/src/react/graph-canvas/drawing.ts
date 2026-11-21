@@ -24,7 +24,7 @@ export type LaidOutGraphProps = GraphCanvasProps & {
   subtitleGrowth: ReadonlyMap<string, number> | undefined
   /**
    * Whether `transition` is the layout of earlier props, drawn while the current ones are laid out: a new scope, say,
-   * whose items the layout may not place yet. The view opens on no focus until its own layout arrives.
+   * whose items the layout may not place yet. The view keeps the focus it opened on until its own layout arrives.
    */
   stale?: boolean
 }

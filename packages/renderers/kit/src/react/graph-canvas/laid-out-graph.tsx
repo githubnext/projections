@@ -2,12 +2,14 @@
 import {useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react'
 import type {CSSProperties, RefObject} from 'react'
 import {entityLabels} from '@githubnext/projections-renderer-sdk/presentation'
+import type {RendererFocus} from '@githubnext/projections-renderer-sdk/protocol'
 import {emphasisInset} from '../../border.js'
 import {graphEntityLimit} from './props.js'
 import {drawing} from './drawing.js'
 import type {LaidOutGraphProps} from './drawing.js'
 import {useFraming, useGraphZoom} from './framing.js'
 import {focusArea} from '../../graph-canvas/focus.js'
+import type {FocusArea} from '../../graph-canvas/focus.js'
 import {boundariesHoldingChanges} from '../../graph-canvas/holds-changes.js'
 import {EntityCard} from './entity-card.js'
 import {GraphFooter} from './graph-footer.js'
@@ -67,15 +69,19 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
     if (edge.shared) setSharedOpen(true)
     else onSelect(edge.id)
   }
-  const request = props.focusRequest
   const shown = props.scope?.shown
-  // A layout drawn while the current props are laid out may hold items the focus no longer names, or more: framing the
-  // focus within it would zoom the old drawing past its fit. It stays fitted until its own layout arrives.
+  // A layout drawn while the current props are laid out may hold items the new focus doesn't name, or more: framing
+  // that focus within it would zoom the old drawing past its fit. Until its own layout arrives, it keeps the focus it
+  // opened on, so its view doesn't move.
   const stale = props.stale === true
+  const opened = useRef<{area: FocusArea | undefined; request: RendererFocus | undefined}>(undefined)
+  const kept = stale ? opened.current : undefined
+  const request = kept ? kept.request : props.focusRequest
   const area = useMemo(
-    () => (stale ? undefined : focusArea(transition, diff, props.model, request, shown)),
-    [stale, transition, diff, props.model, request, shown],
+    () => (kept ? kept.area : focusArea(transition, diff, props.model, request, shown)),
+    [kept, transition, diff, props.model, request, shown],
   )
+  if (!stale) opened.current = {area, request}
   const drawn = nodes.map(node => ({x: node.x - node.width / 2, y: node.y - node.height / 2, width: node.width, height: node.height}))
   const {zoom, scale, borders, keep, top, bottom} = useGraphZoom(
     scroller,

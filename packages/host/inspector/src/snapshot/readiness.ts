@@ -1,4 +1,5 @@
 import type {ExtractionDocument} from '@githubnext/projections-schemas'
+import {paintState} from '@githubnext/projections-host'
 import type {PaneKey, useProjection} from '@githubnext/projections-host'
 import type {SnapshotSettings} from './settings.js'
 
@@ -14,7 +15,7 @@ export interface SnapshotState {
   /** Whether the custom renderer is served (or withheld) for this snapshot. */
   custom: boolean
   notice: string | undefined
-  keys: PaneKey[]
+  /** The shown panes' states. */
   panes: Pane[]
 }
 
@@ -47,17 +48,6 @@ function modeFailure(title: string, {projection, settings}: SnapshotState): stri
   return undefined
 }
 
-/** Whether every pane has painted the progress asked of it. */
-function painted({projection, settings, comparing, keys, panes}: SnapshotState): boolean {
-  const expected = (key: PaneKey): number | undefined =>
-    key === 'before' ? 0 : key === 'after' ? 1 : comparing && projection.mode === 'animated' ? (settings.progress ?? 1) : undefined
-  return keys.every((key, index) => {
-    const rendered = panes[index]!.rendered
-    const target = expected(key)
-    return rendered !== undefined && (target === undefined || Math.abs(rendered - target) < 1e-9)
-  })
-}
-
 /** Whether the snapshot failed (and why), is still waiting for its panes, or has painted what was asked. */
 export function snapshotReadiness(state: SnapshotState): {failure: string} | 'waiting' | 'painted' {
   const {projection, comparing, panes} = state
@@ -71,5 +61,6 @@ export function snapshotReadiness(state: SnapshotState): {failure: string} | 'wa
   if (unavailable) return {failure: unavailable}
   // The renderer's capabilities may still move the stage to its own default mode.
   if (comparing && !projection.availableModes.includes(projection.mode)) return 'waiting'
-  return painted(state) ? 'painted' : 'waiting'
+  // Every shown pane has painted what it was asked, for the document it has now (`paintState`).
+  return paintState(projection) === 'painted' ? 'painted' : 'waiting'
 }

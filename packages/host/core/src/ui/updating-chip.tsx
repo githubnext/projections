@@ -26,11 +26,15 @@ export function UpdatingChip({
   /** Whether the renderer's stage is the view shown (not a built-in table or text view, which keep the last result). */
   rendererShown?: boolean
 }) {
-  // Only once the job has run a moment, then for at least a moment, as every host's running indicator.
-  const shown = useRunningIndicator(running)
-  // A renderer pane still loading says what runs in its own status, where it is shown.
-  if (!shown || (rendererShown && p.rendererStatus === 'loading')) return null
-  return <Chip reducedMotion={p.reducedMotion} />
+  // A renderer pane still loading says what runs in its own status, where it is shown. The indicator's latch lives
+  // only while the chip could show, so time hidden behind that status doesn't count toward the time it stays shown.
+  if (rendererShown && p.rendererStatus === 'loading') return null
+  return <LatchedChip running={running} reducedMotion={p.reducedMotion} />
+}
+
+/** The chip once the job has run a moment, then for at least a moment, as every host's running indicator. */
+function LatchedChip({running, reducedMotion}: {running: 'extracting' | 'comparing' | null | undefined; reducedMotion: boolean}) {
+  return useRunningIndicator(running) ? <Chip reducedMotion={reducedMotion} /> : null
 }
 
 function Chip({reducedMotion}: {reducedMotion: boolean}) {

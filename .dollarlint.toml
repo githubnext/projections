@@ -53,9 +53,10 @@ path = "packages/schemas/schemas/"
 
 [schemas.fetch]
 # Every remote schema the repository uses: SchemaStore (package.json, tsconfig.json, Cargo.toml, workflows, actions and
-# other tool configs), shadcn (the vendored registry items in packages/host/core/src/ui/components/upstream) and
-# json-schema.org (the 2020-12 meta-schema our own schemas declare).
-allowedDomains = ["*.schemastore.org", "ui.shadcn.com", "json-schema.org"]
+# other tool configs), shadcn (the vendored registry items in packages/host/core/src/ui/components/upstream),
+# cargo-nextest (.config/nextest.toml, whose schema SchemaStore's catalog points at nexte.st) and json-schema.org (the
+# 2020-12 meta-schema our own schemas declare).
+allowedDomains = ["*.schemastore.org", "ui.shadcn.com", "nexte.st", "json-schema.org"]
 
 # Extractions: renderer fixtures and scenarios, comparator fixtures, and extractor goldens.
 [[schemas.associations]]

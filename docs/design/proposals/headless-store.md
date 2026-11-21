@@ -111,8 +111,17 @@ them:
    readiness. #122's events depend on every shown pane, so they stay derived
    from `rendererStatus` and `paint` until the store composes the panes (step
    4), where they become its effects, with the same names.
-3. **Playback in the store.** `playbackLifecycle` is driven by `createActor`
-   inside the store, and `usePlaybackControl` goes.
+3. **Playback without React.** `createPlaybackController`
+   (`projection/playback-controller.ts`) drives `playbackLifecycle` with
+   `createActor`: the frame loop runs on an injectable scheduler
+   (`requestAnimationFrame` by default), the position and playing requests go to
+   a host, and `show` sends the `*Shown` events from what the view shows. Like
+   the actor, it does nothing until `start()`. `usePlaybackControl` keeps only
+   React's part: it creates the controller once, starts it in a layout effect
+   and calls `show` after every render. The store composes the controller in
+   step 5, with the settings store as its host. Node tests cover playing,
+   pausing, seeking, a new subject and a declined play with a hand-stepped
+   scheduler.
 4. **Selectors and selection.** Rows, scope, summary, payloads and selection
    move into the store; the remaining per-concern hooks go.
 5. **The adapter.** `createProjection` is exported, `useProjection` becomes

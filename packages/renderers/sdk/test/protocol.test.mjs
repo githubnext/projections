@@ -16,6 +16,7 @@ import {
   rendererLimits,
 } from '../dist/protocol.js'
 import {RendererConnectionError, connectRenderer} from '../dist/client.js'
+import {dispatch} from '../dist/client/host-messages.js'
 import {refusal} from '../dist/react.js'
 
 const channel = 'abcdefghijklmnop0123'
@@ -262,6 +263,10 @@ test('parseHostMessage validates structure and envelope', () => {
       sizing,
     })
   assert.equal(parseHostMessage(envelope({type: 'environment', ...environment, sizing: 'auto'}), channel), undefined)
+  // The renderer's handler receives it too, so a content-sized frame stays one after a later environment.
+  let handled
+  dispatch({environment: message => (handled = message)}, {type: 'environment', ...environment, sizing: 'content'})
+  assert.equal(handled.sizing, 'content')
   const sized = {
     type: 'init',
     mode: 'extraction',

@@ -246,3 +246,7 @@ schema = "./packages/schemas/internal/comparator-golden.json"
 [[schemas.associations]]
 file = "packages/schemas/fixtures/conformance.json"
 schema = "./packages/schemas/internal/conformance.json"
+
+[[schemas.associations]]
+file = "packages/schemas/fixtures/extractor-helpers.json"
+schema = "./packages/schemas/internal/extractor-helpers.json"

@@ -79,3 +79,35 @@ export const ConformanceSchema = Closed({
     }),
   ),
 })
+
+/**
+ * `packages/schemas/fixtures/extractor-helpers.json`: the cases the Python and Node extractor helpers must agree on.
+ * Each reads `stdin` (deliberately any JSON, valid requests or not) or `stdinText`, then reads `accessors` or calls
+ * result() with `result`, and expects `expected`, an `error` or a message starting with `errorStartsWith`.
+ */
+export const ExtractorHelpersSchema = Closed({
+  version: Type.Literal(0),
+  description: Text,
+  cases: Type.Array(
+    Type.Intersect(
+      [
+        Type.Object({id: Id}),
+        Type.Union([
+          Type.Object({stdin: Type.Unknown()}, {required: ['stdin']}),
+          Type.Object({stdinText: Type.String()}, {required: ['stdinText']}),
+        ]),
+        Type.Union([
+          Type.Object({accessors: Type.Array(Type.String({pattern: '^[a-zA-Z][a-zA-Z0-9]*$'}), {minItems: 1})}),
+          Type.Object({result: Type.Unknown()}, {required: ['result']}),
+        ]),
+        Type.Union([
+          Type.Object({expected: Type.Unknown()}, {required: ['expected']}),
+          Type.Object({error: Text}),
+          Type.Object({errorStartsWith: Text}),
+        ]),
+      ],
+      {unevaluatedProperties: false},
+    ),
+    {minItems: 1},
+  ),
+})

@@ -57,6 +57,12 @@ export const repositorySchemas: RepositorySchema[] = [
     files: 'packages/schemas/fixtures/conformance.json',
     schema: fixtures.ConformanceSchema,
   },
+  {
+    name: 'extractor-helpers',
+    title: 'Extractor helper cases',
+    files: 'packages/schemas/fixtures/extractor-helpers.json',
+    schema: fixtures.ExtractorHelpersSchema,
+  },
 ]
 
 /** `schema` as an internal JSON Schema document. */

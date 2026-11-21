@@ -257,7 +257,9 @@ script compiles, and renderers under the harness's `testDir`.
 `npm run tools -- ci explain [files]` explains a plan: each file's class and
 rule, how each unit was reached, and each job and suite with its `when` traced.
 The `changes` job uploads the plan as the `ci-plan` artifact, and
-[what CI runs for what](docs/maintainers/ci-plan.md) lists each case's plan.
+[what CI runs for what](docs/maintainers/ci-plan.md) lists each case's plan. On
+`main`, `ci-miss` reports each failed job the merged pull request's plan skipped
+that passed on the parent commit: a likely gap in the rules. It only reports.
 
 To change what runs, edit the rules, run `npm run tools -- ci replay` (how
 recent pull requests' plans change, in runner-minutes), and add a case to

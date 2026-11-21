@@ -236,7 +236,9 @@ text no longer occurs in its module.
 
 CI runs the `verus` job in parallel with the main job (`.github/actions/verus`):
 a checkout, the cached release and the pinned toolchain, with no npm install and
-no workspace build. Make it a required check in branch protection.
+no workspace build. It runs when a change reaches the Engine's crates, on every
+push to `main` and nightly; `ci-ok`, the required check, fails when it does
+([what CI runs](../../CONTRIBUTING.md#what-ci-runs)).
 
 ## Measurements
 

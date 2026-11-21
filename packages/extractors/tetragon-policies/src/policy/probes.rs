@@ -68,12 +68,13 @@ impl Policy<'_> {
         match family {
             "kprobe" | "fentry" => {
                 let call = text(item.get("call"), &format!("{path}.call"))?;
-                let syscall = flag(item.get("syscall"), true);
+                let syscall = flag(item.get("syscall"), true, &format!("{path}.syscall"))?;
+                let returns = flag(item.get("return"), false, &format!("{path}.return"))?;
                 for (target, via) in self.expand(call)? {
                     let mut data = base.clone();
                     data["target"] = json!(target);
                     data["syscall"] = json!(syscall);
-                    data["return"] = json!(flag(item.get("return"), false));
+                    data["return"] = json!(returns);
                     if let Some(via) = &via {
                         data["viaList"] = json!(via);
                     }
@@ -96,7 +97,7 @@ impl Policy<'_> {
                 let subsystem = text(item.get("subsystem"), &format!("{path}.subsystem"))?;
                 let event = text(item.get("event"), &format!("{path}.event"))?;
                 let target = format!("{subsystem}/{event}");
-                let raw = flag(item.get("raw"), false);
+                let raw = flag(item.get("raw"), false, &format!("{path}.raw"))?;
                 let mut data = base;
                 data["target"] = json!(target);
                 data["raw"] = json!(raw);
@@ -122,6 +123,7 @@ impl Policy<'_> {
             }
             "uprobe" => {
                 let binary = text(item.get("path"), &format!("{path}.path"))?;
+                let returns = flag(item.get("return"), false, &format!("{path}.return"))?;
                 let mut targets: Vec<String> = scalars(item.get("symbols"), &format!("{path}.symbols"))?;
                 for (field, prefix) in [("offsets", "+"), ("addrs", "@")] {
                     for value in scalars(item.get(field), &format!("{path}.{field}"))? {
@@ -140,7 +142,7 @@ impl Policy<'_> {
                     let mut data = base.clone();
                     data["target"] = json!(target);
                     data["binary"] = json!(binary);
-                    data["return"] = json!(flag(item.get("return"), false));
+                    data["return"] = json!(returns);
                     probes.push(Probe {
                         hook: key(&["hook", family, &target]),
                         hook_label: target.clone(),

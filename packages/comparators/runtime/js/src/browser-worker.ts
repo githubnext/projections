@@ -2,7 +2,12 @@ import {runInWorker} from './host.js'
 import type {ExecuteRequest} from './execute.js'
 
 /** Runs one request in a fresh module Web Worker, terminated at the deadline. */
-export function run(request: ExecuteRequest, deadlineMs: number, workerUrl: URL | string | undefined): Promise<unknown> {
+export function run(
+  request: ExecuteRequest,
+  deadlineMs: number,
+  workerUrl: URL | string | undefined,
+  signal?: AbortSignal,
+): Promise<unknown> {
   return runInWorker(
     events => {
       const worker = new Worker(workerUrl ?? new URL('./worker-entry.js', import.meta.url), {type: 'module'})
@@ -19,5 +24,6 @@ export function run(request: ExecuteRequest, deadlineMs: number, workerUrl: URL 
     },
     request,
     deadlineMs,
+    signal,
   )
 }

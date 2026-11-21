@@ -6,7 +6,7 @@
  * comparator file is checked once per content.
  * Portable: no Node or DOM-only APIs.
  */
-import {ComparatorRuntimeError, RULES_INSPECT_EXPORT, errors, limits} from './abi.js'
+import {ComparatorRuntimeError, RULES_INSPECT_EXPORT, abortable, cancelled, errors, limits} from './abi.js'
 import {encodeInput} from './input.js'
 import {inspectModule} from './module-check/inspect.js'
 import type {ExecuteRequest} from './execute.js'
@@ -168,28 +168,57 @@ export function diagnostic(value: unknown): RulesDiagnostic {
  * load-time checks and returns the comparator digest, cached per rules
  * content; `compare` runs one comparison.
  */
-export interface RulesRuntime {
-  check(rules: Uint8Array): Promise<CheckedRules>
-  compare(rules: Uint8Array, input: unknown): Promise<unknown>
+/**
+ * Per call: `signal` cancels the check or comparison, which then stops its Worker or runner process and rejects with
+ * `cancelled`, so a caller with an overall deadline (`AbortSignal.timeout`) never leaves one running past it.
+ */
+export interface RulesCallOptions {
+  signal?: AbortSignal
 }
 
-/** Caches `check` per rules content, so a host checks each rules file once. */
+/** Checks and runs comparator files sandboxed, each call in its own Worker or runner process; see `RulesCallOptions`. */
+export interface RulesRuntime {
+  check(rules: Uint8Array, options?: RulesCallOptions): Promise<CheckedRules>
+  compare(rules: Uint8Array, input: unknown, options?: RulesCallOptions): Promise<unknown>
+}
+
+/**
+ * Caches `check` per rules content, so a host checks each rules file once. A check that succeeded is shared by every
+ * caller; one still running is shared only by callers without a signal. A caller with a signal runs its own check,
+ * which its signal alone can cancel, and shares the result once it succeeds, so cancelling one caller never fails
+ * another. An aborted signal is rejected before anything is looked up or run.
+ */
 export function cachedChecks(
-  check: (rules: Uint8Array) => Promise<CheckedRules>,
+  check: (rules: Uint8Array, options?: RulesCallOptions) => Promise<CheckedRules>,
   capacity = 64,
-): (rules: Uint8Array) => Promise<CheckedRules> {
+): (rules: Uint8Array, options?: RulesCallOptions) => Promise<CheckedRules> {
   const cache = new Map<string, Promise<CheckedRules>>()
-  return async rules => {
-    const key = await sha256(rules)
-    let checked = cache.get(key)
-    if (checked) {
-      cache.delete(key)
-    } else {
-      checked = check(rules)
-      checked.catch(() => cache.delete(key))
-    }
+  const succeeded = new WeakSet<Promise<CheckedRules>>()
+  const remember = (key: string, checked: Promise<CheckedRules>) => {
+    cache.delete(key)
     cache.set(key, checked)
     while (cache.size > capacity) cache.delete(cache.keys().next().value!)
+  }
+  return async (rules, options) => {
+    const signal = options?.signal
+    if (signal?.aborted) throw cancelled(signal)
+    const key = await sha256(rules)
+    const cached = cache.get(key)
+    if (cached && (!signal || succeeded.has(cached))) {
+      remember(key, cached)
+      return abortable(cached, signal)
+    }
+    const checked = check(rules, signal ? {signal} : {})
+    if (!signal) remember(key, checked)
+    checked.then(
+      () => {
+        succeeded.add(checked)
+        if (signal && !cache.has(key)) remember(key, checked)
+      },
+      () => {
+        if (cache.get(key) === checked) cache.delete(key)
+      },
+    )
     return checked
   }
 }

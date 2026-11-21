@@ -1,4 +1,4 @@
-import {ComparatorRuntimeError, PAGE_BYTES, errors, limits} from './abi.js'
+import {ComparatorRuntimeError, PAGE_BYTES, cancelled, errors, limits} from './abi.js'
 import {encodeInput} from './input.js'
 import {inspectModule} from './module-check/inspect.js'
 import type {ExecuteRequest, ExecuteResult} from './execute.js'
@@ -84,14 +84,22 @@ export interface WorkerEvents {
 }
 
 /** Runs one request in a fresh worker, terminating it on completion, failure or deadline. */
-export function runInWorker(spawn: (events: WorkerEvents) => WorkerHandle, request: ExecuteRequest, deadlineMs: number): Promise<unknown> {
+export function runInWorker(
+  spawn: (events: WorkerEvents) => WorkerHandle,
+  request: ExecuteRequest,
+  deadlineMs: number,
+  signal?: AbortSignal,
+): Promise<unknown> {
   return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(cancelled(signal))
     let settled = false
     let worker: WorkerHandle | undefined
+    const abort = () => finish(cancelled(signal!))
     const finish = (error: ComparatorRuntimeError | undefined, value?: unknown) => {
       if (settled) return
       settled = true
       clearTimeout(timer)
+      signal?.removeEventListener('abort', abort)
       worker?.terminate()
       if (error) reject(error)
       else resolve(value)
@@ -100,6 +108,7 @@ export function runInWorker(spawn: (events: WorkerEvents) => WorkerHandle, reque
       () => finish(new ComparatorRuntimeError('deadline', `comparator exceeded its ${deadlineMs} ms deadline`)),
       deadlineMs,
     )
+    signal?.addEventListener('abort', abort, {once: true})
     try {
       worker = spawn({
         message(data) {

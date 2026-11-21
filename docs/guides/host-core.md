@@ -200,6 +200,17 @@ provides the headless pair picker. It returns:
   `presentation` defaults.
 - Actions: `setBefore`, `setAfter`, `swap`, and `retry`.
 
+`useComparisonSession(options)` keeps what the person chooses while they move
+between pairs: the mode, the swipe divider, highlighting, the scope, find, the
+connector and loop. A pair picker's view remounts for each new comparison, so
+call it above the view, with `presentation: pair.presentation`, and spread its
+result (controlled values with their handlers) into `useProjection` or a view.
+Each setting starts from its `initial…` option, else the definition's
+`presentation`, else the shared default: the renderer's default mode, the
+divider centred, animated highlighting, **the Changes scope**
+(`initialChangesOnly` changes it), no find, no connector and loop on
+(`comparisonSessionDefaults`). Each is also controllable, with its `on…Change`.
+
 Comparisons run in the browser using the projection's comparator, with failures
 surfaced explicitly. Companion helpers (`subjectRows`, `rowItems`,
 `describeChange`, `rowStatusCounts`) feed table, text, and detail views.

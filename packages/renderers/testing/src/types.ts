@@ -2,11 +2,13 @@ import type {DefaultComparatorOptions, Comparison, Extraction} from '@githubnext
 import type {
   ColorMode,
   ComparisonMode,
+  FilterPayload,
   RendererCapabilities,
   RendererControl,
   RendererLegend,
   SummaryItem,
   RendererOptions,
+  RendererFocus,
   RendererProjection,
 } from '@githubnext/projections-renderer-sdk/protocol'
 
@@ -38,6 +40,8 @@ export interface StageLoad {
   direction?: 1 | -1
   highlighting?: StageHighlighting
   selection?: string | null
+  /** The host's focus for the opening view, sent in `init` (`RendererFocus`). */
+  focus?: RendererFocus
   options?: RendererOptions
   colorMode?: ColorMode
   reducedMotion?: boolean
@@ -385,6 +389,9 @@ export interface StageApi {
   action(id: string): void
   /** Host-side hover, as another pane or the host's table would send it. */
   hover(id: string | null): void
+  /** The host's scope, summary filter and find (a `filter` message), as a host sends it once the person, or its own
+   * default, chooses them. */
+  filter(payload: FilterPayload): void
   setEnvironment(environment: StageEnvironment): void
   /** Resizes the frame; `null` restores the page width. Resolves once the renderer has painted again. */
   setWidth(width: number | null): Promise<void>

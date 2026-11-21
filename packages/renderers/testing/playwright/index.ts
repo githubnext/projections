@@ -9,7 +9,7 @@ import {basename, dirname, join, resolve} from 'node:path'
 import {expect, test as base} from '@playwright/test'
 import type {FrameLocator, Locator, Page} from '@playwright/test'
 import type {DefaultComparatorOptions, Comparison, Extraction} from '@githubnext/projections-schemas'
-import type {RendererOptions} from '@githubnext/projections-renderer-sdk/protocol'
+import type {FilterPayload, RendererOptions} from '@githubnext/projections-renderer-sdk/protocol'
 import type {FixturesInspector, InspectorOptions} from './server.js'
 import {startInspector} from './server.js'
 import type {
@@ -96,6 +96,8 @@ export interface StageHandle {
   action(id: string): Promise<void>
   /** Host-side hover, as another pane or the host's table would send it. */
   hover(id: string | null): Promise<void>
+  /** The host's scope, summary filter and find (a `filter` message). */
+  filter(payload: FilterPayload): Promise<void>
   setEnvironment(environment: StageEnvironment): Promise<void>
   /** Resizes the frame (`null`: the page width) and resolves once the renderer has painted again. */
   setWidth(width: number | null): Promise<void>
@@ -127,6 +129,7 @@ function handle(page: Page, subject: StageSubject): StageHandle {
     setOptions: options => page.evaluate(options => window.projectionsStage.setOptions(options), options),
     action: id => page.evaluate(id => window.projectionsStage.action(id), id),
     hover: id => page.evaluate(id => window.projectionsStage.hover(id), id),
+    filter: payload => page.evaluate(payload => window.projectionsStage.filter(payload), payload),
     setEnvironment: environment => page.evaluate(environment => window.projectionsStage.setEnvironment(environment), environment),
     setWidth: width => page.evaluate(width => window.projectionsStage.setWidth(width), width),
     measure: <T>(call: ProbeCall, args?: unknown) =>

@@ -1,5 +1,6 @@
 import {RendererFrame, isControlValue} from '@githubnext/projections-host'
 import type {
+  FilterPayload,
   InitPayload,
   ProgressPayload,
   RendererDocuments,
@@ -256,6 +257,10 @@ export class Stage {
 
   hover(id: string | null): void {
     this.frame?.hover(id)
+  }
+
+  filter(payload: FilterPayload): void {
+    this.frame?.filter(payload)
   }
 
   setEnvironment(next: StageEnvironment): void {

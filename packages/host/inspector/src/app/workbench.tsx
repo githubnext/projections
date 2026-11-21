@@ -9,26 +9,35 @@ import {repositoryKey} from './definitions.js'
 
 /**
  * A bare view (`chrome` `none` or `viewer`): the host's banner line, then the view, edge to edge: an editor tab's
- * frame is the editor, and the viewer's page lays its flat chrome under its header.
+ * frame is the editor, and the viewer's page lays its flat chrome under its header, after its pane (`aside`) if any.
  */
 export function BareFrame({
   colorMode,
   viewer,
   mode,
   banner,
+  aside,
   children,
 }: {
   colorMode: 'light' | 'dark'
   viewer: boolean
   mode: 'repository' | 'offline'
   banner: ReactNode
+  aside?: ReactNode
   children: ReactNode
 }) {
   return (
     <ScopedRoot colorMode={colorMode} className={cn('pi pi-bare', viewer && 'pi-viewer')} data-mode={mode}>
       <div className="pi-frame pj:flex pj:h-dvh pj:w-full pj:flex-col pj:overflow-hidden pj:bg-background pj:text-foreground">
         {banner}
-        {viewer ? <div className="pi-viewer-body pj:flex pj:min-h-0 pj:min-w-0 pj:flex-1 pj:flex-col">{children}</div> : children}
+        {viewer ? (
+          <div className="pi-viewer-main pj:flex pj:min-h-0 pj:min-w-0 pj:flex-1">
+            {aside}
+            <div className="pi-viewer-body pj:flex pj:min-h-0 pj:min-w-0 pj:flex-1 pj:flex-col">{children}</div>
+          </div>
+        ) : (
+          children
+        )}
       </div>
     </ScopedRoot>
   )

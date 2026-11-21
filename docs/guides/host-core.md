@@ -164,6 +164,22 @@ static under reduced motion (`reducedMotion`, for example the controller's, or
 `--pj-loading-color` and `--pj-loading-font-size` restyle it. The default UI
 re-exports it.
 
+`ProjectionsPane({items, current, onChoose?, onClose, label?, autoFocus?, footer?})`
+is a surface's projection list as a durable pane, for a surface that offers "Pin
+projections pane" at the end of its projection menu: a `nav` landmark (`label`,
+"Projections") `paneWidth` (240 px) wide with its own edge at its end, a header
+`paneHeaderHeight` tall (the toolbar's row) with a close button that returns to
+the menu, and each projection (`{id, title, detail?, status?}`) as a button, the
+`current` one marked `aria-current="page"`. `autoFocus` moves focus to it when
+the person pins it or when it turns on later (the pane returning in place of a
+focused menu), not on a reload. It comes from `/ui`; its state is headless, from
+the package root, so a custom UI can draw its own pane: `usePinnedPane(key)`
+keeps the pinned state in `localStorage`, one key per surface, and
+`usePaneRoom(element?)` says whether the surface (or `element`) is at least
+`paneMinWidth` (900 px) wide, with hysteresis. Offer the pane only with more
+than one projection and room for it, and fall back to the menu otherwise. The
+viewer page and the Copilot canvas use it.
+
 `useComparisonPair({extractions, engine, renderers, loadComparator?, runComparator?, customRenderer?})`
 is the headless pair picker. It returns:
 

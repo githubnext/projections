@@ -122,6 +122,8 @@ export interface MountInspectorOptions {
   chrome?: InspectorAppProps['chrome']
   /** A line above the projection in a bare view (see `InspectorAppProps.banner`), such as the viewer's header. */
   banner?: InspectorAppProps['banner']
+  /** The viewer's pane beside the projection (see `InspectorAppProps.aside`): its pinned projections pane. */
+  aside?: InspectorAppProps['aside']
   /** What a one-revision view shows, at its toolbar's start (see `InspectorAppProps.toolbarStart`), such as the viewer's. */
   toolbarStart?: InspectorAppProps['toolbarStart']
   /** The stage's utility area in a bare view (see `InspectorAppProps.utilityArea`), such as the viewer's. */
@@ -307,6 +309,7 @@ export function mountInspector(element: HTMLElement, options: MountInspectorOpti
           {...(options.loadingStatus ? {loadingStatus: options.loadingStatus} : {})}
           {...(options.chrome ? {chrome: options.chrome} : {})}
           {...(options.banner ? {banner: options.banner} : {})}
+          {...(options.aside ? {aside: options.aside} : {})}
           {...(options.toolbarStart ? {toolbarStart: options.toolbarStart} : {})}
           {...(options.utilityArea ? {utilityArea: options.utilityArea} : {})}
           {...(options.refresh ? {refresh: options.refresh} : {})}

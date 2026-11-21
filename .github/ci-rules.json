@@ -35,6 +35,13 @@
       "effect": "docs"
     },
     {
+      "description": "Markdown a crate embeds or a generator reads or writes (help text, agent prompts, reference and built-in pages): the Linux checks, which run every crate's tests and generator's check, and not the jobs for what embeds it",
+      "paths": ["**/*.md"],
+      "except": ["**/fixtures/**", "**/test/**", "**/tests/**", "**/templates/**", "**/snapshots/**", "**/golden/**", "**/vendor/**"],
+      "read": true,
+      "effect": "checks"
+    },
+    {
       "description": "A file in a workspace or crate is that workspace's or crate's change",
       "owned": true,
       "effect": "owner"
@@ -81,12 +88,20 @@
     "release": {
       "description": "The release configuration dist reads",
       "paths": ["dist-workspace.toml", ".github/release-build-setup.yml", "**/Cargo.toml"]
+    },
+    "os-specific": {
+      "description": "Rust, the GitHub Action and the CLI's packaging scripts: what macOS checks beyond Linux",
+      "paths": ["**/*.rs", "**/Cargo.toml", "**/Cargo.lock", "rust-toolchain.toml", "action.yml", "packages/cli/scripts/**"]
     }
   },
   "groups": {
     "crates": {
       "description": "Every Cargo crate",
-      "include": [{"kind": "crate"}]
+      "include": [
+        {
+          "kind": "crate"
+        }
+      ]
     },
     "engine": {
       "description": "The core Engine and the crate Verus proves",
@@ -94,7 +109,11 @@
     },
     "coverage": {
       "description": "The crates whose coverage thresholds `npm run test:rust:coverage` enforces",
-      "include": [{"facts": "coverage"}]
+      "include": [
+        {
+          "facts": "coverage"
+        }
+      ]
     },
     "browser-only": {
       "description": "Workspaces whose code runs only in a browser",
@@ -124,44 +143,117 @@
     },
     "harness-renderers": {
       "description": "The built-in renderers the renderer harness tests",
-      "include": [{"facts": "harnessRenderers"}]
+      "include": [
+        {
+          "facts": "harnessRenderers"
+        }
+      ]
     },
     "cli-served": {
       "description": "What the CLI serves or runs, but one built-in renderer or an extractor",
       "include": ["**"],
       "exclude": ["@extractors", "@harness-renderers"]
+    },
+    "inspector": {
+      "description": "The Inspector, whose stage the renderer harness draws every renderer in",
+      "include": ["packages/host/inspector"]
     }
   },
   "conditions": {
     "rust": {
       "description": "Rust: a Rust source, manifest, lockfile or toolchain, or any file of a crate",
       "when": {
-        "any": ["full", {"changes": ["**/*.rs", "**/Cargo.toml", "**/Cargo.lock", "rust-toolchain.toml"]}, {"changed": "crates"}]
+        "any": [
+          "full",
+          {
+            "changes": ["**/*.rs", "**/Cargo.toml", "**/Cargo.lock", "rust-toolchain.toml"]
+          },
+          {
+            "changed": "crates"
+          }
+        ]
       }
     },
     "engine": {
       "description": "The Engine's crates",
-      "when": {"any": ["full", {"changed": "engine"}]}
+      "when": {
+        "any": [
+          "full",
+          {
+            "changed": "engine"
+          }
+        ]
+      }
     },
     "action": {
       "description": "The GitHub Action",
-      "when": {"any": ["full", {"tag": "action"}]}
+      "when": {
+        "any": [
+          "full",
+          {
+            "tag": "action"
+          }
+        ]
+      }
     },
     "platform": {
-      "description": "Code whose result can differ by operating system: Rust, the GitHub Action, or a workspace or crate with code outside a browser",
-      "when": {"any": ["full", {"if": "rust"}, {"if": "action"}, {"changed": "not-browser-only"}]}
+      "description": "Code that runs outside a browser: Rust, the GitHub Action, or a workspace or crate with code outside a browser",
+      "when": {
+        "any": [
+          "full",
+          {
+            "if": "rust"
+          },
+          {
+            "if": "action"
+          },
+          {
+            "changed": "not-browser-only"
+          }
+        ]
+      }
     },
     "release": {
       "description": "The release configuration, or the release workflow dist generates",
-      "when": {"any": ["full", {"tag": "release"}, {"generator": "release-workflow"}]}
+      "when": {
+        "any": [
+          "full",
+          {
+            "tag": "release"
+          },
+          {
+            "generator": "release-workflow"
+          }
+        ]
+      }
     },
     "cli": {
       "description": "The CLI, or what it depends on",
-      "when": {"any": ["full", {"reaches": "cli"}]}
+      "when": {
+        "any": [
+          "full",
+          {
+            "reaches": "cli"
+          }
+        ]
+      }
     },
     "workflows": {
       "description": "CI's workflows or composite actions",
-      "when": {"changes": [".github/workflows/**", ".github/actions/**"]}
+      "when": {
+        "changes": [".github/workflows/**", ".github/actions/**"]
+      }
+    },
+    "os-specific": {
+      "description": "Rust, the GitHub Action or the CLI's packaging scripts",
+      "when": {
+        "any": [
+          "full",
+          {
+            "tag": "os-specific"
+          }
+        ]
+      }
     }
   },
   "jobs": {
@@ -175,46 +267,93 @@
         {
           "value": "ubuntu-latest",
           "description": "Every change but documentation alone",
-          "when": {"not": "docsOnly"}
+          "when": {
+            "not": "docsOnly"
+          }
         },
         {
           "value": "macos-latest",
-          "description": "Code whose result can differ by operating system",
-          "when": {"if": "platform"}
+          "description": "Rust, the GitHub Action or the CLI's packaging scripts",
+          "when": {
+            "if": "os-specific"
+          }
         }
       ]
     },
     "verus": {
       "description": "Verus proofs of the Engine's verified crate",
-      "when": {"if": "engine"}
+      "when": {
+        "if": "engine"
+      }
     },
     "windows": {
       "description": "The Rust suites on Windows",
-      "when": {"if": "rust"}
+      "when": {
+        "if": "rust"
+      }
     },
     "windows-node": {
       "description": "The Node suites and file-system checks on Windows",
-      "when": {"if": "platform"}
+      "when": {
+        "if": "platform"
+      }
     },
     "windows-integration": {
       "description": "The CLI's browser suite, a renderer smoke test, the VS Code extension and the GitHub Action on Windows",
-      "when": {"if": "platform"}
+      "when": {
+        "if": "platform"
+      }
     },
     "package": {
       "description": "@githubnext/projections as published, with a scaffolded renderer the CLI checks in the Inspector: the SDK, Rust, or the CLI and what it serves",
-      "when": {"any": ["full", {"if": "rust"}, {"reaches": "sdk"}, {"reaches": "cli", "from": "cli-served"}]}
+      "when": {
+        "any": [
+          "full",
+          {
+            "if": "rust"
+          },
+          {
+            "reaches": "sdk"
+          },
+          {
+            "reaches": "cli",
+            "from": "cli-served"
+          }
+        ]
+      }
     },
     "release-config": {
       "description": "The release workflow matches dist-workspace.toml, and dist plans the release",
-      "when": {"if": "release"}
+      "when": {
+        "if": "release"
+      }
     },
     "coverage": {
       "description": "The Engine's and default comparator's coverage thresholds",
-      "when": {"any": ["full", {"changed": "coverage"}, {"reaches": "coverage"}]}
+      "when": {
+        "any": [
+          "full",
+          {
+            "changed": "coverage"
+          },
+          {
+            "reaches": "coverage"
+          }
+        ]
+      }
     },
     "mutants-diff": {
       "description": "Mutation testing of the changed files .cargo/mutants.toml examines",
-      "when": {"any": ["full", {"changes": {"facts": "mutants"}}]}
+      "when": {
+        "any": [
+          "full",
+          {
+            "changes": {
+              "facts": "mutants"
+            }
+          }
+        ]
+      }
     },
     "actions-lock": {
       "description": "The workflow dependency lockfile verifies upstream",
@@ -225,7 +364,9 @@
     "description": "The browser suites: each workspace with a test:browser script. Those with shards run in their own jobs; every other affected suite runs in `browser (rest)`.",
     "default": {
       "description": "A suite runs when the change reaches it or a workspace its test:browser script builds",
-      "when": {"any": ["full", "reachesSuite"]}
+      "when": {
+        "any": ["full", "reachesSuite"]
+      }
     },
     "suites": {
       "packages/host/core": {
@@ -237,23 +378,55 @@
         "shards": 3
       },
       "packages/renderers/harness": {
-        "description": "Every built-in renderer in the real host frame, against the CLI's backend in fixtures mode, which runs no extractor. Shards are by measured time: about 64, 72, 40 and 70 test-minutes per project on two workers. macOS runs WebKit, the platform Safari runs on.",
-        "when": {"any": ["full", "reachesSuite", {"reaches": "cli", "from": "not-extractors"}]},
-        "shards": {"chromium-desktop": 3, "webkit-desktop": 4, "chromium-mobile": 2, "webkit-mobile": 3},
-        "macos": {"webkit-desktop": 2},
+        "description": "Every built-in renderer in the Inspector's stage. It runs for what it tests (renderers, kit, SDK and protocol, schemas, Engine) and the Inspector and host it draws in, not for the CLI's backend. Shards follow measured time (about 64, 72, 40 and 70 test-minutes per project); macOS runs WebKit, as Safari.",
+        "shards": {
+          "chromium-desktop": 3,
+          "webkit-desktop": 4,
+          "chromium-mobile": 2,
+          "webkit-mobile": 3
+        },
+        "macos": {
+          "webkit-desktop": 2
+        },
         "narrow": {
           "description": "A change to some built-in renderers alone leaves the other renderers' tests out (--grep-invert)",
           "group": "harness-renderers"
+        },
+        "when": {
+          "any": [
+            "full",
+            "reachesSuite",
+            {
+              "reaches": "inspector"
+            }
+          ]
         }
       },
       "packages/host/inspector": {
         "description": "The Inspector, against the CLI's backend, exploring and extracting from repositories",
-        "when": {"any": ["full", "reachesSuite", {"reaches": "cli"}]},
+        "when": {
+          "any": [
+            "full",
+            "reachesSuite",
+            {
+              "reaches": "cli"
+            }
+          ]
+        },
         "shards": 2
       },
       "examples/renderers/minimal": {
         "description": "The minimal example renderer, against the CLI's backend in fixtures mode",
-        "when": {"any": ["full", "reachesSuite", {"reaches": "cli", "from": "not-extractors"}]}
+        "when": {
+          "any": [
+            "full",
+            "reachesSuite",
+            {
+              "reaches": "cli",
+              "from": "not-extractors"
+            }
+          ]
+        }
       }
     }
   }

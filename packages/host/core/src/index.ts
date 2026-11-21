@@ -208,6 +208,7 @@ export {
 export type {SummaryCount, SummaryDelta, ViewScope} from '@githubnext/projections-renderer-sdk/presentation'
 export {useFullscreen} from './fullscreen.js'
 export type {FullscreenState} from './fullscreen.js'
+export {paneMinWidth, usePaneRoom, usePinnedPane} from './projections-pane.js'
 export {
   hasSettingsModel,
   highlightingChoices,

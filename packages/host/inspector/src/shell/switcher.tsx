@@ -1,7 +1,8 @@
 import {useEffect, useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
 import type {ReactNode, RefObject} from 'react'
+import {activeOption, stepOption} from './switcher-index.js'
 import {Button, ScopedRoot, ToolbarButton, cn} from '@githubnext/projections-host/ui/components'
-import {Check, ChevronDown, CircleAlert, CircleCheck, LoaderCircle, Search, ShieldAlert} from 'lucide-react'
+import {Check, ChevronDown, CircleAlert, CircleCheck, LoaderCircle, PanelLeft, Search, ShieldAlert} from 'lucide-react'
 
 /** Where a projection stands in this session: both sides extracted, one failed, waiting for trust, or extracting. */
 export type ProjectionStatus = 'ok' | 'failed' | 'trust' | 'running'
@@ -155,7 +156,8 @@ export function ProjectionSwitcher({
 
 /**
  * The switcher's popup, under its trigger (centred, or from its start), a sheet on phones: a search over the list of
- * projections, the current one checked. The agent viewer's title opens it too (viewer/title.tsx).
+ * projections, the current one checked. The agent viewer's title opens it too (viewer/title.tsx). With `onPin`, the
+ * list ends with "Pin projections pane", after a separator: the last option the arrow keys reach.
  */
 export function SwitcherPopup({
   id,
@@ -166,6 +168,7 @@ export function SwitcherPopup({
   onClose,
   onChoose,
   align = 'center',
+  onPin,
 }: {
   id: string
   items: readonly SwitcherItem[]
@@ -175,15 +178,20 @@ export function SwitcherPopup({
   onClose: () => void
   onChoose: (id: string) => void
   align?: 'center' | 'start'
+  /** Turns the list into the projections pane (`ProjectionsPane`), where the surface offers one. */
+  onPin?: (() => void) | undefined
 }) {
   const [query, setQuery] = useState('')
   const shown = useMemo(() => items.filter(item => matches(item, query)), [items, query])
+  // The options the arrow keys cycle through: the shown projections, then pinning the pane.
+  const count = shown.length + (onPin ? 1 : 0)
   const [index, setIndex] = useState(() =>
     Math.max(
       0,
       items.findIndex(item => item.id === current),
     ),
   )
+  const active = activeOption(index, count)
   const input = useRef<HTMLInputElement>(null)
   const [sheet] = useState(() => typeof matchMedia === 'function' && matchMedia(sheetQuery).matches)
   const [anchor, setAnchor] = useState<{top: number; center: number; start: number} | undefined>()
@@ -214,8 +222,8 @@ export function SwitcherPopup({
     return () => document.removeEventListener('keydown', keyDown)
   }, [])
   useEffect(() => {
-    document.getElementById(`${id}-option-${index}`)?.scrollIntoView({block: 'nearest'})
-  }, [id, index])
+    document.getElementById(`${id}-option-${active}`)?.scrollIntoView({block: 'nearest'})
+  }, [id, active])
 
   const width = 384
   const left = anchor
@@ -247,14 +255,15 @@ export function SwitcherPopup({
               onClose()
             } else if (event.key === 'ArrowDown') {
               event.preventDefault()
-              setIndex(value => (shown.length ? (value + 1) % shown.length : 0))
+              setIndex(stepOption(active, 1, count))
             } else if (event.key === 'ArrowUp') {
               event.preventDefault()
-              setIndex(value => (shown.length ? (value - 1 + shown.length) % shown.length : 0))
+              setIndex(stepOption(active, -1, count))
             } else if (event.key === 'Enter') {
               event.preventDefault()
-              const item = shown[index]
+              const item = shown[active]
               if (item) onChoose(item.id)
+              else if (onPin && active === shown.length) onPin()
             } else if (event.key === 'Tab') event.preventDefault()
           }}
         >
@@ -266,7 +275,7 @@ export function SwitcherPopup({
               aria-expanded="true"
               aria-autocomplete="list"
               aria-controls={`${id}-list`}
-              aria-activedescendant={shown.length ? `${id}-option-${index}` : undefined}
+              aria-activedescendant={count ? `${id}-option-${active}` : undefined}
               aria-label="Find a projection"
               placeholder="Find a projection by title or ID"
               value={query}
@@ -293,7 +302,7 @@ export function SwitcherPopup({
                   key={item.id}
                   id={`${id}-option-${position}`}
                   role="option"
-                  aria-selected={position === index}
+                  aria-selected={position === active}
                   aria-current={isCurrent ? 'true' : undefined}
                   aria-label={`${item.title}, ${item.id}${item.status ? `, ${statusText(item.status)}` : ''}${isCurrent ? ', current' : ''}`}
                   data-projection={item.id}
@@ -302,7 +311,7 @@ export function SwitcherPopup({
                   onClick={() => onChoose(item.id)}
                   className={cn(
                     'pj:flex pj:min-h-10 pj:cursor-pointer pj:items-center pj:gap-2 pj:rounded-md pj:px-2 pj:py-1',
-                    position === index && 'pj:bg-accent pj:text-accent-foreground',
+                    position === active && 'pj:bg-accent pj:text-accent-foreground',
                   )}
                 >
                   <span aria-hidden="true" className="pj:inline-flex pj:size-4 pj:shrink-0 pj:items-center pj:justify-center">
@@ -316,9 +325,41 @@ export function SwitcherPopup({
                 </li>
               )
             })}
+            {onPin && (
+              <PinOption
+                id={`${id}-option-${shown.length}`}
+                active={active === shown.length}
+                onHover={() => setIndex(shown.length)}
+                onPin={onPin}
+              />
+            )}
           </ul>
         </div>
       </div>
     </ScopedRoot>
+  )
+}
+
+/** The popup's last option, after a separator: "Pin projections pane". */
+function PinOption({id, active, onHover, onPin}: {id: string; active: boolean; onHover: () => void; onPin: () => void}) {
+  return (
+    <>
+      <li role="separator" aria-hidden="true" className="pj:-mx-1 pj:my-1 pj:h-px pj:bg-border" />
+      <li
+        id={id}
+        role="option"
+        aria-selected={active}
+        data-pin-pane=""
+        onMouseMove={onHover}
+        onClick={onPin}
+        className={cn(
+          'pj:flex pj:h-8 pj:cursor-pointer pj:items-center pj:gap-2 pj:rounded-md pj:px-2 pj:text-sm',
+          active && 'pj:bg-accent pj:text-accent-foreground',
+        )}
+      >
+        <PanelLeft aria-hidden="true" className="pj:size-4 pj:shrink-0 pj:text-muted-foreground" />
+        Pin projections pane
+      </li>
+    </>
   )
 }

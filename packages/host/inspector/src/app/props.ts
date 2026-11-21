@@ -48,6 +48,8 @@ export interface InspectorAppProps {
   chrome?: 'workbench' | 'none' | 'viewer'
   /** A line above the projection in a bare view (`chrome` `none` or `viewer`), such as the viewer's header. */
   banner?: ReactNode
+  /** In the viewer's page (`chrome` `viewer`), a pane at the start of what is under the banner: its projections pane. */
+  aside?: ReactNode
   /**
    * In a bare view, what a one-revision view shows, at its toolbar's start where a comparison's mode switch sits, so
    * the toolbar spans the view in every state (the viewer's shows a commit's short hash there, or nothing).

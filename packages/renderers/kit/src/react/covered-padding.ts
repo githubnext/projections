@@ -11,8 +11,9 @@ import {useFrameSizing, useStageCover, useStageInsetBottom, useStageInsetTop} fr
  * summary keeps its own padding, a tall one opens between them. Without a cover, `padding` as it is. Pass the result
  * to `useFitScale` and pad the drawing's top by its `top` and its bottom by its `y` (the kit's `--pk-fit-top` and
  * `--pk-fit-bottom`, which graph.css reads). The stage is measured in the frame on every resize. In a frame the host
- * sizes to the content, the bottom clears the host's `stage-inset-bottom` instead of the cover's rectangles, which
- * move as the frame grows (see `coveredBottom`).
+ * sizes to the content, the host's insets say which rectangles lie at the frame's top and which at its foot, and the
+ * bottom clears its `stage-inset-bottom` rather than where the rectangles lie, which move as the frame grows (see
+ * `coveredBottom`).
  */
 export function useCoveredPadding<P extends FitPadding>(
   stage: RefObject<HTMLElement | null>,
@@ -21,8 +22,10 @@ export function useCoveredPadding<P extends FitPadding>(
   maxScale = 1,
 ): P {
   const cover = useStageCover()
-  const foot = useStageInsetBottom()
-  const content = useFrameSizing() === 'content'
+  const insetTop = useStageInsetTop()
+  const insetBottom = useStageInsetBottom()
+  // A host that sizes the frame to its content places its cover by its insets (see `coveredBottom`).
+  const content = useFrameSizing() === 'content' && (insetTop !== undefined || insetBottom !== undefined)
   const [box, setBox] = useState<{x: number; y: number; width: number; height: number}>()
   const covered = cover !== undefined
   const sized = size !== undefined
@@ -50,9 +53,10 @@ export function useCoveredPadding<P extends FitPadding>(
   }, [stage, covered, sized])
   return useMemo(() => {
     if (!cover || !box || !size) return padding
-    const {top, y} = coveredPadding({cover, view: box, origin: box, size, padding, maxScale, ...(content ? {foot: foot ?? 0} : {})})
+    const insets = content ? {insets: {top: insetTop ?? 0, bottom: insetBottom ?? 0}} : {}
+    const {top, y} = coveredPadding({cover, view: box, origin: box, size, padding, maxScale, ...insets})
     return top === (padding.top ?? padding.y) && y === padding.y ? padding : {...padding, top, y}
-  }, [cover, box, size, padding, maxScale, content, foot])
+  }, [cover, box, size, padding, maxScale, content, insetTop, insetBottom])
 }
 
 /**

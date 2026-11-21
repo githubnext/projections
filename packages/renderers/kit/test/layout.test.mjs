@@ -654,26 +654,23 @@ test('a fitted drawing between a top cover and a foot clears both once refitted'
   assert.ok(drawnTop + 450 <= foot.y - 8 || free < 0, `bottom at ${drawnTop + 450}`)
 })
 
-test("in a content-sized frame, a drawing's bottom clears the foot's inset wherever the foot was measured", async () => {
-  const {coveredBottom} = await import('../dist/index.js')
+test("in a content-sized frame, the host's insets place its cover, wherever the foot was measured", async () => {
+  const {coveredBottom, coveredPadding} = await import('../dist/index.js')
   const padding = {x: 16, y: 16}
   const size = {width: 400, height: 380}
-  // The foot 12px above the bottom of a 448px frame, measured while the frame was 320, 448 or 646px tall: each says
-  // the frame's foot, whose `stage-inset-bottom` is 56px, so each is padded alike.
-  for (const y of [277, 405, 603])
-    assert.equal(
-      coveredBottom({cover: [{x: 458, y, width: 429, height: 30}], view: {width: 1344, height: 448}, size, padding, foot: 56}),
-      56,
-    )
-  // A foot that lies beside the drawing, or none, keeps its own bottom.
-  assert.equal(
-    coveredBottom({cover: [{x: 1100, y: 405, width: 200, height: 30}], view: {width: 1344, height: 448}, size, padding, foot: 56}),
-    16,
-  )
-  assert.equal(
-    coveredBottom({cover: [{x: 458, y: 12, width: 429, height: 30}], view: {width: 1344, height: 448}, size, padding, foot: 0}),
-    16,
-  )
+  const insets = {top: 0, bottom: 56}
+  const foot = y => ({x: 458, y, width: 429, height: 30})
+  // The foot 12px above the bottom of a 320, 448 or 646px frame (its `stage-inset-bottom` 56px), placed in a stage of
+  // 448 or 646px: each is the frame's foot, even one above the stage's middle, and each pads the bottom alike.
+  for (const height of [448, 646])
+    for (const y of [277, 405, 603])
+      assert.deepEqual(coveredPadding({cover: [foot(y)], view: {width: 1344, height}, size, padding, insets}), {top: 16, y: 56})
+  // A chip within the top inset stays at the top, and the drawing opens below it.
+  const view = {width: 1344, height: 448}
+  const chip = {x: 458, y: 12, width: 200, height: 28}
+  assert.deepEqual(coveredPadding({cover: [chip, foot(603)], view, size, padding, insets: {top: 52, bottom: 56}}), {top: 48, y: 56})
+  // A foot that lies beside the drawing keeps its own bottom.
+  assert.equal(coveredBottom({cover: [{x: 1100, y: 405, width: 200, height: 30}], view, size, padding, insets}), 16)
 })
 
 test('fitting centres content, never magnifies it, and always fits both dimensions, however small', async () => {

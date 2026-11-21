@@ -1,4 +1,5 @@
 import {useEffect} from 'react'
+import type {InitPayload} from '@githubnext/projections-renderer-sdk/protocol'
 import {twoPaneMode} from '../modes.js'
 import type {ComparisonMode} from '../modes.js'
 import type {PaneKey, ProjectionController, ProjectionOptions, RendererStatus} from './types.js'
@@ -11,9 +12,16 @@ import type {PaneKey, ProjectionController, ProjectionOptions, RendererStatus} f
  */
 export type PaintState = 'none' | 'loading' | 'failed' | 'painting' | 'painted'
 
-/** The frames' paint state for a controller's renderer, mode, progress and panes (see `PaintState`). */
-export function paintState(projection: Pick<ProjectionController, 'renderer' | 'comparing' | 'mode' | 'progress' | 'panes'>): PaintState {
+/**
+ * The frames' paint state for a controller's renderer, mode, progress and panes (see `PaintState`). With the stage's
+ * `init`, an acknowledgement of an earlier one (the frames haven't caught up with a new mode or subject yet) doesn't
+ * count.
+ */
+export function paintState(
+  projection: Pick<ProjectionController, 'renderer' | 'comparing' | 'mode' | 'progress' | 'panes'> & {stage?: {init: InitPayload}},
+): PaintState {
   const {renderer, comparing, mode, progress, panes} = projection
+  const init = projection.stage?.init
   if (!renderer) return 'none'
   const keys: PaneKey[] = twoPaneMode(mode) ? ['before', 'after'] : ['main']
   const shown = keys.map(key => panes[key])
@@ -21,7 +29,8 @@ export function paintState(projection: Pick<ProjectionController, 'renderer' | '
   if (shown.some(pane => pane.status === 'loading')) return 'loading'
   const expected = (key: PaneKey) => (key === 'before' ? 0 : key === 'after' ? 1 : comparing && mode === 'animated' ? progress : undefined)
   const painted = keys.every((key, index) => {
-    const rendered = shown[index]!.rendered
+    const pane = shown[index]!
+    const rendered = init && pane.renderedInit && pane.renderedInit !== init ? undefined : pane.rendered
     const target = expected(key)
     return rendered !== undefined && (target === undefined || Math.abs(rendered - target) < 1e-9)
   })

@@ -53,10 +53,30 @@ export function columnChanges(row: EntityChange<Entity>): ChangeLine[] {
   return lines.length ? lines : otherFields(before, after, [])
 }
 
+/**
+ * A foreign key's referential action as written: Prisma's and SQL's word (`Cascade`, `SET NULL`), the last part of a
+ * Django callable (`django.db.models.deletion.PROTECT`: `PROTECT`), or `default` when none is declared.
+ */
+export function referentialAction(value: unknown): string {
+  if (typeof value === 'string' && value.length > 0) return value
+  const callable = value && typeof value === 'object' ? text((value as Record<string, unknown>)['callable']) : undefined
+  if (callable) return callable.split('.').at(-1)!
+  return value === undefined || value === null ? 'default' : formatValue(value)
+}
+
+/** A foreign key's referential actions, each a line when it changed: `On delete changed`, `On update changed`. */
+const actions = [
+  ['onDelete', 'on-delete', 'On delete changed'],
+  ['onUpdate', 'on-update', 'On update changed'],
+] as const
+
 /** A key's own name: its database name, else its label. */
 const keyName = (entity: Entity) => text(entity.data?.['databaseName']) ?? entity.label
 
-/** What changed about a key or index: its name (`Renamed`), the columns it covers, its kind, else its other changed fields. */
+/**
+ * What changed about a key or index: its name (`Renamed`), the columns it covers, its kind, a foreign key's referential
+ * actions (`On delete changed`, `Restrict` → `Cascade`), else its other changed fields.
+ */
 export function keyChanges(row: EntityChange<Entity>): ChangeLine[] {
   const {before, after} = row
   if (!before || !after) return []
@@ -65,5 +85,29 @@ export function keyChanges(row: EntityChange<Entity>): ChangeLine[] {
   const columns = [keyColumnNames(before).join(', '), keyColumnNames(after).join(', ')] as const
   if (columns[0] !== columns[1]) lines.push({key: 'columns', word: 'Columns changed', before: columns[0], after: columns[1]})
   if (keyType(before) !== keyType(after)) lines.push({key: 'type', word: 'Kind changed', before: keyType(before), after: keyType(after)})
-  return lines.length ? lines : otherFields(before, after, [])
+  for (const [field, key, word] of actions) {
+    const was = referentialAction(before.data?.[field]),
+      now = referentialAction(after.data?.[field])
+    if (was !== now) lines.push({key, word, before: was, after: now})
+  }
+  return lines.length
+    ? lines
+    : otherFields(
+        before,
+        after,
+        actions.map(([field]) => field),
+      )
+}
+
+/**
+ * What changed about a key a column's marker stands for (a single-column primary or foreign key), as lines under the
+ * column: its referential actions as they are (`On delete changed`), the rest named for the key (`Foreign key
+ * renamed`), each keyed `key-…` so they never read as the column's own changes.
+ */
+export function markerChanges(row: EntityChange<Entity>, title: string): ChangeLine[] {
+  return keyChanges(row).map(line =>
+    line.key === 'on-delete' || line.key === 'on-update'
+      ? line
+      : {...line, key: `key-${line.key}`, word: `${title} ${line.word.charAt(0).toLowerCase()}${line.word.slice(1)}`},
+  )
 }

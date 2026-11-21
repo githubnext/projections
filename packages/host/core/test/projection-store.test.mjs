@@ -126,3 +126,65 @@ test('an action counts each run, so running it again is news to the renderer', (
   snapshot().runAction('missing')
   assert.equal(run.length, 2)
 })
+
+test('an action reaches listeners once, after its handlers, so they never see a half-done change', () => {
+  const seen = []
+  const asked = []
+  const store = createProjection(options({onChangesOnlyChange: next => asked.push(next)}))
+  store.start()
+  store.subscribe(() => seen.push({scope: store.getSnapshot().scope, asked: asked.length}))
+  store.getSnapshot().setScope('all')
+  assert.deepEqual(seen, [{scope: 'all', asked: 1}])
+  seen.length = 0
+  // The pinned target and the selected row: two writes, one change.
+  store.getSnapshot().selectTarget({kind: 'entity', id: 'api', side: 'after'})
+  assert.equal(seen.length, 1)
+  assert.deepEqual(store.getSnapshot().selection?.target, {kind: 'entity', id: 'api', side: 'after'})
+})
+
+test('a handler told of a selection reads it in the snapshot', () => {
+  let read
+  const store = createProjection(options({onSelectedIdChange: () => (read = store.getSnapshot().selectedId)}))
+  store.start()
+  store.getSnapshot().select('api')
+  assert.equal(read, 'api')
+})
+
+test('a projection that never settles says so, and its snapshot still shows the state as it is', () => {
+  const errors = []
+  const original = globalThis.reportError
+  globalThis.reportError = error => errors.push(error)
+  try {
+    // An embedder that answers every selection it is told of with the other row.
+    const store = createProjection(
+      options({onSelectionChange: selection => selection && store.getSnapshot().select(selection.rowId === 'api' ? 'web' : 'api')}),
+    )
+    store.start()
+    store.getSnapshot().select('api')
+    assert.equal(errors.length, 1)
+    assert.match(errors[0].message, /didn't settle/)
+    assert.ok(['api', 'web'].includes(store.getSnapshot().selectedId))
+  } finally {
+    globalThis.reportError = original
+  }
+})
+
+test('stopping while the first preferences are told stops watching them', () => {
+  const removed = []
+  const original = globalThis.window
+  globalThis.window = {
+    matchMedia: query => ({
+      matches: true,
+      addEventListener: () => {},
+      removeEventListener: () => removed.push(query),
+    }),
+  }
+  try {
+    const store = createProjection(options())
+    store.subscribe(() => store.stop())
+    store.start()
+    assert.equal(removed.length, 2)
+  } finally {
+    globalThis.window = original
+  }
+})

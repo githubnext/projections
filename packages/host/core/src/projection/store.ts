@@ -1,7 +1,7 @@
 // The projection store: the state `derive` reads controllers from, the playback actor, the person's preferences, and the
 // two phases that follow a read being shown. `commit` keeps what the read used and reconciles playback with it (before
-// paint); `report` records what renderers declared and tells the embedder what changed (after paint). `createProjection`
-// runs both after every change; `useProjection` runs them in React's effects.
+// paint); `report` records what renderers declared and tells the embedder what changed (after paint).
+// `createProjection` (`create-projection.ts`) runs them after every change; `useProjection` in React's effects.
 import type {RendererFrame} from '../frame.js'
 import type {Side} from '../modes.js'
 import type {PaneState} from '../pane.js'
@@ -20,7 +20,7 @@ import {createSelectionReport} from './selection.js'
 import {notifySetting, requestedSettings} from './settings-store.js'
 import type {Settings} from './settings-store.js'
 import type {StageHandlers} from './stage-binding.js'
-import type {PaneKey, ProjectionController, ProjectionOptions} from './types.js'
+import type {PaneKey, ProjectionOptions} from './types.js'
 
 /** The phases of a projection, for an adapter that runs them when its framework shows a read. */
 export interface ProjectionPhases {
@@ -35,6 +35,8 @@ export interface ProjectionPhases {
   subscribe(listener: () => void): () => void
   /** Starts playback's frames and watching the person's preferences. Construction starts nothing. */
   start(): void
+  /** Whether it is started. */
+  readonly running: boolean
   stop(): void
 }
 
@@ -44,12 +46,30 @@ export function projectionPhases(initial: ProjectionOptions, frames?: FrameSched
   let version = 0
   const listeners = new Set<() => void>()
   let state: ProjectionState = initialState(initial, 1)
+  // An action's writes and the handlers it calls are one change: listeners hear of it once, when the action is done.
+  const batch = {depth: 0, changed: false}
+  const notify = () => {
+    if (batch.depth) batch.changed = true
+    else for (const listener of [...listeners]) listener()
+  }
+  const batched = <T>(act: () => T): T => {
+    batch.depth++
+    try {
+      return act()
+    } finally {
+      batch.depth--
+      if (!batch.depth && batch.changed) {
+        batch.changed = false
+        notify()
+      }
+    }
+  }
   const set = (change: (state: ProjectionState) => ProjectionState) => {
     const next = change(state)
     if (next === state) return
     state = next
     version++
-    for (const listener of [...listeners]) listener()
+    notify()
   }
   const request: RequestChange = (key, next) => {
     const options = latest
@@ -103,6 +123,7 @@ export function projectionPhases(initial: ProjectionOptions, frames?: FrameSched
     interact,
     runAction: id => set(current => ({...current, action: {id, sequence: (current.action?.sequence ?? 0) + 1}})),
     latest: () => latest,
+    batched,
     // Called only by actions, once the controller below exists.
     playback: () => controller,
     frames: renderers,
@@ -120,14 +141,15 @@ export function projectionPhases(initial: ProjectionOptions, frames?: FrameSched
       reducedMotion: () => shown.view.reducedMotion,
       requestPlaying: next => request('playing', next),
       // A slider position: `onPositionChange`, and `onProgressChange` when the embedder controls progress.
-      requestPosition: next => {
-        const clamped = unit(next)
-        const options = latest
-        if (options.position === undefined)
-          setSettings(previous => (previous.position === clamped ? previous : {...previous, position: clamped}))
-        options.onPositionChange?.(clamped)
-        if (options.progress !== undefined) options.onProgressChange?.(shown.view.timing.toProgress(clamped))
-      },
+      requestPosition: next =>
+        batched(() => {
+          const clamped = unit(next)
+          const options = latest
+          if (options.position === undefined)
+            setSettings(previous => (previous.position === clamped ? previous : {...previous, position: clamped}))
+          options.onPositionChange?.(clamped)
+          if (options.progress !== undefined) options.onProgressChange?.(shown.view.timing.toProgress(clamped))
+        }),
     },
     frames,
   )
@@ -202,6 +224,9 @@ export function projectionPhases(initial: ProjectionOptions, frames?: FrameSched
       if (selection !== undefined) options.onSelectionChange?.(selection)
     },
     version: () => version,
+    get running() {
+      return unwatch !== undefined
+    },
     subscribe(listener) {
       listeners.add(listener)
       return () => {
@@ -210,96 +235,26 @@ export function projectionPhases(initial: ProjectionOptions, frames?: FrameSched
     },
     start() {
       controller.actor.start()
-      unwatch ??= watchMedia(media =>
+      if (unwatch) return
+      // The first preferences are told before `watchMedia` returns, and a listener may stop the store then.
+      const starting = {stopped: false}
+      unwatch = () => {
+        starting.stopped = true
+      }
+      const dispose = watchMedia(media =>
         set(current =>
           current.media.prefersDark === media.prefersDark && current.media.reducedMotion === media.reducedMotion
             ? current
             : {...current, media},
         ),
       )
+      if (starting.stopped) dispose()
+      else unwatch = dispose
     },
     stop() {
       unwatch?.()
       unwatch = undefined
       controller.actor.stop()
-    },
-  }
-}
-
-/** A projection without a framework: read its controller, hear when it changes, and give it new options. */
-export interface ProjectionStore {
-  /** The controller as it stands: the same object until something changes. */
-  getSnapshot(): ProjectionController
-  /** Calls `listener` after each change; returns the function that stops it. */
-  subscribe(listener: () => void): () => void
-  /** The embedder's new options: controlled values, handlers, the subject. */
-  update(options: ProjectionOptions): void
-  /**
-   * Starts it: playback's frames, watching the person's preferences, and telling the embedder what changes. Call it
-   * before acting on the controller. Construction starts nothing.
-   */
-  start(): void
-  /** Stops what `start` started; the state is kept, and `start` resumes it. */
-  stop(): void
-}
-
-/** How many reads one change may lead to (a report that changes the state is read again), before the rest waits. */
-const settleRounds = 10
-
-/**
- * The headless Projections host without a framework: `useProjection`'s controller, its state and actions, as a store.
- * Every change is read, committed and reported before listeners hear of it, so `getSnapshot` is always settled.
- */
-export function createProjection(options: ProjectionOptions): ProjectionStore {
-  const phases = projectionPhases(options)
-  let latest = options
-  let snapshot = phases.read(options).controller
-  const listeners = new Set<() => void>()
-  let detach: (() => void) | undefined
-  // A change while one is being settled is settled in the same pass.
-  let settling: {again: boolean} | undefined
-  const settle = () => {
-    if (settling) {
-      settling.again = true
-      return
-    }
-    settling = {again: true}
-    try {
-      for (let round = 0; round < settleRounds && settling.again; round++) {
-        settling.again = false
-        const read = phases.read(latest)
-        phases.commit(read)
-        phases.report()
-        snapshot = read.controller
-      }
-    } finally {
-      settling = undefined
-    }
-    for (const listener of [...listeners]) listener()
-  }
-  return {
-    getSnapshot: () => snapshot,
-    subscribe(listener) {
-      listeners.add(listener)
-      return () => {
-        listeners.delete(listener)
-      }
-    },
-    update(next) {
-      latest = next
-      if (detach) settle()
-      else snapshot = phases.read(next).controller
-    },
-    start() {
-      if (detach) return
-      detach = phases.subscribe(settle)
-      phases.start()
-      settle()
-    },
-    stop() {
-      detach?.()
-      detach = undefined
-      phases.stop()
     },
   }
 }

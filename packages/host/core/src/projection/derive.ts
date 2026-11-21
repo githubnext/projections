@@ -83,6 +83,8 @@ export interface ProjectionPrimitives {
   runAction(id: string): void
   /** The latest options, for callbacks. */
   latest(): ProjectionOptions
+  /** Runs an action: its writes and the handlers it calls reach listeners as one change. */
+  batched<T>(act: () => T): T
   playback(): PlaybackController
   frames: {current: Record<Side, RendererFrame | null>}
   stage: StageHandlers
@@ -172,6 +174,15 @@ function settled(state: ProjectionState, options: ProjectionOptions, basics: Ret
       settings: {...next.settings, controlValues: {...seeding.values, ...next.settings.controlValues}},
     }
   return next
+}
+
+/** The controller with each of its functions run as one change (see `ProjectionPrimitives.batched`). */
+function batchActions(controller: ProjectionController, batched: ProjectionPrimitives['batched']): ProjectionController {
+  const fields: Record<string, unknown> = {...controller}
+  for (const [key, field] of Object.entries(fields))
+    if (typeof field === 'function')
+      fields[key] = (...args: unknown[]) => batched(() => (field as (...args: unknown[]) => unknown)(...args))
+  return fields as unknown as ProjectionController
 }
 
 /** Reads controllers for a projection whose actions go to `primitives`. */
@@ -382,7 +393,7 @@ export function createDerive(primitives: ProjectionPrimitives) {
       selectFrom: (pane, id, path) => selectRow(id, selectedTarget(pane, id, path, rows, subject)),
       activateAnnotation,
     }
-    return {options, state, controller, view}
+    return {options, state, controller: batchActions(controller, primitives.batched), view}
   }
 
   return {

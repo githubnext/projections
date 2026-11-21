@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "An original comparator's recorded verdicts (internal)",
+  "description": "Generated from packages/schemas/src/repository; internal and unversioned, never published. Validates packages/comparators/rules/tests/golden/*.json (see .dollarlint.toml).",
+  "type": "object",
+  "required": ["comparator", "original", "cases"],
+  "properties": {
+    "comparator": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+    "original": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "cases": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "required": ["case", "input", "comparison"],
+            "properties": {
+              "case": {"type": "string", "minLength": 1, "pattern": "\\S"},
+              "input": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+              "baseline": {"type": "string", "const": "rules"},
+              "comparison": {"$ref": "https://schemas.projections.githubnext.com/comparison/v0.json"}
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": ["case", "input", "error"],
+            "properties": {
+              "case": {"type": "string", "minLength": 1, "pattern": "\\S"},
+              "input": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+              "baseline": {"type": "string", "const": "rules"},
+              "error": {"type": "string", "pattern": "^[a-z][a-z-]*$"}
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": ["case", "input", "sameAs"],
+            "properties": {
+              "case": {"type": "string", "minLength": 1, "pattern": "\\S"},
+              "input": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+              "sameAs": {"type": "string", "minLength": 1, "pattern": "\\S"}
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}

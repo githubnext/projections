@@ -35,10 +35,21 @@ exclude = [
   # Bicep-generated ARM templates. They declare Azure's deployment-template schema, but its Microsoft.Network
   # provider schema takes minutes to compile (dollarlint/dollarlint#238).
   "packages/extractors/azure-what-if/tests/fixtures/*/main.json",
+  # Other tools' configuration with no published schema; each tool validates its own: Considered (`considered check`)
+  # and dist (`dist plan`, in CI's release-config job).
+  ".considered.yaml",
+  "dist-workspace.toml",
+  # Generated, and checked byte for byte against their generators: the rules language manifest
+  # (tools/cli/src/lib/generated.ts) and the engine's data rules (`npm run generate --workspace
+  # @githubnext/projections-schemas -- --check`).
+  "packages/comparators/rules/language.json",
+  "packages/schemas/fixtures/data-rules.json",
+  # The polyglot example's sample application data, in the example's own format.
+  "examples/polyglot/services.json",
 ]
 
 [schemas]
-requireCoverage = false
+requireCoverage = true
 
 [schemas.catalogs]
 enabled = true
@@ -118,6 +129,15 @@ schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
 file = "packages/extractors/*/tests/fixtures/**/inputs.json"
 schema = "https://schemas.projections.githubnext.com/definition/v0.json#/properties/inputs"
 
+# Saved comparisons to revisit, and renderer bundle manifests.
+[[schemas.associations]]
+file = ".projections-bookmarks.json"
+schema = "https://schemas.projections.githubnext.com/bookmarks/v0.json"
+
+[[schemas.associations]]
+file = "renderer.json"
+schema = "https://schemas.projections.githubnext.com/renderer/v0.json"
+
 # Comparisons: comparator snapshots.
 [[schemas.associations]]
 file = "**/snapshots/*.json"
@@ -177,3 +197,50 @@ schema = "https://www.schemastore.org/github-issue-config.json"
 file = "packages/cli/templates/renderer/scenarios.json"
 keyword = "pattern"
 reason = "template placeholder, replaced when the template is instantiated"
+
+# The steps dist runs before each build: a GitHub Actions job's steps.
+[[schemas.associations]]
+file = ".github/release-build-setup.yml"
+schema = "https://www.schemastore.org/github-workflow.json#/definitions/normalJob/properties/steps"
+
+# The repository's own tooling and test data, against their internal schemas (packages/schemas/src/repository).
+
+[[schemas.associations]]
+file = ".portability.yaml"
+schema = "./packages/schemas/internal/portability.json"
+
+[[schemas.associations]]
+file = "packages/engine/verified/verus.toml"
+schema = "./packages/schemas/internal/verus.json"
+
+[[schemas.associations]]
+file = "notices/notices.json"
+schema = "./packages/schemas/internal/notices.json"
+
+[[schemas.associations]]
+file = "tools/scripts/check-machines/baseline.json"
+schema = "./packages/schemas/internal/machines-baseline.json"
+
+[[schemas.associations]]
+file = "docs/design/engine-measurements.json"
+schema = "./packages/schemas/internal/engine-measurements.json"
+
+[[schemas.associations]]
+file = "packages/host/core/src/ui/components/upstream/manifest.json"
+schema = "./packages/schemas/internal/upstream-components.json"
+
+[[schemas.associations]]
+file = "packages/host/vscode-ui/fixtures/themes/*.json"
+schema = "./packages/schemas/internal/vscode-theme.json"
+
+[[schemas.associations]]
+file = "examples/extractors/*/test/cases.json"
+schema = "./packages/schemas/internal/example-cases.json"
+
+[[schemas.associations]]
+file = "packages/comparators/rules/tests/golden/*.json"
+schema = "./packages/schemas/internal/comparator-golden.json"
+
+[[schemas.associations]]
+file = "packages/schemas/fixtures/conformance.json"
+schema = "./packages/schemas/internal/conformance.json"

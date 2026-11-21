@@ -133,6 +133,11 @@ the runtime validator, so a hand-written type never stands in for a checked one.
   checks only the envelope its clients read: a saved document's `format` and
   `version` (the CLI validated the document when it loaded it), and an explore
   candidate's trial definition.
+- **The repository's own files**, `src/repository`: its tooling configuration
+  and test data, such as `.portability.yaml`, `notices/notices.json` and the
+  comparator goldens. Like the runner API, they are internal and unversioned,
+  generated to `packages/schemas/internal/<name>.json`, and DollarLint
+  (`.dollarlint.toml`) validates the files against them.
 
 **Rust conformance.** The Rust service has no generated types. Instead, its
 tests (`packages/cli/tests/service/conformance.rs`) check every runner API

@@ -297,7 +297,10 @@ test('parseRendererManifest validates bundle manifests', () => {
   const manifest = {format: 'projections.renderer', version: 0, name: 'basic', title: 'Basic', handles: ['graph', 'dag']}
   assert.deepEqual(parseRendererManifest(manifest), manifest)
   assert.notEqual(parseRendererManifest(manifest).handles, manifest.handles)
+  // 200 characters, though 400 UTF-16 code units: the limit counts code points, as JSON Schema's maxLength does.
+  assert.equal(parseRendererManifest({...manifest, title: '🧭'.repeat(200)}).title.length, 400)
   for (const invalid of [
+    {...manifest, title: '🧭'.repeat(201)},
     null,
     [],
     {...manifest, format: 'other'},

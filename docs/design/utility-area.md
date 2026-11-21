@@ -1,7 +1,7 @@
 # The stage's utility area
 
 Status: shipped in the default UI: the CLI viewer and the Copilot canvas (the
-Inspector's viewer page), the hosted site's stage and the Playground.
+Inspector's viewer page), and the hosts built on it.
 
 ## The problem
 

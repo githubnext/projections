@@ -224,7 +224,7 @@ test("a modified card names the data changes it doesn't mark itself in plain wor
     {key: '2 more fields changed', before: '', after: '', summary: true},
   ])
   // One or two objects are named.
-  const one = extraction([unit({tokens: 5000, runs: ['cli'], testTokens: 12000, ...objects, ...{more: {x: 2}, other: {y: 2}}})], [])
+  const one = extraction([unit({tokens: 5000, runs: ['cli'], testTokens: 12000, ...objects, more: {x: 2}, other: {y: 2}})], [])
   const named = comparisonModel(one, after, await engine.compare(one, after)).entities[0]
   assert.deepEqual(cardChanges(named, ['tokens', 'runs', 'testTokens'], 'en'), [
     {key: 'capability modules changed', before: '', after: '', summary: true},

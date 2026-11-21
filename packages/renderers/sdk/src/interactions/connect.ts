@@ -70,7 +70,7 @@ export const interactionCapabilities = {hover: true, anchors: true, scrollSync: 
  *   at a bounded rate.
  */
 export function connectInteractions(client: RendererClient, root: HTMLElement, options: InteractionOptions = {}): InteractionController {
-  const view = options.window ?? root.ownerDocument.defaultView ?? window
+  const view = options.window ?? root.ownerDocument.defaultView ?? globalThis
   const document = root.ownerDocument
   const attribute = options.attribute ?? 'data-entity-id'
   let selected: string | null = null

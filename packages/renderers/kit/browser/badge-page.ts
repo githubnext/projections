@@ -21,7 +21,7 @@ declare global {
 }
 
 const root = createRoot(document.getElementById('root')!)
-window.showBadges = cells =>
+globalThis.showBadges = cells =>
   flushSync(() =>
     root.render(
       h(

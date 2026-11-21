@@ -157,7 +157,7 @@ test('the first paint the renderer acknowledges is drawn at its final fit', asyn
     await openRenderer(page, {renderer: 'dependencies', before: graph(members.slice(0, 5)), after: graph(members), progress: 0})
     // Read in the renderer document at once: a locator's round trips would give a late refit time to land.
     const document = page.frames().find(frame => frame !== page.mainFrame())!
-    const scale = () => document.evaluate(() => window.document.querySelector('svg.graph')?.getAttribute('data-scale'))
+    const scale = () => document.evaluate(() => globalThis.document.querySelector('svg.graph')?.getAttribute('data-scale'))
     const acknowledged = await scale()
     await page.waitForTimeout(300)
     expect(await scale(), `run ${run}`).toBe(acknowledged)

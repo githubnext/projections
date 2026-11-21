@@ -27,7 +27,7 @@ function lineCount(bytes) {
   if (bytes.subarray(0, 8000).includes(0)) return undefined
   let lines = 0
   for (const byte of bytes) if (byte === 10) lines++
-  return lines + (bytes.length && bytes[bytes.length - 1] !== 10 ? 1 : 0)
+  return lines + (bytes.length && bytes.at(-1) !== 10 ? 1 : 0)
 }
 
 /** A repository-map extraction of `files` ({path, size, lines?}), in the extractor's order. */
@@ -258,7 +258,7 @@ function settings() {
   }
   const after = keys
     .filter(key => !(key.group === 'server' && key.index === 4))
-    .map(key => (key.group === 'client' && key.flags.join() === 'hidden,pre-release' ? {...key, flags: ['pre-release']} : key))
+    .map(key => (key.group === 'client' && key.flags.join(',') === 'hidden,pre-release' ? {...key, flags: ['pre-release']} : key))
   after.push({group: 'providers/atlas', index: -1, name: 'credentialsFile', flags: ['secret', 'hidden']})
   write('settings-before.json', document(keys))
   write('settings-after.json', document(after))

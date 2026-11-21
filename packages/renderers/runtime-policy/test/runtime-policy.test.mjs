@@ -209,9 +209,9 @@ test('markup: identifiers are marked, effects are words, and status footers are 
   // With highlighting off, the sign column also states the change for assistive technology.
   const content = markup =>
     markup
-      .replace(/ style="[^"]*"/g, '')
-      .replace(/ aria-hidden="(true|false)"/g, '')
-      .replace(/<span class="sr-only">[^<]*<\/span>/g, '')
+      .replaceAll(/ style="[^"]*"/g, '')
+      .replaceAll(/ aria-hidden="(true|false)"/g, '')
+      .replaceAll(/<span class="sr-only">[^<]*<\/span>/g, '')
   assert.equal(content(quiet), content(diff), 'highlighting changes only emphasis, never content')
 })
 
@@ -301,7 +301,7 @@ test('each section is a titled panel: a heading in the UI font, then one table, 
   ]
   assert.equal(lanes.length, 2)
   for (const [, head] of lanes) {
-    assert.deepEqual(plain(head.replace(/></g, '> <')).split(' ').filter(Boolean), ['Rule', 'Effect', 'Applies', 'to'])
+    assert.deepEqual(plain(head.replaceAll('><', '> <')).split(' ').filter(Boolean), ['Rule', 'Effect', 'Applies', 'to'])
   }
 })
 

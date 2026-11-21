@@ -23,7 +23,7 @@ function firstAlternative(expression) {
   return words
     .slice(0, or < 0 ? undefined : or)
     .join(' ')
-    .replace(/[()]/g, '')
+    .replaceAll(/[()]/g, '')
     .trim()
 }
 

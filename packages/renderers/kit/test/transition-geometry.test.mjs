@@ -123,7 +123,7 @@ test('a leaving card fades evenly through its window, and its relationships neve
   for (let index = 1; index < fine.length; index++) assert.ok(fine[index] <= fine[index - 1] + 1e-9, 'a leaving card never returns')
   // Halfway through its fade it is half there, not still nearly opaque.
   const start = samples[fine.findIndex(value => value < 1)],
-    end = samples[fine.findIndex(value => value === 0)]
+    end = samples[fine.indexOf(0)]
   assert.ok(Math.abs(opacity(forward.transition, (start + end) / 2) - 0.5) < 0.15)
   for (const t of samples) {
     const card = opacity(forward.transition, t)

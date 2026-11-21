@@ -125,13 +125,13 @@ test('NuGet projects and target frameworks are roots; membership relationships a
   const view = dependencyView(extractionModel(fixture('nuget-after')), [], 'all')
   assert.ok(
     [...view.roots].every(id => id.startsWith('nuget-project') || id.startsWith('nuget-target')),
-    [...view.roots].join(),
+    [...view.roots].join(','),
   )
   assert.ok(!view.model.relationships.some(edge => edge.after.kind === 'resolved'))
   assert.ok(view.direct.size > 0)
   assert.ok(
     [...view.direct].every(id => id.startsWith('nuget-library')),
-    [...view.direct].join(),
+    [...view.direct].join(','),
   )
 })
 

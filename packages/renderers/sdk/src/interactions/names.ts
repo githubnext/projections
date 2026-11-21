@@ -39,7 +39,7 @@ export function itemName(element: Element): string {
     element.querySelector(':scope > title')?.textContent ??
     element.querySelector('[aria-label]')?.getAttribute('aria-label') ??
     visibleText(element)
-  const name = text.replace(/\s+/g, ' ').trim()
+  const name = text.replaceAll(/\s+/g, ' ').trim()
   return name.length > 80 ? `${name.slice(0, 79)}…` : name
 }
 

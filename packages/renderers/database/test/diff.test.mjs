@@ -116,11 +116,11 @@ test('the diff lays out both revisions once, without overlap', async () => {
     for (const available of [1300, 360]) {
       const model = await modelOf(id)
       const {frame} = createDatabaseDiff(model, {available})
-      const cards = frame.tables.map(table => table.change.id)
+      const cards = new Set(frame.tables.map(table => table.change.id))
       // Every card of either revision is drawn.
       for (const entity of model.entities) {
         if (['table', 'view', 'enum'].includes((entity.after ?? entity.before).kind)) {
-          assert.ok(cards.includes(entity.id), `${id}: ${entity.id}`)
+          assert.ok(cards.has(entity.id), `${id}: ${entity.id}`)
         }
       }
       for (const [index, table] of frame.tables.entries()) {

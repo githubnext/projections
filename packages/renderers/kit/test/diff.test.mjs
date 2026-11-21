@@ -265,7 +265,7 @@ test('a diff card lays out its text whole and grows to hold it', () => {
   const status = [{status: 'modified', glyph: '~', icon: 'modified', label: 'Update in place'}]
   const named = diffCardText({after: {id: 'a', kind: 'service', label: 'payments-gateway'}, kind: {text: 'Service'}, status})
   assert.equal(named.width, Math.ceil((32 + 16 * 7.4) / 4) * 4)
-  assert.ok(diffCardText({...{after: {id: 'a', kind: 'service', label: 'a'}}, kind: {text: 'Service'}, status}).width > cardWidthRange.min)
+  assert.ok(diffCardText({after: {id: 'a', kind: 'service', label: 'a'}, kind: {text: 'Service'}, status}).width > cardWidthRange.min)
   const before = {id: 'r', kind: 'resource', label: 'db', data: {version: '1.0.0'}}
   const after = {id: 'r', kind: 'resource', label: 'database', data: {version: '2.0.0'}}
   const card = diffCardText({

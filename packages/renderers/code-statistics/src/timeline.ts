@@ -1,10 +1,8 @@
 import {ease, easeWithin, stepProgress, unitProgress} from '@githubnext/projections-renderer-kit'
 import type {ComparisonModel, ScheduledStep} from '@githubnext/projections-renderer-kit'
-import {codeStatisticsMeasures, defaultCodeStatisticsOptions} from '@githubnext/projections-renderer-sdk/presentation'
-import type {CodeStatisticsMeasure, CodeStatisticsOptions} from '@githubnext/projections-renderer-sdk/presentation'
 
-export {codeStatisticsMeasures, defaultCodeStatisticsOptions}
-export type {CodeStatisticsMeasure, CodeStatisticsOptions}
+export {codeStatisticsMeasures, defaultCodeStatisticsOptions} from '@githubnext/projections-renderer-sdk/presentation'
+export type {CodeStatisticsMeasure, CodeStatisticsOptions} from '@githubnext/projections-renderer-sdk/presentation'
 
 /** How far a language row has moved from its Before to its After count, and how present it is. */
 export interface StatisticsMotion {

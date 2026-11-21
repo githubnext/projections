@@ -57,14 +57,14 @@ export async function focusFailures(id: string): Promise<string[]> {
     if (!target.matches(':focus-visible')) return []
     const failures: string[] = []
     const style = getComputedStyle(target)
-    const outline = style.outlineStyle !== 'none' ? parseFloat(style.outlineWidth) || 0 : 0
+    const outline = style.outlineStyle !== 'none' ? Number.parseFloat(style.outlineWidth) || 0 : 0
     if (outline > 0 && target instanceof SVGElement) {
       failures.push(
         `${id} draws an outline on an SVG element, around its bounding box; the SDK rings its marked edge (data-projections-edge) instead`,
       )
     }
     if (outline > 0) {
-      const grow = Math.max(0, outline + (parseFloat(style.outlineOffset) || 0))
+      const grow = Math.max(0, outline + (Number.parseFloat(style.outlineOffset) || 0))
       const box = target.getBoundingClientRect(),
         outer = unit.getBoundingClientRect()
       if (

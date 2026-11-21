@@ -198,7 +198,7 @@ test('highlighting decorates only mid-transition and never changes values or pro
       items.map(row => {
         const box = (selector: string) => {
           const rect = row.querySelector(selector)!.getBoundingClientRect()
-          return [rect.x, rect.y, rect.width, rect.height].join()
+          return [rect.x, rect.y, rect.width, rect.height].join(',')
         }
         return {
           value: row.querySelector('.stat-value')!.firstChild!.textContent,

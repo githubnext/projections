@@ -13,7 +13,7 @@ const counts = (frame: FrameLocator, column: number) =>
     .evaluateAll(
       (rows: Element[], index: number) =>
         rows.map(row =>
-          Number((row.children[index]?.querySelector('ins, .pk-table-text, .pk-table-value')?.textContent ?? '').replace(/\D/g, '')),
+          Number((row.children[index]?.querySelector('ins, .pk-table-text, .pk-table-value')?.textContent ?? '').replaceAll(/\D/g, '')),
         ),
       column,
     )

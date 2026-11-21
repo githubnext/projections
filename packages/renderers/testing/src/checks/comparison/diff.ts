@@ -40,7 +40,7 @@ export const diffChecks: Pick<Checks, 'diff-changes' | 'diff-neutral' | 'diff-cl
     for (const change of changes) {
       const ids = new Set([change.id, ...change.before, ...change.after])
       const drawn = shown.filter(sample => ids.has(sample.id))
-      const describe = `${change.status}${change.before.join() !== change.after.join() && change.before.length && change.after.length ? ' (renamed)' : ''} "${change.id}"`
+      const describe = `${change.status}${change.before.join(',') !== change.after.join(',') && change.before.length && change.after.length ? ' (renamed)' : ''} "${change.id}"`
       if (!drawn.length) {
         failures.push(
           `The ${describe} change isn't drawn: no visible element has data-entity-id ${[...ids].map(id => `"${id}"`).join(' or ')}.`,

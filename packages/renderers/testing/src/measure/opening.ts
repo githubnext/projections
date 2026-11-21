@@ -169,7 +169,7 @@ function smallestText(root: Element): number | null {
         if (matrix) scale *= Math.hypot(matrix.a, matrix.b)
       }
     }
-    const size = parseFloat(style.fontSize) * scale
+    const size = Number.parseFloat(style.fontSize) * scale
     if (size > 0) smallest = Math.min(smallest, size)
   }
   return Number.isFinite(smallest) ? Math.round(smallest * 100) / 100 : null

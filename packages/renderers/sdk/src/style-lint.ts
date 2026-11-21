@@ -62,7 +62,7 @@ function blankComments(css: string): string {
     const end = start < 0 ? -1 : css.indexOf('*/', start + 2)
     // An unclosed comment is left as it is: with no `*/` after it, none after a later `/*` either.
     if (end < 0) return result + css.slice(index)
-    result += css.slice(index, start) + css.slice(start, end + 2).replace(/[^\n]/g, ' ')
+    result += css.slice(index, start) + css.slice(start, end + 2).replaceAll(/[^\n]/g, ' ')
     index = end + 2
   }
 }
@@ -99,7 +99,7 @@ export function lintRendererStyles(css: string, file = 'styles'): StyleLintResul
   }
   // Declarations, with the selector of the block they are in.
   for (const block of innermostBlocks(source)) {
-    const selector = block.selector.trim().replace(/\s+/g, ' ')
+    const selector = block.selector.trim().replaceAll(/\s+/g, ' ')
     const bodyStart = block.bodyStart
     for (const declaration of block.body.matchAll(/([a-z-]+)\s*:\s*([^;]+)/gi)) {
       const property = declaration[1]!.toLowerCase()

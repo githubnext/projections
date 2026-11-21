@@ -401,7 +401,7 @@ export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, o
   const units = diff.units.slice(0, diUnitLimit)
   const shown = new Set(units.map(unit => unit.id))
   const links = diff.links.filter(link => shown.has(link.fromId) && shown.has(link.toId))
-  const selectedUnits = new Set(units.filter(unit => unitParts(unit.unit).some(part => part === selectedId)).map(unit => unit.id))
+  const selectedUnits = new Set(units.filter(unit => unitParts(unit.unit).includes(selectedId)).map(unit => unit.id))
   const bounds = useMemo(() => {
     const all = [...boxes.values()]
     if (!all.length) return {x: 0, y: 0, width: 960, height: 420}

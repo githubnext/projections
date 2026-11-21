@@ -20,8 +20,8 @@ export function useStageSize(stage: RefObject<HTMLDivElement | null>) {
     const measure = () => {
       const style = getComputedStyle(element)
       const padding = {
-        inline: parseFloat(style.paddingLeft) + parseFloat(style.paddingRight),
-        block: parseFloat(style.paddingTop) + parseFloat(style.paddingBottom),
+        inline: Number.parseFloat(style.paddingLeft) + Number.parseFloat(style.paddingRight),
+        block: Number.parseFloat(style.paddingTop) + Number.parseFloat(style.paddingBottom),
       }
       const room = {width: element.clientWidth - padding.inline, height: element.clientHeight - padding.block}
       const width = Math.max(minimum.width, room.width)
@@ -54,7 +54,7 @@ export function useStageSize(stage: RefObject<HTMLDivElement | null>) {
 export function useLabelSize(): number {
   const [size, setSize] = useState(12)
   useLayoutEffect(() => {
-    const value = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--projections-font-size-xs'))
+    const value = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--projections-font-size-xs'))
     if (Number.isFinite(value) && value > 0) setSize(value)
   }, [])
   return size

@@ -32,7 +32,7 @@ export function looks(sample: EntitySample): string {
 export function difference(a: EntitySample, b: EntitySample): string {
   if (a.text !== b.text) return `its text changes from "${a.text.slice(0, 60)}" to "${b.text.slice(0, 60)}"`
   if (a.opacity !== b.opacity) return `its opacity changes from ${a.opacity} to ${b.opacity}`
-  if (a.box.join() !== b.box.join()) return `it moves from [${a.box.join(', ')}] to [${b.box.join(', ')}]`
+  if (a.box.join(',') !== b.box.join(',')) return `it moves from [${a.box.join(', ')}] to [${b.box.join(', ')}]`
   const left = a.paint.split(';'),
     right = b.paint.split(';')
   const index = left.findIndex((part, at) => part !== right[at])

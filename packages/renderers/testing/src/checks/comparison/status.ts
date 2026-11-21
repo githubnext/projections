@@ -114,7 +114,7 @@ function shifted(on: Map<string, EntitySample>, off: Map<string, EntitySample>, 
   const failures: string[] = []
   for (const [key, sample] of on) {
     const other = off.get(key)
-    if (other && other.box.join() !== sample.box.join()) {
+    if (other && other.box.join(',') !== sample.box.join(',')) {
       failures.push(
         `${where}, "${key}" is at [${other.box.join(', ')}] without highlighting but [${sample.box.join(', ')}] with it: status must not move or resize anything.`,
       )

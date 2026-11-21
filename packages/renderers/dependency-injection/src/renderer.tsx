@@ -419,7 +419,7 @@ function TransitionView({
   const units = frame.units.slice(0, diUnitLimit)
   const shown = new Set(units.map(unit => unit.id))
   const links = frame.links.filter(link => shown.has(link.fromId) && shown.has(link.toId))
-  const selectedUnits = new Set(frame.units.filter(unit => unitParts(unit.unit).some(part => part === selectedId)).map(unit => unit.id))
+  const selectedUnits = new Set(frame.units.filter(unit => unitParts(unit.unit).includes(selectedId)).map(unit => unit.id))
 
   // Framing covers both endpoints, so the composition never zooms while scrubbing.
   const bounds = useMemo(() => {

@@ -56,7 +56,7 @@ for (const color of ['light', 'dark'] as const) {
     const failures: string[] = []
     for (const state of states) {
       for (const id of wellFormed) {
-        await page.evaluate(([id, state]) => window.ring(id, state), [id, state] as const)
+        await page.evaluate(([id, state]) => globalThis.ring(id, state), [id, state] as const)
         const [geometry] = await ringGeometry(page.mainFrame(), id)
         if (!geometry) {
           failures.push(`${id} (${state}): no unit`)
@@ -64,8 +64,8 @@ for (const color of ['light', 'dark'] as const) {
         }
         const report = await ringPixelReport(page, page.mainFrame(), geometry, {
           label: `${id} (${state})`,
-          ring: () => page.evaluate(([id, state]) => window.ring(id, state), [id, state] as const),
-          clear: () => page.evaluate(() => window.ring(null)),
+          ring: () => page.evaluate(([id, state]) => globalThis.ring(id, state), [id, state] as const),
+          clear: () => page.evaluate(() => globalThis.ring(null)),
         })
         failures.push(...report.failures)
       }
@@ -76,10 +76,10 @@ for (const color of ['light', 'dark'] as const) {
 
 /** The `rings` check's failures for `id`, selected. */
 async function check(page: Page, id: string): Promise<string[]> {
-  await page.evaluate(() => window.ring(null))
-  await page.evaluate(id => window.probe('ringNeutral', id), id)
-  await page.evaluate(id => window.ring(id, 'selected'), id)
-  return page.evaluate(id => window.probe<string[]>('rings', {id, state: 'selected'}), id)
+  await page.evaluate(() => globalThis.ring(null))
+  await page.evaluate(id => globalThis.probe('ringNeutral', id), id)
+  await page.evaluate(id => globalThis.ring(id, 'selected'), id)
+  return page.evaluate(id => globalThis.probe<string[]>('rings', {id, state: 'selected'}), id)
 }
 
 test('the rings check passes well-formed items and names the fix for ill-formed ones', async ({page}) => {
@@ -108,7 +108,7 @@ test('the rings check passes well-formed items and names the fix for ill-formed 
 
 test('a ring is styling on the item: it moves, scales and scrolls with it in the same frame', async ({page}) => {
   await open(page, 'approach=sdk')
-  await page.evaluate(() => window.ring('plain', 'selected'))
+  await page.evaluate(() => globalThis.ring('plain', 'selected'))
   const samples = await page.evaluate(
     () =>
       new Promise<{outline: string; offset: string}[]>(resolve => {

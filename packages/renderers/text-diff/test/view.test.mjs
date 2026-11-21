@@ -170,7 +170,7 @@ test('the diff shows every output with both line sets, marked and spoken, and te
 test('without highlighting the diff keeps its content and status cells, and drops only the tint and status words', async () => {
   const {model} = await comparison()
   const strip = markup =>
-    markup.replace(/--emphasis:[^;"]*;?/g, '').replace(/<span class="pk-status-text".*?<\/span><\/span>(?=<\/span><\/header>)/g, '')
+    markup.replaceAll(/--emphasis:[^;"]*;?/g, '').replaceAll(/<span class="pk-status-text".*?<\/span><\/span>(?=<\/span><\/header>)/g, '')
   const on = render(props(model, 1, {highlighting: 1}))
   const off = render(props(model, 1, {highlighting: 0}))
   assert.match(on, /--emphasis:1/)

@@ -13,7 +13,7 @@ export function spreads(value: string): {outer: number; inner: number} {
   const result = {outer: 0, inner: 0}
   if (!value || value === 'none') return result
   for (const shadow of value.split(/,(?![^(]*\))/)) {
-    const colorless = shadow.replace(/(?:rgba?|hsla?|color|oklch|oklab|lab|lch|hwb)\([^()]*\)/gi, '')
+    const colorless = shadow.replaceAll(/(?:rgba?|hsla?|color|oklch|oklab|lab|lch|hwb)\([^()]*\)/gi, '')
     const color = /(?:rgba?|hsla?|color|oklch|oklab|lab|lch|hwb)\([^()]*\)/i.exec(shadow)?.[0] ?? 'black'
     const [x = 0, y = 0, blur = 0, spread = 0] = [...colorless.matchAll(/-?[\d.]+(?:px)?/g)].map(match => px(match[0]))
     if (Math.abs(x) > 0.01 || Math.abs(y) > 0.01 || blur > 0.01 || spread <= 0.01 || colorAlpha(color) <= 0.01) continue

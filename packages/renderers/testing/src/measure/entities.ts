@@ -70,8 +70,8 @@ const stagePadding = 12
  */
 export function contentTop(root: Element = document.body): ContentTop {
   const tokens = getComputedStyle(document.documentElement)
-  const inset = parseFloat(tokens.getPropertyValue('--projections-stage-inset'))
-  const overlaid = parseFloat(tokens.getPropertyValue('--projections-stage-inset-top'))
+  const inset = Number.parseFloat(tokens.getPropertyValue('--projections-stage-inset'))
+  const overlaid = Number.parseFloat(tokens.getPropertyValue('--projections-stage-inset-top'))
   const allowance = Math.max(Number.isFinite(inset) && inset >= 0 ? inset : stagePadding, Number.isFinite(overlaid) ? overlaid : 0)
   let best: ContentTop = {top: Infinity, element: 'nothing', allowance}
   for (const element of root.querySelectorAll('[data-entity-id], svg, [data-projections-content], [data-zoom]')) {

@@ -57,7 +57,7 @@ async function barSentence(scenario, controls = {}) {
   const facts = codeStatisticsFacts({init, model, controls, rendererName: 'code-statistics'})
   return {sentence: summarySentence(rendererSummary(init, codeStatisticsNouns, facts).items, 'en-US'), before, after, comparison}
 }
-const words = html => plain(html.replace(/<span class="sr-only">.*?<\/span>/g, ''))
+const words = html => plain(html.replaceAll(/<span class="sr-only">.*?<\/span>/g, ''))
 /** Each bar row's markup, by entity ID. */
 const rows = html =>
   new Map(
@@ -141,7 +141,7 @@ test('every language of either revision keeps one row with its Before count stru
 test('highlighting off draws diff mode plain but keeps every count and row', async () => {
   const on = await renderDiff('gateway')
   const off = await renderDiff('gateway', {highlighting: 0})
-  assert.equal(words(off.html), words(on.html).replace(/Modified|Removed|Added/g, ''))
+  assert.equal(words(off.html), words(on.html).replaceAll(/Modified|Removed|Added/g, ''))
   assert.doesNotMatch(off.html, /stat-gain|stat-loss|data-change-status/)
   for (const row of rows(off.html).values()) if (/data-change=/.test(row)) assert.match(row, /--emphasis:0/)
 })

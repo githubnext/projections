@@ -62,9 +62,9 @@ export async function cornerBox(
       const matrix = element.getScreenCTM()
       const unit = matrix ? Math.hypot(matrix.a, matrix.b) : 1
       // A dashed outline has no thickness to keep around its curve.
-      const stroke = style.stroke === 'none' || style.strokeDasharray !== 'none' ? 0 : parseFloat(style.strokeWidth) * unit
+      const stroke = style.stroke === 'none' || style.strokeDasharray !== 'none' ? 0 : Number.parseFloat(style.strokeWidth) * unit
       // CSS `rx` wins where it applies, `0px` included; the attribute only where it is `auto` or unset.
-      const css = parseFloat(style.getPropertyValue('rx'))
+      const css = Number.parseFloat(style.getPropertyValue('rx'))
       const rx = Number.isNaN(css) ? element.rx.baseVal.value : css
       return {
         svg: true,
@@ -76,20 +76,20 @@ export async function cornerBox(
       }
     }
     const radius = (value: string) =>
-      value.endsWith('%') ? (parseFloat(value) / 100) * Math.min(rect.width, rect.height) : parseFloat(value) || 0
+      value.endsWith('%') ? (Number.parseFloat(value) / 100) * Math.min(rect.width, rect.height) : Number.parseFloat(value) || 0
     // Its layout width, before any transform on it or its ancestors, so the scale below takes them in.
     const laid = element instanceof HTMLElement && element.offsetWidth ? element.offsetWidth : rect.width
     const radii = [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].map(
       radius,
     )
     const borders = (['top', 'right', 'bottom', 'left'] as const).map(side =>
-      style.getPropertyValue(`border-${side}-style`) === 'solid' ? parseFloat(style.getPropertyValue(`border-${side}-width`)) : 0,
+      style.getPropertyValue(`border-${side}-style`) === 'solid' ? Number.parseFloat(style.getPropertyValue(`border-${side}-width`)) : 0,
     )
     if (frame !== undefined) return {svg: false, width: laid, height: rect.height, radii, borders: [frame, frame, frame, frame], outset: 0}
-    const outline = style.outlineStyle === 'solid' ? parseFloat(style.outlineWidth) : 0
+    const outline = style.outlineStyle === 'solid' ? Number.parseFloat(style.outlineWidth) : 0
     if (borders.some(width => width > 0) || !outline) return {svg: false, width: laid, height: rect.height, radii, borders, outset: 0}
     // An outline's outer edge lies its offset plus its width outside the box, and its corners follow the radii there.
-    const outset = parseFloat(style.outlineOffset) + outline
+    const outset = Number.parseFloat(style.outlineOffset) + outline
     return {svg: false, width: laid, height: rect.height, radii, borders: [outline, outline, outline, outline], outset}
   }, frame)
   // How much it is scaled, by a transform on it, an ancestor or the host's frame (a transformed stage): the box in the

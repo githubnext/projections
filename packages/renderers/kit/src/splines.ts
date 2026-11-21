@@ -266,7 +266,7 @@ export function arrowEnding(
       const onAxis = {x: tip.x - direction.x * run, y: tip.y - direction.y * run}
       const shaft = [...points.slice(0, -4), onAxis, ...lineSpline(onAxis, base).slice(1)]
       if (points.length > 4) {
-        shaft[shaft.length - 5] = {x: shaft[shaft.length - 5]!.x + onAxis.x - p.x, y: shaft[shaft.length - 5]!.y + onAxis.y - p.y}
+        shaft[shaft.length - 5] = {x: shaft.at(-5)!.x + onAxis.x - p.x, y: shaft.at(-5)!.y + onAxis.y - p.y}
       }
       return {shaft, tip, direction, base, head: head.path}
     }

@@ -27,7 +27,7 @@ export interface KindLineText {
  */
 export function entityKindLine(kind: string): KindLineText {
   if (!/^[a-z]+(?:[-_ ][a-z]+)*$/.test(kind)) return {text: kind, identifier: true}
-  return {text: sentenceCase(kind.replace(/[-_]+/g, ' '))}
+  return {text: sentenceCase(kind.replaceAll(/[-_]+/g, ' '))}
 }
 
 /**

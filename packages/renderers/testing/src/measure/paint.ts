@@ -34,7 +34,7 @@ export function normalizeColors(value: string): string {
   if (!value.includes('(')) return value
   const context = canvasContext()
   if (!context) return value
-  return value.replace(/\b(?:rgba?|hsla?|color|oklab|oklch|lab|lch)\([^()]*\)/g, color => {
+  return value.replaceAll(/\b(?:rgba?|hsla?|color|oklab|oklch|lab|lch)\([^()]*\)/g, color => {
     // Canvas keeps `color(srgb …)` as written; spell it as rgba first.
     const srgb = /^color\(srgb\s+([\d.e-]+)\s+([\d.e-]+)\s+([\d.e-]+)(?:\s*\/\s*([\d.e-]+))?\)$/.exec(color)
     const input = srgb
@@ -160,7 +160,7 @@ export function paintOf(element: Element): {paint: string; text: string; categor
   return {paint: paint.join(';'), text: text.join(' '), categories}
 }
 
-export const px = (value: string) => parseFloat(value) || 0
+export const px = (value: string) => Number.parseFloat(value) || 0
 export function colorAlpha(color: string): number {
   if (!color || color === 'transparent' || color === 'none') return 0
   const slash = /\/\s*([\d.]+)(%?)\s*\)$/.exec(color)

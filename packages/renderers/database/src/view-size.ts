@@ -13,8 +13,8 @@ export function useViewSize(view: RefObject<HTMLDivElement | null>) {
     if (!element) return
     const measure = () => {
       const style = getComputedStyle(element)
-      const horizontal = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)
-      const vertical = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
+      const horizontal = Number.parseFloat(style.paddingLeft) + Number.parseFloat(style.paddingRight)
+      const vertical = Number.parseFloat(style.paddingTop) + Number.parseFloat(style.paddingBottom)
       // Laid out for the view's width with or without a scrollbar (which only a zoomed schema has), so zoom never reflows it.
       const width = element.offsetWidth - horizontal
       if (width > 0) setAvailable(Math.floor(width))

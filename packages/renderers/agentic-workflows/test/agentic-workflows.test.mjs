@@ -243,7 +243,7 @@ test('a card says what changed beyond its entries: engine, strict mode, lock, de
   assert.match(plain(markup), /\.github\/workflows\/a\.md/)
   const meta = plain(markup.match(/<p class="aw-meta">.*?<\/p>/)[0])
   for (const text of ['was copilot, now claude', 'was strict mode on, now strict mode off', 'was Lock current, now Lock stale']) {
-    assert.ok(meta.replace(/→/g, '').includes(text), `${text} in ${meta}`)
+    assert.ok(meta.replaceAll('→', '').includes(text), `${text} in ${meta}`)
   }
   // Side by side, an entry changed in place takes its pane's hue while highlighted.
   const pane = progress =>

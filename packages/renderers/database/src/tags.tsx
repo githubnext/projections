@@ -78,8 +78,8 @@ function useSlotSizes(tags: readonly Tag[], room: RefObject<HTMLDivElement | nul
           return Math.ceil(Math.max(size(item).width, status ? size(status).width : 0))
         }),
         height: Math.max(0, ...items.map(item => Math.ceil(size(item).height))),
-        columnGap: parseFloat(style.columnGap) || 0,
-        rowGap: parseFloat(style.rowGap) || 0,
+        columnGap: Number.parseFloat(style.columnGap) || 0,
+        rowGap: Number.parseFloat(style.rowGap) || 0,
       })
     }
     measure()

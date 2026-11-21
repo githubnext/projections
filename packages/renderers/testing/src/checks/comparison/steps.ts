@@ -39,7 +39,7 @@ export const stepChecks: Pick<Checks, 'step-holds' | 'highlight-scope'> = {
             b = frame.get(key)
           if (failures.length >= limit) return failures
           if (!a || !b) failures.push(`In the hold at ${end}, "${key}" ${a ? 'disappears' : 'appears'} at ${where}.`)
-          else if (a.box.join() !== b.box.join() || a.opacity !== b.opacity || looks(a) !== looks(b)) {
+          else if (a.box.join(',') !== b.box.join(',') || a.opacity !== b.opacity || looks(a) !== looks(b)) {
             failures.push(`In the hold at ${end}, "${key}" changes at ${where}: ${difference(a, b)}.`)
           }
         }

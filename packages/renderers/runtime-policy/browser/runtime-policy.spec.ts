@@ -264,7 +264,7 @@ test('each section is a titled panel: its title in the UI font in a band inside 
         const band = header.getBoundingClientRect()
         const title = header.querySelector<HTMLElement>('.pk-group-label')!
         const table = panel.querySelector<HTMLElement>(':scope > .rp-table')!.getBoundingClientRect()
-        const border = parseFloat(getComputedStyle(panel).borderTopWidth)
+        const border = Number.parseFloat(getComputedStyle(panel).borderTopWidth)
         // The subject's icon leads the title at the band's inset, muted, centred on the title's capitals: the cap
         // height's middle is above the baseline by half the font's E ascent, and the baseline is the text box's top
         // plus the font's ascent.
@@ -288,7 +288,7 @@ test('each section is a titled panel: its title in the UI font in a band inside 
           ],
           muted: getComputedStyle(icon).color === getComputedStyle(view.querySelector('.rp-head > .rp-cell')!).color,
           centred: Math.abs((glyph.top + glyph.bottom) / 2 - cap),
-          inset: Math.abs(glyph.left - (cell.getBoundingClientRect().left + parseFloat(getComputedStyle(cell).paddingLeft))),
+          inset: Math.abs(glyph.left - (cell.getBoundingClientRect().left + Number.parseFloat(getComputedStyle(cell).paddingLeft))),
           // The band is the panel's first row, inside its edge, and the table follows it, reaching the panel's sides.
           banded: Math.abs(band.top - box.top - border) < 0.5 && band.left >= box.left && band.right <= box.right,
           table:

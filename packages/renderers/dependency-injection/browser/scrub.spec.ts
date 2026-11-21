@@ -167,7 +167,7 @@ test('the composition opens fitted to the frame (or at the 8 px text floor), nev
             .filter(text => text.textContent?.trim() && text.getClientRects().length)
             .map(
               text =>
-                parseFloat(getComputedStyle(text).fontSize) *
+                Number.parseFloat(getComputedStyle(text).fontSize) *
                 Math.hypot((text as SVGGraphicsElement).getScreenCTM()!.a, (text as SVGGraphicsElement).getScreenCTM()!.b),
             ),
         ),

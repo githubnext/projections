@@ -85,10 +85,10 @@ export function documentOrder(entity: Entity): string[] {
 export function nestedMode(capabilities: RendererCapabilities, preferred?: string): ComparisonMode {
   const supported = supportedComparisonModes(capabilities)
   // Two panes are the host's: a nested renderer is one frame, so it can only animate or draw its diff.
-  const single: ComparisonMode[] = supported.filter(mode => mode === 'diff' || mode === 'animated')
+  const single: Set<ComparisonMode> = new Set(supported.filter(mode => mode === 'diff' || mode === 'animated'))
   const wanted = comparisonModes.find(mode => mode === preferred)
-  if (wanted && single.includes(wanted)) return wanted
-  return single.includes('diff') ? 'diff' : 'animated'
+  if (wanted && single.has(wanted)) return wanted
+  return single.has('diff') ? 'diff' : 'animated'
 }
 
 /** The resting position of an animated nested comparison: the after revision, its changes emphasized. */

@@ -12,7 +12,7 @@ import type {RingGeometry} from '../rings.js'
 export async function ringGeometry(frame: Frame, id: string, {focused = false}: {focused?: boolean} = {}): Promise<RingGeometry[]> {
   return frame.evaluate(
     ([id, focused]) => {
-      const px = (value: string) => parseFloat(value) || 0
+      const px = (value: string) => Number.parseFloat(value) || 0
       const unitOf = (element: Element): Element => {
         let unit = element
         for (let cursor: Element | null = element; cursor; cursor = cursor.parentElement?.closest('[data-entity-id]') ?? null) {

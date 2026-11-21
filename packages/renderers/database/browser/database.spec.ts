@@ -265,7 +265,7 @@ test('keys of no table wrap centered and balanced, with no holes', async ({page}
   for (const progress of samples(20, {roundTrip: true})) {
     await renderer.seek(progress)
     const lines = await renderer.frame.locator('.database-tags').evaluate(room => {
-      const gap = parseFloat(getComputedStyle(room).columnGap)
+      const gap = Number.parseFloat(getComputedStyle(room).columnGap)
       const origin = room.getBoundingClientRect()
       const slots = [...room.querySelectorAll<HTMLElement>(':scope > .database-tag-slot')]
         .filter(slot => getComputedStyle(slot).visibility !== 'hidden')
@@ -370,7 +370,7 @@ test('table, column, type and key names are monospace; status stays whole in its
     const shape = await name.evaluate(element => ({
       fits: element.scrollWidth <= element.clientWidth + 1,
       ellipsis: getComputedStyle(element).textOverflow === 'ellipsis',
-      lines: Math.round(element.getBoundingClientRect().height / parseFloat(getComputedStyle(element).lineHeight)),
+      lines: Math.round(element.getBoundingClientRect().height / Number.parseFloat(getComputedStyle(element).lineHeight)),
     }))
     expect(shape.fits && !shape.ellipsis, `${text} is whole`).toBe(true)
     expect(shape.lines, `${text} wraps`).toBeGreaterThan(1)
@@ -440,7 +440,7 @@ test('status appears in reserved space: nothing moves with highlighting, and eve
 
 test("a column row's status is a two-character icon cell, so names and types keep nearly all their room", async ({page}) => {
   const renderer = await openRenderer(page, {renderer: 'database', before, after, progress: 0})
-  const end = (await renderer.state()).steps.filter(value => value > 0 && value < 1)[0]!
+  const end = (await renderer.state()).steps.find(value => value > 0 && value < 1)!
   await renderer.seek(end, {highlighting: 1})
   const measured = await renderer.frame.locator('.database-view').evaluate(view =>
     [...view.querySelectorAll<HTMLElement>('.database-column')].map(row => {
@@ -455,7 +455,7 @@ test("a column row's status is a two-character icon cell, so names and types kee
       })()
       return {
         id: row.dataset.entityId!,
-        room: cell.getBoundingClientRect().width + parseFloat(getComputedStyle(row).columnGap),
+        room: cell.getBoundingClientRect().width + Number.parseFloat(getComputedStyle(row).columnGap),
         ch,
         glyph: [...cell.querySelectorAll('[data-change-status] [data-icon]')].map(icon => icon.getAttribute('data-icon')).join(' '),
         title: cell.title,

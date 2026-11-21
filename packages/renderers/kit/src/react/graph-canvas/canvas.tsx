@@ -41,7 +41,7 @@ function statusNode(row: EntityChange<Entity>): TransitionNode {
 function useCardTextScale(): number {
   const [scale] = useState(() => {
     if (typeof document === 'undefined') return 1
-    const size = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--projections-font-size-xs'))
+    const size = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--projections-font-size-xs'))
     return size > 0 ? Math.round((size / 12) * 1000) / 1000 : 1
   })
   return scale

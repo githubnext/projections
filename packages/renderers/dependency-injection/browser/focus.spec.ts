@@ -23,7 +23,7 @@ const cardState = (card: Element): CardState => {
   const outlined = [card, ...card.querySelectorAll('*')]
     .filter(node => {
       const style = getComputedStyle(node)
-      return style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) > 0
+      return style.outlineStyle !== 'none' && Number.parseFloat(style.outlineWidth) > 0
     })
     .map(node => node.getAttribute('class') ?? node.tagName)
   // The ring is the card surface's own stroke: the surface is the marked edge, and its stroke shows the state.

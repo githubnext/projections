@@ -40,7 +40,7 @@ const pointerSegments = (path: string): string[] =>
   path
     .split('/')
     .slice(1)
-    .map(segment => segment.replace(/~1/g, '/').replace(/~0/g, '~'))
+    .map(segment => segment.replaceAll('~1', '/').replaceAll('~0', '~'))
 
 /**
  * A varied value's name for display: its pointer below `/data/`, segments

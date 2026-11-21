@@ -23,15 +23,15 @@ export function affordanceFailures(root: Element): string[] {
     }
     return unit
   }
-  const marked = new Set([
-    ...root.querySelectorAll(
+  const marked = new Set(
+    root.querySelectorAll(
       '[data-projections-hovered], [data-entity-id].selected, [data-entity-id][aria-pressed="true"], [data-entity-id][aria-current="true"]',
     ),
-  ])
+  )
   for (const element of marked) {
     const id = element.getAttribute('data-entity-id') ?? ''
     const style = getComputedStyle(element)
-    const outline = style.outlineStyle !== 'none' ? parseFloat(style.outlineWidth) || 0 : 0
+    const outline = style.outlineStyle !== 'none' ? Number.parseFloat(style.outlineWidth) || 0 : 0
     const unit = unitOf(element)
     const box = element.getBoundingClientRect(),
       outer = unit.getBoundingClientRect()
@@ -47,13 +47,13 @@ export function affordanceFailures(root: Element): string[] {
         style.stroke !== 'none' &&
         style.stroke !== 'transparent' &&
         style.stroke !== 'rgba(0, 0, 0, 0)' &&
-        (parseFloat(style.strokeWidth) || 0) > 0
+        (Number.parseFloat(style.strokeWidth) || 0) > 0
       ) {
         failures.push(`SVG part ${id} is stroked inside unit ${unit.getAttribute('data-entity-id')}`)
       }
     }
     // The affordance's own extent: an outline extends by its width plus its offset (a negative offset draws inside).
-    const grow = outline > 0 ? Math.max(0, outline + (parseFloat(style.outlineOffset) || 0)) : 0
+    const grow = outline > 0 ? Math.max(0, outline + (Number.parseFloat(style.outlineOffset) || 0)) : 0
     const tolerance = 0.5
     if (
       box.left - grow < outer.left - tolerance ||

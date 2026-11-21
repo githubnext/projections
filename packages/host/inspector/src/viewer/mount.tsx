@@ -127,6 +127,7 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
       // input since nothing done there can reach the server, and keeps asking, so it resumes if the same viewer answers again.
       stop: () => {
         store.set({status: 'Viewer stopped', stopped: true})
+        store.focus({type: 'stopped'})
         disable()
       },
       resume: ({state: next}) => {

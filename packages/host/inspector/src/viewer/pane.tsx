@@ -18,7 +18,8 @@ export function readPanePinned(): boolean {
 
 /** Pins or closes the viewer's pane, and remembers it; `focus` is where focus goes (the pane, or back to the menu). */
 export function setPanePinned(store: Store, pinned: boolean): void {
-  store.set({pinned, paneFocus: pinned ? 'pane' : 'menu'})
+  store.set({pinned})
+  store.focus({type: pinned ? 'pinned' : 'closed'})
   try {
     if (pinned) globalThis.localStorage?.setItem(panePinnedKey, 'true')
     else globalThis.localStorage?.removeItem(panePinnedKey)
@@ -42,31 +43,28 @@ export function usePaneShown(store: Store, room: boolean): boolean {
  * menu does; closing it returns to the menu.
  */
 export function ViewerPane({store, onChoose}: {store: Store; onChoose: (projection: string) => void}) {
-  const {state, choosing, projections, paneFocus, focusWithin, stopped} = useSyncExternalStore(store.subscribe, store.get, store.get)
+  const {state, choosing, projections, focus, stopped} = useSyncExternalStore(store.subscribe, store.get, store.get)
   const shown = usePaneShown(store, usePaneRoom())
-  // The pane takes focus once, when pinned: not again when it comes back as the page widens.
+  // Shown while focus waits for it, the pane takes it (`autoFocus`), then says so: once, not again as it comes back.
   useEffect(() => {
-    if (shown && paneFocus === 'pane') store.set({paneFocus: undefined})
-  }, [shown, paneFocus, store])
+    if (shown && focus.kind === 'toPane') store.focus({type: 'taken'})
+  }, [shown, focus.kind, store])
   // A pane that goes away while it holds focus (the page narrowing below its room) hands focus to the title's menu,
-  // which takes its place, rather than leaving it on the page.
+  // which takes its place, where that menu is there to take it: not while the server is gone, nor with one projection.
   const pane = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
-    if (shown || focusWithin !== 'pane') return
-    // Only to a menu that is there to take it: not while the server is gone, nor with one projection.
-    const menu = !stopped && projections.length > 1
+    if (shown || focus.kind !== 'pane') return
     const lost = !document.activeElement || document.activeElement === document.body
-    store.set({focusWithin: undefined, ...(lost && menu ? {paneFocus: 'menu' as const} : {})})
-  }, [shown, focusWithin, stopped, projections.length, store])
+    store.focus({type: 'gone', place: 'pane', lost, replaced: !stopped && projections.length > 1})
+  }, [shown, focus.kind, stopped, projections.length, store])
   if (!shown) return null
   return (
     <div
       ref={pane}
       className="pi-viewer-pane-slot pj:contents"
-      onFocus={() => store.set({focusWithin: 'pane'})}
+      onFocus={() => store.focus({type: 'entered', place: 'pane'})}
       onBlur={event => {
-        if (!pane.current?.contains(event.relatedTarget as Node | null) && store.get().focusWithin === 'pane')
-          store.set({focusWithin: undefined})
+        if (!pane.current?.contains(event.relatedTarget as Node | null)) store.focus({type: 'left', place: 'pane'})
       }}
     >
       <ProjectionsPane
@@ -80,7 +78,7 @@ export function ViewerPane({store, onChoose}: {store: Store; onChoose: (projecti
         current={choosing ?? state?.projection ?? undefined}
         onChoose={onChoose}
         onClose={() => setPanePinned(store, false)}
-        autoFocus={paneFocus === 'pane'}
+        autoFocus={focus.kind === 'toPane'}
       />
     </div>
   )

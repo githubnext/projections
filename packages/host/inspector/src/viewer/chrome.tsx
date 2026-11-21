@@ -8,6 +8,8 @@ import {StartupShell} from '../mount.js'
 import type {SwitcherItem} from '../shell/switcher.js'
 import type {ViewerState} from './state.js'
 import {readPanePinned, setPanePinned, usePaneShown} from './pane.js'
+import {paneFocusMachine} from './pane-focus.js'
+import type {PaneFocus, PaneFocusEvent} from './pane-focus.js'
 import {ViewerTitle} from './title.js'
 import {usePaneRoom} from '@githubnext/projections-host'
 
@@ -30,10 +32,8 @@ interface Snapshot {
   noticeDetail?: string | undefined
   /** Whether the person pinned the projections pane (viewer/pane.tsx), remembered across reloads. */
   pinned: boolean
-  /** Where focus goes once the pane opens or closes: into it, or back to the title's menu. */
-  paneFocus?: 'pane' | 'menu' | undefined
-  /** Which of the two holds focus, if either, so the one that replaces it can take focus when it goes away. */
-  focusWithin?: 'pane' | 'menu' | undefined
+  /** Where focus is, and where it goes next, between the pane and the title's menu (pane-focus.ts). */
+  focus: PaneFocus
 }
 
 /** A tiny store the header reads. */
@@ -45,14 +45,20 @@ export function createStore() {
     projections: [],
     colorMode: 'light',
     pinned: readPanePinned(),
+    focus: {kind: 'elsewhere'},
   }
   const listeners = new Set<() => void>()
+  const set = (next: Partial<Snapshot>) => {
+    if (Object.entries(next).every(([key, value]) => snapshot[key as keyof Snapshot] === value)) return
+    snapshot = {...snapshot, ...next}
+    for (const listener of listeners) listener()
+  }
   return {
     get: () => snapshot,
-    set(next: Partial<Snapshot>) {
-      if (Object.entries(next).every(([key, value]) => snapshot[key as keyof Snapshot] === value)) return
-      snapshot = {...snapshot, ...next}
-      for (const listener of listeners) listener()
+    set,
+    /** Moves focus between the pane and the menu (`paneFocusMachine`). */
+    focus(event: PaneFocusEvent) {
+      set({focus: paneFocusMachine.transition(snapshot.focus, event).state})
     },
     subscribe(listener: () => void) {
       listeners.add(listener)
@@ -71,8 +77,11 @@ export type Store = ReturnType<typeof createStore>
  * control (`end`) closes the row.
  */
 export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactNode; onChoose?: (projection: string) => void}) {
-  const {state, status, stopped, projections, colorMode, choosing, failed, notice, noticeDetail, paneFocus, focusWithin} =
-    useSyncExternalStore(store.subscribe, store.get, store.get)
+  const {state, status, stopped, projections, colorMode, choosing, failed, notice, noticeDetail, focus} = useSyncExternalStore(
+    store.subscribe,
+    store.get,
+    store.get,
+  )
   const shown = choosing ?? state?.projection ?? undefined
   const title = shown
     ? choosing
@@ -96,15 +105,12 @@ export function ViewerHeader({store, end, onChoose}: {store: Store; end?: ReactN
         colorMode={colorMode}
         onChoose={stopped || paneShown ? undefined : onChoose}
         onPin={paneRoom && !stopped ? () => setPanePinned(store, true) : undefined}
-        focus={paneFocus === 'menu'}
-        onFocused={() => store.set({paneFocus: undefined})}
-        menuFocused={focusWithin === 'menu'}
-        onMenuFocus={inside => {
-          if (inside) store.set({focusWithin: 'menu'})
-          else if (store.get().focusWithin === 'menu') store.set({focusWithin: undefined})
-        }}
+        focus={focus.kind === 'toMenu'}
+        onFocused={() => store.focus({type: 'taken'})}
+        menuFocused={focus.kind === 'menu'}
+        onMenuFocus={inside => store.focus({type: inside ? 'entered' : 'left', place: 'menu'})}
         // The pane that replaces the menu takes the focus the menu held.
-        onFocusLost={paneShown ? () => store.set({paneFocus: 'pane'}) : undefined}
+        onMenuGone={lost => store.focus({type: 'gone', place: 'menu', lost, replaced: paneShown})}
       />
       {line && (
         <span

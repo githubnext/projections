@@ -11,7 +11,7 @@ import type {SwitcherItem} from '../shell/switcher.js'
  * click): a search by title or ID over the list, the current one checked, then "Pin projections pane" (`onPin`),
  * which turns the list into a pane beside the stage (viewer/pane.tsx). With fewer than two projections, the pane
  * pinned, or while the page has lost its server, it is the title alone. `focus` moves focus to it once the pane closes;
- * a menu that goes away while it holds focus (the pane pinned again as the page widens) says so (`onFocusLost`).
+ * a menu that goes away while it holds focus (the pane pinned again as the page widens) says so (`onMenuGone`).
  */
 export function ViewerTitle({
   title,
@@ -24,7 +24,7 @@ export function ViewerTitle({
   onFocused,
   menuFocused = false,
   onMenuFocus,
-  onFocusLost,
+  onMenuGone,
 }: {
   title: string
   current: string | undefined
@@ -41,8 +41,8 @@ export function ViewerTitle({
   menuFocused?: boolean
   /** Focus came into the menu (`true`) or left it (`false`). */
   onMenuFocus?: ((inside: boolean) => void) | undefined
-  /** The menu went away while it held focus, leaving focus on the page. */
-  onFocusLost?: (() => void) | undefined
+  /** The menu went away while it held focus; `lost`: focus was left on the page. */
+  onMenuGone?: ((lost: boolean) => void) | undefined
 }) {
   const id = useId()
   const trigger = useRef<HTMLButtonElement>(null)
@@ -61,9 +61,8 @@ export function ViewerTitle({
   const slot = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
     if (hasMenu || !menuFocused) return
-    onMenuFocus?.(false)
-    if (!document.activeElement || document.activeElement === document.body) onFocusLost?.()
-  }, [hasMenu, menuFocused, onMenuFocus, onFocusLost])
+    onMenuGone?.(!document.activeElement || document.activeElement === document.body)
+  }, [hasMenu, menuFocused, onMenuGone])
   useEffect(() => {
     if (!focus || !hasMenu) return
     trigger.current?.focus()

@@ -9,6 +9,7 @@ import {
   rovingIndex,
   scopeChoice,
   summaryCountText,
+  summaryFilterable,
   summaryToggle,
   summaryToggleTitle,
   useProjection,
@@ -97,6 +98,9 @@ function Summary({projection: p}: {projection: ProjectionController}): ReactNode
   return (
     <ul aria-label="Summary" style={{...row, listStyle: 'none', padding: 0}}>
       {p.summary.map(figure => {
+        const text = summaryCountText(figure.count, figure.noun)
+        // A fact that doesn't name its items has nothing to filter to: it is only a figure.
+        if (!summaryFilterable(figure)) return <li key={figure.key}>{text}</li>
         const {pressed, next} = summaryToggle(p.summaryFilter, figure)
         return (
           <li key={figure.key}>
@@ -106,7 +110,7 @@ function Summary({projection: p}: {projection: ProjectionController}): ReactNode
               title={summaryToggleTitle(figure, pressed)}
               onClick={() => p.setSummaryFilter(next)}
             >
-              {summaryCountText(figure.count, figure.noun)}
+              {text}
             </button>
           </li>
         )
@@ -196,7 +200,11 @@ function CustomHost({prepared, colorMode, mode}: {prepared: PreparedFixture; col
         <ul aria-label={viewNames[view]} style={{fontSize: 14}}>
           {p.visibleRows.map(item => (
             <li key={item.id}>
-              <button type="button" aria-pressed={item.id === p.selectedId} onClick={() => p.select(item.id)}>
+              <button
+                type="button"
+                aria-pressed={item.id === p.selectedId}
+                onClick={() => p.select(item.id === p.selectedId ? null : item.id)}
+              >
                 {item.label}
               </button>
             </li>

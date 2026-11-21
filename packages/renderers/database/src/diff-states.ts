@@ -107,9 +107,10 @@ export function analyse(model: ComparisonModel): Analysis {
   for (const [column, marker] of union.markers) {
     if (!marker.key || !owner.has(column)) continue
     owner.set(marker.key, owner.get(column)!)
-    // The key the marker stands for has no row of its own: its changes are said under its column.
+    // The key the marker stands for has no row of its own: its changes are said under its column, named for that key
+    // (its PK or FK label; the marker's title names every role the column has).
     const key = rows.get(marker.key)
-    const found = key && both(key) ? markerChanges(key, marker.title) : []
+    const found = key && both(key) ? markerChanges(key, marker.label === 'PK' ? 'Primary key' : 'Foreign key') : []
     if (found.length) lines.set(column, [...(lines.get(column) ?? []), ...found])
   }
   return {rows, before, after, union, state: states.union, owner, lines}

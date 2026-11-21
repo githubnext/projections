@@ -219,6 +219,13 @@ test("a foreign key's referential actions read with their values, as each extrac
     {key: 'on-update', word: 'On update changed', before: 'default', after: 'Cascade'},
   ])
   assert.equal(referentialAction({callable: 'django.db.models.deletion.PROTECT'}), 'PROTECT')
+  // Two callables of the same name in different modules are a change, read in full.
+  assert.deepEqual(
+    keyChanges(change(key({onDelete: {callable: 'old_policy.PROTECT'}}), key({onDelete: {callable: 'new_policy.PROTECT'}}))),
+    [{key: 'on-delete', word: 'On delete changed', before: 'old_policy.PROTECT', after: 'new_policy.PROTECT'}],
+  )
+  // Unset and `null` both mean the default: no change.
+  assert.deepEqual(keyChanges(change(key({onDelete: null}), key({}))), [])
   assert.equal(referentialAction(null), 'default')
   assert.equal(referentialAction('SET NULL'), 'SET NULL')
 })
@@ -242,5 +249,27 @@ test("a single-column foreign key's change is said under its column, never as th
     databaseFacts(model).filter(fact => fact.id !== 'enum-values'),
     [],
     'no column reads as renamed or retyped',
+  )
+})
+
+test("a marker key's changes are named for that key, though its column has other roles", async () => {
+  // OrderLine.orderId is in the composite primary key and has its own foreign key: only that key is renamed.
+  const before = load(scenarios.find(item => item.id === 'prisma-shop').before)
+  const after = structuredClone(before)
+  const key = after.entities.find(
+    entity =>
+      entity.kind === 'constraint' &&
+      entity.data?.type === 'foreign-key' &&
+      entity.data.table === 'table:/OrderLine' &&
+      entity.data.columns?.[0] === 'orderId',
+  )
+  key.data = {...key.data, databaseName: 'OrderLine_order_fkey'}
+  const model = comparisonModel(before, after, await engine.compare(before, after))
+  const {union, lines} = analyse(model)
+  const [column, marker] = [...union.markers].find(([, item]) => item.key === row(model, key.id).id)
+  assert.notEqual(marker.title, 'Foreign key', 'the marker stands for more than the key')
+  assert.deepEqual(
+    lines.get(column).map(line => line.word),
+    ['Foreign key renamed'],
   )
 })

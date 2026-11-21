@@ -69,6 +69,7 @@ launcher's absolute path.
 | `test [target] [--affected] [--rust] [--browser <project>] [--filter <name>]` | Unit and Rust tests; one browser project at a time, at most 2 workers; `--filter` runs only the tests whose name matches |
 | `generated [check]` | The generated files, their generators, and whether they are current |
 | `ci explain [files…] [--base <ref>]` | What CI runs for a change and why: each file's class and rule, how each workspace and crate was reached, every job and suite (run or skipped) with its rules traced, and the checks with their suites, shards and filters |
+| `ci replay [--base <ref>] [--commits <n>]` | Before changing the CI rules or planner: the plans of the last merged pull requests and of every tracked file alone, under the rules at `--base` and in the working tree, compared by check and priced in runner-minutes |
 | `fix` | Formatters and offline regenerators, then what changed |
 | `update shadcn [components…] [--check\|--dry-run]` | Three-way merges the vendored shadcn/ui components with an upstream release (`--version`, `--unreleased`); needs the network, so `fix` never runs it |
 | `install [--only cli,vscode,npm] [--project <dir>]` | Builds the checkout and installs it for early access: links `projections` into `~/.local/bin`, packages and installs the VS Code extension (`--editor code\|code-insiders\|none`), packs `@githubnext/projections` to `dist/dogfood/githubnext-projections.tgz` and points a renderer package at it; `--dry-run` prints the plan |

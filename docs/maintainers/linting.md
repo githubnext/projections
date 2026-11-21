@@ -56,6 +56,7 @@ Each option allows one defined idiom and nothing else.
 | `class-methods-use-this`        | not interface implementations or overrides    | The interface decides the method is an instance method.                                                                                     |
 | `curly`                         | `multi-line`                                  | Braces are required when the body is on its own line, where a second statement can hide; one-line guards (`if (!x) return`) can't hide one. |
 | `no-console`                    | shipped `src` only                            | CLIs, scripts and tests print by design.                                                                                                    |
+| `no-implicit-coercion`          | allows `!!`                                   | `!!value` narrows `value` in TypeScript; `Boolean(value)` doesn't, so its fix breaks type checking.                                         |
 
 ## Rules that stay off
 

@@ -18,6 +18,8 @@ import {createDemoRepository} from './demo-repo.mjs'
 function desktopDisplay() {
   const script = [
     "$ErrorActionPreference = 'Stop'",
+    // Without a console, PowerShell would write its progress to the log as CLIXML.
+    "$ProgressPreference = 'SilentlyContinue'",
     'Set-DisplayResolution -Width 1920 -Height 1080 -Force',
     `Add-Type -Namespace Win32 -Name User -MemberDefinition '[DllImport("user32.dll")] public static extern bool SystemParametersInfo(uint action, uint parameter, IntPtr value, uint flags);'`,
     // SPI_SETCLIENTAREAANIMATION, on, saved and broadcast.

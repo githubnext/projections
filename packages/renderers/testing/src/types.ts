@@ -8,6 +8,7 @@ import type {
   RendererLegend,
   SummaryItem,
   RendererOptions,
+  RendererFocus,
   RendererProjection,
 } from '@githubnext/projections-renderer-sdk/protocol'
 
@@ -39,6 +40,8 @@ export interface StageLoad {
   direction?: 1 | -1
   highlighting?: StageHighlighting
   selection?: string | null
+  /** The host's focus for the opening view, sent in `init` (`RendererFocus`). */
+  focus?: RendererFocus
   options?: RendererOptions
   colorMode?: ColorMode
   reducedMotion?: boolean

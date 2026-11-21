@@ -21,7 +21,12 @@ export function IconStyles({children}: {children: ReactNode}) {
     const pending = [...document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')].filter(link => !link.sheet)
     let current = true
     void Promise.all(
-      pending.map(link => new Promise(settle => ['load', 'error'].forEach(event => link.addEventListener(event, settle, {once: true})))),
+      pending.map(
+        link =>
+          new Promise(settle => {
+            ;['load', 'error'].forEach(event => link.addEventListener(event, settle, {once: true}))
+          }),
+      ),
     ).then(() => current && setReady(true))
     return () => {
       current = false

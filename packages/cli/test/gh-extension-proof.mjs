@@ -25,7 +25,9 @@ export async function verifyGhExtension({source, fixture, binary, repo, revision
     requests.push(`CONNECT ${request.url}`)
     socket.end('HTTP/1.1 502 Network forbidden\r\n\r\n')
   })
-  await new Promise(resolve => proxy.listen(0, '127.0.0.1', resolve))
+  await new Promise(resolve => {
+    proxy.listen(0, '127.0.0.1', resolve)
+  })
   const address = proxy.address()
   assert.ok(address && typeof address !== 'string')
   const proxyUrl = `http://127.0.0.1:${address.port}`
@@ -105,6 +107,8 @@ export async function verifyGhExtension({source, fixture, binary, repo, revision
     assert.match(installed.stdout, /gh projections/)
     assert.deepEqual(requests, [], 'Local installation/invocation must not call a live API or update endpoint')
   } finally {
-    await new Promise((resolve, reject) => proxy.close(error => (error ? reject(error) : resolve())))
+    await new Promise((resolve, reject) => {
+      proxy.close(error => (error ? reject(error) : resolve()))
+    })
   }
 }

@@ -21,12 +21,12 @@ async function settled(card: Locator) {
     .poll(async () => {
       const box = await card.evaluate(
         element =>
-          new Promise<string>(resolve =>
+          new Promise<string>(resolve => {
             requestAnimationFrame(() => {
               const {x, y, width, height} = element.getBoundingClientRect()
               resolve([x, y, width, height].map(value => value.toFixed(1)).join())
-            }),
-          ),
+            })
+          }),
       )
       const same = box === previous
       previous = box
@@ -105,7 +105,14 @@ async function ringStarts(page: Page, frame: Frame, box: {left: number; top: num
 }
 
 async function expectRingOnCard(page: Page, frame: Frame, id: string, where: string) {
-  await frame.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  await frame.evaluate(
+    () =>
+      new Promise(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(resolve)
+        })
+      }),
+  )
   const ring = await ringOnCard(frame, id)
   expect(ring.selected, where).toBe(true)
   const starts = await ringStarts(page, frame, ring.box, ring.strokes[0]!)

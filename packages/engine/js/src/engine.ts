@@ -45,8 +45,8 @@ function pairingSide(document: PairingSide): unknown {
  * const invoke = await createWasmTransport({})
  * const defaultComparator = await createComparatorTransport({})
  * const wasm = engine(
- *   async request => decodeResponse(invoke(encode(request))),
- *   async () => defaultComparator,
+ *   request => Promise.resolve(decodeResponse(invoke(encode(request)))),
+ *   () => Promise.resolve(defaultComparator),
  * )
  * const {digest} = await wasm.canonicalize(await wasm.decode(rawExtractionJson))
  * ```

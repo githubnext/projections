@@ -12,6 +12,8 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {createInterface} from 'node:readline'
 
+const noop = () => undefined
+
 const cli = process.env.PROJECTIONS_CLI!
 let repository: string
 let cache: string
@@ -68,7 +70,9 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   // Windows keeps a running process's directory in use: wait for the viewer to exit, and retry while it lets go.
   if (viewer && viewer.exitCode === null && viewer.signalCode === null) {
-    const exited = new Promise(resolve => viewer.once('exit', resolve))
+    const exited = new Promise(resolve => {
+      viewer.once('exit', resolve)
+    })
     viewer.kill()
     await exited
   }
@@ -568,7 +572,9 @@ test("a theme seed in the link colors the stage and chrome in each mode it has, 
 test("a theme seed that isn't valid is ignored, and the page and the agent say so", async ({page}) => {
   await page.emulateMedia({colorScheme: 'light'})
   const warnings: string[] = []
-  page.on('console', message => void (message.type() === 'warning' && warnings.push(message.text())))
+  page.on('console', message => {
+    if (message.type() === 'warning') warnings.push(message.text())
+  })
   // A color that isn't one, which a stylesheet would take as CSS.
   await page.goto(themed({light: {background: 'white;}body{display:none'}}))
   await expect(page.locator('.pi-viewer-status')).toHaveText("This link's theme isn't valid, so the page keeps its own")
@@ -583,11 +589,13 @@ test("a theme seed that isn't valid is ignored, and the page and the agent say s
 
 test('the agent reads what a page did with its theme seed while the page is still loading the projection', async ({page}) => {
   // The page reports its theme in its first report, before the projection loads: with the definitions held, it never does.
-  let release = () => {}
-  const held = new Promise<void>(resolve => (release = resolve))
+  let release: (() => void) | undefined
+  const held = new Promise<void>(resolve => {
+    release = resolve
+  })
   await page.route(/\/api\/definitions/, async route => {
     await held
-    await route.continue().catch(() => {})
+    await route.continue().catch(noop)
   })
   await page.goto(themed({light: {background: 'white;}body{display:none'}}))
   // This page's report: its theme, and no projection yet (an earlier test's page reported the projection loaded).
@@ -600,7 +608,7 @@ test('the agent reads what a page did with its theme seed while the page is stil
   const text = (await control('control/tool/current_view', {})).body.content[0].text
   expect(text).toContain('No page shows it yet')
   expect(text).toContain('Theme: the page ignored the theme seed in its link')
-  release()
+  release?.()
   await page.unrouteAll({behavior: 'ignoreErrors'})
 })
 

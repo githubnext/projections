@@ -16,7 +16,14 @@ async function run(argv: string[]): Promise<{output: string; exit: number}> {
   let exit = 0
   const before = process.exitCode
   process.exitCode = undefined
-  await cli.serve(argv, {stdout: text => (output += text), exit: code => (exit = code)})
+  await cli.serve(argv, {
+    stdout: text => {
+      output += text
+    },
+    exit: code => {
+      exit = code
+    },
+  })
   exit ||= Number(process.exitCode ?? 0)
   process.exitCode = before
   return {output, exit}

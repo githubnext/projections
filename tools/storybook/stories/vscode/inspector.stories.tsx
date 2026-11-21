@@ -14,12 +14,14 @@ import {rules} from '../../src/runtime.js'
 import {runtimeLoader, scenarioArgTypes, scenarioFixture} from '../../src/stories.js'
 import type {Loaded, ScenarioArgs} from '../../src/stories.js'
 
+const noop = () => undefined
+
 /** The VS Code theme as the Inspector's host theme (`InspectorHost.theme`), as the extension's webview supplies it. */
 function hostOf(theme: VscodeThemeFixture): InspectorHost {
   const kind = vscodeThemeKindOf(theme.bodyClasses) ?? 'dark'
   const accent = theme.variables['--vscode-focusBorder']
   const current = {colorMode: vscodeColorMode(kind), ...(accent ? {accent} : {})}
-  return {theme: {get: () => current, subscribe: () => () => {}}}
+  return {theme: {get: () => current, subscribe: () => noop}}
 }
 
 function Inspector({args, loaded, theme}: {args: ScenarioArgs; loaded: Loaded; theme: VscodeThemeFixture}) {

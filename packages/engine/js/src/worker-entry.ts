@@ -5,7 +5,8 @@ import type {DefaultComparator} from './transport.js'
 let invoke: ((input: Uint8Array) => Uint8Array) | undefined
 let comparator: DefaultComparator | undefined
 let initializing = false
-globalThis.addEventListener('message', async (event: MessageEvent<unknown>) => {
+// Every failure is posted back as a failure message, so the listener needn't wait.
+const receive = async (event: MessageEvent<unknown>) => {
   try {
     const message = event.data
     if (message === null || typeof message !== 'object' || !('type' in message)) {
@@ -60,4 +61,7 @@ globalThis.addEventListener('message', async (event: MessageEvent<unknown>) => {
   } catch (error) {
     globalThis.postMessage({type: 'failure', message: error instanceof Error ? error.message : String(error)})
   }
+}
+globalThis.addEventListener('message', (event: MessageEvent<unknown>) => {
+  void receive(event)
 })

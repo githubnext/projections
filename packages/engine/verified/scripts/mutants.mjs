@@ -15,6 +15,8 @@ import {availableParallelism, tmpdir} from 'node:os'
 import {dirname, join} from 'node:path'
 import {fileURLToPath, pathToFileURL} from 'node:url'
 
+const noop = () => undefined
+
 const crate = join(dirname(fileURLToPath(import.meta.url)), '..')
 const sources = join(crate, 'src')
 
@@ -68,7 +70,7 @@ async function plant(executable, mutant) {
 }
 
 /** Runs every mutant, a few at a time ($VERUS_JOBS, default up to 4). */
-export async function mutationCheck(executable, log = () => {}) {
+export async function mutationCheck(executable, log = noop) {
   const started = Date.now()
   const list = await mutants()
   const jobs = Math.max(1, Number(process.env.VERUS_JOBS) || Math.min(4, availableParallelism()))

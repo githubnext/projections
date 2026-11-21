@@ -179,7 +179,7 @@ export async function createWorkerEngine(options: WorkerEngineOptions = {}): Pro
         throw error
       }
     },
-    async () => ({digest, call: input => send('compare', input)}),
+    () => Promise.resolve({digest, call: (input: Uint8Array) => send('compare', input)}),
   )
   return {...semantic, dispose: () => stop(new EngineTransportError('Engine worker disposed'))}
 }

@@ -260,7 +260,9 @@ test('a cancelled check fails only its own caller: others keep their check, and 
   const controller = new AbortController()
   const mine = check(rules, {signal: controller.signal})
   const shared = check(rules)
-  await new Promise(resolve => setTimeout(resolve, 10))
+  await new Promise(resolve => {
+    setTimeout(resolve, 10)
+  })
   controller.abort()
   await rejects(mine, 'cancelled')
   assert.equal((await shared).digest, 'sha256:d')

@@ -76,7 +76,7 @@ test('without a snapshot, or with an unreadable one, every value is generated', 
   for (const request of [{}, {generations: {file: join(tmpdir(), 'projections-missing-generations.jsonl')}}]) {
     const store = await generations(request)
     assert.equal(store.size, 0)
-    assert.equal(await store.generate('/data/summary', cart, async () => 'New.'), 'New.')
+    assert.equal(await store.generate('/data/summary', cart, () => Promise.resolve('New.')), 'New.')
   }
 })
 

@@ -153,6 +153,10 @@
       "description": "What the CLI serves or runs, but one built-in renderer or an extractor",
       "include": ["**"],
       "exclude": ["@extractors", "@harness-renderers"]
+    },
+    "inspector": {
+      "description": "The Inspector, whose stage the renderer harness draws every renderer in",
+      "include": ["packages/host/inspector"]
     }
   },
   "conditions": {
@@ -374,7 +378,7 @@
         "shards": 3
       },
       "packages/renderers/harness": {
-        "description": "Every built-in renderer in the real host frame. It runs when what it tests changes (the renderers, the kit, the renderer SDK and protocol, the schemas and the Engine they use), not for the CLI's backend, which serves it fixtures. Shards are by measured time: about 64, 72, 40 and 70 test-minutes per project on two workers. macOS runs WebKit, the platform Safari runs on.",
+        "description": "Every built-in renderer in the Inspector's stage. It runs for what it tests (renderers, kit, SDK and protocol, schemas, Engine) and the Inspector and host it draws in, not for the CLI's backend. Shards follow measured time (about 64, 72, 40 and 70 test-minutes per project); macOS runs WebKit, as Safari.",
         "shards": {
           "chromium-desktop": 3,
           "webkit-desktop": 4,
@@ -387,6 +391,15 @@
         "narrow": {
           "description": "A change to some built-in renderers alone leaves the other renderers' tests out (--grep-invert)",
           "group": "harness-renderers"
+        },
+        "when": {
+          "any": [
+            "full",
+            "reachesSuite",
+            {
+              "reaches": "inspector"
+            }
+          ]
         }
       },
       "packages/host/inspector": {

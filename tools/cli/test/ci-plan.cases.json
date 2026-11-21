@@ -333,6 +333,15 @@
         "renderers": [],
         "harnessJobs": 12
       }
+    },
+    {
+      "name": "The Inspector and host the harness draws renderers in run it",
+      "each": true,
+      "files": ["packages/host/core/src/frame.ts", "packages/host/inspector/src/fixtures/stage.ts"],
+      "expect": {
+        "suitesInclude": ["packages/renderers/harness"],
+        "renderers": []
+      }
     }
   ]
 }

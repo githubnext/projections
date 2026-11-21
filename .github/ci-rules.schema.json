@@ -1,0 +1,667 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CI rules",
+  "type": "object",
+  "required": [
+    "description",
+    "full",
+    "files",
+    "tags",
+    "groups",
+    "conditions",
+    "jobs",
+    "browser"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "What the rule does and why. The run summary prints it as the reason a job runs."
+    },
+    "full": {
+      "type": "object",
+      "required": [
+        "description",
+        "events",
+        "labels"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What the rule does and why. The run summary prints it as the reason a job runs."
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "GitHub Actions events that run everything"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Pull request labels that run everything"
+        }
+      },
+      "additionalProperties": false
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "description",
+          "effect"
+        ],
+        "properties": {
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What the rule does and why. The run summary prints it as the reason a job runs."
+          },
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Repository paths: `*` within a path segment, `**` across segments."
+          },
+          "except": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Repository paths: `*` within a path segment, `**` across segments."
+          },
+          "owned": {
+            "type": "boolean",
+            "description": "Whether the file is (true) or isn’t (false) inside a workspace or crate"
+          },
+          "read": {
+            "type": "boolean",
+            "description": "Whether a crate reads the file by path or a generator reads or writes it (true), or nothing does (false)"
+          },
+          "effect": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "full"
+              },
+              {
+                "type": "string",
+                "const": "docs"
+              },
+              {
+                "type": "string",
+                "const": "owner"
+              },
+              {
+                "type": "string",
+                "const": "readers"
+              }
+            ],
+            "description": "full: run everything. docs: documentation only. owner: a change to the workspace or crate containing the file. readers: a change only to what reads it (the crates and generators found for every file); with none, the Linux checks still run"
+          }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "description": "How each changed file counts: the first rule that matches it decides"
+    },
+    "tags": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z][a-z0-9-]*$": {
+          "type": "object",
+          "required": [
+            "description",
+            "paths"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "description": "What the rule does and why. The run summary prints it as the reason a job runs."
+            },
+            "paths": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "Repository paths: `*` within a path segment, `**` across segments."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "description": "Tags every changed file matching the paths gets, whichever file rule decided it"
+    },
+    "groups": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z][a-z0-9-]*$": {
+          "type": "object",
+          "required": [
+            "description",
+            "include"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "description": "What the rule does and why. The run summary prints it as the reason a job runs."
+            },
+            "include": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "A glob of workspace and crate directories, or `@name`: another group"
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "kind"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "crate"
+                          },
+                          {
+                            "type": "string",
+                            "const": "npm"
+                          }
+                        ]
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "facts"
+                    ],
+                    "properties": {
+                      "facts": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "coverage"
+                          },
+                          {
+                            "type": "string",
+                            "const": "harnessRenderers"
+                          }
+                        ]
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ],
+                "description": "A glob, `@group`, {\"kind\": \"crate\" | \"npm\"}, or {\"facts\": …}: The crates `npm run test:rust:coverage` measures; The renderers the renderer harness tests: packages/renderers/<name> with a scenarios.json"
+              },
+              "minItems": 1
+            },
+            "exclude": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "A glob of workspace and crate directories, or `@name`: another group"
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "kind"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "crate"
+                          },
+                          {
+                            "type": "string",
+                            "const": "npm"
+                          }
+                        ]
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "facts"
+                    ],
+                    "properties": {
+                      "facts": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "coverage"
+                          },
+                          {
+                            "type": "string",
+                            "const": "harnessRenderers"
+                          }
+                        ]
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ],
+                "description": "A glob, `@group`, {\"kind\": \"crate\" | \"npm\"}, or {\"facts\": …}: The crates `npm run test:rust:coverage` measures; The renderers the renderer harness tests: packages/renderers/<name> with a scenarios.json"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "description": "Named sets of workspaces and crates"
+    },
+    "conditions": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z][a-z0-9-]*$": {
+          "type": "object",
+          "required": [
+            "description",
+            "when"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "description": "What the rule does and why. The run summary prints it as the reason a job runs."
+            },
+            "when": {
+              "$ref": "#/$defs/When"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "description": "Named conditions, which `{\"if\": name}` refers to; the `changes` job also outputs each"
+    },
+    "jobs": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z][a-z0-9-]*$": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": [
+                "description",
+                "when"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "What the rule does and why. The run summary prints it as the reason a job runs."
+                },
+                "when": {
+                  "$ref": "#/$defs/When"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "description",
+                "matrix"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "What the rule does and why. The run summary prints it as the reason a job runs."
+                },
+                "matrix": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "value",
+                      "description",
+                      "when"
+                    ],
+                    "properties": {
+                      "value": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "description": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "What the rule does and why. The run summary prints it as the reason a job runs."
+                      },
+                      "when": {
+                        "$ref": "#/$defs/When"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false,
+              "description": "A matrix job: the values whose `when` holds, as a JSON array"
+            }
+          ]
+        }
+      },
+      "description": "The jobs of .github/workflows/ci.yml the plan gates, by job ID"
+    },
+    "browser": {
+      "type": "object",
+      "required": [
+        "description",
+        "default",
+        "suites"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What the rule does and why. The run summary prints it as the reason a job runs."
+        },
+        "default": {
+          "type": "object",
+          "required": [
+            "description",
+            "when"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "description": "What the rule does and why. The run summary prints it as the reason a job runs."
+            },
+            "when": {
+              "$ref": "#/$defs/When"
+            }
+          },
+          "additionalProperties": false,
+          "description": "When a suite without its own `when` runs"
+        },
+        "suites": {
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "required": [
+                "description"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "What the rule does and why. The run summary prints it as the reason a job runs."
+                },
+                "when": {
+                  "$ref": "#/$defs/When"
+                },
+                "shards": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    {
+                      "type": "object",
+                      "patternProperties": {
+                        "^.*$": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    }
+                  ],
+                  "description": "Jobs to shard the suite across: a number, or a number per Playwright project"
+                },
+                "macos": {
+                  "type": "object",
+                  "patternProperties": {
+                    "^.*$": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  },
+                  "description": "Shards per project on macOS"
+                },
+                "narrow": {
+                  "type": "object",
+                  "required": [
+                    "description",
+                    "group"
+                  ],
+                  "properties": {
+                    "description": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the rule does and why. The run summary prints it as the reason a job runs."
+                    },
+                    "group": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9-]*$"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "description": "When the suite runs only because of changes to some of the group's members (not all), leave the others' tests out"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "description": "Browser suites by workspace directory; those without `shards` run together in `browser (rest)`"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "When": {
+      "anyOf": [
+        {
+          "type": "string",
+          "const": "always",
+          "description": "Every run, whatever changed: for jobs that check the whole repository cheaply"
+        },
+        {
+          "type": "string",
+          "const": "full",
+          "description": "The run is a full one: an event, a label or a file rule asked for everything"
+        },
+        {
+          "type": "string",
+          "const": "docsOnly",
+          "description": "Every changed file is documentation, and no generator reads or writes one"
+        },
+        {
+          "type": "string",
+          "const": "reachesSuite",
+          "description": "Browser suites only: the change reaches the suite, or a workspace its test:browser script builds"
+        },
+        {
+          "type": "object",
+          "required": [
+            "if"
+          ],
+          "properties": {
+            "if": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]*$"
+            }
+          },
+          "additionalProperties": false,
+          "description": "A named condition holds"
+        },
+        {
+          "type": "object",
+          "required": [
+            "changes"
+          ],
+          "properties": {
+            "changes": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "description": "Repository paths: `*` within a path segment, `**` across segments."
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "facts"
+                  ],
+                  "properties": {
+                    "facts": {
+                      "type": "string",
+                      "const": "mutants"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "description": "A changed file matches; {\"facts\": \"mutants\"}: The files .cargo/mutants.toml examines (examine_globs, without exclude_globs)"
+        },
+        {
+          "type": "object",
+          "required": [
+            "tag"
+          ],
+          "properties": {
+            "tag": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]*$"
+            }
+          },
+          "additionalProperties": false,
+          "description": "A changed file has the tag"
+        },
+        {
+          "type": "object",
+          "required": [
+            "generator"
+          ],
+          "properties": {
+            "generator": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false,
+          "description": "A changed file is an input or output of the generator"
+        },
+        {
+          "type": "object",
+          "required": [
+            "changed"
+          ],
+          "properties": {
+            "changed": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]*$"
+            }
+          },
+          "additionalProperties": false,
+          "description": "A workspace or crate in the group contains, builds in or reads a changed file (its tests included)"
+        },
+        {
+          "type": "object",
+          "required": [
+            "reaches"
+          ],
+          "properties": {
+            "reaches": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]*$"
+            },
+            "from": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]*$"
+            }
+          },
+          "additionalProperties": false,
+          "description": "A workspace or crate in the group contains or builds in a changed file, or depends on one that does (tests that read a file don't count); with `from`, counting only changes to that group"
+        },
+        {
+          "type": "object",
+          "required": [
+            "any"
+          ],
+          "properties": {
+            "any": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/When"
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false,
+          "description": "Any of these holds"
+        },
+        {
+          "type": "object",
+          "required": [
+            "all"
+          ],
+          "properties": {
+            "all": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/When"
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false,
+          "description": "All of these hold"
+        },
+        {
+          "type": "object",
+          "required": [
+            "not"
+          ],
+          "properties": {
+            "not": {
+              "$ref": "#/$defs/When"
+            }
+          },
+          "additionalProperties": false,
+          "description": "This does not hold"
+        }
+      ]
+    }
+  }
+}

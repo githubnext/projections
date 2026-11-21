@@ -7,7 +7,7 @@ import {contentStart, openingZoom} from '../../zoom.js'
 import {useBorderWidths} from '../border.js'
 import {useFitScale} from '../fit.js'
 import {useCoveredPadding, useScrolledPadding} from '../covered-padding.js'
-import {useFrameSizing, useStageCover, useStageInset, useStageInsetTop} from '../shell/frame.js'
+import {useFrameSizing, useStageCover, useStageInset, useStageInsetBottom, useStageInsetTop} from '../shell/frame.js'
 import {useOpeningFloor, useStageZoom} from '../zoom.js'
 import type {ContentBox, ScrollStart} from '../../zoom.js'
 import type {LaidOutGraphProps} from './drawing.js'
@@ -28,8 +28,13 @@ const strokeRoom = 12
 export function useGraphPadding(): GraphPadding {
   const x = useStageInset() ?? graphPadding
   const insetTop = useStageInsetTop()
-  const top = useStageCover() ? graphPadding : (insetTop ?? graphPadding)
-  return useMemo(() => ({x, y: graphPadding, top}), [x, top])
+  const insetBottom = useStageInsetBottom()
+  // A host that says exactly what it overlays (`stage-cover`) leaves both ends to `useCoveredPadding`; one that gives
+  // only bands keeps clear of them.
+  const covered = Boolean(useStageCover())
+  const top = covered ? graphPadding : (insetTop ?? graphPadding)
+  const y = covered ? graphPadding : Math.max(graphPadding, insetBottom ?? 0)
+  return useMemo(() => ({x, y, top}), [x, y, top])
 }
 
 /** The space around a fitted graph, CSS px: across, below, and above it (`useGraphPadding`). */
@@ -144,7 +149,11 @@ export function useGraphZoom(
   // The bands the host's overlays take at the view's ends, which a focus is fitted and centred clear of.
   const covered = Boolean(useStageCover()?.length)
   const insetTop = useStageInsetTop()
-  const bands = useMemo(() => ({top: covered ? (insetTop ?? 0) : 0, bottom: 0}), [covered, insetTop])
+  const insetBottom = useStageInsetBottom()
+  const bands = useMemo(
+    () => ({top: covered ? (insetTop ?? 0) : 0, bottom: covered ? (insetBottom ?? 0) : 0}),
+    [covered, insetTop, insetBottom],
+  )
   const opening = useMemo(
     () =>
       focusOpening({
@@ -164,7 +173,7 @@ export function useGraphZoom(
   )
   const zoom = useStageZoom(scroller, onAction, fit.scale, {floor, start, ...(opening ? {opening} : {}), ...(hold ? {hold} : {})})
   useLayoutEffect(() => setDrawnScale(zoom.scale), [zoom.scale])
-  return {...zoom, borders, top: drawnPadding.top}
+  return {...zoom, borders, top: drawnPadding.top, bottom: drawnPadding.y}
 }
 
 /** The opening view on a focus (see `useGraphZoom`), or undefined for the default one. */

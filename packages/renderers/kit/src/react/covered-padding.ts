@@ -1,15 +1,16 @@
 import {useLayoutEffect, useMemo, useState} from 'react'
 import type {RefObject} from 'react'
-import {coveredTop, scrolledPadding} from '../fit.js'
+import {coveredPadding, scrolledPadding} from '../fit.js'
 import type {FitPadding} from '../fit.js'
-import {useStageCover, useStageInsetTop} from './shell/frame.js'
+import {useStageCover, useStageInsetBottom, useStageInsetTop} from './shell/frame.js'
 
 /**
  * `padding` for content of `size` fitted to the stage element `stage` (as `useFitScale` fits it), with its top moved
- * down only where the host's cover (`useStageCover`) would otherwise lie over the fitted drawing (see `coveredTop`):
- * a flat graph centred below a pane's chips keeps its own top, a tall one opens below them. Without a cover,
- * `padding` as it is. Pass the result to `useFitScale` and pad the drawing's top by its `top` (the kit's
- * `--pk-fit-top`, which graph.css reads). The stage is measured in the frame on every resize.
+ * down and its bottom (`y`) up only where the host's cover (`useStageCover`) would otherwise lie over the fitted
+ * drawing (see `coveredTop` and `coveredBottom`): a flat graph centred below a pane's chips and above a floating
+ * summary keeps its own padding, a tall one opens between them. Without a cover, `padding` as it is. Pass the result
+ * to `useFitScale` and pad the drawing's top by its `top` and its bottom by its `y` (the kit's `--pk-fit-top` and
+ * `--pk-fit-bottom`, which graph.css reads). The stage is measured in the frame on every resize.
  */
 export function useCoveredPadding<P extends FitPadding>(
   stage: RefObject<HTMLElement | null>,
@@ -45,19 +46,20 @@ export function useCoveredPadding<P extends FitPadding>(
   }, [stage, covered, sized])
   return useMemo(() => {
     if (!cover || !box || !size) return padding
-    const top = coveredTop({cover, view: box, origin: box, size, padding, maxScale})
-    return top === (padding.top ?? padding.y) ? padding : {...padding, top}
+    const {top, y} = coveredPadding({cover, view: box, origin: box, size, padding, maxScale})
+    return top === (padding.top ?? padding.y) && y === padding.y ? padding : {...padding, top, y}
   }, [cover, box, size, padding, maxScale])
 }
 
 /**
- * The padding a fitted drawing is drawn with (its `--pk-fit-top`): `padding` while it is drawn at its fitted scale
- * (`fitScale`), and once it is drawn larger and scrolls down (opened at the text floor, or zoomed in: `drawnScale`), a
- * top of at least the host's `stage-inset-top` under a cover, so its first row can open, and scroll back, clear of what
- * the host overlays at the frame's top. `height` is the content's height (content units) and the stage's inner height
- * (`Fit.height`): a drawing drawn larger that still fits the stage's height (a flat graph zoomed in) keeps its padding
- * where, centred, it clears the band, and takes just enough more where it doesn't (`scrolledPadding`), so it moves no
- * more than it must as it zooms. The fit never reads it.
+ * The padding a fitted drawing is drawn with (its `--pk-fit-top` and `--pk-fit-bottom`): `padding` while it is drawn
+ * at its fitted scale (`fitScale`), and once it is drawn larger and scrolls down (opened at the text floor, or zoomed
+ * in: `drawnScale`), under a cover a top of at least the host's `stage-inset-top` and a bottom (`y`) of at least its
+ * `stage-inset-bottom`, so its first row opens, and its last row scrolls, clear of what the host overlays at the
+ * frame's top and foot. `height` is the content's height (content units) and the stage's inner height (`Fit.height`):
+ * a drawing drawn larger that still fits the stage's height (a flat graph zoomed in) keeps its padding where, centred,
+ * it clears the bands, and takes just enough more where it doesn't (`scrolledPadding`), so it moves no more than it
+ * must as it zooms. The fit never reads it.
  */
 export function useScrolledPadding<P extends FitPadding>(
   padding: P,
@@ -67,13 +69,14 @@ export function useScrolledPadding<P extends FitPadding>(
 ): P {
   const cover = useStageCover()
   const insetTop = useStageInsetTop()
+  const insetBottom = useStageInsetBottom()
   const own = padding.top ?? padding.y
-  const scrolled = Boolean(cover?.length) && insetTop !== undefined && fitScale > 0 && drawnScale > fitScale * 1.001
-  const inset = {top: insetTop ?? 0, bottom: 0}
-  const top = !scrolled
-    ? own
+  const scrolled = Boolean(cover?.length) && fitScale > 0 && drawnScale > fitScale * 1.001
+  const inset = {top: insetTop ?? 0, bottom: insetBottom ?? 0}
+  const {top, y: bottom} = !scrolled
+    ? {top: own, y: padding.y}
     : height
-      ? scrolledPadding({own: {top: own, y: padding.y}, inset, height: height.content * drawnScale, view: height.view}).top
-      : Math.max(own, inset.top)
-  return useMemo(() => (top === own ? padding : {...padding, top}), [padding, top, own])
+      ? scrolledPadding({own: {top: own, y: padding.y}, inset, height: height.content * drawnScale, view: height.view})
+      : {top: Math.max(own, inset.top), y: Math.max(padding.y, inset.bottom)}
+  return useMemo(() => (top === own && bottom === padding.y ? padding : {...padding, top, y: bottom}), [padding, top, own, bottom])
 }

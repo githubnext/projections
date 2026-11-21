@@ -71,7 +71,7 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
   const shown = props.scope?.shown
   const area = useMemo(() => focusArea(transition, diff, props.model, request, shown), [transition, diff, props.model, request, shown])
   const drawn = nodes.map(node => ({x: node.x - node.width / 2, y: node.y - node.height / 2, width: node.width, height: node.height}))
-  const {zoom, scale, borders, keep, top} = useGraphZoom(
+  const {zoom, scale, borders, keep, top, bottom} = useGraphZoom(
     scroller,
     framing,
     bounds,
@@ -101,7 +101,7 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
         tabIndex={0}
         ref={scroller}
         data-zoom={zoom}
-        style={{'--pk-fit-top': `${top}px`} as CSSProperties}
+        style={{'--pk-fit-top': `${top}px`, '--pk-fit-bottom': `${bottom}px`} as CSSProperties}
       >
         {!nodes.length ? (
           <div className="empty-state" role="status">

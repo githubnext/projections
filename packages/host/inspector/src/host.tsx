@@ -48,6 +48,12 @@ export interface InspectorHost {
     get(): {[ref: string]: string} | undefined
     subscribe(listener: () => void): () => void
   }
+  /**
+   * The host's own surface already says exactly what is compared (a pull request page names its base and head), so the
+   * viewer doesn't say it again: its header draws no revision pills. The CLI viewer and the Copilot canvas say nothing
+   * of the sort, and keep them.
+   */
+  revisionsNamed?: boolean
 }
 
 const HostContext = createContext<InspectorHost>({})

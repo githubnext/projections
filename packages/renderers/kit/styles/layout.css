@@ -4,11 +4,12 @@
  */
 /*
  * The content root is the stage that groups, cards and tables stand on, set in from the frame's edges by
- * `--pk-stage-padding` on all four sides, and at its top by more where the host overlays the frame's top
- * (`--pk-stage-padding-top`). `ContentView` is one; a renderer with its own root gives it `pk-stage`.
+ * `--pk-stage-padding` on all four sides, and at its top and bottom by more where the host overlays the frame's top or
+ * foot (`--pk-stage-padding-top`, `--pk-stage-padding-bottom`). `ContentView` is one; a renderer with its own root
+ * gives it `pk-stage`.
  */
 .pk :is(.pk-content-view, .pk-stage) {
-  padding: var(--pk-stage-padding-top) var(--pk-stage-padding) var(--pk-stage-padding);
+  padding: var(--pk-stage-padding-top) var(--pk-stage-padding) var(--pk-stage-padding-bottom);
   background: var(--stage);
 }
 /*

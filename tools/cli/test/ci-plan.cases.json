@@ -1,0 +1,248 @@
+{
+  "$schema": "./ci-plan.cases.schema.json",
+  "cases": [
+    {
+      "name": "Documentation alone runs only the docs job",
+      "files": ["README.md", "docs/guides/host.md", "packages/renderers/database/README.md"],
+      "expect": {
+        "full": false,
+        "docsOnly": true,
+        "jobs": {
+          "docs": true,
+          "public-product": [],
+          "verus": false,
+          "windows": false,
+          "windows-node": false,
+          "windows-integration": false,
+          "package": false,
+          "release-config": false,
+          "coverage": false,
+          "mutants-diff": false,
+          "actions-lock": false
+        },
+        "browser": [],
+        "macos": []
+      }
+    },
+    {
+      "name": "Markdown a generator reads or writes, or a crate embeds, is not documentation alone",
+      "each": true,
+      "files": ["docs/reference/cli.md", "docs/setup/install.md", "packages/cli/templates/SKILL.md", "docs/agents/ci.md"],
+      "expect": {
+        "docsOnly": false,
+        "jobs": {
+          "docs": false
+        },
+        "productIncludes": ["ubuntu-latest"]
+      }
+    },
+    {
+      "name": "One renderer's change runs that renderer's harness tests, and the suites that bundle every renderer, on Linux",
+      "files": ["packages/renderers/database/src/styles.css"],
+      "expect": {
+        "renderers": ["database"],
+        "jobs": {
+          "public-product": ["ubuntu-latest"],
+          "windows": false,
+          "windows-node": false,
+          "verus": false,
+          "mutants-diff": false,
+          "package": false
+        },
+        "browser": [
+          "packages/host/core, 1/3",
+          "packages/host/core, 2/3",
+          "packages/host/core, 3/3",
+          "tools/storybook, 1/3",
+          "tools/storybook, 2/3",
+          "tools/storybook, 3/3",
+          "packages/renderers/harness, chromium-desktop (database)",
+          "packages/renderers/harness, webkit-desktop (database)",
+          "packages/renderers/harness, chromium-mobile (database)",
+          "packages/renderers/harness, webkit-mobile (database)",
+          "packages/host/inspector, 1/2",
+          "packages/host/inspector, 2/2",
+          "rest"
+        ],
+        "macos": ["packages/renderers/harness, webkit-desktop (database)"]
+      }
+    },
+    {
+      "name": "A scenario's extraction is its renderer's change",
+      "files": ["packages/extractors/tetragon-policies/tests/fixtures/credentials/after.expected.json"],
+      "expect": {
+        "renderers": ["runtime-policy"],
+        "suitesInclude": ["packages/renderers/harness"]
+      }
+    },
+    {
+      "name": "The kit every renderer uses runs the whole harness",
+      "files": ["packages/renderers/kit/src/index.ts"],
+      "expect": {
+        "renderers": [],
+        "suitesInclude": ["packages/renderers/harness"],
+        "harnessJobs": 12
+      }
+    },
+    {
+      "name": "An Engine change runs the Rust, Windows, Verus, coverage and mutation jobs and every browser suite",
+      "files": ["packages/engine/src/lib.rs"],
+      "expect": {
+        "full": false,
+        "jobs": {
+          "public-product": ["ubuntu-latest", "macos-latest"],
+          "windows": true,
+          "windows-node": true,
+          "verus": true,
+          "coverage": true,
+          "mutants-diff": true,
+          "release-config": false
+        },
+        "allBrowserJobs": true
+      }
+    },
+    {
+      "name": "An extractor's change runs the Inspector, which extracts, but not the suites that serve fixtures",
+      "files": ["packages/extractors/django-schema/src/lib.rs"],
+      "expect": {
+        "jobs": {
+          "windows": true,
+          "mutants-diff": false,
+          "verus": false,
+          "coverage": false
+        },
+        "browser": ["packages/host/inspector, 1/2", "packages/host/inspector, 2/2", "rest"],
+        "suitesInclude": ["packages/cli"],
+        "suitesExclude": ["examples/renderers/minimal", "packages/renderers/harness"]
+      }
+    },
+    {
+      "name": "CI, toolchain, lockfile, tooling and rules changes, and unrecognised files, run everything",
+      "each": true,
+      "files": [
+        ".github/workflows/ci.yml",
+        ".github/actions/browser/action.yml",
+        ".github/ci-rules.json",
+        "Cargo.lock",
+        "tools/cli/src/cli.ts",
+        "tools/cli/README.md",
+        "brand/x.svg"
+      ],
+      "expect": {
+        "full": true,
+        "allBrowserJobs": true,
+        "jobs": {
+          "actions-lock": true,
+          "release-config": true,
+          "mutants-diff": true,
+          "docs": false
+        }
+      }
+    },
+    {
+      "name": "The ci:full label runs everything",
+      "files": ["README.md"],
+      "labels": ["ci:full", "documentation"],
+      "expect": {
+        "full": true,
+        "docsOnly": false,
+        "allBrowserJobs": true
+      }
+    },
+    {
+      "name": "Pushes, the nightly run and manual runs run everything",
+      "files": [],
+      "events": ["push", "schedule", "workflow_dispatch"],
+      "expect": {
+        "full": true,
+        "allBrowserJobs": true,
+        "jobs": {
+          "actions-lock": true
+        }
+      }
+    },
+    {
+      "name": "A file a crate's sources read by path is that crate's change, though no manifest says so",
+      "each": true,
+      "files": ["packages/schemas/fixtures/conformance.json", "packages/schemas/schemas/api/v0.json"],
+      "expect": {
+        "changedInclude": ["packages/engine"],
+        "jobs": {
+          "coverage": true,
+          "windows": true
+        }
+      }
+    },
+    {
+      "name": "A file only a crate's tests read runs its suites without changing what depends on it",
+      "files": ["packages/schemas/fixtures/conformance.json"],
+      "expect": {
+        "changedInclude": ["packages/engine"],
+        "dependantsExclude": ["packages/comparators/rules"]
+      }
+    },
+    {
+      "name": "Any file of a crate is a Rust change, and Markdown test data is not documentation",
+      "each": true,
+      "files": [
+        "packages/extractors/github-agentic-workflows/vendor/gh-aw/fields.json",
+        "packages/extractors/github-agentic-workflows/tests/fixtures/public/.github/workflows/firewall.md"
+      ],
+      "expect": {
+        "docsOnly": false,
+        "jobs": {
+          "windows": true,
+          "package": true
+        }
+      }
+    },
+    {
+      "name": "The default comparator, which packages/engine/js's build bundles, reaches it",
+      "files": ["packages/comparators/default/src/lib.rs"],
+      "expect": {
+        "dependantsInclude": ["packages/engine/js"],
+        "suitesInclude": ["packages/engine/js"]
+      }
+    },
+    {
+      "name": "The rules crate, which packages/comparators/runtime/js's build builds, reaches it",
+      "files": ["packages/comparators/rules/src/lib.rs"],
+      "expect": {
+        "dependantsInclude": ["packages/comparators/runtime/js"],
+        "suitesInclude": ["packages/comparators/runtime/js"]
+      }
+    },
+    {
+      "name": "The package check runs for what the CLI serves",
+      "files": ["packages/host/inspector/src/app/app.tsx"],
+      "expect": {
+        "jobs": {
+          "package": true
+        }
+      }
+    },
+    {
+      "name": "Release configuration runs the release check alone",
+      "files": ["dist-workspace.toml"],
+      "expect": {
+        "full": false,
+        "jobs": {
+          "release-config": true,
+          "public-product": ["ubuntu-latest"]
+        },
+        "browser": []
+      }
+    },
+    {
+      "name": "The GitHub Action's definition runs it on every platform",
+      "files": ["action.yml"],
+      "expect": {
+        "jobs": {
+          "public-product": ["ubuntu-latest", "macos-latest"],
+          "windows-node": true,
+          "windows-integration": true
+        }
+      }
+    }
+  ]
+}

@@ -2,8 +2,9 @@ import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {carryStep, toolbarSteps} from '../dist/layout/steps.js'
 
-const still = toolbarSteps({pickers: true, modes: true, actions: true})
-const animated = toolbarSteps({pickers: true, modes: true, playback: true, actions: true})
+// A host that opts into centring (`centreModes`): the default leads the row with the modes.
+const still = toolbarSteps({pickers: true, modes: true, actions: true, centre: true})
+const animated = toolbarSteps({pickers: true, modes: true, playback: true, actions: true, centre: true})
 const form = layout => `${layout.cluster}|${layout.pickers}|${layout.modes}|${layout.moreActions.join(' ')}`
 
 test('playback coming or going keeps row 1 where it settled, with what each form was measured to need', () => {
@@ -21,6 +22,11 @@ test('playback coming or going keeps row 1 where it settled, with what each form
 })
 
 test('without the settled form in the other order, nothing carries', () => {
-  const tab = toolbarSteps({pickers: true, modes: true, actions: true, centre: false})
+  const tab = toolbarSteps({pickers: true, modes: true, actions: true})
   assert.equal(carryStep(still, 0, [], tab), undefined)
+})
+
+test('by default the modes are never centred: they lead the row', () => {
+  for (const playback of [false, true])
+    assert.ok(toolbarSteps({pickers: true, modes: true, playback, actions: true}).every(layout => layout.cluster === 'start'))
 })

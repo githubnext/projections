@@ -19,7 +19,7 @@ export const utilitySide = 12
  * is on screen, below the host's stuck toolbar, which sets `--ph-stage-sticky-top` to the toolbar's height.
  *
  * It draws the toolbar's surface and the divider at its edge, so it reads as the toolbar's own, floating; a host
- * restyles it with `--ph-utility-fg`, `--ph-utility-muted` (its muted text, which the chips' names take), `--ph-utility-bg`, `--ph-utility-border`, `--ph-utility-radius` and `--ph-utility-shadow`.
+ * restyles it with `--ph-utility-fg`, `--ph-utility-muted` (its muted text, which the chips' names take), `--ph-utility-bg`, `--ph-utility-border`, `--ph-utility-radius`, `--ph-utility-shadow` and `--ph-utility-backdrop` (a `backdrop-filter`, for a translucent fill).
  */
 export function UtilityArea({children}: {children: ReactNode}) {
   const bar = useRef<HTMLDivElement>(null)
@@ -86,6 +86,8 @@ export function UtilityArea({children}: {children: ReactNode}) {
           border: 'var(--ph-utility-border, 1px solid var(--projections-color-divider, #d1d9e0))',
           borderRadius: 'var(--ph-utility-radius, var(--projections-radius, 8px))',
           boxShadow: 'var(--ph-utility-shadow, none)',
+          backdropFilter: 'var(--ph-utility-backdrop, none)',
+          WebkitBackdropFilter: 'var(--ph-utility-backdrop, none)',
         }}
       >
         {children}

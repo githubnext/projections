@@ -210,19 +210,19 @@ and its notices. Above it:
   renderer…", "Waiting for the agent…", "Out of date".
 
 Under the header the chrome lies flat, edge to edge, as the default UI lays it
-everywhere: the toolbar and the summary bar are bands of the header's colour, a
-hairline from the stage, with no card, border or corners, and the stage (the
-single frame and the comparison panes) runs to both edges with no inset. A
-renderer's legend is a band of the same colour between the stage and the summary
-bar. Every boundary in the stack (header, toolbar, stage, legend, summary bar)
-is one 1px hairline in the divider colour; a renderer frame runs a pixel past
-its clipped host, so a frame whose height has a fraction of a pixel never leaves
-a strip that reads as a second line. The toolbar spans the page in every state.
-Each fact appears once: the header says what is shown, so a one-revision view's
-toolbar adds only the revision it shows (a commit's short hash) at its start,
-where a comparison's mode switch sits, when that isn't the working tree. While a
-job runs, a renderer pane that is still loading says what it waits on
-("Extracting…") rather than that it is loading the renderer.
+everywhere: the toolbar is a band of the header's colour, a hairline from the
+stage, with no card, border or corners, and the stage (the single frame and the
+comparison panes) runs to both edges with no inset. A renderer's legend and the
+summary bar float over the stage's foot as one overlay (see
+[the utility area](utility-area.md)). Every boundary in the stack (header,
+toolbar, stage) is one 1px hairline in the divider colour; a renderer frame runs
+a pixel past its clipped host, so a frame whose height has a fraction of a pixel
+never leaves a strip that reads as a second line. The toolbar spans the page in
+every state. Each fact appears once: the header says what is shown, so a
+one-revision view's toolbar adds only the revision it shows (a commit's short
+hash) at its start, where a comparison's mode switch sits, when that isn't the
+working tree. While a job runs, a renderer pane that is still loading says what
+it waits on ("Extracting…") rather than that it is loading the renderer.
 
 **A page that loses its server** (the viewer exited, or the machine slept) says
 "Viewer stopped" in its status line and over the stage, with what to do: ask the

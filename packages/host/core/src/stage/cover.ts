@@ -4,16 +4,48 @@ import type {Side} from '../modes.js'
 
 /**
  * What the stage overlays on each frame (its utility area: side by side's and swipe's chips, animated's playback
- * bar), as the frame's `stage-cover` and `stage-inset-top` theme tokens. Undefined while nothing covers it.
+ * bar; and its foot: the floating legend and summary), as the frame's `stage-cover`, `stage-inset-top` and
+ * `stage-inset-bottom` theme tokens. Undefined while nothing covers it.
  */
 export interface FrameCover {
   /** The covered rectangles, `x y width height` in whole CSS px from the frame's top left, comma separated. */
   cover: string
-  /** The bottom of the lowest rectangle and as much again as the highest one's gap above it, CSS px. */
+  /**
+   * Of the rectangles in the frame's top half: the bottom of the lowest and as much again as the highest one's gap
+   * above it, CSS px; 0 without any.
+   */
   insetTop: number
+  /** The same for the rectangles in its bottom half, up from the frame's bottom edge, CSS px; 0 without any. */
+  insetBottom: number
 }
 
 export type FrameCovers = {[side in Side]?: FrameCover | undefined}
+
+/** The bands that `rects` take at the top and at the foot of a frame `height` tall (`FrameCover`), CSS px. */
+export function insets(rects: readonly {y: number; height: number}[], height: number): {insetTop: number; insetBottom: number} {
+  const middle = height / 2
+  const top = rects.filter(rect => rect.y + rect.height / 2 <= middle)
+  const bottom = rects.filter(rect => rect.y + rect.height / 2 > middle)
+  const band = (
+    side: typeof top,
+    edge: (rect: {y: number; height: number}) => number,
+    extent: (rect: {y: number; height: number}) => number,
+  ) => (side.length ? Math.max(...side.map(extent)) + Math.max(0, Math.min(...side.map(edge))) : 0)
+  return {
+    // The lowest rectangle's bottom, and as much again as the highest one's gap above it.
+    insetTop: band(
+      top,
+      rect => rect.y,
+      rect => rect.y + rect.height,
+    ),
+    // Up from the frame's bottom: the highest rectangle's top, and as much again as the lowest one's gap below it.
+    insetBottom: band(
+      bottom,
+      rect => height - rect.y - rect.height,
+      rect => height - rect.y,
+    ),
+  }
+}
 
 /** The elements of the stage body that overlay its frames. */
 export const coverSelector = '[data-stage-cover]'
@@ -22,7 +54,9 @@ const sameCovers = (a: FrameCovers, b: FrameCovers) =>
   a.before?.cover === b.before?.cover &&
   a.after?.cover === b.after?.cover &&
   a.before?.insetTop === b.before?.insetTop &&
-  a.after?.insetTop === b.after?.insetTop
+  a.after?.insetTop === b.after?.insetTop &&
+  a.before?.insetBottom === b.before?.insetBottom &&
+  a.after?.insetBottom === b.after?.insetBottom
 
 /**
  * The cover of each frame: every element in `container` marked `data-stage-cover` that lies over the frame, in the
@@ -66,11 +100,7 @@ export function useFrameCovers(
             height: Math.round(rect.height),
           }))
         if (!rects.length) return undefined
-        const gap = Math.max(0, Math.min(...rects.map(rect => rect.y)))
-        return {
-          cover: rects.map(rect => `${rect.x} ${rect.y} ${rect.width} ${rect.height}`).join(', '),
-          insetTop: Math.max(...rects.map(rect => rect.y + rect.height)) + gap,
-        }
+        return {cover: rects.map(rect => `${rect.x} ${rect.y} ${rect.width} ${rect.height}`).join(', '), ...insets(rects, box.height)}
       }
       const next = {before: of('before'), after: of('after')}
       setCovers(previous => (sameCovers(previous, next) ? previous : next))
@@ -93,4 +123,13 @@ export function useFrameCovers(
     }
   }, [container, frames, key, reducedMotion])
   return covers
+}
+
+/** A frame's cover as its theme tokens: `stage-cover`, and each inset where something covers that edge. */
+export function coverTokens(cover: FrameCover): {[name: string]: string} {
+  return {
+    'stage-cover': cover.cover,
+    ...(cover.insetTop ? {'stage-inset-top': `${cover.insetTop}px`} : {}),
+    ...(cover.insetBottom ? {'stage-inset-bottom': `${cover.insetBottom}px`} : {}),
+  }
 }

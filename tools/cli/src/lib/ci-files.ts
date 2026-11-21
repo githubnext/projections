@@ -1,74 +1,51 @@
-// Sorts a change's files for the CI plan (ci-plan.ts): the workspaces and crates they belong to or which read them,
-// documentation, configuration only the checks read, release and action files, and what runs everything.
+// Sorts a change's files for the CI plan (ci-plan.ts) by the file rules of .github/ci-rules.json: the first rule that
+// matches a file decides whether it runs everything, is documentation, is its workspace's or crate's change, or is a
+// change only to what reads it. Whatever the rule, the crates that read a file by path and the generators that read or
+// write it count, and the file gets every tag whose paths it matches.
 import {readersOf, type RepoFacts} from './ci-facts.ts'
+import type {CiRules} from './ci-rules.ts'
 import {ownerOf} from './packages.ts'
 import {matches} from './repo.ts'
-
-/** Run everything: CI's definition, toolchains, lockfiles and root manifests, and the repository's own tooling. */
-export const everything = [
-  '.github/workflows/**',
-  '.github/actions/**',
-  'package.json',
-  'package-lock.json',
-  'Cargo.toml',
-  'Cargo.lock',
-  'rust-toolchain.toml',
-  '.node-version',
-  '.npmrc',
-  '.cargo/**',
-  'tools/cli/**',
-  'tools/scripts/**',
-]
-/** Read only as documentation (unless a generator reads or writes it). */
-const documentation = ['**/*.md', 'docs/**', 'LICENSE', '.github/CODEOWNERS', '.github/ISSUE_TEMPLATE/**']
-/** Configuration only the checks in public-product read: file standards, formatting, lint, the self-projection. */
-const checksOnly = [
-  '.considered.yaml',
-  '.oxfmtrc.json',
-  'eslint.config.js',
-  '.portability.yaml',
-  'rustfmt.toml',
-  '.github/actionlint.yaml',
-  '.github/dependabot.yml',
-  '.github/projections/**',
-  '.projections-bookmarks.json',
-]
-export const releaseFiles = ['dist-workspace.toml', '.github/release-build-setup.yml', '**/Cargo.toml']
-const actionFiles = ['action.yml']
-/** Markdown that is test data or a template, not documentation. */
-const notDocumentation = /(^|\/)(fixtures|tests?|templates|snapshots|golden|vendor)\//
 
 export type Sorted = {
   /** Workspaces and crates a changed file belongs to, or which build it in. */
   units: Set<string>
   /** Crates whose tests alone read a changed file. */
   tested: Set<string>
-  docs: string[]
-  checks: string[]
-  release: string[]
-  action: string[]
-  everything: string[]
+  /** Files that run everything, with the rule that says so. */
+  everything: {path: string; rule: string}[]
+  /** Whether every file is documentation. */
+  docsOnly: boolean
+  tags: Set<string>
+  generators: Set<string>
 }
 
-export function sortChanges(facts: RepoFacts, paths: readonly string[], generators: Set<string>): Sorted {
-  const sorted: Sorted = {units: new Set(), tested: new Set(), docs: [], checks: [], release: [], action: [], everything: []}
+type FileRule = CiRules['files'][number]
+
+function applies(rule: FileRule, path: string, owned: boolean, read: boolean): boolean {
+  if (rule.paths && !matches(path, rule.paths)) return false
+  if (rule.except && matches(path, rule.except)) return false
+  if (rule.owned !== undefined && rule.owned !== owned) return false
+  return rule.read === undefined || rule.read === read
+}
+
+export function sortChanges(facts: RepoFacts, rules: CiRules, paths: readonly string[]): Sorted {
+  const sorted: Sorted = {units: new Set(), tested: new Set(), everything: [], docsOnly: true, tags: new Set(), generators: new Set()}
   for (const path of paths) {
     const generated = facts.generators.filter(generator => matches(path, generator.inputs) || matches(path, generator.outputs))
-    for (const generator of generated) generators.add(generator.name)
+    for (const generator of generated) sorted.generators.add(generator.name)
     const readers = readersOf(facts, path)
     for (const crate of readers.build) sorted.units.add(crate)
     for (const crate of readers.test) sorted.tested.add(crate)
-    const read = generated.length || readers.build.length || readers.test.length
-    if (matches(path, everything)) sorted.everything.push(path)
-    else if (!read && path.endsWith('.md') && !notDocumentation.test(path)) sorted.docs.push(path)
-    else if (ownerOf(facts.units, path)) sorted.units.add(ownerOf(facts.units, path)?.path as string)
-    else if (read) continue
-    else if (matches(path, documentation) && !notDocumentation.test(path)) sorted.docs.push(path)
-    else if (matches(path, checksOnly)) sorted.checks.push(path)
-    else if (matches(path, actionFiles)) sorted.action.push(path)
-    else if (matches(path, releaseFiles)) sorted.release.push(path)
-    else sorted.everything.push(path)
-    if (matches(path, releaseFiles) && !sorted.release.includes(path)) sorted.release.push(path)
+    for (const [tag, {paths: globs}] of Object.entries(rules.tags)) if (matches(path, globs)) sorted.tags.add(tag)
+    const owner = ownerOf(facts.units, path)
+    const read = generated.length > 0 || readers.build.length > 0 || readers.test.length > 0
+    const rule = rules.files.find(candidate => applies(candidate, path, owner !== undefined, read))
+    if (!rule) throw new Error(`No file rule in .github/ci-rules.json matches ${path}; end the list with one that matches every file`)
+    if (rule.effect !== 'docs') sorted.docsOnly = false
+    if (rule.effect === 'full') sorted.everything.push({path, rule: rule.description})
+    if (rule.effect === 'owner' && owner) sorted.units.add(owner.path)
   }
+  if (sorted.generators.size) sorted.docsOnly = false
   return sorted
 }

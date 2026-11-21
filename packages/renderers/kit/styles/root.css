@@ -91,10 +91,12 @@ body {
   /*
    * The space between the frame's edges and the content on the stage, the same on all four sides: the host's
    * `stage-inset`, else 12px. A stage root (`.pk-stage`, `ContentView`) pads by it, so cards and tables sit evenly. At
-   * its top it keeps clear of whatever the host overlays there (`stage-inset-top`, such as a pane's label chip).
+   * its top and bottom it keeps clear of whatever the host overlays there (`stage-inset-top`, such as a pane's label
+   * chip, and `stage-inset-bottom`, such as a floating summary).
    */
   --pk-stage-padding: var(--projections-stage-inset, var(--projections-space-3));
   --pk-stage-padding-top: max(var(--pk-stage-padding), var(--projections-stage-inset-top, 0px));
+  --pk-stage-padding-bottom: max(var(--pk-stage-padding), var(--projections-stage-inset-bottom, 0px));
   color: var(--text);
   /* The root is the stage that cards and panels stand on (the renderer check `stage`). */
   background: var(--stage);

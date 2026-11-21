@@ -21,6 +21,8 @@ interface ViewArgs extends VscodeArgs {
   outOfDate?: number
   /** A VS Code tab's start slot: its pair picker, which draws nothing for an ordinary local result (packages/integrations/vscode/src/webview/tab-pair.ts). */
   tabStart?: boolean
+  /** Playback on the stage and chips for the panes' labels, as a VS Code tab draws them (`utilityArea`). */
+  utilityArea?: boolean
   /** A VS Code tab's job: `idle` keeps the summary bar's slot for it empty; extracting or comparing spins in it. */
   running?: 'idle' | 'extracting' | 'comparing'
 }
@@ -43,6 +45,7 @@ const meta = {
     toolbar: {control: 'boolean'},
     outOfDate: {control: 'number', description: 'Files changed since the result, for the out-of-date notice (0: none)'},
     tabStart: {control: 'boolean', description: "A VS Code tab's start slot, empty for an ordinary local result"},
+    utilityArea: {control: 'boolean', description: 'Playback floats on the stage; the panes are labelled by chips on it'},
     running: {
       control: 'inline-radio',
       options: ['idle', 'extracting', 'comparing'],
@@ -88,6 +91,7 @@ const meta = {
         {...(args.annotations ? {annotations: sampleAnnotations(item)} : {})}
         {...(args.details ? {renderDetails} : {})}
         {...(args.tabStart ? {toolbarStart: () => <div className="tp-pair" data-form="full" />, centreModes: false} : {})}
+        {...(args.utilityArea ? {utilityArea: true} : {})}
         {...(args.running ? {running: args.running === 'idle' ? null : args.running} : {})}
         {...(args.outOfDate !== undefined
           ? {
@@ -110,6 +114,11 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Comparison: Story = {}
+/** A VS Code tab with the utility area: the switches lead the row, the tools end it, and playback floats on the stage. */
+export const TabUtilityArea: Story = {
+  name: 'Projection tab, utility area',
+  args: {tabStart: true, utilityArea: true, initialMode: 'animated'},
+}
 /**
  * The summary bar along the bottom of the view, on the dependency graph's express 5 upgrade: a figure per kind in the
  * renderer's words (workspaces, packages, dependencies) with the changes of each; every figure filters to its items.

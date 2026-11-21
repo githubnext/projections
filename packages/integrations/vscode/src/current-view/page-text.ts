@@ -13,9 +13,9 @@ const plural = (count: number, noun: {singular: string; plural: string}) => `${c
 /** `12 jobs (+5 −1 ~2)`: a figure and its changes. */
 export function figureText(figure: ViewFigure): string {
   const deltas = [
-    ...(figure.added ? [`+${figure.added}`] : []),
-    ...(figure.removed ? [`−${figure.removed}`] : []),
-    ...(figure.modified ? [`~${figure.modified}`] : []),
+    ...(figure.added !== undefined && figure.added !== 0 ? [`+${figure.added}`] : []),
+    ...(figure.removed !== undefined && figure.removed !== 0 ? [`−${figure.removed}`] : []),
+    ...(figure.modified !== undefined && figure.modified !== 0 ? [`~${figure.modified}`] : []),
   ]
   return `${plural(figure.count, figure.noun)}${deltas.length ? ` (${deltas.join(' ')})` : ''}`
 }
@@ -49,7 +49,9 @@ function changeLines(page: PageView): string[] {
     lines.push(`Changes: ${counts.length ? counts.join(', ') : 'none'} of ${page.rows ?? 0} items.`)
   }
   // Identity changes (a rename, split or merge) are `unchanged`, but changes.
-  const changed = (page.items ?? []).filter(item => (item.status && item.status !== 'unchanged') || item.correspondence || item.context)
+  const changed = (page.items ?? []).filter(
+    item => (!!item.status && item.status !== 'unchanged') || !!item.correspondence || item.context !== undefined,
+  )
   if (changed.length) {
     lines.push('Changed items (status, kind, label [ID]), each with its context: the items the Changes scope shows to read it:')
     for (const item of changed) {
@@ -64,9 +66,10 @@ function changeLines(page: PageView): string[] {
 export function contextText(context: ViewContext): string {
   const items = context.items.map(item => `${item.kind} ${item.label} [${item.id}]`).join(', ')
   const more = context.total > context.items.length ? ` and ${context.total - context.items.length} more` : ''
-  const rules = context.rules?.length
-    ? ` (added by ${context.rules.length === 1 ? 'rule' : 'rules'} ${context.rules.map(rule => `\`${rule}\``).join(', ')})`
-    : ''
+  const rules =
+    context.rules?.length !== undefined && context.rules.length > 0
+      ? ` (added by ${context.rules.length === 1 ? 'rule' : 'rules'} ${context.rules.map(rule => `\`${rule}\``).join(', ')})`
+      : ''
   const derived = context.derived ? ' (derived: the comparison was saved without context)' : ''
   return `context: ${items}${more}${rules}${derived}`
 }
@@ -74,12 +77,12 @@ export function contextText(context: ViewContext): string {
 /** What the page says of generated values: those regenerated, and the selection's. */
 function generatedLines(page: PageView): string[] {
   const lines: string[] = []
-  if (page.variation?.regenerated) {
+  if (page.variation?.regenerated !== undefined && page.variation.regenerated !== 0) {
     lines.push(
       `Regenerated: ${page.variation.regenerated} item${page.variation.regenerated === 1 ? "'s generated values were" : "s' generated values were"} regenerated from the same inputs (within tolerance, so not a change).`,
     )
   }
-  if (page.generated?.length) {
+  if (page.generated?.length !== undefined && page.generated.length > 0) {
     lines.push(
       `The selection's generated values (written by the extractor's generator, such as a language model; not extracted facts): ${page.generated
         .map(field => `${field.name} (${field.form === 'plain' ? 'unchanged' : (field.words ?? field.form).toLowerCase()})`)
@@ -96,7 +99,7 @@ export function pageLines(page: PageView | undefined): string[] {
   if (page.mode || page.showAs) lines.push(modeLine(page))
   if (page.status && page.status !== 'ok') lines.push(statusLine({...page, status: page.status}))
   for (const notice of page.notices ?? []) lines.push(`Notice: ${notice}`)
-  if (page.figures?.length) lines.push(`Summary bar: ${page.figures.map(figureText).join(' · ')}.`)
+  if (page.figures?.length !== undefined && page.figures.length > 0) lines.push(`Summary bar: ${page.figures.map(figureText).join(' · ')}.`)
   lines.push(...changeLines(page), ...generatedLines(page))
   if (page.selection) {
     lines.push(

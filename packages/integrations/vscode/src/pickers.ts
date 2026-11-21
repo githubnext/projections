@@ -88,7 +88,7 @@ export async function chooseRevision(
     ...(model.pairs?.tags ?? []).map(name => ({label: `$(tag) ${name}`, ref: name})),
     {label: 'Recent commits', kind: vscode.QuickPickItemKind.Separator},
     ...revisions
-      .filter(item => item.kind === 'commit' && item.ref)
+      .filter(item => item.kind === 'commit' && !!item.ref)
       .map(item => ({
         label: `$(git-commit) ${refLabel(item.ref!)}`,
         description: item.title ?? '',
@@ -117,7 +117,7 @@ export async function pickPullRequest(sidebar: Sidebar, folder: vscode.Workspace
   })
   void listPullRequests(cwd).then(
     pulls => {
-      const mine = pulls.filter(pull => branch && pull.headRefName === branch)
+      const mine = pulls.filter(pull => !!branch && pull.headRefName === branch)
       const others = pulls.filter(pull => !mine.includes(pull))
       pick.items = pulls.length
         ? [

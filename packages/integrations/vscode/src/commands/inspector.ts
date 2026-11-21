@@ -77,7 +77,7 @@ export function inspectorCommands(services: Services): vscode.Disposable[] {
       const folder = await chooseFolder()
       if (!folder) return undefined
       const panel = InspectorPanel.find(folder) ?? (await InspectorPanel.show(services, {kind: 'repository', folder}, 'inspect'))
-      return panel?.control(message)
+      return panel.control(message)
     }),
   ]
 }

@@ -35,15 +35,15 @@ export function replaceSkeleton() {
 function diagnosticLink(diagnostic: ProjectionFailure['diagnostics'][number] & {path: string}): HTMLAnchorElement {
   const link = document.createElement('a')
   link.href = '#'
-  link.textContent = diagnostic.line ? `${diagnostic.path}:${diagnostic.line}` : diagnostic.path
+  link.textContent = diagnostic.line !== undefined && diagnostic.line !== 0 ? `${diagnostic.path}:${diagnostic.line}` : diagnostic.path
   link.addEventListener('click', event => {
     event.preventDefault()
     post({
       tag: hostTag,
       op: 'openFile',
       path: diagnostic.path,
-      ...(diagnostic.line ? {line: diagnostic.line} : {}),
-      ...(diagnostic.column ? {column: diagnostic.column} : {}),
+      ...(diagnostic.line !== undefined && diagnostic.line !== 0 ? {line: diagnostic.line} : {}),
+      ...(diagnostic.column !== undefined && diagnostic.column !== 0 ? {column: diagnostic.column} : {}),
     })
   })
   return link

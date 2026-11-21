@@ -65,7 +65,8 @@ export function repository(wizard: Wizard, folder: vscode.WorkspaceFolder) {
   })
   const model = wizard.host.model(folder)
   const taken = (id: string) =>
-    Boolean(model.definition(id) || model.invalidFor(id)) ||
+    model.definition(id) !== undefined ||
+    model.invalidFor(id) !== undefined ||
     ['.github/projections', '.projections'].some(base => existsSync(join(root, ...base.split('/'), `${id}.json`))) ||
     existsSync(join(root, ...directory.split('/'), id))
   return {directory, taken}

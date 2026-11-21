@@ -167,10 +167,10 @@ export class ProjectionTab extends InspectorWebview {
     // For tests: a new extraction job reaches the backend late (`holdJobs`), to see what a long job shows.
     const hold = jobHold(message)
     if (hold > 0) return void setTimeout(() => super.receive(message), hold)
-    const host = message as Partial<HostMessage> & {pair?: unknown; results?: unknown}
+    const host = message as (Partial<HostMessage> & {pair?: unknown; results?: unknown}) | null | undefined
     const op = host?.tag === hostTag ? host.op : undefined
     if (op === 'restore') return this.restore()
-    if (op === 'results') return this.keep(host.pair, host.results)
+    if (op === 'results') return this.keep(host?.pair, host?.results)
     super.receive(message)
   }
 

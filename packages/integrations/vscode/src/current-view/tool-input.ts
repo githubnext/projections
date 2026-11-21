@@ -33,7 +33,7 @@ function partNote(args: Record<string, unknown>, tab: TabDefaults & {parts: NonN
  */
 function definitionAsShown(args: Record<string, unknown>, tab: TabDefaults | undefined): void {
   if (args.definition !== undefined || args.definitionRevision !== undefined) return
-  args.definitionRevision = (args.projection === tab?.projection && tab?.definitionRevision) || 'working-tree'
+  args.definitionRevision = (args.projection === tab?.projection ? (tab?.definitionRevision ?? '') : '') || 'working-tree'
 }
 
 /**

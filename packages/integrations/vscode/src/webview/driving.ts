@@ -5,7 +5,7 @@ import type {InspectorHandle} from '@githubnext/projections-inspector/mount'
 /** The first element matching `selector` (and containing `text`), for tests driving the page. */
 function find(selector: string, text?: string): HTMLElement {
   const target = [...document.querySelectorAll<HTMLElement>(selector)].find(
-    element => text === undefined || (element.textContent ?? '').includes(text),
+    element => text === undefined || element.textContent.includes(text),
   )
   if (!target) throw new Error(`Nothing matches ${selector}${text === undefined ? '' : ` with ${text}`}`)
   return target
@@ -14,7 +14,7 @@ function find(selector: string, text?: string): HTMLElement {
 /** The page's elements matching `selector`, as text and an attribute, for tests driving the page. */
 export function elements(selector: string, attribute?: string) {
   return [...document.querySelectorAll(selector)].slice(0, 200).map(element => ({
-    text: (element.textContent ?? '').trim().slice(0, 500),
+    text: element.textContent.trim().slice(0, 500),
     ...(attribute ? {value: element.getAttribute(attribute)} : {}),
   }))
 }

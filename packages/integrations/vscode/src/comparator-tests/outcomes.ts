@@ -24,7 +24,7 @@ export interface FileOutcome {
 
 /** A value shown as expected or actual: strings as they are, anything else as indented JSON. */
 export function shown(value: unknown): string {
-  return typeof value === 'string' ? value : (JSON.stringify(value, null, 2) ?? String(value))
+  return typeof value === 'string' ? value : (json(value) ?? String(value))
 }
 
 /** The test view's messages for a failed run of a case: one per failure, at its location, else the case's message. */
@@ -104,4 +104,9 @@ export function runBodies(selection: Selection, update: boolean): Record<string,
     files.set(path, set)
   }
   return [...files].map(([path, cases]) => ({path, ...(cases === 'whole' ? {} : {cases: [...cases]}), ...flag}))
+}
+
+/** Indented JSON, which `JSON.stringify` doesn't give for undefined, a function or a symbol, whatever its type says. */
+function json(value: unknown): string | undefined {
+  return JSON.stringify(value, null, 2)
 }

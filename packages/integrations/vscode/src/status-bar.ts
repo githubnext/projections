@@ -71,9 +71,9 @@ export class StatusBar implements vscode.Disposable {
     const model = this.folder()
     const pair = model?.pair
     const active = this.sidebar.active
-    const pinned = active?.pinned && model && active.folder === model.folder ? active.pinned : undefined
+    const pinned = active?.pinned && active.folder === model?.folder ? active.pinned : undefined
     // Another tab in front starts afresh: its job shows after the delay, and the last one's doesn't linger.
-    const front = active && model && active.folder === model.folder ? active : undefined
+    const front = model && active?.folder === model.folder ? active : undefined
     const tab = front ? `${front.folder.uri.toString()}#${front.projection}` : undefined
     if (tab !== this.runningTab) {
       this.runningTab = tab

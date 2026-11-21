@@ -7,15 +7,18 @@ import type {Checks, TestState, Watched} from './state.js'
 async function checkSteps(watched: Watched, projection: string, signal: AbortSignal): Promise<CheckStep[]> {
   const runner = await watched.lease.current()
   const result = await runner.callTool('check', {projections: [projection]}, signal)
-  const report = result.structuredContent as {projections?: {steps?: Partial<CheckStep>[]}[]} | undefined
+  const report = result.structuredContent as {projections?: {steps?: {[K in keyof CheckStep]?: unknown}[]}[]} | undefined
   const listed = report?.projections?.[0]?.steps
   if (!listed) throw new Error(result.content.map(part => part.text ?? '').join('\n') || 'The check reported nothing')
-  return listed.map(step => ({
-    id: String(step.id ?? ''),
-    title: String(step.title ?? step.id ?? ''),
-    status: String(step.status ?? ''),
-    ...(step.message ? {message: String(step.message)} : {}),
-  }))
+  return listed.map(step => {
+    const said = Boolean(step.message)
+    return {
+      id: String(step.id ?? ''),
+      title: String(step.title ?? step.id ?? ''),
+      status: String(step.status ?? ''),
+      ...(said ? {message: String(step.message)} : {}),
+    }
+  })
 }
 
 /** The check items that report: the included ones, and every check of a projection that runs whole. */

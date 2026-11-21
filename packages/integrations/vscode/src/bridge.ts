@@ -72,6 +72,7 @@ export function createBridge(
       // The current generation, which `since=0` returns at once.
       try {
         const current = workspaceChanges((await runner.request({method: 'GET', path: '/api/changes?since=0'}, abort.signal)).body)
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- another call can set it during the await
         if (current) latest = Math.max(latest ?? 0, current.generation)
       } catch {
         // The answer below reports the failure.

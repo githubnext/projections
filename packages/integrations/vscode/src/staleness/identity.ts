@@ -19,7 +19,7 @@ export function staleByIdentity(stamp: ResultStamp, identity: WorkingIdentity, a
     // A verified scope compares only the scope's objects, so an edit outside it leaves the result current; only when
     // the result was taken over the same scope and its own scope identity is known. Otherwise the whole tree.
     const scoped =
-      identity.scopeVerified === true && identity.scopedTree && side.scopedTree && sameScope(side.execution?.scope, identity.scope)
+      identity.scopeVerified === true && !!identity.scopedTree && !!side.scopedTree && sameScope(side.execution?.scope, identity.scope)
     if (scoped ? side.scopedTree !== identity.scopedTree : !side.execution?.tree || side.execution.tree !== identity.tree) {
       return {tier: 'extraction', why: 'working tree'}
     }

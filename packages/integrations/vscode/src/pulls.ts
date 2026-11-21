@@ -75,7 +75,7 @@ export async function listPullRequests(cwd: string): Promise<PullRequest[]> {
   } catch (error) {
     const stderr = (error as {stderr?: unknown}).stderr
     const line = typeof stderr === 'string' ? stderr.trim().split('\n')[0] : ''
-    throw new Error(line || (error instanceof Error ? error.message : String(error)), {cause: error})
+    throw new Error((line ?? '') || (error instanceof Error ? error.message : String(error)), {cause: error})
   }
 }
 

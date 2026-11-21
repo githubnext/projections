@@ -37,7 +37,7 @@ const text = (side: TabSide) => (side.detail ? `${side.name} · ${side.detail}` 
 export function listenForPair(listen: (listener: (data: unknown) => void) => void) {
   let last = ''
   listen(data => {
-    const message = data as Partial<TabPairLabels>
+    const message = data as Partial<TabPairLabels> | null | undefined
     if (message?.tag !== pairTag) return
     // The same description again changes nothing: the toolbar and the view aren't drawn again.
     const json = JSON.stringify(message)

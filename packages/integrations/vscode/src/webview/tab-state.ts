@@ -56,7 +56,7 @@ export function restore(): Promise<TabRestore | undefined> {
   return new Promise(resolve => {
     const timer = setTimeout(() => (stop(), resolve(undefined)), 5000)
     const stop = fromExtension(data => {
-      const message = data as Partial<TabRestore>
+      const message = data as Partial<TabRestore> | null | undefined
       if (message?.tag !== restoreTag) return
       clearTimeout(timer)
       stop()

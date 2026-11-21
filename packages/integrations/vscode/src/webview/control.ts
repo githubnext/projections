@@ -55,9 +55,9 @@ function operations(): {[O in Op]: Operation<O>} {
       if (typeof message.generation === 'number') applySwitch(message.generation)
       inspector.setPair({
         after: String(message.after),
-        ...(message.before ? {before: String(message.before)} : {}),
-        ...(message.projection ? {projection: String(message.projection)} : {}),
-        ...(message.definitionRevision ? {definitionRevision: String(message.definitionRevision)} : {}),
+        ...(message.before ? {before: message.before} : {}),
+        ...(message.projection ? {projection: message.projection} : {}),
+        ...(message.definitionRevision ? {definitionRevision: message.definitionRevision} : {}),
       })
     },
     async setDefinitionRevision(message, ready) {
@@ -96,7 +96,7 @@ function operations(): {[O in Op]: Operation<O>} {
         ...(pair.definitionRevision ? {definitionRevision: pair.definitionRevision} : {}),
       })
     },
-    elements: message => elements(String(message.selector), message.attribute ? String(message.attribute) : undefined),
+    elements: message => elements(String(message.selector), message.attribute),
     press(message) {
       press(String(message.selector), text(message.text), String(message.key))
     },
@@ -110,7 +110,7 @@ function operations(): {[O in Op]: Operation<O>} {
 export function listenForControl(ready: Ready) {
   const operation = operations()
   fromExtension(async data => {
-    const message = data as Partial<ControlMessage>
+    const message = data as Partial<ControlMessage> | null | undefined
     if (message?.tag !== controlTag || typeof message.id !== 'number') return
     const id = message.id
     try {

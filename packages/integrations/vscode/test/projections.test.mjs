@@ -184,6 +184,11 @@ test("pairs: the runner's suggestions and bookmarks, labels, swapping and compar
   assert.equal(samePair({after: 'HEAD'}, {before: 'main', after: 'HEAD'}), false)
   assert.equal(samePair(undefined, {after: 'HEAD'}), false)
   assert.deepEqual(parsePairs({}).suggestions, [])
+  // Malformed entries are skipped, not thrown on.
+  assert.deepEqual(
+    parsePairs({suggestions: [null, 7, ['HEAD'], {before: 'v1', after: 'v2'}]}).suggestions.map(pair => pair.after),
+    ['v2'],
+  )
 })
 
 test('a comparison job counts its changes; the mode toggle moves through the offered modes', () => {

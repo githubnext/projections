@@ -8,7 +8,7 @@ type Runner = Awaited<ReturnType<Lease['current']>>
 
 /** A refusal's diagnostics as sentences, never its raw body. */
 export function readable(status: number, body: unknown): string {
-  const diagnostics = (body as {diagnostics?: {message?: unknown}[]} | null)?.diagnostics
+  const diagnostics = (body as {diagnostics?: ({message?: unknown} | null)[]} | null)?.diagnostics
   const messages = Array.isArray(diagnostics) ? diagnostics.flatMap(item => (typeof item?.message === 'string' ? [item.message] : [])) : []
   return messages.length ? messages.join('; ') : `The Projections backend refused the request (${status})`
 }
@@ -70,7 +70,9 @@ export async function countChanges(
       job = (await runner.request({method: 'GET', path: `/api/jobs/${id}`}, signal)).body as typeof job
     }
     const count = jobChangeCount(job)
-    return count === undefined ? {failed: job.diagnostics?.map(item => item.message).join('; ') || 'The comparison failed'} : {count}
+    return count === undefined
+      ? {failed: (job.diagnostics?.map(item => item.message).join('; ') ?? '') || 'The comparison failed'}
+      : {count}
   } catch (error) {
     if (signal.aborted) return undefined
     return {failed: error instanceof Error ? error.message : String(error)}

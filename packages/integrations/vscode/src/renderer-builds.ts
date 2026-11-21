@@ -167,13 +167,17 @@ export class RendererBuilds implements vscode.Disposable {
       if (JSON.stringify(state) !== JSON.stringify(build.state) || build.running !== item.running) changed = true
       build.state = state
       if (item.phase === 'untrusted') void this.askTrust(entry.folder, item.projection)
-      if (item.run > build.run && item.phase !== 'untrusted' && (item.running || item.lines?.length)) {
+      if (
+        item.run > build.run &&
+        item.phase !== 'untrusted' &&
+        (item.running || (item.lines?.length !== undefined && item.lines.length > 0))
+      ) {
         // A new run: its own task terminal.
         build.terminal?.end(null)
         build.run = item.run
         build.terminal = this.task(entry.folder, item.projection, item.script ?? 'build', item.script === 'watch')
       }
-      if (item.lines?.length) build.terminal?.write(item.lines)
+      if (item.lines?.length !== undefined && item.lines.length > 0) build.terminal?.write(item.lines)
       if (build.running && !item.running) build.terminal?.end(item.exit ?? 0)
       build.running = item.running
     }

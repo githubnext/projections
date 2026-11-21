@@ -73,7 +73,7 @@ export function cliName(name: string): string | undefined {
 
 /** A tool's arguments for the backend: the input without `folder` (and never a `confirm` the model made up). */
 export function cliArguments(input: unknown): Record<string, unknown> {
-  const args = {...((typeof input === 'object' && input) || {})} as Record<string, unknown>
+  const args = {...(typeof input === 'object' && input !== null ? input : {})} as Record<string, unknown>
   delete args.folder
   delete args.confirm
   return args
@@ -82,7 +82,7 @@ export function cliArguments(input: unknown): Record<string, unknown> {
 /** What the chat shows while a tool runs: its title and the projection or part it is about. */
 export function invocationMessage(title: string, input: Record<string, unknown>): string {
   const subject = [input.projection, input.part, Array.isArray(input.projections) ? input.projections.join(', ') : undefined].find(
-    value => typeof value === 'string' && value,
+    (value): value is string => typeof value === 'string' && value !== '',
   )
   return `${title}${subject ? `: ${subject}` : ''}`
 }

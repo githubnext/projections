@@ -12,7 +12,7 @@ export function registerEnvironment(lease: (folder: vscode.WorkspaceFolder) => L
     async (target?: {folder?: vscode.Uri; revision?: string}) => {
       const folders = vscode.workspace.workspaceFolders ?? []
       const folder =
-        (target?.folder && vscode.workspace.getWorkspaceFolder(target.folder)) ||
+        (target?.folder && vscode.workspace.getWorkspaceFolder(target.folder)) ??
         (folders.length === 1
           ? folders[0]
           : await vscode.window.showWorkspaceFolderPick({placeHolder: 'Prepare the environment of which folder?'}))
@@ -71,7 +71,7 @@ export function registerEnvironment(lease: (folder: vscode.WorkspaceFolder) => L
           if (show) output.show()
         }
       } catch (error) {
-        output.appendLine(String((error as Error).message ?? error))
+        output.appendLine(String((error as {message?: unknown}).message ?? error))
         void vscode.window.showErrorMessage(`Preparing the environment failed: ${(error as Error).message}`)
       } finally {
         held.dispose()

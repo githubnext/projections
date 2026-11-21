@@ -170,7 +170,7 @@ export class InspectorWebview {
       if (this.queued.length < 1000) this.queued.push(message)
       return
     }
-    const host = message as Partial<HostMessage>
+    const host = message as Partial<HostMessage> | null | undefined
     if (host?.tag !== hostTag) return
     switch (host.op) {
       case 'ready': {
@@ -183,7 +183,12 @@ export class InspectorWebview {
       }
       case 'controlResult':
         if (typeof host.id === 'number') {
-          this.page.send({type: 'answered', id: host.id, result: host.result, ...(host.error ? {error: String(host.error)} : {})})
+          this.page.send({
+            type: 'answered',
+            id: host.id,
+            result: host.result,
+            ...(host.error ? {error: host.error} : {}),
+          })
         }
         return
       case 'openFile':

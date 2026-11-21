@@ -87,7 +87,7 @@ export function parseInfo(value: unknown): RunnerInfo {
     typeof info.trusted !== 'boolean' ||
     typeof info.explore !== 'boolean'
   ) {
-    throw new Error(`projections serve speaks an unsupported protocol: ${JSON.stringify(value)?.slice(0, 200)}`)
+    throw new Error(`projections serve speaks an unsupported protocol: ${(JSON.stringify(value) as string | undefined)?.slice(0, 200)}`)
   }
   return info as RunnerInfo
 }

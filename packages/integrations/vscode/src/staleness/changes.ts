@@ -21,7 +21,7 @@ export function staleByChanges(stamp: ResultStamp, input: StalenessInput): Stale
   if (complete && kinds.size === 0) return undefined
   // Unknown changes (a gap, or the backend couldn't say what changed): anything may have.
   if (!complete) return {tier: 'extraction', why: 'working tree'}
-  const changed = (kind: string) => !complete || kinds.has(kind)
+  const changed = (kind: string) => kinds.has(kind)
   const id = stamp.projection
   if (readsEdits(stamp, input.definition) && changed('definitions')) return {tier: 'extraction', why: 'definition'}
   // An extractor script runs from the working tree whichever definition names it.

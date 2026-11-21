@@ -38,9 +38,7 @@ function definitionLines(facts: TabFacts): string[] {
       ]
     : []
   if (!facts.definitionFile && !named.length) return []
-  return [
-    `Definition: ${facts.definitionFile ? facts.definitionFile : 'a built-in default'}${named.length ? `; ${named.join(', ')}` : ''}.`,
-  ]
+  return [`Definition: ${(facts.definitionFile ?? '') || 'a built-in default'}${named.length ? `; ${named.join(', ')}` : ''}.`]
 }
 
 /** What the tab shows: its choice and the revisions it resolved to. */
@@ -61,7 +59,7 @@ function freshnessLines(facts: TabFacts): string[] {
   const lines: string[] = []
   if (facts.stale) {
     lines.push(
-      `Out of date: ${facts.stale.why}${facts.stale.files ? ` (${facts.stale.files} file${facts.stale.files === 1 ? '' : 's'} changed since)` : ''}; the person can Refresh it.`,
+      `Out of date: ${facts.stale.why}${facts.stale.files !== undefined && facts.stale.files !== 0 ? ` (${facts.stale.files} file${facts.stale.files === 1 ? '' : 's'} changed since)` : ''}; the person can Refresh it.`,
     )
   } else if (facts.page?.status === 'ok') lines.push('Up to date.')
   if (facts.edits === 'yours') lines.push("Definition: it uses the person's uncommitted edits to the definition.")
@@ -80,7 +78,7 @@ export function currentViewText(facts: TabFacts): string {
   if (facts.description) lines.push(`What it shows: ${facts.description}`)
   lines.push(...definitionLines(facts), ...showingLines(facts), ...pageLines(facts.page), ...freshnessLines(facts))
   if (!facts.page) lines.push("Its page isn't loaded (the tab is hidden), so its mode, selection and counts aren't known.")
-  if (facts.others?.length) lines.push(`Other projection tabs: ${facts.others.join(', ')}.`)
+  if (facts.others?.length !== undefined && facts.others.length > 0) lines.push(`Other projection tabs: ${facts.others.join(', ')}.`)
   lines.push(
     'compare, check, open_projection and set_part default to this projection, and compare without before and after compares exactly these revisions.',
   )

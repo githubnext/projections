@@ -39,7 +39,7 @@ export function viewingRows(input: {facts: RepositoryFacts; current: Choice; rec
   const choiceRow = (choice: Choice): ViewingRow => ({kind: 'choice', choice, selected: sameChoice(choice, current)})
   // The recent commit at `HEAD` is Last commit: listed once, as the commit (it says what it changes), unless Last commit
   // is the choice.
-  const atHead = recent.changes.find(change => facts.head && change.after === facts.head)
+  const atHead = recent.changes.find(change => !!facts.head && change.after === facts.head)
   const lastChosen = current.id === 'last-commit'
   const spans = atHead && !lastChosen ? listed.filter(choice => choice.id !== 'last-commit') : listed
   const changes = recent.changes.filter(change => change !== atHead || !lastChosen)
@@ -49,7 +49,7 @@ export function viewingRows(input: {facts: RepositoryFacts; current: Choice; rec
       ? [
           {
             kind: 'progress' as const,
-            text: recent.progress || 'Checking recent commits…',
+            text: (recent.progress ?? '') || 'Checking recent commits…',
           },
         ]
       : []),

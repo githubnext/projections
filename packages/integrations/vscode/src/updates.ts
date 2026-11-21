@@ -48,7 +48,7 @@ export function coalesce(run: () => void, {delayMs = 0, timers = realTimers}: {d
 export function changed(): (value: unknown) => boolean {
   let last: string | undefined
   return value => {
-    const text = JSON.stringify(value) ?? 'undefined'
+    const text = (JSON.stringify(value) as string | undefined) ?? 'undefined'
     if (text === last) return false
     last = text
     return true

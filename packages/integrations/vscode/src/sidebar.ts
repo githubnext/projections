@@ -159,7 +159,7 @@ export class Sidebar implements vscode.Disposable {
       typeof item.label === 'string' ? item.label : (item.label?.label ?? ''),
       item.description ?? '',
       item.tooltip instanceof vscode.MarkdownString ? item.tooltip.value : (item.tooltip ?? ''),
-      icon instanceof vscode.ThemeIcon ? icon.id : icon ? 'uri' : '',
+      icon instanceof vscode.ThemeIcon ? icon.id : icon === undefined ? '' : 'uri',
       item.contextValue ?? '',
       item.collapsibleState ?? 0,
       item.id ?? '',
@@ -176,7 +176,7 @@ export class Sidebar implements vscode.Disposable {
     void vscode.commands.executeCommand(
       'setContext',
       'projections.loaded',
-      models.every(model => model.definitions || model.error),
+      models.every(model => model.definitions !== undefined || !!model.error),
     )
     void vscode.commands.executeCommand(
       'setContext',
@@ -239,7 +239,7 @@ export class Sidebar implements vscode.Disposable {
     if (!node) {
       const models = this.folders()
       await Promise.all(models.map(model => model.load()))
-      if (models.length > 1) return models.filter(model => model.defines || model.error).map(model => ({kind: 'folder', model}))
+      if (models.length > 1) return models.filter(model => model.defines || !!model.error).map(model => ({kind: 'folder', model}))
       return models[0] ? this.folderRows(models[0]) : []
     }
     if (node.kind === 'folder') return this.folderRows(node.model)

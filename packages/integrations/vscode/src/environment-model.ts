@@ -52,7 +52,7 @@ export async function prepareEnvironment(
 ): Promise<PrepareRun> {
   const body: Record<string, unknown> = {}
   if (options.revision) body.revision = options.revision
-  if (options.steps?.length) body.steps = options.steps
+  if (options.steps?.length !== undefined && options.steps.length > 0) body.steps = options.steps
   if (options.force) body.force = true
   const started = await runner.request({method: 'POST', path: '/api/prepare', body})
   if (started.status !== 202) throw new Error(refusal(started.body) ?? `Preparing failed (${started.status})`)
@@ -77,11 +77,9 @@ export async function prepareEnvironment(
 
 function refusal(body: unknown): string | undefined {
   const error = (body as {error?: unknown} | undefined)?.error
-  return typeof error === 'string'
-    ? error
-    : typeof (error as {message?: unknown})?.message === 'string'
-      ? String((error as {message: string}).message)
-      : undefined
+  if (typeof error === 'string') return error
+  const message = (error as {message?: unknown} | null | undefined)?.message
+  return typeof message === 'string' ? message : undefined
 }
 
 /** The backend arguments for the `projections.workspace` setting: `--workspace STRATEGY`, or none. */

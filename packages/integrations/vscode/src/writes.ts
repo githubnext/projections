@@ -48,7 +48,7 @@ export function parseWrite(value: unknown): OnboardingWrite {
   if (!write || !Array.isArray(write.files) || typeof write.digest !== 'string' || typeof write.written !== 'boolean') {
     throw new Error('The Projections backend returned an invalid preview')
   }
-  for (const file of write.files) {
+  for (const file of write.files as (Partial<OnboardingWrite['files'][number]> | null)[]) {
     if (typeof file?.path !== 'string' || typeof file.after !== 'string' || (file.before !== null && typeof file.before !== 'string')) {
       throw new Error('The Projections backend returned an invalid preview')
     }

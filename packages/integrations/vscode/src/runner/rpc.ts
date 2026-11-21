@@ -30,7 +30,7 @@ export function createRpcClient({input, output, log}: {input: Readable; output: 
     if (closed === undefined && output.writable) output.write(`${JSON.stringify({jsonrpc: '2.0', ...message})}\n`)
   }
   createInterface({input, crlfDelay: Infinity}).on('line', line => {
-    let message: {id?: unknown; method?: unknown; params?: unknown; result?: unknown; error?: {code?: unknown; message?: unknown}}
+    let message: {id?: unknown; method?: unknown; params?: unknown; result?: unknown; error?: {code?: unknown; message?: unknown}} | null
     try {
       message = JSON.parse(line)
     } catch {

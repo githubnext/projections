@@ -88,7 +88,7 @@ export class RecentCommits {
     recent.hidden.clear()
     this.changed()
     await this.follow(model, recent, id)
-    if (recent.sweep?.id === id && recent.sweep.status === 'running') recent.sweep = {...recent.sweep, status: 'cancelled'}
+    if (recent.sweep.id === id && recent.sweep.status === 'running') recent.sweep = {...recent.sweep, status: 'cancelled'}
     this.changed()
     await this.renderThumbnails(model, recent)
   }
@@ -108,8 +108,8 @@ export class RecentCommits {
         try {
           for (;;) {
             const response = await this.host.request(model.folder, {method: 'GET', path: '/api/sweep'})
-            const sweep = (response.body as {sweep?: Sweep | null})?.sweep
-            if (!sweep || sweep.id !== id) break
+            const sweep = (response.body as {sweep?: Sweep | null} | null)?.sweep
+            if (sweep?.id !== id) break
             recent.sweep = sweep
             this.changed()
             if (sweep.status !== 'running') break

@@ -86,7 +86,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/build-ui-css.mjs",
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.browser.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p browser/tsconfig.json",
     "test": "node --test test/*.test.mjs",
     "test:browser": "npm run build --workspace @githubnext/projections-storybook && playwright test"
   }

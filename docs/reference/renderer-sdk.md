@@ -1788,6 +1788,8 @@ How a host presents a comparison with a renderer:
 - `diff`: one frame and no `progress` at all; the renderer draws its own
   static comparison of both subjects (`init.comparisonMode` is `'diff'`).
 
+In the order hosts list them. A renderer manifest's `comparisonModes` names those it supports.
+
 ### `ControlIcon`
 
 ```ts

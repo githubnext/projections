@@ -122,8 +122,11 @@ export function parseStageCover(token: string | undefined): CoverRect[] | undefi
 /** The space kept between a fitted drawing and a cover above it, CSS px. */
 export const coverGap = 8
 
-/** Where a fitted drawing lies before any cover moves it, and the cover's rectangles above and below its stage's middle. */
-function uncoveredFit({cover, view, origin = {x: 0, y: 0}, size, padding = 16, maxScale = 1}: CoveredFitInput): {
+/**
+ * Where a fitted drawing lies before any cover moves it, and the cover's rectangles at the stage's top and at its foot:
+ * those above and below its middle, or with the host's `insets`, those within its top inset and all the others.
+ */
+function uncoveredFit({cover, view, origin = {x: 0, y: 0}, size, padding = 16, maxScale = 1, insets}: CoveredFitInput): {
   left: number
   width: number
   top: number
@@ -139,13 +142,14 @@ function uncoveredFit({cover, view, origin = {x: 0, y: 0}, size, padding = 16, m
   const contentTop = origin.y + Math.max(0, (view.height - (height + top + y)) / 2) + top
   const middle = origin.y + view.height / 2
   const across = cover.filter(rect => rect.x < left + width && rect.x + rect.width > left)
+  const atTop = insets ? (rect: CoverRect) => rect.y + rect.height <= insets.top : (rect: CoverRect) => rect.y + rect.height / 2 <= middle
   return {
     left,
     width,
     top: contentTop,
     bottom: contentTop + height,
-    above: across.filter(rect => rect.y + rect.height / 2 <= middle),
-    below: across.filter(rect => rect.y + rect.height / 2 > middle),
+    above: across.filter(atTop),
+    below: across.filter(rect => !atTop(rect)),
   }
 }
 
@@ -157,6 +161,12 @@ interface CoveredFitInput {
   size: {width: number; height: number}
   padding?: number | FitPadding
   maxScale?: number
+  /**
+   * In a frame the host sizes to its content, the host's `stage-inset-top` and `stage-inset-bottom` (0 where it sends
+   * none), CSS px in from the frame's top and bottom edges, and how much of the frame lies `below` the stage, CSS px
+   * (such as a footer, which keeps clear of the inset itself); see `coveredBottom`.
+   */
+  insets?: {top: number; bottom: number; below?: number}
 }
 
 const fitsNothing = ({cover, view, size}: CoveredFitInput) =>
@@ -164,11 +174,12 @@ const fitsNothing = ({cover, view, size}: CoveredFitInput) =>
 
 /**
  * The space a fitted drawing keeps above it, CSS px, so it never opens under what the host overlays at the stage's
- * top (`cover`, the rectangles above its middle): the drawing is fitted with `padding` and centred in a stage of
- * `view` whose top left is `origin` in the frame, as `useFitScale` and a `margin: auto` drawing place it. Where that
- * leaves it clear of every rectangle (a flat graph centred well below a chip), the padding's own top; else the top
- * that clears the lowest rectangle it reaches, by `coverGap`. Decided from the drawing's fit without the cover, never
- * from the result, so it can't oscillate. The drawing still pans under the cover once zoomed.
+ * top (`cover`, the rectangles above its middle, or with `insets` within the top one, see `coveredBottom`): the
+ * drawing is fitted with `padding` and centred in a stage of `view` whose top left is `origin` in the frame, as
+ * `useFitScale` and a `margin: auto` drawing place it. Where that leaves it clear of every rectangle (a flat graph
+ * centred well below a chip), the padding's own top; else the top that clears the lowest rectangle it reaches, by
+ * `coverGap`. Decided from the drawing's fit without the cover, never from the result, so it can't oscillate. The
+ * drawing still pans under the cover once zoomed.
  */
 export function coveredTop(input: CoveredFitInput): number {
   const {y, top = y} = fitPadding(input.padding)
@@ -184,13 +195,24 @@ export function coveredTop(input: CoveredFitInput): number {
 /**
  * The space a fitted drawing keeps below it, CSS px, as `coveredTop` keeps above: clear of what the host overlays at
  * the stage's foot (the rectangles below its middle, such as a floating legend and summary), only where the fitted
- * drawing would reach them; else the padding's own bottom (`y`).
+ * drawing would reach them; else the padding's own bottom (`y`). In a frame the host sizes to its content (`insets`),
+ * the rectangles are measured from the frame's top, while what floats at its foot moves with its bottom as the frame
+ * grows: measured at one height and placed in the frame at another, they would put the foot anywhere, even above the
+ * middle, and the height asked for from them would feed back. There the host's insets, which it measures with the
+ * rectangles at one height, place them instead: a rectangle whose bottom lies within `stage-inset-top` is at the top,
+ * every other one at the foot. The drawing spans the frame's height, so it reaches every one at the foot that lies
+ * across it, and its bottom is then `stage-inset-bottom`, measured up from the frame's bottom edge, less what lies
+ * below the stage (`insets.below`).
  */
 export function coveredBottom(input: CoveredFitInput): number {
   const {y} = fitPadding(input.padding)
   if (fitsNothing(input)) return y
   const origin = input.origin ?? {x: 0, y: 0}
   const fit = uncoveredFit(input)
+  if (input.insets) {
+    const {bottom, below = 0} = input.insets
+    return fit.below.length ? Math.max(y, Math.ceil(bottom - below)) : y
+  }
   const reached = fit.below.filter(rect => rect.y + rect.height > fit.top && rect.y < origin.y + input.view.height)
   if (!reached.length) return y
   const edge = Math.min(...reached.map(rect => rect.y)) - coverGap

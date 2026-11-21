@@ -86,7 +86,9 @@ them, so leave them unapproved—this repository intentionally configures no
 
 Formatting uses [oxfmt](https://oxc.rs/docs/guide/usage/formatter)
 (`.oxfmtrc.json`). Run `npm run format` before committing; `npm run check` runs
-`format:check`, and ESLint remains the only linter.
+`format:check`, and ESLint remains the only linter: strict and type-aware, run a
+workspace at a time after the build (see
+[linting](docs/maintainers/linting.md)).
 
 Even though installs go through the committed `.npmrc` proxy (see
 [Package sources](#package-sources)), lockfiles must always record canonical
@@ -161,7 +163,7 @@ when).
 
 ### Continuous integration
 
-CI verifies import and dependency boundaries, TypeScript, correctness-focused
+CI verifies import and dependency boundaries, TypeScript, strict type-aware
 ESLint rules, real native-engine artifact tests, and explicit Rust and browser
 suites. Generated files are never linted as authored code. CI runs the same
 public composite action on both Linux and macOS, so passing locally on macOS
@@ -270,10 +272,12 @@ its findings to code scanning. A file gets its schema from its own declaration
 association in `.dollarlint.toml`, or from SchemaStore's catalog. Our own
 formats use the schemas in `packages/schemas`, read from the checkout rather
 than fetched (`[[schemas.mappings]]`), so a change is checked against its own
-schemas, before and after the schemas host serves them. A new kind of data file
-needs a schema and an association; a file no schema can describe, such as a
-third-party format with none published, is excluded in `.dollarlint.toml` with
-its reason.
+schemas, before and after the schemas host serves them. `requireCoverage` fails
+a file with no schema, so a new kind of data file needs one, in TypeBox in
+`packages/schemas` (`src/typebox` for a published format, `src/repository` for
+the repository's own files), and an association. A file no schema can describe,
+such as a third-party format with none published, is excluded in
+`.dollarlint.toml` with its reason.
 
 ## Repository layout
 

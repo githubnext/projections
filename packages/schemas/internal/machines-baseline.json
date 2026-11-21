@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Lifecycle rule baseline (internal)",
+  "description": "Each file, by repository path, and how many lifecycle-rule findings it may have. Generated from packages/schemas/src/repository; internal and unversioned, never published. Validates tools/scripts/check-machines/baseline.json (see .dollarlint.toml).",
+  "type": "object",
+  "propertyNames": {"pattern": "^[^/\\\\][^\\\\]*$"},
+  "additionalProperties": {"type": "integer", "minimum": 1}
+}

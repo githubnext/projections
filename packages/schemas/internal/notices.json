@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Third-party notices (internal)",
+  "description": "Generated from packages/schemas/src/repository; internal and unversioned, never published. Validates notices/notices.json (see .dollarlint.toml).",
+  "type": "object",
+  "required": ["notices"],
+  "properties": {
+    "$comment": {"type": "string"},
+    "notices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["directory", "crates", "repository", "tag", "files"],
+        "properties": {
+          "directory": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]+$",
+            "description": "The directory in notices/ holding the texts."
+          },
+          "crates": {
+            "type": "object",
+            "description": "Each crate the texts cover, with its exact locked versions.",
+            "additionalProperties": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true}
+          },
+          "repository": {
+            "type": "string",
+            "pattern": "^https://",
+            "description": "The upstream repository the texts come from."
+          },
+          "tag": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The upstream tag or commit they were taken at."
+          },
+          "files": {
+            "type": "object",
+            "minProperties": 1,
+            "description": "Each license file in the directory, by the upstream path it was copied from.",
+            "additionalProperties": {"type": "string", "minLength": 1}
+          },
+          "note": {"type": "string", "minLength": 1, "pattern": "\\S"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

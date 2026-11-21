@@ -97,7 +97,9 @@ export function parseRendererManifest(value: unknown): RendererManifest {
   const handles = value.handles
   if (typeof name !== 'string' || !/^[a-z0-9][a-z0-9-]{0,63}$/.test(name))
     throw new Error('Renderer manifest name must be a lowercase identifier')
-  if (typeof title !== 'string' || !title.trim() || title.length > 200) throw new Error('Renderer manifest title must be 1-200 characters')
+  // Characters (code points), as the manifest schema's maxLength counts them.
+  if (typeof title !== 'string' || !title.trim() || [...title].length > 200)
+    throw new Error('Renderer manifest title must be 1-200 characters')
   if (
     !Array.isArray(handles) ||
     handles.length > 100 ||

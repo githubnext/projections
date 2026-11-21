@@ -5,7 +5,7 @@ import {cp, mkdir, rm, writeFile} from 'node:fs/promises'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
 import {test, type TestContext} from 'node:test'
-import {compareExtractions, installPackages, runHelper} from './support.mjs'
+import {compareExtractions, installPackages, runHelper} from './support.ts'
 import {createNativeEngine} from '@githubnext/projections-engine/native'
 import type {Entity, Extraction, Relationship} from '../src/types.js'
 

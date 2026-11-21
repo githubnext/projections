@@ -4,7 +4,7 @@ import type {RendererFrame} from '../frame.js'
 import type {Side} from '../modes.js'
 import type {PaneState} from '../pane.js'
 import type {RendererPayloads} from './payloads.js'
-import type {Anchors} from './selection.js'
+import type {Anchors, InteractionEvent} from './interaction.js'
 import type {PaneKey, StageBinding} from './types.js'
 
 export type StageBindingInput = {
@@ -15,7 +15,8 @@ export type StageBindingInput = {
   anchors: Anchors
   frames: {current: Record<Side, RendererFrame | null>}
   setPanes: (update: (previous: Record<PaneKey, PaneState>) => Record<PaneKey, PaneState>) => void
-  setAnchors: (update: (previous: Anchors) => Anchors) => void
+  /** Sends the renderers' anchors and frame replacements to the interaction. */
+  sendInteraction: (event: InteractionEvent) => void
   selectFrom: (pane: PaneKey, id: string | null, path?: string) => void
   activateAnnotation: (rowId: string) => void
   selectedPath: Record<PaneKey, string | undefined>
@@ -24,7 +25,7 @@ export type StageBindingInput = {
 
 /** What `ProjectionStage` binds its renderer frames to: the payloads they are sent and the handlers for their messages. */
 export function useStageBinding(input: StageBindingInput): StageBinding {
-  const {payloads, stableValues, action, filter, anchors, frames, setPanes, setAnchors} = input
+  const {payloads, stableValues, action, filter, anchors, frames, setPanes, sendInteraction} = input
   const {selectFrom, activateAnnotation, selectedPath, annotationMarks} = input
   const {init, environment, progressPayload, endpoints, diffProgress} = payloads
   return useMemo<StageBinding>(
@@ -45,18 +46,17 @@ export function useStageBinding(input: StageBindingInput): StageBinding {
         after: state => setPanes(previous => ({...previous, after: state})),
       },
       onAnchor: {
-        before: (id, rect) => setAnchors(previous => ({...previous, before: {...previous.before, [id]: rect}})),
-        after: (id, rect) => setAnchors(previous => ({...previous, after: {...previous.after, [id]: rect}})),
+        before: (rowId, rect) => sendInteraction({type: 'anchored', side: 'before', rowId, rect}),
+        after: (rowId, rect) => sendInteraction({type: 'anchored', side: 'after', rowId, rect}),
       },
-      // A side's anchors belong to its frame's renderer: a new frame (or none) reports its own, so the old ones go. A
-      // frame that persists across a mode change keeps them, since its renderer only reports anchors that move.
+      // A side's anchors belong to its frame's renderer: a new frame (or none) reports its own (see `frameReplaced`).
       onFrame: {
         before: frame => {
-          if (frames.current.before !== frame) setAnchors(previous => ({...previous, before: {}}))
+          if (frames.current.before !== frame) sendInteraction({type: 'frameReplaced', side: 'before'})
           frames.current.before = frame
         },
         after: frame => {
-          if (frames.current.after !== frame) setAnchors(previous => ({...previous, after: {}}))
+          if (frames.current.after !== frame) sendInteraction({type: 'frameReplaced', side: 'after'})
           frames.current.after = frame
         },
       },
@@ -90,7 +90,7 @@ export function useStageBinding(input: StageBindingInput): StageBinding {
       annotationMarks,
       frames,
       setPanes,
-      setAnchors,
+      sendInteraction,
     ],
   )
 }

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Engine conformance corpus (internal)",
+  "description": "Generated from packages/schemas/src/repository; internal and unversioned, never published. Validates packages/schemas/fixtures/conformance.json (see .dollarlint.toml).",
+  "type": "object",
+  "required": ["version", "cases", "comparisons"],
+  "properties": {
+    "version": {"type": "number", "const": 0},
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "request"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+          "request": {
+            "type": "object",
+            "required": ["version", "operation"],
+            "properties": {
+              "version": {"type": "number", "const": 0},
+              "operation": {
+                "enum": ["decode", "normalize", "canonicalize", "pair", "vary", "review", "validate-comparison"]
+              }
+            },
+            "description": "An engine request; the other fields are the operation's."
+          },
+          "expectError": {
+            "type": "string",
+            "pattern": "^[a-z][a-z-]*$",
+            "description": "The diagnostic code the engine must fail with."
+          },
+          "expectedErrorPath": {"type": "string"},
+          "expectedCanonical": {"type": "string"},
+          "expectedResult": {}
+        },
+        "additionalProperties": false
+      }
+    },
+    "comparisons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "before", "after"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+          "before": {"type": "object", "properties": {}},
+          "after": {"type": "object", "properties": {}},
+          "expectError": {
+            "type": "string",
+            "pattern": "^[a-z][a-z-]*$",
+            "description": "The diagnostic code the engine must fail with."
+          },
+          "expected": {"$ref": "https://schemas.projections.githubnext.com/comparison/v0.json"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

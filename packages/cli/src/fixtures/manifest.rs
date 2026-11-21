@@ -33,7 +33,8 @@ pub fn renderer_manifest(value: &Value) -> Result<Value> {
     );
     let title = text(&value["title"], "Renderer manifest title")
         .ok()
-        .filter(|title| title.encode_utf16().count() <= 200)
+        // Characters (code points), as renderer/v0's maxLength and the SDK's parser count them.
+        .filter(|title| title.chars().count() <= 200)
         .context("Renderer manifest title must be 1-200 characters")?;
     let handles = value["handles"]
         .as_array()

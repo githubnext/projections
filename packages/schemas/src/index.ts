@@ -39,6 +39,7 @@ import type {ScenarioComparatorSchema, ScenarioSchema, ScenariosDocumentSchema} 
 
 export {customComparator, isComparatorFile} from './comparator.js'
 export {
+  comparisonModes,
   domainSchemas,
   kindColors,
   kindHues,

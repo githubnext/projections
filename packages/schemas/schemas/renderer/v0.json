@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/renderer/v0.json",
+  "title": "Projections renderer manifest",
+  "description": "`renderer.json`, the manifest a renderer bundle ships beside its `index.html`: its name, the definition renderers it presents, and optionally the comparison modes and extractions it supports.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "name", "title", "handles"],
+  "properties": {
+    "format": {"type": "string", "const": "projections.renderer"},
+    "version": {"type": "number", "const": 0},
+    "name": {
+      "description": "The bundle directory name, such as `basic`.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+    },
+    "title": {
+      "description": "The renderer's name in hosts' messages and menus.",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "maxLength": 200
+    },
+    "handles": {
+      "description": "The definition renderer names the bundle presents, such as `[\"graph\", \"dag\"]`.",
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-z0-9][a-z0-9/.-]{0,63}$"},
+      "maxItems": 100
+    },
+    "comparisonModes": {
+      "description": "The comparison modes the bundle supports; absent means side by side, animated and swipe.",
+      "type": "array",
+      "items": {"enum": ["diff", "side-by-side", "animated", "swipe"]},
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "accepts": {
+      "description": "The extractions the bundle presents, by domain schema and optional vocabulary; absent means any.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["schema"],
+        "properties": {
+          "schema": {
+            "enum": ["graph/v0", "dag/v0", "treemap/v0", "metrics/v0", "api/v0", "database/v0", "architecture/v0"]
+          },
+          "vocabulary": {
+            "enum": ["dependency-injection/v0", "infrastructure/v0", "runtime-policy/v0", "agentic-workflows/v0", "scenarios/v0"]
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true
+    }
+  }
+}

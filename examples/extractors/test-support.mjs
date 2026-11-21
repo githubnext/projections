@@ -10,6 +10,9 @@ import {createNativeEngine} from '@githubnext/projections-engine/native'
 const here = path.dirname(fileURLToPath(import.meta.url))
 const engine = createNativeEngine()
 
+/** What the runner preloads into an extractor run with `node`: `@githubnext/projections/extractor`, with nothing installed. */
+const preload = path.join(here, '../../packages/cli/node/register.cjs')
+
 /** A working checkout with `typescript` installed: this workspace. */
 export const checkout = here
 
@@ -34,7 +37,7 @@ export async function run(sample, root, inputs = {}, options = {}) {
     repository,
     capabilities: {trusted: selected !== null, network: false},
   }
-  const result = spawnSync(process.execPath, [path.join(here, sample, 'extract.mjs')], {
+  const result = spawnSync(process.execPath, ['--require', preload, path.join(here, sample, 'extract.mjs')], {
     input: JSON.stringify(request),
     encoding: 'utf8',
     env: {PATH: process.env.PATH},

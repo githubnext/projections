@@ -124,8 +124,8 @@ The extractor process receives exactly this environment:
 | `PYTHONPATH` (custom extractors)     | See below                  |
 
 Nothing else is passed: no `HOME`, tokens, proxies or loader hooks unless the
-definition declares them. A declared environment allowlist is not a sandbox or
-execution grant.
+definition declares them (the runner's own preload for `node`, below, aside). A
+declared environment allowlist is not a sandbox or execution grant.
 
 A custom extractor's `PYTHONPATH` starts with the directory of the `projections`
 Python module, followed by the runner's own `PYTHONPATH` when
@@ -138,6 +138,22 @@ installing anything: `from projections import request, result`, then
 `projections __python-path` prints its directory, to run an extractor by hand.
 Built-in extractors don't get it. The protocol itself stays JSON on stdin and
 stdout, which an extractor in any language can write directly.
+
+A custom extractor whose program is the bare name `node` gets the same helpers
+for JavaScript and TypeScript: the runner adds `--require` and the path of a
+preload script, also unpacked into its cache, before the command's own arguments
+(and, when they turn on Node's permission model with `--permission`, read access
+to that directory; before Node 22.15 the hook also needs `--allow-worker` there,
+and without it the import resolves as usual). The script registers a resolve
+hook for one specifier, `@githubnext/projections/extractor`, which then loads
+the module this runner ships, ahead of any installed copy; every other import
+resolves as usual. ES modules don't search `NODE_PATH`, so an extractor in
+`.mjs`, `.js` or `.ts` imports `{request, result}` from it with nothing
+installed. Installing the `@githubnext/projections` package adds its types, and
+lets other programs, such as `npx tsx`, import it. `projections __node-require`
+prints the script's path, to run an extractor by hand. Both modules behave
+alike, with the same messages:
+`packages/schemas/fixtures/extractor-helpers.json` holds both to it.
 
 A command whose program is the bare name `python3` or `python` runs this
 machine's Python 3, whatever its launcher is called: the runner tries the name

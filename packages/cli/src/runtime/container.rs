@@ -22,6 +22,9 @@ pub(super) struct ContainerRun<'a> {
     /// The `projections` Python module's directory, mounted read-only at
     /// [`crate::python::CONTAINER_DIRECTORY`].
     pub(super) python: Option<&'a Path>,
+    /// The Node extractor module's directory, mounted read-only at
+    /// [`crate::node::CONTAINER_DIRECTORY`] and preloaded into a bare `node`.
+    pub(super) node: Option<&'a Path>,
 }
 
 impl Runner {
@@ -116,6 +119,7 @@ fn create_argv(
         environment,
         selected,
         python,
+        node,
         ..
     } = *run;
     #[cfg(unix)]
@@ -193,11 +197,20 @@ fn create_argv(
         ]);
         crate::python::prepend(&mut container_environment, crate::python::CONTAINER_DIRECTORY, ':');
     }
+    // The Node extractor module, read-only, preloaded into a bare `node`.
+    let mut argv = argv.to_vec();
+    if let Some(directory) = node.and_then(Path::to_str).filter(|directory| !directory.contains(',')) {
+        create.extend([
+            "--mount".into(),
+            format!("type=bind,src={directory},dst={},readonly", crate::node::CONTAINER_DIRECTORY),
+        ]);
+        argv = crate::node::preload(&argv, crate::node::CONTAINER_DIRECTORY, '/');
+    }
     for (key, value) in container_environment {
         create.extend(["--env".into(), format!("{key}={value}")]);
     }
     create.push(image.into());
-    create.extend_from_slice(argv);
+    create.extend(argv);
     Ok(create)
 }
 

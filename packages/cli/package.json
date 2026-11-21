@@ -15,6 +15,7 @@
     "test:browser": "playwright test"
   },
   "devDependencies": {
+    "@githubnext/projections": "0.2.0",
     "@githubnext/projections-engine": "0.2.0",
     "@githubnext/projections-inspector": "0.2.0",
     "@githubnext/projections-renderer-testing": "0.2.0",

@@ -37,7 +37,7 @@ npm test             # builds, then runs the renderer checks on every scenario
 | `@githubnext/projections/vite` | `rendererConfig` and `rendererBundlePlugin`: from your view module (`view: 'src/view.tsx'`), generate the entry that mounts it and build one self-contained `index.html`, `renderer.json` and `THIRD_PARTY_NOTICES.txt` (Node, build time) |
 | `@githubnext/projections/testing` | Playwright fixtures and the built-in renderer checks in the real host frame (`expectScenarioToPass`, `checkScenario`, `openStage`), driving the fixtures workbench, `projections serve --stdio --fixtures` behind a loopback page (Node, test time) |
 | `@githubnext/projections/schemas` | Types of every Projections document (`Extraction`, `Comparison`, `Definition`, …) and the constants and helpers that go with them |
-| `@githubnext/projections/extractor` | For extractors (Node): `readRequest`; `result` writes the extraction, protocol fields filled in and items sorted (`extraction` builds it); for [generated values](../../docs/design/generated-values.md), `basis`, `basisDigest` and `generations` |
+| `@githubnext/projections/extractor` | For extractors (Node; Projections provides it to those it runs with `node`): `request`, with accessors such as `root` and `inputs`; `result` writes the extraction, items sorted; for [generated values](../../docs/design/generated-values.md), `basis`, `basisDigest` and `generations` |
 
 React and react-dom are optional peer dependencies, for `/kit/react` and
 `/renderer/react`: a renderer without React installs the package with Vite alone

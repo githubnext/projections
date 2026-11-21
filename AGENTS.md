@@ -43,6 +43,13 @@ that runs the same commands from anywhere, using the checkout you are in.
 
 - Run `npm ci` only in a fresh checkout or when `tools doctor` says
   `node_modules` doesn't match the lockfile.
+- Model a lifecycle (anything with more than two states, a timer, a poll or a
+  result that comes back later) as an explicit state machine with
+  `@githubnext/projections-machine`, not with boolean refs, effect timers or
+  setters called from callbacks: see
+  [the state machines guide](docs/guides/state-machines.md). Every machine gets
+  an `explore` test, and `npm run check:machines` stops implicit lifecycles from
+  growing.
 - Browser suites run only as `tools test <workspace> --browser <project>`: one
   project at a time, never in parallel.
 - Never edit generated files by hand: `tools explain` says whether a file is

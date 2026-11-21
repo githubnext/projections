@@ -29,12 +29,13 @@ const ignored = new Set([
 // Source trees that must stay browser-portable, and workspaces that may not depend on execution packages.
 const browserSources = [
   'packages/schemas/src/',
+  'packages/machine/src/',
   'packages/engine/js/src/artifacts/',
   'packages/renderers/*/src/',
   'packages/host/core/src/',
   'packages/host/vscode-ui/src/',
 ]
-const browserPackages = ['packages/schemas', 'packages/renderers/*', 'packages/host/core', 'packages/host/vscode-ui']
+const browserPackages = ['packages/schemas', 'packages/machine', 'packages/renderers/*', 'packages/host/core', 'packages/host/vscode-ui']
 const executionPackages = new Set(['@githubnext/projections-typescript-support', '@githubnext/projections-cli'])
 // Nothing here may mention a developer's machine or an agent's session state.
 const privateReferences = [

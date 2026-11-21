@@ -4,13 +4,14 @@ import type {CSSProperties} from 'react'
 import type {ProjectionController} from '../projection.js'
 import {utilityInset, utilitySide} from '../stage/utility.js'
 import {useWholePixels} from '../stage/whole-pixels.js'
+import {useRunningIndicator} from '../use-running.js'
 
 /** The gap between the chip and an overlay above it at the stage's top right, CSS px. */
 const gap = 8
 
 /**
  * "Updating…" over the stage's top right while the host extracts or compares again with the last drawing still shown
- * (`ProjectionViewProps.running`): the page's only cue then, since the stage keeps the drawing until the new one is
+ * (`ProjectionViewProps.running`), after the shared delay (`runningIndicator`): the page's only cue then, since the stage keeps the drawing until the new one is
  * ready, and a first load says so in the stage itself. It takes the playback bar's and chips' look (`--ph-utility-*`),
  * 12px from the stage's edges, below anything already floating at that corner (the playback bar, or the pane chip
  * swipe and side by side put there).
@@ -25,9 +26,15 @@ export function UpdatingChip({
   /** Whether the renderer's stage is the view shown (not a built-in table or text view, which keep the last result). */
   rendererShown?: boolean
 }) {
-  // A renderer pane still loading says what runs in its own status, where it is shown.
-  if (!running || (rendererShown && p.rendererStatus === 'loading')) return null
-  return <Chip reducedMotion={p.reducedMotion} />
+  // A renderer pane still loading says what runs in its own status, where it is shown. The indicator's latch lives
+  // only while the chip could show, so time hidden behind that status doesn't count toward the time it stays shown.
+  if (rendererShown && p.rendererStatus === 'loading') return null
+  return <LatchedChip running={running} reducedMotion={p.reducedMotion} />
+}
+
+/** The chip once the job has run a moment, then for at least a moment, as every host's running indicator. */
+function LatchedChip({running, reducedMotion}: {running: 'extracting' | 'comparing' | null | undefined; reducedMotion: boolean}) {
+  return useRunningIndicator(running) ? <Chip reducedMotion={reducedMotion} /> : null
 }
 
 function Chip({reducedMotion}: {reducedMotion: boolean}) {

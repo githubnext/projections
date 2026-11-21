@@ -263,6 +263,16 @@ calling `close`, or clicking outside the card (inside `container` or outside
 `view`, while toolbar clicks and popovers keep it open) dismisses it and
 restores focus, leaving the item selected until a new selection reopens it.
 
+**Running jobs.** A host that extracts or compares again while the last drawing
+stays shows that a job runs;
+`runningIndicator(onChange, {delayMs?, minimumMs?, timers?})` decides when: only
+after 300 ms (`runningDelayMs`), so short jobs never flash it, then for at least
+400 ms (`runningMinimumMs`). It has no React or DOM, at
+`@githubnext/projections-host/running` for code without either (an extension
+host). `useRunningIndicator(running)` is the hook every UI's indicator uses (the
+default UI's "Updating…", the VS Code UI's summary bar spinner), and
+`runningText` its words ("Extracting…", "Comparing…").
+
 ## The view model
 
 A host UI decides which views it offers and which controls show. The core makes

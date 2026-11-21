@@ -77,7 +77,8 @@ fixture.
 - `runningIndicator`, `runningText` (and `runningDelayMs`, `runningMinimumMs`):
   when a running job's indicator shows, after 300 ms and then for at least 400
   ms, with injectable timers; no React or DOM, so an extension host imports it
-  from `@githubnext/projections-host-vscode/running`.
+  from `@githubnext/projections-host-vscode/running`. They are the host core's
+  (`@githubnext/projections-host/running`), re-exported.
 
 ### Building blocks
 

@@ -121,5 +121,7 @@ export function explorerOptions(): Partial<ComparisonExplorerProps> {
     ...(params.has('loop') ? {initialLoop: params.get('loop') !== 'false'} : {}),
     ...(holds === 'pause' || holds === 'timeline' ? {initialHolds: holds} : {}),
     ...(params.get('fill') === 'false' ? {fill: false} : {}),
+    // `?utilityArea` floats playback over the stage (and `?caption`, in explorer.tsx, adds a host's caption there).
+    ...(params.has('utilityArea') ? {utilityArea: true} : {}),
   }
 }

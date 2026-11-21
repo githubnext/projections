@@ -162,5 +162,12 @@ export interface ProjectionViewProps {
    * keeps one row, and the stage keeps its height; renderers keep clear of what the area covers. Default false.
    */
   utilityArea?: boolean
+  /**
+   * The host's own content in the stage's utility area (`ProjectionStageProps.utility`), over the stage's top edge in
+   * its one-frame modes (animated, diff): a caption, say, or controls. It covers the frames like the floating playback
+   * does, so renderers keep clear of it. With `utilityArea`'s floating playback too, the two share one bar, this content
+   * first and the playback under it, one rule between them. Side by side and swipe have their pane chips there instead.
+   */
+  utility?: ReactNode
   className?: string
 }

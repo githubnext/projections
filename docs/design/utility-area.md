@@ -62,6 +62,16 @@ in one column.
 The foot covers the frames as the utility area does (`data-stage-cover`): the
 stage sends the band it takes at the frame's foot as `stage-inset-bottom`.
 
+## A host's own content
+
+A host can put its own content in the utility area too, through the default
+view's `utility` (the stage's slot of the same name): a caption naming what the
+stage shows, say, where a line under the stage would be read past. It takes the
+bar's place and look and covers the frames like the playback does, so renderers
+keep clear of it with no new measuring. With the floating playback as well, the
+two share the bar, the host's content first. Side by side and swipe keep their
+pane chips there, as they do without it.
+
 ## The toolbar around it: the sides layout
 
 With playback on the stage, the toolbar keeps one row in a fixed order: at its

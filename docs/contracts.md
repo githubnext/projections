@@ -236,7 +236,18 @@ artifact-supplied renderers.
 
 The native and browser Engines implement the same request and response contract
 (engine ABI version 0). Operations are `parse-json`, `decode`, `normalize`,
-`canonicalize`, `validate-comparison`, `vary` and `pair`. `pair`
+`canonicalize`, `validate-comparison`, `vary`, `pair` and `review`. `review`
+(`{comparison}`, reading only each change's `status`, `correspondence` and
+`varied` of a comparison the engine validated) says what a comparison asks of
+its reviewer: `{status, reviewable, content, identity, variation}`. A change is
+a content change when its status is `added`, `removed` or `modified`, an
+identity change when its correspondence is `declared`, `split` or `merge` (a
+renamed, modified item is both), reviewable when it is either, and expected
+variation when it is `unchanged`, `exact` and has `varied`. `status` is
+`changed` exactly when a change is reviewable, so expected variation alone
+leaves a comparison `unchanged`. The CLI's batch and artifact statuses are this
+`status` (`projections_engine::review`), and JavaScript hosts call
+`engine.review(comparison)` rather than counting `changes` themselves. `pair`
 (`{before, after}`, each reading only `projection.id`, `provenance.definition`
 and `provenance.definitionDigest` of an extraction document) decides whether two
 extractions can be compared and returns `{pairing}`: `same`; `projection` for

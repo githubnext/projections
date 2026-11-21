@@ -3,9 +3,18 @@ import type {Checks} from './support.js'
 import {contentChecks} from './frame/content.js'
 import {insetChecks} from './frame/insets.js'
 import {openingChecks} from './frame/opening.js'
+import {routeChecks} from './frame/routes.js'
 import {summaryChecks} from './frame/summary.js'
 
 export const frameChecks: Pick<
   Checks,
-  'legend' | 'summary' | 'phone-overflow' | 'relationships' | 'content-top' | 'stage-insets' | 'opens-fitted' | 'identifiers'
-> = {...contentChecks, ...insetChecks, ...summaryChecks, ...openingChecks}
+  | 'legend'
+  | 'summary'
+  | 'phone-overflow'
+  | 'relationships'
+  | 'content-top'
+  | 'stage-insets'
+  | 'opens-fitted'
+  | 'identifiers'
+  | 'link-routes'
+> = {...contentChecks, ...insetChecks, ...summaryChecks, ...openingChecks, ...routeChecks}

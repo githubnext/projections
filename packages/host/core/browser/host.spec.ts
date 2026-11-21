@@ -274,7 +274,8 @@ test('animated playback loops: it reaches the after revision, holds, and returns
   await page.keyboard.press('Home')
   await expect(view(page)).toHaveAttribute('data-progress', '0')
   await page.getByRole('button', {name: 'Play forward'}).click()
-  // Progress, sampled every frame until playback is back at the before revision after reaching the after revision.
+  // The presentation's progress, sampled every frame until playback is back at the before revision after reaching the
+  // after revision.
   const trace = await view(page).evaluate(
     (element: HTMLElement) =>
       new Promise<{time: number; progress: number}[]>(resolve => {
@@ -292,10 +293,15 @@ test('animated playback loops: it reaches the after revision, holds, and returns
   )
   const head = trace.findIndex(sample => sample.progress === 1)
   expect(head, 'reaches the after revision').toBeGreaterThan(0)
-  const leaves = trace.findIndex((sample, index) => index > head && sample.progress < 1)
-  // It holds at the endpoint (600 ms at 1×) before reversing. Progress becomes 1 after the sample before `head` and
-  // leaves it by the sample at `leaves`, so that bracket spans the hold however far apart a loaded runner's frames are.
-  expect(trace[leaves]!.time - trace[head - 1]!.time).toBeGreaterThanOrEqual(450)
+  // It holds at the endpoint before reversing: the after revision stays shown frame after frame, where playback that
+  // turned without a hold would show it for a frame at most. (How long it holds is playback.test.mjs's: a loaded runner
+  // shows the progress a render or more late, so time between samples measures the runner, not the hold.)
+  const held = trace.filter(sample => sample.progress === 1)
+  expect(held.length, 'the after revision holds over more than one frame').toBeGreaterThan(1)
+  expect(
+    trace.findIndex((sample, index) => index > head && sample.progress < 1),
+    'leaves the after revision',
+  ).toBeGreaterThan(head)
   expect(trace.at(-1)!.progress, 'returns to the before revision').toBe(0)
   // Still playing: it keeps going.
   await expect.poll(async () => Number(await view(page).getAttribute('data-progress'))).toBeGreaterThan(0)

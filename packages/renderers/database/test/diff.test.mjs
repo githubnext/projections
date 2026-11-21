@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs'
 import {createElement} from 'react'
 import {renderToStaticMarkup} from 'react-dom/server'
 import {createNativeEngine} from '@githubnext/projections-engine/native'
-import {comparisonModel, extractionModel} from '@githubnext/projections-renderer-kit'
+import {changesScope, comparisonModel, extractionModel, scopedModel} from '@githubnext/projections-renderer-kit'
 import {summaryCountText} from '@githubnext/projections-renderer-sdk/presentation'
 // `npm test` compiles src/ (without the browser entry) to this cache directory first.
 import {columnChanges, keyChanges, referentialAction} from '../node_modules/.cache/test/change-lines.js'
@@ -13,6 +13,7 @@ import {databaseFacts} from '../node_modules/.cache/test/facts.js'
 import {analyse, mergeValues} from '../node_modules/.cache/test/diff-states.js'
 import {schemaMetrics} from '../node_modules/.cache/test/schema.js'
 import {DatabaseRenderer} from '../node_modules/.cache/test/view.js'
+import {databaseContext} from '../node_modules/.cache/test/scope.js'
 
 const engine = createNativeEngine()
 const scenarios = JSON.parse(readFileSync(new URL('../scenarios.json', import.meta.url), 'utf8')).scenarios
@@ -273,3 +274,41 @@ test("a marker key's changes are named for that key, though its column has other
     ['Foreign key renamed'],
   )
 })
+
+for (const [what, edit] of [
+  [
+    "a changed foreign key's onDelete",
+    after => {
+      const key = after.entities.find(
+        entity => entity.kind === 'constraint' && entity.data?.type === 'foreign-key' && entity.data.target === 'table:/Customer',
+      )
+      key.data = {...key.data, onDelete: 'Cascade'}
+    },
+  ],
+  [
+    'a changed foreign-key column',
+    after => {
+      const column = after.entities.find(entity => entity.kind === 'column' && entity.label === 'customerId')
+      column.data = {...column.data, nullable: !column.data?.nullable}
+    },
+  ],
+]) {
+  test(`the Changes scope keeps the table ${what} references, so its link has both ends`, async () => {
+    // Only that changes: no table, other column or link does.
+    const scenario = scenarios.find(item => item.id === 'prisma-shop')
+    const before = load(scenario.before)
+    const after = structuredClone(before)
+    edit(after)
+    const model = comparisonModel(before, after, await engine.compare(before, after))
+    // Narrowed as the shell narrows it: the changes, their context, the rest of a shown table's columns folded.
+    const scope = changesScope(model, {query: '', changesOnly: true, ids: null})
+    const shown = new Set([...scope.shown, ...databaseContext(model, scope.changes)])
+    const narrowed = scopedModel(model, shown, 'fold').model
+    const tables = narrowed.entities.filter(row => (row.after ?? row.before).kind === 'table').map(row => (row.after ?? row.before).label)
+    assert.deepEqual(tables.sort(), ['Customer', 'Order'])
+    const {frame} = createDatabaseDiff(narrowed, {available: 1300})
+    const label = id => (row(narrowed, id)?.after ?? row(narrowed, id)?.before)?.label
+    const references = frame.links.map(link => `${label(link.dependent)} → ${label(link.principal)}`)
+    assert.ok(references.includes('Order → Customer'), `the link reaches Customer: ${references}`)
+  })
+}

@@ -163,6 +163,13 @@ Build the bundle before the tests. The checks:
   painted in one, text and lines included. An item's own status words, icon and
   marks in its own hue are allowed. Checked in the diff and after the
   animation's steps (or at progress 0.5), with the host's highlighting on.
+- `link-routes`: Every link a renderer routes between cards (marked
+  `data-projections-route`) goes around the cards in its way. When none can, the
+  renderer draws the route that overlaps them least, marks it
+  `data-projections-route="crossing"` with the cards it crosses in
+  `data-projections-route-crosses`, and this check reports it. Checked in the
+  diff and at the end of the animation; skipped for a renderer that routes no
+  links.
 
 The styling checks (`palette`, `type-scale`, `spacing`) measure the diff and,
 with a progress mode, progress 0.5, at full and phone width (`palette` in light

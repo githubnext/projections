@@ -1,17 +1,17 @@
 import Type from 'typebox'
 import {comparisonModes, domainSchemas, vocabularyNames} from '../constants.js'
-import {Closed} from './support.js'
+import {Closed, NonBlank} from './support.js'
 
 /**
- * The JSON Schema of `renderer.json`, the manifest a renderer bundle ships beside its `index.html`; the renderer
- * SDK's `parseRendererManifest` reads it and also rejects a blank `title`.
+ * The JSON Schema of `renderer.json`, the manifest a renderer bundle ships beside its `index.html`, as the renderer
+ * SDK's `parseRendererManifest` reads it.
  */
 export const RendererManifestSchema = Closed(
   {
     format: Type.Literal('projections.renderer'),
     version: Type.Literal(0),
     name: Type.String({pattern: '^[a-z0-9][a-z0-9-]{0,63}$', description: 'The bundle directory name, such as `basic`.'}),
-    title: Type.String({minLength: 1, maxLength: 200, description: "The renderer's name in hosts' messages and menus."}),
+    title: NonBlank({maxLength: 200, description: "The renderer's name in hosts' messages and menus."}),
     handles: Type.Array(Type.String({pattern: '^[a-z0-9][a-z0-9/.-]{0,63}$'}), {
       maxItems: 100,
       description: 'The definition renderer names the bundle presents, such as `["graph", "dag"]`.',
@@ -34,6 +34,6 @@ export const RendererManifestSchema = Closed(
   },
   {
     description:
-      '`renderer.json`, the manifest a renderer bundle ships beside its `index.html`: its name, the definition renderers it presents, and optionally the comparison modes and extractions it supports. Its `title` must not be blank.',
+      '`renderer.json`, the manifest a renderer bundle ships beside its `index.html`: its name, the definition renderers it presents, and optionally the comparison modes and extractions it supports.',
   },
 )

@@ -94,9 +94,9 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
   const summary = useMemo(() => summaryFigures(subject, JSON.parse(summaryKey) ?? undefined), [subject, summaryKey])
   const {visibleRows, filter, counts: scopeCounts, hidden: scopeHidden} = useRowFilter(rows, subject, filters, summary)
   const payloads = useRendererPayloads({options, renderer, mode, progress, direction, highlighting, theme, reducedMotion})
+  const paint = paintState({renderer, comparing, mode, progress, panes, stage: payloads})
   const controls = useRendererControls({latest, internal, setInternal, options, renderer, panes, paneKeys})
   const status = rendererState(renderer, panes, paneKeys)
-  const paint = paintState({renderer, comparing, mode, progress, panes})
   useStatusEvents({latest, status: status.status, paint, playing, mode, progress})
 
   const selection = useSelection({latest, request, subject, rows, selectedId, placed, anchors, frames})

@@ -27,3 +27,11 @@ test('one extraction, or a diff, is painted once its frame has painted at all', 
   assert.equal(paintState(state({comparing: false, panes: panes(pane('ready', 1))})), 'painted')
   assert.equal(paintState(state({mode: 'diff', panes: panes(pane('ready', 1))})), 'painted')
 })
+
+test('an acknowledgement of an earlier init does not count until the frame catches up', () => {
+  const animated = {comparisonMode: 'animated'}
+  const diff = {comparisonMode: 'diff'}
+  const acknowledged = (init, rendered) => ({...pane('ready', rendered), renderedInit: init})
+  assert.equal(paintState(state({mode: 'diff', panes: panes(acknowledged(animated, 0.5)), stage: {init: diff}})), 'painting')
+  assert.equal(paintState(state({mode: 'diff', panes: panes(acknowledged(diff, 1)), stage: {init: diff}})), 'painted')
+})

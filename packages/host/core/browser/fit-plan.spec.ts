@@ -8,11 +8,14 @@ import {story} from './harness.js'
  */
 test.skip(({isMobile}) => isMobile, 'A mouse press and a bar the test sizes; the desktop projects cover Chromium and WebKit.')
 
-/** Sizes the bar and waits until its plan has settled at that width (`data-fit-settled`). */
+/**
+ * Sizes the bar and waits until its plan has settled at that width (`data-fit-settled`). The locator waits for the story
+ * to render, which Storybook does after the page loads.
+ */
 async function setWidth(page: Page, width: number) {
-  await page.evaluate(async barWidth => {
-    document.querySelector<HTMLElement>('.fit-sized')!.style.width = `${barWidth}px`
-    const bar = document.querySelector<HTMLElement>('[data-plan]')!
+  await page.locator('.fit-sized').evaluate(async (sized: HTMLElement, barWidth) => {
+    sized.style.width = `${barWidth}px`
+    const bar = sized.querySelector<HTMLElement>('[data-plan]')!
     const frame = () => new Promise(resolve => requestAnimationFrame(resolve))
     await frame()
     for (let i = 0; i < 600 && bar.dataset.fitSettled !== String(barWidth); i++) await frame()

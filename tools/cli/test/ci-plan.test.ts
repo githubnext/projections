@@ -10,6 +10,7 @@ import {ciPlan, type CiPlan} from '../src/lib/ci-plan.ts'
 import {ruleProblems} from '../src/lib/ci-rules-check.ts'
 import {FULL, loadCiRules, type CiRules} from '../src/lib/ci-rules.ts'
 import {CiRules as Schema} from '../src/lib/ci-rules.schema.ts'
+import {CiPlanCases, type CiPlanCase} from '../src/lib/ci-plan-cases.schema.ts'
 
 // The plan is checked against this repository's own graph and rules, which it exists to read.
 const root = fileURLToPath(new URL('../../../', import.meta.url))
@@ -18,34 +19,9 @@ const rules = loadCiRules(root)
 const suites = facts.browserSuites.map(suite => suite.path)
 const names = (jobs: {name: string}[]) => jobs.map(job => job.name)
 
-/** One table case (ci-plan.cases.json): files, as one change or (`each`) one change apiece, and what to expect. */
-type Case = {
-  name: string
-  files: string[]
-  each?: boolean
-  labels?: string[]
-  events?: string[]
-  expect: {
-    full?: boolean
-    docsOnly?: boolean
-    jobs?: Record<string, boolean | string[]>
-    productIncludes?: string[]
-    renderers?: string[]
-    browser?: string[]
-    macos?: string[]
-    allBrowserJobs?: boolean
-    harnessJobs?: number
-    suitesInclude?: string[]
-    suitesExclude?: string[]
-    changedInclude?: string[]
-    dependantsInclude?: string[]
-    dependantsExclude?: string[]
-  }
-}
-
 const everything = ciPlan(facts, rules, {paths: [], event: 'schedule'})
 
-function check(plan: CiPlan, expect: Case['expect'], label: string) {
+function check(plan: CiPlan, expect: CiPlanCase['expect'], label: string) {
   if (expect.full !== undefined) assert.equal(plan.full.length > 0, expect.full, `${label}: full (${plan.full.join('; ')})`)
   if (expect.docsOnly !== undefined) assert.equal(plan.docsOnly, expect.docsOnly, `${label}: docsOnly`)
   for (const [job, value] of Object.entries(expect.jobs ?? {})) assert.deepEqual(plan.jobs[job], value, `${label}: ${job}`)
@@ -70,8 +46,14 @@ function check(plan: CiPlan, expect: Case['expect'], label: string) {
   for (const unit of expect.dependantsExclude ?? []) assert.ok(!plan.dependants.includes(unit), `${label}: doesn't reach ${unit}`)
 }
 
-const cases = JSON.parse(readFileSync(new URL('ci-plan.cases.json', import.meta.url), 'utf8')) as Case[]
-for (const item of cases) {
+const table = JSON.parse(readFileSync(new URL('ci-plan.cases.json', import.meta.url), 'utf8')) as CiPlanCases
+test('the table of cases matches its schema', () => {
+  assert.deepEqual(
+    [...Value.Errors(CiPlanCases, table)].map(error => `${error.instancePath} ${error.message}`),
+    [],
+  )
+})
+for (const item of table.cases) {
   test(item.name, () => {
     const changes = item.each ? item.files.map(file => [file]) : [item.files]
     for (const events of item.events ?? ['pull_request'])
@@ -88,8 +70,8 @@ test('the rules file matches its schema, and its references resolve', () => {
   assert.deepEqual(ruleProblems(rules, suites), [])
 })
 
-test('the committed JSON Schema is the one its TypeBox source generates', () => {
-  const check = spawnSync(process.execPath, ['tools/scripts/ci-rules-schema.mjs', '--check'], {cwd: root, encoding: 'utf8'})
+test('the committed JSON Schemas are the ones their TypeBox sources generate', () => {
+  const check = spawnSync(process.execPath, ['tools/scripts/ci-schemas.mjs', '--check'], {cwd: root, encoding: 'utf8'})
   assert.equal(check.status, 0, check.stderr)
 })
 

@@ -178,10 +178,11 @@ no CRLF. An intended exception goes in `.portability.yaml` with its reason.
 A pull request runs only the jobs its change reaches. The rules that decide it
 are [`.github/ci-rules.json`](.github/ci-rules.json), with a description on
 every rule; its schema is `.github/ci-rules.schema.json`, generated from
-`tools/cli/src/lib/ci-rules.schema.ts`. The Projections workflow's first job,
-`changes`, runs `tools/scripts/ci-plan.mjs`, which applies the rules to the
-changed files and their place in the graph, and its summary lists each job with
-the descriptions of the rules that made it run.
+`tools/cli/src/lib/ci-rules.schema.ts` (`node tools/scripts/ci-schemas.mjs`).
+The Projections workflow's first job, `changes`, runs
+`tools/scripts/ci-plan.mjs`, which applies the rules to the changed files and
+their place in the graph, and its summary lists each job with the descriptions
+of the rules that made it run.
 
 The rules file holds every decision; the code holds none:
 
@@ -197,12 +198,12 @@ The rules file holds every decision; the code holds none:
 - `browser`: when each browser suite runs, how the large ones are sharded, and
   which narrow to the renderers a change touches.
 
-A `when` is `"full"`, `"docsOnly"`, `{"if": condition}`, `{"changes": globs}`,
-`{"tag": tag}`, `{"generator": name}`, `{"changed": group}` (a member contains,
-builds in or reads a changed file, tests included), `{"reaches": group}` (a
-member contains or builds in a changed file, or depends on one that does,
-optionally counting only changes `from` another group), or `any`, `all` and
-`not` of these.
+A `when` is `"always"`, `"full"`, `"docsOnly"`, `{"if": condition}`,
+`{"changes": globs}`, `{"tag": tag}`, `{"generator": name}`,
+`{"changed": group}` (a member contains, builds in or reads a changed file,
+tests included), `{"reaches": group}` (a member contains or builds in a changed
+file, or depends on one that does, optionally counting only changes `from`
+another group), or `any`, `all` and `not` of these.
 
 The graph is the code's: `ci-facts.ts` reads it as `npm run tools -- affected`
 does, plus what no manifest declares: the files crates read by path

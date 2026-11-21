@@ -79,6 +79,7 @@ function reached(context: Context, from: string | undefined): Set<string> {
 }
 
 export function holds(when: When, context: Context): boolean {
+  if (when === 'always') return true
   if (when === 'full') return context.full.length > 0
   if (when === 'docsOnly') return context.docsOnly
   if (when === 'reachesSuite') {

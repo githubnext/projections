@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CI plan cases",
+  "type": "object",
+  "required": [
+    "cases"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "files",
+          "expect"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What the case shows: the test name"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "The changed files"
+          },
+          "each": {
+            "type": "boolean",
+            "description": "Plan each file as a change of its own, rather than all as one change"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "The pull request's labels"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Plan for each of these GitHub Actions events (default pull_request)"
+          },
+          "expect": {
+            "type": "object",
+            "properties": {
+              "full": {
+                "type": "boolean",
+                "description": "Whether everything runs"
+              },
+              "docsOnly": {
+                "type": "boolean"
+              },
+              "jobs": {
+                "type": "object",
+                "patternProperties": {
+                  "^.*$": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    ]
+                  }
+                },
+                "description": "Jobs by ID: whether each runs, or a matrix job's entry names"
+              },
+              "productIncludes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": "public-product's entries include these"
+              },
+              "renderers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": "The renderers the harness narrows to"
+              },
+              "browser": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": "The Linux browser jobs, exactly, by name"
+              },
+              "macos": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": "The macOS browser jobs, exactly, by name"
+              },
+              "allBrowserJobs": {
+                "type": "boolean",
+                "description": "Every browser job runs, as in a full run"
+              },
+              "harnessJobs": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "How many Linux renderer harness jobs run"
+              },
+              "suitesInclude": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "suitesExclude": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "changedInclude": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "dependantsInclude": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "dependantsExclude": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "additionalProperties": false
+}

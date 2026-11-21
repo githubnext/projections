@@ -487,6 +487,11 @@
       "anyOf": [
         {
           "type": "string",
+          "const": "always",
+          "description": "Every run, whatever changed: for jobs that check the whole repository cheaply"
+        },
+        {
+          "type": "string",
           "const": "full",
           "description": "The run is a full one: an event, a label or a file rule asked for everything"
         },

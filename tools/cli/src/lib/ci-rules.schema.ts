@@ -1,6 +1,7 @@
 // The schema of .github/ci-rules.json, the rules that decide what CI runs for a change (CONTRIBUTING.md#what-ci-runs).
 // The planner (ci-plan.ts) reads the file without this module, so CI's `changes` job needs no install; the tools
-// package's tests validate the file against it, and .github/ci-rules.schema.json is generated from it for editors.
+// package's tests validate the file against it, and tools/scripts/ci-schemas.mjs generates .github/ci-rules.schema.json
+// from it for editors.
 import Type, {type Static} from 'typebox'
 
 const Description = Type.String({
@@ -33,6 +34,7 @@ const Strict = {additionalProperties: false}
 export const When = Type.Cyclic(
   {
     When: Type.Union([
+      Type.Literal('always', {description: 'Every run, whatever changed: for jobs that check the whole repository cheaply'}),
       Type.Literal('full', {description: 'The run is a full one: an event, a label or a file rule asked for everything'}),
       Type.Literal('docsOnly', {description: 'Every changed file is documentation, and no generator reads or writes one'}),
       Type.Literal('reachesSuite', {

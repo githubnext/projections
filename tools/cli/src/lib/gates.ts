@@ -1,12 +1,12 @@
 // The repository's gates, as `npm run check` and CI run them, and a runner that summarises each one.
 import type {Affected} from './affected.ts'
-import {buildState} from './builds.ts'
 import {TOOLS} from './invocation.ts'
 import {cliBinary, unmet} from './needs.ts'
 import {linkProblems} from './links.ts'
 import {inDependencyOrder, readmeProblems, type Unit} from './packages.ts'
 import {parseConsidered, parseFormatCheck, parseProblems, parseStalePages, tail, type Problem} from './problems.ts'
 import {display, run, type Command} from './repo.ts'
+import {changedFiles, fastTypecheck, lintPlan, npm, npx} from './typed-gates.ts'
 import {versionProblems} from './release-check.ts'
 import {existsSync} from 'node:fs'
 import {join} from 'node:path'
@@ -40,9 +40,6 @@ export type Gate = {
   fix?: string
 }
 
-const npm = (...argv: string[]): Command => ({argv: ['npm', ...argv]})
-const npx = (...argv: string[]): Command => ({argv: ['npx', '--no-install', ...argv]})
-
 /** Workspaces the change touches (changed and dependants) with `script`, in dependency order. */
 function affectedWorkspaces(context: GateContext, script: string): Unit[] {
   const affected = context.affected
@@ -60,9 +57,6 @@ function workspaceCommands(context: GateContext, script: string): Plan {
     : {skip: `no affected workspace has a ${script} script`}
 }
 
-const changedFiles = (context: GateContext, pattern: RegExp) =>
-  (context.files ?? []).filter(path => pattern.test(path) && existsSync(join(context.root, path)))
-
 const affectedCrates = (context: GateContext, changedOnly = false) =>
   context.units
     .filter(
@@ -71,31 +65,6 @@ const affectedCrates = (context: GateContext, changedOnly = false) =>
         [...(context.affected?.changed ?? []), ...(changedOnly ? [] : (context.affected?.dependants ?? []))].includes(unit.path),
     )
     .map(unit => unit.names.at(-1) as string)
-
-/**
- * `check --fast`'s typecheck: the changed workspaces only, against their dependencies' current dist. One whose
- * dependency is unbuilt, or older than its src, would be checked against stale types, so it waits for a build.
- */
-function fastTypecheck(context: GateContext): Plan {
-  const changed = new Set(context.affected?.changed ?? [])
-  const units = inDependencyOrder(context.units, changed)
-    .map(path => context.units.find(unit => unit.path === path) as Unit)
-    .filter(unit => unit.kinds.includes('npm') && unit.scripts.includes('typecheck'))
-  if (!units.length) return {skip: 'no changed workspace has a typecheck script'}
-  const waiting: string[] = []
-  const ready = units.filter(unit => {
-    const outdated = unit.dependsOn.filter(path => {
-      const dependency = context.units.find(entry => entry.path === path)
-      const state = dependency && buildState(context.root, dependency)
-      return state !== undefined && state !== 'current'
-    })
-    if (outdated.length) waiting.push(`${unit.path} (${outdated.join(', ')} unbuilt, unfinished or older than its src)`)
-    return !outdated.length
-  })
-  const note = waiting.length ? `not checked until ${TOOLS} build <workspace>: ${waiting.join('; ')}` : undefined
-  if (!ready.length) return {skip: note as string}
-  return {commands: ready.map(unit => npm('run', 'typecheck', '--workspace', unit.names[0] as string)), ...(note ? {note} : {})}
-}
 
 export const gates: Gate[] = [
   {
@@ -194,18 +163,6 @@ export const gates: Gate[] = [
     fix: `${TOOLS} fix --only format`,
   },
   {
-    name: 'lint',
-    fast: true,
-    description: 'ESLint (npm run lint)',
-    plan: context => {
-      if (!context.affected) return {commands: [npx('eslint', '.', '--quiet')]}
-      const files = changedFiles(context, /\.([cm]?[jt]sx?)$/)
-      return files.length
-        ? {commands: [npx('eslint', '--quiet', '--no-warn-ignored', ...files)]}
-        : {skip: 'no TypeScript or JavaScript changed'}
-    },
-  },
-  {
     name: 'cargo-fmt',
     fast: true,
     description: 'Rust formatting (cargo fmt --check)',
@@ -253,6 +210,14 @@ export const gates: Gate[] = [
         : context.affected
           ? workspaceCommands(context, 'typecheck')
           : {commands: [npm('run', 'typecheck')]},
+  },
+  {
+    name: 'lint',
+    fast: true,
+    description: 'ESLint with type information, a process per workspace (npm run lint); with --fast, only the changed files',
+    // Type-aware rules read the dependencies' built declarations, as the typecheck does.
+    after: ['build'],
+    plan: lintPlan,
   },
   {
     name: 'docs',

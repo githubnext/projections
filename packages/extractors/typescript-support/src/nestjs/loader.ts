@@ -105,7 +105,7 @@ export function installLoader(root: string, checkout: string, options: ts.Compil
 /** Application code may print while it loads; stdout carries only the extraction. */
 export async function quietly<T>(action: () => Promise<T>): Promise<T> {
   const write = process.stdout.write
-  process.stdout.write = process.stderr.write.bind(process.stderr) as typeof process.stdout.write
+  process.stdout.write = process.stderr.write.bind<typeof process.stdout.write>(process.stderr)
   try {
     return await action()
   } finally {

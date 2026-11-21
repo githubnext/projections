@@ -68,7 +68,7 @@ export async function rootModule(context: ExtractorContext): Promise<RootModule>
     }
     return {file: await sourcePath(context, configured.slice(0, separator)), name: configured.slice(separator + 1)}
   }
-  const entry = optionalString(context, 'entry') || (await bootstrapFile(context))
+  const entry = (optionalString(context, 'entry') ?? '') || (await bootstrapFile(context))
   const text = await readSource(context, entry)
   const source = ts.createSourceFile(entry, text, ts.ScriptTarget.Latest, true)
   const argument = factoryArgument(source)

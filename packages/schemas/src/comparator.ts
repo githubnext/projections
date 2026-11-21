@@ -4,7 +4,7 @@
  */
 export function customComparator(comparator: unknown): {file: string; options?: unknown; sources?: string[]} | undefined {
   if (typeof comparator === 'string') return {file: comparator}
-  if (comparator && typeof comparator === 'object' && 'file' in comparator && typeof comparator.file === 'string') {
+  if (typeof comparator === 'object' && comparator !== null && 'file' in comparator && typeof comparator.file === 'string') {
     return comparator as {file: string; options?: unknown; sources?: string[]}
   }
   return undefined

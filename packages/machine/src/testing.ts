@@ -97,7 +97,7 @@ export function stableKey(value: unknown): string {
     if (item instanceof Map) return {'@map': sortedEntries([...item])}
     if (item instanceof Set) return {'@set': [...item].map(stableKey).sort()}
     if (typeof item === 'function') return `@function ${item.name}`
-    if (item && typeof item === 'object' && !Array.isArray(item)) {
+    if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
       return Object.fromEntries(Object.entries(item).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
     }
     return item
@@ -184,7 +184,7 @@ export function explore<S extends MachineState, E extends MachineEvent, F extend
   )
   const except = new Set(typeof options.complete === 'object' ? (options.complete.except ?? []) : [])
   const untaken = listed.filter(handler => !taken.has(handler) && !except.has(handler))
-  if (options.complete && untaken.length) {
+  if (options.complete !== undefined && options.complete !== false && untaken.length > 0) {
     throw new ExplorationError('complete', `Handlers never taken within depth ${depth}: ${untaken.join(', ')}`)
   }
   return {states, taken, untaken, truncated}

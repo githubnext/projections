@@ -124,6 +124,7 @@ export function runInWorker(
           finish(new ComparatorRuntimeError('worker', `comparator worker failed: ${message}`))
         },
       })
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- the worker's callbacks can settle it as it starts
       if (settled) worker.terminate()
       else worker.post(request)
     } catch (error) {

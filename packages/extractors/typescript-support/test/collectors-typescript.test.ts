@@ -57,7 +57,7 @@ test('public API resolves barrel aliases, overloads, classes, methods, generics 
   assert.match(String(state.entities.find(node => node.label === 'run')?.data?.signature), /"run"\(input: number\): number/)
   assert(!state.entities.some(node => node.label === 'secret'))
   assert(state.entities.every(node => typeof node.data?.signature === 'string'))
-  assert(state.entities.every(node => node.evidence?.[0]?.source && !path.isAbsolute(node.evidence[0].source)))
+  assert(state.entities.every(node => !!node.evidence?.[0]?.source && !path.isAbsolute(node.evidence[0].source)))
   assert(!(await canonicalize(state)).includes(context.input.repository.root))
 })
 test('moves, formatting, member/export reordering and implementation-only edits do not change API', async t => {
@@ -466,7 +466,7 @@ test('a monorepo: workspace symlinks are followed and only the selected packages
   const area = state.entities.find(node => node.label === 'area')
   assert.equal(area?.data?.package, '@acme/client')
   // `Shape` resolved through the link (not `any`); a dependency's source type is expanded structurally.
-  assert.equal(area?.data?.signature, 'area(shape: { "height": number; "width": number }): number')
+  assert.equal(area.data.signature, 'area(shape: { "height": number; "width": number }): number')
   // The dependency isn't exported itself, and nothing is attributed to node_modules.
   assert(!state.entities.some(node => node.data?.package === '@acme/shapes' || node.data?.package === 'example'))
   assert(state.entities.every(node => !node.evidence?.some(item => item.source.includes('node_modules'))))

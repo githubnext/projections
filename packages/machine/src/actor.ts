@@ -87,6 +87,8 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
 ): Actor<S, E> {
   let state = options.state
   let running = false
+  // Read afresh where an effect or a listener may have stopped the actor since the last read.
+  const live = () => running
   let draining = false
   /** Events waiting to be taken, each with the generation that sent it (none for `send`'s callers). */
   const queue: {event: E; from: Generation<E> | undefined}[] = []
@@ -194,9 +196,9 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
     if (!running || draining) return
     draining = true
     try {
-      while (running && queue.length) {
+      while (live() && queue.length) {
         const before = state
-        while (running && queue.length) {
+        while (live() && queue.length) {
           const {event, from} = queue.shift()!
           // An event from a generation that ended while it waited is as stale as one sent after.
           if (from && !from.live) continue
@@ -210,7 +212,7 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
           }
           for (const effect of effects) runEffect(effect)
           // An effect may have stopped the actor; `start` starts them then.
-          if (wanted && running) startListed(wanted)
+          if (wanted && live()) startListed(wanted)
         }
         if (state !== before) for (const listener of [...listeners]) listener(state)
       }

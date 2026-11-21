@@ -61,7 +61,7 @@ export interface DefaultComparator {
  * do its Workers.
  */
 export async function sha256(bytes: BufferSource): Promise<string> {
-  const subtle = globalThis.crypto?.subtle
+  const subtle = (globalThis.crypto as Partial<Crypto> | undefined)?.subtle
   const digest = subtle ? new Uint8Array(await subtle.digest('SHA-256', bytes)) : sha256Bytes(bytesOf(bytes))
   return `sha256:${[...digest].map(byte => byte.toString(16).padStart(2, '0')).join('')}`
 }

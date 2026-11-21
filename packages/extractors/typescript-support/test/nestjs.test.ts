@@ -74,7 +74,7 @@ test('the container NestJS composes in preview mode: tokens, scopes, factories, 
   const state = await collect(root)
   assert.equal(state.schema, 'architecture/v0')
   assert.equal(state.metadata?.rootModule, 'AppModule')
-  assert.equal(state.metadata?.entry, 'src/main.ts')
+  assert.equal(state.metadata.entry, 'src/main.ts')
 
   // Class, string and symbol tokens; services are scoped to the module that provides them.
   assert.equal(entity(state, 'service:OrdersModule:class:OrdersService').data?.tokenKind, 'class')
@@ -152,7 +152,7 @@ test('the container NestJS composes in preview mode: tokens, scopes, factories, 
   assert.ok(!existsSync(path.join(root, 'started.txt')), 'main.ts is never run')
   assert.ok(
     state.entities
-      .filter(item => item.kind === 'implementation' && item.data?.type)
+      .filter(item => item.kind === 'implementation' && Boolean(item.data?.type))
       .every(item => item.evidence?.[0]?.source.startsWith('src/')),
   )
 })
@@ -220,7 +220,7 @@ export class StandaloneModule {}
   })
   const state = await collect(root, {module: 'src/standalone.module.ts#StandaloneModule', include: 'all'})
   assert.equal(state.metadata?.rootModule, 'StandaloneModule')
-  assert.equal(state.metadata?.entry, undefined)
+  assert.equal(state.metadata.entry, undefined)
   assert.ok(state.entities.some(item => item.id === 'module:InternalCoreModule'))
   assert.ok(state.entities.some(item => item.id === 'service:OrdersModule:class:ModuleRef' && item.kind === 'service'))
   assert.equal(entity(state, 'service:OrdersModule:class:ModuleRef:registration').data?.origin, 'framework')

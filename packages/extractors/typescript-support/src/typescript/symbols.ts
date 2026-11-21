@@ -17,7 +17,7 @@ export function declares(declaration: ts.Node, kind: ts.SyntaxKind): boolean {
 export function privateMember(symbol: ts.Symbol): boolean {
   return (symbol.declarations ?? []).some(declaration => {
     const name = (declaration as ts.NamedDeclaration).name
-    return (name && ts.isPrivateIdentifier(name)) || declares(declaration, ts.SyntaxKind.PrivateKeyword)
+    return (name !== undefined && ts.isPrivateIdentifier(name)) || declares(declaration, ts.SyntaxKind.PrivateKeyword)
   })
 }
 

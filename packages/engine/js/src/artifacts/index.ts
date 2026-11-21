@@ -194,7 +194,7 @@ async function rerunDefault(
   [before, after]: [ExtractionDocument, ExtractionDocument],
   comparator: Definition['comparator'],
 ): Promise<ComparisonDocument> {
-  const defaultComparatorOptions = comparator && typeof comparator === 'object' ? comparator.options : undefined
+  const defaultComparatorOptions = typeof comparator === 'object' ? comparator.options : undefined
   const defaultComparator = await engine.defaultComparator()
   if (value.comparator.digest !== defaultComparator.digest) {
     throw new ArtifactError(

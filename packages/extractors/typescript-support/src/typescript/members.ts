@@ -3,6 +3,7 @@ import type {Entity, Json, Relationship} from '../types.js'
 import {evidence, id, type Project} from './model.js'
 import {apiKind, facts, type Renderer} from './contracts.js'
 import {declares, getterOnly, hasModifier, memberName, privateMember} from './symbols.js'
+import {signatureDeclaration} from './text.js'
 
 interface Member {
   symbol: ts.Symbol
@@ -69,13 +70,13 @@ export class MemberNodes {
 
   private constructors(exportId: string, declaration: ts.Declaration, constructor: ts.Type): void {
     const constructors = constructor.getConstructSignatures().filter(call => {
-      const at = call.getDeclaration()
+      const at = signatureDeclaration(call)
       return !at || !declares(at, ts.SyntaxKind.PrivateKeyword)
     })
     if (!constructors.length) return
     const isProtected = (call: ts.Signature): boolean => {
-      const at = call.getDeclaration()
-      return Boolean(at && declares(at, ts.SyntaxKind.ProtectedKeyword))
+      const at = signatureDeclaration(call)
+      return at !== undefined && declares(at, ts.SyntaxKind.ProtectedKeyword)
     }
     this.node(exportId, id(exportId, 'constructor'), {
       label: 'constructor',

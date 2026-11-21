@@ -65,7 +65,7 @@ export async function containedIn(root: string, relative: string): Promise<strin
     return offset === '' || (offset !== '..' && !offset.startsWith(`..${path.sep}`) && !path.isAbsolute(offset))
   }
   let cursor = root
-  for (const segment of relative.split(/[\\/]/).filter(segment => segment && segment !== '.')) {
+  for (const segment of relative.split(/[\\/]/).filter(segment => segment !== '' && segment !== '.')) {
     cursor = path.join(cursor, segment)
     if ((await lstat(cursor)).isSymbolicLink()) {
       cursor = await realpath(cursor)
@@ -100,7 +100,7 @@ export function extraction(
 }
 
 export function record(value: unknown, label: string): Record<string, unknown> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label} must be an object`)
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error(`${label} must be an object`)
   return value as Record<string, unknown>
 }
 

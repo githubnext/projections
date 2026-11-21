@@ -25,7 +25,7 @@ export function define<T extends TSchema>(document: string, name: string | undef
 
 /** Where `schema` was defined with `define`, from its hidden marker; `undefined` for an inline schema or non-object. */
 export function homeOf(schema: unknown): Home | undefined {
-  return schema && typeof schema === 'object' ? (schema as {[marker]?: Home})[marker] : undefined
+  return typeof schema === 'object' && schema !== null ? (schema as {[marker]?: Home})[marker] : undefined
 }
 
 /** The schema defined at `home`. */

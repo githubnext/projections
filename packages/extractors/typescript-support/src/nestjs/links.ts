@@ -53,7 +53,7 @@ export function registrationsOf(
 export function linksOf(graph: Graph, registrations: Registrations): Link[] {
   const links: Link[] = []
   const covered = new Set<string>()
-  for (const edge of Object.values(graph.edges ?? {})) {
+  for (const edge of Object.values((graph.edges as Graph['edges'] | undefined) ?? {})) {
     if (
       edge.metadata.type !== 'class-to-class' ||
       (edge.metadata.injectionType !== 'constructor' && edge.metadata.injectionType !== 'property')

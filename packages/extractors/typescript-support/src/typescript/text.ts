@@ -8,7 +8,7 @@ import {memberName, modifiers, privateMember} from './symbols.js'
  */
 export function typeText(checker: ts.TypeChecker, exported: Set<ts.Symbol>) {
   const typeParameters = (parameters: readonly ts.TypeParameterDeclaration[] | undefined, seen: Set<ts.Type>): string =>
-    parameters?.length
+    parameters?.length !== undefined && parameters.length > 0
       ? `<${parameters.map(parameter => `${parameter.name.text}${parameter.constraint ? ` extends ${type(checker.getTypeFromTypeNode(parameter.constraint), seen)}` : ''}${parameter.default ? ` = ${type(checker.getTypeFromTypeNode(parameter.default), seen)}` : ''}`).join(', ')}>`
       : ''
   const returns = (value: ts.Signature, seen = new Set<ts.Type>()): string => {
@@ -18,7 +18,7 @@ export function typeText(checker: ts.TypeChecker, exported: Set<ts.Symbol>) {
       : type(checker.getReturnTypeOfSignature(value), seen)
   }
   const signature = (value: ts.Signature, seen = new Set<ts.Type>()): string => {
-    const declaration = value.getDeclaration()
+    const declaration = signatureDeclaration(value)
     const parameters = [...(value.thisParameter ? [value.thisParameter] : []), ...value.getParameters()]
     const returnType = returns(value, seen)
     return `${typeParameters(declaration?.typeParameters, seen)}(${parameters
@@ -53,7 +53,7 @@ export function typeText(checker: ts.TypeChecker, exported: Set<ts.Symbol>) {
   }
   /** The symbol a type is spelled by, when it is exported or comes from a declaration file. */
   const nameOf = (value: ts.Type, expand: ts.Symbol | undefined): ts.Symbol | undefined => {
-    const named = value.aliasSymbol ?? value.symbol
+    const named = value.aliasSymbol ?? symbolOf(value)
     return named &&
       named !== expand &&
       named.name !== '__type' &&
@@ -96,7 +96,7 @@ export function typeText(checker: ts.TypeChecker, exported: Set<ts.Symbol>) {
           `import(${JSON.stringify(path.isAbsolute(module) ? path.basename(module).replace(/\.[cm]?[jt]sx?$/, '') : module)})`,
       )
   const type = (value: ts.Type, seen = new Set<ts.Type>(), expand?: ts.Symbol): string => {
-    if (seen.has(value)) return value.aliasSymbol?.name ?? value.symbol?.name ?? 'recursive'
+    if (seen.has(value)) return value.aliasSymbol?.name ?? symbolOf(value)?.name ?? 'recursive'
     const next = new Set(seen).add(value)
     if (value.isUnion()) {
       return value.types
@@ -105,7 +105,7 @@ export function typeText(checker: ts.TypeChecker, exported: Set<ts.Symbol>) {
         .join(' | ')
     }
     if (value.isIntersection()) return value.types.map(item => type(item, next)).join(' & ')
-    if (value.flags & ts.TypeFlags.TypeParameter) return value.symbol?.name ?? 'unknown'
+    if (value.flags & ts.TypeFlags.TypeParameter) return symbolOf(value)?.name ?? 'unknown'
     if (value.flags & ts.TypeFlags.StringLiteral) return JSON.stringify((value as ts.StringLiteralType).value)
     if (value.flags & ts.TypeFlags.NumberLiteral) return String((value as ts.NumberLiteralType).value)
     if (checker.isTupleType(value)) return tuple(value, next)
@@ -124,3 +124,9 @@ export function typeText(checker: ts.TypeChecker, exported: Set<ts.Symbol>) {
 }
 
 export type TypeText = ReturnType<typeof typeText>
+
+/** A type's symbol: anonymous and primitive types have none, whatever the compiler's types say. */
+export const symbolOf = (value: ts.Type): ts.Symbol | undefined => value.symbol
+
+/** A signature's declaration: a synthetic signature (a default constructor's, a mapped type's) has none. */
+export const signatureDeclaration = (value: ts.Signature): ts.SignatureDeclaration | undefined => value.getDeclaration()

@@ -11,7 +11,7 @@ export function applicationClasses(root: string): Map<unknown, string> {
   for (const [file, module] of Object.entries(cache).sort(([a], [b]) => compareIds(a, b))) {
     if (!module || !within(root, file) || file.split(path.sep).includes('node_modules')) continue
     const exports = module.exports as unknown
-    const values = typeof exports === 'function' ? [exports] : exports && typeof exports === 'object' ? Object.values(exports) : []
+    const values = typeof exports === 'function' ? [exports] : typeof exports === 'object' && exports !== null ? Object.values(exports) : []
     for (const value of values) if (typeof value === 'function' && !classes.has(value)) classes.set(value, slash(path.relative(root, file)))
   }
   return classes

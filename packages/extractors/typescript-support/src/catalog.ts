@@ -9,6 +9,6 @@ export async function collectBuiltin(context: ExtractorContext): Promise<Extract
     case 'nestjs-di':
       return (await import('./nestjs.js')).collectNest(context)
     default:
-      throw new Error(`The Node extractor helper does not implement ${String(extractor)}`)
+      throw new Error(`The Node extractor helper does not implement ${extractor}`)
   }
 }

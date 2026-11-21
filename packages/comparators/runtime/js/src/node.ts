@@ -81,7 +81,7 @@ export function createNativeRulesRuntime(options: NativeRulesRuntimeOptions = {}
         digest?: unknown
         canonical?: unknown
         warnings?: unknown
-      }
+      } | null
       if (typeof result?.digest !== 'string' || typeof result.canonical !== 'string') {
         throw new ComparatorRuntimeError('invalid-output', 'the rules runner returned an invalid check')
       }

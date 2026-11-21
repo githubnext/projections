@@ -17,7 +17,8 @@ function described(value) {
   if (value === null || value === void 0) return String(value)
   if (Array.isArray(value)) return 'an array'
   if (typeof value !== 'object') return article(typeof value)
-  return value.constructor === Object || !value.constructor ? 'an object' : article(value.constructor.name)
+  const made = value.constructor
+  return made === Object || !made ? 'an object' : article(made.name)
 }
 // src/extractor/result.ts
 /** The extractor protocol's version, of requests and extractions. */
@@ -139,6 +140,10 @@ var Request = class {
   toJSON() {
     return (this.#value ??= this.#read())
   }
+  /** The request as it may come: one built by hand can leave out any field, which the accessors answer for. */
+  #given() {
+    return this.toJSON()
+  }
   /** `protocolVersion`: the extractor protocol's version. */
   get protocolVersion() {
     return this.toJSON().protocolVersion
@@ -149,7 +154,7 @@ var Request = class {
   }
   /** `repository`: where the examined revision is and what it is. */
   get repository() {
-    return this.toJSON().repository ?? {}
+    return this.#given().repository ?? {}
   }
   /** `capabilities`: whether the run is trusted and may use the network. */
   get capabilities() {
@@ -161,7 +166,7 @@ var Request = class {
   }
   /** The definition's project, relative to the repository's root and `/`-separated; `""` for the root. */
   get project() {
-    return this.repository.project || ''
+    return this.repository.project ?? ''
   }
   /** The examined revision's root directory (`repository.root`). */
   get repositoryRoot() {
@@ -185,7 +190,7 @@ var Request = class {
   }
   /** The projection's definition. */
   get definition() {
-    return this.projection?.definition ?? {}
+    return this.#given().projection?.definition ?? {}
   }
   /** The definition's `inputs`, or `{}`. */
   get inputs() {

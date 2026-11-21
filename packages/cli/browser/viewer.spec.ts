@@ -67,9 +67,11 @@ test.beforeAll(async () => {
 
 test.afterAll(async () => {
   // Windows keeps a running process's directory in use: wait for the viewer to exit, and retry while it lets go.
-  if (viewer && viewer.exitCode === null && viewer.signalCode === null) {
-    const exited = new Promise(resolve => viewer.once('exit', resolve))
-    viewer.kill()
+  // Unset when beforeAll failed before starting it.
+  const running = viewer as ChildProcess | undefined
+  if (running?.exitCode === null && running.signalCode === null) {
+    const exited = new Promise(resolve => running.once('exit', resolve))
+    running.kill()
     await exited
   }
   for (const directory of [repository, cache]) rmSync(directory, {recursive: true, force: true, maxRetries: 10, retryDelay: 200})
@@ -242,7 +244,8 @@ async function openCanvas(page: Page, link = url) {
     .poll(
       async () => {
         const {page, state: shown} = await state()
-        return page?.view?.status === 'ok' && (!shown.mode || page.mode === shown.mode)
+        const chosen = Boolean(shown.mode)
+        return page?.view?.status === 'ok' && (!chosen || page.mode === shown.mode)
       },
       {timeout: 30_000},
     )
@@ -283,7 +286,8 @@ test("where a browser blocks renderer frames from loading the viewer's URLs, the
   expect(
     await renderer.evaluate(() => {
       try {
-        return parent.document ? 'reached' : 'refused'
+        // Reading it throws when the frame can't reach its parent.
+        return typeof parent.document === 'object' ? 'reached' : 'refused'
       } catch {
         return 'refused'
       }
@@ -594,7 +598,8 @@ test('the agent reads what a page did with its theme seed while the page is stil
   await expect
     .poll(async () => {
       const shown = (await state()).page
-      return shown?.summary?.projection ? 'a loaded page' : (shown?.theme?.ignored ?? 'no theme')
+      const loaded = Boolean(shown?.summary?.projection)
+      return loaded ? 'a loaded page' : (shown?.theme?.ignored ?? 'no theme')
     })
     .toContain("isn't a color")
   const text = (await control('control/tool/current_view', {})).body.content[0].text

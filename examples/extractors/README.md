@@ -9,9 +9,9 @@ can copy into a repository and adapt: a command that reads one extractor request
 on stdin and writes one `architecture/v0` extraction on stdout. They examine
 TypeScript projects with the project's own `typescript` package (TypeScript 5
 or 6) through its compiler API, so they resolve imports, aliases and re-exports
-by symbol rather than by spelling. No Projections package is required, except by
-`class-summaries`, which uses `@githubnext/projections/extractor` for its
-generated values.
+by symbol rather than by spelling. They read the request and write the
+extraction with `@githubnext/projections/extractor`, which Projections provides
+to the extractors it runs with `node`, so no Projections package is required.
 
 <!-- prettier-ignore -->
 | Sample | Finds | Renderer |

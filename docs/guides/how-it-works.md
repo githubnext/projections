@@ -344,9 +344,8 @@ equal basis never asks the model again. In JavaScript, the helpers in
 `@githubnext/projections/extractor` do the hashing and the lookup:
 
 ```js
-import {basis, generations, readRequest} from '@githubnext/projections/extractor'
+import {basis, generations, request} from '@githubnext/projections/extractor'
 
-const request = await readRequest()
 const store = await generations(request)
 const summaryBasis = basis({input: classSource, prompt: PROMPT, model: 'gpt-4o-2024-08-06'})
 const summary = await store.generate('/data/summary', summaryBasis, () => model.summarize(classSource))

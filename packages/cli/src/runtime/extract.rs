@@ -235,13 +235,14 @@ impl Runner {
             .transpose()?
             .unwrap_or_default();
         let mut environment = self.environment(&names)?;
-        // A custom extractor finds the `projections` Python module; built-ins
-        // run their own helpers, beside code that may have a `projections` of its own.
-        let python = if definition["extractor"].is_string() {
-            None
-        } else {
-            self.python_module()
-        };
+        // A custom extractor finds the `projections` Python module and, run with
+        // `node`, `@githubnext/projections/extractor`; built-ins run their own
+        // helpers, beside code that may have a `projections` of its own.
+        let custom = !definition["extractor"].is_string();
+        let python = custom.then(|| self.python_module()).flatten();
+        let node = (custom && argv.first().is_some_and(|program| program == "node"))
+            .then(|| self.node_module())
+            .flatten();
         let timeout = definition["execution"]["timeoutMs"].as_u64().unwrap_or(30_000);
         let output = if let Some((engine, image)) = &self.isolation {
             self.run_container(
@@ -257,6 +258,7 @@ impl Runner {
                     environment: &environment,
                     selected: &names,
                     python: python.as_deref(),
+                    node: node.as_deref(),
                 },
             )
             .map_err(timeout_advice)?
@@ -264,6 +266,14 @@ impl Runner {
             if let Some(directory) = python.as_deref().and_then(Path::to_str) {
                 crate::python::prepend(&mut environment, directory, crate::python::SEPARATOR);
             }
+            let preloaded;
+            let argv = match node.as_deref().and_then(Path::to_str) {
+                Some(directory) => {
+                    preloaded = crate::node::preload(argv, directory, std::path::MAIN_SEPARATOR);
+                    &preloaded[..]
+                }
+                None => argv,
+            };
             let directory = crate::project::directory(program);
             self.run_argv(argv, &directory, Some(&serde_json::to_string(&request)?), timeout, &environment)
                 .map_err(timeout_advice)?
@@ -281,6 +291,12 @@ impl Runner {
     /// is then missing, and an extractor that imports it says so.
     fn python_module(&self) -> Option<PathBuf> {
         crate::python::directory_in(&self.cache_base().ok()?).ok()
+    }
+
+    /// The directory of `@githubnext/projections/extractor` for Node, unpacked
+    /// in this runner's cache; like [`Self::python_module`], never a failure.
+    fn node_module(&self) -> Option<PathBuf> {
+        crate::node::directory_in(&self.cache_base().ok()?).ok()
     }
 
     /// The extraction document for extractor output saved in `path` (what an

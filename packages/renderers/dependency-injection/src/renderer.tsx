@@ -1,18 +1,20 @@
 import {useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
-import type {ReactNode} from 'react'
+import type {CSSProperties, ReactNode} from 'react'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import {cardBorderOutset, emphasisInset, classifyChange, contentStart, describeChange, textPill} from '@githubnext/projections-renderer-kit'
 import type {ScrollStart} from '@githubnext/projections-renderer-kit'
 import {
-  EdgeArrowMarker,
   CardChangeMarks,
-  EmptyDomain,
   cardCornerRadius,
+  EdgeArrowMarker,
+  EmptyDomain,
   useBorderWidths,
+  useCoveredPadding,
+  useScrolledPadding,
   useFitScale,
+  useLegend,
   useOpeningFloor,
   useStageZoom,
-  useLegend,
 } from '@githubnext/projections-renderer-kit/react'
 import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
 import {unitParts} from './model.js'
@@ -434,10 +436,12 @@ function TransitionView({
   // its text below the kit's opening floor: then it opens at the floor, on its root, and scrolls. Zoom enlarges it,
   // keeping the middle (the spine) in view. Both endpoints share the framing and the floor.
   const floor = useOpeningFloor(scroller, transition)
-  const padding = useDiPadding()
+  const padding = useCoveredPadding(scroller, bounds, useDiPadding())
   // Zoomed in, a content-sized stage grows to the drawn scale (see `FitOptions.drawnScale`).
   const [drawnScale, setDrawnScale] = useState(0)
   const fit = useFitScale(scroller, bounds, {padding, floor, drawnScale})
+  // The padding as drawn (more under a cover once it scrolls): the opening view is placed in it.
+  const drawnPadding = useScrolledPadding(padding, drawnScale, fit.scale, {content: bounds.height, view: fit.height})
   // The composition hangs from its root, centred at the top: a view that opens at the text floor opens there, on the
   // cards drawn when it is placed, with no card cut at its left edge (see `contentStart`).
   const drawn = useRef(units)
@@ -452,11 +456,11 @@ function TransitionView({
           height: transition.height,
         })),
         bounds,
-        padding,
+        drawnPadding,
         12,
         'centre',
       )(view),
-    [bounds, transition, padding],
+    [bounds, transition, drawnPadding],
   )
   const {zoom, scale} = useStageZoom(scroller, onAction, fit.scale, {floor, start})
   useLayoutEffect(() => setDrawnScale(scale), [scale])
@@ -471,6 +475,7 @@ function TransitionView({
       <div
         className="di-scroll pk-dot-grid"
         ref={scroller}
+        style={{'--pk-fit-top': `${drawnPadding.top}px`} as CSSProperties}
         data-projections-scroll="dependency-injection"
         role="region"
         aria-label="Scrollable dependency composition"

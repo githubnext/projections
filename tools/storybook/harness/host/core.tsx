@@ -10,8 +10,9 @@ import {demonstration, laterRevision} from './fixtures.js'
 
 const params = new URLSearchParams(location.search)
 // `?fill` puts the stage in a fixed-height container it fills; `?mode=animated|swipe` picks another mode;
-// `?paneLabels=chips|hidden` labels the panes another way.
+// `?paneLabels=chips|hidden` labels the panes another way; `?utility` floats a stand-in bar in the stage's utility area.
 const fill = params.has('fill')
+const utility = params.has('utility') ? <span aria-label="Utility content" style={{display: 'block', width: 320, height: 40}} /> : undefined
 const paneLabels =
   params.get('paneLabels') === 'chips' || params.get('paneLabels') === 'hidden'
     ? (params.get('paneLabels') as 'chips' | 'hidden')
@@ -50,10 +51,16 @@ function Review({subject, renderer}: {subject: ViewSubject; renderer: RendererEn
       </p>
       {fill ? (
         <div className="core-fill" style={{height: 520, border: '1px solid #d1d9e0'}}>
-          <ProjectionStage projection={projection} labels={{before: 'Base', after: 'Head'}} paneLabels={paneLabels} fill />
+          <ProjectionStage
+            projection={projection}
+            labels={{before: 'Base', after: 'Head'}}
+            paneLabels={paneLabels}
+            utility={utility}
+            fill
+          />
         </div>
       ) : (
-        <ProjectionStage projection={projection} labels={{before: 'Base', after: 'Head'}} paneLabels={paneLabels} />
+        <ProjectionStage projection={projection} labels={{before: 'Base', after: 'Head'}} paneLabels={paneLabels} utility={utility} />
       )}
     </main>
   )

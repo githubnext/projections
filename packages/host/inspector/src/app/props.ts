@@ -53,6 +53,8 @@ export interface InspectorAppProps {
    * the toolbar spans the view in every state (the viewer's shows a commit's short hash there, or nothing).
    */
   toolbarStart?: ReactNode
+  /** In a bare view, the stage's utility area (see `ProjectionViewProps.utilityArea`): labels and playback over the stage. */
+  utilityArea?: boolean
   /**
    * `auto` (the default) extracts the shown pair again when the working tree or the projection's code changes, and
    * compares again when its comparator does. `compare` extracts nothing on its own but compares again when the

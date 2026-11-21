@@ -24,6 +24,7 @@ pub mod help_text;
 pub mod history;
 pub mod json_text;
 pub mod mcp;
+pub mod node;
 pub mod onboard;
 pub mod project;
 pub mod pull_request;

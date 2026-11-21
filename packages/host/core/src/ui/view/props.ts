@@ -149,5 +149,12 @@ export interface ProjectionViewProps {
    * sizes the view to its content instead.
    */
   fill?: boolean
+  /**
+   * Puts what would be the toolbar's third bar in a utility area floating over the stage's top edge instead
+   * (`ProjectionStageProps.utility`): the revisions' labels in side by side and swipe, as chips on the stage, and the
+   * playback slider in animated and beside the table and text views, in an inset bar as wide as it needs. The toolbar
+   * keeps one row, and the stage keeps its height; renderers keep clear of what the area covers. Default false.
+   */
+  utilityArea?: boolean
   className?: string
 }

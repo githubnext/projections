@@ -52,6 +52,8 @@ export class RendererFrame {
   private readonly view: Window
   private readonly onEvent: (event: RendererFrameEvent) => void
   private init: InitPayload
+  /** The environment the host last set (`setEnvironment`), which a new `init` keeps: its covers, say. */
+  private environment: RendererEnvironment | undefined
   private progress: ProgressPayload | undefined
   private selection: string | null
   private selectionPath: string | undefined
@@ -110,7 +112,9 @@ export class RendererFrame {
 
   /** Replaces the presented documents. The renderer receives a new `init`. */
   setInit(init: InitPayload, progress?: ProgressPayload): void {
-    this.init = init
+    // A new init (refreshed documents, a new focus) keeps the environment the host set since, such as the theme tokens
+    // that say what covers the frame, which the host doesn't send again while they're unchanged.
+    this.init = this.environment ? {...init, ...this.environment} : init
     this.progress = progress
     this.flow.reset()
     this.renderedProgress = undefined
@@ -171,6 +175,7 @@ export class RendererFrame {
   }
 
   setEnvironment(environment: RendererEnvironment): void {
+    this.environment = environment
     this.init = {...this.init, ...environment}
     this.send({type: 'environment', ...environment})
   }

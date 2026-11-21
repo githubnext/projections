@@ -51,6 +51,7 @@ export function InspectorApp({
   chrome = 'workbench',
   banner,
   toolbarStart,
+  utilityArea = false,
   refresh = 'auto',
   initialResults,
   definitionRevision: openedDefinitionRevision,
@@ -448,6 +449,7 @@ export function InspectorApp({
         controllers,
         ...(api ? {running: running ?? null} : {}),
         ...(bare && toolbarStart ? {toolbarStart} : {}),
+        ...(bare && utilityArea ? {utilityArea} : {}),
       }}
       empty={{
         Loading,

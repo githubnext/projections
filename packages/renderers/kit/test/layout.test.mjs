@@ -590,6 +590,43 @@ test('a card with no relationships keeps its place while another arrives beside 
   }
 })
 
+test("a fitted drawing keeps clear of the host's cover only where its fit would reach it", async () => {
+  const {coveredTop, parseStageCover} = await import('../dist/index.js')
+  assert.deepEqual(parseStageCover('8 6 180 18, 412 6 140 18'), [
+    {x: 8, y: 6, width: 180, height: 18},
+    {x: 412, y: 6, width: 140, height: 18},
+  ])
+  assert.deepEqual(parseStageCover('8 6 180, 0 0 0 10, nope'), [], 'malformed and empty rectangles cover nothing')
+  assert.equal(parseStageCover(undefined), undefined)
+  const padding = {x: 16, y: 16}
+  const chip = {x: 8, y: 6, width: 180, height: 18}
+  const bar = {x: 220, y: 8, width: 560, height: 42}
+  const view = {width: 1000, height: 600}
+  // A flat drawing fitted to the width sits centred far below a chip: it keeps its own top.
+  assert.equal(coveredTop({cover: [chip, bar], view, size: {width: 1000, height: 200}, padding}), 16)
+  // A tall one fitted to the height reaches the bar across its middle, but not the chip at the side.
+  assert.equal(coveredTop({cover: [chip], view, size: {width: 400, height: 1000}, padding}), 16)
+  assert.equal(coveredTop({cover: [chip, bar], view, size: {width: 400, height: 1000}, padding}), 58, "the bar's bottom and 8px")
+  // The stage starts below a notice in the frame: the cover reaches less far into it.
+  assert.equal(coveredTop({cover: [bar], view, origin: {x: 0, y: 40}, size: {width: 400, height: 1000}, padding}), 18)
+})
+
+test('a drawing drawn larger than its fit keeps clear of the bands at its ends, and moves no more than it must', async () => {
+  const {scrolledPadding} = await import('../dist/index.js')
+  const own = {top: 16, y: 16}
+  const inset = {top: 54, bottom: 0}
+  // Zoomed in, a flat drawing still sits centred well below the band: it keeps its own padding, so it doesn't move.
+  assert.deepEqual(scrolledPadding({own, inset, height: 300, view: 600}), own)
+  // Centred, it would reach the band: just enough more at the top that it clears it, still fitting the stage.
+  assert.deepEqual(scrolledPadding({own, inset, height: 520, view: 600}), {top: 44, y: 16})
+  // That much more no longer fits: it scrolls, and opens a band's height down.
+  assert.deepEqual(scrolledPadding({own, inset, height: 533, view: 600}), {top: 54, y: 16})
+  assert.deepEqual(scrolledPadding({own, inset, height: 2000, view: 600}), {top: 54, y: 16})
+  // A band at the foot too: each end clears its own.
+  assert.deepEqual(scrolledPadding({own, inset: {top: 54, bottom: 70}, height: 470, view: 600}), {top: 16, y: 26})
+  assert.deepEqual(scrolledPadding({own, inset: {top: 54, bottom: 70}, height: 480, view: 600}), {top: 54, y: 70})
+})
+
 test('fitting centres content, never magnifies it, and always fits both dimensions, however small', async () => {
   const {fitScale} = await import('../dist/index.js')
   const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} ≈ ${expected}`)

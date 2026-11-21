@@ -12,7 +12,7 @@ import {
   edgeMarkerId,
   edgePaint,
 } from '@githubnext/projections-renderer-kit'
-import {EdgeArrowMarker, useStageInsetTop} from '@githubnext/projections-renderer-kit/react'
+import {EdgeArrowMarker, useStageCover, useStageInsetTop} from '@githubnext/projections-renderer-kit/react'
 import type {BoxEdge, Point, RendererLegend} from '@githubnext/projections-renderer-kit'
 import {lifetimeNames} from './facets.js'
 import type {DiUnit, Lifetime} from './model.js'
@@ -42,10 +42,13 @@ export const diPadding = 16
 
 /**
  * The space around a fitted composition, CSS px: `diPadding`, and above it the host's `stage-inset-top` where it sends
- * one (`styles.css` pads the canvas the same), so the composition opens below what the host overlays on the frame.
+ * one (`styles.css` pads the canvas the same), so the composition opens below what the host overlays on the frame;
+ * `useCoveredPadding` then moves it down only where the fitted composition would reach the host's `stage-cover`.
  */
 export function useDiPadding(): {x: number; y: number; top: number} {
-  const top = useStageInsetTop() ?? diPadding
+  const insetTop = useStageInsetTop()
+  // A host that says exactly what it overlays leaves the top to the kit's `useCoveredPadding`.
+  const top = useStageCover() ? diPadding : (insetTop ?? diPadding)
   return useMemo(() => ({x: diPadding, y: diPadding, top}), [top])
 }
 

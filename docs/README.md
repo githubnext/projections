@@ -105,6 +105,7 @@ single renderer and comparator can work for all of them:
   [schema publishing](maintainers/schema-publishing.md),
   [runner coverage](maintainers/runner-coverage.md),
   [file standards](maintainers/file-standards.md),
+  [what CI runs for what](maintainers/ci-plan.md),
   [dependency advisories](maintainers/dependency-advisories.md), and
   [developing the VS Code extension](maintainers/vscode-extension.md).
 

@@ -18,24 +18,18 @@ export function useWholePixels(ref: RefObject<HTMLElement | null>): void {
         y = Math.round(top) - top
       if (Math.abs(x) > 0.01 || Math.abs(y) > 0.01) element.style.translate = `${x}px ${y}px`
     }
-    let frame = 0
-    const later = () => {
-      frame ||= requestAnimationFrame(() => {
-        frame = 0
-        align()
-      })
-    }
     align()
-    const observer = new ResizeObserver(later)
+    // Observers report after layout and before paint, and the page's scroll once a frame, so aligning straight away
+    // lands in the same frame; the nudge changes no size, so it doesn't report again.
+    const observer = new ResizeObserver(align)
     observer.observe(element)
     if (element.parentElement) observer.observe(element.parentElement)
     observer.observe(element.ownerDocument.documentElement)
     const view = element.ownerDocument.defaultView
-    view?.addEventListener('scroll', later, {capture: true, passive: true})
+    view?.addEventListener('scroll', align, {capture: true, passive: true})
     return () => {
       observer.disconnect()
-      view?.removeEventListener('scroll', later, {capture: true})
-      cancelAnimationFrame(frame)
+      view?.removeEventListener('scroll', align, {capture: true})
     }
   }, [ref])
 }

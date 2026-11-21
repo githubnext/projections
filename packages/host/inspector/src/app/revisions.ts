@@ -1,4 +1,5 @@
 import type {Diagnostic, ExtractionDocument} from '@githubnext/projections-schemas'
+import {formatRevisionLabel, revisionAge} from '@githubnext/projections-host'
 import type {ExtractionChoice} from '@githubnext/projections-host'
 import type {InspectorResultIdentity} from '../control.js'
 import type {InspectorRevision} from '../types.js'
@@ -17,24 +18,8 @@ const shaPattern = /^[0-9a-f]{40}$|^[0-9a-f]{64}$/i
  */
 const namesCommit = (ref: string, commit: string) =>
   shaPattern.test(ref) || ref === commit || (/^[0-9a-f]{7,39}$/i.test(ref) && commit.toLowerCase().startsWith(ref.toLowerCase()))
-/** How long ago an ISO date was, coarsely: `just now`, `5 minutes ago`, `2 days ago`. */
-export function age(date: string | undefined, now = Date.now()): string | undefined {
-  const time = date ? Date.parse(date) : NaN
-  if (!Number.isFinite(time)) return undefined
-  const seconds = Math.max(0, Math.round((now - time) / 1000))
-  const units: [string, number][] = [
-    ['year', 31_536_000],
-    ['month', 2_592_000],
-    ['day', 86_400],
-    ['hour', 3600],
-    ['minute', 60],
-  ]
-  for (const [unit, size] of units) {
-    const count = Math.floor(seconds / size)
-    if (count >= 1) return `${count} ${unit}${count === 1 ? '' : 's'} ago`
-  }
-  return 'just now'
-}
+/** How long ago an ISO date was (`revisionAge`): `just now`, `5 minutes ago`, `2 days ago`. */
+export const age = revisionAge
 /**
  * A revision named for people, never a bare commit: its ref (or `Working tree`, or the short commit when the ref is
  * one), the commit's subject and its age when the runner listed it, for example `main · "Add auth" · 2 days ago`.
@@ -54,7 +39,7 @@ export function choiceLabel(
   const when = age(known?.date, now)
   // Without the commit's subject, a named ref keeps its commit beside it.
   const detail = known?.title ? `"${known.title}"` : name === commit ? undefined : commit
-  return [name, detail, when].filter(Boolean).join(' · ')
+  return formatRevisionLabel({name, detail, when})
 }
 const suppliedPrefix = 'Supplied as extractor output in '
 /**

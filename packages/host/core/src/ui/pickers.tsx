@@ -7,6 +7,7 @@ import {Label} from './components/label.js'
 import {NativeSelect} from './components/native-select.js'
 import {cn} from './lib/utils.js'
 import {ToolbarPopover} from './toolbar-popover.js'
+import {revisionLabelName} from '../revision-label.js'
 
 // Choosing another pair remounts the picker (the view is recomputed), so the control the person used gets focus back.
 let pendingFocus: {slot: 'before' | 'after' | 'swap'; until: number} | undefined
@@ -16,7 +17,6 @@ const remember = (slot: 'before' | 'after' | 'swap') => {
 }
 
 /** The short part of a revision label: "v1 · base" → "v1". */
-const shortLabel = (label: string) => label.split(' · ')[0] ?? label
 
 /**
  * A revision select. `short` draws a compact trigger: the short revision name (truncated, with the full one as its
@@ -98,7 +98,7 @@ export function PairPicker({
       </Label>
       <RevisionSelect
         short={short}
-        label={pair.before ? shortLabel(pair.before.label) : 'None'}
+        label={pair.before ? revisionLabelName(pair.before.label) : 'None'}
         ref={before}
         id={`${id}-before`}
         className={select}
@@ -138,7 +138,7 @@ export function PairPicker({
       </Label>
       <RevisionSelect
         short={short}
-        label={shortLabel(pair.after.label)}
+        label={revisionLabelName(pair.after.label)}
         ref={after}
         id={`${id}-after`}
         className={select}
@@ -177,12 +177,12 @@ export function PairPicker({
             <span className="pj:min-w-0 pj:truncate">
               {comparing ? (
                 <>
-                  {shortLabel(pair.before!.label)}
+                  {revisionLabelName(pair.before!.label)}
                   <span className="pj:px-1 pj:text-muted-foreground">→</span>
-                  {shortLabel(pair.after.label)}
+                  {revisionLabelName(pair.after.label)}
                 </>
               ) : (
-                shortLabel(pair.after.label)
+                revisionLabelName(pair.after.label)
               )}
             </span>
             <ChevronDown className="pj:size-3.5! pj:shrink-0 pj:text-muted-foreground" />

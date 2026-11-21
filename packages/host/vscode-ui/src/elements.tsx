@@ -60,6 +60,7 @@ export const vscodeElementsVersion = '2.5.1'
 
 type Handler<E extends Event> = (event: E) => void
 /** Wrapper props: the element's own properties, its events as `on…` handlers, HTML attributes, children and a ref. */
+// eslint-disable-next-line @typescript-eslint/no-generated-empty-object-type -- Empty on purpose: by default, no events.
 export type ElementProps<T extends HTMLElement, P extends object, E extends Record<string, Event> = Record<never, Event>> = P & {
   [K in keyof E]?: Handler<E[K]> | undefined
 } & Omit<HTMLAttributes<T>, keyof P | keyof E | 'children'> & {
@@ -103,6 +104,7 @@ function useMergedRef<T>(own: RefObject<T | null>, other: Ref<T> | undefined) {
  * A typed React wrapper for a custom element: React 19 sets the element's properties (and `class`, `style` and
  * attributes); `events` maps each `on…` prop to the DOM event it listens for on the element.
  */
+// eslint-disable-next-line @typescript-eslint/no-generated-empty-object-type -- Empty on purpose: by default, no events.
 export function createWrapper<T extends HTMLElement, P extends object, E extends Record<string, Event> = Record<never, Event>>(
   tag: string,
   events: {[K in keyof E]: string},

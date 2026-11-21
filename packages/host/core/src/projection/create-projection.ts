@@ -22,6 +22,7 @@ export interface ProjectionStore {
 /** Reports an error without throwing: `reportError` where there is one, else the console. */
 function reportError(error: Error) {
   if (typeof globalThis.reportError === 'function') globalThis.reportError(error)
+  // eslint-disable-next-line no-console -- The documented fallback where the platform has no reportError.
   else console.error(error)
 }
 

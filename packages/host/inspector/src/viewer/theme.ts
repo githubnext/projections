@@ -93,7 +93,6 @@ export function viewerTheme(hostTheme: InspectorHost['theme']): {
   const theme = pageTheme(document, seed?.seed)
   if (!seed) return {theme}
   if (seed.seed) return {theme, report: {seeded: true}}
-  console.warn(`Projections: ignored the theme in this page's link. ${seed.error}`)
   return {
     theme,
     report: {ignored: seed.error},

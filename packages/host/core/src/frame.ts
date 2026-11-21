@@ -21,6 +21,11 @@ import {OpenedDocument} from './frame/opened.js'
 import type {RendererFrameEvent, RendererFrameOptions, RendererFrameStatus} from './frame/types.js'
 import type {RendererDocuments} from './registry.js'
 
+/** The renderer's messages the frame only passes on, as events. */
+const passedOn = ['aspect', 'steps', 'open', 'hover', 'anchor', 'viewport', 'control', 'annotation', 'legend', 'summary'] as const
+type PassedOn = Extract<RendererMessage, {type: (typeof passedOn)[number]}>
+const isPassedOn = (message: RendererMessage): message is PassedOn => passedOn.some(type => type === message.type)
+
 /**
  * Hosts one renderer bundle in a sandboxed frame and speaks the renderer
  * frame protocol with it.
@@ -244,6 +249,10 @@ export class RendererFrame {
       return
     }
     if (this.status !== 'ready') return
+    if (isPassedOn(message)) {
+      this.onEvent(message)
+      return
+    }
     switch (message.type) {
       case 'rendered':
         this.renderedProgress = message.progress
@@ -274,9 +283,6 @@ export class RendererFrame {
         this.onEvent(message)
         // A renderer that reports an error has handled the host's messages; show its state rather than a loading one.
         this.lifecycle.reveal()
-        return
-      default:
-        this.onEvent(message)
     }
   }
 

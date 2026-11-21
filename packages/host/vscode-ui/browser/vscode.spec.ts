@@ -195,7 +195,9 @@ test.describe('high contrast themes keep the contrast VS Code promises', () => {
         [page.locator('.phv-row-count'), 4.5],
       ] as const) {
         const {color, background} = await colors(locator)
-        expect(contrast(color, background), await locator.evaluate(element => element.className)).toBeGreaterThanOrEqual(ratio)
+        expect(contrast(color, background), await locator.evaluate(element => element.getAttribute('class') ?? '')).toBeGreaterThanOrEqual(
+          ratio,
+        )
       }
       for (const label of await page.locator('.phv-change-label[data-change]').all()) {
         const {color, background} = await colors(label)

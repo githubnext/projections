@@ -144,7 +144,9 @@ test('the sweep summarizes each projection, adopting writes previewed files, and
   await adopt.getByRole('button', {name: /^Write/}).click()
   await expect(adopt).toContainText('Adopted prisma-schema')
   await expect(prisma.getByText('Adopted')).toBeVisible()
-  const definition = JSON.parse(await readFile(join(explore.repo, '.github/projections/prisma-schema.json'), 'utf8'))
+  const definition = JSON.parse(await readFile(join(explore.repo, '.github/projections/prisma-schema.json'), 'utf8')) as {
+    extractor?: unknown
+  }
   expect(definition.extractor).toBe('prisma-schema')
 
   // Where the CI step goes is the person's and their agent's decision: the page offers the prompt and the guide.

@@ -1,10 +1,15 @@
 import type {InspectorPair, InspectorPairs, InspectorRevision} from '../types.js'
+import {optionalText, record} from '../client/guards.js'
 import {refName, workingTree} from './revisions.js'
 
 export interface Marks {
   a?: string | undefined
   b?: string | undefined
 }
+/** Whether a stored value is marks. */
+export const isMarks = (value: unknown): value is Marks => record(value) && optionalText(value.a) && optionalText(value.b)
+/** Whether a stored value is a list of marks. */
+export const isMarksList = (value: unknown): value is Marks[] => Array.isArray(value) && value.every(isMarks)
 
 /**
  * The Before → After pair a repository opens on, from the history the Inspector API lists: `HEAD~1 → HEAD`; with
@@ -33,7 +38,7 @@ export function pairDetail(pair: InspectorPair): string {
       return 'The last commit'
     case 'working-tree':
       return 'Your uncommitted changes'
-    default:
+    case 'head':
       return 'One revision'
   }
 }

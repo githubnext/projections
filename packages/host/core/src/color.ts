@@ -19,7 +19,7 @@ export function parseColor(value: string | undefined): Rgba | undefined {
   const text = value.trim().toLowerCase()
   const hex = /^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/.exec(text)?.[1]
   if (hex) {
-    const full = hex.length <= 4 ? [...hex].map(digit => digit + digit).join('') : hex
+    const full = hex.length <= 4 ? hex.replace(/./g, digit => digit + digit) : hex
     const channel = (index: number) => Number.parseInt(full.slice(index * 2, index * 2 + 2), 16)
     return {r: channel(0), g: channel(1), b: channel(2), a: full.length === 8 ? channel(3) / 255 : 1}
   }

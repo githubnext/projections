@@ -2,7 +2,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import type {Dispatch, SetStateAction} from 'react'
 import type {InspectorApi} from '../client/api.js'
 import type {InspectorPairs, InspectorRevision} from '../types.js'
-import {defaultPair, marking, suggestedMarks} from './pairs.js'
+import {defaultPair, isMarks, isMarksList, marking, suggestedMarks} from './pairs.js'
 import type {Marks} from './pairs.js'
 import {currentKey, openedOn, pairKey, readJson, recentKey, writeJson} from './persistence.js'
 import type {InspectorOpenedOn} from './props.js'
@@ -84,9 +84,9 @@ export function usePairSelection({
   useEffect(() => {
     if (!api || !projection || !repoKey || !revisions.length || marks[projection] || pairsHere === undefined) return
     const opened = openedOn(openedInitially)
-    const saved = opened.projection === projection && opened.pair ? opened.pair : readJson<Marks>(pairKey(repoKey, projection))
+    const saved = opened.projection === projection && opened.pair ? opened.pair : readJson(pairKey(repoKey, projection), isMarks)
     setMarks(current => ({...current, [projection]: saved?.b ? {a: saved.a, b: saved.b} : projectionDefault}))
-    setRecent(current => ({...current, [projection]: readJson<Marks[]>(recentKey(repoKey, projection)) ?? []}))
+    setRecent(current => ({...current, [projection]: readJson(recentKey(repoKey, projection), isMarksList) ?? []}))
   }, [api, projection, repoKey, revisions, marks, setMarks, pairsHere, projectionDefault, openedInitially])
   useEffect(() => {
     const pair = marks[projection]

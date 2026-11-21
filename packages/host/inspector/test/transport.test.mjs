@@ -149,6 +149,7 @@ test('bridges accept only well-formed /api/ requests', () => {
 test('only cross-origin web links are external', () => {
   assert.equal(externalUrl('https://github.com/x', 'http://127.0.0.1:1/'), 'https://github.com/x')
   assert.equal(externalUrl('/api/x', 'http://127.0.0.1:1/'), undefined)
+  // eslint-disable-next-line no-script-url -- The script URL is the input the test refuses.
   assert.equal(externalUrl('javascript:alert(1)', 'http://127.0.0.1:1/'), undefined)
   assert.equal(externalUrl(null, 'http://127.0.0.1:1/'), undefined)
 })

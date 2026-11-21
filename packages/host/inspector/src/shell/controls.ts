@@ -1,4 +1,4 @@
-export const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
+export const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent)
 /** How a shortcut is written on this platform: `⌘K` or `Ctrl+K`; with `alt`, `⌥⌘B` or `Ctrl+Alt+B`. */
 export function shortcutLabel(key: string, {alt = false}: {alt?: boolean} = {}): string {
   return isMac ? `${alt ? '⌥' : ''}⌘${key.toUpperCase()}` : `Ctrl+${alt ? 'Alt+' : ''}${key.toUpperCase()}`

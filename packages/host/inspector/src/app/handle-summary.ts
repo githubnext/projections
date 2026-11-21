@@ -52,10 +52,10 @@ export function withoutQueued(current: Rows, target: string, wanted: ReadonlySet
   const own = current[target]
   const dropped = Object.entries(own ?? {}).filter(([ref, row]) => row.status === 'queued' && !wanted.has(ref))
   if (!own || !dropped.length) return current
-  const next: Record<string, RowState> = {...own}
-  for (const [ref, row] of dropped) {
-    if (row.document) next[ref] = {...row, status: 'done'}
-    else delete next[ref]
+  const next: Record<string, RowState> = {}
+  for (const [ref, row] of Object.entries(own)) {
+    if (row.status !== 'queued' || wanted.has(ref)) next[ref] = row
+    else if (row.document) next[ref] = {...row, status: 'done'}
   }
   return {...current, [target]: next}
 }

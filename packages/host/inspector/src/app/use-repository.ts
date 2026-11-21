@@ -45,7 +45,9 @@ export function useRepository({
         setRepoKey(repositoryKey(list))
         setRevisions(revisionList.revisions)
         // The projection last chosen in this repository, else the first.
-        const last = openedOn(openedInitially).projection ?? readJson<string>(currentKey(repositoryKey(list)))
+        const last =
+          openedOn(openedInitially).projection ??
+          readJson(currentKey(repositoryKey(list)), (value): value is string => typeof value === 'string')
         setProjection(list.definitions.some(item => item.id === last) ? last! : (list.definitions[0]?.id ?? ''))
         setConnected(true)
         setLoading(false)

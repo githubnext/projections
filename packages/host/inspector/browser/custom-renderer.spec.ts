@@ -134,7 +134,7 @@ test('a custom renderer becomes ready with the committed definition (definitionR
   await expect(frame).toHaveAttribute('src', new RegExp(`/custom-renderers/[0-9a-f]+/${repository.head}/cards/index\\.html#`))
   await expect(frame).toHaveAttribute('aria-label', /Package cards/)
   await expect(page.getByText(/did not become ready/)).toHaveCount(0)
-  await expect(page.frameLocator('iframe.ph-frame').first().locator('[data-entity-id]').first()).toBeAttached()
+  await expect(page.locator('iframe.ph-frame').first().contentFrame().locator('[data-entity-id]').first()).toBeAttached()
 })
 
 test('the Inspector supplies built-in renderer documents by name, and refuses custom and unknown names', async ({page, probe}) => {

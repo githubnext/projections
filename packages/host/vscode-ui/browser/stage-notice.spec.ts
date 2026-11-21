@@ -140,8 +140,9 @@ test('the notice stays put while a document-style renderer scrolls under it', as
   const before = await box(pill(page))
   // The renderer's document scrolls inside its frame: scroll whatever scrolls there.
   const scrolled = await page
-    .frameLocator('iframe.ph-frame')
+    .locator('iframe.ph-frame')
     .first()
+    .contentFrame()
     .locator('body')
     .evaluate(body => {
       const document = body.ownerDocument

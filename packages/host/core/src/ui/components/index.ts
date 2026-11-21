@@ -75,6 +75,7 @@ export {
   projectorPalette,
   projectorRendererTokens,
   projectorSurfaces,
+  // eslint-disable-next-line @typescript-eslint/no-deprecated -- The former name stays exported until it is removed.
   shadcnPalette,
   shadcnRendererTokens,
   sharedSurfaceNames,

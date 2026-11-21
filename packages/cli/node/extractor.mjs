@@ -197,7 +197,7 @@ var Request = class {
   }
   /** Whether the run is trusted (`--trust`). */
   get trusted() {
-    return this.capabilities?.trusted === true
+    return this.capabilities?.trusted
   }
 }
 /**

@@ -432,8 +432,9 @@ test('every renderer package scenarios file has unique scenario IDs and referenc
     assert.equal(new Set(ids).size, ids.length, `${name}: duplicate scenario IDs`)
     for (const scenario of document.scenarios) {
       for (const side of ['before', 'after', 'extraction']) {
-        if (typeof scenario[side] === 'string')
+        if (typeof scenario[side] === 'string') {
           assert.ok(existsSync(new URL(scenario[side], file)), `${name}/${scenario.id}: ${scenario[side]}`)
+        }
       }
     }
   }

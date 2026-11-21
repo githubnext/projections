@@ -24,7 +24,10 @@ async function run(argv: string[]): Promise<{output: string; exit: number}> {
 
 // What a command prints with --json: its report, or the envelope of the error that stopped it.
 type Report<F extends (...args: never[]) => unknown> = Awaited<ReturnType<F>>
-type Failure = {code: string; message: string}
+interface Failure {
+  code: string
+  message: string
+}
 
 async function runJson<T>(argv: string[]): Promise<{json: T; exit: number}> {
   const {output, exit} = await run(argv)

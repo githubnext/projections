@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Vendored shadcn/ui release (internal)",
+  "description": "Generated from packages/schemas/src/repository; internal and unversioned, never published. Validates packages/host/core/src/ui/components/upstream/manifest.json (see .dollarlint.toml).",
+  "type": "object",
+  "required": ["style", "version", "tag", "commit", "registryCommit"],
+  "properties": {
+    "style": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(\\+[0-9a-f]{7,40})?$"},
+    "tag": {"type": "string", "pattern": "^shadcn@\\d+\\.\\d+\\.\\d+$"},
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "registryCommit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.projections.githubnext.com/bookmarks/v0.json",
+  "title": "Projections bookmarks",
+  "description": "`.projections-bookmarks.json` at the repository root: saved comparisons to revisit, each a projection and two revisions. `projections bookmark` reads it; bookmark IDs are unique within the file.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "bookmarks"],
+  "properties": {
+    "format": {"type": "string", "const": "projections.bookmarks"},
+    "version": {"type": "number", "const": 0},
+    "bookmarks": {"type": "array", "items": {"$ref": "#/$defs/bookmark"}, "maxItems": 100}
+  },
+  "$defs": {
+    "bookmark": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "projectionId", "before"],
+      "properties": {
+        "id": {
+          "$ref": "https://schemas.projections.githubnext.com/definition/v0.json#/$defs/identifier",
+          "description": "The bookmark's ID, unique in the file."
+        },
+        "title": {"description": "What the comparison shows.", "type": "string", "minLength": 1, "maxLength": 1000},
+        "projectionId": {
+          "$ref": "https://schemas.projections.githubnext.com/definition/v0.json#/$defs/identifier",
+          "description": "The projection it compares."
+        },
+        "before": {
+          "description": "The revision before: a commit, branch, tag or other Git revision.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "after": {
+          "description": "The revision after; absent means the working tree.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      }
+    }
+  }
+}

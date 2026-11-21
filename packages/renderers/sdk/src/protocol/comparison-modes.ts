@@ -1,15 +1,8 @@
 // Comparison modes: which a renderer supports, in what order, and which a host opens with.
+import {comparisonModes} from '@githubnext/projections-schemas'
 
-/**
- * How a host presents a comparison with a renderer:
- *
- * - `animated`: one frame, driven through `progress` from before to after.
- * - `side-by-side`: two frames, one held at progress 0 and one at 1.
- * - `swipe`: the same two frames stacked, with a divider between them.
- * - `diff`: one frame and no `progress` at all; the renderer draws its own
- *   static comparison of both subjects (`init.comparisonMode` is `'diff'`).
- */
-export const comparisonModes = ['diff', 'side-by-side', 'animated', 'swipe'] as const
+/** How a host presents a comparison with a renderer; the schemas package defines the list for the manifest schema too. */
+export {comparisonModes}
 /** One of `comparisonModes`. */
 export type ComparisonMode = (typeof comparisonModes)[number]
 

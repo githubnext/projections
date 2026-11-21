@@ -1,10 +1,10 @@
 # Swift package dependencies
 
-A Swift package's graph as SwiftPM declares and resolves it: its products and
-targets, what each target depends on, and the packages they come from with the
-versions `Package.resolved` pins. Compared across a pull request, it answers
-"which targets and packages did this change add, remove or rewire, and which
-package versions moved?"
+This extractor maps a Swift package's dependency graph as SwiftPM declares and
+resolves it: its products and targets, how targets depend on each other, and the
+external packages they use along with the versions pinned in `Package.resolved`.
+Compared across a pull request, it shows which targets or packages were added,
+removed, or rewired, and which package versions moved.
 
 <!-- generated: facts -->
 
@@ -19,52 +19,52 @@ package versions moved?"
 
 ## When to use it
 
-Use it in a repository with a `Package.swift`: a library package, a command line
-tool, or an app whose code is split into local packages. It shows the module
-structure (which target depends on which) together with the third-party packages
-each target uses, so a review sees both a new internal dependency and a package
-upgrade.
+Use this extractor in any repository with a `Package.swift`—whether a library, a
+CLI tool, or an app split across local packages. It brings internal module
+structure and third-party package dependencies into a single view, so reviewers
+see both new internal edges and external upgrades together.
 
-It reads the manifest without running it, so it needs no Swift toolchain and no
-`--trust`, and works on Linux and Windows as well as macOS. Manifests that
-compute their targets (`#if`, loops, functions, environment variables) need
-SwiftPM to evaluate them: see [What it reads](#what-it-reads).
+By default it parses the manifest without executing it, so it needs no Swift
+toolchain and no `--trust`, and runs on Linux and Windows as well as macOS. If
+your manifest computes targets dynamically (`#if`, loops, helper functions, or
+environment variables), you can have SwiftPM evaluate it instead (see
+[What it reads](#what-it-reads)).
 
-For Xcode projects (`.xcodeproj`) use [`xcode-modules`](xcode-modules.md); for
-what a package exports rather than what it depends on,
+For Xcode projects (`.xcodeproj`), use [`xcode-modules`](xcode-modules.md); to
+review what a package exports rather than what it depends on, use
 [`swift-public-api`](swift-public-api.md).
 
 ## What it reads
 
-It reads `Package.swift` in `root` (default the repository's root) and, through
-`.package(path:)` dependencies, every local package inside the repository,
-transitively, so an app split into local packages is one connected graph. It
-reads `Package.resolved` next to the root manifest.
+Starting from `Package.swift` in `root` (defaulting to the repository root), the
+extractor follows `.package(path:)` references transitively across all local
+packages inside the repository so multi-package apps form one connected graph.
+It also reads `Package.resolved` alongside the root manifest.
 
-**Reading the manifest without running it.** `Package.swift` is Swift code. By
-default the extractor reads it as data: the `Package(…)` initializer, the
-top-level constants it refers to (`let shared: [Target.Dependency] = […]`),
-arrays joined with `+`, and unconditional top-level `+= […]` or `.append(…)`, to
-a constant (for uses after it) or to `package.targets` and its siblings.
-Requirements are normalized as SwiftPM does (`from: "1.1.0"` is
-`1.1.0..<2.0.0`), and a test compares the result with SwiftPM's own evaluation
-of the same manifests. Code that changes something else, such as
-`for target in package.targets { target.swiftSettings = … }`, is ignored, since
-it doesn't change the graph.
+**Static manifest parsing (default).** Although `Package.swift` is Swift code,
+the default mode reads it statically as data: the `Package(…)` initializer,
+top-level constants it references (`let shared: [Target.Dependency] = […]`),
+arrays combined with `+`, and unconditional top-level `+= […]` or `.append(…)`
+calls on a constant (for subsequent uses) or on `package.targets` and its
+siblings. Version requirements are normalized the way SwiftPM normalizes them
+(`from: "1.1.0"` becomes `1.1.0..<2.0.0`), verified by tests against SwiftPM's
+own output. Loops or mutations that don't affect the dependency graph—such as
+`for target in package.targets { target.swiftSettings = … }`—are safely ignored.
 
-When a value the graph needs is decided by code (`#if os(Linux)`, a loop or
-condition, a function, string interpolation, an environment variable), the
-extraction fails and names the manifest's line, rather than guessing. Then
-either:
+When a graph-relevant value depends on runtime code (`#if os(Linux)`, loops,
+conditionals, function calls, string interpolation, or environment variables),
+extraction fails and points to the exact line rather than guessing. When that
+happens, you have two options:
 
-- set `manifest` to `"dump-package"`: SwiftPM evaluates each manifest with
-  `swift package dump-package`. This compiles and runs the manifest, so it needs
-  `--trust` and a Swift toolchain, and it is evaluated for the machine that runs
-  it (`#if os(Linux)` is false on macOS). It doesn't resolve or download
-  packages. A definition in this mode reads a checkout rather than Git objects,
-  and its extractions are cached per toolchain (`environmental`).
-- or set `manifestJsonPath` to `swift package dump-package` output your CI
-  writes into each revision. Nothing runs, and no `--trust` is needed.
+- Set `manifest` to `"dump-package"` so SwiftPM evaluates each manifest via
+  `swift package dump-package`. Because this compiles and runs the manifest, it
+  requires `--trust` and a Swift toolchain, and evaluates conditions for the
+  current host (`#if os(Linux)` is false on macOS). It does not resolve or
+  download packages. In this mode, the definition reads from a checkout rather
+  than Git objects and caches results per toolchain (`environmental`).
+- Or set `manifestJsonPath` to `swift package dump-package` JSON generated by
+  your CI and committed in each revision, which requires neither execution nor
+  `--trust`.
 
 ```json
 {
@@ -75,22 +75,23 @@ either:
 }
 ```
 
-Each target is a `target` entity with its `type` (`regular`, `executable`,
-`test`, `macro`, `plugin`, `system`, `binary`) and its package; each product is
-a `product` entity with its `type` and a library's `linkage`, which `includes`
-its targets. A target's `depends-on` relationships lead to another target, to a
-product of a local package, or to an `external-package`, naming the `product` it
-uses and any `platforms` or `traits` condition. An external package has its
-`source` (`repository`, `registry` or `local`), `location`, declared
-`requirement`, and the `version`, `revision` or `branch` `Package.resolved`
-pins. Packages it pins that no manifest declares are needed by other packages in
-turn; they are marked `transitive`, without a relationship, because
-`Package.resolved` doesn't record which package needs them.
+Each target becomes a `target` entity with its `type` (`regular`, `executable`,
+`test`, `macro`, `plugin`, `system`, `binary`) and owning package; each product
+becomes a `product` entity with its `type` and library `linkage`, linked to its
+targets via `includes`. A target's `depends-on` edges point to another target, a
+local package's product, or an `external-package`, recording the `product` name
+and any `platforms` or `traits` conditions.
 
-IDs are the package's directory and the target's or product's name
-(`swiftpm:.:target:Harbor`), and an external package's identity
-(`swiftpm:package:swift-log`), never a version, so an upgrade is one modified
-package.
+External packages record their `source` (`repository`, `registry`, or `local`),
+`location`, declared `requirement`, and the `version`, `revision`, or `branch`
+pinned in `Package.resolved`. Any pinned package not directly declared by a
+manifest is marked `transitive` without an incoming edge, since
+`Package.resolved` doesn't record which package pulled it in.
+
+Entity IDs use the package directory and target or product name
+(`swiftpm:.:target:Harbor`) or the external package's identity
+(`swiftpm:package:swift-log`)—never a version—so upgrading a dependency appears
+as a single modified package.
 
 ## Options
 
@@ -107,16 +108,16 @@ package.
 
 ## What a comparison shows
 
-- **Targets and products** added, removed or retyped, and the targets a product
-  includes.
-- **Dependencies** between targets, and on packages, added, removed or given a
-  platform condition.
-- **Upgrades and downgrades** of external packages as modified packages, worded
-  by the part of the version that moved (`Minor upgrade`) and counted in the
-  summary bar; a changed requirement (`from:`) without a resolved change is a
-  modified package too.
+- **Targets and products** that were added, removed, or changed type, along with
+  changes to which targets a product includes.
+- **Dependencies** between targets or on external packages that were added,
+  removed, or gained a platform condition.
+- **Package upgrades and downgrades** shown as modified packages, labeled by
+  which version component changed (`Minor upgrade`) and tallied in the summary
+  bar. Changing a declared requirement (like `from:`) also marks the package as
+  modified even if the resolved version stayed the same.
 
-The package's targets and products are the graph's roots, drawn on the left.
+Your package's targets and products sit on the left as the graph's roots.
 
 ## Start from this definition
 
@@ -135,52 +136,58 @@ The package's targets and products are the graph's roots, drawn on the left.
 
 ## Limitations
 
-- It doesn't resolve packages, so it doesn't know which package needs a
-  transitive one, or the products and targets inside external packages. A
-  dependency on a package `Package.resolved` doesn't pin (a missing or stale
-  lockfile) has no version.
-- Read without running it, the manifest is the one in `Package.swift`; SwiftPM
-  may use a version-specific manifest (`Package@swift-6.0.swift`) instead, which
-  `metadata.limitations` names.
-- `dump-package` evaluates the manifest for the machine running it: a
-  platform-specific `#if` is decided by that platform.
-- Local packages outside the repository (`.package(path: "../Shared")`) are
-  external packages, with no products or targets.
+- Because it doesn't run full package resolution, it can't show which package
+  pulls in a transitive dependency or inspect products and targets inside
+  external packages. If `Package.resolved` is missing or stale, unpinned
+  dependencies have no version.
+- Static parsing reads `Package.swift`; if a version-specific manifest like
+  `Package@swift-6.0.swift` exists alongside it, `metadata.limitations` notes
+  that SwiftPM may choose it instead.
+- In `dump-package` mode, platform-specific `#if` branches are evaluated for the
+  machine running the extraction.
+- Local packages referenced outside the repository
+  (`.package(path: "../Shared")`) are treated as external packages without
+  expanding their targets or products.
 
 ## Related
 
-- [`graph`](../renderers/graph.md), whose `dependencies` presentation draws it.
-- [`xcode-modules`](xcode-modules.md), the same graph for Xcode projects.
-- [`swift-public-api`](swift-public-api.md), for what a package exports.
+- [`graph`](../renderers/graph.md) — draws this graph using its `dependencies`
+  presentation.
+- [`xcode-modules`](xcode-modules.md) — the equivalent dependency graph for
+  Xcode projects.
+- [`swift-public-api`](swift-public-api.md) — inspect what a Swift package
+  exports.
 - [`cargo-dependencies`](cargo-dependencies.md) and
-  [`workspace-dependencies`](workspace-dependencies.md), the same for Rust and
-  Node.
+  [`workspace-dependencies`](workspace-dependencies.md) — the same dependency
+  model for Rust and Node.
 
 ## How it works
 
-The
+See the
 [package README](../../../packages/extractors/swift-package-dependencies/README.md)
-details how manifests are read and how identities are formed.
+for details on manifest parsing and entity ID conventions.
 
 ## Build your own
 
-Write your own extractor when the declared graph isn't the one you need:
+Consider writing a custom extractor when the declared manifest graph isn't
+enough:
 
-- **The resolved graph across packages**: which package needs each transitive
-  one, from `swift package show-dependencies --format json`, which resolves and
-  downloads packages.
-- **Module imports rather than declarations**: what each target's sources
-  actually `import`.
-- **Facts SwiftPM doesn't have**: owners, binary sizes or licenses.
+- **Full transitive edges across packages**, using
+  `swift package show-dependencies --format json` (which resolves and downloads
+  packages) to see exactly who pulls in each transitive dependency.
+- **Actual source imports**, tracking what each target's Swift files `import`
+  rather than what the manifest declares.
+- **Extra metadata**, such as team ownership, binary sizes, or licenses.
 
-Try the lighter options first: `root` points it at a package that isn't at the
-repository's root, and `manifestJsonPath` reads an export your CI already makes.
-To draw the same graph differently, keep this extractor and write a renderer.
+Check the built-in options first: `root` targets a package nested inside a
+subdirectory, and `manifestJsonPath` consumes exports your CI already produces.
+If you only want a different visualization, keep this extractor and write a
+custom renderer.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
+**In VS Code**, open the Projections view, select **+ New Projection…**, choose
 **Write a custom extractor, renderer or comparator** › **Custom extractor**, and
-pick its language. Or choose **Ask an agent to write it** and describe what the
-projection should show.
+pick a language. You can also choose **Ask an agent to write it** and describe
+what you want to see.
 
 **With the CLI**, keep this graph's renderer:
 
@@ -188,5 +195,6 @@ projection should show.
 projections init <id> --language node --renderer dependencies
 ```
 
-Run it with `projections show -p <id> --trust` as you change it.
-[Write your first extractor](../../guides/first-extractor.md) walks through one.
+Test changes as you go with `projections show -p <id> --trust`.
+[Write your first extractor](../../guides/first-extractor.md) walks through a
+complete example.

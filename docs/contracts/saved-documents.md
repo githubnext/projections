@@ -2,7 +2,9 @@
 
 ## Saved extractions
 
-Saved extractions use `format: "projections.extraction"`, `version: 0`:
+When the runner persists an extraction to disk or an artifact, it wraps the raw
+extraction in a saved document with `format: "projections.extraction"` and
+`version: 0`:
 
 ```json
 {
@@ -21,46 +23,57 @@ Saved extractions use `format: "projections.extraction"`, `version: 0`:
 }
 ```
 
-Extractors never write provenance; the runner adds it. Provenance records the
-immutable revision, actual dirty state, extractor, definition and its digest,
-reproducibility and limitations, and, for an extractor the runner ran,
-`execution`, the run that observed it: where it ran (`source`: `local-in-place`,
-`local-git-objects`, `local-workspace`, `local-materialized`, or `ci` when a
-verified CI artifact supplied it), how faithful it is (`fidelity`: `exact`;
-`approximate` when a toolchain borrowed dependencies installed for different
-lockfiles; `stale` when the working tree changed while it ran), its
-`determinism` class, the `environment` fingerprint (a hash of the Projections
-version, `PATH` and the granted variables' values), when it ran (`at`, UTC), the
-examined Git `tree`, the workspace `strategy`, the `prepared` environment steps
-and the enforced `scope`. An extraction from a CI artifact has
-`ci: {repository, run, workflow?, authentication?}`: like a test result, the run
-the repository's own CI published is the commit's official extraction, even
-though a rerun might differ. It is `official: true` only when the run was
-authenticated (`authentication`: `download` when `--ci` downloaded it from a run
-GitHub's API identified as the repository's own Projections workflow, never a
-fork's; `attestation` when an imported artifact's attestation named such a run;
-see [CI artifacts as a source](../runner/caches.md#ci-artifacts-as-a-source)).
-An imported artifact nothing authenticated is `official: false`. Hosts show it
-as _From CI_, _Imported_, _Local_, _Approximate_ or _Stale_, and the official
-run for a commit by default. These fields describe how the CLI that wrote the
-document obtained it; a saved document's own claim proves nothing to its reader.
-A working-tree extraction records its base commit with `ref: "working-tree"`. An
-extraction with [generated values](extractions.md#generated-values) records
-`generated`: how many concrete generated values it holds (`values`), how many
-carried a key and value the generation store already held (`reused`), and which
-stores those came from (`sources`: `local`, or `ci` for values harvested from a
-CI artifact). Do not persist temporary root paths, credentials or forwarded
+Extractors never write provenance themselves—the runner attaches it. Provenance
+captures the immutable revision, actual dirty state, extractor metadata,
+definition and its digest, reproducibility class, and any limitations. When the
+runner executes an extractor, it also records `execution` to describe how that
+run happened:
+
+- `source` records where the extraction came from (`local-in-place`,
+  `local-git-objects`, `local-workspace`, `local-materialized`, or `ci` when
+  supplied by a verified CI artifact).
+- `fidelity` indicates how faithfully the revision was observed: `exact`,
+  `approximate` (when a toolchain borrowed dependencies installed for different
+  lockfiles), or `stale` (when the working tree changed while the extractor
+  ran).
+- Additional execution details include the `determinism` class, `environment`
+  fingerprint (a hash of the Projections version, `PATH`, and granted
+  environment values), UTC timestamp (`at`), examined Git `tree`, workspace
+  `strategy`, `prepared` environment steps, and enforced `scope`.
+
+An extraction sourced from a CI artifact carries
+`ci: {repository, run, workflow?, authentication?}`. Just like a test result,
+the run published by the repository's own CI serves as the commit's official
+extraction even if a local rerun might differ. It is marked `official: true`
+only when the run was authenticated—either via `authentication` set to
+`download` (when `--ci` fetched it from a run GitHub's API confirmed as the
+repository's own Projections workflow, never a fork's) or `attestation` (when an
+imported artifact's attestation named such a run; see
+[CI artifacts as a source](../runner/caches.md#ci-artifacts-as-a-source)). An
+imported artifact with no authentication is marked `official: false`. Hosts
+label extractions as _From CI_, _Imported_, _Local_, _Approximate_, or _Stale_,
+and show the official run for a commit by default. Keep in mind that these
+fields only describe how the writing CLI obtained the document—a saved
+document's own claims prove nothing to a reader.
+
+A working-tree extraction records its base commit alongside
+`ref: "working-tree"`. If an extraction contains
+[generated values](extractions.md#generated-values), provenance also includes
+`generated`: the total count of concrete generated values (`values`), how many
+matched an existing key and value in the generation store (`reused`), and which
+stores supplied them (`sources`: `local`, or `ci` for values harvested from a CI
+artifact). Never persist temporary root paths, credentials, or forwarded
 environment values.
 
-Saved documents' claims never grant trust. CI publishes them in one format, the
-[CI artifact](#ci-artifacts).
+Claims inside saved documents never grant trust. CI publishes saved documents in
+a single envelope format, the [CI artifact](#ci-artifacts).
 
 ## CI artifacts
 
-The GitHub Action uploads an Actions artifact named `projections` whose root
-holds `projections.artifact.json` (`format: "projections.artifact"`,
-`version: 0`, [schema](../../packages/schemas/schemas/artifact/v0.json)) and one
-document per projection at `projections/<id>.json`:
+The GitHub Action uploads an Actions artifact named `projections` containing
+`projections.artifact.json` (`format: "projections.artifact"`, `version: 0`,
+[schema](../../packages/schemas/schemas/artifact/v0.json)) at its root and one
+saved document per projection at `projections/<id>.json`:
 
 ```json
 {
@@ -77,47 +90,54 @@ document per projection at `projections/<id>.json`:
 }
 ```
 
-A push's `subject` is
-`{"kind": "push", "ref": "refs/heads/main", "revision": "<sha>"}`. Statuses are
-those of the CLI's batch items: `changed` and `unchanged` (a saved comparison
-from `mergeBase` to `head`; `changed` exactly when the engine's
-[`review`](../contracts.md#one-implementation-native-and-browser) finds a
-reviewable change. CLIs 0.2.0 and earlier also called a comparison with only
-expected variation `changed`; hosts accept that label and show the engine's
-review of the rerun comparison, but never accept `unchanged` for a comparison
-with a reviewable change), `extracted` (a push's saved extraction), `head-only`
-and `base-only` (one side's saved extraction), and `error` (no document; bounded
-diagnostics). `sha256` is over the document file's bytes. At most 60 projections
-and 8 MiB per document.
+For a push event, `subject` is
+`{"kind": "push", "ref": "refs/heads/main", "revision": "<sha>"}`. Projection
+statuses match the CLI's batch items: `changed` and `unchanged` (a saved
+comparison from `mergeBase` to `head`, where `changed` means the engine's
+[`review`](../contracts.md#one-implementation-native-and-browser) found at least
+one reviewable change—CLIs 0.2.0 and earlier also marked comparisons with only
+expected variation as `changed`, so hosts accept that label and display the
+engine's review of the rerun comparison, while never accepting `unchanged` when
+a reviewable change exists), `extracted` (a push's saved extraction),
+`head-only` and `base-only` (a single side's saved extraction), and `error` (no
+document, with bounded diagnostics). Each entry's `sha256` hashes the document
+file's bytes. Artifacts hold at most 60 projections and 8 MiB per document.
 
-A hosted view accepts an artifact only when GitHub independently confirms it:
-the artifact belongs to the latest successful run of the right event for the
-exact head commit, in the same repository; that run's head repository is the
-same repository too, never a fork's (a fork's pull request runs the fork's own
-workflow files, which can upload anything, so its artifacts are never read); the
-run is of the Projections workflow, a workflow file of the repository whose
-content on the default branch uses `githubnext/projections` (as with
-[`--ci`](../runner/caches.md#ci-artifacts-as-a-source), without its per-user
-`ciWorkflows`); the manifest names that repository, run, pull request number and
-head (or pushed commit); every file is listed with a matching SHA-256 and no
-other file exists; every document passes the shared loader (extraction digests
-recomputed, saved comparisons rerun by the default comparator); every document
-describes exactly the manifest's clean commits; and GitHub's merge base of
-`base` and `head` is `mergeBase`. A mismatch in the envelope (the archive, the
-manifest, its repository, run, subject or merge base, duplicate IDs or paths, or
-a file the manifest doesn't list) rejects the whole artifact. A document that
-fails its own checks (its file's SHA-256, the loader or its commits) makes only
-that projection unverified: it is listed without its document and the others are
-shown. A comparison by a custom comparator, whose extractions and commits
-verify, is listed as such when the view can't rerun it. A hosted view never runs
-extractors or imports artifact-supplied code, and authorizes the signed-in user
-for every read.
+A hosted view only accepts an artifact after GitHub independently verifies every
+part of its identity:
 
-With the Action's `snapshots` input, PNG snapshots go to a separate artifact,
-`projections-snapshots` (`<artifact-name>-snapshots`), never into `projections`,
-which must contain only the files its manifest lists. Its `snapshots.json`
-(`format: "projections.snapshots"`, `version: 0`) repeats the manifest's
-`subject` and lists each image as
+- The artifact belongs to the latest successful run of the expected event for
+  the exact head commit in the same repository, and that run's head repository
+  is also the same repository—never a fork (since a fork's pull request runs the
+  fork's own workflow files and could upload arbitrary content).
+- The run executed the Projections workflow—a workflow file in the repository
+  whose content on the default branch uses `githubnext/projections` (matching
+  [`--ci`](../runner/caches.md#ci-artifacts-as-a-source), without its per-user
+  `ciWorkflows`).
+- The manifest matches that repository, run, pull request number, and head (or
+  pushed) commit, and GitHub's merge base of `base` and `head` equals
+  `mergeBase`.
+- Every file in the archive is listed in the manifest with a matching SHA-256,
+  and no unlisted files are present.
+- Every document passes the shared loader (which recomputes extraction digests
+  and reruns saved comparisons with the default comparator) and describes the
+  manifest's exact clean commits.
+
+Any envelope mismatch—an invalid archive, a mismatched manifest repository, run,
+subject, or merge base, duplicate IDs or paths, or an unlisted file—rejects the
+entire artifact. A per-document failure (a bad file SHA-256, loader error, or
+mismatched commits) only marks that single projection as unverified, listing it
+without its document while still displaying the rest. When a comparison was
+produced by a custom comparator and its extractions and commits verify, the
+hosted view lists it as such if it cannot rerun that comparator. Hosted views
+never run extractors or load artifact-supplied code, and they authorize the
+signed-in user on every read.
+
+When the Action's `snapshots` input is enabled, PNG snapshots are uploaded to a
+separate artifact named `projections-snapshots` (`<artifact-name>-snapshots`),
+never mixed into `projections` (which must contain only the files listed in its
+manifest). Its `snapshots.json` (`format: "projections.snapshots"`,
+`version: 0`) repeats the manifest's `subject` and lists each image as
 `{"id", "side"?: "before" | "after", "theme": "light" | "dark", "path", "sha256"}`,
-with `skipped` and `failed` projections. It is informational: hosted views don't
-read it.
+alongside any `skipped` and `failed` projections. Snapshot artifacts are purely
+informational; hosted views do not read them.

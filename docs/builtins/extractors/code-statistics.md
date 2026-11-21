@@ -1,9 +1,9 @@
 # Code statistics
 
-How much of the repository is written in each language: files, and lines of
-code, comments and blanks, split into test files and the rest. Compared across a
-pull request, it answers "how much code did this change add or remove, in which
-languages, and how much of it is tests?"
+This extractor breaks down a repository by language, counting files along with
+lines of code, comments, and blank lines, split between test files and
+everything else. Compared across a pull request, it shows how much code a change
+adds or removes, which languages it touches, and how much of that diff is tests.
 
 <!-- generated: facts -->
 
@@ -17,46 +17,50 @@ languages, and how much of it is tests?"
 
 ## When to use it
 
-Use it in any repository, whatever its languages, to see a change's size the way
-people talk about it: "adds 2,000 lines of TypeScript and 600 of tests",
-"removes the last of the CoffeeScript", "a third of this pull request is
-generated JSON". It reads only files and runs nothing, so it is safe on any pull
-request without `--trust`.
+Use this extractor in any repository, regardless of language, to see the size of
+a change the way engineers actually talk about it—"adds 2,000 lines of
+TypeScript and 600 of tests," "removes the last of the CoffeeScript," or "a
+third of this pull request is generated JSON." Because it only reads files and
+never executes code, it is safe to run on any pull request without `--trust`.
 
-It is a measurement, not a model of the design: it can't say what the code does
-or how its parts depend on each other. For the files themselves, sized and
-placed in their folders, use [`repository-map`](repository-map.md).
+Keep in mind that this is a measurement rather than a structural model. It tells
+you how much code moved, not what the code does or how components depend on each
+other. If you want to see individual files sized inside their folder hierarchy,
+use [`repository-map`](repository-map.md).
 
 ## What it reads
 
-Every file of the revision (tracked, and untracked files Git doesn't ignore)
-that `include` selects and `exclude` doesn't. Unless `defaultExcludes` is
-`false`, these are skipped too, because a vendored tree or a lockfile would
-drown out the repository's own code: `node_modules`, `.git`, `dist`, `build`,
-`out`, `bin`, `obj`, `target`, `vendor`, `__pycache__`, `.venv`, `venv`,
-`coverage`, `.next` and `.nuxt` folders, `*.min.js`, `*.min.css`, `*.lock` and
+The extractor scans every file in the revision (both tracked files and untracked
+files not ignored by Git) that matches `include` and is not filtered out by
+`exclude`. Unless you set `defaultExcludes` to `false`, common generated and
+vendored paths are skipped automatically so lockfiles and dependencies do not
+drown out your own code: `node_modules`, `.git`, `dist`, `build`, `out`, `bin`,
+`obj`, `target`, `vendor`, `__pycache__`, `.venv`, `venv`, `coverage`, `.next`,
+and `.nuxt` folders, plus `*.min.js`, `*.min.css`, `*.lock`, and
 `package-lock.json`.
 
-Languages and line kinds come from [tokei](https://github.com/XAMPPRocky/tokei),
-which recognizes a file by its name or extension:
+Language detection and line classification come from
+[tokei](https://github.com/XAMPPRocky/tokei), which identifies each file by its
+name or extension:
 
-- Every physical line is exactly one of code, comment or blank, so the three add
-  up to the total. A line with both code and a comment counts as code.
-- Documentation strings that span lines count as comments, and so does the prose
-  of Markdown and plain text.
-- Code embedded in another language (a `<script>` in HTML, a fenced block in
-  Markdown, the sections of a Vue file) counts toward the host file's language.
+- Every physical line counts as exactly one of code, comment, or blank, so the
+  three always sum to the total. Lines containing both code and a comment count
+  as code.
+- Multi-line docstrings count as comments, as does prose in Markdown and plain
+  text files.
+- Embedded code—like a `<script>` block in HTML, a fenced code block in
+  Markdown, or sections of a Vue file—counts toward the host file's language.
 
-A file is a test when its path matches a `tests` glob. By default those are
-common conventions: `**/test/**`, `**/tests/**`, `**/__tests__/**`,
-`**/spec/**`, `**/*.test.*`, `**/*.spec.*`, `**/*_test.*`, `**/*_spec.*`,
-`**/test_*.py` and `**/*Tests.cs`.
+A file counts as a test when its path matches any glob in `tests`. By default,
+that covers standard conventions: `**/test/**`, `**/tests/**`,
+`**/__tests__/**`, `**/spec/**`, `**/*.test.*`, `**/*.spec.*`, `**/*_test.*`,
+`**/*_spec.*`, `**/test_*.py`, and `**/*Tests.cs`.
 
-Each language is one `language` entity, named as tokei names it (`Rust`,
-`TypeScript`, `TSX`), with `files`, `code`, `comment`, `blank`, `lines` and
-`bytes`, and the same counts for its test files (`testFiles`, `testCode`, …).
-Every count is on one entity, so a language whose counts moved is one modified
-language.
+Each language becomes a single `language` entity using tokei's naming (`Rust`,
+`TypeScript`, `TSX`). It records `files`, `code`, `comment`, `blank`, `lines`,
+and `bytes`, along with matching counts for test files (`testFiles`, `testCode`,
+…). Because all counts live on the same entity, any change in a language's
+totals shows up as one modified language.
 
 ## Options
 
@@ -72,39 +76,37 @@ language.
 
 <!-- end generated: inputs -->
 
-Globs use `*` within a folder, `**` across folders and `?` for one character.
-`languages` reassigns an extension to a language tokei already knows, for an
-ambiguous one: tokei counts `.inc` as BitBake, so a PHP repository sets
-`{"languages": {".inc": "PHP"}}`. Naming a language tokei doesn't know is an
-error.
+Globs support `*` within a folder, `**` across folders, and `?` for a single
+character. Use `languages` to reassign an ambiguous extension to a language
+tokei already recognizes—for example, tokei treats `.inc` as BitBake by default,
+so a PHP repository can set `{"languages": {".inc": "PHP"}}`. Passing a language
+name that tokei does not recognize results in an error.
 
 ```json
 "inputs": {"include": ["src/**", "tests/**"], "exclude": ["**/*.generated.ts"], "tests": ["tests/**"]}
 ```
 
-The [`code-statistics`](../renderers/code-statistics.md) renderer's controls
-choose what the chart shows, and a definition presets them in
-`presentation.rendererOptions`: **Measure** (`measure`: `code`, `comment`,
-`blank`, `lines` or `files`), **By language** (`byLanguage`, or the code,
-comment and blank composition), **Chart** (`chart`: `bars`, `share` or `table`,
-with **Sort by**, `sort`, and **Changes first**, `sortChangesFirst`) and
-**Files** (`scope`: `all`, `tests` or `other`).
+You can preset the [`code-statistics`](../renderers/code-statistics.md)
+renderer's controls in `presentation.rendererOptions`: **Measure** (`measure`:
+`code`, `comment`, `blank`, `lines`, or `files`), **By language** (`byLanguage`,
+or the code/comment/blank breakdown), **Chart** (`chart`: `bars`, `share`, or
+`table`, along with **Sort by** via `sort` and **Changes first** via
+`sortChangesFirst`), and **Files** (`scope`: `all`, `tests`, or `other`).
 
 ## What a comparison shows
 
-- **Languages** added or removed: the first file in a language, or the last one
-  gone.
-- **Languages** modified, whose counts changed: each bar grows or shrinks in its
-  step, with the lines gained and lost so far drawn inside it, and its signed
-  change beside it.
-- The summary bar counts the languages and their changes, then states the
-  chart's total in After with its net change, in the words of the Measure and
-  Files controls: `11 languages +2 −1 ~8 · 39,882 lines of code +2,056`, or
+- **Added or removed languages** appear when the first file in a language is
+  introduced or the last one is deleted.
+- **Modified languages** update their bars in place as counts shift, showing
+  lines gained and lost inside each bar alongside the signed delta.
+- The summary bar tallies languages and their changes, then shows the After
+  total and net delta phrased to match your active Measure and Files
+  controls—for example, `11 languages +2 −1 ~8 · 39,882 lines of code +2,056` or
   `770 lines of code in tests +290`.
 
-Every comparison mode works. A comparison opens in Diff, which shows each
-language's Before count struck through beside its After count; Side by side,
-Animated and Swipe are a click away.
+All comparison modes are supported. Comparisons open in Diff mode, showing each
+language's Before count struck through next to its After count, and you can
+switch to Side by side, Animated, or Swipe with a click.
 
 ## Start from this definition
 
@@ -123,66 +125,71 @@ Animated and Swipe are a click away.
 
 ## Limitations
 
-- Only files tokei recognizes by name or extension are counted. Everything else,
-  including an extensionless script recognizable only by its shebang, is skipped
-  rather than guessed at; so are binary files, files over 8 MiB and symlinks.
-  The extraction's `metadata.skipped` counts each.
-- Tests are classified by path, not by content or test framework.
-- Counts depend on tokei's language definitions, pinned for each release of
-  Projections. A release that upgrades tokei can rename languages or count lines
-  differently, so compare extractions made by the same release.
-- The chart draws the 24 largest languages; the table view lists them all.
+- Only files that tokei recognizes by name or extension are counted. Everything
+  else—including extensionless scripts identifiable only by a shebang, binary
+  files, files over 8 MiB, and symlinks—is skipped rather than guessed at, with
+  counts recorded in `metadata.skipped`.
+- Test files are identified strictly by path globs, not by file contents or test
+  framework conventions.
+- Counts reflect tokei's language definitions, which are pinned per Projections
+  release. Upgrading Projections to a newer tokei version can rename languages
+  or shift line counts, so compare extractions generated by the same release.
+- The chart displays the 24 largest languages; switch to the table view to see
+  them all.
 
 ## Related
 
-- [`code-statistics`](../renderers/code-statistics.md), the renderer that draws
-  it.
-- [`repository-map`](repository-map.md): every file, sized by bytes or lines,
-  inside its folders.
-- [The default comparator](../comparators/default.md), which can change the
-  largest languages first (`order.by: data.code`).
+- [`code-statistics`](../renderers/code-statistics.md) is the renderer that
+  draws these metrics.
+- [`repository-map`](repository-map.md) displays individual files sized by bytes
+  or lines inside their folders.
+- [The default comparator](../comparators/default.md) can order steps so the
+  largest languages appear first (`order.by: data.code`).
 
 ## How it works
 
-The [package README](../../../packages/extractors/code-statistics/README.md)
-covers how tokei counts and what changed from the earlier counter.
+See the [package README](../../../packages/extractors/code-statistics/README.md)
+for how tokei counts lines and what changed from the earlier counter.
 
 ## Build your own
 
-Write your own extractor when lines per language aren't the measure your
-reviewers care about:
+Consider writing a custom extractor when lines per language is not the metric
+your reviewers need:
 
-- **Another measure**: cyclomatic complexity, test coverage, lint warnings or
-  bundle size per package, from the tools that already compute them.
-- **Another grouping**: lines per team (from `CODEOWNERS`), per service or per
-  package, rather than per language.
-- **Your own classification**: generated, vendored or migrated code told apart
-  by markers in the files, not just by path.
+- **A different metric**, such as cyclomatic complexity, test coverage, lint
+  warnings, or bundle size per package, pulled from the tools that already
+  compute them.
+- **A different grouping**, such as lines per team (from `CODEOWNERS`), per
+  service, or per package instead of per language.
+- **Content-based classification** that separates generated, vendored, or
+  migrated code using markers inside the files rather than path globs.
 
-Try the lighter options first: `include`, `exclude` and `tests` decide what
-counts and what is a test, `languages` fixes an ambiguous extension, and the
-renderer's controls switch measure, grouping and chart. To draw the same counts
-differently, keep this extractor and write a renderer.
+Try the built-in options first: `include`, `exclude`, and `tests` control what
+gets counted and how tests are classified, `languages` fixes ambiguous
+extensions, and the renderer controls switch measures, groupings, and chart
+types. If you only want a different visualization, keep this extractor and write
+a custom renderer.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
-**Write a custom extractor, renderer or comparator** › **Custom extractor** (or
-**Custom extractor and renderer**), and pick its language. It writes the
-definition and a starter extractor (`extract.mjs`, `extract.py` or `extract.go`)
-under `.github/projections/<id>/`, drawn by the built-in graph renderer. Or
-choose **Ask an agent to write it** and describe what the projection should
-show.
+**In VS Code**, open the Projections view, choose **+ New Projection…**, and
+select **Write a custom extractor, renderer or comparator** › **Custom
+extractor** (or **Custom extractor and renderer**). Pick a language to scaffold
+the definition and a starter extractor (`extract.mjs`, `extract.py`, or
+`extract.go`) under `.github/projections/<id>/`, paired with the built-in graph
+renderer. You can also choose **Ask an agent to write it** and describe what you
+want to see.
 
-**With the CLI**, keep this chart's renderer:
+**With the CLI**, scaffold a new extractor while keeping this chart's renderer:
 
 ```sh
 projections init <id> --language node --renderer code-statistics
 ```
 
-Its renderer draws `metrics/v0` entities with numeric `files`, `code`,
-`comment`, `blank` and `lines`. An extractor is any program that prints an
-extraction. Run it with `projections show -p <id> --trust` as you change it; an
-open projection tab uses your uncommitted edits ("Your edits") and says when its
-results are out of date, and the Testing view runs the projection's checks.
-[Write your first extractor](../../guides/first-extractor.md) walks through one,
-and [Extraction schema](../../guides/schemas.md#extraction-schema) describes
-what it prints.
+The renderer draws any `metrics/v0` entities that provide numeric `files`,
+`code`, `comment`, `blank`, and `lines` fields. An extractor is any program that
+prints an extraction. Run `projections show -p <id> --trust` while you
+iterate—an open projection tab picks up your uncommitted edits ("Your edits")
+and flags stale results, and the Testing view runs your projection's checks.
+Walk through [Write your first extractor](../../guides/first-extractor.md) to
+get started, and check
+[Extraction schema](../../guides/schemas.md#extraction-schema) for the output
+format.

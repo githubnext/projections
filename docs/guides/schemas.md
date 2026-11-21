@@ -2,12 +2,12 @@
 
 ## Extraction schema
 
-Every extraction has the same envelope. The `schema` field selects the
-additional rules that apply to its entities and relationships.
+Every extraction shares the same top-level envelope, and its `schema` field
+selects the domain-specific rules that apply to its entities and relationships.
 
-The protocol and domain schemas are at version 0 (`protocolVersion: 0`,
-`graph/v0` and so on): they are pre-stable and may still change incompatibly.
-Version 1 will be the first stable version.
+Both the protocol and domain schemas are currently at version 0
+(`protocolVersion: 0`, `graph/v0`, and so on). They are pre-stable and may still
+change incompatibly until version 1.
 
 <!-- prettier-ignore -->
 | Field | Description |
@@ -20,9 +20,9 @@ Version 1 will be the first stable version.
 | `volatile` | Optional `data` that may vary between runs at the same revision, and how much: see [Volatile data](how-it-works.md#volatile-data). |
 | `metadata` | Optional information about how the extraction was produced. |
 
-Entities and relationships can also carry `data` (domain properties), `evidence`
-(where the fact came from), `confidence`, and `previousIds` (to declare a
-rename).
+Entities and relationships can also include `data` (domain-specific properties),
+`evidence` (where a fact came from), `confidence`, and `previousIds` (to declare
+a rename).
 
 <!-- prettier-ignore -->
 | Domain schema | Use it for | Additional rules |
@@ -35,60 +35,64 @@ rename).
 | `metrics/v0` | Measurements | Every entity carries numeric `data.value`, and optionally a `data.unit` |
 | `architecture/v0` | Components, services and infrastructure | As `graph/v0` |
 
-A `database/v0` column's `data.type` is the type as the framework or source
-declares it (Prisma's `String`, Django's `CharField`, or EF Core's store type).
-`data.databaseType`, when an extractor knows it, is the column's native type in
-the database, as the database or its provider names it, with its arguments, such
-as `varchar(200)`, `decimal(10,2)` or `nvarchar(max)`. It is the most specific
-type available, so viewers show it in place of `data.type` and a change like
-`varchar(120)` to `varchar(200)` is visible. Omit it, or write `null`, when the
-extractor doesn't know the database type. Columns may also carry booleans
-`data.nullable` and `data.primaryKey`; `constraint` and `primary-key` entities
-may name their table and columns by label (`data.table`, `data.columns`), and
-`foreign-key` or `relation` relationships between tables their columns
-(`data.columns`, `data.principalColumns`).
+In `database/v0`, a column's `data.type` holds the type as declared in the
+framework or source code (like Prisma's `String`, Django's `CharField`, or EF
+Core's store type). When an extractor knows the underlying database's native
+type—including arguments like `varchar(200)`, `decimal(10,2)`, or
+`nvarchar(max)`—it puts that in `data.databaseType`. Because it's more specific,
+viewers display it in place of `data.type`, making changes such as
+`varchar(120)` to `varchar(200)` immediately visible. Omit `data.databaseType`
+or set it to `null` when it isn't known.
 
-Each domain schema types only the `data` fields that viewers rely on; any other
-`data` is yours. The engine checks every typed field and reports a violation at
-its path, such as `/entities/3/data/nullable`. Each domain schema is also
-published as a JSON Schema, such as
-`https://schemas.projections.githubnext.com/database/v0.json`, and the
-extraction schema applies the one an extraction's `schema` names. The
-[schema reference](../reference/schemas/README.md) lists every typed field.
+Database columns can also set boolean `data.nullable` and `data.primaryKey`
+fields. Meanwhile, `constraint` and `primary-key` entities can name their table
+and columns by label (`data.table`, `data.columns`), and `foreign-key` or
+`relation` relationships between tables can list their columns (`data.columns`,
+`data.principalColumns`).
 
-A **vocabulary** types conventions over a domain schema for one kind of system,
-which an extraction opts into by naming it in `vocabularies`. `architecture/v0`
-has three: `dependency-injection/v0`
+Domain schemas only type the `data` fields that viewers depend on; everything
+else in `data` is free-form. The engine validates every typed field and
+pinpoints any violation by path, such as `/entities/3/data/nullable`. Each
+domain schema is also published as a JSON Schema (for example,
+`https://schemas.projections.githubnext.com/database/v0.json`), and the
+extraction schema automatically applies whichever one `schema` names. See the
+[schema reference](../reference/schemas/README.md) for the complete list of
+typed fields.
+
+A **vocabulary** adds typed conventions on top of a domain schema for a specific
+kind of system; an extraction opts in by listing it in `vocabularies`.
+`architecture/v0` currently defines three: `dependency-injection/v0`
 ([model](../models/dependency-injection-model.md)), `infrastructure/v0`
-([model](../models/infrastructure-model.md)) and `runtime-policy/v0`
-([model](../models/runtime-policy-model.md)). The engine checks a declared
-vocabulary's typed fields as it does a schema's, and renderers that present a
-vocabulary accept extractions that declare it. An `architecture/v0` extraction
-without one stays valid, with open `data`.
+([model](../models/infrastructure-model.md)), and `runtime-policy/v0`
+([model](../models/runtime-policy-model.md)). The engine validates a
+vocabulary's typed fields the same way it validates a domain schema, and
+renderers tailored to that vocabulary accept extractions declaring it. An
+`architecture/v0` extraction without any vocabulary remains valid with open
+`data`.
 
-The machine-readable JSON Schema is
-[`packages/schemas/schemas/extraction/v0.json`](../../packages/schemas/schemas/extraction/v0.json),
-published at `https://schemas.projections.githubnext.com/extraction/v0.json`.
+The machine-readable JSON Schema lives at
+[`packages/schemas/schemas/extraction/v0.json`](../../packages/schemas/schemas/extraction/v0.json)
+and is published at
+`https://schemas.projections.githubnext.com/extraction/v0.json`.
 
 ### What Projections adds
 
-Your extractor writes only the extraction. When Projections saves one, it adds a
-`provenance` section recording the revision, the extractor and its
-configuration, and a digest of the extraction's content. Extractors never write
-provenance themselves, so a saved extraction can't claim to come from a revision
-it wasn't extracted from.
+Your extractor only writes the extraction itself. When Projections saves it, the
+runner wraps it with a `provenance` section recording the revision, the
+extractor and its configuration, and a content digest. Because extractors never
+write provenance themselves, a saved extraction can't falsely claim to come from
+a different revision.
 
-Provenance also records whether the revision was a commit or a working tree. An
-extraction from a working tree includes uncommitted changes, so it identifies
-the commit it was based on and is marked as modified. It can't be reproduced
-from Git alone, and hosted views that require a verifiable commit don't accept
-it.
+Provenance also distinguishes commits from working trees. A working-tree
+extraction includes uncommitted changes, so it records the base commit it
+started from and flags the tree as modified. Since it can't be reproduced from
+Git alone, hosted views that require verifiable commits won't accept it.
 
 ---
 
 ## Comparison schema
 
-A comparison relates two extractions from the same projection.
+A comparison relates two extractions produced by the same projection.
 
 <!-- prettier-ignore -->
 | Field | Description |
@@ -100,7 +104,7 @@ A comparison relates two extractions from the same projection.
 | `variation` | Present when a change has `varied`: `within` counts the unchanged changes that only varied within tolerance, `beyond` the modified changes with a value beyond it. |
 | `metadata` | Optional information about how the comparison was made. |
 
-Each change has:
+Each entry in `changes` has the following fields:
 
 <!-- prettier-ignore -->
 | Field | Description |
@@ -142,15 +146,17 @@ Each change has:
 }
 ```
 
-The machine-readable JSON Schema is
-[`packages/schemas/schemas/comparison/v0.json`](../../packages/schemas/schemas/comparison/v0.json),
-published at `https://schemas.projections.githubnext.com/comparison/v0.json`. A
-saved comparison records both extractions and the comparator that produced it,
-and any `notices` explaining how the two revisions define the projection
-differently—for example, that the head revision changes the definition or
-doesn't define the projection—or that a declared input doesn't exist at one of
-them (see each extraction's `missingInputs`). Because comparators are
-deterministic, any viewer can rerun the comparator to check a saved comparison
-rather than trusting it. Notices are informational and aren't verified.
+The machine-readable JSON Schema lives at
+[`packages/schemas/schemas/comparison/v0.json`](../../packages/schemas/schemas/comparison/v0.json)
+and is published at
+`https://schemas.projections.githubnext.com/comparison/v0.json`.
+
+A saved comparison bundles both extractions, the comparator that produced it,
+and any `notices` explaining differences between the two revisions—such as when
+the head revision modifies or removes the projection definition, or when a
+declared input is absent on one side (see each extraction's `missingInputs`).
+Because comparators are deterministic, any viewer can rerun the comparator to
+verify a saved comparison instead of taking it on faith. Notices are
+informational and aren't verified.
 
 ---

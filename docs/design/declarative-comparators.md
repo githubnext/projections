@@ -1,48 +1,46 @@
 # Custom comparators
 
-> **Current state:** comparator files are the only custom comparators:
-> rules-only, interpreted by the engine on clients and servers. The JavaScript
-> and WebAssembly comparator modules are removed; sections that compare against
-> them are marked historical.
+> **Current state:** comparator files are the only custom comparators —
+> rules-only data interpreted by the engine on both clients and servers. The
+> earlier JavaScript and WebAssembly comparator modules have been removed;
+> sections comparing against them are marked historical.
 
 Status: **the only custom comparator kind** (productionized from the
-[feasibility study](#history); the JavaScript and WebAssembly comparator kinds
-were removed; the format was renamed from "comparator rules", `*.rules.yaml`, to
-comparator files, `*.comparator.yaml`, before release). Declarative comparators
-are the only way to customize comparison because comparators must run in
-production contexts, on clients and servers that show pull requests, where a
-program from a repository can't. Rules are data an interpreter runs in a
-sandbox; programs from a repository are not.
+[feasibility study](#history), after removing JavaScript/WebAssembly comparators
+and renaming `*.rules.yaml` to comparator files, `*.comparator.yaml`, before
+release). Declarative comparators are the only customization mechanism because
+comparators have to run in production — on browsers and servers rendering pull
+requests — where arbitrary repository code cannot run. Rules are pure data
+evaluated inside a sandboxed interpreter.
 
-A comparator turns two extractions into the one comparison every mode draws:
-which items correspond, what each change is, how it is classified and in which
-order the changes play. The default comparator does this natively. A **custom
-comparator** is a **comparator file**, `<name>.comparator.yaml`, that layers
-declarations over it: identity passes that pair what the default matching leaves
-unmatched, comparator rules (CEL predicates) that classify and summarize
-changes, declarative step operations, and metadata. A definition names one by
-its path, alone or with options:
+A comparator turns two extractions into the single comparison every view mode
+renders: which items correspond, what changed, how each change is classified,
+and what order the steps play in. The default comparator handles this natively.
+A **custom comparator** is a **comparator file** (`<name>.comparator.yaml`) that
+layers declarations on top: extra identity passes for items the default matcher
+left unpaired, CEL rules that classify and summarize changes, declarative step
+operations, and metadata. A projection definition points to one by path, with or
+without options:
 
 ```json
 "comparator": ".github/projections/api.comparator.yaml"
 "comparator": {"file": ".github/projections/api.comparator.yaml", "options": {}}
 ```
 
-A string or an object with `file` is a custom comparator; an object without
-`file` (`{}` or `{"options": ...}`) is the default comparator. The former
-`{"rules": ...}` key, and paths that don't end in `.comparator.yaml` or
-`.comparator.yml`, are refused with how to migrate. The interpreter keeps its
-internal names (the `packages/comparators/rules` crates, `rules.wasm`): it
-interprets the rules a comparator file declares.
+A string or an object containing `file` selects a custom comparator; an object
+without `file` (`{}` or `{"options": ...}`) uses the default comparator. The old
+`{"rules": ...}` key and paths not ending in `.comparator.yaml` or
+`.comparator.yml` are rejected with migration guidance. Internally, the
+interpreter still uses its original names (`packages/comparators/rules`,
+`rules.wasm`), since it evaluates the rules declared in a comparator file.
 
-The implementation is
-[`packages/comparators/rules`](../../packages/comparators/rules): the
-interpreter (Rust, [`cel`](https://crates.io/crates/cel) and
+The implementation lives in
+[`packages/comparators/rules`](../../packages/comparators/rules): the Rust
+interpreter (built on [`cel`](https://crates.io/crates/cel) and
 [`yaml-rust2`](https://crates.io/crates/yaml-rust2)), the
-[JSON Schema](../../packages/schemas/schemas/comparator/v0.json) for comparator
-files (published at `/schemas/comparator/v0.json`), and its tests. It builds to
-`rules.wasm`, a zero-import WebAssembly module that every host runs in its
-sandbox.
+[JSON Schema](../../packages/schemas/schemas/comparator/v0.json) (published at
+`/schemas/comparator/v0.json`), and its test suite. It compiles to `rules.wasm`,
+a zero-import WebAssembly module that every host runs inside its sandbox.
 
 - [The format](#the-format)
 - [Variables](#variables)
@@ -67,11 +65,11 @@ sandbox.
 
 ## The format
 
-A comparator file is YAML. Expressions are
-[CEL](https://github.com/google/cel-spec), the Common Expression Language used
-by Kubernetes admission policies and Google Cloud IAM conditions: a small,
-side-effect-free, non-Turing-complete expression language with C-like syntax.
-This is the moved components comparator in full:
+Comparator files are YAML whose expressions use
+[CEL](https://github.com/google/cel-spec) (the Common Expression Language used
+in Kubernetes admission policies and Google Cloud IAM): a small,
+side-effect-free, non-Turing-complete language with familiar C-like syntax. Here
+is the complete moved-components comparator:
 
 ```yaml
 # yaml-language-server: $schema=https://schemas.projections.githubnext.com/comparator/v0.json
@@ -118,7 +116,7 @@ steps:
           : 'Move %d components'.format([size(members.filter(m, m.collection == 'entities'))])
 ```
 
-The sections, in the order they are evaluated:
+Here are the sections in evaluation order:
 
 <!-- prettier-ignore -->
 | Section | What it holds | Evaluated |
@@ -133,62 +131,58 @@ The sections, in the order they are evaluated:
 | `steps` | Declarative [step operations](#step-operations) with `variables`, or `value`, one CEL expression for the whole list | once |
 | `metadata` | `values`, comparison metadata keys merged over the baseline's, with `variables` | once |
 
-The default comparator always runs first: its matching (exact IDs, then declared
-`previousIds`) is the first two identity passes (named `exact` and `claims`,
-reserved), and its comparison, with the default order, is `baseline`.
-Expressions see `before` and `after` (the normalised extractions), `options`,
-`baseline` and `lookup`, an index built once (`lookup.before.entities[id]`,
-`relationships[id]`, and `incoming[id]` and `outgoing[id]`, an entity's
-relationships in extraction order; likewise for `after`). Sections add their
-own: `item`, `side` and `pairs` (each pass's one-to-one pairs, before ID to
-after ID) in identity passes; `change`, `origin` (the pass that matched it),
-`befores`, `afters`, `beforeItem` and `afterItem` in `classify`, with `item` for
-whichever exists (the after item, or the before item of a removal); and
-`changes`, `pairs`, `changeOf` and `annotations` afterwards. Every entity and
-relationship the rules see carries `data` as a map, `{}` when the extraction
-omitted it, so `item.data.mode` needs no guard; `has(item.data.mode)` or
-`item.data.?mode` still tests an optional field. Inputs are built lazily: a file
-that never reads `lookup` doesn't pay for it.
+The default comparator always runs first: its exact-ID and `previousIds`
+matching form the reserved initial passes (`exact` and `claims`), and its output
+(including the default step order) is exposed as `baseline`. Every expression
+can read `before` and `after` (normalized extractions), `options`, `baseline`,
+and `lookup` (a prebuilt index with `lookup.before.entities[id]`,
+`relationships[id]`, `incoming[id]`, and `outgoing[id]` in extraction order,
+plus the `after` equivalents). Each section adds its own context: `item`,
+`side`, and `pairs` (one-to-one before-to-after maps from earlier passes) in
+`identity`; `change`, `origin` (matching pass name), `befores`, `afters`,
+`beforeItem`, `afterItem`, and `item` (the after item, or the before item for a
+removal) in `classify`; and `changes`, `pairs`, `changeOf`, and `annotations`
+afterward. Every entity and relationship exposes `data` as a map (defaulting to
+`{}` when omitted), so `item.data.mode` needs no null check while
+`has(item.data.mode)` and `item.data.?mode` still test optional fields. Inputs
+are materialized lazily — a comparator that never touches `lookup` pays nothing
+for it.
 
-A `Change` carries `varied`, the
-[volatile](../contracts/extractions.md#volatile-data) values that differ between
-its items: a `list<Varied>` of `{path, within, reason}` (`reason` only when a
-spread bound couldn't apply), and always a list, `[]` when nothing varied, so
-`change.varied.exists(v, !v.within)` needs no guard (in `changes`, `members`,
-`lead` and `baseline.changes` alike). Changes that are only expected variation
-(an `exact` pair `unchanged` with `varied`) are listed in `changes`, but
-`classify` doesn't run on them and step operations (`add`, `rank`, step
-summaries) never see them; a file that wants the noise reads it from `changes`,
-as in
-[`test-timings`](../../examples/comparators/test-timings/test-timings.comparator.yaml):
-`changes.filter(c, c.status == 'unchanged' && size(c.varied) > 0)`. A `steps`
-expression (`steps: <expression>` or `value`) builds every step itself, so it
-must leave them out; the Engine rejects one in a step (`variation-in-step`). The
-core, not the rules, judges variation, so no file can call more or less of it
-expected. No library function was added for it: `change.varied` is what a rule
-needs.
+Every `Change` carries `varied` for
+[volatile](../contracts/extractions.md#volatile-data) differences: a
+`list<Varied>` of `{path, within, reason}` (`reason` is set only when a rule
+says why, and `change.varied` is always a list, `[]` when empty), so
+`change.varied.exists(v, !v.within)` works without guards across `changes`,
+`members`, `lead`, and `baseline.changes`. Pairs with only expected variation
+(`exact`, `unchanged`, with `varied`) appear in `changes` but are skipped by
+`classify` and step operations (`add`, `rank`, step summaries). A comparator
+that wants to report noise can read it directly from `changes`, as
+[`test-timings`](../../examples/comparators/test-timings/test-timings.comparator.yaml)
+does with `changes.filter(c, c.status == 'unchanged' && size(c.varied) > 0)`. A
+raw `steps` expression (`steps: <expression>` or `value`) builds the step list
+itself and must exclude them or the Engine rejects it (`variation-in-step`).
+Variation is always judged by the core, never by rules, so no comparator can
+widen or narrow tolerance.
 
-A [generated value](generated-values.md)'s entry has `generated: true` and
-`because`, the basis parts that moved; both fields are on every `Varied`
-(`false` and `[]` otherwise), so they need no guard. `generated.because(change)`
-gathers the parts across a change, and `generated.only(change, parts)` says
-whether a change differs only in generated values whose bases moved only in
-`parts`, which needs the core's comparison of the rest of the items. Rules use
-them to classify and order, never to change a status: a model upgrade stays
-`modified` (see
-[`model-upgrades`](../../examples/comparators/model-upgrades/model-upgrades.comparator.yaml)).
+For [generated values](generated-values.md), every `Varied` entry carries
+`generated: true` (`false` otherwise) and `because` (`[]` otherwise) — always
+present, no guards needed. `generated.because(change)` collects all moved basis
+parts across a change, and `generated.only(change, parts)` checks whether a
+change differs _only_ in generated values whose bases moved in `parts`. Rules
+can use these to classify and order changes (such as grouping model upgrades in
+[`model-upgrades`](../../examples/comparators/model-upgrades/model-upgrades.comparator.yaml)),
+but never to turn `modified` into `unchanged`.
 
 ## Context rules
 
-A change's **context** is what a person needs to read it: the declaration a
-changed parameter belongs to, the table a changed column is in, the two services
-a new dependency connects. A viewer's Changes scope shows the changes and their
-context, and folds the rest. The core gives every change whose status or
-identity changed its structural context: a changed relationship's endpoints, and
-the items containing a changed or context entity, with the containment
-relationships that place them, in each revision
-([Comparisons](../contracts/comparisons.md)). `context` rules add to it, never
-remove from it, and nothing they say hides a change:
+A change's **context** is the surrounding detail a reviewer needs to understand
+it — the declaration owning a changed parameter, the table owning a changed
+column, or the two services joined by a new edge. In Changes scope, viewers show
+changes plus their context and fold everything else. The core automatically
+supplies structural context for every real change (a changed relationship's
+endpoints, plus ancestors and containment relationships in each revision — see
+[Comparisons](../contracts/comparisons.md)). `context` rules can add domain
+context on top without ever removing structural context or hiding a change:
 
 ```yaml
 context:
@@ -201,31 +195,29 @@ context:
         : []
 ```
 
-Each rule runs, in order, on every change whose status or identity changed (not
-on expected variation), after `classify`, and sees what `classify` sees
-(`change`, `origin`, `item`, `beforeItem`, `afterItem`, `befores`, `afters`,
-`changes`, `pairs`, `changeOf`), `annotations` and the change's `annotation`.
-`where` selects the changes; `variables` are evaluated per change; `before` and
-`after` each return a `list<string>` of IDs of that revision's entities or
-relationships (a removal's context is in `before`), at least one of them given.
-An ID that isn't an item of that revision fails the comparison
-(`invalid-context`, with the rule's line); the change's own items are left out.
-The comparison records each change's context in UTF-16 order, with the names of
-the rules that added an ID (`context.rules`), so viewers and agents can say why
-an item is shown. A change has at most 1,000 context IDs per revision
-(`context-limit`). Comparator tests assert a change's context with
+Each rule runs in order on every real change (skipping expected variation) right
+after `classify`, seeing the same variables as `classify` (`change`, `origin`,
+`item`, `beforeItem`, `afterItem`, `befores`, `afters`, `changes`, `pairs`,
+`changeOf`) plus `annotations` and the current `annotation`. `where` filters
+changes, `variables` evaluate per change, and `before`/`after` (at least one
+required) return `list<string>` of entity or relationship IDs from that
+revision. Returning an unknown ID fails the comparison (`invalid-context`,
+pointing to the rule's line), and the change's own IDs are automatically
+stripped. Results are stored in UTF-16 order alongside `context.rules` (which
+rule contributed each ID) so viewers and agents can explain why an item is
+shown, capped at 1,000 context IDs per revision per change (`context-limit`).
+Comparator tests can assert context via
 `changes: [{id, context: {before?, after?, rules?}}]`.
 
 ## Variables
 
-Variables have the shape of Kubernetes `ValidatingAdmissionPolicy`'s:
-`variables: [{name, expression}]`, evaluated once and in order, each able to
-read the earlier ones, and read as `variables.<name>`, so a reader can tell a
-variable from an input or a function. They are available at file level (once per
-comparison), in `classify` (once per change), in `steps` and `metadata`, and in
-every function (once per call). They replace the study's `let` maps, and they
-are the main tool against accidental quadratic cost: a value used twice is
-computed once.
+Variables follow the Kubernetes `ValidatingAdmissionPolicy` pattern:
+`variables: [{name, expression}]`, evaluated once in order (each able to read
+earlier ones) and referenced as `variables.<name>` so they never blur with
+inputs or functions. They work at file level (once per comparison), in
+`classify` (once per change), in `steps` and `metadata`, and inside functions
+(once per call). Replacing the earlier study's `let` maps, they are the primary
+way to avoid redundant work when a value is used more than once.
 
 Before, in the study's API rules:
 
@@ -251,8 +243,9 @@ body: |-
 
 ## Functions
 
-CEL has no user-defined functions. `functions` are named, parameterised CEL
-expressions, author space for domain logic (`covers`, `typescriptAssignable`):
+Since CEL has no user-defined functions, `functions` gives authors named,
+parameterized expressions for reusable domain logic (`covers`,
+`typescriptAssignable`):
 
 ```yaml
 functions:
@@ -265,23 +258,22 @@ functions:
     body: ...
 ```
 
-`params` are names, or `{name, type}` with a declared type the checker uses at
-call sites and inside the body; `returns` declares the result. A body sees its
-parameters, its own variables, the inputs and the other functions, never its
-caller's variables. The call graph must be acyclic, checked when the file loads,
-so a function is a macro the engine expands lazily: every program it can express
-is a pure CEL program, possibly a larger one.
+Each parameter can be a bare name or `{name, type}` (checked at call sites and
+in the body), and `returns` declares the return type. A function body sees its
+parameters, its own variables, top-level inputs, and other functions — never its
+caller's variables. Because the call graph is checked for cycles at load time,
+functions behave like lazily expanded macros: anything they express is still a
+pure, terminating CEL expression.
 
-A name that is also a library namespace (`ids`, `graph`) can't be a parameter or
-a variable, because it would shadow the library's calls.
+Parameter and variable names cannot shadow library namespaces (`ids`, `graph`).
 
 ## Defaults
 
-A body never sees the file's `variables`, so values several functions share,
-such as the lists a definition may override, go in `defaults`: a map of option
-names to values (any JSON), merged under the comparison's `options`. Every
-expression, functions included, reads them as `options.<name>`, and an option
-the definition sets replaces its default key by key:
+Because functions don't see file-level `variables`, shared configuration (such
+as lists a projection definition might override) belongs in `defaults` — a map
+of JSON values merged underneath `options`. Every expression, including
+functions, reads them as `options.<name>`, with definition options overriding
+defaults key by key:
 
 ```yaml
 defaults:
@@ -293,20 +285,21 @@ functions:
     body: capability in options.impure
 ```
 
-Defaults are literals, part of the file and so of its digest; a value computed
-from other options is a file-level variable.
+Defaults are static literals included in the file's digest; values computed from
+other options belong in file-level `variables`.
 
 ## Macros
 
-CEL's own macros are `has`, `all`, `exists`, `exists_one`, `map` and `filter`.
-Rules add four, for what chains of `? :` and list surgery otherwise spell out.
-Like CEL's, they are rewrites of the parsed expression, done when the file loads
-([`macros/`](../../packages/comparators/rules/src/macros)), never text
-substitution, so diagnostics point at what the author wrote. Each expands to
-plain CEL: only the branch it chooses is evaluated, so a branch may read a field
-that is absent on other changes, and the cost meter charges exactly what the
-expansion costs. CEL's grammar has no `=>`, so conditions are the keys of a map
-literal, which keeps its written order.
+Beyond CEL's built-in macros (`has`, `all`, `exists`, `exists_one`, `map`,
+`filter`), comparator rules add four macros that replace deeply nested `? :`
+chains and list-building boilerplate. Like CEL's own macros, they rewrite the
+parsed AST at load time
+([`macros/`](../../packages/comparators/rules/src/macros)) rather than doing
+text substitution, keeping diagnostics aimed at the author's original lines.
+Only the selected branch evaluates, so branches can safely read fields absent on
+other changes, and the cost meter charges only what actually runs. Because CEL
+has no `=>` syntax, conditions use map literal keys, which preserve their
+written order.
 
 <!-- prettier-ignore -->
 | Macro | For | Expands to |
@@ -316,17 +309,17 @@ literal, which keeps its written order.
 | `collect({condition: value, …})` | The values whose conditions hold, in order | `(condition ? [value] : []) + …` |
 | `template('… {name} …', {'name': value, …})` | Text with named fields; without the map, `{name}` is the function parameter `name`, or else `variables.name` | `'… %s …'.format([value, …])` |
 
-Load-time checks, each with the YAML line and column:
+At load time, the checker verifies (with exact YAML line and column):
 
-- `match` keys are string or int literals, each once;
-- every branch of a `match` or `cond`, and its default, has one type;
-- a template's fields and its map's keys are the same names; `{{` and `}}` are
-  literal braces;
-- a function can't take a macro's name.
+- `match` keys are unique string or int literals;
+- all branches of a `match` or `cond` (including its default) share one type;
+- every `{name}` in `template` matches its map's keys (`{{` and `}}` escape
+  literal braces);
+- no function shares a macro's name.
 
-A variable or a function parameter can declare its domain,
-`values: [newly-enforced, enforcement-removed, …]`. A `match` on it then warns
-about keys outside the domain and about values it leaves to the default.
+If a variable or parameter declares its allowed domain
+(`values: [newly-enforced, enforcement-removed, …]`), a `match` over it warns on
+out-of-domain keys or unhandled values falling through to the default.
 
 Before, in runtime-policy's `sentence` (20 branches):
 
@@ -351,7 +344,7 @@ body: |-
   }, '')
 ```
 
-And `collect` replaces the placeholder-then-filter pattern:
+And `collect` replaces the conditional-concatenation pattern:
 
 ```yaml
 # Before
@@ -366,29 +359,27 @@ collect({
 
 ### Chained conditionals are a smell
 
-A chain of three or more `? :` (through either branch) is a lint warning,
-`chained-conditional`, suggesting `match`, `cond`, `collect` or a named
-function. A comparator file with warnings still loads and runs, and the
-interpreter reports them beside its digest (`warnings` in a host's `check`);
-`npm run check:comparators` fails on any warning in the repository's comparator
-files and documentation examples. The choice, in order:
+Any chain of three or more `? :` expressions triggers the `chained-conditional`
+lint warning, nudging authors toward `match`, `cond`, `collect`, or a helper
+function. Files with warnings still run (reported under `warnings` alongside the
+digest), while `npm run check:comparators` treats warnings as errors for in-repo
+comparators and doc examples. Reach for, in order:
 
-1. `match` when the chain compares one value with constants;
-2. `collect` when it builds a list of what holds;
-3. a named function when its conditions are a domain concept (`covers`,
-   `implied`) whose steps deserve names;
-4. guaranteed `data`, `item` and optional access (`x.?f.orValue(d)`) when the
-   chain only guards against nulls;
-5. `cond` for a genuine if/else-if chain over different conditions.
+1. `match` when comparing one value against constants;
+2. `collect` when assembling a list of matching items;
+3. a named function when the logic represents a domain concept (`covers`,
+   `implied`);
+4. guaranteed `data`, `item`, and optional chaining (`x.?f.orValue(d)`) instead
+   of null-guard ternaries;
+5. `cond` for a genuine multi-condition if/else-if chain.
 
 ## The standard library
 
-What belongs in the engine rather than in author space is anything (a) generic
-across domains, (b) needed by more than one comparator and (c) inexpressible in
-CEL or expressible only as list surgery. Each function is registered with a
-declared signature, a cost class and documentation
-([`library/`](../../packages/comparators/rules/src/library)); the checker checks
-calls against the signatures.
+Functions belong in the engine's standard library when they are (a)
+domain-neutral, (b) needed by multiple comparators, and (c) impossible or ugly
+list surgery in plain CEL. Every function registers a signature, cost class, and
+documentation ([`library/`](../../packages/comparators/rules/src/library)),
+enforced at load time.
 
 <!-- prettier-ignore -->
 | Function | Signature | Why it's in the engine |
@@ -410,44 +401,42 @@ calls against the signatures.
 | `generated.because(change)` | `Change -> list<string>` | The basis parts that moved across a change's [generated values](generated-values.md), unique and in UTF-16 order: deduplicating and sorting is list surgery CEL can't do |
 | `generated.only(change, parts)` | `Change, list<string> -> bool` | Whether a change differs only in generated values whose bases moved only in `parts`: it needs the core's content comparison modulo paths, which CEL can't express |
 
-Three are strictly necessary (`json`, `maps.fromEntries` and the two graph fixed
-points); the rest remove list surgery that more than one comparator needed.
-Domain operators the brief anticipated (`selectorContains`, `semverBump`,
-`typeAssignable`) don't belong in the engine: the first two are short CEL, and
-the third, done properly, is a TypeScript-specific algorithm that belongs in
-that ecosystem's extractor as a precomputed fact. A new operation is
-[contributed to the engine](#comparator-files-only), not written by authors.
+Only three are strictly required (`json`, `maps.fromEntries`, and the two graph
+fixed points); the rest eliminate repetitive list surgery. Domain-specific
+operators considered early on (`selectorContains`, `semverBump`,
+`typeAssignable`) stayed out of the engine — the first two are tiny in CEL, and
+real TypeScript assignability belongs in the extractor as a precomputed fact.
+New library operations are [contributed to the engine](#comparator-files-only),
+not shipped by individual repositories.
 
 ## Types and load-time checking
 
-cel-rust 0.15 has no type checker, so the interpreter has its own
-([`check/`](../../packages/comparators/rules/src/check), over
-[`types.rs`](../../packages/comparators/rules/src/types.rs)), scoped to the
-declared types: `Extraction`, `Entity`, `Relationship`, `Item` (either),
-`Change`, `Varied`, `Step`, `Comparison`, `Lookup`, `Finding` and
-`Classification`, plus CEL's scalars, `list<T>`, `map<K, V>`, `optional` and
-`dyn`. Every input is declared, every section's own variables too, and function
-parameters and results where the author declares them. Data (`item.data`) is
+Because cel-rust 0.15 has no built-in type checker, the interpreter includes its
+own ([`check/`](../../packages/comparators/rules/src/check), backed by
+[`types.rs`](../../packages/comparators/rules/src/types.rs)) covering our domain
+types (`Extraction`, `Entity`, `Relationship`, `Item`, `Change`, `Varied`,
+`Step`, `Comparison`, `Lookup`, `Finding`, `Classification`) alongside CEL
+scalars, `list<T>`, `map<K, V>`, `optional`, and `dyn`. All inputs, section
+variables, and declared function signatures are checked, while `item.data` stays
 `dyn`.
 
-When a file loads, every expression is checked, and every problem is reported at
-once: unknown variables, fields, functions and namespaces (with a "did you mean"
-suggestion), the wrong number of arguments, operators applied to incompatible
-types, a function's declared result not matching its body, and cycles among
-functions. Each diagnostic has the YAML line and column of the offending token,
-computed from the scalar's position (block scalars included) and the CEL offset
-within it:
+Loading a file checks every expression and reports all problems together:
+unknown variables, fields, functions, or namespaces (with "did you mean"
+suggestions), arity mismatches, invalid operator types, mismatched function
+returns, and call cycles. Every diagnostic carries the exact YAML line and
+column of the offending token, even inside block scalars:
 
 ```text
 invalid-rules at /metadata/values/count: Line 5, column 17: Undeclared reference `chnages`; did you mean `changes`?
 ```
 
-The CLI, the Inspector and the hosts get the same diagnostics, because the check
-runs in the interpreter (`projections_rules_inspect`) in the sandbox.
+Because `projections_rules_inspect` runs inside the sandboxed interpreter, the
+CLI, Inspector, and every host surface identical diagnostics.
 
 ## Step operations
 
-Steps are declarative, so common orderings need no list manipulation:
+Common step rearrangements are declarative, sparing authors from rebuilding step
+lists by hand:
 
 ```yaml
 steps:
@@ -463,13 +452,13 @@ steps:
   summary: <per step, with `step`, `members` and `lead`: string or null>
 ```
 
-The engine does the list work: it starts from the baseline's steps, drops the
-changes the comparison no longer has, moves selected changes out of the steps
-they were in, drops steps left empty, orders members by ID (UTF-16), sorts steps
-stably by their best-ranked change with unranked steps after the ranked ones,
-and gives `summary` the step's `lead` (its first best-ranked change). `value`,
-one CEL expression returning the whole step list, remains the escape hatch; no
-comparator here uses it. The priority order comparator is one expression:
+Starting from the baseline steps, the engine strips removed changes, moves
+selected changes into newly added steps, drops empty steps, sorts members by
+UTF-16 ID, stably orders steps by their best-ranked change (unranked steps
+last), and passes each step's `lead` (best-ranked change) to `summary`. A raw
+`value` expression remains available as an escape hatch, though no comparator
+here needs it. The priority-order comparator reduces to a single `rank`
+expression:
 
 ```yaml
 steps:
@@ -481,126 +470,105 @@ steps:
 
 ## YAML, the subset
 
-Rules are YAML so that expressions need no escaping, long expressions can be
-block scalars (`|-`), and files can carry comments. The engine reads a
-deliberately small subset, then validates the result against the schema:
+YAML lets authors write unescaped CEL, use multiline block scalars (`|-`), and
+add comments. To keep parsing predictable and safe, the engine accepts a tight
+subset before validating against the JSON Schema:
 
-- one document; block or flow mappings, sequences and scalars;
+- a single document with block or flow mappings, sequences, and scalars;
 - at most 1 MiB and 32 levels of nesting;
-- no anchors or aliases (no alias bombs, and every value is written where it is
-  used), no tags, no merge keys (`<<`) and no duplicate keys; keys are plain
-  strings;
-- plain scalars resolve by YAML 1.2's core schema, narrowed: `null`, `~` and
-  empty are null, `true` and `false` are booleans, decimal integers and floats
-  are numbers. Everything else, including YAML 1.1's `yes`, `0x1F` and `.inf`,
-  and every quoted or block scalar, is a string.
+- no anchors or aliases (preventing alias bombs and keeping values local), no
+  tags, no merge keys (`<<`), no duplicate keys, and plain string keys only;
+- narrowed YAML 1.2 plain scalars: `null`/`~`/empty → null, `true`/`false` →
+  booleans, decimal ints/floats → numbers, and everything else (including YAML
+  1.1's `yes`, `0x1F`, `.inf`, and all quoted/block scalars) → strings.
 
-Editors validate a file through its first line,
+Editors get schema validation from the standard first-line comment:
 `# yaml-language-server: $schema=https://schemas.projections.githubnext.com/comparator/v0.json`.
 
 ## The comparator's digest
 
 A custom comparator's identity digest is `sha256:` over
-`projections-rules-comparator\n`, the interpreter's identity and `\n`, followed
-by the RFC 8785 canonical JSON of the **parsed** rules; not over the YAML bytes.
-A comment, reflowed text, a different quoting style or key order doesn't change
-it; any change of meaning, or a different interpreter, does. That is the
-property a digest of behaviour needs: saved comparisons stay verifiable when
-someone fixes a typo in a comment, and two files with the same meaning are the
-same comparator. The YAML bytes are still part of the record: the definition
-digest covers the comparator file's bytes (a custom comparator's file always
-belongs to its definition). A change inside a CEL string, even whitespace, does
-change the digest; normalising CEL would need a canonical CEL printer, which
-isn't worth it. The Rust runtime (`rules_digest`), the interpreter (`digest`)
-and the JavaScript runtime (`rulesComparatorDigest`) compute it identically, and
-tests hold them to it.
+`projections-rules-comparator\n`, the interpreter's identity + `\n`, and the RFC
+8785 canonical JSON of the **parsed** rules (not the raw YAML bytes). That way,
+fixing a comment typo, reflowing lines, or reordering keys never invalidates
+saved comparisons, while any semantic change or interpreter change does. (Raw
+YAML bytes are still covered by the projection definition digest, and whitespace
+inside CEL strings still affects the digest since canonicalizing CEL isn't worth
+the complexity.) The Rust runtime (`rules_digest`), interpreter (`digest`), and
+JS runtime (`rulesComparatorDigest`) all produce identical digests, verified by
+tests.
 
-The interpreter's identity is a digest of the **language**, not of
-`rules.wasm`'s bytes or its source. The same source built on macOS and on Linux,
-or on arm64 and x86-64, gives different bytes: Cargo hashes the host into every
-crate's metadata, which reorders symbols and changes code layout, though never
-behaviour. A digest of the source fixed that, but then any refactor of the
-interpreter, or of the default comparator it compiles in, invalidated every
-saved comparison. So the identity is the digest of the language's manifest,
-[`language.json`](../../packages/comparators/rules/language.json): the format,
-the macros, the standard library's signatures and cost classes, the declared
-types, the cost budget and an explicit behaviour `revision`
-([`language.rs`](../../packages/comparators/rules/src/language.rs)), which is
-bumped when what something means changes without its signature changing. A test
-holds the committed manifest to the code. The build
-([`build.mjs`](../../packages/comparators/rules/scripts/build.mjs)) embeds the
-digest in the module's `projections.interpreter` custom section, and hosts read
-it there (`interpreter_digest`; in JavaScript,
-`WebAssembly.Module.customSections`).
+The interpreter's identity hashes the **language specification** rather than
+`rules.wasm`'s binary bytes or Rust source. Compiling the same Rust on macOS vs.
+Linux or arm64 vs. x86-64 produces different Wasm bytes, and hashing source
+files would invalidate saved comparisons on every internal refactor. Instead, we
+hash [`language.json`](../../packages/comparators/rules/language.json) — the
+format, macros, standard library signatures and cost classes, declared types,
+cost budget, and an explicit behavior `revision`
+([`language.rs`](../../packages/comparators/rules/src/language.rs)) bumped
+whenever semantics change without a signature change. A test verifies the
+manifest matches the code, and
+[`build.mjs`](../../packages/comparators/rules/scripts/build.mjs) embeds the
+digest in `rules.wasm`'s `projections.interpreter` custom section (read via
+`interpreter_digest` in Rust or `WebAssembly.Module.customSections` in JS).
 
-A behaviour change that isn't bumped can't make a wrong comparison verify:
-verifying reruns the rules and requires the same comparison, so the saved
-comparison fails verification instead. The section is trusted because the
-interpreter is: hosts run only the `rules.wasm` they ship, never one from a
-repository or an artifact.
+Forgetting to bump `revision` can never let a bad comparison pass verification,
+because verification reruns the rules and requires matching output. Hosts trust
+the embedded section because they only execute the `rules.wasm` they ship.
 
 ## Testing comparators
 
-Comparator files are tested by data too: a file beside each,
-`X.comparator.test.yaml` for `X.comparator.yaml`, whose cases give two
-extractions (fixture files, inline, or revisions) and state the comparison the
-comparator must produce, partially (step order, steps, changes, counts,
-metadata, or the error the comparator must fail with) or whole, as a snapshot.
-`projections check` runs them in the same sandbox as every other host and fails
-CI when one fails; consumers need neither npm nor Rust.
-[The contracts](../contracts/comparisons.md#comparator-tests) define the format
-and its semantics, and [the runner](../runner/stdio-backend.md#comparator-tests)
-the `check` step and the API editors use.
+Comparator files have data-driven sibling tests: `X.comparator.test.yaml` next
+to `X.comparator.yaml`. Each test case supplies two extractions (fixtures,
+inline, or revisions) and asserts the expected comparison — either partially
+(step order, steps, changes, counts, metadata, or an expected error) or as a
+full snapshot. `projections check` runs them in the same sandbox as every host
+and fails CI on any mismatch, with zero npm or Rust dependencies required for
+consumers. See [the contracts](../contracts/comparisons.md#comparator-tests) for
+the format and [the runner](../runner/stdio-backend.md#comparator-tests) for the
+`check` step and editor API.
 
-**A sibling file, not a `tests:` section in the comparator file.** The
+**Why a sibling file instead of an inline `tests:` section?** Because the
 comparator's digest covers the canonical file
-([above](#the-comparators-digest)), so inline tests would change the
-comparator's identity whenever a test changed: saved comparisons would stop
-verifying, and a hosted view would show "the comparator changed in this pull
-request" for an edit to a test. Hosts fetch the comparator file at a revision,
-at most 1 MiB, and must not fetch fixtures or tests. And tests name files
-(fixtures, snapshots) relative to themselves, which pure comparator data
-shouldn't. So test files are never part of a definition's digest and hosts never
-read them.
+([above](#the-comparators-digest)), inline tests would change the comparator's
+identity on every test edit — invalidating saved comparisons and making hosted
+views warn that the comparator changed. Sibling test files stay out of
+definition digests and are never fetched by hosted views (which cap comparator
+files at 1 MiB and shouldn't read local fixture paths).
 
-**No `projections test` command.** `projections check -p <id> --no-render`
-already is the fast loop, and it is the one command agents and CI run before
-saying a projection works; a second command would be one more thing to forget.
-The tests are one step of it, with their cases and failures as data in `--json`,
-and editors list and run them through the Inspector API (`serve --stdio`), not a
-command's text.
+**Why no `projections test` command?** `projections check -p <id> --no-render`
+is already the fast verification loop that agents and CI run; adding another
+command just gives people one more thing to forget. Tests run as a step of
+`check` (with structured results in `--json`), and editors run them through the
+Inspector API (`serve --stdio`).
 
-The pure parts, reading a test file with line and column and judging a
-comparison against a case, are
-[`suite/`](../../packages/comparators/rules/yaml/src/suite) in
-`projections-rules-yaml`, the crate of the YAML subset rules are written in,
-which evaluates nothing; the CLI resolves sources, runs the comparator in the
-interpreter and writes snapshots
+Pure parsing and assertion logic lives in
+[`suite/`](../../packages/comparators/rules/yaml/src/suite) inside
+`projections-rules-yaml`, while the CLI resolves fixtures, executes the
+sandboxed interpreter, and updates snapshots
 ([`comparator_tests/`](../../packages/cli/src/comparator_tests/mod.rs)). The CLI
-never evaluates rules natively. Every test file in this repository (the
-examples, the first-party comparators and the `init` starter) passes in
-`cargo test -p projections-cli --test comparator_tests`.
+never runs rules natively, and
+`cargo test -p projections-cli --test comparator_tests` verifies every test file
+in the repository.
 
 ## Editing comparator files
 
 ![A comparator file in VS Code, Dark Modern: the CEL in its values coloured by what each name is, and the hover of graph.entity with its signature, documentation and cost](images/rules-editor-dark.png)
 
-Editors see comparator files the way the interpreter does. Their language
-service is `rules-editor.wasm`
+Editors get the exact same view of comparator files as the interpreter through
+`rules-editor.wasm`
 ([`projections-rules-editor`](../../packages/comparators/rules/editor)), a
-module built from the interpreter's own crate and kept apart from `rules.wasm`,
-which every viewer downloads. Its export, `projections_rules_editor`, takes one
-JSON request, `{op, source, kind, line?, column?}`, and answers it from the same
-YAML reader and checker that load the file:
+dedicated module built from the interpreter crate and kept separate from the
+smaller `rules.wasm` viewers download. Its `projections_rules_editor` export
+handles `{op, source, kind, line?, column?}` using the same YAML reader and type
+checker:
 
-- **`tokens`.** The CEL in every value that the format says is an expression,
-  and in nothing else: `expression`, `body`, `assert`, `message`, `path`, `key`,
-  `claims`, `when`, `where`, `summary`, `annotation`, `changes`, `sort`, `rank`,
-  `value` and metadata `values`. Each value is lexed by the `cel` crate's own
-  lexer (its `parser_pratt` lexer; the default parser's ANTLR lexer isn't
-  public), and each token is classified from its context and what the expression
-  can see. Every token uses an LSP standard type and modifier, so every theme
-  colours it:
+- **`tokens`.** Highlights CEL inside expression fields only (`expression`,
+  `body`, `assert`, `message`, `path`, `key`, `claims`, `when`, `where`,
+  `summary`, `annotation`, `changes`, `sort`, `rank`, `value`, and metadata
+  `values`), lexed via `cel`'s `parser_pratt` lexer (since ANTLR's isn't public)
+  and mapped onto standard LSP token types and modifiers so every theme colors
+  them cleanly:
 
   <!-- prettier-ignore -->
   | Token | Type and modifiers |
@@ -619,126 +587,96 @@ YAML reader and checker that load the file:
   | Operators and punctuation | `operator`, so the YAML string colour doesn't show through |
   | A `template` string's `{name}` | `variable` (`parameter` for a function's parameter), with its braces as `operator` |
 
-  The types in `params` and `returns` are `type`. Declared variable and
-  parameter names have `declaration`.
+  Types in `params` and `returns` get `type`, and declared variable/parameter
+  names get `declaration`.
 
-  The YAML reader keeps each scalar's first position. The service walks the
-  source from there, through quotes and escapes, block indentation and line
-  folding, and maps a character only where the source spells exactly that
-  character, so a token is never drawn in the wrong place. A file that isn't
-  YAML yet has no tokens, and an expression that doesn't parse still has tokens.
+  Walking from each scalar's starting position through quotes, escapes, block
+  indentation, and folding ensures every token lands on the exact source
+  characters. Unparseable CEL still receives tokens; invalid YAML receives none.
 
-- **`diagnostics`.** Exactly what loading reports: what
-  `projections_rules_inspect`, `projections check` and
-  `npm run check:comparators` report, at their line and column, ending at the
-  end of the token they start at. That means errors (a YAML or CEL syntax error,
-  an unknown field, name or function with its suggestion, a type error, a macro
-  misused) and the lint warnings (`chained-conditional`, `match-values`). As
-  when loading, warnings come once the file has no errors. For a test file
-  (`kind: tests`), the diagnostics are those of the test format's reader.
-- **`hover`.**
-  - The standard library: a signature with parameter names
-    (`json(value: dyn) -> string`), its documentation and its cost class.
-  - Macros and CEL's functions: a signature and documentation.
-  - The file's functions: their parameters, result and `description`.
-  - `variables.<name>`: its checked type, `description`, expression and
-    `values`.
-  - Inputs, parameters, comprehension variables and fields: their declared
-    types.
-- **`complete`.** Completions depend on what comes before the cursor:
-  - after `variables.`, the variables in scope, with their types;
-  - after `options.`, the keys the file reads (`options.x`, `options['x']`, and
-    the keys a check over `options` compares with);
-  - after a library namespace, its functions;
-  - after a value of a declared type (an input, a parameter, a typed variable, a
-    library call's result, or a comprehension variable over a list of them), its
-    fields and the methods for its kind;
-  - otherwise, the names in scope, the file's functions, the macros, the library
-    and CEL's functions.
+- **`diagnostics`.** Matches `projections_rules_inspect`, `projections check`,
+  and `npm run check:comparators` — covering YAML/CEL syntax errors, unknown
+  names with suggestions, type errors, macro misuse, and lint warnings
+  (`chained-conditional`, `match-values`) once errors clear. For test files
+  (`kind: tests`), it reports test-format diagnostics.
+- **`hover`.** Shows signatures, parameter names (`json(value: dyn) -> string`),
+  docs, and cost class for library functions; signatures and docs for macros and
+  CEL built-ins; params, return type, and `description` for user functions;
+  inferred type, `description`, expression, and `values` for `variables.<name>`;
+  and declared types for inputs, parameters, comprehension variables, and
+  fields.
+- **`complete`.** Context-aware completions based on what precedes the cursor:
+  in-scope variables after `variables.`, keys referenced in the file after
+  `options.` (`options.x`, `options['x']`, or option checks), library functions
+  after a namespace, fields/methods after any typed value, or all in-scope
+  names, functions, macros, and built-ins otherwise. Tolerant parsing turns
+  incomplete expressions into `null` so completions still work mid-edit.
 
-  Completions read the scope the checker records for the expression's section.
-  The service reads the file tolerantly, keeping an expression that doesn't
-  parse as `null`, so it still knows what an unfinished expression can see.
-
-Positions are 1-based lines and Unicode code-point columns, as the YAML reader
-counts them. Editors convert them to their own units, such as UTF-16 in VS Code.
-Checker messages count characters too. The tables only editors read, the macros'
-and CEL's documentation and the library's parameter names, live in the editor
-module, not in `language.json`, so the service doesn't change the interpreter's
-identity. Tests hold that every library function and CEL function is documented.
+Positions use 1-based lines and Unicode code-point columns (editors convert to
+UTF-16 as needed). Editor-only docs and parameter-name tables live solely in the
+editor module, leaving `language.json` and the interpreter digest untouched, and
+tests verify every library and CEL function is documented.
 
 The VS Code extension
 ([`rules-language.ts`](../../packages/integrations/vscode/src/rules-language.ts))
-ships `rules-editor.wasm` and runs it in a worker thread. The worker compiles
-the module once and instantiates it per request. This needs neither the CLI nor
-trust, and typing never waits on it. Hosts have the checker in-process, so this
-path, rather than the `serve --stdio` backend, works before any backend starts,
-in untrusted workspaces, and at native WebAssembly speed. Highlighting is a
-semantic tokens provider for comparator files and their tests, not a TextMate
-injection, because an injection can't be limited by file name and would colour
-every YAML file, workflows included. The providers answer only inside
-expressions, so the YAML extension's schema validation, hovers and completions
-(`yamlValidation`) keep working around them. **A separate module.** The service
-needs the CEL lexer, the test format's reader, tolerant reading and the
-checker's recorded scopes, which `rules.wasm` doesn't. Built into `rules.wasm`,
-they would cost every viewer about 250 KB (86 KB compressed). So the editor
-crate links the interpreter without its module ABI (`abi`, a default feature)
-and with the reading hooks (`editing`), and `rules.wasm` is built with neither
-the hooks nor the editor. The build fails if `rules.wasm` exports
-`projections_rules_editor`. `rules-editor.wasm` is about 2.2 MB (650 KB
-compressed), and only the extension ships it.
+runs `rules-editor.wasm` in a worker thread (compiled once, instantiated per
+request) — no CLI, no workspace trust, and no typing lag. Using a semantic
+tokens provider rather than a TextMate injection scopes highlighting strictly to
+comparator and test files instead of every YAML file, and answering only inside
+expression values lets the YAML extension's `yamlValidation`, hovers, and
+completions keep working around them. **Why a separate Wasm module?** Bundling
+the CEL lexer, test reader, tolerant parser, and scope recorder into
+`rules.wasm` would add ~250 KB (~86 KB compressed) for every viewer. Instead,
+the editor crate links the interpreter with `editing` enabled and `abi`
+disabled, while `rules.wasm` builds without either (enforced by a build check
+forbidding `projections_rules_editor` in `rules.wasm`). `rules-editor.wasm` is
+~2.2 MB (~650 KB compressed) and ships only with the VS Code extension.
 
 ## The core and the comparator
 
-The default comparator's matching is a generic core of identity passes
-([`matching.rs`](../../packages/comparators/default/src/matching.rs)) that both
-comparators share: a pass only sees the items earlier passes left unmatched;
-claim groups become one-to-one, split or merge changes (or an
-`ambiguous-correspondence` error); a one-to-one pair's status is derived from
-canonical content modulo variation the extractions declare within tolerance
-(through the Engine's `volatility` module), relationship endpoints compared
-through one-to-one entity correspondence, and pairs that varied only within
-tolerance are listed as `unchanged` with `varied`; what is left is added or
-removed; change IDs are unique. Rules add passes; they can't make an unchanged
-pair `modified` or hide a change, because the contract doesn't allow any
-comparator to.
+Both comparators share one generic identity-pass core
+([`matching.rs`](../../packages/comparators/default/src/matching.rs)): each pass
+only sees items left unmatched by earlier passes, claim groups become
+one-to-one/split/merge changes (or `ambiguous-correspondence`), one-to-one
+statuses compare canonical content modulo volatile tolerance (via the Engine's
+`volatility` module, mapping relationship endpoints through entity
+correspondence), within-tolerance pairs emit as `unchanged` with `varied`,
+remaining items become adds or removals, and change IDs are guaranteed unique.
+Rules can add extra passes, but they can never mark an unchanged pair `modified`
+or hide a real change.
 
-**The default order stays a native core primitive.** It is expressible as rules
+**The default order stays native.** Although we expressed it in rules as an
+executable spec
 ([`default-order.yaml`](../../packages/comparators/rules/tests/rules/default-order.yaml),
-19 functions over `graph.depths` and `graph.components`, kept as an executable
-specification and tested against the native order on 1,831 cases), but it is an
-algorithm, not configuration, and as rules it is quadratic: it finds each
-change's step by scanning, where the native order indexes. Comparator files
-always start from the native order (`baseline`), computed natively, never by the
-default-order rules.
+19 functions over `graph.depths` and `graph.components`, verified against native
+order on 1,831 cases), it is an algorithm rather than configuration — and as
+rules it is quadratic because it scans instead of indexing. Every comparator
+file starts from the native `baseline` order.
 
 ## Reference definitions
 
-_Historical: this records the migration from the removed JavaScript and
+_Historical: this records the migration away from the removed JavaScript and
 WebAssembly comparators._
 
-The rules are the **reference** definitions of the comparators they replace, not
-emulations of the originals. Rules that existed only to reproduce an
-implementation language's behaviour on ordinary inputs are gone:
+The rules are **reference** definitions of the comparators they replaced, not
+bug-for-bug emulations of JavaScript or Rust quirks:
 
-- **Runtime policy.** JavaScript's `?.`, `??` and template-literal coercion
-  (`field`, `orElse`, `text`) became CEL's optional syntax
-  (`entity.?data.?effect.orValue(null)`); the last-write-wins `Map` behind
-  `hookOf` became `graph.parents`/`graph.children`; sorting setting names in
-  UTF-16 order became `ids.sort(maps.keys(...))`. 20 functions instead of 32.
-- **API compatibility.** Zip and enumerate by index became `lists.zip`; Rust's
-  `Classification::from` (consecutive de-duplication, the most severe level,
-  distinct reasons) became `findings.classify`; the .NET `BTreeSet` differences
-  became `filter`s over the declared lists.
+- **Runtime policy.** JS `?.`, `??`, and template-literal helpers (`field`,
+  `orElse`, `text`) became CEL optional syntax
+  (`entity.?data.?effect.orValue(null)`), the last-write-wins `Map` in `hookOf`
+  became `graph.parents`/`graph.children`, and UTF-16 sorting became
+  `ids.sort(maps.keys(...))` — shrinking from 32 functions to 20.
+- **API compatibility.** Manual index loops became `lists.zip`, Rust's
+  `Classification::from` became `findings.classify`, and .NET `BTreeSet` diffs
+  became simple `filter`s over declared lists.
 
-Equivalence is therefore [semantic](#equivalence), and the five places where an
-original was quirky are pinned as divergence tests. Where an original was wrong
-rather than different, it was fixed: the moved components JavaScript named a
-paired relationship's change by its unsuffixed after ID, so a relationship whose
-ID was also a changed entity's ID produced two changes with one ID and an
-invalid comparison; it was changed to add the uniqueness suffix the core adds.
+Equivalence is therefore [semantic](#equivalence), with five original quirks
+pinned as divergence tests. Where an original had a genuine bug, we fixed it —
+for instance, the moved-components JS comparator used an unsuffixed after ID for
+paired relationships, colliding with changed entity IDs until we adopted the
+core's uniqueness suffix.
 
-The originals' fate:
+What happened to the originals:
 
 <!-- prettier-ignore -->
 | Original | Fate |
@@ -749,15 +687,12 @@ The originals' fate:
 | API compatibility (Rust module) | **Deleted; the rules replace it.** Two definitions of 4 ecosystems' rules would drift, the Rust was 2,650 lines against 1,138, and a module comparator can't run where rules must. Its 25 unit tests run against the rules ([`tests/api`](../../packages/comparators/rules/tests/api)), unchanged but for the harness |
 | `projections init` starter and the guide's example (JavaScript) | **Deleted**; they had become rules before |
 
-Before the originals were deleted, their comparisons of every fixed case the
-equivalence tests used (the repository's fixture pairs in both directions, with
-each test's option variants, and the hand-written option and fixture cases; not
-the seeded random ones) were recorded once in
-[`tests/golden`](../../packages/comparators/rules/tests/golden), with each
-case's input digest. The rules must agree with every one in the semantic normal
-form below; a case whose fixtures have since changed is reported as stale and
-skipped, since nothing can record it again. The seeded cases now check that the
-rules run: a comparison the Engine validates, or a comparator's failure.
+Before deleting them, we captured their outputs across every fixed equivalence
+case (every fixture pair in both directions, option variants, and hand-written
+cases) in [`tests/golden`](../../packages/comparators/rules/tests/golden) with
+input digests. Rules must still match every golden case semantically (cases
+whose fixtures changed since are skipped as stale), while seeded random cases
+verify that rules always produce valid comparisons or clean comparator errors.
 
 | Original                                                         | Golden cases |
 | ---------------------------------------------------------------- | ------------ |
@@ -770,85 +705,73 @@ rules run: a comparison the Engine validates, or a comparator's failure.
 
 ## Verdicts per comparator
 
-_Historical: the feasibility study's verdicts, measured against the originals
-before they were removed._
+_Historical: verdicts from the feasibility study, measured before removing the
+originals._
 
-"Idiomatic" means configuration a reviewer reads as intent: identity keys,
-predicates, rank expressions, finding constructors, sentences. "List surgery"
-means CEL that rebuilds data structures or control flow the original language
-provides: index loops, scans standing in for maps, emulated coercions. It is
-expressible, but it counts against the format.
+Here, "idiomatic" means configuration that reads like domain intent (identity
+keys, predicates, rankings, findings, sentences), whereas "list surgery" means
+CEL working around missing data structures or control flow (index loops, scans
+replacing maps, emulated coercions).
 
-- **Default: matching and options**: originally Rust; as rules, 2 passes
-  (reserved) and the native option checks. Verdict: **Core**.
-- **Default: order**: originally Rust, 428 lines; as rules, 168 lines, 19
-  functions (specification only). Verdict: **Expressible with `graph.depths`,
-  `graph.components`**; kept native. Remaining list surgery: All of it:
-  layering, waves, relationship placement.
-- **[Priority order](../../examples/comparators/priority-order/priority-order.comparator.yaml)**:
-  originally Rust 110, JavaScript 37; as rules, 21. Verdict: **Fully
-  expressible**. Idiomatic: All: two option checks and one `rank`.
-- **[`projections init` starter](../../packages/cli/templates/starter.comparator.yaml)**:
-  originally 32; as rules, 31. Verdict: **Fully expressible**. Idiomatic: All.
-- **[Guide example](../guides/order-of-changes.md#write-a-custom-comparator)**:
-  originally 10; as rules, 8. Verdict: **Fully expressible**. Idiomatic: All.
-- **[Moved components](../../examples/comparators/moved-components/moved-components.comparator.yaml)**:
-  originally 116; as rules, 40. Verdict: **Fully expressible**. Idiomatic: All:
-  two identity passes, a summary, one added step.
-- **[Runtime policy](../../packages/comparators/runtime-policy/runtime-policy.comparator.yaml)**:
-  originally 272; as rules, 315, 23 functions. Verdict: **Fully expressible**
-  with `json`. Idiomatic: Interpretations (`collect`, `cond`), selector
-  containment (`implied` as a `match`; `selects`, `covers`: nested
-  `exists`/`all`), sentences (a `match` of `template`s), `rank` and `summary`
-  steps.
-- **[API compatibility](../../packages/comparators/api-compatibility/api-compatibility.comparator.yaml),
-  four ecosystems**: originally Rust, about 2,650; as rules, 1,564, 149
-  functions. Verdict: **Fully expressible** with `findings.classify`,
-  `lists.zipLongest`, `lists.enumerate`. Idiomatic: Every ecosystem rule
-  (ApiCompat diagnostics, TypeScript assignability over union constituents, the
-  Cargo SemVer rules, apidiff), findings and sentences, as `match` by ecosystem
-  and declaration kind, `collect` of findings and `template` sentences, over the
-  typed, language-neutral `api/v0` contract; one shared rule per concept they
-  share (an addition a container's implementers must make, a change of kind,
-  supertypes lost or gained, visibility reduced, arity, a changed type or value,
-  modifiers) reads a 224-line `policy` table of each ecosystem's rule IDs,
-  levels, break kinds and messages. Remaining list surgery: Accessors for
-  optional facts (`fact`, `is`, `listed`), and defensive ones (`holds`,
-  `nativeText`, `field`) for `contract.native`, which is open JSON.
+- **Default (matching and options):** originally Rust; 2 reserved passes plus
+  native option checks. Verdict: **Core**.
+- **Default (order):** originally 428 lines of Rust; 168 lines / 19 functions as
+  rules (spec only). Verdict: **Expressible with `graph.depths` and
+  `graph.components`**, kept native because layering, waves, and relationship
+  placement were all list surgery.
+- **[Priority order](../../examples/comparators/priority-order/priority-order.comparator.yaml):**
+  originally 110 lines Rust / 37 JS; 21 lines as rules (two checks + one
+  `rank`). Verdict: **Fully expressible**, completely idiomatic.
+- **[`projections init` starter](../../packages/cli/templates/starter.comparator.yaml):**
+  originally 32 lines; 31 as rules. Verdict: **Fully expressible**, completely
+  idiomatic.
+- **[Guide example](../guides/order-of-changes.md#write-a-custom-comparator):**
+  originally 10 lines; 8 as rules. Verdict: **Fully expressible**, completely
+  idiomatic.
+- **[Moved components](../../examples/comparators/moved-components/moved-components.comparator.yaml):**
+  originally 116 lines; 40 as rules (two identity passes, a summary, one added
+  step). Verdict: **Fully expressible**, completely idiomatic.
+- **[Runtime policy](../../packages/comparators/runtime-policy/runtime-policy.comparator.yaml):**
+  originally 272 lines; 315 lines / 23 functions as rules. Verdict: **Fully
+  expressible** with `json`. Interpretations (`collect`, `cond`), selector
+  containment (`implied` via `match`; `selects`, `covers` via nested
+  `exists`/`all`), sentences (`match` + `template`), `rank`, and `summary` are
+  all idiomatic.
+- **[API compatibility](../../packages/comparators/api-compatibility/api-compatibility.comparator.yaml)
+  (four ecosystems):** originally ~2,650 lines of Rust; 1,564 lines / 149
+  functions as rules. Verdict: **Fully expressible** with `findings.classify`,
+  `lists.zipLongest`, and `lists.enumerate`. Ecosystem rules (ApiCompat,
+  TypeScript union assignability, Cargo SemVer, apidiff) express cleanly as
+  `match` + `collect` + `template` over `api/v0`, with shared concepts reading a
+  224-line `policy` table. The only remaining boilerplate is small accessors for
+  optional facts (`fact`, `is`, `listed`) and open `contract.native` JSON
+  (`holds`, `nativeText`, `field`).
 
-Nothing needs general computation. No comparator iterates to a fixed point over
-its own output except the default order (graph depth and connectivity), and
-nothing recurses over data of unbounded depth except quoting a value as JSON.
-Notable negative results: **`typeAssignable`** isn't needed (the API comparator
-compares union constituents, one nested `filter`/`exists`/`all`; structural
-assignability into object members would need recursion, but the comparator
-treats such types as opaque text, and the right home for it is the extractor),
-nor are **`selectorContains`** (about ten lines of CEL) and **`semverBump`**
-(the most severe finding wins).
+Nothing required general-purpose computation — no comparator iterates to a fixed
+point except the native default order, and nothing recurses over arbitrary depth
+except json(). Notably, we didn't need **`typeAssignable`** (union checks are a
+single nested `filter`/`exists`/`all`, and full structural assignability belongs
+in the TypeScript extractor), **`selectorContains`** (~10 lines of CEL), or
+**`semverBump`** (most severe finding wins).
 
 ## Equivalence
 
-_Historical: the equivalence runs ended when the originals were removed; the
-golden comparisons replace them._
+_Historical: equivalence runs for the first-party comparators, examples, and
+`init` starter ended when the originals were deleted;
+[golden comparisons](#reference-definitions) now guard those fixed cases._
 
-Until the originals were removed,
-[`tests/`](../../packages/comparators/rules/tests) ran every original and its
-rules on the same inputs; the results below are from then, and the
-[golden comparisons](#reference-definitions) keep the fixed cases checked. The
-inputs are every before and after pair of extraction fixtures in the repository,
-in both directions, with each comparator's option variants, plus seeded
-generators: random graphs with renames, splits, merges, ambiguous claims and IDs
-whose UTF-16 and code-point orders differ; components moving between modules;
-mutations of the Tetragon policy fixtures; and mutations of the API fixtures'
-contract facts, entities, identities and signatures for each ecosystem.
+Before deletion, [`tests/`](../../packages/comparators/rules/tests) ran every
+original alongside its rules on every repo fixture pair (both directions, all
+option variants) plus seeded generators: random graphs with renames, splits,
+merges, ambiguous claims, and UTF-16 vs. code-point edge cases; moving
+components; mutated Tetragon policies; and mutated API fixtures across all four
+ecosystems.
 
-Equivalence is **semantic**: the same correspondences, statuses,
-classifications, counts, steps and step order, with text compared after a normal
-form, because the rules are reference definitions rather than emulations. The
-normal form collapses whitespace, writes integral numbers without a fraction
-(`2.0` is `2`), reads JavaScript's `undefined` as `unknown`, compares
-`; `-separated lists as sets, and compares findings and notices as sets.
-Canonical equality (RFC 8785 with `changes` in ID order) is reported too.
+Equivalence was **semantic**: identical correspondences, statuses,
+classifications, counts, steps, and step order, with normalized text (collapsed
+whitespace, `2.0` → `2`, JS `undefined` → `unknown`, `; `-separated lists and
+findings/notices compared as sets), plus canonical RFC 8785 equality reported
+alongside:
 
 <!-- prettier-ignore -->
 | Comparator | Cases | Byte-identical | Same failure | Canonically equal | Semantically equal | Mismatches |
@@ -862,20 +785,18 @@ Canonical equality (RFC 8785 with `changes` in ID order) is reported too.
 | Runtime policy | 739 | 736 | 3 | 739 | 739 | **0** |
 | API compatibility | 1,693 | 1,668 | 25 | 1,693 | 1,693 | **0** |
 
-On the corpus the domain-direct rules are even canonically equal: the emulation
-was only ever needed for inputs outside it. Moved components' comparisons differ
-in bytes only in the order of `changes`.
-`cargo test --release -p projections-comparator-rules` runs everything; debug
-builds check a tenth of the generated cases and a quarter of the fixture pairs
-(`DECLARATIVE_FULL=1` restores them).
+Across the entire corpus, even canonical equality held (moved-components bytes
+differed only in `changes` order). Run
+`cargo test --release -p projections-comparator-rules` for the full suite; debug
+builds sample 10% of generated cases and 25% of fixture pairs
+(`DECLARATIVE_FULL=1` restores full runs).
 
 ### Known differences
 
-Five inputs outside the corpus made an original and its rules disagree, each
-pinned by a test in
+Five out-of-corpus inputs where an original diverged from its rules are pinned
+in
 [`tests/divergences.rs`](../../packages/comparators/rules/tests/divergences.rs)
-as documentation of where the originals were quirky. The originals are deleted,
-so the tests pin the rules' output and say what the original's was:
+to document the originals' quirks:
 
 <!-- prettier-ignore -->
 | Comparator | Smallest input | Original | Rules |
@@ -888,67 +809,54 @@ so the tests pin the rules' output and say what the original's was:
 
 ## Determinism, termination and cost
 
-**Determinism.** CEL has no clock, randomness or I/O. Map iteration follows hash
-order, so the library's `maps.keys` and `ids.sort` return sorted lists, and
-every file here sorts what it lists. The engine's own lists (changes, steps,
-members) are in canonical order and identity passes iterate in ID order. A test
-runs each comparator file repeatedly in fresh interpreters and compares the
-bytes.
+**Determinism.** CEL has no clock, randomness, or I/O. Because map iteration
+uses hash order, `maps.keys` and `ids.sort` return sorted lists, and engine
+collections plus identity passes run in canonical ID order. Tests run each
+comparator repeatedly in fresh interpreters and require byte-identical output.
 
-**Termination.** CEL is not Turing-complete: comprehensions iterate over
-existing lists, `lists.range` is capped at 10⁶, and functions form an acyclic
-call graph. Every evaluation terminates.
+**Termination.** CEL isn't Turing-complete: comprehensions iterate over finite
+lists, `lists.range` caps at 10⁶, and function call graphs are acyclic, so every
+evaluation terminates.
 
-**Cost.** Termination isn't a cost bound: a quadratic comprehension over
-`lists.range(1000000)` terminates after 10¹² steps, and 32 acyclic functions
-`fN(s) = fN-1(s + s)` build a 4 GiB string. Three limits stop them, from the
-inside out:
+**Cost.** Termination alone isn't a resource bound — a quadratic comprehension
+over `lists.range(1000000)` still takes 10¹² steps, and 32 acyclic functions
+`fN(s) = fN-1(s + s)` build a 4 GiB string. Three layered limits prevent abuse:
 
 1. A **deterministic cost meter**
-   ([`cost.rs`](../../packages/comparators/rules/src/cost.rs)). Every call in
-   every expression (operators, comprehension steps, functions) is instrumented
-   when the file loads and charges one unit plus the size of its result. A
-   comparison may spend 2×10⁸ units; past that it fails with `cost-limit`. The
-   count is a property of the rules and the input, the same on every host and in
-   every build.
-2. The **sandbox**: the interpreter is an ordinary zero-import comparator
-   module, run in wasmi with fuel (`Limits::rules()`, 10¹² units) and a 256 MiB
-   memory cap in the CLI, and in a Worker with a deadline and the same memory
-   cap in browsers.
-3. Static limits: 1 MiB comparator files, 32 levels of YAML nesting and the CEL
-   parser's own nesting limit.
+   ([`cost.rs`](../../packages/comparators/rules/src/cost.rs)) instruments every
+   operation at load time, charging one unit plus result size. Exceeding 2×10⁸
+   units fails with `cost-limit`, identically across every host and build.
+2. The **sandbox**: `rules.wasm` runs zero-import in wasmi with fuel
+   (`Limits::rules()`, 10¹² units) and a 256 MiB memory cap in the CLI, and in a
+   Worker with a deadline and 256 MiB cap in browsers.
+3. Static caps: 1 MiB max file size, 32 YAML nesting levels, and CEL's parser
+   nesting limit.
 
-A static per-expression estimate ("this rule is quadratic in entities") is a
-later addition for the Inspector.
+A static per-expression complexity warning ("this rule is quadratic in
+entities") is planned for the Inspector later.
 
 ## Performance: safety over speed
 
-The rules interpreter evaluates rules from repositories, so it always runs
-**sandboxed**, wasmi with fuel and memory caps in the CLI and a sandboxed Worker
-in browsers, as defence in depth against bugs in the interpreter or the CEL
-crate, even on a server where speed would argue for running it as trusted code.
-The trade-off is plain: the sandbox costs 5-25 times native speed, which on real
-fixtures is tens to hundreds of milliseconds.
+Because comparator files come from repositories, the interpreter always runs
+**sandboxed** (wasmi with fuel and memory caps in the CLI, Worker in browsers)
+as defense in depth against bugs in the interpreter or CEL crate — even on
+servers where native execution would be faster. The sandbox costs 5–25× native
+speed, which translates to tens or hundreds of milliseconds on real fixtures.
 
-Two safety-neutral measures keep it there:
+Two safety-neutral optimizations keep that comfortable:
 
-- **Compile once per content.** Hosts compile the interpreter once and check
-  each comparator file once per content (the CLI keeps the checked module; the
-  JavaScript runtime caches checks by content hash). Each comparison runs in a
-  fresh sandbox instance, which parses the rules again: the parse is the price
-  of not sharing state between comparisons.
-- **A native baseline.** The default matching and order inside a rules
-  comparison are the default comparator's own Rust, compiled into the
-  interpreter, not the order rules.
+- **Compile and check once per content.** Hosts compile `rules.wasm` once and
+  cache checked files by content hash. Each comparison still instantiates a
+  fresh sandbox (re-parsing the rules) so zero state leaks between runs.
+- **Native baseline.** Default matching and ordering run as compiled Rust inside
+  the interpreter, not as CEL rules.
 
-Two measures inside the interpreter took the API comparator from 578 ms to 306
-ms in the sandbox: function calls and variables copy a value once (cel 0.15's
-two value representations otherwise convert, and rehash maps, twice per call),
-and YAML positions split the source into lines once rather than per block
-scalar.
+Two internal fixes also cut the API comparator from 578 ms to 306 ms in the
+sandbox: copying values once across function calls and variables (avoiding
+double conversions/rehashes in `cel` 0.15) and splitting YAML lines once instead
+of per block scalar.
 
-Times on an Apple Silicon laptop under heavy load; the sandbox figures are best
-of three.
+Measurements on an Apple Silicon laptop under heavy load (sandbox = best of 3):
 
 <!-- prettier-ignore -->
 | Comparator, input | Native: check | Native: compare | Native default alone | Sandbox: check | Sandbox: compare | Sandbox default comparator module | Ceiling |
@@ -958,23 +866,18 @@ of three.
 | API compatibility, Go fixture | 14 ms | 4.6 ms | 1.1 ms | 201 ms | 233-259 ms | 8.5 ms | 500 ms |
 | Runtime policy, Tetragon `credentials` | 4.3 ms | 1.7 ms | 0.6 ms | 54 ms | 58-67 ms | 6.6 ms | 500 ms |
 
-On the largest fixture the rules cost what the default comparator costs natively
-(55 against 54 ms) and 1.2 times it in the sandbox; the work is the default
-matching and order, and priority order adds one rank per change. On the small
-API and runtime policy fixtures parsing the rules dominates: the API rules are
-1,138 lines of CEL.
-
-"Compare" in the sandbox includes parsing the rules again in the fresh instance.
-The ceilings, in
-[`tests/module.rs`](../../packages/comparators/rules/tests/module.rs), are loose
-on purpose: they catch pathological regressions, not small slowdowns.
+On the largest fixture, rules match the default comparator natively (55 vs. 54
+ms) and take 1.2× in the sandbox — most of the time is baseline matching and
+ordering. On smaller API and runtime-policy fixtures, parsing dominates (the API
+comparator has 1,138 lines of CEL). Loose regression ceilings live in
+[`tests/module.rs`](../../packages/comparators/rules/tests/module.rs).
 
 ### At the extraction limit
 
-The Engine caps an extraction at 10,000 entities and 50,000 relationships.
-[`examples/scale.rs`](../../packages/comparators/rules/examples/scale.rs)
-generates two extractions of that size with every relationship changed (100,000
-changes), the same worst case as [the engine evaluation](engine-evaluation.md).
+The Engine caps extractions at 10,000 entities and 50,000 relationships.
+[`examples/scale.rs`](../../packages/comparators/rules/examples/scale.rs) tests
+the worst case — every relationship changed (100,000 changes), matching
+[the engine evaluation](engine-evaluation.md):
 
 <!-- prettier-ignore -->
 | Comparator | Native | Native peak (process) | Sandbox (wasmi) | Fits 256 MiB | Fuel |
@@ -984,16 +887,14 @@ changes), the same worst case as [the engine evaluation](engine-evaluation.md).
 | Priority order | 1,132 ms | 618 MiB | 10.5 s | Yes | < 2×10¹¹ |
 | Moved components | 1,361 ms | 649 MiB | 9.9 s | Yes | < 2×10¹¹ |
 
-The process peaks include the generated inputs as JSON values; the interpreter's
-own memory is the sandbox's linear memory, which stays inside the 256 MiB cap. A
-module's default fuel (10¹¹) is too little at the limit, so rules run with
-`Limits::rules()`, 10¹², five times the most measured. The cost meter charged
-200,003 units for priority order, a thousandth of its budget. Cost is linear:
-from 1,250 to 10,000 entities, each doubling costs 2.0-2.2 times (moved
-components 126, 256, 538 and 1,129 ms natively), with no quadratic pass in
-identity matching, `pairs`, step building or copying. Rules need 10 s in the
-sandbox at the limit; that is a CLI run over the largest legal input, and the
-safety decision accepts it.
+Process peaks include the generated JSON inputs; the interpreter's own linear
+memory stays within 256 MiB. Because default module fuel (10¹¹) isn't enough at
+the limit, rules use `Limits::rules()` (10¹², 5× the peak measured). Priority
+order spent just 200,003 cost units (0.1% of budget), and scaling from 1,250 to
+10,000 entities is cleanly linear (2.0–2.2× per doubling: 126, 256, 538, and
+1,129 ms natively for moved components), with no quadratic bottlenecks in
+identity matching, `pairs`, step building, or copying. Taking ~10 s in the
+sandbox on the largest legal input is a trade-off we gladly make for safety.
 
 ## The CEL and YAML implementations
 
@@ -1003,151 +904,127 @@ safety decision accepts it.
 | CEL | [`cel`](https://crates.io/crates/cel) 0.15 (cel-rust), without its `chrono`, `regex` and encoder features | MIT | Builds for `wasm32-unknown-unknown` with zero imports; its dependencies (`antlr4rust`, `nom`, `lazy_static`, `thiserror`, `serde`) are pure Rust |
 | YAML | [`yaml-rust2`](https://crates.io/crates/yaml-rust2) 0.13, its event parser only | MIT or Apache-2.0 | Pure Rust, zero imports |
 
-Neither crate's package includes its license file, so [`notices`](../../notices)
-holds the upstream texts, and `rules.wasm` ships with `THIRD_PARTY_NOTICES.txt`
-for every crate compiled into it. cel 0.15 implements the CEL standard library
-with optional types and cel-go's strings, lists and math extensions, which the
-rules use; it lacks a checker, cost tracking and two-variable comprehensions,
-which the interpreter supplies or works around. The CEL parser (ANTLR) is the
-slowest part: about 30 µs per expression.
+Since neither crate bundles its license file, [`notices`](../../notices) stores
+the upstream texts and `rules.wasm` ships with `THIRD_PARTY_NOTICES.txt`. `cel`
+0.15 provides the CEL standard library, optional types, and cel-go's string,
+list, and math extensions; our interpreter adds type checking, cost metering,
+and workarounds for missing two-variable comprehensions. The ANTLR-based CEL
+parser is the slowest step at ~30 µs per expression.
 
 ## Comparator files only
 
-Custom comparators are comparator files. The JavaScript and WebAssembly
-comparators were removed after rules landed: the `comparator.module` definition
-and scenario kind, the QuickJS engine, the public module ABI and its SDK
-(`comparators/sdk`), the Rust API compatibility crate, and the JavaScript and
-Rust examples, with no compatibility path (the protocol is pre-1.0). wasmi stays
-only as the sandbox for Projections' own modules, the rules interpreter and
-`default-comparator.wasm`, whose interface is now internal
-([the interpreter module](../contracts/comparisons.md#the-interpreter-module));
-the default comparator stays native Rust.
+Comparator files are now the sole custom comparator format. After rules shipped,
+we removed `comparator.module`, the QuickJS runtime, the public module ABI and
+`comparators/sdk`, the Rust API compatibility crate, and the JS/Rust comparator
+examples without a deprecation shim (pre-1.0). wasmi remains solely to sandbox
+Projections' own `rules.wasm` and `default-comparator.wasm` through an internal
+interface
+([the interpreter module](../contracts/comparisons.md#the-interpreter-module)),
+while the default comparator stays native Rust.
 
-Rules can do what every comparator here does. Heavy logic goes elsewhere:
+Rules cover every comparator we need, and heavier work belongs elsewhere:
 
-- **Into the extractor**, computed per revision into `data`, in the author's own
-  toolchain: type assignability, semantic versions, anything that needs a
-  compiler or a parser. A comparator then compares facts.
-- **Into the engine**, as a library operation, when it is generic, needed by
-  more than one comparator, and inexpressible in CEL or only as list surgery.
-  Contributing one means a function in `library.rs` with its signature, cost
-  class and documentation, checker and determinism tests, and a row in
+- **In the extractor**, computed per revision into `data` using the repo's real
+  toolchain (type assignability, semver parsing, anything needing a compiler or
+  parser), leaving the comparator to compare facts.
+- **In the engine**, as a new standard-library function when an operation is
+  generic, needed by multiple comparators, and awkward or impossible in CEL.
+  Adding one means registering its signature, cost class, and docs in
+  `library.rs`, adding checker and determinism tests, and updating
   [the table above](#the-standard-library).
 
 ## Running comparators in a hosted view
 
-A hosted view of CI artifacts never runs code from artifacts. Rules are data:
-interpreting them, in the sandboxed interpreter, is the same kind of act as
-rendering an extraction, so a hosted view can run them, given four decisions.
-What is built is under [What changes](#what-changes).
+Hosted views of CI artifacts never execute untrusted code from artifacts.
+Because comparator rules are pure data interpreted inside a sandbox — just like
+rendering an extraction — hosted views can run them safely, given four decisions
+(see [What changes](#what-changes) for what is built).
 
 ### Obtaining the comparator file
 
-A hosted view already reruns the default comparator rather than trusting a saved
-comparison. For rules it needs the comparator file the comparison claims to have
-used, and two sources are possible:
+Hosted views already rerun the default comparator instead of trusting saved
+comparisons. For custom comparators, there are two ways to get the comparator
+file:
 
-- **Fetch from the repository at the recorded commit** through the GitHub API
-  (`GET /repos/{owner}/{repo}/contents/{path}?ref={commit}`) with the viewer's
-  token, where `{path}` is the definition's comparator file and `{commit}` the
-  definition revision: the merge base by default, the head when the run used
-  `--definition head`.
-- **Embed the comparator file in the artifact**, in the comparison document.
+- **Fetch from GitHub at the recorded commit** via
+  `GET /repos/{owner}/{repo}/contents/{path}?ref={commit}` using the viewer's
+  token, where `{path}` is the definition's comparator file and `{commit}` is
+  the definition revision (merge base by default, or head under
+  `--definition head`).
+- **Embed a copy in the artifact's comparison document.**
 
-Recommendation: **fetch, and use an embedded copy only as a cache.** An artifact
-is produced by a workflow run of the pull request, which the pull request's
-author can change, so anything it embeds is a claim. The repository at the merge
-base is not under the author's control. Either way the view verifies before it
-runs anything: the parsed file's canonical digest must equal the comparison's
-`comparator.digest`, and the definition recorded in both extractions must name
-the same comparator file. A mismatch is a new unverified reason,
-`rules-mismatch`. A fetched file is parsed with the same restricted YAML reader
-and validated against the schema; a file that fails is `incompatible`.
+Recommendation: **always fetch, treating any embedded copy strictly as a
+cache.** A PR author controls workflow artifacts, not the merge base. Before
+running anything, the view verifies that the parsed file's canonical digest
+matches `comparator.digest` and both extractions reference the same comparator
+file — failing with `rules-mismatch` on any discrepancy, or `incompatible` if
+restricted YAML parsing or schema validation fails.
 
 ### Base versus head
 
-Whose rules judge a pull request is a trust decision, and the contracts already
-make it for definitions: by default a comparison applies the **base** revision's
-definition, with its component code, to both revisions. Rules follow the same
-rule, so a pull request can't change how it is judged:
+Choosing whose rules judge a PR follows the same trust rule as definitions: by
+default, the **base** revision's comparator judges both revisions so a PR can't
+rewrite its own verdict:
 
-- The view reruns the comparison with the **base** rules, fetched at the merge
-  base, and shows that.
-- When the head revision's rules differ from the base's (their canonical digests
-  differ, or the head adds or removes the comparator file), the view shows a
-  notice, "This pull request changes the comparator file", and the file's diff
-  itself is the reviewable part of the pull request: a readable YAML diff of
-  declarations, not code.
-- The view offers to show the comparison with the head's rules too, rerun by the
-  view, clearly labelled as the head's rules. It never shows the head's result
-  by default.
-- When the base has no comparator file (the pull request introduces it), the
-  default is the default comparator, with the same notice and the same offer.
+- The view fetches and runs the **base** rules from the merge base by default.
+- If the head modifies, adds, or removes the comparator file, the view displays
+  "This pull request changes the comparator file" — letting reviewers inspect
+  the readable YAML diff directly — and offers an opt-in switch to view the
+  head's rerun comparison (clearly labeled, never default).
+- If the base has no comparator file yet, the view defaults to the default
+  comparator with the same notice and opt-in switch.
 
-This is stricter than the CLI's renderer trust model needs to be, because rules
-can't exfiltrate anything; the risk is only misleading classification ("this
-breaking change is compatible"), and showing the base's judgement by default
-removes it.
+Even though rules can't exfiltrate data, defaulting to base prevents a PR from
+mislabeling a breaking change as compatible.
 
 ### Cost limits
 
-Per artifact, the view:
+Per artifact, a hosted view:
 
-- caps a comparator file at 1 MiB and its YAML nesting at 32;
-- relies on the interpreter's deterministic cost meter (2×10⁸ units per
-  comparison), the same on every host;
-- runs comparisons in a Worker with the comparator runtime's browser bounds (256
-  MiB, and a deadline: 2 s per comparison and 10 s per artifact is a reasonable
-  start), and reports `limit-exceeded`, never a partial result;
-- caches checked rules by content, and verified comparisons by artifact SHA-256,
-  rules digest and interpreter digest.
+- caps comparator files at 1 MiB and 32 levels of YAML nesting;
+- relies on the deterministic cost meter (2×10⁸ units per comparison);
+- runs comparisons in a Worker capped at 256 MiB with a wall-clock deadline
+  (e.g., 2 s per comparison, 10 s per artifact), reporting `limit-exceeded`
+  rather than partial results;
+- caches checked rules by content and verified comparisons by artifact SHA-256,
+  rules digest, and interpreter digest.
 
-A deadline is host-dependent: a slow device might fail what a fast one passes.
-That is acceptable for a viewer, which only fails to verify and never shows a
-different result; the cost meter is what makes a result reproducible.
+Host-dependent deadlines are safe here: a slow device only fails verification
+rather than altering results, while the cost meter guarantees reproducibility.
 
 ### What changes
 
 As built:
 
-- **Server-side sandbox.** A server-side verifier runs rules natively in wasmi
-  with the CLI's bounds (fuel 10¹², 256 MiB), through `projections-rules`, a
-  small runner in the comparator runtime crate that `createNativeRulesRuntime()`
-  (`@githubnext/projections-comparator-runtime/node`) spawns per check or
-  comparison and kills at a 10 s deadline. Browsers keep the Worker sandbox
-  (`createRulesRuntime()`);
-  [the security architecture](../guides/security.md#layer-3-comparators-are-data-interpreted-in-a-sandbox)
-  says what each isolates.
-- **`verifyComparison`** (`packages/engine/js/src/artifacts`) takes optional
-  `rules` (the bytes and a runtime): it checks `comparator.id` against the
-  definition's comparator file and `comparator.digest` against the checked
-  file's digest, reruns them, validates the output with the Engine and compares.
-  Without the file, a custom comparison is still rejected
-  (`ARTIFACT_COMPARATOR`); a failing or invalid comparator run is
+- **Server-side sandbox.** Server verification runs rules in wasmi with CLI
+  limits (fuel 10¹², 256 MiB) via `projections-rules`, spawned per call by
+  `createNativeRulesRuntime()`
+  (`@githubnext/projections-comparator-runtime/node`) with a 10 s deadline.
+  Browsers keep the Worker sandbox (`createRulesRuntime()`); see
+  [the security architecture](../guides/security.md#layer-3-comparators-are-data-interpreted-in-a-sandbox).
+- **`verifyComparison`** (`packages/engine/js/src/artifacts`) accepts optional
+  `rules` (bytes + runtime), verifies `comparator.id` and `comparator.digest`,
+  reruns the comparator, validates output with the Engine, and compares. Missing
+  rules still fail with `ARTIFACT_COMPARATOR`, and failing/invalid runs return
   `ARTIFACT_RULES`.
 
 ## History
 
-The format began as a feasibility study: could every comparator in the
-repository be re-expressed as data? It could, byte for byte, with three generic
-operators, and the study recommended going ahead on the conditions this document
-now records as built: variables at every level, a typed library, a load-time
-checker with line and column, a deterministic cost counter, and the default
-order as a native primitive. The verdict was accepted, and hosted views can run
-custom comparators because rules are data.
+The format started as a feasibility study asking whether every comparator in the
+repo could be expressed as data. It turned out they could — byte for byte, with
+just three generic primitives — provided we added scoped variables, a typed
+standard library, load-time checking with YAML line/column diagnostics, a
+deterministic cost meter, and a native default order. That made hosted custom
+comparators possible.
 
-A later review of the runtime policy and API compatibility rules found the same
-smell everywhere: chains of `? :` standing in for tables, lists built from
-`(c ? [x] : [])` and placeholders filtered out, and null guards around fields
-every item has. The principle adopted: chained ternaries are a smell, and each
-one is a prompt to look for a function or macro. The [macros](#macros),
-guaranteed `data`, `item`, `lists.zipLongest` and `lists.enumerate` came from
-that review, and the lint keeps it: across the repository's comparator files,
-chains of two or more conditionals went from 64 (runtime policy 11, API
-compatibility 52, the default order's specification 1) to 1, and chains of three
-or more from 24 to none.
+A subsequent review of the runtime-policy and API-compatibility files spotted
+recurring pain points: chained `? :` tables, `(c ? [x] : [])` list assembly, and
+boilerplate null guards. Adopting the rule that chained ternaries are a smell
+led to [macros](#macros), guaranteed `data`/`item`, `lists.zipLongest`, and
+`lists.enumerate` — cutting chains of two or more conditionals from 64 (11 in
+runtime policy, 52 in API compatibility, 1 in default-order spec) down to 1, and
+chains of three or more from 24 to zero.
 
-The other custom comparator kinds were then removed, since comparators must run
-in production contexts (client and server) where a program from a repository
-can't. Before deleting the originals, their comparisons of the fixed equivalence
-cases were recorded as golden files, 862 in all, which the rules still match.
+With rules proven, we removed the JavaScript and WebAssembly comparator kinds
+and preserved 862 golden comparisons from the originals to keep the rules
+honest.

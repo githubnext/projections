@@ -1,8 +1,8 @@
 # Text diff
 
-Captured text, such as the output of commands run at each revision, compared
-line by line as a classic diff. Compared across a pull request, it answers "what
-does this command print differently now?"
+This renderer compares captured text—such as command output from each
+revision—line by line in a classic diff view. Across a pull request, it answers
+a straightforward question: "what does this command print differently now?"
 
 <!-- generated: facts -->
 
@@ -15,19 +15,20 @@ does this command print differently now?"
 
 ## When to use it
 
-Use it when the clearest picture of a change is text: a CLI's `--help`, a
-generated schema or lockfile summary, a `terraform plan`, a test report, a
-tool's version listing. The [`command-output`](../extractors/command-output.md)
-extractor runs the commands you name at both revisions and captures what they
-print; this renderer diffs the results.
+Use text diff whenever plain text is the clearest way to inspect a change—a
+CLI's `--help`, a generated schema or lockfile summary, a `terraform plan`, a
+test report, or a version listing. The
+[`command-output`](../extractors/command-output.md) extractor runs the commands
+you specify on both revisions and captures stdout; this renderer diffs the
+results.
 
-It draws only captured outputs: `graph/v0` extractions whose entities are all of
-kind `output`, with a string `data.text` and no relationships. Anything else is
-reported as an error rather than drawn, so although other `graph/v0` extractors
-are listed as accepted, give them [`graph`](graph.md) or
-[`file-packing`](file-packing.md) instead.
+It expects `graph/v0` extractions whose entities are all of kind `output` with a
+string `data.text` and no relationships. Anything else triggers an error rather
+than rendering, so even though it technically accepts `graph/v0`, use
+[`graph`](graph.md) or [`file-packing`](file-packing.md) for other `graph/v0`
+extractors.
 
-Built-in extractors that draw with it by default:
+Built-in extractors that use it by default:
 
 <!-- generated: extractors -->
 
@@ -39,51 +40,52 @@ Built-in extractors that draw with it by default:
 
 ## What it draws
 
-Each output is a titled panel: its label (the command, say) in a header band,
-then its numbered lines. An output's `data.presentation` decides how its text is
-set: `formatted` (the default) in the monospace font, never wrapping and
-scrolling sideways; `prose` in the text font, wrapping. Outputs keep the
-extraction's order.
+Each captured output appears in its own titled panel—its label (such as the
+command) in the header, followed by numbered lines—in the order the extraction
+emitted them. The `data.presentation` field controls text formatting:
+`formatted` (the default) uses monospace without wrapping and scrolls
+horizontally, while `prose` uses the body font and wraps to fit.
 
 ## Options
 
-For a comparison with output, the host draws one control; set its starting value
-in the definition's `presentation.rendererOptions`:
+When a comparison has output, the host provides one layout control. Set its
+starting value in `presentation.rendererOptions`:
 
 | Control | ID               | Values                                        | Default |
 | ------- | ---------------- | --------------------------------------------- | ------- |
 | Layout  | `textDiffLayout` | `split` (Two columns), `unified` (One column) | `split` |
 
-In a frame narrower than 640 px, two columns read as one. It has no zoom.
+Frames narrower than 640 px automatically fall back to a single column, and
+there is no zoom.
 
-It presents a comparison only as Diff: a text changes line by line, which a diff
-shows better than an animation, two unaligned columns of text or a swipe.
+Only Diff mode is supported, since line-by-line text changes are far clearer in
+a diff than in an animation, swipe, or unaligned side-by-side panes.
 
 ## What a comparison shows
 
-Every output of both revisions, in order. Its header ends in its status
-(`+ Added`, `− Removed`, `~ Modified`), and a removed output's label is struck
-through; an output whose text didn't change shows as plain numbered lines.
+Every output from both revisions appears in order. Each panel header ends with
+its status (`+ Added`, `− Removed`, `~ Modified`), removed outputs strike
+through their label, and unchanged outputs show as plain numbered lines.
 
-- **Two columns**: Before on the left and After on the right, each with its own
-  line numbers. A changed line sits beside its replacement, and a line on one
-  side only faces a blank row, so unchanged lines stay aligned.
-- **One column**: a unified diff with old and new line numbers; within each
-  change, removed lines come before added ones.
+- **Two columns** puts Before on the left and After on the right, each with its
+  own line numbers. Modified lines sit beside their replacements, and one-sided
+  lines pair with blank spacers so unchanged context stays aligned.
+- **One column** renders a unified diff with old and new line numbers, showing
+  removed lines before added ones inside each hunk.
 
-Removed lines are tinted and marked `−`, added lines tinted and marked `+`;
-where a removed line pairs with an added one, the words they don't share are
-tinted more strongly. Line-ending and final-newline changes show, annotated.
-Runs of more than six unchanged lines fold into an "N unchanged lines" row,
-keeping three lines of context around each change; activating it shows them.
-With highlighting off, the rows, markers and layout stay, without tints or
-status words.
+Removed lines are tinted and marked `−`, and added lines are tinted and marked
+`+`. When a removed line pairs with an added one, the differing words receive a
+stronger tint. Line-ending and trailing-newline changes are annotated
+explicitly. Runs of more than six unchanged lines fold into an "N unchanged
+lines" row (keeping three lines of context around every change) that you can
+click to expand. Turning highlighting off removes tints and status words while
+preserving rows, markers, and layout.
 
-The **summary bar** counts the outputs, with their changes, then every line in
-After, with the lines the diff inserts and deletes across all outputs:
-`4 outputs +1 −1 ~2 · 21 lines +11 −9`; in one revision, `21 lines`.
+The **summary bar** counts outputs with their deltas, followed by the total
+lines in After and the inserted/deleted line counts across all outputs
+(`4 outputs +1 −1 ~2 · 21 lines +11 −9`, or `21 lines` in a single revision).
 
-Selecting an output's label selects it in the host's table.
+Clicking an output's label selects it in the host's table.
 
 ## Start from this definition
 
@@ -102,54 +104,55 @@ Selecting an output's label selects it in the host's table.
 
 ## Limitations
 
-- It compares text, not meaning: reordered keys or a changed timestamp are
-  changes like any other. Make the commands' output stable (sorted, without
-  dates) at the source.
-- It shows at most 2,000 rows per output; beyond a work budget, the changed
-  middle of a very large output is shown as wholly replaced, with a notice.
-- It has only a Diff mode.
-- It draws only `output` entities, with no relationships.
+- It compares raw text rather than semantics, so reordered keys or changing
+  timestamps show up as diffs. Keep command output deterministic (sorted and
+  free of dates) at the source.
+- Each output caps at 2,000 rows. For very large outputs that exceed the diff
+  budget, the changed middle section is shown as a full replacement with a
+  notice.
+- Only Diff mode is supported.
+- Only `output` entities without relationships are accepted.
 
 ## Related
 
-- [`command-output`](../extractors/command-output.md), the extractor it draws by
-  default.
-- [`graph`](graph.md) and [`file-packing`](file-packing.md), for other
+- [`command-output`](../extractors/command-output.md) — the default extractor.
+- [`graph`](graph.md) and [`file-packing`](file-packing.md) — for other
   `graph/v0` extractions.
-- [The default comparator](../comparators/default.md), which decides which
-  outputs changed.
+- [The default comparator](../comparators/default.md) — determines which outputs
+  changed.
 
 ## How it works
 
-The [package README](../../../packages/renderers/text-diff/README.md) covers the
-extraction shape and how lines are compared.
+See the [package README](../../../packages/renderers/text-diff/README.md) for
+details on the extraction shape and line-diffing logic.
 
 ## Build your own
 
-Text diff treats every output as lines. Write your own renderer when the text
-has structure worth drawing:
+Text diff treats every output as plain lines. Build a custom renderer when your
+output has structure worth visualizing directly:
 
-- **Structured output**: JSON, YAML or a table compared field by field or cell
-  by cell, rather than line by line.
-- **A domain notation**: a test report as passed, failed and skipped tests; a
-  benchmark as numbers with their change; a plan as the actions it takes.
-- **Your own emphasis**: the lines that matter (errors, warnings, version
-  numbers) brought forward and the rest folded away.
+- **Structured diffs** — JSON, YAML, or tabular data compared field by field or
+  cell by cell instead of line by line.
+- **Domain-specific views** — test reports showing passed, failed, and skipped
+  counts; benchmarks with numeric deltas; or execution plans broken down by
+  action.
+- **Custom signal-to-noise** — surfacing errors, warnings, or version numbers at
+  the top and folding away boilerplate.
 
-Try the lighter options first. **Layout** (and its
-`presentation.rendererOptions`) chooses one or two columns, and a command that
-prints sorted, stable text makes a smaller, clearer diff. When the output is
-structured, an extractor that parses it into entities, drawn by
-[`graph`](graph.md) or another built-in that accepts its schema, often beats a
-new renderer.
+Check the lighter options first. **Layout** (via `presentation.rendererOptions`)
+switches between split and unified diffs, and sorting or normalizing your
+command output often makes diffs much cleaner on its own. If the output is
+structured, writing an extractor that parses it into entities for
+[`graph`](graph.md) or another built-in renderer is often simpler than building
+a renderer from scratch.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
+**In VS Code**, select **+ New Projection…** in the Projections view, choose
 **Write a custom extractor, renderer or comparator** › **Custom renderer**, and
-pick the built-in extractor it draws. It writes the definition
-(`.github/projections/<id>.json`) and a TypeScript, Vite and React renderer
-package built on the renderer kit (`.github/projections/<id>/renderer`), and
-opens the definition and the projection's tab. Or choose **Ask an agent to write
-it** and describe what the projection should show.
+pick the built-in extractor it draws. VS Code scaffolds the definition
+(`.github/projections/<id>.json`) and a TypeScript, Vite, and React renderer
+package built on the renderer kit (`.github/projections/<id>/renderer`), then
+opens both the definition and the projection tab. You can also choose **Ask an
+agent to write it** and describe what you want shown.
 
 **With the CLI**:
 
@@ -157,14 +160,15 @@ it** and describe what the projection should show.
 projections init <id> --extractor command-output --renderer custom
 ```
 
-Then, in the renderer package, run `npm install`, then `npm run dev` for a
-development server with hot updates, `npm run workbench` to open its scenarios
-in the fixtures workbench in a browser, and `npm test` to run the renderer
-checks on every scenario. In VS Code an open projection tab uses your
-uncommitted definition edits ("Your edits"), and saving the renderer's sources
-rebuilds it (in a trusted workspace, while its tab is open, with its `watch` or
-`build` script) and reloads the view; the Testing view runs each projection's
-checks (`projections check -p <id>`, renderer checks included).
-[Develop a renderer](../../guides/develop-a-renderer.md) walks through it; the
-[renderer kit guide](../../guides/renderer-kit.md) and the
-[renderer kit API](../../reference/renderer-kit.md) cover the pieces.
+Inside the generated renderer package, run `npm install`, then use `npm run dev`
+for a hot-reloading dev server, `npm run workbench` to preview your scenarios in
+the browser, and `npm test` to run renderer checks across every scenario.
+
+In VS Code, an open projection tab picks up your uncommitted definition edits
+("Your edits"), and saving renderer source files automatically rebuilds and
+reloads the view in a trusted workspace (using its `watch` or `build` script).
+Run projection and renderer checks from the Testing view or via
+`projections check -p <id>`. For a full walkthrough, see
+[Develop a renderer](../../guides/develop-a-renderer.md), the
+[renderer kit guide](../../guides/renderer-kit.md), and the
+[renderer kit API](../../reference/renderer-kit.md).

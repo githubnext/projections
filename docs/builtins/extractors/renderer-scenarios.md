@@ -1,11 +1,11 @@
 # Renderer scenarios
 
-The fixture scenarios renderer authors already keep (`scenarios.json`
-documents), as data: each scenario with the renderer that draws it and its
-synthetic extraction, or its before and after and their comparison. Drawn by the
-[`gallery`](../renderers/gallery.md) renderer, it is a living catalog of what
-your renderers draw, and compared across a pull request it answers "which
-scenarios did this change add, remove or redraw?"
+This extractor turns the `scenarios.json` fixture files that renderer authors
+already maintain into structured data: each scenario paired with its renderer
+and synthetic extraction (or its before/after extractions and comparison).
+Displayed with the [`gallery`](../renderers/gallery.md) renderer, it gives you a
+living catalog of what your renderers draw—and across a pull request, it shows
+which scenarios were added, removed, or redrawn.
 
 <!-- generated: facts -->
 
@@ -19,32 +19,35 @@ scenarios did this change add, remove or redraw?"
 
 ## When to use it
 
-Use it in a repository with renderers and their scenarios: Projections itself,
-or yours if you write renderers. Every scenario is synthetic and committed, so
-the projection runs no repository code: viewing it needs no `--trust`, and a
-pull request that changes a fixture shows that scenario redrawn by the renderer
-that draws it.
+Use this extractor in any repository that develops renderers and keeps scenario
+fixtures (like Projections itself, or your own custom renderer repo). Because
+every scenario is synthetic data committed to Git, no repository code runs and
+no `--trust` is required. When a pull request edits a fixture, reviewers see the
+updated scenario redrawn directly by its renderer.
 
 ## What it reads
 
-The documents `include` matches (`**/scenarios.json` by default), less those
-`exclude` matches, and the extraction and comparator files their scenarios name.
-Each document is a `scenarios` entity that `contains` its `scenario` entities,
-labeled with their titles. A scenario's data says which renderer draws it and
-holds what it presents: one normalized extraction, or before, after and the
-comparison its comparator computes (the default comparator, or the comparator
-file it names). The [scenarios model](../../models/scenarios-model.md) lists
-every field.
+The extractor finds every document matching `include` (`**/scenarios.json` by
+default), skips anything matching `exclude`, and loads the extraction and
+comparator files each scenario references.
 
-Comparisons run in the same sandbox as any comparison, and comparator files are
-data. A scenario whose renderer is a custom bundle is named, with its directory,
-but not drawn: hosts supply only built-in renderers for nesting.
+Each document becomes a `scenarios` entity that `contains` its `scenario`
+entities, labeled by title. Every scenario records which renderer draws it along
+with its data—either a single normalized extraction, or a before/after pair and
+the comparison produced by its comparator (using the default comparator unless a
+comparator file is named). See the
+[scenarios model](../../models/scenarios-model.md) for the full field list.
 
-A renderer is a name (1 to 100 letters, digits, `.`, `_` and `-`, as the
-scenarios schema allows); one that isn't a built-in renderer is the gallery's to
-report, on its card. The extraction fails, naming the document and scenario, on
-an unknown field, a duplicate or unsafe ID, a path that is absolute, a URL or
-outside the project, an invalid extraction or a comparator that fails.
+Scenario comparisons run in the same sandbox as normal comparisons, and
+comparator files are treated purely as data. If a scenario references a custom
+renderer bundle, its name and directory are recorded, but it isn't rendered
+inline because hosts only embed built-in renderers.
+
+Renderer names must be 1 to 100 characters using letters, digits, `.`, `_`, and
+`-` (per the scenarios schema); if a name doesn't match a built-in renderer, the
+gallery reports that on the card. Extraction fails—naming the offending document
+and scenario—on unknown fields, duplicate or unsafe IDs, absolute paths, URLs,
+paths outside the project, invalid extractions, or failing comparators.
 
 ## Options
 
@@ -59,13 +62,13 @@ outside the project, an invalid extraction or a comparator that fails.
 
 ## What a comparison shows
 
-- **Scenarios** added or removed, and scenarios modified because their fixtures,
-  comparator, title, group, description or presentation changed.
-- **Documents** added or removed.
+- **Scenarios** that were added, removed, or modified (including changes to
+  their fixtures, comparator, title, group, description, or presentation).
+- **Documents** that were added or removed.
 
-The [`gallery`](../renderers/gallery.md) renderer draws each scenario as a card
-with its renderer inside, marks added, removed and modified cards, and opens a
-modified one on its new drawing.
+The [`gallery`](../renderers/gallery.md) renderer renders each scenario as a
+card containing its nested renderer, highlights added, removed, and modified
+cards, and opens modified cards directly on their updated output.
 
 ## Start from this definition
 
@@ -84,20 +87,22 @@ modified one on its new drawing.
 
 ## Limitations
 
-- Custom renderer bundles aren't drawn, only named.
-- A scenario's ID includes its document's path: moving a document replaces its
-  scenarios.
-- Large fixtures make a large extraction: the whole gallery is one extraction,
-  within the 8 MiB bound on an extractor's output.
+- Custom renderer bundles are named on their cards, not drawn inline.
+- Because a scenario's ID includes its document path, moving a scenario file
+  shows up as removing the old scenarios and adding new ones.
+- The entire gallery fits into a single extraction, so very large fixtures can
+  bump into the 8 MiB limit on extractor output.
 
 ## Related
 
-- [`gallery`](../renderers/gallery.md), which draws it.
-- [Scenarios](../../contracts/scenarios.md), the document format.
-- [Develop a renderer](../../guides/develop-a-renderer.md), where scenarios come
-  from.
+- [`gallery`](../renderers/gallery.md) — the renderer that displays the catalog.
+- [Scenarios](../../contracts/scenarios.md) — the scenario document format.
+- [Develop a renderer](../../guides/develop-a-renderer.md) — how to author
+  renderers and scenarios.
 
 ## How it works
 
-The [package README](../../../packages/extractors/renderer-scenarios/README.md)
-covers what the extractor reads and rejects, and how it compares.
+See the
+[package README](../../../packages/extractors/renderer-scenarios/README.md) for
+details on what the extractor loads, what it rejects, and how scenario
+comparisons run.

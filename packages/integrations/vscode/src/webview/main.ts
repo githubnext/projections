@@ -56,7 +56,7 @@ async function main() {
   listenForControl(handle)
   if (config.failure) {
     showFailure(root, config.failure)
-    post({tag: hostTag, op: 'ready'})
+    post({tag: hostTag, op: 'ready', ...(config.page === undefined ? {} : {page: config.page})})
     return
   }
   const transport = mount.createMessageTransport({
@@ -122,6 +122,7 @@ async function main() {
   post({
     tag: hostTag,
     op: 'ready',
+    ...(config.page === undefined ? {} : {page: config.page}),
     ...(config.projection
       ? {pinned: tabState.pinned ?? null, committed: tabState.committed && tabState.committed === editsKey ? tabState.committed : null}
       : {}),

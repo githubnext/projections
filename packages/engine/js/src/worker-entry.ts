@@ -19,11 +19,11 @@ globalThis.addEventListener('message', async (event: MessageEvent<unknown>) => {
       if ('module' in message.options) {
         const module = message.options.module
         if (!(module instanceof WebAssembly.Module) && !(module instanceof ArrayBuffer) && !ArrayBuffer.isView(module)) {
-          throw new Error('Invalid engine worker Wasm module')
+          throw new TypeError('Invalid engine worker Wasm module')
         }
         invoke = await createWasmTransport({module})
       } else if ('url' in message.options) {
-        if (typeof message.options.url !== 'string') throw new Error('Invalid engine worker Wasm URL')
+        if (typeof message.options.url !== 'string') throw new TypeError('Invalid engine worker Wasm URL')
         invoke = await createWasmTransport({url: message.options.url})
       } else {
         invoke = await createWasmTransport({})
@@ -33,10 +33,10 @@ globalThis.addEventListener('message', async (event: MessageEvent<unknown>) => {
       }
       if ('module' in message.comparator) {
         const module = message.comparator.module
-        if (!(module instanceof ArrayBuffer) && !ArrayBuffer.isView(module)) throw new Error('Invalid comparator module bytes')
+        if (!(module instanceof ArrayBuffer) && !ArrayBuffer.isView(module)) throw new TypeError('Invalid comparator module bytes')
         comparator = await createComparatorTransport({module: module as BufferSource})
       } else if ('url' in message.comparator) {
-        if (typeof message.comparator.url !== 'string') throw new Error('Invalid comparator module URL')
+        if (typeof message.comparator.url !== 'string') throw new TypeError('Invalid comparator module URL')
         comparator = await createComparatorTransport({url: message.comparator.url})
       } else {
         comparator = await createComparatorTransport({})

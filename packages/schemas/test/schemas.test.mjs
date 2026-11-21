@@ -8,7 +8,7 @@ import {schemaUrl} from '../dist/index.js'
 const ajv = new Ajv2020({allErrors: true, strictTuples: false})
 const directory = new URL('../schemas/', import.meta.url)
 const names = readdirSync(directory, {recursive: true})
-  .map(path => path.split('\\').join('/'))
+  .map(path => path.replaceAll('\\', '/'))
   .filter(path => path.endsWith('/v0.json'))
   .map(path => path.slice(0, -'/v0.json'.length))
 for (const name of names) ajv.addSchema(JSON.parse(readFileSync(new URL(`${name}/v0.json`, directory), 'utf8')))
@@ -287,11 +287,11 @@ test('version 1 shapes, unknown fields, numeric bounds, dirty commits and secret
     assert.equal(validate('definition', {...definition, comparator}), false, JSON.stringify(comparator))
   }
   for (const sources of [['/absolute'], ['a/../b'], ['a', 'a'], ['a//b'], ['C:\\x'], ['../'], ['./a']]) {
-    assert.equal(validate('definition', {...definition, extractor: {command: ['x'], sources}}), false, sources.join())
+    assert.equal(validate('definition', {...definition, extractor: {command: ['x'], sources}}), false, sources.join(','))
   }
   // Paths are relative to the definition's project: leading `..` segments leave a nested one.
   for (const sources of [['../shared'], ['../../a/b.mjs'], ['..']]) {
-    assert.equal(validate('definition', {...definition, extractor: {command: ['x'], sources}}), true, sources.join())
+    assert.equal(validate('definition', {...definition, extractor: {command: ['x'], sources}}), true, sources.join(','))
   }
   assert.equal(validate('definition', {...definition, comparator: '../x.comparator.yaml'}), true)
 })
@@ -424,7 +424,7 @@ test('every renderer package scenarios file has unique scenario IDs and referenc
   const packages = readdirSync(renderers)
     .filter(name => existsSync(new URL(`${name}/scenarios.json`, renderers)))
     .sort()
-  assert.ok(packages.length >= 7, packages.join())
+  assert.ok(packages.length >= 7, packages.join(','))
   for (const name of packages) {
     const file = new URL(`${name}/scenarios.json`, renderers)
     const document = JSON.parse(readFileSync(file, 'utf8'))

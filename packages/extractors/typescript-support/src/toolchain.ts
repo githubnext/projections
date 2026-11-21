@@ -141,7 +141,7 @@ export function loadTypeScript(
     ? (required as unknown as {default: typeof TypeScript}).default
     : required
   if (typeof ts.createProgram !== 'function' || typeof ts.version !== 'string') {
-    throw new Error(`The repository's ${selected.name} ${selected.version} does not expose the TypeScript compiler API.`)
+    throw new TypeError(`The repository's ${selected.name} ${selected.version} does not expose the TypeScript compiler API.`)
   }
   return {ts, version: ts.version, package: selected.name}
 }

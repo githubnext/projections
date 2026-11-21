@@ -39,7 +39,7 @@ try {
     logLevel: 'warn',
   })
   // The bundler names each source module in a comment, with the platform's separators.
-  bundled = readFileSync(join(output, 'extractor.mjs'), 'utf8').replace(/^\/\/ src\\.*$/gm, line => line.replaceAll('\\', '/'))
+  bundled = readFileSync(join(output, 'extractor.mjs'), 'utf8').replaceAll(/^\/\/ src\\.*$/gm, line => line.replaceAll('\\', '/'))
 } finally {
   rmSync(output, {recursive: true, force: true})
 }

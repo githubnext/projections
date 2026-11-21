@@ -55,10 +55,10 @@ test('public API resolves barrel aliases, overloads, classes, methods, generics 
   assert.match(String(state.entities.find(node => node.label === 'Box')?.data?.signature), /<T extends string = string>/)
   assert.match(String(state.entities.find(node => node.label === 'result')?.data?.signature), /"count": number; "name": string/)
   assert.match(String(state.entities.find(node => node.label === 'run')?.data?.signature), /"run"\(input: number\): number/)
-  assert(!state.entities.some(node => node.label === 'secret'))
-  assert(state.entities.every(node => typeof node.data?.signature === 'string'))
-  assert(state.entities.every(node => node.evidence?.[0]?.source && !path.isAbsolute(node.evidence[0].source)))
-  assert(!(await canonicalize(state)).includes(context.input.repository.root))
+  assert.ok(!state.entities.some(node => node.label === 'secret'))
+  assert.ok(state.entities.every(node => typeof node.data?.signature === 'string'))
+  assert.ok(state.entities.every(node => node.evidence?.[0]?.source && !path.isAbsolute(node.evidence[0].source)))
+  assert.ok(!(await canonicalize(state)).includes(context.input.repository.root))
 })
 test('moves, formatting, member/export reordering and implementation-only edits do not change API', async t => {
   const before = await fixture(t, {'index.ts': `export * from './old.js';`, 'old.ts': api}, 'typescript-public-api')
@@ -203,7 +203,7 @@ test('callable interfaces, predicates and computed members have stable, observab
     'typescript-public-api',
   )
   const state = await collectTypeScript(before)
-  assert(state.entities.some(node => node.label === 'call' && String(node.data?.signature).includes('(value: string): number')))
+  assert.ok(state.entities.some(node => node.label === 'call' && String(node.data?.signature).includes('(value: string): number')))
   assert.match(String(state.entities.find(node => node.label === 'isText')?.data?.signature), /value is string/)
   assert.equal(await canonicalize(state), await canonicalize(await collectTypeScript(moved)))
   const changed = await fixture(
@@ -289,7 +289,7 @@ test('tsconfig programs honor JSONC, extends, excludes and checker path aliases'
     {entrypoints: {'.': 'src/index.ts'}},
   )
   const state = await collectTypeScript(context)
-  assert(state.entities.some(node => node.label === 'PublicValue'))
+  assert.ok(state.entities.some(node => node.label === 'PublicValue'))
 })
 test('untracked installed declarations are read through guarded module resolution', async t => {
   const context = await fixture(
@@ -396,7 +396,7 @@ test('a materialized revision reads installed dependencies from the checkout, an
   const price = state.entities.find(node => node.label === 'price')
   // `Shape` is the revision's (with `height`), `Money` the installed package's declaration.
   assert.equal(price?.data?.signature, 'price(shape: { "height": number; "width": number }, rate: Money): Money')
-  assert(state.entities.every(node => !node.evidence?.some(item => item.source.includes('node_modules'))))
+  assert.ok(state.entities.every(node => !node.evidence?.some(item => item.source.includes('node_modules'))))
   // Links in the checkout may not leave it.
   const outside = path.join(fixtureDirectory, `.outside-${randomUUID()}`)
   t.after(() => rm(outside, {recursive: true, force: true}))
@@ -468,8 +468,8 @@ test('a monorepo: workspace symlinks are followed and only the selected packages
   // `Shape` resolved through the link (not `any`); a dependency's source type is expanded structurally.
   assert.equal(area?.data?.signature, 'area(shape: { "height": number; "width": number }): number')
   // The dependency isn't exported itself, and nothing is attributed to node_modules.
-  assert(!state.entities.some(node => node.data?.package === '@acme/shapes' || node.data?.package === 'example'))
-  assert(state.entities.every(node => !node.evidence?.some(item => item.source.includes('node_modules'))))
+  assert.ok(!state.entities.some(node => node.data?.package === '@acme/shapes' || node.data?.package === 'example'))
+  assert.ok(state.entities.every(node => !node.evidence?.some(item => item.source.includes('node_modules'))))
   // Selecting the duplicates themselves still fails.
   const both = structuredClone(context)
   both.input.projection.definition.inputs = {entrypoints: {'.': 'examples/one/index.ts', './two': 'examples/two/index.ts'}}

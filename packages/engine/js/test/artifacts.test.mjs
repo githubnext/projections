@@ -232,8 +232,18 @@ test('a comparison made by a custom comparator verifies only with its comparator
   const forged = structuredClone(saved)
   forged.comparison.changes[0].summary = 'Nothing to see here.'
   assert.equal(await code(forged, {bytes: rules, runtime}), 'ARTIFACT_COMPARISON /comparison')
-  const failing = {...runtime, compare: async () => Promise.reject(new Error('out of fuel'))}
+  const failing = {
+    ...runtime,
+    compare: async () => {
+      throw new Error('out of fuel')
+    },
+  }
   assert.equal(await code(saved, {bytes: rules, runtime: failing}), 'ARTIFACT_RULES /comparator')
-  const invalid = {...runtime, check: async () => Promise.reject(new Error('invalid rules'))}
+  const invalid = {
+    ...runtime,
+    check: async () => {
+      throw new Error('invalid rules')
+    },
+  }
   assert.equal(await code(saved, {bytes: rules, runtime: invalid}), 'ARTIFACT_RULES /comparator')
 })

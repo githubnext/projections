@@ -39,7 +39,7 @@ const vsceTargets = {
 /** The value of one top-level `[dist]` key, as single-line TOML source text. */
 function setting(toml, key) {
   const section = toml.split(/^\[/m).find(part => part.startsWith('dist]'))
-  const joined = section.replace(
+  const joined = section.replaceAll(
     /\[\s*\n([^\]]*)\]/g,
     (_, items) =>
       `[${items

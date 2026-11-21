@@ -12,7 +12,7 @@ export function run(
     events => {
       const worker = new Worker(workerUrl ?? new URL('./worker-entry.js', import.meta.url), {type: 'module'})
       worker.onmessage = event => events.message(event.data)
-      worker.onmessageerror = () => events.error('uncloneable message')
+      worker.addEventListener('messageerror', () => events.error('uncloneable message'))
       worker.onerror = event => {
         event.preventDefault()
         events.error(event.message || 'worker error')

@@ -37,7 +37,7 @@ export async function composeApplication({root, core, moduleFile, moduleName, en
   }
   const rootClass = exported[moduleName]
   if (typeof rootClass !== 'function') {
-    throw new Error(`${slash(path.relative(root, moduleFile))} does not export the module class ${moduleName}.`)
+    throw new TypeError(`${slash(path.relative(root, moduleFile))} does not export the module class ${moduleName}.`)
   }
   let application: ApplicationContext
   try {

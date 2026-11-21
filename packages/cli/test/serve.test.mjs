@@ -119,7 +119,7 @@ test('serve --stdio answers the Inspector API as JSON-RPC, notifies changes and 
   assert.equal(definitions.status, 200)
   assert.match(definitions.contentType, /^application\/json/)
   const ids = definitions.body.definitions.map(definition => definition.id)
-  assert.ok(ids.includes('repository-map') && !ids.includes('services-node'), ids.join())
+  assert.ok(ids.includes('repository-map') && !ids.includes('services-node'), ids.join(','))
   assert.equal(definitions.body.executionAuthorized, false)
   const revisions = await backend.request('GET', '/api/revisions?limit=5')
   assert.deepEqual(

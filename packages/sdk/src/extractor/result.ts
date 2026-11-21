@@ -101,11 +101,11 @@ let written = false
 export function result(fields: ExtractionFields = {}): Extraction {
   if (written) throw new Error("result() already wrote this extractor's extraction; call it once, with everything")
   const document = extraction(fields)
-  const lists: unknown[] = [document.entities, document.relationships]
+  const lists: Set<unknown> = new Set([document.entities, document.relationships])
   let item: unknown
   const text = JSON.stringify(document, function (this: unknown, _key: string, value: unknown) {
     if (this === document) item = undefined
-    else if (lists.includes(this)) item = (value as {id: unknown}).id
+    else if (lists.has(this)) item = (value as {id: unknown}).id
     if ((typeof value === 'number' && !Number.isFinite(value)) || typeof value === 'bigint' || typeof value === 'function') {
       throw new TypeError(
         `${item === undefined ? 'The extraction' : `The item ${quoted(item)}`} holds a value JSON can't represent (${String(value)}); use objects, arrays, strings, finite numbers, booleans and null`,

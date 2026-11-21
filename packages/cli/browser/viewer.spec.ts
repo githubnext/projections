@@ -268,7 +268,7 @@ test("where a browser blocks renderer frames from loading the viewer's URLs, the
   const renderer = page.frames().find(each => each.url().startsWith('blob:'))!
   // The document is the renderer's, in an opaque origin, under the renderer policy the page put first in its head, and
   // that policy refuses every request.
-  expect(await renderer.evaluate(() => self.origin)).toBe('null')
+  expect(await renderer.evaluate(() => globalThis.origin)).toBe('null')
   expect(await renderer.evaluate(() => document.head.firstElementChild?.getAttribute('content'))).toContain("connect-src 'none'")
   expect(
     await renderer.evaluate(
@@ -309,7 +309,7 @@ test('at a canvas width, the header text is whole and centred', async ({page}) =
     const box = (element: Element) => element.getBoundingClientRect()
     const header = document.querySelector('.pi-viewer-header')!
     const frame = box(header)
-    const border = parseFloat(getComputedStyle(header).borderBottomWidth)
+    const border = Number.parseFloat(getComputedStyle(header).borderBottomWidth)
     // Each text's glyphs (ascent to descent) against the box that clips it: negative when tops or descenders are cut.
     const texts = [...header.querySelectorAll('.pi-viewer-text')].map(element => {
       const range = document.createRange()
@@ -321,7 +321,10 @@ test('at a canvas width, the header text is whole and centred', async ({page}) =
     // The title's cap height: its box less the padding that keeps its glyphs (styles.css).
     const title = header.querySelector('.pi-viewer-title')!
     const style = getComputedStyle(title)
-    const cap = {top: box(title).top + parseFloat(style.paddingTop), bottom: box(title).bottom - parseFloat(style.paddingBottom)}
+    const cap = {
+      top: box(title).top + Number.parseFloat(style.paddingTop),
+      bottom: box(title).bottom - Number.parseFloat(style.paddingBottom),
+    }
     const mark = box(header.querySelector('[data-projections-mark]')!)
     return {
       texts,
@@ -343,12 +346,15 @@ test('at a canvas width, the header text is whole and centred', async ({page}) =
         const text = pill.querySelector('.pi-viewer-text')!
         const textStyle = getComputedStyle(text)
         // The text's cap: its box less the padding that keeps its glyphs.
-        const cap = {top: box(text).top + parseFloat(textStyle.paddingTop), bottom: box(text).bottom - parseFloat(textStyle.paddingBottom)}
+        const cap = {
+          top: box(text).top + Number.parseFloat(textStyle.paddingTop),
+          bottom: box(text).bottom - Number.parseFloat(textStyle.paddingBottom),
+        }
         return {
           height: box(pill).height,
           border: style.borderTopWidth,
           background: style.backgroundColor,
-          radius: parseFloat(style.borderTopLeftRadius),
+          radius: Number.parseFloat(style.borderTopLeftRadius),
           above: cap.top - box(pill).top,
           below: box(pill).bottom - cap.bottom,
         }

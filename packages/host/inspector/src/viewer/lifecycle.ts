@@ -21,10 +21,11 @@ export interface Report {
   readonly text: string
 }
 
-/** The page's reports: one in flight at most, and the latest one waiting for it. */
+/** The page's reports: one in flight at most (the `seq`th sent), and the latest one waiting for it. */
 export interface Outbox {
-  readonly sending: boolean
+  readonly sending: (Report & {readonly seq: number}) | null
   readonly next: Report | null
+  readonly seq: number
   /** The last report sent or waiting, to skip one that says nothing new. */
   readonly last: string
 }
@@ -65,16 +66,20 @@ export type ConnectionEffect =
   | {readonly type: 'stop'}
   | {readonly type: 'resume'; readonly state: ViewerState}
   | {readonly type: 'reload'}
-  | {readonly type: 'post'; readonly body: unknown}
 
-/** A long poll: past `since` (at once without one), after `delayMs`. */
-export type ConnectionActivity = {
-  readonly type: 'poll'
-  readonly key: string
-  readonly since: number | undefined
-  readonly build: number | undefined
-  readonly delayMs: number
-}
+/**
+ * A long poll: past `since` (at once without one), after `delayMs`; or the report in flight, which a page that stops
+ * abandons.
+ */
+export type ConnectionActivity =
+  | {
+      readonly type: 'poll'
+      readonly key: string
+      readonly since: number | undefined
+      readonly build: number | undefined
+      readonly delayMs: number
+    }
+  | {readonly type: 'post'; readonly key: string; readonly body: unknown}
 
 /** How long a stopped page waits before it asks again. */
 export const retryMs = 2000
@@ -87,12 +92,8 @@ function answered(connection: Open, answer: Answer): Next {
   if (connection.instance !== undefined && answer.instance !== undefined && answer.instance !== connection.instance)
     return emit({kind: 'replaced'}, {type: 'reload'})
   const effects: ConnectionEffect[] = []
-  let outbox = connection.outbox
-  if (connection.kind === 'stopped') {
-    effects.push({type: 'resume', state: answer})
-    // What the page reported before may never have arrived: it reports again.
-    outbox = {...outbox, last: ''}
-  }
+  const {outbox} = connection
+  if (connection.kind === 'stopped') effects.push({type: 'resume', state: answer})
   const build = answer.build && answer.build.version !== connection.build?.version ? answer.build : connection.build
   if (build !== connection.build && connection.state) effects.push({type: 'build'})
   const changed = answer.generation !== connection.state?.generation
@@ -115,19 +116,22 @@ function answered(connection: Open, answer: Answer): Next {
 }
 
 /** A report: sent at once, or waiting (replacing one that waited) while another is in flight; one that says nothing new is skipped. */
-function report(connection: Open, {body, text}: Report): Next {
+function report(connection: Extract<Connection, {kind: 'live'}>, {body, text}: Report): Next {
   const {outbox} = connection
   if (text === outbox.last) return connection
-  if (outbox.sending) return {...connection, outbox: {sending: true, next: {body, text}, last: text}}
-  return emit({...connection, outbox: {sending: true, next: null, last: text}}, {type: 'post', body})
+  if (outbox.sending) return {...connection, outbox: {...outbox, next: {body, text}, last: text}}
+  return {...connection, outbox: {sending: {body, text, seq: outbox.seq + 1}, next: null, seq: outbox.seq + 1, last: text}}
 }
 
 /** The report in flight arrived (or failed): the one waiting goes next. */
-function posted(connection: Open): Next {
-  const {next} = connection.outbox
-  if (!next) return {...connection, outbox: {...connection.outbox, sending: false}}
-  return emit({...connection, outbox: {...connection.outbox, next: null}}, {type: 'post', body: next.body})
+function posted(connection: Extract<Connection, {kind: 'live'}>): Next {
+  const {next, seq} = connection.outbox
+  const sending = next ? {...next, seq: seq + 1} : null
+  return {...connection, outbox: {sending, next: null, seq: next ? seq + 1 : seq, last: connection.outbox.last}}
 }
+
+/** Nothing in flight or waiting: what a stopped page reported may never have arrived, so it reports afresh. */
+const cleared = (outbox: Outbox): Outbox => ({sending: null, next: null, seq: outbox.seq, last: ''})
 
 const ended = (): Next => ({kind: 'ended'})
 
@@ -138,14 +142,16 @@ export const viewerConnection = defineMachine<Connection, ConnectionEvent, Conne
       on: {
         answered: (connection, {answer}) => answered(connection, answer),
         // The next ask is answered at once, so a server that answers again is noticed then, not after a long poll.
+        // The report in flight is abandoned with the connection: a stale report never goes after it stopped.
         failed: ({kind: _kind, since: _since, ...connection}) =>
-          emit({...connection, kind: 'stopped', asks: connection.asks + 1}, {type: 'stop'}),
+          emit({...connection, kind: 'stopped', asks: connection.asks + 1, outbox: cleared(connection.outbox)}, {type: 'stop'}),
         report: (connection, event) => report(connection, event.report),
         posted,
         unmounted: ended,
       },
-      activities: connection => [
-        {type: 'poll', key: `poll:${connection.asks}`, since: connection.since, build: connection.build?.version, delayMs: 0},
+      activities: ({asks, since, build, outbox}) => [
+        {type: 'poll', key: `poll:${asks}`, since, build: build?.version, delayMs: 0},
+        ...(outbox.sending ? [{type: 'post', key: `post:${outbox.sending.seq}`, body: outbox.sending.body} as const] : []),
       ],
     },
     stopped: {
@@ -154,7 +160,7 @@ export const viewerConnection = defineMachine<Connection, ConnectionEvent, Conne
         failed: connection => ({...connection, asks: connection.asks + 1}),
         // Nothing the page does reaches a server that doesn't answer.
         report: ignore,
-        posted,
+        posted: ignore,
         unmounted: ended,
       },
       activities: connection => [

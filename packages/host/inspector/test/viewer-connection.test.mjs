@@ -12,7 +12,7 @@ const start = {
   instance: undefined,
   build: undefined,
   mounted: false,
-  outbox: {sending: false, next: null, last: ''},
+  outbox: {sending: null, next: null, seq: 0, last: ''},
   asks: 0,
   since: undefined,
 }
@@ -28,18 +28,29 @@ function run(state, ...events) {
   }
   return {state, effects}
 }
-const posts = effects => effects.filter(effect => effect.type === 'post').map(effect => effect.body.text)
+/** The report in flight: the state's post activity. */
+const inFlight = state => viewerConnection.activities(state).find(activity => activity.type === 'post')?.body.text
 
 test('reports go one at a time: the latest waits for the one in flight, and one that says nothing new is skipped', () => {
   const live = run(start, {type: 'answered', answer: answer(1)}).state
   const sent = run(live, report('a'), report('b'), report('c'), report('c'))
   // Before, each report was posted every 400 ms without waiting, so an older one could arrive after a newer one.
-  assert.deepEqual(posts(sent.effects), ['a'])
+  assert.equal(inFlight(sent.state), 'a')
+  assert.equal(sent.state.outbox.next.text, 'c')
   const next = run(sent.state, {type: 'posted'})
-  assert.deepEqual(posts(next.effects), ['c'])
+  assert.equal(inFlight(next.state), 'c')
   const idle = run(next.state, {type: 'posted'}, report('c'))
-  assert.deepEqual(posts(idle.effects), [])
-  assert.equal(idle.state.outbox.sending, false)
+  assert.equal(inFlight(idle.state), undefined)
+})
+
+test('a page that stops abandons the report in flight and the one waiting, and reports afresh once it resumes', () => {
+  const live = run(start, {type: 'answered', answer: answer(1)}, report('a'), report('b')).state
+  const stopped = run(live, {type: 'failed'}, {type: 'posted'})
+  // Its post is no longer an activity, so it is aborted, and its completion changes nothing.
+  assert.equal(inFlight(stopped.state), undefined)
+  assert.deepEqual(stopped.state.outbox, {sending: null, next: null, seq: 1, last: ''})
+  const resumed = run(stopped.state, {type: 'answered', answer: answer(1)}, report('b'))
+  assert.equal(inFlight(resumed.state), 'b')
 })
 
 test('the first state that shows a projection mounts the Inspector, once; an answer of the same generation shows nothing', () => {
@@ -65,7 +76,7 @@ test("a server that stops answering stops the page, which asks again every 2 s, 
   const resumed = run(stopped.state, {type: 'failed'}, {type: 'answered', answer: answer(1)}, report('a'))
   assert.equal(resumed.effects[0].type, 'resume')
   // What it reported before the server stopped may never have arrived, so it reports it again.
-  assert.deepEqual(posts(resumed.effects), ['a'])
+  assert.equal(inFlight(resumed.state), 'a')
 })
 
 test('another server at the URL replaces the page, and nothing more happens', () => {
@@ -105,13 +116,18 @@ test('every connection state keeps one report in flight at most, and replaced an
     depth: 6,
     key: state => JSON.stringify({...state, asks: undefined}),
     invariants: {
-      'a waiting report waits for one in flight': state => !open(state) || !state.outbox.next || state.outbox.sending,
+      'a waiting report waits for one in flight': state => !open(state) || !state.outbox.next || state.outbox.sending !== null,
+      'a stopped page has no report in flight': state => state.kind !== 'stopped' || inFlight(state) === undefined,
       'a stopped page has nothing to poll past': state =>
         state.kind !== 'stopped' || viewerConnection.activities(state)[0].since === undefined,
     },
     transitions: {
-      'a report is posted only when none is in flight': ({from, event, effects}) =>
-        posts(effects).length <= 1 && (posts(effects).length === 0 || !open(from) || !from.outbox.sending || event.type === 'posted'),
+      'a report in flight stays until it lands or the page stops': ({from, event, to}) =>
+        from.kind !== 'live' ||
+        !from.outbox.sending ||
+        event.type === 'posted' ||
+        to.kind !== 'live' ||
+        to.outbox.sending?.seq === from.outbox.sending.seq,
       'the Inspector mounts once': ({from, to, effects}) =>
         effects.filter(effect => effect.mount).length === 0 || (open(from) && !from.mounted && open(to) && to.mounted),
       'replaced and ended are final': ({from, to}) =>

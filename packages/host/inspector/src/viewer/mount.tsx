@@ -107,7 +107,7 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
       instance: undefined,
       build: undefined,
       mounted: false,
-      outbox: {sending: false, next: null, last: ''},
+      outbox: {sending: null, next: null, seq: 0, last: ''},
       asks: 0,
       since: undefined,
     },
@@ -135,13 +135,14 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
       // Another server answers at this URL (one started with --trust replaced the last): what the page learned from the
       // last one (its trust, its renderers) no longer holds, so it loads afresh.
       reload: () => (options.onReplaced ? options.onReplaced() : location.reload()),
+    },
+    activities: {
+      // The report in flight; a page that stops abandons it.
       post: ({body}, {send, signal}) =>
         transport
           .request({method: 'POST', path: '/view/report', body, signal})
           .catch(() => {})
           .finally(() => send({type: 'posted'})),
-    },
-    activities: {
       // One long poll per page: the state, and the build phase with it (browsers allow few connections per host).
       poll: async ({since, build, delayMs}, {send, signal}) => {
         if (delayMs) await sleep(delayMs, signal)

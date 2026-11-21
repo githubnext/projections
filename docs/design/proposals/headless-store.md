@@ -35,7 +35,8 @@ projection.getSnapshot() // ProjectionState: today's ProjectionController withou
 projection.subscribe(listener) // () => unsubscribe; one notification per batch of changes
 projection.update(options) // new props: controlled values and callbacks, the subject
 projection.seek(0.5) // every ProjectionController action, unchanged
-projection.destroy()
+projection.start() // activate: timers, frames, subscriptions; restartable after stop()
+projection.stop()
 
 const stage = mountStage(element, projection, {labels, paneLabels, fill, renderStatus}) // vanilla DOM
 stage.update({labels}) // and stage.destroy()
@@ -78,9 +79,18 @@ them:
   run in layout effects, so a change never paints a stale frame. The React
   adapter calls `update` in a layout effect. A vanilla host calls it
   synchronously, before it draws.
-- **Strict Mode.** The adapter creates the store in a `useState` initializer and
-  destroys it on unmount. The actor's generations already drop events from a
-  store that has ended, so a double mount is harmless.
+- **Strict Mode.** React replays an effect's setup, cleanup and setup while
+  keeping the state it committed, so a store destroyed in cleanup would be
+  reused dead by the second setup. Construction is therefore side-effect free:
+  `createProjection` starts no timers, frames or subscriptions. A store is
+  activated with `start()` and deactivated with `stop()`, which can alternate
+  any number of times, as #110's `useMachine` starts and stops its actor. The
+  adapter creates the store in a `useState` initializer, calls `start()` in a
+  layout effect (so activities run before paint) and `stop()` in its cleanup;
+  events sent before it starts wait for it, as `useMachine`'s do. Stopping ends
+  the current generation, so events from activities it started are dropped, and
+  starting again begins a new one. A vanilla host calls `start()` once and
+  `stop()` when it is done.
 
 ## Steps, as pull requests
 

@@ -1437,7 +1437,7 @@ A change count in words, for accessible names: `2 added`, `1 removed`, `3 modifi
 ### `summaryItems`
 
 ```ts
-summaryItems(subject: { "after": Extraction; "before": Extraction; "comparison": Comparison; "mode": "comparison" } | { "extraction": Extraction; "mode": "extraction" }, nouns?: undefined | { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined } | { readonly [key: string]: SummaryNoun | false }): Array<SummaryCountItem>
+summaryItems(subject: { "after": Extraction; "before": Extraction; "comparison": Comparison; "mode": "comparison" } | { "extraction": Extraction; "mode": "extraction" }, nouns?: Readonly<Record<string, SummaryNoun | false>> | undefined | { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined }): Array<SummaryCountItem>
 ```
 
 A subject's summary, as a renderer posts it: a count figure (`type: 'count'`) per kind and collection (`summaryCounts`), worded with `nouns` where it gives
@@ -1447,7 +1447,7 @@ object of nouns lists come first, in its order. At most `rendererLimits.summaryI
 ### `SummaryNouns`
 
 ```ts
-type SummaryNouns = { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined } | { readonly [key: string]: SummaryNoun | false }
+type SummaryNouns = Readonly<Record<string, SummaryNoun | false>> | { (kind: string, collection: "entities" | "relationships"): SummaryNoun | false | undefined }
 ```
 
 A renderer's words for kinds: a noun per kind, or `false` to leave a kind out of the summary. A key may name one
@@ -1817,7 +1817,7 @@ A control's value: a choice's `value`, a toggle's boolean or a range's number.
 ### `controlValues`
 
 ```ts
-controlValues(controls: Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false | true; "type": "toggle" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" | "download" | "expand" | "filter" | "fit" | "next" | "previous" | "reset" | "search" | "settings" | "zoom-in" | "zoom-out"; "type": "action" }>, options?: RendererOptions): { [key: string]: false | number | string | true }
+controlValues(controls: Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false | true; "type": "toggle" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" | "download" | "expand" | "filter" | "fit" | "next" | "previous" | "reset" | "search" | "settings" | "zoom-in" | "zoom-out"; "type": "action" }>, options?: RendererOptions): Record<string, false | number | string | true>
 ```
 
 Each control's value from `options`, or its default when absent or invalid.
@@ -1933,7 +1933,7 @@ whenever the document changes, and every other message may arrive at any time af
 ### `iconMaskStyle`
 
 ```ts
-iconMaskStyle(name: string): { [key: string]: string }
+iconMaskStyle(name: string): Record<string, string>
 ```
 
 The mask that draws icon `name` where the SDK's icons.css doesn't apply, such as a host's own UI, exactly as
@@ -2486,7 +2486,7 @@ The projection a renderer presents, as `init` names it.
 | Member | Signature | Description |
 |---|---|---|
 | `id` | `"id": string` | The projection definition's ID, stable across documents of the same projection. |
-| `kinds` | `"kinds"?: { [key: string]: RendererKind }` | How the definition presents extraction kinds (`presentation.kinds`), keyed by kind: a color for renderers that color items by kind (a meaning or a categorical hue, painted with theme tokens) and the summary bar's noun. Hosts send it when the definition sets it; renderers ignore kinds they don't draw. |
+| `kinds` | `"kinds"?: Record<string, RendererKind>` | How the definition presents extraction kinds (`presentation.kinds`), keyed by kind: a color for renderers that color items by kind (a meaning or a categorical hue, painted with theme tokens) and the summary bar's noun. Hosts send it when the definition sets it; renderers ignore kinds they don't draw. |
 | `renderer` | `"renderer": string` | The definition's renderer: its renderer name (for example `graph-horizontal`), or the bundle path of a custom renderer. A bundle that handles several names uses it to choose a variant. |
 | `title` | `"title": string` | The definition's title, for headings and accessible names. |
 
@@ -2537,13 +2537,13 @@ them to renderer CSS as `--projections-<name>`.
 | Member | Signature | Description |
 |---|---|---|
 | `colorMode` | `"colorMode": "dark" \| "light"` | The host's color mode, which `applyEnvironment` sets as the document's `color-scheme`. |
-| `tokens` | `"tokens": { [key: string]: string }` | Token values by name, at most `rendererLimits.themeTokens`, each at most `rendererLimits.tokenLength` characters; `icon-*` tokens hold icon values (`isIconValue`). Read them through `resolveThemeTokens`, which fills in defaults. |
+| `tokens` | `"tokens": Record<string, string>` | Token values by name, at most `rendererLimits.themeTokens`, each at most `rendererLimits.tokenLength` characters; `icon-*` tokens hold icon values (`isIconValue`). Read them through `resolveThemeTokens`, which fills in defaults. |
 | `version` | `"version"?: number` | The token set the host follows (`themeTokenSetVersion`). Missing tokens fall back to that set's defaults. |
 
 ### `resolveThemeTokens`
 
 ```ts
-resolveThemeTokens(theme: { "colorMode": "dark" | "light"; "tokens": { [key: string]: string } }): Record<string, string>
+resolveThemeTokens(theme: { "colorMode": "dark" | "light"; "tokens": Record<string, string> }): Record<string, string>
 ```
 
 A host's tokens over the defaults, so every token of the current set is defined.
@@ -2781,7 +2781,7 @@ The host state `useRenderer` keeps, each field as the host last sent it.
 ### `useDeclaredOptions`
 
 ```ts
-useDeclaredOptions(client: RendererClient | undefined, controls: Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false | true; "type": "toggle" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" | "download" | "expand" | "filter" | "fit" | "next" | "previous" | "reset" | "search" | "settings" | "zoom-in" | "zoom-out"; "type": "action" }>, options: RendererOptions): { [key: string]: false | number | string | true }
+useDeclaredOptions(client: RendererClient | undefined, controls: Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false | true; "type": "toggle" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" | "download" | "expand" | "filter" | "fit" | "next" | "previous" | "reset" | "search" | "settings" | "zoom-in" | "zoom-out"; "type": "action" }>, options: RendererOptions): Record<string, false | number | string | true>
 ```
 
 Declares controls after connecting, for example when they depend on the
@@ -2805,7 +2805,7 @@ it. Declare `interactionCapabilities` in `useRenderer`'s capabilities.
 ### `useRenderer`
 
 ```ts
-useRenderer<A extends Array<RendererAccepts> | undefined = undefined>(options: UseRendererOptions<A>): RendererState<ExtractionAccepted<A>> & { "client": RendererClient | undefined; "controlValues": { [key: string]: false | number | string | true }; "failure": string | undefined }
+useRenderer<A extends Array<RendererAccepts> | undefined = undefined>(options: UseRendererOptions<A>): RendererState<ExtractionAccepted<A>> & { "client": RendererClient | undefined; "controlValues": Record<string, false | number | string | true>; "failure": string | undefined }
 ```
 
 React binding for the renderer frame protocol. Connects once on mount (`connectRenderer`), keeps the latest host

@@ -161,7 +161,7 @@ A control's value: a choice's `value`, a toggle's boolean or a range's number.
 ### `controlValues`
 
 ```ts
-controlValues(controls: Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false | true; "type": "toggle" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" | "download" | "expand" | "filter" | "fit" | "next" | "previous" | "reset" | "search" | "settings" | "zoom-in" | "zoom-out"; "type": "action" }>, options?: RendererOptions): { [key: string]: false | number | string | true }
+controlValues(controls: Array<{ "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "choices": Array<{ "label": string; "value": string }>; "default": string; "type": "choice" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": false | true; "type": "toggle" } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "default": number; "max": number; "min": number; "step": number; "type": "range"; "unit"?: string } | { "description"?: string; "group"?: string; "groupLabel"?: string; "id": string; "label": string } & { "icon"?: "collapse" | "download" | "expand" | "filter" | "fit" | "next" | "previous" | "reset" | "search" | "settings" | "zoom-in" | "zoom-out"; "type": "action" }>, options?: RendererOptions): Record<string, false | number | string | true>
 ```
 
 Each control's value from `options`, or its default when absent or invalid.
@@ -277,7 +277,7 @@ whenever the document changes, and every other message may arrive at any time af
 ### `iconMaskStyle`
 
 ```ts
-iconMaskStyle(name: string): { [key: string]: string }
+iconMaskStyle(name: string): Record<string, string>
 ```
 
 The mask that draws icon `name` where the SDK's icons.css doesn't apply, such as a host's own UI, exactly as
@@ -830,7 +830,7 @@ The projection a renderer presents, as `init` names it.
 | Member | Signature | Description |
 |---|---|---|
 | `id` | `"id": string` | The projection definition's ID, stable across documents of the same projection. |
-| `kinds` | `"kinds"?: { [key: string]: RendererKind }` | How the definition presents extraction kinds (`presentation.kinds`), keyed by kind: a color for renderers that color items by kind (a meaning or a categorical hue, painted with theme tokens) and the summary bar's noun. Hosts send it when the definition sets it; renderers ignore kinds they don't draw. |
+| `kinds` | `"kinds"?: Record<string, RendererKind>` | How the definition presents extraction kinds (`presentation.kinds`), keyed by kind: a color for renderers that color items by kind (a meaning or a categorical hue, painted with theme tokens) and the summary bar's noun. Hosts send it when the definition sets it; renderers ignore kinds they don't draw. |
 | `renderer` | `"renderer": string` | The definition's renderer: its renderer name (for example `graph-horizontal`), or the bundle path of a custom renderer. A bundle that handles several names uses it to choose a variant. |
 | `title` | `"title": string` | The definition's title, for headings and accessible names. |
 
@@ -881,13 +881,13 @@ them to renderer CSS as `--projections-<name>`.
 | Member | Signature | Description |
 |---|---|---|
 | `colorMode` | `"colorMode": "dark" \| "light"` | The host's color mode, which `applyEnvironment` sets as the document's `color-scheme`. |
-| `tokens` | `"tokens": { [key: string]: string }` | Token values by name, at most `rendererLimits.themeTokens`, each at most `rendererLimits.tokenLength` characters; `icon-*` tokens hold icon values (`isIconValue`). Read them through `resolveThemeTokens`, which fills in defaults. |
+| `tokens` | `"tokens": Record<string, string>` | Token values by name, at most `rendererLimits.themeTokens`, each at most `rendererLimits.tokenLength` characters; `icon-*` tokens hold icon values (`isIconValue`). Read them through `resolveThemeTokens`, which fills in defaults. |
 | `version` | `"version"?: number` | The token set the host follows (`themeTokenSetVersion`). Missing tokens fall back to that set's defaults. |
 
 ### `resolveThemeTokens`
 
 ```ts
-resolveThemeTokens(theme: { "colorMode": "dark" | "light"; "tokens": { [key: string]: string } }): Record<string, string>
+resolveThemeTokens(theme: { "colorMode": "dark" | "light"; "tokens": Record<string, string> }): Record<string, string>
 ```
 
 A host's tokens over the defaults, so every token of the current set is defined.

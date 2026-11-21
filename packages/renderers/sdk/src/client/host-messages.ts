@@ -92,6 +92,7 @@ export function dispatch(handlers: RendererHandlers, message: HostMessage) {
         reducedMotion: message.reducedMotion,
         locale: message.locale,
         ...(message.pane === undefined ? {} : {pane: message.pane}),
+        ...(message.sizing === undefined ? {} : {sizing: message.sizing}),
       })
       break
     case 'hover':

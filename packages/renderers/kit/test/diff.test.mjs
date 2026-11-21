@@ -23,6 +23,8 @@ import {ChangePills, SvgValueChange, ValueChange} from '../dist/react.js'
 import {compare, entity, extraction, relationship} from './engine.mjs'
 import {plain} from './markup.mjs'
 
+const noop = () => undefined
+
 const html = node => renderToStaticMarkup(node)
 
 async function rewired() {
@@ -145,7 +147,7 @@ test('change pills carry their sign, their change in words and, when selectable,
         {key: 'b', label: 'IClock', change: 'added', entityId: 'service:IClock'},
         {key: 'c', label: 'ICache', change: 'removed'},
       ],
-      onSelect() {},
+      onSelect: noop,
       selectedId: 'service:IClock',
     }),
   )

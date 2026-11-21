@@ -69,10 +69,16 @@ for (const colorMode of ['light', 'dark'] as const) {
       }, rows as string)
       expect(ids.length, 'rows to ring').toBeGreaterThan(0)
       const states: [string, () => Promise<void>][] = [
-        ['at rest', async () => {}],
+        ['at rest', () => Promise.resolve()],
         ...ids.flatMap((id): [string, () => Promise<void>][] => [
           [`${id} selected`, () => stage.select(id)],
-          [`${id} hovered`, async () => (await stage.select(null), await stage.hover(id))],
+          [
+            `${id} hovered`,
+            async () => {
+              await stage.select(null)
+              await stage.hover(id)
+            },
+          ],
         ]),
       ]
       for (const [state, enter] of states) {

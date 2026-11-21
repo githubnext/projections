@@ -16,6 +16,8 @@ import {RuntimePolicyView} from '../node_modules/.cache/test/view.js'
 import {runtimePolicyContext} from '../node_modules/.cache/test/scope.js'
 import {plain} from '../../kit/test/markup.mjs'
 
+const noop = () => undefined
+
 const engine = createNativeEngine()
 const runtime = createRulesRuntime()
 const rules = new Uint8Array(readFileSync(new URL('../../../comparators/runtime-policy/runtime-policy.comparator.yaml', import.meta.url)))
@@ -46,13 +48,13 @@ function props(model, init, overrides = {}) {
     rendererName: 'runtime-policy',
     selectedId: null,
     hoveredId: null,
-    onSelect() {},
-    onOpen() {},
-    reportSteps() {},
+    onSelect: noop,
+    onOpen: noop,
+    reportSteps: noop,
     controls: {},
-    declareControls() {},
-    onAction: () => () => {},
-    reportLegend() {},
+    declareControls: noop,
+    onAction: () => noop,
+    reportLegend: noop,
     options: {},
     viewport: undefined,
     reducedMotion: false,

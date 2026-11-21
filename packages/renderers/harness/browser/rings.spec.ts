@@ -150,7 +150,11 @@ test('the pixel check names a ring inside or outside its item', async ({page}) =
           const card = document.querySelector<HTMLElement>('.card')!
           card.style.outline = on ? '3px solid #0969da' : ''
           card.style.outlineOffset = on ? offset : ''
-          return new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+          return new Promise<void>(resolve => {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => resolve())
+            })
+          })
         },
         [on, offset] as const,
       )

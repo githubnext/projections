@@ -492,7 +492,7 @@ test('every name, type, key and value shows whole in every scenario and mode (an
   test.setTimeout(240_000)
   const {readFile} = await import('node:fs/promises')
   const read = async (path: string) => JSON.parse(await readFile(new URL(`../${path}`, import.meta.url), 'utf8'))
-  const load = async (value: unknown) => (typeof value === 'string' ? read(value) : value)
+  const load = (value: unknown) => (typeof value === 'string' ? read(value) : Promise.resolve(value))
   const {scenarios} = (await read('scenarios.json')) as {scenarios: {id: string; before?: unknown; after?: unknown; extraction?: unknown}[]}
   let checked = 0
   for (const scenario of scenarios)

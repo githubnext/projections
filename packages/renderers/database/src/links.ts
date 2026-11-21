@@ -108,7 +108,9 @@ export function linkTracks(links: readonly {key: string; points: readonly Schema
   )
   const tracks = routeTracks(runs)
   const result = new Map(links.map(link => [link.key, Array.from({length: link.points.length / 2}, () => 0)]))
-  runs.forEach((run, index) => (result.get(run.key)![run.index] = tracks[index]!))
+  runs.forEach((run, index) => {
+    result.get(run.key)![run.index] = tracks[index]!
+  })
   return result
 }
 

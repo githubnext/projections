@@ -9,6 +9,8 @@ import {columnType, declaredType, typeChange} from '../node_modules/.cache/test/
 import {DatabaseRenderer} from '../node_modules/.cache/test/view.js'
 import {plain} from '../../kit/test/markup.mjs'
 
+const noop = () => undefined
+
 const fixture = name => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
 const column = data => ({id: 'c', kind: 'column', label: 'c', data})
 
@@ -53,10 +55,10 @@ test('real Prisma and Django retypes read as type changes', async () => {
         init: {},
         model,
         direction: 1,
-        onOpen() {},
-        reportSteps() {},
-        declareControls() {},
-        onAction: () => () => {},
+        onOpen: noop,
+        reportSteps: noop,
+        declareControls: noop,
+        onAction: () => noop,
         viewport: undefined,
         schedule: scheduleSteps(model),
         progress: 1,
@@ -66,7 +68,7 @@ test('real Prisma and Django retypes read as type changes', async () => {
         diff: false,
         selectedId: null,
         hoveredId: null,
-        onSelect() {},
+        onSelect: noop,
         controls: {},
         options: {},
         reducedMotion: true,

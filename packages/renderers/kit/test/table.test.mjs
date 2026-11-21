@@ -6,6 +6,8 @@ import {parseControls} from '@githubnext/projections-renderer-sdk/protocol'
 import {nextSort, parseTableSort, sortTableRows, tableSortControls, tableSortOf, tableSortValue} from '../dist/index.js'
 import {DataTable} from '../dist/react.js'
 
+const noop = () => undefined
+
 const columns = [
   {id: 'name', label: 'Name', value: item => item.name},
   {id: 'lines', label: 'Lines', value: item => item.lines, sort: 'number'},
@@ -84,7 +86,7 @@ test('the sort controls are valid declarations whose values round-trip', () => {
 })
 
 const table = props =>
-  renderToStaticMarkup(createElement(DataTable, {label: 'Files', columns, rows, comparing: true, onSortChange: () => {}, ...props}))
+  renderToStaticMarkup(createElement(DataTable, {label: 'Files', columns, rows, comparing: true, onSortChange: noop, ...props}))
 
 test('the table is a labelled table whose sorted heading says its direction', () => {
   const markup = table({sort: {column: 'lines', direction: 'descending'}})

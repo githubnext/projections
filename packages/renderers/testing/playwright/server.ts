@@ -11,6 +11,8 @@ import type {AddressInfo} from 'node:net'
 import {resolve} from 'node:path'
 import {createInterface} from 'node:readline'
 
+const noop = () => undefined
+
 /** The options of `startInspector`: the scenarios and bundles to serve, and how to run the `projections` CLI. */
 export interface InspectorOptions {
   /** `scenarios.json` files, or directories that hold one. */
@@ -97,7 +99,9 @@ function backend(command: string, args: string[], cwd: string, env: NodeJS.Proce
   const pending = new Map<number, {done(value: unknown): void; fail(error: Error): void}>()
   let next = 0
   let ended: Error | undefined
-  const exited = new Promise<void>(done => child.once('close', () => done()))
+  const exited = new Promise<void>(done => {
+    child.once('close', () => done())
+  })
   const end = (error: Error) => {
     ended ??= error
     for (const call of pending.values()) call.fail(ended)
@@ -105,7 +109,7 @@ function backend(command: string, args: string[], cwd: string, env: NodeJS.Proce
   }
   child.once('error', error => end(new Error(`Could not run ${command}: ${error.message}. Pass cli or set PROJECTIONS_CLI.`)))
   void exited.then(() => end(new Error(`The Projections backend exited: ${diagnostic.trim()}`)))
-  child.stdin.on('error', () => {})
+  child.stdin.on('error', noop)
   const lines = createInterface({input: child.stdout, crlfDelay: Infinity})
   lines.on('line', line => {
     let message: {id?: number; result?: unknown; error?: {message: string}}
@@ -145,7 +149,9 @@ function backend(command: string, args: string[], cwd: string, env: NodeJS.Proce
       lines.close()
       if (child.exitCode !== null || child.signalCode !== null) return
       child.stdin.end()
-      const timer = setTimeout(() => child.kill('SIGKILL'), 5000)
+      const timer = setTimeout(() => {
+        child.kill('SIGKILL')
+      }, 5000)
       await exited
       clearTimeout(timer)
     },
@@ -202,7 +208,7 @@ export async function startInspector(options: InspectorOptions): Promise<Fixture
           clearTimeout(timer)
           done(value)
         },
-        (error: Error) => {
+        (error: unknown) => {
           clearTimeout(timer)
           fail(error)
         },
@@ -218,17 +224,23 @@ export async function startInspector(options: InspectorOptions): Promise<Fixture
   const server = createServer((request, response) => {
     void (async () => {
       // Only this address: a page on another site that rebinds a name to loopback can't reach the backend.
-      if (!hosts.has(request.headers.host ?? '')) return send(response, 403, 'text/plain', 'Forbidden')
+      if (!hosts.has(request.headers.host ?? '')) {
+        send(response, 403, 'text/plain', 'Forbidden')
+        return
+      }
       const path = (request.url ?? '/').split('?')[0]!
       const url = request.method === 'GET' && path === probe.path ? probe.asset : (request.url ?? '/')
       if (request.method === 'GET' && path === '/') {
-        return send(response, 200, 'text/html; charset=utf-8', page, {'content-security-policy': pageCsp})
+        send(response, 200, 'text/html; charset=utf-8', page, {'content-security-policy': pageCsp})
+        return
       }
       if (request.method === 'GET' && path === '/__projections/workbench.js') {
-        return send(response, 200, 'text/javascript; charset=utf-8', script, {'content-security-policy': pageCsp})
+        send(response, 200, 'text/javascript; charset=utf-8', script, {'content-security-policy': pageCsp})
+        return
       }
       if ((request.method !== 'GET' && request.method !== 'POST') || !relayed.some(prefix => url.startsWith(prefix))) {
-        return send(response, 404, 'text/plain', 'Not found')
+        send(response, 404, 'text/plain', 'Not found')
+        return
       }
       const aborted = new AbortController()
       response.on('close', () => {
@@ -260,7 +272,9 @@ export async function startInspector(options: InspectorOptions): Promise<Fixture
     page: (query = {}) => `${origin}/${Object.keys(query).length ? `?${new URLSearchParams(query)}` : ''}`,
     async close() {
       server.closeAllConnections()
-      await new Promise<void>(done => server.close(() => done()))
+      await new Promise<void>(done => {
+        server.close(() => done())
+      })
       await runner.close()
     },
   }
@@ -272,6 +286,6 @@ export function connectInspector(url: string): FixturesInspector {
   return {
     url,
     page: (query = {}) => `${origin}/${Object.keys(query).length ? `?${new URLSearchParams(query)}` : ''}`,
-    close: async () => {},
+    close: () => Promise.resolve(),
   }
 }

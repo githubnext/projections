@@ -16,7 +16,7 @@ export function useStageSize(stage: RefObject<HTMLDivElement | null>) {
   const [size, setSize] = useState<{width: number; height: number; chrome: number; fit: number; padding: number}>()
   useLayoutEffect(() => {
     const element = stage.current
-    if (!element) return
+    if (!element) return undefined
     const measure = () => {
       const style = getComputedStyle(element)
       const padding = {

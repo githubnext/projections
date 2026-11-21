@@ -19,6 +19,8 @@ import {RendererConnectionError, afterPaint, connectRenderer} from '../dist/clie
 import {dispatch} from '../dist/client/host-messages.js'
 import {refusal} from '../dist/react.js'
 
+const noop = () => undefined
+
 const channel = 'abcdefghijklmnop0123'
 const hostOrigin = 'https://host.example'
 const envelope = (message, overrides = {}) => ({projections: 0, channel, ...message, ...overrides})
@@ -510,8 +512,8 @@ test('observeHeight requests the height at once, before any resize is observed, 
       this.callback = callback
       observers.push(this)
     }
-    observe() {}
-    disconnect() {}
+    observe = noop
+    disconnect = noop
   }
   try {
     const client = connectRenderer({}, {capabilities: {changeHighlighting: 'none'}, window: fake.view})
@@ -1100,7 +1102,7 @@ test("a renderer's rendered echoes the latest init's generation, which its init 
 test('a paint finished after the host sent a new init echoes the generation of the init it painted', () => {
   const fake = fakeWindow()
   const frames = []
-  const view = {...fake.view, requestAnimationFrame: callback => frames.push(callback), cancelAnimationFrame: () => {}}
+  const view = {...fake.view, requestAnimationFrame: callback => frames.push(callback), cancelAnimationFrame: noop}
   const received = []
   const client = connectRenderer({init: payload => received.push(payload)}, {capabilities: {changeHighlighting: 'none'}, window: fake.view})
   const init = {type: 'init', mode: 'extraction', extraction, projection: {id: 'p', title: 'P', renderer: 'graph'}, ...environment}

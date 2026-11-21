@@ -77,7 +77,7 @@ export function usePaintAcknowledgement(
     }
   }, [])
   useEffect(() => {
-    if (!client || !init || holds.current) return
+    if (!client || !init || holds.current) return undefined
     return afterPaint(() => {
       if (!holds.current) client.rendered(hostProgress.progress, init)
     })
@@ -108,9 +108,10 @@ export function useFrameFillReport(
   // Sent as the layout commits, before the paint it is acknowledged with: a host that measures the frame once the paint
   // is acknowledged (a check, a screenshot) never sees it at the height from before, with the view placed for that.
   useLayoutEffect(() => {
-    if (!client || !root.current) return
+    if (!client || !root.current) return undefined
     if (!filling) return client.observeHeight(root.current)
     if (preferredHeight !== undefined) client.height(preferredHeight)
+    return undefined
   }, [client, filling, preferredHeight, root])
   return {filling: filling > 0, fill}
 }

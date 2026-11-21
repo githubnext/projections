@@ -39,7 +39,9 @@ export function paintedColors(
   if (colorAlpha(background) > 0) colors['background-color'] = background
   for (const side of Object.keys(borders)) colors[`border-${side}-color`] = normalizeColors(style.getPropertyValue(`border-${side}-color`))
   if (style.outlineStyle !== 'none' && px(style.outlineWidth) > 0) colors['outline-color'] = normalizeColors(style.outlineColor)
-  shadowColors(style.boxShadow).forEach((color, at) => (colors[`box-shadow ${at + 1}`] = color))
+  shadowColors(style.boxShadow).forEach((color, at) => {
+    colors[`box-shadow ${at + 1}`] = color
+  })
   if (style.textDecorationLine !== 'none' && text) colors['text-decoration-color'] = normalizeColors(style.textDecorationColor)
   if (svg) svgPaints(element, style, text, colors)
   return colors

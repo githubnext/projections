@@ -28,8 +28,11 @@ async function delayResizes(page: Page, delay: number): Promise<void> {
               return typeof value === 'function' ? value.bind(target) : value
             },
             set: (target, key, value) => {
-              if (key === 'height' && /^\d+px$/.test(String(value))) setTimeout(() => Reflect.set(target, key, value, target), delay)
-              else Reflect.set(target, key, value, target)
+              if (key === 'height' && /^\d+px$/.test(String(value))) {
+                setTimeout(() => {
+                  Reflect.set(target, key, value, target)
+                }, delay)
+              } else Reflect.set(target, key, value, target)
               return true
             },
           })
@@ -63,7 +66,9 @@ async function delayResizeObservations(page: Page, delay: number): Promise<void>
     const Observer = window.ResizeObserver
     window.ResizeObserver = class extends Observer {
       constructor(callback: ResizeObserverCallback) {
-        super((entries, observer) => setTimeout(() => callback(entries, observer), delay))
+        super((entries, observer) => {
+          setTimeout(() => callback(entries, observer), delay)
+        })
       }
     }
   }, delay)

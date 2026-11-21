@@ -144,7 +144,9 @@ export function routeLinks(
     const box = cards.get(id)!
     const ordered = [...list].sort((a, b) => a.from.x - b.from.x || (a.key < b.key ? -1 : 1))
     const offsets = spreadPorts(ordered.length, box.width)
-    ordered.forEach((link, index) => arrival.set(link.key, link.to.x + offsets[index]!))
+    ordered.forEach((link, index) => {
+      arrival.set(link.key, link.to.x + offsets[index]!)
+    })
   }
   const portsOf = (link: DiLinkFrame) =>
     downward(link) ? {start: link.from, end: {x: arrival.get(link.key)!, y: link.to.y - outset}} : ({} as {start?: Point; end?: Point})

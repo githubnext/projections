@@ -23,10 +23,12 @@ export function useDragPan(scroller: RefObject<HTMLElement | null>): void {
   const active = sizing === 'content' && cap !== undefined
   useEffect(() => {
     const element = scroller.current
-    if (!element || !active) return
+    if (!element || !active) return undefined
     element.dataset.pan = 'drag'
     const pannable = () => element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1
-    const mark = () => element.toggleAttribute('data-pannable', pannable())
+    const mark = () => {
+      element.toggleAttribute('data-pannable', pannable())
+    }
     mark()
     const observer = new ResizeObserver(mark)
     observer.observe(element)

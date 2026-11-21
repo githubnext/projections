@@ -61,12 +61,12 @@ function useInView(element: React.RefObject<HTMLElement | null>, margin: string,
     const target = element.current
     if (always) {
       setInView(true)
-      return
+      return undefined
     }
-    if (!target) return
+    if (!target) return undefined
     if (typeof IntersectionObserver === 'undefined') {
       setInView(true)
-      return
+      return undefined
     }
     const observer = new IntersectionObserver(entries => setInView(entries.some(entry => entry.isIntersecting)), {rootMargin: margin})
     observer.observe(target)
@@ -119,15 +119,19 @@ export function NestedStage({
   // One frame per scenario document: a new subject loads it again.
   useEffect(() => {
     const container = host.current
-    if (!near || !container || !scenario.subject || scenario.bundle !== undefined) return
+    if (!near || !container || !scenario.subject || scenario.bundle !== undefined) return undefined
     setState({status: 'loading', entity})
     const stop = loadNested(container, scenario, requestDocument, {
       present: declared =>
         nestedPresentation(entity.id, latest.current.title, latest.current.scenario, latest.current.environment, declared)!,
       label: () => latest.current.label,
       colorMode: () => latest.current.environment.theme.colorMode,
-      started: frame => (nested.current = frame),
-      animated: value => (animated.current = value),
+      started: frame => {
+        nested.current = frame
+      },
+      animated: value => {
+        animated.current = value
+      },
       select: () => latest.current.onSelect(),
       settled: next => setState({...next, entity}),
     })
@@ -149,7 +153,7 @@ export function NestedStage({
   // Hovering or focusing an animated comparison plays it once from before to after, then it rests again.
   useEffect(() => {
     const frame = nested.current
-    if (!frame || !playing || !animated.current || state.status !== 'ready' || environment.reducedMotion) return
+    if (!frame || !playing || !animated.current || state.status !== 'ready' || environment.reducedMotion) return undefined
     const view = host.current?.ownerDocument.defaultView ?? window
     const start = view.performance.now()
     let handle = 0
@@ -220,10 +224,10 @@ export function loadNested(
   let cancelled = false
   let failed = false
   let paint = 0
-  let release = () => {}
+  let release: (() => void) | undefined
   const fail = (message: string) => {
     view.clearTimeout(paint)
-    release()
+    release?.()
     if (failed || cancelled) return
     failed = true
     hooks.settled({status: 'failed', message})
@@ -231,7 +235,10 @@ export function loadNested(
   // A few renderers load at once, the rest queue, so a gallery drawn whole (an image of it) doesn't start dozens.
   void loads.acquire().then(free => {
     release = free
-    if (cancelled) return free()
+    if (cancelled) {
+      free()
+      return
+    }
     frame = embedRenderer({requestDocument}, container, {
       renderer: scenario.renderer,
       title: hooks.label(),
@@ -260,7 +267,7 @@ export function loadNested(
   return () => {
     cancelled = true
     view.clearTimeout(paint)
-    release()
+    release?.()
     frame?.dispose()
   }
 }

@@ -4,14 +4,16 @@ import type {RendererEnvironment} from '@githubnext/projections-renderer-sdk/pro
 import {contentHeightCap} from '../../fit.js'
 import type {CoverRect} from '../../fit.js'
 
-export const PaintGate = createContext<() => () => void>(() => () => {})
+const noop = () => undefined
+
+export const PaintGate = createContext<() => () => void>(() => noop)
 export interface FrameFillControl {
   /** Starts filling the frame; the returned function stops. */
   start(): () => void
   /** The content height to report while filling, once known. */
   prefer(height: number | undefined): void
 }
-export const FrameFill = createContext<FrameFillControl>({start: () => () => {}, prefer: () => {}})
+export const FrameFill = createContext<FrameFillControl>({start: () => noop, prefer: noop})
 
 /**
  * While the calling component is mounted, the renderer fills its frame's
@@ -119,7 +121,7 @@ export function stageInsetOf(
   return match ? Number(match[1]) : undefined
 }
 
-export const ContentAspect = createContext<(ratio: number | undefined) => void>(() => {})
+export const ContentAspect = createContext<(ratio: number | undefined) => void>(noop)
 
 /**
  * Reports the shape (width / height) of the content a renderer fits to its stage, over the whole transition, so a

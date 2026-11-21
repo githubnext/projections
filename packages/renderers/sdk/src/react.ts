@@ -186,7 +186,7 @@ export function useRenderer<const A extends readonly RendererAccepts[] | undefin
       )
     } catch (error) {
       setFailure(error instanceof Error ? error.message : String(error))
-      return
+      return undefined
     }
     setClient(connected)
     return () => connected.dispose()
@@ -194,7 +194,7 @@ export function useRenderer<const A extends readonly RendererAccepts[] | undefin
   const acknowledge = options.acknowledge !== false
   const {init, progress} = state
   useEffect(() => {
-    if (!client || !acknowledge || !init) return
+    if (!client || !acknowledge || !init) return undefined
     return afterPaint(() => client.rendered(progress.progress, init))
   }, [client, acknowledge, init, progress])
   const [declared] = useState(() => capabilities.controls ?? [])
@@ -227,7 +227,7 @@ export function useInteractions(
   const partOf = useRef(options.partOf)
   partOf.current = options.partOf
   useEffect(() => {
-    if (!client || !root.current) return
+    if (!client || !root.current) return undefined
     const created = connectInteractions(client, root.current, {
       ...(attribute ? {attribute} : {}),
       select: id => (select.current ? select.current(id) : client.select(id)),

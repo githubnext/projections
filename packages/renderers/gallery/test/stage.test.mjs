@@ -2,10 +2,15 @@ import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {concurrentLoads, loadNested, paintTimeoutMs} from '../node_modules/.cache/test/stage.js'
 
+const noop = () => undefined
+
 const extraction = {protocolVersion: 0, schema: 'graph/v0', entities: [], relationships: []}
 const scenario = {renderer: 'graph', subject: {mode: 'extraction', extraction}}
 const present = () => ({init: {mode: 'extraction', extraction, projection: {id: 's', title: 'S', renderer: 'graph'}}})
-const tick = () => new Promise(resolve => setImmediate(resolve))
+const tick = () =>
+  new Promise(resolve => {
+    setImmediate(resolve)
+  })
 
 /** A window whose timers run on demand, and containers whose frames can speak to it as their renderers would. */
 function host() {
@@ -21,16 +26,16 @@ function host() {
   }
   const requestDocument = async () => '<!doctype html><html><head></head><body></body></html>'
   const load = () => {
-    const iframe = {dataset: {}, style: {}, srcdoc: '', setAttribute() {}, remove() {}, contentWindow: {postMessage() {}}}
-    const container = {ownerDocument: {defaultView: view, createElement: () => iframe}, append() {}}
+    const iframe = {dataset: {}, style: {}, srcdoc: '', setAttribute: noop, remove: noop, contentWindow: {postMessage: noop}}
+    const container = {ownerDocument: {defaultView: view, createElement: () => iframe}, append: noop}
     const states = []
     const stop = loadNested(container, scenario, requestDocument, {
       present,
       label: () => 'S',
       colorMode: () => 'light',
-      started() {},
-      animated() {},
-      select() {},
+      started: noop,
+      animated: noop,
+      select: noop,
       settled: state => states.push(state),
     })
     const say = message => {

@@ -4,6 +4,8 @@ import {openStage, ringGeometry, ringPixelReport} from '@githubnext/projections-
 import {harnessInspector} from '@githubnext/projections-renderer-harness/playwright'
 import {scenarios} from './scenarios.js'
 
+const noop = () => undefined
+
 /**
  * Every built-in renderer's rings, in pixels: for the first entities of each
  * renderer's first scenarios, the selection and keyboard focus rings the SDK
@@ -34,7 +36,7 @@ for (const directory of [...new Set(scenarios.map(item => item.directory))]) {
       if (!frame) throw new Error('no renderer frame')
       for (const id of (await stage.measure<string[]>('entities')).slice(0, perScenario)) {
         const element = stage.frame.locator(`[data-entity-id="${id.replaceAll('"', '\\"')}"]`).first()
-        await element.scrollIntoViewIfNeeded().catch(() => {})
+        await element.scrollIntoViewIfNeeded().catch(noop)
         for (const state of ['selected', 'focus'] as const) {
           const show = async () => {
             if (state === 'selected') await stage.select(id)
@@ -62,7 +64,11 @@ for (const directory of [...new Set(scenarios.map(item => item.directory))]) {
                 const target = (item.matches(focusable) ? item : item.querySelector(focusable)) as HTMLElement | null
                 if (focus && on) target?.focus({preventScroll: true, focusVisible: true} as FocusOptions)
                 if (focus && !on) target?.blur()
-                return new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+                return new Promise<void>(resolve => {
+                  requestAnimationFrame(() => {
+                    requestAnimationFrame(() => resolve())
+                  })
+                })
               },
               [on, state === 'focus'] as const,
             )
@@ -118,7 +124,11 @@ for (const {scenario, diff} of [
     const rings = (on: boolean) =>
       frame.evaluate(on => {
         for (const sheet of document.querySelectorAll<HTMLStyleElement>('style[data-projections-rings]')) sheet.disabled = !on
-        return new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+        return new Promise<void>(resolve => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => resolve())
+          })
+        })
       }, on)
     const measure = async (id: string, where: string) => {
       const element = stage.frame.locator(`[data-entity-id="${id.replaceAll('"', '\\"')}"]`).first()
@@ -151,7 +161,7 @@ for (const {scenario, diff} of [
         await stage.measure('settle')
         await measure(id, `after ${action}`)
       }
-      await stage.action('zoom-fit').catch(() => {})
+      await stage.action('zoom-fit').catch(noop)
     }
     await stage.select(null)
     expect(failures).toEqual([])

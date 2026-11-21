@@ -21,13 +21,13 @@ async function presentations(
     const ends = steps.filter(end => end > 0 && end < 1)
     const at = ends.length ? ends.filter((_, index) => index % Math.ceil(ends.length / 8) === 0) : [0.5]
     // The first loads the animation (the diff may have been loaded since), the rest seek through it.
-    at.forEach((progress, index) =>
+    at.forEach((progress, index) => {
       views.push({
         where: `At progress ${Math.round(progress * 1000) / 1000}`,
         load: () =>
           index ? driver.seek(progress, {highlighting: 1}) : driver.load(subject, {progress, comparisonMode: 'animated', highlighting: 1}),
-      }),
-    )
+      })
+    })
   } else {
     const progressMode = modes.find(mode => progressModes.includes(mode))
     if (progressMode) {

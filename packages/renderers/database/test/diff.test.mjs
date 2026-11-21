@@ -15,6 +15,8 @@ import {schemaMetrics} from '../node_modules/.cache/test/schema.js'
 import {DatabaseRenderer} from '../node_modules/.cache/test/view.js'
 import {databaseContext} from '../node_modules/.cache/test/scope.js'
 
+const noop = () => undefined
+
 const engine = createNativeEngine()
 const scenarios = JSON.parse(readFileSync(new URL('../scenarios.json', import.meta.url), 'utf8')).scenarios
 const load = value => (typeof value === 'string' ? JSON.parse(readFileSync(new URL(`../${value}`, import.meta.url), 'utf8')) : value)
@@ -179,10 +181,10 @@ const render = (model, diff, highlighting = 1) =>
       init: {},
       model,
       direction: 1,
-      onOpen() {},
-      reportSteps() {},
-      declareControls() {},
-      onAction: () => () => {},
+      onOpen: noop,
+      reportSteps: noop,
+      declareControls: noop,
+      onAction: () => noop,
       viewport: undefined,
       schedule: [],
       progress: 1,
@@ -192,7 +194,7 @@ const render = (model, diff, highlighting = 1) =>
       diff,
       selectedId: null,
       hoveredId: null,
-      onSelect() {},
+      onSelect: noop,
       controls: {},
       options: {},
       reducedMotion: true,

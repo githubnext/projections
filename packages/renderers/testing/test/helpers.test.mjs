@@ -7,6 +7,8 @@ import {allChecks, checkTitles, runChecks} from '../dist/src/index.js'
 import {checkFailures, connectInspector, samples, scenarioKeys} from '../dist/playwright/index.js'
 import {StageRecord, bounded} from '../dist/playwright/bounded.js'
 
+const noop = () => undefined
+
 test('scenario keys use the directory name for scenarios.json and the file name otherwise', () => {
   const root = mkdtempSync(join(tmpdir(), 'projections-testing-'))
   mkdirSync(join(root, 'graph'))
@@ -70,8 +72,8 @@ function fakeDriver(
         const {subject, ...options} = loads.at(-1)
         return this.load(subject, {...options, progress})
       },
-      select() {},
-      hover() {},
+      select: noop,
+      hover: noop,
       state: () => ({selections: []}),
       async measure(call) {
         const unchanged = loads.at(-1).subject.comparison?.changes.length === 0
@@ -87,7 +89,7 @@ function fakeDriver(
       async compare() {
         return {protocolVersion: 0, changes: [], steps: []}
       },
-      sleep: async () => {},
+      sleep: () => Promise.resolve(),
     },
   }
 }
@@ -142,9 +144,9 @@ test('stable-layout compares two diffs once each frame has the height its render
         rejected: [],
       }
     },
-    async seek() {},
-    select() {},
-    hover() {},
+    seek: () => Promise.resolve(),
+    select: noop,
+    hover: noop,
     state: () => ({selections: [], height: 1217}),
     async measure(call) {
       if (call === 'settle' && pending && !--pending) height = 1217
@@ -155,7 +157,7 @@ test('stable-layout compares two diffs once each frame has the height its render
     async compare() {
       return {protocolVersion: 0, changes: [], steps: []}
     },
-    sleep: async () => {},
+    sleep: () => Promise.resolve(),
   }
   const [result] = await runChecks(driver, subject, {checks: ['stable-layout']})
   assert.equal(result.status, 'pass', result.details.join('\n'))
@@ -363,7 +365,7 @@ function styledDriver(elements, exemptions = []) {
       if (call === 'styles') return {tokens: tokens(colorMode), elements: elements(colorMode), exemptions}
       return undefined
     },
-    sleep: async () => {},
+    sleep: () => Promise.resolve(),
   }
 }
 const element = (index, properties) => ({
@@ -442,7 +444,7 @@ test('stage-surface passes a field on the stage or transparent and names whateve
         const samples = ['top left', 'top right', 'left side', 'right side'].map(where => ({where, at: '2, 2', ...paint(where, colorMode)}))
         return {stage: stage[colorMode], samples}
       },
-      sleep: async () => {},
+      sleep: () => Promise.resolve(),
     }
   }
   const onStage = fieldDriver((where, mode) =>
@@ -469,7 +471,7 @@ test('stage-insets passes equal insets, names uneven ones and skips fitted drawi
   const insetDriver = measured => ({
     load: async () => ({status: 'ready', capabilities: {changeHighlighting: 'supported', comparisonModes: ['diff']}}),
     measure: async (call, _args) => (call === 'stageInsets' ? measured : undefined),
-    sleep: async () => {},
+    sleep: () => Promise.resolve(),
   })
   const even = {cards: 1, first: 'div.panel', insets: {top: 12, right: 12, bottom: 12.4, left: 12}}
   const [passing] = await runChecks(insetDriver(even), subject, {checks: ['stage-insets']})
@@ -575,7 +577,7 @@ test('nested-accents fails a change color inside another, and lets an item keep 
     async measure(call) {
       return call === 'accents' ? nestings : undefined
     },
-    sleep: async () => {},
+    sleep: () => Promise.resolve(),
   })
   const card = paint('li.card[data-entity-id="a"]', 'modified', 'background-color', 'a')
   const own = [
@@ -614,7 +616,7 @@ test('link-routes reports a link drawn across cards, and skips a renderer that r
     async measure(call) {
       return call === 'routes' ? measurement : undefined
     },
-    sleep: async () => {},
+    sleep: () => Promise.resolve(),
   })
   const [clear] = await runChecks(routesDriver({count: 3, crossing: []}), subject, {checks: ['link-routes']})
   assert.equal(clear.status, 'pass', clear.details.join('\n'))
@@ -649,7 +651,7 @@ test('nested-accents measures the animation in animated mode, after the diff', a
     async measure(call) {
       return call === 'accents' ? [] : undefined
     },
-    sleep: async () => {},
+    sleep: () => Promise.resolve(),
   }
   const [result] = await runChecks(driver, subject, {checks: ['nested-accents']})
   assert.equal(result.status, 'pass')
@@ -663,7 +665,7 @@ test('a stage request the page never answers fails, naming it, the scenario and 
   const state = {status: 'ready', bundle: 'graph', comparisonMode: 'diff', progress: 1, rendered: 1, height: 1217, errors: []}
   assert.equal(await bounded(record, 'state', Promise.resolve(state), 1000), state)
   await assert.rejects(
-    bounded(record, 'measure(settle)', new Promise(() => {}), 50),
+    bounded(record, 'measure(settle)', new Promise(noop), 50),
     error =>
       /didn't answer measure\(settle\) for graph\/npm-express-5 within 0\.05 s/.test(error.message) &&
       /status ready, renderer graph, diff, progress 1, painted 1, asked for 1217px; it last answered state/.test(error.message),

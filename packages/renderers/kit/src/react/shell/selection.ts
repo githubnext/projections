@@ -126,7 +126,10 @@ export function useSelection(
   )
   const onSelect = useCallback(
     (id: string | null) => {
-      if (id === null || id !== current.current) return setSelection(id)
+      if (id === null || id !== current.current) {
+        setSelection(id)
+        return
+      }
       // The second click of a double-click keeps the item its first click selected.
       if (clicks.current > 1) handled.current = true
       else setSelection(null)

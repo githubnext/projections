@@ -324,9 +324,9 @@ function useNarrow() {
   // Measured before paint, so a narrow frame never flashes two columns.
   useLayoutEffect(() => {
     const element = ref.current
-    if (!element) return
+    if (!element) return undefined
     setNarrow(element.clientWidth < narrowWidth)
-    if (typeof ResizeObserver === 'undefined') return
+    if (typeof ResizeObserver === 'undefined') return undefined
     const observer = new ResizeObserver(() => setNarrow(element.clientWidth < narrowWidth))
     observer.observe(element)
     return () => observer.disconnect()

@@ -33,7 +33,7 @@ export function useTextMeasure(): {probe: ReactNode; measure?: MeasureText; chro
   useLayoutEffect(() => {
     const element = root.current
     const context = typeof document === 'undefined' ? null : document.createElement('canvas').getContext('2d')
-    if (!element || !context) return
+    if (!element || !context) return undefined
     const read = () => {
       const fonts = new Map<TextRole, string>()
       for (const role of roles) {

@@ -10,6 +10,8 @@ import {segments} from '../node_modules/.cache/test/folding.js'
 import {outputOrder, TextDiffView} from '../node_modules/.cache/test/view.js'
 import {plain} from '../../kit/test/markup.mjs'
 
+const noop = () => undefined
+
 const engine = createNativeEngine()
 const graph = entities => ({protocolVersion: 0, schema: 'graph/v0', entities, relationships: []})
 const output = (id, text, presentation) => ({id, kind: 'output', label: id, data: {text, ...(presentation ? {presentation} : {})}})
@@ -40,15 +42,15 @@ const props = (model, progress, {comparing = true, highlighting = 1, schedule = 
   schedule,
   rendererName: 'text-diff',
   selectedId: null,
-  onSelect() {},
-  onOpen() {},
-  reportSteps() {},
+  onSelect: noop,
+  onOpen: noop,
+  reportSteps: noop,
   controls: options,
-  declareControls() {},
+  declareControls: noop,
   get emphasis() {
     return stepEmphasis(this.schedule ?? [], this.progress, this.highlighting)
   },
-  onAction: () => () => {},
+  onAction: () => noop,
   options,
   viewport: undefined,
   reducedMotion: false,

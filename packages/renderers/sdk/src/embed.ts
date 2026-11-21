@@ -12,6 +12,8 @@ import type {
 } from './protocol.js'
 import type {RendererClient} from './client.js'
 
+const noop = () => undefined
+
 /** What `embedRenderer` runs and how it reports back. */
 export interface EmbedOptions {
   /** The built-in renderer to run, by name, for example `graph`. */
@@ -148,7 +150,7 @@ export function embedRenderer(
     readiness = {resolve, reject}
   })
   // Nobody need observe a failure for it to be handled.
-  ready.catch(() => {})
+  ready.catch(noop)
   const send = (message: HostMessage) => {
     if (disposed || !capabilities) return
     iframe.contentWindow?.postMessage({projections: rendererProtocolVersion, channel, ...message}, '*')
@@ -165,10 +167,9 @@ export function embedRenderer(
     readiness.reject(new Error(message))
     options.onFailure?.(message)
   }
-  const timer = view.setTimeout(
-    () => capabilities || fail(`The ${options.renderer} renderer did not become ready`),
-    rendererLimits.readyTimeoutMs + rendererLimits.documentTimeoutMs,
-  )
+  const timer = view.setTimeout(() => {
+    if (!capabilities) fail(`The ${options.renderer} renderer did not become ready`)
+  }, rendererLimits.readyTimeoutMs + rendererLimits.documentTimeoutMs)
   // The frame's size, as a host reports it on load and whenever it changes.
   let size = ''
   const sendViewport = () => {

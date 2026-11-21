@@ -7,6 +7,8 @@ import {extractionModel, scheduleSteps, stepEmphasis} from '@githubnext/projecti
 import {createDatabaseTransition} from '../node_modules/.cache/test/transition.js'
 import {DatabaseRenderer} from '../node_modules/.cache/test/view.js'
 
+const noop = () => undefined
+
 const extraction = (entities, relationships) => ({protocolVersion: 0, schema: 'database/v0', entities, relationships})
 const frameOf = value => createDatabaseTransition(extractionModel(value), [], {available: 1100})(1)
 const markupOf = value => {
@@ -22,13 +24,13 @@ const markupOf = value => {
       schedule: scheduleSteps(model),
       rendererName: 'database',
       selectedId: null,
-      onSelect() {},
-      onOpen() {},
-      reportSteps() {},
+      onSelect: noop,
+      onOpen: noop,
+      reportSteps: noop,
       controls: {},
-      declareControls() {},
+      declareControls: noop,
       emphasis: stepEmphasis([], 1, 0),
-      onAction: () => () => {},
+      onAction: () => noop,
       options: {},
       viewport: undefined,
     }),

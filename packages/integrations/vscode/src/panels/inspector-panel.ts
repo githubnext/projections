@@ -9,7 +9,7 @@ import {InspectorWebview} from './inspector-webview.js'
 export class InspectorPanel extends InspectorWebview {
   private static readonly panels = new Map<string, InspectorPanel>()
 
-  static async show(services: Services, source: PanelSource, view: 'explore' | 'inspect' = 'inspect') {
+  static async open(services: Services, source: PanelSource, view: 'explore' | 'inspect' = 'inspect') {
     const key = sourceKey(source)
     let panel = InspectorPanel.panels.get(key)
     if (panel) {

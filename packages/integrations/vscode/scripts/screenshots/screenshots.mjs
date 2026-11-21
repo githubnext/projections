@@ -25,7 +25,9 @@ for (const shot of shots.filter(item => !only || only.includes(item.file))) {
     const frame = await inspectorFrame(window)
     await frame.locator('[data-host-ui="vscode"] .phv-root[data-renderer-status="ready"]').first().waitFor({timeout: 90_000})
     // Renderer layout and the toolbar's measured layout settle.
-    await new Promise(resolve => setTimeout(resolve, 4000))
+    await new Promise(resolve => {
+      setTimeout(resolve, 4000)
+    })
     await window.screenshot({path: join(output, `${shot.file}.png`)})
     console.log(shot.file)
   } finally {
@@ -44,7 +46,9 @@ if (!only || only.includes('vscode-explore-dark')) {
     await frame.locator('td.pi-sweep-cell').first().waitFor({timeout: 120_000})
     await frame.locator('section[aria-labelledby="pi-sweep-title"] form button[type="submit"]:not([disabled])').waitFor({timeout: 120_000})
     // Thumbnails render one at a time.
-    await new Promise(resolve => setTimeout(resolve, 8000))
+    await new Promise(resolve => {
+      setTimeout(resolve, 8000)
+    })
     await window.screenshot({path: join(output, 'vscode-explore-dark.png')})
     console.log('vscode-explore-dark')
   } finally {

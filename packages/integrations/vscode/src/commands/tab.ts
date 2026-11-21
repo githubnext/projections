@@ -55,8 +55,8 @@ export function tabCommands(sources: ProjectionSources): vscode.Disposable[] {
     vscode.commands.registerCommand('projections.openDefinition', async (node?: unknown) => {
       const target = rowTarget(node) ?? {folder: current().folder, id: current().projection}
       const file = await definitionFile(target.folder, target.id)
-      if (file) return vscode.window.showTextDocument(file)
-      void vscode.window.showWarningMessage(`Projections: no definition file defines ${target.id}`)
+      if (file) await vscode.window.showTextDocument(file)
+      else void vscode.window.showWarningMessage(`Projections: no definition file defines ${target.id}`)
     }),
   ]
 }

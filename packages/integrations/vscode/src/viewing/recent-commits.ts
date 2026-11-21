@@ -4,6 +4,7 @@ import type {RecentState} from '../choices/viewing-rows.js'
 import {sweepProgress} from '../develop-model.js'
 import type {FolderModel} from '../folder-model.js'
 import type {Recent, Sweep, ViewingHost} from './types.js'
+import {noop} from '../noop.ts'
 
 const themeOf = (): 'light' | 'dark' => {
   const kind = vscode.window.activeColorTheme.kind
@@ -103,7 +104,7 @@ export class RecentCommits {
       },
       async (_progress, token) => {
         const cancel = token.onCancellationRequested(
-          () => void this.host.request(model.folder, {method: 'POST', path: '/api/sweep', body: {cancel: true}}).catch(() => {}),
+          () => void this.host.request(model.folder, {method: 'POST', path: '/api/sweep', body: {cancel: true}}).catch(noop),
         )
         try {
           for (;;) {
@@ -113,7 +114,9 @@ export class RecentCommits {
             recent.sweep = sweep
             this.changed()
             if (sweep.status !== 'running') break
-            await new Promise(resolve => setTimeout(resolve, 500))
+            await new Promise(resolve => {
+              setTimeout(resolve, 500)
+            })
           }
         } finally {
           cancel.dispose()

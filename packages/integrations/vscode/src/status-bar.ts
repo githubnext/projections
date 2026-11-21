@@ -98,7 +98,10 @@ export class StatusBar implements vscode.Disposable {
         folder: (vscode.workspace.workspaceFolders?.length ?? 0) > 1 ? model.folder.name : undefined,
       })
     this.readout = Boolean(model && shown)
-    if (!model || !shown) return this.apply()
+    if (!model || !shown) {
+      this.apply()
+      return
+    }
     this.item.text = shown.text
     // A new tooltip only when it says something new, so an open hover doesn't flicker.
     if (!(this.item.tooltip instanceof vscode.MarkdownString) || this.item.tooltip.value !== shown.tooltip) {

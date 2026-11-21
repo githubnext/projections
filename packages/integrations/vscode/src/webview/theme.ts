@@ -22,7 +22,9 @@ export function vscodeTheme(): NonNullable<InspectorHost['theme']> {
     get: () => current,
     subscribe(listener) {
       listeners.add(listener)
-      return () => listeners.delete(listener)
+      return () => {
+        listeners.delete(listener)
+      }
     },
   }
 }

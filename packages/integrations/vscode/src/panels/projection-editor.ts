@@ -6,12 +6,13 @@ import {parseProjectionQuery} from '../projections/resources.js'
 import type {Services} from '../services.js'
 import {projectionViewType} from '../decorations.js'
 import {ProjectionTab} from './projection-tab.js'
+import {noop} from '../noop.ts'
 
 /** The projection editor: a read-only custom editor on `projection:` resources, one projection per tab. */
 export function projectionEditor(services: Services): vscode.CustomReadonlyEditorProvider {
   const {context, sidebar} = services
   return {
-    openCustomDocument: uri => ({uri, dispose() {}}),
+    openCustomDocument: uri => ({uri, dispose: noop}),
     async resolveCustomEditor(document, panel) {
       const parsed = parseProjectionQuery(document.uri.query)
       const folder = parsed && vscode.workspace.workspaceFolders?.find(item => item.uri.toString() === parsed.folder)

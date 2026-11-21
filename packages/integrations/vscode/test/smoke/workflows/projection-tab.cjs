@@ -187,7 +187,9 @@ module.exports = async function projectionTab({folder, api, manifest, mergeBase,
       if (samples.length && samples.at(-1).at > 0.5 && at < samples.at(-1).at) break
       samples.push({at, playing: label === 'pause'})
       if (!samples.at(-1).playing) break
-      await new Promise(resolve => setTimeout(resolve, 40))
+      await new Promise(resolve => {
+        setTimeout(resolve, 40)
+      })
     }
     const trace = JSON.stringify(samples.map(({at, playing}) => `${Math.round(at * 1000) / 1000}${playing ? '' : ' stopped'}`))
     assert.ok(

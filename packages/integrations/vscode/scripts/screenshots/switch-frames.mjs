@@ -13,6 +13,8 @@ import {chromium} from 'playwright-core'
 import {createDemoRepository} from '../../test/smoke/demo-repo.mjs'
 import {cli, command, inspectorFrame, launch} from './electron.mjs'
 
+const noop = () => undefined
+
 const output = process.argv[2]
 if (!output) throw new Error('Usage: switch-frames.mjs <output directory> [repository] [projection title]')
 const source = process.argv[3]
@@ -25,7 +27,10 @@ if (source) execFileSync('cp', ['-R', source, repository])
 const log = join(await mkdtemp(join(tmpdir(), 'projections-switch-log-')), 'events.jsonl')
 process.env.PROJECTIONS_TEST_EVENT_LOG = log
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+const sleep = ms =>
+  new Promise(resolve => {
+    setTimeout(resolve, ms)
+  })
 /** Records each distinct state of `read()` once a frame, in the page it runs in, as `globalThis[key]`. */
 function sampler({key, read}) {
   const reader = new Function(`return (${read})()`)
@@ -119,7 +124,7 @@ try {
   const screencast = []
   cdp.on('Page.screencastFrame', ({data, sessionId, metadata}) => {
     screencast.push({t: Math.round(metadata.timestamp * 1000), data})
-    void cdp.send('Page.screencastFrameAck', {sessionId}).catch(() => {})
+    void cdp.send('Page.screencastFrameAck', {sessionId}).catch(noop)
   })
   await cdp.send('Page.startScreencast', {format: 'jpeg', quality: 70, maxWidth: 1440, maxHeight: 900, everyNthFrame: 1})
   // Current state, Uncommitted changes and the first recent commit, twice: extracted the first time, shown again after.
@@ -174,7 +179,7 @@ try {
     await writeFile(join(output, `switch-${index + 1}.html`), html)
     console.log(JSON.stringify({switch: index + 1, to: label, counts, renderer, pageStates: page.length, sidebarStates: side.length}))
   }
-  await cdp.send('Page.stopScreencast').catch(() => {})
+  await cdp.send('Page.stopScreencast').catch(noop)
   // Each strip as an image, and how many of its frames show the editor's view blank: next to no ink where the graph is.
   const browser = await chromium.launch()
   try {

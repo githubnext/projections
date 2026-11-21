@@ -12,6 +12,7 @@ import {
   utf16Range,
 } from './rules-service.js'
 import type {RulesKind} from './rules-service.js'
+import {noop} from './noop.ts'
 
 /** How long typing pauses before a comparator file is checked again. */
 const diagnosticsDelayMs = 300
@@ -55,7 +56,7 @@ export function registerRulesLanguage(context: vscode.ExtensionContext, output: 
   const worker = context.asAbsolutePath('dist/rules-worker.cjs')
   if (!existsSync(wasm) || !existsSync(worker)) {
     output.warn(`Comparator file editing is off: ${existsSync(wasm) ? worker : wasm} is missing`)
-    return new vscode.Disposable(() => {})
+    return new vscode.Disposable(noop)
   }
   const service = new RulesService({worker, wasm})
   let reported = false

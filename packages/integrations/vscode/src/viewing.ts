@@ -24,6 +24,7 @@ import {RecentCommits} from './viewing/recent-commits.js'
 import {rowKey, shownRow} from './viewing/rows.js'
 import {treeItem} from './viewing/tree-item.js'
 import type {Node, ViewingHost, ViewingItem} from './viewing/types.js'
+import {noop} from './noop.ts'
 
 export class ViewingView implements vscode.TreeDataProvider<Node>, vscode.Disposable {
   private readonly changed = new vscode.EventEmitter<Node | undefined>()
@@ -92,7 +93,7 @@ export class ViewingView implements vscode.TreeDataProvider<Node>, vscode.Dispos
   getChildren(node?: Node): Node[] {
     if (node?.kind === 'group') {
       // Expanding Recent changes the first time checks the recent commits.
-      if (node.group === 'recent' && !this.recent.state(node.model).sweep) void this.recent.find(node.model, false).catch(() => {})
+      if (node.group === 'recent' && !this.recent.state(node.model).sweep) void this.recent.find(node.model, false).catch(noop)
       return node.children.map(row => ({...row, model: node.model}))
     }
     if (node) return []
@@ -134,14 +135,14 @@ export class ViewingView implements vscode.TreeDataProvider<Node>, vscode.Dispos
     const {model} = node
     if (node.kind === 'recent') {
       const pair = {before: node.change.before, after: node.change.after}
-      return model.choose({id: pairChoiceId(pair), pair, title: node.change.title})
+      model.choose({id: pairChoiceId(pair), pair, title: node.change.title})
+      return
     }
     if (node.kind !== 'choice') return
     const reason = unavailableReason(node.choice, model.facts())
     if (reason) {
-      return void vscode.window.showInformationMessage(
-        `Projections: ${model.describe(node.choice, undefined).name} isn't available: ${reason}`,
-      )
+      void vscode.window.showInformationMessage(`Projections: ${model.describe(node.choice, undefined).name} isn't available: ${reason}`)
+      return
     }
     model.choose(node.choice)
   }

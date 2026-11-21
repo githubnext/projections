@@ -4,6 +4,8 @@ import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {eventLine, prepareEnvironment, provenanceBadge, workspaceArguments} from '../src/environment-model.ts'
 
+const noop = () => undefined
+
 test('preparing starts a run, reports each new event once and returns the finished run', async () => {
   const requests = []
   const states = [
@@ -36,10 +38,7 @@ test('preparing starts a run, reports each new event once and returns the finish
 
 test("a refused preparation fails with the backend's reason, and aborting cancels it in the backend", async () => {
   const refused = {request: async () => ({status: 403, contentType: 'application/json', body: {error: 'trust the workspace'}, size: 1})}
-  await assert.rejects(
-    prepareEnvironment(refused, {}, () => {}),
-    /trust the workspace/,
-  )
+  await assert.rejects(prepareEnvironment(refused, {}, noop), /trust the workspace/)
   const requests = []
   const abort = new AbortController()
   const slow = {
@@ -56,7 +55,7 @@ test("a refused preparation fails with the backend's reason, and aborting cancel
       }
     },
   }
-  const run = await prepareEnvironment(slow, {}, () => {}, abort.signal, 1)
+  const run = await prepareEnvironment(slow, {}, noop, abort.signal, 1)
   assert.equal(run.status, 'cancelled')
   assert.ok(requests.some(request => request.method === 'POST' && request.path === '/api/prepare/r2/cancel'))
 })

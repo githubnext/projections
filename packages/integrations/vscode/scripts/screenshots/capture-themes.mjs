@@ -42,7 +42,9 @@ for (const theme of themes.filter(item => !only || only.includes(item.id))) {
       join(output, `${theme.id}.json`),
       `${JSON.stringify({id: theme.id, name: captured.themeName, setting: theme.name, kind: theme.kind, source: `VS Code ${await app.evaluate(({app}) => app.getVersion())}, webview-injected CSS`, bodyClasses: captured.bodyClasses, themeKind: captured.themeKind, variables: sorted}, null, 2)}\n`,
     )
-    await new Promise(resolve => setTimeout(resolve, 6000))
+    await new Promise(resolve => {
+      setTimeout(resolve, 6000)
+    })
     await window.screenshot({path: join(output, `${theme.id}.vscode.png`)})
     console.log(theme.id, Object.keys(sorted).length, 'variables')
   } finally {

@@ -2,6 +2,7 @@
 // (`POST /api/prepare`, then `GET /api/prepare/:id` until it finishes), the lines its output channel shows, the
 // backend arguments a workspace strategy adds, and the provenance badge an extraction's run earns.
 import type {Runner} from './runner.js'
+import {noop} from './noop.ts'
 
 /** What `POST /api/prepare` and `GET /api/prepare/:id` return. */
 export interface PrepareRun {
@@ -37,6 +38,8 @@ export function eventLine(event: PrepareEvent): string {
     case 'failed':
       return `✗ ${event.step}: ${event.error ?? 'failed'}${event.log ? ` (log: ${event.log})` : ''}`
   }
+  // An event a newer CLI reports: its step and name.
+  return `${event.step}: ${String(event.event)}`
 }
 
 /**
@@ -57,7 +60,7 @@ export async function prepareEnvironment(
   const started = await runner.request({method: 'POST', path: '/api/prepare', body})
   if (started.status !== 202) throw new Error(refusal(started.body) ?? `Preparing failed (${started.status})`)
   const id = (started.body as PrepareRun).id
-  const cancel = () => void runner.request({method: 'POST', path: `/api/prepare/${id}/cancel`}).catch(() => {})
+  const cancel = () => void runner.request({method: 'POST', path: `/api/prepare/${id}/cancel`}).catch(noop)
   signal?.addEventListener('abort', cancel, {once: true})
   let shown = 0
   try {
@@ -68,7 +71,9 @@ export async function prepareEnvironment(
       for (const event of run.events.slice(shown)) report(eventLine(event))
       shown = run.events.length
       if (run.status !== 'running') return run
-      await new Promise(resolve => setTimeout(resolve, pollMs))
+      await new Promise(resolve => {
+        setTimeout(resolve, pollMs)
+      })
     }
   } finally {
     signal?.removeEventListener('abort', cancel)

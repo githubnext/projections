@@ -21,6 +21,8 @@ import {parseWrite, refusal} from '../src/writes.ts'
 import {addToCiPrompt, isAddToCiChoice} from '../src/projections/ci.ts'
 import {rendererPackage, scenarioRenderer, sourceArguments} from '../src/sources.ts'
 
+const noop = () => undefined
+
 const cli = fileURLToPath(new URL(`../../../cli/dist/projections${process.platform === 'win32' ? '.exe' : ''}`, import.meta.url))
 
 /** A fake backend: answers like `serve --stdio` would, from a table of paths. */
@@ -32,7 +34,9 @@ function fakeRunner(answers) {
       seen.push(request)
       const answer = answers[request.path]
       if (answer === 'hang') {
-        return new Promise((_, reject) => signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError'))))
+        return new Promise((_, reject) => {
+          signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
+        })
       }
       if (answer instanceof Error) return Promise.reject(answer)
       return Promise.resolve({size: JSON.stringify(answer?.body ?? null).length, ...answer})
@@ -97,7 +101,9 @@ test('an aborted request is cancelled in the backend and not answered', async ()
   bridge.receive({tag: transportTag, type: 'request', id: 1, method: 'GET', path: '/api/changes?since=1'})
   bridge.receive({tag: transportTag, type: 'abort', id: 1})
   bridge.receive({tag: transportTag, type: 'request', id: 2, method: 'GET', path: '/api/revisions'})
-  await new Promise(resolve => setTimeout(resolve, 50))
+  await new Promise(resolve => {
+    setTimeout(resolve, 50)
+  })
   assert.deepEqual(
     replies.map(reply => [reply.id, reply.type]),
     [[2, 'response']],
@@ -114,7 +120,11 @@ test('the JSON-RPC client matches replies by id, cancels on abort, relays notifi
   client.onNotification((method, params) => notifications.push([method, params]))
   const reply = message => fromBackend.write(`${JSON.stringify({jsonrpc: '2.0', ...message})}\n`)
   const next = async count => {
-    while (sent.length < count) await new Promise(resolve => setTimeout(resolve, 5))
+    while (sent.length < count) {
+      await new Promise(resolve => {
+        setTimeout(resolve, 5)
+      })
+    }
   }
   const first = client.call('request', {method: 'GET', path: '/api/a'})
   const second = client.call('request', {method: 'GET', path: '/api/b'})
@@ -134,7 +144,9 @@ test('the JSON-RPC client matches replies by id, cancels on abort, relays notifi
   // The late cancelled reply is ignored.
   reply({id: 3, error: {code: -32800, message: 'Request cancelled'}})
   reply({method: 'changes', params: {generation: 2, changes: ['working-tree'], complete: true}})
-  await new Promise(resolve => setTimeout(resolve, 20))
+  await new Promise(resolve => {
+    setTimeout(resolve, 20)
+  })
   assert.deepEqual(notifications, [['changes', {generation: 2, changes: ['working-tree'], complete: true}]])
   const pending = client.call('initialize')
   client.close('The Projections backend exited (1)')
@@ -163,17 +175,27 @@ test(
     bridge.receive({tag: transportTag, type: 'request', id: 1, method: 'GET', path: '/api/revisions?limit=2'})
     bridge.receive({tag: transportTag, type: 'request', id: 2, method: 'GET', path: `/api/changes?since=1`})
     bridge.receive({tag: transportTag, type: 'abort', id: 2})
-    while (!replies.length) await new Promise(resolve => setTimeout(resolve, 10))
+    while (!replies.length) {
+      await new Promise(resolve => {
+        setTimeout(resolve, 10)
+      })
+    }
     assert.equal(replies[0].id, 1)
     assert.equal(replies[0].status, 200)
     assert.equal(replies[0].body.revisions[0].ref, 'working-tree')
-    const changes = new Promise(resolve => runner.onNotification((method, params) => method === 'changes' && resolve(params)))
+    const changes = new Promise(resolve => {
+      runner.onNotification((method, params) => method === 'changes' && resolve(params))
+    })
     // A change subscription at the current generation is answered by the next notification.
     const generation = (await runner.request({method: 'GET', path: '/api/changes?since=0'})).body.generation
     bridge.receive({tag: transportTag, type: 'next', id: 3, channel: 'changes', since: generation})
     await writeFile(path.join(root, 'notes.txt'), 'changed\n')
     assert.ok((await changes).changes.includes('working-tree'))
-    while (replies.length < 2) await new Promise(resolve => setTimeout(resolve, 10))
+    while (replies.length < 2) {
+      await new Promise(resolve => {
+        setTimeout(resolve, 10)
+      })
+    }
     assert.equal(replies[1].id, 3)
     assert.ok(replies[1].body.generation > generation && replies[1].body.changes.includes('working-tree'))
     runner.stop()
@@ -336,7 +358,11 @@ test('change subscriptions are answered from notifications, at once when behind,
   const replies = []
   const bridge = createBridge(runner, reply => replies.push(reply))
   const settled = async count => {
-    while (replies.length < count) await new Promise(resolve => setTimeout(resolve, 5))
+    while (replies.length < count) {
+      await new Promise(resolve => {
+        setTimeout(resolve, 5)
+      })
+    }
   }
   // Behind the current generation (5, learned with since=0): the backend answers at once.
   bridge.receive({tag: transportTag, type: 'next', id: 1, channel: 'changes', since: 3})
@@ -351,7 +377,9 @@ test('change subscriptions are answered from notifications, at once when behind,
   })
   // Current: it waits for the next notification, without asking the backend.
   bridge.receive({tag: transportTag, type: 'next', id: 2, channel: 'changes', since: 5})
-  await new Promise(resolve => setTimeout(resolve, 20))
+  await new Promise(resolve => {
+    setTimeout(resolve, 20)
+  })
   assert.equal(replies.length, 1)
   notify('changes', {generation: 5, changes: [], complete: true})
   notify('fixtures', {generation: 9})
@@ -377,7 +405,11 @@ test('change subscriptions are answered from notifications, at once when behind,
   const quiet = []
   const waiting = createBridge(runner, reply => quiet.push(reply), {waitMs: 30})
   waiting.receive({tag: transportTag, type: 'next', id: 1, channel: 'changes', since: 5})
-  while (!quiet.length) await new Promise(resolve => setTimeout(resolve, 5))
+  while (!quiet.length) {
+    await new Promise(resolve => {
+      setTimeout(resolve, 5)
+    })
+  }
   assert.deepEqual(quiet[0].body, {generation: 5, changes: [], complete: true})
   waiting.dispose()
 })
@@ -391,7 +423,7 @@ test('custom renderer files are fetched from the backend for the webview; nothin
       body: {diagnostics: [{message: 'trust'}]},
     },
   })
-  const bridge = createBridge(runner, () => {})
+  const bridge = createBridge(runner, noop)
   assert.deepEqual(await bridge.rendererFile('/custom-renderers/cap/working-tree/map/index.html?v=2'), {
     type: 'text/html; charset=utf-8',
     base64: Buffer.from('<p>map</p>').toString('base64'),

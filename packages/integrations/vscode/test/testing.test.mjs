@@ -14,6 +14,8 @@ import {listPath, repositoryPath, runPath} from '../src/comparator-tests/wire.ts
 import {parseListing, parseResults, refusalMessage} from '../src/comparator-tests/parse.ts'
 import {startRunner} from '../src/runner.ts'
 
+const noop = () => undefined
+
 const cli = fileURLToPath(new URL(`../../../cli/dist/projections${process.platform === 'win32' ? '.exe' : ''}`, import.meta.url))
 const at = (line, column = 11) => ({path: 'tools/order.comparator.test.yaml', line, column})
 
@@ -180,7 +182,9 @@ function fakeRunner(name) {
   const runner = {
     name,
     stopped: 0,
-    exited: new Promise(resolve => (exit = resolve)),
+    exited: new Promise(resolve => {
+      exit = resolve
+    }),
     stop() {
       runner.stopped++
       exit(0)
@@ -222,7 +226,9 @@ test('backends are shared per source, replaced on restart or exit with holders t
 
   // A backend that exits is started again on next use, and holders hear of it.
   started[3].exit()
-  await new Promise(resolve => setTimeout(resolve, 0))
+  await new Promise(resolve => {
+    setTimeout(resolve, 0)
+  })
   assert.equal((await tests.current()).name, 'repo#4')
   assert.deepEqual(told, ['repo#1', 'repo#3', 'repo#4'])
 
@@ -230,12 +236,16 @@ test('backends are shared per source, replaced on restart or exit with holders t
   panel.dispose()
   assert.equal(started[4].stopped, 0)
   tests.dispose()
-  await new Promise(resolve => setTimeout(resolve, 0))
+  await new Promise(resolve => {
+    setTimeout(resolve, 0)
+  })
   assert.equal(started[4].stopped, 1)
   assert.equal(pool.held('repo'), false)
   await assert.rejects(tests.current(), /released/)
   other.dispose()
-  await new Promise(resolve => setTimeout(resolve, 0))
+  await new Promise(resolve => {
+    setTimeout(resolve, 0)
+  })
   assert.equal(started[2].stopped, 1)
 })
 
@@ -285,7 +295,7 @@ test('the real backend lists comparator tests and runs them: a pass, and a failu
       ].join('\n'),
     )
     execFileSync('git', ['init', '--quiet'], {cwd: root})
-    const runner = await startRunner({executable: cli, repository: root, trust: false, log: () => {}})
+    const runner = await startRunner({executable: cli, repository: root, trust: false, log: noop})
     try {
       const listed = parseListing((await runner.request({method: 'GET', path: listPath})).body)
       assert.deepEqual(

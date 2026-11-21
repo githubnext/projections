@@ -21,6 +21,7 @@ import type {PairLabels} from './refs.js'
 import type {Candidate, DefinitionList, InvalidDefinition, ProjectionDefinition} from './projections/definitions.js'
 import type {Pair, PairList} from './projections/pairs.js'
 import type {TabSummary} from './projections/rows.js'
+import {noop} from './noop.ts'
 
 const refreshDelayMs = 300
 
@@ -106,7 +107,7 @@ export class FolderModel implements vscode.Disposable {
       subscribe(runner)
       this.schedule()
     })
-    void lease.current().then(subscribe, () => {})
+    void lease.current().then(subscribe, noop)
   }
 
   /** Reads the definitions and candidates once, or again after a change. */

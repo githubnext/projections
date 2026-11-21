@@ -8,6 +8,8 @@ import {refreshPickLabel, statusItem, statusShown} from '../src/choices/status.t
 import {statusName, truncate} from '../src/choices/status-names.ts'
 import {runningIndicator} from '@githubnext/projections-host-vscode/running'
 
+const noop = () => undefined
+
 const head = 'a'.repeat(40)
 const base = 'b'.repeat(40)
 const other = 'c'.repeat(40)
@@ -172,7 +174,7 @@ function fakeClock() {
 /** What the indicator shows at each of `times` (ms), for a job that starts at 0 and ends at `end`. */
 function shownAt(end, times) {
   const clock = fakeClock()
-  const indicator = runningIndicator(() => {}, {timers: clock.timers})
+  const indicator = runningIndicator(noop, {timers: clock.timers})
   indicator.set('extracting')
   const events = [...times.map(at => ({at, read: true})), {at: end, read: false}].sort((a, b) => a.at - b.at || a.read - b.read)
   const shown = {}

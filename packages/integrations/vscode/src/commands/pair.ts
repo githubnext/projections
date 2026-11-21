@@ -39,7 +39,8 @@ export function pairCommands(services: Services, viewingView: ViewingView): vsco
     vscode.commands.registerCommand('projections.swapPair', async (argument?: unknown) => {
       // From a projection tab's title bar, the tab swaps (its own pair when pinned).
       if (argument instanceof vscode.Uri && argument.scheme === projectionScheme && ProjectionTab.current) {
-        return ProjectionTab.current.swap()
+        await ProjectionTab.current.swap()
+        return
       }
       const folder = await folderFrom(argument)
       if (!folder) return
@@ -74,7 +75,10 @@ export function pairCommands(services: Services, viewingView: ViewingView): vsco
         active: items.find(item => item.current),
       })
       if (!chosen) return
-      if (chosen.refresh) return front?.refresh()
+      if (chosen.refresh) {
+        await front?.refresh()
+        return
+      }
       const command = chosen.command ?? {title: 'Show in Side Bar', command: 'projections.viewing.focus'}
       await vscode.commands.executeCommand(command.command, ...(command.arguments ?? []))
     }),
@@ -93,9 +97,10 @@ export function pairCommands(services: Services, viewingView: ViewingView): vsco
       const model = sidebar.model(folder)
       await model.load()
       if (!model.pair?.before) {
-        return void vscode.window.showInformationMessage(
+        void vscode.window.showInformationMessage(
           `Projections: ${model.describe().name} shows the working tree alone, so there's nothing to count. Choose a comparison first.`,
         )
+        return
       }
       await vscode.window.withProgress(
         {location: {viewId: 'projections.projections'}, title: 'Comparing every projection', cancellable: true},

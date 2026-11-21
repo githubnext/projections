@@ -22,13 +22,17 @@ module.exports = async function switching({api, mergeBase, shownSummary}) {
     await api.viewingActivate(id)
     await settled(id)
   }
-  await new Promise(resolve => setTimeout(resolve, 1500))
+  await new Promise(resolve => {
+    setTimeout(resolve, 1500)
+  })
   const measure = async run => {
     const before = api.counters()
     await api.control('packages', {op: 'probe', reset: true})
     await run()
     // The tab reports twice a second; labels and counts arrive after the pick.
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    await new Promise(resolve => {
+      setTimeout(resolve, 1500)
+    })
     const after = api.counters()
     const delta = Object.fromEntries(
       [...new Set([...Object.keys(before), ...Object.keys(after)])].map(name => [name, (after[name] ?? 0) - (before[name] ?? 0)]),

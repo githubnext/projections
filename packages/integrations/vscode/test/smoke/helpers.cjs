@@ -19,7 +19,9 @@ async function until(what, check, timeoutMs = 60_000, describe) {
       if (Date.now() + 250 >= deadline) throw error
     }
     if (last) return last
-    await new Promise(resolve => setTimeout(resolve, 250))
+    await new Promise(resolve => {
+      setTimeout(resolve, 250)
+    })
   }
   const state = describe ? await describe().catch(error => `(describing it failed: ${error.message})`) : undefined
   throw new Error(
@@ -90,7 +92,9 @@ async function git(cwd, ...args) {
       return execFileSync('git', args, {cwd, encoding: 'utf8', stdio: 'pipe'}).trim()
     } catch (error) {
       if (attempt >= 20 || !String(error.stderr ?? error.message).includes('index.lock')) throw error
-      await new Promise(resolve => setTimeout(resolve, 250))
+      await new Promise(resolve => {
+        setTimeout(resolve, 250)
+      })
     }
   }
 }

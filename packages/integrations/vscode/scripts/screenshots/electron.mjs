@@ -7,6 +7,8 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {fileURLToPath} from 'node:url'
 
+const noop = () => undefined
+
 export const extension = fileURLToPath(new URL('../../', import.meta.url))
 export const cli = process.env.PROJECTIONS_CLI ?? fileURLToPath(new URL('../../../../cli/dist/projections', import.meta.url))
 
@@ -66,16 +68,20 @@ export async function launch({
     env: {...process.env, PROJECTIONS_CLI: cli},
   })
   const window = await app.firstWindow()
-  await window.setViewportSize?.({width, height}).catch(() => {})
+  await window.setViewportSize?.({width, height}).catch(noop)
   await window.waitForSelector('.monaco-workbench', {timeout: 60_000})
   // A theme from an extension (Solarized, the high-contrast themes) applies once the extensions have registered it,
   // so it is set by editing the settings file VS Code watches.
-  await new Promise(resolve => setTimeout(resolve, 1500))
+  await new Promise(resolve => {
+    setTimeout(resolve, 1500)
+  })
   await writeFile(settingsFile, JSON.stringify(settings(theme)))
   await window.waitForFunction(expected => document.querySelector('.monaco-workbench')?.classList.contains(expected), kinds[kind], {
     timeout: 20_000,
   })
-  await new Promise(resolve => setTimeout(resolve, 500))
+  await new Promise(resolve => {
+    setTimeout(resolve, 500)
+  })
   return {app, window}
 }
 
@@ -96,10 +102,14 @@ export async function selectTheme(window, theme) {
     .locator('.quick-input-widget .quick-input-list .monaco-list-row[aria-label*="Theme" i], .quick-input-widget .monaco-list-row')
     .first()
     .waitFor()
-  await new Promise(resolve => setTimeout(resolve, 300))
+  await new Promise(resolve => {
+    setTimeout(resolve, 300)
+  })
   await window.keyboard.type(theme)
   await window.locator('.quick-input-list .monaco-list-row', {hasText: theme}).first().waitFor()
-  await new Promise(resolve => setTimeout(resolve, 300))
+  await new Promise(resolve => {
+    setTimeout(resolve, 300)
+  })
   await window.keyboard.press('Enter')
   await window.locator('.quick-input-widget').waitFor({state: 'hidden'})
 }
@@ -118,7 +128,9 @@ export async function inspectorFrame(window, timeoutMs = 60_000) {
         return frame
       }
     }
-    await new Promise(resolve => setTimeout(resolve, 250))
+    await new Promise(resolve => {
+      setTimeout(resolve, 250)
+    })
   }
   throw new Error('The Inspector webview did not load')
 }

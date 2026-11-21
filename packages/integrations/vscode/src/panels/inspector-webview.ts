@@ -1,7 +1,5 @@
 import * as vscode from 'vscode'
-import {execFile} from 'node:child_process'
 import {randomBytes} from 'node:crypto'
-import {promisify} from 'node:util'
 import {parseTransportMessage} from '@githubnext/projections-inspector/transport'
 import {sourceRoot} from '../backend-sources.js'
 import type {PanelSource} from '../backend-sources.js'
@@ -16,8 +14,7 @@ import type {ControlRequest, HostMessage, WebviewConfig} from '../protocol.js'
 import type {Runner} from '../runner.js'
 import type {Services} from '../services.js'
 import {pageLifecycle} from './page-lifecycle.js'
-
-const run = promisify(execFile)
+import {execFileOutput as run} from '../exec.ts'
 
 /**
  * A webview presenting a source's Inspector on its shared backend: the Inspector panel, or a projection tab. It relays
@@ -79,16 +76,24 @@ export class InspectorWebview {
   }
 
   /** A projection tab's summary report. */
-  protected summary(_summary: unknown) {}
+  protected summary(_summary: unknown) {
+    // Only a projection tab has one.
+  }
 
   /** The page's `ready`, which a projection tab's carries its pinned pair. */
-  protected onReady(_message: Partial<HostMessage>) {}
+  protected onReady(_message: Partial<HostMessage>) {
+    // Only a projection tab has more to do.
+  }
 
   /** A projection tab's toolbar asked to change its pair. */
-  protected pairAction(_action: unknown) {}
+  protected pairAction(_action: unknown) {
+    // Only a projection tab has a pair.
+  }
 
   /** The page asked the backend for something (a projection tab counts its extraction jobs). */
-  protected request(_method: 'GET' | 'POST', _path: string) {}
+  protected request(_method: 'GET' | 'POST', _path: string) {
+    // Only a projection tab counts them.
+  }
 
   /**
    * Shows the page at once and binds the backend when it is ready: the page loads (its script, Workers and skeleton) in
@@ -100,7 +105,11 @@ export class InspectorWebview {
     try {
       // A test-only hold on the backend, to picture the tab before it's ready.
       const hold = Number(process.env.PROJECTIONS_TEST_HOLD_BACKEND_MS ?? 0)
-      if (hold > 0) await new Promise(resolve => setTimeout(resolve, Math.min(hold, 60_000)))
+      if (hold > 0) {
+        await new Promise(resolve => {
+          setTimeout(resolve, Math.min(hold, 60_000))
+        })
+      }
       const runner = await this.lease.current()
       // A replacement that arrived meanwhile already bound (and reloaded) the page.
       if (!this.runner) this.attach(runner)

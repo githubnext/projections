@@ -13,6 +13,8 @@ import {chromium} from 'playwright-core'
 import {createDemoRepository} from '../../test/smoke/demo-repo.mjs'
 import {cli, command, inspectorFrame, launch} from './electron.mjs'
 
+const noop = () => undefined
+
 const output = process.argv[2] || fileURLToPath(new URL('../../../../../docs/design/images/desktop-surfaces/', import.meta.url))
 process.env.PROJECTIONS_TEST_HOLD_JOB_MS = '6000'
 // feature/auth, a commit ahead of main (tagged v1.0), with an untracked package.
@@ -74,7 +76,9 @@ try {
   await row.click()
   const frame = await inspectorFrame(window)
   await frame.locator('[data-host-ui="vscode"] .phv-root[data-renderer-status="ready"]').first().waitFor({timeout: 90_000})
-  await new Promise(resolve => setTimeout(resolve, 3000))
+  await new Promise(resolve => {
+    setTimeout(resolve, 3000)
+  })
   const statusbar = window.locator('.part.statusbar')
   /** The item, once its accessible label says it shows `name` (and `state`: out of date, or extracting). */
   const item = async (name, state = '') => {
@@ -85,7 +89,9 @@ try {
   /** The status bar's left part, where the item sits. */
   const strip = async () => {
     await window.mouse.move(900, 400)
-    await new Promise(resolve => setTimeout(resolve, 600))
+    await new Promise(resolve => {
+      setTimeout(resolve, 600)
+    })
     const box = await statusbar.boundingBox()
     return window.screenshot({clip: {x: box.x, y: box.y, width: 520, height: box.height}})
   }
@@ -94,7 +100,9 @@ try {
     await press(choice)
     await item(choice.name)
     // A job the choice started shows its spinner in a moment: its strip waits until it ends.
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    await new Promise(resolve => {
+      setTimeout(resolve, 1500)
+    })
     await item(choice.name)
     strips.push({caption: choice.caption, image: await strip()})
   }
@@ -102,7 +110,9 @@ try {
   await press(choices[1])
   await item('Branch changes')
   await frame.locator('[data-host-ui="vscode"] .phv-root[data-renderer-status="ready"]').first().waitFor({timeout: 90_000})
-  await new Promise(resolve => setTimeout(resolve, 3000))
+  await new Promise(resolve => {
+    setTimeout(resolve, 3000)
+  })
   const web = join(repository, 'packages', 'web', 'package.json')
   const original = await readFile(web, 'utf8')
   const edited = JSON.parse(original)
@@ -114,7 +124,9 @@ try {
   await stale.hover()
   const hover = window.locator('.monaco-hover, .workbench-hover').filter({hasText: 'Branch changes'}).first()
   await hover.waitFor({timeout: 10_000})
-  await new Promise(resolve => setTimeout(resolve, 800))
+  await new Promise(resolve => {
+    setTimeout(resolve, 800)
+  })
   {
     const [tip, bar] = [await hover.boundingBox(), await statusbar.boundingBox()]
     const top = Math.max(0, tip.y - 12)
@@ -155,7 +167,9 @@ try {
   await (await item('Branch changes', 'out of date')).click()
   const pick = window.locator('.quick-input-widget')
   await pick.locator('.monaco-list-row', {hasText: 'Show in Side Bar'}).waitFor({timeout: 10_000})
-  await new Promise(resolve => setTimeout(resolve, 800))
+  await new Promise(resolve => {
+    setTimeout(resolve, 800)
+  })
   {
     const box = await pick.boundingBox()
     await window.screenshot({
@@ -184,7 +198,7 @@ try {
   }
 } catch (error) {
   // What the window showed when it failed, for debugging (not committed).
-  await window.screenshot({path: 'failed-status-bar.png'}).catch(() => {})
+  await window.screenshot({path: 'failed-status-bar.png'}).catch(noop)
   throw error
 } finally {
   await app.close()

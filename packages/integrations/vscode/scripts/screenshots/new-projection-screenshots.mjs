@@ -10,12 +10,17 @@ import {fileURLToPath} from 'node:url'
 import {createDemoRepository} from '../../test/smoke/demo-repo.mjs'
 import {cli, command, inspectorFrame, launch} from './electron.mjs'
 
+const noop = () => undefined
+
 const output = process.argv[2] || fileURLToPath(new URL('../../../../../docs/design/images/desktop-surfaces/', import.meta.url))
 const themes = [
   {suffix: 'dark', theme: 'Default Dark Modern', kind: 'dark'},
   {suffix: 'light', theme: 'Default Light Modern', kind: 'light'},
 ]
-const pause = ms => new Promise(resolve => setTimeout(resolve, ms))
+const pause = ms =>
+  new Promise(resolve => {
+    setTimeout(resolve, ms)
+  })
 
 /** Drags the side bar's edge so it is `width` px wide. */
 async function sideBarWidth(window, width) {
@@ -93,7 +98,7 @@ for (const {suffix, theme, kind} of themes) {
     console.log(`new-projection-created-${suffix}`)
   } catch (error) {
     // What the window showed when it failed, for debugging (not committed).
-    await window.screenshot({path: `failed-new-projection-${suffix}.png`}).catch(() => {})
+    await window.screenshot({path: `failed-new-projection-${suffix}.png`}).catch(noop)
     throw error
   } finally {
     await app.close()

@@ -143,12 +143,16 @@ export class ProjectionSources {
    */
   async open(folder: vscode.WorkspaceFolder, item: SourceItem, here = false) {
     if (item.file) {
-      return void (await vscode.window.showTextDocument(vscode.Uri.joinPath(folder.uri, ...item.file.split('/')), {
+      await vscode.window.showTextDocument(vscode.Uri.joinPath(folder.uri, ...item.file.split('/')), {
         viewColumn: here ? vscode.ViewColumn.Active : vscode.ViewColumn.Beside,
         preview: true,
-      }))
+      })
+      return
     }
-    if (item.command) return void (await vscode.commands.executeCommand(item.command))
+    if (item.command) {
+      await vscode.commands.executeCommand(item.command)
+      return
+    }
     if (item.docs) await this.docs.open(item.docs, {here})
   }
 
@@ -164,7 +168,10 @@ export class ProjectionSources {
     const files = items.filter(item => item.file)
     this.last = items.map(item => `${item.group}: ${item.label}`)
     // One real file (built-ins leave only the definition): it opens directly.
-    if (files.length === 1) return open(files[0]!)
+    if (files.length === 1) {
+      await open(files[0]!)
+      return
+    }
     type Entry = vscode.QuickPickItem & {item?: SourceItem}
     const here: vscode.QuickInputButton = {iconPath: new vscode.ThemeIcon('go-to-file'), tooltip: 'Open in this group'}
     const read: vscode.QuickInputButton = {iconPath: new vscode.ThemeIcon('book'), tooltip: 'Open Documentation'}

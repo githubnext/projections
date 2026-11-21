@@ -188,7 +188,9 @@ test('the debouncer runs the last call for a key once typing pauses', async () =
   debouncer.schedule('b', () => ran.push('b1'))
   debouncer.schedule('c', () => ran.push('c1'))
   debouncer.cancel('c')
-  await new Promise(resolve => setTimeout(resolve, 60))
+  await new Promise(resolve => {
+    setTimeout(resolve, 60)
+  })
   assert.deepEqual(ran.sort(), ['a2', 'b1'])
   debouncer.dispose()
 })

@@ -2,11 +2,8 @@
  * Pull requests for the Pull request… choice: listed with the GitHub CLI (`gh`), and compared locally from the pull
  * request's merge base with its base branch to its head commit (fetched from `origin` when it isn't here yet).
  */
-import {execFile} from 'node:child_process'
-import {promisify} from 'node:util'
 import type {Pair} from './projections/pairs.js'
-
-const run = promisify(execFile)
+import {execFileOutput as run} from './exec.ts'
 
 export interface PullRequest {
   number: number

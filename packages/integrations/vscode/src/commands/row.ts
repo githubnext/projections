@@ -23,7 +23,10 @@ export function rowCommands(sidebar: Sidebar): vscode.Disposable[] {
         for (const tab of tabs) await tab.refresh()
         return
       }
-      if (!model.pair?.before) return model.refresh()
+      if (!model.pair?.before) {
+        await model.refresh()
+        return
+      }
       await vscode.window.withProgress(
         {location: {viewId: 'projections.projections'}, title: `Comparing ${target.id}`, cancellable: true},
         (progress, token) => model.compareAll(progress, token, target.id),

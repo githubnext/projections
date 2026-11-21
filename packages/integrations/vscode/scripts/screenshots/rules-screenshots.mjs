@@ -29,14 +29,18 @@ for (const shot of shots) {
     await window.keyboard.press('Enter')
     await window.locator('.monaco-editor .view-lines').first().waitFor()
     // Semantic tokens arrive once the language service has read the file.
-    await new Promise(resolve => setTimeout(resolve, 3000))
+    await new Promise(resolve => {
+      setTimeout(resolve, 3000)
+    })
     await window
       .locator('.view-line', {hasText: shot.line})
       .locator('span span', {hasText: new RegExp(`^${shot.token}$`)})
       .first()
       .hover()
     await window.locator('.monaco-hover:not(.hidden) .rendered-markdown').first().waitFor({timeout: 30_000})
-    await new Promise(resolve => setTimeout(resolve, 800))
+    await new Promise(resolve => {
+      setTimeout(resolve, 800)
+    })
     await window.screenshot({path: join(output, `${shot.file}.png`)})
     console.log(shot.file)
   } finally {

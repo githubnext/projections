@@ -94,4 +94,5 @@ export function buildRow(state: BuildState): {description: string; icon?: string
         ].join('\n'),
       }
   }
+  throw new TypeError('Unknown build phase')
 }

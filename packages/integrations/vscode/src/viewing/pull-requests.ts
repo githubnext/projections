@@ -1,5 +1,6 @@
 import type {FolderModel} from '../folder-model.js'
 import type {ViewingHost} from './types.js'
+import {noop} from '../noop.ts'
 
 /** Each folder's current branch's open pull request, asked of `gh` at most every five minutes per branch. */
 export class PullRequests {
@@ -22,12 +23,9 @@ export class PullRequests {
     if (!branch || branch === model.pairs?.defaultBranch) return
     if (known?.branch === branch && Date.now() - known.at < 300_000) return
     this.pulls.set(key, {branch, at: Date.now()})
-    void this.host.pullRequest(model.folder, branch).then(
-      number => {
-        this.pulls.set(key, {branch, number, at: Date.now()})
-        if (number !== undefined) this.found()
-      },
-      () => {},
-    )
+    void this.host.pullRequest(model.folder, branch).then(number => {
+      this.pulls.set(key, {branch, number, at: Date.now()})
+      if (number !== undefined) this.found()
+    }, noop)
   }
 }

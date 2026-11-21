@@ -21,7 +21,10 @@ const text = (value: unknown) => (value === undefined ? undefined : String(value
 
 /** The editor's title actions on a projection tab's view: how it shows, its mode, playback, changes only and actions. */
 function runViewAction(view: View | null | undefined, {action, value}: MessageOf<'view'>) {
-  if (action === 'showAs') return void showAs.set(String(value) as ViewKind)
+  if (action === 'showAs') {
+    showAs.set(String(value) as ViewKind)
+    return
+  }
   if (!view) throw new Error('The projection is not shown yet')
   switch (action) {
     case 'setMode':
@@ -109,7 +112,8 @@ function operations(): {[O in Op]: Operation<O>} {
 /** Commands from the extension (`projections.inspectorControl`), for tests and other extensions driving the page. */
 export function listenForControl(ready: Ready) {
   const operation = operations()
-  fromExtension(async data => {
+  // Each command answers with its result or its failure, so nothing waits for it.
+  const run = async (data: unknown) => {
     const message = data as Partial<ControlMessage>
     if (message?.tag !== controlTag || typeof message.id !== 'number') return
     const id = message.id
@@ -121,5 +125,8 @@ export function listenForControl(ready: Ready) {
     } catch (error) {
       post({tag: hostTag, op: 'controlResult', id, error: error instanceof Error ? error.message : String(error)})
     }
+  }
+  fromExtension(data => {
+    void run(data)
   })
 }

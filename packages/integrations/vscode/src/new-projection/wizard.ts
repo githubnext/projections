@@ -55,7 +55,10 @@ export class Wizard {
       const executable = this.cli().path
       this.host.output.info(`projections ${args.map(arg => (/^[\w./@:-]+$/.test(arg) ? arg : JSON.stringify(arg))).join(' ')}`)
       execFile(executable, args, {cwd: folder.uri.fsPath, maxBuffer: 32 * 1024 * 1024}, (error, stdout, stderr) => {
-        if (!error) return resolve(stdout)
+        if (!error) {
+          resolve(stdout)
+          return
+        }
         const missing = (error as NodeJS.ErrnoException).code === 'ENOENT'
         if (stderr.trim()) this.host.output.error(stderr.trim())
         reject(

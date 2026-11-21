@@ -532,6 +532,7 @@ test('the renderer manifest schema follows parseRendererManifest: names, handles
     {...valid, extra: true},
     {...valid, name: 'Basic'},
     {...valid, title: ''},
+    {...valid, title: ' \t\n'},
     {...valid, handles: ['Graph']},
     {...valid, comparisonModes: []},
     {...valid, comparisonModes: ['diff', 'diff']},

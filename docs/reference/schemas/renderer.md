@@ -2,7 +2,7 @@
 
 # Renderer manifest
 
-`renderer.json`, the manifest a renderer bundle ships beside its `index.html`: its name, the definition renderers it presents, and optionally the comparison modes and extractions it supports. Its `title` must not be blank. The schema is published at its ID, `https://schemas.projections.githubnext.com/renderer/v0.json`; it is generated from TypeBox
+`renderer.json`, the manifest a renderer bundle ships beside its `index.html`: its name, the definition renderers it presents, and optionally the comparison modes and extractions it supports. The schema is published at its ID, `https://schemas.projections.githubnext.com/renderer/v0.json`; it is generated from TypeBox
 definitions into [`packages/schemas/schemas/renderer/v0.json`](../../../packages/schemas/schemas/renderer/v0.json).
 
 ## Document
@@ -12,7 +12,7 @@ definitions into [`packages/schemas/schemas/renderer/v0.json`](../../../packages
 | `format` | `"projections.renderer"` | Yes |  |
 | `version` | `0` | Yes |  |
 | `name` | string | Yes | The bundle directory name, such as `basic`. Pattern `^[a-z0-9][a-z0-9-]{0,63}$`. |
-| `title` | string | Yes | The renderer's name in hosts' messages and menus. At least 1 character. At most 200 characters. |
+| `title` | string | Yes | The renderer's name in hosts' messages and menus. Pattern `\S`. At least 1 character. At most 200 characters. |
 | `handles` | array of string | Yes | The definition renderer names the bundle presents, such as `["graph", "dag"]`. At most 100 items. |
 | `comparisonModes` | array of `"diff"` or `"side-by-side"` or `"animated"` or `"swipe"` |  | The comparison modes the bundle supports; absent means side by side, animated and swipe. At least 1 item. Items are unique. |
 | `accepts` | array of object |  | The extractions the bundle presents, by domain schema and optional vocabulary; absent means any. At least 1 item. At most 32 items. Items are unique. |

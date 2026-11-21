@@ -21,7 +21,6 @@ import {viewOptions} from './view/options.js'
 import {RendererPaneStatus} from './view/pane-status.js'
 import type {ProjectionViewProps} from './view/props.js'
 import {ViewToolbar} from './view/toolbar.js'
-import {ScopeNotice} from './scope-notice.js'
 import {Notices} from './view/notices.js'
 
 /** A notice under the toolbar: a band of the raised surface, edge to edge, ruled off below by a hairline. */
@@ -185,7 +184,7 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
                 fill={fill}
                 paneLabels={paneLabels}
                 legend={false}
-                foot={<StageFoot projection={p} summary={on('summary')} legend />}
+                foot={<StageFoot projection={p} summary={on('summary')} legend scope={on('changesOnly')} />}
                 utility={view === 'renderer' && floating}
                 renderStatus={pane => (
                   <RendererPaneStatus
@@ -208,14 +207,13 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
               fill={fill}
               marks={marks}
               summary={on('summary')}
+              scope={on('changesOnly')}
               floating={floating}
               scrollTop={scrollTop}
             />
           )}
         </div>
         <UpdatingChip projection={p} running={props.running} rendererShown={view === 'renderer'} />
-        {/* Without the summary bar, which says what the scope hides, a pill over the stage says it. */}
-        {on('changesOnly') && !on('summary') && <ScopeNotice projection={p} />}
         {props.details !== 'none' && (
           <DetailCard
             projection={p}

@@ -12,7 +12,7 @@ import {
   edgeMarkerId,
   edgePaint,
 } from '@githubnext/projections-renderer-kit'
-import {EdgeArrowMarker, useStageCover, useStageInsetTop} from '@githubnext/projections-renderer-kit/react'
+import {EdgeArrowMarker, useStageCover, useStageInsetBottom, useStageInsetTop} from '@githubnext/projections-renderer-kit/react'
 import type {Point, RendererLegend} from '@githubnext/projections-renderer-kit'
 import {lifetimeNames} from './facets.js'
 import type {DiUnit, Lifetime} from './model.js'
@@ -47,9 +47,13 @@ export const diPadding = 16
  */
 export function useDiPadding(): {x: number; y: number; top: number} {
   const insetTop = useStageInsetTop()
-  // A host that says exactly what it overlays leaves the top to the kit's `useCoveredPadding`.
-  const top = useStageCover() ? diPadding : (insetTop ?? diPadding)
-  return useMemo(() => ({x: diPadding, y: diPadding, top}), [top])
+  const insetBottom = useStageInsetBottom()
+  // A host that says exactly what it overlays leaves both ends to the kit's `useCoveredPadding`; one that gives only
+  // bands keeps clear of them.
+  const covered = Boolean(useStageCover())
+  const top = covered ? diPadding : (insetTop ?? diPadding)
+  const y = covered ? diPadding : Math.max(diPadding, insetBottom ?? 0)
+  return useMemo(() => ({x: diPadding, y, top}), [y, top])
 }
 
 /** Units drawn at once; the host's table presents the complete model. */

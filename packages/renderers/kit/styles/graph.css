@@ -307,6 +307,11 @@
     gap: var(--projections-space-3);
   }
 }
+/* The strip sits below the scrolling drawing, so scrolling can't bring it out from under what the host overlays at the
+   frame's foot (`stage-inset-bottom`): it reserves that room under its own content. */
+.graph-footer {
+  padding-bottom: calc(var(--projections-space-2) + var(--projections-stage-inset-bottom, 0px));
+}
 @media (prefers-reduced-motion: reduce) {
   .pk *,
   .pk *::before,

@@ -5,6 +5,7 @@ import {join} from 'node:path'
 import {test} from 'node:test'
 import {allChecks, checkTitles, runChecks} from '../dist/src/index.js'
 import {checkFailures, connectInspector, samples, scenarioKeys} from '../dist/playwright/index.js'
+import {StageRecord, bounded} from '../dist/playwright/bounded.js'
 
 test('scenario keys use the directory name for scenarios.json and the file name otherwise', () => {
   const root = mkdtempSync(join(tmpdir(), 'projections-testing-'))
@@ -653,4 +654,17 @@ test('nested-accents measures the animation in animated mode, after the diff', a
   assert.equal(result.status, 'pass')
   // The diff is measured first; the animation's first step is loaded in animated mode again, the next sought.
   assert.deepEqual(calls.slice(1), ['load animated 0', 'load diff 1', 'load animated 0.5', 'seek 0.75'])
+})
+
+test('a stage request the page never answers fails, naming it, the scenario and what the stage last said', async () => {
+  const record = new StageRecord()
+  record.scenario = 'graph/npm-express-5'
+  const state = {status: 'ready', bundle: 'graph', comparisonMode: 'diff', progress: 1, rendered: 1, height: 1217, errors: []}
+  assert.equal(await bounded(record, 'state', Promise.resolve(state), 1000), state)
+  await assert.rejects(
+    bounded(record, 'measure(settle)', new Promise(() => {}), 50),
+    error =>
+      /didn't answer measure\(settle\) for graph\/npm-express-5 within 0\.05 s/.test(error.message) &&
+      /status ready, renderer graph, diff, progress 1, painted 1, asked for 1217px; it last answered state/.test(error.message),
+  )
 })

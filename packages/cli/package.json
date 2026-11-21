@@ -12,7 +12,7 @@
     "test:gh": "node test/installed.mjs --gh-extension",
     "test:container": "node test/container-native.mjs",
     "test:binary": "node test/binary.mjs",
-    "test:browser": "exit 1"
+    "test:browser": "playwright test"
   },
   "devDependencies": {
     "@githubnext/projections-engine": "0.2.0",

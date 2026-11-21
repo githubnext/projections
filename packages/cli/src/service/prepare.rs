@@ -15,18 +15,56 @@ use super::{
     state::ServiceState,
 };
 
+/// Where an environment preparation is.
+pub(super) enum PrepareStatus {
+    Running,
+    Succeeded(Value),
+    Failed(String),
+    Cancelled(String),
+}
+
+/// A preparation's status and its progress events (200 at most).
+pub(super) struct Progress {
+    pub(super) status: PrepareStatus,
+    pub(super) events: Vec<Value>,
+}
+
 /// An environment preparation the Inspector started: its progress events and
 /// outcome, and the cancellation flag its runner watches.
 pub(super) struct PrepareRun {
     pub(super) id: String,
     pub(super) cancel: Arc<AtomicBool>,
-    pub(super) state: Mutex<Value>,
+    pub(super) revision: Option<String>,
+    pub(super) progress: Mutex<Progress>,
 }
 
 impl PrepareRun {
+    pub(super) fn running(&self) -> bool {
+        matches!(
+            self.progress.lock().unwrap_or_else(|e| e.into_inner()).status,
+            PrepareStatus::Running
+        )
+    }
+
     pub(super) fn value(&self) -> Value {
-        let mut value = self.state.lock().unwrap_or_else(|e| e.into_inner()).clone();
-        value["id"] = json!(self.id);
+        let progress = self.progress.lock().unwrap_or_else(|e| e.into_inner());
+        let mut value = json!({"id": self.id, "revision": self.revision, "events": progress.events});
+        match &progress.status {
+            PrepareStatus::Running => value["status"] = json!("running"),
+            PrepareStatus::Succeeded(report) => {
+                value["status"] = json!("succeeded");
+                value["report"] = report.clone();
+            }
+            PrepareStatus::Failed(error) => {
+                value["status"] = json!("failed");
+                value["error"] = json!(error);
+            }
+            PrepareStatus::Cancelled(error) => {
+                value["status"] = json!("cancelled");
+                value["error"] = json!(error);
+            }
+        }
+        drop(progress);
         // The latest step's log, as it is now: its last 64 KiB.
         if let Some(log) = value["events"]
             .as_array()
@@ -84,8 +122,7 @@ pub(super) async fn start(state: &Arc<ServiceState>, request: Request) -> Result
     };
     let run = {
         let mut prepares = state.prepares.lock().unwrap_or_else(|e| e.into_inner());
-        let running = |run: &Arc<PrepareRun>| run.state.lock().unwrap_or_else(|e| e.into_inner())["status"] == "running";
-        if prepares.iter().any(running) {
+        if prepares.iter().any(|run| run.running()) {
             return Err(HttpError::new(
                 StatusCode::CONFLICT,
                 "An environment is already being prepared; wait for it or cancel it",
@@ -97,7 +134,11 @@ pub(super) async fn start(state: &Arc<ServiceState>, request: Request) -> Result
         let run = Arc::new(PrepareRun {
             id: Uuid::new_v4().to_string(),
             cancel: Arc::new(AtomicBool::new(false)),
-            state: Mutex::new(json!({"status": "running", "revision": revision, "events": []})),
+            revision: revision.clone(),
+            progress: Mutex::new(Progress {
+                status: PrepareStatus::Running,
+                events: Vec::new(),
+            }),
         });
         prepares.push_back(run.clone());
         run
@@ -106,28 +147,20 @@ pub(super) async fn start(state: &Arc<ServiceState>, request: Request) -> Result
     runner.cancel = run.cancel.clone();
     let listening = run.clone();
     let runner = runner.with_listener(Arc::new(move |event: &Value| {
-        let mut state = listening.state.lock().unwrap_or_else(|e| e.into_inner());
-        if let Some(events) = state["events"].as_array_mut()
-            && events.len() < 200
-        {
-            events.push(event.clone());
+        let mut progress = listening.progress.lock().unwrap_or_else(|e| e.into_inner());
+        if progress.events.len() < 200 {
+            progress.events.push(event.clone());
         }
     }));
     let finished = run.clone();
     tokio::task::spawn_blocking(move || {
         let outcome = runner.prepare_environment(revision.as_deref(), &crate::environment::Options { force, steps });
         let cancelled = finished.cancel.load(Ordering::SeqCst);
-        let mut state = finished.state.lock().unwrap_or_else(|e| e.into_inner());
-        match outcome {
-            Ok(report) => {
-                state["status"] = json!("succeeded");
-                state["report"] = report;
-            }
-            Err(error) => {
-                state["status"] = json!(if cancelled { "cancelled" } else { "failed" });
-                state["error"] = json!(format!("{error:#}"));
-            }
-        }
+        finished.progress.lock().unwrap_or_else(|e| e.into_inner()).status = match outcome {
+            Ok(report) => PrepareStatus::Succeeded(report),
+            Err(error) if cancelled => PrepareStatus::Cancelled(format!("{error:#}")),
+            Err(error) => PrepareStatus::Failed(format!("{error:#}")),
+        };
     });
     Ok(json_response(StatusCode::ACCEPTED, run.value()))
 }

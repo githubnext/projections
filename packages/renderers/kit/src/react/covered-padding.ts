@@ -1,6 +1,6 @@
 import {useLayoutEffect, useMemo, useState} from 'react'
 import type {RefObject} from 'react'
-import {coveredTop} from '../fit.js'
+import {coveredTop, scrolledPadding} from '../fit.js'
 import type {FitPadding} from '../fit.js'
 import {useStageCover, useStageInsetTop} from './shell/frame.js'
 
@@ -55,8 +55,9 @@ export function useCoveredPadding<P extends FitPadding>(
  * (`fitScale`), and once it is drawn larger and scrolls down (opened at the text floor, or zoomed in: `drawnScale`), a
  * top of at least the host's `stage-inset-top` under a cover, so its first row can open, and scroll back, clear of what
  * the host overlays at the frame's top. `height` is the content's height (content units) and the stage's inner height
- * (`Fit.height`): a drawing drawn larger that still fits the stage's height (a flat graph zoomed in) doesn't scroll
- * down, keeps its padding, and so doesn't move as it zooms. The fit never reads it.
+ * (`Fit.height`): a drawing drawn larger that still fits the stage's height (a flat graph zoomed in) keeps its padding
+ * where, centred, it clears the band, and takes just enough more where it doesn't (`scrolledPadding`), so it moves no
+ * more than it must as it zooms. The fit never reads it.
  */
 export function useScrolledPadding<P extends FitPadding>(
   padding: P,
@@ -67,8 +68,12 @@ export function useScrolledPadding<P extends FitPadding>(
   const cover = useStageCover()
   const insetTop = useStageInsetTop()
   const own = padding.top ?? padding.y
-  const tall = !height || height.content * drawnScale + own + padding.y > height.view + 0.5
-  const scrolled = fitScale > 0 && drawnScale > fitScale * 1.001 && tall
-  const top = scrolled && cover?.length && insetTop !== undefined ? Math.max(own, insetTop) : own
+  const scrolled = Boolean(cover?.length) && insetTop !== undefined && fitScale > 0 && drawnScale > fitScale * 1.001
+  const inset = {top: insetTop ?? 0, bottom: 0}
+  const top = !scrolled
+    ? own
+    : height
+      ? scrolledPadding({own: {top: own, y: padding.y}, inset, height: height.content * drawnScale, view: height.view}).top
+      : Math.max(own, inset.top)
   return useMemo(() => (top === own ? padding : {...padding, top}), [padding, top, own])
 }

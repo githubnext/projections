@@ -611,6 +611,22 @@ test("a fitted drawing keeps clear of the host's cover only where its fit would 
   assert.equal(coveredTop({cover: [bar], view, origin: {x: 0, y: 40}, size: {width: 400, height: 1000}, padding}), 18)
 })
 
+test('a drawing drawn larger than its fit keeps clear of the bands at its ends, and moves no more than it must', async () => {
+  const {scrolledPadding} = await import('../dist/index.js')
+  const own = {top: 16, y: 16}
+  const inset = {top: 54, bottom: 0}
+  // Zoomed in, a flat drawing still sits centred well below the band: it keeps its own padding, so it doesn't move.
+  assert.deepEqual(scrolledPadding({own, inset, height: 300, view: 600}), own)
+  // Centred, it would reach the band: just enough more at the top that it clears it, still fitting the stage.
+  assert.deepEqual(scrolledPadding({own, inset, height: 520, view: 600}), {top: 44, y: 16})
+  // That much more no longer fits: it scrolls, and opens a band's height down.
+  assert.deepEqual(scrolledPadding({own, inset, height: 533, view: 600}), {top: 54, y: 16})
+  assert.deepEqual(scrolledPadding({own, inset, height: 2000, view: 600}), {top: 54, y: 16})
+  // A band at the foot too: each end clears its own.
+  assert.deepEqual(scrolledPadding({own, inset: {top: 54, bottom: 70}, height: 470, view: 600}), {top: 16, y: 26})
+  assert.deepEqual(scrolledPadding({own, inset: {top: 54, bottom: 70}, height: 480, view: 600}), {top: 54, y: 70})
+})
+
 test('fitting centres content, never magnifies it, and always fits both dimensions, however small', async () => {
   const {fitScale} = await import('../dist/index.js')
   const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} ≈ ${expected}`)

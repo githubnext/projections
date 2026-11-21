@@ -159,3 +159,32 @@ export function coveredTop({
   const bottom = Math.max(...reached.map(rect => rect.y + rect.height)) + coverGap
   return bottom <= contentTop ? top : Math.max(top, Math.ceil(bottom - origin.y))
 }
+
+/**
+ * The top and bottom (`y`) padding of a drawing drawn larger than its fit, CSS px, so it clears bands of `inset.top`
+ * and `inset.bottom` at the ends of a stage `view` px tall: `height` is the drawing's own height at the drawn scale.
+ * While it still fits the stage's height it sits centred (`margin: auto`) and keeps `own` where that leaves it clear,
+ * else just enough more at the end it reaches to clear the band; once that padding no longer fits, the drawing scrolls
+ * and each end is padded at least its band, so its first and last rows can scroll clear.
+ */
+export function scrolledPadding({
+  own,
+  inset,
+  height,
+  view,
+}: {
+  own: {top: number; y: number}
+  inset: {top: number; bottom: number}
+  height: number
+  view: number
+}): {top: number; y: number} {
+  const scrolls = {top: Math.max(own.top, inset.top), y: Math.max(own.y, inset.bottom)}
+  const space = view - height
+  if (view <= 0 || space < own.top + own.y) return scrolls
+  // Centred, the drawing's top sits (space + top - y) / 2 below the stage's, and its bottom as far above the stage's.
+  let {top, y} = own
+  if ((space + top - y) / 2 < inset.top) top = y + 2 * inset.top - space
+  if ((space - top + y) / 2 < inset.bottom) y = top + 2 * inset.bottom - space
+  if (top + y > space || (space + top - y) / 2 < inset.top - 0.5) return scrolls
+  return {top: Math.ceil(top), y: Math.ceil(y)}
+}

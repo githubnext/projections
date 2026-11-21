@@ -11,6 +11,7 @@ import type {
   RendererAccepts,
   AnnotationMark,
   ControlValue,
+  FilterPayload,
   InitPayload,
   ProgressPayload,
   RendererCapabilities,
@@ -44,6 +45,11 @@ export interface RendererState<X extends Extraction = Extraction> {
   viewport: {width: number; height: number} | undefined
   /** The theme, motion preference, locale and pane from `init` or a later `environment`; undefined until `init`. */
   environment: RendererEnvironment | undefined
+  /**
+   * The host's scope, summary filter and find (capability `filter`); undefined until it sends one. Kept from the
+   * first message: a host sends the filter it has chosen right after `init`, before a later subscriber could see it.
+   */
+  filter: FilterPayload | undefined
 }
 
 /** What `useRenderer` declares and how it behaves. */
@@ -130,6 +136,7 @@ export function useRenderer<const A extends readonly RendererAccepts[] | undefin
     options: {},
     viewport: undefined,
     environment: undefined,
+    filter: undefined,
   })
   const [client, setClient] = useState<RendererClient>()
   const [failure, setFailure] = useState<string>()
@@ -173,6 +180,7 @@ export function useRenderer<const A extends readonly RendererAccepts[] | undefin
           action: ({id}) => actionRef.current?.(id),
           viewport: viewport => setState(previous => ({...previous, viewport})),
           environment,
+          filter: filter => setState(previous => ({...previous, filter})),
         },
         {capabilities},
       )

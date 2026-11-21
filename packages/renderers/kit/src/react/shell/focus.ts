@@ -2,7 +2,6 @@
 import {useEffect, useMemo, useState} from 'react'
 import type {RefObject} from 'react'
 import type {FilterPayload} from '@githubnext/projections-renderer-sdk/protocol'
-import type {RendererClient} from '@githubnext/projections-renderer-sdk/client'
 import {afterPaint} from '@githubnext/projections-renderer-sdk/client'
 import {placedAttribute} from '../../focus.js'
 import {layoutFilter} from '../../scope-filter.js'
@@ -11,15 +10,15 @@ import {layoutFilter} from '../../scope-filter.js'
  * What the host's latest filter lays out (`layoutFilter`), or undefined before it sends any: the same object while a
  * summary figure or find changes only what recedes.
  */
-export function useHostFilter(client: RendererClient | undefined): FilterPayload | undefined {
-  const [filter, setFilter] = useState<FilterPayload>()
-  useEffect(
-    () =>
-      client?.subscribe(message => {
-        if (message.type === 'filter') setFilter(previous => layoutFilter(previous, message))
-      }),
-    [client],
-  )
+export function useHostFilter(message: FilterPayload | undefined): FilterPayload | undefined {
+  // The host's latest filter, as `useRenderer` kept it from the first message (a subscription made after the client
+  // connects can miss the one sent with the documents).
+  const [seen, setSeen] = useState(message)
+  const [filter, setFilter] = useState(() => (message ? layoutFilter(undefined, message) : undefined))
+  if (message !== seen) {
+    setSeen(message)
+    if (message) setFilter(layoutFilter(filter, message))
+  }
   return filter
 }
 

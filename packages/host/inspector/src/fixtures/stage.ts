@@ -176,6 +176,7 @@ export class Stage {
       open.hover(null)
       open.setEnvironment(this.frameEnvironment())
       open.setInit(init, progress)
+      if (request.filter) open.filter(request.filter)
       return first
     }
     this.reset()
@@ -200,6 +201,8 @@ export class Stage {
       ...(request.height ? {fill: true} : {}),
       ...(this.documents ? {builtinDocuments: this.documents} : {}),
     })
+    // Kept by the frame and sent right after `init` once the renderer is ready, as a host's scope is.
+    if (request.filter) this.frame.filter(request.filter)
     await ready
     return first
   }

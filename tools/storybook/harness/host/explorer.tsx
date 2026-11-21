@@ -39,11 +39,14 @@ const caption = (
   </div>
 )
 
-/** `?footCaption`: a host's own content at the stage's foot (`ProjectionViewProps.foot`), over the legend. */
-const footCaption = (
-  <div className="demo-foot-caption" style={{padding: '6px 12px', lineHeight: '20px'}}>
+/** `?edgeCaption`: a host's own content on the stage's bottom edge (`ProjectionViewProps.edge`), 52px tall. */
+const edgeCaption = (
+  <div
+    className="demo-edge-caption"
+    style={{padding: '6px 16px', lineHeight: '20px', borderRadius: 26, background: 'CanvasText', color: 'Canvas', textAlign: 'center'}}
+  >
     <strong style={{display: 'block', fontSize: 14}}>Checkout gains a payments queue</strong>
-    <span style={{display: 'block', fontSize: 12, opacity: 0.75}}>A host’s caption at the stage’s foot</span>
+    <span style={{display: 'block', fontSize: 12, opacity: 0.75}}>A host’s caption on the stage’s edge</span>
   </div>
 )
 
@@ -202,7 +205,7 @@ export function HostHarness() {
             colorMode={colorMode}
             {...explorerOptions()}
             {...(params.has('caption') ? {utility: caption} : {})}
-            {...(params.has('footCaption') ? {foot: footCaption} : {})}
+            {...(params.has('edgeCaption') ? {edge: edgeCaption} : {})}
             onOpen={(path, line) => setOpened(`${path}${line ? `:${line}` : ''}`)}
             {...(params.get('details') === 'none' ? {details: 'none' as const} : {})}
             {...(params.has('evidenceLinks') ? {evidenceLink} : {})}

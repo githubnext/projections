@@ -115,7 +115,9 @@ export function stageLayout({
           display: 'grid',
           minWidth: 0,
           isolation: 'isolate',
-          overflow: bleed > 0 ? 'visible' : 'clip',
+          // Clipped across only: the host's content on the stage's bottom edge hangs below it.
+          overflowX: bleed > 0 ? 'visible' : 'clip',
+          overflowY: 'visible',
           ...fillBody,
         } as CSSProperties)
       : mode === 'side-by-side'

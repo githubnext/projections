@@ -18,8 +18,8 @@ interface ViewArgs extends ScenarioArgs {
   utilityArea?: boolean
   /** A host's own caption in the stage's utility area (`utility`). */
   caption?: boolean
-  /** The same caption at the stage's foot (`foot`), over the legend. */
-  footCaption?: boolean
+  /** The same caption on the stage's bottom edge (`edge`), the legend floating above it. */
+  edgeCaption?: boolean
 }
 
 /** A host's caption, as a page might name what the stage shows. */
@@ -47,7 +47,7 @@ const meta = {
     holds: {control: 'inline-radio', options: ['timeline', 'pause']},
     utilityArea: {control: 'boolean'},
     caption: {control: 'boolean'},
-    footCaption: {control: 'boolean'},
+    edgeCaption: {control: 'boolean'},
   },
   render: function Render(args, {globals, loaded}) {
     const {runtime, prepared} = loaded as Required<Loaded>
@@ -88,7 +88,7 @@ const meta = {
         {...(args.details ? {renderDetails} : {})}
         {...(args.utilityArea ? {utilityArea: true} : {})}
         {...(args.caption ? {utility: caption} : {})}
-        {...(args.footCaption ? {foot: caption} : {})}
+        {...(args.edgeCaption ? {edge: caption} : {})}
       />
     )
   },
@@ -141,4 +141,4 @@ export const HostUtilityWithPlayback: Story = {
   name: 'Host content with floating playback',
   args: {caption: true, utilityArea: true, initialMode: 'animated'},
 }
-export const HostFoot: Story = {name: 'Host content at the stage’s foot', args: {footCaption: true, initialMode: 'diff'}}
+export const HostEdge: Story = {name: 'Host content on the stage’s edge', args: {edgeCaption: true, initialMode: 'diff'}}

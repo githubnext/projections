@@ -28,7 +28,7 @@ function bare(value: string): string {
   for (let index = 0; index < value.length;) {
     const match = /^(var|url)\(/i.exec(value.slice(index))
     if (!match) {
-      result += value[index]
+      result += value.charAt(index)
       index += 1
       continue
     }

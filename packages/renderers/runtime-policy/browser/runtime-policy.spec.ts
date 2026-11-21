@@ -6,7 +6,7 @@ import {compare, compareWithComparator, openRenderer} from '@githubnext/projecti
 import type {RendererHandle} from '@githubnext/projections-renderer-harness/playwright'
 
 const fixture = (name: string): Extraction =>
-  JSON.parse(readFileSync(new URL(`../../../extractors/tetragon-policies/tests/fixtures/${name}`, import.meta.url), 'utf8'))
+  JSON.parse(readFileSync(new URL(`../../../extractors/tetragon-policies/tests/fixtures/${name}`, import.meta.url), 'utf8')) as Extraction
 const before = fixture('credentials/before.expected.json')
 const after = fixture('credentials/after.expected.json')
 const monitor = fixture('credentials/monitor.expected.json')

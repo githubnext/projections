@@ -17,7 +17,7 @@ function coveredRing(unit: Element, box: DOMRect, name: string, isolated: boolea
     let under = false
     for (let cursor: Element | null = child; cursor && cursor !== unit; cursor = cursor.parentElement) {
       const cursorStyle = getComputedStyle(cursor)
-      if (cursorStyle.position !== 'static' && (parseInt(cursorStyle.zIndex) || 0) < 0) under = true
+      if (cursorStyle.position !== 'static' && (parseInt(cursorStyle.zIndex, 10) || 0) < 0) under = true
     }
     if (under && isolated) continue
     const paints = colorAlpha(childStyle.backgroundColor) > 0.01 || childStyle.backgroundImage !== 'none'

@@ -19,8 +19,14 @@ const after = extraction('api/v0', [
   ),
   declaration('stable', 'stable(): void'),
 ])
+/** A declaration's signature, which every one here has. */
+function signatureOf(entity: (typeof before)['entities'][number]): string {
+  const signature = entity.data?.signature
+  if (typeof signature !== 'string') throw new Error(`${entity.id} has no signature`)
+  return signature
+}
 const signatures = (document: typeof before) =>
-  document.entities.map(entity => [entity.id, String(entity.data!.signature)] as const).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+  document.entities.map(entity => [entity.id, signatureOf(entity)] as const).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
 
 /** Each row as a sighted reader sees it: the status in its footer and its signature lines, with the runs marked in them. */
 function rows(root: Locator) {
@@ -54,7 +60,7 @@ test('the diff lists every declaration once, with its status as text and inline 
   expect(state.steps).toEqual([])
   const view = renderer.frame.locator('.api-view')
   expect(await rows(view)).toEqual([
-    {id: 'added', status: ['Added'], lines: [`added:${after.entities[2]!.data!.signature}`], runs: []},
+    {id: 'added', status: ['Added'], lines: [`added:${signatureOf(after.entities[2]!)}`], runs: []},
     {id: 'hello', status: ['Modified'], lines: ['plain:hello(name: string): string'], runs: ['ins:name: string']},
     {id: 'legacy', status: ['Removed'], lines: ['removed:legacy(): void'], runs: []},
     {id: 'parse', status: ['Modified'], lines: ['removed:parse(text: string): Node', 'added:tokenize(input: Buffer): Token[]'], runs: []},
@@ -76,7 +82,7 @@ test('the diff lists every declaration once, with its status as text and inline 
   expect(tint).not.toMatch(/^(transparent|rgba\(0, 0, 0, 0\))$/)
   const stable = await paint(renderer.frame.locator('[data-entity-id="stable"]'))
   await openRenderer(page, {renderer: 'api', before: after, after, comparisonMode: 'diff'})
-  expect(await paint(page.frameLocator('iframe').first().locator('[data-entity-id="stable"]'))).toBe(stable)
+  expect(await paint(page.locator('iframe').first().contentFrame().locator('[data-entity-id="stable"]'))).toBe(stable)
 })
 
 test('without highlighting the diff keeps its content and layout and drops only the change tint and status words', async ({page}) => {

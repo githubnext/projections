@@ -26,12 +26,15 @@ async function statuses(renderer: Awaited<ReturnType<typeof openRenderer>>) {
     .evaluate(root =>
       Object.fromEntries(
         [...root.querySelectorAll<SVGGElement>('svg.graph .graph-node[data-entity-id]')]
-          .map(node => [
-            node.dataset.entityId!,
-            [...node.querySelectorAll('.pk-svg-status .pk-status-part')]
-              .map(part => `${part.querySelector('[data-icon]')?.getAttribute('data-icon') ?? '?'} ${part.textContent}`)
-              .join(' '),
-          ])
+          .map(
+            node =>
+              [
+                node.dataset.entityId!,
+                [...node.querySelectorAll('.pk-svg-status .pk-status-part')]
+                  .map(part => `${part.querySelector('[data-icon]')?.getAttribute('data-icon') ?? '?'} ${part.textContent}`)
+                  .join(' '),
+              ] as const,
+          )
           .filter(([, text]) => text),
       ),
     )
@@ -94,7 +97,7 @@ test('selecting a resource brings forward what depends on it, unless the control
   await expect(renderer.frame.getByRole('status').filter({hasText: '6 resources depend on main'})).toHaveCount(1)
   const forward = await renderer.frame
     .locator('.graph-node:not(.graph-group):not(.receded)')
-    .evaluateAll(nodes => nodes.map(node => (node as SVGGElement).dataset.entityId).sort())
+    .evaluateAll(nodes => nodes.map(node => (node as SVGGElement).dataset.entityId ?? '').sort())
   expect(forward).toEqual(
     [
       database,

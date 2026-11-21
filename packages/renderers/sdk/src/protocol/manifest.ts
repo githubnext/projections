@@ -100,16 +100,11 @@ export function parseRendererManifest(value: unknown): RendererManifest {
     throw new Error('Renderer manifest name must be a lowercase identifier')
   }
   // Characters (code points), as the manifest schema's maxLength counts them.
+  // eslint-disable-next-line @typescript-eslint/no-misused-spread -- Spreading a string yields its code points, which this counts.
   if (typeof title !== 'string' || !title.trim() || [...title].length > 200) {
     throw new Error('Renderer manifest title must be 1-200 characters')
   }
-  if (
-    !Array.isArray(handles) ||
-    handles.length > 100 ||
-    !handles.every(item => typeof item === 'string' && /^[a-z0-9][a-z0-9/.-]{0,63}$/.test(item))
-  ) {
-    throw new Error('Renderer manifest handles must be renderer names')
-  }
+  if (!rendererNames(handles)) throw new Error('Renderer manifest handles must be renderer names')
   const modes = value.comparisonModes === undefined ? undefined : parseComparisonModes(value.comparisonModes)
   if (value.comparisonModes !== undefined && !modes) throw new Error('Renderer manifest comparisonModes must be distinct comparison modes')
   const accepts = value.accepts === undefined ? undefined : parseAccepts(value.accepts)
@@ -121,8 +116,15 @@ export function parseRendererManifest(value: unknown): RendererManifest {
     version: 0,
     name,
     title,
-    handles: [...handles] as string[],
+    handles: [...handles],
     ...(modes ? {comparisonModes: modes} : {}),
     ...(accepts ? {accepts} : {}),
   }
+}
+
+/** At most 100 renderer names: what a manifest's `handles` lists. */
+function rendererNames(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) && value.length <= 100 && value.every(item => typeof item === 'string' && /^[a-z0-9][a-z0-9/.-]{0,63}$/.test(item))
+  )
 }

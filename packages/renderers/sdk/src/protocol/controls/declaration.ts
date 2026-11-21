@@ -146,8 +146,10 @@ export function parseControls(value: unknown): RendererControl[] | undefined {
   if (!Array.isArray(value) || value.length > rendererLimits.controls) return undefined
   const ids = new Set<string>()
   const controls: RendererControl[] = []
-  for (const item of value) {
-    const base = record(item) ? parseBase(item, ids) : undefined
+  const items: unknown[] = value
+  for (const item of items) {
+    if (!record(item)) return undefined
+    const base = parseBase(item, ids)
     if (!base) return undefined
     ids.add(base.id)
     const parse = typeof item.type === 'string' && Object.hasOwn(parsers, item.type) ? parsers[item.type] : undefined

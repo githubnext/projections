@@ -108,7 +108,7 @@ export function rendererBundlePlugin(options: Omit<RendererBuildOptions, 'entry'
             .filter(([, module]) => module.renderedLength > 0)
             .map(([id]) => id),
         )
-        for (const name of Object.keys(bundle)) delete bundle[name]
+        for (const name of Object.keys(bundle)) Reflect.deleteProperty(bundle, name)
         const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -401,7 +401,7 @@ export function rendererStyleLintPlugin(): Plugin {
     },
     transform(code, id) {
       const file = id.split('?')[0]!.replace(/\\/g, '/')
-      if (!/\.css$/.test(file) || /\/node_modules\/|\/renderers\/(?:kit|sdk)\//.test(file)) return null
+      if (!file.endsWith('.css') || /\/node_modules\/|\/renderers\/(?:kit|sdk)\//.test(file)) return null
       const name = file.startsWith(root) ? file.slice(root.length) : file
       const lint = lintRendererStyles(code, name)
       if (lint.errors.length) this.error(`Renderer styles use properties that aren't theme tokens:\n${lint.errors.join('\n')}`)

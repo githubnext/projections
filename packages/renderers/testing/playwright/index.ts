@@ -203,7 +203,10 @@ export async function openStage(
     subject = {mode: 'comparison', before, after, comparison: computed}
   } else throw new Error('openStage needs a scenario, an extraction, or before and after extractions')
   await ask(record, 'load', () =>
-    page.evaluate(json => window.projectionsStage.load(JSON.parse(json)), JSON.stringify({...rest, subject} satisfies StageLoad)),
+    page.evaluate(
+      json => window.projectionsStage.load(JSON.parse(json) as StageLoad),
+      JSON.stringify({...rest, subject} satisfies StageLoad),
+    ),
   )
   return handle(page, subject, record)
 }
@@ -267,6 +270,7 @@ export function samples(count = 20, {roundTrip = false}: {roundTrip?: boolean} =
  * `projections` option, for example
  * `test.use({projections: {fixtures: 'scenarios.json', renderers: 'dist'}})`.
  */
+// eslint-disable-next-line @typescript-eslint/no-generated-empty-object-type -- Empty on purpose: no test-scoped fixtures.
 export const test = base.extend<Record<never, never>, {projections: InspectorOptions; inspector: FixturesInspector}>({
   projections: [
     {fixtures: 'scenarios.json', renderers: 'dist'},

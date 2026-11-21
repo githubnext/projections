@@ -148,6 +148,7 @@ test('a view builds into the bundle with renderer.json from the same config', as
     const html = readFileSync(join(root, 'dist/index.html'), 'utf8')
     assert.match(html, /\.pk\s*\{\s*display:\s*block/, "the kit's styles are inlined")
     const script = html.slice(html.lastIndexOf('<script>') + '<script>'.length, html.lastIndexOf('</script>'))
+    // eslint-disable-next-line no-new-func -- Runs the built bundle's script, as the renderer document would.
     new Function(script)()
     const {component, options} = globalThis.mounted
     assert.equal(component(), 'view', 'the default export')

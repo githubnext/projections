@@ -102,8 +102,7 @@ export function proseLines(text: string, room: number, textScale = 1, max: numbe
   const words = text.split(/\s+/).filter(Boolean)
   const lines: string[] = []
   let line = ''
-  for (let index = 0; index < words.length; index++) {
-    const word = words[index]!
+  for (const word of words) {
     const next = line ? `${line} ${word}` : word
     if (next.length <= fits) {
       line = next

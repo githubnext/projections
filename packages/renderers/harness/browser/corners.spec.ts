@@ -100,8 +100,8 @@ test("the report finds a data table's square heading poking past its frame", asy
   })
   await stage.measure('settle')
   const report = await cornerReport(page, stage.frame.locator('.pk-table-scroll').first(), {frame: 1})
-  expect(report.failures.some(failure => /^box top-left corner/.test(failure))).toBe(true)
-  expect(report.failures.some(failure => /^box top-right corner/.test(failure))).toBe(true)
+  expect(report.failures.some(failure => failure.startsWith('box top-left corner'))).toBe(true)
+  expect(report.failures.some(failure => failure.startsWith('box top-right corner'))).toBe(true)
 })
 
 test('the report finds a square header band covering its group border', async ({page}, info) => {

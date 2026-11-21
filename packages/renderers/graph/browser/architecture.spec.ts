@@ -1,9 +1,14 @@
 import {expect, test} from '@playwright/test'
 import {readFile} from 'node:fs/promises'
+import type {Extraction} from '@githubnext/projections-schemas'
 import {openRenderer} from '@githubnext/projections-renderer-harness/playwright'
 import {architectureModules, capabilityUnits, emptiedBoundaries} from '../../kit/browser/fixtures.js'
 import {scrubSuite, selectionSuite} from '../../kit/browser/suite.js'
 import {paneStatusSuite, statusSuite} from '../../kit/browser/status.js'
+
+/** An extraction in this renderer's fixtures. */
+const fixture = async (name: string) =>
+  JSON.parse(await readFile(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8')) as Extraction
 
 scrubSuite([architectureModules(), emptiedBoundaries(), capabilityUnits()])
 selectionSuite(architectureModules(), 'worker')
@@ -129,7 +134,6 @@ test('in the diff a modified card lists its changed data fields and marks the ba
 })
 
 test('a large architecture collapses unchanged boundaries, and its diff opens on the changes', async ({page}) => {
-  const fixture = async (name: string) => JSON.parse(await readFile(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
   const [before, after] = await Promise.all([fixture('large-architecture-before'), fixture('large-architecture-after')])
   const renderer = await openRenderer(page, {renderer: 'architecture', before, after, comparisonMode: 'diff', height: 650})
   const frame = renderer.frame
@@ -167,7 +171,6 @@ test('a large architecture collapses unchanged boundaries, and its diff opens on
 })
 
 test('expanding a boundary keeps the activated card where it was and the zoom as it was; selecting moves nothing', async ({page}) => {
-  const fixture = async (name: string) => JSON.parse(await readFile(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
   const [before, after] = await Promise.all([fixture('large-architecture-before'), fixture('large-architecture-after')])
   const renderer = await openRenderer(page, {renderer: 'architecture', before, after, comparisonMode: 'diff', height: 650})
   const frame = renderer.frame
@@ -204,7 +207,6 @@ test('expanding a boundary keeps the activated card where it was and the zoom as
 })
 
 test('a summary card shows it expands, and a double click expands it once without selecting text', async ({page}) => {
-  const fixture = async (name: string) => JSON.parse(await readFile(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
   const [before, after] = await Promise.all([fixture('large-architecture-before'), fixture('large-architecture-after')])
   const renderer = await openRenderer(page, {renderer: 'architecture', before, after, comparisonMode: 'diff', height: 650})
   const frame = renderer.frame
@@ -271,8 +273,7 @@ test('a definition can give cards a subtitle, size them by a number and add word
 })
 
 test("a field naming icons draws each before its card's kind, crossfades a changed one and ignores unknown names", async ({page}) => {
-  const read = async (name: string) => JSON.parse(await readFile(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
-  const [before, after] = [await read('icons-before'), await read('icons-after')]
+  const [before, after] = [await fixture('icons-before'), await fixture('icons-after')]
   const renderer = await openRenderer(page, {renderer: 'architecture', before, after, progress: 0, options: {icon: '/data/icon'}})
   const icons = (id: string) => renderer.frame.locator(`[data-entity-id="${id}"] .node-icon`)
   await expect(icons('cli')).toHaveAttribute('data-card-icon', 'terminal')

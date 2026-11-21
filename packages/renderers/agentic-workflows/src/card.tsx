@@ -95,6 +95,8 @@ const lockWords: Record<string, string> = {
 
 const record = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
+/** A JSON value as text: a string as it is, anything else as JSON. */
+const shown = (value: unknown): string => (typeof value === 'string' ? value : JSON.stringify(value))
 
 /** A workflow's engine and model (text with inline code), whether strict mode is off, and its lock file's state. */
 function facts(entity: WorkflowItem['entity'] | undefined) {
@@ -102,7 +104,7 @@ function facts(entity: WorkflowItem['entity'] | undefined) {
   const engine = record(data.engine)
   const lock = record(data.lock).status
   return {
-    engine: codeSpan(String(engine.id ?? 'copilot')) + (engine.model !== undefined ? ` ${codeSpan(String(engine.model))}` : ''),
+    engine: codeSpan(shown(engine.id ?? 'copilot')) + (engine.model !== undefined ? ` ${codeSpan(shown(engine.model))}` : ''),
     strict: data.strict !== false,
     lock: typeof lock === 'string' ? lock : undefined,
   }
@@ -181,7 +183,7 @@ export function WorkflowCard({item, frame}: {item: WorkflowItem; frame: Frame}) 
     <EntityCard
       id={item.row.id}
       label={name ?? <code className="pk-code">{item.entity.label}</code>}
-      identifier={String(data.path ?? item.entity.label)}
+      identifier={shown(data.path ?? item.entity.label)}
       selected={frame.props.selectedId === item.row.id}
       onSelect={frame.props.onSelect}
       {...(frame.comparing ? {change: item.row, emphasis: strength} : {})}

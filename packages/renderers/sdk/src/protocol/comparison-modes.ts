@@ -29,8 +29,13 @@ export function defaultComparisonMode(modes: readonly ComparisonMode[]): Compari
 /** Validates a `comparisonModes` declaration: a non-empty list of distinct known modes, in any order. */
 export function parseComparisonModes(value: unknown): ComparisonMode[] | undefined {
   if (!Array.isArray(value) || !value.length || value.length > comparisonModes.length) return undefined
-  if (!value.every(mode => comparisonModes.includes(mode as ComparisonMode)) || new Set(value).size !== value.length) return undefined
-  return [...value] as ComparisonMode[]
+  const modes: unknown[] = value
+  if (!modes.every(isComparisonMode) || new Set(modes).size !== modes.length) return undefined
+  return modes.filter(isComparisonMode)
+}
+
+function isComparisonMode(mode: unknown): mode is ComparisonMode {
+  return comparisonModes.some(known => known === mode)
 }
 
 /** The comparison modes a renderer supports, in canonical order (see `defaultComparisonMode`). */

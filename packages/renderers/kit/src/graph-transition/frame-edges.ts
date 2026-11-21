@@ -58,7 +58,11 @@ export function frameEdges(input: {
   // before it could reach a neighbouring card (routes keep at least `edgeNode` spacing from cards).
   const redrawNearness = (edge: Ends) => {
     const layout = mix < 0.5 ? from : to
-    const moved = Math.max(Math.hypot(...Object.values(offset(edge.from, layout))), Math.hypot(...Object.values(offset(edge.to, layout))))
+    const distance = (id: string) => {
+      const {x, y} = offset(id, layout)
+      return Math.hypot(x, y)
+    }
+    const moved = Math.max(distance(edge.from), distance(edge.to))
     return 1 - smoothstep(Math.min(1, moved / redrawReach))
   }
   const edges: TransitionEdge[] = []

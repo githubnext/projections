@@ -1,7 +1,7 @@
 // The interactions controller: wires a renderer's root to the host's hover, selection, filter, scroll and
 // annotations, and reports what the person does there.
 import type {RendererClient} from '../client.js'
-import type {AnnotationMark, HostMessage} from '../protocol.js'
+import type {AnchorRect, AnnotationMark, HostMessage} from '../protocol.js'
 import {documentRings, ringFocusAttribute, ringHoverAttribute, ringSelectedAttribute} from '../rings.js'
 import {createAnchorReporter} from './anchors.js'
 import {annotatedAttribute, filteredAttribute, hoveredAttribute} from './attributes.js'
@@ -126,7 +126,7 @@ export function connectInteractions(client: RendererClient, root: HTMLElement, o
     markHovered(entities, hovered)
     markFiltered(entities, isVisible, isAnnotated)
     const clips = new Map<Element, boolean>()
-    const annotated = marks.size ? annotatedRects(entities, view, isAnnotated, isVisible, clips) : new Map()
+    const annotated = marks.size ? annotatedRects(entities, view, isAnnotated, isVisible, clips) : new Map<string, AnchorRect>()
     badges.place(annotated)
     anchors.report({
       primary: new Set([selected, hovered].filter((id): id is string => id !== null)),

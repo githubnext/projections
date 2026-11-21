@@ -110,7 +110,7 @@ function backend(command: string, args: string[], cwd: string, env: NodeJS.Proce
   lines.on('line', line => {
     let message: {id?: number; result?: unknown; error?: {message: string}}
     try {
-      message = JSON.parse(line)
+      message = JSON.parse(line) as typeof message
     } catch {
       return
     }
@@ -172,14 +172,13 @@ function send(response: ServerResponse, status: number, type: string, body: stri
   response.end(body)
 }
 
-/** The bytes of a relayed result: JSON as text, `{base64}` as bytes, anything else as text. */
+/** The bytes of a relayed result: JSON as text, text as it is, `{base64}` as bytes, anything else as JSON. */
 function payload({contentType, body}: RequestResult): string | Buffer {
   if (body === null || body === undefined) return ''
   if (/^application\/([\w.-]+\+)?json\b/i.test(contentType)) return JSON.stringify(body)
-  if (typeof body === 'object' && typeof (body as {base64?: unknown}).base64 === 'string') {
-    return Buffer.from((body as {base64: string}).base64, 'base64')
-  }
-  return String(body)
+  if (typeof body === 'string') return body
+  const {base64} = body as {base64?: unknown}
+  return typeof base64 === 'string' ? Buffer.from(base64, 'base64') : JSON.stringify(body)
 }
 
 /** Starts the fixtures workbench and resolves with its URL. */

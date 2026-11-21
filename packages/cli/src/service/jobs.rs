@@ -19,35 +19,72 @@ pub(super) const MAX_QUEUED_JOBS: usize = 16;
 pub(super) struct Job {
     pub(super) id: String,
     pub(super) runner: Runner,
-    pub(super) result: Mutex<JobResult>,
+    pub(super) state: Mutex<JobState>,
     pub(super) finished: Notify,
 }
 
-pub(super) struct JobResult {
-    pub(super) status: &'static str,
-    pub(super) diagnostics: Vec<Value>,
-    pub(super) document: Option<(&'static str, Value)>,
+/// What a job collected: its document (`extraction` or `comparison`) and its notices.
+pub(super) struct Collected {
+    pub(super) kind: &'static str,
+    pub(super) document: Value,
     pub(super) notices: Vec<String>,
+}
+
+/// Where a job is. Waiting for its turn and running are both `running` on the wire: clients poll while it is.
+pub(super) enum JobState {
+    Queued,
+    Running,
+    Completed(Collected),
+    Failed {
+        diagnostics: Vec<Value>,
+    },
+    /// Cancelled before it ran, or while it ran, with what it collected regardless.
+    Cancelled(Option<Collected>),
+}
+
+impl JobState {
+    pub(super) fn name(&self) -> &'static str {
+        match self {
+            Self::Queued | Self::Running => "running",
+            Self::Completed(_) => "completed",
+            Self::Failed { .. } => "failed",
+            Self::Cancelled(_) => "cancelled",
+        }
+    }
+
+    pub(super) fn finished(&self) -> bool {
+        !matches!(self, Self::Queued | Self::Running)
+    }
 }
 
 impl Job {
     pub(super) fn value(&self) -> Value {
-        let result = self.result.lock().unwrap_or_else(|e| e.into_inner());
+        let state = self.state.lock().unwrap_or_else(|e| e.into_inner());
+        let (diagnostics, collected): (&[Value], Option<&Collected>) = match &*state {
+            JobState::Queued | JobState::Running | JobState::Cancelled(None) => (&[], None),
+            JobState::Completed(collected) | JobState::Cancelled(Some(collected)) => (&[], Some(collected)),
+            JobState::Failed { diagnostics } => (diagnostics, None),
+        };
+        let notices: &[String] = collected.map_or(&[], |collected| &collected.notices);
         let mut value = json!({
             "id": self.id,
-            "status": result.status,
+            "status": state.name(),
             "outputs": *self.runner.outputs.lock().unwrap_or_else(|e| e.into_inner()),
-            "diagnostics": result.diagnostics,
-            "notices": result.notices,
+            "diagnostics": diagnostics,
+            "notices": notices,
         });
-        if let Some((kind, document)) = &result.document {
-            value[*kind] = document.clone();
+        if let Some(collected) = collected {
+            value[collected.kind] = collected.document.clone();
         }
         value
     }
 
     pub(super) fn running(&self) -> bool {
-        self.result.lock().unwrap_or_else(|e| e.into_inner()).status == "running"
+        !self.state.lock().unwrap_or_else(|e| e.into_inner()).finished()
+    }
+
+    fn set(&self, state: JobState) {
+        *self.state.lock().unwrap_or_else(|e| e.into_inner()) = state;
     }
 
     pub(super) async fn wait(&self) {
@@ -148,12 +185,7 @@ pub(super) async fn start(state: &Arc<ServiceState>, request: Request) -> Result
         let job = Arc::new(Job {
             id: Uuid::new_v4().to_string(),
             runner: state.runner(),
-            result: Mutex::new(JobResult {
-                status: "running",
-                diagnostics: Vec::new(),
-                document: None,
-                notices: Vec::new(),
-            }),
+            state: Mutex::new(JobState::Queued),
             finished: Notify::new(),
         });
         jobs.push_back(job.clone());
@@ -166,10 +198,11 @@ pub(super) async fn start(state: &Arc<ServiceState>, request: Request) -> Result
         let _turn = queue.collecting.lock().await;
         // Cancelled (or the service closed) while it waited: it never runs.
         if job.runner.cancel.load(Ordering::SeqCst) {
-            job.result.lock().unwrap_or_else(|e| e.into_inner()).status = "cancelled";
+            job.set(JobState::Cancelled(None));
             job.finished.notify_waiters();
             return;
         }
+        job.set(JobState::Running);
         let runner = job.runner.clone();
         let kind = if input.after.is_some() { "comparison" } else { "extraction" };
         let collected = tokio::task::spawn_blocking(move || {
@@ -215,24 +248,23 @@ pub(super) async fn start(state: &Arc<ServiceState>, request: Request) -> Result
         })
         .await;
         let cancelled = job.runner.cancel.load(Ordering::SeqCst);
-        {
-            let mut result = job.result.lock().unwrap_or_else(|e| e.into_inner());
-            match collected {
-                Ok(Ok((document, notices))) => {
-                    result.document = Some((kind, document));
-                    result.notices = notices;
-                    result.status = if cancelled { "cancelled" } else { "completed" };
-                }
-                error => {
-                    result.status = if cancelled { "cancelled" } else { "failed" };
-                    result.diagnostics = match error {
-                        Ok(Err(error)) => error_diagnostics(&error),
-                        Err(error) => vec![diagnostic(error.to_string())],
-                        Ok(Ok(_)) => unreachable!(),
-                    };
+        job.set(match collected {
+            Ok(Ok((document, notices))) => {
+                let collected = Collected { kind, document, notices };
+                if cancelled {
+                    JobState::Cancelled(Some(collected))
+                } else {
+                    JobState::Completed(collected)
                 }
             }
-        }
+            _ if cancelled => JobState::Cancelled(None),
+            Ok(Err(error)) => JobState::Failed {
+                diagnostics: error_diagnostics(&error),
+            },
+            Err(error) => JobState::Failed {
+                diagnostics: vec![diagnostic(error.to_string())],
+            },
+        });
         job.finished.notify_waiters();
     });
     Ok(json_response(StatusCode::ACCEPTED, created))

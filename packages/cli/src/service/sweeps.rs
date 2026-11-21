@@ -24,11 +24,37 @@ use super::{
 };
 use crate::runtime::DefinitionSource;
 
+/// Where a history sweep is.
+pub(super) enum SweepStatus {
+    Running,
+    Completed,
+    Failed(String),
+    /// Stopped, keeping what it found; the error, if it also failed.
+    Cancelled(Option<String>),
+}
+
+impl SweepStatus {
+    fn name(&self) -> &'static str {
+        match self {
+            Self::Running => "running",
+            Self::Completed => "completed",
+            Self::Failed(_) => "failed",
+            Self::Cancelled(_) => "cancelled",
+        }
+    }
+
+    fn error(&self) -> Option<&str> {
+        match self {
+            Self::Failed(error) | Self::Cancelled(Some(error)) => Some(error),
+            Self::Running | Self::Completed | Self::Cancelled(None) => None,
+        }
+    }
+}
+
 /// A history sweep the Inspector started.
 pub(super) struct SweepRun {
     pub(super) id: String,
-    pub(super) status: &'static str,
-    pub(super) error: Option<String>,
+    pub(super) status: SweepStatus,
     pub(super) changes: Vec<Value>,
     /// The same changes, for bookmarking them.
     pub(super) swept: Vec<crate::sweep::Change>,
@@ -41,7 +67,7 @@ pub(super) struct SweepRun {
 
 impl SweepRun {
     pub(super) fn value(&self) -> Value {
-        json!({"id": self.id, "status": self.status, "error": self.error, "changes": self.changes,
+        json!({"id": self.id, "status": self.status.name(), "error": self.status.error(), "changes": self.changes,
             "projections": self.rows, "cells": self.cells})
     }
 }
@@ -112,8 +138,7 @@ pub(super) fn start_sweep(state: &Arc<ServiceState>, body: &Value) -> Result<Val
         }
         *sweep = Some(SweepRun {
             id: id.clone(),
-            status: "running",
-            error: None,
+            status: SweepStatus::Running,
             changes: Vec::new(),
             swept: Vec::new(),
             rows: Vec::new(),
@@ -200,14 +225,12 @@ pub(super) fn start_sweep(state: &Arc<ServiceState>, body: &Value) -> Result<Val
         })();
         let cancelled = cancel.load(Ordering::SeqCst);
         update(&|sweep| {
-            sweep.status = match (&result, cancelled) {
-                (_, true) => "cancelled",
-                (Ok(()), false) => "completed",
-                (Err(_), false) => "failed",
+            let error = result.as_ref().err().map(|error| format!("{error:#}"));
+            sweep.status = match (error, cancelled) {
+                (error, true) => SweepStatus::Cancelled(error),
+                (None, false) => SweepStatus::Completed,
+                (Some(error), false) => SweepStatus::Failed(error),
             };
-            if let Err(error) = &result {
-                sweep.error = Some(format!("{error:#}"));
-            }
         });
     });
     Ok(json!({"id": id, "status": "running"}))

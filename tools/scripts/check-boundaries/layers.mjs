@@ -18,6 +18,8 @@ const builtInRenderers = [
 ]
 export const layers = [
   ['packages/schemas', [], []],
+  // State machines: no dependencies, below everything that runs a lifecycle.
+  ['packages/machine', [], []],
   ['packages/engine/js', ['packages/schemas'], []],
   // Its tests evaluate first-party rules files and check what they produce with the Engine.
   ['packages/comparators/runtime/js', [], ['packages/engine/js']],
@@ -40,13 +42,14 @@ export const layers = [
   // @githubnext/projections bundles the renderer-facing packages into one published package.
   ['packages/sdk', [], ['packages/schemas', 'packages/renderers/sdk', 'packages/renderers/kit', 'packages/renderers/testing']],
   ['examples/renderers/*', ['packages/sdk'], []],
-  ['packages/host/core', ['packages/schemas', 'packages/renderers/sdk'], ['packages/engine/js']],
-  ['packages/host/vscode-ui', ['packages/schemas', 'packages/host/core'], ['packages/renderers/sdk']],
+  ['packages/host/core', ['packages/schemas', 'packages/machine', 'packages/renderers/sdk'], ['packages/engine/js']],
+  ['packages/host/vscode-ui', ['packages/schemas', 'packages/machine', 'packages/host/core'], ['packages/renderers/sdk']],
   // The Inspector runs comparisons in the browser and hosts the renderer fixtures workbench; it bundles the built-in renderers.
   [
     'packages/host/inspector',
     [
       'packages/schemas',
+      'packages/machine',
       'packages/engine/js',
       'packages/comparators/runtime/js',
       'packages/renderers/sdk',
@@ -55,7 +58,7 @@ export const layers = [
     ],
     builtInRenderers,
   ],
-  ['packages/integrations/vscode', ['packages/host/vscode-ui', 'packages/host/inspector'], []],
+  ['packages/integrations/vscode', ['packages/machine', 'packages/host/vscode-ui', 'packages/host/inspector'], []],
   // The CLI embeds the Inspector, the renderer checks and the TypeScript helper at build time.
   [
     'packages/cli',

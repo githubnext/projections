@@ -310,6 +310,7 @@ jobs:
           npm run --silent check:portability
           npm run --silent check:boundaries
           npm run --silent check:casing
+          npm run --silent check:machines
           npm run --silent check:readmes
           npm run --silent check:links
           npm run --silent check:versions

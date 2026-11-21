@@ -1,5 +1,5 @@
-// The browser jobs of a CI plan (ci-plan.ts): which suites run, in how many shards, and, for a change to renderers
-// alone, the renderer harness without the other renderers' tests.
+// The browser jobs of a CI plan (ci-plan.ts): the affected suites in the shards .github/ci-rules.json gives them, and,
+// for a change to some renderers alone, the renderer harness without the other renderers' tests.
 
 export type BrowserJob = {
   /** The job's name in the checks list, after `browser`. */
@@ -14,23 +14,8 @@ export type BrowserJob = {
   except: string
 }
 
-export const HARNESS = 'packages/renderers/harness'
-
-/**
- * The large suites, sharded across jobs; every other browser suite runs in `rest`. Linux WebKit is several times slower
- * than a workstation, and Playwright shards by test count, not time, so the renderer harness, the largest, shards each
- * project by its measured time (about 64, 72, 40 and 70 test-minutes on two workers), keeping each job near 20 minutes
- * of tests after about 14 of setup. The Inspector takes two (in `rest`, it took 26 of the job's 60 minutes).
- */
-export const linuxLayout: Record<string, Record<string, number>> = {
-  'packages/host/core': {'': 3},
-  'tools/storybook': {'': 3},
-  [HARNESS]: {'chromium-desktop': 3, 'webkit-desktop': 4, 'chromium-mobile': 2, 'webkit-mobile': 3},
-  'packages/host/inspector': {'': 2},
-}
-
-/** WebKit on macOS, the platform Safari runs on: 10 to 30 minutes of tests after a 15-minute build. */
-export const macosLayout: Record<string, Record<string, number>> = {[HARNESS]: {'webkit-desktop': 2}}
+/** Shards per Playwright project (`''` for a suite run without one), by suite. */
+export type Layout = Record<string, Record<string, number>>
 
 /**
  * Matches renderers' own specs (by their path) and the harness tests whose title starts with one of their names or
@@ -43,11 +28,9 @@ export function rendererGrep(renderers: readonly string[]): string {
   return `(^|[\\s/])(${names})/browser/|\\.spec\\.ts (${names})[/:]`
 }
 
-function shards(
-  suite: string,
-  projects: Record<string, number>,
-  filter: {kept: string[]; others: readonly string[]} | undefined,
-): BrowserJob[] {
+type Narrow = {suite: string; kept: string[]; others: readonly string[]}
+
+function shards(suite: string, projects: Record<string, number>, filter: Narrow | undefined): BrowserJob[] {
   return Object.entries(projects).flatMap(([project, count]) => {
     const total = filter ? Math.min(count, filter.kept.length) : count
     return Array.from({length: total}, (_, index) => {
@@ -66,21 +49,22 @@ function shards(
 }
 
 /**
- * The jobs for the affected suites. `filter`, when set, leaves the other renderers' tests out of the harness: one job
- * per project for one kept renderer, as many shards as kept renderers (up to the full layout's) for more.
+ * The jobs for the affected suites. `narrow`, when set, leaves the other renderers' tests out of its suite: one job per
+ * project for one kept renderer, as many shards as kept renderers (up to the full layout's) for more.
  */
 export function browserJobs(
   all: readonly string[],
   affected: ReadonlySet<string>,
-  filter: {kept: string[]; others: readonly string[]} | undefined,
+  layouts: {linux: Layout; macos: Layout},
+  narrow: Narrow | undefined,
 ): {linux: BrowserJob[]; macos: BrowserJob[]} {
-  const jobs = (layout: Record<string, Record<string, number>>) =>
+  const jobs = (layout: Layout) =>
     Object.entries(layout)
       .filter(([suite]) => affected.has(suite))
-      .flatMap(([suite, projects]) => shards(suite, projects, suite === HARNESS ? filter : undefined))
-  const rest = all.filter(suite => !(suite in linuxLayout))
+      .flatMap(([suite, projects]) => shards(suite, projects, suite === narrow?.suite ? narrow : undefined))
+  const rest = all.filter(suite => !(suite in layouts.linux))
   const restAffected = rest.filter(suite => affected.has(suite))
-  const except = [...Object.keys(linuxLayout), ...rest.filter(suite => !affected.has(suite))]
+  const except = [...Object.keys(layouts.linux), ...rest.filter(suite => !affected.has(suite))]
   const restJob: BrowserJob = {name: 'rest', suite: 'rest', project: '', shard: '', grepInvert: '', except: except.join(',')}
-  return {linux: [...jobs(linuxLayout), ...(restAffected.length ? [restJob] : [])], macos: jobs(macosLayout)}
+  return {linux: [...jobs(layouts.linux), ...(restAffected.length ? [restJob] : [])], macos: jobs(layouts.macos)}
 }

@@ -44,8 +44,9 @@ requireCoverage = false
 enabled = true
 failure = "error"
 
-# The published schemas refer to each other by their URLs (packages/schemas/README.md); the copies in this checkout
-# are the ones to validate against, never the published ones.
+# The published schemas refer to each other by their URLs (packages/schemas/README.md). The schemas host doesn't serve
+# them yet; it will, and this mapping stays then: a change is validated against the copies in its own checkout, never
+# the published ones, which lag behind a branch that changes them.
 [[schemas.mappings]]
 url = "https://schemas.projections.githubnext.com/"
 path = "packages/schemas/schemas/"

@@ -269,9 +269,11 @@ its findings to code scanning. A file gets its schema from its own declaration
 (`$schema`, or a `# yaml-language-server: $schema=` comment), from an
 association in `.dollarlint.toml`, or from SchemaStore's catalog. Our own
 formats use the schemas in `packages/schemas`, read from the checkout rather
-than fetched (`[[schemas.mappings]]`). A new kind of data file needs a schema
-and an association; a file no schema can describe, such as a third-party format
-with none published, is excluded in `.dollarlint.toml` with its reason.
+than fetched (`[[schemas.mappings]]`), so a change is checked against its own
+schemas, before and after the schemas host serves them. A new kind of data file
+needs a schema and an association; a file no schema can describe, such as a
+third-party format with none published, is excluded in `.dollarlint.toml` with
+its reason.
 
 ## Repository layout
 

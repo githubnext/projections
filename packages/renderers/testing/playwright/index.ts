@@ -12,6 +12,7 @@ import type {DefaultComparatorOptions, Comparison, Extraction} from '@githubnext
 import type {FilterPayload, RendererOptions} from '@githubnext/projections-renderer-sdk/protocol'
 import type {FixturesInspector, InspectorOptions} from './server.js'
 import {startInspector} from './server.js'
+import {bounded, StageRecord} from './bounded.js'
 import type {
   CheckId,
   CheckResult,
@@ -33,6 +34,7 @@ declare global {
 }
 
 export {connectInspector, startInspector} from './server.js'
+export {stageRequestTimeoutMs} from './bounded.js'
 export type {FixturesInspector, InspectorOptions} from './server.js'
 
 /**
@@ -106,9 +108,15 @@ export interface StageHandle {
   state(): Promise<StageState>
 }
 
-function handle(page: Page, subject: StageSubject): StageHandle {
+/** A request of the stage page, bounded (see `bounded`) and named `what` in a failure. */
+const ask = <T>(record: StageRecord, what: string, run: () => Promise<T>): Promise<T> => bounded(record, what, run())
+
+function handle(page: Page, subject: StageSubject, record: StageRecord): StageHandle {
+  const call = <T>(what: string, run: () => Promise<T>) => ask(record, what, run)
   const seek = (progress: number, options: StageSeek = {}) =>
-    page.evaluate(([progress, options]) => window.projectionsStage.seek(progress, options), [progress, options] as const)
+    call(`seek(${progress})`, () =>
+      page.evaluate(([progress, options]) => window.projectionsStage.seek(progress, options), [progress, options] as const),
+    )
   return {
     page,
     frame: page.frameLocator('#stage-frame iframe'),
@@ -125,16 +133,20 @@ function handle(page: Page, subject: StageSubject): StageHandle {
         await check(progress)
       }
     },
-    select: id => page.evaluate(id => window.projectionsStage.select(id), id),
-    setOptions: options => page.evaluate(options => window.projectionsStage.setOptions(options), options),
-    action: id => page.evaluate(id => window.projectionsStage.action(id), id),
-    hover: id => page.evaluate(id => window.projectionsStage.hover(id), id),
-    filter: payload => page.evaluate(payload => window.projectionsStage.filter(payload), payload),
-    setEnvironment: environment => page.evaluate(environment => window.projectionsStage.setEnvironment(environment), environment),
-    setWidth: width => page.evaluate(width => window.projectionsStage.setWidth(width), width),
-    measure: <T>(call: ProbeCall, args?: unknown) =>
-      page.evaluate(([call, args]) => window.projectionsStage.measure(call, args), [call, args] as const) as Promise<T>,
-    state: () => page.evaluate(() => window.projectionsStage.state()),
+    select: id => call('select', () => page.evaluate(id => window.projectionsStage.select(id), id)),
+    setOptions: options => call('setOptions', () => page.evaluate(options => window.projectionsStage.setOptions(options), options)),
+    action: id => call(`action(${id})`, () => page.evaluate(id => window.projectionsStage.action(id), id)),
+    hover: id => call('hover', () => page.evaluate(id => window.projectionsStage.hover(id), id)),
+    filter: payload => call('filter', () => page.evaluate(payload => window.projectionsStage.filter(payload), payload)),
+    setEnvironment: environment =>
+      call('setEnvironment', () => page.evaluate(environment => window.projectionsStage.setEnvironment(environment), environment)),
+    setWidth: width => call(`setWidth(${width})`, () => page.evaluate(width => window.projectionsStage.setWidth(width), width)),
+    measure: <T>(probe: ProbeCall, args?: unknown) =>
+      call(
+        `measure(${probe})`,
+        () => page.evaluate(([probe, args]) => window.projectionsStage.measure(probe, args), [probe, args] as const) as Promise<T>,
+      ),
+    state: () => call('state', () => page.evaluate(() => window.projectionsStage.state())),
   }
 }
 
@@ -150,14 +162,15 @@ export async function openStage(
   request: OpenRequest | ({scenario: string} & Omit<Partial<StageLoad>, 'subject' | 'renderer'>),
 ): Promise<StageHandle> {
   await stagePage(page, inspector)
+  const record = new StageRecord()
   if ('scenario' in request) {
     const {scenario, ...overrides} = request
-    await page.evaluate(([scenario, overrides]) => window.projectionsStage.loadScenario(scenario, overrides), [
-      scenario,
-      overrides,
-    ] as const)
-    const subject = await page.evaluate(() => window.projectionsStage.subject())
-    return handle(page, subject)
+    record.scenario = scenario
+    await ask(record, 'loadScenario', () =>
+      page.evaluate(([scenario, overrides]) => window.projectionsStage.loadScenario(scenario, overrides), [scenario, overrides] as const),
+    )
+    const subject = await ask(record, 'subject', () => page.evaluate(() => window.projectionsStage.subject()))
+    return handle(page, subject, record)
   }
   const {extraction, before, after, comparison, comparatorOptions, ...rest} = request as OpenRequest &
     Partial<{
@@ -182,8 +195,10 @@ export async function openStage(
       ))
     subject = {mode: 'comparison', before, after, comparison: computed}
   } else throw new Error('openStage needs a scenario, an extraction, or before and after extractions')
-  await page.evaluate(json => window.projectionsStage.load(JSON.parse(json)), JSON.stringify({...rest, subject} satisfies StageLoad))
-  return handle(page, subject)
+  await ask(record, 'load', () =>
+    page.evaluate(json => window.projectionsStage.load(JSON.parse(json)), JSON.stringify({...rest, subject} satisfies StageLoad)),
+  )
+  return handle(page, subject, record)
 }
 
 /** Opens the fixtures workbench, optionally at one scenario. */

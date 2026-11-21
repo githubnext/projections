@@ -198,6 +198,7 @@ export function stageApi(stage: Stage, store: FixturesStore, context: FixturesCo
     setOptions: options => stage.setOptions(options),
     action: id => stage.action(id),
     hover: id => stage.hover(id),
+    filter: payload => stage.filter(payload),
     setEnvironment: environment => stage.setEnvironment(environment),
     setWidth: width => stage.setWidth(width),
     measure: (call, args) => stage.measure(call, args),

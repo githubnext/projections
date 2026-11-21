@@ -41,6 +41,23 @@
 .text-diff-command > .td-body:last-child {
   margin-bottom: calc(-1 * var(--projections-border-width));
   padding-bottom: var(--projections-border-width);
+  border-end-start-radius: var(--projections-radius);
+  border-end-end-radius: var(--projections-radius);
+}
+/*
+ * At the card's end the body's corners are the card's, so it clips what it holds to the card's curve. What fills its
+ * last line takes the card's inner radius there (kit `--pk-group-inner-radius`), concentric with the card's border, so
+ * it never covers it: the row in one column, each side of the pair in two, and the gutter that starts either.
+ */
+.text-diff-command > .td-body:last-child > * > .td-row:last-child,
+.text-diff-command > .td-body:last-child > * > .td-row:last-child > .td-num:first-child,
+.text-diff-command > .td-body:last-child > * > .td-pair:last-child > .td-side-before,
+.text-diff-command > .td-body:last-child > * > .td-pair:last-child > .td-side-before > .td-num:first-child {
+  border-end-start-radius: var(--pk-group-inner-radius);
+}
+.text-diff-command > .td-body:last-child > * > .td-row:last-child,
+.text-diff-command > .td-body:last-child > * > .td-pair:last-child > .td-side-after {
+  border-end-end-radius: var(--pk-group-inner-radius);
 }
 .td-body[data-presentation='formatted'] {
   font-family: var(--font-mono);

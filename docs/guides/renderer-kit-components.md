@@ -121,15 +121,20 @@ The kit's `pk-region-run` helper (for contiguous rows) draws its border on the
 surrounding lines, painting one stroke outside the run over a neighbor's rule, a
 header's bottom edge, or the container border. When two runs touch, the later
 run's top edge draws the shared line. Because `Group` clips to its outer edge
-(`clip-path`), a run flush against the group's edge cleanly replaces the group's
-border there. To keep that outer stroke visible inside a scrolling container,
-extend the scroll box over the card edge by one border width and pad it back in
-(as text diff does). For rows that draw their own side borders (like runtime
-policy's bottom-bordered rows or text diff's After column), color that border
-with `--pk-region-line` (fading to `--pk-line`) instead of adding a second edge
-next to it. A changed `EntityCard` acting as a change region colors its own
-border, and a pill containing a `ValueChange` draws no outer frame around its
-two inner pills.
+(`overflow: clip` with the border width as its margin, or a `clip-path` where
+the browser lacks that margin), a run flush against the group's edge cleanly
+replaces the group's border there. Anything that reaches a group's corner uses
+the group's inner radius (`--pk-group-inner-radius`: the radius minus the border
+width), so it stays concentric with the border and never covers it. The header
+band takes it at the top, and a renderer's last row or band at the bottom (as
+runtime policy's last rows and text diff's last line do). To keep that outer
+stroke visible inside a scrolling container, extend the scroll box over the card
+edge by one border width and pad it back in (as text diff does). For rows that
+draw their own side borders (like runtime policy's bottom-bordered rows or text
+diff's After column), color that border with `--pk-region-line` (fading to
+`--pk-line`) instead of adding a second edge next to it. A changed `EntityCard`
+acting as a change region colors its own border, and a pill containing a
+`ValueChange` draws no outer frame around its two inner pills.
 
 ## Item rings
 

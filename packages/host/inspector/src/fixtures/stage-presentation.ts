@@ -93,6 +93,7 @@ export function presentation(request: StageLoad, bundle: RendererEntry): Present
     projection: {...projection, renderer: request.renderer},
     ...request.subject,
     ...(request.subject.mode === 'comparison' && request.comparisonMode ? {comparisonMode: request.comparisonMode} : {}),
+    ...(request.focus ? {focus: request.focus} : {}),
   }
   return {state, comparing, diff, highlightingMode, environment, init, sendProgress: !(diff && !diffHighlighting)}
 }

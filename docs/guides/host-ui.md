@@ -334,6 +334,11 @@ props:
   `undefined`).
 - `details?: 'card' | 'none'` lets you disable the built-in detail card (`none`
   turns it off).
+- `onRendererStatusChange?: (status: RendererStatus) => void` and
+  `onPainted?: (painted: Painted) => void` report when the renderer is ready or
+  failed, and when the frames settle on what is shown, as `useProjection`'s
+  options of the same names do (see the host core guide), so a host waits on
+  them rather than on the view's DOM.
 - `controllerRef?: Ref<ProjectionController | null>` exposes `selectTarget`,
   `resolveTarget`, and `anchorFor` (or use `useProjectionAnchor`).
 - `ComparisonExplorer` also supports controlled `before`/`after` props with

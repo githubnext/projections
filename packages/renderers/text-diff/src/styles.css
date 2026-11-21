@@ -50,15 +50,6 @@
   font-size: var(--projections-font-size);
   --td-line-height: calc(1em * var(--projections-line-height));
 }
-/*
- * A single revision's formatted text never wraps: the output scrolls sideways inside its own frame. A diff's lines wrap
- * in either layout, so a long changed line reads whole beside its markers and line numbers, which stay at its top.
- */
-.td-body[data-presentation='formatted'][data-layout='plain'] .td-lines {
-  width: max-content;
-  min-width: 100%;
-}
-
 .td-row,
 .td-cell {
   display: flex;
@@ -71,10 +62,10 @@
   flex: 1 1 auto;
   min-width: 0;
   padding: 0 var(--projections-space-3) 0 var(--projections-space-1);
-  white-space: pre;
-}
-.td-body[data-presentation='prose'] .td-text,
-.td-diff .td-text {
+  /*
+   * Every line wraps, formatted or prose, in a diff or in one revision: nothing scrolls sideways. A long line reads whole
+   * beside its markers and line numbers, which stay on its first line.
+   */
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }

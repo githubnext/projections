@@ -17,7 +17,7 @@ It handles the `text-diff` definition renderer name.
 |---|---|
 | `label` | Shown in the output's header, for example the command: in the monospace font for `formatted` output, in the text font (as a title) for `prose` |
 | `data.text` | The captured text (required string) |
-| `data.presentation` | `formatted` (default: monospace; in one revision it never wraps and scrolls sideways, in a diff it wraps) or `prose` (wraps) |
+| `data.presentation` | `formatted` (default: monospace) or `prose` (the text font, at a readable measure); both wrap long lines |
 
 Anything else (another kind, a non-string `text`, an unknown presentation, a
 relationship, another schema) is reported as an error. Outputs keep extraction

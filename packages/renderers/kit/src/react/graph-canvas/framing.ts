@@ -118,8 +118,9 @@ export function useGraphZoom(
     drawnScale,
     ...(area && request ? {aspect: (area.box.width + 2 * padding.x) / (area.box.height + padding.top + padding.y)} : {}),
   })
-  // The padding as drawn once the drawing scrolls (more under a cover), which a reading start is placed in.
-  const scrolled = useScrolledPadding(padding, drawnScale, fit.scale)
+  // The padding as drawn (more under a cover once the drawing scrolls), which every opening is placed in, so it never
+  // changes when the person zooms or pans away from one.
+  const drawnPadding = useScrolledPadding(padding, drawnScale, fit.scale)
   // Arrowheads stop on the outer edge of their target's border; a change border is inset so it never reaches further.
   const borders = useBorderWidths(scroller)
   const content = useMemo((): ContentBox => ({x: bounds.minX, y: bounds.minY, width: bounds.width, height: bounds.height}), [bounds])
@@ -136,8 +137,9 @@ export function useGraphZoom(
     }))
     const align = orientation === 'vertical' ? 'centre' : 'left'
     // Flush with the host's stage inset, the leftmost card opens that inset from the view's edge.
-    return view => contentStart(shown.current.length ? shown.current : all, content, scrolled, 12, align, flush ? scrolled.x : 0)(view)
-  }, [framing, content, orientation, scrolled, flush])
+    return view =>
+      contentStart(shown.current.length ? shown.current : all, content, drawnPadding, 12, align, flush ? drawnPadding.x : 0)(view)
+  }, [framing, content, orientation, drawnPadding, flush])
   const sized = useFrameSizing() === 'content'
   const opening = useMemo(
     () =>
@@ -151,24 +153,11 @@ export function useGraphZoom(
         sized,
         orientation,
         padding,
-        drawn: scrolled,
+        drawn: drawnPadding,
       }),
-    [area, request, floor, content, fit.scale, fit.width, fit.height, sized, orientation, padding, scrolled],
+    [area, request, floor, content, fit.scale, fit.width, fit.height, sized, orientation, padding, drawnPadding],
   )
   const zoom = useStageZoom(scroller, onAction, fit.scale, {floor, start, ...(opening ? {opening} : {}), ...(hold ? {hold} : {})})
-  // An opening centred on a focus keeps the fitted padding while it lasts, as its placement does; every other view, and
-  // that one once the person zooms or pans, draws the padding a reading start is placed in, so its top can scroll clear.
-  const centred = Boolean(opening?.centred && zoom.opening)
-  const drawnPadding = centred ? padding : scrolled
-  // Leaving a centred opening adds padding above the drawing: the view moves with it, so nothing jumps.
-  const wasCentred = useRef(centred)
-  const drawnTop = useRef(drawnPadding.top)
-  useLayoutEffect(() => {
-    const element = scroller.current
-    if (wasCentred.current && !centred && element) element.scrollTop += drawnPadding.top - drawnTop.current
-    wasCentred.current = centred
-    drawnTop.current = drawnPadding.top
-  }, [scroller, centred, drawnPadding.top])
   useLayoutEffect(() => setDrawnScale(zoom.scale), [zoom.scale])
   return {...zoom, borders, top: drawnPadding.top}
 }
@@ -195,9 +184,9 @@ function focusOpening({
   /** Whether the host sizes the frame to the content, which it measures at the floor. */
   sized: boolean
   orientation: 'vertical' | 'horizontal'
-  /** The space around the fitted graph (`useGraphPadding`), which a centred opening is placed in. */
+  /** The space around the fitted graph (`useGraphPadding`), which the room for the focus is measured in. */
   padding: GraphPadding
-  /** The padding drawn once the view scrolls (`useScrolledPadding`), which a reading start is placed in. */
+  /** The padding as drawn (`useScrolledPadding`), which the opening is placed in. */
   drawn: GraphPadding
 }): {zoom: number; start: ScrollStart; centred: boolean} | undefined {
   if (!fit) return undefined
@@ -216,8 +205,8 @@ function focusOpening({
   const scale = Math.max(fit, request?.fit ? fitted : request || !sized ? Math.max(fitted, floor) : floor)
   const fits = fitted >= scale * (1 - 1e-6)
   const centred: ScrollStart = ({scale, width, height}) => ({
-    left: (box.x + box.width / 2 - content.x) * scale + padding.x - width / 2,
-    top: (box.y + box.height / 2 - content.y) * scale + padding.top - height / 2,
+    left: (box.x + box.width / 2 - content.x) * scale + drawn.x - width / 2,
+    top: (box.y + box.height / 2 - content.y) * scale + drawn.top - height / 2,
   })
   // Asked for: centred where the area fits, else its reading start, as the whole graph opens.
   if (request) return {zoom: scale / fit, start: fits ? centred : contentStart(area.cards, content, drawn), centred: fits}
@@ -230,7 +219,7 @@ function focusOpening({
       top: (corner.y - content.y) * view.scale + drawn.top,
     }
   }
-  return {zoom: scale / fit, start: uncutStart(fits ? centred : reading, area, content, fits, fits ? padding : drawn), centred: fits}
+  return {zoom: scale / fit, start: uncutStart(fits ? centred : reading, area, content, fits, drawn), centred: fits}
 }
 
 /**

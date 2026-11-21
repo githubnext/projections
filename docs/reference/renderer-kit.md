@@ -2796,7 +2796,6 @@ The zoom `useStageZoom` applies: draw the content at `scale`.
 | Member | Signature | Description |
 |---|---|---|
 | `keep` | `"keep": { (): void }` | Keeps the view where the caller just scrolled it, as though the person had: later changes of scale keep its middle. |
-| `opening` | `"opening": boolean` | Whether the view is still on its opening: the person hasn't zoomed or panned since, nor `hold` set a zoom. |
 | `scale` | `"scale": number` | The drawn scale: the fitted scale times the zoom; 0 until the stage has been measured. |
 | `zoom` | `"zoom": number` | The zoom multiple of the fitted scale (1 is fitted); a scroll container carries it as `data-zoom`. |
 

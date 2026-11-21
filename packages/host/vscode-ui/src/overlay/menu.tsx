@@ -101,11 +101,12 @@ function MenuLevel({
   const command = (event: KeyboardEvent<HTMLDivElement>, target: HTMLElement): (() => void) | undefined => {
     const submenu = target.dataset.submenu
     if (event.key === 'ArrowRight' && submenu) return () => openSub(submenu)
-    if (event.key === 'ArrowLeft' && nested)
+    if (event.key === 'ArrowLeft' && nested) {
       return () => {
         event.stopPropagation()
         onClose()
       }
+    }
     return event.key === 'Tab' ? done : undefined
   }
   const move = (event: KeyboardEvent<HTMLDivElement>) => {

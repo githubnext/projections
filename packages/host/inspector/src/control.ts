@@ -32,7 +32,7 @@ export interface InspectorSummary {
   /** Whether repository code may run (the runner's `--trust`). */
   executionAuthorized: boolean
   /** The comparison of the shown pair, by change status, once it is compared. */
-  comparison?: {compared: boolean; rows: number; changes: {[status: string]: number}}
+  comparison?: {compared: boolean; rows: number; changes: Record<string, number>}
   /**
    * The presented rows (entities, relationships, changes), changed ones first, at most 100: IDs for `selectEntity`. A
    * change lists its context: the items a person needs to read it, which the Changes scope shows beside it. An identity
@@ -49,7 +49,7 @@ export interface InspectorSummary {
    * The shown pair's extractions, by ref: the runner's job and the result's identity (`provenance.definitionDigest`
    * and `provenance.execution`), for a host that tells when a result is out of date.
    */
-  results?: {[ref: string]: InspectorResultIdentity}
+  results?: Record<string, InspectorResultIdentity>
   /** The renderer scenario shown instead of the pair (`showScenario`). */
   scenario?: string
   /** The shown pair's sides whose extraction failed, with why: for an agent, never shown in a viewer page. */
@@ -95,7 +95,7 @@ export interface InspectorHandle {
   /** Extracts the shown pair again and compares it, as a host's Refresh does when it refreshes by hand. */
   refresh(): void
   /** The shown pair's extractions, by ref, for a host to keep and present again later (`initialResults`). */
-  results(): {[ref: string]: InspectorKeptResult}
+  results(): Record<string, InspectorKeptResult>
   /**
    * Applies the projection's definition from a revision to both sides (`working-tree`: your edits; `HEAD`: the
    * committed version), as `--definition-revision` does, extracting the shown pair with it.

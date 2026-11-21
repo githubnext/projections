@@ -17,8 +17,8 @@ const measure = (page: Page) =>
     secondRow: '.phv-playback',
   })
 
-for (const width of [1280, 600, 400, 320])
-  for (const mode of ['side-by-side', 'animated', 'diff'] as const)
+for (const width of [1280, 600, 400, 320]) {
+  for (const mode of ['side-by-side', 'animated', 'diff'] as const) {
     test(`at ${width}px, ${mode}: a VS Code tab's toolbar insets its edge controls as far from its ends as from its top and bottom`, async ({
       page,
     }) => {
@@ -37,9 +37,11 @@ for (const width of [1280, 600, 400, 320])
         expect(height).toBeGreaterThan(35)
       }
     })
+  }
+}
 
-for (const width of [1280, 600, 400, 320])
-  for (const mode of ['animated', 'side-by-side'] as const)
+for (const width of [1280, 600, 400, 320]) {
+  for (const mode of ['animated', 'side-by-side'] as const) {
     test(`at ${width}px, ${mode}: the explorer's toolbar, its pair pickers leading, insets its edge controls alike`, async ({page}) => {
       await page.setViewportSize({width, height: 700})
       await page.goto(story(`comparison-explorer--${mode}`))
@@ -51,3 +53,5 @@ for (const width of [1280, 600, 400, 320])
         if (outer && inner) expect(outer.height, `explorer at ${width}px, ${mode}: a pair field's height`).toBe(inner.height)
       }
     })
+  }
+}

@@ -23,7 +23,7 @@ const view = (page: Page) => page.locator('.ph')
 const frame = (page: Page) => page.frameLocator('iframe.ph-frame')
 
 async function open(page: Page, query: string) {
-  await page.goto(explorer(`${query}`))
+  await page.goto(explorer(query))
   await expect(page.locator('.ph-explorer')).toBeVisible()
 }
 
@@ -126,7 +126,7 @@ test('progress is acknowledged by the renderer after painting and flow-controlle
   await expect(view(page)).toHaveAttribute('data-rendered-progress', '0.6')
   const report = page.getByRole('alert').filter({hasText: 'progress messages'})
   await expect(report).toContainText('last progress:0.6')
-  const received = Number((await report.textContent())!.match(/received (\d+) progress messages/)![1])
+  const received = Number(/received (\d+) progress messages/.exec((await report.textContent())!)![1])
   // Each frame takes the probe 300 ms, and the host keeps at most one progress in flight. It sends the initial
   // progress, the first new value, one more per frame painted while values arrive, and the latest when the
   // last frame finishes; superseded values are never sent.

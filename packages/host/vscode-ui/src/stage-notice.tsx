@@ -21,7 +21,7 @@ export interface StageNoticeProps {
   /** One flat text button at the pill's end, with an optional codicon: Refresh. */
   action?: {label: string; icon?: string; onClick: () => void} | undefined
   /** Attributes for hosts and tests to find it by (`data-*`). */
-  data?: {[name: `data-${string}`]: string}
+  data?: Record<`data-${string}`, string>
 }
 
 /** A warning pill over the stage; a status, so screen readers announce it when it appears. */

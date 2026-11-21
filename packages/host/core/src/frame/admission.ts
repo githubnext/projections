@@ -69,8 +69,9 @@ export class MessageGate {
     if (!this.rate.allow()) {
       this.dropped++
       if (this.dropped === 1) return {type: 'rejected', reason: 'rate-limited'}
-      if (this.dropped > rendererLimits.messagesPerSecond * 10)
+      if (this.dropped > rendererLimits.messagesPerSecond * 10) {
         return {type: 'failed', message: 'The renderer sent too many messages and was stopped'}
+      }
       return {type: 'dropped'}
     }
     if (size(event.data) > rendererLimits.messageBytes) return {type: 'rejected', reason: 'oversized'}

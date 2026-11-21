@@ -16,7 +16,7 @@ export function useTheme(): {
   preference: ThemePreference
   setPreference: (value: ThemePreference) => void
   colorMode: 'light' | 'dark'
-  themeTokens: {[name: string]: string} | undefined
+  themeTokens: Record<string, string> | undefined
   commands: Command[]
 } {
   const [preference, set] = useState<ThemePreference>(() => {

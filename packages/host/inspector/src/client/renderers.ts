@@ -16,8 +16,9 @@ export function parseRendererList(value: unknown, origin: string): InspectorRend
   }
   const list: InspectorRendererList = {renderers: names as string[]}
   if (value.customRendererBase !== undefined) {
-    if (typeof value.customRendererBase !== 'string' || value.customRendererBase.length > 1024)
+    if (typeof value.customRendererBase !== 'string' || value.customRendererBase.length > 1024) {
       throw new Error('The local runner returned an invalid custom renderer base')
+    }
     const base = new URL(value.customRendererBase, origin)
     if (base.origin !== new URL(origin).origin || base.search || base.hash || !base.pathname.endsWith('/')) {
       throw new Error('The custom renderer base must be a same-origin directory')

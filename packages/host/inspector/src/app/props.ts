@@ -65,7 +65,7 @@ export interface InspectorAppProps {
    */
   refresh?: 'auto' | 'manual' | 'compare'
   /** Extractions of `initial.projection` a host kept, by ref, presented instead of extracting those refs again. */
-  initialResults?: {[ref: string]: InspectorKeptResult}
+  initialResults?: Record<string, InspectorKeptResult>
   /**
    * The revision whose definition applies to both sides at first (`working-tree` by default, the advanced Definition
    * from): a host showing results with the committed definition passes `HEAD`.

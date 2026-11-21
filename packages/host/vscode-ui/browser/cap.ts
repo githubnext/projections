@@ -6,7 +6,11 @@ import type {Locator, Page} from '@playwright/test'
  * screenshot, a probe "E" replaces a label's text, and its ink is where the screenshot departs from the container's
  * background by half its peak contrast. Shared by cap-height.spec.ts and stage-notice.spec.ts.
  */
-export type Gaps = {top: number; bottom: number; left: number}
+export interface Gaps {
+  top: number
+  bottom: number
+  left: number
+}
 
 /**
  * The gaps around a capital "E" in place of `label`'s text, inside `container`'s border box (a strip's hairline is its
@@ -16,11 +20,12 @@ export type Gaps = {top: number; bottom: number; left: number}
 export async function capGaps(page: Page, container: Locator, label: Locator, afterIcon = false): Promise<Gaps> {
   await label.evaluate(element => {
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT)
-    for (let node = walker.nextNode(); node; node = walker.nextNode())
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
       if (node.textContent?.trim()) {
         node.textContent = 'E'
         return
       }
+    }
   })
   const box = await container.evaluate(
     (element, label) => {
@@ -86,13 +91,15 @@ export async function capGaps(page: Page, container: Locator, label: Locator, af
       let peak = 0
       for (let y = above; y < below; y++) for (let x = from; x < to; x++) peak = Math.max(peak, contrast(x, y))
       let [top, bottom, left] = [Infinity, -Infinity, Infinity]
-      for (let y = above; y < below; y++)
-        for (let x = from; x < to; x++)
+      for (let y = above; y < below; y++) {
+        for (let x = from; x < to; x++) {
           if (contrast(x, y) >= peak / 2) {
             top = Math.min(top, y)
             bottom = Math.max(bottom, y + 1)
             left = Math.min(left, x)
           }
+        }
+      }
       return {
         top: (top - y0) / scale,
         bottom: (y1 - bottom) / scale,
@@ -121,10 +128,11 @@ export const withoutTextBox = (page: Page) =>
   page.evaluate(() => {
     const fallbacks: string[] = []
     const visit = (rules: CSSRuleList) => {
-      for (const rule of rules)
-        if (rule instanceof CSSSupportsRule && /not\s*\(\s*text-box/.test(rule.conditionText))
+      for (const rule of rules) {
+        if (rule instanceof CSSSupportsRule && /not\s*\(\s*text-box/.test(rule.conditionText)) {
           fallbacks.push(...[...rule.cssRules].map(inner => inner.cssText))
-        else if ('cssRules' in rule) visit((rule as CSSGroupingRule).cssRules)
+        } else if ('cssRules' in rule) visit((rule as CSSGroupingRule).cssRules)
+      }
     }
     for (const sheet of document.styleSheets) visit(sheet.cssRules)
     const style = document.createElement('style')
@@ -137,14 +145,17 @@ export const withoutTextBox = (page: Page) =>
  * An edge control's insets from the toolbar row around it: `side` is its left inset at the row's start, its right inset
  * at the row's end. A slider's end is its track's, not a control's edge (`slider`).
  */
-export type EdgeInsets = {
+export interface EdgeInsets {
   what: string
   side: number
   top: number
   bottom: number
   slider?: boolean
 }
-export type RowInsets = {lead: EdgeInsets; trail: EdgeInsets}
+export interface RowInsets {
+  lead: EdgeInsets
+  trail: EdgeInsets
+}
 
 /**
  * The toolbar's edge insets, from getBoundingClientRect border boxes, per row: the leading control's left inset and the
@@ -178,7 +189,7 @@ export const toolbarInsets = (toolbar: Locator, options: {wrappers: string; seco
       return filled || bordered
     }
     const text = (node: Element) => [...node.childNodes].some(child => child.nodeType === Node.TEXT_NODE && child.textContent?.trim())
-    type Control = {
+    interface Control {
       what: string
       rect: DOMRect
       text: boolean
@@ -234,7 +245,7 @@ export const toolbarInsets = (toolbar: Locator, options: {wrappers: string; seco
     if (rows) {
       const lines = [...element.querySelectorAll(`:scope > ${rows}`)].filter(line => line.getBoundingClientRect().height > 0)
       const boxes = lines.map(line => line.getBoundingClientRect())
-      const result: {[name: string]: RowInsets} = {}
+      const result: Record<string, RowInsets> = {}
       lines.forEach((line, index) => {
         const top = index === 0 ? inner.top : boxes[index - 1]!.bottom
         const bottom = index === lines.length - 1 ? inner.bottom : boxes[index + 1]!.top
@@ -263,11 +274,12 @@ export function expectEdgeInsets(insets: {main: RowInsets; playback?: RowInsets}
     type: 'insets',
     description: `${what} ${JSON.stringify(insets)}`,
   })
-  for (const [name, row] of Object.entries(insets))
+  for (const [name, row] of Object.entries(insets)) {
     for (const edge of [row.lead, row.trail]) {
       if (edge.slider) continue
       const measured = `${what}, ${name} row, ${edge === row.lead ? 'leading' : 'trailing'} ${JSON.stringify(edge)}`
       expect.soft(Math.abs(edge.side - edge.top), measured).toBeLessThanOrEqual(0.5)
       expect.soft(Math.abs(edge.side - edge.bottom), measured).toBeLessThanOrEqual(0.5)
     }
+  }
 }

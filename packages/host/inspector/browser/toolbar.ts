@@ -14,8 +14,9 @@ async function inToolbar(page: Page, locate: (scope: Page | Locator) => Locator)
   const inline = locate(page.locator('.ph')).first()
   if (await inline.isVisible()) return inline
   const more = page.getByRole('dialog', {name: 'More'})
-  if (!(await more.isVisible()))
+  if (!(await more.isVisible())) {
     await page.getByRole('group', {name: 'Projection toolbar'}).getByRole('button', {name: 'More', exact: true}).click()
+  }
   await more.waitFor()
   return locate(more).first()
 }
@@ -26,8 +27,9 @@ async function inToolbar(page: Page, locate: (scope: Page | Locator) => Locator)
  */
 export async function showAs(page: Page, name: string) {
   const settings = page.getByRole('menu', {name: 'Settings'})
-  if (!(await settings.isVisible()))
+  if (!(await settings.isVisible())) {
     await (await inToolbar(page, scope => scope.getByRole('button', {name: 'Settings', exact: true}))).click()
+  }
   await settings.getByRole('group', {name: 'Show as'}).getByRole('menuitemradio', {name, exact: true}).click()
   await expect(page.locator('.ph')).toHaveAttribute('data-view', name === 'Table' ? 'table' : name === 'Text' ? 'text' : 'renderer')
   await closeToolbarMenus(page)

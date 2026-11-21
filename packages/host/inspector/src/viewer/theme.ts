@@ -11,7 +11,7 @@ import type {InspectorHost, InspectorHostTheme} from '../host.js'
 const chromeStyleId = 'pi-app-theme-chrome'
 
 type ColorMode = 'light' | 'dark'
-type Tokens = Readonly<{[name: string]: string}>
+type Tokens = Readonly<Record<string, string>>
 
 /**
  * Gives the chrome the stage's colors: one rule for each color mode the theme colors, setting the default UI's `--pj-*`

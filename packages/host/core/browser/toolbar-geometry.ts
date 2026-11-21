@@ -98,10 +98,13 @@ export const toolbarGeometry = (page: Page) =>
         return {name: nameOf(element), left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width}
       })
       const overlaps: string[] = []
-      for (const [index, a] of controls.entries())
-        for (const b of controls.slice(index + 1))
-          if (Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5)
+      for (const [index, a] of controls.entries()) {
+        for (const b of controls.slice(index + 1)) {
+          if (Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5) {
             overlaps.push(`${a.name} × ${b.name}`)
+          }
+        }
+      }
       const outside = controls
         .filter(c => c.left < bar.left - 0.5 || c.right > bar.right + 0.5 || c.top < bar.top - 0.5 || c.bottom > bar.bottom + 0.5)
         .map(c => c.name)

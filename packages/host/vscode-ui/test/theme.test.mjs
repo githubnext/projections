@@ -34,8 +34,9 @@ test('the fixtures are the representative VS Code themes, captured with their bo
   for (const fixture of fixtures) {
     assert.ok(vscodeThemeKindOf(fixture.bodyClasses), `${fixture.id} has a theme kind`)
     assert.ok(Object.keys(fixture.variables).length > 500, `${fixture.id} has VS Code's variables`)
-    for (const name of ['--vscode-editor-background', '--vscode-foreground', '--vscode-focusBorder', '--vscode-font-family'])
+    for (const name of ['--vscode-editor-background', '--vscode-foreground', '--vscode-focusBorder', '--vscode-font-family']) {
       assert.ok(fixture.variables[name], `${fixture.id} sets ${name}`)
+    }
   }
   const mapped = new Set(Object.values(vscodeTokenMap).flat())
   for (const name of [
@@ -46,8 +47,9 @@ test('the fixtures are the representative VS Code themes, captured with their bo
     '--vscode-diffEditor-removedLineBackground',
     '--vscode-focusBorder',
     '--vscode-editor-font-family',
-  ])
+  ]) {
     assert.ok(mapped.has(name), `the mapping reads ${name}`)
+  }
 })
 
 for (const fixture of fixtures) {
@@ -69,8 +71,9 @@ for (const fixture of fixtures) {
   test(`${fixture.name}: the theme's own colors and fonts drive the tokens where they have the contrast`, () => {
     assert.equal(tokens['color-bg'], same(v['--vscode-editor-background']))
     const foreground = v['--vscode-editor-foreground'] ?? v['--vscode-foreground']
-    if (surfaces.every(name => contrast(parseColor(foreground), color(tokens, name)) >= (hc ? 7 : 4.5)))
+    if (surfaces.every(name => contrast(parseColor(foreground), color(tokens, name)) >= (hc ? 7 : 4.5))) {
       assert.equal(tokens['color-fg'], same(foreground))
+    }
     assert.equal(tokens['font-family'], v['--vscode-font-family'].trim().replace(/\s+/g, ' '))
     assert.equal(tokens['font-family-mono'], v['--vscode-editor-font-family'].trim().replace(/\s+/g, ' '))
     for (const [hue, variable] of [
@@ -82,8 +85,9 @@ for (const fixture of fixtures) {
       if (surfaces.every(name => contrast(own, color(tokens, name)) >= 4.5)) assert.equal(tokens[`color-${hue}`], same(v[variable]), hue)
     }
     const focus = composite(parseColor(v['--vscode-focusBorder']), color(tokens, 'color-bg'))
-    if (['color-bg', 'color-surface-raised'].every(name => contrast(focus, color(tokens, name)) >= 3))
+    if (['color-bg', 'color-surface-raised'].every(name => contrast(focus, color(tokens, name)) >= 3)) {
       assert.equal(tokens['color-focus'], formatColor(focus))
+    }
   })
 
   test(`${fixture.name}: text, edges and fills keep their contrast${hc ? ' (high contrast: 7:1 text)' : ''}`, () => {
@@ -102,9 +106,11 @@ for (const fixture of fixtures) {
         assert.ok(contrast(color(tokens, `color-${hue}-border`), color(tokens, surface)) >= 3, `color-${hue}-border on ${surface}`)
       }
     }
-    for (const hue of hues)
-      for (const fill of [`color-${hue}-muted`, `color-${hue}-highlight`])
+    for (const hue of hues) {
+      for (const fill of [`color-${hue}-muted`, `color-${hue}-highlight`]) {
         assert.ok(contrast(fg, composite(color(tokens, fill), color(tokens, 'color-surface-raised'))) >= text, `text on ${fill}`)
+      }
+    }
     if (hc) assert.match(tokens['shadow-md'], /#00000000$/, 'high contrast draws no shadows')
   })
 }

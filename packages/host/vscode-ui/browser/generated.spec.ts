@@ -12,7 +12,7 @@ const summary = (page: Page) => card(page).locator('.phv-generated[data-generate
 
 test.use({viewport: {width: 1280, height: 800}})
 
-for (const theme of ['light-modern', 'dark-modern'] as const)
+for (const theme of ['light-modern', 'dark-modern'] as const) {
   test(`${theme}: regenerated items have their own toggle, and the detail card presents generated values`, async ({page}) => {
     await page.goto(story('projection-view--generated-values', theme))
     await ready(page)
@@ -36,3 +36,4 @@ for (const theme of ['light-modern', 'dark-modern'] as const)
     await summary(page).getByRole('button', {name: 'Word diff'}).click()
     await expect(summary(page).locator('[data-word-diff] ins')).toContainText(['sends a confirmation'])
   })
+}

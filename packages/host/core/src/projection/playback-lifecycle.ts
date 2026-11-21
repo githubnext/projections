@@ -11,7 +11,7 @@ import type {PlaybackPlan, PlaybackState, PlaybackTimeline} from '../playback.js
 /** What playback moves through: the plan, the timeline when holds are on it, and the speed. */
 export type PlaybackRun = PlaybackPlan & {readonly timeline: PlaybackTimeline | undefined; readonly speed: number}
 
-type Course = {
+interface Course {
   /** The slider position: the one shown, or the one last asked for. */
   readonly position: number
   /** The direction playback goes, or last went. */
@@ -54,7 +54,10 @@ export type PlaybackEffect =
   | {readonly type: 'requestPosition'; readonly position: number}
 
 /** Animation frames, while playing. */
-export type PlaybackActivity = {readonly type: 'frames'; readonly key: 'frames'}
+export interface PlaybackActivity {
+  readonly type: 'frames'
+  readonly key: 'frames'
+}
 
 const epsilon = 1e-9
 const unit = (value: number) => Math.max(0, Math.min(1, value))
@@ -109,15 +112,17 @@ function play(state: PlaybackLifecycle, direction: 1 | -1, plan: PlaybackRun, re
 /** The view started showing playback: the armed play, or one the embedder started, away from an end it is at. */
 function started(state: Extract<PlaybackLifecycle, {kind: 'paused'}>, plan: PlaybackRun, reducedMotion: boolean): Next {
   // Motion is reduced: the end it goes to, at once.
-  if (reducedMotion)
+  if (reducedMotion) {
     return emit(
       {...resting(state), stopping: true},
       {type: 'requestPosition', position: endpoint(state.direction)},
       {type: 'requestPlaying', playing: false},
     )
+  }
   const {armed} = state
-  if (armed && Math.abs(armed.progress - state.position) <= epsilon && armed.direction === state.direction)
+  if (armed && Math.abs(armed.progress - state.position) <= epsilon && armed.direction === state.direction) {
     return {kind: 'playing', position: state.position, direction: state.direction, travelled: true, run: armed} as const
+  }
   const direction = state.position <= 0 ? 1 : state.position >= 1 ? -1 : state.direction
   const run = beginPlayback(state.position, direction, plan)
   return {kind: 'playing', position: state.position, direction, travelled: true, run} as const

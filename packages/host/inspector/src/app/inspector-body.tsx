@@ -6,13 +6,16 @@ import {ComparisonFailure, EmptyState, ErrorBanner, PlainMessage, PresentedView}
 import {refName} from './revisions.js'
 import type {RowState} from './revisions.js'
 
-type Side = {side: string; ref: string}
+interface Side {
+  side: string
+  ref: string
+}
 
 /** What the failure cards need: the shown pair's sides, those that failed, and what to do about them. */
 export interface FailureCardsProps {
   sides: readonly Side[]
   failedSides: readonly Side[]
-  projectionRows: {[ref: string]: RowState}
+  projectionRows: Record<string, RowState>
   jobs: readonly InspectorJob[]
   /** Re-extracts a side, when the projection can run. */
   onRetry: ((ref: string) => void) | undefined

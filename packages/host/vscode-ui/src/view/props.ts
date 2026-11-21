@@ -49,7 +49,7 @@ export interface VscodeProjectionViewProps {
   /** Overrides the color mode resolved from the VS Code theme. */
   colorMode?: ColorMode | 'auto'
   /** Theme token overrides, applied over the tokens resolved from VS Code's variables. */
-  themeTokens?: {[name: string]: string}
+  themeTokens?: Record<string, string>
   /** Playback duration at 1× speed, in milliseconds. Defaults to the definition's `presentation.durationMs`, else 900 ms per step, between 3 and 20 seconds. */
   durationMs?: number
   initialView?: ViewKind
@@ -100,7 +100,7 @@ export interface VscodeProjectionViewProps {
   onChangesOnlyChange?: (changesOnly: boolean) => void
   search?: string
   onSearchChange?: (search: string) => void
-  controlValues?: {[id: string]: ControlValue}
+  controlValues?: Record<string, ControlValue>
   onControlChange?: (id: string, value: ControlValue) => void
   onAction?: (id: string) => void
   /** Uncontrolled initial setting for where playback holds (`timeline` by default; see `Holds`). */

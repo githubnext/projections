@@ -50,8 +50,9 @@ test('every standard schema resolves to a dedicated built-in renderer that handl
   }
   assert.ok(!catalog.some(entry => entry.name === 'basic'), 'no generic renderer ships')
   // One bundle presents every staged-graph name, so the layout engine ships once.
-  for (const name of ['graph', 'graph-horizontal', 'dag', 'architecture'])
+  for (const name of ['graph', 'graph-horizontal', 'dag', 'architecture']) {
     assert.equal(resolveRenderer(name, catalog).renderer?.name, 'graph', name)
+  }
   // A renderer name nothing handles gets the host's own table and text views.
   assert.equal(resolveRenderer('unknown-renderer', catalog).renderer, undefined)
 })

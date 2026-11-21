@@ -64,8 +64,9 @@ let instances = 0
 
 /** Starts a backend (`serve --stdio` with `args`, for example `['-C', repo, '--trust']`) and routes a page origin to it. */
 export async function startHarness(context: BrowserContext, args: string[]): Promise<Harness> {
-  if (!existsSync(join(client, 'mount.js')))
+  if (!existsSync(join(client, 'mount.js'))) {
     throw new Error('Build the Inspector first: npm run build -w @githubnext/projections-inspector')
+  }
   // Git alone on PATH. Git for Windows finds its installation from its own path, so there PATH is the directory of its
   // git.exe launcher (cmd), which has no Node, rather than a link to it.
   const windows = process.platform === 'win32'
@@ -119,8 +120,9 @@ export async function startHarness(context: BrowserContext, args: string[]): Pro
     const request = route.request()
     const url = new URL(request.url())
     const path = `${url.pathname}${url.search}`
-    if (url.pathname === '/' || url.pathname === '/index.html')
+    if (url.pathname === '/' || url.pathname === '/index.html') {
       return route.fulfill({status: 200, headers: {'content-type': types['.html']!, 'content-security-policy': policy}, body: page})
+    }
     if (url.pathname === '/harness.js') return route.fulfill({status: 200, headers: {'content-type': types['.js']!}, body: script})
     if (!/^\/(api|renderers|custom-renderers)\//.test(url.pathname)) {
       const file = join(client, ...url.pathname.split('/').filter(part => part && part !== '..'))

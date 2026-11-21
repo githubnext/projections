@@ -8,8 +8,9 @@ export function assertJob(value: unknown): asserts value is InspectorJob {
     !['running', 'completed', 'failed', 'cancelled'].includes(String(value.status)) ||
     !Array.isArray(value.outputs) ||
     !Array.isArray(value.diagnostics)
-  )
+  ) {
     throw new Error('The local runner returned an invalid job response')
+  }
 }
 function extractionDocument(value: unknown): boolean {
   return record(value) && value.format === 'projections.extraction' && record(value.projection) && record(value.extraction)

@@ -19,7 +19,7 @@ const pane = (page: Page, side: 'before' | 'after'): FrameLocator => page.locato
 const entity = (frame: FrameLocator, id: string) => frame.locator(`[data-entity-id="${id}"]`).first()
 
 async function open(page: Page, query: string) {
-  await page.goto(explorer(`${query}`))
+  await page.goto(explorer(query))
   await expect(page.locator('.ph-explorer')).toBeVisible()
   await expect(view(page)).toHaveAttribute('data-renderer-status', 'ready')
 }

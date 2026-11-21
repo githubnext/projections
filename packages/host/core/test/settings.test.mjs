@@ -89,8 +89,9 @@ test('the dependency graph’s option groups carry distinct labels (no repeated 
     options.entries.map(entry => entry.label),
     ['Packages', 'Dependencies'],
   )
-  for (const level of settingsLabels(model))
+  for (const level of settingsLabels(model)) {
     assert.equal(new Set(level.map(label => label.toLowerCase())).size, level.length, level.join(', '))
+  }
 })
 
 test('renderer option groups get unique labels even when declarations repeat them or leave them out', () => {

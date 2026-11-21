@@ -54,11 +54,12 @@ function Chip({reducedMotion}: {reducedMotion: boolean}) {
         .filter(cover => cover.width && cover.right > own.left && cover.left < own.right)
         .sort((a, b) => a.top - b.top)
       let top = own.top
-      for (const cover of covers)
+      for (const cover of covers) {
         if (cover.top < bottom && cover.bottom > top) {
           top = cover.bottom + gap
           bottom = top + own.height
         }
+      }
       element.style.top = `${Math.round(top - origin)}px`
     }
     // Placed again as the workspace resizes, and as the overlays come, go or resize (a mode or view switch mid-update).

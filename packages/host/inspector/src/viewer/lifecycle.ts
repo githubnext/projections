@@ -30,7 +30,7 @@ export interface Outbox {
   readonly last: string
 }
 
-type Connected = {
+interface Connected {
   /** The state the page shows, once one has arrived. */
   readonly state: ViewerState | undefined
   readonly instance: string | undefined
@@ -89,8 +89,9 @@ type Open = Extract<Connection, {kind: 'live' | 'stopped'}>
 
 /** A new answer: another server (which replaces the page), the build, and the state when its generation changed. */
 function answered(connection: Open, answer: Answer): Next {
-  if (connection.instance !== undefined && answer.instance !== undefined && answer.instance !== connection.instance)
+  if (connection.instance !== undefined && answer.instance !== undefined && answer.instance !== connection.instance) {
     return emit({kind: 'replaced'}, {type: 'reload'})
+  }
   const effects: ConnectionEffect[] = []
   const {outbox} = connection
   if (connection.kind === 'stopped') effects.push({type: 'resume', state: answer})

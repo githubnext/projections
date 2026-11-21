@@ -47,8 +47,9 @@ test('the custom renderer prefix must be a same-origin directory, and is absent 
   )
   assert.equal(customRendererPrefix({renderers: [], customRendererBase: null}, origin), undefined)
   assert.equal(customRendererPrefix({renderers: []}, origin), undefined)
-  for (const base of ['https://example.com/x/', '/custom-renderers/ab12', '/x/?q=1', 7])
+  for (const base of ['https://example.com/x/', '/custom-renderers/ab12', '/x/?q=1', 7]) {
     assert.throws(() => customRendererPrefix({customRendererBase: base}, origin), /custom renderer base/)
+  }
 })
 
 test('an animated snapshot is painted at the progress it asked for, not where a step snapped the controller', async () => {

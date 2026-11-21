@@ -31,7 +31,7 @@ test('one revision: the bar sits along the bottom and counts each kind in the re
   expect(strip!.height).toBe(22)
 })
 
-for (const theme of ['dark-modern', 'light-modern', 'dark-high-contrast'] as const)
+for (const theme of ['dark-modern', 'light-modern', 'dark-high-contrast'] as const) {
   test(`${theme}: a comparison shows totals with their changes in the Git decoration colors, then the upgrades as facts`, async ({
     page,
   }) => {
@@ -75,8 +75,9 @@ for (const theme of ['dark-modern', 'light-modern', 'dark-high-contrast'] as con
       })
     expect(badge).toEqual({layers: 2, composite: ['exclude']})
   })
+}
 
-for (const theme of ['dark-modern', 'dark-high-contrast'] as const)
+for (const theme of ['dark-modern', 'dark-high-contrast'] as const) {
   test(`${theme}: figures are apart by a small round dot on the x-height centre, clear of each pill, with even room for the text`, async ({
     page,
   }) => {
@@ -127,6 +128,7 @@ for (const theme of ['dark-modern', 'dark-high-contrast'] as const)
       expect(Math.abs(dot.centre - dot.xCentre)).toBeLessThanOrEqual(0.75)
     }
   })
+}
 
 test('a figure filters the renderer to its items, and pressed again shows every item', async ({page}) => {
   await open(page, 'summary-bar')

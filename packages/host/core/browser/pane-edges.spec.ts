@@ -46,7 +46,7 @@ const cases = [
   {mode: 'swipe', width: 390, arrangement: 'swipe'},
 ] as const
 
-for (const {mode, width, arrangement} of cases)
+for (const {mode, width, arrangement} of cases) {
   test(`${mode} at ${width}px (${arrangement}): each pane lies flat, its band and frame spanning it alike, and left and right panes meet at a hairline`, async ({
     page,
   }) => {
@@ -78,6 +78,7 @@ for (const {mode, width, arrangement} of cases)
     // Stacked, the upper pane reaches the rule: no gap between them.
     if (stacked) expect(Math.abs(found[1]!.top - found[0]!.bottom), 'row gap').toBeLessThanOrEqual(0.5)
   })
+}
 
 /**
  * Where the after frame and its drawing lie against the stage's floating foot (`StageFoot`, a `data-stage-cover`),

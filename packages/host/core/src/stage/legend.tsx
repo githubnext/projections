@@ -62,7 +62,7 @@ export function ProjectionLegend({
         {legend.items.map((item, index) => {
           const color = item.token ? tokens[item.token] : item.color
           // An item without a swatch is a plain label, drawn as a chip.
-          if (!color)
+          if (!color) {
             return (
               <li
                 key={index}
@@ -79,6 +79,7 @@ export function ProjectionLegend({
                 {item.label}
               </li>
             )
+          }
           const shape = item.shape ?? 'square'
           const edge = item.token && changeFill.exec(item.token)
           const lineStyle = lineStyles[shape]

@@ -83,7 +83,8 @@ export function signalCounts(sweep: Pick<Sweep, 'cells' | 'projections'>): Map<s
     sweep.projections.filter(row => columnStats(row.projection, sweep.cells).signal === 'noisy').map(row => row.projection),
   )
   const counts = new Map<string, number>()
-  for (const cell of sweep.cells)
+  for (const cell of sweep.cells) {
     if (cell.status === 'changed' && !noisy.has(cell.projection)) counts.set(cell.after, (counts.get(cell.after) ?? 0) + 1)
+  }
   return counts
 }

@@ -11,8 +11,9 @@ test('a message mentions a path when it names a rooted or nested path or a file 
     'in src/app/ now',
     'package.json is missing',
     'edit my-file.tsx',
-  ])
+  ]) {
     assert.ok(mentionsPath(text), text)
+  }
   for (const text of ['and/or', 'Version 1.2 is out', '--.json', 'a.jsonx', 'path/only', 'No changes']) assert.ok(!mentionsPath(text), text)
 })
 

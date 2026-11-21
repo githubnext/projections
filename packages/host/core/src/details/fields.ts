@@ -54,11 +54,12 @@ export function valueText(value: unknown): string | undefined {
 /** JSON with object keys sorted, so equal values compare equal. */
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
-  if (value && typeof value === 'object')
+  if (value && typeof value === 'object') {
     return `{${Object.keys(value)
       .sort()
       .map(key => `${JSON.stringify(key)}:${canonical((value as Record<string, unknown>)[key])}`)
       .join(',')}}`
+  }
   return JSON.stringify(value) ?? String(value)
 }
 
@@ -84,16 +85,18 @@ export function changedFields(
       ...(path ? {path, side} : {}),
     })
   }
-  if (row.correspondence && row.correspondence !== 'exact' && row.correspondence !== 'none')
+  if (row.correspondence && row.correspondence !== 'exact' && row.correspondence !== 'none') {
     fields.push({key: 'id', name: 'Identity', before: row.before.join(', '), after: row.after.join(', ')})
+  }
   if (before && after) {
-    for (const key of ['label', 'kind', 'from', 'to'] as const)
+    for (const key of ['label', 'kind', 'from', 'to'] as const) {
       compare(
         key,
         itemFieldNames[key],
         (before as unknown as Record<string, unknown>)[key],
         (after as unknown as Record<string, unknown>)[key],
       )
+    }
   }
   const data = [...Object.keys(after?.data ?? {}), ...Object.keys(before?.data ?? {}).filter(key => !(after?.data && key in after.data))]
   for (const key of data) compare(`data:${key}`, key, before?.data?.[key], after?.data?.[key], propertyPath(key))

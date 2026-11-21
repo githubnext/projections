@@ -13,12 +13,13 @@ const pill = 'pj:inline pj:rounded-sm pj:border pj:px-1 pj:py-px pj:font-mono pj
  * only the other pill; an unchanged value (one extraction) is plain.
  */
 export function ValueChange({before, after}: {before?: string | undefined; after?: string | undefined}) {
-  if (before !== undefined && before === after)
+  if (before !== undefined && before === after) {
     return (
       <span className="ph-value pj:break-words pj:font-mono pj:text-xs" title={after}>
         {short(after)}
       </span>
     )
+  }
   return (
     <span className="ph-value-change pj:flex pj:min-w-0 pj:flex-wrap pj:items-baseline pj:gap-x-1 pj:gap-y-0.5">
       {before !== undefined && (

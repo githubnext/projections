@@ -34,19 +34,23 @@ function collectClassStrings(sourceFile) {
     else if (ts.isBinaryExpression(node)) {
       const operator = node.operatorToken.kind
       if (operator === ts.SyntaxKind.AmpersandAmpersandToken) classValue(node.right)
-      else if (operator === ts.SyntaxKind.BarBarToken || operator === ts.SyntaxKind.QuestionQuestionToken)
-        [node.left, node.right].forEach(classValue)
+      else if (operator === ts.SyntaxKind.BarBarToken || operator === ts.SyntaxKind.QuestionQuestionToken) {
+        ;[node.left, node.right].forEach(classValue)
+      }
     } else if (ts.isArrayLiteralExpression(node)) node.elements.forEach(classValue)
     else if (ts.isTemplateExpression(node)) found.push(node.head, ...node.templateSpans.map(span => span.literal))
   }
   const cva = call => {
     classValue(call.arguments[0])
     eachProperty(call.arguments[1], option => {
-      if (propertyName(option) === 'variants')
+      if (propertyName(option) === 'variants') {
         eachProperty(option.initializer, variant => eachProperty(variant.initializer, value => classValue(value.initializer)))
-      if (propertyName(option) === 'compoundVariants' && ts.isArrayLiteralExpression(option.initializer))
-        for (const compound of option.initializer.elements)
+      }
+      if (propertyName(option) === 'compoundVariants' && ts.isArrayLiteralExpression(option.initializer)) {
+        for (const compound of option.initializer.elements) {
           eachProperty(compound, field => ['className', 'class'].includes(propertyName(field)) && classValue(field.initializer))
+        }
+      }
     })
   }
   const visit = node => {

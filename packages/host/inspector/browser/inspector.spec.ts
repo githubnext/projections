@@ -1102,8 +1102,9 @@ test('without trust, the switcher marks the projections that need it', async ({p
   await expect(switcher(page)).toBeEnabled()
   await switcher(page).click()
   const list = page.getByRole('listbox', {name: 'Projections'})
-  for (const id of ['architecture', 'broken', 'slow'])
+  for (const id of ['architecture', 'broken', 'slow']) {
     await expect(list.locator(`[data-projection="${id}"] .pi-dot`), id).toHaveText('Needs trust')
+  }
   await expect(list.locator('[data-projection="files"]')).not.toHaveAttribute('data-status', 'trust')
   await page.keyboard.press('Escape')
 })
@@ -1265,13 +1266,16 @@ test('the title bar is a planned toolbar: no overlap, nothing clipped or truncat
         rect: box(element),
       }))
       const overlaps: string[] = []
-      for (const [index, a] of controls.entries())
-        for (const b of controls.slice(index + 1))
+      for (const [index, a] of controls.entries()) {
+        for (const b of controls.slice(index + 1)) {
           if (
             Math.min(a.rect.right, b.rect.right) - Math.max(a.rect.left, b.rect.left) > 0.5 &&
             Math.min(a.rect.bottom, b.rect.bottom) - Math.max(a.rect.top, b.rect.top) > 0.5
-          )
+          ) {
             overlaps.push(`${a.name} × ${b.name}`)
+          }
+        }
+      }
       const outside = controls
         .filter(
           ({rect}) => rect.left < outer.left - 0.5 || rect.right > outer.right + 0.5 || rect.top < outer.top || rect.bottom > outer.bottom,
@@ -1298,12 +1302,14 @@ test('the title bar is a planned toolbar: no overlap, nothing clipped or truncat
     await expect(page.locator('.pi-trust-state'), at).toBeVisible()
     const titlebar = page.locator('.pi-titlebar')
     const more = page.getByRole('dialog', {name: 'More actions'})
-    if (await titlebar.getByRole('button', {name: 'More actions'}).isVisible())
+    if (await titlebar.getByRole('button', {name: 'More actions'}).isVisible()) {
       await titlebar.getByRole('button', {name: 'More actions'}).click()
+    }
     // The Settings gear is already an icon: it stays in the bar at every width.
     await expect(titlebar.getByRole('button', {name: 'Settings', exact: true}), at).toBeVisible()
-    for (const name of [/^(Show|Hide) explorer sidebar$/, /^(Show|Hide) panel$/, /^(Show|Hide) details panel$/, /^Command palette$/])
+    for (const name of [/^(Show|Hide) explorer sidebar$/, /^(Show|Hide) panel$/, /^(Show|Hide) details panel$/, /^Command palette$/]) {
       await expect(titlebar.or(more).getByRole('button', {name}).first(), `${name} ${at}`).toBeVisible()
+    }
     await expect(
       titlebar
         .getByLabel('Open saved artifact', {exact: true})
@@ -1345,7 +1351,7 @@ for (const [theme, width] of [
   ['Dark', 1440],
   ['Light', 390],
   ['Dark', 390],
-] as const)
+] as const) {
   test(`the Explorer's spacing is one system (${theme.toLowerCase()}, ${width}px)`, async ({page, app}, testInfo) => {
     test.skip(testInfo.project.name !== 'chromium-desktop', 'One project covers the geometry')
     await page.setViewportSize({width, height: 900})
@@ -1367,11 +1373,13 @@ for (const [theme, width] of [
       expect(fill.left, JSON.stringify(fill)).toBe(fill.right)
       expect(fill.height % 4, JSON.stringify(fill)).toBe(0)
     }
-    if (process.env.PROJECTIONS_SHOTS)
+    if (process.env.PROJECTIONS_SHOTS) {
       await page
         .getByRole('complementary', {name: 'Explorer'})
         .screenshot({path: join(process.env.PROJECTIONS_SHOTS, `explorer-${theme.toLowerCase()}-${width}.png`)})
+    }
   })
+}
 
 /** The look of a card: its radius, border and surface. */
 const cardLook = (locator: Locator) =>
@@ -1389,7 +1397,7 @@ for (const [theme, width] of [
   ['Dark', 1440],
   ['Light', 390],
   ['Dark', 390],
-] as const)
+] as const) {
   test(`the workbench is cards on a gutter (${theme.toLowerCase()}, ${width}px)`, async ({page, app}, testInfo) => {
     test.skip(testInfo.project.name !== 'chromium-desktop', 'One project covers the geometry')
     await page.setViewportSize({width, height: 900})
@@ -1409,7 +1417,7 @@ for (const [theme, width] of [
     await sidebar(page)
     expect(await cardLook(explorer)).toEqual(stage)
     // The title bar and status bar sit on the gutter: no fill or edge of their own.
-    for (const bar of ['.pi-titlebar', '.pi-statusbar'])
+    for (const bar of ['.pi-titlebar', '.pi-statusbar']) {
       expect(
         await page.locator(bar).evaluate(element => {
           const style = getComputedStyle(element)
@@ -1417,6 +1425,7 @@ for (const [theme, width] of [
         }),
         bar,
       ).toEqual(['rgba(0, 0, 0, 0)', '0px', '0px'])
+    }
     // Section labels sit on the card: no bars, no full-width dividers.
     const sections = await explorer.locator('.pi-explorer-section').evaluateAll(list =>
       list.map(section => {
@@ -1473,6 +1482,7 @@ for (const [theme, width] of [
       expect(card.width).toBeLessThan(width - 2 * gutter)
     }
   })
+}
 
 test('the docked Details panel: toggled and resized like the Explorer, remembered, and it follows the selection', async ({
   page,
@@ -1555,8 +1565,9 @@ test('the command palette input has no focus ring; the active command row is hig
     }))
     expect(look.outline).toBe('none')
     expect(look.background).not.toBe('rgba(0, 0, 0, 0)')
-    if (process.env.PROJECTIONS_SHOTS && testInfo.project.name === 'chromium-desktop')
+    if (process.env.PROJECTIONS_SHOTS && testInfo.project.name === 'chromium-desktop') {
       await palette.screenshot({path: join(process.env.PROJECTIONS_SHOTS, `palette-${theme.toLowerCase()}.png`)})
+    }
     await page.keyboard.press('Escape')
     await expect(palette).toHaveCount(0)
   }
@@ -1576,7 +1587,7 @@ for (const [theme, width] of [
   ['Dark', 1440],
   ['Light', 390],
   ['Dark', 390],
-] as const)
+] as const) {
   test(`screenshots of the workbench, the switcher and Details (${theme.toLowerCase()}, ${width}px)`, async ({page, app}, testInfo) => {
     test.skip(!process.env.PROJECTIONS_SHOTS || testInfo.project.name !== 'chromium-desktop', 'Screenshots on request')
     const shot = (name: string) =>
@@ -1605,3 +1616,4 @@ for (const [theme, width] of [
     await expect(page.getByRole('listbox', {name: 'Projections'})).toBeVisible()
     await shot('switcher-details')
   })
+}

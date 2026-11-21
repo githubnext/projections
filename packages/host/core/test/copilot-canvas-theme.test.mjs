@@ -86,8 +86,13 @@ for (const colorMode of ['dark', 'light']) {
     }
     // Fills behind plain text keep it readable on a card.
     const raised = color('color-surface-raised')
-    for (const fill of ['color-highlight', 'color-accent-muted', ...hues.flatMap(hue => [`color-${hue}-muted`, `color-${hue}-highlight`])])
+    for (const fill of [
+      'color-highlight',
+      'color-accent-muted',
+      ...hues.flatMap(hue => [`color-${hue}-muted`, `color-${hue}-highlight`]),
+    ]) {
       assert.ok(contrast(color('color-fg'), composite(color(fill), raised)) >= 4.5, `fg on ${fill}`)
+    }
     assert.ok(ratio('color-fg-on-emphasis', 'color-accent-emphasis') >= 4.5)
     for (let index = 1; index <= 16; index++) assert.ok(ratio(`chart-${index}`, 'color-bg') >= 3, `chart-${index}`)
   })
@@ -99,8 +104,9 @@ for (const colorMode of ['dark', 'light']) {
       // Moved only toward white (or black), which keeps the hue: never another color.
       const [before, after] = [parseColor(defaults[name]), parseColor(tokens[name])]
       const toward = colorMode === 'dark' ? 255 : 0
-      for (const channel of ['r', 'g', 'b'])
+      for (const channel of ['r', 'g', 'b']) {
         assert.ok(Math.abs(after[channel] - toward) <= Math.abs(before[channel] - toward) + 1, `${name} keeps its hue`)
+      }
     }
   })
 }
@@ -147,8 +153,9 @@ test("the chrome takes the stage's colors: every variable is a token's value, ch
     assert.equal(chrome['--pj-muted'], tokens['color-surface-inset'])
     assert.equal(chrome['--pj-ring'], tokens['color-focus'])
     assert.equal(chrome['--pj-font-family'], tokens['font-family'])
-    for (const [name, value] of Object.entries(chrome))
+    for (const [name, value] of Object.entries(chrome)) {
       if (!name.startsWith('--pj-font')) assert.ok(parseColor(value), `${mode} ${name} is a color: ${value}`)
+    }
     for (const hue of ['added', 'removed', 'modified', 'moved']) assert.equal(chrome[`--pj-${hue}`], tokens[`color-${hue}`])
   }
   assert.equal(hostChromeVariables({}, 'dark')['--pj-background'], defaultThemeTokens('dark')['color-surface-canvas'])

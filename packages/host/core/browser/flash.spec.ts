@@ -9,7 +9,7 @@ test.use({trace: 'off'})
 const view = (page: Page) => page.locator('.ph')
 
 async function open(page: Page, query: string) {
-  await page.goto(explorer(`${query}`))
+  await page.goto(explorer(query))
   await expect(view(page)).toHaveAttribute('data-renderer-status', 'ready')
   await expect(view(page)).toHaveAttribute('data-color-mode', 'dark')
 }

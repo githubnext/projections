@@ -8,9 +8,9 @@ import type {Memos} from './memo.js'
 import type {PaneKey, PresentationDefaults, RendererStatus} from './types.js'
 
 /** The modes each renderer declared when it connected, by bundle URL; they outlive the panes that reported them. */
-export type DeclaredModes = {readonly [url: string]: readonly ComparisonMode[]}
+export type DeclaredModes = Readonly<Record<string, readonly ComparisonMode[]>>
 
-export type ComparisonModesInput = {
+export interface ComparisonModesInput {
   comparing: boolean
   renderer: RendererEntry | undefined
   chosenMode: ComparisonMode | undefined
@@ -86,28 +86,28 @@ export function seedControls(
   controls: readonly RendererControl[],
   presentation: PresentationDefaults | undefined,
   renderer: RendererEntry | undefined,
-): {seeded: SeededControls; values: {[id: string]: ControlValue}} | undefined {
+): {seeded: SeededControls; values: Record<string, ControlValue>} | undefined {
   const key = JSON.stringify(controls)
   if (key === seeded.key || !controls.length || !presentation?.rendererOptions) return undefined
   const notices: string[] = []
-  const values: {[id: string]: ControlValue} = {}
+  const values: Record<string, ControlValue> = {}
   for (const [id, raw] of Object.entries(presentation.rendererOptions)) {
     const control = controls.find(item => item.id === id)
-    if (!control)
+    if (!control) {
       notices.push(`The projection definition sets "${id}", which the ${renderer?.title ?? ''} renderer doesn't offer; it was ignored.`)
-    else if (!isControlValue(control, raw))
+    } else if (!isControlValue(control, raw)) {
       notices.push(`The projection definition's value for "${control.label}" isn't valid for this renderer; its default is used.`)
-    else values[id] = raw
+    } else values[id] = raw
   }
   return {seeded: {notices, key}, values}
 }
 
 /** The declared controls' values: the embedder's when it controls them, else the core's; compared by value. */
 export function createControlValues({byValue}: Memos) {
-  const valuesOf = byValue<{[id: string]: ControlValue}>()
+  const valuesOf = byValue<Record<string, ControlValue>>()
   return (
     controls: RendererControl[],
-    controlled: {[id: string]: ControlValue} | undefined,
-    own: {[id: string]: ControlValue},
-  ): {[id: string]: ControlValue} => valuesOf(controlValues(controls, controlled ?? own))
+    controlled: Record<string, ControlValue> | undefined,
+    own: Record<string, ControlValue>,
+  ): Record<string, ControlValue> => valuesOf(controlValues(controls, controlled ?? own))
 }

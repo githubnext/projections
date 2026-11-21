@@ -5,7 +5,7 @@ import {featureOn} from '../blocks.js'
 import type {ProjectionViewProps} from './props.js'
 
 /** The headless core's options for a `ProjectionView`: its props, with only what the embedder set passed through. */
-export function viewOptions(props: ProjectionViewProps, colorMode: ColorMode, themeTokens: {[name: string]: string}): ProjectionOptions {
+export function viewOptions(props: ProjectionViewProps, colorMode: ColorMode, themeTokens: Record<string, string>): ProjectionOptions {
   return {
     subject: props.subject,
     projection: props.projection,

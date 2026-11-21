@@ -16,12 +16,13 @@ function showPair(page: ViewerPage, state: ViewerState, projection: string, hand
     if (state.scenario) {
       if (summary.projection?.id !== projection) handle.selectProjection(projection)
       handle.showScenario(state.scenario)
-    } else
+    } else {
       handle.setPair({
         projection,
         after: state.after ?? 'working-tree',
         ...(state.before ? {before: state.before} : {}),
       })
+    }
     page.shown = {key, refresh: state.refresh}
   } else if (shown.refresh !== state.refresh) {
     shown.refresh = state.refresh

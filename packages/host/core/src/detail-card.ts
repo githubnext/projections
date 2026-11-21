@@ -112,11 +112,12 @@ export function useDetailCard(
     if (!row) return
     let frame = 0
     const schedule = () => {
-      if (!frame)
+      if (!frame) {
         frame = requestAnimationFrame(() => {
           frame = 0
           measure()
         })
+      }
     }
     addEventListener('scroll', schedule, {capture: true, passive: true})
     addEventListener('resize', schedule)

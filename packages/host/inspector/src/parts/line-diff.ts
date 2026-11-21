@@ -3,9 +3,11 @@ export function lineDiff(before: string, after: string): {kind: ' ' | '-' | '+';
   const a = before.split('\n')
   const b = after.split('\n')
   const table = Array.from({length: a.length + 1}, () => new Array<number>(b.length + 1).fill(0))
-  for (let i = a.length - 1; i >= 0; i--)
-    for (let j = b.length - 1; j >= 0; j--)
+  for (let i = a.length - 1; i >= 0; i--) {
+    for (let j = b.length - 1; j >= 0; j--) {
       table[i]![j] = a[i] === b[j] ? table[i + 1]![j + 1]! + 1 : Math.max(table[i + 1]![j]!, table[i]![j + 1]!)
+    }
+  }
   const lines: {kind: ' ' | '-' | '+'; text: string}[] = []
   let i = 0
   let j = 0

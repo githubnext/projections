@@ -19,7 +19,7 @@ export interface FrameCover {
   insetBottom: number
 }
 
-export type FrameCovers = {[side in Side]?: FrameCover | undefined}
+export type FrameCovers = Partial<Record<Side, FrameCover | undefined>>
 
 /** The bands that `rects` take at the top and at the foot of a frame `height` tall (`FrameCover`), CSS px. */
 export function insets(rects: readonly {y: number; height: number}[], height: number): {insetTop: number; insetBottom: number} {
@@ -66,7 +66,7 @@ const sameCovers = (a: FrameCovers, b: FrameCovers) =>
  */
 export function useFrameCovers(
   container: RefObject<HTMLElement | null>,
-  frames: () => {[side in Side]?: HTMLIFrameElement | undefined},
+  frames: () => Partial<Record<Side, HTMLIFrameElement | undefined>>,
   key: unknown,
   reducedMotion: boolean,
 ): FrameCovers {
@@ -111,12 +111,13 @@ export function useFrameCovers(
     for (const cover of element.querySelectorAll(coverSelector)) observer.observe(cover)
     for (const frame of Object.values(frames())) if (frame) observer.observe(frame)
     window.addEventListener('resize', measure)
-    if (!reducedMotion)
+    if (!reducedMotion) {
       for (const cover of element.querySelectorAll<HTMLElement>(coverSelector)) {
         if (cover.dataset.stageCoverShown !== undefined) continue
         cover.dataset.stageCoverShown = ''
         cover.animate?.([{opacity: 0}, {opacity: 1}], {duration: 120, easing: 'ease-out'})
       }
+    }
     return () => {
       observer.disconnect()
       window.removeEventListener('resize', measure)
@@ -126,7 +127,7 @@ export function useFrameCovers(
 }
 
 /** A frame's cover as its theme tokens: `stage-cover`, and each inset where something covers that edge. */
-export function coverTokens(cover: FrameCover): {[name: string]: string} {
+export function coverTokens(cover: FrameCover): Record<string, string> {
   return {
     'stage-cover': cover.cover,
     ...(cover.insetTop ? {'stage-inset-top': `${cover.insetTop}px`} : {}),

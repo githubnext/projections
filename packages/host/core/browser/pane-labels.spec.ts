@@ -6,7 +6,12 @@ import {explorer, story} from './harness.js'
  * Side by side and swipe show each revision held in its own pane: the host labels each pane in a header band above
  * it, which never covers the renderer's content.
  */
-type Box = {left: number; top: number; right: number; bottom: number}
+interface Box {
+  left: number
+  top: number
+  right: number
+  bottom: number
+}
 const intersects = (a: Box, b: Box) =>
   Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5
 
@@ -41,8 +46,8 @@ async function nodeBoxes(page: Page, frames = page.locator('iframe.ph-frame')): 
 for (const [mode, label] of [
   ['side-by-side', '.ph-pane-label'],
   ['swipe', '.ph-swipe-label'],
-] as const)
-  for (const width of [1440, 768, 390])
+] as const) {
+  for (const width of [1440, 768, 390]) {
     test(`${mode} at ${width}px: pane labels are bands that cover no node, and no pane narrates the transition`, async ({page}) => {
       await page.setViewportSize({width, height: 900})
       await page.goto(explorer(`before=v1&after=v3&mode=${mode}`))
@@ -69,10 +74,13 @@ for (const [mode, label] of [
       // Each band sits above its frame, never over it.
       for (const frame of await frames.all()) {
         const area = (await frame.boundingBox())!
-        for (const box of labels)
+        for (const box of labels) {
           expect(intersects(box, {left: area.x, top: area.y, right: area.x + area.width, bottom: area.y + area.height})).toBe(false)
+        }
       }
     })
+  }
+}
 
 test('animated shows no transition caption: the footer strip takes no room without a focus', async ({page}) => {
   await page.goto(explorer('before=v1&after=v3&mode=animated'))
@@ -87,8 +95,8 @@ const chipInset = 12
 /** The space a chip takes at its frame's top, which the stage sends as `stage-inset-top` (`paneChipClearance`). */
 const chipClearance = 52
 
-for (const mode of ['side-by-side', 'swipe'] as const)
-  for (const fill of [false, true])
+for (const mode of ['side-by-side', 'swipe'] as const) {
+  for (const fill of [false, true]) {
     test(`${mode}${fill ? ', filling,' : ''} with paneLabels="chips": quiet chips overlay each frame's top corner, clear of its nodes`, async ({
       page,
     }) => {
@@ -146,8 +154,10 @@ for (const mode of ['side-by-side', 'swipe'] as const)
         for (const node of await nodeBoxes(page, iframe)) expect(intersects(chipBox, node), JSON.stringify({chipBox, node})).toBe(false)
       }
     })
+  }
+}
 
-for (const fill of [false, true])
+for (const fill of [false, true]) {
   test(`animated${fill ? ', filling,' : ''} with a utility area: the bar floats inset over the stage's top, and the frame keeps clear of it`, async ({
     page,
   }) => {
@@ -178,6 +188,7 @@ for (const fill of [false, true])
     const barBox = {left: box.x, top: box.y, right: box.x + box.width, bottom: box.y + box.height}
     for (const node of await nodeBoxes(page, iframe)) expect(intersects(barBox, node), JSON.stringify({barBox, node})).toBe(false)
   })
+}
 
 test('in a stage laid out in its page, the bar sticks while the page scrolls, on whole pixels, and stops at the stage end', async ({
   page,

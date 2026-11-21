@@ -7,7 +7,7 @@ import {after, defineMachine, ignore} from '@githubnext/projections-machine'
 /** Whether a pointer is pressed: the plan isn't replanned away between a press and its click. */
 export type FitPlanHand = 'free' | 'pressing'
 
-type Planned = {
+interface Planned {
   /** The plan the bar renders. */
   readonly plan: unknown
   /** The plan the bar last settled on: a move to a more spacious plan is measured from it (the hysteresis). */
@@ -57,7 +57,10 @@ export type FitPlanEvent =
   | {readonly type: 'replan'}
 
 /** The frame after a resize, while one waits for it. */
-export type FitPlanActivity = {readonly type: 'frame'; readonly key: 'frame'}
+export interface FitPlanActivity {
+  readonly type: 'frame'
+  readonly key: 'frame'
+}
 
 const planned = ({plan, settled, width, run, hand, frame}: FitPlanState): Planned => ({plan, settled, width, run, hand, frame})
 

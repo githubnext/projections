@@ -102,7 +102,7 @@ export function ChoiceButton({
   disabled?: boolean | undefined
   title?: string | undefined
   onClick: () => void
-} & {[key: `data-${string}`]: string | undefined} & {'aria-label'?: string}) {
+} & Record<`data-${string}`, string | undefined> & {'aria-label'?: string}) {
   return (
     <button
       type="button"

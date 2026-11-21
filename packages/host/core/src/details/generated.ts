@@ -78,9 +78,11 @@ export function generatedFields(
         ['before', subject.before],
         ['after', subject.after],
       ] as const)
-    : ([['after', subject.extraction]] as const))
-    for (const {path, basis} of generatedPaths(extraction, items[side][0], row.collection))
+    : ([['after', subject.extraction]] as const)) {
+    for (const {path, basis} of generatedPaths(extraction, items[side][0], row.collection)) {
       if (!declared.has(path)) declared.set(path, basis)
+    }
+  }
   const hidden = new Set([...declared.keys(), ...declared.values()])
   const generated: GeneratedField[] = [...declared].map(([path, basis]) => {
     const entry = (row.varied ?? []).find(candidate => candidate.path === path && candidate.generated)

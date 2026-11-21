@@ -9,8 +9,9 @@ const defaultOutput = fileURLToPath(new URL('../dist/ui.css', import.meta.url))
 const root = '.pj-root'
 const allowedAtRules = new Set(['media', 'supports', 'container', 'keyframes', '-webkit-keyframes'])
 const inKeyframes = node => {
-  for (let parent = node.parent; parent; parent = parent.parent)
+  for (let parent = node.parent; parent; parent = parent.parent) {
     if (parent.type === 'atrule' && parent.name.endsWith('keyframes')) return true
+  }
   return false
 }
 
@@ -48,7 +49,7 @@ function embeddingSafe() {
           syntax = declaration.value.replace(/["']/g, '')
         })
         // A registered zero keeps its type (minification writes `0px` as `0`); unregistered, `calc(1px + 0)` is invalid.
-        if (initial === '0')
+        if (initial === '0') {
           initial = /length/.test(syntax)
             ? '0px'
             : /percentage/.test(syntax)
@@ -58,6 +59,7 @@ function embeddingSafe() {
                 : /angle/.test(syntax)
                   ? '0deg'
                   : initial
+        }
         defaults.push([rule.params.trim(), initial])
         rule.remove()
       })
@@ -148,10 +150,12 @@ export function scopeViolations(css) {
     }
   })
   parsed.walkDecls(declaration => {
-    if (declaration.prop.startsWith('--') && !/^--(pj|tw)-/.test(declaration.prop))
+    if (declaration.prop.startsWith('--') && !/^--(pj|tw)-/.test(declaration.prop)) {
       problems.push(`custom property ${declaration.prop} is not --pj-/--tw- prefixed`)
-    if (/\d(r?em)?rem\b/.test(declaration.value) || /\brem\b/.test(declaration.value))
+    }
+    if (/\d(r?em)?rem\b/.test(declaration.value) || /\brem\b/.test(declaration.value)) {
       problems.push(`rem unit in ${declaration.prop}: ${declaration.value}`)
+    }
   })
   return problems
 }

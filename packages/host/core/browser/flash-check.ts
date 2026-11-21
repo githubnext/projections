@@ -20,8 +20,9 @@ export async function watchFrames(page: Page): Promise<void> {
         }
         const style = getComputedStyle(frame)
         const visible = style.visibility !== 'hidden' && Number(style.opacity) > 0 && frame.getBoundingClientRect().height > 0
-        if (visible && frame.dataset.revealed !== 'true')
+        if (visible && frame.dataset.revealed !== 'true') {
           state.violations.push(`${frame.getAttribute('aria-label')} visible before it painted`)
+        }
       }
       requestAnimationFrame(tick)
     }

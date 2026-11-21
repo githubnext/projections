@@ -39,12 +39,13 @@ let token
 function githubToken() {
   if (token !== undefined) return token
   token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || ''
-  if (!token)
+  if (!token) {
     try {
       token = execFileSync('gh', ['auth', 'token'], {encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']}).trim()
     } catch {
       token = ''
     }
+  }
   return token
 }
 
@@ -52,12 +53,13 @@ async function github(path) {
   const headers = {accept: 'application/vnd.github+json', 'x-github-api-version': '2022-11-28'}
   if (githubToken()) headers.authorization = `Bearer ${githubToken()}`
   const response = await request(`https://api.github.com/repos/${repository}/${path}`, {headers})
-  if (!response.ok)
+  if (!response.ok) {
     throw new RegistryError(
       `GitHub ${path}: ${response.status} ${(await response.text()).slice(0, 200)}`,
       [403, 429].includes(response.status) ? 'Rate limited: set GITHUB_TOKEN or run gh auth login' : undefined,
       response.status,
     )
+  }
   return response.json()
 }
 
@@ -86,8 +88,9 @@ export async function changesSince(version) {
   const changes = new Map()
   for (const path of buildInputs) {
     const commits = await github(`commits?sha=main&since=${tag.date}&per_page=100&path=${encodeURIComponent(path)}`)
-    for (const commit of commits)
+    for (const commit of commits) {
       if (commit.sha !== tag.sha) changes.set(commit.sha, {sha: commit.sha, message: commit.commit.message.split('\n')[0], path})
+    }
   }
   return {tag, head: head.sha, changes: [...changes.values()]}
 }

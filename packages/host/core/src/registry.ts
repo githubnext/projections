@@ -237,8 +237,10 @@ export function compatibleRenderers(
   const named = (entry: RendererEntry) => names.has(entry.name) || entry.handles.some(name => names.has(name))
   const declared = (entry: RendererEntry) => entry.accepts !== undefined
   const list = resolved ? [resolved] : []
-  for (const fits of [named, declared])
-    for (const entry of catalog)
+  for (const fits of [named, declared]) {
+    for (const entry of catalog) {
       if (fits(entry) && rendererAccepts(entry, extraction) && !list.some(item => item.url === entry.url)) list.push(entry)
+    }
+  }
   return list
 }

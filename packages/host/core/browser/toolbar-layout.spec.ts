@@ -49,7 +49,7 @@ for (const [mode, query, expected] of [
   ['side by side', 'before=v1&after=v3&mode=side-by-side', [...common, 'Animated', 'Side by side', 'Swipe']],
   // The table view presents progress too, with the renderer's controls (zoom, modes) gone from the row.
   ['animated table', 'before=v1&after=v3&view=table', [...actions, 'Showing table; show the Graph renderer', ...playback]],
-] as const)
+] as const) {
   test(`the ${mode} toolbar keeps its layout rules from 1600px to 320px`, async ({page}) => {
     test.slow()
     await open(page, query)
@@ -72,13 +72,14 @@ for (const [mode, query, expected] of [
       // The content below starts right under the toolbar's hairline: the chrome is flat, with no gutter between them.
       expect(Math.abs(geometry.below!), at).toBeLessThanOrEqual(0.5)
       // The slider's thumb stays clear of the toolbar's border and corners at both ends (checked every 100px).
-      if (mode !== 'side by side' && width % 100 === 0)
+      if (mode !== 'side by side' && width % 100 === 0) {
         for (const key of ['Home', 'End'] as const) {
           await slideTo(page, key)
           const {thumb} = await toolbarGeometry(page)
           expect(thumb!.left, `${key} ${at}`).toBeGreaterThanOrEqual(geometry.left + 8)
           expect(thumb!.right, `${key} ${at}`).toBeLessThanOrEqual(geometry.left + geometry.width - 8)
         }
+      }
       // Nothing overlaps or leaves the toolbar.
       expect(geometry.overlaps, at).toEqual([])
       expect(geometry.outside, at).toEqual([])
@@ -102,6 +103,7 @@ for (const [mode, query, expected] of [
       ).toBe(true)
     }
   })
+}
 
 test('mode icons never look like playback: Animated is a clapperboard, distinct from the play, pause and step icons', async ({page}) => {
   await open(page, 'before=v1&after=v3')
@@ -113,8 +115,9 @@ test('mode icons never look like playback: Animated is a clapperboard, distinct 
   expect(playback).toEqual(expect.arrayContaining(['play', 'step-back', 'step-forward']))
   for (const icon of modes) expect(['play', 'pause', 'step-back', 'step-forward']).not.toContain(icon)
   // Every mode icon has a label or a tooltip.
-  for (const radio of await page.getByRole('radiogroup', {name: 'Comparison mode'}).getByRole('radio').all())
+  for (const radio of await page.getByRole('radiogroup', {name: 'Comparison mode'}).getByRole('radio').all()) {
     expect(await radio.getAttribute('title')).toBeTruthy()
+  }
   // The mode menu's button, on a narrow toolbar, shows the current mode's icon (not a play glyph) and names it.
   const menu = page.getByRole('button', {name: 'Comparison mode: Animated'})
   for (let width = 1000; width >= 320 && !(await menu.isVisible()); width -= 20) await setWidth(page, width)

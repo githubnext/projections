@@ -243,7 +243,7 @@ export function ShowAsChip({
   const label = viewName(view, undefined)
   const chip =
     'ph-show-as-chip pj:inline-flex pj:h-8 pj:min-w-0 pj:shrink-0 pj:items-center pj:gap-1 pj:rounded-md pj:border pj:bg-background pj:pl-2 pj:text-xs pj:font-medium pj:text-foreground pj:shadow-xs pj:[&_svg]:size-3.5 pj:[&_svg]:shrink-0'
-  if (!onDismiss)
+  if (!onDismiss) {
     return (
       <span className={cn(chip, 'pj:pr-2', className)} data-view={view}>
         <Icon aria-hidden="true" className="pj:text-muted-foreground" />
@@ -253,6 +253,7 @@ export function ShowAsChip({
         </span>
       </span>
     )
+  }
   const name = `Showing ${label.toLowerCase()}; show the ${rendererTitle ?? 'renderer'}${rendererTitle ? ' renderer' : ''}`
   return (
     <button

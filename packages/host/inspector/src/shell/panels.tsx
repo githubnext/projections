@@ -54,8 +54,9 @@ export function DiagnosticsList({diagnostics}: {diagnostics: readonly Diagnostic
 }
 
 export function RawOutput({jobs}: {jobs: readonly InspectorJob[]}) {
-  if (!jobs.some(item => item.outputs.length))
+  if (!jobs.some(item => item.outputs.length)) {
     return <Empty>No raw extractor output. Saved artifacts contain the normalized extraction, not the process output.</Empty>
+  }
   return (
     <div className="pj:flex pj:flex-col pj:gap-4">
       {[...jobs].reverse().map(item => (

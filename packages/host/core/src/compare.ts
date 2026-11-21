@@ -80,8 +80,9 @@ const definitionParts: Record<keyof Definition, string> = {
  * definitions differ or, when the definitions agree, that the content of their declared component sources does.
  */
 export function explainDefinitionMismatch(pairing: Exclude<DefinitionPairing, {pairing: 'same' | 'projection'}>): string[] {
-  if (pairing.pairing === 'components')
+  if (pairing.pairing === 'components') {
     return ['The definitions are identical, so the content of their declared component sources differs.']
+  }
   return pairing.differing.map(key => `The ${definitionParts[key as keyof Definition] ?? key} differs.`)
 }
 

@@ -156,8 +156,9 @@ test('the toolbar count shows "N varied within tolerance" as a toggle, and nothi
   assert.match(markup, /pj:text-muted-foreground/)
   assert.doesNotMatch(markup, /added|removed|modified/)
   assert.match(renderToStaticMarkup(createElement(VariedToggle, {projection: {...controller, variedOnly: true}})), /aria-pressed="true"/)
-  for (const variation of [undefined, {within: 0, beyond: 2}])
+  for (const variation of [undefined, {within: 0, beyond: 2}]) {
     assert.equal(renderToStaticMarkup(createElement(VariedToggle, {projection: {...controller, variation}})), '')
+  }
   assert.equal(renderToStaticMarkup(createElement(VariedToggle, {projection: {...controller, comparing: false}})), '')
 })
 

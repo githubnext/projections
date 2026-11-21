@@ -145,8 +145,7 @@ export const VscToolbarContainer = createWrapper<VscodeToolbarContainer, object>
 /** `vscode-button`, a primary (or `secondary`) button with an optional codicon before or after its text. */
 export const VscButton = createWrapper<
   VscodeButton,
-  {secondary?: boolean; icon?: string; iconAfter?: string; disabled?: boolean; block?: boolean; type?: 'button' | 'submit' | 'reset'},
-  Record<never, Event>
+  {secondary?: boolean; icon?: string; iconAfter?: string; disabled?: boolean; block?: boolean; type?: 'button' | 'submit' | 'reset'}
 >('vscode-button', {})
 /**
  * `vscode-single-select`, a dropdown of `VscOption` children. `onChange` fires when the user picks one; read the new

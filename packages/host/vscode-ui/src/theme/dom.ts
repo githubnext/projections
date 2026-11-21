@@ -69,9 +69,11 @@ export function useVscodeTheme(ref: RefObject<Element | null>): VscodeTheme {
     update()
     const observer = new MutationObserver(update)
     const watched = new Set([element.ownerDocument.documentElement, element.ownerDocument.body, themeHolder(element).holder])
-    for (const node of watched)
-      if (node)
+    for (const node of watched) {
+      if (node) {
         observer.observe(node, {attributes: true, attributeFilter: ['class', 'style', 'data-vscode-theme-kind', 'data-vscode-theme-id']})
+      }
+    }
     const media = matchMedia('(prefers-color-scheme: dark)')
     media.addEventListener('change', update)
     return () => {

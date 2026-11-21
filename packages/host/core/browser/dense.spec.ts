@@ -101,11 +101,13 @@ test('on desktop row 1 holds, in order, the picker, mode, scope, zoom actions, f
   // Table and text are in Settings ("Show as"), not the row; playback has one play button and small step buttons.
   await expect(row.getByRole('tablist')).toHaveCount(0)
   await expect(row.getByRole('group', {name: 'Comparison playback'}).getByRole('button', {name: /^(Play|Pause)/})).toHaveCount(1)
-  for (const name of ['Previous step', 'Next step'])
+  for (const name of ['Previous step', 'Next step']) {
     expect((await row.getByRole('button', {name}).boundingBox())!.width).toBeLessThanOrEqual(32)
+  }
   // The renderer's `zoom` group: icon buttons named by their labels.
-  for (const name of ['Zoom out', 'Fit to view', 'Zoom in'])
+  for (const name of ['Zoom out', 'Fit to view', 'Zoom in']) {
     await expect(row.getByRole('group', {name: 'Zoom'}).getByRole('button', {name})).toBeVisible()
+  }
   // The active-view label and the comparator stay mounted, visually hidden; About shows them.
   await expect(page.locator('[data-active-view]')).toHaveText('Graph renderer · built-in, sandboxed')
   await expect(page.locator('[data-active-view]')).not.toBeInViewport()
@@ -147,8 +149,9 @@ test('on a phone, row 1 keeps the pickers, mode, Settings and More; row 2 is pla
   await expect(await openFilter(page)).toBeVisible()
   await closeMenus(page)
   // The steps and percent are reachable too: in the playback group's overflow, or in More.
-  for (const name of ['Previous step', 'Next step'])
+  for (const name of ['Previous step', 'Next step']) {
     await expect(await inToolbar(page, scope => scope.getByRole('button', {name, exact: true}))).toBeVisible()
+  }
   await closeMenus(page)
   // Settings shows the table instead of the renderer; the row's chip returns to it.
   await (await openSettings(page)).getByRole('group', {name: 'Show as'}).getByRole('menuitemradio', {name: 'Table'}).click()
@@ -333,8 +336,9 @@ test('Filter expands into the find field; Escape clears the query, then collapse
   await expect(field).toBeFocused()
   await field.fill('pay')
   await expect(page.locator('.ph-table-view tbody tr[data-row-id]')).not.toHaveCount(0)
-  for (const id of await page.locator('.ph-table-view tbody tr[data-row-id]').evaluateAll(rows => rows.map(row => row.textContent ?? '')))
+  for (const id of await page.locator('.ph-table-view tbody tr[data-row-id]').evaluateAll(rows => rows.map(row => row.textContent ?? ''))) {
     expect(id.toLowerCase()).toContain('pay')
+  }
   // While a query applies, the field stays expanded.
   await showAs(page, 'Text')
   await expect(field).toHaveValue('pay')

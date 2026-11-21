@@ -16,7 +16,7 @@ export function StatusItem({
   title,
   className,
   ...data
-}: {children: ReactNode; title?: string | undefined; className?: string} & {[key: `data-${string}`]: string | undefined}) {
+}: {children: ReactNode; title?: string | undefined; className?: string} & Record<`data-${string}`, string | undefined>) {
   return (
     <span className={cn('pj:inline-flex pj:min-w-0 pj:shrink-0 pj:items-center pj:gap-1 pj:truncate', className)} title={title} {...data}>
       {children}

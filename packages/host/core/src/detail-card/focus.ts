@@ -75,8 +75,9 @@ export function useCardFocus({projection, container, view, card, row, key, setDi
         event.preventDefault()
         event.stopPropagation()
         close()
-      } else if ((event.key === 'Enter' || event.key === ' ') && !(card && element && card.contains(element)))
+      } else if ((event.key === 'Enter' || event.key === ' ') && !(card && element && card.contains(element))) {
         state.keyboardAt = performance.now()
+      }
     }
     const pointerDown = (event: PointerEvent) => {
       state.keyboardAt = -Infinity

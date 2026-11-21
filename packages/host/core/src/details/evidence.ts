@@ -23,8 +23,8 @@ export function rowEvidence(items: ReturnType<typeof rowItems>): DetailEvidence[
   const evidence: DetailEvidence[] = []
   const seen = new Set<string>()
   const afterPaths = new Set(items.after.flatMap(item => (item.evidence ?? []).map(entry => entry.source)))
-  for (const side of ['after', 'before'] as const)
-    for (const item of items[side])
+  for (const side of ['after', 'before'] as const) {
+    for (const item of items[side]) {
       for (const entry of item.evidence ?? []) {
         if (side === 'before' && afterPaths.has(entry.source)) continue
         const key = `${side}:${entry.source}:${entry.location?.line ?? ''}`
@@ -32,5 +32,7 @@ export function rowEvidence(items: ReturnType<typeof rowItems>): DetailEvidence[
         seen.add(key)
         evidence.push({side, path: entry.source, ...(entry.location ? {line: entry.location.line} : {})})
       }
+    }
+  }
   return evidence
 }

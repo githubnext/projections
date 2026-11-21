@@ -23,12 +23,13 @@ export function VscodeLegend({legend, tokens, className}: VscodeLegendProps) {
       <ul className="phv-legend-items">
         {legend.items.map((item, index) => {
           const color = item.token ? tokens?.[item.token as ThemeTokenName] : item.color
-          if (!color)
+          if (!color) {
             return (
               <li key={index} className="ph-legend-item phv-legend-item" data-shape="label">
                 {item.label}
               </li>
             )
+          }
           const shape = item.shape ?? 'square'
           const hue = item.token?.match(swatchHue)?.[1]
           const line = shape === 'line' || shape === 'dashed' || shape === 'dotted'

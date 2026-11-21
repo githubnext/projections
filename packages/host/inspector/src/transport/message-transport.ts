@@ -37,9 +37,9 @@ export function createMessageTransport({
         if (!request.blob) request.resolve(reply.body)
         else {
           const {type, base64} = (reply.body ?? {}) as {type?: unknown; base64?: unknown}
-          if (typeof type !== 'string' || typeof base64 !== 'string')
+          if (typeof type !== 'string' || typeof base64 !== 'string') {
             request.reject(new Error('The Inspector bridge returned an invalid binary body'))
-          else request.resolve(new Blob([Uint8Array.from(atob(base64), character => character.charCodeAt(0))], {type}))
+          } else request.resolve(new Blob([Uint8Array.from(atob(base64), character => character.charCodeAt(0))], {type}))
         }
       } else request.reject(new InspectorRequestError(requestErrorMessage(reply.status, reply.body), reply.status))
     } else if (reply.type === 'failure') request.reject(new Error(String(reply.message ?? 'The Inspector bridge failed')))

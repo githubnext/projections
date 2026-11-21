@@ -7,7 +7,12 @@ import {explorer} from './harness.js'
  * one-frame modes, a cover the frames are told about, so no drawn node sits under it; with the floating playback too,
  * one bar, the host's content first. Side by side keeps its pane chips there instead.
  */
-type Box = {left: number; top: number; right: number; bottom: number}
+interface Box {
+  left: number
+  top: number
+  right: number
+  bottom: number
+}
 const intersects = (a: Box, b: Box) =>
   Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5
 
@@ -46,7 +51,7 @@ async function ready(page: Page, query: string) {
   await expect(page.locator('iframe.ph-frame').first().contentFrame()!.locator('.node-surface').first()).toBeVisible()
 }
 
-for (const mode of ['diff', 'animated'] as const)
+for (const mode of ['diff', 'animated'] as const) {
   test(`${mode}: a host's utility content floats over the stage's top, and no node sits under it`, async ({page}) => {
     await ready(page, `mode=${mode}&caption`)
     const bar = page.locator('.ph-utility')
@@ -61,6 +66,7 @@ for (const mode of ['diff', 'animated'] as const)
     const covered = await pageBox(bar)
     await expect.poll(async () => (await nodeBoxes(page)).filter(node => intersects(node, covered)).length).toBe(0)
   })
+}
 
 test('animated with floating playback: the host content and the playback share one bar, the host content first', async ({page}) => {
   await ready(page, 'mode=animated&utilityArea&caption')

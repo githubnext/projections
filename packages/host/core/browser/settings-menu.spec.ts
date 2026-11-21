@@ -24,8 +24,9 @@ async function open(page: Page, id: string) {
 const settled = (menu: Locator) =>
   menu.evaluate(async element => {
     const running = () => element.getAnimations({subtree: true}).filter(animation => animation.playState !== 'finished')
-    for (let animations = running(); animations.length; animations = running())
+    for (let animations = running(); animations.length; animations = running()) {
       await Promise.allSettled(animations.map(animation => animation.finished))
+    }
   })
 
 /** Every item of `menu` scrolls into view inside it, and the menu stays inside the viewport. */

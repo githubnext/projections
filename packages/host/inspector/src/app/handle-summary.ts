@@ -32,16 +32,17 @@ export interface HandleState {
 const titleOf = (state: HandleState, id: string) => state.definitions?.definitions.find(item => item.id === id)?.title ?? id
 
 /** The shown pair's extractions, for a host to keep and restore (`initialResults`). */
-export function keptResults({marked: shown, projection: id, rows: all}: HandleState): {[ref: string]: InspectorKeptResult} {
-  const kept: {[ref: string]: InspectorKeptResult} = {}
+export function keptResults({marked: shown, projection: id, rows: all}: HandleState): Record<string, InspectorKeptResult> {
+  const kept: Record<string, InspectorKeptResult> = {}
   for (const ref of [shown.a, shown.b]) {
     const row = ref ? all[id]?.[ref] : undefined
-    if (ref && row?.status === 'done' && row.document)
+    if (ref && row?.status === 'done' && row.document) {
       kept[ref] = {
         document: row.document,
         ...(row.jobId ? {job: row.jobId} : {}),
         ...(row.definition ? {definition: row.definition} : {}),
       }
+    }
   }
   return kept
 }
@@ -51,7 +52,7 @@ export function withoutQueued(current: Rows, target: string, wanted: ReadonlySet
   const own = current[target]
   const dropped = Object.entries(own ?? {}).filter(([ref, row]) => row.status === 'queued' && !wanted.has(ref))
   if (!own || !dropped.length) return current
-  const next: {[ref: string]: RowState} = {...own}
+  const next: Record<string, RowState> = {...own}
   for (const [ref, row] of dropped) {
     if (row.document) next[ref] = {...row, status: 'done'}
     else delete next[ref]
@@ -66,7 +67,7 @@ export function inspectorSummary(
   status: ProjectionStatus | undefined,
 ): InspectorSummary {
   const selected = controller?.selectedRow
-  const changes: {[status: string]: number} = {}
+  const changes: Record<string, number> = {}
   for (const row of controller?.rows ?? []) if (row.status) changes[row.status] = (changes[row.status] ?? 0) + 1
   const failures =
     state.showing === 'live' && state.projection

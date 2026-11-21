@@ -60,8 +60,9 @@ export function vscodeThemeTokens(variables: VscodeVariables, kind: VscodeThemeK
   /** A fill behind plain `fg` text: as translucent as the theme draws it, and never so strong the text drops below 4.5:1. */
   const fill = (value: Rgba, base: Rgba = raised) => {
     let candidate = value
-    for (let tries = 0; tries < 20 && contrast(fg, composite(candidate, base)) < (hc ? 7 : 4.5); tries++)
+    for (let tries = 0; tries < 20 && contrast(fg, composite(candidate, base)) < (hc ? 7 : 4.5); tries++) {
       candidate = withAlpha(candidate, candidate.a * 0.8)
+    }
     return candidate
   }
   const set = (name: ThemeTokenName, value: Rgba) => (tokens[name] = formatColor(value))

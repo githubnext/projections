@@ -152,8 +152,9 @@ test('renderer tokens are sRGB, follow the Projector palette and keep annotation
     const changes = ['added', 'removed', 'modified', 'moved'].flatMap(change =>
       ['', '-muted', '-emphasis', '-highlight'].map(suffix => tokens[`color-${change}${suffix}`]),
     )
-    for (const tone of ['color-accent', 'color-accent-emphasis', 'color-accent-muted', 'color-bg-subtle', 'color-fg-muted'])
+    for (const tone of ['color-accent', 'color-accent-emphasis', 'color-accent-muted', 'color-bg-subtle', 'color-fg-muted']) {
       assert.ok(!changes.includes(tokens[tone]), `${mode} ${tone}`)
+    }
     // The accent is the lens: the same hue as the UI's, and AA as text on the canvas.
     assert.ok(contrast(hexToSrgb(tokens['color-accent']), hexToSrgb(tokens['color-bg'])) >= text, `${mode} accent on bg`)
     assert.ok(contrast(hexToSrgb(tokens['color-focus']), hexToSrgb(tokens['color-bg'])) >= nonText, `${mode} focus on bg`)

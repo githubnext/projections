@@ -12,7 +12,7 @@ export const extractedKey = (id: string, definition: string, ref: string) => JSO
 export function restoredRows(
   openedInitially: InspectorOpenedOn | undefined,
   initialResults: InspectorAppProps['initialResults'],
-): {[projection: string]: {[ref: string]: RowState}} {
+): Record<string, Record<string, RowState>> {
   const kept = openedInitially?.projection && initialResults ? Object.entries(initialResults) : []
   if (!kept.length) return {}
   const restored = kept.map(([ref, result]): [string, RowState] => [
@@ -28,8 +28,8 @@ export function restoredRows(
 }
 
 /** Keeps each done extraction in `cache` (most recent last), at most `maxExtracted` of them. */
-export function rememberExtracted(cache: Map<string, RowState>, rows: {[projection: string]: {[ref: string]: RowState}}) {
-  for (const [id, refs] of Object.entries(rows))
+export function rememberExtracted(cache: Map<string, RowState>, rows: Record<string, Record<string, RowState>>) {
+  for (const [id, refs] of Object.entries(rows)) {
     for (const [ref, row] of Object.entries(refs)) {
       if (row.status !== 'done' || !row.document || !row.definition) continue
       const key = extractedKey(id, row.definition, ref)
@@ -37,6 +37,7 @@ export function rememberExtracted(cache: Map<string, RowState>, rows: {[projecti
       cache.delete(key)
       cache.set(key, row)
     }
+  }
   for (const key of [...cache.keys()].slice(0, Math.max(0, cache.size - maxExtracted))) cache.delete(key)
 }
 

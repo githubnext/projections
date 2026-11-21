@@ -52,6 +52,7 @@ for (const [name, path] of await runtimeDependencies(manifest)) {
 const text = `${sections.join('\n').trimEnd()}\n`
 if (process.argv.includes('--check')) {
   const current = await readFile(output, 'utf8').catch(() => '')
-  if (current !== text)
+  if (current !== text) {
     throw new Error('THIRD_PARTY_NOTICES.md is out of date: run npm run notices --workspace @githubnext/projections-host-vscode')
+  }
 } else await writeFile(output, text)

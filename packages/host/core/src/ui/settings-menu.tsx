@@ -73,7 +73,7 @@ function SettingsEntries({entries, openRange}: {entries: readonly (SettingsEntry
           <DropdownMenuCheckboxItem
             key={entry.id}
             checked={entry.checked}
-            onCheckedChange={checked => entry.set(checked === true)}
+            onCheckedChange={checked => entry.set(checked)}
             title={entry.description}
             data-control={entry.control}
           >

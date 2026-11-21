@@ -25,8 +25,9 @@ export function VscodeTextView({
   if (subject.mode === 'extraction') {
     const {extraction} = subject
     const relationships = new Map<string, Row[]>()
-    for (const row of rows)
+    for (const row of rows) {
       if (row.collection === 'relationships' && row.from) relationships.set(row.from, [...(relationships.get(row.from) ?? []), row])
+    }
     const labels = new Map(extraction.entities.map(entity => [entity.id, entity.label]))
     return (
       <div className="ph-text-view phv-text-view" data-view="text">

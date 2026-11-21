@@ -20,11 +20,12 @@ function fetchTransport(fetcher) {
         ...(signal ? {signal} : {}),
         ...(body === undefined ? {} : {headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)}),
       })
-      if (!response.ok)
+      if (!response.ok) {
         throw new InspectorRequestError(
           `Local runner request failed (${response.status}): ${(await response.text()).slice(0, 2048)}`,
           response.status,
         )
+      }
       return responseType === 'blob' ? response.blob() : response.json()
     },
   }
@@ -137,8 +138,9 @@ test('renderer development servers are loopback http origins only', () => {
     'http://localhost:5173/src/',
     'http://localhost:5173/?x',
     7,
-  ])
+  ]) {
     assert.ok(!isDevServerUrl(url), String(url))
+  }
   const catalog = renderer => ({generation: 1, sources: [], renderers: [renderer], scenarios: []})
   const manifest = {format: 'projections.renderer', version: 0, name: 'x', title: 'X', handles: []}
   assert.equal(

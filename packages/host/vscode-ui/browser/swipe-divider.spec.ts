@@ -18,7 +18,7 @@ const colors = async (page: Page) => ({
 
 test.use({viewport: {width: 1280, height: 800}})
 
-for (const theme of ['light-modern', 'dark-modern', 'dark-high-contrast', 'light-high-contrast'] as const)
+for (const theme of ['light-modern', 'dark-modern', 'dark-high-contrast', 'light-high-contrast'] as const) {
   test(`${theme}: the swipe line is the thumb's outline color, 1px, at rest, on hover, while dragged and under focus`, async ({page}) => {
     await page.goto(story('comparison-explorer--swipe', theme))
     await ready(page)
@@ -46,6 +46,7 @@ for (const theme of ['light-modern', 'dark-modern', 'dark-high-contrast', 'light
     expect(focus.line).toBe(focus.outline)
     expect((await colors(page)).width).toBe(1)
   })
+}
 
 test('side by side keeps the neutral editor group border between its panes', async ({page}) => {
   await page.goto(story('comparison-explorer--side-by-side', 'dark-modern'))

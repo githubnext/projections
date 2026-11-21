@@ -45,10 +45,11 @@ export function SnapshotPage({document: snapshot, settings, renderers, customRen
   )
   const custom = useMemo((): RendererEntry | WithheldRenderer | undefined => {
     if (typeof requested === 'string') return undefined
-    if (settings.withheld)
+    if (settings.withheld) {
       return {
         withheld: `The custom renderer ${requested.bundle} is repository code that differs from the default branch's, so it needs --trust.`,
       }
+    }
     if (!customRendererBase || !settings.definition) return undefined
     return customRenderer(
       {...customManifest, title: shown.projection.title || customManifest.title},

@@ -40,8 +40,8 @@ export function useParts({
   definitions: InspectorDefinitionList | null
   definitionRevision: string
   authorized: boolean
-  overrides: {[projection: string]: PartOverrides}
-  setOverrides: Dispatch<SetStateAction<{[projection: string]: PartOverrides}>>
+  overrides: Record<string, PartOverrides>
+  setOverrides: Dispatch<SetStateAction<Record<string, PartOverrides>>>
   setRows: Dispatch<SetStateAction<Rows>>
   refreshDefinitions: (ref: string, quiet?: boolean) => Promise<void>
   builtins: readonly RendererEntry[]
@@ -49,7 +49,7 @@ export function useParts({
   policy: InspectorPolicy
   statusOf: (id: string) => PartRow['status']
   rows: Rows
-  marks: {[projection: string]: Marks}
+  marks: Record<string, Marks>
   usesOwnRenderer: boolean
   rendererPolicy: InspectorPolicy
 }) {

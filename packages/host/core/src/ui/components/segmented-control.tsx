@@ -47,8 +47,9 @@ export const SegmentedControlItem = forwardRef<
           item.parentElement?.contains(from) &&
           item.matches(':focus-visible') &&
           item.getAttribute('aria-checked') !== 'true'
-        )
+        ) {
           item.click()
+        }
       }}
       className={cn(
         'pj:inline-flex pj:h-full pj:items-center pj:justify-center pj:whitespace-nowrap pj:rounded-sm pj:px-2.5 pj:text-sm pj:font-medium pj:text-muted-foreground pj:transition-colors pj:hover:text-foreground pj:focus-visible:relative pj:focus-visible:z-10 pj:disabled:pointer-events-none pj:disabled:opacity-50 pj:data-[state=checked]:bg-card pj:data-[state=checked]:text-foreground pj:data-[state=checked]:shadow-[var(--pj-bevel),0_1px_2px_oklch(0_0_0/0.12)]',

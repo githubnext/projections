@@ -159,8 +159,9 @@ test('step ends map to the middle of their holds, and positions round trip', () 
   assert.equal(presentationProgress(first, t), 0.25)
   assert.equal(timelinePosition(0, t), 0)
   assert.equal(timelinePosition(1, t), 1)
-  for (const progress of [0.01, 0.2, 0.3, 0.49, 0.75, 0.99])
+  for (const progress of [0.01, 0.2, 0.3, 0.49, 0.75, 0.99]) {
     assert.ok(Math.abs(presentationProgress(timelinePosition(progress, t), t) - progress) < 1e-9)
+  }
 })
 
 test('with one step, the only holds are the endpoints', () => {

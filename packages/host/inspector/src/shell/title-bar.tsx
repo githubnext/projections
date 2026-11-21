@@ -87,7 +87,7 @@ export function TitleActivity({
   verb?: string | undefined
   /** Why, after the time, for example "(`extract.py` changed)". */
   reason?: ReactNode
-} & {[key: `data-${string}`]: string | boolean | undefined}) {
+} & Record<`data-${string}`, string | boolean | undefined>) {
   const {level, place} = useTitleBar()
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
@@ -150,7 +150,7 @@ export function TitleFileButton({
 }) {
   const {level, place} = useTitleBar()
   const hidden = level >= titleLevel.overflow
-  if (place === 'more')
+  if (place === 'more') {
     return hidden ? (
       <Button
         type="button"
@@ -164,6 +164,7 @@ export function TitleFileButton({
         {name}
       </Button>
     ) : null
+  }
   const input = (
     <input
       ref={inputRef}

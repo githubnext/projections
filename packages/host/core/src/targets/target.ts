@@ -115,7 +115,8 @@ export function resolveTarget(subject: ViewSubject, rows: readonly Row[], target
   )
   const item = targetItem(subject, target)
   if (!row || !item) return {status: 'absent', reason: 'item'}
-  if (target.path !== undefined && readPointer(item.data ?? {}, target.path) === undefined)
+  if (target.path !== undefined && readPointer(item.data ?? {}, target.path) === undefined) {
     return {status: 'absent', reason: 'property', rowId: row.id}
+  }
   return {status: 'present', rowId: row.id}
 }

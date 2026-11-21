@@ -15,8 +15,8 @@ const measure = (page: Page) => toolbarInsets(page.locator('.ph-toolbar').first(
 
 test.skip(({isMobile}) => isMobile, 'The test sizes the viewport itself; the desktop projects cover Chromium and WebKit.')
 
-for (const width of [1280, 600, 400, 320])
-  for (const mode of ['side-by-side', 'animated', 'diff'] as const)
+for (const width of [1280, 600, 400, 320]) {
+  for (const mode of ['side-by-side', 'animated', 'diff'] as const) {
     test(`at ${width}px, ${mode}: the toolbar insets its edge controls as far from its ends as from its top and bottom`, async ({page}) => {
       await page.setViewportSize({width, height: 700})
       await page.goto(explorer(`mode=${mode}`))
@@ -24,19 +24,24 @@ for (const width of [1280, 600, 400, 320])
       await page.waitForTimeout(500)
       expectEdgeInsets(await measure(page), `at ${width}px, ${mode}`)
     })
+  }
+}
 
 /**
  * An edge control's insets from the toolbar row around it: `side` is its left inset at the row's start, its right inset
  * at the row's end. A slider's end is its track's, not a control's edge (`slider`).
  */
-export type EdgeInsets = {
+export interface EdgeInsets {
   what: string
   side: number
   top: number
   bottom: number
   slider?: boolean
 }
-export type RowInsets = {lead: EdgeInsets; trail: EdgeInsets}
+export interface RowInsets {
+  lead: EdgeInsets
+  trail: EdgeInsets
+}
 
 /**
  * The toolbar's edge insets, from getBoundingClientRect border boxes, per row: the leading control's left inset and the
@@ -70,7 +75,7 @@ export const toolbarInsets = (toolbar: Locator, options: {wrappers: string; seco
       return filled || bordered
     }
     const text = (node: Element) => [...node.childNodes].some(child => child.nodeType === Node.TEXT_NODE && child.textContent?.trim())
-    type Control = {
+    interface Control {
       what: string
       rect: DOMRect
       text: boolean
@@ -126,7 +131,7 @@ export const toolbarInsets = (toolbar: Locator, options: {wrappers: string; seco
     if (rows) {
       const lines = [...element.querySelectorAll(`:scope > ${rows}`)].filter(line => line.getBoundingClientRect().height > 0)
       const boxes = lines.map(line => line.getBoundingClientRect())
-      const result: {[name: string]: RowInsets} = {}
+      const result: Record<string, RowInsets> = {}
       lines.forEach((line, index) => {
         const top = index === 0 ? inner.top : boxes[index - 1]!.bottom
         const bottom = index === lines.length - 1 ? inner.bottom : boxes[index + 1]!.top
@@ -155,11 +160,12 @@ export function expectEdgeInsets(insets: {main: RowInsets; playback?: RowInsets}
     type: 'insets',
     description: `${what} ${JSON.stringify(insets)}`,
   })
-  for (const [name, row] of Object.entries(insets))
+  for (const [name, row] of Object.entries(insets)) {
     for (const edge of [row.lead, row.trail]) {
       if (edge.slider) continue
       const measured = `${what}, ${name} row, ${edge === row.lead ? 'leading' : 'trailing'} ${JSON.stringify(edge)}`
       expect.soft(Math.abs(edge.side - edge.top), measured).toBeLessThanOrEqual(0.5)
       expect.soft(Math.abs(edge.side - edge.bottom), measured).toBeLessThanOrEqual(0.5)
     }
+  }
 }

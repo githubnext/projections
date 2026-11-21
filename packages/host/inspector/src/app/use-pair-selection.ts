@@ -33,8 +33,8 @@ export function usePairSelection({
   setProjection: Dispatch<SetStateAction<string>>
   repoKey: string
   revisions: readonly InspectorRevision[]
-  marks: {[projection: string]: Marks}
-  setMarks: Dispatch<SetStateAction<{[projection: string]: Marks}>>
+  marks: Record<string, Marks>
+  setMarks: Dispatch<SetStateAction<Record<string, Marks>>>
   marked: Marks
   openedInitially: InspectorOpenedOn | undefined
   showing: 'live' | 'artifact'
@@ -44,9 +44,9 @@ export function usePairSelection({
   setSource: Dispatch<SetStateAction<'live' | 'artifact'>>
 }) {
   // Recently used Before → After pairs of the selected projection, newest first.
-  const [recent, setRecent] = useState<{[projection: string]: Marks[]}>({})
+  const [recent, setRecent] = useState<Record<string, Marks[]>>({})
   // The runner's suggested pairs per projection: undefined until asked, null when it suggests none.
-  const [suggested, setSuggested] = useState<{[projection: string]: InspectorPairs | null}>({})
+  const [suggested, setSuggested] = useState<Record<string, InspectorPairs | null>>({})
   const setMark = useCallback(
     (letter: 'A' | 'B', key: string, artifactRow: boolean) => {
       if (artifactRow) {
@@ -122,7 +122,7 @@ export function usePairSelection({
     [projection, repoKey, setMarks, setProjection, setSource],
   )
   // The Before a pair had when one revision was chosen, restored when two are compared again.
-  const lastBefore = useRef<{[projection: string]: string | undefined}>({})
+  const lastBefore = useRef<Record<string, string | undefined>>({})
   const toggleOne = useCallback(
     (one: boolean) => {
       setSource('live')

@@ -18,7 +18,7 @@ export function createStageBinding({memo}: Memos, handlers: StageHandlers) {
   return memo(
     (
       payloads: RendererPayloads,
-      options: {[id: string]: ControlValue},
+      options: Record<string, ControlValue>,
       action: StageBinding['action'],
       filter: FilterPayload,
       anchors: Anchors,

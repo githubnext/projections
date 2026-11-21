@@ -131,9 +131,9 @@ export function useCommands({
           run: () => void refreshDefinitions(definitionRevision),
         },
       )
-      for (const row of partRows)
-        for (const option of row.options)
-          if (!option.disabled && option.value !== row.value)
+      for (const row of partRows) {
+        for (const option of row.options) {
+          if (!option.disabled && option.value !== row.value) {
             list.push({
               id: `use.${row.part}.${option.value}`,
               group: 'Parts',
@@ -141,9 +141,13 @@ export function useCommands({
               keywords: `${option.origin} ${option.group}`,
               run: () => row.onChange(option.value),
             })
-      if (partRows.some(row => row.changed))
+          }
+        }
+      }
+      if (partRows.some(row => row.changed)) {
         list.push({id: 'parts.reset', group: 'Parts', label: 'Reset parts to the definition', run: resetParts})
-      for (const item of definitionOptions)
+      }
+      for (const item of definitionOptions) {
         list.push({
           id: `definition.${item.ref}`,
           group: 'Definition',
@@ -152,6 +156,7 @@ export function useCommands({
           disabled: item.ref === definitionRevision || busy,
           run: () => chooseDefinition(item.ref),
         })
+      }
       for (const definition of definitions?.definitions ?? []) {
         list.push({
           id: `projection.${definition.id}`,
@@ -184,12 +189,12 @@ export function useCommands({
       {id: 'artifact.open', group: 'File', label: 'Open saved artifact…', shortcut: shortcutLabel('o'), run: () => upload.current?.click()},
       ...themeCommands,
     )
-    if (host.revealInScm && showing === 'live')
+    if (host.revealInScm && showing === 'live') {
       for (const [side, ref] of [
         ['Before', marked.a],
         ['After', marked.b],
-      ] as const)
-        if (ref)
+      ] as const) {
+        if (ref) {
           list.push({
             id: `scm.reveal.${side.toLowerCase()}`,
             group: 'Source control',
@@ -197,6 +202,9 @@ export function useCommands({
             keywords: 'git scm commit history',
             run: () => host.revealInScm!(ref),
           })
+        }
+      }
+    }
     return list
   }, [
     host,

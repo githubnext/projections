@@ -9,7 +9,7 @@ import type {Rows} from './use-extractions.js'
 import {bumpedRenderers, bumpedScenarios, changeSet, withoutStale} from './change-set.js'
 import type {ChangeSet} from './change-set.js'
 
-type Versions = {[projection: string]: number}
+type Versions = Record<string, number>
 
 /**
  * The shown pair's sides to extract again: those whose code or working tree changed, and, when HEAD moved (a commit or
@@ -30,8 +30,9 @@ async function staleRefs(
   const list = await api.revisions(signal, 30).catch(() => undefined)
   if (!list) return refs
   setRevisions(list.revisions)
-  if (list.revisions.find(item => item.ref !== workingTree)?.commit !== before)
+  if (list.revisions.find(item => item.ref !== workingTree)?.commit !== before) {
     for (const ref of present) if (symbolic(ref) && !refs.includes(ref)) refs.push(ref)
+  }
   return refs
 }
 
@@ -119,8 +120,9 @@ export function useLiveChanges({
       const {changes, complete, changed, changedPart} = set
       const current = latest.current
       // A host that refreshes by hand keeps the definitions it applies (the committed ones stay as they are).
-      if (changed('definitions') || changedPart('renderer'))
+      if (changed('definitions') || changedPart('renderer')) {
         void current.refreshDefinitions(current.manual ? current.definitionRevision : workingTree, true)
+      }
       if (changedPart('renderer')) setRendererVersions(versions => bumpedRenderers(versions, set, current.rows))
       // The shown pair is extracted again, both sides when the code changed, keeping what is shown until the new
       // extractions arrive; others are dropped and extracted when they are next shown. A host that refreshes by hand
@@ -140,11 +142,13 @@ export function useLiveChanges({
         setReplay({kinds: changes, complete, at: Date.now()})
         current.retry()
       }
-      if (current.projection && complete && changes.includes(`renderer:${current.projection}`) && current.rows[current.projection])
+      if (current.projection && complete && changes.includes(`renderer:${current.projection}`) && current.rows[current.projection]) {
         setReplay(previous => (previous && Date.now() - previous.at < 1000 ? previous : {kinds: changes, complete, at: Date.now()}))
+      }
       // Scenarios are made with the working tree's definition, so a new definition remakes them too.
-      if (changed('definitions') || changedPart('scenarios') || changedPart('extractor'))
+      if (changed('definitions') || changedPart('scenarios') || changedPart('extractor')) {
         setScenarioVersions(versions => bumpedScenarios(versions, set, current.projection))
+      }
     }
     void (async () => {
       let since: number | undefined

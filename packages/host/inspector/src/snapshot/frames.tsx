@@ -55,7 +55,7 @@ export function SnapshotFrame({projection, settings, comparing, failure, labels}
   const stage = (legend: boolean) => <ProjectionStage projection={projection} fill legend={legend} {...(labels ? {labels} : {})} />
   const mode = comparing ? projection.mode : 'extraction'
 
-  if (frame === 'none')
+  if (frame === 'none') {
     return (
       <ScopedRoot colorMode={settings.theme} className="pi pi-snapshot">
         <main id="snapshot" data-mode={mode} data-frame="none" style={{...main, background: 'var(--projections-color-bg)'}}>
@@ -63,8 +63,9 @@ export function SnapshotFrame({projection, settings, comparing, failure, labels}
         </main>
       </ScopedRoot>
     )
+  }
 
-  if (frame === 'page')
+  if (frame === 'page') {
     return (
       <ScopedRoot colorMode={settings.theme} className="pi pi-snapshot">
         <main id="snapshot" data-mode={mode} data-frame="page" style={{...main, background: 'var(--projections-color-bg)'}}>
@@ -78,6 +79,7 @@ export function SnapshotFrame({projection, settings, comparing, failure, labels}
         </main>
       </ScopedRoot>
     )
+  }
 
   // Two panes keep their own cards, set in from the card's edge.
   const inset = comparing && twoPaneMode(projection.mode) ? 12 : 0

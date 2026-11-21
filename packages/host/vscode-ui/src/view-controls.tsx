@@ -227,13 +227,14 @@ export function ShowAsChip({
       <span className="phv-chip-text phv-cap">{name}</span>
     </>
   )
-  if (!onDismiss)
+  if (!onDismiss) {
     return (
       <span className="phv-chip" data-view={view}>
         <span className="phv-visually-hidden">Showing </span>
         {content}
       </span>
     )
+  }
   return (
     <button
       type="button"

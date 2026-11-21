@@ -19,6 +19,10 @@
       "types": "./dist/typebox/index.d.ts",
       "import": "./dist/typebox/index.js"
     },
+    "./runner": {
+      "types": "./dist/runner/index.d.ts",
+      "import": "./dist/runner/index.js"
+    },
     "./schemas/*": "./schemas/*",
     "./fixtures/*": "./fixtures/*"
   },

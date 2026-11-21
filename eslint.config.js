@@ -1,6 +1,7 @@
 import {readdirSync} from 'node:fs'
 import js from '@eslint/js'
 import reactHooks from 'eslint-plugin-react-hooks'
+import unicorn from 'eslint-plugin-unicorn'
 import globals from 'globals'
 import {defineConfig} from 'eslint/config'
 import tseslint from 'typescript-eslint'
@@ -217,6 +218,54 @@ export default defineConfig(
     rules: {
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'error',
+    },
+  },
+  {
+    // eslint-plugin-unicorn's rules that find bugs and footguns: mutating sorts, coercing globals, lost error types, wrong
+    // DOM and promise APIs. Its stylistic rules stay off (docs/maintainers/linting.md#eslint-plugin-unicorn).
+    plugins: {unicorn},
+    rules: {
+      'unicorn/prefer-export-from': ['error', {checkUsedVariables: false}],
+      ...Object.fromEntries(
+        [
+          'consistent-assert',
+          'error-message',
+          'new-for-builtins',
+          'no-array-reverse',
+          'no-array-sort',
+          'no-await-in-promise-methods',
+          'no-instanceof-builtins',
+          'no-invalid-remove-event-listener',
+          'no-new-array',
+          'no-single-promise-in-promise-methods',
+          'no-typeof-undefined',
+          'no-unnecessary-await',
+          'no-useless-fallback-in-spread',
+          'no-useless-promise-resolve-reject',
+          'no-useless-spread',
+          'no-useless-switch-case',
+          'prefer-add-event-listener',
+          'prefer-array-find',
+          'prefer-array-flat-map',
+          'prefer-array-index-of',
+          'prefer-array-some',
+          'prefer-at',
+          'prefer-dom-node-text-content',
+          'prefer-global-this',
+          'prefer-includes',
+          'prefer-node-protocol',
+          'prefer-number-properties',
+          'prefer-regexp-test',
+          'prefer-set-has',
+          'prefer-string-replace-all',
+          'prefer-structured-clone',
+          'prefer-type-error',
+          'require-array-join-separator',
+          'require-post-message-target-origin',
+          'text-encoding-identifier-case',
+          'throw-new-error',
+        ].map(rule => [`unicorn/${rule}`, 'error']),
+      ),
     },
   },
   {

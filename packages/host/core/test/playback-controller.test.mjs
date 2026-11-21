@@ -110,3 +110,19 @@ test('a play the embedder declines leaves playback paused', () => {
   render({playing: false})
   assert.equal(controller.actor.getState().kind, 'paused')
 })
+
+test('a host that shows one view object again, changed, still has the change noticed', () => {
+  const {controller, view, queued} = setup()
+  controller.actor.start()
+  // One object the host updates in place and shows after each change.
+  const shown = {...view}
+  controller.show(shown)
+  controller.play()
+  shown.playing = view.playing
+  controller.show(shown)
+  assert.equal(controller.actor.getState().kind, 'playing')
+  shown.reducedMotion = true
+  controller.show(shown)
+  assert.equal(controller.actor.getState().kind, 'paused')
+  assert.equal(queued.size, 0)
+})

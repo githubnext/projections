@@ -54,7 +54,19 @@ test('browser (rest) is priced by the suites it runs; sharded workflow jobs by t
   const rest = (suites: string[]) => price([{check: 'browser (rest)', job: 'browser', suites}]).minutes
   assert.equal(rest([]), PRICES.rest.setup)
   assert.equal(rest(['packages/cli', 'examples/renderers/minimal']), PRICES.rest.setup + 3.2 + 0.25)
-  const mutants = price([{check: 'mutants-diff', job: 'mutants-diff'}])
+  const mutants = price(
+    Array.from({length: 6}, (_, shard) => ({check: `mutants-diff (${shard})`, job: 'mutants-diff', shard: String(shard)})),
+  )
   assert.equal(mutants.runners, 6)
+  assert.equal(Math.round(mutants.minutes * 10), 126)
   assert.deepEqual(price([{check: 'nothing known', job: 'x'}]).unpriced, ['nothing known'])
+  // A suite with no measured time in rest is named, not silently free.
+  assert.deepEqual(price([{check: 'browser (rest)', job: 'browser', suites: ['packages/host/core']}]).unpriced, [
+    'browser (rest): packages/host/core',
+  ])
+  // The order of an execution's keys doesn't make it a different check.
+  assert.deepEqual(
+    price([{check: 'p (x)', job: 'p', with: {os: 'a', part: 'b'}}]).checks,
+    price([{job: 'p', with: {part: 'b', os: 'a'}, check: 'p (x)'}]).checks,
+  )
 })

@@ -31,8 +31,8 @@ export const PRICES = {
     coverage: 1.3,
     'actions-lock': 0.2,
   } as Record<string, number>,
-  /** Runners and minutes per runner of a job sharded in the workflow rather than the plan. */
-  sharded: {'mutants-diff': {runners: 6, minutes: 2.1}} as Record<string, {runners: number; minutes: number}>,
+  /** A shard of a job the workflow shards (the rules' `shards`), by job. */
+  shards: {'mutants-diff': 2.1} as Record<string, number>,
   /** A browser job by suite, or by Playwright project for the renderer harness. */
   browser: {
     'packages/host/core': 21.9,
@@ -60,22 +60,32 @@ export const PRICES = {
 
 export type Priced = {runners: number; minutes: number; macos: number; checks: string[]; unpriced: string[]}
 
+/** JSON with object keys sorted, so two executions that differ only in key order compare equal. */
+function canonical(value: unknown): string {
+  return JSON.stringify(value, (_, item: unknown) =>
+    item && typeof item === 'object' && !Array.isArray(item)
+      ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b)))
+      : item,
+  )
+}
+
 export function price(checks: readonly Execution[]): Priced {
-  const priced: Priced = {runners: 0, minutes: 0, macos: 0, checks: checks.map(check => JSON.stringify(check)).sort(), unpriced: []}
+  const priced: Priced = {runners: 0, minutes: 0, macos: 0, checks: checks.map(canonical).sort(), unpriced: []}
   for (const check of checks) {
-    const sharded = PRICES.sharded[check.job]
     let minutes: number | undefined
-    if (sharded) minutes = sharded.runners * sharded.minutes
+    if (check.job in PRICES.shards) minutes = PRICES.shards[check.job]
     else if (check.job === 'browser-macos') minutes = check.grepInvert ? PRICES.macos.narrowed : PRICES.macos.full
-    else if (check.check === 'browser (rest)')
-      minutes = PRICES.rest.setup + (check.suites ?? []).reduce((sum, suite) => sum + (PRICES.rest.suites[suite] ?? 0), 0)
-    else if (check.job === 'browser')
+    else if (check.check === 'browser (rest)') {
+      const suites = check.suites ?? []
+      for (const suite of suites) if (!(suite in PRICES.rest.suites)) priced.unpriced.push(`browser (rest): ${suite}`)
+      minutes = PRICES.rest.setup + suites.reduce((sum, suite) => sum + (PRICES.rest.suites[suite] ?? 0), 0)
+    } else if (check.job === 'browser')
       minutes = check.project
         ? (check.grepInvert ? PRICES.narrowed : PRICES.browser)[check.project]
         : PRICES.browser[check.suites?.[0] ?? '']
     else minutes = PRICES.checks[check.check]
     if (minutes === undefined) priced.unpriced.push(check.check)
-    priced.runners += sharded?.runners ?? 1
+    priced.runners += 1
     priced.minutes += minutes ?? 0
     if (check.job === 'browser-macos' || check.with?.['os']?.startsWith('macos')) priced.macos += minutes ?? 0
   }
@@ -133,8 +143,11 @@ export function mergedCommits(root: string, ref: string, count: number): Commit[
     .filter(Boolean)
     .map(line => {
       const [sha = '', subject = ''] = line.split('\t')
-      const paths = (git(root, ['diff-tree', '--no-commit-id', '--name-only', '-r', '--no-renames', `${sha}^`, sha]) ?? '').split('\n')
-      return {sha, subject, paths: paths.filter(Boolean)}
+      const diff = git(root, ['diff-tree', '--no-commit-id', '--name-only', '-r', '--no-renames', `${sha}^`, sha])
+      // A shallow clone's last commit has no parent to compare with: replaying it as an empty change would be wrong.
+      if (diff === undefined)
+        throw new Error(`Can't diff ${sha.slice(0, 12)} with its parent; fetch more history (git fetch --deepen ${count})`)
+      return {sha, subject, paths: diff.split('\n').filter(Boolean)}
     })
 }
 
@@ -150,6 +163,9 @@ export type Replay = {
   files?: {count: number; changed: number; minutes: number; kinds: Kind[]}
   unpriced: string[]
 }
+
+/** A difference with its minutes rounded for the report, after any sums. */
+const round = (item: Difference): Difference => ({...item, minutes: Math.round(item.minutes * 10) / 10})
 
 const side = (items: readonly Priced[]): Side => ({
   runners: items.reduce((sum, item) => sum + item.runners, 0),
@@ -168,7 +184,7 @@ function difference(name: string, before: Priced, after: Priced): Difference | u
     added: b.filter(check => !a.includes(check)),
     removed: a.filter(check => !b.includes(check)),
     changedChecks,
-    minutes: Math.round((after.minutes - before.minutes) * 10) / 10,
+    minutes: after.minutes - before.minutes,
   }
 }
 
@@ -201,7 +217,7 @@ export function replay(
       after: side(rows.map(row => row.after)),
       selective: {before: side(selective.map(row => row.before)), after: side(selective.map(row => row.after))},
       full: rows.length - selective.length,
-      differences: rows.flatMap(row => difference(row.commit.subject, row.before, row.after) ?? []),
+      differences: rows.flatMap(row => difference(row.commit.subject, row.before, row.after) ?? []).map(round),
     },
     unpriced: [],
   }

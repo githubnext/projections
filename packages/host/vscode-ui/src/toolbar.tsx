@@ -134,7 +134,7 @@ export function MoreMenu({
       id: item.id,
       group: 'zoom',
       label: item.label,
-      icon: item.type === 'action' && item.icon ? vscodeControlIcons[item.icon] : undefined,
+      icon: item.icon ? vscodeControlIcons[item.icon] : undefined,
       onSelect: () => p.runAction(item.id),
     })),
     ...(has('filter') && on(features, 'search')
@@ -231,7 +231,7 @@ export function Toolbar({
         'data-step': layout.step,
         'data-playback-overflow': layout.playbackOverflow || undefined,
         'data-actions-overflow': layout.actionsOverflow || undefined,
-        'data-more-actions': layout.moreActions?.join(' ') || undefined,
+        'data-more-actions': (layout.moreActions?.join(' ') ?? '') || undefined,
       }
     : {}
   return (

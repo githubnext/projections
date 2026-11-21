@@ -67,7 +67,7 @@ export function submenuGroups(id: string, label: string, entries: readonly Setti
       continue
     }
     const last = groups.at(-1)
-    if (last && last.entries.every(item => item.type !== 'choice')) last.entries.push(entry)
+    if (last?.entries.every(item => item.type !== 'choice')) last.entries.push(entry)
     else groups.push({id: `${id}-${entry.id}`, entries: [entry]})
   }
   return groups

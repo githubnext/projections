@@ -40,7 +40,10 @@ export function ChangeLabel({row}: {row: Row}) {
 
 /** The accessible description of a marker: its label, else its count. */
 export function annotationText(mark: Pick<AnnotationMark, 'count' | 'label'>): string {
-  return mark.label ?? (mark.count ? `${mark.count} ${mark.count === 1 ? 'annotation' : 'annotations'}` : 'Annotation')
+  return (
+    mark.label ??
+    (mark.count !== undefined && mark.count !== 0 ? `${mark.count} ${mark.count === 1 ? 'annotation' : 'annotations'}` : 'Annotation')
+  )
 }
 
 /** A row's annotation marker: a comment codicon and VS Code's count badge; its tones never use change colors. */
@@ -56,7 +59,7 @@ export function AnnotationMarker({mark, row, onActivate}: {mark: AnnotationMark;
       onClick={() => onActivate(row.id)}
     >
       <span className="codicon codicon-comment" aria-hidden="true" />
-      {mark.count ? (
+      {mark.count !== undefined && mark.count !== 0 ? (
         <VscBadge variant="counter" aria-hidden="true">
           {mark.count.toLocaleString()}
         </VscBadge>

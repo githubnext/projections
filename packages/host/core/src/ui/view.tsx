@@ -108,7 +108,7 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
         afterLabel={afterLabel}
         space={space}
       />
-      {props.banner && <div className="ph-banner pj:shrink-0 pj:p-2">{props.banner}</div>}
+      {Boolean(props.banner) && <div className="ph-banner pj:shrink-0 pj:p-2">{props.banner}</div>}
       {/* About this projection shows these visibly; they stay mounted for assistive technology and embedders. */}
       <p className="ph-active pj:sr-only" aria-live="polite">
         Showing: <strong data-active-view={view}>{active}</strong>

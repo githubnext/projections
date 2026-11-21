@@ -34,7 +34,7 @@ export async function mergeFile({ours, base, theirs}, labels) {
  * Without a base or a file of ours, the component is new and is the transformed item.
  */
 export async function mergeComponent({name, ours, baseItem, nextItem, style, version}) {
-  if (ours == null) {
+  if (ours === undefined || ours === null) {
     if (baseItem) throw new Error(`${name}: upstream/${name}.json exists but ${name}.tsx doesn't`)
     return {status: 'added', text: await transformItem(nextItem, {style, version}), conflicts: 0}
   }

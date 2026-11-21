@@ -3,8 +3,8 @@
  * browser lacks it, nor in WebKit (Safari, and every iOS browser), which doesn't blur a renderer's iframe behind an
  * overlay: its content would show through sharp and hurt the overlay's contrast, so the fill stays solid there.
  */
-export function glassSupported(agent = globalThis.navigator?.userAgent ?? ''): boolean {
-  const css = globalThis.CSS
+export function glassSupported(agent = (globalThis.navigator as Navigator | undefined)?.userAgent ?? ''): boolean {
+  const css = globalThis.CSS as typeof CSS | undefined
   if (!css?.supports('backdrop-filter', 'blur(1px)') && !css?.supports('-webkit-backdrop-filter', 'blur(1px)')) return false
   // Desktop Chromium names itself (`Chrome/`, `Edg/`); Chrome, Edge and Firefox on iOS are WebKit (`CriOS/`, `EdgiOS/`, `FxiOS/`).
   return !(agent.includes('AppleWebKit') && !/Chrome\/|Chromium\/|Edg\//.test(agent))

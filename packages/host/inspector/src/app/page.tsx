@@ -181,14 +181,14 @@ export function PresentedView({
         colorMode={colorMode}
         {...(themeTokens ? {themeTokens} : {})}
         {...(notices.length ? {notices} : {})}
-        {...(banner ? {banner} : {})}
+        {...(banner !== undefined ? {banner} : {})}
         {...(pair.outcome.status === 'compared' ? {comparator: pair.outcome.result.comparator} : {})}
         {...(onOpen ? {onOpen} : {})}
         // The docked Details panel presents the selection, so the view draws no detail card of its own.
         details="none"
         controllerRef={controllers.set}
         {...(running !== undefined ? {running} : {})}
-        {...(toolbarStart && subject.mode !== 'comparison' ? {toolbarStart} : {})}
+        {...(toolbarStart !== undefined && subject.mode !== 'comparison' ? {toolbarStart} : {})}
         {...(utilityArea ? {utilityArea} : {})}
       />
     </div>

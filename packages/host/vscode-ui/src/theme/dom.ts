@@ -23,7 +23,7 @@ export function readVscodeVariables(
 /** The nearest theme-marked element at `element` (a webview's `body`, or a Storybook frame), and its kind. */
 function themeHolder(element: Element): {holder: Element | null; kind: VscodeThemeKind | undefined} {
   const holder =
-    element.closest('.vscode-light, .vscode-dark, .vscode-high-contrast, .vscode-high-contrast-light') ?? element.ownerDocument.body
+    element.closest('.vscode-light, .vscode-dark, .vscode-high-contrast, .vscode-high-contrast-light') ?? bodyOf(element.ownerDocument)
   return {holder, kind: holder ? vscodeThemeKindOf(holder.classList) : undefined}
 }
 
@@ -82,4 +82,9 @@ export function useVscodeTheme(ref: RefObject<Element | null>): VscodeTheme {
     }
   }, [ref])
   return theme
+}
+
+/** A document's body, which an XML document or one still loading hasn't got, whatever its type says. */
+function bodyOf(document: Document): HTMLElement | null {
+  return document.body
 }

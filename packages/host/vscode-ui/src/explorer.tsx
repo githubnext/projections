@@ -140,11 +140,11 @@ export function VscodeComparisonExplorer(props: VscodeComparisonExplorerProps) {
             : {})}
           {...(props.colorMode ? {colorMode: props.colorMode} : {})}
           {...(props.themeTokens ? {themeTokens: props.themeTokens} : {})}
-          {...(props.durationMs ? {durationMs: props.durationMs} : {})}
+          {...(props.durationMs !== undefined && props.durationMs !== 0 ? {durationMs: props.durationMs} : {})}
           {...(props.diagnostics ? {diagnostics: props.diagnostics} : {})}
           {...(props.notices ? {notices: props.notices} : {})}
           {...(props.features ? {features: props.features} : {})}
-          {...(props.actions ? {actions: props.actions} : {})}
+          {...(props.actions !== undefined ? {actions: props.actions} : {})}
           {...(props.onOpen ? {onOpen: props.onOpen} : {})}
           {...(props.onSelectionChange ? {onSelectionChange: props.onSelectionChange} : {})}
           {...(props.onProgressChange ? {onProgressChange: props.onProgressChange} : {})}

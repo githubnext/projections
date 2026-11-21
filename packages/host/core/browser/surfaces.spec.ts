@@ -77,7 +77,7 @@ async function tintedRegions(page: Page) {
         if (style.display === 'none' || style.visibility === 'hidden') continue
         const painted = [rgba(style.backgroundColor), ...colors(style.backgroundImage)].filter(color => color[3]! > 0)
         const match = fills.find(({fill}) => painted.some(color => same(color, fill)))
-        const label = `${element.tagName.toLowerCase()}.${[...element.classList].filter(name => name.startsWith('ph-')).join('.')} "${(element.textContent ?? '').trim().slice(0, 30)}"`
+        const label = `${element.tagName.toLowerCase()}.${[...element.classList].filter(name => name.startsWith('ph-')).join('.')} "${element.textContent.trim().slice(0, 30)}"`
         // A fill whose channels spread is tinted: it must be one of the fills the rule covers.
         const saturated = painted.some(color => Math.max(...color.slice(0, 3)) - Math.min(...color.slice(0, 3)) > 12)
         if (!match) {

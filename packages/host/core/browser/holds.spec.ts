@@ -43,7 +43,7 @@ function plateaus(samples: {value: number; progress: number}[]) {
   const runs: {progress: number; from: number; to: number; count: number}[] = []
   for (const {value, progress} of samples) {
     const last = runs.at(-1)
-    if (last && last.progress === progress) {
+    if (last?.progress === progress) {
       last.to = value
       last.count++
     } else runs.push({progress, from: value, to: value, count: 1})

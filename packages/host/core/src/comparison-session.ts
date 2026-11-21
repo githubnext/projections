@@ -81,7 +81,8 @@ export function comparisonSessionDefaults(
   const {presentation, features} = options
   const initial = options.initialMode ?? presentation?.mode
   const modes = offeredModes(features)
-  const mode = initial && modes.includes(initial) ? initial : features?.modes ? modes[0] : undefined
+  const limited = features?.modes !== undefined && features.modes !== false
+  const mode = initial && modes.includes(initial) ? initial : limited ? modes[0] : undefined
   return {
     ...(mode ? {mode} : {}),
     swipePosition: 0.5,

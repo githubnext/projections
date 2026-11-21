@@ -914,7 +914,7 @@ test('human text is sentence case: nothing in the workbench is uppercased by sty
   await expect(page.getByRole('heading', {name: 'History', exact: true})).toBeVisible()
   const uppercased = await page.evaluate(() =>
     [...document.querySelectorAll('body *')]
-      .filter(element => getComputedStyle(element).textTransform === 'uppercase' && element.textContent?.trim())
+      .filter(element => getComputedStyle(element).textTransform === 'uppercase' && !!element.textContent.trim())
       .map(element => element.textContent.trim().slice(0, 40)),
   )
   expect(uppercased).toEqual([])
@@ -1186,7 +1186,7 @@ test('every title-bar control moves its content, never its box, while pressed; r
     // the first read. The hold keeps menus closed, so it measures only the press; springing back while open is checked below.
     await page.evaluate(() => {
       const hold = (event: Event) => {
-        if ((event.target as Element | null)?.closest?.('[aria-haspopup]')) event.stopImmediatePropagation()
+        if ((event.target as Element | null)?.closest('[aria-haspopup]')) event.stopImmediatePropagation()
       }
       ;(window as unknown as {__hold?: typeof hold}).__hold = hold
       window.addEventListener('pointerdown', hold, true)
@@ -1262,7 +1262,7 @@ test('the title bar is a planned toolbar: no overlap, nothing clipped or truncat
       const shown = (element: Element) => box(element).width > 1 && box(element).height > 1
       const outer = box(header)
       const controls = [...header.querySelectorAll('button, [role="combobox"], input, [role="status"]')].filter(shown).map(element => ({
-        name: element.getAttribute('aria-label') ?? element.textContent?.trim() ?? '',
+        name: element.getAttribute('aria-label') ?? element.textContent.trim(),
         rect: box(element),
       }))
       const overlaps: string[] = []
@@ -1284,7 +1284,7 @@ test('the title bar is a planned toolbar: no overlap, nothing clipped or truncat
       // Text cut short (by overflow) must carry its full value as a title, on itself or an ancestor.
       const untitled = [...header.querySelectorAll('span, button, [role="combobox"]')]
         .filter(element => shown(element) && element.scrollWidth > element.clientWidth + 1 && !element.closest('[title]'))
-        .map(element => element.textContent?.trim())
+        .map(element => element.textContent.trim())
       return {height: outer.height, overflow: header.scrollWidth - header.clientWidth, overlaps, outside, untitled}
     })
     expect(bar.height, at).toBeLessThanOrEqual(40)

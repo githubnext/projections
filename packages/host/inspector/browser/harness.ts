@@ -125,7 +125,7 @@ export async function startHarness(context: BrowserContext, args: string[]): Pro
     }
     if (url.pathname === '/harness.js') return route.fulfill({status: 200, headers: {'content-type': types['.js']!}, body: script})
     if (!/^\/(api|renderers|custom-renderers)\//.test(url.pathname)) {
-      const file = join(client, ...url.pathname.split('/').filter(part => part && part !== '..'))
+      const file = join(client, ...url.pathname.split('/').filter(part => part !== '' && part !== '..'))
       if (!file.startsWith(client) || !existsSync(file)) return route.fulfill({status: 404, body: 'Not found'})
       return route.fulfill({
         status: 200,

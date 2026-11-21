@@ -79,7 +79,7 @@ export function ViewToolbar({
     {
       pair: typeof props.toolbarStart === 'function',
       modes: (showModes && comparing && p.availableModes.filter(value => modes.includes(value)).length > 1) || showScope,
-      playback: Boolean(showPlayback),
+      playback: showPlayback,
       sides: sidesOf(props),
       actions: [
         ...(showVaried ? (['varied'] as const) : []),
@@ -96,6 +96,7 @@ export function ViewToolbar({
   const inMore = (action: ToolbarAction) => plan.more.includes(action)
   const hasMore = plan.more.length > 0 || (showPlayback && plan.playback === 'minimal')
   const start = typeof props.toolbarStart === 'function' ? props.toolbarStart(plan.pair !== 'full', plan.pair) : props.toolbarStart
+  const hasStart = Boolean(start)
   // Table and text are escape hatches: chosen under Settings' "Show as", and marked in the row by a chip that returns to the renderer.
   const showAs: ShowAsOptions = {view, views, onViewChange: setView, rendererTitle: renderer?.title}
   const chip = (
@@ -156,7 +157,7 @@ export function ViewToolbar({
         )}
         {settings}
         {!inMore('info') && info}
-        {props.actions && <div className="ph-actions pj:flex pj:items-center pj:gap-1">{props.actions}</div>}
+        {Boolean(props.actions) && <div className="ph-actions pj:flex pj:items-center pj:gap-1">{props.actions}</div>}
         {!inMore('fullscreen') && fullscreen}
         {hasMore && (
           <ToolbarMore
@@ -178,7 +179,7 @@ export function ViewToolbar({
     <Toolbar ref={row} rows onKeyDown={space} className={cn(plan.rows === 2 && 'ph-toolbar-two-rows')}>
       {/* The mode region is centred on the row while the row has room for it there, else it follows the start region. */}
       <ToolbarRow centred={centred}>
-        {start ? (
+        {hasStart ? (
           <div data-toolbar-region="start" className="ph-toolbar-start pj:flex pj:min-w-0 pj:shrink-0 pj:justify-self-start">
             {start}
           </div>

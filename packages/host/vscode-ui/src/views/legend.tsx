@@ -16,7 +16,7 @@ const swatchHue = /^color-(added|removed|modified|moved)(?:-muted|-emphasis|-bor
  * hue's `-border` edge, so a tinted swatch never stands as a fill alone.
  */
 export function VscodeLegend({legend, tokens, className}: VscodeLegendProps) {
-  if (!legend?.items.length) return null
+  if (!legend || legend.items.length === 0) return null
   return (
     <div className={`ph-legend phv-legend ${className ?? ''}`} role="group" aria-label={legend.title ?? 'Legend'}>
       {legend.title && <span className="ph-legend-title phv-legend-title">{legend.title}</span>}

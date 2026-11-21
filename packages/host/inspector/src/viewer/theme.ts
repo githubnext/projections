@@ -121,7 +121,7 @@ export function pageTheme(doc: Document = document, seed?: ThemeSeed): NonNullab
   }
   const read = (): InspectorHostTheme => {
     const app = readCopilotCanvasTheme(doc, dark.matches)
-    const marked = root.getAttribute('data-color-mode') ?? doc.body?.getAttribute('data-color-mode')
+    const marked = root.getAttribute('data-color-mode') ?? (doc.body as HTMLElement | null)?.getAttribute('data-color-mode')
     const colorMode: ColorMode = app?.colorMode ?? (marked === 'dark' || marked === 'light' ? marked : dark.matches ? 'dark' : 'light')
     const tokens = seeded[colorMode] ?? (app && copilotCanvasThemeTokens(app.variables, app.colorMode))
     return applyAppTheme(doc, {colorMode, tokens, modes: seeded}) ?? {colorMode}
@@ -143,7 +143,8 @@ export function pageTheme(doc: Document = document, seed?: ThemeSeed): NonNullab
     observer.observe(root, {attributes: true, attributeFilter: ['data-color-mode', 'class', 'style']})
     // The app's stylesheet may be added, replaced or rewritten in place.
     observer.observe(doc.head, {childList: true, subtree: true, characterData: true})
-    if (doc.body) observer.observe(doc.body, {attributes: true, attributeFilter: ['data-color-mode']})
+    const body = doc.body as HTMLElement | null
+    if (body) observer.observe(body, {attributes: true, attributeFilter: ['data-color-mode']})
     dark.addEventListener('change', changed)
   }
   return {

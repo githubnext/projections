@@ -88,10 +88,7 @@ export function InfoButton({
           <ul className="phv-info-list">
             {diagnostics.map((diagnostic, index) => (
               <li key={index} data-severity={diagnostic.severity}>
-                <span
-                  className={`codicon codicon-${diagnostic.severity === 'error' ? 'error' : diagnostic.severity === 'warning' ? 'warning' : 'info'}`}
-                  aria-hidden="true"
-                />
+                <span className={`codicon codicon-${diagnostic.severity === 'error' ? 'error' : 'warning'}`} aria-hidden="true" />
                 <span>
                   <strong>
                     {diagnostic.severity}: {diagnostic.code}

@@ -212,9 +212,10 @@ export function TableView({subject, rows, total = rows.length, selectedId, onSel
 export function TextView({subject, rows, progress, selectedId, onSelect, annotations, onAnnotationActivate, summary}: BuiltInViewProps) {
   const marker = (row: Row) => <Marker row={row} annotations={annotations} onAnnotationActivate={onAnnotationActivate} />
   // The summary bar's sentence, word for word, so the text says what the bar says.
-  const summarized = summary?.length ? (
-    <p data-summary-sentence="">Summary: {figuresSentence(summary, subject.mode === 'comparison')}.</p>
-  ) : null
+  const summarized =
+    summary?.length !== undefined && summary.length > 0 ? (
+      <p data-summary-sentence="">Summary: {figuresSentence(summary, subject.mode === 'comparison')}.</p>
+    ) : null
   if (subject.mode === 'extraction') {
     const {extraction} = subject
     const relationships = new Map<string, Row[]>()
@@ -243,7 +244,7 @@ export function TextView({subject, rows, progress, selectedId, onSelect, annotat
                   ({row.kind}
                   {row.label === row.id ? '' : `, ${row.id}`})
                 </span>
-                {relationships.get(row.id)?.length ? (
+                {(relationships.get(row.id)?.length ?? 0) > 0 ? (
                   <ul className="pj:mt-1 pj:list-[circle] pj:space-y-1 pj:pl-5">
                     {relationships.get(row.id)!.map(edge => (
                       <li key={edge.id} data-item-id={edge.id}>

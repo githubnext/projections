@@ -119,7 +119,7 @@ export function ProjectionsPane({
           )
         })}
       </ul>
-      {footer && <div className="pj:shrink-0 pj:border-t pj:border-divider pj:p-1">{footer}</div>}
+      {Boolean(footer) && <div className="pj:shrink-0 pj:border-t pj:border-divider pj:p-1">{footer}</div>}
     </nav>
   )
 }

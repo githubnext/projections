@@ -64,7 +64,7 @@ export type SettingKey = keyof Settings & keyof ProjectionOptions
 
 /** A setting's value: the embedder's when it controls it, else the core's own. */
 export const settingValue = <K extends SettingKey>(settings: Settings, options: ProjectionOptions, key: K): Settings[K] =>
-  (options[key] !== undefined ? options[key] : settings[key]) as Settings[K]
+  (options[key] ?? settings[key]) as Settings[K]
 
 /**
  * The core's settings after a requested change: changed only while the embedder doesn't control the setting (and the

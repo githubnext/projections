@@ -74,7 +74,7 @@ export const toolbarInsets = (toolbar: Locator, options: {wrappers: string; seco
       )
       return filled || bordered
     }
-    const text = (node: Element) => [...node.childNodes].some(child => child.nodeType === Node.TEXT_NODE && child.textContent?.trim())
+    const text = (node: Element) => [...node.childNodes].some(child => child.nodeType === Node.TEXT_NODE && !!child.textContent?.trim())
     interface Control {
       what: string
       rect: DOMRect
@@ -143,13 +143,13 @@ export const toolbarInsets = (toolbar: Locator, options: {wrappers: string; seco
       })
       return result as {main: RowInsets; playback?: RowInsets}
     }
-    const second = secondRow ? element.querySelector<HTMLElement>(`:scope > ${secondRow}`) : null
-    const two = element.getAttribute('data-rows') === '2' && second
-    const main = row(controls(element, two ? second : null), {
+    const second =
+      secondRow && element.getAttribute('data-rows') === '2' ? element.querySelector<HTMLElement>(`:scope > ${secondRow}`) : null
+    const main = row(controls(element, second), {
       ...inner,
-      bottom: two ? second.getBoundingClientRect().top : inner.bottom,
+      bottom: second ? second.getBoundingClientRect().top : inner.bottom,
     })
-    if (!two) return {main}
+    if (!second) return {main}
     const top = second.getBoundingClientRect().top + (parseFloat(getComputedStyle(second).borderTopWidth) || 0)
     return {main, playback: row(controls(second, null), {...inner, top})}
   }, options)

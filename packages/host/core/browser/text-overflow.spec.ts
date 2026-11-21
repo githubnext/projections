@@ -13,7 +13,7 @@ const wide = (page: Page) =>
           (element.getBoundingClientRect().left + element.scrollWidth > innerWidth + 1 &&
             getComputedStyle(element).overflowX === 'visible'),
       )
-      .map(element => `${element.tagName.toLowerCase()}.${String(element.className).split(' ').slice(0, 2).join('.')}`)
+      .map(element => `${element.tagName.toLowerCase()}.${(element.getAttribute('class') ?? '').split(' ').slice(0, 2).join('.')}`)
       .slice(-6)
       .join(', '),
   )
@@ -46,7 +46,7 @@ test('human text is sentence case: nothing in the view or Settings is uppercased
   await openSettings(page)
   const uppercased = await page.evaluate(() =>
     [...document.querySelectorAll('body *')]
-      .filter(element => getComputedStyle(element).textTransform === 'uppercase' && element.textContent?.trim())
+      .filter(element => getComputedStyle(element).textTransform === 'uppercase' && !!element.textContent.trim())
       .map(element => element.textContent.trim().slice(0, 40)),
   )
   expect(uppercased).toEqual([])

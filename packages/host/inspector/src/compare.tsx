@@ -103,6 +103,7 @@ export function ChoiceButton({
   title?: string | undefined
   onClick: () => void
 } & Record<`data-${string}`, string | undefined> & {'aria-label'?: string}) {
+  const hasIcon = Boolean(icon)
   return (
     <button
       type="button"
@@ -115,12 +116,12 @@ export function ChoiceButton({
       )}
       {...data}
     >
-      <span aria-hidden={icon ? undefined : true} className="pi-x-icon pj:text-muted-foreground pj:[&_svg]:size-3.5">
+      <span aria-hidden={hasIcon ? undefined : true} className="pi-x-icon pj:text-muted-foreground pj:[&_svg]:size-3.5">
         {icon}
       </span>
       <span className="pj:flex pj:min-w-0 pj:flex-1 pj:flex-col">
         <span className="pi-x-title pj:truncate pj:font-medium">{label}</span>
-        {detail && <span className="pi-x-detail pj:truncate pj:text-[11px] pj:text-muted-foreground">{detail}</span>}
+        {Boolean(detail) && <span className="pi-x-detail pj:truncate pj:text-[11px] pj:text-muted-foreground">{detail}</span>}
       </span>
     </button>
   )

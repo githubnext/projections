@@ -54,7 +54,7 @@ export function CommandPalette({
     setIndex(0)
     requestAnimationFrame(() => input.current?.focus())
     return () => {
-      ;(returnFocus.current as HTMLElement | null)?.focus?.()
+      ;(returnFocus.current as HTMLElement | null)?.focus()
     }
   }, [open])
   useEffect(() => setIndex(0), [query])

@@ -119,7 +119,7 @@ export function subjectRows(subject: ViewSubject): Row[] {
         after: change.after,
         ...(change.summary ? {summary: change.summary} : {}),
         ...(step === undefined ? {} : {step}),
-        ...(change.varied?.length ? {varied: change.varied} : {}),
+        ...(change.varied?.length !== undefined && change.varied.length > 0 ? {varied: change.varied} : {}),
         ...(change.context ? {context: change.context} : {}),
       }
     })

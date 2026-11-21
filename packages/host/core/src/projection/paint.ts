@@ -66,6 +66,6 @@ export function createStatusEvents(): (view: StatusView, events: StatusEvents) =
     const before = last
     last = {status, settled}
     if (before?.status !== status) events.onRendererStatusChange?.(status)
-    if (settled !== undefined && (before === undefined || before.settled !== settled)) events.onPainted?.({mode, progress})
+    if (settled !== undefined && before?.settled !== settled) events.onPainted?.({mode, progress})
   }
 }

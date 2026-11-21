@@ -27,7 +27,7 @@ export function requestErrorMessage(status: number, body: unknown): string {
     return [where ? `${diagnostic.message} (${where})` : diagnostic.message]
   })
   if (lines.length) return lines.join('\n')
-  for (const key of ['message', 'error'] as const) if (typeof record?.[key] === 'string' && record[key]) return String(record[key])
+  for (const key of ['message', 'error'] as const) if (typeof record?.[key] === 'string' && record[key]) return record[key]
   // Text that isn't JSON (a proxy's page, a plain message): at most a line of it.
   if (typeof value === 'string' && value.trim() && !/^[[{]/.test(value.trim())) {
     return `The Projections runner refused the request (${status}): ${value.trim().split('\n')[0]!.slice(0, 300)}`

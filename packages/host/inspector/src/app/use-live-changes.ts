@@ -157,6 +157,7 @@ export function useLiveChanges({
         try {
           result = await api.changes(since ?? 0, abort.signal)
         } catch {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- the signal can abort during the await
           if (abort.signal.aborted) return
           setWatching(false)
           await new Promise(resolve => setTimeout(resolve, 2000))

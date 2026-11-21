@@ -14,7 +14,7 @@ const tones: Record<string, string> = {
 
 /** The accessible name of a row's annotation marker. */
 export function annotationName(mark: Pick<AnnotationMark, 'count' | 'label'>, rowLabel: string): string {
-  return `${mark.label ?? (mark.count ? `${mark.count} ${mark.count === 1 ? 'annotation' : 'annotations'}` : 'Annotation')} on ${rowLabel}`
+  return `${mark.label ?? (mark.count !== undefined && mark.count !== 0 ? `${mark.count} ${mark.count === 1 ? 'annotation' : 'annotations'}` : 'Annotation')} on ${rowLabel}`
 }
 
 /**
@@ -49,7 +49,11 @@ export function AnnotationMarker({
         onActivate(mark.id)
       }}
     >
-      {mark.count ? mark.count : <span aria-hidden="true" className="pj:h-1.5 pj:w-1.5 pj:rounded-full pj:bg-current" />}
+      {mark.count !== undefined && mark.count !== 0 ? (
+        mark.count
+      ) : (
+        <span aria-hidden="true" className="pj:h-1.5 pj:w-1.5 pj:rounded-full pj:bg-current" />
+      )}
     </button>
   )
 }

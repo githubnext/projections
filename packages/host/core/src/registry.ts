@@ -49,7 +49,7 @@ export function builtinRendererDocuments(catalog: readonly RendererEntry[], fetc
     }
     let document = documents.get(entry.name)
     if (!document) {
-      document = entry.document ? entry.document() : text(new URL(entry.url, globalThis.location?.href), fetcher)
+      document = entry.document ? entry.document() : text(new URL(entry.url, pageHref()), fetcher)
       documents.set(entry.name, document)
       // A failed read is tried again on the next request.
       document.catch(() => documents.delete(entry.name))
@@ -118,7 +118,7 @@ export async function loadRendererCatalog({
   fetch?: typeof fetch
   signal?: AbortSignal
 }): Promise<RendererEntry[]> {
-  const root = new URL(base, globalThis.location?.href)
+  const root = new URL(base, pageHref())
   if (!root.pathname.endsWith('/')) root.pathname += '/'
   if (names) {
     const manifests = await Promise.all(
@@ -141,7 +141,7 @@ export function customRenderer(manifest: RendererManifest, url: string | URL): R
     name: manifest.name,
     title: manifest.title,
     handles: manifest.handles,
-    url: new URL(url, globalThis.location?.href).href,
+    url: new URL(url, pageHref()).href,
     source: 'custom',
     ...(manifest.comparisonModes ? {comparisonModes: manifest.comparisonModes} : {}),
     ...(manifest.accepts ? {accepts: manifest.accepts} : {}),
@@ -178,7 +178,10 @@ function schemaRenderer(subject: string | RendererSubject | undefined, catalog: 
 
 function describeSubject(subject: string | RendererSubject): string {
   if (typeof subject === 'string') return `\`${subject}\``
-  const vocabularies = subject.vocabularies?.length ? ` with ${subject.vocabularies.map(name => `\`${name}\``).join(', ')}` : ''
+  const vocabularies =
+    subject.vocabularies?.length !== undefined && subject.vocabularies.length > 0
+      ? ` with ${subject.vocabularies.map(name => `\`${name}\``).join(', ')}`
+      : ''
   return `\`${subject.schema}\`${vocabularies}`
 }
 
@@ -243,4 +246,10 @@ export function compatibleRenderers(
     }
   }
   return list
+}
+
+/** The page's address, which there is none of outside a browser. */
+function pageHref(): string | undefined {
+  const location = globalThis.location as Location | undefined
+  return location?.href
 }

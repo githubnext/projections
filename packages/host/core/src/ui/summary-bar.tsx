@@ -56,7 +56,7 @@ function bandAnchor(bar: HTMLElement | null): DOMRect {
  */
 function deltaCells(figure: SummaryFigure, menu: boolean | undefined, cell: (delta: SummaryDelta) => ReactNode): ReactNode {
   return summaryDeltas
-    .filter(delta => menu || figure[delta] > 0)
+    .filter(delta => menu === true || figure[delta] > 0)
     .map(delta => (figure[delta] > 0 ? cell(delta) : <span key={delta} aria-hidden="true" />))
 }
 

@@ -86,7 +86,7 @@ export function RevisionItem({
                 : status === 'queued'
                   ? 'Queued'
                   : status === 'done'
-                    ? state?.ms
+                    ? state?.ms !== undefined && state.ms !== 0
                       ? `Extracted in ${(state.ms / 1000).toFixed(1)} s`
                       : (row.detail ?? 'Loaded')
                     : (row.detail ?? '')}

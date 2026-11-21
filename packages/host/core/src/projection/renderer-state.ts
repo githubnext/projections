@@ -25,7 +25,7 @@ export function createComparisonModes({memo}: Memos) {
   const orderedOf = memo((key: string) => orderComparisonModes(key.split(',').filter(Boolean) as ComparisonMode[]))
   return ({comparing, renderer, chosenMode, declaredModes}: ComparisonModesInput) => {
     // Shown in canonical order, whatever order the renderer declares them in.
-    const declared = (renderer && (declaredModes[renderer.url] ?? renderer.comparisonModes)) || defaultComparisonModes
+    const declared = (renderer ? (declaredModes[renderer.url] ?? renderer.comparisonModes) : undefined) ?? defaultComparisonModes
     const availableModes = orderedOf(declared.join())
     // Until a renderer is resolved and says which modes it supports (its manifest or its ready message), a chosen mode
     // is trusted and kept pending: a host mounted before its renderer catalog loads must not clamp `initialMode: 'diff'`

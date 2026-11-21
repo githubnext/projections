@@ -136,10 +136,10 @@ export async function expectNoFlash(page: Page, steps: () => Promise<void>): Pro
   try {
     // Frames must be on screen to be sampled (and painted).
     await page.locator('.ph-stage').first().scrollIntoViewIfNeeded()
-    let running = true
+    const loop = {running: true}
     const shares: LightSample[] = []
     const sampling = (async () => {
-      while (running) {
+      while (loop.running) {
         const phase = await page.evaluate(() => document.querySelector('.ph')?.getAttribute('data-comparison-mode') ?? '').catch(() => '')
         shares.push(...(await lightShares(page, analyzer).catch(() => [])).map(sample => ({...sample, phase})))
         // Let the page render between screenshots, so slow engines still reach the stable frames actions wait for.
@@ -149,7 +149,7 @@ export async function expectNoFlash(page: Page, steps: () => Promise<void>): Pro
     try {
       await steps()
     } finally {
-      running = false
+      loop.running = false
       await sampling
     }
     await page.locator('.ph-stage').first().scrollIntoViewIfNeeded()

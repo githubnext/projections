@@ -163,7 +163,7 @@ export function ComparisonExplorer(props: ComparisonExplorerProps) {
             : {})}
           colorMode={colorMode}
           {...(props.themeTokens ? {themeTokens: props.themeTokens} : {})}
-          {...(props.durationMs ? {durationMs: props.durationMs} : {})}
+          {...(props.durationMs !== undefined && props.durationMs !== 0 ? {durationMs: props.durationMs} : {})}
           {...(props.diagnostics ? {diagnostics: props.diagnostics} : {})}
           {...(props.notices ? {notices: props.notices} : {})}
           {...(props.onOpen ? {onOpen: props.onOpen} : {})}
@@ -181,9 +181,9 @@ export function ComparisonExplorer(props: ComparisonExplorerProps) {
           fill={fill}
           {...(comparator ? {comparator} : {})}
           {...(props.features ? {features: props.features} : {})}
-          {...(props.actions ? {actions: props.actions} : {})}
+          {...(props.actions !== undefined ? {actions: props.actions} : {})}
           {...(props.utilityArea !== undefined ? {utilityArea: props.utilityArea} : {})}
-          {...(props.utility ? {utility: props.utility} : {})}
+          {...(props.utility !== undefined ? {utility: props.utility} : {})}
           {...(props.controlValues ? {controlValues: props.controlValues} : {})}
           {...(props.onControlChange ? {onControlChange: props.onControlChange} : {})}
           {...(props.onAction ? {onAction: props.onAction} : {})}

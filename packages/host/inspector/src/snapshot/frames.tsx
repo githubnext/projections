@@ -47,11 +47,11 @@ export function SnapshotFrame({projection, settings, comparing, failure, labels}
     color: 'var(--projections-color-fg)',
     fontFamily: 'var(--projections-font-family)',
   }
-  const alert = failure && (
+  const alert = failure ? (
     <p role="alert" style={{margin: 0, padding: 12}}>
       {failure}
     </p>
-  )
+  ) : undefined
   const stage = (legend: boolean) => <ProjectionStage projection={projection} fill legend={legend} {...(labels ? {labels} : {})} />
   const mode = comparing ? projection.mode : 'extraction'
 
@@ -59,7 +59,7 @@ export function SnapshotFrame({projection, settings, comparing, failure, labels}
     return (
       <ScopedRoot colorMode={settings.theme} className="pi pi-snapshot">
         <main id="snapshot" data-mode={mode} data-frame="none" style={{...main, background: 'var(--projections-color-bg)'}}>
-          {alert || <div style={{flex: 1, minHeight: 0}}>{stage(false)}</div>}
+          {alert ?? <div style={{flex: 1, minHeight: 0}}>{stage(false)}</div>}
         </main>
       </ScopedRoot>
     )
@@ -69,7 +69,7 @@ export function SnapshotFrame({projection, settings, comparing, failure, labels}
     return (
       <ScopedRoot colorMode={settings.theme} className="pi pi-snapshot">
         <main id="snapshot" data-mode={mode} data-frame="page" style={{...main, background: 'var(--projections-color-bg)'}}>
-          {alert || (
+          {alert ?? (
             <>
               <div style={{flex: 1, minHeight: 0}}>{stage(true)}</div>
               {/* The summary bar, as every view has it: totals per kind, and a comparison's changes. */}
@@ -103,7 +103,7 @@ export function SnapshotFrame({projection, settings, comparing, failure, labels}
             background: 'var(--projections-color-surface-raised)',
           }}
         >
-          {alert || (
+          {alert ?? (
             <>
               <div style={{flex: grow, minHeight: 0, padding: inset, ...(hugged === undefined ? {} : {height: hugged})}}>
                 {stage(false)}

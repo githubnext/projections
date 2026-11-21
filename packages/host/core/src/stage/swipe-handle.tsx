@@ -45,7 +45,7 @@ export function SwipeHandle({
   const percent = `${Math.round(position * 1000) / 10}%`
   function fromPointer(event: PointerEvent<HTMLElement>) {
     const bounds = container.current?.getBoundingClientRect()
-    if (bounds?.width) set((event.clientX - bounds.left) / bounds.width)
+    if (bounds?.width !== undefined && bounds.width !== 0) set((event.clientX - bounds.left) / bounds.width)
   }
   return (
     <div

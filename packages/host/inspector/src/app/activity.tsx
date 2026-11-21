@@ -84,7 +84,7 @@ export function inspectorActivity({
     const text = scenario ? `Showing renderer scenario ${scenario.title}` : `Showing a saved artifact: ${artifact.name}`
     return {kind: scenario ? 'scenario' : 'artifact', message: text, plain: text}
   }
-  if (active && active.projection === projection) {
+  if (active?.projection === projection) {
     const side = sides.find(item => item.ref === active.ref)
     const name = refName(active.ref)
     return {

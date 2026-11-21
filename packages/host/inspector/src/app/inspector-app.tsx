@@ -214,7 +214,7 @@ export function InspectorApp({
   const diagnostics = useMemo(() => [...(job?.diagnostics ?? []), ...limitations(choices)], [job, choices])
   const labelOf = (key: string | undefined) => choices.find(choice => choice.key === key)?.label
   const lastTiming = Object.values(projectionRows)
-    .filter(state => state.status === 'done' && state.ms)
+    .filter(state => state.status === 'done' && state.ms !== undefined && state.ms !== 0)
     .at(-1)?.ms
 
   const statusOf = (id: string) => projectionStatus(marks, rows, id)
@@ -279,7 +279,10 @@ export function InspectorApp({
   })
   const viewer = chrome === 'viewer'
   const notices = viewNotices({
-    reported: showing === 'artifact' && artifact?.notices?.length ? artifact.notices : (job?.notices ?? []),
+    reported:
+      showing === 'artifact' && artifact?.notices?.length !== undefined && artifact.notices.length > 0
+        ? artifact.notices
+        : (job?.notices ?? []),
     shownBefore: pair.subject?.mode === 'comparison' ? choices.find(choice => choice.key === before)?.document : undefined,
     shownAfter: choices.find(choice => choice.key === after)?.document,
     viewer,
@@ -449,7 +452,7 @@ export function InspectorApp({
         onOpen,
         controllers,
         ...(api ? {running: running ?? null} : {}),
-        ...(bare && toolbarStart ? {toolbarStart} : {}),
+        ...(bare && toolbarStart !== undefined ? {toolbarStart} : {}),
         ...(bare && utilityArea ? {utilityArea} : {}),
       }}
       empty={{

@@ -36,7 +36,7 @@ export const focused = (page: Page) =>
       tag: active?.tagName.toLowerCase(),
       host: host?.tagName.toLowerCase(),
       role: active?.getAttribute('role'),
-      label: active?.getAttribute('aria-label') ?? active?.textContent?.trim(),
+      label: active?.getAttribute('aria-label') ?? active?.textContent.trim(),
       outline: active ? getComputedStyle(active).outlineColor : undefined,
       outlineWidth: active ? getComputedStyle(active).outlineWidth : undefined,
       focusId: host?.getAttribute('data-focus-id') ?? active?.getAttribute('data-focus-id'),
@@ -74,7 +74,7 @@ export const colors = (locator: Locator) =>
       return {r: parts[0]!, g: parts[1]!, b: parts[2]!, a: value.startsWith('rgba') ? parts[3]! : 1}
     }
     const layers: ReturnType<typeof parse>[] = []
-    for (let node: Element | null = element; node; node = node.parentElement ?? (node.getRootNode() as ShadowRoot).host ?? null) {
+    for (let node: Element | null = element; node; node = node.parentElement ?? (node.getRootNode() as Partial<ShadowRoot>).host ?? null) {
       const layer = parse(getComputedStyle(node).backgroundColor)
       if (layer.a > 0) layers.push(layer)
       if (layer.a >= 1) break

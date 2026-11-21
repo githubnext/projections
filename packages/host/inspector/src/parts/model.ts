@@ -60,7 +60,7 @@ export function overriddenDefinition(definition: Definition, overrides: PartOver
     next.comparator = overrides.comparator.slice('file:'.length)
   } else {
     const module = other(overrides.comparator, 'module:')
-    if (module?.comparator) next.comparator = module.comparator
+    if (module?.comparator !== undefined && module.comparator !== '') next.comparator = module.comparator
   }
   if (overrides.renderer?.startsWith('builtin:')) next.renderer = overrides.renderer.slice('builtin:'.length)
   else {

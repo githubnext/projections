@@ -69,7 +69,13 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
   }
   const request = props.focusRequest
   const shown = props.scope?.shown
-  const area = useMemo(() => focusArea(transition, diff, props.model, request, shown), [transition, diff, props.model, request, shown])
+  // A layout drawn while the current props are laid out may hold items the focus no longer names, or more: framing the
+  // focus within it would zoom the old drawing past its fit. It stays fitted until its own layout arrives.
+  const stale = props.stale === true
+  const area = useMemo(
+    () => (stale ? undefined : focusArea(transition, diff, props.model, request, shown)),
+    [stale, transition, diff, props.model, request, shown],
+  )
   const drawn = nodes.map(node => ({x: node.x - node.width / 2, y: node.y - node.height / 2, width: node.width, height: node.height}))
   const {zoom, scale, borders, keep, top, bottom} = useGraphZoom(
     scroller,

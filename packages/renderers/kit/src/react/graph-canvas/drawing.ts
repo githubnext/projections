@@ -22,6 +22,11 @@ export type LaidOutGraphProps = GraphCanvasProps & {
   badgeGrowth: ReadonlyMap<string, number> | undefined
   /** How much each card grows for its subtitle (see `GraphCanvasProps.subtitle`). */
   subtitleGrowth: ReadonlyMap<string, number> | undefined
+  /**
+   * Whether `transition` is the layout of earlier props, drawn while the current ones are laid out: a new scope, say,
+   * whose items the layout may not place yet. The view opens on no focus until its own layout arrives.
+   */
+  stale?: boolean
 }
 
 export interface Drawing {

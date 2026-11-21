@@ -163,9 +163,10 @@ interface CoveredFitInput {
   maxScale?: number
   /**
    * In a frame the host sizes to its content, the host's `stage-inset-top` and `stage-inset-bottom` (0 where it sends
-   * none), CSS px in from the frame's top and bottom edges (see `coveredBottom`).
+   * none), CSS px in from the frame's top and bottom edges, and how much of the frame lies `below` the stage, CSS px
+   * (such as a footer, which keeps clear of the inset itself); see `coveredBottom`.
    */
-  insets?: {top: number; bottom: number}
+  insets?: {top: number; bottom: number; below?: number}
 }
 
 const fitsNothing = ({cover, view, size}: CoveredFitInput) =>
@@ -200,14 +201,18 @@ export function coveredTop(input: CoveredFitInput): number {
  * middle, and the height asked for from them would feed back. There the host's insets, which it measures with the
  * rectangles at one height, place them instead: a rectangle whose bottom lies within `stage-inset-top` is at the top,
  * every other one at the foot. The drawing spans the frame's height, so it reaches every one at the foot that lies
- * across it, and its bottom is then `stage-inset-bottom`, measured up from the frame's bottom edge.
+ * across it, and its bottom is then `stage-inset-bottom`, measured up from the frame's bottom edge, less what lies
+ * below the stage (`insets.below`).
  */
 export function coveredBottom(input: CoveredFitInput): number {
   const {y} = fitPadding(input.padding)
   if (fitsNothing(input)) return y
   const origin = input.origin ?? {x: 0, y: 0}
   const fit = uncoveredFit(input)
-  if (input.insets) return fit.below.length ? Math.max(y, Math.ceil(input.insets.bottom)) : y
+  if (input.insets) {
+    const {bottom, below = 0} = input.insets
+    return fit.below.length ? Math.max(y, Math.ceil(bottom - below)) : y
+  }
   const reached = fit.below.filter(rect => rect.y + rect.height > fit.top && rect.y < origin.y + input.view.height)
   if (!reached.length) return y
   const edge = Math.min(...reached.map(rect => rect.y)) - coverGap

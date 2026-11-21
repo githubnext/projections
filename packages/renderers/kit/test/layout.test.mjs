@@ -669,6 +669,9 @@ test("in a content-sized frame, the host's insets place its cover, wherever the 
   const view = {width: 1344, height: 448}
   const chip = {x: 458, y: 12, width: 200, height: 28}
   assert.deepEqual(coveredPadding({cover: [chip, foot(603)], view, size, padding, insets: {top: 52, bottom: 56}}), {top: 48, y: 56})
+  // A footer below the stage that keeps clear of the inset itself takes it off the drawing's bottom.
+  assert.deepEqual(coveredPadding({cover: [foot(603)], view, size, padding, insets: {...insets, below: 70}}), {top: 16, y: 16})
+  assert.deepEqual(coveredPadding({cover: [foot(603)], view, size, padding, insets: {...insets, below: 20}}), {top: 16, y: 36})
   // A foot that lies beside the drawing keeps its own bottom.
   assert.equal(coveredBottom({cover: [{x: 1100, y: 405, width: 200, height: 30}], view, size, padding, insets}), 16)
 })

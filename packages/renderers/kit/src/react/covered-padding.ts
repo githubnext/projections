@@ -12,8 +12,8 @@ import {useFrameSizing, useStageCover, useStageInsetBottom, useStageInsetTop} fr
  * to `useFitScale` and pad the drawing's top by its `top` and its bottom by its `y` (the kit's `--pk-fit-top` and
  * `--pk-fit-bottom`, which graph.css reads). The stage is measured in the frame on every resize. In a frame the host
  * sizes to the content, the host's insets say which rectangles lie at the frame's top and which at its foot, and the
- * bottom clears its `stage-inset-bottom` rather than where the rectangles lie, which move as the frame grows (see
- * `coveredBottom`).
+ * bottom clears its `stage-inset-bottom`, less what lies below the stage, rather than where the rectangles lie, which
+ * move as the frame grows (see `coveredBottom`).
  */
 export function useCoveredPadding<P extends FitPadding>(
   stage: RefObject<HTMLElement | null>,
@@ -26,7 +26,8 @@ export function useCoveredPadding<P extends FitPadding>(
   const insetBottom = useStageInsetBottom()
   // A host that sizes the frame to its content places its cover by its insets (see `coveredBottom`).
   const content = useFrameSizing() === 'content' && (insetTop !== undefined || insetBottom !== undefined)
-  const [box, setBox] = useState<{x: number; y: number; width: number; height: number}>()
+  // The stage in the frame's document, and how much of the frame lies below it (a footer under the drawing).
+  const [box, setBox] = useState<{x: number; y: number; width: number; height: number; below: number}>()
   const covered = cover !== undefined
   const sized = size !== undefined
   useLayoutEffect(() => {
@@ -40,9 +41,17 @@ export function useCoveredPadding<P extends FitPadding>(
         y: Math.round(rect.top + (view?.scrollY ?? 0)),
         width: element.clientWidth,
         height: element.clientHeight,
+        below: Math.max(0, Math.round(element.ownerDocument.documentElement.clientHeight - rect.bottom)),
       }
       setBox(last =>
-        last && last.x === next.x && last.y === next.y && last.width === next.width && last.height === next.height ? last : next,
+        last &&
+        last.x === next.x &&
+        last.y === next.y &&
+        last.width === next.width &&
+        last.height === next.height &&
+        last.below === next.below
+          ? last
+          : next,
       )
     }
     measure()
@@ -53,7 +62,7 @@ export function useCoveredPadding<P extends FitPadding>(
   }, [stage, covered, sized])
   return useMemo(() => {
     if (!cover || !box || !size) return padding
-    const insets = content ? {insets: {top: insetTop ?? 0, bottom: insetBottom ?? 0}} : {}
+    const insets = content ? {insets: {top: insetTop ?? 0, bottom: insetBottom ?? 0, below: box.below}} : {}
     const {top, y} = coveredPadding({cover, view: box, origin: box, size, padding, maxScale, ...insets})
     return top === (padding.top ?? padding.y) && y === padding.y ? padding : {...padding, top, y}
   }, [cover, box, size, padding, maxScale, content, insetTop, insetBottom])

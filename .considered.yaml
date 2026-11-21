@@ -27,6 +27,8 @@ exclude:
     - '**/tests.rs'
     - '**/scenarios.json'
     - '**/*.generated.ts'
+    # Generated from packages/sdk/src/extractor.ts, which is measured.
+    - 'packages/cli/node/extractor.mjs'
     - 'packages/schemas/schemas/**'
     - 'docs/reference/**'
     - 'docs/agents/**'

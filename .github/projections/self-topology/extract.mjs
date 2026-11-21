@@ -32,8 +32,7 @@
 //
 // Deterministic for a revision and toolchain: files are listed the way Git does, output is sorted, and nothing reads
 // the clock, the network or randomness. `cargo metadata --no-deps --offline` reads only manifests.
-import {readFileSync} from 'node:fs'
-import path from 'node:path'
+import {request, result} from '@githubnext/projections/extractor'
 import {unitFacts} from './facts.mjs'
 import {releaseChannels} from './releases.mjs'
 import {byText, listFiles, reader, sortedUnique} from './files.mjs'
@@ -44,10 +43,8 @@ import {manifestRelationships} from './relationships.mjs'
 import {linkUnits} from './links.mjs'
 import {topologyEntities} from './areas.mjs'
 
-const request = JSON.parse(readFileSync(0, 'utf8'))
 // The project's directory in the examined revision: what the definition's paths, and so this extractor's, are relative to.
-const repo = request.repository?.root ? path.join(request.repository.root, request.repository.project ?? '') : process.cwd()
-const inputs = request.projection?.definition?.inputs ?? {}
+const {root: repo, inputs} = request
 const roots = (inputs.roots ?? [{path: '.'}]).map(root => ({
   ...root,
   path: root.path.replace(/\/$/, '').replace(/^\.$/, ''),
@@ -84,22 +81,13 @@ for (const unit of units.values()) unit.label = belowContainer(unit, unit.label)
 
 const entities = topologyEntities({...found, roots, relationships, facts, read})
 
-process.stdout.write(
-  `${JSON.stringify(
-    {
-      protocolVersion: 0,
-      schema: 'architecture/v0',
-      entities,
-      relationships: [...relationships.values()]
-        .sort((a, b) => byText(a.id, b.id))
-        .map(({via, evidence, ...relationship}) => ({
-          ...relationship,
-          ...(via.size ? {data: {via: sortedUnique([...via])}} : {}),
-          ...(evidence.length ? {evidence: evidence.map(item => (item.location ? item : {kind: item.kind, source: item.source}))} : {}),
-        })),
-      metadata: {capabilities: capabilityNames, roots: roots.map(root => root.path || '.')},
-    },
-    null,
-    2,
-  )}\n`,
-)
+result({
+  schema: 'architecture/v0',
+  entities,
+  relationships: [...relationships.values()].map(({via, evidence, ...relationship}) => ({
+    ...relationship,
+    ...(via.size ? {data: {via: sortedUnique([...via])}} : {}),
+    ...(evidence.length ? {evidence: evidence.map(item => (item.location ? item : {kind: item.kind, source: item.source}))} : {}),
+  })),
+  metadata: {capabilities: capabilityNames, roots: roots.map(root => root.path || '.')},
+})

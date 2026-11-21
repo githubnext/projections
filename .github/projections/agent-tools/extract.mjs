@@ -15,12 +15,12 @@
 // so a reworded description is no change here. Deterministic for a revision: it reads only files.
 import {readFileSync} from 'node:fs'
 import path from 'node:path'
+import {request, result} from '@githubnext/projections/extractor'
 import {appTools, canvasActions, catalogTools, paths, vscodeTools} from './surfaces.mjs'
 import {keyLines} from './rust-literals.mjs'
 import {parameterDifferences, parameterRow, surfaceRow, toolRow} from './rows.mjs'
 
-const request = JSON.parse(readFileSync(0, 'utf8'))
-const repo = request.repository?.root ? path.join(request.repository.root, request.repository.project ?? '') : process.cwd()
+const repo = request.root
 const read = file => {
   try {
     return readFileSync(path.join(repo, file), 'utf8')
@@ -90,17 +90,4 @@ for (const tool of tools.values()) {
   }
 }
 
-const byId = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
-process.stdout.write(
-  `${JSON.stringify(
-    {
-      protocolVersion: 0,
-      schema: 'api/v0',
-      entities: entities.sort(byId),
-      relationships: relationships.sort(byId),
-      metadata: {surfaces},
-    },
-    null,
-    2,
-  )}\n`,
-)
+result({schema: 'api/v0', entities, relationships, metadata: {surfaces}})

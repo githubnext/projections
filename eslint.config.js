@@ -25,6 +25,8 @@ export default defineConfig(
       // Scaffolding templates are checked filled in: the CLI's browser test
       // builds and checks a scaffolded renderer with its own TypeScript setup.
       'packages/cli/templates/renderer/**',
+      // Generated from packages/sdk/src/extractor.ts, which is linted.
+      'packages/cli/node/extractor.mjs',
       '**/playwright-report/**',
     ],
   },

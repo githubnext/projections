@@ -141,6 +141,10 @@ enum Commands {
     /// extractors find on PYTHONPATH, to run a Python extractor by hand
     #[command(name = "__python-path", hide = true)]
     PythonPath,
+    /// Print the file custom extractors run with `node` preload (`node --require`)
+    /// to import `@githubnext/projections/extractor`, to run one by hand
+    #[command(name = "__node-require", hide = true)]
+    NodeRequire,
     /// Print the command line as JSON, for the generated CLI reference
     /// (tools/scripts/reference-docs.mjs)
     #[command(name = "__reference", hide = true)]
@@ -284,6 +288,11 @@ async fn run(directory: &Path, command: Commands) -> Result<()> {
         Commands::PythonPath => {
             let directory = projections_cli::python::directory_in(&projections_cli::cache::base()?)?;
             writeln!(io::stdout().lock(), "{}", directory.display())?;
+            Ok(())
+        }
+        Commands::NodeRequire => {
+            let directory = projections_cli::node::directory_in(&projections_cli::cache::base()?)?;
+            writeln!(io::stdout().lock(), "{}", directory.join(projections_cli::node::PRELOAD).display())?;
             Ok(())
         }
         Commands::Reference => {

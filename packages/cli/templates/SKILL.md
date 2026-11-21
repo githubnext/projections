@@ -392,9 +392,21 @@ result(entities={"service:payments": {"kind": "service", "label": "Payments"}},
                        "from": "service:checkout", "to": "service:payments"}])
 ```
 
-In JavaScript, `result({entities, relationships})` from
-`@githubnext/projections/extractor` does the same, when the project has that
-package; otherwise, and in other languages, write the JSON above.
+**In JavaScript or TypeScript, don't either.** For an extractor it runs with
+`node`, Projections provides `@githubnext/projections/extractor` (nothing to
+install; install the `@githubnext/projections` package only for its types):
+the same `request`, with camelCase accessors (`request.root`,
+`request.checkout`, `request.inputs`), and
+`result({entities, relationships})`, with `schema`, `metadata`, `volatile` and
+`missingInputs`:
+
+```js
+import {request, result} from '@githubnext/projections/extractor'
+
+result({entities: {'service:payments': {kind: 'service', label: 'Payments'}}})
+```
+
+In other languages, write the JSON above.
 
 {{schemas}}
 
@@ -456,7 +468,7 @@ package; otherwise, and in other languages, write the JSON above.
   revisions check out only that (`--workspace sparse`): seconds, not minutes.
 
 To debug it directly, pipe a request in:
-`echo '{"protocolVersion":0,"projection":{"id":"x","definition":{}},"repository":{"root":"."},"capabilities":{"trusted":true,"network":false}}' | node .github/projections/<id>/extract.mjs`
+`echo '{"protocolVersion":0,"projection":{"id":"x","definition":{}},"repository":{"root":"."},"capabilities":{"trusted":true,"network":false}}' | node --require "$(projections __node-require)" .github/projections/<id>/extract.mjs`
 (for Python, `PYTHONPATH="$(projections __python-path)" python3 .github/projections/<id>/extract.py`; in PowerShell,
 set `$env:PYTHONPATH = projections __python-path` and run `python`). In a
 definition, write `python3`: the runner runs a bare `python3` or `python` with

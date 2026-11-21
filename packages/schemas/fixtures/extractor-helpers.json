@@ -1,0 +1,508 @@
+{
+  "version": 0,
+  "description": "The extractor helpers' shared behaviour: the Python module (packages/cli/python/projections) and @githubnext/projections/extractor (packages/sdk/src/extractor) read each request, answer each accessor and write each extraction alike, failing with the same messages. A case reads `stdin` (or the text `stdinText`) as the request, then either reads the `accessors` named (JavaScript's names; Python's in snake_case) or calls result() with `result`; it expects their values or the extraction (`expected`), or an `error` message (or one starting with `errorStartsWith`). Paths are written with `/`, which Windows separators are compared as.",
+  "cases": [
+    {
+      "id": "accessors-at-the-root",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags","inputs":{"file":"flags.yaml"}}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "project": "",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false},
+          "checkout": "/repo"
+        },
+        "capabilities": {"trusted":true,"network":false},
+        "upstream": {"crates":{"protocolVersion":0,"schema":"graph/v0","entities":[],"relationships":[]}}
+      },
+      "accessors": ["project","repositoryRoot","root","checkout","id","definition","inputs","upstream","trusted"],
+      "expected": {
+        "project": "",
+        "repositoryRoot": "/repo",
+        "root": "/repo",
+        "checkout": "/repo",
+        "id": "flags",
+        "definition": {"id":"flags","inputs":{"file":"flags.yaml"}},
+        "inputs": {"file":"flags.yaml"},
+        "upstream": {"crates":{"protocolVersion":0,"schema":"graph/v0","entities":[],"relationships":[]}},
+        "trusted": true
+      }
+    },
+    {
+      "id": "accessors-in-a-nested-project",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags","inputs":{"file":"flags.yaml"}}},
+        "repository": {
+          "mode": "materialized",
+          "root": "/tmp/revision",
+          "project": "packages/app",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false},
+          "checkout": "/repo"
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "accessors": ["project","repositoryRoot","root","checkout","id","definition","inputs","upstream","trusted"],
+      "expected": {
+        "project": "packages/app",
+        "repositoryRoot": "/tmp/revision",
+        "root": "/tmp/revision/packages/app",
+        "checkout": "/repo/packages/app",
+        "id": "flags",
+        "definition": {"id":"flags","inputs":{"file":"flags.yaml"}},
+        "inputs": {"file":"flags.yaml"},
+        "upstream": {},
+        "trusted": true
+      }
+    },
+    {
+      "id": "accessors-with-what-a-request-may-omit",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":false,"network":false}
+      },
+      "accessors": ["project","repositoryRoot","root","checkout","id","definition","inputs","upstream","trusted"],
+      "expected": {
+        "project": "",
+        "repositoryRoot": "/repo",
+        "root": "/repo",
+        "checkout": null,
+        "id": "flags",
+        "definition": {"id":"flags"},
+        "inputs": {},
+        "upstream": {},
+        "trusted": false
+      }
+    },
+    {
+      "id": "no-root-in-git-objects-mode",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "git-objects",
+          "git": {"directory":"/repo/.git","tree":"0123456789abcdef0123456789abcdef01234567"},
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "accessors": ["root"],
+      "error": "This request has no repository.root, so the extractor can't read the examined revision"
+    },
+    {
+      "id": "a-request-that-is-not-json",
+      "stdinText": "{\"protocolVersion\": 0,",
+      "accessors": ["root"],
+      "errorStartsWith": "The extractor request on stdin is not JSON: "
+    },
+    {
+      "id": "a-request-that-is-not-an-object",
+      "stdin": [
+        {
+          "protocolVersion": 0,
+          "projection": {"id":"flags","definition":{"id":"flags"}},
+          "repository": {
+            "mode": "in-place",
+            "root": "/repo",
+            "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+          },
+          "capabilities": {"trusted":true,"network":false}
+        }
+      ],
+      "accessors": ["root"],
+      "error": "The extractor request on stdin is not a JSON object"
+    },
+    {
+      "id": "another-protocol-version",
+      "stdin": {
+        "protocolVersion": 1,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "accessors": ["root"],
+      "error": "The extractor request has protocolVersion 1; this module speaks 0. Use the module of the Projections that runs the extractor"
+    },
+    {
+      "id": "a-boolean-protocol-version",
+      "stdin": {
+        "protocolVersion": false,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "accessors": ["root"],
+      "error": "The extractor request has protocolVersion false; this module speaks 0. Use the module of the Projections that runs the extractor"
+    },
+    {
+      "id": "a-string-protocol-version",
+      "stdin": {
+        "protocolVersion": "0",
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "accessors": ["root"],
+      "error": "The extractor request has protocolVersion \"0\"; this module speaks 0. Use the module of the Projections that runs the extractor"
+    },
+    {
+      "id": "no-protocol-version",
+      "stdin": {
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "accessors": ["root"],
+      "error": "The extractor request has no protocolVersion; this module speaks 0. Use the module of the Projections that runs the extractor"
+    },
+    {
+      "id": "items-keyed-or-listed-in-order-of-id",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {
+        "entities": {
+          "team:b": {"kind":"team","label":"B"},
+          "team:a": {"id":"team:a","kind":"team","label":"A","data":{"size":3}}
+        },
+        "relationships": [
+          {"id":"owns:b","kind":"owns","from":"team:a","to":"team:b"},
+          {"id":"owns:a","kind":"owns","from":"team:b","to":"team:a"}
+        ],
+        "metadata": {"authority":"declared"}
+      },
+      "expected": {
+        "protocolVersion": 0,
+        "schema": "graph/v0",
+        "entities": [
+          {"id":"team:a","kind":"team","label":"A","data":{"size":3}},
+          {"id":"team:b","kind":"team","label":"B"}
+        ],
+        "relationships": [
+          {"id":"owns:a","kind":"owns","from":"team:b","to":"team:a"},
+          {"id":"owns:b","kind":"owns","from":"team:a","to":"team:b"}
+        ],
+        "metadata": {"authority":"declared"}
+      }
+    },
+    {
+      "id": "ids-in-utf-16-code-unit-order",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {
+        "entities": [
+          {"id":"😀","kind":"k","label":"😀"},
+          {"id":"～","kind":"k","label":"～"},
+          {"id":"a","kind":"k","label":"a"}
+        ]
+      },
+      "expected": {
+        "protocolVersion": 0,
+        "schema": "graph/v0",
+        "entities": [
+          {"id":"a","kind":"k","label":"a"},
+          {"id":"😀","kind":"k","label":"😀"},
+          {"id":"～","kind":"k","label":"～"}
+        ],
+        "relationships": []
+      }
+    },
+    {
+      "id": "another-schema-and-the-optional-fields",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {
+        "schema": "architecture/v0",
+        "entities": [],
+        "metadata": null,
+        "missingInputs": [{"name":"tsconfig","reason":"absent"}],
+        "vocabularies": ["infrastructure/v0"],
+        "volatile": [{"path":"/data/ms"}]
+      },
+      "expected": {
+        "protocolVersion": 0,
+        "schema": "architecture/v0",
+        "entities": [],
+        "relationships": [],
+        "missingInputs": [{"name":"tsconfig","reason":"absent"}],
+        "vocabularies": ["infrastructure/v0"],
+        "volatile": [{"path":"/data/ms"}]
+      }
+    },
+    {
+      "id": "items-that-are-a-string",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {"entities":"a"},
+      "error": "entities must be an array of objects, or an object of them keyed by ID, not a string"
+    },
+    {
+      "id": "items-that-are-a-number",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {"relationships":1},
+      "error": "relationships must be an array of objects, or an object of them keyed by ID, not a number"
+    },
+    {
+      "id": "items-that-are-null",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {"entities":null},
+      "error": "entities must be an array of objects, or an object of them keyed by ID, not null"
+    },
+    {
+      "id": "a-listed-item-that-is-an-array",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {"entities":[["a"]]},
+      "error": "entities[0] is an array, not an object"
+    },
+    {
+      "id": "a-listed-item-that-is-null",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {"entities":[{"id":"a","kind":"k","label":"A"},null]},
+      "error": "entities[1] is null, not an object"
+    },
+    {
+      "id": "a-keyed-item-that-is-a-string",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {"entities":{"a":"A"}},
+      "error": "entities[\"a\"] is a string, not an object"
+    },
+    {
+      "id": "a-listed-item-without-an-id",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {"entities":[{"kind":"k","label":"A"}]},
+      "error": "entities[0] has no id"
+    },
+    {
+      "id": "a-keyed-item-with-another-id",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {"entities":{"a":{"id":"b","kind":"k","label":"A"}}},
+      "error": "entities[\"a\"] has the id \"b\"; give it its key's, or none"
+    },
+    {
+      "id": "an-id-that-is-a-number",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {"entities":[{"id":1,"kind":"k","label":"A"}]},
+      "error": "An entity's id must be a nonempty string, not 1"
+    },
+    {
+      "id": "an-empty-id",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {"relationships":[{"id":"","kind":"k","from":"a","to":"a"}]},
+      "error": "A relationship's id must be a nonempty string, not \"\""
+    },
+    {
+      "id": "an-entity-without-a-label",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {"entities":[{"id":"a","kind":"k"}]},
+      "error": "The entity \"a\" needs label, a string"
+    },
+    {
+      "id": "a-relationship-without-an-end",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {"relationships":[{"id":"r","kind":"k","from":"a"}]},
+      "error": "The relationship \"r\" needs to, a string"
+    },
+    {
+      "id": "an-id-shared-by-an-entity-and-a-relationship",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {
+        "entities": [{"id":"a","kind":"k","label":"A"}],
+        "relationships": [{"id":"a","kind":"k","from":"a","to":"a"}]
+      },
+      "error": "Two items have the id \"a\"; entities and relationships share one set of IDs"
+    },
+    {
+      "id": "a-schema-that-is-not-a-domain-schema",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {"schema":"graph"},
+      "error": "schema must name a domain schema, such as \"graph/v0\", not \"graph\""
+    },
+    {
+      "id": "a-field-an-extraction-has-not",
+      "stdin": {
+        "protocolVersion": 0,
+        "projection": {"id":"flags","definition":{"id":"flags"}},
+        "repository": {
+          "mode": "in-place",
+          "root": "/repo",
+          "revision": {"kind":"commit","ref":"HEAD","commit":"0123456789abcdef0123456789abcdef01234567","dirty":false}
+        },
+        "capabilities": {"trusted":true,"network":false}
+      },
+      "result": {"colour":"red"},
+      "error": "An extraction has no field \"colour\"; besides its entities and relationships it may have metadata, missingInputs, vocabularies, volatile"
+    }
+  ]
+}

@@ -3,7 +3,6 @@
   "packages/host/core/src/detail-card.ts": 1,
   "packages/host/core/src/fullscreen.ts": 2,
   "packages/host/core/src/pair.ts": 1,
-  "packages/host/core/src/projection/payloads.ts": 1,
   "packages/host/core/src/ui/view-controls.tsx": 1,
   "packages/host/inspector/src/app/cards.tsx": 2,
   "packages/host/inspector/src/app/use-live-changes.ts": 1,

@@ -30,6 +30,18 @@ export type Vocabulary = (typeof vocabularyNames)[number]
 export type Json = null | boolean | number | string | Json[] | {[key: string]: Json}
 
 /**
+ * How a host presents a comparison with a renderer:
+ *
+ * - `animated`: one frame, driven through `progress` from before to after.
+ * - `side-by-side`: two frames, one held at progress 0 and one at 1.
+ * - `swipe`: the same two frames stacked, with a divider between them.
+ * - `diff`: one frame and no `progress` at all; the renderer draws its own
+ *   static comparison of both subjects (`init.comparisonMode` is `'diff'`).
+ *
+ * In the order hosts list them. A renderer manifest's `comparisonModes` names those it supports.
+ */
+export const comparisonModes = ['diff', 'side-by-side', 'animated', 'swipe'] as const
+/**
  * Colors a definition may give a kind (`presentation.kinds.<kind>.color`): a meaning (`danger`, `warning`, `success`,
  * `info`, `neutral`) or one of the theme's sixteen categorical hues, in palette order. Renderers paint them with theme
  * tokens, never a fixed value, so they follow every host's theme.

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Engine measurements (internal)",
+  "description": "Generated from packages/schemas/src/repository; internal and unversioned, never published. Validates docs/design/engine-measurements.json (see .dollarlint.toml).",
+  "type": "object",
+  "required": ["date", "scope", "environment", "artifacts", "samples", "conformance", "qualifications"],
+  "properties": {
+    "date": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+    "scope": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "environment": {"type": "object", "additionalProperties": {"type": "string"}},
+    "artifacts": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0}},
+    "samples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["nodes", "edges", "stateBytes", "repetitions", "operations"],
+        "properties": {
+          "nodes": {"type": "integer", "minimum": 0},
+          "edges": {"type": "integer", "minimum": 0},
+          "stateBytes": {"type": "integer", "minimum": 0},
+          "repetitions": {"type": "integer", "minimum": 1},
+          "operations": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["nativeMedianMs", "wasmMedianMs", "responseBytes", "agreement"],
+              "properties": {
+                "nativeMedianMs": {"type": "number", "minimum": 0},
+                "wasmMedianMs": {"type": "number", "minimum": 0},
+                "responseBytes": {"type": "integer", "minimum": 0},
+                "agreement": {"type": "boolean"}
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "conformance": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [{"type": "integer", "minimum": 0}, {"type": "boolean"}, {"type": "array", "items": {"type": "string"}}]
+      }
+    },
+    "qualifications": {"type": "array", "items": {"type": "string", "minLength": 1, "pattern": "\\S"}}
+  },
+  "additionalProperties": false
+}

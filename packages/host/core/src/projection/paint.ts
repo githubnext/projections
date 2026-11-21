@@ -1,4 +1,4 @@
-import {useEffect} from 'react'
+import {useEffect, useState} from 'react'
 import type {InitPayload} from '@githubnext/projections-renderer-sdk/protocol'
 import {twoPaneMode} from '../modes.js'
 import type {ComparisonMode} from '../modes.js'
@@ -43,33 +43,39 @@ export interface Painted {
   progress: number
 }
 
-/**
- * Tells the embedder when the renderer status changes (`onRendererStatusChange`, with the first status too) and when
- * the frames settle on what is shown while paused (`onPainted`, once each time they get there), so a host waits on the
- * core instead of observing the view's DOM.
- */
-export function useStatusEvents({
-  latest,
-  status,
-  paint,
-  playing,
-  mode,
-  progress,
-}: {
-  latest: {current: Pick<ProjectionOptions, 'onRendererStatusChange' | 'onPainted'>}
+/** What the status events are worked out from, after each change. */
+export interface StatusView {
   status: RendererStatus
   paint: PaintState
   playing: boolean
   mode: ComparisonMode
   progress: number
-}) {
+}
+
+/** The events a host is told: `onRendererStatusChange` and `onPainted` (see `ProjectionOptions`). */
+export type StatusEvents = Pick<ProjectionOptions, 'onRendererStatusChange' | 'onPainted'>
+
+/**
+ * Tells the embedder when the renderer status changes (`onRendererStatusChange`, with the first status too) and when
+ * the frames settle on what is shown while paused (`onPainted`, once each time they get there), so a host waits on the
+ * core instead of observing the view's DOM. Without a framework: call the returned function with each new view.
+ */
+export function createStatusEvents(): (view: StatusView, events: StatusEvents) => void {
+  let last: {status: RendererStatus; settled: string | undefined} | undefined
+  return ({status, paint, playing, mode, progress}, events) => {
+    const settled = paint === 'painted' && !playing ? `${mode}|${progress}` : undefined
+    const before = last
+    last = {status, settled}
+    if (before?.status !== status) events.onRendererStatusChange?.(status)
+    if (settled !== undefined && (before === undefined || before.settled !== settled)) events.onPainted?.({mode, progress})
+  }
+}
+
+/** `createStatusEvents` for a component's lifetime, told after each commit. */
+export function useStatusEvents({latest, ...view}: StatusView & {latest: {current: StatusEvents}}) {
+  const [tell] = useState(createStatusEvents)
+  const {status, paint, playing, mode, progress} = view
   useEffect(() => {
-    latest.current.onRendererStatusChange?.(status)
-  }, [latest, status])
-  const settled = paint === 'painted' && !playing ? `${mode}|${progress}` : undefined
-  useEffect(() => {
-    if (settled !== undefined) latest.current.onPainted?.({mode, progress})
-    // Only a new settled state reports; mode and progress are part of it.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [latest, settled])
+    tell({status, paint, playing, mode, progress}, latest.current)
+  }, [tell, latest, status, paint, playing, mode, progress])
 }

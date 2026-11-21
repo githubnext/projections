@@ -78,3 +78,57 @@ for (const {mode, width, arrangement} of cases)
     // Stacked, the upper pane reaches the rule: no gap between them.
     if (stacked) expect(Math.abs(found[1]!.top - found[0]!.bottom), 'row gap').toBeLessThanOrEqual(0.5)
   })
+
+/**
+ * Where the after frame and its drawing lie against the stage's floating foot (`StageFoot`, a `data-stage-cover`),
+ * in the host page's CSS px: the frame, the foot, and in the frame the graph's box (with its padding), the padding
+ * below the cards and the `stage-inset-bottom` the frame was sent.
+ */
+async function footClearance(page: Page) {
+  const frame = page.locator('[data-side="after"] iframe.ph-frame')
+  const [host, inner] = await Promise.all([
+    frame.evaluate(element => {
+      const foot = element.closest('.ph-stage-body')!.querySelector('.ph-stage-foot')!.getBoundingClientRect()
+      const box = element.getBoundingClientRect()
+      return {frameTop: box.top, height: box.height, foot: foot.top}
+    }),
+    frame
+      .contentFrame()
+      .locator('svg.graph')
+      .evaluate(graph => {
+        const box = graph.getBoundingClientRect()
+        return {
+          view: document.documentElement.clientHeight,
+          top: box.top,
+          bottom: box.bottom,
+          padding: parseFloat(getComputedStyle(graph).paddingBottom),
+          inset: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--projections-stage-inset-bottom')),
+        }
+      }),
+  ])
+  return {...host, ...inner}
+}
+
+test('swipe at 1440px, content-sized: the after frame grows by its foot, and its drawing ends clear of it', async ({page}) => {
+  await page.setViewportSize({width: 1440, height: 1000})
+  await page.goto(explorer('before=v1&after=v3&mode=swipe&fill=false'))
+  const view = page.locator('.ph')
+  await expect(view).toHaveAttribute('data-renderer-status', 'ready', {timeout: 30_000})
+  await expect(page.locator('.ph-stage-foot')).toBeVisible()
+  const settled = async () => {
+    const at = await footClearance(page)
+    expect(at.inset, 'the frame is sent the foot as its stage-inset-bottom').toBeGreaterThan(0)
+    // The frame is as tall as its drawing asks: the drawing, padded, spans it exactly, neither clipped nor left short.
+    expect(Math.abs(at.view - at.height), 'the frame has the height it was given').toBeLessThanOrEqual(1)
+    expect(Math.abs(at.top), 'the drawing starts at the frame top').toBeLessThanOrEqual(1)
+    expect(Math.abs(at.bottom - at.view), 'the drawing ends at the frame bottom').toBeLessThanOrEqual(1)
+    expect(at.padding, 'the drawing is padded clear of the foot').toBeGreaterThanOrEqual(at.inset)
+    expect(at.frameTop + at.bottom - at.padding, 'the cards end above the foot').toBeLessThanOrEqual(at.foot)
+    return at
+  }
+  await expect(settled).toPass()
+  // Still so once the host's height loop guard (`HeightRequests`, 1s) has nothing recent to hold on to.
+  const first = await settled()
+  await page.waitForTimeout(1200)
+  expect(await settled()).toEqual(first)
+})

@@ -40,6 +40,7 @@ test('every published schema is draft 2020-12 at its URL, compiles strictly and 
     'api',
     'architecture',
     'artifact',
+    'bookmarks',
     'comparator',
     'comparator-tests',
     'comparison',
@@ -53,6 +54,7 @@ test('every published schema is draft 2020-12 at its URL, compiles strictly and 
     'extractor-request',
     'graph',
     'metrics',
+    'renderer',
     'scenarios',
     'treemap',
     'vocabularies/agentic-workflows',
@@ -495,4 +497,51 @@ test('the environment schema accepts prepare steps, a toolchain and a strategy, 
     {...valid, workspace: {strategy: 'magic'}},
   ])
     assert.equal(validate('environment', invalid), false, JSON.stringify(invalid))
+})
+
+test('the bookmarks schema follows what the CLI accepts: identifiers, nonempty revisions and no unknown fields', () => {
+  const bookmark = {id: 'pr-7', title: '#7 compare', projectionId: 'agent-tools', before: 'main'}
+  const valid = {format: 'projections.bookmarks', version: 0, bookmarks: [bookmark, {...bookmark, id: 'b', after: 'HEAD'}]}
+  assert.equal(validate('bookmarks', valid), true)
+  for (const invalid of [
+    {...valid, version: 1},
+    {...valid, $schema: 'x'},
+    {...valid, bookmarks: [{...bookmark, extra: true}]},
+    {...valid, bookmarks: [{...bookmark, id: '-x'}]},
+    {...valid, bookmarks: [{...bookmark, before: ''}]},
+    {...valid, bookmarks: [{...bookmark, after: 'x'.repeat(1025)}]},
+    {...valid, bookmarks: [{...bookmark, title: undefined}]},
+    {...valid, bookmarks: Array.from({length: 101}, (_, index) => ({...bookmark, id: `b${index}`}))},
+  ])
+    assert.equal(validate('bookmarks', JSON.parse(JSON.stringify(invalid))), false, JSON.stringify(invalid))
+})
+
+test('the renderer manifest schema follows parseRendererManifest: names, handles, distinct modes and known accepts', () => {
+  const valid = {
+    format: 'projections.renderer',
+    version: 0,
+    name: 'basic',
+    title: 'Basic',
+    handles: ['graph', 'dag'],
+    comparisonModes: ['diff', 'animated'],
+    accepts: [{schema: 'architecture/v0', vocabulary: 'dependency-injection/v0'}, {schema: 'graph/v0'}],
+  }
+  assert.equal(validate('renderer', valid), true)
+  assert.equal(validate('renderer', {...valid, title: '🧭'.repeat(200)}), true)
+  assert.equal(validate('renderer', {format: 'projections.renderer', version: 0, name: 'x', title: 'X', handles: []}), true)
+  for (const invalid of [
+    {...valid, extra: true},
+    {...valid, name: 'Basic'},
+    {...valid, title: ''},
+    {...valid, title: ' \t\n'},
+    {...valid, title: '🧭'.repeat(201)},
+    {...valid, handles: ['Graph']},
+    {...valid, comparisonModes: []},
+    {...valid, comparisonModes: ['diff', 'diff']},
+    {...valid, comparisonModes: ['wipe']},
+    {...valid, accepts: [{schema: 'graph/v9'}]},
+    {...valid, accepts: [{schema: 'graph/v0', vocabulary: 'unknown/v0'}]},
+    {...valid, accepts: [{schema: 'graph/v0'}, {schema: 'graph/v0'}]},
+  ])
+    assert.equal(validate('renderer', invalid), false, JSON.stringify(invalid))
 })

@@ -1,4 +1,5 @@
 import type {TSchema} from 'typebox'
+import * as bookmarks from './bookmarks.js'
 import * as comparison from './comparison.js'
 import * as comparatorFile from './comparator.js'
 import * as comparatorTests from './comparator-tests.js'
@@ -7,8 +8,10 @@ import {domainSchemaDocuments} from './domains.js'
 import * as documents from './documents.js'
 import * as environment from './environment.js'
 import * as extraction from './extraction.js'
+import * as renderer from './renderer.js'
 import * as scenarios from './scenarios.js'
 
+export * from './bookmarks.js'
 export * from './comparison.js'
 export * from './comparator.js'
 export * from './comparator-tests.js'
@@ -17,6 +20,7 @@ export * from './documents.js'
 export * from './environment.js'
 export * from './domains.js'
 export * from './extraction.js'
+export * from './renderer.js'
 export * from './scenarios.js'
 export {emit, type EmittedSchema} from './emit.js'
 export {homeOf, type Home} from './support.js'
@@ -41,5 +45,7 @@ export const schemaDocuments: SchemaDocument[] = [
   {name: 'environment', title: 'Projections environment', schema: environment.EnvironmentSchema},
   {name: 'comparator', title: 'Projections comparator file', schema: comparatorFile.ComparatorFileSchema},
   {name: 'comparator-tests', title: 'Projections comparator tests', schema: comparatorTests.ComparatorTestsSchema},
+  {name: 'bookmarks', title: 'Projections bookmarks', schema: bookmarks.BookmarksSchema},
+  {name: 'renderer', title: 'Projections renderer manifest', schema: renderer.RendererManifestSchema},
   ...domainSchemaDocuments,
 ]

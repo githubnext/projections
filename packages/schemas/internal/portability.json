@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Portability exceptions (internal)",
+  "description": "Generated from packages/schemas/src/repository; internal and unversioned, never published. Validates .portability.yaml (see .dollarlint.toml).",
+  "type": "object",
+  "required": ["allow"],
+  "properties": {
+    "allow": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "rule", "reason"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^/\\\\][^\\\\]*$",
+            "description": "A repository-relative path."
+          },
+          "rule": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "description": "A rule's name in tools/scripts/check-portability.mjs."
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Why the code is right on Linux, macOS and Windows."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

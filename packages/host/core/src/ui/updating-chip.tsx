@@ -18,12 +18,15 @@ const gap = 8
 export function UpdatingChip({
   projection: p,
   running,
+  rendererShown = true,
 }: {
   projection: ProjectionController
   running: 'extracting' | 'comparing' | null | undefined
+  /** Whether the renderer's stage is the view shown (not a built-in table or text view, which keep the last result). */
+  rendererShown?: boolean
 }) {
-  // A pane still loading says what runs in its own status.
-  if (!running || p.rendererStatus === 'loading') return null
+  // A renderer pane still loading says what runs in its own status, where it is shown.
+  if (!running || (rendererShown && p.rendererStatus === 'loading')) return null
   return <Chip reducedMotion={p.reducedMotion} />
 }
 

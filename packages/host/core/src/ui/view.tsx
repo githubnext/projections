@@ -213,7 +213,7 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
             />
           )}
         </div>
-        <UpdatingChip projection={p} running={props.running} />
+        <UpdatingChip projection={p} running={props.running} rendererShown={view === 'renderer'} />
         {/* Without the summary bar, which says what the scope hides, a pill over the stage says it. */}
         {on('changesOnly') && !on('summary') && <ScopeNotice projection={p} />}
         {props.details !== 'none' && (

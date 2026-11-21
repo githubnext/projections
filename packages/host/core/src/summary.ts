@@ -157,7 +157,8 @@ export function fitSummary(widths: readonly number[], available: number, more: n
  * a hidden measuring row: elements marked `data-summary-measure` holding one `data-summary-figure` per figure, in
  * order, and a `data-summary-more` button. Content marked `data-summary-fixed` (such as the varied toggle) always
  * stays in the bar and takes its room first, at the end and as much again at the start, so the figures stay centred,
- * with the padding of the element marked `data-summary-trail` that holds it and the gaps between the bar's own items.
+ * with the padding of the element marked `data-summary-trail` that holds it and the gaps between the bar's own items;
+ * the "…" itself, when it is one of them, is marked `data-summary-overflow`.
  * `key` changes whenever the figures' text does.
  * `room` is the element whose width the bar may take, for a bar sized to its content.
  */
@@ -188,15 +189,23 @@ export function useSummaryFit(
       // A bar as wide as its content (in a floating foot) fits to the room it may grow to (`room`), not to itself, and
       // keeps no room at its start: it grows to fit its figures, so they are centred anyway.
       const holder = element.parentElement
-      const width = room?.current ? room.current.clientWidth - (holder ? holder.offsetWidth - holder.clientWidth : 0) : element.clientWidth
+      // The bar's own width unrounded (`clientWidth` rounds): a bar as wide as its content fits it exactly.
+      const borders = style ? parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth) : 0
+      const width = room?.current
+        ? room.current.clientWidth - (holder ? holder.offsetWidth - holder.clientWidth : 0)
+        : element.getBoundingClientRect().width - borders
       const view = element.ownerDocument.defaultView
       const trail = element.querySelector<HTMLElement>('[data-summary-trail]')
       const trailStyle = trail && view?.getComputedStyle(trail)
       const trailPadding = trailStyle ? parseFloat(trailStyle.paddingLeft) + parseFloat(trailStyle.paddingRight) : 0
-      // The gaps between the bar's items in its row (the measuring row is out of it).
-      const items = [...element.children].filter(child => view?.getComputedStyle(child).position !== 'absolute').length
+      // The gaps between the bar's items in its row: not the measuring row (out of it), the fixed content or the "…"
+      // (`data-summary-overflow`), whose gaps are counted with them.
+      const items = [...element.children].filter(
+        child => view?.getComputedStyle(child).position !== 'absolute' && !child.matches('[data-summary-fixed], [data-summary-overflow]'),
+      ).length
       const gaps = gap * Math.max(0, items - 1)
-      const available = width - padding - gaps - (room?.current ? 1 : 2) * (fixed + trailPadding)
+      // A hair to spare: fractional widths summed can land a little past an exact fit.
+      const available = width - padding - gaps - (room?.current ? 1 : 2) * (fixed + trailPadding) + 0.5
       // Too narrow for even the "…" beside the fixed content: the bar is tight, and the fixed content's words give way
       // (summary-bar.tsx cuts them with an ellipsis) so nothing overlaps the "…".
       if (available < more + gap) element.setAttribute('data-tight', '')

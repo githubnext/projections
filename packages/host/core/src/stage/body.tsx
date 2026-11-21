@@ -196,8 +196,15 @@ export function StageBody({
       // The chip starts where the renderer's content does: the stage inset the frame is given, less how far it bleeds.
       const edge = paneBleed(mode, stacked, side, bleed)[align === 'left' ? 'start' : 'end']
       const inset = bleed > 0 ? bleed - edge : chipInset
+      // Keyed by its tag, so a chip whose root changes (`h3` in side by side, `span` in swipe) mounts again and its
+      // whole-pixel alignment follows the new element.
       return (
-        <PaneChip key="label" {...common} inset={inset} maxWidth={mode === 'swipe' ? swipeChipWidth(width, inset) : undefined}>
+        <PaneChip
+          key={`label-${common.as}`}
+          {...common}
+          inset={inset}
+          maxWidth={mode === 'swipe' ? swipeChipWidth(width, inset) : undefined}
+        >
           {side === 'before' ? beforeLabel : afterLabel}
         </PaneChip>
       )

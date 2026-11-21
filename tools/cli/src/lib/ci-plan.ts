@@ -4,7 +4,7 @@
 // all in the rules file.
 import {browserJobs, type BrowserJob, type Layout} from './ci-browser.ts'
 import type {RepoFacts} from './ci-facts.ts'
-import {sortChanges} from './ci-files.ts'
+import {sortChanges, type Contents} from './ci-files.ts'
 import {ruleProblems} from './ci-rules-check.ts'
 import {holds, reasons, resolveGroups, RULES, type CiRules, type Context} from './ci-rules.ts'
 import {dependantsOf} from './packages.ts'
@@ -15,6 +15,8 @@ export type Change = {
   event?: string
   /** The pull request's labels. */
   labels?: readonly string[]
+  /** The changed files' contents before and after, for the lockfile rules; without them, a lockfile change runs everything. */
+  contents?: Contents
 }
 
 export type CiPlan = {
@@ -75,13 +77,13 @@ function narrowed(context: Context, affected: readonly string[]): {suite: string
 }
 
 export function ciPlan(facts: RepoFacts, rules: CiRules, change: Change): CiPlan {
-  const {paths, event = 'pull_request', labels = []} = change
+  const {paths, event = 'pull_request', labels = [], contents} = change
   const problems = ruleProblems(
     rules,
     facts.browserSuites.map(suite => suite.path),
   )
   if (problems.length) throw new Error(`${RULES}:\n${problems.join('\n')}`)
-  const sorted = sortChanges(facts, rules, paths)
+  const sorted = sortChanges(facts, rules, paths, contents)
   const full = [
     ...(rules.full.events.includes(event) ? [`a ${event} run`] : []),
     ...labels.filter(label => rules.full.labels.includes(label)).map(label => `the ${label} label`),

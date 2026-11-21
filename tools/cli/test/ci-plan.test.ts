@@ -137,3 +137,21 @@ test('a full run says why, and a run following the change gives each job its rea
   assert.deepEqual(plan.why['mutants-diff'], [rules.jobs['mutants-diff']?.description])
   assert.deepEqual(ciPlan(facts, rules, {paths: ['README.md']}).why.docs, [rules.jobs.docs?.description])
 })
+
+test("a lockfile change runs the jobs for what its changed packages reach; the root's own tooling, everything", () => {
+  const lock = readFileSync(new URL('../../../package-lock.json', import.meta.url), 'utf8')
+  const packages = (JSON.parse(lock) as {packages: Record<string, {version?: string; dependencies?: object}>}).packages
+  const bump = (key: string) => {
+    const changed = structuredClone(packages)
+    ;(changed[key] as {version?: string}).version = '999.0.0'
+    return JSON.stringify({...JSON.parse(lock), packages: changed})
+  }
+  const plan = (after: string, before: string | undefined) =>
+    ciPlan(facts, rules, {paths: ['package-lock.json'], contents: {before: () => before, after: () => after}})
+  // A dependency of the VS Code extension alone: that extension, nothing else.
+  const vscode = plan(bump('node_modules/@vscode/test-electron'), lock)
+  assert.deepEqual(vscode.full, [])
+  assert.deepEqual(vscode.changed, ['packages/integrations/vscode'])
+  assert.deepEqual(plan(bump('node_modules/eslint'), lock).full.length, 1)
+  assert.match(plan(lock, undefined).full[0] as string, /no earlier version/)
+})

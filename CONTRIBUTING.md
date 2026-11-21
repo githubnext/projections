@@ -189,7 +189,10 @@ The rules file holds every decision; the code holds none:
 - `files`: how each changed file counts, by the first rule that matches it:
   everything runs, documentation alone, the Linux checks alone (Markdown a crate
   embeds or a generator reads or writes), a change to the workspace or crate
-  containing it, or a change only to what reads it.
+  containing it, a change only to what reads it, or, for `package-lock.json` and
+  `Cargo.lock`, a change to the workspaces and crates whose resolved
+  dependencies changed (compared with the lockfile at the merge base, by the
+  lockfiles alone; a change to the root package's own tooling runs everything).
 - `tags`: labels a file gets by its path, whichever rule decided it, such as
   `release` for dist's configuration.
 - `groups`: named sets of workspaces and crates.

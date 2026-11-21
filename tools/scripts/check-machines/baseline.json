@@ -7,7 +7,6 @@
   "packages/host/core/src/ui/fit-plan.ts": 4,
   "packages/host/core/src/ui/view-controls.tsx": 1,
   "packages/host/inspector/src/app/cards.tsx": 2,
-  "packages/host/inspector/src/app/use-extractions.ts": 1,
   "packages/host/inspector/src/app/use-live-changes.ts": 1,
   "packages/host/inspector/src/app/use-pair-selection.ts": 2,
   "packages/host/inspector/src/app/use-repository.ts": 10,

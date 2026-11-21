@@ -77,8 +77,12 @@ export const generators: Generator[] = [
   },
   {
     name: 'schemas',
-    description: 'The published JSON Schemas and the engine data rules fixture, from the TypeBox sources',
-    outputs: ['packages/schemas/schemas/**/*.json', 'packages/schemas/fixtures/data-rules.json'],
+    description: 'The published JSON Schemas, the internal runner API schema and the engine data rules fixture, from the TypeBox sources',
+    outputs: [
+      'packages/schemas/schemas/**/*.json',
+      'packages/schemas/internal/runner-api.json',
+      'packages/schemas/fixtures/data-rules.json',
+    ],
     inputs: ['packages/schemas/src/**', 'packages/schemas/scripts/generate.mjs'],
     generate: [npm('run', 'generate', '--workspace', '@githubnext/projections-schemas')],
     check: {

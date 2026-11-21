@@ -266,16 +266,13 @@ recent pull requests' plans change, in runner-minutes), and add a case to
 `tools/cli/test/ci-plan.cases.json`; `tools test tools/cli` checks the rules,
 the workflow's gating and every case. A rules change runs everything.
 
-Everything also runs on pushes to `main`, nightly, on manual runs (**Run
-workflow** on the Projections workflow), and when a pull request carries the
-`ci:full` label (add the label, then push or re-run the workflow so the plan
-sees it).
+To run everything on a pull request, add the `ci:full` label, then push or
+re-run the workflow so the plan sees it (**Run workflow** runs everything too).
 
 `ci-ok` is the single required check. It passes when `changes` succeeds and
 every other job either passes or is skipped by the plan; any failed, cancelled,
-or timed-out job fails it.
-
-`dollarlint` runs on every change, outside the plan; see below.
+or timed-out job fails it. `dollarlint` runs on every change, outside the plan;
+see below.
 
 ### Schemas for data files
 

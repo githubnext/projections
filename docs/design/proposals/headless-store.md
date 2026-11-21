@@ -94,10 +94,15 @@ them:
 
 ## Steps, as pull requests
 
-1. **The store skeleton.** `createProjection` runs the settings reducer and
-   `subscribe`, and `useProjection` keeps its implementation and reads the
-   store's settings. Node tests cover controlled and uncontrolled settings
-   without React.
+1. **The settings reducer.** The controllable settings' rules (initial values,
+   reading, requesting, restarting on a new subject) become framework-free
+   functions in `projection/settings-store.ts`, with `createSettingsStore` to
+   run them with `subscribe`. `useControllable` runs the same functions in
+   component state, so React's timing is unchanged (a new subject still resets
+   settings during render). Node tests cover controlled and uncontrolled
+   settings without React. Nothing new is exported yet: the public
+   `createProjection` arrives in step 5, once its snapshot is the whole
+   controller, so its API doesn't churn.
 2. **Panes as a machine.** The pane-status machine, with #122's events as its
    effects and `paint` as a selector. The Inspector's snapshot page uses it for
    its readiness.
@@ -105,8 +110,8 @@ them:
    inside the store, and `usePlaybackControl` goes.
 4. **Selectors and selection.** Rows, scope, summary, payloads and selection
    move into the store; the remaining per-concern hooks go.
-5. **The adapter.** `useProjection` becomes `useSyncExternalStore` over the
-   store, and `controllerRef` hosts can `subscribe`.
+5. **The adapter.** `createProjection` is exported, `useProjection` becomes
+   `useSyncExternalStore` over it, and `controllerRef` hosts can `subscribe`.
 6. **`mountStage` and a vanilla host.** The stage without React, a Storybook
    story of a plain-DOM host as its conformance check, and `ProjectionStage` on
    top of it.

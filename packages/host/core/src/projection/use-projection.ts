@@ -13,6 +13,7 @@ import {placeAnnotations} from '../targets/annotations.js'
 import {summaryFigures} from '../summary.js'
 import type {PaneKey, ProjectionController, ProjectionOptions} from './types.js'
 import {speedRange, unit, useControllable} from './controllable.js'
+import {restartedSettings} from './settings-store.js'
 import {useHostEnvironment} from './environment.js'
 import {filterActions, filterState, useRowFilter} from './filtering.js'
 import {usePlaybackControl} from './playback-control.js'
@@ -105,12 +106,7 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
   const [shownSubject, setShownSubject] = useState(subject)
   if (shownSubject !== subject) {
     setShownSubject(subject)
-    setInternal(previous => ({
-      ...previous,
-      position: subject.mode === 'comparison' ? unit(options.initialPosition ?? toPosition(options.initialProgress ?? 1)) : 1,
-      playing: false,
-      selectedId: options.initialSelectedId ?? null,
-    }))
+    setInternal(previous => restartedSettings(previous, options, toPosition))
     setHoveredId(null)
     setAnchors({before: {}, after: {}})
     selection.setPinned(null)

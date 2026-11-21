@@ -194,7 +194,6 @@
       "from": "package:is-odd",
       "id": "dependency:[\"package:is-odd\",\"dependencies\",\"is-number\"]",
       "kind": "dependencies",
-      "label": null,
       "to": "package:is-number@6"
     }
   ],

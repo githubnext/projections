@@ -8,7 +8,7 @@ export type RangeProps = Omit<ComponentProps<'input'>, 'type'>
  * A native `input[type=range]` styled like shadcn/ui's Slider (track, filled range, thumb; see `.pj-range` in
  * theme.css). Native, so it keeps keyboard, form and `fill()` behavior; use `Slider` for multi-thumb ranges.
  */
-export const Range = forwardRef<HTMLInputElement, RangeProps>(function Range({className, style, ...props}, ref) {
+export const Range = forwardRef<HTMLInputElement, RangeProps>(({className, style, ...props}, ref) => {
   const min = Number(props.min ?? 0)
   const max = Number(props.max ?? 100)
   const value = Number(props.value ?? props.defaultValue ?? min)

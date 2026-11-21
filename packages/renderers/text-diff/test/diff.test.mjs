@@ -72,7 +72,7 @@ test('random edits always reconstruct both texts', () => {
   for (let round = 0; round < 200; round++) {
     const lines = Array.from({length: Math.floor(random() * 30)}, () => 'abcde'[Math.floor(random() * 5)])
     const changed = lines.flatMap(line => (random() < 0.2 ? [] : random() < 0.2 ? [line, 'xyz'[Math.floor(random() * 3)]] : [line]))
-    const text = list => list.map(line => line + '\n').join('')
+    const text = list => list.map(line => `${line}\n`).join('')
     const diff = check(text(lines), text(changed))
     assert.ok(edits(diff) <= lines.length + changed.length)
   }

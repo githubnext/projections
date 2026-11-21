@@ -77,7 +77,7 @@ function revisionFiles(revision, prefix) {
       return {mode, type, object, path: path.slice(prefix.length)}
     })
     .filter(entry => entry.type === 'blob' && ['100644', '100755', '120000'].includes(entry.mode))
-  const output = git(['cat-file', '--batch'], entries.map(entry => entry.object).join('\n') + '\n')
+  const output = git(['cat-file', '--batch'], `${entries.map(entry => entry.object).join('\n')}\n`)
   let cursor = 0
   return entries.map(entry => {
     const end = output.indexOf(10, cursor)

@@ -281,7 +281,7 @@ test('sweep columns summarize how often a projection changed and order by signal
 
 test('choices are named for people: the ref, the commit subject and age, never a bare commit when the runner knows it', async () => {
   const {choiceLabel} = await import('../dist/ui/index.js')
-  const commit = 'e6e30acc' + 'a'.repeat(32)
+  const commit = `e6e30acc${'a'.repeat(32)}`
   const document = kind => ({provenance: {revision: {kind, ref: 'x', commit, dirty: kind === 'working-tree'}}})
   const revisions = [{commit, title: 'Set up the workspaces', date: '2026-11-01T12:00:00Z'}]
   const now = Date.parse('2026-11-10T12:00:00Z')

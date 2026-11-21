@@ -111,7 +111,7 @@ try {
   const repo = path.join(root, 'repo')
   await mkdir(repo)
   const git = (...args) => {
-    const result = spawnSync('git', ['-c', 'core.hooksPath=' + (windows ? 'NUL' : '/dev/null'), '-c', 'commit.gpgsign=false', ...args], {
+    const result = spawnSync('git', ['-c', `core.hooksPath=${windows ? 'NUL' : '/dev/null'}`, '-c', 'commit.gpgsign=false', ...args], {
       cwd: repo,
       encoding: 'utf8',
       env: {...process.env, GIT_CONFIG_GLOBAL: windows ? 'NUL' : '/dev/null'},

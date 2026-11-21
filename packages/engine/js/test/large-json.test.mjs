@@ -18,15 +18,15 @@ for (const [name, engine] of [
     assert.ok(Buffer.byteLength(request) > 32 * 1024 * 1024)
     assert.ok(Buffer.byteLength(request) < limits.requestBytes)
     assert.deepEqual(await engine.parseJson(raw), value)
-    const exact = '"' + 'x'.repeat(limits.artifactBytes - 2) + '"'
+    const exact = `"${'x'.repeat(limits.artifactBytes - 2)}"`
     assert.equal(Buffer.byteLength(exact), limits.artifactBytes)
     assert.equal((await engine.parseJson(exact)).length, limits.artifactBytes - 2)
     await assert.rejects(
-      engine.parseJson('"' + 'x'.repeat(limits.artifactBytes) + '"'),
+      engine.parseJson(`"${'x'.repeat(limits.artifactBytes)}"`),
       error => error instanceof EngineError && error.diagnostics[0].code === 'json-size-limit',
     )
     await assert.rejects(
-      engine.decode(' '.repeat(limits.extractionBytes) + '{}'),
+      engine.decode(`${' '.repeat(limits.extractionBytes)}{}`),
       error => error instanceof EngineError && error.diagnostics[0].code === 'extraction-size-limit',
     )
     const empty = '{"protocolVersion":0,"schema":"graph/v0","entities":[],"relationships":[]}'

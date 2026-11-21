@@ -63,8 +63,9 @@ async function resolveRelease(manifest, adding) {
   })
   const moved = provenance.changes.length > 0
   const summary = moved
-    ? `the registry (${repository} main@${provenance.head.slice(0, 7)}) has moved past ${tagOf(target)}:\n` +
-      provenance.changes.map(change => `  ${change.sha.slice(0, 7)} ${change.message} (${change.path})`).join('\n')
+    ? `the registry (${repository} main@${provenance.head.slice(0, 7)}) has moved past ${tagOf(target)}:\n${provenance.changes
+        .map(change => `  ${change.sha.slice(0, 7)} ${change.message} (${change.path})`)
+        .join('\n')}`
     : `the registry (${repository} main@${provenance.head.slice(0, 7)}) builds ${tagOf(target)}: no build input changed since the tag`
   if (moved && !options.unreleased && !options.check) {
     throw new UsageError(

@@ -102,7 +102,7 @@ test('scrubbing a new table forward and back keeps cards apart, links attached a
         }
       }
       for (const link of frame.links) {
-        const dependent = 'table:' + link.key.replace(/^column:/, '').split('.')[0]
+        const dependent = `table:${link.key.replace(/^column:/, '').split('.')[0]}`
         const card = frame.tables.find(table => table.id === dependent)!
         expect(card, `link ${link.key} has its card at ${progress}`).toBeTruthy()
         expect(

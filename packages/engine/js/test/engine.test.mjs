@@ -199,7 +199,7 @@ for (const [name, engine] of Object.entries(engines)) {
       [64, true],
       [65, false],
     ]) {
-      const nested = '['.repeat(levels) + '0' + ']'.repeat(levels)
+      const nested = `${'['.repeat(levels)}0${']'.repeat(levels)}`
       if (valid) await engine.parseJson(nested)
       else await assert.rejects(engine.parseJson(nested), error => error.diagnostics[0].code === 'depth-limit')
     }

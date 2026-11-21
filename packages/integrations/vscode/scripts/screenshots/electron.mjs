@@ -49,9 +49,9 @@ export async function launch({
     executablePath: executable,
     args: [
       repository,
-      '--extensionDevelopmentPath=' + extension,
-      '--user-data-dir=' + user,
-      '--extensions-dir=' + join(user, 'extensions'),
+      `--extensionDevelopmentPath=${extension}`,
+      `--user-data-dir=${user}`,
+      `--extensions-dir=${join(user, 'extensions')}`,
       '--skip-welcome',
       '--skip-release-notes',
       '--disable-workspace-trust',

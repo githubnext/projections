@@ -10,7 +10,7 @@ import {cn} from '../lib/utils.js'
 export const SegmentedControl = forwardRef<
   ElementRef<typeof RadioGroupPrimitive.Root>,
   ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
->(function SegmentedControl({className, ...props}, ref) {
+>(({className, ...props}, ref) => {
   // No orientation: every arrow key moves, as with native radios.
   return (
     <RadioGroupPrimitive.Root
@@ -32,7 +32,7 @@ export const SegmentedControl = forwardRef<
 export const SegmentedControlItem = forwardRef<
   ElementRef<typeof RadioGroupPrimitive.Item>,
   ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>
->(function SegmentedControlItem({className, children, onFocus, ...props}, ref) {
+>(({className, children, onFocus, ...props}, ref) => {
   return (
     <RadioGroupPrimitive.Item
       ref={ref}

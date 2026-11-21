@@ -133,11 +133,11 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
       }
     }
     console.log(
-      `${release.snapshots.length} snapshots for ${release.version}` +
-        (release.prerelease
+      `${release.snapshots.length} snapshots for ${release.version}${
+        release.prerelease
           ? ' (a prerelease: the schemas at their IDs are unchanged)'
-          : `, and ${release.current.length} schemas at their IDs`) +
-        ` in ${out}, for ${base}`,
+          : `, and ${release.current.length} schemas at their IDs`
+      } in ${out}, for ${base}`,
     )
   }
 }

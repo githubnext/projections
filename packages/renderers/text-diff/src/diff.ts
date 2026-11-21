@@ -75,7 +75,7 @@ export function diffLines(beforeText: string, afterText: string, limits: DiffLim
   const ids = new Map<string, number>()
   const encode = (lines: Line[]) =>
     Int32Array.from(lines, line => {
-      const key = line.eol + '\u0000' + line.text
+      const key = `${line.eol}\u0000${line.text}`
       let id = ids.get(key)
       if (id === undefined) ids.set(key, (id = ids.size))
       return id

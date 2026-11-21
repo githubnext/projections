@@ -107,7 +107,7 @@ export function findings(path, text) {
   if (/(^|\/)package\.json$/.test(path)) {
     const scripts = JSON.parse(text).scripts ?? {}
     return Object.entries(scripts).flatMap(([name, command]) => {
-      const number = lines.findIndex(text => text.trim().startsWith(JSON.stringify(name) + ':')) + 1
+      const number = lines.findIndex(text => text.trim().startsWith(`${JSON.stringify(name)}:`)) + 1
       return applicable
         .filter(rule => rule.pattern.test(command))
         .map(rule => ({rule: rule.name, line: number, text: `${JSON.stringify(name)}: ${JSON.stringify(command)}`}))

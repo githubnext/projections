@@ -82,7 +82,7 @@ for (const engine of ['chromium', 'webkit']) {
           await promise
           return 'unexpected success'
         } catch (error) {
-          return error.name + ': ' + error.message
+          return `${error.name}: ${error.message}`
         }
       }
       const engine = await createWorkerEngine()
@@ -96,11 +96,11 @@ for (const engine of ['chromium', 'webkit']) {
       engine.dispose()
       errors.push(...(await settled), await error(engine.normalize(state)))
       const blob = source => URL.createObjectURL(new Blob([source], {type: 'text/javascript'}))
-      const ready = '{type:"ready",digest:"sha256:' + '0'.repeat(64) + '"}'
-      const hang = blob('onmessage = e => { if(e.data.type === "init") postMessage(' + ready + ') }')
-      const crash = blob('onmessage = e => { if(e.data.type === "init") postMessage(' + ready + '); else throw Error("worker crash") }')
+      const ready = `{type:"ready",digest:"sha256:${'0'.repeat(64)}"}`
+      const hang = blob(`onmessage = e => { if(e.data.type === "init") postMessage(${ready}) }`)
+      const crash = blob(`onmessage = e => { if(e.data.type === "init") postMessage(${ready}); else throw Error("worker crash") }`)
       const malformed = blob(
-        'onmessage = e => postMessage(e.data.type === "init" ? ' + ready + ' : {type:"response",id:e.data.id,bytes:new Uint8Array([0])})',
+        `onmessage = e => postMessage(e.data.type === "init" ? ${ready} : {type:"response",id:e.data.id,bytes:new Uint8Array([0])})`,
       )
       const neverReady = blob('onmessage = () => {}')
       try {

@@ -245,8 +245,8 @@ test('M2: the badge beside the choice, from provenanceBadge', () => {
 })
 
 test('M5: a verified scope compares the scope identity, so edits outside it leave the result current', () => {
-  const scopedThen = 'sha256:' + '1'.repeat(64)
-  const scopedNow = 'sha256:' + '2'.repeat(64)
+  const scopedThen = `sha256:${'1'.repeat(64)}`
+  const scopedNow = `sha256:${'2'.repeat(64)}`
   // provenance.execution.scope as an extraction records it, with the scope identity the host computed from its tree.
   const scoped = {
     ...now,

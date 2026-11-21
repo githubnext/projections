@@ -95,11 +95,11 @@ export async function verifyGhExtension({source, fixture, binary, repo, revision
     await invoke('gh', ['projections', 'show', revision, '-p', 'services-node', '--trust', '--output', output], repo)
     assert.equal(JSON.parse(await readFile(path.join(repo, output), 'utf8')).digest, snapshot.digest)
     const main = path.join(fixture, 'packages/cli/dist/projections')
-    await rename(main, main + '.saved')
+    await rename(main, `${main}.saved`)
     try {
       await assert.rejects(invoke('gh', ['projections', '--help'], repo), /built native CLI is missing[\s\S]*npm ci[\s\S]*npm run build/)
     } finally {
-      await rename(main + '.saved', main)
+      await rename(`${main}.saved`, main)
     }
     const installed = await invoke('gh', ['extension', 'list'], fixture)
     assert.match(installed.stdout, /gh projections/)

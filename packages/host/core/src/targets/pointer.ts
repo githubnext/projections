@@ -7,7 +7,7 @@ export function readPointer(value: unknown, pointer: string): unknown {
     if (Array.isArray(current)) {
       if (!/^(0|[1-9][0-9]*)$/.test(token)) return undefined
       current = current[Number(token)]
-    } else if (typeof current === 'object' && current !== null && Object.prototype.hasOwnProperty.call(current, token)) {
+    } else if (typeof current === 'object' && current !== null && Object.hasOwn(current, token)) {
       current = (current as Record<string, unknown>)[token]
     } else {
       return undefined

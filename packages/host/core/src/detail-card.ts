@@ -89,7 +89,7 @@ export function useDetailCard(
       )
       if (button) anchor = button.getBoundingClientRect()
     }
-    anchor = anchor && intersect(anchor, bounds)
+    anchor &&= intersect(anchor, bounds)
     const frame = card.offsetHeight - card.clientHeight
     const next = placeDetailCard({anchor, height: card.scrollHeight + frame, bounds, sheetBelow})
     // The card is positioned in its container's padding box.

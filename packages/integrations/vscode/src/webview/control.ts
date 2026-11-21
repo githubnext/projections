@@ -35,7 +35,6 @@ function runViewAction(view: View | null | undefined, {action, value}: MessageOf
       return
     case 'runAction':
       view.runAction(String(value))
-      return
   }
 }
 

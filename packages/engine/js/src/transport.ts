@@ -66,8 +66,9 @@ export async function sha256(bytes: BufferSource): Promise<string> {
   return `sha256:${[...digest].map(byte => byte.toString(16).padStart(2, '0')).join('')}`
 }
 
-const bytesOf = (data: BufferSource) =>
-  data instanceof ArrayBuffer ? new Uint8Array(data) : new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
+function bytesOf(data: BufferSource) {
+  return data instanceof ArrayBuffer ? new Uint8Array(data) : new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
+}
 
 const roundConstants = new Uint32Array([
   0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be,

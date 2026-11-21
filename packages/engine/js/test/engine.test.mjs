@@ -181,8 +181,8 @@ for (const [name, engine] of Object.entries(engines)) {
   })
 
   test(`${name}: strict entire artifact envelopes, generic JSON and scalar results`, async () => {
-    const raw = '{"format":"projections.extraction","version":0,"provenance":{"revision":{"ref":"one"}},"extraction":{"entities":[]}}'
-    assert.deepEqual(await engine.parseJson(raw), JSON.parse(raw))
+    const envelope = '{"format":"projections.extraction","version":0,"provenance":{"revision":{"ref":"one"}},"extraction":{"entities":[]}}'
+    assert.deepEqual(await engine.parseJson(envelope), JSON.parse(envelope))
     for (const raw of ['null', 'true', '1', '""', '[1,2,3]']) {
       assert.deepEqual(await engine.parseJson(raw), JSON.parse(raw))
     }

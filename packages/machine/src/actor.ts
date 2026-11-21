@@ -194,9 +194,12 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
     if (!running || draining) return
     draining = true
     try {
-      while (running && queue.length) {
+      // Each loop also ends when an effect stops the actor, leaving what waits for `start`.
+      while (queue.length) {
+        if (!running) break
         const before = state
-        while (running && queue.length) {
+        while (queue.length) {
+          if (!running) break
           const {event, from} = queue.shift()!
           // An event from a generation that ended while it waited is as stale as one sent after.
           if (from && !from.live) continue
@@ -219,7 +222,7 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
     }
   }
 
-  const enqueue = (event: E, from: Generation<E> | undefined) => {
+  function enqueue(event: E, from: Generation<E> | undefined) {
     queue.push({event, from})
     drain()
   }

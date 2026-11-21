@@ -1,4 +1,6 @@
 {
+ "protocolVersion": 0,
+ "schema": "architecture/v0",
  "entities": [
   {
    "id": "messages:event:messages:archived",

@@ -1,4 +1,6 @@
 {
+ "protocolVersion": 0,
+ "schema": "architecture/v0",
  "entities": [
   {
    "id": "flags:consumer:%40example%2Fapp:enabled",

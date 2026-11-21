@@ -1,6 +1,6 @@
 //! The Prisma parser against fixture schemas.
 //!
-//! `tests/fixtures/expected` holds the entities and relationships the previous
+//! `tests/fixtures/expected` holds the `database/v0` extractions the previous
 //! extractor produced for each fixture by driving Prisma 6.19.3's own schema engine
 //! (`get_dmmf`), so these tests check that the native parser preserves Prisma's
 //! semantics, not merely its own earlier output. `expected/views.json` departs from
@@ -108,10 +108,7 @@ fn matches_prisma_schema_engine_semantics_for_every_fixture() {
             };
             assert_eq!(data.remove("databaseType"), Some(expected), "{name}: {}", entity["id"]);
         }
-        let mut expected: Value =
-            serde_json::from_str(&fs::read_to_string(fixtures().join(format!("expected/{name}.json"))).unwrap()).unwrap();
-        expected["protocolVersion"] = json!(0);
-        expected["schema"] = json!("database/v0");
+        let expected: Value = serde_json::from_str(&fs::read_to_string(fixtures().join(format!("expected/{name}.json"))).unwrap()).unwrap();
         let (actual_items, expected_items) = (semantic(&actual), semantic(&expected));
         for (id, item) in &expected_items {
             assert_eq!(actual_items.get(id), Some(item), "{name}: {id}");

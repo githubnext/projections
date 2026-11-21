@@ -49,10 +49,7 @@ export const canonical = async extraction => (await engine.canonicalize(extracti
 export const compare = (before, after) => engine.compare(before, after)
 
 /** The extraction the sample's former built-in produced for this fixture, ignoring evidence. */
-export function expected(sample, name) {
-  const value = JSON.parse(readFileSync(`${fixture(sample, name)}.expected.json`, 'utf8'))
-  return {protocolVersion: 0, schema: 'architecture/v0', ...value}
-}
+export const expected = (sample, name) => JSON.parse(readFileSync(`${fixture(sample, name)}.expected.json`, 'utf8'))
 
 /** A copy of a fixture outside this workspace. */
 export async function isolated(sample, name, action) {

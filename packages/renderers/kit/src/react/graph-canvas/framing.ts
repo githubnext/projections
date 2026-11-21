@@ -141,6 +141,10 @@ export function useGraphZoom(
       contentStart(shown.current.length ? shown.current : all, content, drawnPadding, 12, align, flush ? drawnPadding.x : 0)(view)
   }, [framing, content, orientation, drawnPadding, flush])
   const sized = useFrameSizing() === 'content'
+  // The bands the host's overlays take at the view's ends, which a focus is fitted and centred clear of.
+  const covered = Boolean(useStageCover()?.length)
+  const insetTop = useStageInsetTop()
+  const bands = useMemo(() => ({top: covered ? (insetTop ?? 0) : 0, bottom: 0}), [covered, insetTop])
   const opening = useMemo(
     () =>
       focusOpening({
@@ -154,8 +158,9 @@ export function useGraphZoom(
         orientation,
         padding,
         drawn: drawnPadding,
+        bands,
       }),
-    [area, request, floor, content, fit.scale, fit.width, fit.height, sized, orientation, padding, drawnPadding],
+    [area, request, floor, content, fit.scale, fit.width, fit.height, sized, orientation, padding, drawnPadding, bands],
   )
   const zoom = useStageZoom(scroller, onAction, fit.scale, {floor, start, ...(opening ? {opening} : {}), ...(hold ? {hold} : {})})
   useLayoutEffect(() => setDrawnScale(zoom.scale), [zoom.scale])
@@ -174,6 +179,7 @@ function focusOpening({
   orientation,
   padding,
   drawn,
+  bands,
 }: {
   area: FocusArea | undefined
   request: RendererFocus | undefined
@@ -188,6 +194,8 @@ function focusOpening({
   padding: GraphPadding
   /** The padding as drawn (`useScrolledPadding`), which the opening is placed in. */
   drawn: GraphPadding
+  /** The bands the host's overlays take at the view's top and bottom, CSS px (0 without a cover). */
+  bands: {top: number; bottom: number}
 }): {zoom: number; start: ScrollStart; centred: boolean} | undefined {
   if (!fit) return undefined
   if (!area) return request?.fit ? {zoom: 1, start: {x: 0, y: 0}, centred: false} : undefined
@@ -196,7 +204,7 @@ function focusOpening({
   const {box} = area
   const room = Math.min(
     Math.max(0, view.width - 2 * padding.x) / box.width,
-    Math.max(0, view.height - padding.top - padding.y) / box.height,
+    Math.max(0, view.height - Math.max(padding.top, bands.top) - Math.max(padding.y, bands.bottom)) / box.height,
   )
   const fitted = Math.min(1, room)
   // Asked for, the area is fitted (at most at full size, and not below the floor unless `fit`). Diff mode's own focus
@@ -206,7 +214,8 @@ function focusOpening({
   const fits = fitted >= scale * (1 - 1e-6)
   const centred: ScrollStart = ({scale, width, height}) => ({
     left: (box.x + box.width / 2 - content.x) * scale + drawn.x - width / 2,
-    top: (box.y + box.height / 2 - content.y) * scale + drawn.top - height / 2,
+    // Centred in the room the bands leave, not the whole view.
+    top: (box.y + box.height / 2 - content.y) * scale + drawn.top - (height + bands.top - bands.bottom) / 2,
   })
   // Asked for: centred where the area fits, else its reading start, as the whole graph opens.
   if (request) return {zoom: scale / fit, start: fits ? centred : contentStart(area.cards, content, drawn), centred: fits}

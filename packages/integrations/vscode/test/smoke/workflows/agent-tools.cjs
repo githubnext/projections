@@ -8,8 +8,9 @@ const vscode = require('vscode')
 module.exports = async function agentTools({folder, api, invoke}) {
   // Agent tools: VS Code's agent calls the CLI's tools on the folder's backend.
   const names = vscode.lm.tools.filter(tool => tool.name.startsWith('projections_')).map(tool => tool.name)
-  for (const name of ['projections_list_projections', 'projections_compare', 'projections_open_projection', 'projections_set_part'])
+  for (const name of ['projections_list_projections', 'projections_compare', 'projections_open_projection', 'projections_set_part']) {
     assert.ok(names.includes(name), names.join())
+  }
   assert.match(await invoke('projections_list_projections', {}), /- packages: Packages\. Extractor workspace-dependencies/)
   const compared = await invoke('projections_compare', {projection: 'packages', before: 'main', after: 'HEAD'})
   assert.match(compared, /\d+ changes in \d+ steps?: /)

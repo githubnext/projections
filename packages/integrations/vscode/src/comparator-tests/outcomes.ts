@@ -85,10 +85,10 @@ export function outcomes(results: readonly FileResult[]): Map<string, FileOutcom
 }
 
 /** What a run covers: every test file, or files, each whole or some of its cases. */
-export type Selection = 'all' | ReadonlyArray<{path: string; cases?: readonly string[]}>
+export type Selection = 'all' | readonly {path: string; cases?: readonly string[]}[]
 
 /** The `POST /api/comparator-tests/run` bodies for a selection: one per file (whole, or its chosen cases), or one for all. */
-export function runBodies(selection: Selection, update: boolean): Array<Record<string, unknown>> {
+export function runBodies(selection: Selection, update: boolean): Record<string, unknown>[] {
   const flag = update ? {update: true} : {}
   if (selection === 'all') return [{...flag}]
   const files = new Map<string, Set<string> | 'whole'>()

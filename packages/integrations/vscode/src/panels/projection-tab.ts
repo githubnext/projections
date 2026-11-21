@@ -279,8 +279,9 @@ export class ProjectionTab extends InspectorWebview {
     if (pair) return this.follow(pair)
     // The definition the tab should apply changed (a commit, or the edits were undone): Refresh applies it.
     const desired = this.revisionFor(this.shownPair())
-    if (this.last?.definitionRevision && this.last.definitionRevision !== desired)
+    if (this.last?.definitionRevision && this.last.definitionRevision !== desired) {
       return void (await this.control({op: 'setDefinitionRevision', ref: desired}))
+    }
     await this.control({op: 'refresh'})
   }
 

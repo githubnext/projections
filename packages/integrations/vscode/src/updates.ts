@@ -108,8 +108,9 @@ export class PairSummaries {
 
   /** Keeps only the summaries for `pair` (what changed in the repository may change the others' counts). */
   keepOnly(pair: Pair | undefined) {
-    for (const pairs of this.byProjection.values())
+    for (const pairs of this.byProjection.values()) {
       for (const key of [...pairs.keys()]) if (!pair || key !== pairKey(pair)) pairs.delete(key)
+    }
   }
 }
 

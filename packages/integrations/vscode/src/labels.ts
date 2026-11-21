@@ -20,8 +20,8 @@ export interface RefFacts {
 /** The repository's names for commits, from `GET /api/pairs`. */
 export interface RefNames {
   head?: {branch?: string; commit?: string}
-  branches?: Array<{name: string; commit?: string; current?: boolean}>
-  tags?: Array<{name: string; commit?: string}>
+  branches?: {name: string; commit?: string; current?: boolean}[]
+  tags?: {name: string; commit?: string}[]
   mergeBase?: string
   defaultBranch?: string
 }
@@ -97,8 +97,9 @@ export function sideLabel(facts: RefFacts, names: RefNames, now: number = Date.n
     if (branch) return {...dated, kind: 'branch', name: branch.name}
     const tag = tags.find(item => item.commit === commit)
     if (tag) return {...dated, kind: 'tag', name: tag.name}
-    if (names.mergeBase && names.mergeBase === commit)
+    if (names.mergeBase && names.mergeBase === commit) {
       return {...dated, kind: 'merge-base', name: `merge base with ${names.defaultBranch ?? 'the default branch'}`}
+    }
     return {...dated, kind: 'commit', name: short(commit)}
   }
   return {...dated, kind: 'commit', name: ref}

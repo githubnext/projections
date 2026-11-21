@@ -7,7 +7,7 @@ import type {TestNode} from '../test-items.js'
 /** The last outcome of each item, for tests driving the view (the extension's `comparatorTests` API). */
 export interface RecordedOutcome {
   state: 'started' | 'passed' | 'failed' | 'skipped' | 'errored'
-  messages: Array<{message: string; path?: string; line?: number; expected?: string; actual?: string}>
+  messages: {message: string; path?: string; line?: number; expected?: string; actual?: string}[]
 }
 
 /** One projection's checks in a run: the included check items, and whether the whole projection runs. */
@@ -58,8 +58,8 @@ export class TestState {
 
   constructor(readonly controller: vscode.TestController) {}
 
-  items(): Array<[string, vscode.TestItem]> {
-    const all: Array<[string, vscode.TestItem]> = []
+  items(): [string, vscode.TestItem][] {
+    const all: [string, vscode.TestItem][] = []
     this.controller.items.forEach(item => all.push([item.id, item]))
     return all
   }
@@ -69,8 +69,9 @@ export class TestState {
       outcome.expected !== undefined || outcome.actual !== undefined
         ? vscode.TestMessage.diff(outcome.message, outcome.expected ?? '', outcome.actual ?? '')
         : new vscode.TestMessage(outcome.message)
-    if (outcome.location)
+    if (outcome.location) {
       message.location = new vscode.Location(vscode.Uri.joinPath(folder.uri, ...outcome.location.path.split('/')), range(outcome.location))
+    }
     return message
   }
 

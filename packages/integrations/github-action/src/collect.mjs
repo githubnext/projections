@@ -77,8 +77,9 @@ for (const [file, bytes] of files) {
 }
 const failed = manifest.projections.filter(projection => projection.status === 'error')
 for (const projection of failed) {
-  for (const diagnostic of projection.diagnostics)
+  for (const diagnostic of projection.diagnostics) {
     console.log(`::error title=Projection ${projection.id}::${diagnostic.code}: ${diagnostic.message.replace(/\r?\n/g, ' ')}`)
+  }
 }
 output('directory', directory)
 output('manifest', path.join(directory, artifactManifest))

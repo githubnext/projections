@@ -26,7 +26,7 @@ export const shownChoice = () => labels?.choice.id
  * The pair's revisions named for people, by ref, for the Inspector's panes, slider and
  * labels (`InspectorHost.revisionLabels`).
  */
-let named: {[ref: string]: string} | undefined
+let named: Record<string, string> | undefined
 export const revisionLabels = {
   get: () => named,
   subscribe: store.subscribe,
@@ -77,7 +77,7 @@ function addStyle() {
   document.head.append(element)
 }
 
-const provenanceIcons: {[label: string]: string} = {
+const provenanceIcons: Record<string, string> = {
   'From CI': 'github-action',
   Imported: 'package',
   Approximate: 'info',

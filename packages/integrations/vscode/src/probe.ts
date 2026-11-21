@@ -3,7 +3,7 @@
 // each is also appended to that file as a JSON line with its time, for tests driving VS Code from outside.
 import {appendFileSync} from 'node:fs'
 
-const log = process.env['PROJECTIONS_TEST_EVENT_LOG']
+const log = process.env.PROJECTIONS_TEST_EVENT_LOG
 const counts = new Map<string, number>()
 
 /** Counts one `name` update. */
@@ -18,6 +18,6 @@ export function count(name: string): void {
 }
 
 /** The counts so far, by name. */
-export function counters(): {[name: string]: number} {
+export function counters(): Record<string, number> {
   return Object.fromEntries(counts)
 }

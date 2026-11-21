@@ -9,8 +9,9 @@ export function loadReport(environment) {
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
   const documents = new Map()
   for (const projection of manifest.projections) {
-    if (projection.path)
+    if (projection.path) {
       documents.set(projection.id, JSON.parse(readFileSync(path.join(path.dirname(manifestPath), projection.path), 'utf8')))
+    }
   }
   const indexPath = environment.PROJECTIONS_SNAPSHOTS && path.join(environment.PROJECTIONS_SNAPSHOTS, snapshotIndex)
   const snapshots =

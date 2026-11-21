@@ -234,8 +234,9 @@ export function initArguments(plan: Plan): string[] {
   if (plan.title.trim()) args.push('--title', plan.title.trim())
   if ('builtin' in plan.extractor) {
     args.push('--extractor', plan.extractor.builtin)
-    for (const [name, value] of Object.entries(plan.extractor.inputs ?? {}))
+    for (const [name, value] of Object.entries(plan.extractor.inputs ?? {})) {
       args.push('--input', `${name}=${typeof value === 'string' ? value : JSON.stringify(value)}`)
+    }
   } else if (plan.extractor.language) args.push('--language', plan.extractor.language)
   if (plan.renderer) args.push('--renderer', plan.renderer)
   if (plan.comparator) args.push('--comparator', 'custom')
@@ -275,7 +276,7 @@ export type InitFailure = 'exists' | 'language' | 'other'
 
 export function initFailure(message: string): InitFailure {
   if (/already exists at|already has files/.test(message)) return 'exists'
-  if (/Choose the extractor's language/.test(message)) return 'language'
+  if (message.includes("Choose the extractor's language")) return 'language'
   return 'other'
 }
 

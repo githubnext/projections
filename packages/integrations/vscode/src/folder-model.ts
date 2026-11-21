@@ -154,7 +154,7 @@ export class FolderModel implements vscode.Disposable {
     const key = pairKey(pair)
     const cached = this.described.get(key)
     if (cached && !(cached instanceof Promise)) return cached
-    if (!cached)
+    if (!cached) {
       this.described.set(
         key,
         describePair(this.folder.uri.fsPath, pair, this.pairs?.refs ?? {}).then(
@@ -165,6 +165,7 @@ export class FolderModel implements vscode.Disposable {
           () => void this.described.delete(key),
         ),
       )
+    }
     return undefined
   }
 

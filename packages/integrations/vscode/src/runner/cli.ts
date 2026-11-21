@@ -81,9 +81,11 @@ export function incompatibility(info: RunnerInfo, extensionVersion: string, cli:
     cli.source === 'bundled'
       ? 'Reinstall the Projections extension.'
       : `Install projections ${extensionVersion}, or point projections.cliPath at a compatible build.`
-  if (!supportedProtocols.includes(info.protocol))
+  if (!supportedProtocols.includes(info.protocol)) {
     return `projections ${info.version} at ${where} speaks protocol ${info.protocol}; this extension speaks ${supportedProtocols.join(', ')}. ${fix}`
-  if (!compatibleVersion(extensionVersion, info.version))
+  }
+  if (!compatibleVersion(extensionVersion, info.version)) {
     return `projections ${info.version} at ${where} is not compatible with the Projections extension ${extensionVersion}. ${fix}`
+  }
   return undefined
 }

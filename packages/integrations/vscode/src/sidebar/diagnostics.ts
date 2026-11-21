@@ -35,7 +35,7 @@ export class SidebarDiagnostics implements vscode.Disposable {
     }
     for (const model of this.models()) for (const {uri, items} of definitionDiagnostics(model)) add(uri, items)
     // What the shown extractions reported, on the definition that produced them (Problems and squiggles).
-    for (const {uri, messages} of this.extraction.values())
+    for (const {uri, messages} of this.extraction.values()) {
       add(
         uri,
         messages.map(message => {
@@ -44,6 +44,7 @@ export class SidebarDiagnostics implements vscode.Disposable {
           return item
         }),
       )
+    }
     for (const {uri, items} of all.values()) this.diagnostics.set(uri, items)
   }
 

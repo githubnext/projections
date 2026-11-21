@@ -30,8 +30,9 @@ export function revisionNote(tool: string, args: Record<string, unknown>, tab: T
     args.after = pair.after
     return `Revision: ${shortRevision(pair.after)}, the one ${named} shows (${choice}).`
   }
-  if (!given && tab)
+  if (!given && tab) {
     return `${named[0]!.toUpperCase()}${named.slice(1)} shows one revision (${choice}: ${pair ? shortRevision(pair.after) : 'none yet'}) and compares nothing, so these are the revisions Projections suggests: not what is on the person's screen.`
+  }
   if (!given) return 'Revisions: the ones Projections suggests (no projection tab is open).'
   if (!tab) return undefined
   return samePair(args, pair)

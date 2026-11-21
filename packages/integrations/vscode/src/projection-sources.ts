@@ -69,8 +69,9 @@ async function rendererScenarios(folder: vscode.WorkspaceFolder, definition: Par
         },
         renderer,
       )
-    )
+    ) {
       found.push({path, directory, count: parsed.scenarios.length})
+    }
   }
   return found
 }
@@ -119,11 +120,12 @@ export class ProjectionSources {
       'src/view.ts',
       'index.html',
     ]
-    for (const candidate of packageDir ? candidates : [])
+    for (const candidate of packageDir ? candidates : []) {
       if (await exists(at(`${packageDir}/${candidate}`))) {
         rendererSource = `${packageDir}/${candidate}`
         break
       }
+    }
     const environment = file ? vscode.Uri.joinPath(file, '..', 'environment.json') : undefined
     return definitionModel({
       ...(file ? {definition: relative(file)} : {}),
@@ -140,11 +142,12 @@ export class ProjectionSources {
    * Markdown preview, Configure… the default comparator. To the side of the projection tab unless `here`.
    */
   async open(folder: vscode.WorkspaceFolder, item: SourceItem, here = false) {
-    if (item.file)
+    if (item.file) {
       return void (await vscode.window.showTextDocument(vscode.Uri.joinPath(folder.uri, ...item.file.split('/')), {
         viewColumn: here ? vscode.ViewColumn.Active : vscode.ViewColumn.Beside,
         preview: true,
       }))
+    }
     if (item.command) return void (await vscode.commands.executeCommand(item.command))
     if (item.docs) await this.docs.open(item.docs, {here})
   }

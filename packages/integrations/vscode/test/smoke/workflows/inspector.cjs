@@ -24,8 +24,9 @@ module.exports = async function inspector({folder}) {
 
   // The Comparator part offers the repository's comparator files (GET /api/definitions' rules) and runs the one chosen
   // (GET /api/comparator?rules=) in the webview's sandbox.
-  if (!(await elements('[data-part="comparator"]')).length)
+  if (!(await elements('[data-part="comparator"]')).length) {
     await control({op: 'click', selector: 'button[aria-label="Show explorer sidebar"]'})
+  }
   const trigger = '[data-part="comparator"] [aria-label="Comparator"]'
   await until('the comparator part', async () => (await elements(trigger)).length > 0)
   await control({op: 'click', selector: trigger})
@@ -56,8 +57,9 @@ module.exports = async function inspector({folder}) {
   const item = compared.items.find(row => row.kind !== 'relationship' && /auth/.test(row.label)) ?? compared.items[0]
   assert.equal(await control({op: 'selectEntity', entity: item.id}), true)
   // The selection's evidence is in the docked Details panel.
-  if ((await elements('button[aria-label="Show details panel"]')).length)
+  if ((await elements('button[aria-label="Show details panel"]')).length) {
     await control({op: 'click', selector: 'button[aria-label="Show details panel"]'})
+  }
   const evidence = '.ph-evidence button, .phv-evidence-link'
   await until(
     'the evidence',

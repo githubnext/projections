@@ -138,10 +138,11 @@ export class ViewingView implements vscode.TreeDataProvider<Node>, vscode.Dispos
     }
     if (node.kind !== 'choice') return
     const reason = unavailableReason(node.choice, model.facts())
-    if (reason)
+    if (reason) {
       return void vscode.window.showInformationMessage(
         `Projections: ${model.describe(node.choice, undefined).name} isn't available: ${reason}`,
       )
+    }
     model.choose(node.choice)
   }
 
@@ -156,9 +157,9 @@ export class ViewingView implements vscode.TreeDataProvider<Node>, vscode.Dispos
 
   /** Remove: a bookmark from the file, a recent commit from view. */
   private async remove(node: Node) {
-    if (node.kind === 'choice' && node.choice.id.startsWith('bookmark:'))
+    if (node.kind === 'choice' && node.choice.id.startsWith('bookmark:')) {
       await removeBookmarkOf(node.model, node.choice.id.slice('bookmark:'.length))
-    else if (node.kind === 'recent') {
+    } else if (node.kind === 'recent') {
       this.recent.state(node.model).hidden.add(node.change.key)
       this.changed.fire(undefined)
     }

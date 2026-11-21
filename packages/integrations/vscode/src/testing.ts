@@ -12,7 +12,7 @@ import {applyTree} from './testing/tree.js'
 
 /** The projections a folder defines, by ID with their titles, and their changes (the side bar's models). */
 export interface ProjectionSource {
-  projections(folder: vscode.WorkspaceFolder): Promise<Array<{id: string; title: string}>>
+  projections(folder: vscode.WorkspaceFolder): Promise<{id: string; title: string}[]>
   readonly onDidChange: vscode.Event<void>
 }
 
@@ -127,8 +127,9 @@ export class ProjectionTests implements vscode.Disposable {
     watched.unsubscribe?.()
     watched.lease.dispose()
     this.watched.delete(key)
-    for (const [id, item] of this.state.items())
+    for (const [id, item] of this.state.items()) {
       if (this.state.data.get(item)?.folder.uri.toString() === key) this.controller.items.delete(id)
+    }
   }
 
   private schedule(folder: vscode.WorkspaceFolder) {
@@ -166,11 +167,12 @@ export class ProjectionTests implements vscode.Disposable {
     const cancelled = token.onCancellationRequested(() => abort.abort())
     try {
       const {checks, cases} = plan(this.state, request, update)
-      for (const entry of [...checks, ...cases])
+      for (const entry of [...checks, ...cases]) {
         for (const item of entry.items) {
           run.started(item)
           this.state.record(item, 'started')
         }
+      }
       for (const entry of checks) {
         if (abort.signal.aborted) break
         await runChecks(this.state, run, entry, abort.signal, watched => this.apply(watched))
@@ -179,9 +181,11 @@ export class ProjectionTests implements vscode.Disposable {
         if (abort.signal.aborted) break
         await runCases(this.state, run, entry, update, abort.signal)
       }
-      if (abort.signal.aborted)
-        for (const [key, outcome] of this.state.recorded)
+      if (abort.signal.aborted) {
+        for (const [key, outcome] of this.state.recorded) {
           if (outcome.state === 'started') this.state.recorded.set(key, {state: 'skipped', messages: []})
+        }
+      }
     } finally {
       cancelled.dispose()
       run.end()

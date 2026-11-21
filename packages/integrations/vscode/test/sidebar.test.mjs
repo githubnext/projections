@@ -213,8 +213,9 @@ test('Viewing rows say short facts; their tooltips explain', () => {
   assert.equal(choiceFact({id: 'custom', pair: {before: one, after: two}}, feature), '1111111 → 2222222')
   assert.equal(choiceFact({id: 'branch'}, main), 'unavailable')
   // Every fact fits a narrow side bar.
-  for (const id of ['now', 'uncommitted', 'branch', 'last-commit', 'release', 'bookmark:auth-landed'])
+  for (const id of ['now', 'uncommitted', 'branch', 'last-commit', 'release', 'bookmark:auth-landed']) {
     assert.ok(choiceFact({id}, feature).length <= 12, id)
+  }
   assert.equal(pairFact({before: 'main', after: 'working-tree'}), 'main → working tree')
   assert.equal(shortCommit(head), 'aaaaaaa')
   const tooltip = choiceTooltip({id: 'uncommitted'}, feature, {detail: 'last commit → your files · 2 files', selected: true})

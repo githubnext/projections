@@ -14,7 +14,10 @@ import type {ResultStamp, Staleness} from '../../staleness.js'
 /** Whether the shown result is out of date, and how many working-tree files changed since it. */
 export type TabStale = Staleness & {files?: number | undefined}
 
-type Start = {generation: number; head?: string | undefined}
+interface Start {
+  generation: number
+  head?: string | undefined
+}
 type Results = NonNullable<TabSummary['results']>
 
 /** What the tab tells its freshness, and is told by it. */

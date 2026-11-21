@@ -63,12 +63,14 @@ export function choiceDetail(
 ): string {
   const id = choice.id
   if (id === 'now') return `${yourFiles} as they are now`
-  if (id === 'uncommitted')
+  if (id === 'uncommitted') {
     return `last commit → ${yourFiles} · ${facts.changes ? plural(facts.changes, 'file') : facts.dirty ? 'uncommitted' : 'no edits'}`
+  }
   if (id === 'branch') return `${facts.defaultBranch ?? 'the default branch'} → ${yourFiles} · ${branchDetail(facts)}`
   if (id === 'last-commit') return 'previous commit → last commit'
-  if (id.startsWith('pr:'))
+  if (id.startsWith('pr:')) {
     return [choice.title ?? `#${id.slice(3)}`, ...(pair ? [pairNames(pair, labels).replace(/working tree/g, yourFiles)] : [])].join(' · ')
+  }
   // A pair named by its revisions needs no detail; a titled one (a commit subject) shows them.
   if (id.startsWith('pair:') && !choice.title) return ''
   return pair ? pairNames(pair, labels).replace(/^working tree$|(?<=→ )working tree$/, yourFiles) : ''

@@ -21,11 +21,12 @@ async function temporary(t, prefix) {
 /** Every `$ref` in a schema. */
 function references(value, found = []) {
   if (Array.isArray(value)) value.forEach(item => references(item, found))
-  else if (value && typeof value === 'object')
+  else if (value && typeof value === 'object') {
     for (const [key, child] of Object.entries(value)) {
       if (key === '$ref' && typeof child === 'string') found.push(child)
       else references(child, found)
     }
+  }
   return found
 }
 

@@ -30,20 +30,21 @@ export function extractionMessages(documents: readonly {side: string; document: 
   const messages: string[] = []
   for (const {side, document} of documents) {
     const value = document as {diagnostics?: unknown; extraction?: {diagnostics?: unknown}} | null
-    for (const list of [value?.diagnostics, value?.extraction?.diagnostics])
+    for (const list of [value?.diagnostics, value?.extraction?.diagnostics]) {
       for (const item of Array.isArray(list) ? list : []) {
         const message = String((item as {message?: unknown})?.message ?? JSON.stringify(item))
         if (seen.has(message)) continue
         seen.add(message)
         messages.push(`${side}: ${message}`)
       }
+    }
   }
   return messages
 }
 
 /** A tab's kept results as sides: Before and After (or the one revision), each with its ref and document. */
 export function keptSides(
-  kept: {pair: {before?: string; after: string}; results: {[ref: string]: {document: unknown}}} | undefined,
+  kept: {pair: {before?: string; after: string}; results: Record<string, {document: unknown}>} | undefined,
 ): {side: string; ref: string; document: unknown}[] {
   if (!kept) return []
   const {pair, results} = kept
@@ -131,16 +132,19 @@ const baseName = (path: string) => path.split('/').at(-1) ?? path
  */
 export function definitionModel(input: DefinitionInput): DefinitionNode[] {
   const nodes: DefinitionNode[] = []
-  if (input.definition)
+  if (input.definition) {
     nodes.push({kind: 'definition', group: 'Definition', label: baseName(input.definition), file: input.definition, children: []})
+  }
   for (const part of input.parts) {
     const group = (part.part[0]!.toUpperCase() + part.part.slice(1)) as DefinitionNode['group']
     const children: DefinitionNode[] = []
-    if (part.part === 'comparator' && part.file && input.comparatorTests)
+    if (part.part === 'comparator' && part.file && input.comparatorTests) {
       children.push({kind: 'tests', group, label: baseName(input.comparatorTests), file: input.comparatorTests, children: []})
+    }
     if (part.part === 'renderer') {
-      if (input.rendererSource && !part.docs)
+      if (input.rendererSource && !part.docs) {
         children.push({kind: 'source', group, label: baseName(input.rendererSource), file: input.rendererSource, children: []})
+      }
       for (const entry of input.scenarios ?? []) {
         const scenarios = typeof entry === 'string' ? {path: entry} : entry
         const directory = scenarios.directory ?? scenarios.path.split('/').slice(0, -1).join('/')
@@ -166,7 +170,7 @@ export function definitionModel(input: DefinitionInput): DefinitionNode[] {
       children,
     })
   }
-  if (input.environment)
+  if (input.environment) {
     nodes.push({
       kind: 'environment',
       group: 'Environment',
@@ -175,6 +179,7 @@ export function definitionModel(input: DefinitionInput): DefinitionNode[] {
       file: input.environment,
       children: [],
     })
+  }
   return nodes
 }
 

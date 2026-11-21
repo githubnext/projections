@@ -12,7 +12,7 @@ export class RelayTerminal implements vscode.Pseudoterminal {
   execution: vscode.TaskExecution | undefined
   private opened = false
   private ended = false
-  private pending: string[] = []
+  private readonly pending: string[] = []
   private exit: number | null | undefined
 
   constructor(private readonly stopped: () => void) {}

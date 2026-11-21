@@ -121,7 +121,7 @@ try {
   output('images', JSON.stringify(images))
 } catch (error) {
   // A read-only token (pull requests from forks, or no contents: write) or a concurrent push.
-  if ([403, 404, 409, 422].includes(error.status))
+  if ([403, 404, 409, 422].includes(error.status)) {
     warn(`Could not commit the snapshots (${error.message}). The workflow needs contents: write; they remain in the snapshots artifact.`)
-  else throw error
+  } else throw error
 }

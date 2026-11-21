@@ -12,8 +12,9 @@ const bookmarksFile = (model: FolderModel) => vscode.Uri.joinPath(model.folder.u
 /** The revisions a row bookmarks, its title and the projections it changes: a recent commit's, or the current choice's. */
 function bookmarked(node: Node): {pair: Pair | undefined; title: string; changes: RecentChange['projections']} {
   const {model} = node
-  if (node.kind === 'recent')
+  if (node.kind === 'recent') {
     return {pair: {before: node.change.before, after: node.change.after}, title: node.change.title, changes: node.change.projections}
+  }
   const pair = model.pair
   const shown = model.describe()
   return {pair, title: model.choice.title ?? (model.choice.id === 'custom' && pair ? pairFact(pair) : shown.name), changes: []}

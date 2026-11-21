@@ -105,8 +105,9 @@ async function place(directory, input) {
 
 /** Why a CLI call failed, in its own words. */
 function failure(result) {
-  if (result.error?.code === 'ENOENT')
+  if (result.error?.code === 'ENOENT') {
     return "The projections CLI isn't installed (or PROJECTIONS_CLI doesn't name it): install it, then open the canvas again."
+  }
   // The tool's own answer (its text, or with --json its error) says why; the last lines of standard error otherwise.
   const answer = result.stdout.trim()
   if (answer) {

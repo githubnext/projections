@@ -55,7 +55,7 @@ export interface PageView {
   error?: string
   compared?: boolean
   rows?: number
-  changes?: {[status: string]: number}
+  changes?: Record<string, number>
   /** The presented items, changed ones first (at most 100). */
   items?: ViewItem[]
   selection?: ViewItem

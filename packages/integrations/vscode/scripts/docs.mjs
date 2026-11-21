@@ -166,8 +166,9 @@ export function bundleProblems(pages) {
       const [location = '', fragment] = href.split(/#(.*)/s)
       const target = location ? posix.normalize(posix.join(posix.dirname(page), decodeURI(location))) : page
       if (!pages.has(target)) problem('not a bundled page')
-      else if (fragment !== undefined && !headings.get(target).has(decodeURIComponent(fragment)))
+      else if (fragment !== undefined && !headings.get(target).has(decodeURIComponent(fragment))) {
         problem(`${target} has no heading #${fragment}`)
+      }
     }
   }
   return problems
@@ -200,12 +201,13 @@ export async function planDocs(root) {
   // most often stay in VS Code. Package READMEs aren't bundled: they are for the people maintaining a built-in, and
   // its page links one ("How it works") on GitHub.
   const files = new Set(seeds)
-  for (const file of seeds)
+  for (const file of seeds) {
     for (const match of (await read(file)).matchAll(/\]\(\s*([^)\s#]+\.md)(?:#[^)\s]*)?(?:\s+"[^"]*")?\s*\)/g)) {
       if (/^[a-z][a-z0-9+.-]*:/i.test(match[1])) continue
       const linked = posix.normalize(posix.join(posix.dirname(file), decodeURI(match[1])))
       if (linked.startsWith('docs/') && (await exists(path.join(root, linked)))) files.add(linked)
     }
+  }
   const bundled = new Map([...files].sort().map(file => [file, bundledName(file)]))
   const names = new Map()
   for (const [file, name] of bundled) {
@@ -214,8 +216,9 @@ export async function planDocs(root) {
   }
   const pages = new Map()
   // Without front matter (a description for this repository's tools), which the preview would show as a table.
-  for (const [file, name] of bundled)
+  for (const [file, name] of bundled) {
     pages.set(name, rewriteLinks((await read(file)).replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n+/, ''), file, bundled))
+  }
   const index = {
     format: 'projections.vscode.docs',
     version: 0,

@@ -10,8 +10,9 @@ export function choiceMeaning(choice: Choice, facts: RepositoryFacts): string {
   const id = choice.id
   if (id === 'now') return 'Each projection of your files as they are now, with nothing compared.'
   if (id === 'uncommitted') return 'What your uncommitted edits change: the last commit compared with your files.'
-  if (id === 'branch')
+  if (id === 'branch') {
     return `What your branch changes: where it left ${facts.defaultBranch ?? 'the default branch'} compared with your files, its commits and your uncommitted edits.`
+  }
   if (id === 'last-commit') return 'What the last commit changed: the commit before it compared with it.'
   if (id === 'release') return 'Everything since the tag: the tag compared with the last commit.'
   if (id.startsWith('pr:')) return 'An open pull request: where it left its base compared with its head, locally.'

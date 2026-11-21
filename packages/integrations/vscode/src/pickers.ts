@@ -76,7 +76,7 @@ export async function chooseRevision(
   const revisions = await services.withBackend(folder, async runner => {
     const response = await runner.request({method: 'GET', path: '/api/revisions?limit=30'})
     return response.status === 200
-      ? ((response.body as {revisions?: Array<{ref?: string; title?: string; kind?: string; date?: string}>}).revisions ?? [])
+      ? ((response.body as {revisions?: {ref?: string; title?: string; kind?: string; date?: string}[]}).revisions ?? [])
       : []
   })
   type Item = vscode.QuickPickItem & {ref?: string}

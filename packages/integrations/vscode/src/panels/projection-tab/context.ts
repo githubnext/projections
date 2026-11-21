@@ -43,7 +43,7 @@ export function movedPin(pinned: (Choice & {pair: Pair}) | undefined, model: Fol
 export async function setTabContext(tab: {last: TabSummary | undefined; pinned: unknown} | undefined) {
   const view = tab?.last?.view
   const comparing = Boolean(tab?.last?.pair?.before) && Boolean(view?.modes?.length)
-  const entries: Array<[string, unknown]> = [
+  const entries: [string, unknown][] = [
     ['projections.tabMode', comparing ? (view?.mode ?? '') : ''],
     ['projections.tabPlaying', Boolean(view?.playing)],
     ['projections.tabShowAs', view?.showAs ?? ''],

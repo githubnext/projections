@@ -16,8 +16,9 @@ export interface Counted {
 /** A `changes` notification's record, or nothing when it isn't one. */
 export function changeRecord(params: unknown): ChangeRecord | undefined {
   const value = params as Partial<ChangeRecord> | null
-  if (!value || !Number.isSafeInteger(value.generation) || !Array.isArray(value.changes) || typeof value.complete !== 'boolean')
+  if (!value || !Number.isSafeInteger(value.generation) || !Array.isArray(value.changes) || typeof value.complete !== 'boolean') {
     return undefined
+  }
   return {
     generation: value.generation!,
     changes: value.changes.filter((kind): kind is string => typeof kind === 'string'),

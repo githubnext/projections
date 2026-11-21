@@ -18,7 +18,7 @@ export interface SuggestedPair extends Pair {
 export interface PairList {
   default: Pair | undefined
   suggestions: SuggestedPair[]
-  bookmarks: Array<SuggestedPair & {id?: string; projection?: string}>
+  bookmarks: (SuggestedPair & {id?: string; projection?: string})[]
   branches: string[]
   tags: string[]
   /** `HEAD`'s commit and branch, and whether the working tree has uncommitted changes. */
@@ -56,7 +56,7 @@ export function jobChangeCount(job: unknown): number | undefined {
 }
 
 /** The comparison modes as the editor's title actions name them. */
-export const modeTitles: {[mode: string]: string} = {
+export const modeTitles: Record<string, string> = {
   animated: 'Animated',
   'side-by-side': 'Side by Side',
   swipe: 'Swipe',

@@ -8,17 +8,17 @@ export interface ViewingHost {
     folder: vscode.WorkspaceFolder,
     request: {method: 'GET' | 'POST'; path: string; body?: unknown},
   ): Promise<{status: number; body: unknown}>
-  resolveCommits(cwd: string, refs: string[]): Promise<Array<string | undefined>>
+  resolveCommits(cwd: string, refs: string[]): Promise<(string | undefined)[]>
   /** The open pull request of the folder's current branch, if `gh` says there is one. */
   pullRequest(folder: vscode.WorkspaceFolder, branch: string): Promise<number | undefined>
 }
 
-export type Sweep = {
+export interface Sweep {
   id: string
   status: string
   changes: DevelopChange[]
   cells: DevelopCell[]
-  projections?: Array<{status?: string}>
+  projections?: {status?: string}[]
 }
 
 /** A folder's run over the recent commits, its thumbnails and the rows removed from view. */

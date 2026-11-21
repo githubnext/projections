@@ -46,9 +46,11 @@ const invoke = (command, args, cwd) => {
 }
 /** The first executable named `name` on PATH. */
 function find(name) {
-  for (const directory of (process.env.PATH ?? '').split(path.delimiter).filter(Boolean))
-    for (const suffix of windows ? ['.exe', '.cmd', ''] : [''])
+  for (const directory of (process.env.PATH ?? '').split(path.delimiter).filter(Boolean)) {
+    for (const suffix of windows ? ['.exe', '.cmd', ''] : ['']) {
       if (existsSync(path.join(directory, name + suffix))) return path.join(directory, name + suffix)
+    }
+  }
   throw new Error(`${name} is not on PATH`)
 }
 try {
@@ -79,8 +81,9 @@ try {
     ),
   )
   const dependencies = Object.fromEntries(packed.map(pkg => [pkg.name, `file:${path.join(packs, pkg.filename)}`]))
-  for (const name of ['react', 'react-dom'])
+  for (const name of ['react', 'react-dom']) {
     dependencies[name] = JSON.parse(await readFile(path.join(source, 'node_modules', name, 'package.json'), 'utf8')).version
+  }
   await writeFile(
     path.join(install, 'package.json'),
     JSON.stringify({name: 'installed-cli-proof', private: true, type: 'module', dependencies}),

@@ -38,8 +38,9 @@ export function pairCommands(services: Services, viewingView: ViewingView): vsco
     }),
     vscode.commands.registerCommand('projections.swapPair', async (argument?: unknown) => {
       // From a projection tab's title bar, the tab swaps (its own pair when pinned).
-      if (argument instanceof vscode.Uri && argument.scheme === projectionScheme && ProjectionTab.current)
+      if (argument instanceof vscode.Uri && argument.scheme === projectionScheme && ProjectionTab.current) {
         return ProjectionTab.current.swap()
+      }
       const folder = await folderFrom(argument)
       if (!folder) return
       const model = sidebar.model(folder)
@@ -56,7 +57,7 @@ export function pairCommands(services: Services, viewingView: ViewingView): vsco
       // The tab in front out of date: Refresh first, as its pill's Refresh.
       const front = ProjectionTab.current?.folder === folder ? ProjectionTab.current : undefined
       const refresh = refreshPickLabel(front && sidebar.active?.projection === front.projection ? sidebar.active.stale : undefined)
-      const items: Array<vscode.QuickPickItem & {command?: vscode.Command; current?: boolean; refresh?: boolean}> = [
+      const items: (vscode.QuickPickItem & {command?: vscode.Command; current?: boolean; refresh?: boolean})[] = [
         ...(refresh
           ? [
               {label: refresh, refresh: true},
@@ -91,10 +92,11 @@ export function pairCommands(services: Services, viewingView: ViewingView): vsco
       if (!folder) return
       const model = sidebar.model(folder)
       await model.load()
-      if (!model.pair?.before)
+      if (!model.pair?.before) {
         return void vscode.window.showInformationMessage(
           `Projections: ${model.describe().name} shows the working tree alone, so there's nothing to count. Choose a comparison first.`,
         )
+      }
       await vscode.window.withProgress(
         {location: {viewId: 'projections.projections'}, title: 'Comparing every projection', cancellable: true},
         (progress, token) => model.compareAll(progress, token),

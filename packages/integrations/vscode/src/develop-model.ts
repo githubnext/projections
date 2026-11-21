@@ -46,9 +46,10 @@ export function addBookmark(
   const file = text?.trim()
     ? (JSON.parse(text) as {format?: unknown; version?: unknown; bookmarks?: unknown})
     : {format: 'projections.bookmarks', version: 0, bookmarks: []}
-  if (file.format !== 'projections.bookmarks' || file.version !== 0 || !Array.isArray(file.bookmarks))
+  if (file.format !== 'projections.bookmarks' || file.version !== 0 || !Array.isArray(file.bookmarks)) {
     throw new Error('.projections-bookmarks.json is not a bookmarks file this version reads')
-  const bookmarks = file.bookmarks as Array<{id?: unknown}>
+  }
+  const bookmarks = file.bookmarks as {id?: unknown}[]
   const ids = new Set(bookmarks.map(item => String(item.id)))
   const base = `${bookmark.projectionId}-${short(bookmark.after)}`.replace(/[^a-zA-Z0-9._-]/g, '-').slice(0, 90)
   let id = base
@@ -63,9 +64,10 @@ export function addBookmark(
 /** `.projections-bookmarks.json` without the bookmark `id` (the Viewing view's Remove). */
 export function removeBookmark(text: string, id: string): string {
   const file = JSON.parse(text) as {format?: unknown; version?: unknown; bookmarks?: unknown}
-  if (file.format !== 'projections.bookmarks' || file.version !== 0 || !Array.isArray(file.bookmarks))
+  if (file.format !== 'projections.bookmarks' || file.version !== 0 || !Array.isArray(file.bookmarks)) {
     throw new Error('.projections-bookmarks.json is not a bookmarks file this version reads')
-  const bookmarks = (file.bookmarks as Array<{id?: unknown}>).filter(item => String(item.id) !== id)
+  }
+  const bookmarks = (file.bookmarks as {id?: unknown}[]).filter(item => String(item.id) !== id)
   return jsonText({...file, bookmarks}, text)
 }
 
@@ -78,8 +80,9 @@ export function sweepProgress(
   projections = 1,
 ): string {
   if (!sweep) return ''
-  if (sweep.status === 'running')
+  if (sweep.status === 'running') {
     return `Checking recent commits… ${sweep.cells.length} of ${sweep.changes.length * Math.max(1, projections) || '…'}`
+  }
   if (sweep.status === 'cancelled') return 'Checking recent commits cancelled'
   if (sweep.status === 'failed') return 'Checking recent commits failed'
   return ''
@@ -94,7 +97,7 @@ export function parseScenarios(text: string): {title?: string; renderer?: string
     return undefined
   }
   if (document?.format !== 'projections.scenarios' || !Array.isArray(document.scenarios)) return undefined
-  const scenarios = (document.scenarios as Array<{id?: unknown; title?: unknown}>).flatMap(item =>
+  const scenarios = (document.scenarios as {id?: unknown; title?: unknown}[]).flatMap(item =>
     typeof item?.id === 'string' ? [{id: item.id, title: typeof item.title === 'string' ? item.title : item.id}] : [],
   )
   return {

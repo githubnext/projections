@@ -10,18 +10,19 @@ export interface TabSummary {
   running?: 'extracting' | 'comparing'
   /** Whether the tab's page moves less: VS Code's reduce motion (`vscode-reduce-motion`), or the system's. */
   reducedMotion?: boolean
-  comparison?: {compared: boolean; rows: number; changes: {[status: string]: number}}
+  comparison?: {compared: boolean; rows: number; changes: Record<string, number>}
   error?: string
   /** The revision whose definition it applied (`HEAD`, or `working-tree`). */
   definitionRevision?: string
   /** The shown pair's extractions, by ref: the job and the result's identity (its definition digest and execution). */
-  results?: {
-    [ref: string]: {
+  results?: Record<
+    string,
+    {
       job?: string
       definitionDigest?: string
       execution?: {source?: string; fidelity?: string; tree?: string; strategy?: string}
     }
-  }
+  >
   /** The tab's switch of pair it shows (`ControlMessage`'s `generation`), once it was switched. */
   generation?: number
   /** How the tab shows it: its comparison mode and the modes offered, playback, the view kind and changes only. */
@@ -31,7 +32,7 @@ export interface TabSummary {
 /** The codicon for a renderer's kind; custom bundles and unknown renderers get a generic one. */
 export function rendererIcon(renderer: ProjectionDefinition['renderer'] | undefined): string {
   if (typeof renderer !== 'string') return 'symbol-misc'
-  const icons: {[name: string]: string} = {
+  const icons: Record<string, string> = {
     graph: 'type-hierarchy',
     dependencies: 'package',
     dag: 'git-merge',
@@ -84,9 +85,7 @@ export function statusText({
 }
 
 /** A definition's parts as the tree shows them: what each is, and the repository file it names, if any. */
-export function parts(
-  definition: ProjectionDefinition,
-): Array<{part: 'extractor' | 'comparator' | 'renderer'; label: string; file?: string}> {
+export function parts(definition: ProjectionDefinition): {part: 'extractor' | 'comparator' | 'renderer'; label: string; file?: string}[] {
   const extractor =
     typeof definition.extractor === 'string'
       ? {part: 'extractor' as const, label: definition.extractor}

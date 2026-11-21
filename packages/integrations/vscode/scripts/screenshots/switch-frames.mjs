@@ -34,8 +34,9 @@ function sampler({key, read}) {
   // Renderer frames' messages (from their opaque origin): `ready` is a frame that loaded, `rendered` a render.
   addEventListener('message', event => {
     const type = event.data?.type
-    if (event.origin === 'null' && event.data?.projections !== undefined && typeof type === 'string' && state.messages.length < 5000)
+    if (event.origin === 'null' && event.data?.projections !== undefined && typeof type === 'string' && state.messages.length < 5000) {
       state.messages.push({t: Date.now(), type})
+    }
   })
   const tick = () => {
     try {
@@ -150,8 +151,9 @@ try {
     const page = (await frame.evaluate(() => globalThis.__switchFrames.frames)).slice(page0)
     const side = (await window.evaluate(() => globalThis.__switchFrames.frames)).slice(side0)
     const renderer = {}
-    for (const {type} of (await frame.evaluate(() => globalThis.__switchFrames.messages)).slice(messages0))
+    for (const {type} of (await frame.evaluate(() => globalThis.__switchFrames.messages)).slice(messages0)) {
       renderer[type] = (renderer[type] ?? 0) + 1
+    }
     const counts = {}
     for (const event of (await events()).filter(item => item.t >= at && item.t < end)) counts[event.name] = (counts[event.name] ?? 0) + 1
     const shots = screencast.slice(shot0)
@@ -179,7 +181,7 @@ try {
     const page = await browser.newPage({viewport: {width: 1480, height: 400}})
     for (const [index, {at, frames}] of strips.entries()) {
       const ink = []
-      for (const shot of frames)
+      for (const shot of frames) {
         ink.push({
           ms: Math.max(0, shot.t - at),
           ink: await page.evaluate(async data => {
@@ -195,11 +197,13 @@ try {
             const {data: pixels} = context.getImageData(x, y, Math.round(image.width * 0.65), Math.round(image.height * 0.6))
             let inked = 0
             const [r0, g0, b0] = [pixels[0], pixels[1], pixels[2]]
-            for (let at = 0; at < pixels.length; at += 4)
+            for (let at = 0; at < pixels.length; at += 4) {
               if (Math.abs(pixels[at] - r0) + Math.abs(pixels[at + 1] - g0) + Math.abs(pixels[at + 2] - b0) > 40) inked++
+            }
             return Math.round((inked / (pixels.length / 4)) * 10000) / 100
           }, shot.data),
         })
+      }
       const typical = [...ink].map(item => item.ink).sort((a, b) => a - b)[Math.floor(ink.length / 2)] ?? 0
       results[index].ink = ink
       results[index].blankFrames = ink.filter(item => item.ink < typical * 0.25).length

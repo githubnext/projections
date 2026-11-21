@@ -114,8 +114,9 @@ export async function inspectorFrame(window, timeoutMs = 60_000) {
           .locator('#projections-config')
           .count()
           .catch(() => 0)
-      )
+      ) {
         return frame
+      }
     }
     await new Promise(resolve => setTimeout(resolve, 250))
   }

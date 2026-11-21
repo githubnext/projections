@@ -65,7 +65,7 @@ export const caseId = (path: string, id: string) => `case:${path}#${id}`
  * the cases of the test files beside its comparator; then each test file no projection uses, with its cases.
  */
 export function testTree(input: {
-  projections: ReadonlyArray<{id: string; title: string}>
+  projections: readonly {id: string; title: string}[]
   files: readonly ListedFile[]
   /** Each projection's last run's step IDs, in order. */
   reported?: ReadonlyMap<string, readonly string[]>
@@ -143,8 +143,9 @@ export function checkOutcomes(steps: readonly CheckStep[], items: readonly strin
     const status = (step.status in rank ? step.status : 'skip') as keyof typeof rank
     const entry = found.get(id) ?? {status, messages: []}
     if (rank[status] > rank[entry.status]) entry.status = status
-    if (step.message)
+    if (step.message) {
       entry.messages.push(steps.filter(item => checkItem(item.id) === id).length > 1 ? `${step.title}: ${step.message}` : step.message)
+    }
     found.set(id, entry)
   }
   const outcomes = new Map<string, CheckOutcome>()

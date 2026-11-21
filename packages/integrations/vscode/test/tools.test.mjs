@@ -127,11 +127,12 @@ test('package.json contributes every CLI tool, as scripts/tools.mjs writes them'
   const current = tools.find(tool => tool.name === 'projections_current_view')
   assert.match(current?.modelDescription ?? '', /"this projection"/)
   assert.deepEqual(current.tags, ['projections'])
-  for (const name of ['projections_refresh', 'projections_screenshot'])
+  for (const name of ['projections_refresh', 'projections_screenshot']) {
     assert.ok(
       tools.some(tool => tool.name === name),
       name,
     )
+  }
 })
 
 // One catalog: VS Code's agent and projections mcp's get the same tools, with the same schemas and descriptions. The

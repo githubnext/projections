@@ -99,7 +99,7 @@ export class InspectorWebview {
     this.show(this.view)
     try {
       // A test-only hold on the backend, to picture the tab before it's ready.
-      const hold = Number(process.env['PROJECTIONS_TEST_HOLD_BACKEND_MS'] ?? 0)
+      const hold = Number(process.env.PROJECTIONS_TEST_HOLD_BACKEND_MS ?? 0)
       if (hold > 0) await new Promise(resolve => setTimeout(resolve, Math.min(hold, 60_000)))
       const runner = await this.lease.current()
       // A replacement that arrived meanwhile already bound (and reloaded) the page.
@@ -183,8 +183,9 @@ export class InspectorWebview {
         return
       }
       case 'controlResult':
-        if (typeof host.id === 'number')
+        if (typeof host.id === 'number') {
           this.page.send({type: 'answered', id: host.id, result: host.result, ...(host.error ? {error: String(host.error)} : {})})
+        }
         return
       case 'openFile':
         void this.openFile(host.path, host.line, host.column)

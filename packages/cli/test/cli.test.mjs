@@ -191,8 +191,9 @@ test('extractor list/init work without execution; invalid flags, duplicate outpu
     ],
   )
   await assert.rejects(cli(root, ['show', '-p', 'services-node', '--before', 'HEAD']), /unexpected argument/)
-  for (const removed of ['collect', 'collect-all', 'compare-all', 'compare-bookmarks', 'catalog', 'bookmarks', 'review', 'snapshot'])
+  for (const removed of ['collect', 'collect-all', 'compare-all', 'compare-bookmarks', 'catalog', 'bookmarks', 'review', 'snapshot']) {
     await assert.rejects(cli(root, [removed]), /unrecognized subcommand/)
+  }
 })
 
 test('a saved document is served over stdio without running extractors', async t => {

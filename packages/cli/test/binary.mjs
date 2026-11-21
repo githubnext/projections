@@ -102,8 +102,9 @@ try {
   assert.match(licenses, /^MIT License/)
   assert.match(licenses, /Copyright \(c\) GitHub, Inc\./)
   assert.ok(licenses.includes('Third-party licenses for the bundled native and Wasm engines.'))
-  for (const dependency of ['react', 'wasmi', 'windows-sys', 'tokio', 'elkjs', 'perfect-arrows'])
+  for (const dependency of ['react', 'wasmi', 'windows-sys', 'tokio', 'elkjs', 'perfect-arrows']) {
     assert.ok(licenses.includes(`===== ${dependency} `), `Missing ${dependency} notice`)
+  }
   assert.match(licenses, /Distributed under EPL-2\.0\. Source: https:\/\/github\.com\/kieler\/elkjs\/tree\//)
 
   // A repository with a built-in projection and one compared by a custom comparator.
@@ -251,11 +252,12 @@ try {
     assert.ok(first.extraction.entities.some(entity => entity.id === 'go:example.com/ledger.Ledger'))
     assert.equal(first.extraction.metadata.ecosystem, 'go')
     const helpers = await cached()
-    for (const name of ['main.go', 'api.go'])
+    for (const name of ['main.go', 'api.go']) {
       assert.deepEqual(
         await readFile(path.join(helpers, 'go', name)),
         await readFile(path.join(source, 'packages/extractors/go-support/helper', name)),
       )
+    }
     // An altered cached helper is detected and replaced before it runs.
     await writeFile(path.join(helpers, 'go/main.go'), 'package main\nfunc main() { panic("altered") }\n')
     assert.equal(goRun().digest, first.digest)

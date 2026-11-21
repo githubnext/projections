@@ -36,9 +36,11 @@ try {
   )
   if (subject.kind !== 'pull-request') process.exit(0)
   if (!/^[A-Za-z0-9-]+\/[A-Za-z0-9_.-]+$/.test(repository)) throw new Error(`Unexpected repository ${repository}`)
-  for (const commit of [subject.base, subject.head])
-    if (spawnSync('git', ['cat-file', '-e', `${commit}^{commit}`], {cwd: repo}).status !== 0)
+  for (const commit of [subject.base, subject.head]) {
+    if (spawnSync('git', ['cat-file', '-e', `${commit}^{commit}`], {cwd: repo}).status !== 0) {
       spawnSync('git', ['fetch', '--no-tags', '--quiet', 'origin', commit], {cwd: repo})
+    }
+  }
   const workflow = workflowPath(environment.GITHUB_WORKFLOW_REF, repository)
   if (!workflow) throw new Error(`Unexpected workflow ${environment.GITHUB_WORKFLOW_REF}`)
   const mergeBase = run('git', ['merge-base', subject.base, subject.head]).trim()

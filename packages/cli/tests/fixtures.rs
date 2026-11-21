@@ -402,6 +402,13 @@ fn renderer_manifests_keep_valid_accepts_and_reject_invalid_ones() {
 }
 
 #[test]
+fn renderer_manifest_titles_are_at_most_200_characters_counted_as_code_points() {
+    let manifest = |title: String| json!({"format": "projections.renderer", "version": 0, "name": "x", "title": title, "handles": []});
+    assert!(renderer_manifest(&manifest("🧭".repeat(200))).is_ok());
+    assert!(renderer_manifest(&manifest("🧭".repeat(201))).is_err());
+}
+
+#[test]
 fn renderer_manifests_keep_valid_comparison_modes_and_reject_invalid_ones() {
     let manifest = json!({"format": "projections.renderer", "version": 0, "name": "plan",
         "title": "Plan", "handles": ["plan"], "comparisonModes": ["diff", "side-by-side"]});

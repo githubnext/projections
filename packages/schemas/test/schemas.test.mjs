@@ -527,12 +527,14 @@ test('the renderer manifest schema follows parseRendererManifest: names, handles
     accepts: [{schema: 'architecture/v0', vocabulary: 'dependency-injection/v0'}, {schema: 'graph/v0'}],
   }
   assert.equal(validate('renderer', valid), true)
+  assert.equal(validate('renderer', {...valid, title: '🧭'.repeat(200)}), true)
   assert.equal(validate('renderer', {format: 'projections.renderer', version: 0, name: 'x', title: 'X', handles: []}), true)
   for (const invalid of [
     {...valid, extra: true},
     {...valid, name: 'Basic'},
     {...valid, title: ''},
     {...valid, title: ' \t\n'},
+    {...valid, title: '🧭'.repeat(201)},
     {...valid, handles: ['Graph']},
     {...valid, comparisonModes: []},
     {...valid, comparisonModes: ['diff', 'diff']},

@@ -25,8 +25,8 @@ export type Hosts = ReturnType<typeof createHosts>
 /** Compiler hosts that read only loaded texts, recording what the compiler asks for that is not loaded yet. */
 export function createHosts(files: SourceFiles, libraries: Libraries) {
   const {root, texts, aliases, missing, requested, requestedDirectories, directoryCache, within} = files
-  const lookup = (file: string): string | undefined => {
-    file = path.resolve(file)
+  const lookup = (name: string): string | undefined => {
+    const file = path.resolve(name)
     const text = texts.get(file) ?? libraries.texts.get(file)
     if (text === undefined && within(file) && !missing.has(file)) requested.add(file)
     return text
@@ -67,8 +67,8 @@ export function createHosts(files: SourceFiles, libraries: Libraries) {
       )
     },
   }
-  const getDirectories = (directory: string): string[] => {
-    directory = path.resolve(directory)
+  const getDirectories = (name: string): string[] => {
+    const directory = path.resolve(name)
     if (!within(directory)) return []
     const cached = directoryCache.get(directory)
     if (cached) return cached

@@ -95,7 +95,7 @@ export function typeText(checker: ts.TypeChecker, exported: Set<ts.Symbol>) {
         (_match, module: string) =>
           `import(${JSON.stringify(path.isAbsolute(module) ? path.basename(module).replace(/\.[cm]?[jt]sx?$/, '') : module)})`,
       )
-  const type = (value: ts.Type, seen = new Set<ts.Type>(), expand?: ts.Symbol): string => {
+  function type(value: ts.Type, seen = new Set<ts.Type>(), expand?: ts.Symbol): string {
     if (seen.has(value)) return value.aliasSymbol?.name ?? value.symbol?.name ?? 'recursive'
     const next = new Set(seen).add(value)
     if (value.isUnion()) {

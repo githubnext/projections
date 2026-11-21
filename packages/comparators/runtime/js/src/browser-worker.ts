@@ -18,7 +18,7 @@ export function run(
         events.error(event.message || 'worker error')
       }
       return {
-        post: request => worker.postMessage(request, [request.input.buffer]),
+        post: message => worker.postMessage(message, [message.input.buffer]),
         terminate: () => worker.terminate(),
       }
     },

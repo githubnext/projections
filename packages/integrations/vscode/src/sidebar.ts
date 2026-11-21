@@ -202,10 +202,10 @@ export class Sidebar implements vscode.Disposable {
     if (this.projectionsShown(shown.map(({suggested: _, ...rest}) => rest))) this.projectionsChanged.fire(undefined)
     if (this.suggestedShown(shown.map(item => [item.folder, item.suggested]))) this.suggestedChanged.fire(undefined)
     // The badge: how many projections changed in the folders' choices, as far as they have been compared.
-    const changed = models.reduce((total, model) => total + model.changedCount(), 0)
+    const changedCount = models.reduce((total, model) => total + model.changedCount(), 0)
     const pairs = models.flatMap(model => (model.pair && model.defines ? [model.describe().name] : []))
-    this.projectionsView.badge = changed
-      ? {value: changed, tooltip: `${changed} projection${changed === 1 ? '' : 's'} changed in ${pairs.join(', ')}`}
+    this.projectionsView.badge = changedCount
+      ? {value: changedCount, tooltip: `${changedCount} projection${changedCount === 1 ? '' : 's'} changed in ${pairs.join(', ')}`}
       : undefined
     this.updateStatus()
     this.updated.fire()

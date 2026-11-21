@@ -64,8 +64,14 @@ export function createRpcClient({input, output, log}: {input: Readable; output: 
         }
         signal?.addEventListener('abort', abort, {once: true})
         pending.set(id, {
-          resolve: value => (signal?.removeEventListener('abort', abort), resolve(value)),
-          reject: error => (signal?.removeEventListener('abort', abort), reject(error)),
+          resolve: value => {
+            signal?.removeEventListener('abort', abort)
+            resolve(value)
+          },
+          reject: error => {
+            signal?.removeEventListener('abort', abort)
+            reject(error)
+          },
         })
         write({id, method, ...(params === undefined ? {} : {params})})
       })

@@ -197,7 +197,8 @@ export async function startRunner({
       request: async ({method, path, body}, signal) =>
         parseResponse(await client.call('request', {method, path, ...(body === undefined ? {} : {body})}, signal)),
       tools: async signal => parseTools((await client.call('tools/list', undefined, signal)).result),
-      callTool: async (name, args, signal) => parseToolResult((await client.call('tools/call', {name, arguments: args}, signal)).result),
+      callTool: async (name, toolArguments, signal) =>
+        parseToolResult((await client.call('tools/call', {name, arguments: toolArguments}, signal)).result),
     }
   } catch (error) {
     stop()

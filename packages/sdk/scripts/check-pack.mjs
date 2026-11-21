@@ -28,12 +28,12 @@ import {pinToWorkspace} from './pin-to-workspace.mjs'
 
 const options = new Set()
 let given
-const args = process.argv.slice(2)
-while (args.length) {
-  const option = args.shift()
+const cliArgs = process.argv.slice(2)
+while (cliArgs.length) {
+  const option = cliArgs.shift()
   if (option === '--tarball') {
-    if (!args.length) throw new Error('--tarball needs a file')
-    given = resolve(args.shift())
+    if (!cliArgs.length) throw new Error('--tarball needs a file')
+    given = resolve(cliArgs.shift())
   } else if (['--contents', '--no-scaffold', '--keep'].includes(option)) options.add(option)
   else throw new Error(`Unknown option ${option}`)
 }

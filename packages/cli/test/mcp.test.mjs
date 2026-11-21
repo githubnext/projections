@@ -45,13 +45,16 @@ function start(t, root, args, extra = {}) {
     const id = nextId++
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error(`No reply to ${method} ${JSON.stringify(params)}\n${stderr}`)), 120_000)
-      pending.set(id, message => (clearTimeout(timer), resolve(message)))
+      pending.set(id, message => {
+        clearTimeout(timer)
+        resolve(message)
+      })
       send({id, method, ...(params === undefined ? {} : {params})})
     })
   }
   /** A tool's `CallToolResult`: `{content: [{type: 'text', text}], structuredContent, isError}`. */
-  const tool = async (name, args = {}) => {
-    const message = await call('tools/call', {name, arguments: args})
+  const tool = async (name, toolArguments = {}) => {
+    const message = await call('tools/call', {name, arguments: toolArguments})
     assert.equal(message.error, undefined, JSON.stringify(message.error))
     assert.equal(message.result.content[0].type, 'text')
     return {...message.result, text: message.result.content[0].text}

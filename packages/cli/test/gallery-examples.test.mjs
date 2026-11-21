@@ -82,7 +82,7 @@ test('every before-and-after project in docs/images/sources/ is drawn by readme-
 
 // Images that draw one comparison twice (`side`) share a test.
 const distinct = new Map()
-for (const item of (await images()).filter(item => item.example)) {
+for (const item of (await images()).filter(image => image.example)) {
   const {example, definition, comparator, tools, typescript} = item
   const key = JSON.stringify({example, definition, comparator, tools, typescript})
   if (!distinct.has(key)) distinct.set(key, item)

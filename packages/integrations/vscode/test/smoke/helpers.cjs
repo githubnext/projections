@@ -8,8 +8,8 @@ const extensionId = 'githubnext.projections-vscode'
 
 const control = (message, target) => vscode.commands.executeCommand('projections.inspectorControl', message, target)
 /** Polls `check` until it returns something; on timeout, the error adds what `describe` reports, to diagnose it. */
-async function until(what, check, timeoutMs = 60_000, describe) {
-  const deadline = Date.now() + timeoutMs
+async function until(what, check, timeoutMs, describe) {
+  const deadline = Date.now() + (timeoutMs ?? 60_000)
   let last
   while (Date.now() < deadline) {
     try {

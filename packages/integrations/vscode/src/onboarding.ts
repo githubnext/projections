@@ -22,7 +22,7 @@ export class PreviewDocuments implements vscode.TextDocumentContentProvider {
   add(folder: vscode.Uri, files: readonly OnboardingFile[]): [vscode.Uri, vscode.Uri, vscode.Uri][] {
     const preview = this.next++
     // Previews are small; only the latest few are kept.
-    for (const key of [...this.contents.keys()].filter(key => Number(vscode.Uri.parse(key).path.split('/')[1]) < preview - 8)) {
+    for (const key of [...this.contents.keys()].filter(candidate => Number(vscode.Uri.parse(candidate).path.split('/')[1]) < preview - 8)) {
       this.contents.delete(key)
     }
     return files.map(file => {

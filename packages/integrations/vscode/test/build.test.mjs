@@ -157,12 +157,14 @@ test("the mark and the part icons are glyphs of the packaged icon font, and the 
   // The Definition view and its rows (definition/tree-item.ts).
   const definition = (
     await Promise.all(
-      ['../src/definition.ts', '../src/definition/tree-item.ts'].map(path =>
-        readFile(fileURLToPath(new URL(path, import.meta.url)), 'utf8'),
+      ['../src/definition.ts', '../src/definition/tree-item.ts'].map(source =>
+        readFile(fileURLToPath(new URL(source, import.meta.url)), 'utf8'),
       ),
     )
   ).join('\n')
-  for (const name of Object.keys(icons).filter(name => name !== 'projections-mark')) assert.ok(definition.includes(`'${name}'`), name)
+  for (const name of Object.keys(icons).filter(candidate => candidate !== 'projections-mark')) {
+    assert.ok(definition.includes(`'${name}'`), name)
+  }
   assert.doesNotMatch(definition, /ThemeIcon\('(inspect|git-compare|eye)'\)|'inspect' :|'git-compare' :/)
 })
 

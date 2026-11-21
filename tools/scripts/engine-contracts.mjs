@@ -4,6 +4,13 @@
 
 const pair = 'Whether two extractions can be compared is the engine’s decision: call `engine.pair(before, after)`.'
 
+const review =
+  'Whether a comparison changed, and how many changes of each kind it has, is the engine’s review: call `engine.review(comparison)` or read a batch item’s `status` and `review`.'
+
+/** Selector attributes for `<path>` being a comparison's `changes`: `comparison.changes` or `x.comparison.changes`. */
+const comparisonChanges = path =>
+  `[${path}.property.name='changes'][${path}.object.name='comparison'], [${path}.property.name='changes'][${path}.object.property.name='comparison']`
+
 export const engineContracts = [
   {
     // `before.provenance.definitionDigest !== after.provenance.definitionDigest`
@@ -22,6 +29,16 @@ export const engineContracts = [
     // `extraction_definition`, which `engine.pair` applies.
     selector: "VariableDeclarator[init.name=/[dD]efinition$/] > ObjectPattern:has(Property[key.name='presentation']):has(RestElement)",
     message: `${pair} It ignores \`presentation\` itself.`,
+  },
+  {
+    // `comparison.changes.length > 0`, `!comparison.changes.length`: expected variation alone is not a change.
+    selector: `:matches(BinaryExpression, LogicalExpression, UnaryExpression[operator='!'], ConditionalExpression, IfStatement) > MemberExpression[property.name='length']:matches(${comparisonChanges('object')})`,
+    message: review,
+  },
+  {
+    // `comparison.changes.some(change => change.status !== 'unchanged')`: an identity change is reviewable too.
+    selector: `CallExpression[callee.property.name=/^(some|every)$/]:matches(${comparisonChanges('callee.object')}) BinaryExpression[right.value='unchanged']`,
+    message: review,
   },
 ]
 

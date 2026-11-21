@@ -256,16 +256,28 @@ test('the summary tells each comparison in steps and changes, escapes repository
     projections: [
       {id: 'services', status: 'changed', path: 'projections/services.json'},
       {id: 'files', status: 'unchanged', path: 'projections/files.json'},
+      {id: 'timings', status: 'unchanged', path: 'projections/timings.json'},
     ],
   }
+  const varied = {id: 'test:a', collection: 'entities', before: ['test:a'], after: ['test:a'], status: 'unchanged', correspondence: 'exact'}
   const documents = new Map([
     ['services', {before, after, comparison}],
     ['files', {before: {projection: {title: 'Files'}}, after: {}, comparison: {changes: [], steps: []}}],
+    [
+      'timings',
+      {
+        before: {projection: {title: 'Timings'}},
+        after: {},
+        comparison: {changes: [{...varied, varied: [{path: '/data/durationMs', within: true}]}], steps: []},
+      },
+    ],
   ])
   const text = summaryMarkdown(manifest, documents)
-  assert.match(text, /^### Projections\n\nCompared `ccccccc` \(merge base\) with `bbbbbbb` for pull request #7: 1 changed, 1 unchanged\./)
+  assert.match(text, /^### Projections\n\nCompared `ccccccc` \(merge base\) with `bbbbbbb` for pull request #7: 1 changed, 2 unchanged\./)
   assert.match(text, /\| `services` \| Changed: 4 changes in 3 steps: 3 added, 1 removed \|/)
   assert.match(text, /\| `files` \| Unchanged: no changes \|/)
+  // Expected variation alone leaves a comparison unchanged, and is never called a rename.
+  assert.match(text, /\| `timings` \| Unchanged: no changes to review \(1 varied within tolerance\) \|/)
   assert.match(
     text,
     /<details><summary><strong>Services<\/strong> \(<code>services<\/code>\): changed, 4 changes in 3 steps: 3 added, 1 removed<\/summary>/,

@@ -173,6 +173,22 @@ doesn't promise a top-heavy result, so renderers place items with this.
 | `lines` | `"lines": Array<Array<number>>` | Item indices on each line, in order. |
 | `widths` | `"widths": Array<number>` | Each line's width: its items plus the gaps between them. |
 
+### `BlockedBoxEdge`
+
+```ts
+interface BlockedBoxEdge
+```
+
+No route around the cards exists (`routeBoxEdge`): `least` is the candidate that overlaps the obstacles least
+(fewest cards crossed, then the shortest stretch inside them), and `crossed` the indices in `obstacles` it crosses.
+Whether to draw it is the caller's policy, and drawing it should be reported.
+
+| Member | Signature | Description |
+|---|---|---|
+| `blocked` | `"blocked": true` | No route clears the cards. |
+| `crossed` | `"crossed": Array<number>` | The indices in `obstacles` of the cards `least` crosses. |
+| `least` | `"least": BoxEdge` | The candidate route that overlaps the obstacles least. |
+
 ### `BorderWidths`
 
 ```ts
@@ -220,7 +236,7 @@ Fits a legend to the protocol's bounds: labels are clipped, and past
 ### `boxEdge`
 
 ```ts
-boxEdge(from: ArrowBox, target: ArrowBox, obstacles?: Array<ArrowBox>, style?: "curved" | "orthogonal", ports?: { "end"?: Point; "start"?: Point }, outset?: number, tracks?: Array<number>): { "base": Point; "d": string; "end": Point; "start": Point; "turns"?: Array<EdgeTurn> }
+boxEdge(from: ArrowBox, target: ArrowBox, obstacles?: Array<ArrowBox>, style?: "curved" | "orthogonal", ports?: { "end"?: Point; "start"?: Point }, outset?: number, tracks?: Array<number>): BoxEdge
 ```
 
 An arrow from one card to another, around `obstacles`, ending at the base
@@ -230,6 +246,22 @@ card is drafted down the nearest clear corridor between cards instead, and
 failing that the arrow is routed around the cards on a grid. The head's
 painted tip stops `outset` outside the target's box, on the outer edge of
 its border (see `cardBorderOutset`, the default for kit cards).
+
+### `BoxEdge`
+
+```ts
+interface BoxEdge
+```
+
+A `boxEdge` arrow: its path `d`, endpoints, and the S turns a downward route takes.
+
+| Member | Signature | Description |
+|---|---|---|
+| `base` | `"base": Point` | The base of the arrowhead, where the path ends. |
+| `d` | `"d": string` | The SVG path, from `start` to the head's `base`. |
+| `end` | `"end": Point` | The head's tip, `outset` outside the target card. |
+| `start` | `"start": Point` | Where the arrow leaves its source card. |
+| `turns` | `"turns"?: Array<EdgeTurn>` | The S turns a downward route takes, for `routeTracks`. |
 
 ### `boxEdgeTurn`
 
@@ -1989,6 +2021,26 @@ it is placed beside (see `placeUnlinked`). ELK's placement at this spacing decid
 column; a graph on a grid then spreads its columns to `columnGap` (see `snapToGrid`), which leaves those decisions
 as they are.
 
+### `NoRouteError`
+
+```ts
+class NoRouteError extends Error
+```
+
+`boxEdge` found no route around the cards; `blocked` says which least-overlapping route there is.
+
+| Member | Signature | Description |
+|---|---|---|
+| `blocked` | `readonly "blocked": BlockedBoxEdge` |  |
+| `captureStackTrace` | `static "captureStackTrace"(targetObject: object, constructorOpt?: Function \| undefined): void` |  |
+| `cause` | `"cause"?: unknown` |  |
+| `constructor` | `new (blocked: BlockedBoxEdge): NoRouteError` |  |
+| `message` | `"message": string` |  |
+| `name` | `"name": string` | `NoRouteError`. |
+| `prepareStackTrace` | `static "prepareStackTrace"(err: Error, stackTraces: Array<CallSite>): any` |  |
+| `stack` | `"stack"?: string` |  |
+| `stackTraceLimit` | `static "stackTraceLimit": number` |  |
+
 ### `numericValue`
 
 ```ts
@@ -2331,6 +2383,16 @@ points are dropped, and every corner becomes a quarter curve whose radius is
 at most half of each adjacent leg, so a dogleg between layers reads as one
 S-curve, the same as a spline route, and a short jog as a gentle wave rather
 than a stair-step.
+
+### `routeBoxEdge`
+
+```ts
+routeBoxEdge(from: ArrowBox, target: ArrowBox, obstacles?: Array<ArrowBox>, style?: "curved" | "orthogonal", ports?: { "end"?: Point; "start"?: Point }, outset?: number, tracks?: Array<number>): BlockedBoxEdge | BoxEdge
+```
+
+`boxEdge`, with no route around the cards as a result rather than an error: a `BlockedBoxEdge` with the
+least-overlapping route, for the caller to draw and report or to refuse. Boxes that can't be joined at all still
+throw a `RangeError`.
 
 ### `routeCrossings`
 

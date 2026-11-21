@@ -110,3 +110,15 @@ test('every control is posted once and settled once, whatever the page does', t 
   })
   assert.equal(result.truncated, false)
 })
+
+test("a control asked for on a ready page is posted before its timeout starts, so it's measured from the post", t => {
+  const {actor, log} = page(t)
+  actor.send({type: 'ready', page: 1})
+  const timers = t.mock.method(globalThis, 'setTimeout', (callback, ms) => {
+    log.push(`timeout ${ms}`)
+    return 0
+  })
+  actor.send({type: 'asked', control: control(2, 5_000)})
+  assert.deepEqual(log, ['post 2', 'timeout 5000'])
+  timers.mock.restore()
+})

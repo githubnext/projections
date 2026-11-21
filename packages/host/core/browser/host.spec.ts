@@ -274,15 +274,16 @@ test('animated playback loops: it reaches the after revision, holds, and returns
   await page.keyboard.press('Home')
   await expect(view(page)).toHaveAttribute('data-progress', '0')
   await page.getByRole('button', {name: 'Play forward'}).click()
-  // Progress, sampled every frame until playback is back at the before revision after reaching the after revision.
+  // The presentation's progress and the slider's position, as one render shows them, sampled every frame until playback
+  // is back at the before revision after reaching the after revision.
   const trace = await view(page).evaluate(
     (element: HTMLElement) =>
-      new Promise<{time: number; progress: number}[]>(resolve => {
-        const samples: {time: number; progress: number}[] = []
+      new Promise<{time: number; progress: number; position: number}[]>(resolve => {
+        const samples: {time: number; progress: number; position: number}[] = []
         const start = performance.now()
         const tick = () => {
           const time = performance.now() - start
-          samples.push({time, progress: Number(element.dataset.progress)})
+          samples.push({time, progress: Number(element.dataset.progress), position: Number(element.dataset.position)})
           const reached = samples.findIndex(sample => sample.progress === 1)
           if ((reached >= 0 && samples.at(-1)!.progress === 0) || time > 30_000) resolve(samples)
           else requestAnimationFrame(tick)
@@ -292,10 +293,15 @@ test('animated playback loops: it reaches the after revision, holds, and returns
   )
   const head = trace.findIndex(sample => sample.progress === 1)
   expect(head, 'reaches the after revision').toBeGreaterThan(0)
-  const leaves = trace.findIndex((sample, index) => index > head && sample.progress < 1)
-  // It holds at the endpoint (600 ms at 1×) before reversing. Progress becomes 1 after the sample before `head` and
-  // leaves it by the sample at `leaves`, so that bracket spans the hold however far apart a loaded runner's frames are.
-  expect(trace[leaves]!.time - trace[head - 1]!.time).toBeGreaterThanOrEqual(450)
+  // It holds at the endpoint: the hold is a stretch of the timeline, so the slider moves on through it while the
+  // presentation stays at the after revision. (How long it holds is playback.test.mjs's: a loaded runner shows the
+  // progress a render or more late, so time between samples measures the runner, not the hold.)
+  const held = trace.filter(sample => sample.progress === 1).map(sample => sample.position)
+  expect(new Set(held).size, 'the slider moves while the after revision holds').toBeGreaterThan(1)
+  expect(
+    trace.findIndex((sample, index) => index > head && sample.progress < 1),
+    'leaves the after revision',
+  ).toBeGreaterThan(head)
   expect(trace.at(-1)!.progress, 'returns to the before revision').toBe(0)
   // Still playing: it keeps going.
   await expect.poll(async () => Number(await view(page).getAttribute('data-progress'))).toBeGreaterThan(0)

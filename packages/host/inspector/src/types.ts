@@ -8,6 +8,22 @@ import type {
 } from '@githubnext/projections-schemas'
 import type {RendererManifest} from '@githubnext/projections-host'
 
+// The runner API responses with schemas (`@githubnext/projections-schemas/runner`), whose decoders check them.
+export type {
+  ExploreCandidate,
+  ExploreCandidates,
+  OnboardingFile,
+  OnboardingWrite,
+  Sweep,
+  SweepCell,
+  SweepChange,
+  SweepProjection,
+  Pair as InspectorPair,
+  Pairs as InspectorPairs,
+  DefinitionSave as InspectorDefinitionSave,
+  WorkspaceChanges as InspectorWorkspaceChanges,
+} from '@githubnext/projections-schemas/runner'
+
 /** Transport API for the local-only Inspector; browser requests can never grant execution trust. */
 /**
  * What using a definition requires, as `projections list` reports it:
@@ -41,132 +57,6 @@ export interface InspectorScenario {
   after?: ExtractionDocument
   /** Why the scenario can't be presented; then it has no documents. */
   error?: string
-}
-/** A projection `projections explore` proposes for this repository, as a trial definition (`GET /api/explore`). */
-export interface ExploreCandidate {
-  /** The trial definition's ID: the built-in extractor's. */
-  id: string
-  title: string
-  description: string
-  extractor: string
-  schema: string
-  renderer: string
-  requiresTrust: boolean
-  /** Why it was proposed: the detection pattern that matched, how many files and the first few. */
-  basis: {pattern: string; count: number; examples: string[]}
-  /** The authored definition that already uses it, if any. */
-  adopted: string | null
-  definition: Definition
-}
-/** A change a history sweep tries: a revision against the one before it. */
-export interface SweepChange {
-  before: string
-  after: string
-  title: string
-  /** The pull request number its message names, if any. */
-  number: number | null
-  kind: 'merge' | 'commit' | 'pair'
-  date: string
-}
-
-/** A swept projection: `ready`, or skipped because it needs `--trust`, or failed to prepare. */
-export interface SweepProjection {
-  projection: string
-  status: 'ready' | 'trust' | 'failed'
-  requiresTrust?: boolean
-  error?: string
-}
-
-/** One projection on one change. */
-export interface SweepCell {
-  projection: string
-  before: string
-  after: string
-  status: 'changed' | 'unchanged' | 'failed'
-  changes?: number
-  steps?: number
-  /** Changes by status (`added`, `removed`, `modified`, …). */
-  counts?: Record<string, number>
-  error?: string
-}
-
-/** A history sweep (`GET /api/sweep`). */
-export interface Sweep {
-  id: string
-  status: 'running' | 'completed' | 'failed' | 'cancelled'
-  error: string | null
-  changes: SweepChange[]
-  projections: SweepProjection[]
-  cells: SweepCell[]
-}
-
-/** A file Adopt would write: its current content (`null` when absent) and new content. */
-export interface OnboardingFile {
-  path: string
-  before: string | null
-  after: string
-  created: boolean
-  changed: boolean
-}
-
-/** An Adopt preview or result (`POST /api/adopt`). */
-export interface OnboardingWrite {
-  files: OnboardingFile[]
-  /** The files' current contents, which writing must still find. */
-  digest: string
-  written: boolean
-  /** Adopt: the adopted IDs and the changes bookmarked for them. */
-  adopted?: string[]
-  bookmarked?: {id: string; projection: string; change: SweepChange}[]
-}
-
-export interface ExploreCandidates {
-  /** Whether this Inspector is an explore session (no projections yet), whose candidates every revision defines. */
-  session: boolean
-  candidates: ExploreCandidate[]
-}
-/** A Before → After pair the repository suggests (`GET /api/pairs`). */
-export interface InspectorPair {
-  /** Absent for one revision alone. */
-  before?: string
-  after: string
-  label: string
-  source: 'bookmark' | 'merge-base' | 'tag' | 'parent' | 'working-tree' | 'head'
-  /** The bookmark's ID, for `source: 'bookmark'`. */
-  bookmark?: string
-  /** Both sides hold the same files, so the comparison is empty. */
-  identical?: boolean
-  /** Why it can't be compared here, for example a ref that doesn't exist. */
-  error?: string
-}
-/**
- * What the runner offers as Before → After pairs (`InspectorApi.pairs`): `HEAD` and the default branch, their merge
- * base, the bookmarks (or `bookmarksError` when they couldn't be read), tags and branches, and the suggested pairs.
- * Commits are full hashes; dates are ISO 8601.
- */
-export interface InspectorPairs {
-  head: {commit: string | null; branch: string | null; dirty: boolean}
-  defaultBranch: string | null
-  mergeBase: string | null
-  bookmarks: {id: string; title: string; projectionId: string; before: string; after: string}[]
-  tags: {name: string; commit: string; date: string}[]
-  branches: {name: string; commit: string; date: string; current: boolean}[]
-  /** Candidates in the order the default is chosen from; ones with identical sides are left out, except bookmarks. */
-  suggestions: InspectorPair[]
-  /** The pair a projection opens on: the first suggestion with changes, else HEAD (or the working tree) alone. */
-  default: InspectorPair
-  bookmarksError?: string
-}
-/** `POST /api/definition`: what saving parts writes (`dryRun`), or wrote. */
-export interface InspectorDefinitionSave {
-  /** The definition file, relative to the repository. */
-  path: string
-  before: string
-  after: string
-  /** The file's digest before saving; pass it back to save exactly this preview. */
-  digest: string
-  changed: boolean
-  written: boolean
 }
 export interface InspectorScenarioList {
   /** The `scenarios.json` presented, or `null` when the projection's renderer package has none. */
@@ -208,17 +98,6 @@ export interface InspectorInvalidDefinition {
     pointer?: string
     location?: {path: string; line: number; column: number}
   }[]
-}
-/**
- * What changed in the working tree since a generation: `definitions`,
- * `working-tree` (files extractors examine), or `extractor:<id>`,
- * `renderer:<id>` and `comparator:<id>`. `complete` is false when the runner no
- * longer knows every change since then.
- */
-export interface InspectorWorkspaceChanges {
-  generation: number
-  changes: string[]
-  complete: boolean
 }
 /** A revision the Inspector can extract, the working tree or a commit: the `ref` the runner takes and its `commit`. */
 export interface InspectorRevision {

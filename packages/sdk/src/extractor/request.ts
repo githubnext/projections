@@ -107,7 +107,9 @@ export class Request {
 
   /** Whether the run is trusted (`--trust`). */
   get trusted(): boolean {
-    return this.capabilities?.trusted
+    // The request isn't validated: without capabilities, or with anything but `true`, the run isn't trusted.
+    const capabilities: unknown = this.toJSON().capabilities
+    return typeof capabilities === 'object' && capabilities !== null && 'trusted' in capabilities && capabilities.trusted === true
   }
 }
 

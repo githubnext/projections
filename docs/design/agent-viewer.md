@@ -94,7 +94,7 @@ pages, including the Copilot app's canvas, reconnect to the trusted viewer.
 ### 2. The server owns the view state
 
 The **view state** is
-`{projection, choice or before/after, mode, selection, scenario, chosenBy, generation}`,
+`{projection, choice or before/after, mode, selection, scenario, chosenBy, reportedBy, generation}`,
 one for each named viewer (below). The server holds it; pages render it. Pages
 long-poll it (`GET TOKEN/view/state?since=N`), as the Inspector long-polls
 working-tree changes, and report the person's interactions with
@@ -104,7 +104,11 @@ long poll plus POST is simpler than Server-Sent Events or a WebSocket here: the
 state changes rarely, the reports are small, and it needs no new dependency.
 
 Several open pages mirror one another: a report that changes the selection or
-mode becomes the state, and every page receives it. The newest report wins.
+mode becomes the state, and every page receives it. The newest report wins. The
+state names the page whose report made it (`reportedBy`), so that page takes it
+for its own report's echo and doesn't undo what the person did since. Every
+other page applies it. A page sends one report at a time: the latest waits for
+the one in flight, so an older report never arrives after a newer one.
 
 **Which pages count as open.** A page counts while it asks for its viewer's
 state: each page makes a random ID (with `crypto.getRandomValues`, not

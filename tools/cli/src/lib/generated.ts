@@ -77,8 +77,12 @@ export const generators: Generator[] = [
   },
   {
     name: 'schemas',
-    description: 'The published JSON Schemas and the engine data rules fixture, from the TypeBox sources',
-    outputs: ['packages/schemas/schemas/**/*.json', 'packages/schemas/fixtures/data-rules.json'],
+    description: 'The published JSON Schemas, the internal runner API schema and the engine data rules fixture, from the TypeBox sources',
+    outputs: [
+      'packages/schemas/schemas/**/*.json',
+      'packages/schemas/internal/runner-api.json',
+      'packages/schemas/fixtures/data-rules.json',
+    ],
     inputs: ['packages/schemas/src/**', 'packages/schemas/scripts/generate.mjs'],
     generate: [npm('run', 'generate', '--workspace', '@githubnext/projections-schemas')],
     check: {
@@ -99,6 +103,17 @@ export const generators: Generator[] = [
     generate: [node('packages/integrations/vscode/scripts/tools.mjs')],
     check: {mode: 'script', commands: [node('packages/integrations/vscode/scripts/tools.mjs', '--check')]},
     needs: ['cli'],
+    fix: true,
+  },
+  {
+    name: 'node-extractor-module',
+    description:
+      'packages/cli/node/extractor.mjs: @githubnext/projections/extractor bundled into one module, which the CLI gives extractors run with node',
+    outputs: ['packages/cli/node/extractor.mjs'],
+    inputs: ['packages/sdk/src/extractor.ts', 'packages/sdk/src/extractor/**', 'packages/sdk/scripts/extractor-module.mjs'],
+    generate: [npm('run', 'generate:extractor', '--workspace', '@githubnext/projections')],
+    check: {mode: 'script', commands: [node('packages/sdk/scripts/extractor-module.mjs', '--check')]},
+    needs: [],
     fix: true,
   },
   {

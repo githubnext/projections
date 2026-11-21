@@ -6,7 +6,9 @@ mod comparison;
 pub mod context;
 mod data_rules;
 pub mod model;
+pub mod pairing;
 mod parse;
+pub mod review;
 mod validate;
 pub mod volatility;
 #[cfg(all(target_arch = "wasm32", feature = "abi"))]
@@ -19,12 +21,14 @@ pub use model::{
     Change, Collection, Comparison, Context, Correspondence, Counts, Datum, Entity, Extraction, Fields, ItemRef, Number, Relationship,
     Reverse, Side, Status, Step, StepKind,
 };
+pub use pairing::{Pairing, extraction_definition, pairing};
 pub use parse::{
     canonical, canonicalize, check_comparison, content, content_value, diagnostic_response, handle, normalize, parse_json, semantic,
     validate_comparison,
 };
 /// The Engine's formally verified decisions (see `VERIFICATION.md`).
 pub use projections_engine_verified as verified;
+pub use review::{Review, review};
 pub use validate::{MAX_ENTITIES, MAX_EXTRACTION_BYTES, MAX_RELATIONSHIPS, SCHEMAS};
 
 /// The two collections, in the order every pass runs over them.

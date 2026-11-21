@@ -35,12 +35,6 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
 }
 
-/** A definition without `presentation`, which never affects extractions or their digest. */
-function withoutPresentation(definition: Definition): Omit<Definition, 'presentation'> {
-  const {presentation: _presentation, ...rest} = definition
-  return rest
-}
-
 function sameJson(left: unknown, right: unknown): boolean {
   if (left === right) return true
   if (Array.isArray(left)) {
@@ -95,8 +89,8 @@ async function verifyExtraction(document: ExtractionDocument, engine: Projection
  * `createNativeRulesRuntime()` from `@githubnext/projections-comparator-runtime`.
  */
 export interface ArtifactRulesRuntime {
-  check(rules: Uint8Array): Promise<{digest: string}>
-  compare(rules: Uint8Array, input: unknown): Promise<unknown>
+  check(rules: Uint8Array, options?: {signal?: AbortSignal}): Promise<{digest: string}>
+  compare(rules: Uint8Array, input: unknown, options?: {signal?: AbortSignal}): Promise<unknown>
 }
 
 /**
@@ -107,18 +101,17 @@ export interface ArtifactRulesRuntime {
 export interface ArtifactRules {
   bytes: Uint8Array
   runtime: ArtifactRulesRuntime
+  /** Cancels the rerun: the runtime stops its worker or process, and loading fails. */
+  signal?: AbortSignal
 }
 
 async function verifyComparison(value: ComparisonDocument, engine: ProjectionEngine, rules?: ArtifactRules): Promise<ComparisonDocument> {
-  if (value.before.projection.id !== value.after.projection.id) {
+  // One definition, with one version of its component code, explains both revisions (the engine decides).
+  const {pairing} = await engine.pair(value.before, value.after)
+  if (pairing === 'projection') {
     throw new ArtifactError('ARTIFACT_PROJECTION', '/after/projection/id', 'A comparison must describe the same projection')
   }
-  // One definition, with one version of its component code, explains both revisions.
-  // Presentation defaults are only viewers' initial settings and may differ.
-  if (
-    value.before.provenance.definitionDigest !== value.after.provenance.definitionDigest ||
-    !sameJson(withoutPresentation(value.before.provenance.definition), withoutPresentation(value.after.provenance.definition))
-  ) {
+  if (pairing !== 'same') {
     throw new ArtifactError(
       'ARTIFACT_DEFINITION',
       '/after/provenance/definitionDigest',
@@ -158,7 +151,7 @@ async function rerunCustom(
   // The file supplied must be the comparator file that produced the comparison: its digest covers its meaning and the interpreter.
   let digest: string
   try {
-    ;({digest} = await rules.runtime.check(rules.bytes))
+    ;({digest} = await rules.runtime.check(rules.bytes, rules.signal ? {signal: rules.signal} : {}))
   } catch (error) {
     throw new ArtifactError(
       'ARTIFACT_RULES',
@@ -175,13 +168,11 @@ async function rerunCustom(
   }
   let output: unknown
   try {
-    output = await rules.runtime.compare(rules.bytes, {
-      protocolVersion: 0,
-      before: before.extraction,
-      after: after.extraction,
-      baseline: {},
-      options: custom.options ?? {},
-    })
+    output = await rules.runtime.compare(
+      rules.bytes,
+      {protocolVersion: 0, before: before.extraction, after: after.extraction, baseline: {}, options: custom.options ?? {}},
+      rules.signal ? {signal: rules.signal} : {},
+    )
   } catch (error) {
     throw new ArtifactError(
       'ARTIFACT_RULES',

@@ -3,6 +3,7 @@ import type {
   DefaultComparatorOptions,
   Comparison,
   Definition,
+  DefinitionPairing,
   Extraction,
   ExtractionDocument,
   ProjectionEngine,
@@ -61,17 +62,6 @@ export class ComparisonError extends Error {
   }
 }
 
-function canonical(value: unknown): string {
-  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
-  if (value && typeof value === 'object') {
-    return `{${Object.keys(value)
-      .sort()
-      .map(key => `${JSON.stringify(key)}:${canonical((value as Record<string, unknown>)[key])}`)
-      .join(',')}}`
-  }
-  return JSON.stringify(value) ?? 'null'
-}
-
 const definitionParts: Record<keyof Definition, string> = {
   id: 'projection ID',
   title: 'title',
@@ -86,18 +76,13 @@ const definitionParts: Record<keyof Definition, string> = {
 }
 
 /**
- * Explains why two extractions have different definition digests: which
- * parts of the definition differ, or, when the definitions are identical,
- * that the content of the declared component sources differs.
+ * Explains why two extractions can't be compared as one definition's (`ProjectionEngine.pair`): which parts of their
+ * definitions differ or, when the definitions agree, that the content of their declared component sources does.
  */
-export function explainDefinitionMismatch(before: ExtractionDocument, after: ExtractionDocument): string[] {
-  const left = before.provenance.definition as unknown as Record<string, unknown>
-  const right = after.provenance.definition as unknown as Record<string, unknown>
-  // Presentation defaults are excluded from the digest, so they never explain a mismatch.
-  const keys = [...new Set([...Object.keys(left), ...Object.keys(right)])].filter(key => key !== 'presentation').sort()
-  const differing = keys.filter(key => canonical(left[key]) !== canonical(right[key]))
-  if (!differing.length) return ['The definitions are identical, so the content of their declared component sources differs.']
-  return differing.map(key => `The ${definitionParts[key as keyof Definition] ?? key} differs.`)
+export function explainDefinitionMismatch(pairing: Exclude<DefinitionPairing, {pairing: 'same' | 'projection'}>): string[] {
+  if (pairing.pairing === 'components')
+    return ['The definitions are identical, so the content of their declared component sources differs.']
+  return pairing.differing.map(key => `The ${definitionParts[key as keyof Definition] ?? key} differs.`)
 }
 
 /** Lowercase hex SHA-256 of bytes, as `sha256:<hex>`. */
@@ -113,7 +98,7 @@ function message(error: unknown): string {
 /**
  * Compares two saved extractions in the browser.
  *
- * Both must come from the same projection and the same definition digest.
+ * Both must come from one projection definition, as the engine decides (`ProjectionEngine.pair`).
  * The definition's comparator decides how: the default comparator runs
  * through the engine with the definition's options; a custom comparator runs
  * in the supplied rules runtime's sandbox, and the engine validates its
@@ -132,17 +117,18 @@ export async function computeComparison({
   comparator: ComparatorSource
   rules?: RulesRuntime
 }): Promise<ComputedComparison> {
-  if (before.projection.id !== after.projection.id) {
+  const pairing = await engine.pair(before, after)
+  if (pairing.pairing === 'projection') {
     throw new ComparisonError(
       'projection-mismatch',
       `These extractions belong to different projections (${before.projection.id} and ${after.projection.id}).`,
     )
   }
-  if (before.provenance.definitionDigest !== after.provenance.definitionDigest) {
+  if (pairing.pairing !== 'same') {
     throw new ComparisonError(
       'definition-mismatch',
       'These extractions were produced by different versions of the projection definition, so comparing them would mix code changes with projection changes. Extract both revisions with the same definition.',
-      explainDefinitionMismatch(before, after),
+      explainDefinitionMismatch(pairing),
     )
   }
   const declared = before.provenance.definition.comparator

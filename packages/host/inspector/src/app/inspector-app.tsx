@@ -51,6 +51,7 @@ export function InspectorApp({
   chrome = 'workbench',
   banner,
   toolbarStart,
+  utilityArea = false,
   refresh = 'auto',
   initialResults,
   definitionRevision: openedDefinitionRevision,
@@ -73,8 +74,6 @@ export function InspectorApp({
   // The title bar's projection switcher, and the presented view's controller for the docked Details panel.
   const [switcher, setSwitcher] = useState(false)
   const [controllers] = useState(createControllerStore)
-  // The hooks below are called in the order their effects must run: an effect can read what an earlier one wrote in
-  // the same commit (the shown pair is extracted after the extraction cache is brought up to date).
   const {artifact, setArtifact, artifactMarks, setArtifactMarks, source, setSource, loadingArtifact, upload, openArtifact} = useArtifacts({
     initialDocument,
     loadArtifact,
@@ -102,7 +101,7 @@ export function InspectorApp({
     overrides[projection],
   )
   const runnable = Boolean(api && definitions && projection) && (!runPolicy.requiresTrust || (authorized && trusted))
-  const {jobs, rows, setRows, setQueue, active, extracted, forgetExtracted, extract, cancel, busy} = useExtractions({
+  const {jobs, rows, setRows, dropQueued, active, extracted, forgetExtracted, extract, cancel, busy} = useExtractions({
     api,
     projection,
     definitionRevision,
@@ -306,7 +305,7 @@ export function InspectorApp({
     actions: {switchProjection, switcherStatus, extract, retry: pair.retry, chooseDefinition, cancel, requestScenario},
     setSource,
     setMarks,
-    setQueue,
+    dropQueued,
     setRows,
   })
 
@@ -450,6 +449,7 @@ export function InspectorApp({
         controllers,
         ...(api ? {running: running ?? null} : {}),
         ...(bare && toolbarStart ? {toolbarStart} : {}),
+        ...(bare && utilityArea ? {utilityArea} : {}),
       }}
       empty={{
         Loading,

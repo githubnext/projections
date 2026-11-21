@@ -136,6 +136,7 @@ export type ProbeCall =
   | 'stageSurface'
   | 'stageInsets'
   | 'accents'
+  | 'routes'
   | 'viewport'
 
 /** An entity element as painted: its box, effective opacity, paint and visible text. */
@@ -157,6 +158,14 @@ export interface EntitySample {
    * colour from Before to After.
    */
   categories: {[key: string]: string}
+}
+
+/** The links a renderer routes between cards (`data-projections-route`): how many, and those that cross cards. */
+export interface RouteMeasurement {
+  /** How many routed links the renderer marks. */
+  count: number
+  /** Each link drawn across cards because no route around them exists, with the IDs of the cards it crosses. */
+  crossing: {id: string; crosses: string[]}[]
 }
 
 /** Identifier elements (`data-projections-identifier`) as painted: how many are visible, and those not in a monospace font. */
@@ -349,6 +358,7 @@ export type CheckId =
   | 'type-scale'
   | 'spacing'
   | 'nested-accents'
+  | 'link-routes'
 
 /**
  * One check's outcome (`runChecks`): `skip` when it doesn't apply to the subject or renderer, `fail` when it found a

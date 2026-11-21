@@ -56,7 +56,8 @@ class RequestTest(unittest.TestCase):
             ("", "not JSON"),
             ("[]", "not a JSON object"),
             ('{"protocolVersion": 1}', "protocolVersion 1"),
-            ('{"protocolVersion": false}', "protocolVersion False"),
+            ('{"protocolVersion": false}', "protocolVersion false"),
+            ("{}", "no protocolVersion"),
         ]:
             with self.subTest(text=text), self.assertRaisesRegex(ValueError, message):
                 read_request(io.StringIO(text))
@@ -94,16 +95,16 @@ class ExtractionTest(unittest.TestCase):
     def test_explains_what_is_wrong(self):
         entity = {"id": "a", "kind": "k", "label": "A"}
         for call, error, message in [
-            (lambda: extraction(entities="a"), TypeError, "list of dicts"),
-            (lambda: extraction(entities=[["a"]]), TypeError, r"entities\[0\] is a list"),
+            (lambda: extraction(entities="a"), TypeError, "array of objects"),
+            (lambda: extraction(entities=[["a"]]), TypeError, r"entities\[0\] is an array, not an object"),
             (lambda: extraction(entities=[{"kind": "k"}]), ValueError, r"entities\[0\] has no id"),
-            (lambda: extraction(entities={"a": {"id": "b", "kind": "k", "label": "A"}}), ValueError, "has the id 'b'"),
+            (lambda: extraction(entities={"a": {"id": "b", "kind": "k", "label": "A"}}), ValueError, 'has the id "b"'),
             (lambda: extraction(entities=[{"id": "", "kind": "k", "label": "A"}]), ValueError, "nonempty string"),
-            (lambda: extraction(entities=[{"id": "a", "kind": "k"}]), ValueError, "entity 'a' needs 'label'"),
-            (lambda: extraction(relationships=[{"id": "r", "kind": "k", "from": "a"}]), ValueError, "relationship 'r' needs 'to'"),
+            (lambda: extraction(entities=[{"id": "a", "kind": "k"}]), ValueError, 'entity "a" needs label'),
+            (lambda: extraction(relationships=[{"id": "r", "kind": "k", "from": "a"}]), ValueError, 'relationship "r" needs to'),
             (lambda: extraction(entities=[entity], relationships=[{**entity, "from": "a", "to": "a"}]), ValueError, "Two items"),
             (lambda: extraction(schema="graph"), ValueError, "domain schema"),
-            (lambda: extraction(colour="red"), TypeError, "no field 'colour'"),
+            (lambda: extraction(colour="red"), TypeError, 'no field "colour"'),
         ]:
             with self.subTest(message=message), self.assertRaisesRegex(error, message):
                 call()
@@ -130,7 +131,7 @@ class ResultTest(unittest.TestCase):
 
     def test_names_the_item_json_cannot_hold(self):
         for value, message in [({1, 2}, "set"), (float("nan"), "Out of range")]:
-            with self.subTest(message=message), fresh_result() as stdout, self.assertRaisesRegex(ValueError, f"'b'.*{message}"):
+            with self.subTest(message=message), fresh_result() as stdout, self.assertRaisesRegex(ValueError, f'"b".*{message}'):
                 projections.result(entities=[{"id": "a", "kind": "k", "label": "A"}, {"id": "b", "kind": "k", "label": "B", "data": {"v": value}}])
             self.assertEqual(stdout.buffer.getvalue(), b"", "nothing is written")
 

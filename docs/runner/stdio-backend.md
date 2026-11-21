@@ -92,6 +92,10 @@ and thumbnail renders.
 
 ## Requests
 
+The responses the Inspector decodes have TypeBox schemas, and the service tests
+hold these responses to them
+([schema-owned contracts](../contracts.md#schema-owned-contracts)).
+
 - `GET /api/definitions?ref=REV[&include=ID]`:
   `{"definitions", "policies", "ref", "commit"?, "executionAuthorized", "invalid"}`;
   `commit` is the full commit `ref` names when it isn't `working-tree` (a

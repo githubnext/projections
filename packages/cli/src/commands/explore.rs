@@ -60,7 +60,7 @@ pub async fn explore(directory: &Path, args: Explore) -> Result<()> {
     if !args.list {
         writeln!(
             out,
-            "In VS Code, Projections: Explore Repository (the Projections extension) tries them on recent changes and adopts them."
+            "Run `projections explore --sweep` to try them on recent changes, or `projections adopt <id>...` to keep the useful ones."
         )?;
     }
     Ok(())
@@ -153,7 +153,7 @@ pub fn adopt(directory: &Path, args: Adopt) -> Result<()> {
     text.push_str(if args.dry_run {
         "\nNothing was written. Adopt them: rerun without --dry-run.\n"
     } else {
-        "\nCommit these files. Add them to CI with your coding agent: projections help agents ci. Tune one in VS Code: click it in the Projections side bar; its tab applies your edits.\n"
+        "\nCommit these files. See one in the viewer: `projections view show -p <id> --open`. Add them to CI with your coding agent: `projections help agents ci`.\n"
     });
     io::stdout().lock().write_all(text.as_bytes())?;
     Ok(())

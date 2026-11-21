@@ -6,6 +6,7 @@ import {parseTransportMessage} from '@githubnext/projections-inspector/transport
 import {sourceRoot} from '../backend-sources.js'
 import type {PanelSource} from '../backend-sources.js'
 import type {Lease} from '../backends.js'
+import {createActor} from '@githubnext/projections-machine'
 import {createBridge} from '../bridge.js'
 import {openExternal} from '../docs.js'
 import {webviewHtml} from '../html.js'
@@ -14,6 +15,7 @@ import {controlTag, hostTag, position, relativePath, rendererTag, revision} from
 import type {ControlRequest, HostMessage, WebviewConfig} from '../protocol.js'
 import type {Runner} from '../runner.js'
 import type {Services} from '../services.js'
+import {pageLifecycle} from './page-lifecycle.js'
 
 const run = promisify(execFile)
 
@@ -27,12 +29,21 @@ export class InspectorWebview {
   protected readonly lease: Lease
   protected runner: Runner | undefined
   protected bridge: ReturnType<typeof createBridge> | undefined
-  protected ready: Promise<void>
-  protected markReady!: () => void
-  /** Whether the page said it's ready since it last loaded. */
-  protected isReady = false
+  /** How many times the extension loaded the page; the page says which load it is when it's ready. */
+  private pageLoads = 0
   private nextControl = 1
-  private readonly pending = new Map<number, {resolve: (value: unknown) => void; reject: (error: Error) => void}>()
+  /** The callers waiting on each control the page's lifecycle hasn't settled. */
+  private readonly answers = new Map<number, {resolve: (value: unknown) => void; reject: (error: Error) => void}>()
+  /** The page's lifecycle (page-lifecycle.ts): loading, ready or closed, and the controls waiting on it. */
+  protected readonly page = createActor(pageLifecycle, {
+    state: {kind: 'loading', page: 0, waiting: []},
+    effects: {
+      post: ({control}) => void this.panel.webview.postMessage({tag: controlTag, id: control.id, ...control.message}),
+      resolve: ({id, result}) => this.settle(id)?.resolve(result),
+      reject: ({id, reason}) => this.settle(id)?.reject(new Error(reason)),
+    },
+    onError: error => this.output.error(error instanceof Error ? error : String(error)),
+  })
   /** Transport requests the page sent before a backend was bound: answered, in order, once one is. */
   private queued: unknown[] = []
   /** For tests: the first page this webview was given, when, and when its first backend was bound. */
@@ -50,8 +61,8 @@ export class InspectorWebview {
   ) {
     this.context = services.context
     this.output = services.output
-    this.ready = new Promise(resolve => (this.markReady = resolve))
     this.firstPage = firstPage
+    this.page.start()
     this.lease = services.backends.lease(source)
     // A replaced backend (with --trust once the workspace is trusted, or after it exited) gets a new bridge and page.
     const unsubscribe = this.lease.onDidChange(runner => this.bind(runner))
@@ -129,8 +140,8 @@ export class InspectorWebview {
   show(view: 'explore' | 'inspect') {
     const webview = this.panel.webview
     this.view = view
-    this.isReady = false
-    this.ready = new Promise(resolve => (this.markReady = resolve))
+    const page = ++this.pageLoads
+    this.page.send({type: 'loaded', page})
     const dist = vscode.Uri.joinPath(this.context.extensionUri, 'dist')
     const resource = (...path: string[]) => webview.asWebviewUri(vscode.Uri.joinPath(dist, ...path)).toString()
     const config: WebviewConfig = {
@@ -139,6 +150,7 @@ export class InspectorWebview {
       comparatorWorker: resource('workers', 'comparator.js'),
       nonce: randomBytes(18).toString('base64url'),
       view,
+      page,
       ...this.pageConfig(),
     }
     count('page.load')
@@ -162,19 +174,18 @@ export class InspectorWebview {
     const host = message as Partial<HostMessage>
     if (host?.tag !== hostTag) return
     switch (host.op) {
-      case 'ready':
-        this.isReady = true
-        this.markReady()
-        this.onReady(host)
-        return
-      case 'controlResult': {
-        const pending = typeof host.id === 'number' ? this.pending.get(host.id) : undefined
-        if (!pending) return
-        this.pending.delete(host.id!)
-        if (host.error) pending.reject(new Error(host.error))
-        else pending.resolve(host.result)
+      case 'ready': {
+        // A ready from an earlier load, whose HTML was already replaced, isn't this page's.
+        const page = typeof host.page === 'number' ? host.page : undefined
+        const before = this.page.getState()
+        this.page.send({type: 'ready', page})
+        if (before.kind !== 'closed' && (page === undefined || page === before.page)) this.onReady(host)
         return
       }
+      case 'controlResult':
+        if (typeof host.id === 'number')
+          this.page.send({type: 'answered', id: host.id, result: host.result, ...(host.error ? {error: String(host.error)} : {})})
+        return
       case 'openFile':
         void this.openFile(host.path, host.line, host.column)
         return
@@ -244,21 +255,23 @@ export class InspectorWebview {
     }
   }
 
-  /** Sends a command to the webview's Inspector handle once it is ready. */
-  async control(message: ControlRequest, timeoutMs = 30_000): Promise<unknown> {
-    await this.ready
+  /**
+   * Sends a command to the webview's Inspector handle once it is ready. It fails when the page doesn't answer within
+   * `timeoutMs` of the call (waiting for the page included), when the page reloads before answering, or when it closes.
+   */
+  control(message: ControlRequest, timeoutMs = 30_000): Promise<unknown> {
     const id = this.nextControl++
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        this.pending.delete(id)
-        reject(new Error('The Inspector did not answer'))
-      }, timeoutMs)
-      this.pending.set(id, {
-        resolve: value => (clearTimeout(timer), resolve(value)),
-        reject: error => (clearTimeout(timer), reject(error)),
-      })
-      void this.panel.webview.postMessage({tag: controlTag, id, ...message})
+      this.answers.set(id, {resolve, reject})
+      this.page.send({type: 'asked', control: {id, message, timeoutMs}})
     })
+  }
+
+  /** The caller waiting on control `id`, no longer waiting. */
+  private settle(id: number) {
+    const answer = this.answers.get(id)
+    this.answers.delete(id)
+    return answer
   }
 
   /** Whether the panel is closed: posting to it would throw. */
@@ -268,8 +281,8 @@ export class InspectorWebview {
     this.closed = true
     this.bridge?.dispose()
     this.lease.dispose()
-    for (const pending of this.pending.values()) pending.reject(new Error('The Inspector was closed'))
-    this.pending.clear()
+    // The lifecycle stays running, closed: a command asked for after this fails at once.
+    this.page.send({type: 'closed'})
     for (const disposable of this.disposables.splice(0)) disposable.dispose()
   }
 }

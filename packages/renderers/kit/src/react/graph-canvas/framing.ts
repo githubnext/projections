@@ -6,7 +6,8 @@ import type {GraphTransition} from '../../graph-transition.js'
 import {contentStart, openingZoom} from '../../zoom.js'
 import {useBorderWidths} from '../border.js'
 import {useFitScale} from '../fit.js'
-import {useFrameSizing, useStageInset, useStageInsetTop} from '../shell/frame.js'
+import {useCoveredPadding, useScrolledPadding} from '../covered-padding.js'
+import {useFrameSizing, useStageCover, useStageInset, useStageInsetTop} from '../shell/frame.js'
 import {useOpeningFloor, useStageZoom} from '../zoom.js'
 import type {ContentBox, ScrollStart} from '../../zoom.js'
 import type {LaidOutGraphProps} from './drawing.js'
@@ -21,11 +22,13 @@ const strokeRoom = 12
  * The space around a fitted graph, CSS px: `graphPadding`, or across the host's `stage-inset` (`styles/graph.css`
  * pads the drawing the same), where the drawing's sides then reach exactly to the outermost cards and routes (see
  * `useFraming`), so they line up with the host's column; and above it the host's `stage-inset-top`, where it sends
- * one, so the graph opens below what the host overlays on the frame's top.
+ * one, so the graph opens below what the host overlays on the frame's top. A host that says exactly what it overlays
+ * (`stage-cover`) leaves the top to `useCoveredPadding`, which moves it down only where the fitted graph would reach.
  */
 export function useGraphPadding(): GraphPadding {
   const x = useStageInset() ?? graphPadding
-  const top = useStageInsetTop() ?? graphPadding
+  const insetTop = useStageInsetTop()
+  const top = useStageCover() ? graphPadding : (insetTop ?? graphPadding)
   return useMemo(() => ({x, y: graphPadding, top}), [x, top])
 }
 
@@ -105,7 +108,7 @@ export function useGraphZoom(
 ) {
   const {area, request} = focus
   const floor = useOpeningFloor(scroller, framing)
-  const padding = useGraphPadding()
+  const padding = useCoveredPadding(scroller, bounds, useGraphPadding())
   const flush = useStageInset() !== undefined
   // The scale drawn last: zoomed in, a content-sized stage grows to it (see `FitOptions.drawnScale`).
   const [drawnScale, setDrawnScale] = useState(0)
@@ -115,6 +118,9 @@ export function useGraphZoom(
     drawnScale,
     ...(area && request ? {aspect: (area.box.width + 2 * padding.x) / (area.box.height + padding.top + padding.y)} : {}),
   })
+  // The padding as drawn (more under a cover once the drawing scrolls), which every opening is placed in, so it never
+  // changes when the person zooms or pans away from one.
+  const drawnPadding = useScrolledPadding(padding, drawnScale, fit.scale, {content: bounds.height, view: fit.height})
   // Arrowheads stop on the outer edge of their target's border; a change border is inset so it never reaches further.
   const borders = useBorderWidths(scroller)
   const content = useMemo((): ContentBox => ({x: bounds.minX, y: bounds.minY, width: bounds.width, height: bounds.height}), [bounds])
@@ -131,9 +137,14 @@ export function useGraphZoom(
     }))
     const align = orientation === 'vertical' ? 'centre' : 'left'
     // Flush with the host's stage inset, the leftmost card opens that inset from the view's edge.
-    return view => contentStart(shown.current.length ? shown.current : all, content, padding, 12, align, flush ? padding.x : 0)(view)
-  }, [framing, content, orientation, padding, flush])
+    return view =>
+      contentStart(shown.current.length ? shown.current : all, content, drawnPadding, 12, align, flush ? drawnPadding.x : 0)(view)
+  }, [framing, content, orientation, drawnPadding, flush])
   const sized = useFrameSizing() === 'content'
+  // The bands the host's overlays take at the view's ends, which a focus is fitted and centred clear of.
+  const covered = Boolean(useStageCover()?.length)
+  const insetTop = useStageInsetTop()
+  const bands = useMemo(() => ({top: covered ? (insetTop ?? 0) : 0, bottom: 0}), [covered, insetTop])
   const opening = useMemo(
     () =>
       focusOpening({
@@ -146,12 +157,14 @@ export function useGraphZoom(
         sized,
         orientation,
         padding,
+        drawn: drawnPadding,
+        bands,
       }),
-    [area, request, floor, content, fit.scale, fit.width, fit.height, sized, orientation, padding],
+    [area, request, floor, content, fit.scale, fit.width, fit.height, sized, orientation, padding, drawnPadding, bands],
   )
   const zoom = useStageZoom(scroller, onAction, fit.scale, {floor, start, ...(opening ? {opening} : {}), ...(hold ? {hold} : {})})
   useLayoutEffect(() => setDrawnScale(zoom.scale), [zoom.scale])
-  return {...zoom, borders}
+  return {...zoom, borders, top: drawnPadding.top}
 }
 
 /** The opening view on a focus (see `useGraphZoom`), or undefined for the default one. */
@@ -165,6 +178,8 @@ function focusOpening({
   sized,
   orientation,
   padding,
+  drawn,
+  bands,
 }: {
   area: FocusArea | undefined
   request: RendererFocus | undefined
@@ -175,17 +190,21 @@ function focusOpening({
   /** Whether the host sizes the frame to the content, which it measures at the floor. */
   sized: boolean
   orientation: 'vertical' | 'horizontal'
-  /** The space around the fitted graph (`useGraphPadding`). */
+  /** The space around the fitted graph (`useGraphPadding`), which the room for the focus is measured in. */
   padding: GraphPadding
-}): {zoom: number; start: ScrollStart} | undefined {
+  /** The padding as drawn (`useScrolledPadding`), which the opening is placed in. */
+  drawn: GraphPadding
+  /** The bands the host's overlays take at the view's top and bottom, CSS px (0 without a cover). */
+  bands: {top: number; bottom: number}
+}): {zoom: number; start: ScrollStart; centred: boolean} | undefined {
   if (!fit) return undefined
-  if (!area) return request?.fit ? {zoom: 1, start: {x: 0, y: 0}} : undefined
+  if (!area) return request?.fit ? {zoom: 1, start: {x: 0, y: 0}, centred: false} : undefined
   // Diff mode's own focus: only when everything doesn't fit at the floor.
   if (!request && openingZoom(fit, floor) <= 1) return undefined
   const {box} = area
   const room = Math.min(
     Math.max(0, view.width - 2 * padding.x) / box.width,
-    Math.max(0, view.height - padding.top - padding.y) / box.height,
+    Math.max(0, view.height - Math.max(padding.top, bands.top) - Math.max(padding.y, bands.bottom)) / box.height,
   )
   const fitted = Math.min(1, room)
   // Asked for, the area is fitted (at most at full size, and not below the floor unless `fit`). Diff mode's own focus
@@ -194,21 +213,22 @@ function focusOpening({
   const scale = Math.max(fit, request?.fit ? fitted : request || !sized ? Math.max(fitted, floor) : floor)
   const fits = fitted >= scale * (1 - 1e-6)
   const centred: ScrollStart = ({scale, width, height}) => ({
-    left: (box.x + box.width / 2 - content.x) * scale + padding.x - width / 2,
-    top: (box.y + box.height / 2 - content.y) * scale + padding.top - height / 2,
+    left: (box.x + box.width / 2 - content.x) * scale + drawn.x - width / 2,
+    // Centred in the room the bands leave, not the whole view.
+    top: (box.y + box.height / 2 - content.y) * scale + drawn.top - (height + bands.top - bands.bottom) / 2,
   })
   // Asked for: centred where the area fits, else its reading start, as the whole graph opens.
-  if (request) return {zoom: scale / fit, start: fits ? centred : contentStart(area.cards, content, padding)}
+  if (request) return {zoom: scale / fit, start: fits ? centred : contentStart(area.cards, content, drawn), centred: fits}
   // Diff mode's own focus: centred on its changes where they fit; else on the part of the view's size that holds the
   // most of them, the first such along the layers (the top of a graph laid out top to bottom).
   const reading: ScrollStart = view => {
     const corner = busiestWindow(area.cards, {width: view.width / view.scale, height: view.height / view.scale}, orientation)
     return {
-      left: (corner.x - content.x) * view.scale + padding.x,
-      top: (corner.y - content.y) * view.scale + padding.top,
+      left: (corner.x - content.x) * view.scale + drawn.x,
+      top: (corner.y - content.y) * view.scale + drawn.top,
     }
   }
-  return {zoom: scale / fit, start: uncutStart(fits ? centred : reading, area, content, fits, padding)}
+  return {zoom: scale / fit, start: uncutStart(fits ? centred : reading, area, content, fits, drawn), centred: fits}
 }
 
 /**

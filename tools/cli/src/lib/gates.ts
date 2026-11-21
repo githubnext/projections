@@ -134,6 +134,14 @@ export const gates: Gate[] = [
     },
   },
   {
+    name: 'machines',
+    fast: true,
+    description:
+      'No file gains an implicit lifecycle over its baseline, and every state machine has an explore test (npm run check:machines)',
+    plan: () => ({commands: [npm('run', '--silent', 'check:machines')]}),
+    fix: 'node tools/scripts/check-machines.mjs --update',
+  },
+  {
     name: 'tsdoc',
     description: 'Every public TypeScript symbol has a documentation comment (npm run check:tsdoc)',
     plan: context =>

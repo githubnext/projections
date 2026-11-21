@@ -4,15 +4,16 @@ import {readFileSync} from 'node:fs'
 import {createElement} from 'react'
 import {renderToStaticMarkup} from 'react-dom/server'
 import {createNativeEngine} from '@githubnext/projections-engine/native'
-import {comparisonModel, extractionModel} from '@githubnext/projections-renderer-kit'
+import {changesScope, comparisonModel, extractionModel, scopedModel} from '@githubnext/projections-renderer-kit'
 import {summaryCountText} from '@githubnext/projections-renderer-sdk/presentation'
 // `npm test` compiles src/ (without the browser entry) to this cache directory first.
-import {columnChanges, keyChanges} from '../node_modules/.cache/test/change-lines.js'
+import {columnChanges, keyChanges, referentialAction} from '../node_modules/.cache/test/change-lines.js'
 import {createDatabaseDiff} from '../node_modules/.cache/test/diff.js'
 import {databaseFacts} from '../node_modules/.cache/test/facts.js'
-import {mergeValues} from '../node_modules/.cache/test/diff-states.js'
+import {analyse, mergeValues} from '../node_modules/.cache/test/diff-states.js'
 import {schemaMetrics} from '../node_modules/.cache/test/schema.js'
 import {DatabaseRenderer} from '../node_modules/.cache/test/view.js'
+import {databaseContext} from '../node_modules/.cache/test/scope.js'
 
 const engine = createNativeEngine()
 const scenarios = JSON.parse(readFileSync(new URL('../scenarios.json', import.meta.url), 'utf8')).scenarios
@@ -211,3 +212,103 @@ test('the diff marks changes in place, in words, and leaves the summary to the h
   const animated = render(model, false)
   for (const mark of ['database-spanning', 'database-change-line', 'data-diff']) assert.ok(!animated.includes(mark), mark)
 })
+
+test("a foreign key's referential actions read with their values, as each extractor writes them", () => {
+  const key = data => ({id: 'k', kind: 'constraint', label: 'k', data: {type: 'foreign-key', columns: ['a'], ...data}})
+  assert.deepEqual(keyChanges(change(key({onDelete: 'Restrict'}), key({onDelete: 'Cascade', onUpdate: 'Cascade'}))), [
+    {key: 'on-delete', word: 'On delete changed', before: 'Restrict', after: 'Cascade'},
+    {key: 'on-update', word: 'On update changed', before: 'default', after: 'Cascade'},
+  ])
+  assert.equal(referentialAction({callable: 'django.db.models.deletion.PROTECT'}), 'PROTECT')
+  // Two callables of the same name in different modules are a change, read in full.
+  assert.deepEqual(
+    keyChanges(change(key({onDelete: {callable: 'old_policy.PROTECT'}}), key({onDelete: {callable: 'new_policy.PROTECT'}}))),
+    [{key: 'on-delete', word: 'On delete changed', before: 'old_policy.PROTECT', after: 'new_policy.PROTECT'}],
+  )
+  // Unset and `null` both mean the default: no change.
+  assert.deepEqual(keyChanges(change(key({onDelete: null}), key({}))), [])
+  assert.equal(referentialAction(null), 'default')
+  assert.equal(referentialAction('SET NULL'), 'SET NULL')
+})
+
+test("a single-column foreign key's change is said under its column, never as the column's own", async () => {
+  // Only the Order → Customer key's onDelete changes; the key is drawn as customerId's FK marker.
+  const scenario = scenarios.find(item => item.id === 'prisma-shop')
+  const before = load(scenario.before)
+  const after = structuredClone(before)
+  const key = after.entities.find(
+    entity => entity.kind === 'constraint' && entity.data?.type === 'foreign-key' && entity.data.target === 'table:/Customer',
+  )
+  key.data = {...key.data, onDelete: 'Cascade'}
+  const model = comparisonModel(before, after, await engine.compare(before, after))
+  const {union, lines} = analyse(model)
+  const [column] = [...union.markers].find(([, marker]) => marker.key === row(model, key.id).id)
+  assert.deepEqual(lines.get(column), [{key: 'on-delete', word: 'On delete changed', before: 'default', after: 'Cascade'}])
+  const {frame} = createDatabaseDiff(model, {available: 1300})
+  assert.ok(JSON.stringify(frame).includes('On delete changed'), 'the diff draws the line under the column')
+  assert.deepEqual(
+    databaseFacts(model).filter(fact => fact.id !== 'enum-values'),
+    [],
+    'no column reads as renamed or retyped',
+  )
+})
+
+test("a marker key's changes are named for that key, though its column has other roles", async () => {
+  // OrderLine.orderId is in the composite primary key and has its own foreign key: only that key is renamed.
+  const before = load(scenarios.find(item => item.id === 'prisma-shop').before)
+  const after = structuredClone(before)
+  const key = after.entities.find(
+    entity =>
+      entity.kind === 'constraint' &&
+      entity.data?.type === 'foreign-key' &&
+      entity.data.table === 'table:/OrderLine' &&
+      entity.data.columns?.[0] === 'orderId',
+  )
+  key.data = {...key.data, databaseName: 'OrderLine_order_fkey'}
+  const model = comparisonModel(before, after, await engine.compare(before, after))
+  const {union, lines} = analyse(model)
+  const [column, marker] = [...union.markers].find(([, item]) => item.key === row(model, key.id).id)
+  assert.notEqual(marker.title, 'Foreign key', 'the marker stands for more than the key')
+  assert.deepEqual(
+    lines.get(column).map(line => line.word),
+    ['Foreign key renamed'],
+  )
+})
+
+for (const [what, edit] of [
+  [
+    "a changed foreign key's onDelete",
+    after => {
+      const key = after.entities.find(
+        entity => entity.kind === 'constraint' && entity.data?.type === 'foreign-key' && entity.data.target === 'table:/Customer',
+      )
+      key.data = {...key.data, onDelete: 'Cascade'}
+    },
+  ],
+  [
+    'a changed foreign-key column',
+    after => {
+      const column = after.entities.find(entity => entity.kind === 'column' && entity.label === 'customerId')
+      column.data = {...column.data, nullable: !column.data?.nullable}
+    },
+  ],
+]) {
+  test(`the Changes scope keeps the table ${what} references, so its link has both ends`, async () => {
+    // Only that changes: no table, other column or link does.
+    const scenario = scenarios.find(item => item.id === 'prisma-shop')
+    const before = load(scenario.before)
+    const after = structuredClone(before)
+    edit(after)
+    const model = comparisonModel(before, after, await engine.compare(before, after))
+    // Narrowed as the shell narrows it: the changes, their context, the rest of a shown table's columns folded.
+    const scope = changesScope(model, {query: '', changesOnly: true, ids: null})
+    const shown = new Set([...scope.shown, ...databaseContext(model, scope.changes)])
+    const narrowed = scopedModel(model, shown, 'fold').model
+    const tables = narrowed.entities.filter(row => (row.after ?? row.before).kind === 'table').map(row => (row.after ?? row.before).label)
+    assert.deepEqual(tables.sort(), ['Customer', 'Order'])
+    const {frame} = createDatabaseDiff(narrowed, {available: 1300})
+    const label = id => (row(narrowed, id)?.after ?? row(narrowed, id)?.before)?.label
+    const references = frame.links.map(link => `${label(link.dependent)} → ${label(link.principal)}`)
+    assert.ok(references.includes('Order → Customer'), `the link reaches Customer: ${references}`)
+  })
+}

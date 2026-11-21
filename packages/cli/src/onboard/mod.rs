@@ -87,7 +87,7 @@ fn apply(root: &Path, changes: Vec<Change>, expected: Option<&str>, dry_run: boo
                 .map_err(|error| error.error)
                 .with_context(|| format!("{} already exists", change.path))?;
         } else {
-            file.persist(&path).map_err(|error| error.error)?;
+            crate::replace::replace(file, &path)?;
         }
     }
     result["written"] = json!(true);

@@ -11,11 +11,14 @@ import {
   statusParts,
   svgStatusWidth,
   contentStart,
+  textPill,
 } from '@githubnext/projections-renderer-kit'
 import {
   CardChangeMarks,
   cardCornerRadius,
   useBorderWidths,
+  useCoveredPadding,
+  useScrolledPadding,
   useFitScale,
   useLegend,
   useOpeningFloor,
@@ -26,7 +29,7 @@ import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
 import type {accepts} from './accepts.js'
 import {unitParts} from './model.js'
 import {capitalize, createDiDiff} from './diff-model.js'
-import {diMetrics} from './geometry.js'
+import {diMetrics, monoAdvance, sansAdvance} from './geometry.js'
 import {lifetimeDash, markSpan} from './lifetime-mark.js'
 import {facetNouns} from './facets.js'
 import type {DiDependencyChange, DiDiff, DiDiffUnit} from './diff-model.js'
@@ -42,10 +45,12 @@ import {
   halfHeight,
   halfWidth,
   lifetimeDescription,
+  rightX,
   routeLinks,
   unitDescription,
 } from './card.js'
 import {DependencyLine, DiLine} from './diff-lines.js'
+import {LifetimePill, useTextAdvances} from './lifetime-pill.js'
 
 const linkNouns: Record<DiDependencyChange['kind'], [string, string]> = {
   dependency: ['dependency', 'dependencies'],
@@ -142,10 +147,13 @@ function Part({
   emphasis,
   selected,
   onSelect,
+  pill,
 }: {
   id: string
   part: PartName
   d: string
+  /** The lifetime's pill: the part's change fills `d`, its hover, focus and selection tint the pill instead. */
+  pill?: ReturnType<typeof textPill> | undefined
   label: string
   clipId: string
   change: ReturnType<typeof changeMark>
@@ -171,8 +179,14 @@ function Part({
     >
       <title>{label}</title>
       <path className="di-part-change" clipPath={`url(#${clipId})`} d={d} />
-      <path className={`di-tint di-tint-${part}`} clipPath={`url(#${clipId})`} d={d} />
-      {selected && <path className="di-zone-highlight" clipPath={`url(#${clipId})`} d={d} />}
+      {pill ? (
+        <LifetimePill box={pill} tint={`di-tint-${part}`} selected={selected} />
+      ) : (
+        <>
+          <path className={`di-tint di-tint-${part}`} clipPath={`url(#${clipId})`} d={d} />
+          {selected && <path className="di-zone-highlight" clipPath={`url(#${clipId})`} d={d} />}
+        </>
+      )}
     </g>
   )
 }
@@ -238,6 +252,14 @@ function DiffCard({
     card.text.dependencies.length > 0 || card.text.lines.some(line => line.spans.some(span => span.tone === 'was' || span.tone === 'now'))
   const slices = tone && !holdsChanges ? parts.filter(item => !(item.id && partMark(item.changeId)['data-change'])) : []
   const slicePaths = partPaths(card, !!unit.registrationId, fillInset)
+  // A lifetime at the kind line's right is a pill as wide as the browser draws it, neutral over its part's slice.
+  const lifetime = card.text.lines.find(line => line.role === 'lifetime')
+  const lifetimeText = lifetime?.spans.map(span => span.text).join('') ?? ''
+  const text = useRef<SVGGElement>(null)
+  const advanceOf = useTextAdvances(text, '.di-lifetime-label', lifetimeText, () =>
+    (lifetime?.spans ?? []).reduce((sum, span) => sum + span.text.length * (span.code ? monoAdvance : sansAdvance), 0),
+  )
+  const pill = lifetime && card.text.registration.y === 0 ? textPill(rightX, top + lifetime.y, advanceOf(lifetimeText), 'end') : undefined
   return (
     <g
       transform={`translate(${card.x} ${card.y})`}
@@ -285,6 +307,7 @@ function DiffCard({
           emphasis={partEmphasis(unit.registrationId)}
           selected={selectedPart(unit.registrationId)}
           onSelect={onSelect}
+          pill={pill}
         />
       )}
       {unit.contract && unit.serviceId && (
@@ -335,7 +358,8 @@ function DiffCard({
         bottom={top + card.text.markBottom}
         dash={lifetimeDash(unit.lifetime, card.text.markBottom - markSpan.top)}
       />
-      <g className="di-card-text" aria-hidden="true">
+      {!unit.registrationId && pill && <LifetimePill box={pill} selected={false} />}
+      <g className="di-card-text" aria-hidden="true" ref={text}>
         {card.text.lines.map((line, index) => (
           <DiLine key={index} line={line} top={top} lifetime={line.role === 'lifetime' ? unit.lifetime : undefined} />
         ))}
@@ -392,11 +416,13 @@ export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, o
   // Opens fitted, everything in view, unless that would draw its text below the kit's opening floor: then it opens at
   // the floor on its top row's leftmost card (from the layout alone, never the frame's momentary size) and scrolls.
   const floor = useOpeningFloor(scroller, diff)
-  const padding = useDiPadding()
+  const padding = useCoveredPadding(scroller, bounds, useDiPadding())
   // Zoomed in, a content-sized stage grows to the drawn scale (see `FitOptions.drawnScale`).
   const [drawnScale, setDrawnScale] = useState(0)
   const fit = useFitScale(scroller, bounds, {padding, floor, drawnScale})
-  const start = useMemo(() => contentStart([...boxes.values()].slice(0, diUnitLimit), bounds, padding), [boxes, bounds, padding])
+  // The padding as drawn (more under a cover once it scrolls): the opening view is placed in it.
+  const drawnPadding = useScrolledPadding(padding, drawnScale, fit.scale, {content: bounds.height, view: fit.height})
+  const start = useMemo(() => contentStart([...boxes.values()].slice(0, diUnitLimit), bounds, drawnPadding), [boxes, bounds, drawnPadding])
   const {zoom, scale} = useStageZoom(scroller, onAction, fit.scale, {floor, start})
   useLayoutEffect(() => setDrawnScale(scale), [scale])
 
@@ -410,6 +436,7 @@ export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, o
       <div
         className="di-scroll pk-dot-grid"
         ref={scroller}
+        style={{'--pk-fit-top': `${drawnPadding.top}px`} as CSSProperties}
         data-projections-scroll="dependency-injection"
         role="region"
         aria-label="Scrollable dependency composition"

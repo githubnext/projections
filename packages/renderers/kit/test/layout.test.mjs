@@ -10,6 +10,7 @@ import {
   extractionModel,
   inflections,
   layoutGraph,
+  columnGap,
   nodeSpacing,
   sampleSpline,
   scheduleSteps,
@@ -421,7 +422,9 @@ test('a card with no relationships takes free room beside the roots rather than 
       z = box(layout, 'z')
     assert.equal(z[flowStart], root[flowStart], `${orientation}: in the roots' layer`)
     const gap = Math.max(z[acrossStart] - root[acrossEnd], root[acrossStart] - z[acrossEnd])
-    assert.ok(Math.abs(gap - nodeSpacing) < 0.5, `${orientation}: next to the root (${gap})`)
+    // On the layout's grid: a column apart, top to bottom; left to right, rows keep ELK's spacing.
+    const apart = orientation === 'horizontal' ? nodeSpacing : columnGap
+    assert.ok(Math.abs(gap - apart) < 0.5, `${orientation}: next to the root (${gap})`)
   }
 })
 
@@ -439,6 +442,13 @@ test('cards with no relationships and nothing else make a grid, in ID order', as
     assert.equal(layers.length, 3, `${orientation}: √5 rounded up layers`)
     const read = [...cards].sort((a, b) => a[flowStart] - b[flowStart] || a[acrossStart] - b[acrossStart]).map(card => card.id)
     assert.deepEqual(read, ['a', 'b', 'c', 'd', 'e'], `${orientation}: in ID order, layer by layer`)
+    if (orientation === 'vertical') {
+      // On the layout's column grid, as cards ELK places are: a column apart, `columnGap` between neighbours.
+      const pitch = cards[0].right - cards[0].left + columnGap
+      for (const card of cards) assert.ok(Number.isInteger((card.left - 32) / pitch), `${card.id} at ${card.left}, off the ${pitch} grid`)
+      const first = cards.filter(card => card.top === layers[0]).sort((a, b) => a.left - b.left)
+      assert.equal(first[1].left - first[0].right, columnGap, 'neighbours a column gap apart')
+    }
   }
 })
 
@@ -510,7 +520,7 @@ test('top to bottom, every card starts on a column line of one grid, in every la
     const layout = await layoutOf(graph)
     const cards = [...layout.points.keys()].map(id => box(layout, id))
     const widths = cards.map(card => card.right - card.left).sort((a, b) => a - b)
-    const pitch = widths[Math.floor(widths.length / 2)] + nodeSpacing
+    const pitch = widths[Math.floor(widths.length / 2)] + columnGap
     for (const card of cards) {
       const column = (card.left - 32) / pitch
       assert.ok(Math.abs(column - Math.round(column)) < 1e-6, `${graph.name}: a card at ${card.left} is off the ${pitch} grid`)
@@ -552,7 +562,8 @@ test('cards with no relationships share the first layer, beside its cards, and n
     assert.ok(Math.abs(box(graph, 'x')[flowStart] - box(graph, 'b')[flowStart]) < 0.5, `${name}: x is on the first layer`)
     const [x, b] = [box(graph, 'x'), box(graph, 'b')]
     const apart = Math.max(x[acrossStart] - b[acrossEnd], b[acrossStart] - x[acrossEnd])
-    assert.ok(Math.abs(apart - nodeSpacing) < 0.5, `${name}: x is beside b, ${apart} from it`)
+    const spacing = orientation === 'horizontal' ? nodeSpacing : columnGap
+    assert.ok(Math.abs(apart - spacing) < 0.5, `${name}: x is beside b, ${spacing} apart (${apart})`)
     for (const id of linked) assert.deepEqual(box(graph, id), box(alone, id), `${name}: ${id} stays where it was`)
     assert.deepEqual([graph.width, graph.height], [alone.width, alone.height], `${name}: the drawing keeps its size`)
   }
@@ -577,6 +588,43 @@ test('a card with no relationships keeps its place while another arrives beside 
     const layers = new Set(['a', 'b', 'c', 'd'].map(id => box(layout, id).left))
     assert.ok(layers.has(box(layout, 'x').left), 'x stays on a layer')
   }
+})
+
+test("a fitted drawing keeps clear of the host's cover only where its fit would reach it", async () => {
+  const {coveredTop, parseStageCover} = await import('../dist/index.js')
+  assert.deepEqual(parseStageCover('8 6 180 18, 412 6 140 18'), [
+    {x: 8, y: 6, width: 180, height: 18},
+    {x: 412, y: 6, width: 140, height: 18},
+  ])
+  assert.deepEqual(parseStageCover('8 6 180, 0 0 0 10, nope'), [], 'malformed and empty rectangles cover nothing')
+  assert.equal(parseStageCover(undefined), undefined)
+  const padding = {x: 16, y: 16}
+  const chip = {x: 8, y: 6, width: 180, height: 18}
+  const bar = {x: 220, y: 8, width: 560, height: 42}
+  const view = {width: 1000, height: 600}
+  // A flat drawing fitted to the width sits centred far below a chip: it keeps its own top.
+  assert.equal(coveredTop({cover: [chip, bar], view, size: {width: 1000, height: 200}, padding}), 16)
+  // A tall one fitted to the height reaches the bar across its middle, but not the chip at the side.
+  assert.equal(coveredTop({cover: [chip], view, size: {width: 400, height: 1000}, padding}), 16)
+  assert.equal(coveredTop({cover: [chip, bar], view, size: {width: 400, height: 1000}, padding}), 58, "the bar's bottom and 8px")
+  // The stage starts below a notice in the frame: the cover reaches less far into it.
+  assert.equal(coveredTop({cover: [bar], view, origin: {x: 0, y: 40}, size: {width: 400, height: 1000}, padding}), 18)
+})
+
+test('a drawing drawn larger than its fit keeps clear of the bands at its ends, and moves no more than it must', async () => {
+  const {scrolledPadding} = await import('../dist/index.js')
+  const own = {top: 16, y: 16}
+  const inset = {top: 54, bottom: 0}
+  // Zoomed in, a flat drawing still sits centred well below the band: it keeps its own padding, so it doesn't move.
+  assert.deepEqual(scrolledPadding({own, inset, height: 300, view: 600}), own)
+  // Centred, it would reach the band: just enough more at the top that it clears it, still fitting the stage.
+  assert.deepEqual(scrolledPadding({own, inset, height: 520, view: 600}), {top: 44, y: 16})
+  // That much more no longer fits: it scrolls, and opens a band's height down.
+  assert.deepEqual(scrolledPadding({own, inset, height: 533, view: 600}), {top: 54, y: 16})
+  assert.deepEqual(scrolledPadding({own, inset, height: 2000, view: 600}), {top: 54, y: 16})
+  // A band at the foot too: each end clears its own.
+  assert.deepEqual(scrolledPadding({own, inset: {top: 54, bottom: 70}, height: 470, view: 600}), {top: 16, y: 26})
+  assert.deepEqual(scrolledPadding({own, inset: {top: 54, bottom: 70}, height: 480, view: 600}), {top: 54, y: 70})
 })
 
 test('fitting centres content, never magnifies it, and always fits both dimensions, however small', async () => {

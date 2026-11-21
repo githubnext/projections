@@ -245,8 +245,8 @@ pub fn init(directory: &Path, args: Init) -> Result<()> {
         steps.push(("Extract the working tree and print it", format!("projections show -p {id}{trust}")));
         steps.push(("Check it end to end", format!("projections check -p {id}{trust}")));
         steps.push((
-            "See it in VS Code, with your edits as you make them (trust the workspace if it runs repository code)",
-            "open it from the Projections side bar".to_owned(),
+            "Open it in the Projections viewer (in your agent's browser, or a standalone browser with --open)",
+            format!("projections view show -p {id}{trust} --open"),
         ));
         text.push_str("\nNext:\n");
         for (purpose, command) in steps {

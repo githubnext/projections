@@ -11,11 +11,11 @@ It should show: the services in services/*/app.yaml and which services each one 
 ```
 
 You need the [CLI](install.md) on your PATH. The agent shows you the projection
-in the Projections viewer, a page in your browser that it drives while you
-watch; to watch it take shape in your editor, use the
-[VS Code extension](quick-start.md#step-1-install-the-vs-code-extension). The
-rest of this page is what the agent does, step by step, so you can follow along
-or do it yourself.
+in the Projections viewer, a page it drives in your agent's in-app browser or a
+standalone browser while you watch; if you prefer an alternate experience closer
+to the code inside your editor, see the
+[VS Code extension](install.md#the-vs-code-extension). The rest of this page is
+what the agent does, step by step, so you can follow along or do it yourself.
 
 Every codebase is unusual somewhere: a home-grown plugin registry, services
 wired together in YAML, feature flags with owners. Built-in projections can't
@@ -60,15 +60,21 @@ before changing anything:
 
 ```sh
 projections show -p service-map --trust
+projections view show -p service-map --trust --open
 ```
 
-prints it as text. To see it, open the repository in VS Code (trust the
-workspace, since the extractor is repository code), open the **Projections**
-side bar and click the projection: it opens as a tab, like a file. The side
-bar's **Viewing** view chooses what every projection tab shows: **Current
-state** (your files alone), **Uncommitted changes**, **Branch changes**, a pull
-request, a recent commit or bookmark, or any two revisions. Leave the tab open
-while you work on the projection:
+`projections show` prints it as text, and `projections view show` opens it in
+the Projections viewer (in your agent's in-app browser, or a standalone browser
+with `--open`). The viewer follows your working tree: when you save changes to
+the projection, it re-extracts and updates.
+
+If you prefer working directly in VS Code, you can open the repository there
+(trust the workspace, since the extractor is repository code), open the
+**Projections** side bar, and click the projection to open it as a tab, like a
+file. The side bar's **Viewing** view chooses what every projection tab shows:
+**Current state** (your files alone), **Uncommitted changes**, **Branch
+changes**, a pull request, a recent commit or bookmark, or any two revisions.
+Leave the tab open while you work on the projection:
 
 - **Your edits apply.** While the projection's files have uncommitted edits, the
   tab applies them to both sides and says **Your edits** beside the choice

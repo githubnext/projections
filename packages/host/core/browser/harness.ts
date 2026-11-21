@@ -110,9 +110,19 @@ export async function modeGroup(scope: Scope): Promise<Locator> {
   await menu.waitFor()
   return menu.getByRole('radiogroup', {name: 'Comparison mode'})
 }
-/** Chooses a comparison mode (in the menu, choosing closes it). */
+/**
+ * Chooses a comparison mode. In the menu, choosing closes it, and this returns once the menu has handed focus on: it
+ * does so only as it unmounts, after its exit animation, so a control the test focused before then would lose its
+ * focus, and the keys pressed next would miss it.
+ */
 export async function chooseMode(scope: Scope, name: string) {
-  await (await modeGroup(scope)).getByRole('radio', {name, exact: true}).click()
+  const group = await modeGroup(scope)
+  const inMenu = (await group.locator('xpath=ancestor::*[@role="dialog"]').count()) > 0
+  await group.getByRole('radio', {name, exact: true}).click()
+  if (!inMenu) return
+  await settled(scope)
+  // The popover's focus scope hands focus on in a timer it starts as it unmounts; one started now runs after it.
+  await pageOf(scope).evaluate(() => new Promise(resolve => setTimeout(resolve, 0)))
 }
 /** Asserts the checked mode, closing the menu again if it had to be opened. */
 export async function expectMode(scope: Scope, name: string) {
@@ -179,7 +189,10 @@ export const submenuItem = (menu: Locator, name: string) =>
 export async function openSettingsSubmenu(scope: Scope, name: string): Promise<Locator> {
   const menu = openMenu(scope, name)
   if (await menu.isVisible()) return menu
-  await submenuItem(await openSettings(scope), name).click()
+  // By keyboard: where a submenu opens to the left, the menu reads the pointer's jump into it as moving away from it (its
+  // first move in the menu always reads as rightward), so the submenu closes as the pointer leaves its item, and a click
+  // on one of its items lands only while it fades out; on a slow runner it falls through to whatever is behind.
+  await submenuItem(await openSettings(scope), name).press('ArrowRight')
   await menu.waitFor()
   return menu
 }
@@ -192,10 +205,10 @@ export const menuItem = (menu: Locator, name: string) => {
     .or(menu.getByRole('menuitemcheckbox', {name: label}))
     .or(menu.getByRole('menuitem', {name: label}))
 }
-/** Chooses an item in Settings, or in one of its submenus (`submenu`); choosing closes the menu. */
+/** Chooses an item in Settings, or in one of its submenus (`submenu`), by keyboard (see `openSettingsSubmenu`); choosing closes the menu. */
 export async function chooseSetting(scope: Scope, name: string, submenu?: string) {
   const menu = submenu ? await openSettingsSubmenu(scope, submenu) : await openSettings(scope)
-  await menuItem(menu, name).click()
+  await menuItem(menu, name).press('Enter')
   await closeMenus(scope)
 }
 /** Shows every item: the All scope, from Settings' "Show" (the toolbar's scope switch leaves narrow rows). */

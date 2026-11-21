@@ -1,18 +1,20 @@
 import {useId, useLayoutEffect, useMemo, useRef, useState} from 'react'
-import type {ReactNode} from 'react'
+import type {CSSProperties, ReactNode} from 'react'
 import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
-import {cardBorderOutset, emphasisInset, classifyChange, contentStart, describeChange} from '@githubnext/projections-renderer-kit'
+import {cardBorderOutset, emphasisInset, classifyChange, contentStart, describeChange, textPill} from '@githubnext/projections-renderer-kit'
 import type {ScrollStart} from '@githubnext/projections-renderer-kit'
 import {
-  EdgeArrowMarker,
   CardChangeMarks,
-  EmptyDomain,
   cardCornerRadius,
+  EdgeArrowMarker,
+  EmptyDomain,
   useBorderWidths,
+  useCoveredPadding,
+  useScrolledPadding,
   useFitScale,
+  useLegend,
   useOpeningFloor,
   useStageZoom,
-  useLegend,
 } from '@githubnext/projections-renderer-kit/react'
 import type {RendererProps} from '@githubnext/projections-renderer-kit/react'
 import {unitParts} from './model.js'
@@ -46,6 +48,7 @@ import {
   unitDescription,
 } from './card.js'
 import {DiffView, unitStatusParts} from './diff.js'
+import {LifetimePill, useTextAdvances} from './lifetime-pill.js'
 import {unitFacets} from './facets.js'
 import type {accepts} from './accepts.js'
 
@@ -200,6 +203,20 @@ function Card({
     implementationZone,
   ]
   const scoped = sides.some(side => side.scope)
+  // The pill is as wide as the label shown, and between the two while they crossfade. The labels drawn (both, or one
+  // endpoint's) are measured whenever they change, so a seek straight from one endpoint to the other measures the new one.
+  const labels = useRef<SVGGElement>(null)
+  const crossfading = lifetimes[0] !== lifetimes[1] && frame.local > 0 && frame.local < 1
+  const drawn = crossfading ? 'both' : frame.local <= 0 ? 'before' : 'after'
+  const advanceOf = useTextAdvances(
+    labels,
+    '.di-lifetime-label',
+    `${lifetimes.join('\n')}\n${drawn}`,
+    label => label.length * (sides.find(side => lifetimeLabelOf(side, side.lifetime) === label)?.scope ? advance.key : advance.lifetime),
+  )
+  const labelAdvance = crossfading
+    ? advanceOf(lifetimes[0]) + (advanceOf(lifetimes[1]) - advanceOf(lifetimes[0])) * frame.local
+    : advanceOf(lifetimes[frame.local <= 0 ? 0 : 1])
   // A modified card says what changed about it, as its diff card does: "Lifetime changed".
   const status =
     frame.before && frame.after ? unitStatusParts({...frame, facets: unitFacets(frame.before, frame.after), dependencies: []}) : undefined
@@ -243,10 +260,18 @@ function Card({
       />
       {/* Parts are tinted, never outlined: hover and focus lightly, selection more, under the text and inside the card's shape. */}
       <g clipPath={`url(#${clipId})`} className="di-tints">
-        {tinted.map(zone => (
-          <path key={zone} className={`di-tint di-tint-${zone}`} d={tints[zone]} />
-        ))}
-        {selectedZone && <path className="di-zone-highlight" d={tints[selectedZone]} />}
+        {tinted
+          .filter(zone => zone !== 'registration')
+          .map(zone => (
+            <path key={zone} className={`di-tint di-tint-${zone}`} d={tints[zone]} />
+          ))}
+        {selectedZone && selectedZone !== 'registration' && <path className="di-zone-highlight" d={tints[selectedZone]} />}
+        {/* The registration's tints are the lifetime pill's own shape. */}
+        <LifetimePill
+          box={textPill(rightX, top + kindBaseline, labelAdvance, 'end')}
+          tint={unit.registrationId ? 'di-tint-registration' : undefined}
+          selected={selectedZone === 'registration'}
+        />
       </g>
 
       {unit.contract ? (
@@ -259,23 +284,26 @@ function Card({
         </text>
       )}
       <LifetimeMark lifetime={frame.lifetime} top={top + markSpan.top} bottom={top + markSpan.bottom} dash={frame.dash} />
-      <Crossfade
-        values={lifetimes}
-        local={frame.local}
-        render={(label, _, opacity) => (
-          <text
-            key={label}
-            className={`node-detail di-lifetime-label ${frame.lifetime}`}
-            x={rightX}
-            y={top + kindBaseline}
-            textAnchor="end"
-            opacity={opacity}
-            {...(sides.find(side => lifetimeLabelOf(side, side.lifetime) === label)?.scope ? identifier : {})}
-          >
-            {label}
-          </text>
-        )}
-      />
+      <g ref={labels}>
+        <Crossfade
+          values={lifetimes}
+          local={frame.local}
+          render={(label, _, opacity) => (
+            <text
+              key={label}
+              className={`node-detail di-lifetime-label ${frame.lifetime}`}
+              data-label={label}
+              x={rightX}
+              y={top + kindBaseline}
+              textAnchor="end"
+              opacity={opacity}
+              {...(sides.find(side => lifetimeLabelOf(side, side.lifetime) === label)?.scope ? identifier : {})}
+            >
+              {label}
+            </text>
+          )}
+        />
+      </g>
       <Crossfade
         values={[sides[0].implementation, sides[1].implementation]}
         local={frame.local}
@@ -408,10 +436,12 @@ function TransitionView({
   // its text below the kit's opening floor: then it opens at the floor, on its root, and scrolls. Zoom enlarges it,
   // keeping the middle (the spine) in view. Both endpoints share the framing and the floor.
   const floor = useOpeningFloor(scroller, transition)
-  const padding = useDiPadding()
+  const padding = useCoveredPadding(scroller, bounds, useDiPadding())
   // Zoomed in, a content-sized stage grows to the drawn scale (see `FitOptions.drawnScale`).
   const [drawnScale, setDrawnScale] = useState(0)
   const fit = useFitScale(scroller, bounds, {padding, floor, drawnScale})
+  // The padding as drawn (more under a cover once it scrolls): the opening view is placed in it.
+  const drawnPadding = useScrolledPadding(padding, drawnScale, fit.scale, {content: bounds.height, view: fit.height})
   // The composition hangs from its root, centred at the top: a view that opens at the text floor opens there, on the
   // cards drawn when it is placed, with no card cut at its left edge (see `contentStart`).
   const drawn = useRef(units)
@@ -426,11 +456,11 @@ function TransitionView({
           height: transition.height,
         })),
         bounds,
-        padding,
+        drawnPadding,
         12,
         'centre',
       )(view),
-    [bounds, transition, padding],
+    [bounds, transition, drawnPadding],
   )
   const {zoom, scale} = useStageZoom(scroller, onAction, fit.scale, {floor, start})
   useLayoutEffect(() => setDrawnScale(scale), [scale])
@@ -445,6 +475,7 @@ function TransitionView({
       <div
         className="di-scroll pk-dot-grid"
         ref={scroller}
+        style={{'--pk-fit-top': `${drawnPadding.top}px`} as CSSProperties}
         data-projections-scroll="dependency-injection"
         role="region"
         aria-label="Scrollable dependency composition"

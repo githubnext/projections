@@ -101,6 +101,8 @@ everywhere and runs on Linux and macOS.
 | VS Code extension                                          | unit suites; release proof installs it | the same                   | unit suites; smoke test in VS Code (`test:vscode`)  |
 | GitHub Action end to end (`.github/actions/action-e2e`)    | `public-product`                       | `public-product`           | `windows-integration`                               |
 
+This is what pushes to `main` and the nightly run cover; a pull request runs the
+jobs its change reaches ([what CI runs](../../CONTRIBUTING.md#what-ci-runs)).
 The browser suites run in full on Linux, sharded. On Windows the CLI's own
 browser suite runs in full, since it exercises the CLI's server and processes,
 and one renderer's suite runs as a smoke test: a renderer draws the same on

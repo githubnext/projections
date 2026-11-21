@@ -124,6 +124,8 @@ export interface MountInspectorOptions {
   banner?: InspectorAppProps['banner']
   /** What a one-revision view shows, at its toolbar's start (see `InspectorAppProps.toolbarStart`), such as the viewer's. */
   toolbarStart?: InspectorAppProps['toolbarStart']
+  /** The stage's utility area in a bare view (see `InspectorAppProps.utilityArea`), such as the viewer's. */
+  utilityArea?: InspectorAppProps['utilityArea']
   /** `manual`: working-tree changes don't extract the shown pair again; the host refreshes (see `InspectorAppProps.refresh`). */
   refresh?: InspectorAppProps['refresh']
   /**
@@ -306,6 +308,7 @@ export function mountInspector(element: HTMLElement, options: MountInspectorOpti
           {...(options.chrome ? {chrome: options.chrome} : {})}
           {...(options.banner ? {banner: options.banner} : {})}
           {...(options.toolbarStart ? {toolbarStart: options.toolbarStart} : {})}
+          {...(options.utilityArea ? {utilityArea: options.utilityArea} : {})}
           {...(options.refresh ? {refresh: options.refresh} : {})}
           {...(options.initialResults ? {initialResults: options.initialResults} : {})}
           {...(options.definitionRevision ? {definitionRevision: options.definitionRevision} : {})}

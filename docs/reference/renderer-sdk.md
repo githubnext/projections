@@ -129,7 +129,7 @@ are rounded to hundredths of a pixel.
 | `height` | `"height"(px: number): void` | Requests a frame height in CSS pixels. The host clamps it. |
 | `hover` | `"hover"(id: null \| string): void` | Reports the entity under the pointer (capability `hover`). |
 | `legend` | `"legend"(legend: RendererLegend): void` | Asks the host to draw the renderer's legend once beside the frames, with the host's design system, instead of drawing one in each pane. Items use theme tokens (preferred) or CSS colors; an empty list clears it. Throws when the legend is invalid. |
-| `observeHeight` | `"observeHeight"(element: Element): { (): void }` | Requests the height of `element` whenever it resizes. Returns a function that stops observing. |
+| `observeHeight` | `"observeHeight"(element: Element): { (): void }` | Requests the height of `element` now and whenever it resizes. Returns a function that stops observing. |
 | `open` | `"open"(path: string, line?: number \| undefined): void` | Asks the host to open a repository file; the host decides whether to navigate. |
 | `rendered` | `"rendered"(progress: number): void` | Acknowledges that the frame for `progress` has been painted. |
 | `requestDocument` | `"requestDocument"(name: string): Promise<string>` | Asks the host for the document of the built-in renderer `name` (for example `graph`), to run in a frame nested in this one (`embedRenderer` does both). Resolves with its `index.html` text, as the host runs it; rejects with the host's reason when it supplies none (an unknown or custom renderer, or a host without documents), or after `rendererLimits.documentTimeoutMs` without an answer. Repeated requests for one name share one answer. |
@@ -2101,12 +2101,13 @@ that can't draw it draws it `dashed`.
 ### `optionalThemeTokenNames`
 
 ```ts
-optionalThemeTokenNames: readonly ["stage-inset", "stage-inset-top", "stage-max-height", "color-connector"]
+optionalThemeTokenNames: readonly ["stage-inset", "stage-inset-top", "stage-cover", "stage-max-height", "color-connector"]
 ```
 
 Layout tokens a host may send that have no default (`resolveThemeTokens` leaves them undefined), so a renderer reads
 each with its own value as the fallback: `stage-inset`, the space between the frame's edges and its content on every
-side, `stage-inset-top`, the space above the content where the host overlays the frame's top, and `stage-max-height`,
+side, `stage-inset-top`, the space above the content where the host overlays the frame's top, `stage-cover`, the
+rectangles of the frame the host overlays (`x y width height`, comma separated), and `stage-max-height`,
 the most a content-sized stage that pans and zooms asks for (`px`, or `vh` of the host's window), and
 `color-connector`, the color of lines that carry meaning (a graph's links), for a host whose `color-divider` is its
 app's own quiet rule rather than a 3:1 edge; renderers fall back to `color-divider`.

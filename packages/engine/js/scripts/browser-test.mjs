@@ -18,9 +18,11 @@ for (const engine of ['chromium', 'webkit']) {
           ? [json]
           : operation === 'validate-comparison'
             ? [before, after, comparison]
-            : operation === 'vary'
+            : operation === 'vary' || operation === 'pair'
               ? [before, after]
-              : [extraction]
+              : operation === 'review'
+                ? [comparison]
+                : [extraction]
       let expected
       try {
         expected = {ok: true, result: await native[method](...args)}

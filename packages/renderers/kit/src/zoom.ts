@@ -82,8 +82,9 @@ export interface StageZoomOptions {
   /**
    * An opening view chosen by the caller instead, for example on a focus (see `RendererFocus`): its zoom multiple of
    * the fit (clamped to the zoom range) and where it starts. Like the default, it holds until the person zooms or pans.
+   * `centred`: the start centres a focus in the view, so it isn't moved clear of a stage cover as a reading start is.
    */
-  opening?: {zoom: number; start: ScrollStart}
+  opening?: {zoom: number; start: ScrollStart; centred?: boolean}
   /**
    * A drawn scale (CSS px per content unit) to keep: whenever `key` changes, the zoom becomes the multiple of the fit
    * that draws at `scale` (within the zoom range), as though the person had zoomed there, so a view that changes its

@@ -277,6 +277,36 @@ fn rejects_malformed_and_contradictory_policies() {
 }
 
 #[test]
+fn a_supplied_boolean_must_be_true_or_false() {
+    let scratch = Scratch::new("booleans");
+    let syscall = |field: &str| {
+        fs::write(scratch.0.join("policy.yaml"), format!("{HEADER}  kprobes:\n    - call: f\n{field}")).unwrap();
+        find(&extract(&scratch.0, json!({})).unwrap(), "probe", "f")["data"]["syscall"].clone()
+    };
+    assert_eq!(syscall(""), true);
+    assert_eq!(syscall("      syscall: true\n"), true);
+    assert_eq!(syscall("      syscall: false\n"), false);
+    for (policy, expected) in [
+        (
+            format!("{HEADER}  kprobes:\n    - call: f\n      syscall: \"false\"\n"),
+            "spec.kprobes[0].syscall must be true or false, not \"false\"",
+        ),
+        (
+            format!("{HEADER}  loader: {{enabled: true}}\n"),
+            "spec.loader must be true or false",
+        ),
+        // Read once per probe, even when its list expands to no targets.
+        (
+            format!("{HEADER}  lists: [{{name: empty, values: []}}]\n  kprobes:\n    - call: list:empty\n      return: \"false\"\n"),
+            "spec.kprobes[0].return must be true or false",
+        ),
+    ] {
+        let message = scratch.error(&policy, json!({}));
+        assert!(message.contains(expected), "{policy}\n=> {message}");
+    }
+}
+
+#[test]
 fn declared_inputs_the_revision_lacks_are_missing_not_errors() {
     let scratch = Scratch::new("missing");
     fs::write(scratch.0.join("policy.yaml"), format!("{HEADER}  kprobes:\n    - call: f\n")).unwrap();

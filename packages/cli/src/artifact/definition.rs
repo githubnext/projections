@@ -260,18 +260,6 @@ fn normalized_execution(execution: &Value) -> Result<Value> {
     Ok(normalized)
 }
 
-/// The part of a definition that determines extractions: everything except
-/// `presentation`, which only sets viewers' initial settings. Definition digests
-/// and comparability use it, so changing presentation defaults never makes
-/// existing extractions incomparable.
-pub fn semantic_definition(definition: &Value) -> Value {
-    let mut semantic = definition.clone();
-    if let Some(object) = semantic.as_object_mut() {
-        object.remove("presentation");
-    }
-    semantic
-}
-
 /// A scope: 1–100 files or directories relative to the project, `/`-separated,
 /// normalized without a trailing slash, sorted and unique. `.` is the project
 /// itself, and leading `..` segments widen it beyond a nested project.

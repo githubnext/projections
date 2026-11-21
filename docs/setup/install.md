@@ -70,9 +70,11 @@ binaries.
 
 ## The VS Code extension
 
-Each release also attaches the VS Code extension, one `.vsix` per platform with
-that platform's `projections` executable inside, so it needs no CLI on your
-`PATH`. It isn't on the Visual Studio Marketplace yet.
+If you want an alternate, closer-to-the-code experience inside VS Code instead
+of (or alongside) the agent-driven Projections viewer, each release also
+attaches the VS Code extension—one `.vsix` per platform with that platform's
+`projections` executable bundled inside, so it needs no CLI on your `PATH`. It
+isn't on the Visual Studio Marketplace yet.
 
 | Platform             | Asset                                            |
 | -------------------- | ------------------------------------------------ |

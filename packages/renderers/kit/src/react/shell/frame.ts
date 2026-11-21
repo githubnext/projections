@@ -2,6 +2,7 @@
 import {createContext, useContext, useEffect, useLayoutEffect} from 'react'
 import type {RendererEnvironment} from '@githubnext/projections-renderer-sdk/protocol'
 import {contentHeightCap} from '../../fit.js'
+import type {CoverRect} from '../../fit.js'
 
 export const PaintGate = createContext<() => () => void>(() => () => {})
 export interface FrameFillControl {
@@ -74,6 +75,17 @@ export const StageInsetTop = createContext<number | undefined>(undefined)
  */
 export function useStageInsetTop(): number | undefined {
   return useContext(StageInsetTop)
+}
+
+export const StageCover = createContext<readonly CoverRect[] | undefined>(undefined)
+
+/**
+ * The rectangles of the frame the host overlays (its `stage-cover` theme token, see `parseStageCover`), CSS px from
+ * the frame's top left, or undefined when it sends none. A fitted canvas keeps clear of them only where its drawing
+ * would reach them (`useCoveredPadding`); content that scrolls pads by `stage-inset-top` instead.
+ */
+export function useStageCover(): readonly CoverRect[] | undefined {
+  return useContext(StageCover)
 }
 
 export const StageMaxHeight = createContext<string | undefined>(undefined)

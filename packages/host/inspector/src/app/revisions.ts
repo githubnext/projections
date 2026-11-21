@@ -10,7 +10,13 @@ export function revisionKey(document: ExtractionDocument): string {
   const revision = document.provenance.revision
   return revision.kind === 'working-tree' ? workingTree : revision.commit
 }
-const shaPattern = /^[0-9a-f]{40}$|^[0-9a-f]{64}$/
+const shaPattern = /^[0-9a-f]{40}$|^[0-9a-f]{64}$/i
+/**
+ * Whether `ref` names `commit` by its hash: in full, or abbreviated as `git rev-parse --short` gives it (7 to 39 hex
+ * digits, `5c95b54e0d1b`). Shorter hex names are left as refs: a branch may well be called `cafe`.
+ */
+const namesCommit = (ref: string, commit: string) =>
+  shaPattern.test(ref) || ref === commit || (/^[0-9a-f]{7,39}$/i.test(ref) && commit.toLowerCase().startsWith(ref.toLowerCase()))
 /** How long ago an ISO date was, coarsely: `just now`, `5 minutes ago`, `2 days ago`. */
 export function age(date: string | undefined, now = Date.now()): string | undefined {
   const time = date ? Date.parse(date) : NaN
@@ -44,7 +50,7 @@ export function choiceLabel(
   // The working tree's entry carries HEAD's commit too, but not its subject.
   const known = revisions.find(item => item.commit === revision.commit && item.ref !== workingTree && item.kind !== 'working-tree')
   const commit = revision.commit.slice(0, 8)
-  const name = shaPattern.test(ref) || ref === revision.commit ? commit : ref
+  const name = namesCommit(ref, revision.commit) ? commit : ref
   const when = age(known?.date, now)
   // Without the commit's subject, a named ref keeps its commit beside it.
   const detail = known?.title ? `"${known.title}"` : name === commit ? undefined : commit
@@ -70,7 +76,7 @@ export function revisionLabel(document: ExtractionDocument): string {
   if (supplied) return supplied
   if (revision.kind === 'working-tree') return 'Working tree'
   const commit = revision.commit.slice(0, 8)
-  return revision.ref === revision.commit ? commit : `${revision.ref} · ${commit}`
+  return namesCommit(revision.ref, revision.commit) ? commit : `${revision.ref} · ${commit}`
 }
 export function limitations(choices: readonly ExtractionChoice[]): Diagnostic[] {
   return choices.flatMap(choice =>

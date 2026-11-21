@@ -15,9 +15,8 @@ import type {PaneKey, ProjectionController, ProjectionOptions} from './types.js'
 import {speedRange, unit, useControllable} from './controllable.js'
 import {useHostEnvironment} from './environment.js'
 import {filterActions, filterState, useRowFilter} from './filtering.js'
+import {usePlaybackControl} from './playback-control.js'
 import {usePlaybackPosition} from './playback-position.js'
-import {usePlaybackActions} from './playback-actions.js'
-import {usePlaybackLoop} from './playback-loop.js'
 import {useRendererPayloads} from './payloads.js'
 import {rendererState, useComparisonModes, useRendererControls} from './renderer-state.js'
 import {useSelection} from './selection.js'
@@ -66,9 +65,20 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
     holds,
     speed,
     internalPosition: internal.position,
-    reducedMotion,
   })
-  const {position, progress, direction, toPosition, nextStep, previousStep, nextDirection} = timing
+  const {position, progress, toPosition, nextStep, previousStep} = timing
+  const playback = usePlaybackControl({
+    ...controllable,
+    ...timing,
+    playing,
+    loop,
+    speed,
+    reducedMotion,
+    mode,
+    subject,
+    direction: options.direction,
+  })
+  const {direction, seek} = playback
   const [anchors, setAnchors] = useState<Anchors>({before: {}, after: {}})
   const frames = useRef<Record<Side, RendererFrame | null>>({before: null, after: null})
 
@@ -86,16 +96,12 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
   const controls = useRendererControls({latest, internal, setInternal, options, renderer, panes, paneKeys})
   const status = rendererState(renderer, panes, paneKeys)
 
-  const playback = usePlaybackActions({...controllable, ...timing, playing, loop, speed, reducedMotion})
-  const {seek, play, requestPlaying, playingRef} = playback
   const selection = useSelection({latest, request, subject, rows, selectedId, placed, anchors, frames})
-  usePlaybackLoop({...playback, ...timing, playing, reducedMotion, mode})
 
   // A new subject starts over, before the next commit.
   const [shownSubject, setShownSubject] = useState(subject)
   if (shownSubject !== subject) {
     setShownSubject(subject)
-    timing.travelled.current = false
     setInternal(previous => ({
       ...previous,
       position: subject.mode === 'comparison' ? unit(options.initialPosition ?? toPosition(options.initialProgress ?? 1)) : 1,
@@ -181,14 +187,11 @@ export function useProjection(options: ProjectionOptions): ProjectionController 
     legend: twoPaneMode(mode) ? (panes.after.legend ?? panes.before.legend) : panes.main.legend,
     seek,
     seekProgress: next => seek(toPosition(unit(next))),
-    play,
+    play: playback.play,
     pause: playback.pause,
     toggle: playback.toggle,
-    nextDirection,
-    togglePlayback: () => {
-      if (playingRef.current) requestPlaying(false)
-      else play(nextDirection)
-    },
+    nextDirection: playback.nextDirection,
+    togglePlayback: playback.togglePlayback,
     stepForward: () => {
       if (nextStep !== undefined) seek(nextStep)
     },

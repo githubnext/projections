@@ -19,4 +19,5 @@ pub use api::{
     Generated, basis_digest, canonical, canonicalize, check_comparison, content, content_value, generated_values, normalize, parse_json,
     semantic, validate_comparison, vary,
 };
+pub(crate) use fields::{choice, object};
 pub use request::{diagnostic_response, handle};

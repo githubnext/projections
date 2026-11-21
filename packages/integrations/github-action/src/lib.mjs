@@ -211,16 +211,23 @@ function describeChange(change, before, after) {
 }
 
 const changesShown = 25
-/** A comparison's counts, such as `3 changes in 2 steps: 2 added, 1 removed`. */
-function comparisonCounts(comparison) {
+/**
+ * A comparison's counts, such as `3 changes in 2 steps: 2 added, 1 removed`. Whether it changed at all is the entry's
+ * `status`, which the CLI took from the engine's review; this only words the listed changes, and an `unchanged` change
+ * is listed either for its identity (renamed, split or merged) or for expected variation.
+ */
+function comparisonCounts(status, comparison) {
   const changes = comparison?.changes ?? []
-  if (!changes.length) return 'no changes'
   const counts = new Map()
-  for (const change of changes) counts.set(change.status, (counts.get(change.status) ?? 0) + 1)
-  const parts = ['added', 'removed', 'modified', 'unchanged']
-    .filter(status => counts.has(status))
-    .map(status => (status === 'unchanged' ? `${counts.get(status)} renamed without other changes` : `${counts.get(status)} ${status}`))
-  return `${count(changes.length, 'change', 'changes')} in ${count(comparison.steps?.length ?? 0, 'step', 'steps')}: ${parts.join(', ')}`
+  const tally = word => counts.set(word, (counts.get(word) ?? 0) + 1)
+  for (const change of changes)
+    tally(change.status !== 'unchanged' ? change.status : change.correspondence === 'exact' ? 'varied' : 'renamed')
+  const words = {renamed: 'renamed without other changes', varied: 'varied within tolerance'}
+  const parts = ['added', 'removed', 'modified', 'renamed', 'varied']
+    .filter(word => counts.has(word))
+    .map(word => `${counts.get(word)} ${words[word] ?? word}`)
+  if (status === 'unchanged' || !changes.length) return parts.length ? `no changes to review (${parts.join(', ')})` : 'no changes'
+  return `${count(changes.length, 'change', 'changes')} in ${count(comparison?.steps?.length ?? 0, 'step', 'steps')}: ${parts.join(', ')}`
 }
 
 /** A projection's one-line result and its details: a comparison's steps, an extraction's size or a failure's diagnostics. */
@@ -245,7 +252,7 @@ function projectionDetails(entry, document) {
       }
       if (ids.length > changesShown) lines.push(`   - …and ${ids.length - changesShown} more`)
     }
-    return {result: comparisonCounts(comparison), lines}
+    return {result: comparisonCounts(entry.status, comparison), lines}
   }
   const extraction = document?.extraction
   const size = extraction

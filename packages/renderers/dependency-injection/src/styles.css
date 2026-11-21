@@ -23,8 +23,8 @@
   flex: none;
   margin: auto;
   box-sizing: content-box;
-  /* `diPadding`, and above it the host's top inset (`useDiPadding`). */
-  padding: var(--projections-stage-inset-top, 16px) 16px 16px;
+  /* `diPadding`, and above it the host's top inset (`useDiPadding`), or as much as clears its cover (`--pk-fit-top`). */
+  padding: var(--pk-fit-top, var(--projections-stage-inset-top, 16px)) 16px 16px;
 }
 .di-card {
   cursor: pointer;
@@ -80,11 +80,25 @@
   fill: var(--accent-soft);
   pointer-events: none;
 }
-.di-card:has(.di-zone-registration:is(:hover, [data-projections-hovered])) .di-tint-registration,
 .di-card:has(.di-zone-contract:is(:hover, [data-projections-hovered])) .di-tint-contract,
 .di-card:has(.di-zone-implementation:is(:hover, [data-projections-hovered])) .di-tint-implementation,
 .di-card:has(.di-zone-whole:is(:hover, [data-projections-hovered])) .di-tint-whole {
   fill: var(--hover);
+}
+/*
+ * The lifetime is a pill inset in the card's top right (src/lifetime-pill.tsx, sized by the kit's `pillMetrics`): a
+ * rounded rectangle, its corners tighter than the card's, a little darker (in dark, lighter) than what it sits on. The
+ * registration's hover, focus and selection tint it, in its own shape.
+ */
+.di-lifetime-pill {
+  rx: max(0px, calc(var(--projections-radius-sm) - 2px));
+  pointer-events: none;
+}
+.di-lifetime-pill-surface {
+  fill: color-mix(in srgb, var(--text) 6%, transparent);
+}
+.di-card:has(.di-zone-registration:is(:hover, [data-projections-hovered])) .di-tint-registration {
+  fill: color-mix(in srgb, var(--text) 8%, transparent);
 }
 /* A focused part: the kit's quieter part tint; the card's SDK ring carries the focus color. */
 .di-card:has(.di-zone-registration:focus-visible) .di-tint-registration,

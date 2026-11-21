@@ -112,10 +112,12 @@ accepts only immutable digests, and supports repository-owned executable
 extractors (not installation-owned built-in extractors) in this mode. It mounts
 only a temporary copy of the revision, read-only, at `/repository` (and, when a
 comparison applies another revision's definition, that revision read-only at
-`/definition` as the working directory) and the `projections` Python module
-read-only at `/projections/python`, first on `PYTHONPATH`, changes the request
-root accordingly, drops capabilities, disables network, restricts resources,
-uses a read-only container filesystem and a bounded writable `/tmp`. Container
-provenance records the exact image digest as `pinned-toolchain`, not `hermetic`.
-The daemon remains trusted; no socket, credential home or current checkout is
-mounted. Container cleanup is explicit even after timeout/abort.
+`/definition` as the working directory), the `projections` Python module
+read-only at `/projections/python`, first on `PYTHONPATH`, and the Node
+extractor module read-only at `/projections/node`, preloaded into a bare `node`,
+changes the request root accordingly, drops capabilities, disables network,
+restricts resources, uses a read-only container filesystem and a bounded
+writable `/tmp`. Container provenance records the exact image digest as
+`pinned-toolchain`, not `hermetic`. The daemon remains trusted; no socket,
+credential home or current checkout is mounted. Container cleanup is explicit
+even after timeout/abort.

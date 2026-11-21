@@ -173,6 +173,22 @@ doesn't promise a top-heavy result, so renderers place items with this.
 | `lines` | `"lines": Array<Array<number>>` | Item indices on each line, in order. |
 | `widths` | `"widths": Array<number>` | Each line's width: its items plus the gaps between them. |
 
+### `BlockedBoxEdge`
+
+```ts
+interface BlockedBoxEdge
+```
+
+No route around the cards exists (`routeBoxEdge`): `least` is the candidate that overlaps the obstacles least
+(fewest cards crossed, then the shortest stretch inside them), and `crossed` the indices in `obstacles` it crosses.
+Whether to draw it is the caller's policy, and drawing it should be reported.
+
+| Member | Signature | Description |
+|---|---|---|
+| `blocked` | `"blocked": true` | No route clears the cards. |
+| `crossed` | `"crossed": Array<number>` | The indices in `obstacles` of the cards `least` crosses. |
+| `least` | `"least": BoxEdge` | The candidate route that overlaps the obstacles least. |
+
 ### `BorderWidths`
 
 ```ts
@@ -220,7 +236,7 @@ Fits a legend to the protocol's bounds: labels are clipped, and past
 ### `boxEdge`
 
 ```ts
-boxEdge(from: ArrowBox, target: ArrowBox, obstacles?: Array<ArrowBox>, style?: "curved" | "orthogonal", ports?: { "end"?: Point; "start"?: Point }, outset?: number, tracks?: Array<number>): { "base": Point; "d": string; "end": Point; "start": Point; "turns"?: Array<EdgeTurn> }
+boxEdge(from: ArrowBox, target: ArrowBox, obstacles?: Array<ArrowBox>, style?: "curved" | "orthogonal", ports?: { "end"?: Point; "start"?: Point }, outset?: number, tracks?: Array<number>): BoxEdge
 ```
 
 An arrow from one card to another, around `obstacles`, ending at the base
@@ -230,6 +246,22 @@ card is drafted down the nearest clear corridor between cards instead, and
 failing that the arrow is routed around the cards on a grid. The head's
 painted tip stops `outset` outside the target's box, on the outer edge of
 its border (see `cardBorderOutset`, the default for kit cards).
+
+### `BoxEdge`
+
+```ts
+interface BoxEdge
+```
+
+A `boxEdge` arrow: its path `d`, endpoints, and the S turns a downward route takes.
+
+| Member | Signature | Description |
+|---|---|---|
+| `base` | `"base": Point` | The base of the arrowhead, where the path ends. |
+| `d` | `"d": string` | The SVG path, from `start` to the head's `base`. |
+| `end` | `"end": Point` | The head's tip, `outset` outside the target card. |
+| `start` | `"start": Point` | Where the arrow leaves its source card. |
+| `turns` | `"turns"?: Array<EdgeTurn>` | The S turns a downward route takes, for `routeTracks`. |
 
 ### `boxEdgeTurn`
 
@@ -558,6 +590,16 @@ type ColorTokenName = "accent" | "accent-emphasis" | "accent-muted" | "added" | 
 
 Color token names without `color-`, such as `fg-muted` or `added-border`.
 
+### `columnGap`
+
+```ts
+columnGap: number
+```
+
+Space between columns on the grid a top-to-bottom layout's cards snap to (see `columnGrid`): a channel for a route between two cards, clear
+of both (`edgeNodeSpacing` each side), with room to spare, so columns read apart and a relationship can pass
+between them.
+
 ### `ColumnSort`
 
 ```ts
@@ -711,6 +753,42 @@ countText(count: number, singular: string, plural?: string, locale?: string | un
 ```
 
 `count` and its noun, in the locale's digits: `1 package`, `3 packages`.
+
+### `coveredTop`
+
+```ts
+coveredTop(__0: { "cover": Array<CoverRect>; "maxScale"?: number; "origin"?: { "x": number; "y": number }; "padding"?: FitPadding | number; "size": { "height": number; "width": number }; "view": { "height": number; "width": number } }): number
+```
+
+The space a fitted drawing keeps above it, CSS px, so it never opens under what the host overlays (`cover`): the
+drawing is fitted with `padding` and centred in a stage of `view` whose top left is `origin` in the frame, as
+`useFitScale` and a `margin: auto` drawing place it. Where that leaves it clear of every rectangle (a flat graph
+centred well below a chip), the padding's own top; else the top that clears the lowest rectangle it reaches, by
+`coverGap`. Decided from the drawing's fit without the cover, never from the result, so it can't oscillate. The
+drawing still pans under the cover once zoomed.
+
+### `coverGap`
+
+```ts
+coverGap: 8
+```
+
+The space kept between a fitted drawing and a cover above it, CSS px.
+
+### `CoverRect`
+
+```ts
+interface CoverRect
+```
+
+A rectangle of the frame the host overlays (its `stage-cover` theme token), CSS px from the frame's top left.
+
+| Member | Signature | Description |
+|---|---|---|
+| `height` | `"height": number` | Its height, CSS px. |
+| `width` | `"width": number` | Its width, CSS px. |
+| `x` | `"x": number` | Its left edge, CSS px from the frame's left. |
+| `y` | `"y": number` | Its top edge, CSS px from the frame's top. |
 
 ### `createGraphTransition`
 
@@ -1974,7 +2052,30 @@ The sort a heading's activation asks for: the other direction for the sorted col
 nodeSpacing: 24
 ```
 
-Space between cards in a layer (ELK `spacing.nodeNode`), and between a card with no relationships and what it is placed beside (see `placeUnlinked`).
+Space ELK keeps between cards in a layer (ELK `spacing.nodeNode`), and between a card with no relationships and what
+it is placed beside (see `placeUnlinked`). ELK's placement at this spacing decides each card's layer, order and
+column; a graph on a grid then spreads its columns to `columnGap` (see `snapToGrid`), which leaves those decisions
+as they are.
+
+### `NoRouteError`
+
+```ts
+class NoRouteError extends Error
+```
+
+`boxEdge` found no route around the cards; `blocked` says which least-overlapping route there is.
+
+| Member | Signature | Description |
+|---|---|---|
+| `blocked` | `readonly "blocked": BlockedBoxEdge` |  |
+| `captureStackTrace` | `static "captureStackTrace"(targetObject: object, constructorOpt?: Function \| undefined): void` |  |
+| `cause` | `"cause"?: unknown` |  |
+| `constructor` | `new (blocked: BlockedBoxEdge): NoRouteError` |  |
+| `message` | `"message": string` |  |
+| `name` | `"name": string` | `NoRouteError`. |
+| `prepareStackTrace` | `static "prepareStackTrace"(err: Error, stackTraces: Array<CallSite>): any` |  |
+| `stack` | `"stack"?: string` |  |
+| `stackTraceLimit` | `static "stackTraceLimit": number` |  |
 
 ### `numericValue`
 
@@ -2073,6 +2174,15 @@ How `categoryPalette` assigns colors beyond its defaults.
 | `distinct` | `"distinct"?: false \| true` | Choose each free slot to be as far as possible from every color already used (OKLab, in both themes), rather than by its preferred slot: for categories with no conventional color, such as entity kinds, so no two look alike. |
 | `pinned` | `"pinned"?: ReadonlyMap<string, "border-width" \| "border-width-thick" \| "chart-1" \| "chart-10" \| "chart-11" \| "chart-12" \| "chart-13" \| "chart-14" \| "chart-15" \| "chart-16" \| "chart-2" \| "chart-3" \| "chart-4" \| "chart-5" \| "chart-6" \| "chart-7" \| "chart-8" \| "chart-9" \| "color-accent" \| "color-accent-emphasis" \| "color-accent-muted" \| "color-added" \| "color-added-border" \| "color-added-emphasis" \| "color-added-highlight" \| "color-added-muted" \| "color-bg" \| "color-bg-inset" \| "color-bg-overlay" \| "color-bg-subtle" \| "color-border" \| "color-border-emphasis" \| "color-border-muted" \| "color-divider" \| "color-fg" \| "color-fg-muted" \| "color-fg-on-emphasis" \| "color-fg-subtle" \| "color-focus" \| "color-highlight" \| "color-modified" \| "color-modified-border" \| "color-modified-emphasis" \| "color-modified-highlight" \| "color-modified-muted" \| "color-moved" \| "color-moved-border" \| "color-moved-emphasis" \| "color-moved-highlight" \| "color-moved-muted" \| "color-removed" \| "color-removed-border" \| "color-removed-emphasis" \| "color-removed-highlight" \| "color-removed-muted" \| "color-surface-canvas" \| "color-surface-header" \| "color-surface-inset" \| "color-surface-raised" \| "control-height" \| "control-height-lg" \| "control-height-sm" \| "focus-ring-offset" \| "focus-ring-width" \| "font-family" \| "font-family-mono" \| "font-size" \| "font-size-lg" \| "font-size-sm" \| "font-size-xl" \| "font-size-xs" \| "font-weight-bold" \| "font-weight-medium" \| "font-weight-normal" \| "font-weight-semibold" \| "icon-added" \| "icon-additive" \| "icon-agent" \| "icon-application" \| "icon-blocked" \| "icon-breaking" \| "icon-bytecode" \| "icon-changed" \| "icon-collapse" \| "icon-comparator" \| "icon-compatible" \| "icon-credential" \| "icon-downgraded" \| "icon-enforced" \| "icon-error" \| "icon-exclude" \| "icon-expand" \| "icon-extractor" \| "icon-file" \| "icon-generated" \| "icon-hidden" \| "icon-host" \| "icon-import" \| "icon-include" \| "icon-info" \| "icon-modified" \| "icon-module" \| "icon-moved" \| "icon-namespace" \| "icon-network" \| "icon-other" \| "icon-policy" \| "icon-process" \| "icon-read" \| "icon-redeploy" \| "icon-removed" \| "icon-renamed" \| "icon-renderer" \| "icon-replace" \| "icon-rescoped" \| "icon-settings" \| "icon-unenforced" \| "icon-unknown" \| "icon-upgraded" \| "icon-varied" \| "icon-visible" \| "icon-warning" \| "icon-workload" \| "label-font-size" \| "label-font-weight" \| "label-height" \| "label-padding-x" \| "label-radius" \| "line-height" \| "line-height-relaxed" \| "line-height-tight" \| "radius" \| "radius-full" \| "radius-lg" \| "radius-sm" \| "shadow-lg" \| "shadow-md" \| "shadow-sm" \| "space-1" \| "space-2" \| "space-3" \| "space-4" \| "space-5" \| "space-6" \| "space-7" \| "space-8">` | Categories whose color is set (a definition's kind colors), by key: they keep it, and the rest keep clear of it. |
 
+### `parseStageCover`
+
+```ts
+parseStageCover(token: string | undefined): Array<CoverRect> | undefined
+```
+
+The host's `stage-cover` theme token as rectangles: `x y width height` in CSS px, separated by commas. Undefined when
+the host sends none (the renderer keeps to `stage-inset-top`, if any); empty when it sends one that covers nothing.
+
 ### `parseTableSort`
 
 ```ts
@@ -2089,6 +2199,20 @@ partOwners(model: ComparisonModel<Extraction> | undefined): ReadonlyMap<string, 
 
 The change each further part of a split or merge presents, by its row's ID: the host's filter names the change, and
 the part is kept with it (`InteractionOptions.partOf`).
+
+### `pillMetrics`
+
+```ts
+pillMetrics: { "baseline": 13; "height": 17; "padding": 3 }
+```
+
+A pill around one line of card text at the type scale's default size (12), aligned optically rather than by its box:
+the space above a capital E's top, below its baseline, left of its stem and right of a last capital H's right stem is
+about the same (to within a card unit: the pill is a whole number of them wide), with every edge on a whole card unit. The text's baseline is `baseline` under the
+pill's top: the sans fonts' cap height is about 8.6 card units, which leaves about 4.4 above it and 4 below. Its
+`padding` beyond the text's advance on each side is 3, which the glyphs' own side bearings (about 1 card unit) make
+about 4 to their stems. Measured from rendered pixels with the renderer testing package's `opticalInsets`. See
+`textPill`.
 
 ### `placeBadges`
 
@@ -2304,6 +2428,16 @@ points are dropped, and every corner becomes a quarter curve whose radius is
 at most half of each adjacent leg, so a dogleg between layers reads as one
 S-curve, the same as a spline route, and a short jog as a gentle wave rather
 than a stair-step.
+
+### `routeBoxEdge`
+
+```ts
+routeBoxEdge(from: ArrowBox, target: ArrowBox, obstacles?: Array<ArrowBox>, style?: "curved" | "orthogonal", ports?: { "end"?: Point; "start"?: Point }, outset?: number, tracks?: Array<number>): BlockedBoxEdge | BoxEdge
+```
+
+`boxEdge`, with no route around the cards as a result rather than an error: a `BlockedBoxEdge` with the
+least-overlapping route, for the caller to draw and report or to refuse. Boxes that can't be joined at all still
+throw a `RangeError`.
 
 ### `routeCrossings`
 
@@ -2523,6 +2657,18 @@ to show more of it.
 | `expand` | `"expand"(ids: Iterable<string, any, any>): void` | Shows these items too, or opens these folds (`isFold`), until the host's scope changes. A canvas lays them out with the rest; an open fold stays, as the way to fold its parts again. |
 | `shown` | `"shown": ReadonlySet<string>` | Both: every row the scope shows. |
 
+### `scrolledPadding`
+
+```ts
+scrolledPadding(__0: { "height": number; "inset": { "bottom": number; "top": number }; "own": { "top": number; "y": number }; "view": number }): { "top": number; "y": number }
+```
+
+The top and bottom (`y`) padding of a drawing drawn larger than its fit, CSS px, so it clears bands of `inset.top`
+and `inset.bottom` at the ends of a stage `view` px tall: `height` is the drawing's own height at the drawn scale.
+While it still fits the stage's height it sits centred (`margin: auto`) and keeps `own` where that leaves it clear,
+else just enough more at the end it reaches to clear the band; once that padding no longer fits, the drawing scrolls
+and each end is padded at least its band, so its first and last rows can scroll clear.
+
 ### `ScrollStart`
 
 ```ts
@@ -2739,7 +2885,7 @@ Where `useStageZoom` opens the view; by default fitted, or at the text floor whe
 |---|---|---|
 | `floor` | `"floor"?: number` | The scale at which the smallest text reaches `openingFloorPx` (see `useOpeningFloor`): content whose fit is smaller opens at it instead and scrolls. Measure it over everything the stage frames (both endpoints of a transition), so it never changes while scrubbing. |
 | `hold` | `"hold"?: { "key": unknown; "scale": number }` | A drawn scale (CSS px per content unit) to keep: whenever `key` changes, the zoom becomes the multiple of the fit that draws at `scale` (within the zoom range), as though the person had zoomed there, so a view that changes its content's size, and with it the fit, keeps its zoom. |
-| `opening` | `"opening"?: { "start": { "x": number; "y": number } \| { (view: { "height": number; "scale": number; "width": number }): { "left": number; "top": number } }; "zoom": number }` | An opening view chosen by the caller instead, for example on a focus (see `RendererFocus`): its zoom multiple of the fit (clamped to the zoom range) and where it starts. Like the default, it holds until the person zooms or pans. |
+| `opening` | `"opening"?: { "centred"?: false \| true; "start": { "x": number; "y": number } \| { (view: { "height": number; "scale": number; "width": number }): { "left": number; "top": number } }; "zoom": number }` | An opening view chosen by the caller instead, for example on a focus (see `RendererFocus`): its zoom multiple of the fit (clamped to the zoom range) and where it starts. Like the default, it holds until the person zooms or pans. `centred`: the start centres a focus in the view, so it isn't moved clear of a stage cover as a reading start is. |
 | `start` | `"start"?: { "x": number; "y": number } \| { (view: { "height": number; "scale": number; "width": number }): { "left": number; "top": number } }` | Where content that overflows the opening view starts (default the top left; see `ScrollStart`). |
 
 ### `statusGlyphs`
@@ -3141,6 +3287,15 @@ type TableValue = false | null | number | string | true | undefined
 ```
 
 A cell's value, as a column reads it from one version of a row: what it sorts by and, by default, shows.
+
+### `textPill`
+
+```ts
+textPill(x: number, baseline: number, advance: number, anchor?: "end" | "start"): { "height": number; "width": number; "x": number; "y": number }
+```
+
+The box of a pill (see `pillMetrics`) around one line of text `advance` card units wide, its baseline at `baseline`,
+starting at `x` or, anchored at its `end`, ending there. The pill is a whole number of card units wide.
 
 ### `tidyRoute`
 
@@ -4218,6 +4373,18 @@ useControlActions(onAction: { (listener: { (id: string): void }): { (): void } }
 Runs `handlers[id]` when the host activates the declared action control
 `id`, for as long as the component is mounted.
 
+### `useCoveredPadding`
+
+```ts
+useCoveredPadding<P extends FitPadding>(stage: RefObject<HTMLElement | null>, size: undefined | { "height": number; "width": number }, padding: P, maxScale?: number): P
+```
+
+`padding` for content of `size` fitted to the stage element `stage` (as `useFitScale` fits it), with its top moved
+down only where the host's cover (`useStageCover`) would otherwise lie over the fitted drawing (see `coveredTop`):
+a flat graph centred below a pane's chips keeps its own top, a tall one opens below them. Without a cover,
+`padding` as it is. Pass the result to `useFitScale` and pad the drawing's top by its `top` (the kit's
+`--pk-fit-top`, which graph.css reads). The stage is measured in the frame on every resize.
+
 ### `useDomainIndex`
 
 ```ts
@@ -4338,7 +4505,7 @@ returns to release. Outside a kit renderer it holds nothing.
 ### `useScrollAnchor`
 
 ```ts
-useScrollAnchor(scroller: RefObject<HTMLElement | null>, scale: number, opening?: false | true, start?: { "x": number; "y": number } | { (view: { "height": number; "scale": number; "width": number }): { "left": number; "top": number } }, onMove?: undefined | { (): void }): { (): void }
+useScrollAnchor(scroller: RefObject<HTMLElement | null>, scale: number, opening?: false | true, start?: { "x": number; "y": number } | { (view: { "height": number; "scale": number; "width": number }): { "left": number; "top": number } }, onMove?: undefined | { (): void }, clearCover?: false | true): { (): void }
 ```
 
 Keeps the point at the middle of a scroll container in the middle when the
@@ -4348,6 +4515,30 @@ default its top left, where reading begins) rather than cut through the middle.
 `onMove` is called when the person first scrolls, drags, taps or presses a
 scroll key in content that overflows: the moment they start to pan.
 Returns a function that keeps the view where its caller just scrolled it.
+
+### `useScrolledPadding`
+
+```ts
+useScrolledPadding<P extends FitPadding>(padding: P, drawnScale: number, fitScale: number, height?: undefined | { "content": number; "view": number }): P
+```
+
+The padding a fitted drawing is drawn with (its `--pk-fit-top`): `padding` while it is drawn at its fitted scale
+(`fitScale`), and once it is drawn larger and scrolls down (opened at the text floor, or zoomed in: `drawnScale`), a
+top of at least the host's `stage-inset-top` under a cover, so its first row can open, and scroll back, clear of what
+the host overlays at the frame's top. `height` is the content's height (content units) and the stage's inner height
+(`Fit.height`): a drawing drawn larger that still fits the stage's height (a flat graph zoomed in) keeps its padding
+where, centred, it clears the band, and takes just enough more where it doesn't (`scrolledPadding`), so it moves no
+more than it must as it zooms. The fit never reads it.
+
+### `useStageCover`
+
+```ts
+useStageCover(): Array<CoverRect> | undefined
+```
+
+The rectangles of the frame the host overlays (its `stage-cover` theme token, see `parseStageCover`), CSS px from
+the frame's top left, or undefined when it sends none. A fitted canvas keeps clear of them only where its drawing
+would reach them (`useCoveredPadding`); content that scrolls pads by `stage-inset-top` instead.
 
 ### `useStageHeightCap`
 

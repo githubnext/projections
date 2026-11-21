@@ -4,7 +4,7 @@
 // `fixtures/data-rules.json`, the domain data rules the engine's rule table must equal, formatted as the
 // repository formats JSON. `--check` fails instead when a file differs.
 import {execFileSync} from 'node:child_process'
-import {mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs'
+import {existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs'
 import {createRequire} from 'node:module'
 import {dirname, join, relative} from 'node:path'
 import {fileURLToPath} from 'node:url'
@@ -84,7 +84,7 @@ const filesChanged = files.filter(([path, text]) => {
 })
 
 const stale = existing.filter(path => !expected.has(path))
-const staleInternal = readdirSync(join(root, 'internal'))
+const staleInternal = (existsSync(join(root, 'internal')) ? readdirSync(join(root, 'internal')) : [])
   .map(name => `internal/${name}`)
   .filter(path => !files.some(([file]) => file === path))
 const changed = [...expected].filter(([path, text]) => {

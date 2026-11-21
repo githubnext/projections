@@ -2,33 +2,34 @@
 
 Status: **adopted** for Tetragon. The
 [`tetragon-policies`](../../packages/extractors/tetragon-policies/README.md)
-extractor writes it, the
+extractor writes this model, the
 [runtime-policy renderer](../../packages/renderers/runtime-policy/README.md)
 presents it, and the
 [runtime policy comparator](../../packages/comparators/runtime-policy/README.md)
-interprets its changes. The vocabulary is deliberately not Tetragon's, so that
-other runtime policy engines (KubeArmor, Falco, Tracee, seccomp, AppArmor) can
-write the same model later. Its motivation is in the
-[proposal](../design/ebpf-policy-projection.md).
+interprets its changes. The vocabulary is intentionally engine-neutral so other
+runtime policy engines — such as KubeArmor, Falco, Tracee, seccomp, or AppArmor
+— can adopt the same model later. See the
+[proposal](../design/ebpf-policy-projection.md) for the background.
 
-A runtime security policy says, in some form, **where** in a running system it
-attaches, **when** it acts there, **who** it applies to and **what happens**. A
-pull request that changes a policy changes one or more of those four, and a
-reviewer needs to know which: a new kill action, a policy that now covers every
-pod, or a hook that nothing watches any more. This model keeps the four apart so
-a comparison can say exactly which changed.
+Every runtime security policy answers four questions: **where** in a running
+system it attaches, **when** it triggers, **who** it applies to, and **what
+happens** when it does. A pull request that edits a policy changes one or more
+of those four dimensions, and reviewers need to see which one shifted — whether
+it's a new kill action, a policy that suddenly covers every pod, or a hook that
+nothing watches anymore. This model separates those four concerns so comparisons
+can pinpoint exactly what changed.
 
 ## Ground rules
 
-- **The declaration is the policy.** Extractors read what the repository
-  declares, never a running cluster. A policy loaded at run time, or a mode
-  changed at run time, isn't part of the model.
-- **No guessing.** Values a policy only gains when it loads (a generated list of
-  every syscall, a CEL expression, a kernel symbol that may not exist) are
-  recorded as such, never resolved by approximation. A field the extractor
-  doesn't know is kept, not dropped (see [version skew](#version-skew)).
-- **Deterministic.** The same revision and inputs always produce the same
-  extraction, independent of file listing order.
+- **The declaration is the policy.** Extractors read only what the repository
+  declares, never a live cluster. Policies loaded or toggled at runtime aren't
+  part of the model.
+- **No guessing.** Values that only resolve when a policy loads — like a
+  generated syscall list, a CEL expression, or a kernel symbol that may not
+  exist — are recorded literally rather than approximated. Unknown fields are
+  preserved rather than dropped (see [version skew](#version-skew)).
+- **Stay deterministic.** The same revision and inputs always produce the same
+  extraction, regardless of file listing order.
 
 ## The boundaries
 
@@ -51,14 +52,13 @@ a comparison can say exactly which changed.
 
 ## Vocabulary
 
-Everything is ordinary `architecture/v0`
-([contracts](../contracts/extractions.md)). Fields an engine has no use for are
-absent. Extractions declare the vocabulary,
-`"vocabularies": ["runtime-policy/v0"]`, and the engine checks the fields
-renderers rely on
-([`vocabularies/runtime-policy`](../reference/schemas/vocabularies-runtime-policy.md)
-lists them); the others are documented here and stay open. A cluster-wide
-policy's `namespace` is `null`.
+Everything here is standard `architecture/v0`
+([contracts](../contracts/extractions.md)), with unused fields omitted.
+Extractions declare `"vocabularies": ["runtime-policy/v0"]`, and the engine
+validates the fields renderers rely on (listed in
+[`vocabularies/runtime-policy`](../reference/schemas/vocabularies-runtime-policy.md));
+other fields are documented here and left open. Cluster-wide policies set
+`namespace` to `null`.
 
 ### policy
 
@@ -91,13 +91,13 @@ policy's `namespace` is `null`.
 | `category` | `file`, `credentials`, `process`, `network`, `kernel-modules`, `bpf`, `namespaces`, `user-space` or `other`, derived from a table of well-known targets (`confidence: derived`) |
 | `findings` | Kernel profiles that can't support the hook ([findings](#findings)) |
 
-Hook IDs are `hook:<hookType>:<target>`.
+Hook IDs follow the format `hook:<hookType>:<target>`.
 
 ### probe
 
-`hookType`, `target`, and the engine's own description of what is captured:
+A probe records `hookType`, `target`, and the engine's own capture details:
 `message`, `tags`, `args`, `data`, `return`, `returnArg`, `syscall`, `raw`,
-`binary`, `viaList` (the list a target was expanded from) and `unmodelled`.
+`binary`, `viaList` (the list a target was expanded from), and `unmodelled`.
 
 ### selector
 
@@ -122,8 +122,8 @@ Hook IDs are `hook:<hookType>:<target>`.
 | `silent` | Neither reports nor acts | `NoPost` alone |
 | `unknown` | Uses an action the extractor doesn't know, and nothing known enforces | |
 
-Keeping `effect` and `enforcement` apart lets a reviewer see a mode change as
-"three selectors start enforcing" rather than as one changed option.
+Separating `effect` from `enforcement` lets reviewers read a mode toggle as
+"three selectors start enforcing" instead of a single flipped option.
 
 ### subject
 
@@ -133,9 +133,10 @@ Keeping `effect` and `enforcement` apart lets a reviewer see a mode change as
 | `workloads` | `all`, `host`, `namespace`, `pods` and `containers` (normalized label requirements `{key, operator, values}`), `display` | `subject:workloads:<display>` |
 | `binary` | `match`: `exact`, `prefix` or `suffix` | `subject:binary:<match>:<path>` |
 
-Label selectors are normalized before they are described: `matchLabels: {a: x}`
-and `a In [x]` are one requirement, values are sorted and requirements ordered,
-so equivalent spellings produce one subject.
+Label selectors are normalized before being described: `matchLabels: {a: x}` and
+`a In [x]` collapse into the same requirement, values are sorted, and
+requirements are ordered consistently so equivalent spellings always map to one
+subject.
 
 ### Relationships
 
@@ -149,19 +150,20 @@ so equivalent spellings produce one subject.
 | `matches`, `excludes` | selector → binary, with `operator`, `parent`, `followChildren` | `binary:<selector>/<self or parent>/<match>/<path>` |
 | `covers` | policy → workload, with `containers` when a container selector picks some; `confidence: derived` | `covers:<policy>/<workload>` |
 
-`applies-to` has one relationship per policy, identified by the policy alone, so
-a scope change is the same relationship moving to a different subject: a
-modification, never a removal and an addition.
+Each policy has a single `applies-to` relationship identified by the policy
+alone. When a policy's scope changes, that same relationship moves to a new
+subject, showing up as a clean modification rather than a removal and an
+addition.
 
 ### Text
 
-Text an extractor writes for people (a condition, an action, a workload scope, a
-node selector, a finding, a limitation) is
-[text with inline code](../contracts.md#text-with-inline-code): identifiers,
-paths, addresses, values and label selectors go in backtick spans, the
-connecting words stay outside, for example
-`` `arg0` (`file`) starts with `/root/.ssh` or `/home` ``. Renderers draw it
-with the kit's `Prose`; entity labels stay plain.
+Human-facing strings written by an extractor — conditions, actions, workload
+scopes, node selectors, findings, and limitations — use
+[text with inline code](../contracts.md#text-with-inline-code). Identifiers,
+paths, addresses, values, and label selectors sit inside backticks while
+connecting words stay outside, such as
+`` `arg0` (`file`) starts with `/root/.ssh` or `/home` ``. Renderers display
+these fields with the kit's `Prose` component; entity labels stay plain text.
 
 | Item              | Prose fields                                |
 | ----------------- | ------------------------------------------- |
@@ -173,9 +175,10 @@ with the kit's `Prose`; entity labels stay plain.
 
 ## Deployment facts
 
-Optional extractor inputs add facts from other repository files that change what
-a policy means in practice. They are entities of their own, so a pull request
-that changes them is compared like any other change.
+Optional extractor inputs can pull in context from other repository files that
+affect how a policy behaves in practice. Because they are modeled as their own
+entities, pull requests that change them show up in comparisons alongside policy
+edits.
 
 <!-- prettier-ignore -->
 | Entity | What it is | ID | Fields |
@@ -184,15 +187,15 @@ that changes them is compared like any other change.
 | **kernel** | A kernel profile of the nodes policies load on | `kernel:<name>` | `name`, `kernel` (version), `config` (option → enabled), `symbols` and `errorInjection` (`{path, count}`) |
 | **workload** | A Kubernetes workload the repository deploys | `workload:<kind>:<namespace>:<name>` | `resource`, `name`, `namespace`, `labels` (the pod template's), `containers` (`{name, repo}`), `path` |
 
-A policy's `covers` relationships say which workloads its scope includes, so a
-scope change is visible as workloads gained or lost, not only as a different
+A policy's `covers` relationships map out which workloads fall inside its scope,
+so a scope edit shows up as workloads gained or lost instead of just a changed
 label selector.
 
 ### Findings
 
-`data.findings` holds warnings about the presented revision, each
-`{kind, message, profiles?}`: they are facts about that revision, not about a
-change, so renderers show them at every point of a comparison.
+`data.findings` stores warnings about the revision being viewed, each shaped as
+`{kind, message, profiles?}`. Because findings are facts about a single revision
+rather than a diff, renderers show them at every point in a comparison.
 
 <!-- prettier-ignore -->
 | `kind` | On | Meaning |
@@ -204,30 +207,31 @@ change, so renderers show them at every point of a comparison.
 
 ## Identity across revisions
 
-- **Policies** are identified as the engine identifies them:
-  `policy:tetragon:<kind>[:<namespace>]:<name>`. Moving a policy between files
-  changes only its `path`; renaming one is a removal and an addition unless the
-  projection definition declares a `correspondence`.
-- **Probes** are `probe:<policy>/<hookType>:<target>`, with `#2`, `#3` for a
-  second or third probe on one target in one policy.
-- **Selectors** are `selector:<probe>/<label>` when the engine gives them a
-  label, and `selector:<probe>/#<position>` otherwise; `*` is the implicit
-  selector. Unlabelled selectors are identified by position, so inserting one
-  before others reports the later ones as modified. Tetragon's selector `label`
-  exists for this; recommend it.
+- **Policies** use the engine's own identity:
+  `policy:tetragon:<kind>[:<namespace>]:<name>`. Moving a policy to another file
+  only updates its `path`, while renaming it counts as a removal and addition
+  unless the projection definition specifies a `correspondence`.
+- **Probes** use `probe:<policy>/<hookType>:<target>`, adding `#2`, `#3`, and so
+  on when one policy attaches multiple probes to the same target.
+- **Selectors** use `selector:<probe>/<label>` when labeled, or
+  `selector:<probe>/#<position>` otherwise (`*` denotes the implicit selector).
+  Because unlabeled selectors rely on position, inserting a new selector before
+  existing ones makes the later ones look modified — so recommending Tetragon's
+  selector `label` is good practice.
 
-Child IDs nest their parent's ID without its kind prefix, separated by `/`.
-Every part is percent-encoded, so `/` never appears inside one.
+Child IDs nest their parent's ID without the kind prefix, separated by `/`.
+Every segment is percent-encoded so `/` never collides inside a part.
 
 ## Version skew
 
-Policy engines add fields often. A field the extractor doesn't model must
-neither fail the extraction (a newer engine version is valid) nor vanish (a
-change to it would go unreviewed). The extractor therefore copies unknown fields
-of a policy's spec, a probe or a selector into its `data.unmodelled`, which is
-part of the extraction's content, so changing one marks the item modified. Each
-one is also listed in `metadata.limitations`. An action it doesn't know makes
-the selector's effect `unknown` unless a known action enforces.
+Policy engines add new fields frequently. When an extractor encounters a field
+it doesn't model, it shouldn't fail (the newer engine config is still valid) and
+it shouldn't silently drop it (changes to that field would slip past review).
+Instead, unknown fields on a policy spec, probe, or selector are copied into
+`data.unmodelled` and noted in `metadata.limitations`. Because `data.unmodelled`
+is part of the extraction, editing an unknown field still marks the item as
+modified. Unknown actions set the selector's effect to `unknown` unless a known
+action enforces.
 
 ## How Tetragon maps
 
@@ -247,10 +251,11 @@ the selector's effect `unknown` unless a known action enforces.
 
 ## Not modelled
 
-- Policies loaded or modes changed at run time (`tetra tracingpolicy add`,
+- Policies loaded or modes changed at runtime (`tetra tracingpolicy add`,
   `set-mode`).
-- Whether a kernel has a symbol, allows error injection or supports BPF LSM; the
-  hook's `stability` says how much to worry.
-- Event volume, overhead and whether a selector ever matches.
-- Precedence between policies: Tetragon has none, so coverage is a union. An
-  engine with precedence would add it explicitly.
+- Whether a given kernel actually has a symbol, permits error injection, or
+  supports BPF LSM; the hook's `stability` indicates how cautious to be.
+- Event volume, runtime overhead, or whether a selector ever matches in
+  practice.
+- Precedence between policies. Tetragon has none, so coverage is simply a union;
+  an engine with precedence would model it explicitly.

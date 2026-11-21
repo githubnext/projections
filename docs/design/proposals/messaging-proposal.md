@@ -1,59 +1,62 @@
 # Proposal: a messaging projection
 
-Status: **proposal**. Nothing here is implemented; it records a direction for a
-future built-in projection.
+Status: **proposal**. Nothing here is implemented yet; this document outlines a
+direction for a future built-in projection.
 
-Asynchronous messaging is a system that a diff hides well. A pull request that
-adds a subscriber, renames a topic or changes an event's payload touches a few
-lines in one service, but what changed is a relationship between services that
-never call each other directly. Projections should make that visible: who
-publishes what, on which channel, and who consumes it.
+Asynchronous messaging is easy to miss in a code diff. A pull request that adds
+a subscriber, renames a topic, or tweaks an event payload might only touch a few
+lines in one service, yet it changes the relationship between services that
+never call each other directly. A messaging projection should make those links
+obvious: who publishes what, on which channel, and who consumes it.
 
 ## What we had, and why it was removed
 
-The built-in `messaging` renderer presented `architecture/v0` extractions from
-the `message-handlers` extractor, now a
-[custom extractor sample](../../../examples/extractors/message-handlers/README.md).
-That extractor finds handlers and publishers from _conventions_: calls shaped
-like `subscribe("event", handler)`, decorators and registries that each team
-configures. That makes it a good sample and a weak built-in. It infers the
-system from source spelling, covers one language, and its accuracy depends on
-how well the configuration matches the code. The renderer was a dedicated list
-for data that the graph renderer can already present. Both were removed in the
-renderer review.
+We previously shipped a built-in `messaging` renderer for `architecture/v0`
+extractions produced by the `message-handlers` extractor (now a
+[custom extractor sample](../../../examples/extractors/message-handlers/README.md)).
+That extractor looked for handlers and publishers by matching code _conventions_
+— calls like `subscribe("event", handler)`, decorators, and registries
+configured per team. That works nicely as a sample, but poorly as a built-in: it
+guesses structure from source spelling, only covers one language, and is only as
+accurate as its hand-tuned configuration. Meanwhile, the renderer was just a
+custom list for data the graph renderer can already display. Both were removed
+during the renderer review.
 
 ## Proposed sources
 
-A built-in messaging projection should read the system the way the
-[dependency injection model](../../models/dependency-injection-model.md) does:
-ask a declared contract or the framework itself, never guess from text. Two
-sources complement each other:
+A built-in messaging projection should follow the same principle as our
+[dependency injection model](../../models/dependency-injection-model.md): read a
+declared contract or ask the framework directly, never guess from source text.
+Two complementary sources fit that rule:
 
 1. **AsyncAPI documents.**
    [AsyncAPI](https://www.asyncapi.com/docs/reference/specification/latest) (2.x
-   and 3.x) is the declared contract: servers, channels, operations (`send` /
-   `receive` in 3.x, `publish` / `subscribe` in 2.x), messages and their payload
-   schemas, per application. Reading committed documents executes nothing, needs
-   no `--trust`, and is deterministic. Several documents in one repository (one
-   per service) join on channel addresses and message IDs.
-2. **Framework subscriber registries.** Where no AsyncAPI document exists, or to
-   check that the code matches it, ask the framework what it registered without
-   connecting to a broker. Candidates, by analogy with the DI extractors: NestJS
-   microservice handlers (`@MessagePattern`, `@EventPattern`) from the container
-   in preview mode; Spring `@KafkaListener`, `@RabbitListener`, `@JmsListener`
-   endpoints and Spring Cloud Stream bindings from the bean factory; .NET
-   MassTransit and NServiceBus endpoint and consumer configuration from the
-   built host. These run application code and require `--trust`, like
-   `nestjs-di`, `spring-di` and `dotnet-di`, and could share their helpers.
+   and 3.x) is already a declared contract covering servers, channels,
+   operations (`send` and `receive` in 3.x; `publish` and `subscribe` in 2.x),
+   messages, and payload schemas per application. Reading committed documents
+   executes no code, needs no `--trust`, and is deterministic. When a repository
+   has multiple AsyncAPI documents (one per service), they join naturally on
+   channel addresses and message IDs.
+2. **Framework subscriber registries.** When there is no AsyncAPI document — or
+   when you want to verify that the code matches it — we can ask the framework
+   what it registered without ever connecting to a broker. By analogy with the
+   DI extractors, good candidates are NestJS microservice handlers
+   (`@MessagePattern`, `@EventPattern`) read from the container in preview mode;
+   Spring `@KafkaListener`, `@RabbitListener`, and `@JmsListener` endpoints plus
+   Spring Cloud Stream bindings from the bean factory; and .NET MassTransit or
+   NServiceBus endpoint and consumer registrations from the built host. Like
+   `nestjs-di`, `spring-di`, and `dotnet-di`, these run application code, need
+   `--trust`, and could share the same helpers.
 
-Both sources describe structure, not traffic. Broker introspection, consumer
-lag, throughput or traced message flows are out of scope: they depend on the
-environment and the moment, not the revision (see
+Both sources describe static structure, not live traffic. Broker introspection,
+consumer lag, throughput, and traced message flows are out of scope because they
+depend on the runtime environment and the moment in time, not on the Git
+revision (see
 [determinism and authority](../../models/domain-model/extension-points.md#determinism-and-authority)).
 
 ## Model sketch
 
-One `architecture/v0` model, whichever source wrote it:
+Whichever source produces it, the extraction uses one `architecture/v0` model:
 
 <!-- prettier-ignore -->
 | Entity kind | ID | Notes |
@@ -70,27 +73,31 @@ One `architecture/v0` model, whichever source wrote it:
 | `receives` | channel → application | The application consumes from the channel (with `data.message`, and the handler as evidence) |
 | `carries` | channel → message | Messages the channel transports |
 
-IDs never contain versions or file positions, so changing a payload is one
-modified message, and moving a handler is evidence, not a change of identity.
-Channels that are sent to but never received (or the reverse) are ordinary graph
-facts that the presentation can call out.
+Because IDs never include versions or file positions, editing a payload shows up
+as a single modified message, and moving a handler updates evidence without
+changing identity. Channels that have publishers but no consumers (or vice
+versa) fall out as ordinary graph facts that the presentation can highlight.
 
 ## Presentation
 
-Start with the graph renderer's `architecture` view (applications as boundaries,
-channels between them), not a new renderer. A comparison then shows a new
-subscriber, a removed publisher or a rewired channel as graph changes in step
-order. A payload change would show as a modified message. Following the API
-compatibility comparator's approach (in progress), a comparator could also
-classify a payload change as compatible or breaking for each consumer. A
-dedicated renderer is justified only if the graph can't explain those changes.
+We should start with the graph renderer's `architecture` view — applications as
+boundaries with channels between them — rather than building a new renderer. A
+comparison will show a new subscriber, a removed publisher, or a rewired channel
+as graph changes in step order, and a payload edit as a modified message.
+Following the API compatibility comparator's approach (in progress), a
+comparator could also flag whether a payload change is compatible or breaking
+for each consumer. A dedicated renderer only makes sense if the graph fails to
+make those changes clear.
 
 ## Open questions
 
-- AsyncAPI 2.x and 3.x model operations from opposite perspectives; normalize to
-  `sends`/`receives` from the application's point of view.
-- How to join channels across services when addresses are parameterized or
-  environment-specific (`orders.{region}`), without inventing identity.
-- Whether registry extraction should validate against a committed AsyncAPI
-  document (and report drift) or simply union the two.
-- Which ecosystems come first; NestJS and Spring reuse existing helpers.
+- AsyncAPI 2.x and 3.x frame operations from opposite perspectives, so we will
+  need to normalize both to `sends` and `receives` from the application's point
+  of view.
+- We need a clean way to join channels across services when addresses are
+  parameterized or environment-specific (such as `orders.{region}`) without
+  inventing fake identity.
+- Should registry extraction validate against a committed AsyncAPI document and
+  report drift, or simply union the two?
+- Which ecosystems should go first? NestJS and Spring are natural starting
+  points because they reuse existing helpers.

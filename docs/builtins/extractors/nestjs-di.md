@@ -1,11 +1,10 @@
 # NestJS dependency injection
 
-The modules and providers of a NestJS application, and what each provider
-injects, as Nest's own container resolves them: every provider and controller in
-each module, with its scope and the provider that satisfies each of its
-dependencies across module imports. Compared across a pull request, it answers
-"which providers did this change add, remove or rewire, and did any scope
-change?"
+This extractor maps the modules, providers, and controllers of a NestJS
+application—including each provider's scope and which provider satisfies every
+dependency across module imports—exactly as Nest's container resolves them.
+Compared across a pull request, it shows which providers were added, removed, or
+rewired, and whether any scope changed.
 
 <!-- generated: facts -->
 
@@ -22,51 +21,53 @@ change?"
 
 ## When to use it
 
-Use it for NestJS applications, where a module's `providers`, `imports` and
-`exports` decide what every class receives: a new provider and what it injects,
-a `useClass` swapped behind an abstract class, a provider made request-scoped
-(and every provider that injects it, which Nest re-creates per request too), a
-token now resolved from another module. It reads the composition Nest itself
-computes, not decorators parsed from source.
+Use this extractor in NestJS applications where edits to `providers`, `imports`,
+and `exports` shape what every class receives. It makes it easy to spot a new
+provider and its dependencies, a `useClass` swapped behind an abstract class, a
+provider turning request-scoped (and pulling every dependent into per-request
+instantiation along with it), or a token now resolving from a different module.
+Because it queries Nest's own container composition, you see the resolved graph
+rather than a static parse of decorators.
 
-It loads the application's modules, so it needs `--trust` (see
-[What it reads](#what-it-reads)). For .NET use [`dotnet-di`](dotnet-di.md), for
-Spring Boot [`spring-di`](spring-di.md); all three write the same model.
+Loading your application's modules executes import-time code, so extraction
+requires `--trust` (see [What it reads](#what-it-reads)). For .NET use
+[`dotnet-di`](dotnet-di.md), and for Spring Boot use
+[`spring-di`](spring-di.md)—all three emit the same model.
 
 ## What it reads
 
-Usually nothing needs configuring:
+In most repositories, it works out of the box with no extra configuration:
 
-- **The root module**: the class the bootstrap file (`src/main.ts`, or the one
-  source file that calls `NestFactory`) passes to `NestFactory.create`,
-  `createApplicationContext` or `createMicroservice`. `entry` names another
-  bootstrap file, and `module` names the root module directly
-  (`apps/api/src/app.module.ts#AppModule`), for a monorepo with several apps.
-- **The project's own toolchain**: Node.js 20 or newer, and the repository's own
-  `typescript` (5.x or 6.x) and `@nestjs/core` (9.3 or newer), installed in the
-  checkout. Projections bundles neither: run your package manager's install
-  first. Sources are transpiled to CommonJS as they load, with the compiler
-  options of `tsconfig` (default the nearest to the root module).
-- **Nest's preview mode.** The root module is composed with
+- **The root module** is discovered from your bootstrap file (`src/main.ts`, or
+  the single source file calling `NestFactory`) via `NestFactory.create`,
+  `createApplicationContext`, or `createMicroservice`. Use `entry` to point at a
+  different bootstrap file, or `module` to name the root module directly
+  (`apps/api/src/app.module.ts#AppModule`) in a monorepo with multiple apps.
+- **The project's own toolchain** must be installed in the checkout: Node.js 20
+  or newer, `typescript` (5.x or 6.x), and `@nestjs/core` (9.3 or newer).
+  Projections bundles neither, so run your package manager's install first.
+  Source files are transpiled to CommonJS on the fly using the compiler options
+  from `tsconfig` (defaulting to the nearest one to the root module).
+- **Nest's preview mode** composes the root module via
   `NestFactory.createApplicationContext(root, {preview: true, snapshot: true})`,
-  which scans every module and resolves every dependency as startup would, but
-  creates no provider and calls no factory; the bootstrap file itself
-  (`app.listen`) never runs. Loading the modules still runs their import-time
-  code, decorators and module factories (`ConfigModule.forRoot(...)`), which is
-  why it needs `--trust`.
-- **Or a file.** `snapshot` imports an extraction exported earlier; nothing
-  runs, and no trust is needed.
+  scanning modules and resolving dependencies without instantiating providers or
+  invoking factories. Your bootstrap file (`app.listen`) never runs, though
+  importing modules still executes top-level code, decorators, and dynamic
+  module factories (`ConfigModule.forRoot(...)`)—which is why `--trust` is
+  needed.
+- **Or a file.** Pass `snapshot` to load a previously exported extraction with
+  nothing executed and no `--trust` required.
 
-Each provider (or controller) in a module becomes a `service` (its token, in
-that module), a `registration` (its scope and kind: `class`, `value`, `factory`
-or `alias` for `useExisting`) and an `implementation` (the class, or the factory
-function). Dependencies come from Nest's serialized graph, the data Nest
-Devtools shows: each constructor, property and factory injection points at the
-provider Nest actually resolved, across imports and re-exports. Modules are
-entities too, with their declared `imports` and the providers they provide. By
-default (`include: application`) it keeps the application's own modules and the
-framework providers they inject; `include: all` adds every Nest-internal
-provider.
+Each provider or controller in a module becomes a `service` (its token within
+that module), a `registration` (its scope and kind: `class`, `value`, `factory`,
+or `alias` for `useExisting`), and an `implementation` (the class or factory
+function). Dependencies come from Nest's serialized graph—the same data Nest
+Devtools inspects—so every constructor, property, and factory injection points
+to the exact provider Nest resolved across imports and re-exports. Modules are
+also captured as entities with their declared `imports` and provided services.
+By default (`include: application`), the graph keeps your application's modules
+plus the framework providers they inject; set `include: all` to include every
+Nest-internal provider as well.
 
 ## Options
 
@@ -85,30 +86,31 @@ provider.
 ## What a comparison shows
 
 The [`dependency-injection`](../renderers/dependency-injection.md) renderer
-folds each provider's token, registration and implementation into one card, with
-its lifetime drawn as a line (continuous for the default scope, broken per
-request, dotted for transient), an arrow for each injection, and a dotted alias
-arrow for each `useExisting`:
+combines each provider's token, registration, and implementation into a single
+card. A line style indicates scope—solid for default singleton, dashed for
+request-scoped, dotted for transient—with solid arrows for injections and dotted
+alias arrows for `useExisting`:
 
-- **Providers** added or removed, with their dependencies.
-- **Scope changes**, as lifetime changes (`Lifetime Transient → Singleton`).
-  Nest's scope bubbling is visible: when a provider becomes request-scoped, each
-  default-scoped provider that injects it becomes scoped too, and its accessible
-  label says Nest changed the lifetime it declared.
-- **Implementations** replaced behind an unchanged token
-  (`useClass: StripeGateway` to `AdyenGateway`): the card says so, and what
-  injects the token is untouched.
-- **Dependencies** added, removed or resolved to another provider, listed on the
-  card by the cards they point at.
+- **Added or removed providers** appear alongside their dependencies.
+- **Scope changes** appear as lifetime updates
+  (`Lifetime Transient → Singleton`). Nest's scope bubbling shows up clearly:
+  when a provider turns request-scoped, every default-scoped provider that
+  injects it becomes request-scoped too, with an accessible label noting that
+  Nest overrode its declared lifetime.
+- **Swapped implementations** behind an unchanged token (such as
+  `useClass: StripeGateway` to `AdyenGateway`) are called out on the card while
+  leaving callers untouched.
+- **Added, removed, or rewired dependencies** are listed right on each card by
+  target.
 
-The summary bar counts the composition (services, registrations,
-implementations, modules, dependencies and aliases, each with what was added,
-removed and modified), then what changed about cards in both revisions:
-lifetimes, implementations, service types and registration counts changed, each
-filtering to its cards. A comparison starts as one diff, and plays as side by
-side, animated or swipe too. It opens fitted to the frame unless that would draw
-text smaller than 8 px; a large application then opens at that size, at its
-root, and scrolls, with zoom controls.
+The summary bar tallies services, registrations, implementations, modules,
+dependencies, and aliases with their deltas, then summarizes changes on cards
+present in both revisions (lifetimes, implementations, service types, and
+registration counts). Clicking any count filters to the matching cards.
+Comparisons open in Diff mode and also support Side by side, Animated, and Swipe
+views. The graph fits the frame automatically unless text would shrink below 8
+px, in which case large apps open at a readable size near the root with pan and
+zoom controls.
 
 ## Start from this definition
 
@@ -127,75 +129,80 @@ root, and scrolls, with zoom controls.
 
 ## Limitations
 
-- Factories are never called, so a `useValue` or `useFactory` provider's class
-  is known only when it exists at composition.
-- Enhancers bound with decorators (`@UseGuards`, interceptors, pipes, filters)
-  and middleware aren't registrations; providers bound to `APP_GUARD` and
-  similar tokens are.
-- Services belong to their module: moving a provider to another module is a
-  removal and an addition. Class tokens are identified by class name, and by
-  file only when two classes share a name.
-- Applications that run only as native ECMAScript modules aren't supported, and
-  neither is Yarn Plug'n'Play (use `nodeLinker: node-modules`).
-- Nest's preview mode leaves a few injections unrecorded (property injection
-  into a request-scoped tree); those follow Nest's lookup rule and are marked
-  `derived`.
+- Because factories are never invoked, a `useValue` or `useFactory` provider's
+  runtime class is recorded only when it is already known at composition time.
+- Enhancers attached via decorators (`@UseGuards`, interceptors, pipes, filters)
+  and middleware are not container registrations, whereas providers bound to
+  `APP_GUARD` and similar tokens are included.
+- Services are scoped to their owning module, so moving a provider to another
+  module appears as a removal and an addition. Class tokens are identified by
+  class name, falling back to file path only when two classes share the same
+  name.
+- Native ESM-only applications and Yarn Plug'n'Play are not supported (use
+  `nodeLinker: node-modules` with Yarn).
+- Nest's preview mode omits a few edge-case injections (such as property
+  injection inside a request-scoped subtree); the extractor fills those in using
+  Nest's lookup rules and marks them `derived`.
 
 ## Related
 
-- [`dependency-injection`](../renderers/dependency-injection.md), the renderer
-  that draws it.
-- [`dotnet-di`](dotnet-di.md) and [`spring-di`](spring-di.md), the same model
-  for .NET and Spring Boot.
-- [`typescript-public-api`](typescript-public-api.md), which uses the same
-  installed TypeScript.
-- [The default comparator](../comparators/default.md), which compares it.
-- [One model for dependency injection](../../models/dependency-injection-model.md),
-  how containers map onto services, registrations and implementations.
+- [`dependency-injection`](../renderers/dependency-injection.md) is the renderer
+  that draws this graph.
+- [`dotnet-di`](dotnet-di.md) and [`spring-di`](spring-di.md) produce the same
+  model for .NET and Spring Boot.
+- [`typescript-public-api`](typescript-public-api.md) uses the same installed
+  TypeScript toolchain.
+- [The default comparator](../comparators/default.md) compares extractions
+  across revisions.
+- [One model for dependency injection](../../models/dependency-injection-model.md)
+  explains how different containers map onto services, registrations, and
+  implementations.
 
 ## How it works
 
-The [package README](../../../packages/extractors/nestjs-di/README.md) details
-preview mode and how each kind of provider is recorded.
+See the [package README](../../../packages/extractors/nestjs-di/README.md) for
+details on preview mode and how each provider kind is modeled.
 
 ## Build your own
 
-Write your own extractor when Nest's container isn't the composition you need to
-review:
+Consider writing a custom extractor when Nest's container is not the composition
+you need to review:
 
-- **Another container**: InversifyJS, tsyringe, Angular's injectors, or a
-  hand-rolled composition root. An extractor that writes the same services,
-  registrations and implementations (the `dependency-injection/v0` vocabulary)
-  is drawn by the same renderer.
-- **Facts the container doesn't have**: the routes each controller serves, the
-  guards and interceptors that apply to them, or the team that owns each module.
-- **No code execution**: when CI can't load the application with `--trust`,
-  export the graph from a test and import it with `snapshot`, or write an
-  extractor that reads module metadata statically.
+- **Another container**, such as InversifyJS, tsyringe, Angular injectors, or a
+  hand-rolled composition root. Emit the same services, registrations, and
+  implementations using the `dependency-injection/v0` vocabulary to reuse this
+  renderer.
+- **Facts the container does not track**, like the HTTP routes each controller
+  serves, which guards and interceptors apply to them, or team ownership per
+  module.
+- **No code execution**, if CI cannot load your app under `--trust`. Export the
+  graph from a test and load it via `snapshot`, or write a static extractor that
+  reads module metadata from source.
 
-Try the lighter options first: `module` and `entry` pick the application,
-`include` widens or narrows what's shown, and `snapshot` imports a graph your
-tests already export. To flag changes that matter to you (a provider becoming
-request-scoped, say), keep this extractor and add a comparator file; to group
-cards by module, write a renderer.
+Check the built-in options first: `module` and `entry` pick the application,
+`include` widens or narrows the graph, and `snapshot` imports test-generated
+exports. To flag specific changes—like a provider turning request-scoped—keep
+this extractor and add a comparator file; to group cards by module, write a
+custom renderer.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
-**Write a custom extractor, renderer or comparator** › **Custom extractor** (or
-**Custom extractor and renderer**), and pick its language: the repository's
-toolchain, Node.js (`extract.mjs`), Python or Go. It writes the definition and a
-starter extractor under `.github/projections/<id>/`, drawn by the built-in graph
-renderer. Or choose **Ask an agent to write it** and describe what the
-projection should show.
+**In VS Code**, open the Projections view, choose **+ New Projection…**, and
+select **Write a custom extractor, renderer or comparator** › **Custom
+extractor** (or **Custom extractor and renderer**). Pick a language—your
+repository's toolchain, Node.js (`extract.mjs`), Python, or Go—to scaffold the
+definition and a starter extractor under `.github/projections/<id>/`, paired
+with the built-in graph renderer. You can also choose **Ask an agent to write
+it** and describe what you want to see.
 
-**With the CLI**, keep the `dependency-injection` renderer:
+**With the CLI**, scaffold a new extractor while keeping the
+`dependency-injection` renderer:
 
 ```sh
 projections init <id> --language node --renderer dependency-injection
 ```
 
-Run it with `projections show -p <id> --trust` as you change it; an open
-projection tab uses your uncommitted edits ("Your edits") and says when its
-results are out of date, and the Testing view runs the projection's checks.
-[Write your first extractor](../../guides/first-extractor.md) walks through one,
-and [Extraction schema](../../guides/schemas.md#extraction-schema) describes
-what it prints.
+Run `projections show -p <id> --trust` while you iterate—an open projection tab
+picks up your uncommitted edits ("Your edits") and flags stale results, and the
+Testing view runs your projection's checks. Walk through
+[Write your first extractor](../../guides/first-extractor.md) to get started,
+and check [Extraction schema](../../guides/schemas.md#extraction-schema) for the
+output format.

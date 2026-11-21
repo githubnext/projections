@@ -1,5 +1,8 @@
 # The host's default UI
 
+If you want a ready-made interface that drops straight into a web app without
+CSS collisions, use `@githubnext/projections-host/ui`:
+
 ```tsx
 import {ComparisonExplorer} from '@githubnext/projections-host/ui'
 import '@githubnext/projections-host/ui.css'
@@ -8,250 +11,237 @@ import '@githubnext/projections-host/ui.css'
   loadComparator={loadComparator} runComparator={runComparator} />
 ```
 
-`ProjectionView` presents a subject; `ComparisonExplorer` adds the pair picker.
-Both accept the core's controlled and uncontrolled settings.
+`ProjectionView` displays a single subject, while `ComparisonExplorer` adds a
+before/after revision picker. Both support all of the headless core's controlled
+and uncontrolled props.
 
-The views give the projection the space: **a planned toolbar** (one row, or two
-where playback needs them) above a stage that takes the rest, at full width.
-Their chrome lies flat, edge to edge, in every host: the toolbar and the summary
-bar are bands of the header surface (`surface-header`), each ruled off from the
-stage by one `divider` hairline, with no card, border or corners; the stage (the
-single frame and each comparison pane) runs to both edges, and a renderer's
-legend is a band of the same surface between the stage and the summary bar.
-Notices sit between the toolbar and the stage as bands too. The toolbar's 4px
-padding is the space around every 32px control, at its ends as at its top and
-bottom. In order, it holds three regions:
+The layout prioritizes the projection itself: **a planned toolbar** (one row, or
+two when playback controls are active) sits above a full-width stage that claims
+the remaining height. All chrome lies flat edge to edge across hosts—the toolbar
+and summary bar use the `surface-header` band separated from the stage by a
+single `divider` hairline, with no outer card, border, or rounded corners. The
+stage spans edge to edge, and any renderer legend or notice renders as its own
+flat band. Inside the toolbar, 4px padding frames every 32px control evenly on
+all four sides.
 
-- **start:** the pair picker (`ComparisonExplorer`, or `toolbarStart`);
-- **center:** the comparison mode (the renderer's `availableModes`, hidden when
-  there is one; Animated is a clapperboard, and no mode icon looks like a play,
-  pause or step glyph), then playback (animated mode, and beside the table and
-  text views): **one round play button**, small step buttons, the "Transition"
-  slider, which takes all remaining space, and its percent at a fixed width;
-- **end:**
-  1. while the table or text view is shown, a chip ("Table ×") that returns to
-     the renderer in one click (named "Showing table; show the Graph renderer";
-     with no renderer it only says what is shown);
-  2. the renderer's `zoom` group of declared controls, as icon buttons (hidden
-     while the table or text view is shown);
-  3. **Filter**, which expands into the "Filter rows" field;
-  4. **Settings**, a menu (`settingsModel`): **Show as** first (the renderer by
-     its title, **Table** or **Text**, radio items) and **Changes only**, then
-     submenus: **Highlight changes**, **Renderer**, **Playback** (animated: Loop
-     and Holds, not under reduced motion, and Speed) and the renderer's other
-     declared controls by group (not while the table or text view is shown). It
-     is never taller than the room beside its button (it opens over the button
-     when there is more room there) and scrolls inside; the keyboard moves
-     through it and its submenus (Right Arrow opens one, Left Arrow closes it),
-     scrolling the focused item into view;
-  5. **About this projection**: the title, counts, the active renderer, the
-     comparator, and diagnostics and limitations;
-  6. `actions`, then **Enter full screen** (the Fullscreen API, or a fixed
-     overlay where element full screen is unavailable).
+The toolbar is organized into three regions from start to end:
 
-The table and text views are escape hatches, so they live in Settings rather
-than the row; without a renderer, or when it fails, the view still falls back to
-them. The play button calls the core's `togglePlayback()`: it pauses while
-playing, and otherwise plays in `nextDirection` (forward from the before end,
-backward from the after end, else the way playback, a step or a seek last went),
-named "Play forward", "Play backward" (a mirrored icon) or "Pause". With Loop on
-it starts and stops the back-and-forth. Under reduced motion it shows the other
-endpoint at once and is named "Show <after label>" or "Show <before label>".
-**Space** toggles playback while focus is in the row or on the stage's chrome
-(the row and stage take focus when their background is clicked), but not in text
-fields or controls that use Space themselves.
+- **Start:** the revision pair picker (`ComparisonExplorer`, or custom
+  `toolbarStart`).
+- **Center:** the comparison mode switch (showing `availableModes`, hidden when
+  only one mode exists; Animated uses a clapperboard icon so no mode icon looks
+  like a play, pause, or step button), plus playback controls in animated mode
+  and alongside table/text views—**one round play button**, compact step
+  buttons, a flexible "Transition" slider, and a fixed-width percentage readout.
+- **End:**
+  1. When viewing Table or Text, a one-click return chip ("Table ×", labeled
+     "Showing table; show the Graph renderer", or simply what is shown when no
+     renderer is available).
+  2. Icon buttons for the renderer's declared `zoom` controls (hidden in table
+     and text views).
+  3. **Filter**, expanding into the "Filter rows" input.
+  4. **Settings** (built from `settingsModel`): **Show as** (active renderer
+     title, **Table**, and **Text** as radio items) and **Changes only** at the
+     top, followed by submenus for **Highlight changes**, **Renderer**,
+     **Playback** (animated mode: Loop and Holds when not under reduced motion,
+     plus Speed), and the renderer's remaining control groups (hidden in table
+     and text views). The menu sizes itself to fit available space (opening
+     upward when there is more room above) with internal scrolling and full
+     arrow-key navigation (Right Arrow opens a submenu, Left Arrow closes it).
+  5. **About this projection**, summarizing the title, counts, active renderer,
+     comparator, diagnostics, and limitations.
+  6. Custom `actions`, followed by **Enter full screen** (using the Fullscreen
+     API or a fixed-overlay fallback).
+
+Table and text views act as escape hatches inside Settings so the toolbar stays
+uncluttered, while still serving as automatic fallbacks if a renderer is missing
+or crashes. The play button calls `togglePlayback()`: pausing if playing,
+otherwise playing in `nextDirection` (forward from Before, backward from After,
+or continuing the last playback/step/seek direction), labeled "Play forward",
+"Play backward" (mirrored icon), or "Pause". With Loop enabled, it starts and
+stops back-and-forth playback; under reduced motion, it jumps straight to the
+opposite endpoint ("Show <after label>" / "Show <before label>"). Pressing
+**Space** toggles playback whenever focus is on the toolbar or stage chrome
+(clicking their background focuses them), except inside text inputs or controls
+that already handle Space.
 
 ### The toolbar
 
-The toolbar never wraps, and no control ever overlaps, clips or leaves another:
-it is **planned** from its own width (a ResizeObserver on the toolbar, not the
-viewport, since a view is embedded at any width; `useToolbarLayout` in
-`packages/host/core/src/ui/toolbar-layout.ts`, over the generic `useFitPlan` in
-`fit-plan.ts`). Each plan is measured as rendered, before paint, with every
-control at its minimum size: the slider at 160px (120px on a toolbar under
-480px), the pickers at their compact width, and every control (buttons, pickers,
-the chip and the round play button) 32px tall. It shows the most spacious plan
-that fits.
+The toolbar never wraps, clips, or overlaps its controls. Instead, it is
+**planned** from its own measured width via a ResizeObserver (`useToolbarLayout`
+in `packages/host/core/src/ui/toolbar-layout.ts`, built on `useFitPlan` in
+`fit-plan.ts`), so embedded views adapt to their container rather than the
+viewport. Candidate layouts are measured before paint using each control's
+minimum size—160px for the slider (120px below 480px), compact widths for
+pickers, and 32px height across buttons, pickers, chips, and the play button—and
+the roomiest plan that fits wins.
 
-**Playback always has a second row of its own** (animated mode, and the table
-and text views, which present progress in every mode): the play button, the step
-buttons, a slider spanning at least 80% of the row (inset from the toolbar's
-edge, so its thumb never touches the border) and the percent. The steps and
-percent move into the group's overflow ("More playback controls"), or into More,
-only when the row needs it to keep the slider's span. So choosing Animated, or
-leaving it, never moves the controls in row 1.
+**Playback always lives on its own second row** (in animated mode, and in table
+and text views which support progress in every mode): play button, step buttons,
+a slider spanning at least 80% of the row (inset from the edge so its thumb
+never touches the border), and percentage readout. Step buttons and percentage
+only spill into "More playback controls" (or More) when needed to protect the
+slider's span. Because playback has its own row, toggling Animated never shifts
+row 1.
 
-**The mode region is centred first.** While row 1 has room, the mode switch and
-the scope switch (Changes · All) sit together at the centre of the toolbar's
-whole width, the pickers at its start and the actions at its end, all in their
-fullest forms (`ToolbarRow`'s `centred` grid: the regions beside it get equal
-halves of what it leaves). It keeps 24px from them; with less room it moves to
-follow the pickers, still in its fullest forms. The scope's counts keep the
-widest count's digits, and its two forms (the switch, and the note when the
-Changes scope hides nothing) share one slot, so the region keeps its width as
-they change.
+**The mode region centers first.** When row 1 has space, the mode switch and
+scope switch (Changes · All) sit dead center across the toolbar (`ToolbarRow`'s
+`centred` grid gives the flanking regions equal halves of the remaining space)
+with at least 24px clearance; when space tightens, they slide next to the
+pickers in full form. Scope counts reserve digits for the widest number, and the
+switch shares one slot with the note shown when Changes hides nothing, keeping
+the region's width steady.
 
-Narrower still, row 1 collapses in priority order:
+As row 1 narrows further, controls collapse in priority order:
 
-1. the Before/After selects become compact triggers with the short revision
-   names ("v1"), truncated, the full names as their titles;
-2. the mode switch drops its labels (each icon keeps its label as tooltip and
-   accessible name), then becomes one dropdown button with the current mode's
-   icon ("Comparison mode: Animated"); the scope then moves to Settings' "Show";
-3. the actions move into **More** ("⋯") one at a time, in `actionCollapseOrder`:
-   zoom, About, full screen, then Filter (Settings and `actions` stay);
-4. the pickers merge into one compare button ("v1 → v3", named "Revisions: …")
-   whose "Revisions" popover holds both selects and Swap.
+1. Before/After pickers shrink to compact triggers showing truncated short names
+   ("v1") with full names in their tooltips.
+2. The mode switch drops text labels (retaining them as tooltips and accessible
+   names), then collapses into a single icon dropdown ("Comparison mode:
+   Animated"), while scope moves into Settings under "Show".
+3. End actions move into **More** ("⋯") one by one following
+   `actionCollapseOrder`: zoom, About, full screen, then Filter (leaving
+   Settings and custom `actions` visible).
+4. The pickers merge into one compare button ("v1 → v3", named "Revisions: …")
+   opening a "Revisions" popover with both selects and Swap.
 
-With nothing at its start (one revision and no `toolbarStart`: no pickers, modes
-or playback) the band keeps its full width, with its end group (the chip, zoom,
-Filter, Settings, About, full screen) at the right. Hidden controls keep their
-accessible names in their overflow menus. A more spacious plan returns only once
-the toolbar is 24px wider than it needs (hysteresis), so the toolbar doesn't
-flicker at a boundary; while a person is using a region (focus in it, or in a
-popover it opened) its form is kept, so the control in their hands isn't
-remounted. Filter expands its field in row 1 when the row's spare room can take
-it, else it opens in a popover. Storybook shows the explorer at 1440, 1024, 768,
-600, 480 and 390px (Default UI › Comparison explorer › At …px).
+When nothing sits at the start (a single revision with no `toolbarStart`), the
+toolbar still spans full width with the end group right-aligned. Overflowed
+controls retain their accessible names in menus. A 24px hysteresis prevents
+layout flicker at width boundaries, and while a user has focus inside a region
+or its open popover, that region stays pinned so controls never remount under
+their hands. Filter expands inline in row 1 when spare room allows, otherwise
+opening in a popover. You can inspect every breakpoint in Storybook at 1440,
+1024, 768, 600, 480, and 390px (Default UI › Comparison explorer › At …px).
 
 ### The stage
 
-At 1440×900 and on an iPhone 13 the stage takes at least 80% of the view's
-height. Pane labels are 28px header bands above the panes, never over their
-content; in swipe each band is clipped with its layer. Left and right, side by
-side's panes meet at one `divider` hairline rather than a gutter
-(`ProjectionStage`'s `paneEdge.between`; a host's own `paneEdge` without it
-keeps the 16px gutter), and `paneArrangement` sizes the columns with that 1px.
-Swipe's divider (`.ph-swipe-handle`) is one control: its 1px line
-(`.ph-swipe-line`) and the thumb's outline take `--ph-swipe-edge` (the accent by
-default), the thumb is filled with `--ph-swipe-fill`, and the handle carries
-`data-dragging` and `data-focus-visible`, so a host UI changes line and thumb
-together. Side by side links its panes by shared selection styling and a brief
-pulse on the counterpart of a selection (`data-projections-pulse`); the
-connector between them is off unless a host opts in with the `connector` prop
-(no setting toggles it). Notices and failure alerts stay visible below it. The
-active-view label (`[data-active-view]`) and the comparator line
-(`.ph-comparator`) stay mounted, visually hidden.
+Both at 1440×900 desktop and on an iPhone 13, the stage claims at least 80% of
+the view's height. Pane labels sit in 28px header bands above each pane (clipped
+with their layer in swipe mode) so they never cover content. In side-by-side
+mode, panes meet at a single `divider` hairline (`ProjectionStage`'s
+`paneEdge.between`, accounted for by `paneArrangement`; custom `paneEdge`
+configurations without it retain the 16px gutter). Swipe's divider
+(`.ph-swipe-handle`) styles its 1px line (`.ph-swipe-line`) and thumb outline
+with `--ph-swipe-edge` (accent by default) and thumb fill with
+`--ph-swipe-fill`, setting `data-dragging` and `data-focus-visible` so line and
+thumb update together. Side-by-side panes share selection styling and pulse
+counterparts (`data-projections-pulse`), with cross-pane connectors off unless
+enabled via `connector`. Notices and failure alerts stay visible underneath,
+while the active-view label (`[data-active-view]`) and comparator line
+(`.ph-comparator`) remain mounted and visually hidden.
 
-The views **fill their container's height** by default: give it a definite
-height (for example `height: 100dvh`). Without one they keep a usable minimum.
-`fill={false}` sizes them to their content instead. A host that lays a
-content-sized view flat on its page's column can line renderer content up with
-that column: `ProjectionStage`'s `bleed` extends the frames that far past the
-stage's outer edges, into the page's gutter, and the host sends the same length
-as the `stage-inset` theme token, the space renderers keep between the frame's
-edges and their content on all four sides (rings at the edges then still show).
-A host that also sends `stage-max-height` (for example `100vh`) caps stages that
-pan and zoom at that height; they then pan by dragging, so the wheel scrolls the
-page. `features` turns off blocks and views (`playback`, `modes`,
-`highlighting`, `changesOnly`, `search`, `rendererChoice`, `speed`,
-`rendererControls`, `zoom`, `table`, `text`, `info`, `fullscreen`, `title`,
-`annotations`, `summary`); `actions` adds host content to the row.
+Views **fill their container's height** by default—give the container a definite
+height such as `height: 100dvh` (without one they fall back to a usable
+minimum), or pass `fill={false}` to size to content. When embedding a
+content-sized view flat in a scrolling page column, pass `bleed` on
+`ProjectionStage` alongside a matching `stage-inset` theme token so frames
+extend into the page gutter while renderer content aligns squarely with your
+column and edge rings remain unclipped. Sending `stage-max-height` (such as
+`100vh`) caps pannable stages at that height and switches them to drag panning
+so mouse wheels continue scrolling the page. Use `features` to disable
+individual blocks (`playback`, `modes`, `highlighting`, `changesOnly`, `search`,
+`rendererChoice`, `speed`, `rendererControls`, `zoom`, `table`, `text`, `info`,
+`fullscreen`, `title`, `annotations`, `summary`), and `actions` to inject custom
+toolbar items.
 
 ### The summary bar
 
-A thin band along the bottom of every view (`SummaryBar`, `[data-summary-bar]`,
-named "Summary", 28px under its hairline), under the renderer, table and text
-alike, like an editor's status bar: small muted text, a figure per kind in the
-renderer's words (`12 workspaces · 18 dependencies`), and in a comparison each
-figure's changes after it (`12 workspaces +1 −1`), only the change figures in
-their change colors. Every figure is a toggle for `summaryFilter`: the total
-shows only those items, `+1` only the added ones, and pressing it again shows
-every item. A renderer adds fact figures, findings no kind count says
-(`2 breaking changes`, `1 newly enforced`, `3 to replace`) or measures that
-aren't kinds (`39,882 lines of code`): its theme icon (a badge, such as
-`breaking`, `upgraded` or a planned action, on its disc as in the renderer:
-`iconMaskStyle`), count and noun, muted unless it has a tone, a filter toggle
-only when it names its items (`ids`; `summaryFilterable`), and in a comparison
-its changes after it in their change colors, as a count's, but not filters
-(`39,882 lines of code +2,056`). Its `description` (such as the rules that
-classified it) is its tooltip and accessible description. Renderers draw no
-summary line of their own: the bar is their summary in every view, and the text
-view opens with the same sentence (`Summary: …`, `figuresSentence`; the
-`summary` prop of `TextView`). Figures that don't fit collapse from the end into
-a "…" popover (`useSummaryFit`, `fitSummary`). The count of items that varied
-within tolerance sits at the bar's end (below). Its text, like the toolbar's
-mode, varied and Show as labels, is centred by its cap height rather than its
-line box (`text-box: trim-both cap alphabetic`, with a line box one cap high
-where `text-box` is unsupported): a capital E has the same space above, below
-and to its left in the bar (its inline padding is computed from the font's cap
-height) and in a figure's pill.
+Every view finishes with a 28px bottom band (`SummaryBar`, `[data-summary-bar]`,
+named "Summary") beneath the renderer, table, and text views. Styled like an
+editor status bar, it shows muted kind counts in the renderer's vocabulary
+(`12 workspaces · 18 dependencies`) plus color-coded comparison deltas
+(`12 workspaces +1 −1`). Clicking a total or a delta (`+1` for added items)
+toggles `summaryFilter` to focus on those items (clicking again clears it).
 
-**Volatile variation.** When a comparison has items that varied only within
-tolerance, the summary bar's end shows their count, "3 varied within tolerance"
-(`.ph-varied-toggle[data-varied-within]`), muted and neutral, never in a change
-color. It is a toggle (`aria-pressed`) for `variedOnly`: pressed, the renderer,
-table and text show only those items, as "changes only" shows only changes, and
-pressing it again shows every item. With the `summary` feature off it returns to
-the toolbar (`VariedToggle`), the first action to move into More on a narrow row
-(`actionCollapseOrder`). These items are never highlighted or animated; the text
-view adds how many of the unchanged items varied. The renderer kit marks a
-modified item with a volatile value beyond tolerance with the neutral `varied`
-icon beside its status.
+Renderer facts appear right after kind counts—either domain findings
+(`2 breaking changes`, `1 newly enforced`, `3 to replace`) or non-kind measures
+(`39,882 lines of code`). Each renders its theme icon (`iconMaskStyle`, putting
+badges like `breaking`, `upgraded`, or planned actions on their disc just like
+the renderer), count, and noun, staying muted unless given a tone. Facts with
+`ids` act as filter toggles (`summaryFilterable`); comparison deltas appear in
+change colors (`39,882 lines of code +2,056`) without acting as filters, and
+`description` serves as both tooltip and accessible description. Renderers never
+draw their own summary row—this bar serves as the summary everywhere, and the
+text view opens with the matching `Summary: …` sentence (`figuresSentence`, via
+`TextView`'s `summary` prop). Overflowing figures collapse from the end into a
+"…" popover (`useSummaryFit`, `fitSummary`). Text across the summary bar and
+toolbar labels centers optically by cap height
+(`text-box: trim-both cap alphabetic`, falling back to a one-cap line box where
+`text-box` is unsupported) with inline padding derived from cap height so
+capitals sit evenly spaced inside pills and bars.
 
-**Generated values.** Items whose
-[generated values](../design/generated-values.md) were reworded from an equal
-basis are counted on their own, "1 regenerated"
-(`.ph-regenerated-toggle[data-regenerated]`, with the `generated` sparkle),
-before "varied within tolerance" and like it: muted, a toggle for
-`regeneratedOnly`, and in the toolbar (`RegeneratedToggle`) without the summary
-bar. The detail card lists the selected item's generated values first, each with
-a quiet **Generated** mark: reworded from the same inputs, After's text with
-"Regenerated from the same inputs" and a toggle for Before's wording; changed,
-why ("Regenerated because the input changed") and both passages side by side,
-with a toggle for a word diff. The toggles swap layers of one grid cell, so the
-card never shifts.
+**Volatile variation.** When unchanged items varied within tolerance, the far
+end of the summary bar shows a neutral, muted toggle such as "3 varied within
+tolerance" (`.ph-varied-toggle[data-varied-within]`, `aria-pressed`) bound to
+`variedOnly`. Toggling it filters the renderer, table, and text view down to
+those items. If the `summary` feature is disabled, `VariedToggle` moves to the
+toolbar (collapsing first into More via `actionCollapseOrder`). Within-tolerance
+items are never highlighted or animated, and the text view notes how many
+unchanged items varied. Beyond-tolerance volatile values on modified items carry
+the neutral `varied` icon next to their status.
+
+**Generated values.** Unchanged items whose
+[generated values](../design/generated-values.md) were reworded from equal
+inputs appear just before the varied toggle as "1 regenerated"
+(`.ph-regenerated-toggle[data-regenerated]` with the `generated` sparkle),
+toggling `regeneratedOnly` (or moving to the toolbar as `RegeneratedToggle` when
+the summary bar is off). Inside the detail card, generated values appear first
+with a quiet **Generated** mark: when regenerated from identical inputs, After's
+text shows "Regenerated from the same inputs" with a toggle for Before's
+wording; when inputs changed, it explains why ("Regenerated because the input
+changed") and displays both passages side by side with a word-diff toggle.
+Toggles swap layers within one grid cell so the card never shifts height.
 
 ### The detail card
 
-Selecting an item opens a **detail card** anchored to it over the stage
-(`DetailCard`, on the core's `useDetailCard`): nothing reflows, and the stage,
-toolbar and frames keep their boxes. It sits beside the item and flips and
-shifts to stay in view, follows the item as it moves, and on a stage narrower
-than 640px is a bottom sheet over the stage. Escape, "Close details", a press on
-the stage or the page outside the view, or selecting nothing close it; the
-toolbar's controls keep it open. In order, it shows:
+Selecting any item opens a floating **detail card** (`DetailCard`, powered by
+`useDetailCard`) anchored beside the item over the stage without reflowing the
+toolbar, stage, or frames. It flips and shifts to stay in bounds, tracks the
+item as you scroll or play, and turns into a bottom sheet on stages narrower
+than 640px. Dismiss it with Escape, "Close details", clicking the stage or
+outside the view, or clearing selection (toolbar interactions keep it open).
 
-1. **What changed:** the change's pills (`statusTone`, "Renamed" in the moved
-   hue) and the comparator's classification tags, its summary, then each changed
-   field, old → new in the renderer kit's value-change vocabulary
-   (`ValueChange`: the old value struck through in a removed pill, an arrow, the
-   new one in an added pill; read as "was …, now …"). A changed `data` field is
-   a selectable property target (`[data-property-path][data-side]`, pressed when
-   selected, with its annotation count). In one extraction: **Properties**, the
-   item's set fields. **Volatile values** (`VariedList`,
-   `.ph-varied-field[data-varied-path][data-within]`) follow: each value of the
-   change's `varied`, path and values in the monospace font, old → new, then
-   "within tolerance" or "beyond tolerance (volatile)" (with the volatile icon)
-   and the comparison's reason, all neutral. A modified item whose only
-   difference is a volatile value lists it here rather than as a field.
-2. **Where in the code:** each evidence location as a link where the host's
-   `evidenceLink(location, side)` gives one (a hosted view can link a pull
-   request's file diff at the line, or the file at the commit), else a button
-   that calls `onOpen` (the Inspector and CLI open files), else plain text.
-3. **Connections:** an entity's outgoing (→) and incoming (←) relationships, or
-   a relationship's endpoints (From, To), with their change; each selects its
-   item, moving the card.
+The card displays three sections in order:
 
-It shows no identity, kind, confidence or raw data. The embedder's
-`renderDetails` content follows in `.ph-details-slot`. `details="none"` turns
-the card off, for an embedder that draws the selection itself, as the
-Inspector's docked raw panel does (`RawDetails`: identity, kind, each side's
-properties as targets and evidence, and the change's volatile values).
+1. **What changed:** change pills (`statusTone`, with "Renamed" in the moved
+   hue), comparator tags, summary, and each changed field formatted as old → new
+   with `ValueChange` (old value struck through in a removed pill, arrow, new
+   value in an added pill; read as "was …, now …"). Changed `data` fields are
+   selectable property targets (`[data-property-path][data-side]`) showing
+   pressed state and annotation counts. Single extractions show **Properties**
+   for the item's set fields. **Volatile values** (`VariedList`,
+   `.ph-varied-field[data-varied-path][data-within]`) follow in monospace: old →
+   new, "within tolerance" or "beyond tolerance (volatile)" (with the volatile
+   icon), and the reason, all styled neutrally. Modified items differing only in
+   a volatile value list it here rather than under changed fields.
+2. **Where in the code:** evidence locations rendered as links when
+   `evidenceLink(location, side)` returns a URL (such as a PR diff line or
+   commit file), as buttons calling `onOpen` when supported (Inspector and CLI),
+   or as plain text.
+3. **Connections:** outgoing (→) and incoming (←) relationships for an entity,
+   or From/To endpoints for a relationship, each showing its change and
+   selecting its target when clicked.
 
-**Annotation markers:** a badge (`.ph-annotation[data-annotation-id]`) with the
-count, or a dot, on each annotated row in the table and text views and in the
-detail card's header.
+Raw identity, kind, confidence, and raw JSON are intentionally omitted. Any
+embedder content from `renderDetails` renders inside `.ph-details-slot`. Pass
+`details="none"` to suppress the floating card if you render selection details
+yourself, as the Inspector does with its docked `RawDetails` panel (identity,
+kind, per-side property targets, evidence, and volatile values).
+
+**Annotation markers** render as count badges or dots
+(`.ph-annotation[data-annotation-id]`) on annotated rows in the table and text
+views as well as in the detail card header.
 
 ## Layer-2 blocks
 
-The blocks the prebuilt views are made of are a stable public tier, exported
-from `@githubnext/projections-host/ui`, with the same names and props as the VS
-Code UI's (`@githubnext/projections-host-vscode`) where both offer a block.
-Their props and accessible names are versioned like the rest of the public API;
-their styling is not. Each is bound to a `ProjectionController` from
-`useProjection` (the picker to a `ComparisonPair` from `useComparisonPair`) and
-renders inside a `ScopedRoot`:
+All of the building blocks behind `ProjectionView` and `ComparisonExplorer` are
+exported as a stable public tier from `@githubnext/projections-host/ui`, sharing
+the same names and prop signatures as `@githubnext/projections-host-vscode`
+where both exist. Props and accessible names follow semver, while internal
+styling may evolve. Bind each block to a `ProjectionController` from
+`useProjection` (or a `ComparisonPair` from `useComparisonPair` for the picker)
+and wrap them in `ScopedRoot`:
 
 <!-- prettier-ignore -->
 | Block | Props | What it draws |
@@ -281,8 +271,8 @@ renders inside a `ScopedRoot`:
 | `ValueChange` | `before?`, `after?` | A value that changed, old → new in removed and added pills. |
 | `RawDetails` | `projection`, `row?`, `onClose?`, `onOpen?`, `beforeLabel?`, `afterLabel?`, `renderDetails?` | A row's raw details for a docked panel: identity, kind, each side's properties as targets and evidence. |
 
-A custom view composes them around the core's `ProjectionStage`, for example a
-toolbar of its own with the table as an escape hatch (Storybook: Default UI ›
+Here is how you can assemble a custom compact toolbar around `ProjectionStage`
+with the table view as an escape hatch (also in Storybook under Default UI ›
 Building blocks › A custom toolbar around ProjectionStage):
 
 ```tsx
@@ -321,41 +311,45 @@ function Compact({subject, renderer}) {
 }
 ```
 
-`ScopedRoot` (also in `@githubnext/projections-host/ui/components`, with the
-shadcn components) scopes the stylesheet; its own element takes plain CSS, not
-`pj:` utilities.
+`ScopedRoot` (also exported from `@githubnext/projections-host/ui/components`
+with the shadcn primitives) isolates the stylesheet; style `ScopedRoot` itself
+with plain CSS rather than `pj:` utility classes.
 
-Hooks for embedders that build their own features on targets, for example
-comments (the UI itself shows no annotation content):
+To layer your own target-based features such as comments on top of the prebuilt
+views (the UI itself renders no annotation content), use these integration
+props:
 
 - `annotations?: readonly TargetAnnotation[]` and
   `onAnnotationActivate?: (activation: AnnotationActivation) => void`.
-- `onSelectionChange?: (id: string | null, selection: ProjectionSelection | null) => void`:
-  fires on every selection change, including a property path.
-- `renderDetails?: (selection, projection) => ReactNode`: content at the end of
-  the detail card, in `.ph-details-slot`.
-- `evidenceLink?: (location, side) => string | undefined`: where the detail card
-  links an evidence location (`{path, line?}`) on a side; `undefined` falls back
-  to `onOpen`.
-- `details?: 'card' | 'none'`: `none` turns the detail card off.
-- `controllerRef?: Ref<ProjectionController | null>`: for `selectTarget`,
-  `resolveTarget`, `anchorFor` (or `useProjectionAnchor`).
-- `ComparisonExplorer` only: controlled `before`/`after` with
+- `onSelectionChange?: (id: string | null, selection: ProjectionSelection | null) => void`
+  fires on every selection change, including property paths.
+- `renderDetails?: (selection, projection) => ReactNode` appends custom content
+  into `.ph-details-slot` at the bottom of the detail card.
+- `evidenceLink?: (location, side) => string | undefined` turns an evidence
+  location (`{path, line?}`) into a hyperlink (falling back to `onOpen` when
+  `undefined`).
+- `details?: 'card' | 'none'` lets you disable the built-in detail card (`none`
+  turns it off).
+- `controllerRef?: Ref<ProjectionController | null>` exposes `selectTarget`,
+  `resolveTarget`, and `anchorFor` (or use `useProjectionAnchor`).
+- `ComparisonExplorer` also supports controlled `before`/`after` props with
   `onBeforeChange`/`onAfterChange`.
 
-The UI is built with shadcn/ui components (Radix primitives, copied into
-`packages/host/core/src/ui/components` under MIT). Its Tailwind CSS v4 is
-compiled with the `pj` prefix (classes are written `pj:bg-background`), under a
-`.pj-root` scope and without a global reset. The build unwraps Tailwind's
-cascade layers in order and scopes every rule, custom property and keyframe to
-`.pj-root`, so embedding pages and the UI don't affect each other. The theme is
-Projector (see `packages/host/core/src/ui/components/README.md`); renderer
-frames receive its tokens. `./styles.css` remains as an alias of `./ui.css`.
+Under the hood, the default UI uses shadcn/ui components (Radix primitives
+vendored into `packages/host/core/src/ui/components` under MIT) styled with
+Tailwind CSS v4 using the `pj` prefix (`pj:bg-background`), scoped inside
+`.pj-root` with no global reset. The build unwraps Tailwind's cascade layers in
+order and scopes every rule, custom property, and keyframe to `.pj-root` so your
+host page and the UI never leak styles into each other. It ships with the
+Projector theme (see `packages/host/core/src/ui/components/README.md`) and
+forwards those tokens into renderer frames. `./styles.css` remains available as
+an alias for `./ui.css`.
 
-**Surfaces and edges.** The chrome stacks the same surfaces as renderers, with
-the renderer token set's own values (`defaultThemeTokens`, light and dark;
-`test/theme.test.mjs` keeps `theme.css` equal to them, and `sharedSurfaceNames`
-/ `projectorSurfaces` in `packages/host/core/src/ui/lib/tokens.ts` list them):
+**Surfaces and edges.** The default UI stacks the exact same elevation surfaces
+as renderers, backed by `defaultThemeTokens` in both light and dark modes
+(`test/theme.test.mjs` asserts parity with `theme.css`, and `sharedSurfaceNames`
+and `projectorSurfaces` in `packages/host/core/src/ui/lib/tokens.ts` enumerate
+them):
 
 <!-- prettier-ignore -->
 | `--pj-*` (Tailwind) | Token | Where the default UI draws it |
@@ -367,22 +361,21 @@ the renderer token set's own values (`defaultThemeTokens`, light and dark;
 | `divider` (`pj:border-divider`) | `color-divider` | a card's edge and a band's rule, 3:1 or more against every surface; quieter rules between rows keep `border` |
 | `<change>-muted`, `<change>-border` | `color-<change>-muted`, `-border` | change fills and their edges, for `added`, `removed`, `modified` and `moved` |
 
-**A tinted region always has a same-hue edge, never a fill alone.** Change chips
-(`statusTone`) paint their `-muted` fill over the raised surface (opaque, so
-their text stays AA on any row) inside a 1px `-border` edge; a legend swatch
-with a change fill token (`color-<change>-muted` or `-highlight`) gets a 1px
-`-border` edge; the lens's neutral selection fill (`lens-muted`, on a selected
-row or property) keeps a 2px lens edge on its leading side, and the current
-text-view step a lens ring; the destructive badge's faint red fill takes a
-destructive edge. `packages/host/core/browser/surfaces.spec.ts` checks every
-tinted fill in the table, text, detail card, legend and notices for its edge, in
-both modes.
+**Every tinted region carries a same-hue edge—never a bare fill.** Change chips
+(`statusTone`) paint an opaque `-muted` fill over the raised surface (keeping
+text AA on any row) framed by a 1px `-border` edge; change-colored legend
+swatches (`color-<change>-muted` or `-highlight`) take a 1px `-border` edge;
+neutral selection fills (`lens-muted`) carry a 2px leading lens edge, and the
+active text-view step wears a lens ring; destructive badges pair their faint red
+fill with a destructive edge. `packages/host/core/browser/surfaces.spec.ts`
+enforces this rule across table, text, detail card, legend, and notice elements
+in both color modes.
 
-Projections apps (the Inspector) compose the same components from
-`@githubnext/projections-host/ui/components`: render them inside `ScopedRoot`
-and load `ui.css`. Only classes used in `packages/host/core/src/ui/**` and
-`packages/host/inspector/src/**` are compiled into `ui.css`. Apps that bundle
-the UI should append `hostUiNotices()` from
-`@githubnext/projections-host/build/ui-notices` to their third-party notices
-(shadcn/ui, Radix, lucide and friends; MIT, ISC, 0BSD and Apache-2.0 for
-class-variance-authority).
+First-party apps like the Inspector import these primitives from
+`@githubnext/projections-host/ui/components`, render inside `ScopedRoot`, and
+load `ui.css` (which compiles only classes referenced in
+`packages/host/core/src/ui/**` and `packages/host/inspector/src/**`). If your
+app bundles the default UI, append `hostUiNotices()` from
+`@githubnext/projections-host/build/ui-notices` to your third-party notices
+(covering shadcn/ui, Radix, lucide, and related packages under MIT, ISC, 0BSD,
+and Apache-2.0 for class-variance-authority).

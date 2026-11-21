@@ -1,11 +1,11 @@
 # Django schema
 
-The database schema a Django project's models describe: its tables, columns with
-their database types, keys, indexes, constraints and foreign keys, read from
-Django's own initialized model registry rather than from the source of
-`models.py`. Compared across a pull request, it answers "what does this change
-do to the schema the application expects: which tables and columns arrive or
-leave, which types, nullability, constraints and relations change?"
+This extractor captures the database schema your Django models describe—tables,
+columns with their database types, keys, indexes, constraints, and foreign
+keys—by reading Django's initialized model registry rather than parsing
+`models.py` by hand. Compared across a pull request, it shows how a change
+affects the schema your application expects: which tables and columns are added
+or removed, and how types, nullability, constraints, and relations shift.
 
 <!-- generated: facts -->
 
@@ -20,49 +20,51 @@ leave, which types, nullability, constraints and relations change?"
 
 ## When to use it
 
-Use it in a Django project to review model changes as an entity-relationship
-diagram rather than a migration file. Because it asks Django itself, it sees
-what the models actually amount to: implicit primary keys, automatic
-many-to-many tables, inherited fields, `Meta` indexes and constraints, and
-fields contributed by third-party apps, so moving or reformatting model files
-changes nothing.
+Use this extractor in a Django project when you want to review model changes as
+an entity-relationship diagram instead of reading migration files. Because it
+queries Django directly, it sees the effective schema your models
+produce—implicit primary keys, automatic many-to-many join tables, inherited
+fields, `Meta` indexes and constraints, and fields added by third-party apps.
+Moving or reformatting model files produces no noise.
 
-It describes the models, not a live database: it doesn't run migrations,
-connect, or detect drift between the two. For EF Core use
-[`efcore-schema`](efcore-schema.md), for Prisma
-[`prisma-schema`](prisma-schema.md).
+Keep in mind that this models what your code expects, not a live database. It
+never runs migrations, opens a database connection, or detects drift against
+production. For EF Core use [`efcore-schema`](efcore-schema.md), and for Prisma
+use [`prisma-schema`](prisma-schema.md).
 
 ## What it reads
 
-It runs a small Python helper with **your** interpreter (`python`, by default
-`python3`, which on Windows also finds `python` or `py -3`), so the project's
-own Django (4.2 or 5) and its database backend must be installed there, ideally
-the project's locked virtual environment. The helper imports the settings module
-(`settings`, or a granted `DJANGO_SETTINGS_MODULE`), calls `django.setup()` and
-reads every model's `_meta`. That imports and runs the project's code (settings,
-apps and their `AppConfig.ready()`), which is why it needs `--trust`. Database
-connections and cursors are blocked before setup, so startup code that queries
-the database fails the extraction rather than reaching a database; other side
-effects aren't blocked.
+The extractor runs a small Python helper using **your** interpreter (`python`,
+which defaults to `python3` and also checks `python` or `py -3` on Windows).
+Your project's version of Django (4.2 or 5) and its database backend need to be
+installed in that environment—ideally the project's locked virtual environment.
+The helper imports your settings module (`settings`, or a granted
+`DJANGO_SETTINGS_MODULE`), calls `django.setup()`, and inspects every model's
+`_meta`. Because that imports and runs project code (settings, apps, and
+`AppConfig.ready()`), it requires `--trust`. Database connections and cursors
+are blocked before setup, so startup code that queries the database will fail
+the extraction rather than hitting a live server, though other side effects are
+not blocked.
 
-The `database` input names the alias whose backend decides the database types
-(default `default`). It only selects type metadata; it never connects.
+The `database` option selects which configured database alias determines column
+types (default `default`). It only looks up backend type metadata and never
+connects.
 
-It writes a `table` per concrete model, including unmanaged models (marked
-`managed: false`) and the automatic through tables of many-to-many fields;
-abstract, proxy and swapped-out models add no table. Each `column` has Django's
-field type as `data.type` (`CharField`) and the backend's type as `databaseType`
-(`varchar(200)`), with nullability, length, precision, defaults and comments.
-Primary keys, uniqueness, indexes, check and unique constraints, and foreign
-keys are `constraint` entities, each with its `data.type`; a foreign key also
-links its columns to the target table's. Defaults are never evaluated: a
-callable default is recorded by its import path. IDs come from database names
-(`db_table`, `db_column`), so renaming a model or field while keeping its
-mapping changes nothing.
+Each concrete model becomes a `table`, including unmanaged models (marked
+`managed: false`) and automatic through tables created for many-to-many fields;
+abstract, proxy, and swapped-out models do not produce tables. Each `column`
+records Django's field type as `data.type` (`CharField`) and the backend type as
+`databaseType` (`varchar(200)`), along with nullability, length, precision,
+defaults, and comments. Primary keys, uniqueness rules, indexes, check and
+unique constraints, and foreign keys become `constraint` entities with their
+`data.type`, and foreign keys also connect their columns to the target table.
+Defaults are never called—a callable default is recorded by its import path.
+Because IDs are built from database names (`db_table`, `db_column`), renaming a
+Python model or field without changing its database mapping shows no change.
 
-`snapshot` reads a `database/v0` extraction exported earlier instead, with no
-Python and no trust; it is read from the revision being extracted, so each
-revision you compare needs its own.
+If you prefer not to run Python, pass `snapshot` to read a previously exported
+`database/v0` extraction with no `--trust` required. Snapshot files are read
+from each revision being extracted, so every compared revision needs its own.
 
 ## Options
 
@@ -77,34 +79,36 @@ revision you compare needs its own.
 
 <!-- end generated: inputs -->
 
-Environment variables reach the helper only when listed in the definition's
-`execution.environment` (for example the variable your settings module reads to
-choose its configuration); `inputs.env` is rejected so values never land in a
-definition.
+Environment variables are passed to the helper only if you explicitly allow them
+in `execution.environment` (such as a variable your settings module reads to
+select a configuration). `inputs.env` is rejected so secret values never end up
+committed in a definition.
 
 ## What a comparison shows
 
 The [`database`](../renderers/database.md) renderer draws each table as a card
-with its columns, keys and indexes, and each foreign key as a link from the
-dependent row to the principal one.
+listing its columns, keys, and indexes, with foreign keys drawn as links from
+the dependent row to the principal one.
 
-- **Tables** added, removed or modified, and **columns** added or removed within
-  them.
-- **Column changes**: a new database type reads as a type change (`varchar(120)`
-  to `varchar(200)`, with the Django field type in the column's tooltip), and
-  `null=True` added or removed as made optional or made required.
-- **Keys, indexes, constraints and foreign keys** added, removed or modified: a
-  new `UniqueConstraint`, an index that gains a field, a foreign key whose
-  `on_delete` changed.
+- **Tables and columns** highlight any tables added, removed, or modified, along
+  with columns added or removed inside them.
+- **Column changes** call out database type changes (such as `varchar(120)` to
+  `varchar(200)`, with the Django field type shown in the tooltip) and
+  nullability changes—adding or removing `null=True` appears as made optional or
+  made required.
+- **Keys, indexes, constraints, and foreign keys** track additions, removals,
+  and modifications, such as a new `UniqueConstraint`, an index gaining a field,
+  or a foreign key changing its `on_delete` behavior.
 
-The summary bar counts tables, columns, constraints and foreign keys, each with
-its changes (`5 tables +1 · 24 columns +8 ~2`), then states what the counts
-can't: column types changed, columns made required or optional, and anything
-renamed, each filtering to its rows.
+The summary bar counts tables, columns, constraints, and foreign keys along with
+their deltas (`5 tables +1 · 24 columns +8 ~2`), then calls out higher-level
+shifts: changed column types, columns made required or optional, and renames.
+Clicking any item filters down to the affected rows.
 
-Changing a table's or column's database name (`db_table`, `db_column`) gives it
-a new ID, so it reads as a removal and an addition; declare the old ID in the
-definition's `correspondence` to show it as a rename.
+Because IDs come from database names (`db_table`, `db_column`), changing a
+table's or column's database name looks like a removal and an addition. Declare
+the old ID in `correspondence` in your definition to show it as a rename
+instead.
 
 ## Start from this definition
 
@@ -126,72 +130,75 @@ definition's `correspondence` to show it as a rename.
 
 ## Limitations
 
-- It is the model registry, not the database: routers, migration-only
-  operations, database-generated constraint names and whether the backend
-  enforces each declared constraint aren't known.
-- `on_delete` is the ORM's behavior (`django.db.models.deletion.CASCADE`), not a
-  SQL `ON DELETE` clause.
-- Generic relations create no foreign keys.
-- A default it can't serialize stably (an object without a stable
-  representation, a lambda or local function) fails the extraction.
-- Importing the project runs its code with your user's privileges; blocking ORM
-  access is not a sandbox. Use a settings module with safe startup behavior, and
-  trust only repositories you have reviewed.
-- A large schema opens at a readable size (text no smaller than 8 px) and
-  scrolls, rather than shrinking to fit.
+- This reflects the model registry rather than the live database, so routers,
+  migration-only operations, database-generated constraint names, and whether
+  the backend actually enforces a declared constraint are not captured.
+- `on_delete` reflects Django ORM behavior (`django.db.models.deletion.CASCADE`)
+  rather than a SQL `ON DELETE` clause.
+- Generic relations do not produce foreign keys.
+- Defaults that cannot be serialized stably (objects without a stable
+  representation, lambdas, or local functions) cause the extraction to fail.
+- Importing your project executes its code with your user's privileges—blocking
+  ORM queries is not a sandbox. Use a settings module with safe startup behavior
+  and only trust repositories you have reviewed.
+- Large schemas open at a readable scale (text at least 8 px) and scroll instead
+  of shrinking to fit the viewport.
 
 ## Related
 
-- [`database`](../renderers/database.md), the renderer that draws it.
-- [`efcore-schema`](efcore-schema.md) and [`prisma-schema`](prisma-schema.md),
-  the same model for EF Core and Prisma.
-- [The default comparator](../comparators/default.md), which decides what
-  changed.
+- [`database`](../renderers/database.md) is the renderer that draws these
+  schemas.
+- [`efcore-schema`](efcore-schema.md) and [`prisma-schema`](prisma-schema.md)
+  provide the same model for EF Core and Prisma.
+- [The default comparator](../comparators/default.md) determines what changed
+  between revisions.
 
 ## How it works
 
-The [package README](../../../packages/extractors/django-schema/README.md)
-covers the helper, identities and how values are serialized.
+See the [package README](../../../packages/extractors/django-schema/README.md)
+for details on the Python helper, entity IDs, and how values are serialized.
 
 ## Build your own
 
-Write your own extractor when Django's model registry isn't the schema you want
-to review:
+Consider writing a custom extractor when Django's model registry is not the
+schema you want to review:
 
-- **Another Python data layer**: SQLAlchemy or SQLModel models, Alembic
+- **Another Python data layer**, such as SQLAlchemy or SQLModel models, Alembic
   migrations, or raw SQL.
-- **The live database, not the models**: what is deployed, drift from the
-  models, or the migration graph and which migrations a change adds.
-- **Facts Django doesn't have**: which app or team owns each table, which
-  columns hold personal data, row counts from your own inventory.
+- **The live database instead of models**, including deployed state, schema
+  drift, or the migration graph and which migrations a pull request adds.
+- **Facts Django does not track**, like which app or team owns each table, which
+  columns hold personal data, or row counts from an internal inventory.
 
-Try the lighter options first: `settings` and a granted environment variable
-select an inspection configuration whose startup is safe, `database` picks the
-backend whose types you want to see, and `snapshot` reads a schema your own
-tooling exported. To draw the schema differently, keep this extractor and write
-a renderer; to say which changes are destructive (a dropped column, a field made
+Try the lighter options first: `settings` paired with a granted environment
+variable lets you pick a safe inspection configuration, `database` chooses which
+backend's column types to show, and `snapshot` reads a schema exported by your
+own tooling. To change the visual layout, keep this extractor and write a custom
+renderer; to flag destructive changes (such as a dropped column or a field made
 required without a default), add a comparator file.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
-**Write a custom extractor, renderer or comparator** › **Custom extractor** (or
-**Custom extractor and renderer**), and pick its language. It writes the
-definition and a starter extractor (`extract.mjs`, `extract.py` or `extract.go`)
-under `.github/projections/<id>/`, drawn by the built-in graph renderer; print a
-`database/v0` extraction and set the definition's renderer to `database` to draw
-it as this one is. Or choose **Ask an agent to write it** and describe what the
-projection should show.
+**In VS Code**, open the Projections view, choose **+ New Projection…**, and
+select **Write a custom extractor, renderer or comparator** › **Custom
+extractor** (or **Custom extractor and renderer**). Pick a language to scaffold
+the definition and a starter extractor (`extract.mjs`, `extract.py`, or
+`extract.go`) under `.github/projections/<id>/`, paired with the built-in graph
+renderer. Emit a `database/v0` extraction and set the definition's renderer to
+`database` to get the same diagram view. You can also choose **Ask an agent to
+write it** and describe what you want to see.
 
-**With the CLI**, keep this schema's renderer:
+**With the CLI**, scaffold a Python extractor while keeping the `database`
+renderer:
 
 ```sh
 projections init <id> --language python --renderer database
 ```
 
-An extractor is any program that prints an extraction. Run it with
-`projections show -p <id> --trust` as you change it; an open projection tab uses
-your uncommitted edits ("Your edits") and says when its results are out of date,
-and the Testing view runs the projection's checks.
-[Write your first extractor](../../guides/first-extractor.md) walks through one,
-and [Extraction schema](../../guides/schemas.md#extraction-schema) describes
-what it prints; the [`database/v0` schema](../../reference/schemas/database.md)
-lists the fields the `database` renderer reads.
+An extractor is any program that prints an extraction. Run
+`projections show -p <id> --trust` while you iterate—an open projection tab
+picks up your uncommitted edits ("Your edits") and flags stale results, and the
+Testing view runs your projection's checks. Walk through
+[Write your first extractor](../../guides/first-extractor.md) to get started,
+check [Extraction schema](../../guides/schemas.md#extraction-schema) for the
+output format, and see the
+[`database/v0` schema](../../reference/schemas/database.md) for the fields the
+`database` renderer expects.

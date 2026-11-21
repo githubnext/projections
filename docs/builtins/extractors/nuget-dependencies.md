@@ -1,10 +1,10 @@
 # NuGet dependencies
 
-The .NET projects in a repository and the NuGet packages they resolve, for each
-target framework: what each project references directly, the exact versions
-restore chose, and what those packages pull in, transitively. Compared across a
-pull request, it answers "which packages did this change add, remove, upgrade or
-downgrade, for which framework, and what pulls them in?"
+This extractor maps the .NET projects in a repository and the NuGet packages
+they resolve for each target framework—every direct reference, the exact
+versions restore chose, and the transitive tree pulled in beneath them. Compared
+across a pull request, it shows which packages were added, removed, upgraded, or
+downgraded for each framework, and what pulls them in.
 
 <!-- generated: facts -->
 
@@ -19,45 +19,46 @@ downgrade, for which framework, and what pulls them in?"
 
 ## When to use it
 
-Use it in a C#, F# or Visual Basic repository to review package changes as a
-graph rather than a project-file diff: a new `PackageReference` and the packages
-it brings, a transitive upgrade from bumping one direct reference, a framework
-added to `TargetFrameworks` and everything it resolves. It restores each
-revision you compare with the repository's own `dotnet`, so it needs `--trust`,
-or reads assets a revision already holds without it (below). It covers NuGet
-packages only. For Node workspaces use
-[`workspace-dependencies`](workspace-dependencies.md), for Rust
+Use this extractor in any C#, F#, or Visual Basic repository to review NuGet
+changes as a dependency graph instead of a project-file diff. It makes it easy
+to see a new `PackageReference` and the transitive packages it brings along, a
+downstream upgrade triggered by bumping a direct reference, or a new entry in
+`TargetFrameworks` with everything it resolves. By default it restores each
+revision with your repository's `dotnet` CLI (requiring `--trust`), or it can
+read committed restore assets without `--trust` (see below). This extractor
+covers NuGet packages only; for Node workspaces use
+[`workspace-dependencies`](workspace-dependencies.md), and for Rust use
 [`cargo-dependencies`](cargo-dependencies.md).
 
 ## What it reads
 
-The `project.assets.json` file `dotnet restore` writes for each project (assets
-format versions 3 and 4), from one of two places:
+The extractor reads the `project.assets.json` file produced by `dotnet restore`
+for each project (assets format versions 3 and 4), from one of two sources:
 
-- **Restored for each revision** (the default, with `--trust`): it runs
-  `dotnet restore` for every project file of the revision (`.csproj`, `.fsproj`,
-  `.vbproj`), or those in `projects`, with `dotnet` (the `dotnet` input, default
-  `dotnet` on `PATH`) and the repository's own NuGet configuration and feeds.
-  Each restore covers just its project and writes its assets to a private
-  folder, never into the project's `obj/`, so restoring doesn't touch your
-  checkout's build output.
-- **Imported from the revision**: the paths in `assetsPaths`, with no `--trust`.
-  Only files of the revision are read, and Git-ignored files aren't: `obj/` is
-  usually ignored, so this suits assets committed (or exported) somewhere in
-  each revision. An `assetsPaths` file your checkout has but Git ignores fails
-  with a message saying so, rather than reading as missing.
+- **Restored per revision** (the default, requiring `--trust`): runs
+  `dotnet restore` for every `.csproj`, `.fsproj`, and `.vbproj` in the revision
+  (or just those listed in `projects`), using `dotnet` (via the `dotnet` input,
+  defaulting to `dotnet` on `PATH`) and your repository's NuGet feeds and
+  configuration. Each restore targets a single project and writes to an isolated
+  folder rather than `obj/`, leaving your working tree's build output untouched.
+- **Imported from the revision**: reads the paths listed in `assetsPaths`
+  without requiring `--trust`. Only tracked files in each revision are
+  read—never Git-ignored files. Since `obj/` is usually ignored, this mode is
+  meant for assets committed or exported into each revision. If a path in
+  `assetsPaths` exists locally but is ignored by Git, extraction fails with a
+  clear message instead of treating it as missing.
 
-Assets that record a restore error are rejected.
+Assets files that contain restore errors are rejected.
 
-Each project is a `project` entity, named by its restore project name, and each
-of its target frameworks (with its runtime identifier, when it has one) a
-`target-framework`. Each package resolved for a framework is a `package` entity
-with its `version`, and each referenced project a `project-reference`. A
-framework's direct references are `direct-dependency` relationships, and the
-dependencies between packages `depends-on` relationships, both from the resolved
-versions, never from version ranges. IDs are the project, the framework and the
-package's lowercase name, never its version, so an upgrade is one modified
-package.
+Each project becomes a `project` entity named by its restore project name, and
+each target framework (including its runtime identifier, if present) becomes a
+`target-framework`. Each resolved package becomes a `package` entity with its
+`version`, and each project reference becomes a `project-reference`. A
+framework's direct references become `direct-dependency` relationships, and
+package-to-package edges become `depends-on` relationships—all reflecting
+resolved versions rather than declared version ranges. Entity IDs combine the
+project, framework, and lower-cased package name without the version, so an
+upgrade appears as one modified package.
 
 ## Options
 
@@ -73,23 +74,23 @@ package.
 
 ## What a comparison shows
 
-- **Packages** added or removed, for each framework: a new reference and
-  everything it brings in, or one that is no longer resolved.
-- **Upgrades and downgrades** as modified packages, whose resolved version
-  changed. The [`dependencies`](../renderers/graph.md) renderer words each by
-  the part of the version that moved (`Major upgrade`, `Patch downgrade`), and
-  its summary bar counts them (`2 major upgrades · 9 minor upgrades`), then how
-  many changed packages a framework references directly, each filtering to its
-  packages.
-- **Frameworks** added or removed, with everything resolved for them.
-- **Dependencies** added or removed: a direct reference added, or a package that
-  no longer depends on another.
+- **Added or removed packages** highlight new references and everything they
+  pull in, as well as packages that dropped out of a framework's graph.
+- **Upgrades and downgrades** appear as modified packages whose resolved version
+  shifted. The [`dependencies`](../renderers/graph.md) renderer labels each by
+  the version component that moved (`Major upgrade`, `Patch downgrade`). Its
+  summary bar tallies those shifts (`2 major upgrades · 9 minor upgrades`) along
+  with how many changed packages a framework references directly, and clicking
+  any count filters the graph to those packages.
+- **Added or removed frameworks** appear alongside everything resolved for them.
+- **Added or removed dependencies** track structural changes such as a new
+  direct reference or a package dropping a transitive dependency.
 
-Projects and target frameworks are the graph's roots. Unchanged transitive
-packages collapse into summary cards ("12 more packages") so the change stays
-readable; the renderer's **All packages** control (`transitive`) shows them all,
-and **Every dependency** (`paths`) draws every edge rather than the one path
-that pulls each package in.
+Projects and target frameworks sit at the root of the graph. To keep diffs easy
+to read, unchanged transitive packages collapse into summary cards ("12 more
+packages"). Turn on **All packages** (`transitive`) to expand them all, or
+**Every dependency** (`paths`) to show every edge rather than a single path into
+each package.
 
 ## Start from this definition
 
@@ -108,67 +109,72 @@ that pulls each package in.
 
 ## Limitations
 
-- A package resolved for two frameworks is two packages, one per framework, so a
-  multi-targeting project shows each change once for each framework.
-- Restoring resolves floating versions (`1.*`) from what the feeds offer when
-  each revision is extracted, and needs those feeds reachable.
-- Imported assets that are stale, from a failed restore, or missing from a
-  revision give a wrong or failed graph; nothing checks them against the project
-  files.
-- Project names must be unique across the assets files it reads.
-- It reads the resolved graph, not the feed: it can't tell you about
-  vulnerabilities, deprecations, licenses or package contents.
+- A package resolved for two target frameworks appears as two separate package
+  nodes—one per framework—so multi-targeted projects show each change once per
+  framework.
+- Restoring resolves floating versions (`1.*`) against whatever the configured
+  feeds offer at extraction time, and requires those feeds to be reachable.
+- Imported assets that are stale, incomplete from a failed restore, or missing
+  in a revision produce an inaccurate or failed graph, since they are not
+  cross-checked against project files.
+- Project names must be unique across all assets files read together.
+- Because it inspects the resolved graph rather than the NuGet feed, it does not
+  report vulnerabilities, deprecations, licenses, or package contents.
 
 ## Related
 
-- [`graph`](../renderers/graph.md), whose `dependencies` presentation draws it.
+- [`graph`](../renderers/graph.md) renders this extractor with its
+  `dependencies` presentation.
 - [`workspace-dependencies`](workspace-dependencies.md) and
-  [`cargo-dependencies`](cargo-dependencies.md), the same graph for Node and
-  Rust.
-- [`dotnet-public-api`](dotnet-public-api.md) and [`dotnet-di`](dotnet-di.md),
-  for what the projects export and compose.
-- [The default comparator](../comparators/default.md), which can order steps by
-  how many packages depend on each (`order.by: dependents`).
+  [`cargo-dependencies`](cargo-dependencies.md) provide the same dependency
+  graph for Node and Rust.
+- [`dotnet-public-api`](dotnet-public-api.md) and [`dotnet-di`](dotnet-di.md)
+  inspect what .NET projects export and wire up.
+- [The default comparator](../comparators/default.md) can order review steps by
+  how many packages depend on each change (`order.by: dependents`).
 
 ## How it works
 
-The [package README](../../../packages/extractors/nuget-dependencies/README.md)
-details the assets formats and how packages are identified.
+See the
+[package README](../../../packages/extractors/nuget-dependencies/README.md) for
+details on supported assets formats and package identity rules.
 
 ## Build your own
 
-Write your own extractor when the restored assets don't say what you need:
+Consider writing a custom extractor when restored assets do not capture what you
+need:
 
-- **Another source of truth**: central package management
-  (`Directory.Packages.props`) or `packages.lock.json` read directly, without
-  restoring, or `packages.config` projects.
-- **Facts restore doesn't have**: which team owns each project, which packages
-  ship in which deployable, or vulnerability and license data from your own
+- **Another source of truth**, such as reading central package management
+  (`Directory.Packages.props`) or `packages.lock.json` directly without running
+  restore, or supporting legacy `packages.config` projects.
+- **Facts restore does not track**, like project ownership by team, which
+  deployables ship each package, or vulnerability and license data from your own
   inventory.
-- **Another grain**: project-to-project references alone, without packages.
+- **A different level of detail**, such as project-to-project references alone
+  without NuGet packages.
 
-Try the lighter options first: `assetsPaths` chooses which projects to read. To
-draw the same graph differently, keep this extractor and write a renderer; to
-say which upgrades matter, add a comparator file.
+Try the lighter options first: `assetsPaths` selects which projects to read. To
+change the visual layout, keep this extractor and write a custom renderer; to
+highlight specific upgrades that matter to your team, add a comparator file.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
-**Write a custom extractor, renderer or comparator** › **Custom extractor** (or
-**Custom extractor and renderer**), and pick its language. It writes the
-definition and a starter extractor (`extract.mjs`, `extract.py` or `extract.go`)
-under `.github/projections/<id>/`, drawn by the built-in graph renderer. Or
-choose **Ask an agent to write it** and describe what the projection should
-show.
+**In VS Code**, open the Projections view, choose **+ New Projection…**, and
+select **Write a custom extractor, renderer or comparator** › **Custom
+extractor** (or **Custom extractor and renderer**). Pick a language to scaffold
+the definition and a starter extractor (`extract.mjs`, `extract.py`, or
+`extract.go`) under `.github/projections/<id>/`, paired with the built-in graph
+renderer. You can also choose **Ask an agent to write it** and describe what you
+want to see.
 
-**With the CLI**, keep this graph's renderer:
+**With the CLI**, scaffold a new extractor while keeping this graph's renderer:
 
 ```sh
 projections init <id> --language node --renderer dependencies
 ```
 
-An extractor is any program that prints an extraction. Run it with
-`projections show -p <id> --trust` as you change it; an open projection tab uses
-your uncommitted edits ("Your edits") and says when its results are out of date,
-and the Testing view runs the projection's checks.
-[Write your first extractor](../../guides/first-extractor.md) walks through one,
-and [Extraction schema](../../guides/schemas.md#extraction-schema) describes
-what it prints.
+An extractor is any program that prints an extraction. Run
+`projections show -p <id> --trust` while you iterate—an open projection tab
+picks up your uncommitted edits ("Your edits") and flags stale results, and the
+Testing view runs your projection's checks. Walk through
+[Write your first extractor](../../guides/first-extractor.md) to get started,
+and check [Extraction schema](../../guides/schemas.md#extraction-schema) for the
+output format.

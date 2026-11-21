@@ -1,10 +1,10 @@
 # Go public API
 
-The exported API of a Go module's packages: every exported constant, variable,
-function and type, with the method sets and selectable fields of its types, read
-with `go/types` and the project's own Go toolchain. Compared across a pull
-request, it answers "what did this change add, remove or change in what
-importers can use, and does it break them?"
+This extractor captures the exported API of a Go module's packages—every
+exported constant, variable, function, and type, along with each type's method
+set and selectable fields—using `go/types` and the repository's own Go
+toolchain. Compared across a pull request, it shows what changed for downstream
+importers and whether any change breaks compatibility.
 
 <!-- generated: facts -->
 
@@ -19,47 +19,50 @@ importers can use, and does it break them?"
 
 ## When to use it
 
-Use it for Go modules other code imports, to review API changes as declarations
-instead of a source diff: a method that moved from the value to the pointer
-receiver, a struct that stopped being comparable, an interface that gained a
-method. With the [`api-compatibility`](#classify-changes-as-breaking) comparator
-file, each change is classified by the rules of the Go team's `apidiff`.
+Use this extractor for Go modules imported by other code when you want to review
+API changes as clean declarations instead of a source diff. It makes subtle
+breaks easy to spot—a method shifting from a value receiver to a pointer
+receiver, a struct losing comparability, or an interface gaining a new method.
+Pairing it with the [`api-compatibility`](#classify-changes-as-breaking)
+comparator file classifies each change using the Go team's `apidiff` rules.
 
-It needs `--trust` (see [What it reads](#what-it-reads)). Packages under
-`internal/` and `main` packages can't be imported, so they aren't API and aren't
-shown. For TypeScript use [`typescript-public-api`](typescript-public-api.md),
-for Rust [`rust-public-api`](rust-public-api.md), for .NET
+Extraction requires `--trust` (see [What it reads](#what-it-reads)). Packages
+under `internal/` and `main` packages cannot be imported, so they are excluded
+from the public API. For TypeScript use
+[`typescript-public-api`](typescript-public-api.md), for Rust use
+[`rust-public-api`](rust-public-api.md), and for .NET use
 [`dotnet-public-api`](dotnet-public-api.md).
 
 ## What it reads
 
-The packages `patterns` matches (default `./...`, from the repository root),
-loaded the way the Go toolchain loads them:
+The extractor inspects every package matched by `patterns` (default `./...` from
+the repository root), loading them the same way the Go toolchain does:
 
-- **The project's own Go**, 1.24 or newer, as `go` on `PATH` or `goPath`.
-  `go list -export -compiled -deps` resolves the packages and builds export data
-  for their dependencies, then the matched packages are type-checked from
-  source. Running the toolchain over your module (including any cgo) is why it
-  needs `--trust`.
-- **A small helper** that ships with Projections as source and uses only the Go
-  standard library, built with `go run` (or a prebuilt one at `goHelperPath`),
-  so nothing is downloaded for it.
+- **The project's own Go toolchain** (1.24 or newer, found as `go` on `PATH` or
+  configured via `goPath`). It runs `go list -export -compiled -deps` to resolve
+  packages and build export data for dependencies, then type-checks the matched
+  packages from source. Running the toolchain over your module (including any
+  cgo) is why `--trust` is required.
+- **A small standard-library helper** shipped as source with Projections and
+  executed with `go run` (or a prebuilt binary at `goHelperPath`), so nothing
+  needs to be downloaded to run it.
 - **Your existing caches.** Go never downloads another toolchain
-  (`GOTOOLCHAIN=local`), and it uses the module and build caches your own Go
-  configuration reports. An extractor sees only the variables its definition
-  grants, so list `HOME` (and any of `GOPATH`, `GOMODCACHE`, `GOCACHE` or
-  `GOFLAGS` you set) in `execution.environment`. Without network access the
-  module's dependencies must already be downloaded or vendored.
+  (`GOTOOLCHAIN=local`) and uses the module and build caches configured in your
+  Go environment. Because extractors only see environment variables you grant,
+  include `HOME` (plus any custom `GOPATH`, `GOMODCACHE`, `GOCACHE`, or
+  `GOFLAGS`) in `execution.environment`. In offline environments, module
+  dependencies must already be cached or vendored.
 
-Each importable package is a `package` entity, and each exported name a
-`constant`, `variable`, `function` or `type`, with a `method` for each exported
-method in its method set and a `field` for each exported field a selector
-reaches, promoted ones included. IDs use the import path
-(`go:example.com/ledger.Ledger.Len`), so moving a declaration to another file of
-the package is no change. Every declaration carries its contract (its type
-without parameter names, a constant's exact value, a method's receiver,
-comparability, numeric sizes), the facts the `api-compatibility` rules read.
-Load and type errors fail the extraction rather than producing a partial API.
+Each importable package becomes a `package` entity, and each exported symbol
+becomes a `constant`, `variable`, `function`, or `type`, with `method` entities
+for exported methods in its method set and `field` entities for exported
+selectable fields (including promoted ones). IDs use the import path
+(`go:example.com/ledger.Ledger.Len`), so moving a declaration between files in
+the same package produces no diff. Every declaration records its full contract
+(type without parameter names, exact constant value, method receiver,
+comparability, and numeric sizes) so the `api-compatibility` rules can evaluate
+it. Load or type-checking errors fail the extraction rather than emitting a
+partial API.
 
 ## Options
 
@@ -75,22 +78,25 @@ Load and type errors fail the extraction rather than producing a partial API.
 
 ## What a comparison shows
 
-The [`api`](../renderers/api.md) renderer lists every declaration with its
-signature, side by side or as one diff:
+The [`api`](../renderers/api.md) renderer displays every declaration with its
+signature, either side by side or in a unified diff:
 
-- **Declarations** added, removed or modified, each with its signature diff.
-- **Renames** only when the definition's `correspondence` declares them;
-  otherwise a renamed or moved declaration is a removal and an addition.
+- **Added, removed, or modified declarations** appear with inline signature
+  diffs.
+- **Renames** are shown only when declared in `correspondence` in your
+  definition; otherwise a renamed or moved symbol appears as a removal and an
+  addition.
 
-The summary bar counts declarations: `36 declarations +10 −1 ~6`.
+The summary bar tallies declarations and deltas (for example,
+`36 declarations +10 −1 ~6`).
 
 ### Classify changes as breaking
 
-The default comparator says _that_ a declaration changed. The
-`api-compatibility` comparator file, which ships with Projections, says whether
-it breaks importers. It is a comparator file, not the default comparator: copy
+By default, the comparator only reports _that_ a declaration changed. To see
+whether a change breaks importers, use the `api-compatibility` comparator file
+shipped with Projections. Copy
 [`api-compatibility.comparator.yaml`](../../../packages/comparators/api-compatibility/api-compatibility.comparator.yaml)
-into your repository and name it in the definition:
+into your repository and reference it in your definition:
 
 ```json
 {
@@ -103,31 +109,32 @@ into your repository and name it in the definition:
 }
 ```
 
-Each change is then `breaking`, `additive`, `compatible` or `unknown`, with a
-reason and the rule that decided it, following `apidiff` and the Go 1
-compatibility guarantee:
+Each change is then classified as `breaking`, `additive`, `compatible`, or
+`unknown`, paired with a reason and the rule that triggered it, following
+`apidiff` and the Go 1 compatibility guarantee:
 
-- **Breaking**: an exported name, method or field removed (`removed`), a name
-  that now denotes another kind of object (`kind`), a changed type or constant
-  value (`type`, `value`), a method added to an interface that outside packages
-  can implement (`interface-method-added`), a method moved to the pointer method
-  set (`method-set`), a struct no longer comparable (`comparable`), a type that
-  stops implementing one of the package's exported interfaces (`implements`).
-- **Additive**: a new exported name, method or field (`added`), a method added
-  to an interface with an unexported method, a method that moved to the value
-  method set.
-- **Compatible**: a numeric type grown within its family, a channel that lost a
-  direction, and a renamed parameter: parameter names aren't part of a Go type,
-  so only the signature shown changes.
+- **Breaking** covers removed exported names, methods, or fields (`removed`), a
+  symbol changing kind (`kind`), type or constant value changes (`type`,
+  `value`), adding a method to an interface that external packages can implement
+  (`interface-method-added`), moving a method to the pointer method set
+  (`method-set`), making a struct non-comparable (`comparable`), or a type
+  stopping implementation of an exported interface from the package
+  (`implements`).
+- **Additive** covers new exported names, methods, or fields (`added`), adding a
+  method to an interface that already has an unexported method, or moving a
+  method to the value method set.
+- **Compatible** covers widening a numeric type within its family, dropping a
+  channel direction, or renaming a parameter (parameter names are not part of a
+  Go type, so only the displayed signature changes).
 
-The summary bar then counts each level, breaking first
-(`2 breaking changes · 5 additive changes`), each filtering to its changes; the
-diff lists breaking changes first with each reason, and the renderer's
-**Breaking only** control (`breakingOnly` in `presentation.rendererOptions`)
-hides the rest. A workflow can fail a pull request on
-`metadata.compatibility.counts.breaking`.
-[API compatibility](../../models/api-compatibility.md#go-apidiffs-rules) lists
-every rule.
+The summary bar groups counts by severity with breaking changes first
+(`2 breaking changes · 5 additive changes`), and clicking any count filters to
+those changes. Breaking changes appear at the top of the diff with their
+reasons, and the **Breaking only** toggle (`breakingOnly` in
+`presentation.rendererOptions`) hides the rest. CI workflows can fail a pull
+request on `metadata.compatibility.counts.breaking`. See
+[API compatibility](../../models/api-compatibility.md#go-apidiffs-rules) for the
+full rule list.
 
 ## Start from this definition
 
@@ -146,70 +153,71 @@ every rule.
 
 ## Limitations
 
-- Build tags and the platform of the machine running it decide which files are
-  in the program; declarations for other platforms aren't seen.
-- The rules are `apidiff`'s, reproduced, not `apidiff` run on your module: a
-  variable whose type changes to a renamed unexported type is reported as a type
-  change, and packages renamed relative to the module root aren't matched.
-- Each revision is loaded and type-checked, so the module's dependencies must
-  resolve as your own `go build` would.
+- Build tags and the host platform determine which files are included;
+  declarations gated for other platforms are not inspected.
+- Compatibility checks reproduce `apidiff`'s rules rather than running `apidiff`
+  directly on your module: changing a variable's type to a renamed unexported
+  type is reported as a type change, and packages moved relative to the module
+  root are not matched automatically.
+- Because every revision is loaded and type-checked, module dependencies must
+  resolve the same way `go build` requires.
 
 ## Related
 
-- [`api`](../renderers/api.md), the renderer that draws it.
+- [`api`](../renderers/api.md) is the renderer that displays these declarations.
 - The
   [`api-compatibility`](../../../packages/comparators/api-compatibility/README.md)
-  comparator file, and [the default comparator](../comparators/default.md) it
-  builds on.
+  comparator file builds on [the default comparator](../comparators/default.md)
+  to classify breaking changes.
 - [`typescript-public-api`](typescript-public-api.md),
-  [`rust-public-api`](rust-public-api.md) and
-  [`dotnet-public-api`](dotnet-public-api.md): the same model for other
+  [`rust-public-api`](rust-public-api.md), and
+  [`dotnet-public-api`](dotnet-public-api.md) provide the same model for other
   languages.
 
 ## How it works
 
-The [package README](../../../packages/extractors/go-public-api/README.md)
-details what each declaration records, and
-[Go support](../../../packages/extractors/go-support/README.md) how the
-toolchain and caches are used.
+See the [package README](../../../packages/extractors/go-public-api/README.md)
+for what each declaration records, and
+[Go support](../../../packages/extractors/go-support/README.md) for how the
+toolchain and caches are handled.
 
 ## Build your own
 
-Write your own extractor when exported Go declarations aren't the surface you
-need to review:
+Consider writing a custom extractor when exported Go declarations are not the
+surface you need to review:
 
-- **Another surface**: a gRPC service from its `.proto` files, HTTP routes
-  registered on a router, a CLI's commands and flags (Cobra, `flag`), or the
+- **Another surface**, such as gRPC services from `.proto` files, HTTP routes
+  registered on a router, CLI commands and flags (Cobra or `flag`), or
   environment variables a service reads.
-- **Facts the type checker doesn't have**: deprecation comments, which packages
-  are covered by your stability promise, or owners from `CODEOWNERS`.
-- **Another grain**: one entity per package, or packages and their imports as a
-  graph.
+- **Facts the type checker does not track**, like deprecation comments, which
+  packages carry a stability guarantee, or owners from `CODEOWNERS`.
+- **A different level of detail**, such as one entity per package or a package
+  import graph.
 
-Try the lighter options first: `patterns` limits the API to the packages you
-publish. To change what counts as breaking (for a `v0` module, say), copy
-`api-compatibility.comparator.yaml` and edit its rules; to draw the API
-differently, keep this extractor and write a renderer.
+Try the lighter options first: `patterns` scopes the API to the packages you
+publish. To adjust what counts as breaking (for example, in a `v0` module), copy
+`api-compatibility.comparator.yaml` and edit its rules. To change the visual
+layout, keep this extractor and write a custom renderer.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
-**Write a custom extractor, renderer or comparator** › **Custom extractor** (or
-**Custom extractor and renderer**), and pick its language: the repository's
-toolchain, Node.js, Python or Go (`extract.go`). It writes the definition and a
-starter extractor under `.github/projections/<id>/`, drawn by the built-in graph
-renderer. Or choose **Ask an agent to write it** and describe what the
-projection should show.
+**In VS Code**, open the Projections view, choose **+ New Projection…**, and
+select **Write a custom extractor, renderer or comparator** › **Custom
+extractor** (or **Custom extractor and renderer**). Pick a language—your
+repository's toolchain, Node.js, Python, or Go (`extract.go`)—to scaffold the
+definition and a starter extractor under `.github/projections/<id>/`, paired
+with the built-in graph renderer. You can also choose **Ask an agent to write
+it** and describe what you want to see.
 
-**With the CLI**, write it in Go and keep the `api` renderer:
+**With the CLI**, scaffold a Go extractor while keeping the `api` renderer:
 
 ```sh
 projections init <id> --language go --renderer api
 ```
 
-An extractor that writes `api/v0` declarations with a `data.signature` is drawn
-by the `api` renderer. Run it with `projections show -p <id> --trust` as you
-change it; an open projection tab uses your uncommitted edits ("Your edits") and
-says when its results are out of date, and the Testing view runs the
-projection's checks.
-[Write your first extractor](../../guides/first-extractor.md) walks through one,
-and [Extraction schema](../../guides/schemas.md#extraction-schema) describes
-what it prints.
+Any extractor that emits `api/v0` declarations with a `data.signature` works
+with the `api` renderer. Run `projections show -p <id> --trust` while you
+iterate—an open projection tab picks up your uncommitted edits ("Your edits")
+and flags stale results, and the Testing view runs your projection's checks.
+Walk through [Write your first extractor](../../guides/first-extractor.md) to
+get started, and check
+[Extraction schema](../../guides/schemas.md#extraction-schema) for the output
+format.

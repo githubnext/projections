@@ -1,53 +1,65 @@
 # Default comparator
 
-The default comparator decides what changed between two extractions: which items
-are the same thing, whether each was added, removed or modified, and in what
-order the change is told. Every projection uses it unless its definition names a
-comparator file, and a comparator file starts from its result. It knows nothing
-about your domain: it matches items by ID and explicit renames, and orders
-changes by the graph's structure.
+The default comparator figures out what changed between two extractions. It
+decides which items represent the same thing across revisions, marks each item
+as added, removed, or modified, and puts the changes in a sensible order.
+
+Every projection uses it unless its definition points to a comparator file—and
+even then, a comparator file builds on top of the default comparator's result.
+Because it knows nothing about your domain, it relies purely on IDs, explicit
+renames, and the graph's structure.
 
 ## When to use it
 
-Always, to begin with: it needs no configuration and fits every extraction. It
-is enough when IDs are stable across revisions and "added, removed, modified"
-says what a reviewer needs. Reach for a comparator file when a change needs a
-verdict only your domain can give (breaking or compatible, newly enforced,
-riskier), when renames and moves can't be declared in the extraction, or when
-the story should be told in an order the structure doesn't give.
+Start with the default comparator on every projection. It requires zero
+configuration and works with any extraction. As long as your IDs stay stable
+across revisions and "added, removed, modified" tells reviewers what they need
+to know, you don't need anything else.
+
+Move to a comparator file when reviewers need a domain-specific verdict (such as
+breaking vs. compatible, newly enforced, or higher risk), when renames and moves
+can't be declared during extraction, or when you want to present the changes in
+an order the graph's structure doesn't capture.
 
 ## How it decides
 
-1. **Same ID, same item.** Items with the same ID on both sides correspond
-   (`exact`). A pair is `modified` when its content differs, else unchanged.
-2. **Declared renames.** The remaining items are connected by the `previousIds`
-   an extraction claims, in either direction, so swapping the revisions finds
-   the same connection. A definition's `correspondence` map is applied as
-   `previousIds` too. Each connected group becomes one change: one item to one
-   item is `declared` (a rename or move), one to several is a `split`, several
-   to one a `merge`. Any other group is an `ambiguous-correspondence` error.
-3. **Everything else** is `added` or `removed`.
+1. **Match by ID.** Items with the same ID on both sides are paired as `exact`.
+   If their content differs, the pair is `modified`; otherwise it is unchanged.
+2. **Match declared renames.** Remaining items are linked using the
+   `previousIds` reported by the extraction, checked in both directions so
+   swapping the two revisions produces the same match. Any `correspondence` map
+   in the projection definition is applied as `previousIds` too. Each connected
+   group becomes a single change: one-to-one is `declared` (a rename or move),
+   one-to-many is a `split`, and many-to-one is a `merge`. Any other grouping
+   produces an `ambiguous-correspondence` error.
+3. **Classify everything else.** Any unmatched item is either `added` or
+   `removed`.
 
-A relationship whose endpoints were renamed is compared through the rename, so
-renaming an entity doesn't also modify every relationship that touches it.
-Evidence, `previousIds` and metadata never make a change. Fields an extraction
-declares [volatile](../../contracts/extractions.md#volatile-data), such as
-timings, only make a change when they move beyond their tolerance; within it,
-the pair is `unchanged`, listed with `varied` and in no step.
+When an entity is renamed, relationships pointing to it are compared across the
+rename so that a simple rename doesn't falsely mark every connected relationship
+as modified. Evidence, `previousIds`, and metadata never trigger a change on
+their own. Fields marked
+[volatile](../../contracts/extractions.md#volatile-data) by the extraction (such
+as timings) only count as a change when they move outside their tolerance;
+within tolerance, the pair stays `unchanged`, is listed with `varied`, and
+doesn't appear in any step.
 
-**Order.** Changes connected through the change itself form one group, and
-independent peers at the same depth change together. Removals go leaves first
-and additions roots first, as mirror images, so reversing the comparison
-reverses the steps. There are at most five removal and five addition waves
-(whole adjacent layers merge to stay within them); every other change
-(modifications, renames, splits and merges, and relationships between surviving
-items) forms one restructure step between them. A relationship leaves with the
-first of its departing endpoints and arrives with the last of its arriving ones.
+**How steps are ordered.** Connected changes travel together in one group, and
+independent peers at the same depth change at the same time. Removals run from
+the leaves inward and additions run from the roots outward, as mirror images, so
+reversing a comparison cleanly reverses its steps.
+
+To keep animations concise, removals and additions are each capped at five waves
+(adjacent layers merge when needed to stay within that limit). Everything
+else—modifications, renames, splits, merges, and relationship changes between
+surviving items—forms a single restructure step in between. A relationship
+leaves alongside the first of its departing endpoints and arrives with the last
+of its arriving ones.
 
 ## Options
 
-The only option sorts the steps within each phase. Set it in the definition's
-`comparator`:
+The default comparator has one option, which controls how steps are sorted
+within each phase. Set it under `comparator` in your projection definition:
 
 ```json
 "comparator": {"options": {"order": {"by": "dependents", "direction": "descending"}}}
@@ -62,31 +74,33 @@ The only option sorts the steps within each phase. Set it in the definition's
 
 <!-- end generated: options -->
 
-`order.by` is `dependents` (how many relationships point at a step's items, in
-the after extraction, or the before extraction for removals) or `data.<key>` (a
-numeric `data` field, such as `data.size`). Steps are sorted by the largest
-value among their items, `descending` by default. Ties keep the default order,
-and steps without a value go last.
+Set `order.by` to `dependents` to sort by how many relationships point at a
+step's items (measured in the after extraction, or the before extraction for
+removals), or to `data.<key>` to sort by a numeric `data` field such as
+`data.size`. Each step is ranked by the largest value among its items, in
+`descending` order by default. Ties preserve the default order, and steps
+missing that value sort last.
 
 ## What a comparison shows
 
-- **Status** of each change: `added`, `removed`, `modified` or `unchanged` (an
-  unchanged change is listed only when a rename or a volatile variation makes it
-  worth showing).
-- **Correspondence**: `exact`, `declared`, `split` or `merge`.
-- **Steps**: removals, then one restructure step, then additions, each with its
-  kind.
-- **No interpretations.** It writes no summaries, classifications or summary-bar
-  facts of its own; the renderer's summary bar counts each kind and its changes.
-  Verdicts such as "breaking" or "newly enforced" come from a comparator file.
+- **Change status** — `added`, `removed`, `modified`, or `unchanged` (unchanged
+  items appear only when a rename or volatile variation makes them worth
+  showing).
+- **Correspondence** — `exact`, `declared`, `split`, or `merge`.
+- **Ordered steps** — removals first, then a single restructure step, then
+  additions, each tagged with its kind.
+- **Counts without verdicts** — the default comparator doesn't add summaries,
+  classifications, or custom summary-bar facts; the renderer's summary bar
+  simply counts each kind and its changes. Domain verdicts like "breaking" or
+  "newly enforced" come from a comparator file.
 
-The same comparison drives every comparison mode (Side by side, Animated, Swipe
-and Diff) and the table and text views, so they always agree.
+One comparison object drives every view—Side by side, Animated, Swipe, Diff,
+table, and text—so they always agree.
 
 ## Start from this definition
 
-A definition uses the default comparator when it names none. To set its options,
-give `comparator` an object without `file`:
+You get the default comparator automatically whenever a definition doesn't name
+a comparator file. To pass options, add a `comparator` object without `file`:
 
 ```json
 {
@@ -99,72 +113,76 @@ give `comparator` an object without `file`:
 
 ## What a comparator file adds
 
-The same API change, compared by the default comparator and then by the
+Here is the same API change compared first with the default comparator and then
+with the
 [`api-compatibility`](../../../packages/comparators/api-compatibility/README.md)
-comparator file, which classifies each change as breaking, additive or
+comparator file, which classifies every change as breaking, additive, or
 compatible:
 
 ![The API renderer with the default comparator: changes marked added, removed and modified](../../images/comparators/api-compatibility-default.png)
 
 ![The same change with the api-compatibility comparator: each change classified, breaking ones first](../../images/comparators/api-compatibility.png)
 
-[Custom comparators: what they make possible](../../guides/comparators.md) shows
-more, with the default comparison of each beside it.
+See [Custom comparators: what they make possible](../../guides/comparators.md)
+for more side-by-side examples.
 
 ## Limitations
 
-- It trusts IDs. An extractor whose IDs change when nothing meaningful did (an
-  index, a generated name) makes every such item removed and added; declare
-  `previousIds` or a definition `correspondence`, or write identity passes in a
-  comparator file.
-- It can't tell how much a change matters: a whitespace edit and a breaking
-  change are both `modified`.
-- The order follows the graph's structure, not risk or domain priority, beyond
-  what `order.by` can sort.
+- **It takes IDs at face value.** If an extractor uses unstable IDs (such as an
+  array index or a generated name), unchanged items will show up as removed and
+  re-added. Fix this by emitting `previousIds`, adding a `correspondence` map in
+  the definition, or writing identity passes in a comparator file.
+- **It can't judge severity.** A harmless whitespace edit and a breaking change
+  both show up as `modified`.
+- **Ordering is structural.** Beyond what `order.by` can sort, steps follow the
+  graph's shape rather than risk or domain priority.
 
 ## Related
 
-- Comparator files that ship with Projections:
+- Built-in comparator files that ship with Projections:
   [`api-compatibility`](../../../packages/comparators/api-compatibility/README.md),
-  [`runtime-policy`](../../../packages/comparators/runtime-policy/README.md) and
+  [`runtime-policy`](../../../packages/comparators/runtime-policy/README.md),
+  and
   [`agentic-workflows`](../../../packages/comparators/agentic-workflows/README.md).
-- [Comparisons](../../contracts/comparisons.md): the rules every comparison
-  follows, whichever comparator made it.
+- [Comparisons](../../contracts/comparisons.md) — the contract every comparison
+  follows, regardless of which comparator produced it.
 
 ## How it works
 
-The [package README](../../../packages/comparators/default/README.md) covers how
-the comparator is built and sandboxed.
+See the [package README](../../../packages/comparators/default/README.md) for
+how the default comparator is built and sandboxed.
 
 ## Build your own
 
-The default comparator can say _that_ something changed, not what the change
+The default comparator tells you _that_ something changed, not what that change
 means. Write a comparator file when:
 
-- **Your domain decides what's breaking or noteworthy.** A removed export is
-  breaking, a widened selector broadens a security policy, a migration that
-  drops a column needs a second look: rules classify each change and write its
-  summary in your words.
-- **Things move without keeping their IDs.** Identity passes pair items by a key
-  you choose (a name within its new module, a path that moved), so a move reads
-  as one change, not a removal and an addition.
-- **The story needs another order.** Rank steps by risk, owner or priority, or
-  regroup them.
-- **The summary bar should state your facts.** A comparator's summaries and
-  metadata reach every renderer, the text view and the JSON, so "3 breaking
-  changes" is the same everywhere.
+- **Your domain defines what is breaking or risky.** Removing an export breaks
+  callers, widening a selector broadens a security policy, and dropping a
+  database column deserves a closer look. Custom rules let you classify each
+  change and explain it in your team's terms.
+- **Items move without keeping their IDs.** Identity passes let you pair items
+  by a key you choose (like a symbol name in a new module or a relocated path)
+  so a move reads as one change instead of a removal and an addition.
+- **The review needs a different order.** You can rank steps by risk, owner, or
+  priority, or regroup them altogether.
+- **The summary bar should surface domain facts.** Summaries and metadata from a
+  comparator flow to every renderer, the text view, and the JSON output, so "3
+  breaking changes" stays consistent everywhere.
 
-Try the lighter fix first: `order.by` sorts steps by dependents or a numeric
-field, and a definition's `correspondence` declares known renames. A comparator
-file never replaces the default comparator; it layers declarations over it, so
-you only write what's different.
+Before writing a full comparator file, check whether a lighter option works:
+`order.by` can sort steps by dependents or a numeric field, and `correspondence`
+in the projection definition handles known renames. When you do write a
+comparator file, it layers on top of the default comparator rather than
+replacing it, so you only declare what's different.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
+**In VS Code**, select **+ New Projection…** in the Projections view, choose
 **Write a custom extractor, renderer or comparator** › **Custom comparator**,
-and pick the built-in extractor it works with. It writes the definition, a
-commented starter comparator file (`<id>.comparator.yaml`) and its tests
-(`<id>.comparator.test.yaml`) under `.github/projections/<id>/`. Or choose **Ask
-an agent to write it** and describe what the comparison should say.
+and pick the built-in extractor it pairs with. VS Code scaffolds the definition,
+a commented starter comparator file (`<id>.comparator.yaml`), and its tests
+(`<id>.comparator.test.yaml`) under `.github/projections/<id>/`. You can also
+choose **Ask an agent to write it** and describe what you want the comparison to
+report.
 
 **With the CLI**:
 
@@ -172,14 +190,15 @@ an agent to write it** and describe what the comparison should say.
 projections init <id> --extractor <extractor> --comparator custom
 ```
 
-Then edit the comparator file. VS Code checks it as you type (diagnostics,
-hovers and completions for its CEL), an open projection tab uses your
-uncommitted edits ("Your edits") and compares again each time you save, and the
-Testing view runs the comparator's tests and the projection's checks
-(`projections check -p <id>` does the same in a terminal).
+As you edit the comparator file, VS Code validates its CEL expressions live with
+diagnostics, hovers, and completions. An open projection tab picks up your
+uncommitted edits ("Your edits") and re-runs the comparison whenever you save.
+You can run the comparator's tests and projection checks from the Testing view,
+or from a terminal with `projections check -p <id>`.
+
+To go deeper, see
 [Write a custom comparator](../../guides/order-of-changes.md#write-a-custom-comparator)
-walks through one,
+for a walkthrough,
 [Test a custom comparator](../../guides/order-of-changes.md#test-a-custom-comparator)
-covers its tests, and
-[Custom comparators](../../design/declarative-comparators.md) is the full
-reference.
+for testing, and [Custom comparators](../../design/declarative-comparators.md)
+for the full reference.

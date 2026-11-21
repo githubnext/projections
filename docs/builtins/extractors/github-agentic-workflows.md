@@ -1,12 +1,13 @@
 # Agentic workflows
 
-The agentic workflows a repository runs with
-[GitHub Agentic Workflows](https://github.com/github/gh-aw) (gh-aw), as what a
-reviewer asks of an unattended agent: what starts it, what it can reach (tools,
-repositories, bash, network, permissions), what it may write and how much, what
-it costs, what it loads, and whether its compiled lock file still matches its
-source. Compared across a pull request, it answers "does this change let an
-agent reach more, write more or spend more, or drop a guardrail?"
+This extractor summarizes the unattended agent workflows a repository runs with
+[GitHub Agentic Workflows](https://github.com/github/gh-aw) (gh-aw) around the
+questions reviewers actually ask: what triggers each agent, what it can access
+(tools, repositories, bash, network, permissions), what and how much it may
+write, what budgets limit its cost, what shared files it loads, and whether its
+compiled lock file still matches its source. Compared across a pull request, it
+shows whether a change lets an agent reach further, write more, spend more, or
+drop a guardrail.
 
 <!-- generated: facts -->
 
@@ -22,54 +23,54 @@ agent reach more, write more or spend more, or drop a guardrail?"
 
 ## When to use it
 
-Use it in a repository with gh-aw workflows (`.github/workflows/*.md` beside
-their `.lock.yml`), to review a workflow change by what it allows rather than as
-a front matter diff, where a new network domain, a second repository in
-`allowed-repos` or `bash: true` is one line among many, and where a widened
-allowlist can arrive through a shared import without the workflow changing at
-all. It reads the checked-in markdown and lock headers, so it runs nothing and
-needs no `--trust`: a projection defined on the base branch can examine a fork's
-pull request safely.
+Use this extractor in repositories running gh-aw workflows
+(`.github/workflows/*.md` alongside their `.lock.yml` files) when you want to
+review workflow changes by capability rather than combing through front matter
+diffs. In raw YAML, an extra network domain, a second repository in
+`allowed-repos`, or `bash: true` is easy to miss—and a widened allowlist can
+even sneak in through a shared import without touching the workflow file at all.
+Because this extractor only parses checked-in Markdown and lock headers, it
+executes nothing and needs no `--trust`, so a projection defined on the base
+branch can safely inspect pull requests from forks.
 
-It describes what the repository declares, not what a run did: which tools the
-agent called, what it wrote and what it cost are a run's facts, not the
-declaration's.
+It models what the repository declares rather than what happened in a specific
+run: actual tool calls, outputs written, and credits spent belong to run
+telemetry rather than the workflow definition.
 
 ## What it reads
 
-- **Workflows**: every `.md` under `.github/workflows` (`paths` and `exclude`
-  change which) whose front matter has `on`; shared components and `README.md`
-  are skipped.
-- **Front matter**: triggers and activation (roles, bots, reactions, skip
-  conditions), engine and model, tools and their scope (GitHub toolsets,
+- **Workflows** include every `.md` file under `.github/workflows` (customized
+  with `paths` and `exclude`) whose front matter declares `on`. Shared
+  components and `README.md` are skipped automatically.
+- **Front matter** covers triggers and activation (roles, bots, reactions, skip
+  conditions), engine and model, tools and scope (GitHub toolsets,
   `allowed-repos`, `min-integrity`, bash commands, MCP servers), network
-  allowlist, permissions, safe outputs with their limits and target
-  repositories, secrets referenced, imports and skills, budgets (timeout, turns,
-  tool calls, AI credits per run and per day), custom jobs and steps,
-  concurrency and strict mode.
-- **Imports**, transitively, merged into the workflow as gh-aw merges them, with
-  the import each merged item came from: a domain a shared file adds shows as
-  added _via_ that file.
-- **Lock files**: the hashes gh-aw records in each `.lock.yml`, recomputed from
-  the source as gh-aw computes them, so a lock that no longer matches its
-  workflow is `stale` (a missing one is `missing`).
+  allowlists, permissions, safe outputs with their limits and target
+  repositories, referenced secrets, imports and skills, budgets (timeout, turns,
+  tool calls, and per-run/per-day AI credits), custom jobs and steps,
+  concurrency, and strict mode.
+- **Imports** are resolved transitively and merged into each workflow the same
+  way gh-aw merges them, preserving provenance so a domain introduced by a
+  shared file shows as added _via_ that file.
+- **Lock files** verify the hashes gh-aw writes into each `.lock.yml` by
+  recomputing them from source. A lock file that no longer matches its workflow
+  is flagged `stale`, and a missing one is flagged `missing`.
 
-`groups` makes units of workflows that work together, by name prefix
-(`"prefix"`: `docs-bot` with `docs-bot-links` and `docs-bot-examples`) or by
-glob. `classes` names imports and skills by glob, such as `guardrail` for
-`skills/check-*`.
+Use `groups` to cluster related workflows—either `"prefix"` (grouping `docs-bot`
+with `docs-bot-links` and `docs-bot-examples`) or a map of globs. Use `classes`
+to tag imports and skills by glob, such as `guardrail` for `skills/check-*`.
 
 ### gh-aw's changing front matter
 
-gh-aw's front matter has been changing. The extractor pins the schema of one
-gh-aw release (v1.3.0) and records it in every extraction (`metadata.ghAw`). A
-field that release doesn't declare is reported as unrecognized rather than
-failing or being dropped; fields gh-aw renamed (`timeout_minutes`, `on.command`,
-`tools.github.repos`, …) are read under their current names and reported as
-deprecated with the `gh aw fix` codemod that moves them; and a lock compiled by
-a newer gh-aw is a notice. The
+Because gh-aw's front matter schema is evolving, this extractor pins one gh-aw
+release (v1.3.0) and records it in every extraction (`metadata.ghAw`). Fields
+not declared in that release are reported as unrecognized rather than failing or
+being silently dropped. Fields renamed by gh-aw (`timeout_minutes`,
+`on.command`, `tools.github.repos`, …) are read under their current names and
+reported as deprecated alongside the `gh aw fix` codemod that migrates them. A
+lock file compiled by a newer version of gh-aw produces a notice. See the
 [package README](../../../packages/extractors/github-agentic-workflows/README.md#gh-aws-changing-front-matter)
-describes how the pin moves.
+for how the schema pin advances.
 
 ## Options
 
@@ -86,55 +87,59 @@ describes how the pin moves.
 
 ## What a comparison shows
 
-The [`agentic-workflows`](../renderers/agentic-workflows.md) renderer draws a
-card per workflow, in its group, with a row per section, and shows a comparison
-as one Diff view or Side by side. Each workflow is one item, so a workflow whose
-triggers, scope, outputs, budgets, imports or lock state change is modified:
+The [`agentic-workflows`](../renderers/agentic-workflows.md) renderer displays
+one card per workflow inside its group, with a row for each section, in either
+Diff or Side by side view. Because each workflow is one entity, any change to
+its triggers, scope, outputs, budgets, imports, or lock state marks that
+workflow as modified:
 
-- **Entries** that arrive or leave in a section (a domain, a repository, a
-  toolset, a safe output, a skill) are pills with their sign; one that changes
-  in place reads old → new (`max 1` → `max 3`).
-- **Workflows** added or removed, groups that gain or lose members, and
-  `dispatches` between workflows.
-- **Warnings** (a stale or missing lock file, an unrecognized or renamed field)
-  describe the revision they are found in.
+- **Section entries** added or removed (domains, repositories, toolsets, safe
+  outputs, skills) appear as signed pills, while in-place updates show old → new
+  (`max 1` → `max 3`).
+- **Structure changes** highlight added or removed workflows, group membership
+  changes, and `dispatches` between workflows.
+- **Warnings** surface stale or missing lock files and unrecognized or renamed
+  fields for the revision where they occur.
 
-The summary bar counts workflows, groups and dispatches, then the lock files out
-of date (`1 lock file out of date`). The **Matrix** view (the renderer's `view`
-control) draws workflows against what they load, use, write and reach.
+The summary bar tallies workflows, groups, and dispatches, followed by any out
+of date lock files (`1 lock file out of date`). Switch to the **Matrix** view
+(via the renderer's `view` control) to see all workflows cross-referenced
+against what they load, use, write, and reach.
 
 ### Interpreting changes: the agentic-workflows comparator
 
-The default comparator says _that_ a workflow changed. The
+The default comparator tells you _that_ a workflow changed. The
 [`agentic-workflows` comparator file](../../../packages/comparators/agentic-workflows/README.md)
-that ships with Projections says in which direction: whether the change widens
-what an unattended agent may do (a warning) or narrows it (a note). It isn't
-built in: copy
+shipped with Projections tells you which direction it moved—flagging changes
+that widen an unattended agent's authority as warnings, and changes that narrow
+it as notes. Copy
 `packages/comparators/agentic-workflows/agentic-workflows.comparator.yaml` into
-your repository and name it in the definition:
+your repository and reference it in your definition:
 
 ```json
 "comparator": {"file": ".github/projections/agentic-workflows.comparator.yaml", "options": {"gates": ["guardrail"]}}
 ```
 
-It keeps the default comparator's matching and statuses and adds:
+It keeps the default comparator's matching and statuses while adding:
 
-- **Interpretations** of each change, each a warning or a note with what moved:
-  `gate-removed` (a classified import or skill, such as a `check-*` guardrail,
-  is no longer loaded), `repos-widened`, `permissions-widened`, `bash-widened`,
-  `network-widened`, `outputs-widened` (a new safe output, a higher `max`,
-  another target repository), `tools-widened` (a tool, MCP server or toolset, a
-  lower `min-integrity`), `secrets-added`, `strict-disabled`,
-  `triggers-widened`, `budget-raised`, `workflow-added`, `lock-stale` and
-  `unrecognized-field`, and their narrowing counterparts as notes.
-- **One sentence per change**, from its most severe interpretation: "`docs-bot`
-  no longer loads `skills/check-links` (`guardrail`)." or "`repo-ask` can reach
-  more of the network: `*.readthedocs.io`, `python`."
-- **Order**: steps by their widest change, a dropped gate first.
+- **Directional interpretations** for each change, labeling widenings as
+  warnings and narrowings as notes: `gate-removed` (a classified import or skill
+  like a `check-*` guardrail was dropped), `repos-widened`,
+  `permissions-widened`, `bash-widened`, `network-widened`, `outputs-widened` (a
+  new safe output, higher `max`, or additional target repo), `tools-widened` (a
+  new tool, MCP server, or toolset, or a lower `min-integrity`),
+  `secrets-added`, `strict-disabled`, `triggers-widened`, `budget-raised`,
+  `workflow-added`, `lock-stale`, and `unrecognized-field`.
+- **Plain-English summaries**, one sentence per change based on its most severe
+  finding—for example, "`docs-bot` no longer loads `skills/check-links`
+  (`guardrail`)." or "`repo-ask` can reach more of the network:
+  `*.readthedocs.io`, `python`."
+- **Risk-first ordering**, sorting steps by their widest change with dropped
+  gates at the top.
 
-Rules run sandboxed and need no trust, in the CLI, VS Code and hosted views; a
-hosted view runs the comparator file from the pull request's base, so a pull
-request can't change how it is judged.
+Comparator rules run sandboxed without requiring trust in the CLI, VS Code, and
+hosted views. In hosted views, the comparator file is loaded from the pull
+request's base branch, so a PR cannot alter the rules judging it.
 
 ## Start from this definition
 
@@ -155,70 +160,73 @@ request can't change how it is judged.
 
 ## Limitations
 
-- gh-aw's compiler isn't run: natural-language triggers (`on: daily`,
-  `push to main`) stay as written, and defaults gh-aw fills in are shown only
-  for the network (`defaults`), the GitHub toolsets (`default`), roles, the
-  engine (`copilot`), the timeout (20 minutes) and AI credits (1,000 per run, no
+- gh-aw's compiler does not run during extraction. Natural-language triggers
+  (`on: daily`, `push to main`) remain as written, and gh-aw defaults are filled
+  in only for network (`defaults`), GitHub toolsets (`default`), roles, engine
+  (`copilot`), timeout (20 minutes), and AI credits (1,000 per run, with no
   daily limit).
-- Imports from other repositories are listed but not read; gh-aw fetches them
-  when it compiles. Runtime imports (`{{#runtime-import}}`) count for the lock
-  check but their contents aren't modeled.
-- A workflow's prompt (its markdown body) isn't modeled: only whether it changed
-  since the lock was compiled.
-- Renaming a workflow file is a removal and an addition unless the definition
-  declares a `correspondence`.
+- Imports from external repositories are listed but not fetched (gh-aw fetches
+  them at compile time). Runtime imports (`{{#runtime-import}}`) participate in
+  the lock-hash check, though their contents are not modeled.
+- The workflow's prompt (its Markdown body) is not modeled beyond whether it
+  changed since the lock file was compiled.
+- Renaming a workflow file appears as a removal and an addition unless you
+  declare a `correspondence` entry in your definition.
 
 ## Related
 
-- [`agentic-workflows`](../renderers/agentic-workflows.md), the renderer that
-  draws it.
-- [`github-actions-jobs`](github-actions-jobs.md), the job graph of an ordinary
-  Actions workflow (such as a compiled lock file).
-- [One model for agentic workflows](../../models/agentic-workflow-model.md), the
-  vocabulary it writes, and the
+- [`agentic-workflows`](../renderers/agentic-workflows.md) is the renderer that
+  displays these workflows.
+- [`github-actions-jobs`](github-actions-jobs.md) graphs the jobs of standard
+  Actions workflows, including compiled lock files.
+- [One model for agentic workflows](../../models/agentic-workflow-model.md)
+  documents the vocabulary this extractor emits, alongside the
   [`agentic-workflows` comparator file](../../../packages/comparators/agentic-workflows/README.md)
   that interprets it.
-- [The default comparator](../comparators/default.md), which the comparator file
-  builds on.
+- [The default comparator](../comparators/default.md) is the foundation the
+  comparator file builds on.
 
 ## How it works
 
-The
+See the
 [package README](../../../packages/extractors/github-agentic-workflows/README.md)
-details what it reads, how it handles gh-aw's schema changes and how the lock
-check matches gh-aw.
+for details on parsing, gh-aw schema evolution, and how lock verification
+matches gh-aw.
 
 ## Build your own
 
-Write your own extractor when gh-aw's declarations aren't what you want to
-review:
+Consider writing a custom extractor when gh-aw's declarations are not what you
+need to review:
 
-- **Another agent platform**: a coding agent's repository configuration, another
-  workflow compiler's sources. Write the same
-  [agentic workflow model](../../models/agentic-workflow-model.md).
-- **What runs did**: the tools an agent called, the outputs it wrote and the
-  credits it spent, from the Actions API or gh-aw's logs.
+- **Another agent platform**, such as a coding agent's repository config or a
+  different workflow compiler's source files. Emit the same
+  [agentic workflow model](../../models/agentic-workflow-model.md) to reuse this
+  renderer.
+- **Actual run behavior**, pulling the tools an agent called, outputs it wrote,
+  and credits it spent from the Actions API or gh-aw logs.
 
-Try the lighter options first: `paths` and `exclude` choose the workflows,
-`groups` the units and `classes` the imports and skills that matter. To change
-what counts as widening or how a change is worded, edit your copy of the
-comparator file rather than the extractor.
+Check the built-in options first: `paths` and `exclude` select which workflows
+to include, `groups` organizes them into units, and `classes` tags important
+imports and skills. If you only want to tune what counts as widening or how
+summaries are phrased, edit your copy of the comparator file instead of writing
+a new extractor.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
-**Write a custom extractor, renderer or comparator** › **Custom extractor** (or
-**Custom extractor and renderer**), and pick its language. Or choose **Ask an
-agent to write it** and describe what the projection should show.
+**In VS Code**, open the Projections view, choose **+ New Projection…**, and
+select **Write a custom extractor, renderer or comparator** › **Custom
+extractor** (or **Custom extractor and renderer**), then pick a language. You
+can also choose **Ask an agent to write it** and describe what you want to see.
 
-**With the CLI**:
+**With the CLI**, scaffold a new extractor while keeping the `agentic-workflows`
+renderer:
 
 ```sh
 projections init <id> --language node --renderer agentic-workflows
 ```
 
-An extractor is any program that prints an extraction; here an `architecture/v0`
-extraction that declares the
+An extractor is any program that prints an extraction—in this case, an
+`architecture/v0` extraction declaring the
 [`agentic-workflows/v0` vocabulary](../../reference/schemas/vocabularies-agentic-workflows.md).
-Run it with `projections show -p <id> --trust` as you change it.
-[Write your first extractor](../../guides/first-extractor.md) walks through one,
-and [Extraction schema](../../guides/schemas.md#extraction-schema) describes
-what it prints.
+Run `projections show -p <id> --trust` as you iterate. Walk through
+[Write your first extractor](../../guides/first-extractor.md) to get started,
+and check [Extraction schema](../../guides/schemas.md#extraction-schema) for the
+output format.

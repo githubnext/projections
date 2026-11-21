@@ -1,64 +1,70 @@
 # Projections host guide
 
-The browser host presents one extraction, or a comparison of two, through
-renderer bundles in sandboxed frames. It comes in three layers:
+The browser host renders a single extraction or a comparison of two extractions
+inside sandboxed renderer frames. It is split into two public packages (with
+third-party or custom shells as an optional third layer):
 
 <!-- prettier-ignore -->
 | Layer | Package | What it is |
 |---|---|---|
-| Headless core | `@githubnext/projections-host` | State, actions and renderer frames. It owns everything that must be correct and secure, and renders no controls. |
-| Default UI | `@githubnext/projections-host/ui` | `ProjectionView` and `ComparisonExplorer` built on the core with shadcn/ui, scoped so embedding pages and the UI don't affect each other. Used by the Inspector and third-party embedders. |
+| Headless core | `@githubnext/projections-host` | State, actions, and renderer frames. It handles everything that has to be correct and secure without rendering any UI controls of its own. |
+| Default UI | `@githubnext/projections-host/ui` | `ProjectionView` and `ComparisonExplorer` built on top of the core with shadcn/ui, styled in isolation so the host UI and your page do not interfere with each other. Used by the Inspector and third-party embedders. |
 
-Hosts choose which features to expose. A host can offer side by side only and no
-play button, or draw every control with its own design system.
+Each host decides how much of the surface to expose—you might ship a
+side-by-side-only view with no play button, or build every control in your own
+design system.
 
-This guide explains each layer and how to embed it. The package's
-[README](../../packages/host/core/README.md) lists its entry points, and the
-[guide's embedding section](embedding.md#embedding-projections-in-your-own-app)
-shows where the host fits in an application.
+This page covers the shared frame boundary, bundle serving, and CLI contracts.
+For the entry points exported by the package, see its
+[README](../../packages/host/core/README.md), and for how the host fits into a
+larger app, see
+[embedding projections in your own app](embedding.md#embedding-projections-in-your-own-app).
 
 ## Layers
 
-Each layer has its own page:
+Each layer has its own guide:
 
-- [The host's headless core](host-core.md): state, actions, targets, annotations
-  and settings.
-- [The host's default UI](host-ui.md): `ProjectionView`, `ComparisonExplorer`
-  and the layer-2 blocks.
+- [The host's headless core](host-core.md) covers state, actions, targets,
+  annotations, and settings.
+- [The host's default UI](host-ui.md) covers `ProjectionView`,
+  `ComparisonExplorer`, and the reusable layer-2 blocks.
 
 ## Renderer frames
 
 `RendererFrame` implements the host side of the
-[renderer frame protocol](renderer-sdk.md#protocol):
+[renderer frame protocol](renderer-sdk.md#protocol) and enforces the sandbox
+boundary:
 
-- It creates
+- It mounts
   `<iframe sandbox="allow-scripts" allow="" referrerpolicy="no-referrer" aria-label="<Renderer> renderer">`.
-  The name is an `aria-label`, not a `title`, which browsers would show as a
-  tooltip over the whole frame. It never sets `allow-same-origin`, so the
-  renderer runs in an opaque origin with no access to the host's DOM, storage or
-  cookies.
-- Each frame gets a fresh 192-bit channel nonce, sent in the URL fragment
-  together with the host origin and color mode. A message is accepted only if
-  all of the following hold; otherwise it is dropped:
-  - `event.source` is that frame's window and `event.origin` is `"null"`.
-  - It carries the protocol tag and channel.
-  - It validates strictly: known type, no unknown fields, values in range.
-  - It is no larger than 64 KiB, and the frame is within 240 messages per
-    second.
-- A frame that becomes non-opaque is stopped. So is one that isn't ready within
-  10 s, loads a second document (navigates), or exceeds the rate limit tenfold.
-  The alert keeps the table and text views one click away.
-- Progress is flow-controlled. At most one progress value is unacknowledged;
-  newer values replace a pending one and are sent on `rendered`, or after a 1 s
-  acknowledgement timeout.
+  The accessible name uses `aria-label` rather than `title` so browsers do not
+  pop up a tooltip over the entire frame. Because `allow-same-origin` is never
+  set, the renderer runs in an opaque origin with no access to the host's DOM,
+  storage, or cookies.
+- Each frame receives a fresh 192-bit channel nonce in its URL fragment along
+  with the host origin and color mode. Incoming messages are silently dropped
+  unless every check passes:
+  - `event.source` matches the frame's window and `event.origin` is `"null"`.
+  - The message includes the expected protocol tag and channel.
+  - The payload validates strictly—known type, no unknown fields, and all values
+    within range.
+  - The message is 64 KiB or smaller and stays within 240 messages per second.
+- The host terminates any frame that escapes its opaque origin, fails to report
+  ready within 10 s, navigates to a second document, or exceeds the message rate
+  limit by 10×. When that happens, the error alert keeps the table and text
+  views one click away.
+- Progress updates are flow-controlled. Only one progress value can be in flight
+  without an acknowledgement at a time; newer values replace the pending one and
+  are flushed on `rendered` or after a 1 s timeout.
 
 ### Serving renderer bundles
 
-Renderer bundles are single documents: `index.html` and `renderer.json`, with
-the `THIRD_PARTY_NOTICES.txt` the SDK build writes beside them. Serve each
-bundle's `index.html` with this policy as a response header. It is exported as
-`rendererContentSecurityPolicy` from the package and from the SDK protocol, and
-as `rendererResponseHeaders(path)` from `@githubnext/projections-host/build`:
+A renderer bundle is a self-contained static directory containing `index.html`,
+`renderer.json`, and the `THIRD_PARTY_NOTICES.txt` generated by the SDK build.
+Serve every bundle's `index.html` with the following Content Security Policy
+header. You can import it as `rendererContentSecurityPolicy` from the host
+package or SDK protocol, or get the full header map from
+`rendererResponseHeaders(path)` in `@githubnext/projections-host/build`:
 
 ```
 default-src 'none'; script-src 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'unsafe-inline';
@@ -66,43 +72,48 @@ img-src data: blob:; font-src data:; media-src data: blob:; worker-src blob:; co
 object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; sandbox allow-scripts
 ```
 
-The policy grants no source at all, not even `'self'`. A renderer can't fetch,
-load or prefetch anything, including files from its own bundle. Don't send
-`X-Frame-Options: DENY` or `frame-ancestors 'none'` on renderer documents. The
-host page itself needs `frame-src 'self'` (or the renderer origin).
+This policy denies all network and origin sources, including `'self'`, so a
+renderer cannot fetch, load, or prefetch anything—not even other files in its
+own bundle. Avoid sending `X-Frame-Options: DENY` or `frame-ancestors 'none'` on
+renderer documents, and give the host page itself `frame-src 'self'` (or the
+origin serving the renderers).
 
+To package bundles at build time, call
 `collectRenderers({packages, outDir, from})` from
-`@githubnext/projections-host/build` copies built bundles into
-`<outDir>/renderers/<name>/` and writes `<outDir>/renderers/index.json`
-(`{"format":"projections.renderers","version":0,"renderers":[manifest…]}`) and
-`<outDir>/renderers/THIRD_PARTY_NOTICES.txt` (every bundle's notices, each
-package version once). It fails for a bundle without notices.
-`rendererNotices({packages, from, exclude})` returns the same merged notices for
-an application's own `THIRD_PARTY_NOTICES.txt`; the Inspector (and so
-`projections licenses`) include them. `loadRendererCatalog({base})` reads that
-catalog. With `loadRendererCatalog({base, names})` it reads each
-`<base><name>/renderer.json` instead.
+`@githubnext/projections-host/build`. It copies built bundles into
+`<outDir>/renderers/<name>/`, writes `<outDir>/renderers/index.json`
+(`{"format":"projections.renderers","version":0,"renderers":[manifest…]}`), and
+merges every bundle's notices into `<outDir>/renderers/THIRD_PARTY_NOTICES.txt`
+(deduplicated by package version). Any bundle missing its notices file causes
+collection to fail. If you want those same merged notices for your own
+application's `THIRD_PARTY_NOTICES.txt`, call
+`rendererNotices({packages, from, exclude})`; the Inspector (and therefore
+`projections licenses`) uses this. At runtime, `loadRendererCatalog({base})`
+reads `index.json`, or `loadRendererCatalog({base, names})` reads each
+`<base><name>/renderer.json` directly.
 
-A definition's renderer string matches a bundle with that exact `name` first,
-then the first bundle whose `handles` includes it. A custom renderer
-(`{"bundle": …}`) needs an entry from the embedding application
-(`customRenderer(manifest, url)`). An application that withholds one, for
-example because it needs trust that wasn't granted, passes `{withheld: reason}`
-instead. Without a custom entry, the built-in renderer for the extraction's
-schema (`resolveRenderer(requested, catalog, custom, schema)`) is used. If
-nothing matches, the host says so and shows the table.
+When resolving a definition's renderer string, the host first looks for a bundle
+with that exact `name`, then falls back to the first bundle whose `handles` list
+includes it. A custom renderer (`{"bundle": …}`) requires the embedding app to
+supply an entry via `customRenderer(manifest, url)`, or `{withheld: reason}` if
+it needs to block the renderer (for instance, when workspace trust has not been
+granted). Without a custom entry,
+`resolveRenderer(requested, catalog, custom, schema)` falls back to the built-in
+renderer for the extraction's schema. If nothing matches, the host explains why
+and shows the table view instead.
 
-`ProjectionView` and `ComparisonExplorer` display `notices`, for example those
-of a saved comparison document.
+Both `ProjectionView` and `ComparisonExplorer` also render `notices`, such as
+those carried by a saved comparison document.
 
 ## Contracts with the native CLI
 
-The Inspector UI (`packages/host/inspector/`) uses these. The CLI documents its
-side in `docs/runner.md`.
+The Inspector UI (`packages/host/inspector/`) talks to the CLI over the
+endpoints below. For the CLI's side of these contracts, see `docs/runner.md`.
 
-**Inspector service.** The CLI answers these paths in memory, with no listener:
-for the VS Code extension through `projections serve --stdio` (its `request`
-method), and in its own headless pages (`--png`, `check`).
+**Inspector service.** The CLI handles these routes in memory without opening a
+network listener—for the VS Code extension via the `request` method of
+`projections serve --stdio`, and for its own headless commands (`--png` and
+`check`).
 
 <!-- prettier-ignore -->
 | Route | Use |
@@ -113,16 +124,17 @@ method), and in its own headless pages (`--png`, `check`).
 | `GET /api/renderers` | Optional: `{"renderers": [names], "customRendererBase"?: "<prefix>"}`. A custom renderer for projection P is at `<prefix><P>/index.html?ref=<definition revision>`. |
 | `GET /renderers/<name>/index.html`, `renderer.json`, `index.json` | Built-in bundles from the Inspector's embedded assets, sent with the renderer policy |
 
-The Inspector's assets also include `packages/engine/` (engine and default
-comparator Wasm and Worker) and `comparator/` (comparator runtime Worker:
-`worker-entry.js`, `execute.js`, `abi.js`) as same-origin scripts. The page
-policy needs `script-src 'self' 'wasm-unsafe-eval'` and `frame-src 'self'` (or
-`default-src 'self'`).
+The Inspector's embedded assets also ship `packages/engine/` (the engine and
+default comparator Wasm and Worker) and `comparator/` (the comparator runtime
+Worker: `worker-entry.js`, `execute.js`, `abi.js`) as same-origin scripts. The
+host page's CSP needs `script-src 'self' 'wasm-unsafe-eval'` and
+`frame-src 'self'` (or `default-src 'self'`).
 
-**Fixtures mode** (`projections serve --stdio --fixtures`) adds
-`GET /api/fixtures` (validated scenarios, inline extractions and renderer
-bundles served at `/custom-renderers/<capability>/fixtures/<key>/index.html`)
-and `GET /api/fixtures/changes?since=<generation>` (a long poll that returns
-when a watched file changes). Comparisons are computed in the browser with
-`compareExtractions`, which runs the default comparator with options, or a
-comparator file in the rules runtime, without definition checks.
+**Fixtures mode** (`projections serve --stdio --fixtures`) adds two endpoints:
+`GET /api/fixtures` returns validated scenarios, inline extractions, and
+renderer bundles served at
+`/custom-renderers/<capability>/fixtures/<key>/index.html`, while
+`GET /api/fixtures/changes?since=<generation>` is a long poll that resolves
+whenever a watched file changes. Comparisons run in the browser through
+`compareExtractions`, which executes either the default comparator with options
+or a comparator file in the rules runtime without definition checks.

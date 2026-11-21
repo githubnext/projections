@@ -1,12 +1,12 @@
 # Extension points
 
-Part of the [domain model](../domain-model.md): what customers can replace, and
-the rules every component follows.
+This page is part of the [domain model](../domain-model.md). It explains which
+pieces of a projection teams can replace and the rules every component follows.
 
-A customer can replace none, any or all of a projection's three components. All
-three are fully and officially supported extension points, with documentation,
-schemas, Inspector support and compatibility commitments. They differ in how
-often customers are expected to need them.
+You can swap out none, some, or all of a projection's three components. All
+three are first-class extension points with documentation, schemas, Inspector
+support, and compatibility guarantees, though in practice teams reach for them
+at very different rates.
 
 <!-- prettier-ignore -->
 | Component | Expected use | Typical reason to replace it | Runs in |
@@ -15,29 +15,29 @@ often customers are expected to need them.
 | Renderer | **Somewhat common** | A different presentation is needed | A sandboxed browser frame |
 | Comparator | **Relatively uncommon** | Default matching, interpretation or ordering doesn't explain changes well | Comparator rules: a YAML file of CEL expressions, run by the sandboxed rules interpreter in the CLI, the Inspector, browsers and hosted views |
 
-The expected frequency shapes investment. Extractor authoring gets the most
-examples, templates and Inspector support. The default comparator gets
-configuration options that cover common needs, so that writing a comparator is
-reserved for genuinely domain-specific logic, but custom comparators are never
-second-class.
+That frequency shapes where we invest. Extractor authoring gets the most
+examples, templates, and Inspector support. For comparisons, we give the default
+comparator configuration options for common needs so you only have to write
+custom rules for genuinely domain-specific logic — though custom comparators are
+still first-class.
 
-Components communicate only through the extraction and comparison schemas. This
-makes them independently replaceable: a generic `dag` renderer can present a
-comparison whose order came from domain knowledge it doesn't have, and a
-comparator doesn't need to know which renderer will present its output. Each
-component declares the domain schemas it accepts or produces so the runner can
-reject incompatible combinations.
+Because components talk to each other only through the extraction and comparison
+schemas, they can be swapped independently. A generic `dag` renderer can display
+a comparison whose step order came from domain rules it knows nothing about, and
+a comparator never needs to know which renderer will show its output. Each
+component declares the domain schemas it reads or writes so the runner can catch
+mismatches up front.
 
-Configuration comes before code. Common needs, such as ordering by a property,
-are options on built-in components. Custom programs are for genuinely
-domain-specific logic.
+Configuration always comes before code. Common needs, like sorting by a
+property, belong as options on built-in components; custom programs are for
+logic that is truly specific to your domain.
 
 ## First-party components get no privileges
 
-**Decision: every built-in extractor, comparator and renderer uses exactly the
-public contract a third party uses.** Built-ins are the proof that each
-extension point is sufficient; a privilege would hide a gap that third parties
-would hit.
+**Every built-in extractor, comparator, and renderer uses the exact same public
+contract as a third-party one.** Built-ins serve as proof that each extension
+point is complete — giving them shortcuts would only hide gaps that third-party
+authors would later run into.
 
 <!-- prettier-ignore -->
 | Component | Built-ins run as | Through |
@@ -46,63 +46,66 @@ would hit.
 | Comparator | `default-comparator.wasm`, a zero-import WebAssembly module | The comparator runtime, with the same limits as the rules interpreter, in the CLI as in browsers |
 | Renderer | A static bundle | The same sandboxed frame, content security policy and frame protocol |
 
-Built-in code uses only the public SDKs: the Rust
-[extractor SDK](../../../packages/extractors/sdk/README.md), comparator files
-and the renderer SDK and kit, and tests with the same renderer testing package.
-`tools/scripts/check-boundaries.mjs` rejects a first-party dependency on runner,
-CLI, host or runtime internals; a test runs every built-in extractor both ways
-and requires identical extractions, and another requires the CLI's and the
-browser's default comparisons to be identical.
+First-party code depends only on the public SDKs: the Rust
+[extractor SDK](../../../packages/extractors/sdk/README.md), comparator files,
+and the renderer SDK, kit, and testing package. We enforce this in CI:
+`tools/scripts/check-boundaries.mjs` rejects any first-party import of runner,
+CLI, host, or runtime internals. Tests also run every built-in extractor through
+both paths and assert identical output, and verify that CLI and browser default
+comparisons match.
 
-What still differs is provenance, not capability. A built-in ships with the
-executable or host rather than the examined repository, so running one that
-executes no tools or repository code needs no trust, and a built-in renderer can
-be a schema's fallback.
+The only difference between built-in and third-party components is provenance,
+not capability. Because a built-in ships with the executable or host rather than
+coming from the inspected repository, a built-in that doesn't execute external
+tools or repo code needs no trust prompt, and a built-in renderer can act as a
+schema's fallback.
 
-Tradeoffs:
+This strict boundary comes with a few tradeoffs:
 
 - **One executable.** Built-in extractors are compiled into the `projections`
-  executable and run as its own subprocesses, so installation stays one file.
-  Each extraction pays a process start (a few milliseconds), and the executable
-  passes its own helper location to its entrypoint in argv, as any extractor may
-  with its own files. Distributing extractors separately, or letting users
-  replace one, is possible later without changing the protocol.
-- **Interpreted comparisons.** The CLI runs the default comparator in the
-  `wasmi` interpreter, about seven times slower than linked native code: about
-  4.5 seconds instead of 0.7 for the limit-sized worst case, milliseconds for
-  typical comparisons
+  binary and spawned as subprocesses, keeping installation to a single file.
+  Each extraction pays a few milliseconds of process startup, and the binary
+  passes its helper location in argv just as any custom extractor can. If we
+  ever want to distribute extractors separately or let users override one, the
+  protocol won't have to change.
+- **Interpreted comparisons.** The CLI runs the default comparator inside the
+  `wasmi` interpreter, which is roughly seven times slower than linked native
+  code. In practice that means milliseconds for normal comparisons and about 4.5
+  seconds (versus 0.7) at the limit-sized worst case
   ([measurements](../../design/engine-evaluation.md#the-default-comparator-in-the-clis-comparator-runtime)).
-- **One timeout per extractor.** The definition's timeout covers the extractor
-  and every tool it runs, so built-ins that build the project need a larger
-  `execution.timeoutMs`, as custom extractors always did.
-- **Only granted variables.** Built-ins read only the environment the definition
-  grants, so Go, .NET and Spring users grant `HOME`, `JAVA_HOME` and the like to
-  reuse their caches and toolchains.
+- **One timeout per extractor.** A definition's `execution.timeoutMs` covers the
+  extractor and every tool it invokes. Built-ins that compile or build the
+  project need a larger timeout, just like custom extractors do.
+- **Explicit environment allowlist.** Built-ins only see the environment
+  variables the definition grants, so Go, .NET, and Spring projections still
+  grant `HOME`, `JAVA_HOME`, and similar variables to reuse local caches and
+  toolchains.
 
 ## Determinism and authority
 
-Extractions work like test results. A test run is an observation: run the same
-suite against the same commit twice and you usually, not always, get the same
-answer. Teams don't respond by forbidding anything short of perfect determinism.
-They make tests as deterministic as they reasonably can, they notice flaky ones
-by rerunning them, and they agree that the run in CI is the official result for
-a commit, even though a rerun could differ.
+Extractions behave a lot like test results. Run the same test suite on the same
+commit twice and you usually — but not always — get the same answer. Teams don't
+solve that by banning anything short of mathematical purity. They make tests as
+deterministic as they reasonably can, catch flaky ones by rerunning them, and
+treat the CI run as the official result for a commit.
 
-An extraction is the same kind of thing: **an observation of a revision, made by
-one run in one environment**, not a pure value. Three consequences follow.
+An extraction is the same kind of artifact: **an observation of a revision, made
+by one run in one environment**, rather than a pure mathematical value. Three
+design choices follow from this.
 
-**Authority.** A commit's official extraction is the run the team's CI published
-(the Action's artifact). Local runs are labelled as runs. Every extraction's
-`provenance.execution` records the run: where it ran (`source`), its environment
-fingerprint, when (`at`), and for a CI run the repository and run ID, with
-`official: true` only when that run is authenticated as the repository's own CI
-(an imported artifact nothing authenticated is labelled imported). Hosts show
-the official run for a commit by default and say _From CI_, _Imported_, _Local_,
-_Approximate_ or _Stale_ ([local execution](../../design/local-execution.md)).
+**Authority.** A commit's official extraction is the one published by the team's
+CI (the Action's artifact); local runs are clearly labeled as local. Every
+extraction's `provenance.execution` records where it ran (`source`), its
+environment fingerprint, when it ran (`at`), and — for CI runs — the repository
+and run ID. Only runs authenticated as the repository's own CI carry
+`official: true`, while unauthenticated imported artifacts are labeled imported.
+Hosts show the official run by default and tag every view as _From CI_,
+_Imported_, _Local_, _Approximate_, or _Stale_
+([local execution](../../design/local-execution.md)).
 
-**Determinism classes.** An extractor declares how reproducible it is, as
+**Determinism classes.** Each extractor declares how reproducible it is via
 `execution.determinism` in the definition and `determinism` in a built-in's
-descriptor. The class is descriptive, never enforced:
+descriptor. These classes describe reality rather than enforcing it:
 
 <!-- prettier-ignore -->
 | Class | Depends on | Reuse | Examples |
@@ -111,49 +114,52 @@ descriptor. The class is descriptive, never enforced:
 | `environmental` | Files, toolchain and installed dependencies | Cached only within the same environment fingerprint | Compiler and type-checker output, dependency-injection containers. The default for custom extractors |
 | `observed` | Live or varying data | Never reused silently: always "the latest observation, from *when*" | Timings, benchmarks, coverage |
 
-A built-in's definition may declare a less reproducible class than the built-in
-does, never a more reproducible one.
+A definition using a built-in extractor can downgrade its determinism class to
+something less reproducible, but never upgrade it.
 
-**Determinism is measured, like flaky tests.** `projections check` reruns each
-extraction and compares the two runs. A difference is a warning, never a
-failure, that names the items and fields that varied; `--strict-determinism`
-makes it a failure, which CI uses for built-ins, and our own tests hold every
-built-in to its class. The local-vs-CI parity check (`check --parity REV`)
-reports stability across environments the same way ("varies between this
-environment and CI on 12% of items"). An extraction may declare which fields
-vary and by how much (its top-level `volatile` list, with tolerances);
-comparators then report those differences as variation within tolerance rather
-than as changes.
+**Determinism is measured, like flaky tests.** `projections check` runs each
+extraction twice and compares the results. Any difference shows up as a warning
+naming the exact items and fields that drifted, rather than failing outright.
+Passing `--strict-determinism` turns that warning into a failure, which CI uses
+for built-ins (and our own test suite holds every built-in to its declared
+class). The local-vs-CI parity check (`check --parity REV`) measures stability
+across environments the same way, reporting results like "varies between this
+environment and CI on 12% of items". When an extractor knows certain fields
+naturally vary, it can list them in its top-level `volatile` array with
+tolerances so comparators treat drift within tolerance as expected variation
+instead of a real change.
 
-**Unchanged:** comparators stay deterministic, and verifying a saved comparison
-reruns the comparator over the recorded extractions; it never re-extracts.
+**Unchanged:** comparators remain strictly deterministic. Verifying a saved
+comparison simply reruns the comparator over the recorded extractions without
+re-extracting anything.
 
-Determinism remains the goal, because a projection's value falls quickly when
-readers can't tell a real change from noise. The built-in extractors are
-deterministic, and authoring guidance steers custom ones the same way:
+Determinism is still the goal — a projection loses its usefulness fast if
+reviewers can't tell real changes from noise. All built-in extractors are
+deterministic, and custom ones should follow the same habits:
 
 - **Read declared or resolved structure, not observed behavior.** Manifests,
-  lockfiles, compiler and type-checker output, schemas, container registrations
-  and plans describe what the code _is_. Profiles, traces, timings, sampled
-  telemetry, benchmark results and load-test output describe one run of it and
-  change between identical runs; when you want them anyway, declare the
+  lockfiles, compiler output, schemas, container registrations, and deployment
+  plans describe what the code _is_. Profiles, traces, timings, sampled
+  telemetry, benchmarks, and load-test results describe a single run and shift
+  between identical runs. If you still want to project them, declare the
   extractor `observed` and mark the varying fields `volatile`.
-- **Keep the environment out of the output.** No clocks, random identifiers,
-  absolute paths, host names, usernames, temporary directories or process IDs in
-  IDs or data. The runner records the environment in provenance, not in
-  entities.
-- **Pin what the result depends on.** Prefer lockfiles and resolved graphs to
-  version ranges, the project's own toolchain to whatever is newest, and offline
-  reads to network lookups (registries, download counts, advisories change
-  without the revision changing).
-- **Order deterministically.** Sort entities, relationships and collections
-  inside `data` by a stable key; never emit in hash-map or filesystem order.
-- **Make identity independent of incidental values.** An ID names the thing (a
-  package, a service, a table), not its version or position, so an upgrade is
-  one modified entity rather than a removal and an addition.
+- **Keep environment details out of the output.** Never embed clocks, random
+  IDs, absolute paths, hostnames, usernames, temp directories, or process IDs in
+  entity IDs or data. The runner already captures environment details in
+  provenance.
+- **Pin your inputs.** Favor lockfiles and resolved graphs over version ranges,
+  the project's own toolchain over whatever happens to be newest, and offline
+  reads over live network lookups (registries, download counts, and advisories
+  drift even when the commit doesn't).
+- **Sort everything consistently.** Order entities, relationships, and nested
+  collections inside `data` by a stable key instead of relying on hash-map or
+  filesystem iteration order.
+- **Keep entity IDs independent of incidental values.** Name the thing itself (a
+  package, service, or table) rather than its version or position, so an upgrade
+  shows up as a modified entity instead of a removal and an addition.
 
-The built-in `timeline` renderer was removed for this reason: the data it was
-designed for (profiling and trace timings) mostly showed run-to-run variance
-when comparing two revisions. `execution.reproducibility` (`hermetic`,
-`pinned-toolchain`, `local`, `unknown`, `external`) still describes how the
-toolchain is pinned, independently of the determinism class.
+We removed the built-in `timeline` renderer for exactly this reason: profiling
+and trace timings mostly surfaced run-to-run noise when comparing two revisions.
+Separately, `execution.reproducibility` (`hermetic`, `pinned-toolchain`,
+`local`, `unknown`, `external`) still records how tightly the toolchain is
+pinned, independent of the determinism class.

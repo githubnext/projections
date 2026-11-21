@@ -1,59 +1,66 @@
 # Renderer gallery
 
-Status: implemented (`renderer-scenarios`, `gallery`, the `renderer-gallery`
+Status: implemented (`renderer-scenarios`, `gallery`, and the `renderer-gallery`
 projection).
 
 ## Goal
 
-A projection of Projections' own built-in renderers, each drawn by itself inside
-a projection, from synthetic data, so that viewing it needs no local trust; and
-reusable, so any repository with renderers and scenarios gets the same gallery.
+We want a projection of Projections' own built-in renderers — where each
+renderer draws itself from synthetic data — that anyone can view without
+granting local trust. It should also be reusable, so any repository with
+renderers and scenarios gets the same gallery automatically.
 
 ## Design
 
-Three parts, each reusable, none of which runs repository code:
+The gallery is built from three reusable pieces, none of which runs repository
+code:
 
 1. **Data: the `renderer-scenarios` extractor.** It reads the committed
-   `projections.scenarios` documents and the fixtures they name, and writes each
-   scenario as a `graph/v0` entity under the `scenarios/v0` vocabulary: its
-   renderer and its normalized extraction, or before, after and their
-   comparison. It only reads files, so it never needs trust.
-2. **Comparisons: a service of the extractor SDK's `Context`.** A renderer in
-   comparison mode needs a comparison document, and extractor crates may depend
-   on nothing but the extractor SDK. The CLI provides `Context::compare` to its
-   built-in extractors (`with_comparisons`): the default comparator module or
-   the scenario's comparator file, read from the examined revision, run in the
-   comparator runtime's sandbox and validated by the Engine, exactly as for a
-   projection. Comparator files are data and never need trust. The service is
-   optional: extractors that don't call it are unchanged, and elsewhere
-   `compare` fails, saying so. Computing them at extraction makes the gallery's
-   extraction self-contained, so CI artifacts, PNGs and every host draw it.
+   `projections.scenarios` documents along with the fixtures they reference, and
+   emits each scenario as a `graph/v0` entity under the `scenarios/v0`
+   vocabulary. Each entity carries its renderer name plus either a normalized
+   extraction or a before/after pair with its comparison. Because the extractor
+   only reads files, it never needs trust.
+2. **Comparisons: a service on the extractor SDK's `Context`.** Renderers in
+   comparison mode need a comparison document, and extractor crates can only
+   depend on the extractor SDK. To bridge that, the CLI supplies
+   `Context::compare` to its built-in extractors (`with_comparisons`). It runs
+   the default comparator module or the scenario's comparator file (read from
+   the examined revision) inside the comparator runtime's sandbox and validates
+   the result with the Engine, just like a normal projection. Comparator files
+   are treated as data and never need trust. The service is optional: extractors
+   that don't call it behave identically, and calling `compare` elsewhere fails
+   with a clear message. Computing comparisons during extraction keeps the
+   gallery self-contained, so CI artifacts, PNG exports, and every host can
+   render it directly.
 3. **Presentation: nested built-in renderers.** The `gallery` renderer asks its
-   host for a built-in renderer's document by name (`document-request`); the
-   host answers from its own registry (`document`), never taking a URL or path
-   and refusing custom and unknown names. The SDK's `embedRenderer` runs the
-   document in `<iframe sandbox="allow-scripts" srcdoc>` and hosts it.
+   host for a built-in renderer's document by name via `document-request`. The
+   host responds from its own registry (`document`), never accepting a URL or
+   file path and rejecting custom or unknown names. The SDK's `embedRenderer`
+   then mounts that document inside `<iframe sandbox="allow-scripts" srcdoc>`
+   and hosts it.
 
 ## Why it keeps the trust model
 
-- Built-in extractors that only read files never need trust; this one only reads
-  files, and compares in the same sandbox comparator files always run in.
-- Renderer frames are sandboxed with a policy that grants no source. A `srcdoc`
-  frame inherits its parent's policy (`frame-src 'none'` doesn't stop it, in
-  Chromium and WebKit) and gets an opaque origin of its own, so a nested
-  renderer can do nothing its nesting renderer can't.
-- Hosts supply only built-in renderers, which are Projections' own code: no
-  custom renderer runs nested, so nesting adds no new code to trust. The nesting
-  renderer passes on only data it was given.
+- Built-in extractors that only read files never need trust. This extractor only
+  reads files and runs comparisons inside the same sandbox comparator files
+  already use.
+- Renderer frames run under a sandbox policy that grants no external sources. A
+  `srcdoc` frame inherits its parent's policy (`frame-src 'none'` does not block
+  it in Chromium or WebKit) and gets its own opaque origin, so a nested renderer
+  cannot do anything its parent renderer couldn't do.
+- Hosts only serve built-in renderers, which are Projections' own code. No
+  custom renderer runs nested, so nesting introduces no new code to trust, and
+  the parent renderer only forwards data it was already given.
 
 ## Alternatives considered
 
-- **Inlining every built-in renderer in the gallery bundle**: no protocol
-  change, but about 5 MB more in the CLI and the VS Code extension, and
-  built-ins only for good. The protocol pair leaves room for hosts to supply
-  base-revision custom renderers later, under the rule that already decides
-  whether they run.
-- **The host computing nested comparisons on request**: more protocol, and only
-  hosts with the Engine could.
-- **No nested comparisons**: most scenarios are comparisons, and renderers
-  mostly draw change.
+- **Inlining every built-in renderer in the gallery bundle.** That would avoid a
+  protocol addition, but it would add roughly 5 MB to both the CLI and the VS
+  Code extension and lock the gallery to built-ins permanently. The request/
+  response protocol pair leaves room for hosts to serve base-revision custom
+  renderers later under the existing trust rules.
+- **Having the host compute nested comparisons on demand.** That would expand
+  the host protocol and restrict the gallery to hosts that bundle the Engine.
+- **Skipping nested comparisons.** Most scenarios are comparisons, and showing
+  change is the main job of most renderers.

@@ -1,152 +1,165 @@
 # Renderer SDK guide
 
-The [renderer SDK](../../packages/renderers/sdk/README.md)'s protocol, as a
-renderer sees it, and the theme tokens the host applies.
+This guide walks through the
+[renderer SDK](../../packages/renderers/sdk/README.md) from a renderer's point
+of view: the frame protocol it speaks with the host, and the theme tokens and
+icons the host provides.
 
 ## Protocol
 
-Version 0. The host loads a renderer's `index.html` into
-`<iframe sandbox="allow-scripts">` (opaque origin) served with
-`rendererContentSecurityPolicy` (`connect-src 'none'`, `sandbox allow-scripts`).
-The URL fragment carries `channel` (a fresh random nonce per frame), the host
-`origin` and the host's `color` mode. The host keeps the frame invisible until
-the renderer posts its first `rendered` (or an `error`), so draw nothing before
-`init`: `rendererConfig` builds a document whose root uses
-`color-scheme: light dark` with a transparent background, and whose body takes
-the fragment's color mode until `applyEnvironment` applies the theme (it sets
-`color-scheme` on the body and keeps the root at `light dark`). Every message is
-a plain object `{projections: 0, channel, type, ...payload}` sent with
-`postMessage`.
+The protocol is currently version 0. The host loads your renderer's `index.html`
+inside an opaque-origin `<iframe sandbox="allow-scripts">` served with
+`rendererContentSecurityPolicy` (`connect-src 'none'` and
+`sandbox allow-scripts`). The URL fragment passes `channel` (a fresh random
+nonce per frame), the host `origin`, and the host's `color` mode.
 
-The renderer speaks first: it posts `ready` as soon as it listens. The host then
-sends `init`, then `options`, `select`, `viewport` and `progress` as needed, and
-`hover`, `scroll`, `filter` and `annotations` only to renderers that declare the
-matching capability. A host may show two frames of the same bundle side by side
-(one at progress 0, one at 1); it keeps their selection and hover in sync and
-mirrors scrolling between them.
+Because the host keeps the frame hidden until your renderer posts its first
+`rendered` (or `error`) message, do not draw anything before `init` arrives.
+`rendererConfig` generates a document whose root uses `color-scheme: light dark`
+with a transparent background, while the body picks up the fragment's color mode
+until `applyEnvironment` applies the full theme (setting `color-scheme` on the
+body and leaving the root at `light dark`). Every protocol message is a plain
+object `{projections: 0, channel, type, ...payload}` sent over `postMessage`.
 
-- `init`: `mode: 'extraction'` with `extraction`, or `mode: 'comparison'` with
-  `before`, `after`, `comparison` and optional `comparisonMode` (see
-  [Comparison modes](#comparison-modes)); plus
-  `projection {id, title, renderer}` (`renderer` is the definition's renderer
-  name, or a custom bundle's path, so a bundle that handles several names can
-  pick a variant), `theme {colorMode, tokens}`, `reducedMotion`, `locale`,
-  optional `pane` and `sizing`
-- `progress`: `progress` 0..1, `highlighting` 0..1 (0 at both endpoints),
-  `direction` 1 or -1
-- `select`: `id` or `null`, optional `path`: the selected item, or a property of
-  it
-- `options`: `options: {showRelationships?, …}`
-- `viewport`: `width`, `height`
-- `environment`: `theme`, `reducedMotion`, `locale` and `pane` (when they change
-  after `init`). `pane` (`before` or `after`) is set while the frame is one held
-  pane of side by side or swipe: it shows that revision only, which the host
-  labels in a band above the pane, so leave out narration of the transition such
-  as step captions. `applyEnvironment` marks it as `data-pane` on the document
-  element; the kit passes it to renderers as `pane`. `sizing` says how the host
-  sizes the frame: `content` when it gives the frame the height the renderer
-  reports (`height`), `fill` when it sizes the frame itself (a tab or pane).
-  Content fitted to a `content` frame need only fit its width, from the first
-  paint: the frame's height before the host answers is not the one it gets.
-  Hosts that don't say leave it out; fit both dimensions then. The kit's
-  `useFrameSizing()` returns it.
-- `action`: `id` of an activated `action` control
-- `filter`: `query`, `changesOnly`, `ids` (matching selection IDs, or `null`),
-  `scope` (in the Changes scope, what to lay out): the host's scope, summary
-  filter and find (capability `filter`). Lay out `scope`; recede what `ids`
-  leaves out, never removing or moving it
-- `hover`: `id` or `null`: the entity the person is pointing at in any pane
-  (capability `hover`)
-- `scroll`: `x`, `y` (CSS px, ≥ 0), optional `key`: scroll that container to
-  mirror another pane (capability `scrollSync`)
-- `annotations`: `items`: `{id, count?, label?, tone?}` markers to draw on
-  items, replacing any earlier ones (capability `annotations`)
+Your renderer speaks first, posting `ready` as soon as its message listener is
+attached. The host answers with `init`, followed by `options`, `select`,
+`viewport`, and `progress` as needed. Messages for `hover`, `scroll`, `filter`,
+and `annotations` are only sent if your renderer declares the corresponding
+capability. A host can also mount two frames of the same bundle side by side
+(one held at progress 0, the other at 1), keeping selection, hover, and
+scrolling synchronized between them.
 
-- `ready`:
+**Host-to-renderer messages:**
+
+- `init` delivers either `mode: 'extraction'` with `extraction`, or
+  `mode: 'comparison'` with `before`, `after`, `comparison`, and an optional
+  `comparisonMode` (see [Comparison modes](#comparison-modes)). It also carries
+  `projection {id, title, renderer}` (where `renderer` is the definition's
+  renderer name or a custom bundle path, letting multi-purpose bundles pick a
+  variant), `theme {colorMode, tokens}`, `reducedMotion`, `locale`, and optional
+  `pane` and `sizing`.
+- `progress` carries `progress` (0..1), `highlighting` (0..1, always 0 at both
+  endpoints), and `direction` (1 or -1).
+- `select` carries `id` (or `null`) and an optional `path` pointing to a
+  selected item or one of its properties.
+- `options` passes `options: {showRelationships?, …}`.
+- `viewport` reports `width` and `height`.
+- `environment` updates `theme`, `reducedMotion`, `locale`, and `pane` whenever
+  they change after `init`. `pane` (`before` or `after`) is set when the frame
+  is a held pane in side-by-side or swipe mode; since the host labels that
+  revision in a banner above the pane, omit transition narration such as step
+  captions. `applyEnvironment` reflects it as `data-pane` on the document
+  element, and the kit passes it as `pane`. `sizing` tells you how the host
+  sizes the frame: `content` means it adopts the height you report via `height`,
+  while `fill` means the host controls the height (for example in a tab or
+  pane). In a `content` frame, fit your layout to the width on the first paint
+  rather than relying on the initial frame height; when `sizing` is omitted, fit
+  both dimensions. The kit exposes this via `useFrameSizing()`.
+- `action` carries the `id` of a triggered `action` control.
+- `filter` (capability `filter`) carries `query`, `changesOnly`, `ids` (matching
+  selection IDs, or `null`), and `scope` (what to lay out in Changes scope). Lay
+  out `scope`, and visually recede anything excluded by `ids` without removing
+  or reflowing it.
+- `hover` (capability `hover`) carries `id` or `null` for the entity currently
+  pointed at in any pane.
+- `scroll` (capability `scrollSync`) carries `x` and `y` (CSS px, ≥ 0) and an
+  optional `key` to mirror scrolling from another pane.
+- `annotations` (capability `annotations`) carries `items` of
+  `{id, count?, label?, tone?}` markers to display on items, replacing any
+  previous set.
+
+**Renderer-to-host messages:**
+
+- `ready` declares
   `capabilities {changeHighlighting: 'supported' | 'none', toggleableRelationships?, drawsRelationships?, ownTimeline?, hover?, anchors?, scrollSync?, filter?, context?, annotations?, properties?, comparisonModes?, pace?, controls?}`
-  (flags are booleans)
-- `rendered`: `progress` whose frame was painted
-- `select`: `id` or `null`, optional `path` (only with an `id`): the person
-  selected an item or a property of it
-- `height`: `px` (host clamps to 120–20,000)
-- `aspect`: `ratio`: width / height of the content the renderer fits to its
-  stage, over the whole transition (0.01–100). Optional; a host uses it to stack
-  side by side's panes for wide content. The kit's `useFitScale` sends it
-- `steps`: `ends`: increasing progress values in 0..1 where the host may hold;
-  optional `slots`: how many step slots the presentation spans (steps plus
-  reading time, `timelineSlots`), for the host's default pace
-- `open`: `path`, optional `line` (the host decides whether to navigate)
-- `error`: `message`
-- `hover`: `id` (non-empty) or `null`: the entity under the pointer or focus
-- `anchor`: `id`, `rect {x, y, width, height}` or `null`: where the selected,
-  hovered or an annotated entity is visible, in the frame's viewport (CSS px),
-  for the host's connector between panes and overlays it places on items; `null`
-  when it isn't visible
-- `viewport`: `x`, `y` (CSS px, ≥ 0), optional `key`: the person scrolled a
-  container
-- `controls`: `controls`: replaces the declared controls (see
-  [Controls](../../packages/renderers/sdk/README.md#controls))
-- `control`: `id`, `value`: the person set a declared control from the
-  renderer's content (a sortable column heading); the host applies it as if they
-  had set it in its settings and answers with `options`. Post it with
-  `client.setControl(id, value)`
-- `annotation`: `id` (non-empty): the person activated the annotation marker on
-  that item, after selecting it
-- `legend`: optional `title`, `items [{label, token? | color?, shape?}]` (at
-  most `rendererLimits.legendItems`, labels up to `legendLabel`): the host draws
-  it once beside the frames; post it with `client.legend(...)`, which throws
-  when it's invalid
-- `summary`: `items`: counts
+  (where the optional flags are booleans).
+- `rendered` acknowledges that the frame for `progress` has been painted.
+- `select` reports `id` or `null` plus an optional `path` (only valid when `id`
+  is set) when the user selects an item or property.
+- `height` reports desired content height in `px` (clamped by the host to
+  120–20,000).
+- `aspect` optionally reports `ratio` (width / height of the stage-fitted
+  content across the whole transition, 0.01–100) so hosts can stack wide
+  side-by-side panes vertically; the kit's `useFitScale` sends this
+  automatically.
+- `steps` reports `ends` (increasing progress values in 0..1 where playback can
+  hold) and optional `slots` (total step slots including reading time,
+  `timelineSlots`) so the host can compute default playback pacing.
+- `open` requests navigation to `path` and an optional `line` (the host decides
+  whether to act on it).
+- `error` reports a fatal `message`.
+- `hover` reports a non-empty `id` or `null` for the hovered or focused entity.
+- `anchor` reports `id` and `rect {x, y, width, height}` (in frame viewport CSS
+  px) or `null` when hidden, so the host can draw cross-pane connectors and
+  anchored overlays for selected, hovered, or annotated items.
+- `viewport` reports `x` and `y` (CSS px, ≥ 0) plus an optional `key` when the
+  user scrolls a container.
+- `controls` sends `controls` to replace the renderer's declared controls (see
+  [Controls](../../packages/renderers/sdk/README.md#controls)).
+- `control` reports `id` and `value` when the user adjusts a declared control
+  directly inside the renderer (such as clicking a sortable column header). Post
+  it via `client.setControl(id, value)`; the host updates its state and replies
+  with `options`.
+- `annotation` reports a non-empty `id` when the user activates an item's
+  annotation marker (after selecting the item).
+- `legend` sends an optional `title` and
+  `items [{label, token? | color?, shape?}]` (up to `rendererLimits.legendItems`
+  entries and `legendLabel` characters per label) so the host draws a single
+  legend beside the frames. Post it with `client.legend(...)`, which throws on
+  invalid input.
+- `summary` sends `items` in display order—counts of
   `{type?: 'count', collection?, kind, noun {singular, plural}, count, added?, removed?, modified?}`
-  and facts
+  and facts of
   `{type: 'fact', id, icon?, count, noun, tone?, ids?, added?, removed?, modified?, description?}`
-  (at most `rendererLimits.summaryItems`, nouns up to `summaryNoun`): the
-  renderer's figures for the host's summary bar in display order (see
-  [Summary bar](#summary-bar)); post it with `client.summary(...)`, which throws
-  when it's invalid. Optional: without it the host words the kinds itself
+  (up to `rendererLimits.summaryItems` entries and `summaryNoun` characters per
+  noun)—for the host's summary bar (see [Summary bar](#summary-bar)). Post it
+  with `client.summary(...)`, which throws on invalid input. If you omit it, the
+  host derives labels from the raw kind names.
 
 ### Summary bar
 
-Hosts draw a thin bar along the bottom of every projection view: a figure per
-extraction kind (`12 workspaces · 18 dependencies`), and in a comparison its
-changes (`12 workspaces +1 −1 · 18 dependencies +2`, the change figures in their
-change colors). Clicking a figure filters to those items. The words are the
-renderer's: post `summary` with a figure per kind you want shown, in order, each
-with the `noun` for one item and for any other count. `/presentation` counts
-them for you: `summaryItems(init, nouns)` returns the figures of an
-`InitPayload` (or the host's subject), worded with `nouns`
-(`{kind: {singular, plural}}`, `false` to leave a kind out, a
-`relationships:kind` or `entities:kind` key for one collection's kind; the kinds
-an object lists come first) and `humanizeKind` for the rest:
+Every projection view includes a slim summary bar along the bottom, showing one
+count per extraction kind (`12 workspaces · 18 dependencies`) and, in
+comparisons, color-coded deltas (`12 workspaces +1 −1 · 18 dependencies +2`).
+Clicking any figure filters the view to those items.
+
+Your renderer owns the wording. Send a `summary` message listing each kind in
+the order you want it displayed, with singular and plural forms in `noun`. The
+`/presentation` helper `summaryItems(init, nouns)` builds these figures for you
+from an `InitPayload` (or host subject). Pass `nouns` as
+`{kind: {singular, plural}}`—use `false` to hide a kind, or prefix with
+`relationships:kind` or `entities:kind` to target one collection. Listed kinds
+appear first, and any remaining kinds fall back to `humanizeKind`:
 
 ```ts
 client.summary({items: summaryItems(init, {package: {singular: 'workspace', plural: 'workspaces'}, resolved: false})})
 ```
 
-A definition can word its own kinds and color them (`presentation.kinds`, see
-[definitions](../contracts/definitions.md)); hosts send it as
-`init.projection.kinds`, `{kind: {color?, noun?}}`. Its nouns should win over
-yours: kit renderers apply them for you (`rendererSummary`). `humanizeKind`
-counts an adjective kind without a plural (`24 hidden`, `5 not patchable`) and
-keeps common prefixes hyphenated (`6 pre-releases`).
+A projection definition can also supply its own kind names and colors via
+`presentation.kinds` (see [definitions](../contracts/definitions.md)), which the
+host forwards as `init.projection.kinds` (`{kind: {color?, noun?}}`). Definition
+nouns should take precedence over yours—kit renderers handle this automatically
+via `rendererSummary`. `humanizeKind` leaves adjective kinds unpluralized
+(`24 hidden`, `5 not patchable`) and preserves hyphenated prefixes
+(`6 pre-releases`).
 
-Each item has a `type`. A count (`type: 'count'`, the default when absent;
-`summaryItems` sends it) names a kind: `count` is its total (in `after` for a
-comparison); `added`, `removed` and `modified` count the comparison's changes of
-that status by the item each names (`summaryCounts`). The previous total ("was
-N") is `count − added + removed`, so it is never sent. Hosts show their own
-counts of the kinds you name; the renderer checks hold you to the same counts. A
-fact (`type: 'fact'`) is a finding no kind count says, or a measure that isn't a
-kind,
-`{type: 'fact', id, icon?, count, noun, tone?, ids?, added?, removed?, modified?, description?}`:
-an optional theme icon name (`--projections-icon-<name>`), a `tone` (`added`,
-`removed`, `modified` or `neutral`) that colors its figure, `ids` (at most
-`rendererLimits.summaryFactIds` item or change IDs) that make it a filter to
-those items, its changes in a comparison (how many of what it counts arrived,
-left or changed, or a measure's net change, `added` when it grew and `removed`
-when it shrank; hosts draw them in the change colors after it, as a count's),
-and a `description` (at most `rendererLimits.summaryDescription` characters) for
-its tooltip:
+Every summary item has a `type`. A count (`type: 'count'`, the default emitted
+by `summaryItems`) reports a kind's `count` (its total in `after` for a
+comparison) along with `added`, `removed`, and `modified` counts
+(`summaryCounts`). The prior total ("was N") is computed as
+`count − added + removed`, so you never send it; hosts cross-check your counts
+against their own, and the renderer checks enforce the same numbers.
+
+A fact (`type: 'fact'`) captures a domain finding or metric that no single kind
+count expresses:
+`{type: 'fact', id, icon?, count, noun, tone?, ids?, added?, removed?, modified?, description?}`.
+You can attach a theme icon (`--projections-icon-<name>`), a `tone` (`added`,
+`removed`, `modified`, or `neutral`), `ids` (up to
+`rendererLimits.summaryFactIds` item or change IDs) to make the fact clickable
+as a filter, comparison deltas (either item changes or a net metric
+delta—`added` for growth, `removed` for shrinkage—rendered in change colors just
+like kind counts), and a tooltip `description` (up to
+`rendererLimits.summaryDescription` characters):
 
 ```ts
 client.summary({
@@ -158,18 +171,18 @@ client.summary({
 })
 ```
 
-Hosts show a fact as sent; the checks verify that its `ids` exist, that one
-extraction's facts have no changes and that what it counts as added or modified
-is part of its count. The summary describes the whole document, so send the same
-one at every progress, and draw no summary line of your own. Hosts drop an item
-of a `type` they don't know and keep the rest, so later types are additive.
-Without a `summary` the host words every kind from its name, so bundles written
-before the message keep working. `summarySentence` writes the bar's words as one
-line.
+Hosts display facts as sent, while renderer checks verify that every entry in
+`ids` exists, that single-extraction facts carry no changes, and that `added` or
+`modified` never exceed `count`. Because the summary describes the whole
+document, emit the exact same summary at every progress value and avoid drawing
+a duplicate summary line inside your frame. Hosts ignore unknown item `type`
+values so future types remain backward compatible, and older renderers that
+never send `summary` continue to work with automatic kind wording. You can also
+format the bar as a single sentence with `summarySentence`.
 
 ### Comparison modes
 
-A host presents a comparison in one of four modes:
+Hosts present comparisons in four modes:
 
 <!-- prettier-ignore -->
 | Mode | Frames | Progress |
@@ -179,61 +192,65 @@ A host presents a comparison in one of four modes:
 | `swipe` | the same two, stacked under a divider | as side by side |
 | `diff` | one | none: `init.comparisonMode` is `'diff'` and the renderer draws its own static comparison of `before` and `after` |
 
-A renderer declares which modes it supports as `capabilities.comparisonModes`
-and in its `renderer.json` (the Vite helper's `comparisonModes` option writes
-it); without a declaration it supports `side-by-side`, `animated` and `swipe`
-(`defaultComparisonModes`). The renderer chooses only _which_ modes: hosts show
-them in one canonical order (diff, side by side, animated, then swipe;
-`orderComparisonModes`) and open in the first supported mode in that order: diff
-whenever it is supported, else side by side (`defaultComparisonMode`). List them
-in canonical order for readability. Not every renderer suits every mode: a text
-diff explains a change best as one static view, so it declares only `diff`.
+Declare supported modes in `capabilities.comparisonModes` and in `renderer.json`
+(via the Vite helper's `comparisonModes` option). If omitted, the host assumes
+`side-by-side`, `animated`, and `swipe` (`defaultComparisonModes`). Your
+renderer only chooses _which_ modes it supports: hosts always present them in
+the canonical order—diff, side by side, animated, then swipe
+(`orderComparisonModes`)—and open in the first supported mode (`diff` if
+available, otherwise `side-by-side`, via `defaultComparisonMode`). Listing them
+in canonical order in your config keeps things clear. Not every visualization
+fits every mode; a text diff, for instance, makes the most sense as a static
+comparison and declares only `diff`.
 
-Implement `diff` first: it is the view a comparison opens in and where people
-review changes. The defaults leave it out because only the renderer can draw it.
-A union of both revisions has to be laid out in the renderer's own form, and a
-frame drawn at After loses every removed item, so the SDK can't derive a diff
-from the other modes. `projections check` warns about a renderer without one;
-the kit's [diff mode](renderer-kit.md#diff-mode) has the pieces.
+Build `diff` first, because comparisons open in it by default and it is where
+reviewers spend their time. It is excluded from the defaults because only your
+renderer knows how to lay out the union of both revisions in its own visual
+language—rendering `after` alone drops every removed item, so the SDK cannot
+synthesize a diff automatically. `projections check` warns when a renderer lacks
+diff mode; see the kit's [diff mode helpers](renderer-kit.md#diff-mode) to get
+started.
 
-A renderer whose motion needs more time than the host's default playback can
-declare `capabilities.pace: {stepMs}`, how long one comparison step should take
-(an integer from 300 to 5000 ms, `rendererLimits.paceStepMs`). Hosts that size
-playback by the step count use it instead of their default; the person's speed
-setting still applies, and the host still owns progress. The kit's graph
-canvases declare `graphCanvasPace` (1800 ms per step).
+If your animations need more breathing room than the host's default playback
+speed, declare `capabilities.pace: {stepMs}` with an integer between 300 and
+5000 ms (`rendererLimits.paceStepMs`). Hosts that pace playback by step count
+will use that duration (still respecting the user's speed setting and keeping
+ownership of progress). The kit's graph canvases declare `graphCanvasPace` (1800
+ms per step).
 
-In `diff` mode the host sends no `progress`, playback or swipe. `useRenderer`
-then reports progress 1 with `highlighting` 1 (`isDiff(init)` tells the modes
-apart); a host that turns highlighting off may send one `progress` with
-`highlighting: 0`. Selection, hover, controls, annotations and the host's filter
-(find and "changes only") apply as in every mode.
+In `diff` mode, the host sends no `progress`, playback, or swipe updates.
+`useRenderer` reports progress 1 with `highlighting` 1 (use `isDiff(init)` to
+tell modes apart), though a host that disables highlighting may send a single
+`progress` with `highlighting: 0`. Selection, hover, controls, annotations, and
+filtering (find and "changes only") all work identically across modes.
 
-Scroll `key` names a scroll container: the value of its
-`data-projections-scroll` attribute, or a structural path such as
-`div:0>section:2`; without it, the document. Keys match
-`[A-Za-z0-9_.:> -]{1,256}`. Coordinates are finite and at most
-`rendererLimits.maxCoordinate` (1,000,000) in absolute value; anchor sizes and
-scroll offsets are never negative; unknown fields reject the message.
+When syncing scroll containers, `key` identifies the target container—either its
+`data-projections-scroll` attribute value or a structural path such as
+`div:0>section:2`—and omitting it targets the document itself. Keys must match
+`[A-Za-z0-9_.:> -]{1,256}`. Coordinates must be finite with absolute value at
+most `rendererLimits.maxCoordinate` (1,000,000), anchor sizes and scroll offsets
+must be non-negative, and unknown fields cause the message to be rejected.
 
-Selection IDs are the host's row IDs: in a comparison, the change ID for a
-changed item and the item ID for an unchanged one; in an extraction, the item
-ID. A `select` `path` is an RFC 6901 JSON pointer into the selected item (for
-example `/data/owner`; `""` is the whole item; `~0` and `~1` escape `~` and
-`/`), checked with `isPropertyPath`. A `path` without an `id` is invalid.
+Selection IDs match the host's row IDs: in a comparison, use the change ID for a
+changed item and the item ID for an unchanged one; in a single extraction, use
+the item ID. A `select` `path` is an RFC 6901 JSON pointer into that item (for
+example `/data/owner`, `""` for the whole item, with `~0` and `~1` escaping `~`
+and `/`), validated by `isPropertyPath`. Sending a `path` without an `id` is
+invalid.
 
-Annotations are generic markers a host draws through the renderer, for example
-comment counts or findings; what they mean stays with the host. Each
-`AnnotationMark` has the item's selection `id`, an optional `count` (an integer
-0 to `rendererLimits.annotationCount`, 1,000,000), an optional short `label` (at
-most `rendererLimits.annotationLabel`, 64 characters, used as the marker's
-accessible description) and an optional `tone` (`annotationTones`: `neutral`,
-`attention` for something unresolved, `done` for something resolved, `subtle`
-for something outdated). Tones are deliberately unlike change colors. A message
-carries at most `rendererLimits.annotations` (10,000) items and replaces every
-earlier one; an empty list clears them. Unknown fields reject the whole message.
-When the person activates a marker, the renderer reports `select` for the item
-and then `annotation` with its ID; the host decides what to open.
+Annotations are generic markers—such as comment counts or diagnostic findings—
+whose meaning stays in the host while the renderer draws them on items. Each
+`AnnotationMark` includes the item's selection `id`, an optional integer `count`
+(0 to `rendererLimits.annotationCount`, 1,000,000), an optional short `label`
+(up to `rendererLimits.annotationLabel`, 64 characters, used as the accessible
+description), and an optional `tone` from `annotationTones` (`neutral`,
+`attention` for unresolved items, `done` for resolved ones, or `subtle` for
+outdated ones). These tones are intentionally distinct from change colors. Each
+message holds at most `rendererLimits.annotations` (10,000) items and replaces
+all prior markers (an empty list clears them); unknown fields reject the entire
+message. When a user activates a marker, the renderer posts `select` for the
+item followed by `annotation` with its ID, leaving the host to decide what UI to
+open.
 
 <!-- prettier-ignore -->
 | Capability | Renderer promises |
@@ -251,25 +268,28 @@ and then `annotation` with its ID; the host decides what to open.
 | `properties` | It draws item properties and may report `select` with a `path` |
 | `controls` | The controls the host draws for it (see [Controls](../../packages/renderers/sdk/README.md#controls)) |
 
-Host guarantees: messages reach the renderer only from its parent window on its
-channel; progress is flow-controlled (at most one unacknowledged value, newer
-values replace a pending one, a 1 s acknowledgement timeout); extraction mode
-uses progress 1 and highlighting 0.
+On the host side, you can rely on three guarantees: messages only arrive from
+your parent window on your channel, progress updates are flow-controlled (at
+most one unacknowledged update in flight, newer values replacing pending ones,
+with a 1 s timeout), and extraction mode always runs at progress 1 with
+highlighting 0.
 
-Host enforcement (`rendererLimits`): messages must come from the frame's window
-and an opaque origin, carry the channel, validate strictly (unknown fields and
-types are dropped), stay under 64 KiB and 240 per second. A renderer that isn't
-ready within 10 s, navigates its frame or floods the host is stopped; the host's
-table and text views stay available.
+The host enforces strict limits (`rendererLimits`): every message must come from
+the frame's window in an opaque origin, carry the right channel, pass strict
+validation (unknown types or fields are dropped), stay under 64 KiB, and remain
+within 240 messages per second. Any renderer that fails to report ready within
+10 s, navigates its frame, or floods the host is terminated, leaving the host's
+table and text views available.
 
 ### Nesting a built-in renderer
 
-A renderer can show another renderer's view inside its own: the `gallery`
-renderer draws each fixture scenario with the renderer it names. `embedRenderer`
-asks the host for a built-in renderer's document by name
-(`client.requestDocument`), runs it in a sandboxed `srcdoc` frame in `container`
-and hosts it there: it sends `init`, `options`, `select` and `progress`, answers
-its own `document-request`s through yours, and hands you every message it sends.
+A renderer can embed another built-in renderer inside its own view—for example,
+the `gallery` renderer displays each fixture scenario with whichever renderer it
+targets. Calling `embedRenderer` asks the host for a built-in renderer document
+by name (`client.requestDocument`), mounts it in a sandboxed `srcdoc` frame
+inside `container`, forwards `init`, `options`, `select`, and `progress`, relays
+any nested `document-request`s through your client, and passes every child
+message back to you:
 
 ```ts
 import {connectRenderer, embedRenderer} from '@githubnext/projections/renderer'
@@ -286,145 +306,151 @@ nested.setEnvironment(environment) // follow the host's theme
 nested.dispose()
 ```
 
-Hosts supply only built-in renderers, by name from their own registry: a custom
-renderer's or an unknown name is refused with the reason, which `onFailure`
-receives, as does a host that supplies no documents. The nested frame inherits
-your document's content security policy and gets an opaque origin of its own, so
-it can do nothing your renderer can't; it fills `container` (`sizing: 'fill'`)
-and stays transparent until it has painted.
+Hosts only serve built-in renderers from their own registry. Requesting a custom
+renderer, an unknown name, or running in a host that does not supply documents
+invokes `onFailure` with the reason. The nested frame inherits your document's
+CSP and runs in its own opaque origin, so it has no privileges beyond yours; it
+fills `container` (`sizing: 'fill'`) and stays transparent until its first
+paint.
 
 ## Theme tokens
 
-`init.theme` and `environment.theme` carry `{colorMode, version, tokens}`.
-`version` is the token set (`themeTokenSetVersion`, currently 0). Token set 0
-defines every token below with light and dark defaults
-(`defaultThemeTokens(colorMode)`). `resolveThemeTokens(theme)` fills any token a
-host omits, and `applyEnvironment` exposes the resolved set as
-`--projections-<name>` custom properties, so renderers can rely on all of them.
-Hosts map their design system onto these names: the default UI uses shadcn's
-neutral palette, the VS Code UI VS Code's theme variables, and the agent viewer
-in the GitHub Copilot app's canvas the app's canvas theme variables
-(`copilotCanvasThemeTokens`). Every mapping keeps the contrast the token set
-promises, and change colors and the categorical palette keep their meaning.
+Both `init.theme` and `environment.theme` carry `{colorMode, version, tokens}`,
+where `version` identifies the token set (`themeTokenSetVersion`, currently 0).
+Token set 0 defines light and dark defaults for every token below
+(`defaultThemeTokens(colorMode)`). `resolveThemeTokens(theme)` fills in anything
+a host omits, and `applyEnvironment` writes the full resolved set as
+`--projections-<name>` CSS custom properties so your renderer can count on every
+token existing.
 
-- Surfaces: `color-bg` (canvas), `color-bg-subtle`, `color-bg-inset`,
-  `color-bg-overlay`
-- Text: `color-fg`, `color-fg-muted`, `color-fg-subtle`, `color-fg-on-emphasis`
-- Stacked surfaces: In elevation order: `color-surface-canvas` (the stage behind
-  cards) < `color-surface-raised` (a card) < `color-surface-header` (a header
-  band in a card) and `color-surface-inset` (a recessed column, such as a
-  line-number gutter, or room with nothing in it), with visible steps in both
-  modes
-- Borders: `color-border`, `color-border-muted`, `color-border-emphasis`;
-  `color-divider` separates any two stacked surfaces at 3:1 or more against both
-  (a card's edge, a band's rule), while `color-border` stays the quieter rule
-  between rows
-- Accent and focus: `color-accent`, `color-accent-muted`,
-  `color-accent-emphasis`, `color-focus`
-- Changes: `color-{added,removed,modified,moved}`, each with `-muted` (subtle
-  fill), `-border` (the fill's edge, in the same hue, at 3:1 or more against the
-  raised surface and the canvas: a tinted region always has a defining edge,
-  never a fill alone), `-highlight` (stronger fill still drawn behind plain
-  `color-fg` text, for word-level changes) and `-emphasis` (strong fill behind
-  `color-fg-on-emphasis`)
-- Highlight: `color-highlight`: a neutral fill behind plain `color-fg` text, for
-  hover emphasis and find matches
-- Categorical palette: `chart-1` … `chart-16`: sixteen distinct hues, muted to
-  sit on the theme's canvas (chroma capped well under the change colors, one
-  lightness band, see
+Different hosts map their own design systems onto these names—the default UI
+uses shadcn's neutral palette, VS Code maps its theme variables, and the GitHub
+Copilot app's canvas viewer maps its canvas theme variables
+(`copilotCanvasThemeTokens`). Every mapping preserves the contrast guarantees
+and keeps change colors and the categorical palette consistent:
+
+- **Surfaces** — `color-bg` (canvas), `color-bg-subtle`, `color-bg-inset`, and
+  `color-bg-overlay`.
+- **Text** — `color-fg`, `color-fg-muted`, `color-fg-subtle`, and
+  `color-fg-on-emphasis`.
+- **Stacked surfaces** — Ordered by elevation: `color-surface-canvas` (the stage
+  behind cards) < `color-surface-raised` (a card) < `color-surface-header` (a
+  card header band), alongside `color-surface-inset` (recessed columns like a
+  line-number gutter or vacant space), with clear tonal steps in both modes.
+- **Borders** — `color-border`, `color-border-muted`, `color-border-emphasis`,
+  and `color-divider`. Use `color-divider` wherever two stacked surfaces meet (a
+  card edge or band rule, guaranteed at least 3:1 against both), and reserve
+  `color-border` for quieter rules between rows.
+- **Accent and focus** — `color-accent`, `color-accent-muted`,
+  `color-accent-emphasis`, and `color-focus`.
+- **Changes** — `color-{added,removed,modified,moved}`, each paired with
+  `-muted` (subtle fill), `-border` (a matching border at 3:1 or higher against
+  both the raised surface and canvas, so tinted regions always have a crisp edge
+  rather than a bare fill), `-highlight` (a stronger fill behind plain
+  `color-fg` text for word-level diffs), and `-emphasis` (a solid fill behind
+  `color-fg-on-emphasis`).
+- **Highlight** — `color-highlight`, a neutral fill behind plain `color-fg` text
+  for hover emphasis and find matches.
+- **Categorical palette** — `chart-1` … `chart-16`, sixteen distinct hues tuned
+  to sit comfortably on the theme canvas (chroma kept well below change colors,
+  uniform lightness band; see
   [Languages](../../packages/renderers/sdk/README.md#languages)), each at least
-  3:1 against `color-bg`, none gray (keep `color-border-emphasis` for "other");
-  `chart-1` … `chart-8` avoid the change hues (green, red, amber, violet), so
-  use them for categories that aren't changes. Color languages with `/languages`
-  instead
-- Type: `font-family`, `font-family-mono`, `font-size-xs`, `font-size-sm`,
+  3:1 against `color-bg` and none gray (use `color-border-emphasis` for
+  "other"). `chart-1` … `chart-8` stay clear of change hues (green, red, amber,
+  violet), making them safe for non-change categories; for programming
+  languages, use `/languages` instead.
+- **Type** — `font-family`, `font-family-mono`, `font-size-xs`, `font-size-sm`,
   `font-size`, `font-size-lg`, `font-size-xl`,
   `font-weight-{normal,medium,semibold,bold}`, `line-height-tight`,
-  `line-height`, `line-height-relaxed`
-- Spacing: `space-1` (4px) … `space-8` (48px)
-- Shape: `radius-sm`, `radius`, `radius-lg`, `radius-full`, `border-width`,
-  `border-width-thick`
-- Elevation: `shadow-sm`, `shadow-md`, `shadow-lg`
-- Controls: `control-height-sm`, `control-height`, `control-height-lg`,
-  `focus-ring-width`, `focus-ring-offset`
-- Labels and badges: `label-font-size`, `label-font-weight`, `label-height`,
-  `label-padding-x`, `label-radius`
+  `line-height`, and `line-height-relaxed`.
+- **Spacing** — `space-1` (4px) … `space-8` (48px).
+- **Shape** — `radius-sm`, `radius`, `radius-lg`, `radius-full`, `border-width`,
+  and `border-width-thick`.
+- **Elevation** — `shadow-sm`, `shadow-md`, and `shadow-lg`.
+- **Controls** — `control-height-sm`, `control-height`, `control-height-lg`,
+  `focus-ring-width`, and `focus-ring-offset`.
+- **Labels and badges** — `label-font-size`, `label-font-weight`,
+  `label-height`, `label-padding-x`, and `label-radius`.
 
-The kit aliases these as `--stage`, `--raised`, `--band`, `--inset`, `--divider`
-and `--{green,red,amber,violet}-border`, draws a change region with `pk-region`
-and `data-change` (fill and edge, both scaled by `--emphasis`), and hatches
-empty room with `--pk-vacant`.
+In the kit, these are aliased to `--stage`, `--raised`, `--band`, `--inset`,
+`--divider`, and `--{green,red,amber,violet}-border`. Change regions use
+`pk-region` with `data-change` (scaling both fill and edge by `--emphasis`), and
+vacant space uses `--pk-vacant` hatching.
 
-`token` writes a token as a CSS value for an inline style, typed so a name that
-isn't a token doesn't compile: `token.color('fg-muted')`, `token.space(2)`,
+For inline styles, `token` emits type-checked CSS variable references so typos
+fail at compile time: `token.color('fg-muted')`, `token.space(2)`,
 `token.fontSize('sm')`, `token.fontWeight('semibold')`, `token.radius('sm')`,
-`token.chart(index)`, or `tokenVar(name)` for any token. The renderer checks
-`palette`, `type-scale` and `spacing` hold every painted value to these tokens,
-`stage-surface` holds the field behind a renderer's content to
-`color-surface-canvas`, and `stage-insets` holds the cards, panels and tables on
-it to one inset from the frame on all four sides (see
+`token.chart(index)`, or `tokenVar(name)` for any token. Automated checks keep
+these honest: `palette`, `type-scale`, and `spacing` verify that painted values
+come from tokens, `stage-surface` checks that the stage background uses
+`color-surface-canvas`, and `stage-insets` ensures top-level cards, panels, and
+tables share a uniform inset from all four frame edges (see
 [renderer testing](../../packages/renderers/testing/README.md)).
 
-Hosts may send at most 256 tokens. Names are lowercase kebab-case and values are
-at most 512 characters. Later token sets only add names.
+Hosts can pass up to 256 tokens, with lowercase kebab-case names and values of
+at most 512 characters. Future token set versions will only add new names.
 
 ### Icons
 
-Renderers ask for an icon by meaning, never by glyph. The vocabulary is
-`iconNames`: `added`, `removed`, `modified`, `renamed`, `moved`, `warning`,
-`error`, `breaking`, `info`, `unknown`, `additive`, `compatible`, `upgraded`,
-`downgraded`, `changed`, `enforced`, `unenforced`, `include`, `exclude`,
-`visible`, `hidden`, `expand`, `collapse`, `rescoped`, `settings`, `agent`,
-`replace`, `redeploy`, `import`, `read`, `blocked`, `varied` (a volatile value
-that changed beyond its tolerance; neutral, drawn in the text color beside the
-change's own status), the subjects a section holds, drawn beside its title
-(`host`, `policy`, `workload`, `credential`, `process`, `file`, `network`,
-`module`, `bytecode`, `namespace`, `application`, `other`), and the projection's
-parts, `extractor`, `comparator` and `renderer` (Projections' own drawings: a
-dot is the extraction, with strokes converging on it, two dots divided, or
-strokes leaving it). Each is a theme token, `icon-<name>`, whose value is an SVG
-image as a percent-encoded data URL (`url("data:image/svg+xml,…")`, at most
-`iconTokenLength` characters, checked by `isIconValue`).
+Renderers always request icons by semantic meaning rather than by glyph name.
+The shared vocabulary (`iconNames`) covers:
 
-The change kinds, the planned actions and `breaking` (`badgeIconNames`) are
-badges: a solid disc with the glyph cut out of it. Every other icon is an
-outline glyph, so a note after a change's status (a comparator's interpretation,
-such as Scope changed) asks for an outline icon of its own, never a change
-kind's.
+- **Change and status icons:** `added`, `removed`, `modified`, `renamed`,
+  `moved`, `warning`, `error`, `breaking`, `info`, `unknown`, `additive`,
+  `compatible`, `upgraded`, `downgraded`, `changed`, `enforced`, `unenforced`,
+  `include`, `exclude`, `visible`, `hidden`, `expand`, `collapse`, `rescoped`,
+  `settings`, `agent`, `replace`, `redeploy`, `import`, `read`, `blocked`, and
+  `varied` (drawn in neutral text color beside a change status when a volatile
+  value shifted beyond tolerance).
+- **Section subjects** (shown beside section titles): `host`, `policy`,
+  `workload`, `credential`, `process`, `file`, `network`, `module`, `bytecode`,
+  `namespace`, `application`, and `other`.
+- **Projection pipeline parts:** `extractor`, `comparator`, and `renderer`
+  (custom Projections marks built around a dot representing an extraction, with
+  converging strokes, a split pair of dots, or outgoing strokes).
 
-Badge glyphs are the SDK's own drawings, the same in every host (the default UI
-and the VS Code UI send them unchanged): an icon set's glyph scaled into a disc
-keeps neither its stroke nor its centre. Each is drawn in the badge's 24-unit
-box (the disc a circle of radius 11 at its centre) at one stroke, 2.75 units
-(1.83px at 16px), with round caps and joins and no transform, a dot being a
-stroke of no length; and each is placed so that its ink's bounding box, caps and
-joins included, is centred on the disc's centre, (12, 12), with no ink further
-than 8 units from it. The margins are optical rather than weighted, so an
-arrow's head points the way it goes; the arrows (`moved`, `upgraded`,
-`downgraded`) are one drawing turned in quarter turns. The exception is
-`redeploy`, a ring arrow whose ring is concentric with the disc and whose head
-sits where the ring puts it. A host that draws its own badge glyphs keeps to the
-same rules; the kit's browser suite
-(`packages/renderers/kit/browser/badges.spec.ts`) measures the cut-outs'
-bounding boxes and strokes in pixels.
+Each icon is exposed as a theme token `icon-<name>` whose value is a
+percent-encoded SVG data URL (`url("data:image/svg+xml,…")`, up to
+`iconTokenLength` characters, validated with `isIconValue`).
 
-Draw one with an element carrying `data-icon="<name>"` and the SDK's stylesheet
-(`@githubnext/projections/renderer/icons.css`, which the kit's styles include):
-it masks `--projections-icon-<name>` in `currentColor`, 1em square, so the icon
-takes the size and color of the text beside it. Mark it `aria-hidden="true"` and
-always put the word it stands for beside it; an icon never carries meaning
-alone. The renderer policy already allows `data:` images, which masks use.
+Change kinds, planned actions, and `breaking` (`badgeIconNames`) are rendered as
+badges—a solid disc with the glyph cut out—while every other icon is an outline
+glyph. Because of that distinction, a secondary note after a change status (such
+as a comparator's "Scope changed" note) should always use an outline icon rather
+than a change-kind badge.
 
-Outside a frame, where icons.css doesn't apply (a host's own UI, such as the
-summary bar's facts), `iconMaskStyle(name)` gives the same mask as style
-properties: the token, and for a badge the disc (`--projections-icon-badge`,
-`badgeDiscValue` by default) with the glyph cut out. Give the element a size and
-a `currentColor` background; a name the theme lacks draws nothing.
+Badge glyphs are authored directly by the SDK and stay identical across hosts
+(both the default UI and VS Code pass them through untouched), because scaling
+an arbitrary icon set's glyph into a disc breaks its stroke weight and optical
+centering. Each badge is drawn in a 24-unit box (a radius-11 disc at the center)
+with a uniform 2.75-unit stroke (1.83px at 16px), round caps and joins, no
+transforms (a dot is a zero-length stroke), and its inked bounding box centered
+on (12, 12) within an 8-unit radius. Margins are balanced optically rather than
+by bounding-box weight so arrowheads point cleanly; `moved`, `upgraded`, and
+`downgraded` are quarter-turn rotations of the same drawing, while `redeploy` is
+the one exception, placing its arrowhead where its concentric ring demands. Any
+host supplying custom badge glyphs must uphold these rules, which the kit's
+browser suite (`packages/renderers/kit/browser/badges.spec.ts`) verifies in
+pixels.
 
-The SDK's defaults are Lucide icons (ISC) and its badge glyphs; the default UI
-sends them, and a host with its own icon set sends its outline icons instead
-(the VS Code UI sends codicons), so renderer icons match the surrounding
-interface. A host overrides any icon like any token
-(`hostTheme(mode, {'icon-warning': svgIconValue(svg)})`), and an embedder or
-renderer author can override `--projections-icon-<name>` in CSS, or
-`--projections-icon` on a single element.
+To render an icon inside a frame, put `data-icon="<name>"` on an element and
+include `@githubnext/projections/renderer/icons.css` (already bundled with the
+kit's styles). It masks `--projections-icon-<name>` in `currentColor` at 1em
+square so the icon automatically inherits the adjacent text's size and color.
+Always set `aria-hidden="true"` and pair the icon with visible text—never rely
+on an icon alone to convey meaning. The renderer CSP already permits `data:`
+images for masks.
+
+Outside a renderer frame (such as in a host's own summary bar), where icons.css
+is not loaded, call `iconMaskStyle(name)` to get the equivalent inline style
+properties—referencing the icon token, and for badges combining the disc
+(`--projections-icon-badge`, defaulting to `badgeDiscValue`) with the cut-out
+glyph. Give the element explicit dimensions and a `currentColor` background;
+unknown icon names render nothing.
+
+By default, the SDK ships Lucide icons (ISC) alongside its badge glyphs. Hosts
+with their own icon set swap in their outline icons—VS Code supplies codicons—so
+renderer icons blend right into the host UI. Hosts override icons like any other
+token (`hostTheme(mode, {'icon-warning': svgIconValue(svg)})`), and embedders or
+renderer authors can override `--projections-icon-<name>` in CSS or set
+`--projections-icon` on an individual element.

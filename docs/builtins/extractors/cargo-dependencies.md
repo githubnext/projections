@@ -1,9 +1,10 @@
 # Cargo dependencies
 
-The crates of a Cargo workspace and everything they depend on, as Cargo resolves
-them: each workspace member, the packages it depends on, and what those pull in,
-transitively. Compared across a pull request, it answers "which crates did this
-change add, remove, upgrade or downgrade, and what pulls them in?"
+This extractor maps the crates in a Cargo workspace and everything they depend
+on, exactly as Cargo resolves them—every workspace member, its direct
+dependencies, and the transitive tree beneath them. Compared across a pull
+request, it shows which crates were added, removed, upgraded, or downgraded, and
+what pulls each one into the build.
 
 <!-- generated: facts -->
 
@@ -18,43 +19,47 @@ change add, remove, upgrade or downgrade, and what pulls them in?"
 
 ## When to use it
 
-Use it in a Rust repository with a `Cargo.toml`, single crate or workspace, to
-review dependency changes as a graph rather than a `Cargo.lock` diff: a new
-crate and the dozens it brings, a major upgrade deep in the tree, two
-semver-incompatible versions of one crate built side by side. It asks Cargo
-itself, so the graph is the one Cargo resolves, including Git and path
-dependencies.
+Use this extractor in any Rust repository with a `Cargo.toml`—whether a single
+crate or a multi-crate workspace—to review dependency changes as a graph instead
+of digging through a `Cargo.lock` diff. It makes it easy to spot a newly added
+crate and the dozens of packages it pulls in, a major upgrade buried deep in the
+tree, or two semver-incompatible versions of the same crate built side by side.
+Because it queries Cargo directly, the graph reflects what Cargo actually
+resolves, including Git and path dependencies.
 
-Running Cargo needs `--trust` (or a metadata export, below). It covers Rust
-crates only. For Node workspaces use
-[`workspace-dependencies`](workspace-dependencies.md), for .NET
+Running Cargo requires `--trust` unless you supply a pre-exported metadata file
+(described below). This extractor covers Rust crates only; for Node workspaces
+use [`workspace-dependencies`](workspace-dependencies.md), and for .NET use
 [`nuget-dependencies`](nuget-dependencies.md).
 
 ## What it reads
 
-By default it runs
-`cargo metadata --format-version 1 --manifest-path <manifest>` in the revision,
-with `manifestPath` (default `Cargo.toml`) and `cargoPath` (default `cargo`).
-Cargo reads the manifests and `Cargo.lock`, and may update the lockfile or fetch
-the registry index while it resolves. Grant the variables Cargo needs, such as
-`CARGO_HOME` and `RUSTUP_HOME`, in the definition's `execution.environment`, and
-raise `execution.timeoutMs` (30 seconds by default) if resolution is slow:
+By default, the extractor runs
+`cargo metadata --format-version 1 --manifest-path <manifest>` in each revision,
+using `manifestPath` (default `Cargo.toml`) and `cargoPath` (default `cargo`).
+Cargo reads the manifests and `Cargo.lock`, and it may update the lockfile or
+fetch the registry index while resolving. Grant any environment variables Cargo
+needs—such as `CARGO_HOME` and `RUSTUP_HOME`—in your definition's
+`execution.environment`, and bump `execution.timeoutMs` (30 seconds by default)
+if resolution takes longer:
 
 ```json
 "execution": {"environment": ["CARGO_HOME", "RUSTUP_HOME"], "timeoutMs": 120000}
 ```
 
-With `metadataPath`, it reads that repository-relative file instead: the JSON
-`cargo metadata --format-version 1` printed. It runs nothing and needs no
-`--trust`, but the file must be present, and current, in every revision you
-compare. Metadata without a resolved graph (from `--no-deps`) is rejected.
+If you set `metadataPath`, the extractor reads that repository-relative JSON
+file instead (the output of `cargo metadata --format-version 1`). Nothing runs
+and `--trust` is not required, though the file must exist and stay up to date in
+every revision you compare. Metadata generated with `--no-deps` is rejected
+because it lacks the resolved graph.
 
-Each resolved crate is a `package` entity with its `version`, its `source` (a
-registry, a Git repository, or `local`) and whether it is a `workspaceMember`.
-Each dependency is a `depends-on` relationship with the name it is used under
-(an alias, when renamed) and its kinds (`normal`, `dev`, `build`) and target
-conditions. IDs are the crate's name and source, never its version, so an
-upgrade is one modified package, not a removal and an addition.
+Each resolved crate becomes a `package` entity with its `version`, its `source`
+(a registry, a Git repository, or `local`), and a `workspaceMember` flag. Each
+dependency becomes a `depends-on` relationship carrying the name it is imported
+under (including aliases when renamed), its kinds (`normal`, `dev`, `build`),
+and any target conditions. Entity IDs combine the crate's name and source
+without its version, so upgrading a crate shows up as a single modified package
+rather than a removal and an addition.
 
 ## Options
 
@@ -70,22 +75,24 @@ upgrade is one modified package, not a removal and an addition.
 
 ## What a comparison shows
 
-- **Packages** added or removed: a new crate and everything it brings in, or one
-  that is no longer in the graph.
-- **Upgrades and downgrades** as modified packages, whose version changed. The
-  [`dependencies`](../renderers/graph.md) renderer words each by the part of the
-  version that moved (`Major upgrade`, `Patch downgrade`), and its summary bar
-  counts them (`3 major upgrades · 12 patch upgrades`), then packages whose
-  versions can't be ordered (`changed otherwise`) and how many direct
-  dependencies of a workspace member changed, each filtering to its packages.
-- **Dependencies** added, removed or modified: a crate moved from
-  `[dev-dependencies]` to `[dependencies]`, or given a target condition.
+- **Added or removed packages** highlight any new crate and everything it brings
+  along, as well as crates that dropped out of the graph.
+- **Upgrades and downgrades** appear as modified packages whose version changed.
+  The [`dependencies`](../renderers/graph.md) renderer labels each change by the
+  version component that moved (`Major upgrade`, `Patch downgrade`). Its summary
+  bar tallies those shifts (`3 major upgrades · 12 patch upgrades`), followed by
+  packages whose versions cannot be ordered (`changed otherwise`) and the number
+  of changed direct workspace dependencies. Clicking any count filters the graph
+  to those packages.
+- **Added, removed, or modified dependencies** show structural changes like a
+  crate moving from `[dev-dependencies]` to `[dependencies]` or gaining a target
+  condition.
 
-Workspace members are the graph's roots, drawn as workspaces. Unchanged
-transitive crates collapse into summary cards ("12 more packages") so the change
-stays readable; the renderer's **All packages** control (`transitive`) shows
-them all, and **Every dependency** (`paths`) draws every edge rather than the
-one path that pulls each crate in.
+Workspace members sit at the root of the graph as workspaces. To keep diffs
+scannable, unchanged transitive crates collapse into summary cards ("12 more
+packages"). Turn on **All packages** (`transitive`) to expand them all, or
+**Every dependency** (`paths`) to show every edge instead of a single path into
+each crate.
 
 ## Start from this definition
 
@@ -104,70 +111,75 @@ one path that pulls each crate in.
 
 ## Limitations
 
-- It is Cargo's resolved graph for every target and feature Cargo resolved, not
-  one build: a dependency behind a `cfg` for another platform is listed, with
-  its condition.
-- When a crate is resolved at two versions at once (`syn` 1 and 2), each ID
-  gains its semver-compatible line (`@1`, `@2`). So when a second version
-  arrives or the last duplicate leaves, the existing crate's ID changes, and it
-  reads as removed and added rather than unchanged.
-- A Git dependency's ID leaves out its revision, so moving it to another commit
-  is a modified package; its version may not change, and then it counts as
-  `changed otherwise`.
-- It reads Cargo's metadata, not the registry: it can't tell you about
-  advisories, licenses or crate contents.
+- The graph reflects everything Cargo resolved across all targets and features,
+  not a single build configuration. A dependency gated behind a `cfg` for
+  another platform still appears, along with its condition.
+- When two versions of the same crate exist side by side (such as `syn` 1 and
+  2), each ID gets its semver-compatible line appended (`@1`, `@2`). When a
+  second version is introduced—or the last duplicate is removed—the existing
+  crate's ID changes, so it appears as removed and re-added instead of
+  unchanged.
+- A Git dependency's ID omits its commit revision, so moving it to a different
+  commit appears as a modified package. If its version number did not change, it
+  is counted under `changed otherwise`.
+- Because it reads Cargo metadata rather than the registry, it cannot report
+  security advisories, licenses, or crate contents.
 
 ## Related
 
-- [`graph`](../renderers/graph.md), whose `dependencies` presentation draws it.
+- [`graph`](../renderers/graph.md) renders this extractor with its
+  `dependencies` presentation.
 - [`workspace-dependencies`](workspace-dependencies.md) and
-  [`nuget-dependencies`](nuget-dependencies.md), the same graph for Node and
-  .NET.
-- [`rust-public-api`](rust-public-api.md), for what a crate exports rather than
-  what it depends on.
-- [The default comparator](../comparators/default.md), which can order steps by
-  how many crates depend on each (`order.by: dependents`).
+  [`nuget-dependencies`](nuget-dependencies.md) provide the same dependency
+  graph for Node and .NET.
+- [`rust-public-api`](rust-public-api.md) tracks what a crate exports rather
+  than what it depends on.
+- [The default comparator](../comparators/default.md) can order review steps by
+  how many crates depend on each package (`order.by: dependents`).
 
 ## How it works
 
-The [package README](../../../packages/extractors/cargo-dependencies/README.md)
-details how crates are identified and what Cargo's metadata contributes.
+See the
+[package README](../../../packages/extractors/cargo-dependencies/README.md) for
+how crates are identified and what information Cargo's metadata provides.
 
 ## Build your own
 
-Write your own extractor when Cargo's resolved graph isn't the one you need:
+Consider writing a custom extractor when Cargo's resolved graph does not tell
+the story you need:
 
-- **One build, not every one**: the crates a single target, platform or feature
-  set actually compiles, from `cargo tree --target … --features …` or your build
-  system.
-- **Facts Cargo doesn't have**: which team owns each crate, which binaries ship
-  it, `unsafe` usage or audit status from `cargo vet` or `cargo deny`.
-- **Another build system**: Bazel or Buck targets with their own dependency
-  graph.
+- **A single build instead of all targets**, showing only the crates compiled
+  for one target, platform, or feature set via
+  `cargo tree --target … --features …` or your build system.
+- **Facts Cargo does not track**, like crate ownership by team, which binaries
+  ship each crate, `unsafe` usage, or audit results from `cargo vet` or
+  `cargo deny`.
+- **Another build system**, such as Bazel or Buck targets with their own
+  dependency graph.
 
-Try the lighter options first: `manifestPath` points it at a workspace that
-isn't at the repository root, and `metadataPath` reads an export your CI already
-makes. To draw the same graph differently, keep this extractor and write a
-renderer; to say which upgrades matter, add a comparator file.
+Check the lighter options first: `manifestPath` handles workspaces outside the
+repository root, and `metadataPath` reads an export your CI already produces. To
+change the visual layout, keep this extractor and write a renderer; to highlight
+specific upgrades that matter to your team, add a comparator file.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
-**Write a custom extractor, renderer or comparator** › **Custom extractor** (or
-**Custom extractor and renderer**), and pick its language. It writes the
-definition and a starter extractor (`extract.mjs`, `extract.py` or `extract.go`)
-under `.github/projections/<id>/`, drawn by the built-in graph renderer. Or
-choose **Ask an agent to write it** and describe what the projection should
-show.
+**In VS Code**, open the Projections view, choose **+ New Projection…**, and
+select **Write a custom extractor, renderer or comparator** › **Custom
+extractor** (or **Custom extractor and renderer**). Pick a language to scaffold
+the definition and a starter extractor (`extract.mjs`, `extract.py`, or
+`extract.go`) under `.github/projections/<id>/`, paired with the built-in graph
+renderer. You can also choose **Ask an agent to write it** and describe what you
+want to see.
 
-**With the CLI**, keep this graph's renderer:
+**With the CLI**, scaffold a new extractor while keeping this graph's renderer:
 
 ```sh
 projections init <id> --language node --renderer dependencies
 ```
 
-An extractor is any program that prints an extraction. Run it with
-`projections show -p <id> --trust` as you change it; an open projection tab uses
-your uncommitted edits ("Your edits") and says when its results are out of date,
-and the Testing view runs the projection's checks.
-[Write your first extractor](../../guides/first-extractor.md) walks through one,
-and [Extraction schema](../../guides/schemas.md#extraction-schema) describes
-what it prints.
+An extractor is any program that prints an extraction. Run
+`projections show -p <id> --trust` while you iterate—an open projection tab
+picks up your uncommitted edits ("Your edits") and flags stale results, and the
+Testing view runs your projection's checks. Walk through
+[Write your first extractor](../../guides/first-extractor.md) to get started,
+and check [Extraction schema](../../guides/schemas.md#extraction-schema) for the
+output format.

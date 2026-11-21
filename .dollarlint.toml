@@ -1,0 +1,181 @@
+# DollarLint (https://dollarlint.dev) validates every JSON, YAML and TOML file in the repository against a schema:
+# `dollarlint validate .`, and CI's `dollarlint` job. A file declares its schema (`$schema`, or a
+# `# yaml-language-server: $schema=` comment), or an association below gives it one, or a SchemaStore catalog
+# match does. Files outside every schema are excluded below, each group with its reason.
+
+[discovery]
+exclude = [
+  # Third-party formats with no published schema, as the extractor tests read them: Terraform and OpenTofu plans and
+  # state, Azure what-if results, Swift symbol graphs and package dumps, `cargo metadata`, rustdoc JSON, NuGet assets,
+  # Rails route tables, and npm and pnpm lockfiles. The extractors that parse them are their check.
+  "packages/extractors/terraform-infrastructure/tests/fixtures/*-plan.json",
+  "packages/extractors/terraform-infrastructure/tests/fixtures/*-state.json",
+  "packages/extractors/terraform-infrastructure/tests/fixtures/aws/*.plan.json",
+  "docs/images/sources/encrypt-database/*/plan.json",
+  "packages/extractors/azure-what-if/tests/fixtures/*/what-if.json",
+  "*.symbols.json",
+  "*.dump.json",
+  "packages/extractors/cargo-dependencies/tests/fixtures/cargo-metadata.json",
+  "packages/extractors/rust-public-api/tests/fixtures/minimal.json",
+  "packages/extractors/nuget-dependencies/tests/fixtures/nuget/project.assets.json",
+  "packages/extractors/rails-routes/tests/fixtures/expected/*.json",
+  "package-lock.json",
+  "packages.lock.json",
+  "pnpm-lock.yaml",
+  # Kubernetes manifests (Tetragon TracingPolicies, their CRDs, workloads, Helm values and kernel profiles) as the
+  # tetragon-policies extractor and its docs examples read them. Kubernetes schemas are per kind and per cluster
+  # version, and none is published for a mixed manifest; the extractor validates the policies against the CRDs.
+  "packages/extractors/tetragon-policies/tests/fixtures/**/*.yaml",
+  "docs/design/ebpf-samples/**/*.yaml",
+  "docs/images/sources/credentials-policy/**/*.yaml",
+  # Compiled gh-aw workflow stubs: only the `gh-aw-metadata` and `gh-aw-manifest` comment header the
+  # github-agentic-workflows extractor reads, with no workflow body to validate.
+  "packages/extractors/github-agentic-workflows/tests/fixtures/**/*.lock.yml",
+  "docs/images/sources/docs-bot/**/*.lock.yml",
+  # Bicep-generated ARM templates. They declare Azure's deployment-template schema, but its Microsoft.Network
+  # provider schema takes minutes to compile (dollarlint/dollarlint#238).
+  "packages/extractors/azure-what-if/tests/fixtures/*/main.json",
+]
+
+[schemas]
+requireCoverage = false
+
+[schemas.catalogs]
+enabled = true
+failure = "error"
+
+# The published schemas refer to each other by their URLs (packages/schemas/README.md). The schemas host doesn't serve
+# them yet; it will, and this mapping stays then: a change is validated against the copies in its own checkout, never
+# the published ones, which lag behind a branch that changes them.
+[[schemas.mappings]]
+url = "https://schemas.projections.githubnext.com/"
+path = "packages/schemas/schemas/"
+
+[schemas.fetch]
+# Every remote schema the repository uses: SchemaStore (package.json, tsconfig.json, Cargo.toml, workflows, actions and
+# other tool configs), shadcn (the vendored registry items in packages/host/core/src/ui/components/upstream),
+# cargo-nextest (.config/nextest.toml, whose schema SchemaStore's catalog points at nexte.st) and json-schema.org (the
+# 2020-12 meta-schema our own schemas declare).
+allowedDomains = ["*.schemastore.org", "ui.shadcn.com", "nexte.st", "json-schema.org"]
+
+# Extractions: renderer fixtures and scenarios, comparator fixtures, and extractor goldens.
+[[schemas.associations]]
+file = "packages/renderers/*/fixtures/*.json"
+schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
+
+[[schemas.associations]]
+file = "packages/renderers/*/test/fixtures/**/*.json"
+schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
+
+[[schemas.associations]]
+file = "packages/comparators/*/fixtures/*.json"
+schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
+
+[[schemas.associations]]
+file = "examples/comparators/*/fixtures/*.json"
+schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
+
+[[schemas.associations]]
+file = ".github/projections/*/fixtures/*.json"
+schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
+
+[[schemas.associations]]
+file = "packages/extractors/*/tests/fixtures/**/*expected.json"
+schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
+
+[[schemas.associations]]
+file = "packages/extractors/*/tests/fixtures/expected/*.json"
+schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
+
+[[schemas.associations]]
+file = "examples/extractors/*/test/fixtures/*.expected.json"
+schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
+
+[[schemas.associations]]
+file = "packages/extractors/django-schema/tests/fixtures/django.extraction.json"
+schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
+
+[[schemas.associations]]
+file = "packages/extractors/dotnet-di/tests/fixtures/di.json"
+schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
+
+[[schemas.associations]]
+file = "packages/extractors/dotnet-public-api/tests/fixtures/api.json"
+schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
+
+[[schemas.associations]]
+file = "packages/extractors/efcore-schema/tests/fixtures/schema.json"
+schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
+
+[[schemas.associations]]
+file = "packages/extractors/nestjs-di/tests/fixtures/nestjs.json"
+schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
+
+[[schemas.associations]]
+file = "packages/extractors/spring-di/tests/fixtures/spring.json"
+schema = "https://schemas.projections.githubnext.com/extraction/v0.json"
+
+# An extractor test's definition inputs.
+[[schemas.associations]]
+file = "packages/extractors/*/tests/fixtures/**/inputs.json"
+schema = "https://schemas.projections.githubnext.com/definition/v0.json#/properties/inputs"
+
+# Comparisons: comparator snapshots.
+[[schemas.associations]]
+file = "**/snapshots/*.json"
+schema = "https://schemas.projections.githubnext.com/comparison/v0.json"
+
+# Projection definitions.
+[[schemas.associations]]
+file = ".github/projections/*.json"
+schema = "https://schemas.projections.githubnext.com/definition/v0.json"
+
+[[schemas.associations]]
+file = "examples/polyglot/.github/projections/*.json"
+schema = "https://schemas.projections.githubnext.com/definition/v0.json"
+
+[[schemas.associations]]
+file = "examples/polyglot/.projections/*.json"
+schema = "https://schemas.projections.githubnext.com/definition/v0.json"
+
+# Renderer scenarios.
+[[schemas.associations]]
+file = "scenarios.json"
+schema = "https://schemas.projections.githubnext.com/scenarios/v0.json"
+
+# Comparator files and their tests that don't declare their schema.
+[[schemas.associations]]
+file = "*.comparator.yaml"
+schema = "https://schemas.projections.githubnext.com/comparator/v0.json"
+
+[[schemas.associations]]
+file = "*.comparator.test.yaml"
+schema = "https://schemas.projections.githubnext.com/comparator-tests/v0.json"
+
+# GitHub workflows and issue forms outside the paths SchemaStore's catalog matches: documentation sources, extractor
+# fixtures and the example workflow.
+[[schemas.associations]]
+file = "docs/images/sources/deploy-pipeline-split/*/ci.yml"
+schema = "https://www.schemastore.org/github-workflow.json"
+
+[[schemas.associations]]
+file = "packages/extractors/github-actions-jobs/tests/fixtures/workflow.yml"
+schema = "https://www.schemastore.org/github-workflow.json"
+
+[[schemas.associations]]
+file = "examples/ci/projections.yml"
+schema = "https://www.schemastore.org/github-workflow.json"
+
+[[schemas.associations]]
+file = ".github/ISSUE_TEMPLATE/*.yml"
+schema = "https://www.schemastore.org/github-issue-forms.json"
+
+[[schemas.associations]]
+file = ".github/ISSUE_TEMPLATE/config.yml"
+schema = "https://www.schemastore.org/github-issue-config.json"
+
+# The renderer template's scenarios name the renderer `{{name}}`, which `projections renderer new` fills in.
+[[ignore]]
+file = "packages/cli/templates/renderer/scenarios.json"
+keyword = "pattern"
+reason = "template placeholder, replaced when the template is instantiated"

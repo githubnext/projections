@@ -257,6 +257,24 @@ or timed-out job fails it. To preview what your current branch would trigger
 (including uncommitted changes against `origin/main`), run
 `node tools/scripts/ci-plan.mjs`.
 
+`dollarlint` runs on every change, outside the plan; see below.
+
+### Schemas for data files
+
+Every JSON, YAML and TOML file is validated against a schema by
+[DollarLint](https://dollarlint.dev), configured in `.dollarlint.toml`: run
+`dollarlint validate .` (after `npm ci`, which installs the schema
+`.oxfmtrc.json` names). CI's `dollarlint` job runs it on every change and sends
+its findings to code scanning. A file gets its schema from its own declaration
+(`$schema`, or a `# yaml-language-server: $schema=` comment), from an
+association in `.dollarlint.toml`, or from SchemaStore's catalog. Our own
+formats use the schemas in `packages/schemas`, read from the checkout rather
+than fetched (`[[schemas.mappings]]`), so a change is checked against its own
+schemas, before and after the schemas host serves them. A new kind of data file
+needs a schema and an association; a file no schema can describe, such as a
+third-party format with none published, is excluded in `.dollarlint.toml` with
+its reason.
+
 ## Repository layout
 
 The repository is organized by domain component; language only determines what

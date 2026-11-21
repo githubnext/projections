@@ -199,15 +199,13 @@ intentional exception in `.portability.yaml` with its justification.
 
 #### What CI runs
 
-Pull requests run only the jobs their changes reach. All scheduling decisions
-live in [`.github/ci-rules.json`](.github/ci-rules.json), where every rule
-carries a description; its schema (`.github/ci-rules.schema.json`) is generated
-from `tools/cli/src/lib/ci-rules.schema.ts` via
-`node tools/scripts/ci-schemas.mjs`. The workflow's first job, `changes`, runs
-`tools/scripts/ci-plan.mjs` to evaluate those rules against the changed files
-and their position in the dependency graph, then prints a summary: each file's
-class and why, the workspaces and crates it touches and reaches, and each job
-with the rule descriptions that ran it.
+Pull requests run only the jobs their changes reach, as
+[`.github/ci-rules.json`](.github/ci-rules.json) decides. Every rule carries a
+description, and its schema is generated from
+`tools/cli/src/lib/ci-rules.schema.ts` (`node tools/scripts/ci-schemas.mjs`).
+The first job, `changes`, applies the rules (`tools/scripts/ci-plan.mjs`) and
+summarises each file's class, the units it touches and reaches, and each job
+with the rules that ran it.
 
 The planner evaluates in this order:
 

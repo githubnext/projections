@@ -190,3 +190,17 @@ test('needs carried to new plans by a key, and shifted alike when the shown plan
   shiftNeeds(carried, 'merged, two rows', 300)
   assert.equal(carried.get('centre, two rows'), 940)
 })
+
+test('focus that moves into a control’s own popup is still the control’s: choosing an item may remount it', async () => {
+  const {leftOnPurpose} = await import('../dist/fit-plan/focus.js')
+  const outside = {}
+  const bar = {ownerDocument: {activeElement: outside}, contains: element => element !== outside}
+  const control = expanded => ({isConnected: true, getAttribute: name => (name === 'aria-expanded' ? String(expanded) : null)})
+  // A menu button whose menu is open, focus in the menu (portalled outside the bar): kept.
+  assert.equal(leftOnPurpose(control(true), bar), false)
+  // Focus moved elsewhere from a control with nothing open: forgotten.
+  assert.equal(leftOnPurpose(control(false), bar), true)
+  // Focus still in the bar, or a control that left the document (a remount): kept.
+  assert.equal(leftOnPurpose(control(false), {...bar, contains: () => true}), false)
+  assert.equal(leftOnPurpose({...control(false), isConnected: false}, bar), false)
+})

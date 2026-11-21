@@ -87,11 +87,53 @@ test('--fast typechecks only the changed workspaces, once their dependencies are
   const context = {root, units, affected: affected(['app'], [], ['ts']), fast: true}
   assert.deepEqual(argvs(plan('typecheck', context)), ['npm run typecheck --workspace @fixture/app'])
   workspace(root, 'lib', {src: 300, dist: 200})
-  assert.match((plan('typecheck', context) as {skip: string}).skip, /app \(lib unbuilt, unfinished or older than its src\)/)
+  assert.match((plan('typecheck', context) as {skip: string}).skip, /app \(lib unbuilt, unfinished or out of date\)/)
   // One that can be checked still is; the other waits, noted.
   const both = plan('typecheck', {...context, affected: affected(['app', 'lib'], ['other'], ['ts'])})
   assert.deepEqual(argvs(both), ['npm run typecheck --workspace @fixture/lib'])
   assert.match((both as {note: string}).note, /app/)
+})
+
+test('--fast waits for transitive dependencies too, and for one built after a dependency of its own', () => {
+  const root = mkdtempSync(join(tmpdir(), 'tools-fast-deep-'))
+  const units = [unit('base'), unit('lib', {dependsOn: ['base']}), unit('app', {dependsOn: ['lib']})]
+  workspace(root, 'base', {src: 100, dist: 200})
+  workspace(root, 'lib', {src: 100, dist: 300})
+  const context = {root, units, affected: affected(['app'], [], ['ts']), fast: true}
+  assert.deepEqual(argvs(plan('typecheck', context)), ['npm run typecheck --workspace @fixture/app'])
+  // base rebuilt after lib: lib's declarations may describe the old base.
+  workspace(root, 'base', {src: 100, dist: 400})
+  assert.match((plan('typecheck', context) as {skip: string}).skip, /app \(lib unbuilt, unfinished or out of date\)/)
+  workspace(root, 'lib', {src: 100, dist: 500})
+  workspace(root, 'base', {src: 600, dist: 400})
+  assert.match((plan('typecheck', context) as {skip: string}).skip, /app \(base unbuilt, unfinished or out of date\)/)
+})
+
+test('lint: a process per workspace; --fast lints changed TypeScript once its dependencies are current, and JavaScript always', () => {
+  const root = mkdtempSync(join(tmpdir(), 'tools-lint-'))
+  const units = [unit('lib'), unit('app', {dependsOn: ['lib']}), unit('other')]
+  workspace(root, 'lib', {src: 100, dist: 200})
+  const files = ['app/src/a.ts', 'app/scripts/b.mjs', 'other/src/c.ts', 'tools/d.mjs']
+  for (const file of files) {
+    mkdirSync(join(root, file, '..'), {recursive: true})
+    writeFileSync(join(root, file), '')
+  }
+  const eslint = (...paths: string[]) => `npx --no-install eslint --quiet --no-warn-ignored ${paths.join(' ')}`
+  const fast = {root, units, affected: affected(['app', 'other'], [], ['ts']), files, fast: true}
+  assert.deepEqual(argvs(plan('lint', fast)), [
+    eslint('tools/d.mjs'),
+    eslint('app/src/a.ts', 'app/scripts/b.mjs'),
+    eslint('other/src/c.ts'),
+  ])
+  workspace(root, 'lib', {src: 300, dist: 200})
+  const waiting = plan('lint', fast)
+  assert.deepEqual(argvs(waiting), [eslint('tools/d.mjs'), eslint('app/scripts/b.mjs'), eslint('other/src/c.ts')])
+  assert.match((waiting as {note: string}).note, /app \(lib/)
+  // --affected lints whole workspaces, dependants included; the lint configuration, or everything, is npm run lint.
+  const affectedOnly = {root, units, affected: affected(['lib'], ['app'], ['ts']), files: ['lib/src/index.ts']}
+  assert.deepEqual(argvs(plan('lint', affectedOnly)), [eslint('lib'), eslint('app')])
+  assert.deepEqual(argvs(plan('lint', {...affectedOnly, files: ['eslint.config.js']})), ['npm run --silent lint'])
+  assert.deepEqual(argvs(plan('lint', {root, units})), ['npm run --silent lint'])
 })
 
 test('build: a dependency is current until its src, or a dependency of its own, is newer than its dist', () => {

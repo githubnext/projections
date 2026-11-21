@@ -1,6 +1,5 @@
 import {useEffect} from 'react'
-import type {Dispatch, RefObject, SetStateAction} from 'react'
-import {extractedKey} from './extraction-state.js'
+import type {Dispatch, SetStateAction} from 'react'
 import type {Marks} from './pairs.js'
 import type {RowState} from './revisions.js'
 import type {Rows} from './use-extractions.js'
@@ -28,7 +27,7 @@ export function useExtractedPair({
   setRows: Dispatch<SetStateAction<Rows>>
   definitionRevision: string
   extract: (refs: readonly string[], keep?: boolean) => void
-  extracted: RefObject<Map<string, RowState>>
+  extracted: (projection: string, definition: string, ref: string) => RowState | undefined
 }) {
   useEffect(() => {
     if (!runnable || !projection || !paired) return
@@ -42,7 +41,7 @@ export function useExtractedPair({
     // Extracted before under this definition: presented again.
     const reused = new Map(
       stale.flatMap(ref => {
-        const row = extracted.current.get(extractedKey(projection, definitionRevision, ref))
+        const row = extracted(projection, definitionRevision, ref)
         return row ? [[ref, row] as const] : []
       }),
     )

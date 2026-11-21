@@ -1,6 +1,7 @@
 // Writes the published JSON Schemas (`schemas/<name>/v<version>.json`) from the TypeBox sources in
-// `src/typebox`, and `fixtures/data-rules.json`, the domain data rules the engine's rule table must equal,
-// formatted as the repository formats JSON. `--check` fails instead when a file differs.
+// `src/typebox`, the internal runner API's schema (`internal/runner-api.json`) from `src/runner`, and
+// `fixtures/data-rules.json`, the domain data rules the engine's rule table must equal, formatted as the
+// repository formats JSON. `--check` fails instead when a file differs.
 import {execFileSync} from 'node:child_process'
 import {mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs'
 import {createRequire} from 'node:module'
@@ -12,6 +13,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const output = join(root, 'schemas')
 const {emit, schemaDocuments} = await import('../dist/typebox/index.js')
 const {dataRules, vocabularies} = await import('../dist/domains.js')
+const {runnerApiSchema} = await import('../dist/runner/api.js')
 
 const require = createRequire(import.meta.url)
 const oxfmt = join(dirname(require.resolve('oxfmt/package.json')), 'bin/oxfmt')
@@ -61,17 +63,21 @@ const rules = dataRules.map(({schema, vocabulary, collection, kinds, fields}) =>
   kinds: kinds ?? null,
   fields: fieldsOf(fields),
 }))
-const fixture = join(root, 'fixtures/data-rules.json')
-const fixtureText = format(
-  'packages/schemas/fixtures/data-rules.json',
-  `${stringify({version: 0, vocabularies: Object.fromEntries(Object.entries(vocabularies).map(([name, {schemas}]) => [name, schemas])), rules})}\n`,
-)
-let fixtureChanged
-try {
-  fixtureChanged = readFileSync(fixture, 'utf8') !== fixtureText
-} catch {
-  fixtureChanged = true
-}
+// Files outside the published set, each written whole: the engine's data rules and the internal runner API's schema.
+const files = [
+  [
+    'fixtures/data-rules.json',
+    {version: 0, vocabularies: Object.fromEntries(Object.entries(vocabularies).map(([name, {schemas}]) => [name, schemas])), rules},
+  ],
+  ['internal/runner-api.json', runnerApiSchema()],
+].map(([path, value]) => [path, format(`packages/schemas/${path}`, `${stringify(value)}\n`)])
+const filesChanged = files.filter(([path, text]) => {
+  try {
+    return readFileSync(join(root, path), 'utf8') !== text
+  } catch {
+    return true
+  }
+})
 
 const stale = existing.filter(path => !expected.has(path))
 const changed = [...expected].filter(([path, text]) => {
@@ -82,9 +88,9 @@ const changed = [...expected].filter(([path, text]) => {
   }
 })
 if (check) {
-  if (stale.length || changed.length || fixtureChanged) {
+  if (stale.length || changed.length || filesChanged.length) {
     for (const path of [...stale, ...changed.map(([path]) => path)]) console.error(`schemas/${path} is out of date`)
-    if (fixtureChanged) console.error('fixtures/data-rules.json is out of date')
+    for (const [path] of filesChanged) console.error(`${path} is out of date`)
     console.error('Run `npm run generate --workspace @githubnext/projections-schemas`.')
     process.exit(1)
   }
@@ -94,6 +100,9 @@ if (check) {
     mkdirSync(dirname(join(output, path)), {recursive: true})
     writeFileSync(join(output, path), text)
   }
-  if (fixtureChanged) writeFileSync(fixture, fixtureText)
-  console.log(`${changed.length + (fixtureChanged ? 1 : 0)} written, ${stale.length} removed, ${expected.size} schemas`)
+  for (const [path, text] of filesChanged) {
+    mkdirSync(dirname(join(root, path)), {recursive: true})
+    writeFileSync(join(root, path), text)
+  }
+  console.log(`${changed.length + filesChanged.length} written, ${stale.length} removed, ${expected.size} schemas`)
 }

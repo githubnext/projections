@@ -16,11 +16,14 @@ for (const key of ['dependency-injection/orders', 'graph/service-platform', 'gra
     const settings = toolbar.getByRole('button', {name: 'Settings', exact: true})
     if (!(await settings.isVisible())) await toolbar.getByRole('button', {name: 'More', exact: true}).click()
     await settings.click()
+    // By keyboard: here the submenu opens to the left, and the menu reads the pointer's jump into it as moving right
+    // (its first move in the menu always reads so), not towards the submenu, so the submenu closes as the pointer leaves
+    // its item; a click then lands only while it fades out, and on a slow runner falls through to the renderer's frame.
     await page
       .getByRole('menu', {name: 'Settings'})
       .getByRole('menuitem', {name: /^Highlight changes/})
-      .click()
-    await page.getByRole('menu', {name: 'Highlight changes'}).getByRole('menuitemradio', {name: 'Always'}).click()
+      .press('ArrowRight')
+    await page.getByRole('menu', {name: 'Highlight changes'}).getByRole('menuitemradio', {name: 'Always'}).press('Enter')
     await expect(page.getByRole('menu', {name: 'Settings'})).toHaveCount(0)
     if (await page.getByRole('dialog', {name: 'More'}).isVisible()) await page.keyboard.press('Escape')
     await page.getByRole('slider', {name: 'Transition'}).fill('100')

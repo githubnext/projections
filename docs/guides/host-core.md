@@ -139,7 +139,10 @@ instead of adding a toolbar row above the stage. The stage measures whatever it
 overlays (bar or chips) and sends the same two tokens so the frame clears it
 while still panning or scrolling underneath; the default UI's `utilityArea` uses
 this for playback with chips for labels (see
-[the design note](../design/utility-area.md)). Pass `renderStatus` to customize
+[the design note](../design/utility-area.md)). The default view's own `utility`
+prop puts your content there too (a caption, for example), in the same bar and
+look and clear of the drawing in the same way; with floating playback, both
+share the bar. Pass `renderStatus` to customize
 loading and error states (or `null` to render `rendererStatus` and
 `rendererErrors` yourself). While one pane loads, its status centers over that
 frame; while both panes of side by side or swipe load, a single status covers

@@ -27,6 +27,14 @@ const rules = createRulesRuntime({
 let engine: Promise<ProjectionEngine> | undefined
 
 /** The default UI explorer with the controls and evidence outputs the suites drive and read. */
+/** `?caption`: a host's own content in the stage's utility area (`ProjectionViewProps.utility`), two lines of text. */
+const caption = (
+  <div className="demo-caption" style={{padding: '6px 12px', lineHeight: '20px'}}>
+    <strong style={{display: 'block', fontSize: 14}}>Checkout gains a payments queue</strong>
+    <span style={{display: 'block', fontSize: 12, opacity: 0.75}}>A host’s caption over the stage</span>
+  </div>
+)
+
 export function HostHarness() {
   usePageStyles(styles)
   const [schema, setSchema] = useState<DomainSchema>(domainSchemas.find(value => value === params.get('schema')) ?? 'graph/v0')
@@ -181,6 +189,7 @@ export function HostHarness() {
             customRenderer={custom}
             colorMode={colorMode}
             {...explorerOptions()}
+            {...(params.has('caption') ? {utility: caption} : {})}
             onOpen={(path, line) => setOpened(`${path}${line ? `:${line}` : ''}`)}
             {...(params.get('details') === 'none' ? {details: 'none' as const} : {})}
             {...(params.has('evidenceLinks') ? {evidenceLink} : {})}

@@ -5,7 +5,7 @@ import {useProjection} from '../projection.js'
 import type {ProjectionController} from '../projection.js'
 import {ProjectionStage} from '../stage.js'
 import {UpdatingChip} from './updating-chip.js'
-import {useUtilityPlayback} from './view/utility.js'
+import {stageUtility, useUtilityPlayback} from './view/utility.js'
 import {StageFoot} from './view/stage-foot.js'
 import {HostViews} from './view/host-views.js'
 import {DetailCard} from './detail-card.js'
@@ -185,7 +185,7 @@ function DefaultView({projection: p, props}: {projection: ProjectionController; 
                 paneLabels={paneLabels}
                 legend={false}
                 foot={<StageFoot projection={p} summary={on('summary')} legend scope={on('changesOnly')} />}
-                utility={view === 'renderer' && floating}
+                utility={view === 'renderer' ? stageUtility(props.utility, floating) : undefined}
                 renderStatus={pane => (
                   <RendererPaneStatus
                     pane={pane}

@@ -111,11 +111,16 @@ impl Transitive<'_> {
                 if dependency.key != name {
                     data["alias"] = json!(dependency.key);
                 }
-                graph.relationships.push(json!({
+                let mut relationship = json!({
                     "id":format!("dependency:{}",serde_json::to_string(&json!([from,dependency.kind,dependency.key]))?),
-                    "from":from,"to":to,"kind":dependency.kind,"label":dependency.range,"data":data,
+                    "from":from,"to":to,"kind":dependency.kind,"data":data,
                     "confidence":"authoritative","evidence":evidence
-                }));
+                });
+                // A relationship's label is optional but never null: a lockfile entry without a range has none.
+                if let Some(range) = &dependency.range {
+                    relationship["label"] = json!(range);
+                }
+                graph.relationships.push(relationship);
             }
         }
         Ok(())

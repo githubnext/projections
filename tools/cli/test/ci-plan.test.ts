@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import {spawnSync} from 'node:child_process'
 import {readFileSync} from 'node:fs'
 import {fileURLToPath} from 'node:url'
 import test from 'node:test'
@@ -87,6 +88,11 @@ test('the rules file matches its schema, and its references resolve', () => {
   assert.deepEqual(ruleProblems(rules, suites), [])
 })
 
+test('the committed JSON Schema is the one its TypeBox source generates', () => {
+  const check = spawnSync(process.execPath, ['tools/scripts/ci-rules-schema.mjs', '--check'], {cwd: root, encoding: 'utf8'})
+  assert.equal(check.status, 0, check.stderr)
+})
+
 test('the rules checks catch references to groups, conditions, tags and suites that do not exist', () => {
   const broken = structuredClone(rules) as CiRules
   broken.jobs.verus = {description: 'x', when: {any: [{if: 'nope'}, {reaches: 'nobody', from: 'cli'}, {tag: 'none'}, 'reachesSuite']}}
@@ -145,4 +151,7 @@ test('a full run says why, and a run following the change gives each job its rea
   const plan = ciPlan(facts, rules, {paths: ['packages/engine/src/lib.rs']})
   assert.deepEqual(plan.why.verus, [rules.conditions.engine?.description])
   assert.deepEqual(plan.why.windows, [rules.conditions.rust?.description])
+  // A predicate on files or units, with no condition to name: the job's own description.
+  assert.deepEqual(plan.why['mutants-diff'], [rules.jobs['mutants-diff']?.description])
+  assert.deepEqual(ciPlan(facts, rules, {paths: ['README.md']}).why.docs, [rules.jobs.docs?.description])
 })

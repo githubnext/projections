@@ -108,7 +108,8 @@ export function ciPlan(facts: RepoFacts, rules: CiRules, change: Change): CiPlan
   for (const [name, job] of Object.entries(rules.jobs)) {
     if ('when' in job) {
       jobs[name] = holds(job.when, context)
-      if (jobs[name]) why[name] = reasons(job.when, context)
+      // A predicate on files or units gives no reason of its own: the job's description says what it checks.
+      if (jobs[name]) why[name] = reasons(job.when, context).length ? reasons(job.when, context) : [job.description]
     } else {
       const values = job.matrix.filter(item => holds(item.when, context))
       jobs[name] = values.map(item => item.value)

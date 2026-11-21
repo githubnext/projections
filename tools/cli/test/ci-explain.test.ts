@@ -60,3 +60,16 @@ test('the generated table of what runs for what is current', () => {
   const check = spawnSync(process.execPath, ['tools/scripts/ci-table.mjs', '--check'], {cwd: root, encoding: 'utf8'})
   assert.equal(check.status, 0, check.stderr)
 })
+
+test('ci explain reads named files as repository paths', () => {
+  const plain = ciExplainReport(root, {
+    files: ['packages/renderers/database/src/styles.css'],
+    base: 'HEAD',
+    event: 'pull_request',
+    labels: [],
+  })
+  for (const file of ['./packages/renderers/database/src/styles.css', `${root}packages/renderers/database/src/styles.css`]) {
+    const report = ciExplainReport(root, {files: [file], base: 'HEAD', event: 'pull_request', labels: []})
+    assert.deepEqual(report.files, plain.files, file)
+  }
+})

@@ -188,7 +188,26 @@ export const generators: Generator[] = [
     name: 'ci-table',
     description: "docs/maintainers/ci-plan.md: what CI runs for each case of the CI planner's table, by the rules",
     outputs: ['docs/maintainers/ci-plan.md'],
-    inputs: ['.github/ci-rules.json', 'tools/cli/test/ci-plan.cases.json', 'tools/cli/src/lib/ci-*.ts', 'tools/scripts/ci-table.mjs'],
+    // The rules and cases, and what the planner reads the graph from (ci-facts.ts) where workspaces and crates live:
+    // manifests, what crates read by path and build scripts build, renderers' scenarios, Playwright configs and mutation
+    // testing's globs.
+    inputs: [
+      '.github/ci-rules.json',
+      'tools/cli/test/ci-plan.cases.json',
+      'tools/cli/src/lib/*.ts',
+      'tools/scripts/ci-table.mjs',
+      'package.json',
+      'Cargo.toml',
+      '.cargo/mutants.toml',
+      ...['packages', 'examples', 'tools'].flatMap(area => [
+        `${area}/**/package.json`,
+        `${area}/**/Cargo.toml`,
+        `${area}/**/*.rs`,
+        `${area}/**/scripts/**`,
+        `${area}/**/playwright.config.ts`,
+      ]),
+      'packages/renderers/*/scenarios.json',
+    ],
     generate: [node('tools/scripts/ci-table.mjs')],
     check: {mode: 'script', commands: [node('tools/scripts/ci-table.mjs', '--check')]},
     needs: [],

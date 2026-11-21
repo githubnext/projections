@@ -271,9 +271,7 @@ sees it).
 
 `ci-ok` is the single required check. It passes when `changes` succeeds and
 every other job either passes or is skipped by the plan; any failed, cancelled,
-or timed-out job fails it. To preview what your current branch would trigger
-(including uncommitted changes against `origin/main`), run
-`node tools/scripts/ci-plan.mjs`.
+or timed-out job fails it.
 
 `dollarlint` runs on every change, outside the plan; see below.
 

@@ -4,6 +4,7 @@ import type {Side} from '../modes.js'
 import {paneGeometry} from './arrangement.js'
 import {ChipText} from './chip-text.js'
 import {useWholePixels} from './whole-pixels.js'
+import {parseRevisionLabel} from '../revision-label.js'
 
 const srOnly: CSSProperties = {
   position: 'absolute',
@@ -25,7 +26,8 @@ const genericLabels = new Set(['Before', 'After', 'A', 'B'])
  */
 function RevisionText({label}: {label: ReactNode}) {
   if (typeof label !== 'string' || genericLabels.has(label.trim())) return <>{label}</>
-  const [name = '', ...rest] = label.split(' · ')
+  const {name, detail, when} = parseRevisionLabel(label)
+  const rest = [detail, when].filter(Boolean)
   return (
     <>
       <span style={{fontFamily: 'var(--projections-font-family-mono, ui-monospace, SFMono-Regular, Menlo, monospace)'}}>{name}</span>

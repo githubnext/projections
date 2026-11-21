@@ -6,12 +6,14 @@ import {Overlay} from './overlay/overlay.js'
 import {QuickPick} from './overlay/quick-pick.js'
 import {uiCodicons} from './codicons.js'
 import type {ToolbarLayout} from './layout/steps.js'
+import {revisionLabelName} from '@githubnext/projections-host'
 
 /** A pair picker's form, named as the default UI names it: two dropdowns, two with short names, or one compare action. */
 export type PairForm = 'full' | 'short' | 'merged'
 
 /** A revision's short name: its label up to the first " · ", for example "v1" for "v1 · base". */
-export const shortRevisionLabel = (label: string) => label.split(' · ')[0]!.trim() || label
+/** A revision label's name alone (`revisionLabelName`), for compact pickers. */
+export const shortRevisionLabel = revisionLabelName
 
 /** One revision dropdown: VS Code's dropdown (`vscode-single-select`), with the full name in each option's description. */
 function RevisionSelect({

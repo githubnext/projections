@@ -6,7 +6,6 @@
     "description",
     "full",
     "files",
-    "tags",
     "groups",
     "conditions",
     "jobs",
@@ -59,7 +58,8 @@
         "type": "object",
         "required": [
           "description",
-          "effect"
+          "paths",
+          "class"
         ],
         "properties": {
           "description": {
@@ -83,16 +83,12 @@
             },
             "description": "Repository paths: `*` within a path segment, `**` across segments."
           },
-          "owned": {
-            "type": "boolean",
-            "description": "Whether the file is (true) or isn’t (false) inside a workspace or crate"
-          },
-          "read": {
-            "type": "boolean",
-            "description": "Whether a crate reads the file by path or a generator reads or writes it (true), or nothing does (false)"
-          },
-          "effect": {
+          "class": {
             "anyOf": [
+              {
+                "type": "string",
+                "const": "lockfile"
+              },
               {
                 "type": "string",
                 "const": "full"
@@ -107,66 +103,16 @@
               },
               {
                 "type": "string",
-                "const": "owner"
-              },
-              {
-                "type": "string",
-                "const": "readers"
-              },
-              {
-                "type": "string",
-                "const": "lockfile"
+                "const": "code"
               }
             ],
-            "description": "full: run everything. docs: documentation only. checks: the Linux checks only, which run every crate's tests and generator's check, without counting it a change to what reads it. owner: a change to the workspace or crate containing the file. readers: a change only to what reads it (the crates and generators found for every file); with none, the Linux checks still run. lockfile (package-lock.json, Cargo.lock): a change to the workspaces and crates whose resolved dependencies changed; with no earlier version to compare, everything runs."
-          },
-          "root": {
-            "anyOf": [
-              {
-                "type": "string",
-                "const": "full"
-              },
-              {
-                "type": "string",
-                "const": "readers"
-              }
-            ],
-            "description": "For a lockfile rule, when the root package's own dependencies (the repository's tooling) changed: run everything (full), or count only the workspaces and crates the change reaches (readers)"
+            "description": "lockfile (package-lock.json, Cargo.lock): code for the workspaces and crates whose resolved dependencies changed; full when the root package’s own dependencies changed, or there is no earlier version to compare. full: run everything. docs: documentation; checks instead when a crate or generator reads it. checks: the Linux checks alone, which run every crate's tests and generator's check. code: touches the workspace or crate containing the file and those reading it by path; with none, the Linux checks alone."
           }
         },
         "additionalProperties": false
       },
       "minItems": 1,
-      "description": "How each changed file counts: the first rule that matches it decides"
-    },
-    "tags": {
-      "type": "object",
-      "patternProperties": {
-        "^[a-z][a-z0-9-]*$": {
-          "type": "object",
-          "required": [
-            "description",
-            "paths"
-          ],
-          "properties": {
-            "description": {
-              "type": "string",
-              "minLength": 1,
-              "description": "What the rule does and why. The run summary prints it as the reason a job runs."
-            },
-            "paths": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "minLength": 1
-              },
-              "description": "Repository paths: `*` within a path segment, `**` across segments."
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "description": "Tags every changed file matching the paths gets, whichever file rule decided it"
+      "description": "Each changed file’s class: the first rule whose paths match it, or, when none does, code if a workspace or crate contains it or anything reads it, and full otherwise"
     },
     "groups": {
       "type": "object",
@@ -322,7 +268,7 @@
           "additionalProperties": false
         }
       },
-      "description": "Named conditions, which `{\"if\": name}` refers to; the `changes` job also outputs each"
+      "description": "Named conditions, which `{\"if\": name}` refers to"
     },
     "jobs": {
       "type": "object",
@@ -410,7 +356,6 @@
       "type": "object",
       "required": [
         "description",
-        "default",
         "suites"
       ],
       "properties": {
@@ -418,25 +363,6 @@
           "type": "string",
           "minLength": 1,
           "description": "What the rule does and why. The run summary prints it as the reason a job runs."
-        },
-        "default": {
-          "type": "object",
-          "required": [
-            "description",
-            "when"
-          ],
-          "properties": {
-            "description": {
-              "type": "string",
-              "minLength": 1,
-              "description": "What the rule does and why. The run summary prints it as the reason a job runs."
-            },
-            "when": {
-              "$ref": "#/$defs/When"
-            }
-          },
-          "additionalProperties": false,
-          "description": "When a suite without its own `when` runs"
         },
         "suites": {
           "type": "object",
@@ -504,7 +430,8 @@
                   "description": "When the suite runs only because of changes to some of the group's members (not all), leave the others' tests out"
                 }
               },
-              "additionalProperties": false
+              "additionalProperties": false,
+              "description": "A browser suite runs when the change reaches it or a workspace its test:browser script builds, and when its own `when` holds"
             }
           },
           "description": "Browser suites by workspace directory; those without `shards` run together in `browser (rest)`"
@@ -520,22 +447,17 @@
         {
           "type": "string",
           "const": "always",
-          "description": "Every run, whatever changed: for jobs that check the whole repository cheaply"
+          "description": "Every pull request, whatever changed: for jobs that check the whole repository cheaply"
         },
         {
           "type": "string",
-          "const": "full",
-          "description": "The run is a full one: an event, a label or a file rule asked for everything"
+          "const": "never",
+          "description": "Only in full runs"
         },
         {
           "type": "string",
           "const": "docsOnly",
-          "description": "Every changed file is documentation, and no generator reads or writes one"
-        },
-        {
-          "type": "string",
-          "const": "reachesSuite",
-          "description": "Browser suites only: the change reaches the suite, or a workspace its test:browser script builds"
+          "description": "Every changed file is documentation"
         },
         {
           "type": "object",
@@ -584,49 +506,21 @@
             }
           },
           "additionalProperties": false,
-          "description": "A changed file matches; {\"facts\": \"mutants\"}: The files .cargo/mutants.toml examines (examine_globs, without exclude_globs)"
+          "description": "A changed file's path matches, whatever its class; {\"facts\": \"mutants\"}: The files .cargo/mutants.toml examines (examine_globs, without exclude_globs)"
         },
         {
           "type": "object",
           "required": [
-            "tag"
+            "touches"
           ],
           "properties": {
-            "tag": {
+            "touches": {
               "type": "string",
               "pattern": "^[a-z][a-z0-9-]*$"
             }
           },
           "additionalProperties": false,
-          "description": "A changed file has the tag"
-        },
-        {
-          "type": "object",
-          "required": [
-            "generator"
-          ],
-          "properties": {
-            "generator": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          "additionalProperties": false,
-          "description": "A changed file is an input or output of the generator"
-        },
-        {
-          "type": "object",
-          "required": [
-            "changed"
-          ],
-          "properties": {
-            "changed": {
-              "type": "string",
-              "pattern": "^[a-z][a-z0-9-]*$"
-            }
-          },
-          "additionalProperties": false,
-          "description": "A workspace or crate in the group contains, builds in or reads a changed file (its tests included)"
+          "description": "A workspace or crate in the group is touched: it contains, builds in or reads (tests included) a changed file"
         },
         {
           "type": "object",
@@ -637,14 +531,10 @@
             "reaches": {
               "type": "string",
               "pattern": "^[a-z][a-z0-9-]*$"
-            },
-            "from": {
-              "type": "string",
-              "pattern": "^[a-z][a-z0-9-]*$"
             }
           },
           "additionalProperties": false,
-          "description": "A workspace or crate in the group contains or builds in a changed file, or depends on one that does (tests that read a file don't count); with `from`, counting only changes to that group"
+          "description": "A workspace or crate in the group is reached: touched, or depending on one that contains or builds in a changed file (a crate whose tests alone read a file is touched, but its dependants are not reached through it)"
         },
         {
           "type": "object",
@@ -662,23 +552,6 @@
           },
           "additionalProperties": false,
           "description": "Any of these holds"
-        },
-        {
-          "type": "object",
-          "required": [
-            "all"
-          ],
-          "properties": {
-            "all": {
-              "type": "array",
-              "items": {
-                "$ref": "#/$defs/When"
-              },
-              "minItems": 1
-            }
-          },
-          "additionalProperties": false,
-          "description": "All of these hold"
         },
         {
           "type": "object",

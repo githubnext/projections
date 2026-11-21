@@ -34,6 +34,11 @@ export const CiPlanCase = Type.Object(
         changedInclude: Type.Optional(Paths),
         dependantsInclude: Type.Optional(Paths),
         dependantsExclude: Type.Optional(Paths),
+        classes: Type.Optional(
+          Type.Array(Type.Union([Type.Literal('full'), Type.Literal('docs'), Type.Literal('checks'), Type.Literal('code')]), {
+            description: "Each changed file's class, in order",
+          }),
+        ),
       },
       Strict,
     ),

@@ -203,48 +203,63 @@ carries a description; its schema (`.github/ci-rules.schema.json`) is generated
 from `tools/cli/src/lib/ci-rules.schema.ts` via
 `node tools/scripts/ci-schemas.mjs`. The workflow's first job, `changes`, runs
 `tools/scripts/ci-plan.mjs` to evaluate those rules against the changed files
-and their position in the dependency graph, then prints a summary listing each
-job alongside the rule descriptions that triggered it.
+and their position in the dependency graph, then prints a summary: each file's
+class and why, the workspaces and crates it touches and reaches, and each job
+with the rule descriptions that ran it.
 
-The rules file owns every policy decision, while the code owns none:
+The planner evaluates in this order:
 
-- `files` classifies each changed file by the first matching rule: run
-  everything, documentation only, Linux checks only (for Markdown embedded by a
-  crate or read/written by a generator), a change to the containing workspace or
-  crate, a change only to consumers that read the file, or—for
-  `package-lock.json` and `Cargo.lock`—only the workspaces and crates whose
-  resolved dependencies changed compared with the merge base (root tooling
-  changes still run everything).
-- `tags` attaches path-based labels regardless of which file rule matched, such
-  as `release` for dist configuration.
-- `groups` defines named sets of workspaces and crates.
-- `conditions` defines named predicates such as `rust` and `platform`.
-- `jobs` controls when each job in `ci.yml` runs, keyed by job ID
-  (`public-product` by runner).
-- `browser` controls when each browser suite runs, how larger suites shard, and
-  which ones narrow to only the renderers a change touches.
+1. **Each changed file gets one class**, and nothing else happens to it. The
+   first rule in `files` whose paths match it gives the class. A `docs` file
+   that a crate reads by path, or a generator reads or writes, is `checks`
+   instead (the Linux checks run every crate's tests and generator's check). A
+   file no rule matches is `code` when a workspace or crate contains it or
+   anything reads it, and `full` otherwise. The classes:
+   - `full`: run everything.
+   - `docs`: documentation; a change of only docs files runs the `docs` job
+     alone.
+   - `checks`: the Linux checks alone.
+   - `code`: touches the workspace or crate containing the file and those that
+     read it by path (`include_str!`, `CARGO_MANIFEST_DIR`, a renderer's
+     `scenarios.json`); with neither, the Linux checks alone.
+   - `lockfile` (`package-lock.json`, `Cargo.lock`): `code` for the workspaces
+     and crates whose resolved dependencies changed compared with the merge
+     base, and `full` when the root's own tooling changed.
+2. **A full run runs every job**, whatever its `when` says: pushes to `main`,
+   the nightly run, manual runs, the `ci:full` label, and any `full` file.
+3. **Touched and reached units.** The `code` files give the touched workspaces
+   and crates. Those, and everything depending on one that contains or builds in
+   a changed file, are reached. A crate whose tests alone read a file is touched
+   (its own suites run), but its dependants aren't reached through it.
+4. **Each job's `when`** is evaluated against the changed paths and the touched
+   and reached units. `{"changes": globs}` looks at paths whatever their class:
+   `action.yml` is `code` and also selects the jobs whose `changes` name it, and
+   `Cargo.lock` is a lockfile and also a Rust change.
+5. **Browser suites.** Each suite runs when the change reaches it or a workspace
+   its `test:browser` script builds, or when its own `when` holds. Suites with
+   `shards` run in their own jobs; the rest share `browser (rest)`. The renderer
+   harness's `narrow` leaves the other renderers' tests out when only some
+   renderers changed.
 
-A `when` expression can be `"always"`, `"full"`, `"docsOnly"`,
-`{"if": condition}`, `{"changes": globs}`, `{"tag": tag}`,
-`{"generator": name}`, `{"changed": group}` (a member contains, builds in, or
-reads a changed file, tests included), `{"reaches": group}` (a member contains
-or builds in a changed file, or depends on one that does, optionally limited to
-changes `from` another group), or boolean combinations using `any`, `all`, and
-`not`.
+A `when` is `"always"`, `"never"` (full runs only), `"docsOnly"`,
+`{"if": condition}`, `{"changes": globs}` (or
+`{"changes": {"facts": "mutants"}}`, the files `.cargo/mutants.toml` examines),
+`{"touches": group}`, `{"reaches": group}`, `{"any": [...]}` or `{"not": ...}`.
+`groups` name sets of workspaces and crates by glob, `@group`,
+`{"kind": "crate"}` or a fact the repository states elsewhere
+(`{"facts": "coverage"}`, the crates `test:rust:coverage` measures).
+`conditions` name the predicates jobs share, such as `rust` and `platform`.
 
-The dependency graph itself comes from code: `ci-facts.ts` reads the same graph
-as `npm run tools -- affected`, plus undeclared edges—files crates read by path
-(`include_str!`, `CARGO_MANIFEST_DIR`), crates and packages compiled by a
-workspace's `build` script (`cargo build -p`), extractions and comparators
-referenced in renderers' `scenarios.json`, and renderers under the harness's
-`testDir`.
+The graph comes from code: `ci-facts.ts` reads the graph `tools affected` does,
+plus edges no manifest declares: files read by path, what a workspace's `build`
+script compiles, and renderers under the harness's `testDir`.
 
 To change what runs, update the rules file and add a test case to
 `tools/cli/test/ci-plan.cases.json`. Running `npm run tools -- test tools/cli`
 validates the file against its schema, verifies that every referenced group,
-condition, tag, and suite exists, confirms `ci.yml` gates each job on the
-matching decision name, and executes every case. Any change to the rules file
-itself runs the full suite.
+condition and suite exists, confirms `ci.yml` gates each job on the matching
+decision name, and executes every case. Any change to the rules file itself runs
+the full suite.
 
 Everything also runs on pushes to `main`, nightly, on manual runs (**Run
 workflow** on the Projections workflow), and when a pull request carries the

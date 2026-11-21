@@ -1,13 +1,20 @@
-// What CI runs for a change (CONTRIBUTING.md#what-ci-runs): the rules of .github/ci-rules.json applied to the changed
-// files' workspaces and crates and everything depending on them (ci-facts.ts reads the graph). This module holds no
-// rule of its own: which files run everything, which jobs and suites run for what, and how suites are sharded are
-// all in the rules file.
+// What CI runs for a change (CONTRIBUTING.md#what-ci-runs). This module holds no rule of its own: which files run
+// everything, which jobs and suites run for what, and how suites are sharded are all in .github/ci-rules.json. It
+// evaluates them in this order:
+//
+// 1. Each changed file gets one class (ci-files.ts).
+// 2. The run is full when its event or a label asks for it, or a file's class is full: then every job, matrix entry
+//    and suite runs, whatever its `when` says.
+// 3. Otherwise the code files give the touched workspaces and crates, and those with everything depending on them,
+//    the reached ones (ci-facts.ts reads the graph).
+// 4. Each job's and matrix entry's `when` is evaluated against the paths and the touched and reached units.
+// 5. Each browser suite runs when the change reaches it or a workspace its script builds, or its `when` holds; then
+//    the suites are laid out in jobs and shards (ci-browser.ts), and the harness narrowed.
 import {browserJobs, type BrowserJob, type Layout} from './ci-browser.ts'
 import type {RepoFacts} from './ci-facts.ts'
-import {sortChanges, type Contents} from './ci-files.ts'
+import {classifyFiles, type ClassifiedFile, type Contents} from './ci-files.ts'
 import {ruleProblems} from './ci-rules-check.ts'
-import {holds, reasons, resolveGroups, RULES, type CiRules, type Context} from './ci-rules.ts'
-import {dependantsOf} from './packages.ts'
+import {FULL, holds, reach, reasons, resolveGroups, RULES, type CiRules, type Context, type When} from './ci-rules.ts'
 
 export type Change = {
   paths: readonly string[]
@@ -15,19 +22,19 @@ export type Change = {
   event?: string
   /** The pull request's labels. */
   labels?: readonly string[]
-  /** The changed files' contents before and after, for the lockfile rules; without them, a lockfile change runs everything. */
+  /** The changed files' contents before and after, for lockfiles; without them, a lockfile change runs everything. */
   contents?: Contents
 }
 
 export type CiPlan = {
   /** Why everything runs; empty when the plan follows the change. */
   full: string[]
-  files: number
+  files: ClassifiedFile[]
   docsOnly: boolean
-  /** Changed workspaces and crates, and those depending on them. */
+  /** Workspaces and crates containing, building in or reading a changed file. */
   changed: string[]
-  dependants: string[]
-  generators: string[]
+  /** Those depending on one that contains or builds in a changed file, each with the dependency that led there. */
+  dependants: Record<string, string>
   /** Each condition of the rules file, and whether it holds. */
   conditions: Record<string, boolean>
   /** Each job the rules gate: whether it runs, or the names of a matrix job's entries. */
@@ -44,6 +51,19 @@ export type CiPlan = {
   browserMacos: BrowserJob[]
 }
 
+/** One check the plan runs, as GitHub lists it, and what it runs. */
+export type Execution = {
+  check: string
+  job: string
+  /** A matrix entry's values. */
+  with?: Record<string, string>
+  /** Browser suites it runs. */
+  suites?: string[]
+  project?: string
+  shard?: string
+  grepInvert?: string
+}
+
 function layouts(rules: CiRules): {linux: Layout; macos: Layout} {
   const linux: Layout = {}
   const macos: Layout = {}
@@ -54,24 +74,40 @@ function layouts(rules: CiRules): {linux: Layout; macos: Layout} {
   return {linux, macos}
 }
 
-function affectedSuites(context: Context): string[] {
-  return context.facts.browserSuites
-    .filter(suite => holds(context.rules.browser.suites[suite.path]?.when ?? context.rules.browser.default.when, {...context, suite}))
-    .map(suite => suite.path)
+function evaluate(rules: CiRules, facts: RepoFacts, files: readonly ClassifiedFile[], docsOnly: boolean): Context {
+  const touched = new Set(files.flatMap(file => file.touches))
+  const tested = new Set(files.flatMap(file => file.tested))
+  // A unit some file builds in counts as built, though another file's tests alone read it.
+  for (const file of files) for (const unit of file.touches) if (!file.tested.includes(unit)) tested.delete(unit)
+  return {
+    rules,
+    groups: resolveGroups(rules, facts),
+    docsOnly,
+    paths: files.map(file => file.path),
+    mutants: facts.mutants,
+    touched,
+    reached: reach(facts.units, touched, tested),
+  }
+}
+
+function suiteRuns(facts: RepoFacts, rules: CiRules, path: string, context: Context): boolean {
+  const suite = facts.browserSuites.find(item => item.path === path)
+  const when: When | undefined = rules.browser.suites[path]?.when
+  return Boolean(
+    suite && (context.reached.has(path) || suite.uses.some(unit => context.reached.has(unit)) || (when && holds(when, context))),
+  )
 }
 
 /** A suite to narrow: one that runs only because of changes to some (not all) members of its `narrow` group. */
-function narrowed(context: Context, affected: readonly string[]): {suite: string; kept: string[]; others: string[]} | undefined {
-  for (const [path, suite] of Object.entries(context.rules.browser.suites)) {
+function narrowed(facts: RepoFacts, rules: CiRules, files: readonly ClassifiedFile[], context: Context, affected: readonly string[]) {
+  for (const [path, suite] of Object.entries(rules.browser.suites)) {
     if (!suite.narrow || !affected.includes(path)) continue
     const members = context.groups.get(suite.narrow.group) ?? new Set<string>()
-    const kept = context.built.filter(unit => members.has(unit))
+    const kept = [...context.touched].filter(unit => members.has(unit)).sort()
     if (!kept.length || kept.length === members.size) continue
-    const rest = context.built.filter(unit => !kept.includes(unit))
-    const facts = context.facts.browserSuites.find(item => item.path === path)
-    const others: Context = {...context, built: rest, changed: rest}
-    if (facts) others.suite = facts
-    if (holds(suite.when ?? context.rules.browser.default.when, others)) continue
+    const others = files.map(file => ({...file, touches: file.touches.filter(unit => !kept.includes(unit))}))
+    const {touched, reached} = evaluate(rules, facts, others, false)
+    if (suiteRuns(facts, rules, path, {...context, touched, reached})) continue
     const name = (unit: string) => unit.slice(unit.lastIndexOf('/') + 1)
     return {suite: path, kept: kept.map(name), others: [...members].filter(unit => !kept.includes(unit)).map(name)}
   }
@@ -85,59 +121,52 @@ export function ciPlan(facts: RepoFacts, rules: CiRules, change: Change): CiPlan
     facts.browserSuites.map(suite => suite.path),
   )
   if (problems.length) throw new Error(`${RULES}:\n${problems.join('\n')}`)
-  const sorted = sortChanges(facts, rules, paths, contents)
+  const files = classifyFiles(facts, rules, paths, contents)
   const full = [
     ...(rules.full.events.includes(event) ? [`a ${event} run`] : []),
     ...labels.filter(label => rules.full.labels.includes(label)).map(label => `the ${label} label`),
-    ...Object.entries(Object.groupBy(sorted.everything, ({rule}) => rule)).map(
-      ([rule, files]) => `${rule} (${(files ?? []).map(({path}) => path).join(', ')})`,
-    ),
+    ...Object.entries(
+      Object.groupBy(
+        files.filter(file => file.class === 'full'),
+        file => file.rule,
+      ),
+    ).map(([rule, matched]) => `${rule} (${(matched ?? []).map(file => file.path).join(', ')})`),
   ]
-  const built = [...sorted.units].sort()
-  const changed = [...new Set([...built, ...sorted.tested])].sort()
-  const context: Context = {
-    rules,
-    facts,
-    groups: resolveGroups(rules, facts),
-    full,
-    docsOnly: !full.length && sorted.docsOnly,
-    paths,
-    tags: sorted.tags,
-    generators: sorted.generators,
-    built,
-    changed,
-  }
+  const all = full.length > 0
+  const docsOnly = !all && files.every(file => file.class === 'docs')
+  const state = evaluate(rules, facts, files, docsOnly)
+  const decide = (when: When) => all || holds(when, state)
   const jobs: CiPlan['jobs'] = {}
   const why: CiPlan['why'] = {}
   const matrices: CiPlan['matrices'] = {}
   for (const [name, job] of Object.entries(rules.jobs)) {
     if ('when' in job) {
-      jobs[name] = holds(job.when, context)
+      jobs[name] = decide(job.when)
       // A predicate on files or units gives no reason of its own: the job's description says what it checks.
-      if (jobs[name]) why[name] = reasons(job.when, context).length ? reasons(job.when, context) : [job.description]
+      if (jobs[name]) why[name] = all ? [FULL] : reasons(job.when, state).length ? reasons(job.when, state) : [job.description]
     } else {
-      const entries = job.matrix.filter(item => holds(item.when, context))
+      const entries = job.matrix.filter(item => decide(item.when))
       jobs[name] = entries.map(item => item.name)
       matrices[name] = entries.map(item => ({name: item.name, ...item.with}))
-      if (entries.length) why[name] = entries.map(item => `${item.name}: ${item.description}`)
+      if (entries.length) why[name] = all ? [FULL] : entries.map(item => `${item.name}: ${item.description}`)
     }
   }
-  const suites = affectedSuites(context)
-  const narrow = narrowed(context, suites)
+  const suites = facts.browserSuites.map(suite => suite.path).filter(path => all || suiteRuns(facts, rules, path, state))
+  const narrow = all ? undefined : narrowed(facts, rules, files, state, suites)
   const browser = browserJobs(
     facts.browserSuites.map(suite => suite.path),
     new Set(suites),
     layouts(rules),
     narrow,
   )
+  const changed = [...state.touched].sort()
   return {
     full,
-    files: paths.length,
-    docsOnly: context.docsOnly,
+    files,
+    docsOnly,
     changed,
-    dependants: dependantsOf(facts.units, built).filter(path => !changed.includes(path)),
-    generators: [...sorted.generators].sort(),
-    conditions: Object.fromEntries(Object.entries(rules.conditions).map(([name, {when}]) => [name, holds(when, context)])),
+    dependants: Object.fromEntries([...state.reached].filter(([unit]) => !state.touched.has(unit)).sort(([a], [b]) => a.localeCompare(b))),
+    conditions: Object.fromEntries(Object.entries(rules.conditions).map(([name, {when}]) => [name, decide(when)])),
     jobs,
     matrices,
     why,
@@ -146,6 +175,31 @@ export function ciPlan(facts: RepoFacts, rules: CiRules, change: Change): CiPlan
     browser: browser.linux,
     browserMacos: browser.macos,
   }
+}
+
+/** Every check the plan runs, with the suites, projects, shards and filters of each: what replays and explanations compare. */
+export function executions(plan: CiPlan, rules: CiRules): Execution[] {
+  const sharded = new Set(Object.entries(rules.browser.suites).flatMap(([path, suite]) => (suite.shards === undefined ? [] : [path])))
+  const rest = plan.suites.filter(suite => !sharded.has(suite))
+  const browser = (job: string, item: BrowserJob): Execution => ({
+    check: `${job} (${item.name})`,
+    job,
+    suites: item.suite === 'rest' ? rest : [item.suite],
+    ...(item.project ? {project: item.project} : {}),
+    ...(item.shard ? {shard: item.shard} : {}),
+    ...(item.grepInvert ? {grepInvert: item.grepInvert} : {}),
+  })
+  return [
+    ...Object.entries(plan.jobs).flatMap(([job, value]): Execution[] =>
+      Array.isArray(value)
+        ? (plan.matrices[job] ?? []).map(({name, ...values}) => ({check: `${job} (${name})`, job, with: values}))
+        : value
+          ? [{check: job, job}]
+          : [],
+    ),
+    ...plan.browser.map(item => browser('browser', item)),
+    ...plan.browserMacos.map(item => browser('browser-macos', item)),
+  ]
 }
 
 /** The `changes` job's step outputs: each job's decision by ID (a matrix job's as its `matrix.include`), and the rest. */

@@ -1,68 +1,80 @@
-// Sorts a change's files for the CI plan (ci-plan.ts) by the file rules of .github/ci-rules.json: the first rule that
-// matches a file decides whether it runs everything, is documentation, runs the Linux checks alone, is its workspace's or
-// crate's change, or is a change only to what reads it. But for `checks`, the crates that read a file by path count;
-// whatever the rule, the generators that read or write it count, and it gets every tag whose paths it matches.
+// Gives each file of a change one class, for the CI plan (ci-plan.ts), and nothing else happens to it:
+//
+// 1. The first file rule of .github/ci-rules.json whose paths match the file gives its class: lockfile, full, docs,
+//    checks or code.
+// 2. A docs file that a crate reads by path, or a generator reads or writes, is checks instead: the Linux checks run
+//    every crate's tests and every generator's check.
+// 3. A file no rule matches is code when a workspace or crate contains it or anything reads it, and full otherwise.
+//
+// A code file touches the workspace or crate containing it and the crates and workspaces that read it by path; a
+// lockfile, the workspaces and crates whose resolved dependencies changed.
 import {readersOf, type RepoFacts} from './ci-facts.ts'
 import {lockfileReach} from './ci-lockfiles.ts'
-import type {CiRules} from './ci-rules.ts'
+import type {CiRules} from './ci-rules.schema.ts'
 import {ownerOf} from './packages.ts'
 import {matches} from './repo.ts'
 
-export type Sorted = {
-  /** Workspaces and crates a changed file belongs to, or which build it in. */
-  units: Set<string>
-  /** Crates whose tests alone read a changed file. */
-  tested: Set<string>
-  /** Files that run everything, with the rule that says so. */
-  everything: {path: string; rule: string}[]
-  /** Whether every file is documentation. */
-  docsOnly: boolean
-  tags: Set<string>
-  generators: Set<string>
+export type FileClass = 'full' | 'docs' | 'checks' | 'code'
+
+export type ClassifiedFile = {
+  path: string
+  class: FileClass
+  /** Why it has its class: the file rule's description, or what the graph says. */
+  rule: string
+  /** Workspaces and crates it touches: containing it, building it in or reading it, or (a lockfile) whose dependencies changed. */
+  touches: string[]
+  /** Of those, the crates whose tests alone read it: their own suites run, but what depends on them isn't reached. */
+  tested: string[]
 }
 
-type FileRule = CiRules['files'][number]
-
-/** A changed file's contents before and after the change, for the rules that compare them (lockfiles). */
+/** A changed file's contents before and after the change, for lockfiles. */
 export type Contents = {before: (path: string) => string | undefined; after: (path: string) => string | undefined}
 
-function applies(rule: FileRule, path: string, owned: boolean, read: boolean): boolean {
-  if (rule.paths && !matches(path, rule.paths)) return false
-  if (rule.except && matches(path, rule.except)) return false
-  if (rule.owned !== undefined && rule.owned !== owned) return false
-  return rule.read === undefined || rule.read === read
-}
+export const UNOWNED = 'No file rule matches it, and no workspace or crate contains or reads it: run everything, to be safe'
 
-/** A lockfile's change: the workspaces and crates it reaches, or why everything runs. */
-function lockfile(facts: RepoFacts, rule: FileRule, path: string, contents: Contents | undefined, sorted: Sorted) {
+const list = (items: readonly string[]) => items.join(', ')
+
+export function classifyFile(facts: RepoFacts, rules: CiRules, path: string, contents?: Contents): ClassifiedFile {
+  const readers = readersOf(facts, path)
+  const generators = facts.generators.filter(item => matches(path, item.inputs) || matches(path, item.outputs)).map(item => item.name)
+  const owner = ownerOf(facts.units, path)?.path
+  const readBy = [...readers.build, ...readers.test]
+  const rule = rules.files.find(item => matches(path, item.paths) && !(item.except && matches(path, item.except)))
+  const file = (fileClass: FileClass, why: string, touches: string[] = [], tested: string[] = []): ClassifiedFile => ({
+    path,
+    class: fileClass,
+    rule: why,
+    touches,
+    tested,
+  })
+  const code = (why: string) => {
+    const built = [...new Set([...(owner ? [owner] : []), ...readers.build])].sort()
+    return file(
+      'code',
+      why,
+      [...new Set([...built, ...readers.test])].sort(),
+      readers.test.filter(unit => !built.includes(unit)),
+    )
+  }
+  const readNote = [
+    ...(readBy.length ? [`read by ${list(readBy)}`] : []),
+    ...(generators.length ? [`an input or output of the ${list(generators)} generator${generators.length > 1 ? 's' : ''}`] : []),
+  ].join('; ')
+  if (!rule) {
+    if (owner) return code(`A file of ${owner}${readBy.length ? `, read by ${list(readBy)}` : ''}`)
+    if (readNote) return code(`Outside every workspace and crate, ${readNote}`)
+    return file('full', UNOWNED)
+  }
+  if (rule.class === 'docs' && readNote) return file('checks', `${rule.description}, but ${readNote}: the Linux checks`)
+  if (rule.class === 'code') return code(rule.description)
+  if (rule.class !== 'lockfile') return file(rule.class, rule.description)
   const before = contents?.before(path)
   const reach = before === undefined ? undefined : lockfileReach(path, before, contents?.after(path), facts.units)
-  if (!reach) sorted.everything.push({path, rule: `${rule.description}; there is no earlier version to compare`})
-  else if (reach.root && rule.root !== 'readers')
-    sorted.everything.push({path, rule: `${rule.description}; the root's own dependencies changed`})
-  else for (const unit of reach.units) sorted.units.add(unit)
+  if (!reach) return file('full', `${rule.description}; there is no earlier version to compare`)
+  if (reach.root) return file('full', `${rule.description}; the root's own dependencies changed`)
+  return file('code', `${rule.description}: the resolved dependencies of ${list(reach.units) || 'nothing'} changed`, reach.units)
 }
 
-export function sortChanges(facts: RepoFacts, rules: CiRules, paths: readonly string[], contents?: Contents): Sorted {
-  const sorted: Sorted = {units: new Set(), tested: new Set(), everything: [], docsOnly: true, tags: new Set(), generators: new Set()}
-  for (const path of paths) {
-    const generated = facts.generators.filter(generator => matches(path, generator.inputs) || matches(path, generator.outputs))
-    for (const generator of generated) sorted.generators.add(generator.name)
-    const readers = readersOf(facts, path)
-    for (const [tag, {paths: globs}] of Object.entries(rules.tags)) if (matches(path, globs)) sorted.tags.add(tag)
-    const owner = ownerOf(facts.units, path)
-    const read = generated.length > 0 || readers.build.length > 0 || readers.test.length > 0
-    const rule = rules.files.find(candidate => applies(candidate, path, owner !== undefined, read))
-    if (!rule) throw new Error(`No file rule in .github/ci-rules.json matches ${path}; end the list with one that matches every file`)
-    if (rule.effect !== 'checks') {
-      for (const crate of readers.build) sorted.units.add(crate)
-      for (const crate of readers.test) sorted.tested.add(crate)
-    }
-    if (rule.effect !== 'docs') sorted.docsOnly = false
-    if (rule.effect === 'full') sorted.everything.push({path, rule: rule.description})
-    if (rule.effect === 'owner' && owner) sorted.units.add(owner.path)
-    if (rule.effect === 'lockfile') lockfile(facts, rule, path, contents, sorted)
-  }
-  if (sorted.generators.size) sorted.docsOnly = false
-  return sorted
+export function classifyFiles(facts: RepoFacts, rules: CiRules, paths: readonly string[], contents?: Contents): ClassifiedFile[] {
+  return paths.map(path => classifyFile(facts, rules, path, contents))
 }

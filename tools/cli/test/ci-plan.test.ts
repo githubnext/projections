@@ -6,9 +6,9 @@ import test from 'node:test'
 import {Value} from 'typebox/value'
 import {repoFacts, tomlStrings} from '../src/lib/ci-facts.ts'
 import {rendererGrep} from '../src/lib/ci-browser.ts'
-import {ciPlan, planOutputs, type CiPlan} from '../src/lib/ci-plan.ts'
+import {ciPlan, executions, planOutputs, type CiPlan} from '../src/lib/ci-plan.ts'
 import {ruleProblems} from '../src/lib/ci-rules-check.ts'
-import {FULL, loadCiRules, type CiRules} from '../src/lib/ci-rules.ts'
+import {FULL, loadCiRules, reach, type CiRules} from '../src/lib/ci-rules.ts'
 import {CiRules as Schema} from '../src/lib/ci-rules.schema.ts'
 import {CiPlanCases, type CiPlanCase} from '../src/lib/ci-plan-cases.schema.ts'
 
@@ -42,8 +42,14 @@ function check(plan: CiPlan, expect: CiPlanCase['expect'], label: string) {
   for (const suite of expect.suitesInclude ?? []) assert.ok(plan.suites.includes(suite), `${label}: runs ${suite}`)
   for (const suite of expect.suitesExclude ?? []) assert.ok(!plan.suites.includes(suite), `${label}: doesn't run ${suite}`)
   for (const unit of expect.changedInclude ?? []) assert.ok(plan.changed.includes(unit), `${label}: changes ${unit}`)
-  for (const unit of expect.dependantsInclude ?? []) assert.ok(plan.dependants.includes(unit), `${label}: reaches ${unit}`)
-  for (const unit of expect.dependantsExclude ?? []) assert.ok(!plan.dependants.includes(unit), `${label}: doesn't reach ${unit}`)
+  for (const unit of expect.dependantsInclude ?? []) assert.ok(unit in plan.dependants, `${label}: reaches ${unit}`)
+  for (const unit of expect.dependantsExclude ?? []) assert.ok(!(unit in plan.dependants), `${label}: doesn't reach ${unit}`)
+  if (expect.classes)
+    assert.deepEqual(
+      plan.files.map(file => file.class),
+      expect.classes,
+      `${label}: classes (${plan.files.map(file => file.rule).join('; ')})`,
+    )
 }
 
 const table = JSON.parse(readFileSync(new URL('ci-plan.cases.json', import.meta.url), 'utf8')) as CiPlanCases
@@ -75,15 +81,14 @@ test('the committed JSON Schemas are the ones their TypeBox sources generate', (
   assert.equal(check.status, 0, check.stderr)
 })
 
-test('the rules checks catch references to groups, conditions, tags and suites that do not exist', () => {
+test('the rules checks catch references to groups, conditions and suites that do not exist', () => {
   const broken = structuredClone(rules) as CiRules
-  broken.jobs.verus = {description: 'x', when: {any: [{if: 'nope'}, {reaches: 'nobody', from: 'cli'}, {tag: 'none'}, 'reachesSuite']}}
+  broken.jobs.verus = {description: 'x', when: {any: [{if: 'nope'}, {reaches: 'nobody'}, {not: {touches: 'none'}}]}}
   broken.browser.suites['packages/nothing'] = {description: 'x'}
   assert.deepEqual(ruleProblems(broken, suites), [
     'jobs.verus.any[0]: no condition nope',
     'jobs.verus.any[1]: no group nobody',
-    'jobs.verus.any[2]: no tag none',
-    'jobs.verus.any[3]: reachesSuite outside a browser suite',
+    'jobs.verus.any[2].not: no group none',
     'browser.suites: packages/nothing has no test:browser script',
   ])
   assert.throws(() => ciPlan(facts, broken, {paths: []}), /no condition nope/)
@@ -147,10 +152,10 @@ test('a full run says why, and a run following the change gives each job its rea
   assert.deepEqual(labelled.full, ['the ci:full label'])
   assert.deepEqual(labelled.why.verus, [FULL])
   const plan = ciPlan(facts, rules, {paths: ['packages/engine/src/lib.rs']})
-  assert.deepEqual(plan.why.verus, [rules.conditions.engine?.description])
   assert.deepEqual(plan.why.windows, [rules.conditions.rust?.description])
   // A predicate on files or units, with no condition to name: the job's own description.
   assert.deepEqual(plan.why['mutants-diff'], [rules.jobs['mutants-diff']?.description])
+  assert.deepEqual(plan.why.verus, [rules.jobs.verus?.description])
   assert.deepEqual(ciPlan(facts, rules, {paths: ['README.md']}).why.docs, [rules.jobs.docs?.description])
 })
 
@@ -170,4 +175,36 @@ test("a lockfile change runs the jobs for what its changed packages reach; the r
   assert.deepEqual(vscode.changed, ['packages/integrations/vscode'])
   assert.deepEqual(plan(bump('node_modules/eslint'), lock).full.length, 1)
   assert.match(plan(lock, undefined).full[0] as string, /no earlier version/)
+})
+
+test('a unit is reached through what it depends on, not through a crate whose tests alone read the change', () => {
+  const units = [
+    {path: 'a', dependsOn: []},
+    {path: 'b', dependsOn: ['a']},
+    {path: 'c', dependsOn: ['b']},
+    {path: 't', dependsOn: ['a']},
+    {path: 'u', dependsOn: ['t']},
+  ] as unknown as Parameters<typeof reach>[0]
+  assert.deepEqual(Object.fromEntries(reach(units, ['a'], new Set())), {a: 'a', b: 'a', t: 'a', c: 'b', u: 't'})
+  // Only t's tests read the change: t's suites run, u is not reached.
+  assert.deepEqual(Object.fromEntries(reach(units, ['t'], new Set(['t']))), {t: 't'})
+  // t is tested-only and also depends on the built a: its dependants are reached through it.
+  assert.deepEqual(Object.fromEntries(reach(units, ['a', 't'], new Set(['t']))), {a: 'a', t: 't', b: 'a', c: 'b', u: 't'})
+})
+
+test('the execution plan names each check with the suites, projects, shards and filters it runs', () => {
+  const plan = ciPlan(facts, rules, {paths: ['packages/renderers/database/src/styles.css']})
+  const run = executions(plan, rules)
+  const rest = run.find(item => item.check === 'browser (rest)')
+  assert.deepEqual(
+    rest?.suites,
+    plan.suites.filter(suite => !rules.browser.suites[suite]?.shards),
+  )
+  const harness = run.filter(item => item.suites?.includes('packages/renderers/harness'))
+  assert.ok(harness.length > 0 && harness.every(item => item.grepInvert && item.project))
+  assert.deepEqual(
+    run.filter(item => item.job === 'public-product').map(item => item.with),
+    [{os: 'ubuntu-latest', part: 'all'}],
+  )
+  assert.equal(run.filter(item => item.job === 'browser').length, plan.browser.length)
 })

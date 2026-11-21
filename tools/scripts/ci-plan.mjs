@@ -51,20 +51,29 @@ const outputs = planOutputs(plan)
 
 const list = items => (items.length ? items.map(item => `\`${item}\``).join(', ') : 'none')
 const runs = value => (Array.isArray(value) ? list(value) : value ? 'yes' : 'no')
+// When the run follows the change, each file's class and why, up to a screenful; beyond that, the count of each class.
+const files = plan.full.length
+  ? []
+  : plan.files.length <= 40
+    ? plan.files.map(file => `- \`${file.path}\`: ${file.class}. ${file.rule}`)
+    : Object.entries(Object.groupBy(plan.files, file => file.class)).map(([name, items]) => `- ${items.length} ${name}`)
 const summary = [
   '## What CI runs',
   '',
-  plan.full.length ? `Everything runs: ${plan.full.join('; ')}.` : `${plan.files} changed files, by .github/ci-rules.json.`,
+  plan.full.length ? `Everything runs: ${plan.full.join('; ')}.` : `${plan.files.length} changed files, by .github/ci-rules.json.`,
   '',
-  `- Changed: ${list(plan.changed)}`,
-  `- Depending on them: ${list(plan.dependants)}`,
-  `- Generators: ${list(plan.generators)}`,
+  ...files,
+  '',
+  `- Touched: ${list(plan.changed)}`,
+  `- Reached through them: ${list(Object.entries(plan.dependants).map(([unit, via]) => `${unit} (through ${via})`))}`,
   '',
   '| Job | Runs | Why |',
   '| --- | --- | --- |',
   ...Object.entries(plan.jobs).map(([job, value]) => `| ${job} | ${runs(value)} | ${(plan.why[job] ?? []).join('; ')} |`),
   `| browser | ${list(plan.browser.map(job => job.name))} | |`,
   `| browser-macos | ${list(plan.browserMacos.map(job => job.name))} | |`,
+  '',
+  `Browser suites: ${list(plan.suites)}${plan.renderers.length ? `; the renderer harness limited to ${list(plan.renderers)}` : ''}.`,
   '',
 ].join('\n')
 

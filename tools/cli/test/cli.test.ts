@@ -29,6 +29,7 @@ interface Failure {
   message: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- Callers name the command's report type, as `JSON.parse(output) as T` would.
 async function runJson<T>(argv: string[]): Promise<{json: T; exit: number}> {
   const {output, exit} = await run(argv)
   return {json: JSON.parse(output) as T, exit}

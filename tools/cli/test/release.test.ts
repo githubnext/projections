@@ -31,7 +31,12 @@ function repository(): string {
     Object.entries(files)
       .filter(([file]) => file !== 'package.json' && file.endsWith('package.json'))
       .map(([file, text]) => {
-        const {name, version, dependencies, devDependencies} = JSON.parse(text)
+        const {name, version, dependencies, devDependencies} = JSON.parse(text) as {
+          name: string
+          version: string
+          dependencies?: Record<string, string>
+          devDependencies?: Record<string, string>
+        }
         return [dirname(file), {name, version, ...(dependencies && {dependencies}), ...(devDependencies && {devDependencies})}]
       }),
   )
@@ -93,7 +98,7 @@ test('setting the version changes every shipped manifest, their dependencies and
       json({name: '@x/tools', version: '0.0.0', private: true, dependencies: {'@x/sdk': '0.2.0'}}),
       'tools stay at 0.0.0 and depend on the new version',
     )
-    assert.deepEqual(JSON.parse(read(root, 'package-lock.json')).packages['packages/js/core'], {
+    assert.deepEqual((JSON.parse(read(root, 'package-lock.json')) as {packages: Record<string, unknown>}).packages['packages/js/core'], {
       name: '@x/core',
       version: '0.2.0',
       dependencies: {left: '^0.1.0'},

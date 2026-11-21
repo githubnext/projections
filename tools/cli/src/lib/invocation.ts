@@ -7,7 +7,7 @@ export const BIN_VARIABLE = 'PROJECTIONS_TOOLS_BIN'
 
 const bin = process.env[BIN_VARIABLE]
 // Read once and removed, so commands this CLI runs (npm scripts that run `node tools/cli/src/bin.ts`) are plain `tools`.
-delete process.env[BIN_VARIABLE]
+Reflect.deleteProperty(process.env, BIN_VARIABLE)
 
 /** The `projections-tools` command that ran this CLI, when it did. */
 export const linkedBin = bin && isAbsolute(bin) ? bin : undefined

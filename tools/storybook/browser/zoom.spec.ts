@@ -84,7 +84,7 @@ const read = async (frame: Frame): Promise<Reading> =>
         })
         .map(element => {
           const box = element.getBoundingClientRect()
-          return `${element.getAttribute('data-entity-id')} [${[box.left, box.top, box.right, box.bottom].map(Math.round)}] in [${[left, top, right, bottom].map(Math.round)}]`
+          return `${element.getAttribute('data-entity-id')} [${[box.left, box.top, box.right, box.bottom].map(Math.round).join()}] in [${[left, top, right, bottom].map(Math.round).join()}]`
         })
       let smallest = Infinity
       const walker = document.createTreeWalker(scroller, NodeFilter.SHOW_TEXT)

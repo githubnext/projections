@@ -113,10 +113,10 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
     // node:test spec reporter's summary: `test at path:line:col`, `✖ name (12ms)`, the error, then its stack, whose
     // first frame outside Node is where the assertion failed.
     match = /^test at (.+?):(\d+):\d+$/.exec(line)
-    if (match && /^✖ /.test(lines[index + 1] ?? '')) {
+    if (match && (lines[index + 1] ?? '').startsWith('✖ ')) {
       const name = lines[index + 1]!.replace(/^✖ /, '').replace(/ \([\d.]+m?s\)$/, '')
       const block = lines.slice(index + 2, index + 60)
-      const end = block.findIndex(next => /^test at /.test(next) || /^ℹ /.test(next))
+      const end = block.findIndex(next => next.startsWith('test at ') || next.startsWith('ℹ '))
       const body = end >= 0 ? block.slice(0, end) : block
       const error =
         body
@@ -175,7 +175,7 @@ export function parseConsidered(output: string): Problem[] {
   if (start < 0 || end < start) return []
   let report: {violations?: {subject: string; metric: string; actual: number; standard: {max?: number; min?: number}}[]}
   try {
-    report = JSON.parse(output.slice(start, end + 1))
+    report = JSON.parse(output.slice(start, end + 1)) as typeof report
   } catch {
     return []
   }

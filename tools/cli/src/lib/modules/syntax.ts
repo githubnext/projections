@@ -28,7 +28,7 @@ export function importsOf(path: string, text: string): Import[] {
               ...(bindings && ts.isNamedImports(bindings) ? bindings.elements.map(item => (item.propertyName ?? item.name).text) : []),
             ]
       const typeOnly =
-        !!clause?.isTypeOnly ||
+        clause?.phaseModifier === ts.SyntaxKind.TypeKeyword ||
         (!!clause && !clause.name && !!bindings && ts.isNamedImports(bindings) && bindings.elements.every(item => item.isTypeOnly))
       found.push({specifier: node.moduleSpecifier.text, names, typeOnly})
     } else if (ts.isExportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {

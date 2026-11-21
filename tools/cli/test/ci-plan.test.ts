@@ -101,7 +101,7 @@ test('the workflow gates each job on the rules decision of the same name', () =>
   const workflow = readFileSync(new URL('../../../.github/workflows/ci.yml', import.meta.url), 'utf8')
   const gated = new Set([...workflow.matchAll(/needs\.changes\.outputs\.([\w-]+)/g)].map(match => match[1]!))
   const mapped = new Set(
-    [...workflow.matchAll(/^ {6}([\w-]+): \$\{\{ steps\.plan\.outputs\.([\w-]+) \}\}$/gm)].filter(m => m[1] === m[2]).map(m => m[1]),
+    [...workflow.matchAll(/^ {6}([\w-]+): \$\{\{ steps\.plan\.outputs\.([\w-]+) \}\}$/gm)].filter(m => m[1] === m[2]).map(m => m[1] ?? ''),
   )
   const outputs = [...Object.keys(rules.jobs), 'browser', 'browser-macos']
   assert.deepEqual([...gated].sort(), [...outputs].sort())

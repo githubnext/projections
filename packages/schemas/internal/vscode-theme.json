@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Captured VS Code theme (internal)",
+  "description": "Generated from packages/schemas/src/repository; internal and unversioned, never published. Validates packages/host/vscode-ui/fixtures/themes/*.json (see .dollarlint.toml).",
+  "type": "object",
+  "required": ["id", "name", "setting", "kind", "source", "bodyClasses", "themeKind", "variables"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+    "name": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "setting": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "kind": {"enum": ["light", "dark", "hc-light", "hc-dark"]},
+    "source": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "bodyClasses": {"type": "array", "items": {"type": "string", "pattern": "^vscode-[a-z-]+$"}, "minItems": 1},
+    "themeKind": {"type": "string", "pattern": "^vscode-[a-z-]+$"},
+    "variables": {
+      "type": "object",
+      "propertyNames": {"pattern": "^--vscode-"},
+      "minProperties": 1,
+      "additionalProperties": {"type": "string"}
+    }
+  },
+  "additionalProperties": false
+}

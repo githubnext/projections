@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Verus pins (internal)",
+  "description": "Generated from packages/schemas/src/repository; internal and unversioned, never published. Validates packages/engine/verified/verus.toml (see .dollarlint.toml).",
+  "type": "object",
+  "required": ["release", "toolchain", "macros"],
+  "properties": {
+    "release": {
+      "type": "string",
+      "pattern": "^[0-9][0-9A-Za-z.]*$",
+      "description": "Verus's release name, such as `0.2026.11.02.8bf68ee`."
+    },
+    "toolchain": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "The Rust toolchain the release needs."
+    },
+    "macros": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The `verus_builtin_macros` version the release was built with."
+    }
+  },
+  "additionalProperties": false
+}

@@ -202,7 +202,7 @@ test('highlighting decorates only mid-transition and never changes values or pro
         }
         return {
           value: row.querySelector('.stat-value')!.firstChild!.textContent,
-          proportion: (row.querySelector('.stat-bar') as HTMLElement).style.width,
+          proportion: row.querySelector<HTMLElement>('.stat-bar')!.style.width,
           track: box('.stat-track'),
           count: box('.stat-count'),
           status: box('.stat-status'),
@@ -291,8 +291,9 @@ test('the gateway migration scrubs a dozen languages without jumps, remounts or 
     const frame = await measure()
     expect(checkRenderedFrame(frame, {rowHeight}), `gateway frame at ${progress}`).toEqual([])
     forward.push(frame)
-    if (review && [0, 0.5, 1].includes(progress))
+    if (review && [0, 0.5, 1].includes(progress)) {
       await renderer.iframe.screenshot({path: `${review}/stats-gateway-${testInfo.project.name}-${progress}.png`})
+    }
   })
   expect(forward[0]!.slots).toHaveLength(12)
   // Rust and Protobuf arrive in one step, so the rows below them make room for two at once.

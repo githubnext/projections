@@ -421,7 +421,7 @@ export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, o
   const [drawnScale, setDrawnScale] = useState(0)
   const fit = useFitScale(scroller, bounds, {padding, floor, drawnScale})
   // The padding as drawn (more under a cover once it scrolls): the opening view is placed in it.
-  const drawnPadding = useScrolledPadding(padding, drawnScale, fit.scale)
+  const drawnPadding = useScrolledPadding(padding, drawnScale, fit.scale, {content: bounds.height, view: fit.height})
   const start = useMemo(() => contentStart([...boxes.values()].slice(0, diUnitLimit), bounds, drawnPadding), [boxes, bounds, drawnPadding])
   const {zoom, scale} = useStageZoom(scroller, onAction, fit.scale, {floor, start})
   useLayoutEffect(() => setDrawnScale(scale), [scale])

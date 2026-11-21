@@ -441,7 +441,7 @@ function TransitionView({
   const [drawnScale, setDrawnScale] = useState(0)
   const fit = useFitScale(scroller, bounds, {padding, floor, drawnScale})
   // The padding as drawn (more under a cover once it scrolls): the opening view is placed in it.
-  const drawnPadding = useScrolledPadding(padding, drawnScale, fit.scale)
+  const drawnPadding = useScrolledPadding(padding, drawnScale, fit.scale, {content: bounds.height, view: fit.height})
   // The composition hangs from its root, centred at the top: a view that opens at the text floor opens there, on the
   // cards drawn when it is placed, with no card cut at its left edge (see `contentStart`).
   const drawn = useRef(units)

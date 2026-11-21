@@ -120,7 +120,7 @@ export function useGraphZoom(
   })
   // The padding as drawn (more under a cover once the drawing scrolls), which every opening is placed in, so it never
   // changes when the person zooms or pans away from one.
-  const drawnPadding = useScrolledPadding(padding, drawnScale, fit.scale)
+  const drawnPadding = useScrolledPadding(padding, drawnScale, fit.scale, {content: bounds.height, view: fit.height})
   // Arrowheads stop on the outer edge of their target's border; a change border is inset so it never reaches further.
   const borders = useBorderWidths(scroller)
   const content = useMemo((): ContentBox => ({x: bounds.minX, y: bounds.minY, width: bounds.width, height: bounds.height}), [bounds])

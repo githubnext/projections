@@ -13,6 +13,8 @@ import {SummaryBar} from '../summary-bar.js'
  * Its lines are 18px, so the row is 30px and the foot's edges land on whole pixels.
  */
 const legendInFoot: CSSProperties = {borderTop: 'none', background: 'transparent', lineHeight: '18px'}
+/** Under a host's row the legend draws the rule between them, as the summary's and scope's rows do when not first. */
+const legendUnderHost: CSSProperties = {...legendInFoot, borderTop: '1px solid var(--pj-divider)'}
 
 /** The foot's height with only the summary's row, CSS px: the bar's 28px (no rule above it) and the foot's edge above and below. */
 export const summaryFootHeight = 30
@@ -59,7 +61,7 @@ export function StageFoot({
   summary: boolean
   legend: boolean
   scope?: boolean
-  /** The host's own content (`ProjectionViewProps.foot`), the foot's first row, a rule under it when more follows. */
+  /** The host's own content (`ProjectionViewProps.foot`), the foot's first row; the row after it draws the rule between. */
   host?: ReactNode
 }) {
   const room = useRef<HTMLDivElement>(null)
@@ -102,8 +104,8 @@ export function StageFoot({
           WebkitBackdropFilter: 'var(--ph-utility-backdrop, none)',
         }}
       >
-        {host && <div className="ph-stage-foot-host pj:min-w-0 pj:border-b pj:border-divider pj:last:border-b-0">{host}</div>}
-        {legend && <ProjectionLegend projection={p} style={legendInFoot} />}
+        {host && <div className="ph-stage-foot-host pj:min-w-0">{host}</div>}
+        {legend && <ProjectionLegend projection={p} style={host ? legendUnderHost : legendInFoot} />}
         {summary && <SummaryBar projection={p} room={room} anchor={foot} className="pj:bg-transparent pj:first:h-7 pj:first:border-t-0" />}
         {scoped && <ScopeRow projection={p} text={scoped} />}
       </div>

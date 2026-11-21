@@ -113,7 +113,6 @@ export function SnapshotPage({document: snapshot, settings, renderers, customRen
       requested,
       custom: Boolean(custom),
       notice: resolution.notice,
-      keys,
       panes,
     })
     if (typeof readiness === 'object') {

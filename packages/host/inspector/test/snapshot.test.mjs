@@ -50,3 +50,31 @@ test('the custom renderer prefix must be a same-origin directory, and is absent 
   for (const base of ['https://example.com/x/', '/custom-renderers/ab12', '/x/?q=1', 7])
     assert.throws(() => customRendererPrefix({customRendererBase: base}, origin), /custom renderer base/)
 })
+
+test('an animated snapshot is painted at the progress it asked for, not where a step snapped the controller', async () => {
+  const {snapshotReadiness} = await import('../dist/ui/snapshot/readiness.js')
+  const capabilities = {protocolVersion: 1, comparisonModes: ['animated']}
+  const pane = rendered => ({status: 'ready', capabilities, rendered, steps: [0.5], rendererErrors: [], rejected: 0, controls: []})
+  const state = rendered => {
+    const main = pane(rendered)
+    const projection = {
+      renderer: {title: 'API', url: '/api'},
+      comparing: true,
+      mode: 'animated',
+      availableModes: ['animated'],
+      progress: 0.5,
+      panes: {main, before: main, after: main},
+    }
+    return {
+      projection,
+      settings: {theme: 'light', frame: 'card', withheld: false, progress: 0.4999995},
+      comparing: true,
+      requested: 'api',
+      custom: false,
+      notice: undefined,
+      panes: [main],
+    }
+  }
+  assert.equal(snapshotReadiness(state(0.5)), 'waiting')
+  assert.equal(snapshotReadiness(state(0.4999995)), 'painted')
+})

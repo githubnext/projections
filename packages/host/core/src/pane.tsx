@@ -1,4 +1,5 @@
-import {useEffect, useRef, useState} from 'react'
+import {useEffect, useMemo, useRef, useState} from 'react'
+import {useMachine} from '@githubnext/projections-machine/react'
 import type {ReactNode} from 'react'
 import type {
   AnchorRect,
@@ -18,6 +19,7 @@ import type {
 import {RendererFrame} from './frame.js'
 import type {RendererFrameEvent} from './frame/types.js'
 import type {RendererDocuments, RendererEntry} from './registry.js'
+import {loadingLifecycle, paneLifecycle, paneStateOf} from './pane-lifecycle.js'
 
 /**
  * What a `RendererPane` reports through `onState`: its frame's status (with the failure `message`), the renderer's
@@ -109,7 +111,8 @@ export function RendererPane(props: RendererPaneProps) {
   const {renderer, init, progress, environment, selectedId, hoveredId} = props
   const container = useRef<HTMLDivElement>(null)
   const frame = useRef<RendererFrame | null>(null)
-  const [state, setState] = useState<PaneState>(loadingPane)
+  const [lifecycle, send] = useMachine(paneLifecycle, {state: loadingLifecycle})
+  const state = useMemo(() => paneStateOf(lifecycle), [lifecycle])
   // Counts the renderer's `control` messages, each answered with the options once the host has applied it.
   const [controlAnswer, setControlAnswer] = useState(0)
   const callbacks = useRef(props)
@@ -135,40 +138,27 @@ export function RendererPane(props: RendererPaneProps) {
   useEffect(() => {
     const host = container.current
     if (!host) return
-    setState(loadingPane)
+    send({type: 'reloaded'})
     const onEvent = (event: RendererFrameEvent) => {
       const current = callbacks.current
       switch (event.type) {
-        case 'ready':
-          setState(previous => ({...previous, capabilities: event.capabilities, controls: event.capabilities.controls ?? []}))
-          break
-        case 'revealed':
-          setState(previous => ({...previous, status: 'ready'}))
-          break
-        case 'controls':
-          setState(previous => ({...previous, controls: event.controls}))
-          break
-        case 'failed':
-          setState(previous => ({...previous, status: 'failed', message: event.message}))
-          break
         case 'rendered':
-          setState(previous => ({...previous, rendered: event.progress, renderedInit: initialized.current}))
+          send({...event, init: initialized.current})
           break
+        case 'ready':
+        case 'revealed':
+        case 'controls':
+        case 'failed':
         case 'steps':
-          setState(({stepSlots: _slots, ...previous}) => ({
-            ...previous,
-            steps: event.ends,
-            ...(event.slots === undefined ? {} : {stepSlots: event.slots}),
-          }))
-          break
         case 'aspect':
-          setState(previous => (previous.aspect === event.ratio ? previous : {...previous, aspect: event.ratio}))
-          break
+        case 'height':
+        case 'legend':
+        case 'summary':
         case 'error':
-          setState(previous => ({...previous, rendererErrors: [...previous.rendererErrors, event.message].slice(-5)}))
+          send(event)
           break
         case 'rejected':
-          setState(previous => ({...previous, rejected: previous.rejected + 1}))
+          send({type: 'rejected'})
           break
         case 'select':
           current.onSelect(event.id, event.path)
@@ -181,26 +171,6 @@ export function RendererPane(props: RendererPaneProps) {
           // Answer with the options as they stand once applied, so a value the host or its embedder declined is undone.
           setControlAnswer(previous => previous + 1)
           break
-        case 'legend': {
-          const {type: _type, ...legend} = event
-          setState(previous => {
-            if (!legend.items.length) {
-              const {legend: _legend, ...rest} = previous
-              return rest
-            }
-            return {...previous, legend}
-          })
-          break
-        }
-        case 'summary':
-          setState(previous => {
-            if (!event.items.length) {
-              const {summary: _summary, ...rest} = previous
-              return rest
-            }
-            return JSON.stringify(previous.summary) === JSON.stringify(event.items) ? previous : {...previous, summary: event.items}
-          })
-          break
         case 'hover':
           current.onHover(event.id)
           break
@@ -212,9 +182,6 @@ export function RendererPane(props: RendererPaneProps) {
           break
         case 'open':
           current.onOpen(event.path, event.line)
-          break
-        case 'height':
-          setState(previous => (previous.height === event.px ? previous : {...previous, height: event.px}))
           break
       }
     }
@@ -241,7 +208,8 @@ export function RendererPane(props: RendererPaneProps) {
       if (frame.current === created) frame.current = null
       callbacks.current.frameRef?.(null)
     }
-  }, [url])
+    // `send` is the pane's actor's, the same for its life.
+  }, [url, send])
   useEffect(() => {
     frame.current?.setTitle(title)
   }, [title])
@@ -251,9 +219,9 @@ export function RendererPane(props: RendererPaneProps) {
   useEffect(() => {
     if (initialized.current === init) return
     initialized.current = init
-    setState(({rendered: _rendered, renderedInit: _init, stepSlots: _slots, ...previous}) => ({...previous, steps: []}))
+    send({type: 'reinit'})
     frame.current?.setInit(init, latest.current.progress)
-  }, [init])
+  }, [init, send])
   useEffect(() => {
     if (progress) frame.current?.setProgress(progress)
   }, [progress])

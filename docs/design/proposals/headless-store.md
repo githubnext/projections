@@ -103,9 +103,14 @@ them:
    settings without React. Nothing new is exported yet: the public
    `createProjection` arrives in step 5, once its snapshot is the whole
    controller, so its API doesn't churn.
-2. **Panes as a machine.** The pane-status machine, with #122's events as its
-   effects and `paint` as a selector. The Inspector's snapshot page uses it for
-   its readiness.
+2. **Panes as a machine.** `paneLifecycle` (`pane-lifecycle.ts`): loading until
+   the frame is revealed, then ready; failed for good until a new bundle loads;
+   each state keeps what the renderer reported. `RendererPane` runs it with
+   `useMachine`, and `PaneState` is unchanged. `paint` stays a selector over the
+   shown panes, and the Inspector's snapshot page uses it (`paintState`) for its
+   readiness. #122's events depend on every shown pane, so they stay derived
+   from `rendererStatus` and `paint` until the store composes the panes (step
+   4), where they become its effects, with the same names.
 3. **Playback in the store.** `playbackLifecycle` is driven by `createActor`
    inside the store, and `usePlaybackControl` goes.
 4. **Selectors and selection.** Rows, scope, summary, payloads and selection

@@ -160,9 +160,16 @@ jobs:
           path: ~/.cache/dollarlint
           key: dollarlint-schemas-${{ steps.day.outputs.day }}
           restore-keys: dollarlint-schemas-
-      - uses: dollarlint/dollarlint@v0.1.27
+      # TEMPORARY, until DollarLint releases [[schemas.mappings]] (dollarlint/dollarlint#237): built from that pull
+      # request's head, without SARIF. The release replaces these two steps with `dollarlint/dollarlint@<release>` and
+      # `upload-sarif`.
+      - uses: actions/setup-go@v7.0.0
         with:
-          upload-sarif: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+          go-version: '1.26'
+          cache: false
+      - run: |
+          go install github.com/dollarlint/dollarlint/cmd/dollarlint@12b2520481e9066174cf92d7fc2cc000cf78b9b9
+          dollarlint validate .
   # The vulnerability gate: a pull request may not add a dependency with a known high or critical advisory (npm, Cargo
   # and the other manifests GitHub's dependency graph reads). It uses the dependency graph, not an npm audit endpoint;
   # Dependabot (.github/dependabot.yml) covers what is already locked.

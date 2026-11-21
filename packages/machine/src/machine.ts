@@ -39,7 +39,10 @@ export interface Step<S, F> {
 
 const steps = new WeakSet<object>()
 
-/** A transition to `state` that also asks for `effects`, run in order once the state is current. */
+/**
+ * A transition to `state` that also asks for `effects`, run in order once the state is current: after the activities it
+ * no longer lists end, and before those it newly lists start.
+ */
 export function emit<S, F>(state: S, ...effects: F[]): Step<S, F> {
   const step = {state, effects} as unknown as Step<S, F>
   steps.add(step)

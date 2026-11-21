@@ -125,6 +125,22 @@ another is being handled (by an effect, a listener or a synchronous activity)
 waits its turn. Events sent before `start` wait for it. `stop` keeps the state,
 and `start` resumes from it.
 
+When a transition changes the state, it runs in this order:
+
+1. the activities the new state no longer lists end;
+2. the transition's effects run, in order;
+3. the activities it newly lists start.
+
+So a new activity sees what the effects did: a clock an effect shifted, or a
+request an effect sent.
+
+**A `send` can end its own runner.** A `send` from a callback (a frame, a timer,
+a response) is handled before it returns. The event can end the very activity or
+effect that sent it (its state stops listing it), running its cleanup before
+`send` returns. A runner that does more work after sending must request that
+work first, so the cleanup cancels it, or check `signal.aborted` after sending.
+For example, a frame loop should request the next frame before sending its tick.
+
 In React, `useMachine(machine, options)` from
 `@githubnext/projections-machine/react` runs an actor per component and returns
 `[state, send, actor]`.

@@ -24,7 +24,9 @@ const argumentsOf = ({operation, extraction, before, after, comparison, json}) =
       ? [before, after, comparison]
       : operation === 'vary' || operation === 'pair'
         ? [before, after]
-        : [extraction]
+        : operation === 'review'
+          ? [comparison]
+          : [extraction]
 
 for (const [name, engine] of Object.entries(engines)) {
   for (const item of corpus.cases) {

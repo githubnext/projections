@@ -43,7 +43,8 @@ export default defineConfig(
   {
     // Decisions the engine owns (tools/scripts/engine-contracts.mjs): the code outside it asks the engine.
     files: ['**/src/**/*.{ts,tsx,js,mjs}', 'tools/**/*.{ts,tsx,js,mjs}'],
-    ignores: ['packages/engine/**', 'tools/scripts/engine-contracts.test.mjs'],
+    // Renderers can't reach the engine from their sandboxed frames; they classify rows through the renderer SDK.
+    ignores: ['packages/engine/**', 'packages/renderers/**', 'tools/scripts/engine-contracts.test.mjs'],
     rules: {'no-restricted-syntax': engineContractsRule},
   },
   {

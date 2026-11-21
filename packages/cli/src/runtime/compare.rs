@@ -205,7 +205,11 @@ pub struct Compared {
 
 impl Compared {
     pub(super) fn batch_item(&self, id: &str) -> Value {
-        json!({"id":id,"status":changed(&self.document),"comparison":self.document,"notices":self.notices})
+        let mut item = json!({"id":id,"status":changed(&self.document),"comparison":self.document,"notices":self.notices});
+        if let Some(review) = review(&self.document) {
+            item["review"] = review;
+        }
+        item
     }
 }
 
@@ -227,15 +231,22 @@ pub fn short(reference: &str) -> String {
     }
 }
 
-pub(super) fn changed(comparison: &Value) -> &'static str {
-    if comparison["comparison"]["changes"]
-        .as_array()
-        .is_some_and(|changes| !changes.is_empty())
-    {
-        "changed"
-    } else {
-        "unchanged"
-    }
+/// A comparison document's batch status, as the engine reviews it
+/// ([`projections_engine::review`]): `changed` when a change is reviewable.
+/// The engine validated the comparison, so it can't fail to review; were it
+/// to, `changed` never hides a change.
+pub fn changed(document: &Value) -> &'static str {
+    projections_engine::review(&document["comparison"]).map_or("changed", |review| review.status())
+}
+
+/// A comparison document's review counts for a batch item, when the engine
+/// can review it.
+fn review(document: &Value) -> Option<Value> {
+    projections_engine::review(&document["comparison"]).ok().map(|review| {
+        let mut counts = review.to_json();
+        counts.as_object_mut().map(|counts| counts.remove("status"));
+        counts
+    })
 }
 
 /// Parses `<base>[..<head>]` or `<base>...<head>`. One revision compares with

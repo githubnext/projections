@@ -223,6 +223,26 @@ with a capital H and check that the space above the E, below it, left of its
 stem and right of the H's right stem match. Take it at a device scale of 2 or
 more, and divide by the drawing's own scale when it is zoomed or fitted.
 
+## Corners in pixels
+
+`cornerReport(page, target, {label, frame})` checks a bordered box's rounded
+corners in pictures of them: the border keeps its thickness around each curve,
+within a quarter CSS px plus half a device pixel of its sides (or between them,
+where the sides differ), no third color shows in it and no paint shows outside
+the curve. That is what a filled band in a rounded container breaks when it
+isn't concentric with it: a header, footer or last changed row with square
+corners covers the inside of the border's curve, and one with the container's
+own radius pokes out past it. Nested radii are the container's less the inset.
+The `target` is a locator (an element's border box, radii and solid borders, its
+solid outline where it has no border, or an SVG `rect`'s stroked outline, read
+by `cornerBox`) or a `CornerBox` of your own. For a frame its contents draw (a
+data table's scroll box, whose heading and rows draw its lines), pass `frame`,
+the line's width; each corner is measured where its sides are painted, since a
+browser may snap a border to whole pixels, and a box taller than the view is
+scrolled for its top and then its bottom corners. Dashed outlines and corners no
+larger than their border are skipped. Take the page at a device scale of 2 or
+more; failing corners' pictures come back in `pictures`, to attach.
+
 ## Your own assertions
 
 ```ts

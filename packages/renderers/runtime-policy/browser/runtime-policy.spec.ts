@@ -220,8 +220,13 @@ test('panels clip their rows to their corners, rows are divided, and a removed l
     const lane = view.querySelector<HTMLElement>('[data-entity-id="hook:kprobe:security_mmap_file"]')!
     const transparent = (value: string) => value === 'rgba(0, 0, 0, 0)' || value === 'transparent'
     return {
-      // The kit's group clips to its outer edge, so a change region at its edge draws over its border.
-      group: [style('.pk-group').clipPath.startsWith('inset('), style('.pk-group').borderTopLeftRadius],
+      // The kit's group clips to its outer edge, so a change region at its edge draws over its border: with
+      // `overflow: clip` and its border as the margin where the browser has that margin, else a clip path.
+      group: [
+        style('.pk-group').clipPath.startsWith('inset(') ||
+          (style('.pk-group').overflow === 'clip' && style('.pk-group').getPropertyValue('overflow-clip-margin') !== '0px'),
+        style('.pk-group').borderTopLeftRadius,
+      ],
       // The line between two rows is the upper one's.
       divided: [...view.querySelectorAll<HTMLElement>('.rp-rules > .rp-row:has(+ .rp-row)')].every(
         row => getComputedStyle(row).borderBottomWidth !== '0px',

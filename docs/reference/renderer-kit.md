@@ -3617,9 +3617,11 @@ CardChangeMarks(__0: { "change": { "renamed"?: false | true | undefined; "status
 ```
 
 A changed card's marks, as every kit card draws them: the card filled with its change's soft hue under a strong
-edge of the same hue (inset by `inset`, see `emphasisInset`), and a footer band `footer` tall across its bottom,
-ruled off from the body, holding the status words centred (see `SvgChangeStatus`). The edge is drawn again over
-the band, so the band never covers the border or its corners. Draw it over the card's surface and under its text;
+edge of the same hue (inset by `inset`, see `emphasisInset`, with its radius less the inset, so it is concentric with
+the card's border), and a footer band `footer` tall across its bottom, ruled off from the body, holding the status
+words centred (see `SvgChangeStatus`). The band is clipped to the card's shape (`node-card-shape`, rounded as the
+card's surface is), so its corners follow the card's, and the edge is drawn again over it, so the band never covers
+the border or pokes outside its corners. Draw it over the card's surface and under its text;
 everything fades with `emphasis`, and nothing is drawn at zero. `fill: false` leaves the body's fill to the
 caller, for a card whose parts tint their own slices of it.
 
@@ -3631,7 +3633,8 @@ The box is in card units: `x` and `y` are its top-left corner.
 cardCornerRadius: 6
 ```
 
-The corner radius of a graph card's shape, in card units: the footer band's bottom corners follow it.
+The corner radius a graph card's shape is drawn with, in card units, where the theme's radius (`rx` in CSS,
+`--projections-radius`) doesn't reach: a shape's CSS `rx` wins over it.
 
 ### `CardGrid`
 

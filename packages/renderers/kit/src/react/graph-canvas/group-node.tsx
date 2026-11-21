@@ -46,7 +46,7 @@ export function GroupNode({node, drawing, holdsChanges = false}: {node: Transiti
           y={node.y - node.height / 2 + inset}
           width={node.width - 2 * inset}
           height={node.height - 2 * inset}
-          rx="8"
+          rx={Math.max(0, 8 - inset)}
           opacity={emphasis}
         />
       )}

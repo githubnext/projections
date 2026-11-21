@@ -2,7 +2,7 @@ import {useLayoutEffect, useMemo, useState} from 'react'
 import type {RefObject} from 'react'
 import {coveredPadding, scrolledPadding} from '../fit.js'
 import type {FitPadding} from '../fit.js'
-import {useStageCover, useStageInsetBottom, useStageInsetTop} from './shell/frame.js'
+import {useFrameSizing, useStageCover, useStageInsetBottom, useStageInsetTop} from './shell/frame.js'
 
 /**
  * `padding` for content of `size` fitted to the stage element `stage` (as `useFitScale` fits it), with its top moved
@@ -10,7 +10,9 @@ import {useStageCover, useStageInsetBottom, useStageInsetTop} from './shell/fram
  * drawing (see `coveredTop` and `coveredBottom`): a flat graph centred below a pane's chips and above a floating
  * summary keeps its own padding, a tall one opens between them. Without a cover, `padding` as it is. Pass the result
  * to `useFitScale` and pad the drawing's top by its `top` and its bottom by its `y` (the kit's `--pk-fit-top` and
- * `--pk-fit-bottom`, which graph.css reads). The stage is measured in the frame on every resize.
+ * `--pk-fit-bottom`, which graph.css reads). The stage is measured in the frame on every resize. In a frame the host
+ * sizes to the content, the bottom clears the host's `stage-inset-bottom` instead of the cover's rectangles, which
+ * move as the frame grows (see `coveredBottom`).
  */
 export function useCoveredPadding<P extends FitPadding>(
   stage: RefObject<HTMLElement | null>,
@@ -19,6 +21,8 @@ export function useCoveredPadding<P extends FitPadding>(
   maxScale = 1,
 ): P {
   const cover = useStageCover()
+  const foot = useStageInsetBottom()
+  const content = useFrameSizing() === 'content'
   const [box, setBox] = useState<{x: number; y: number; width: number; height: number}>()
   const covered = cover !== undefined
   const sized = size !== undefined
@@ -46,9 +50,9 @@ export function useCoveredPadding<P extends FitPadding>(
   }, [stage, covered, sized])
   return useMemo(() => {
     if (!cover || !box || !size) return padding
-    const {top, y} = coveredPadding({cover, view: box, origin: box, size, padding, maxScale})
+    const {top, y} = coveredPadding({cover, view: box, origin: box, size, padding, maxScale, ...(content ? {foot: foot ?? 0} : {})})
     return top === (padding.top ?? padding.y) && y === padding.y ? padding : {...padding, top, y}
-  }, [cover, box, size, padding, maxScale])
+  }, [cover, box, size, padding, maxScale, content, foot])
 }
 
 /**

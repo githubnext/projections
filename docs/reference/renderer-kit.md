@@ -757,17 +757,21 @@ countText(count: number, singular: string, plural?: string, locale?: string | un
 ### `coveredBottom`
 
 ```ts
-coveredBottom(input: { "cover": Array<CoverRect>; "maxScale"?: number; "origin"?: { "x": number; "y": number }; "padding"?: FitPadding | number; "size": { "height": number; "width": number }; "view": { "height": number; "width": number } }): number
+coveredBottom(input: { "cover": Array<CoverRect>; "foot"?: number; "maxScale"?: number; "origin"?: { "x": number; "y": number }; "padding"?: FitPadding | number; "size": { "height": number; "width": number }; "view": { "height": number; "width": number } }): number
 ```
 
 The space a fitted drawing keeps below it, CSS px, as `coveredTop` keeps above: clear of what the host overlays at
 the stage's foot (the rectangles below its middle, such as a floating legend and summary), only where the fitted
-drawing would reach them; else the padding's own bottom (`y`).
+drawing would reach them; else the padding's own bottom (`y`). In a frame the host sizes to its content (`foot`), the
+drawing spans the frame's height, so it reaches every rectangle below the middle that lies across it, and its bottom
+is the host's `stage-inset-bottom` (`foot`), never where the rectangles lie: they are measured from the frame's top,
+while what floats at its foot moves with its bottom as the frame grows, so rectangles measured at one height and
+placed in the frame at another would put the foot anywhere, and the height asked for from them would feed back.
 
 ### `coveredPadding`
 
 ```ts
-coveredPadding(input: { "cover": Array<CoverRect>; "maxScale"?: number; "origin"?: { "x": number; "y": number }; "padding"?: FitPadding | number; "size": { "height": number; "width": number }; "view": { "height": number; "width": number } }): { "top": number; "y": number }
+coveredPadding(input: { "cover": Array<CoverRect>; "foot"?: number; "maxScale"?: number; "origin"?: { "x": number; "y": number }; "padding"?: FitPadding | number; "size": { "height": number; "width": number }; "view": { "height": number; "width": number } }): { "top": number; "y": number }
 ```
 
 The top and bottom (`y`) a fitted drawing keeps from the host's covers at both ends (`coveredTop`, `coveredBottom`),
@@ -777,7 +781,7 @@ each is raised until the fit clears both (only ever raised, so it settles in a f
 ### `coveredTop`
 
 ```ts
-coveredTop(input: { "cover": Array<CoverRect>; "maxScale"?: number; "origin"?: { "x": number; "y": number }; "padding"?: FitPadding | number; "size": { "height": number; "width": number }; "view": { "height": number; "width": number } }): number
+coveredTop(input: { "cover": Array<CoverRect>; "foot"?: number; "maxScale"?: number; "origin"?: { "x": number; "y": number }; "padding"?: FitPadding | number; "size": { "height": number; "width": number }; "view": { "height": number; "width": number } }): number
 ```
 
 The space a fitted drawing keeps above it, CSS px, so it never opens under what the host overlays at the stage's
@@ -4407,7 +4411,9 @@ down and its bottom (`y`) up only where the host's cover (`useStageCover`) would
 drawing (see `coveredTop` and `coveredBottom`): a flat graph centred below a pane's chips and above a floating
 summary keeps its own padding, a tall one opens between them. Without a cover, `padding` as it is. Pass the result
 to `useFitScale` and pad the drawing's top by its `top` and its bottom by its `y` (the kit's `--pk-fit-top` and
-`--pk-fit-bottom`, which graph.css reads). The stage is measured in the frame on every resize.
+`--pk-fit-bottom`, which graph.css reads). The stage is measured in the frame on every resize. In a frame the host
+sizes to the content, the bottom clears the host's `stage-inset-bottom` instead of the cover's rectangles, which
+move as the frame grows (see `coveredBottom`).
 
 ### `useDomainIndex`
 

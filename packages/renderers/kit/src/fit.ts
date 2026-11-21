@@ -157,6 +157,11 @@ interface CoveredFitInput {
   size: {width: number; height: number}
   padding?: number | FitPadding
   maxScale?: number
+  /**
+   * In a frame the host sizes to its content, the host's `stage-inset-bottom`, CSS px up from the frame's bottom edge
+   * (see `coveredBottom`).
+   */
+  foot?: number
 }
 
 const fitsNothing = ({cover, view, size}: CoveredFitInput) =>
@@ -184,13 +189,18 @@ export function coveredTop(input: CoveredFitInput): number {
 /**
  * The space a fitted drawing keeps below it, CSS px, as `coveredTop` keeps above: clear of what the host overlays at
  * the stage's foot (the rectangles below its middle, such as a floating legend and summary), only where the fitted
- * drawing would reach them; else the padding's own bottom (`y`).
+ * drawing would reach them; else the padding's own bottom (`y`). In a frame the host sizes to its content (`foot`), the
+ * drawing spans the frame's height, so it reaches every rectangle below the middle that lies across it, and its bottom
+ * is the host's `stage-inset-bottom` (`foot`), never where the rectangles lie: they are measured from the frame's top,
+ * while what floats at its foot moves with its bottom as the frame grows, so rectangles measured at one height and
+ * placed in the frame at another would put the foot anywhere, and the height asked for from them would feed back.
  */
 export function coveredBottom(input: CoveredFitInput): number {
   const {y} = fitPadding(input.padding)
   if (fitsNothing(input)) return y
   const origin = input.origin ?? {x: 0, y: 0}
   const fit = uncoveredFit(input)
+  if (input.foot !== undefined) return fit.below.length ? Math.max(y, Math.ceil(input.foot)) : y
   const reached = fit.below.filter(rect => rect.y + rect.height > fit.top && rect.y < origin.y + input.view.height)
   if (!reached.length) return y
   const edge = Math.min(...reached.map(rect => rect.y)) - coverGap

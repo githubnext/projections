@@ -654,6 +654,28 @@ test('a fitted drawing between a top cover and a foot clears both once refitted'
   assert.ok(drawnTop + 450 <= foot.y - 8 || free < 0, `bottom at ${drawnTop + 450}`)
 })
 
+test("in a content-sized frame, a drawing's bottom clears the foot's inset wherever the foot was measured", async () => {
+  const {coveredBottom} = await import('../dist/index.js')
+  const padding = {x: 16, y: 16}
+  const size = {width: 400, height: 380}
+  // The foot 12px above the bottom of a 448px frame, measured while the frame was 320, 448 or 646px tall: each says
+  // the frame's foot, whose `stage-inset-bottom` is 56px, so each is padded alike.
+  for (const y of [277, 405, 603])
+    assert.equal(
+      coveredBottom({cover: [{x: 458, y, width: 429, height: 30}], view: {width: 1344, height: 448}, size, padding, foot: 56}),
+      56,
+    )
+  // A foot that lies beside the drawing, or none, keeps its own bottom.
+  assert.equal(
+    coveredBottom({cover: [{x: 1100, y: 405, width: 200, height: 30}], view: {width: 1344, height: 448}, size, padding, foot: 56}),
+    16,
+  )
+  assert.equal(
+    coveredBottom({cover: [{x: 458, y: 12, width: 429, height: 30}], view: {width: 1344, height: 448}, size, padding, foot: 0}),
+    16,
+  )
+})
+
 test('fitting centres content, never magnifies it, and always fits both dimensions, however small', async () => {
   const {fitScale} = await import('../dist/index.js')
   const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} ≈ ${expected}`)

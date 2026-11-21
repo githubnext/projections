@@ -10,18 +10,18 @@ import type {PlaybackEvent, PlaybackLifecycle, PlaybackRun} from './playback-lif
 /** What playback reads of the host each time it acts, and the requests it makes of it. */
 export interface PlaybackHost {
   /** The plan playback runs now: stops, speed, holds, loop. */
-  plan(): PlaybackRun
-  reducedMotion(): boolean
+  plan: () => PlaybackRun
+  reducedMotion: () => boolean
   /** Playback asks to play or pause: the core's setting, or the embedder's. */
-  requestPlaying(playing: boolean): void
+  requestPlaying: (playing: boolean) => void
   /** Playback asks to move the slider. */
-  requestPosition(position: number): void
+  requestPosition: (position: number) => void
 }
 
 /** Schedules animation frames: `requestAnimationFrame` by default, a fake one in a test. */
 export interface FrameScheduler {
-  request(callback: (time: number) => void): unknown
-  cancel(handle: unknown): void
+  request: (callback: (time: number) => void) => unknown
+  cancel: (handle: unknown) => void
 }
 
 const animationFrames: FrameScheduler = {
@@ -51,12 +51,12 @@ export interface PlaybackController {
    * mode and reduced motion are sent when they change; the position, a controlled direction and whether it plays when
    * they differ from the lifecycle's, so a request an embedder declined (or hasn't applied yet) never leaves the two apart.
    */
-  show(view: PlaybackView): void
-  seek(to: number): void
-  play(direction?: 1 | -1): void
-  pause(): void
-  toggle(direction?: 1 | -1): void
-  togglePlayback(): void
+  show: (view: PlaybackView) => void
+  seek: (to: number) => void
+  play: (direction?: 1 | -1) => void
+  pause: () => void
+  toggle: (direction?: 1 | -1) => void
+  togglePlayback: () => void
 }
 
 /**

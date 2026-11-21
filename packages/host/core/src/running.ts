@@ -21,9 +21,9 @@ export const runningText = (running: Running) => (running === 'extracting' ? 'Ex
  * after `ms` milliseconds and returns a handle that `clear` cancels. Defaults to `Date.now` and `setTimeout`.
  */
 export interface RunningTimers {
-  now(): number
-  set(run: () => void, ms: number): unknown
-  clear(timer: unknown): void
+  now: () => number
+  set: (run: () => void, ms: number) => unknown
+  clear: (timer: unknown) => void
 }
 const realTimers: RunningTimers = {
   now: () => Date.now(),

@@ -32,7 +32,7 @@ function push(problems: Problem[], seen: Set<string>, problem: Problem) {
 export function parseProblems(output: string, root: string, cwd = ''): Problem[] {
   const problems: Problem[] = []
   const seen = new Set<string>()
-  const lines = output.replace(ansi, '').replaceAll('\r\n', '\n').split('\n')
+  const lines = output.replaceAll(ansi, '').replaceAll('\r\n', '\n').split('\n')
   // npm prints `> @scope/name@0.0.0 build` and then runs in that workspace; tsc paths are relative to it.
   let directory = cwd
   let eslintFile: string | undefined
@@ -159,7 +159,7 @@ export function parseProblems(output: string, root: string, cwd = ''): Problem[]
 /** oxfmt --check lists unformatted files, one per line (with or without a leading marker). */
 export function parseFormatCheck(output: string, root: string): Problem[] {
   const problems: Problem[] = []
-  for (const raw of output.replace(ansi, '').split('\n')) {
+  for (const raw of output.replaceAll(ansi, '').split('\n')) {
     const line = raw.trim().replace(/^[✗×x!-]\s+/, '')
     if (/^[\w@.-]+(\/[\w@.-]+)*\.\w+( \(\d+ms\))?$/.test(line) && !/^Finished|^Checking/.test(line)) {
       problems.push({file: normalizePath(line.replace(/ \(\d+ms\)$/, ''), root), line: undefined, message: 'not formatted (oxfmt)'})
@@ -208,7 +208,7 @@ export function parseStalePages(output: string): Problem[] {
 /** The last `count` non-empty lines, for failures nothing could be parsed from. */
 export function tail(output: string, count = 12): string[] {
   return output
-    .replace(ansi, '')
+    .replaceAll(ansi, '')
     .split('\n')
     .map(line => line.trimEnd())
     .filter(line => line.trim())

@@ -106,7 +106,7 @@ const read = async (frame: Frame): Promise<Reading> =>
             }
           }
         } else continue
-        smallest = Math.min(smallest, parseFloat(getComputedStyle(element).fontSize) * scale)
+        smallest = Math.min(smallest, Number.parseFloat(getComputedStyle(element).fontSize) * scale)
       }
       return {
         smallest: Math.round(smallest * 100) / 100,

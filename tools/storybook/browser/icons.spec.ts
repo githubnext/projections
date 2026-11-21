@@ -119,7 +119,7 @@ async function showStory(page: Page, storyId: string, rendered: string) {
   await page.evaluate(
     id =>
       (
-        window as unknown as {__STORYBOOK_PREVIEW__: {onSetCurrentStory(selection: object): Promise<void>}}
+        globalThis as unknown as {__STORYBOOK_PREVIEW__: {onSetCurrentStory(selection: object): Promise<void>}}
       ).__STORYBOOK_PREVIEW__.onSetCurrentStory({storyId: id, viewMode: 'story'}),
     storyId,
   )

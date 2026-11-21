@@ -27,13 +27,13 @@ const modeNames = {'side-by-side': 'Side by side', animated: 'Animated', swipe: 
 const patternValues = pattern => {
   const alternatives = /^\^\(\?:(.*)\)\$$/.exec(pattern)?.[1]?.split('|')
   if (!alternatives) return `matches ${code(pattern)}`
-  return alternatives.map(item => code(item.replace(/\\\.\.\+$/, '.<key>').replace(/\\(.)/g, '$1'))).join(' or ')
+  return alternatives.map(item => code(item.replace(/\\\.\.\+$/, '.<key>').replaceAll(/\\(.)/g, '$1'))).join(' or ')
 }
 
 /** Fills a page's regions from `regions` (name → Markdown); a region the page lacks, or one it has that isn't known, fails. */
 function fillRegions(file, text, regions) {
   const seen = new Set()
-  const filled = text.replace(regionPattern, (whole, name) => {
+  const filled = text.replaceAll(regionPattern, (whole, name) => {
     if (!(name in regions)) fail(`${file}: unknown generated region "${name}"; it may have ${Object.keys(regions).join(', ')}`)
     seen.add(name)
     return `<!-- generated: ${name} -->\n${regions[name].trim()}\n<!-- end generated: ${name} -->`
@@ -52,7 +52,7 @@ export async function builtins() {
   const page = (file, from) => posix.relative(posix.dirname(from), file)
   const schemaLink = (schema, from) => {
     const name = schema.replace(/\/v\d+$/, '')
-    const target = `${outDir}/schemas/${name.replace(/\//g, '-')}.md`
+    const target = `${outDir}/schemas/${name.replaceAll('/', '-')}.md`
     return `[${code(schema)}](${page(target, from)})`
   }
   const rendererFor = handle => found.find(({manifest}) => manifest.handles.includes(handle))

@@ -23,8 +23,8 @@ test('resolves renamed and barrel imports, actions, selectors and slice dependen
       .sort(),
     ['cart', 'checkout'],
   )
-  assert(state.entities.some(node => node.kind === 'selector' && node.label === 'total'))
-  assert(state.entities.some(node => node.kind === 'action' && node.label === 'add'))
+  assert.ok(state.entities.some(node => node.kind === 'selector' && node.label === 'total'))
+  assert.ok(state.entities.some(node => node.kind === 'action' && node.label === 'add'))
   assert.equal(state.relationships.filter(edge => edge.kind === 'depends-on').length, 1)
 })
 
@@ -36,7 +36,7 @@ test('a new action is a change; reformatting is not', async () => {
     assert.equal((await compare(before, await run('redux-slices', root))).changes.length, 0)
     writeFileSync(cart, readFileSync(cart, 'utf8').replace('reducers: {', 'reducers: { clear(state: number) { return 0; },'))
     const changes = (await compare(before, await run('redux-slices', root))).changes
-    assert(changes.some(change => change.status === 'added' && change.id.includes('action') && change.id.includes('clear')))
+    assert.ok(changes.some(change => change.status === 'added' && change.id.includes('action') && change.id.includes('clear')))
   })
 })
 

@@ -75,7 +75,7 @@ const rendererPackages = {
   'examples/renderers/*': ['@githubnext/projections-renderer-sdk', '@githubnext/projections-schemas'],
 }
 // Test tooling for renderers rather than renderers.
-const rendererTooling = ['packages/renderers/testing', 'packages/renderers/harness']
+const rendererTooling = new Set(['packages/renderers/testing', 'packages/renderers/harness'])
 const rendererDevelopment = [
   '@githubnext/projections-engine',
   '@githubnext/projections-renderer-testing',
@@ -85,13 +85,13 @@ const rendererDevelopment = [
 ]
 const rendererComparator = /^@githubnext\/projections-comparator-/
 const rendererSources = ['packages/renderers/*/src/', 'examples/renderers/*/src/']
-const rendererForbidden = [
+const rendererForbidden = new Set([
   '@githubnext/projections-host',
   '@githubnext/projections-inspector',
   '@githubnext/projections-cli',
   '@githubnext/projections-engine',
   '@githubnext/projections-comparator-runtime',
-]
+])
 /** Workspace directory by package name, from the root manifest's workspaces. */
 const workspaces = new Map(
   JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8')).workspaces.flatMap(entry => {
@@ -121,7 +121,7 @@ const firstParty = specifier => {
 /** Paths inside a workspace that it ships: other workspaces' files are reached through their packages, never by path. */
 const shipped = /^(?:src|build)\//
 
-const scripts = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts']
+const scripts = new Set(['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts'])
 const builtins = new Set(builtinModules.map(name => name.replace(/^node:/, '')))
 const failures = []
 let modules = 0
@@ -206,7 +206,7 @@ function importProblem(path, sourcePath, name, {from, runners, declared}) {
   if (name.startsWith('/') || /^[a-zA-Z]:[\\/]/.test(name) || name.startsWith('file:')) {
     return `${sourcePath}: absolute local import is not portable: ${name}`
   }
-  if (matches(sourcePath, rendererSources) && rendererForbidden.includes(name.split('/').slice(0, 2).join('/'))) {
+  if (matches(sourcePath, rendererSources) && rendererForbidden.has(name.split('/').slice(0, 2).join('/'))) {
     return `${sourcePath}: a renderer imports ${name}; renderers use only the public renderer SDK and kit`
   }
   const scope = forbiddenScope(name)
@@ -307,7 +307,7 @@ function inspectManifest(path, text) {
   if (repositoryDirectory !== undefined && repositoryDirectory !== packagePath) {
     failures.push(`${posix(path)}: repository.directory is ${repositoryDirectory}, but the package is in ${packagePath}`)
   }
-  const rendererRule = rendererTooling.includes(packagePath)
+  const rendererRule = rendererTooling.has(packagePath)
     ? undefined
     : Object.entries(rendererPackages).find(([glob]) => matches(packagePath, [glob]))?.[1]
   if (rendererRule) {
@@ -386,7 +386,7 @@ function crateDependencies(text) {
     if (header) {
       const name = header[1].trim()
       const table = /(?:^|\.)((?:dev-|build-)?dependencies)(?:\.(.+))?$/.exec(name)
-      section = table ? {development: table[1] === 'dev-dependencies', crate: table[2]?.replace(/["']/g, '')} : undefined
+      section = table ? {development: table[1] === 'dev-dependencies', crate: table[2]?.replaceAll(/["']/g, '')} : undefined
       if (section?.crate) dependencies.push([section.crate, section.development])
       continue
     }
@@ -450,10 +450,10 @@ async function visit(directory) {
       continue
     }
     const extension = extname(entry.name)
-    if (scripts.includes(extension) || textFiles.has(extension) || (entry.name.startsWith('.') && !extension)) {
+    if (scripts.has(extension) || textFiles.has(extension) || (entry.name.startsWith('.') && !extension)) {
       inspectPrivate(path, await readFile(path, 'utf8'))
     }
-    const inspect = scripts.includes(extension)
+    const inspect = scripts.has(extension)
       ? inspectScript
       : extension === '.rs'
         ? inspectRust

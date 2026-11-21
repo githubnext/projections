@@ -16,7 +16,7 @@ const codeExtensions = ['.ts', '.tsx', '.mts', '.cts']
 /** A vendored third-party file, kept as upstream ships it (packages/host/core/src/ui/components): its header says so. */
 const vendored = source => /^\/\/ Adapted from /m.test(source.text.slice(0, 200))
 
-const toPosix = path => path.split('\\').join('/')
+const toPosix = path => path.replaceAll('\\', '/')
 const repositoryPath = path => toPosix(relative(root, path))
 
 /** The workspace directories the root package.json lists, with `dir/*` patterns expanded. */
@@ -86,7 +86,7 @@ async function entryPoints(workspace, options) {
 function compilerOptions(workspace) {
   const config = join(root, workspace, 'tsconfig.json')
   const parsed = ts.getParsedCommandLineOfConfigFile(config, {}, {...ts.sys, onUnRecoverableConfigFileDiagnostic: () => {}})
-  return {...(parsed?.options ?? {}), noEmit: true, allowJs: true}
+  return {...parsed?.options, noEmit: true, allowJs: true}
 }
 
 /** The documentation comment's summary, or `undefined` when it has none; `false` when it opts out. */

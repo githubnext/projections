@@ -59,7 +59,7 @@ export function redactPaths(text: string, root: string, home: string): string {
     for (const prefix of variants(home)) redacted = redacted.split(prefix).join('~')
   }
   // Other users' home directories (another checkout in a log line, for example).
-  return redacted.replace(/(\/Users\/|\/home\/|[A-Za-z]:\\Users\\)[^/\\\s'"]+/g, '~')
+  return redacted.replaceAll(/(\/Users\/|\/home\/|[A-Za-z]:\\Users\\)[^/\\\s'"]+/g, '~')
 }
 
 export function redactSecrets(text: string): string {
@@ -108,7 +108,7 @@ export function buildDraft(
   options: {repository: string; root: string; home: string},
 ): Draft {
   const clean = (text: string | undefined) => (text?.trim() ? bounded(redact(text.trim(), options.root, options.home)) : undefined)
-  const summary = clean(input.summary)?.replace(/\s+/g, ' ') ?? 'Agent feedback'
+  const summary = clean(input.summary)?.replaceAll(/\s+/g, ' ') ?? 'Agent feedback'
   const title = `[agent feedback] ${summary.length > 90 ? `${summary.slice(0, 89)}…` : summary}`
   const fields: Record<string, string> = {
     summary,
@@ -145,7 +145,7 @@ export function similarity(a: string, b: string): number {
     new Set(
       text
         .toLowerCase()
-        .replace(/\[agent feedback\]/g, '')
+        .replaceAll('[agent feedback]', '')
         .split(/[^\p{L}\p{N}]+/u)
         .filter(word => word.length > 2),
     )

@@ -22,7 +22,7 @@ export function devVersion(base: string, commit: string, dirty: boolean, now = n
   const release = base.replace(/[-+].*$/, '')
   // A numeric prerelease identifier can't have a leading zero; an all-digit hash gets git describe's `g` prefix.
   const id = /^\d+$/.test(commit) ? `g${commit}` : commit
-  const stamp = now.toISOString().replace(/\D/g, '').slice(0, 14)
+  const stamp = now.toISOString().replaceAll(/\D/g, '').slice(0, 14)
   return `${release}-dev.${id}${dirty ? `.dirty.${stamp}` : ''}`
 }
 

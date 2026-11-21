@@ -24,8 +24,8 @@ test('calls, registries and decorators bind events to resolved handlers', async 
     ['created', 'deleted', 'updated'],
   )
   assert.equal(state.relationships.filter(edge => edge.kind === 'consumes').length, 3)
-  assert(state.entities.some(node => node.kind === 'handler' && node.label === 'receive'))
-  assert(state.entities.some(node => node.kind === 'handler' && node.label === 'Worker.run'))
+  assert.ok(state.entities.some(node => node.kind === 'handler' && node.label === 'receive'))
+  assert.ok(state.entities.some(node => node.kind === 'handler' && node.label === 'Worker.run'))
 })
 
 test('publish APIs attribute events to their enclosing publisher and warn on dynamic events', async () => {

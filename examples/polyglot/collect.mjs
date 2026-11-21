@@ -6,10 +6,11 @@ if (request.protocolVersion !== 0 || request.capabilities?.trusted !== true) {
   throw new Error('Review both revisions and explicitly authorize execution')
 }
 const {services} = JSON.parse(readFileSync(path.join(request.repository.root, 'services.json'), 'utf8'))
-if (!Array.isArray(services)) throw new Error('services must be an array')
+if (!Array.isArray(services)) throw new TypeError('services must be an array')
 const evidence = [{kind: 'declared-service-catalog', source: 'services.json'}]
 const entities = services.map(service => {
-  if (typeof service.name !== 'string' || typeof service.language !== 'string') throw new Error('Each service needs a name and language')
+  if (typeof service.name !== 'string' || typeof service.language !== 'string')
+    throw new TypeError('Each service needs a name and language')
   return {
     id: `service:${service.name}`,
     kind: 'service',

@@ -108,7 +108,7 @@ const root = new URL('../../', import.meta.url)
 export function markOutline(source) {
   const elements = [...source.matchAll(/<(path|circle)\b([^>]*)\/>/g)]
   const attribute = (attributes, name) => new RegExp(`\\s${name}="([^"]*)"`).exec(attributes)?.[1]
-  if (!elements.length || source.replace(/<(path|circle)\b[^>]*\/>/g, '').match(/<(?!\/?svg\b)\w/)) {
+  if (!elements.length || /<(?!\/?svg\b)\w/.test(source.replaceAll(/<(path|circle)\b[^>]*\/>/g, ''))) {
     throw new Error('The mark must be paths and circles only')
   }
   return elements

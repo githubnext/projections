@@ -14,7 +14,7 @@ import {compareIds, inputs, slash, sourceExtension} from './basics.mjs'
 export function loadTypeScript(request) {
   const {checkout} = request.repository
   if (typeof checkout !== 'string') {
-    throw new Error(
+    throw new TypeError(
       "This extractor uses the project's own `typescript` package from your working checkout, which Projections provides only to trusted extractors; run with --trust.",
     )
   }

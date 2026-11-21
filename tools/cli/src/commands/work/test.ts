@@ -66,7 +66,7 @@ const MAX_BROWSER_WORKERS = 2
  * (`node --test test/*.test.mjs`), and node reads options only before those, so an appended one is ignored.
  */
 export function nodeTestPattern(filter: string): string {
-  return [process.env.NODE_OPTIONS, `--test-name-pattern="${filter.replace(/[\\"]/g, '\\$&')}"`].filter(Boolean).join(' ')
+  return [process.env.NODE_OPTIONS, `--test-name-pattern="${filter.replaceAll(/[\\"]/g, '\\$&')}"`].filter(Boolean).join(' ')
 }
 
 /** The test commands for the options: workspace suites, Rust crates and, only when asked, one browser project. */

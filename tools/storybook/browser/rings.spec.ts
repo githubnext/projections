@@ -24,7 +24,7 @@ async function settled(card: Locator) {
           new Promise<string>(resolve =>
             requestAnimationFrame(() => {
               const {x, y, width, height} = element.getBoundingClientRect()
-              resolve([x, y, width, height].map(value => value.toFixed(1)).join())
+              resolve([x, y, width, height].map(value => value.toFixed(1)).join(','))
             }),
           ),
       )

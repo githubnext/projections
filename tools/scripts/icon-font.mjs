@@ -235,7 +235,7 @@ function nameTable(family, version) {
     [3, `${family} ${version}`],
     [4, family],
     [5, `Version ${version}`],
-    [6, family.replace(/[^A-Za-z0-9-]/g, '')],
+    [6, family.replaceAll(/[^A-Za-z0-9-]/g, '')],
   ]
   const strings = records.map(([, text]) => Buffer.from(text, 'utf16le').swap16())
   const header = Buffer.alloc(6 + 12 * records.length)

@@ -35,7 +35,7 @@ export async function rustApi() {
       '--output-format',
       'json',
     ])
-    const file = `target/doc/${crate.name.replace(/-/g, '_')}.json`
+    const file = `target/doc/${crate.name.replaceAll('-', '_')}.json`
     const rustdoc = JSON.parse(await readFile(join(root, file), 'utf8'))
     // Importing a generated rustdoc JSON file runs nothing, so it needs no trust.
     const extraction = extract('rust-public-api', {rustdocJson: file})

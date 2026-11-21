@@ -1,7 +1,11 @@
 // Markdown helpers: README front matter, first paragraphs, titles and sections. No Markdown library: READMEs here
 // use plain ATX headings and paragraphs, and the front matter is flat `key: value` YAML.
 
-export type FrontMatter = {data: Record<string, string>; body: string; present: boolean}
+export interface FrontMatter {
+  data: Record<string, string>
+  body: string
+  present: boolean
+}
 
 /** Splits leading `---` front matter (flat `key: value` pairs, quoted or not) from the body. */
 export function parseFrontMatter(text: string): FrontMatter {
@@ -13,7 +17,7 @@ export function parseFrontMatter(text: string): FrontMatter {
   for (const line of (match[1] ?? '').split('\n')) {
     const pair = /^([A-Za-z][\w-]*):\s*(.*)$/.exec(line)
     if (pair) {
-      key = pair[1] as string
+      key = pair[1]!
       data[key] = unquote((pair[2] ?? '').trim())
     } else if (key && /^\s+\S/.test(line)) {
       // A folded continuation line (`description: >-`, or a plain scalar wrapped onto the next line).
@@ -84,10 +88,14 @@ export function firstParagraph(markdown: string): string | undefined {
 /** The first `# ` heading, as plain text. */
 export function title(markdown: string): string | undefined {
   const match = /^# +(.+)$/m.exec(parseFrontMatter(markdown).body)
-  return match ? plain(match[1] as string) || undefined : undefined
+  return match ? plain(match[1]!) || undefined : undefined
 }
 
-export type Heading = {level: number; text: string; line: number}
+export interface Heading {
+  level: number
+  text: string
+  line: number
+}
 
 /** Every ATX heading outside fenced code, with its 1-based line in the text given. */
 export function headings(markdown: string): Heading[] {
@@ -99,7 +107,7 @@ export function headings(markdown: string): Heading[] {
     .forEach((line, index) => {
       if (/^\s*(\x60\x60\x60|~~~)/.test(line)) fenced = !fenced
       const match = !fenced && /^(#{1,6}) +(.+?)\s*#*\s*$/.exec(line)
-      if (match) found.push({level: (match[1] as string).length, text: plain(match[2] as string), line: index + 1})
+      if (match) found.push({level: match[1]!.length, text: plain(match[2]!), line: index + 1})
     })
   return found
 }
@@ -128,12 +136,15 @@ export function listItems(markdown: string): string[] {
   return items.map(plain)
 }
 
-export type Description = {description: string | undefined; source: 'front-matter' | 'first-paragraph' | 'missing'}
+export interface Description {
+  description: string | undefined
+  source: 'front-matter' | 'first-paragraph' | 'missing'
+}
 
 /** A README's description: front matter `description`, else its first paragraph (flagged as a fallback). */
 export function describe(markdown: string | undefined): Description {
   if (markdown === undefined) return {description: undefined, source: 'missing'}
-  const front = parseFrontMatter(markdown).data['description']
+  const front = parseFrontMatter(markdown).data.description
   if (front) return {description: front, source: 'front-matter'}
   const paragraph = firstParagraph(markdown)
   return paragraph ? {description: paragraph, source: 'first-paragraph'} : {description: undefined, source: 'missing'}

@@ -36,7 +36,7 @@ export interface FieldValues {
   boolean: boolean
   'nullable-string': string | null
   strings: string[]
-  object: {[key: string]: Json}
+  object: Record<string, Json>
 }
 
 /**
@@ -48,7 +48,7 @@ export type Shape =
   | {type: PrimitiveType}
   | {type: 'enum'; values: readonly string[]}
   | {type: 'array'; items: Shape}
-  | {type: 'record'; name: string; about: string; fields: {readonly [name: string]: FieldRule}}
+  | {type: 'record'; name: string; about: string; fields: Readonly<Record<string, FieldRule>>}
 
 /** A field's type, whether every item must carry it, and what it means. Nullable fields are optional. */
 export type FieldRule =
@@ -66,7 +66,7 @@ export interface DataRule {
   collection: 'entities' | 'relationships'
   /** The kinds the rule applies to; every kind when absent. A kind appears in at most one rule per collection and vocabulary. */
   kinds?: readonly string[]
-  fields: {readonly [name: string]: FieldRule}
+  fields: Readonly<Record<string, FieldRule>>
 }
 
 /** What each domain schema is for, and what it adds to the extraction envelope. */
@@ -80,7 +80,7 @@ export const domainDescriptions = {
     'Public API declarations: declaration entities carry `data.signature`, and optionally `data.contract`, their compatibility facts in terms every ecosystem shares.',
   'database/v0': 'Tables, columns, keys and constraints, and the relations between them; columns carry `data.type`.',
   'architecture/v0': 'Components and their connections, as `graph/v0`, for architecture and infrastructure.',
-} as const satisfies {[schema in DomainSchema]: string}
+} as const satisfies Record<DomainSchema, string>
 
 /** What each vocabulary is for, the domain schemas it applies to, and the design document that defines it. */
 export const vocabularies = {
@@ -113,7 +113,7 @@ export const vocabularies = {
     description:
       'Renderer fixture scenarios (`projections.scenarios` documents) as data: each scenario with the renderer that draws it and its synthetic extraction, or before, after and their comparison.',
   },
-} as const satisfies {[vocabulary in Vocabulary]: {schemas: readonly DomainSchema[]; document: string; description: string}}
+} as const satisfies Record<Vocabulary, {schemas: readonly DomainSchema[]; document: string; description: string}>
 
 /**
  * Every typed `data` rule of the domain schemas and vocabularies, the single source of the published JSON Schemas'
@@ -407,7 +407,7 @@ type Merge<T> = {[K in keyof T]: T[K]}
 type NoFields = Record<never, never>
 
 /** `data` with the typed fields of `fields`, and any other JSON. */
-export type TypedData<F> = Merge<Required<F> & Optional<F>> & {[key: string]: Json}
+export type TypedData<F> = Merge<Required<F> & Optional<F>> & Record<string, Json>
 
 // Rules for schema S and collection C that apply with the vocabularies V.
 type RulesOf<S extends DomainSchema, C extends DataRule['collection'], V extends Vocabulary> =

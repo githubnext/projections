@@ -15,7 +15,7 @@ export function entryPoints(root: string, unit: Unit): [string, string][] {
     typeof value === 'string'
       ? value
       : value
-        ? (targetOf(value['import'] ?? null) ?? targetOf(value['default'] ?? null) ?? targetOf(value['types'] ?? null))
+        ? (targetOf(value.import ?? null) ?? targetOf(value.default ?? null) ?? targetOf(value.types ?? null))
         : undefined
   const entries: [string, string][] = []
   for (const [subpath, value] of Object.entries(exports)) {
@@ -40,7 +40,10 @@ function consumers(root: string, also: readonly string[]): string[] {
   )
 }
 
-export type UnusedExports = {entry: string; names: string[]}
+export interface UnusedExports {
+  entry: string
+  names: string[]
+}
 
 /**
  * For each workspace, the names its entry points export that no other file imports. Entry points re-exported whole

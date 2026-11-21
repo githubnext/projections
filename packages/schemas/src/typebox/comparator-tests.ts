@@ -1,7 +1,7 @@
 import {Type} from 'typebox'
 
 /** Where a case's extraction comes from: a fixture file (relative to the test file), an inline extraction or a revision. */
-export type ComparatorTestSource = string | {file: string} | {extraction: {[key: string]: unknown}} | {revision: string}
+export type ComparatorTestSource = string | {file: string} | {extraction: Record<string, unknown>} | {revision: string}
 
 /** A check on the one change `item` or `id` selects. */
 export type ComparatorTestChange = ({item: string; id?: never} | {id: string; item?: never}) & {
@@ -20,7 +20,7 @@ export interface ComparatorTestExpectations {
   steps?: {kind?: 'remove' | 'restructure' | 'add'; summary?: string | null; changes?: string[]}[]
   changes?: ComparatorTestChange[]
   count?: {changes?: number; steps?: number}
-  metadata?: {[key: string]: unknown}
+  metadata?: Record<string, unknown>
   error?: string
 }
 
@@ -29,7 +29,7 @@ export interface ComparatorTestCase {
   name: string
   before: ComparatorTestSource
   after: ComparatorTestSource
-  options?: {[key: string]: unknown}
+  options?: Record<string, unknown>
   expect?: ComparatorTestExpectations
   snapshot?: string
 }
@@ -40,7 +40,7 @@ export interface ComparatorTests {
   format: 'projections.comparator-tests'
   version: 0
   description?: string
-  options?: {[key: string]: unknown}
+  options?: Record<string, unknown>
   cases: ComparatorTestCase[]
 }
 

@@ -8,7 +8,10 @@ import {currentHost, findNode, isCheckout, launcherText, linkFileName, readLaunc
 import type {Finding} from './doctor.ts'
 import {UsageError} from './work/change-set.ts'
 
-export type LinkOptions = {binDir?: string | undefined; dryRun: boolean}
+export interface LinkOptions {
+  binDir?: string | undefined
+  dryRun: boolean
+}
 
 /** The file at `path`: its text, `undefined` when there is none, or `null` when it isn't a regular file. */
 function existing(path: string): string | undefined | null {
@@ -32,11 +35,13 @@ const foreign = (path: string) =>
 /** PATH problems with a link at `path`: its directory isn't on PATH, or another `projections-tools` comes first. */
 function pathWarnings(binDir: string, path: string, host: Host): {warnings: string[]; next: string[]} {
   const name = linkFileName(host.platform)
-  if (!onPathList(binDir, host.env['PATH'] ?? ''))
+  if (!onPathList(binDir, host.env.PATH ?? '')) {
     return {warnings: [`${binDir} is not on PATH`], next: [`Add it to PATH in your shell profile: export PATH="${binDir}:$PATH"`]}
-  const first = firstOnPath(name, host.env['PATH'] ?? '')
-  if (first && canonical(first) !== canonical(path))
+  }
+  const first = firstOnPath(name, host.env.PATH ?? '')
+  if (first && canonical(first) !== canonical(path)) {
     return {warnings: [`${first} comes first on PATH and shadows ${path}; remove it or reorder PATH`], next: []}
+  }
   return {warnings: [], next: []}
 }
 
@@ -49,8 +54,9 @@ export function linkReport(root: string, options: LinkOptions, host: Host = curr
   const before = existing(path)
   const current = before === null ? ({kind: 'foreign'} as const) : readLauncher(before)
   if (current.kind === 'foreign') throw foreign(path)
-  if (!node.matched)
+  if (!node.matched) {
     warnings.push(`Node ${node.pinned} (.node-version) isn't installed; the link runs Node ${node.version} until it is (link again then)`)
+  }
   if (current.kind === 'launcher' && current.checkout !== checkout) warnings.push(`Replaces the link to ${current.checkout}`)
   const unchanged = before === text
   if (!options.dryRun && !unchanged) {
@@ -91,15 +97,17 @@ export function unlinkReport(options: LinkOptions, host: Host = currentHost()) {
 export function linkFindings(root: string, host: Host = currentHost()): Finding[] {
   const name = linkFileName(host.platform)
   const atDefault = join(defaultBinDir(host.home), name)
-  const path = existing(atDefault) !== undefined ? atDefault : (firstOnPath(name, host.env['PATH'] ?? '') ?? atDefault)
+  const path = existing(atDefault) !== undefined ? atDefault : (firstOnPath(name, host.env.PATH ?? '') ?? atDefault)
   const before = existing(path)
   const current = before === null ? ({kind: 'foreign'} as const) : readLauncher(before)
   const check = 'projections-tools'
-  if (current.kind === 'absent')
+  if (current.kind === 'absent') {
     return [{check, status: 'ok', detail: `not linked (optional: ${TOOLS} link puts projections-tools on PATH)`}]
-  if (current.kind === 'foreign')
+  }
+  if (current.kind === 'foreign') {
     return [{check, status: 'warn', detail: `${path} exists but wasn't written by tools link`, fix: 'remove it, or link with --bin-dir'}]
-  if (!isCheckout(current.checkout))
+  }
+  if (!isCheckout(current.checkout)) {
     return [
       {
         check,
@@ -108,6 +116,7 @@ export function linkFindings(root: string, host: Host = currentHost()): Finding[
         fix: `${TOOLS} link (from the checkout to link), or ${TOOLS} unlink`,
       },
     ]
+  }
   const findings: Finding[] = []
   const here = canonical(root) === current.checkout
   findings.push({
@@ -115,13 +124,14 @@ export function linkFindings(root: string, host: Host = currentHost()): Finding[
     status: 'ok',
     detail: `${path} links ${here ? 'this checkout' : `${current.checkout}; inside this checkout it runs this checkout's tools`}`,
   })
-  if (!existsSync(current.node))
+  if (!existsSync(current.node)) {
     findings.push({
       check,
       status: 'warn',
       detail: `its Node ${current.node} no longer exists; it runs node from PATH`,
       fix: `${TOOLS} link`,
     })
+  }
   const onPath = pathWarnings(dirname(path), path, host)
   findings.push(
     ...onPath.warnings.map(warning => ({

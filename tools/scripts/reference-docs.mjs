@@ -66,9 +66,11 @@ const onlyIndex = args.indexOf('--only')
 const only = onlyIndex >= 0 ? new Set(args[onlyIndex + 1]?.split(',')) : undefined
 // Not a generator: it reads the same sources the API pages do and fails when a public symbol is undocumented.
 const checks = {tsdoc: publicApiDocs}
-for (const name of only ?? [])
-  if (!(name in generators) && !(name in checks))
+for (const name of only ?? []) {
+  if (!(name in generators) && !(name in checks)) {
     fail(`Unknown generator ${name}; one of ${[...Object.keys(generators), ...Object.keys(checks)].join(', ')}`)
+  }
+}
 
 async function documentation() {
   const {problems, coverage} = await checks.tsdoc()

@@ -52,10 +52,11 @@ export function publishHelper({
   } catch (error) {
     if (!(error instanceof Unavailable)) throw error
     const message = `The prebuilt .NET helper requires the .NET ${minimumSdk} SDK or newer at build time: ${error.message}.`
-    if (strict)
+    if (strict) {
       throw new Error(`${message} Every extractor helper is required (PROJECTIONS_REQUIRE_HELPERS=1 or an explicit publish).`, {
         cause: error,
       })
+    }
     log(
       `\n${'*'.repeat(78)}\nWARNING: ${message}\nOmitting the .NET helper: dotnet-public-api, dotnet-di and efcore-schema will report\nthat this distribution was built without it. Set PROJECTIONS_REQUIRE_HELPERS=1 to fail instead.\n${'*'.repeat(78)}\n`,
     )

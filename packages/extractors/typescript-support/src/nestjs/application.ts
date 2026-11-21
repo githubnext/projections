@@ -5,8 +5,11 @@ import type {ResolvedPackage} from '../toolchain.js'
 import {compose} from './compose.js'
 import {describe, slash, type NestModule, type SerializedGraph} from './model.js'
 
-type ApplicationContext = {get(token: unknown, options?: unknown): unknown; container?: {getModules(): Map<string, NestModule>}}
-type NestCore = {
+interface ApplicationContext {
+  get(token: unknown, options?: unknown): unknown
+  container?: {getModules(): Map<string, NestModule>}
+}
+interface NestCore {
   NestFactory: {createApplicationContext(module: unknown, options: Record<string, unknown>): Promise<ApplicationContext>}
   SerializedGraph: unknown
   ModuleRef: unknown
@@ -33,8 +36,9 @@ export async function composeApplication({root, core, moduleFile, moduleName, en
     throw new Error(`Cannot load the root module ${slash(path.relative(root, moduleFile))}: ${describe(error)}`, {cause: error})
   }
   const rootClass = exported[moduleName]
-  if (typeof rootClass !== 'function')
+  if (typeof rootClass !== 'function') {
     throw new Error(`${slash(path.relative(root, moduleFile))} does not export the module class ${moduleName}.`)
+  }
   let application: ApplicationContext
   try {
     application = await nest.NestFactory.createApplicationContext(rootClass, {

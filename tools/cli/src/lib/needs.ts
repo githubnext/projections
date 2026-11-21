@@ -16,17 +16,19 @@ export function unmet(root: string, needs: readonly Need[]): {need: Need; fix: s
   let night: ReturnType<typeof nightly> | undefined
   for (const need of needs) {
     if (need === 'build' && !builtMarkers.every(path => existsSync(join(root, path)))) missing.push({need, fix: 'npm run build'})
-    if (need === 'cli' && !existsSync(join(root, cliBinary)))
+    if (need === 'cli' && !existsSync(join(root, cliBinary))) {
       missing.push({need, fix: 'npm run build (builds packages/cli/dist/projections)'})
+    }
     if (need === 'rust' && !onPath('cargo')) missing.push({need, fix: 'install Rustup (rust-toolchain.toml selects the toolchain)'})
     if (need === 'dist' && !onPath('dist')) missing.push({need, fix: 'install the dist version dist-workspace.toml pins (cargo-dist)'})
     if (need === 'nightly') {
       night ??= nightly(root)
-      if (!night.installed)
+      if (!night.installed) {
         missing.push({
           need,
           fix: `rustup toolchain install ${night.name ?? '<node tools/scripts/reference-docs.mjs --nightly>'} --profile minimal`,
         })
+      }
     }
     if (need === 'network') missing.push({need, fix: 'run it explicitly; it downloads from the network'})
     if (need === 'browser') missing.push({need, fix: 'run it explicitly; it drives a browser'})

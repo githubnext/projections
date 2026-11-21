@@ -98,21 +98,23 @@ export function typeText(checker: ts.TypeChecker, exported: Set<ts.Symbol>) {
   const type = (value: ts.Type, seen = new Set<ts.Type>(), expand?: ts.Symbol): string => {
     if (seen.has(value)) return value.aliasSymbol?.name ?? value.symbol?.name ?? 'recursive'
     const next = new Set(seen).add(value)
-    if (value.isUnion())
+    if (value.isUnion()) {
       return value.types
         .map(item => type(item, next))
         .sort()
         .join(' | ')
+    }
     if (value.isIntersection()) return value.types.map(item => type(item, next)).join(' & ')
     if (value.flags & ts.TypeFlags.TypeParameter) return value.symbol?.name ?? 'unknown'
     if (value.flags & ts.TypeFlags.StringLiteral) return JSON.stringify((value as ts.StringLiteralType).value)
     if (value.flags & ts.TypeFlags.NumberLiteral) return String((value as ts.NumberLiteralType).value)
     if (checker.isTupleType(value)) return tuple(value, next)
-    if (checker.isArrayType(value))
+    if (checker.isArrayType(value)) {
       return `Array<${checker
         .getTypeArguments(value as ts.TypeReference)
         .map(item => type(item, next))
         .join(', ')}>`
+    }
     const named = nameOf(value, expand)
     if (named) return reference(value, named, next)
     if (value.flags & ts.TypeFlags.Object && !((value as ts.ObjectType).objectFlags & ts.ObjectFlags.Mapped)) return object(value, next)

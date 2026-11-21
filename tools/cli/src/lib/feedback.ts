@@ -5,11 +5,29 @@ import {release} from 'node:os'
 export const FEEDBACK_LABEL = 'agent-feedback'
 export const FEEDBACK_TEMPLATE = 'agent-feedback.yml'
 
-export type FeedbackInput = {summary: string; details?: string | undefined; command?: string | undefined; error?: string | undefined}
+export interface FeedbackInput {
+  summary: string
+  details?: string | undefined
+  command?: string | undefined
+  error?: string | undefined
+}
 
-export type Environment = {tools: string; os: string; node: string; rust: string | undefined; ref: string | undefined}
+export interface Environment {
+  tools: string
+  os: string
+  node: string
+  rust: string | undefined
+  ref: string | undefined
+}
 
-export type Draft = {repository: string; title: string; body: string; labels: string[]; fields: Record<string, string>; url: string}
+export interface Draft {
+  repository: string
+  title: string
+  body: string
+  labels: string[]
+  fields: Record<string, string>
+  url: string
+}
 
 /** Credential-shaped substrings: GitHub, npm, Slack, AWS, OpenAI-style and JWT tokens, bearer headers, URL passwords and key=value secrets. */
 const secrets: [RegExp, string][] = [
@@ -102,11 +120,11 @@ export function buildDraft(
   const section = (heading: string, text: string, fence?: string) =>
     `### ${heading}\n\n${text ? (fence !== undefined ? `\`\`\`${fence}\n${text}\n\`\`\`` : text) : '_No response_'}`
   const body = [
-    section('What were you trying to do?', fields['summary'] as string),
-    section('Details', fields['details'] as string),
-    section('Command and inputs', fields['command'] as string, 'sh'),
-    section('Error', fields['error'] as string, 'text'),
-    section('Environment', fields['environment'] as string),
+    section('What were you trying to do?', fields.summary!),
+    section('Details', fields.details!),
+    section('Command and inputs', fields.command!, 'sh'),
+    section('Error', fields.error!, 'text'),
+    section('Environment', fields.environment!),
     '<sub>Drafted by `tools feedback`; absolute paths and credential-like strings were redacted.</sub>',
   ].join('\n\n')
   const params = new URLSearchParams({template: FEEDBACK_TEMPLATE, title, labels: FEEDBACK_LABEL})

@@ -31,7 +31,7 @@ export function versionProblems(manifest, packages, hasOwnLicense = pkg => ownLi
     problems.push(problem)
     drifted.add(pkg.name)
   }
-  for (const entry of manifest)
+  for (const entry of manifest) {
     for (const [name, versions] of Object.entries(entry.crates)) {
       // A drifted crate's message already names the version the manifest covers.
       if (drifted.has(name)) continue
@@ -48,6 +48,7 @@ export function versionProblems(manifest, packages, hasOwnLicense = pkg => ownLi
         )
       }
     }
+  }
   return problems
 }
 
@@ -57,8 +58,9 @@ export function directoryProblems(manifest, directory = notices) {
   const directories = readdirSync(directory, {withFileTypes: true})
     .filter(entry => entry.isDirectory())
     .map(entry => entry.name)
-  for (const name of directories)
+  for (const name of directories) {
     if (!manifest.some(entry => entry.directory === name)) problems.push(`notices/${name}/ has no entry in notices/notices.json`)
+  }
   for (const entry of manifest) {
     if (!directories.includes(entry.directory)) {
       problems.push(`notices/notices.json lists notices/${entry.directory}/, which doesn't exist`)
@@ -66,12 +68,15 @@ export function directoryProblems(manifest, directory = notices) {
     }
     const present = readdirSync(join(directory, entry.directory)).sort()
     const listed = Object.keys(entry.files).sort()
-    for (const file of present.filter(file => !listed.includes(file)))
+    for (const file of present.filter(file => !listed.includes(file))) {
       problems.push(`notices/${entry.directory}/${file} isn't in its notices/notices.json entry's files`)
-    for (const file of listed.filter(file => !present.includes(file)))
+    }
+    for (const file of listed.filter(file => !present.includes(file))) {
       problems.push(`notices/notices.json lists notices/${entry.directory}/${file}, which doesn't exist`)
-    for (const file of listed.filter(file => !license(file)))
+    }
+    for (const file of listed.filter(file => !license(file))) {
       problems.push(`notices/${entry.directory}/${file} isn't named as a license file (LICENSE*, LICENCE*, COPYING*, NOTICE*)`)
+    }
   }
   return problems
 }
@@ -102,9 +107,11 @@ export function withTable(readme, manifest) {
 /** Every third-party crate package that any build compiles in, on any platform it builds for. */
 function lockedPackages() {
   const packages = new Map()
-  for (const {builds, buildDependencies} of Object.values(noticeBuilds()))
-    for (const {platform, crates} of builds)
+  for (const {builds, buildDependencies} of Object.values(noticeBuilds())) {
+    for (const {platform, crates} of builds) {
       for (const [id, pkg] of compiledCrates(cargoMetadata(platform), crates, buildDependencies)) packages.set(id, pkg)
+    }
+  }
   return packages.values()
 }
 

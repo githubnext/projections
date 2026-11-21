@@ -16,8 +16,9 @@ function strings(value: unknown, label: string): string[] {
 
 /** The tsconfig files `inputs.tsconfig` or `inputs.tsconfigs` select, or the root `tsconfig.json` when present. */
 function selectedConfigs(options: ReturnType<typeof inputs>, files: SourceFiles): string[] {
-  if (options.tsconfig !== undefined && options.tsconfigs !== undefined)
+  if (options.tsconfig !== undefined && options.tsconfigs !== undefined) {
     throw new Error('Use `inputs.tsconfig` or `inputs.tsconfigs`, not both')
+  }
   return options.tsconfig !== undefined
     ? strings([options.tsconfig], 'inputs.tsconfig')
     : options.tsconfigs !== undefined
@@ -36,8 +37,9 @@ function selectedEntryFiles(options: ReturnType<typeof inputs>): string[] {
       : Array.isArray(explicit)
         ? strings(explicit, 'inputs.entrypoints')
         : Object.values(record(explicit, 'inputs.entrypoints')).map(value => {
-            if (typeof value !== 'string' || !value.trim())
+            if (typeof value !== 'string' || !value.trim()) {
               throw new Error('`inputs.entrypoints` values must be repository-relative filenames')
+            }
             return value
           })
   if (explicit !== undefined && !entryFiles.length) throw new Error('`inputs.entrypoints` must not be empty')
@@ -67,14 +69,16 @@ function programSources(files: SourceFiles, programs: Project['programs']): Proj
         seen.has(source.fileName) ||
         !files.within(source.fileName) ||
         native(source.fileName).includes(`${path.sep}node_modules${path.sep}`)
-      )
+      ) {
         continue
+      }
       seen.add(source.fileName)
       if (sourceExtension.test(source.fileName)) sources.push({source, checker: program.getTypeChecker()})
     }
   }
-  if (!sources.length)
+  if (!sources.length) {
     throw new Error('No TypeScript/JavaScript sources found; provide tracked source files and `inputs.tsconfig` or `inputs.entrypoints`')
+  }
   return sources.sort((a, b) => compareIds(a.source.fileName, b.source.fileName))
 }
 

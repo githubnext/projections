@@ -184,9 +184,11 @@ test('infrastructure: the selected card is its own ring at any zoom and scroll, 
           // The box's corner is outside the disc: the band's color. Painted pixels depart from it.
           const band = [data[0]!, data[1]!, data[2]!]
           let painted = 0
-          for (let index = 0; index < data.length; index += 4)
-            if (Math.abs(data[index]! - band[0]!) + Math.abs(data[index + 1]! - band[1]!) + Math.abs(data[index + 2]! - band[2]!) > 150)
+          for (let index = 0; index < data.length; index += 4) {
+            if (Math.abs(data[index]! - band[0]!) + Math.abs(data[index + 1]! - band[1]!) + Math.abs(data[index + 2]! - band[2]!) > 150) {
               painted++
+            }
+          }
           return painted / (data.length / 4)
         },
         `data:image/png;base64,${shot.toString('base64')}`,

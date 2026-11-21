@@ -214,8 +214,8 @@ function launcher(): {
     {...host(home), platform: process.platform, execPath: process.execPath, version: process.version},
   )
   const environment: NodeJS.ProcessEnv = {...process.env, HOME: home, XDG_DATA_HOME: join(home, '.local/share')}
-  delete environment['npm_config_user_agent']
-  delete environment['npm_execpath']
+  delete environment.npm_config_user_agent
+  delete environment.npm_execpath
   return {
     base,
     shim,
@@ -270,7 +270,7 @@ test('projections-tools: outside a checkout it runs the linked one, says so, and
   const record = join(base, 'npx-args')
   writeFileSync(join(fakes, 'npx'), `#!/bin/sh\nprintf '%s\\n' "$@" > '${record}'\n`)
   chmodSync(join(fakes, 'npx'), 0o755)
-  const added = run(outside, ['mcp', 'add'], {PATH: `${fakes}${delimiter}${process.env['PATH'] ?? ''}`})
+  const added = run(outside, ['mcp', 'add'], {PATH: `${fakes}${delimiter}${process.env.PATH ?? ''}`})
   assert.equal(added.status, 0, String(added.stdout) + String(added.stderr))
   assert.deepEqual(readFileSync(record, 'utf8').trim().split('\n'), ['add-mcp', `${shim} --mcp`, '--name', 'projections-tools', '-y', '-g'])
   const amp = JSON.parse(readFileSync(join(base, 'home/.config/amp/settings.json'), 'utf8'))

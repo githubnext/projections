@@ -6,7 +6,7 @@ import {declares, privateMember} from './symbols.js'
 type GenericDeclaration = ts.ClassDeclaration | ts.InterfaceDeclaration | ts.TypeAliasDeclaration
 
 /** What an exported symbol declares: its text, contract facts and the surface conflicting exports compare. */
-export type ExportDescription = {
+export interface ExportDescription {
   isType: boolean
   structured: boolean
   declared: ts.Type

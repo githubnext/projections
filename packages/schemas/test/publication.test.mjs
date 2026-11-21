@@ -37,8 +37,9 @@ test('a release publishes immutable snapshots, and a stable release also replace
 
 test('only release versions name snapshots', () => {
   assert.deepEqual(releaseVersion('0.1.0'), {version: '0.1.0', prerelease: false})
-  for (const tag of ['latest', 'v1', 'v1.2', 'v01.2.3', 'v1.2.3+build', 'v1.2.3/../x', '../v1.2.3-x/y'])
+  for (const tag of ['latest', 'v1', 'v1.2', 'v01.2.3', 'v1.2.3+build', 'v1.2.3/../x', '../v1.2.3-x/y']) {
     assert.throws(() => releaseVersion(tag), /not a release version/, tag)
+  }
 })
 
 test('nothing in the repository uses the retired schema base', () => {

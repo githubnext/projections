@@ -55,10 +55,12 @@ for (const [rule, examples] of Object.entries(cases)) {
 
 test('npm-script-posix flags scripts cmd.exe cannot run', () => {
   const scripts = command => JSON.stringify({scripts: {build: command}}, null, 2)
-  for (const command of ['rm -rf dist && tsc', 'NODE_ENV=production vite build', "eslint 'src/**'", 'echo $HOME', 'tsc && cp a b'])
+  for (const command of ['rm -rf dist && tsc', 'NODE_ENV=production vite build', "eslint 'src/**'", 'echo $HOME', 'tsc && cp a b']) {
     assert.deepEqual(rulesIn('packages/x/package.json', scripts(command)), ['npm-script-posix'], command)
-  for (const command of ['tsc -p tsconfig.json && node scripts/copy.mjs', 'node --test test/*.test.mjs', 'vite build --mode production'])
+  }
+  for (const command of ['tsc -p tsconfig.json && node scripts/copy.mjs', 'node --test test/*.test.mjs', 'vite build --mode production']) {
     assert.deepEqual(rulesIn('packages/x/package.json', scripts(command)), [], command)
+  }
 })
 
 test('every rule has a case', () => {
@@ -81,15 +83,17 @@ test('tests, fixtures and browser suites are not shipped; the CLI and the action
     'packages/renderers/sdk/src/style.test.ts',
     'examples/extractors/x.mjs',
     'tools/scripts/considered.mjs',
-  ])
+  ]) {
     assert.equal(shipped(path), false, path)
+  }
   for (const path of [
     'packages/cli/src/browser/session.rs',
     'packages/cli/templates/renderer/src/index.ts',
     'action.yml',
     '.github/actions/check/action.yml',
-  ])
+  ]) {
     assert.equal(shipped(path), true, path)
+  }
 })
 
 test('an exception needs a reason, excuses only its rule in its file, and fails once stale', () => {

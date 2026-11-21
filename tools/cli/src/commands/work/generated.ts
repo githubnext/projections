@@ -45,7 +45,7 @@ function snapshot(root: string, paths: readonly string[]): Snapshot {
   return new Map(paths.map(path => [path, existsSync(join(root, path)) ? readFileSync(join(root, path), 'latin1') : undefined]))
 }
 
-export type GeneratorResult = {
+export interface GeneratorResult {
   name: string
   status: 'current' | 'stale' | 'skip' | 'error'
   detail?: string
@@ -56,11 +56,13 @@ export type GeneratorResult = {
 /** Checks one generator: its own `--check`, or regenerating and comparing (restoring the files afterwards). */
 export async function checkGenerator(root: string, generator: Generator): Promise<GeneratorResult> {
   if (generator.check.mode === 'none') return {name: generator.name, status: 'skip', detail: generator.check.reason}
-  if (generator.check.mode === 'tests')
+  if (generator.check.mode === 'tests') {
     return {name: generator.name, status: 'skip', detail: `checked by the tests: ${describeCommands(generator.check.commands)}`}
+  }
   const missing = unmet(root, generator.needs)
-  if (missing.length)
+  if (missing.length) {
     return {name: generator.name, status: 'skip', detail: `needs ${missing.map(need => `${need.need} (${need.fix})`).join('; ')}`}
+  }
   const fix = `${TOOLS} fix --only ${generator.name}`
   if (generator.check.mode === 'script') {
     for (const command of generator.check.commands) {
@@ -101,8 +103,9 @@ export async function checkGenerator(root: string, generator: Generator): Promis
 
 export async function generatedCheck(root: string, only: string[], progress?: (line: string) => void) {
   const unknown = only.filter(name => !generators.some(generator => generator.name === name))
-  if (unknown.length)
+  if (unknown.length) {
     throw new UsageError(`Unknown generator ${unknown.join(', ')}`, `Generators: ${generators.map(generator => generator.name).join(', ')}`)
+  }
   const results: GeneratorResult[] = []
   for (const generator of generators.filter(candidate => !only.length || only.includes(candidate.name))) {
     progress?.(`▸ ${generator.name}`)

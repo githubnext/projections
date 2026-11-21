@@ -7,7 +7,11 @@ function owner(project: Project, file: string): Package {
   return project.packages.find(pkg => !pkg.directory || relative.startsWith(`${pkg.directory}/`))!
 }
 
-export type Entry = {pkg: Package; subpath: string; file: string}
+export interface Entry {
+  pkg: Package
+  subpath: string
+  file: string
+}
 type Add = (pkg: Package, subpath: string, relative: string) => void
 
 /** The conditions' targets, preferring `types` where a condition object names it. */
@@ -23,10 +27,11 @@ function targets(value: unknown): string[] {
 /** A package's public subpaths and their targets, from `exports`, or `types`/`typings`. */
 function mappings(manifest: Record<string, unknown>): [string, unknown][] {
   const exports = manifest.exports
-  if (exports !== undefined)
+  if (exports !== undefined) {
     return exports && typeof exports === 'object' && !Array.isArray(exports) && Object.keys(exports).some(key => key.startsWith('.'))
       ? Object.entries(exports)
       : [['.', exports]]
+  }
   if (manifest.types !== undefined || manifest.typings !== undefined) return [['.', manifest.types ?? manifest.typings]]
   return []
 }
@@ -37,10 +42,11 @@ function mappings(manifest: Record<string, unknown>): [string, unknown][] {
  */
 function addWildcard(project: Project, add: Add, pkg: Package, subpath: string, target: string, relative: string): void {
   const [head, tail, ...more] = subpath.split('*')
-  if (tail === undefined || more.length)
+  if (tail === undefined || more.length) {
     throw new Error(
       `Package export ${code(pkg.name)} ${code(subpath)} maps to wildcard ${code(target)} without exactly one \`*\` of its own; set \`inputs.entrypoints\``,
     )
+  }
   const resolved = path.resolve(project.root, relative)
   const pattern = glob(slash(resolved))
   const pieces = resolved.split('*')
@@ -63,8 +69,9 @@ function addPackage(project: Project, add: Add, pkg: Package): void {
     const paths = [...new Set(targets(value))].sort()
     if (!paths.length) throw new Error(`Unsupported package exports for ${code(pkg.name)} ${code(subpath)}; set \`inputs.entrypoints\``)
     for (const target of paths) {
-      if (!target.startsWith('./') && exports !== undefined)
+      if (!target.startsWith('./') && exports !== undefined) {
         throw new Error(`Package export ${code(pkg.name)} ${code(subpath)} must be repository-local; set \`inputs.entrypoints\``)
+      }
       const relative = slash(path.join(pkg.directory, target))
       if (target.includes('*')) addWildcard(project, add, pkg, subpath, target, relative)
       else add(pkg, subpath, relative)
@@ -89,10 +96,11 @@ export function apiEntries(project: Project): Entry[] {
         .replace(/\.js$/, '.d.ts'),
     ]
     const file = alternatives.find(candidate => project.sources.some(item => native(item.source.fileName) === candidate))
-    if (!file)
+    if (!file) {
       throw new Error(
         `Public API entrypoint ${code(relative)} for ${code(pkg.name)} (${code(subpath)}) is missing or outside the selected tsconfig program. Set \`inputs.entrypoints\` to source entrypoints or include its declarations.`,
       )
+    }
     entries.push({pkg, subpath, file})
   }
   if (explicit !== undefined) {
@@ -103,9 +111,10 @@ export function apiEntries(project: Project): Entry[] {
     return entries
   }
   for (const pkg of project.packages) addPackage(project, add, pkg)
-  if (!entries.length)
+  if (!entries.length) {
     throw new Error(
       'Cannot identify the public API. Define `package.json` `exports` or `types`, or `inputs.entrypoints` (an array of paths or a subpath-to-path object).',
     )
+  }
   return entries
 }

@@ -6,8 +6,12 @@ import type {Evidence, Json} from '../types.js'
 import {compareIds} from '../values.js'
 import type {ExtractorContext} from '../shared.js'
 
-export type Package = {name: string; directory: string; manifest: Record<string, unknown>}
-export type Project = {
+export interface Package {
+  name: string
+  directory: string
+  manifest: Record<string, unknown>
+}
+export interface Project {
   context: ExtractorContext
   root: string
   texts: Map<string, string>

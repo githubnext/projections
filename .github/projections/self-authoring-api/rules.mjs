@@ -39,8 +39,9 @@ export function rulesDeclarations({language, text, source}) {
       `"name": "${fn.name}"`,
     )
   }
-  for (const macro of language.macros ?? [])
+  for (const macro of language.macros ?? []) {
     declare(root, {id: `${root}:${macro}`, kind: 'macro', label: macro, data: {signature: `macro ${macro}`}}, `"${macro}"`)
+  }
   // A type's fields are few and short: one signature lists them, so a field's change shows in its type's row.
   for (const type of language.types ?? []) {
     const fields = (type.fields ?? []).map(([name, fieldType]) => `${name}: ${fieldType}`).join('; ')

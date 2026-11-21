@@ -158,8 +158,9 @@ function checkReference(path, reference, bases, label = 'path') {
 
 function browserCallback(node) {
   for (let parent = node.parent; parent; parent = parent.parent) {
-    if (ts.isCallExpression(parent) && ts.isPropertyAccessExpression(parent.expression) && parent.expression.name.text === 'evaluate')
+    if (ts.isCallExpression(parent) && ts.isPropertyAccessExpression(parent.expression) && parent.expression.name.text === 'evaluate') {
       return true
+    }
   }
   return false
 }
@@ -202,18 +203,22 @@ function importProblem(path, sourcePath, name, {from, runners, declared}) {
     }
     return undefined
   }
-  if (name.startsWith('/') || /^[a-zA-Z]:[\\/]/.test(name) || name.startsWith('file:'))
+  if (name.startsWith('/') || /^[a-zA-Z]:[\\/]/.test(name) || name.startsWith('file:')) {
     return `${sourcePath}: absolute local import is not portable: ${name}`
-  if (matches(sourcePath, rendererSources) && rendererForbidden.includes(name.split('/').slice(0, 2).join('/')))
+  }
+  if (matches(sourcePath, rendererSources) && rendererForbidden.includes(name.split('/').slice(0, 2).join('/'))) {
     return `${sourcePath}: a renderer imports ${name}; renderers use only the public renderer SDK and kit`
+  }
   const scope = forbiddenScope(name)
   if (scope) return `${sourcePath}: forbidden import ${name}; ${scope[1]}`
-  if (portable && (name.startsWith('node:') || builtins.has(name) || executionPackages.has(name.split('/').slice(0, 2).join('/'))))
+  if (portable && (name.startsWith('node:') || builtins.has(name) || executionPackages.has(name.split('/').slice(0, 2).join('/')))) {
     return `${sourcePath}: forbidden host or execution import: ${name}`
+  }
   // A first-party package a workspace imports is one it declares, so the layer table sees the edge.
   const dependency = firstParty(name)
-  if (from && dependency && !declared.has(dependency))
+  if (from && dependency && !declared.has(dependency)) {
     return `${sourcePath}: imports ${dependency}, which ${runners.join('/package.json or ')}/package.json doesn't declare`
+  }
   return undefined
 }
 
@@ -239,8 +244,9 @@ function inspectScript(path, text) {
     if (
       ts.isCallExpression(node) &&
       (node.expression.kind === ts.SyntaxKind.ImportKeyword || (ts.isIdentifier(node.expression) && node.expression.text === 'require'))
-    )
+    ) {
       check(node.arguments[0])
+    }
     if (
       ts.isNewExpression(node) &&
       ts.isIdentifier(node.expression) &&
@@ -472,9 +478,11 @@ const tracked = spawnSync('git', ['ls-files', '-z', '--cached', '--ignored', '--
   cwd: root,
   encoding: 'utf8',
 })
-if (tracked.status === 0)
-  for (const file of tracked.stdout.split('\0').filter(Boolean))
+if (tracked.status === 0) {
+  for (const file of tracked.stdout.split('\0').filter(Boolean)) {
     failures.push(`${file}: tracked but matched by .gitignore, so a fresh commit of this tree would leave it out`)
+  }
+}
 if (failures.length) throw new Error(`Public dependency boundary violations:\n${failures.join('\n')}`)
 console.log(
   `Public boundaries: ${files} authored files (${modules} source modules) stay inside ${basename(root)}/ with no parent/private imports or forbidden browser dependencies`,

@@ -12,7 +12,13 @@ const PACKAGE_NAME = '@githubnext/projections-tools'
 
 export type Platform = NodeJS.Platform
 /** What the launcher and node discovery depend on, injectable for tests. */
-export type Host = {platform: Platform; env: NodeJS.ProcessEnv; home: string; execPath: string; version: string}
+export interface Host {
+  platform: Platform
+  env: NodeJS.ProcessEnv
+  home: string
+  execPath: string
+  version: string
+}
 
 export function currentHost(): Host {
   return {platform: process.platform, env: process.env, home: homedir(), execPath: process.execPath, version: process.version}
@@ -74,28 +80,33 @@ export function pinnedNode(root: string): string | undefined {
 export function nodeCandidates(version: string, host: Pick<Host, 'platform' | 'env' | 'home'>): string[] {
   const {env, home} = host
   if (host.platform === 'win32') {
-    const appData = env['APPDATA'] ?? join(home, 'AppData/Roaming')
-    const localAppData = env['LOCALAPPDATA'] ?? join(home, 'AppData/Local')
+    const appData = env.APPDATA ?? join(home, 'AppData/Roaming')
+    const localAppData = env.LOCALAPPDATA ?? join(home, 'AppData/Local')
     return [
-      ...(env['NVM_HOME'] ? [join(env['NVM_HOME'], `v${version}`, 'node.exe')] : []),
-      join(env['FNM_DIR'] ?? join(appData, 'fnm'), 'node-versions', `v${version}`, 'installation', 'node.exe'),
-      join(env['VOLTA_HOME'] ?? join(localAppData, 'Volta'), 'tools/image/node', version, 'node.exe'),
+      ...(env.NVM_HOME ? [join(env.NVM_HOME, `v${version}`, 'node.exe')] : []),
+      join(env.FNM_DIR ?? join(appData, 'fnm'), 'node-versions', `v${version}`, 'installation', 'node.exe'),
+      join(env.VOLTA_HOME ?? join(localAppData, 'Volta'), 'tools/image/node', version, 'node.exe'),
     ]
   }
-  const fnm = env['FNM_DIR']
-    ? [env['FNM_DIR']]
+  const fnm = env.FNM_DIR
+    ? [env.FNM_DIR]
     : [join(home, '.local/share/fnm'), join(home, 'Library/Application Support/fnm'), join(home, '.fnm')]
   return [
-    join(env['NVM_DIR'] ?? join(home, '.nvm'), 'versions/node', `v${version}`, 'bin/node'),
+    join(env.NVM_DIR ?? join(home, '.nvm'), 'versions/node', `v${version}`, 'bin/node'),
     ...fnm.map(directory => join(directory, 'node-versions', `v${version}`, 'installation/bin/node')),
-    join(env['VOLTA_HOME'] ?? join(home, '.volta'), 'tools/image/node', version, 'bin/node'),
-    join(env['ASDF_DATA_DIR'] ?? join(home, '.asdf'), 'installs/nodejs', version, 'bin/node'),
-    join(env['MISE_DATA_DIR'] ?? join(home, '.local/share/mise'), 'installs/node', version, 'bin/node'),
-    join(env['N_PREFIX'] ?? '/usr/local', 'n/versions/node', version, 'bin/node'),
+    join(env.VOLTA_HOME ?? join(home, '.volta'), 'tools/image/node', version, 'bin/node'),
+    join(env.ASDF_DATA_DIR ?? join(home, '.asdf'), 'installs/nodejs', version, 'bin/node'),
+    join(env.MISE_DATA_DIR ?? join(home, '.local/share/mise'), 'installs/node', version, 'bin/node'),
+    join(env.N_PREFIX ?? '/usr/local', 'n/versions/node', version, 'bin/node'),
   ]
 }
 
-export type NodeChoice = {path: string; version: string; pinned: string | undefined; matched: boolean}
+export interface NodeChoice {
+  path: string
+  version: string
+  pinned: string | undefined
+  matched: boolean
+}
 
 /** The Node to run a checkout's tools with: its pinned version when this one is it or a version manager has it, else this one. */
 export function findNode(root: string, host: Host = currentHost(), exists: (path: string) => boolean = existsSync): NodeChoice {
@@ -111,7 +122,10 @@ function shellQuote(value: string): string {
   return `'${value.replace(/'/g, `'\\''`)}'`
 }
 
-export type Launcher = {checkout: string; node: string}
+export interface Launcher {
+  checkout: string
+  node: string
+}
 
 /**
  * The `projections-tools` launcher: runs the linked checkout's src/launch.ts with the recorded Node (or `node` on
@@ -120,7 +134,7 @@ export type Launcher = {checkout: string; node: string}
  */
 export function launcherText(path: string, launcher: Launcher, platform: Platform = process.platform): string {
   const message = 'projections-tools: the linked checkout is gone (moved or deleted); run `npm run tools -- link` in a checkout'
-  if (platform === 'win32')
+  if (platform === 'win32') {
     return [
       '@echo off',
       `rem ${MARKER}; projections-tools unlink removes it`,
@@ -136,6 +150,7 @@ export function launcherText(path: string, launcher: Launcher, platform: Platfor
       '"%node%" "%checkout%\\tools\\cli\\src\\launch.ts" %*',
       '',
     ].join('\r\n')
+  }
   return [
     '#!/bin/sh',
     `# ${MARKER}; \`projections-tools unlink\` removes it`,

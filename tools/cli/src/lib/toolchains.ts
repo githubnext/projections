@@ -5,7 +5,7 @@ import {compareVersions, satisfies, versionIn} from './versions.ts'
 
 export type Status = 'ok' | 'warn' | 'fail'
 
-export type Toolchain = {
+export interface Toolchain {
   name: string
   required: string | undefined
   installed: string | undefined
@@ -19,14 +19,14 @@ export function rustToolchainFile(root: string): {channel: string; targets: stri
   const text = readText(root, 'rust-toolchain.toml')
   const channel = text && /^channel\s*=\s*"([^"]+)"/m.exec(text)?.[1]
   if (!text || !channel) return undefined
-  const targets = [...(/targets\s*=\s*\[([^\]]*)\]/.exec(text)?.[1]?.matchAll(/"([^"]+)"/g) ?? [])].map(match => match[1] as string)
+  const targets = [...(/targets\s*=\s*\[([^\]]*)\]/.exec(text)?.[1]?.matchAll(/"([^"]+)"/g) ?? [])].map(match => match[1]!)
   return {channel, targets}
 }
 
 /** Installed rustup toolchains (names such as `1.97.1-aarch64-apple-darwin`), or undefined without rustup. */
 export function rustupToolchains(root: string): string[] | undefined {
   const list = probe(root, ['rustup', 'toolchain', 'list'])
-  return list === undefined ? undefined : list.split('\n').map(line => line.split(' ')[0] as string)
+  return list === undefined ? undefined : list.split('\n').map(line => line.split(' ')[0]!)
 }
 
 /** The toolchains this repository uses, required versus installed. */
@@ -99,7 +99,7 @@ export function optionalToolchains(root: string, skipDotnet = false): Toolchain[
     .filter(([name, required]) => required && !(skipDotnet && name === 'dotnet'))
     .map(([name, required, argv]) => {
       const installed = versionIn(probe(root, argv))
-      const wanted = (required as string).replace(/\.x$/, '')
+      const wanted = required!.replace(/\.x$/, '')
       return {
         name,
         required,

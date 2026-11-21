@@ -17,8 +17,9 @@ export function majorTagMove(tag, releases) {
   const stable = /^v(\d+)\.\d+\.\d+$/.exec(tag)
   if (!stable) return {reason: `${tag} is not a stable release tag such as v0.1.0, so no major version tag moves`}
   const major = `v${stable[1]}`
-  if (!releases.some(release => release.tagName === tag && !release.isDraft && !release.isPrerelease))
+  if (!releases.some(release => release.tagName === tag && !release.isDraft && !release.isPrerelease)) {
     return {reason: `${tag} is not a published stable release`}
+  }
   const newest = newestInMajor(releases, major)
   if (newest !== tag) return {reason: `${newest} is newer than ${tag}, so ${major} stays where it is`}
   return {major}

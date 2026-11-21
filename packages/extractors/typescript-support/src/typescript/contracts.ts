@@ -3,7 +3,7 @@ import type {Json} from '../types.js'
 import {typeText, type TypeText} from './text.js'
 
 /** api/v0 contract facts without the ones that are false or empty, which mean the same as absent ones. */
-export function facts(values: {[key: string]: Json | undefined}): Json {
+export function facts(values: Record<string, Json | undefined>): Json {
   return Object.fromEntries(
     Object.entries(values).filter(
       ([, value]) =>

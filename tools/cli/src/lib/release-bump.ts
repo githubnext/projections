@@ -45,8 +45,9 @@ export function setReleaseVersion(root: string, next: string): string[] {
   const releasedCrates = new Set(crates.filter(crate => crate.released).map(crate => crate.name))
   for (const crate of crates) {
     let text = crate.text
-    for (const dependency of pathDependencies(crate.text).reverse())
+    for (const dependency of pathDependencies(crate.text).reverse()) {
       if (releasedCrates.has(dependency.name)) text = versionAt(text, dependency.index)
+    }
     update(root, crate.file, crate.text, text, changed)
   }
   const lock = readText(root, 'Cargo.lock')
@@ -61,16 +62,17 @@ export function setReleaseVersion(root: string, next: string): string[] {
     const result = structuredClone(manifest)
     const edits: {key: string; within?: string; value: string}[] = []
     if (released) {
-      result['version'] = next
+      result.version = next
       edits.push({key: 'version', value: next})
     }
     for (const field of dependencyFields) {
       const dependencies = result[field] as Record<string, string> | undefined
-      for (const name of Object.keys(dependencies ?? {}))
+      for (const name of Object.keys(dependencies ?? {})) {
         if (releasedWorkspaces.has(name) && dependencies) {
           dependencies[name] = next
           edits.push({key: name, within: field, value: next})
         }
+      }
     }
     return {result, edits}
   }

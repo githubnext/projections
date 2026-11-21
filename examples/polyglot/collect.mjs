@@ -2,8 +2,9 @@ import {readFileSync} from 'node:fs'
 import path from 'node:path'
 
 const request = JSON.parse(readFileSync(0, 'utf8'))
-if (request.protocolVersion !== 0 || request.capabilities?.trusted !== true)
+if (request.protocolVersion !== 0 || request.capabilities?.trusted !== true) {
   throw new Error('Review both revisions and explicitly authorize execution')
+}
 const {services} = JSON.parse(readFileSync(path.join(request.repository.root, 'services.json'), 'utf8'))
 if (!Array.isArray(services)) throw new Error('services must be an array')
 const evidence = [{kind: 'declared-service-catalog', source: 'services.json'}]
@@ -19,8 +20,9 @@ const entities = services.map(service => {
   }
 })
 const relationships = services.flatMap(service => {
-  if (!Array.isArray(service.dependencies) || service.dependencies.some(dependency => typeof dependency !== 'string'))
+  if (!Array.isArray(service.dependencies) || service.dependencies.some(dependency => typeof dependency !== 'string')) {
     throw new Error('dependencies must be string arrays')
+  }
   return service.dependencies.map(dependency => ({
     id: `dependency:${JSON.stringify([service.name, dependency])}`,
     kind: 'depends-on',

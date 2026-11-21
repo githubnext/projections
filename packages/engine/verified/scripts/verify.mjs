@@ -93,8 +93,9 @@ export function consistent() {
   const {macros} = pins()
   const manifest = readFileSync(join(crate, 'Cargo.toml'), 'utf8')
   const used = /^verus_builtin_macros\s*=\s*"=([^"]+)"/m.exec(manifest)?.[1]
-  if (used !== macros)
+  if (used !== macros) {
     return [`packages/engine/verified/Cargo.toml uses verus_builtin_macros ${used ?? '(none)'}, but verus.toml pins ${macros}`]
+  }
   return []
 }
 

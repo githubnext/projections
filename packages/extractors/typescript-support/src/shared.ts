@@ -28,8 +28,9 @@ export function repositoryRoot(context: ExtractorContext): string {
 }
 
 export async function sourcePath(context: ExtractorContext, relative: string): Promise<string> {
-  if (path.isAbsolute(relative) || relative.split(/[\\/]/).includes('..'))
+  if (path.isAbsolute(relative) || relative.split(/[\\/]/).includes('..')) {
     throw new Error(`Path must stay within the repository: ${relative}`)
+  }
   const root = await realpath(repositoryRoot(context))
   const target = path.resolve(root, relative)
   let cursor = root
@@ -56,8 +57,9 @@ export async function containedPath(context: ExtractorContext, relative: string)
  * they stay inside `root`.
  */
 export async function containedIn(root: string, relative: string): Promise<string> {
-  if (path.isAbsolute(relative) || relative.split(/[\\/]/).includes('..'))
+  if (path.isAbsolute(relative) || relative.split(/[\\/]/).includes('..')) {
     throw new Error(`Path must stay within the repository: ${relative}`)
+  }
   const inside = (file: string) => {
     const offset = path.relative(root, file)
     return offset === '' || (offset !== '..' && !offset.startsWith(`..${path.sep}`) && !path.isAbsolute(offset))

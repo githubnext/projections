@@ -4,7 +4,10 @@ import {evidence, id, type Project} from './model.js'
 import {apiKind, facts, type Renderer} from './contracts.js'
 import {declares, getterOnly, hasModifier, memberName, privateMember} from './symbols.js'
 
-type Member = {symbol: ts.Symbol; static: boolean}
+interface Member {
+  symbol: ts.Symbol
+  static: boolean
+}
 
 /** The members of an exported class or interface, collected as `contains` children of its export. */
 export class MemberNodes {

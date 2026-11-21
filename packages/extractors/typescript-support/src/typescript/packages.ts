@@ -15,7 +15,7 @@ function manifests(files: SourceFiles): Package[] {
     if (path.basename(file) !== 'package.json' || aliases.has(file) || file.includes(`${path.sep}node_modules${path.sep}`)) continue
     let manifest: Record<string, unknown>
     try {
-      manifest = record(JSON.parse(text), `${slash(path.relative(root, file))}`)
+      manifest = record(JSON.parse(text), slash(path.relative(root, file)))
     } catch (error) {
       throw new Error(`Invalid package manifest ${code(slash(path.relative(root, file)))}: ${String(error)}`, {cause: error})
     }
@@ -43,8 +43,9 @@ export function apiPackages(files: SourceFiles, programs: ts.Program[], entryFil
     const relative = slash(path.relative(files.root, file))
     const pkg = candidates.find(item => !item.directory || relative.startsWith(`${item.directory}/`))
     if (pkg && !packages.includes(pkg)) {
-      if (packages.some(other => other.name === pkg.name))
+      if (packages.some(other => other.name === pkg.name)) {
         throw new Error(`Duplicate package name ${code(pkg.name)}; package identities must be unique`)
+      }
       packages.push(pkg)
     }
   }

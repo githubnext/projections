@@ -6,8 +6,9 @@ import {sortedUnique} from './files.mjs'
 export function literals(lines) {
   const found = []
   lines.forEach((line, index) => {
-    for (const match of line.matchAll(/'((?:\\.|[^'\\])*)'|"((?:\\.|[^"\\])*)"|\x60((?:\\.|[^\x60\\])*)\x60/g))
+    for (const match of line.matchAll(/'((?:\\.|[^'\\])*)'|"((?:\\.|[^"\\])*)"|\x60((?:\\.|[^\x60\\])*)\x60/g)) {
       found.push({value: (match[1] ?? match[2] ?? match[3]).replace(/\$\{[^}]*\}/g, '@'), line: index + 1})
+    }
   })
   return found
 }
@@ -33,8 +34,9 @@ export function manifestRelationships(cx) {
     const existing = relationships.get(id)
     if (existing) {
       existing.via.add(via)
-      if (evidence && existing.evidence.length < 20 && !existing.evidence.some(item => item.source === evidence.source))
+      if (evidence && existing.evidence.length < 20 && !existing.evidence.some(item => item.source === evidence.source)) {
         existing.evidence.push(evidence)
+      }
       return
     }
     relationships.set(id, {id, kind, from, to, via: new Set([via]), evidence: evidence ? [evidence] : [], confidence})
@@ -67,8 +69,9 @@ export function manifestRelationships(cx) {
         !best ||
         unit.directory.length > best.directory.length ||
         (unit.directory.length === best.directory.length && rank(unit) > rank(best))
-      )
+      ) {
         best = unit
+      }
     }
     return best
   }
@@ -130,7 +133,7 @@ export function manifestRelationships(cx) {
           {kind: 'build', source: entry.file, location: {line: at?.line ?? 1}},
           'derived',
         )
-        if (unit.id !== crate)
+        if (unit.id !== crate) {
           relate(
             'bundles',
             unit.id,
@@ -139,6 +142,7 @@ export function manifestRelationships(cx) {
             {kind: 'build', source: entry.file, location: {line: written?.line ?? 1}},
             'derived',
           )
+        }
       }
     }
   }

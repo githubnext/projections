@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {fileURLToPath} from 'node:url'
 import test from 'node:test'
 
-process.env['TOOLS_ROOT'] = fileURLToPath(new URL('fixtures/repo/', import.meta.url))
+process.env.TOOLS_ROOT = fileURLToPath(new URL('fixtures/repo/', import.meta.url))
 const {default: cli, exitCodes} = await import('../src/cli.ts')
 const {docsRead, docsSearch} = await import('../src/commands/docs.ts')
 const {feedbackReport} = await import('../src/commands/feedback.ts')
@@ -153,6 +153,7 @@ test('the manifest lists every command', async () => {
     'fix',
     'feedback',
     'update shadcn',
-  ])
+  ]) {
     assert.match(output, new RegExp(`\\| \`tools ${command}[\` ]`), command)
+  }
 })

@@ -68,8 +68,9 @@ export class Request {
   /** The examined revision's root directory (`repository.root`). */
   get repositoryRoot(): string {
     const root = this.repository.root
-    if (typeof root !== 'string' || !root)
+    if (typeof root !== 'string' || !root) {
       throw new Error("This request has no repository.root, so the extractor can't read the examined revision")
+    }
     return root
   }
 
@@ -106,7 +107,7 @@ export class Request {
 
   /** Whether the run is trusted (`--trust`). */
   get trusted(): boolean {
-    return this.capabilities?.trusted === true
+    return this.capabilities?.trusted
   }
 }
 
@@ -115,25 +116,28 @@ export class Request {
  * with a clear message when there is none, it isn't JSON or it speaks another protocol version.
  */
 export function readRequest(fd = 0): Request {
-  if (isatty(fd))
+  if (isatty(fd)) {
     throw new Error(
       'No extractor request on stdin. Projections sends one when it runs this extractor ' +
         '(projections show -p <id> --trust); to run it by hand, pipe a request in',
     )
+  }
   let value: unknown
   try {
     value = JSON.parse(readFileSync(fd, 'utf8'))
   } catch (error) {
     throw new SyntaxError(`The extractor request on stdin is not JSON: ${(error as Error).message}`, {cause: error})
   }
-  if (typeof value !== 'object' || value === null || Array.isArray(value))
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     throw new TypeError('The extractor request on stdin is not a JSON object')
+  }
   const version = (value as {protocolVersion?: unknown}).protocolVersion
-  if (version !== PROTOCOL_VERSION)
+  if (version !== PROTOCOL_VERSION) {
     throw new RangeError(
       `The extractor request has ${version === undefined ? 'no protocolVersion' : `protocolVersion ${quoted(version)}`}; ` +
         `this module speaks ${PROTOCOL_VERSION}. Use the module of the Projections that runs the extractor`,
     )
+  }
   return new Request(value as ExtractorRequest)
 }
 

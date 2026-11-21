@@ -4,7 +4,7 @@ import {generatorsAffectedBy, type Generator} from './generated.ts'
 import {dependantsOf, ownerOf, type Unit} from './packages.ts'
 import type {Change} from './git.ts'
 
-export type Affected = {
+export interface Affected {
   /** Workspaces and crates containing a changed file. */
   changed: string[]
   /** Workspaces and crates depending, directly or transitively, on a changed one. */
@@ -25,8 +25,9 @@ export function kindsOf(paths: readonly string[]): ChangeKind[] {
     if (/\.([cm]?[jt]sx?)$/.test(path)) kinds.add('ts')
     if (/\.rs$|(^|\/)Cargo\.(toml|lock)$|^rust-toolchain\.toml$/.test(path)) kinds.add('rust')
     if (/\.md$/.test(path)) kinds.add('docs')
-    if (/\.comparator(\.test)?\.ya?ml$/.test(path) || path.startsWith('packages/comparators/') || path.startsWith('packages/schemas/'))
+    if (/\.comparator(\.test)?\.ya?ml$/.test(path) || path.startsWith('packages/comparators/') || path.startsWith('packages/schemas/')) {
       kinds.add('comparators')
+    }
     if (/(^|\/)package(-lock)?\.json$|(^|\/)tsconfig[\w.]*\.json$|^\.npmrc$/.test(path)) kinds.add('manifests')
     if (path.startsWith('.github/')) kinds.add('workflows')
   }

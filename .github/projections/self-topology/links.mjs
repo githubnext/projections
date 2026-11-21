@@ -36,8 +36,9 @@ export function linkUnits({units, unitByPackage, unitByCrateIdent, unitFiles, li
           }
           // A workspace package a build names (vite, tsdown, collectRenderers): bundled.
           const named = namedPackage(item.value)
-          if (named && units.get(unitByPackage.get(named)).kind === 'npm-package')
+          if (named && units.get(unitByPackage.get(named)).kind === 'npm-package') {
             relate('bundles', unit.id, unitByPackage.get(named), `${item.value}`, evidence(item.line), 'derived')
+          }
         })
       }
 
@@ -85,14 +86,15 @@ export function linkUnits({units, unitByPackage, unitByCrateIdent, unitFiles, li
         lines.forEach((line, index) => {
           for (const [, macro, relative] of line.matchAll(/\b(include_str|include_bytes)!\s*\(\s*"([^"]+)"\s*\)/g)) {
             const owner = unitAtPath(unit.root, path.posix.normalize(path.posix.join(path.posix.dirname(entry.file), relative)))
-            if (owner && owner.directory !== unit.directory)
+            if (owner && owner.directory !== unit.directory) {
               relate('bundles', unit.id, owner.id, `${macro}!("${relative}")`, evidence(index + 1), 'derived')
+            }
           }
         })
         // The CLI runs built-in extractors as its own hidden subcommand, from the catalog crate it links.
-        if (values.some(item => item.value === '__extract'))
-          for (const [ident, target] of unitByCrateIdent)
-            if (target !== unit.id && new RegExp(`\\b${ident}::`).test(text))
+        if (values.some(item => item.value === '__extract')) {
+          for (const [ident, target] of unitByCrateIdent) {
+            if (target !== unit.id && new RegExp(`\\b${ident}::`).test(text)) {
               relate(
                 'spawns',
                 unit.id,
@@ -101,16 +103,20 @@ export function linkUnits({units, unitByPackage, unitByCrateIdent, unitFiles, li
                 evidence(firstLine(/__extract/)),
                 'inferred',
               )
+            }
+          }
+        }
         // Extractors that run a helper by its installed asset name.
-        if (/\b(helper|run_helper)\s*\(/.test(text))
+        if (/\b(helper|run_helper)\s*\(/.test(text)) {
           for (const item of values) {
             const asset = [...helperAssets.keys()].find(name => item.value === name || item.value.startsWith(`${name}/`))
             if (asset) relate('spawns', unit.id, helperAssets.get(asset), `${item.value} (helper process)`, evidence(item.line), 'inferred')
           }
+        }
       }
 
       // postMessage peers: a file that messages, importing another workspace package that messages.
-      if (entry.language === 'javascript' && patterns.javascript.messaging.test(text))
+      if (entry.language === 'javascript' && patterns.javascript.messaging.test(text)) {
         for (const match of text.matchAll(/(?:from\s+|import\(\s*)['"]([^'"]+)['"]/g)) {
           const named = namedPackage(match[1])
           const target = named && unitByPackage.get(named)
@@ -124,6 +130,7 @@ export function linkUnits({units, unitByPackage, unitByCrateIdent, unitFiles, li
             'inferred',
           )
         }
+      }
     }
   }
 }

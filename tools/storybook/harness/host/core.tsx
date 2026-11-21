@@ -80,11 +80,12 @@ export function CoreHarness() {
       setState({engine, renderers})
     })
   }, [])
-  if (!state || !subject)
+  if (!state || !subject) {
     return (
       <div style={{display: 'flex', height: '100dvh', fontFamily: 'system-ui'}}>
         <LoadingStatus label="Starting the engine…" />
       </div>
     )
+  }
   return <Review subject={subject} renderer={resolveRenderer('graph', state.renderers).renderer} />
 }

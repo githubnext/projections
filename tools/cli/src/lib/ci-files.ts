@@ -16,7 +16,7 @@ import {matches} from './repo.ts'
 
 export type FileClass = 'full' | 'docs' | 'checks' | 'code'
 
-export type ClassifiedFile = {
+export interface ClassifiedFile {
   path: string
   class: FileClass
   /** Why it has its class: the file rule's description, or what the graph says. */
@@ -28,7 +28,10 @@ export type ClassifiedFile = {
 }
 
 /** A changed file's contents before and after the change, for lockfiles. */
-export type Contents = {before: (path: string) => string | undefined; after: (path: string) => string | undefined}
+export interface Contents {
+  before: (path: string) => string | undefined
+  after: (path: string) => string | undefined
+}
 
 export const UNOWNED = 'No file rule matches it, and no workspace or crate contains or reads it: run everything, to be safe'
 

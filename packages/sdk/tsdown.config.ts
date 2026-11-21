@@ -78,8 +78,9 @@ export default defineConfig([
       {
         name: 'projections-vendored-data',
         resolveId(source, importer) {
-          if (importer && source.startsWith('.') && vendored.test(new URL(source, `file://${importer}`).pathname))
+          if (importer && source.startsWith('.') && vendored.test(new URL(source, `file://${importer}`).pathname)) {
             return {id: '../vendor/linguist/languages.js', external: 'absolute'}
+          }
           return null
         },
       },

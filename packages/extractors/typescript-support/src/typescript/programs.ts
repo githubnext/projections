@@ -4,7 +4,10 @@ import {escape, slash, sourceExtension} from './model.js'
 import type {SourceFiles} from './files.js'
 import type {Hosts} from './hosts.js'
 
-type Configuration = {roots: string[]; options: ts.CompilerOptions}
+interface Configuration {
+  roots: string[]
+  options: ts.CompilerOptions
+}
 
 /** Cannot find module, its declarations, or its types. */
 const UNRESOLVED_MODULE = new Set([2307, 2792, 7016])
@@ -67,12 +70,13 @@ function configurations(files: SourceFiles, hosts: Hosts, configs: string[], ent
     }
   }
   for (const file of configs) parseConfig(path.resolve(root, file))
-  if (configs.length && entryFiles.length)
+  if (configs.length && entryFiles.length) {
     scopeToEntries(
       result,
       entryFiles.map(file => path.resolve(root, file)),
     )
-  if (!configs.length)
+  }
+  if (!configs.length) {
     result.push({
       roots: entryFiles.length
         ? entryFiles.map(file => path.resolve(root, file))
@@ -90,6 +94,7 @@ function configurations(files: SourceFiles, hosts: Hosts, configs: string[], ent
         types: [],
       },
     })
+  }
   return result
 }
 
@@ -130,8 +135,9 @@ export async function buildPrograms(files: SourceFiles, hosts: Hosts, configs: s
       break
     }
   }
-  if (!settled)
+  if (!settled) {
     throw new Error('TypeScript module/config resolution exceeded 64 passes; simplify `inputs.tsconfigs` or check dependency cycles')
+  }
   const errors = diagnostics.filter(diagnostic => diagnostic.category === ts.DiagnosticCategory.Error)
   if (errors.length) {
     const unresolved = errors.some(diagnostic => UNRESOLVED_MODULE.has(diagnostic.code))

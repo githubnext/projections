@@ -46,7 +46,7 @@ function workspace(root: string, path: string, times: {src: number; dist?: numbe
   utimesSync(join(root, path, 'dist'), times.dist, times.dist)
 }
 
-const plan = (name: string, context: GateContext) => (gates.find(gate => gate.name === name) as (typeof gates)[number]).plan(context)
+const plan = (name: string, context: GateContext) => gates.find(gate => gate.name === name)!.plan(context)
 const argvs = (planned: ReturnType<typeof plan>) =>
   'commands' in planned ? planned.commands.map(command => command.argv.join(' ')) : planned
 
@@ -73,11 +73,12 @@ test('cargo check covers the changed crates with --fast, and their dependants wi
     skip: 'no Rust changed',
   })
   // The workspace's own manifest, lockfile or toolchain affect every crate, alone or beside a crate's change.
-  for (const changed of [[], ['core']])
+  for (const changed of [[], ['core']]) {
     assert.deepEqual(
       argvs(plan('cargo-check', {root: '.', units, affected: affected(changed, [], ['rust']), files: ['Cargo.lock'], fast: true})),
       ['cargo check --workspace --all-targets --locked --message-format short'],
     )
+  }
 })
 
 test('--fast typechecks only the changed workspaces, once their dependencies are built and current', () => {
@@ -176,9 +177,9 @@ test('build: a workspace checked unchanged after its dependency rebuilt stays cu
   const units = [unit('lib'), unit('app', {dependsOn: ['lib']})]
   workspace(root, 'lib', {src: 100, dist: 400})
   workspace(root, 'app', {src: 100, dist: 300})
-  assert.equal(staleness(root, units, units[1] as Unit, new Set()), 'lib was built after it')
+  assert.equal(staleness(root, units, units[1]!, new Set()), 'lib was built after it')
   recordBuild(root, 'app', {checked: 500_000})
-  assert.equal(staleness(root, units, units[1] as Unit, new Set()), undefined)
+  assert.equal(staleness(root, units, units[1]!, new Set()), undefined)
 })
 
 test('build: outputs written again unchanged keep their times, so nothing above them rebuilds', () => {
@@ -219,8 +220,9 @@ function configured(root: string, path: string, times: {src: number; dist?: numb
   writeFileSync(join(root, path, 'scripts/css.mjs'), '')
   mkdirSync(join(root, path, 'build'), {recursive: true})
   writeFileSync(join(root, path, 'build/assets.mjs'), '')
-  for (const file of ['package.json', 'tsconfig.json', 'scripts/css.mjs', 'build/assets.mjs'])
+  for (const file of ['package.json', 'tsconfig.json', 'scripts/css.mjs', 'build/assets.mjs']) {
     utimesSync(join(root, path, file), times.src, times.src)
+  }
   utimesSync(join(root, 'tsconfig.base.json'), times.src, times.src)
 }
 
@@ -303,7 +305,7 @@ test('test --filter narrows each runner to the matching tests, and needs a targe
     runs.map(command => command.argv.join(' ')),
     ['npm test --workspace @fixture/app', 'cargo test --locked -p fixture-app parses'],
   )
-  assert.match(runs[0]?.env?.['NODE_OPTIONS'] ?? '', /--test-name-pattern="parses"/)
+  assert.match(runs[0]?.env?.NODE_OPTIONS ?? '', /--test-name-pattern="parses"/)
   assert.throws(() => testPlan(fixture, {filter: 'parses'}), /needs a target/)
 })
 

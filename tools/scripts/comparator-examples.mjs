@@ -104,8 +104,9 @@ try {
       [`${example.name}-default`, undefined],
     ]) {
       // The working tree's definition normalizes and digests the raw extractions, running nothing.
-      for (const side of ['before', 'after'])
+      for (const side of ['before', 'after']) {
         projections('show', '-p', id, '--from', join(root, example[side]), '--output', join(repo, `${id}.${side}.json`))
+      }
       const comparison = join(repo, `${id}.comparison.json`)
       projections(
         'compare',

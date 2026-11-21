@@ -124,8 +124,9 @@ export function findings(path, text) {
 /** The violations in `files` that `allowed` (the .portability.yaml entries) doesn't excuse, and its stale entries. */
 export function check(files, allowed) {
   for (const entry of allowed) {
-    if (!entry.path || !entry.rule || !entry.reason?.trim())
+    if (!entry.path || !entry.rule || !entry.reason?.trim()) {
       throw new Error(`.portability.yaml: every entry needs a path, a rule and a reason: ${JSON.stringify(entry)}`)
+    }
     if (!rules.some(rule => rule.name === entry.rule)) throw new Error(`.portability.yaml: no rule ${entry.rule}`)
   }
   const used = new Set()
@@ -170,10 +171,11 @@ if (import.meta.main) {
     ),
     ...stale.map(entry => `.portability.yaml: ${entry.path} no longer breaks ${entry.rule}; remove the entry`),
   ]
-  if (problems.length)
+  if (problems.length) {
     throw new Error(
       `Shipped code must run on Linux, macOS and Windows (docs/maintainers/runner-coverage.md#platform-coverage); fix each, or add an exception with its reason to .portability.yaml:\n${problems.join('\n')}`,
     )
+  }
   console.log(
     `Portability: ${files.length} shipped files make no operating-system assumptions beyond the ${allowed.length} in .portability.yaml`,
   )

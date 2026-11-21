@@ -23,18 +23,20 @@ test('every generator has a unique name, outputs, inputs and a way to run it', (
   for (const generator of generators) {
     assert.ok(generator.outputs.length && generator.inputs.length && generator.generate.length, generator.name)
     assert.ok(generator.check.mode !== 'none' || generator.check.reason, `${generator.name} says why it can't be checked`)
-    if (generator.fix)
+    if (generator.fix) {
       assert.ok(
         !generator.needs.some(need => ['network', 'browser', 'toolchains'].includes(need)),
         `${generator.name} can't be part of tools fix`,
       )
+    }
   }
 })
 
 test("the registry matches this repository: each generator's outputs exist, and every marked file is registered", () => {
   const files = walkAll(workspaceRoot)
-  for (const generator of generators)
+  for (const generator of generators) {
     assert.ok(outputFiles(workspaceRoot, generator, files).length > 0, `${generator.name} matches no committed file`)
+  }
   const unregistered = markedFiles(
     workspaceRoot,
     files.filter(path => !/(^|\/)fixtures\//.test(path)),

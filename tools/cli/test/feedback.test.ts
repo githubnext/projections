@@ -52,8 +52,9 @@ test('credential-like strings are removed', () => {
     'zyxwvu987654',
     'secretvalue',
     'MIIabc',
-  ])
+  ]) {
     assert.ok(!redacted.includes(secret), `${secret} leaked: ${redacted}`)
+  }
   assert.match(redacted, /https:\/\/user:\[redacted\]@example\.com/)
   assert.match(redacted, /NPM_TOKEN=\[redacted\]/)
   // Ordinary text is untouched.
@@ -82,8 +83,9 @@ test('the draft: a title, the issue form headings, redacted fields and a prefill
   )
   assert.equal(draft.title, '[agent feedback] tools check skipped docs without saying why')
   assert.deepEqual(draft.labels, [FEEDBACK_LABEL])
-  for (const heading of ['What were you trying to do?', 'Details', 'Command and inputs', 'Error', 'Environment'])
+  for (const heading of ['What were you trying to do?', 'Details', 'Command and inputs', 'Error', 'Environment']) {
     assert.ok(draft.body.includes(`### ${heading}\n\n`), heading)
+  }
   assert.ok(draft.body.includes('```sh\nnpm run tools -- check --only docs\n```'))
   assert.ok(draft.body.includes('Ran from .'))
   assert.ok(!draft.body.includes(root) && !draft.body.includes('ghp_'))

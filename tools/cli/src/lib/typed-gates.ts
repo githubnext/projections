@@ -59,12 +59,12 @@ function withCurrentDependencies(context: GateContext, units: readonly Unit[]): 
 export function fastTypecheck(context: GateContext): Plan {
   const changed = new Set(context.affected?.changed ?? [])
   const units = inDependencyOrder(context.units, changed)
-    .map(path => context.units.find(unit => unit.path === path) as Unit)
+    .map(path => context.units.find(unit => unit.path === path)!)
     .filter(unit => unit.kinds.includes('npm') && unit.scripts.includes('typecheck'))
   if (!units.length) return {skip: 'no changed workspace has a typecheck script'}
   const {ready, note} = withCurrentDependencies(context, units)
-  if (!ready.length) return {skip: note as string}
-  return {commands: ready.map(unit => npm('run', 'typecheck', '--workspace', unit.names[0] as string)), ...(note ? {note} : {})}
+  if (!ready.length) return {skip: note!}
+  return {commands: ready.map(unit => npm('run', 'typecheck', '--workspace', unit.names[0]!)), ...(note ? {note} : {})}
 }
 
 /** The npm workspace a repository path belongs to: the deepest one holding it. */
@@ -92,7 +92,7 @@ export function lintPlan(context: GateContext): Plan {
   const outside = files.filter(path => !workspaceOf(context, path))
   if (!context.fast) {
     const units = inDependencyOrder(context.units, [...context.affected.changed, ...context.affected.dependants])
-      .map(path => context.units.find(unit => unit.path === path) as Unit)
+      .map(path => context.units.find(unit => unit.path === path)!)
       .filter(unit => unit.kinds.includes('npm'))
     const commands = [...units.map(unit => eslint(unit.path)), ...(outside.length ? [eslint(...outside)] : [])]
     return commands.length ? {commands} : {skip: 'no TypeScript or JavaScript changed'}

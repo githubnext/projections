@@ -18,8 +18,9 @@ function jsonValue(value: unknown, path: string, ancestors: Set<object>, depth: 
   if (typeof value === 'string') return unicode(value, path)
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) invalid('nonfinite-number', path, 'Numbers must be finite')
-    if (Number.isInteger(value) && !Number.isSafeInteger(value))
+    if (Number.isInteger(value) && !Number.isSafeInteger(value)) {
       invalid('unsafe-integer', path, 'Integer exceeds the JavaScript safe-integer range')
+    }
     return
   }
   if (typeof value !== 'object') invalid('invalid-json-value', path, 'Expected a JSON value')
@@ -42,8 +43,9 @@ function jsonValue(value: unknown, path: string, ancestors: Set<object>, depth: 
     for (const [key, property] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
       unicode(key, path)
       const childPath = `${path}/${key.replaceAll('~', '~0').replaceAll('/', '~1')}`
-      if (!property.enumerable || !('value' in property))
+      if (!property.enumerable || !('value' in property)) {
         invalid('invalid-json-value', childPath, 'Nonenumerable fields and accessors are not JSON')
+      }
       jsonValue(property.value, childPath, ancestors, depth + 1)
     }
   }

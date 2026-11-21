@@ -2,7 +2,7 @@
 import {TOOLS, gates, runGate, type GateContext, type GateResult} from '../../lib/gates.ts'
 import {changeSet, split, UsageError} from './change-set.ts'
 
-export type CheckOptions = {
+export interface CheckOptions {
   affected?: boolean | undefined
   fast?: boolean | undefined
   since?: string | undefined

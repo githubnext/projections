@@ -27,8 +27,9 @@ function factoryDependencies(target: unknown, inject: unknown[]): Dependency[] {
 /** A class provider's constructor parameters, then its injected properties. */
 function classDependencies(target: unknown): Dependency[] {
   const types = [...((getMetadata('design:paramtypes', target) as unknown[] | undefined) ?? [])]
-  for (const {index, param} of (getMetadata('self:paramtypes', target) as {index: number; param: unknown}[] | undefined) ?? [])
+  for (const {index, param} of (getMetadata('self:paramtypes', target) as {index: number; param: unknown}[] | undefined) ?? []) {
     types[index] = param
+  }
   const optional = new Set((getMetadata('optional:paramtypes', target) as number[] | undefined) ?? [])
   const names = parameterNames(target, true)
   const dependencies: Dependency[] = types.map((type, index) => ({

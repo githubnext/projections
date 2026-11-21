@@ -38,7 +38,7 @@ export function canonicalJson(value: Json): string {
     return JSON.stringify(value)
   }
   if (Array.isArray(value)) return `[${value.map(item => canonicalJson(item as Json)).join(',')}]`
-  const object = value as {readonly [key: string]: Json}
+  const object = value as Readonly<Record<string, Json>>
   return `{${Object.keys(object)
     .sort()
     .filter(key => object[key] !== undefined)
@@ -59,17 +59,19 @@ export function sha256(text: string): string {
  */
 export function basis(parts: Readonly<Record<string, Json>>, {verbatim = ['model']}: {verbatim?: readonly string[]} = {}): Basis {
   const names = Object.keys(parts)
-  if (names.length === 0 || names.length > MAX_BASIS_PARTS)
+  if (names.length === 0 || names.length > MAX_BASIS_PARTS) {
     throw new RangeError(`A basis has 1 to ${MAX_BASIS_PARTS} parts, not ${names.length}`)
+  }
   const result: Record<string, string> = {}
   for (const name of names) {
     if (!partName.test(name)) throw new RangeError(`Basis part ${JSON.stringify(name)}: a letter, then up to 63 letters, digits, _ or -`)
     const value = parts[name]!
     if (verbatim.includes(name)) {
-      if (typeof value !== 'string' || !value || Buffer.byteLength(value) > MAX_BASIS_PART_BYTES)
+      if (typeof value !== 'string' || !value || Buffer.byteLength(value) > MAX_BASIS_PART_BYTES) {
         throw new RangeError(
           `Basis part ${name} is kept verbatim, so it must be a nonempty string of at most ${MAX_BASIS_PART_BYTES} bytes`,
         )
+      }
       result[name] = value
     } else {
       result[name] = sha256(typeof value === 'string' ? value : canonicalJson(value))
@@ -109,8 +111,9 @@ export async function generations(request: {readonly generations?: {readonly fil
       if (!line.trim()) continue
       try {
         const entry = JSON.parse(line) as {path?: unknown; basis?: unknown; value?: Json}
-        if (typeof entry.path === 'string' && typeof entry.basis === 'string' && 'value' in entry)
+        if (typeof entry.path === 'string' && typeof entry.basis === 'string' && 'value' in entry) {
           values.set(key(entry.path, entry.basis), entry.value as Json)
+        }
       } catch {
         // A damaged line is skipped: the value is generated again.
       }

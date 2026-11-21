@@ -52,8 +52,9 @@ await main(request => {
         ts.isCallExpression(value) &&
         ts.isPropertyAccessExpression(value.expression) &&
         (methods.has(value.expression.name.text.toLowerCase()) || value.expression.name.text === 'route')
-      )
+      ) {
         return isReceiver(value.expression.expression, seen)
+      }
       return false
     }
     const addRoute = (method, route, handler, at) => {

@@ -7,7 +7,7 @@ export function affectedReport(root: string, since?: string) {
   const {base, changes, units, affected: change} = changeSet(root, since)
   const byPath = new Map(units.map(unit => [unit.path, unit]))
   const label = (path: string) => {
-    const unit = byPath.get(path) as Unit
+    const unit = byPath.get(path)!
     return {path, kind: unit.kinds.join('+'), name: unit.names.join(', ')}
   }
   const tests = [...change.changed, ...change.dependants].filter(

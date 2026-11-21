@@ -27,8 +27,9 @@ export async function prepareStatic(directory = staticDirectory) {
   await mkdir(directory, {recursive: true})
   await collectRenderers({packages: rendererPackages, outDir: directory, from: import.meta.url})
   // The brand mark and favicon for Storybook's sidebar and browser tab.
-  for (const name of ['projections-mark-two-tone.svg', 'favicon.svg'])
+  for (const name of ['projections-mark-two-tone.svg', 'favicon.svg']) {
     await copyFile(fileURLToPath(new URL(`../../../brand/${name}`, import.meta.url)), `${directory}${name}`)
+  }
   // The codicon font and stylesheet the VS Code UI's stories link as `vscode-codicon-stylesheet` (VSCode Elements' icons read it).
   await cp(
     fileURLToPath(new URL('./dist/codicons/', import.meta.resolve('@githubnext/projections-host-vscode/package.json'))),
@@ -40,8 +41,9 @@ export async function prepareStatic(directory = staticDirectory) {
   // The comparator runtime's Worker is served as plain same-origin modules, not bundled.
   const runtime = new URL('./', import.meta.resolve('@githubnext/projections-comparator-runtime/browser'))
   await mkdir(`${directory}comparator`, {recursive: true})
-  for (const name of ['worker-entry.js', 'execute.js', 'abi.js', 'rules.wasm'])
+  for (const name of ['worker-entry.js', 'execute.js', 'abi.js', 'rules.wasm']) {
     await copyFile(new URL(name, runtime), `${directory}comparator/${name}`)
+  }
   // Scenario comparator files; the rules runtime computes each one's digest when it checks it.
   const {comparators} = await loadScenarios()
   const priority = fileURLToPath(new URL('../../../examples/comparators/priority-order/priority-order.comparator.yaml', import.meta.url))

@@ -7,7 +7,7 @@ import {workspaceCycles} from '../lib/modules/cycles.ts'
 import {TOOLS} from '../lib/gates.ts'
 import {UsageError} from './work/change-set.ts'
 
-export type ModulesReport = {
+export interface ModulesReport {
   workspaces: {path: string; cycles: string[][]; unusedExports: {entry: string; names: string[]}[]}[]
   note: string
   next: string[]

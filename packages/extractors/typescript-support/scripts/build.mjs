@@ -40,5 +40,6 @@ const foreign = inputs.filter(input => !path.resolve(input).startsWith(path.join
 if (foreign.length) throw new Error(`The extractor helper must bundle only its own sources, not ${foreign.join(', ')}`)
 const output = result.metafile.outputs[path.relative(process.cwd(), outfile)] ?? Object.values(result.metafile.outputs)[0]
 const external = output.imports.filter(item => item.external && !item.path.startsWith('node:'))
-if (external.length)
+if (external.length) {
   throw new Error(`The extractor helper may import only Node.js built-ins, not ${external.map(item => item.path).join(', ')}`)
+}

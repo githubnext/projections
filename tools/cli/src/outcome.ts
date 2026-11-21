@@ -16,20 +16,22 @@ export async function guard<T>(work: () => T | Promise<T>): Promise<T> {
   try {
     return await work()
   } catch (error) {
-    if (error instanceof UsageError)
+    if (error instanceof UsageError) {
       throw new Errors.IncurError({
         code: 'USAGE',
         message: error.message,
         ...(error.hint ? {hint: error.hint} : {}),
         exitCode: exitCodes.usage,
       })
-    if (error instanceof PrerequisiteError)
+    }
+    if (error instanceof PrerequisiteError) {
       throw new Errors.IncurError({
         code: 'PREREQUISITE',
         message: error.message,
         ...(error.hint ? {hint: error.hint} : {}),
         exitCode: exitCodes.prerequisite,
       })
+    }
     throw error
   }
 }

@@ -21,8 +21,8 @@ const server = await startStorybookServer()
 const browsers = {desktop: await chromium.launch(), mobile: await webkit.launch()}
 const viewports = {desktop: {viewport: {width: 1440, height: 1000}}, mobile: devices['iPhone 13']}
 try {
-  for (const [device, options] of Object.entries(viewports))
-    for (const theme of ['light', 'dark'])
+  for (const [device, options] of Object.entries(viewports)) {
+    for (const theme of ['light', 'dark']) {
       for (const [scene, id] of Object.entries(stories)) {
         const name = `${device}-${theme}-${scene}`
         if (only && !name.includes(only)) continue
@@ -38,6 +38,8 @@ try {
         await context.close()
         console.log(name)
       }
+    }
+  }
 } finally {
   for (const browser of Object.values(browsers)) await browser.close()
   await server.close()

@@ -44,7 +44,7 @@ function sourceModules(root: string, unit: Unit): string[] {
   return walk(root, unit.path, path => !skipped.test(path)).filter(
     path =>
       sources.test(path) &&
-      /\/src\//.test(`/${path.slice(unit.path.length + 1)}`) &&
+      `/${path.slice(unit.path.length + 1)}`.includes('/src/') &&
       !/\.(?:test|spec)\./.test(path) &&
       !path.endsWith('.d.ts'),
   )

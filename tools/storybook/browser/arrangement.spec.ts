@@ -15,7 +15,7 @@ const viewport = {width: 1440, height: 1300}
 /** `arrangementHysteresis` in the host's stage: how much larger the other arrangement must fit before a stage switches. */
 const hysteresis = 1.15
 
-for (const ui of ['default'] as const)
+for (const ui of ['default'] as const) {
   test(`${ui} UI: side by side stacks wide content and keeps tall content left and right, for the larger fit`, async ({
     page,
     theme,
@@ -70,3 +70,4 @@ for (const ui of ['default'] as const)
     }
     expect([...new Set(chosen)].sort(), `arrangements across ${stories.join(', ')}: ${chosen.join(', ')}`).toEqual(['columns', 'stacked'])
   })
+}

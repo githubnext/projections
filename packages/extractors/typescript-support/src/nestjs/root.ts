@@ -3,7 +3,11 @@ import ts from 'typescript'
 import {readSource, sourcePath, type ExtractorContext} from '../shared.js'
 import {optionalString, sourceFile} from './model.js'
 
-export type RootModule = {file: string; name: string; entry?: string}
+export interface RootModule {
+  file: string
+  name: string
+  entry?: string
+}
 
 /** The one source file that calls `NestFactory`, `src/main.ts` by convention. */
 async function bootstrapFile(context: ExtractorContext): Promise<string> {
@@ -59,8 +63,9 @@ export async function rootModule(context: ExtractorContext): Promise<RootModule>
   const configured = optionalString(context, 'module')
   if (configured) {
     const separator = configured.lastIndexOf('#')
-    if (separator <= 0 || separator === configured.length - 1)
+    if (separator <= 0 || separator === configured.length - 1) {
       throw new Error('inputs.module must be "<file>#<exported module class>", for example "src/app.module.ts#AppModule"')
+    }
     return {file: await sourcePath(context, configured.slice(0, separator)), name: configured.slice(separator + 1)}
   }
   const entry = optionalString(context, 'entry') || (await bootstrapFile(context))
@@ -78,8 +83,9 @@ export async function rootModule(context: ExtractorContext): Promise<RootModule>
     const element = bindings.elements.find(item => item.name.text === local)
     if (!element) continue
     const specifier = statement.moduleSpecifier.text
-    if (!specifier.startsWith('.'))
+    if (!specifier.startsWith('.')) {
       throw new Error(`${entry} imports ${local} from the package ${specifier}. Set inputs.module to "<file>#<module class>".`)
+    }
     const base = path.posix.join(path.posix.dirname(entry), specifier.replace(/\.[cm]?js$/, ''))
     const file = [`${base}.ts`, `${base}.tsx`, `${base}/index.ts`, base].find(candidate => context.files.includes(candidate))
     if (!file) throw new Error(`Cannot find the module ${specifier} that ${entry} imports ${local} from.`)

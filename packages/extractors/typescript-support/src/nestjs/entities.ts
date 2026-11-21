@@ -4,7 +4,12 @@ import type {Link} from './links.js'
 import {declaredImportsOf} from './metadata.js'
 import {SCOPES, type NestModule, type Registration, type Wrapper} from './model.js'
 
-type Implementation = {id: string; label: string; data: Record<string, Json>; source?: unknown}
+interface Implementation {
+  id: string
+  label: string
+  data: Record<string, Json>
+  source?: unknown
+}
 
 /** The registration's lifetime, as Nest's scope and whether its dependency tree is static decide it. */
 function lifetimes(wrapper: Wrapper) {

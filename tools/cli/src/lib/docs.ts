@@ -2,17 +2,29 @@
 import {headings, parseFrontMatter, plain, title} from './markdown.ts'
 import {readText, walk} from './repo.ts'
 
-export type Doc = {path: string; title: string; description: string | undefined; text: string}
+export interface Doc {
+  path: string
+  title: string
+  description: string | undefined
+  text: string
+}
 
 /** Markdown outside dependencies, build output and test fixtures. */
 export function loadDocs(root: string): Doc[] {
   return walk(root, '.', path => path.endsWith('.md') && !/(^|\/)(fixtures|snapshots|golden|notices)\//.test(path)).map(path => {
     const text = readText(root, path) ?? ''
-    return {path, title: title(text) ?? path, description: parseFrontMatter(text).data['description'], text}
+    return {path, title: title(text) ?? path, description: parseFrontMatter(text).data.description, text}
   })
 }
 
-export type Hit = {path: string; title: string; section: string | undefined; line: number; snippet: string; score: number}
+export interface Hit {
+  path: string
+  title: string
+  section: string | undefined
+  line: number
+  snippet: string
+  score: number
+}
 
 function terms(query: string): string[] {
   return [
@@ -92,10 +104,10 @@ export function findDoc(docs: readonly Doc[], target: string): {doc?: Doc; candi
   const suffix = docs.filter(
     doc => doc.path.toLowerCase().endsWith(`/${normalized}`) || doc.path.toLowerCase().endsWith(`/${normalized}.md`),
   )
-  if (suffix.length === 1) return {doc: suffix[0] as Doc, candidates: []}
+  if (suffix.length === 1) return {doc: suffix[0]!, candidates: []}
   const exactTitle = docs.filter(doc => doc.title.toLowerCase() === normalized)
-  if (exactTitle.length === 1) return {doc: exactTitle[0] as Doc, candidates: []}
+  if (exactTitle.length === 1) return {doc: exactTitle[0]!, candidates: []}
   const partial = docs.filter(doc => doc.title.toLowerCase().includes(normalized))
-  if (partial.length === 1) return {doc: partial[0] as Doc, candidates: []}
+  if (partial.length === 1) return {doc: partial[0]!, candidates: []}
   return {candidates: [...suffix, ...exactTitle, ...partial].slice(0, 8)}
 }

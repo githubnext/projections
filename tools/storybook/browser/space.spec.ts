@@ -19,7 +19,7 @@ const sizes = [
   {name: 'iPhone 13', width: 390, height: 664},
 ] as const
 
-for (const id of stories)
+for (const id of stories) {
   for (const {name, width, height} of sizes) {
     test(`${id} plans its toolbar rows and gives the stage at least 80% of the view's height at ${name}`, async ({page, theme}) => {
       await page.setViewportSize({width, height})
@@ -55,12 +55,14 @@ for (const id of stories)
             let count = 0
             for (const [index, a] of boxes.entries()) {
               if (a.left < bar.left - 0.5 || a.right > bar.right + 0.5 || a.top < bar.top - 0.5 || a.bottom > bar.bottom + 0.5) count++
-              for (const b of boxes.slice(index + 1))
+              for (const b of boxes.slice(index + 1)) {
                 if (
                   Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5 &&
                   Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5
-                )
+                ) {
                   count++
+                }
+              }
             }
             return count
           })(),
@@ -82,3 +84,4 @@ for (const id of stories)
       expect(measured.height).toBeGreaterThanOrEqual(0.8)
     })
   }
+}

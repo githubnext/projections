@@ -54,8 +54,9 @@ export function checkFrameworkFree({scratch, tarball, name, npm, version, fail})
     ['install', '--no-audit', '--no-fund', '--ignore-scripts', tarball, `vite@${version('vite')}`, `typescript@${version('typescript')}`],
     consumer,
   )
-  for (const peer of ['react', 'react-dom', '@types/react'])
+  for (const peer of ['react', 'react-dom', '@types/react']) {
     if (existsSync(join(consumer, 'node_modules', peer))) fail(`Installing the tarball with Vite alone installed ${peer}`)
+  }
   writeFileSync(join(consumer, 'src/main.ts'), main(name))
   writeFileSync(
     join(consumer, 'vite.config.js'),
@@ -105,10 +106,12 @@ export default defineConfig(rendererConfig({entry: 'src/main.ts', name: 'plain',
   }
   const page = readFileSync(join(consumer, 'dist/index.html'), 'utf8')
   const notices = readFileSync(join(consumer, 'dist/THIRD_PARTY_NOTICES.txt'), 'utf8')
-  for (const name of ['react', 'react-dom', 'scheduler'])
+  for (const name of ['react', 'react-dom', 'scheduler']) {
     if (notices.includes(`===== ${name} `)) fail(`A renderer without React attributes ${name} in its notices`)
-  if (/react\.(production|development)|__SECRET_INTERNALS|ReactCurrentDispatcher|react-dom/.test(page))
+  }
+  if (/react\.(production|development)|__SECRET_INTERNALS|ReactCurrentDispatcher|react-dom/.test(page)) {
     fail('A renderer without React bundles React')
+  }
   if (!/\.pk\s*\{[^}]*--surface:/.test(page)) fail("A renderer without React doesn't bundle the kit's base styles")
   console.log(`  built dist/index.html (${(page.length / 1024).toFixed(1)} kB) with the kit's base styles and no React`)
 }

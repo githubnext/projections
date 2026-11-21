@@ -60,19 +60,22 @@ export const lifecycleRule = {
       },
       CallExpression(node) {
         const name = calleeName(node.callee)
-        if (name === 'useRef' && node.arguments[0]?.type === 'Literal' && typeof node.arguments[0].value === 'boolean')
+        if (name === 'useRef' && node.arguments[0]?.type === 'Literal' && typeof node.arguments[0].value === 'boolean') {
           context.report({node, messageId: 'booleanRef'})
+        }
         const callbacks = callbackOf(context.sourceCode.getAncestors(node))
-        if (timers.has(name) && callbacks.some(callback => effectHooks.has(callback)))
+        if (timers.has(name) && callbacks.some(callback => effectHooks.has(callback))) {
           context.report({node, messageId: 'timerInEffect', data: {timer: name}})
+        }
         if (node.callee.type === 'Identifier') {
           const callback = callbacks.find(callee => timers.has(callee) || settlers.has(callee))
           if (callback) deferred.push({node, setter: node.callee.name, callback})
         }
       },
       'Program:exit'() {
-        for (const {node, setter, callback} of deferred)
+        for (const {node, setter, callback} of deferred) {
           if (setters.has(resolve(node.callee))) context.report({node, messageId: 'deferredSetState', data: {setter, callback}})
+        }
       },
     }
   },

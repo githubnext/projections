@@ -66,8 +66,9 @@ export async function schemas() {
       const types = Array.isArray(value.type) ? value.type : value.type ? [value.type] : []
       const described = types.map(kind => {
         if (kind === 'array') return value.items ? `array of ${type(value.items, depth + 1)}` : 'array'
-        if (kind === 'object' && !value.properties && value.additionalProperties && typeof value.additionalProperties === 'object')
+        if (kind === 'object' && !value.properties && value.additionalProperties && typeof value.additionalProperties === 'object') {
           return `map of ${type(value.additionalProperties, depth + 1)}`
+        }
         return kind
       })
       return described.join(' or ') || (value.properties ? 'object' : 'any')
@@ -87,8 +88,9 @@ export async function schemas() {
         ['maxItems', count => `At most ${plural(count, 'item')}`],
         ['minProperties', count => `At least ${plural(count, 'property').replace('propertys', 'properties')}`],
         ['maxProperties', count => `At most ${plural(count, 'property').replace('propertys', 'properties')}`],
-      ])
+      ]) {
         if (value[keyword] !== undefined) parts.push(`${label(value[keyword])}.`)
+      }
       if (value.uniqueItems) parts.push('Items are unique.')
       if (value.default !== undefined) parts.push(`Default ${code(JSON.stringify(value.default))}.`)
       return parts.join(' ')
@@ -113,14 +115,16 @@ export async function schemas() {
       if (value.properties) {
         parts.push(table(['Property', 'Type', 'Required', 'Description'], rows(value)))
         if (value.additionalProperties === false) parts.push('No other properties are allowed.')
-        else if (value.additionalProperties && typeof value.additionalProperties === 'object')
+        else if (value.additionalProperties && typeof value.additionalProperties === 'object') {
           parts.push(`Other properties: ${type(value.additionalProperties)}.`)
+        }
       } else {
         const notes = constraints(value)
         parts.push(`Type: ${type(value)}.${notes ? ` ${notes}` : ''}`)
       }
-      if (value.if || value.dependentRequired || value.dependentSchemas)
+      if (value.if || value.dependentRequired || value.dependentSchemas) {
         parts.push('Further rules depend on these values; see the JSON Schema for them.')
+      }
       return parts.join('\n\n')
     }
     // A domain schema's refinement: the typed `data` fields of each collection and kind.

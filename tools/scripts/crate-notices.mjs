@@ -103,11 +103,13 @@ export const noticeEntry = (manifest, name) => manifest.find(entry => Object.has
 /** Why the manifest doesn't cover `pkg`, a crate package with no license files of its own; undefined when it does. */
 export function uncovered(manifest, pkg) {
   const entry = noticeEntry(manifest, pkg.name)
-  if (!entry)
+  if (!entry) {
     return `${pkg.name} ${pkg.version} ships no license files and notices/notices.json has no entry for it: fetch the license from ${pkg.repository ?? 'its repository'} at the matching tag into notices/ and add it to notices/notices.json`
+  }
   const covered = entry.crates[pkg.name]
-  if (!covered.includes(pkg.version))
+  if (!covered.includes(pkg.version)) {
     return `${pkg.name} is locked at ${pkg.version}, but notices/notices.json covers ${pkg.name} ${covered.join(', ')}: fetch the license from ${entry.repository} at the matching tag and update notices/notices.json`
+  }
 }
 
 /**
@@ -117,8 +119,9 @@ export function uncovered(manifest, pkg) {
  */
 export function crateNotices({builds, title, buildDependencies = false}) {
   const dependencies = new Map()
-  for (const {platform, crates} of builds)
+  for (const {platform, crates} of builds) {
     for (const [id, pkg] of compiledCrates(cargoMetadata(platform), crates, buildDependencies)) dependencies.set(id, pkg)
+  }
   const manifest = readNoticeManifest()
   const text = [`${title}\n`]
   for (const dependency of [...dependencies.values()].sort((a, b) =>

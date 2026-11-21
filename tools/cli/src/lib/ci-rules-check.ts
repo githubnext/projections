@@ -16,9 +16,11 @@ export function ruleProblems(rules: CiRules, suites: readonly string[]): string[
     else if ('touches' in when) name('group', rules.groups, when.touches, where)
     else if ('reaches' in when) name('group', rules.groups, when.reaches, where)
   }
-  for (const [group, {include, exclude = []}] of Object.entries(rules.groups))
-    for (const selector of [...include, ...exclude])
+  for (const [group, {include, exclude = []}] of Object.entries(rules.groups)) {
+    for (const selector of [...include, ...exclude]) {
       if (typeof selector === 'string' && selector.startsWith('@')) name('group', rules.groups, selector.slice(1), `groups.${group}`)
+    }
+  }
   for (const [condition, {when}] of Object.entries(rules.conditions)) visit(when, `conditions.${condition}`)
   for (const [job, definition] of Object.entries(rules.jobs)) {
     if ('when' in definition) visit(definition.when, `jobs.${job}`)

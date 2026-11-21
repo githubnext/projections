@@ -4,7 +4,11 @@ import {after, createActor, defineMachine, emit, ignore} from '../src/index.js'
 type State = {kind: 'idle'} | {kind: 'running'; job: string} | {kind: 'done'; result: number}
 type Event = {type: 'start'; job: string} | {type: 'finished'; result: number} | {type: 'reset'}
 type Effect = {readonly type: 'log'; readonly text: string} | {readonly type: 'notify'; readonly count: number}
-type Activity = {type: 'poll'; key: string; job: string}
+interface Activity {
+  type: 'poll'
+  key: string
+  job: string
+}
 
 const define = defineMachine<State, Event, Effect, Activity>()
 

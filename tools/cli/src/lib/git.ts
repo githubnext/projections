@@ -1,7 +1,12 @@
 // Git state: the branch, dirty files, and the files changed since a base.
 import {git} from './repo.ts'
 
-export type GitState = {branch: string | undefined; head: string | undefined; dirty: number; untracked: number}
+export interface GitState {
+  branch: string | undefined
+  head: string | undefined
+  dirty: number
+  untracked: number
+}
 
 export function gitState(root: string): GitState {
   const status = git(root, ['status', '--porcelain=v1', '--', '.']) ?? ''
@@ -14,7 +19,11 @@ export function gitState(root: string): GitState {
   }
 }
 
-export type Base = {ref: string; commit: string; reason: string}
+export interface Base {
+  ref: string
+  commit: string
+  reason: string
+}
 
 /** The repository's default branch: origin/HEAD, else origin/main, main or master. */
 export function defaultBranch(root: string): string | undefined {
@@ -45,7 +54,10 @@ export function resolveBase(root: string, since?: string): Base | undefined {
   return undefined
 }
 
-export type Change = {path: string; status: string}
+export interface Change {
+  path: string
+  status: string
+}
 
 /** Status letters to words. */
 const statuses: Record<string, string> = {
@@ -64,7 +76,7 @@ export function changedFiles(root: string, base: Base | undefined): Change[] {
   const diff = git(root, ['diff', '--relative', '--name-status', '--no-renames', base?.commit ?? 'HEAD', '--', '.']) ?? ''
   for (const line of diff.split('\n')) {
     const [status, path] = line.split('\t')
-    if (status && path) changes.set(path, statuses[status[0] as string] ?? status)
+    if (status && path) changes.set(path, statuses[status[0]!] ?? status)
   }
   const untracked = git(root, ['ls-files', '--others', '--exclude-standard', '--', '.']) ?? ''
   for (const path of untracked.split('\n')) if (path) changes.set(path, 'untracked')

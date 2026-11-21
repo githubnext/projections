@@ -6,7 +6,10 @@ import {buildDraft, currentOs, FEEDBACK_LABEL, repositorySlug, similarity, type 
 import {git, onPath, probe, readJson} from '../lib/repo.ts'
 import {UsageError} from './work/change-set.ts'
 
-type Manifest = {version?: string; repository?: string | {url?: string}}
+interface Manifest {
+  version?: string
+  repository?: string | {url?: string}
+}
 
 /** The repository issues go to: tools' package.json `repository`, the root's, then the git remote. */
 export function feedbackRepository(root: string): string {
@@ -26,8 +29,9 @@ function gh(root: string, args: string[]): {ok: boolean; stdout: string; stderr:
 export type FeedbackOptions = FeedbackInput & {submit?: boolean | undefined; comment?: number | undefined}
 
 export function feedbackReport(root: string, options: FeedbackOptions) {
-  if (!options.summary.trim())
+  if (!options.summary.trim()) {
     throw new UsageError('Describe the friction in one line', `${TOOLS} feedback "tools check --affected skipped the docs gate silently"`)
+  }
   const repository = feedbackRepository(root)
   const branch = git(root, ['rev-parse', '--abbrev-ref', 'HEAD'])
   const commit = git(root, ['rev-parse', '--short', 'HEAD'])
@@ -122,7 +126,7 @@ export function feedbackReport(root: string, options: FeedbackOptions) {
     created = create(false)
     note = `The ${FEEDBACK_LABEL} label doesn't exist in ${repository}; filed without it.`
   }
-  if (!created.ok)
+  if (!created.ok) {
     return {
       status: 'url' as const,
       repository,
@@ -131,5 +135,6 @@ export function feedbackReport(root: string, options: FeedbackOptions) {
       reason: `gh issue create failed: ${created.stderr.trim().split('\n').pop()}`,
       next: ['Open the URL to file the issue'],
     }
+  }
   return {status: 'filed' as const, repository, url: created.stdout.trim(), ...(note ? {note} : {}), next: [`${TOOLS} context`]}
 }

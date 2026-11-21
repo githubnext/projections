@@ -8,7 +8,7 @@ import {generators, type Generator} from './generated.ts'
 import {findUnit, loadUnits, ownerOf, type Unit} from './packages.ts'
 import {git, readJson, readText} from './repo.ts'
 
-export type BrowserSuite = {
+export interface BrowserSuite {
   /** The workspace with a `test:browser` script. */
   path: string
   /**
@@ -18,7 +18,7 @@ export type BrowserSuite = {
   uses: string[]
 }
 
-export type RepoFacts = {
+export interface RepoFacts {
   /** The workspaces and crates, with the build dependencies their manifests don't declare (ci-builds.ts). */
   units: Unit[]
   browserSuites: BrowserSuite[]
@@ -36,7 +36,7 @@ export type RepoFacts = {
   fileInputs: FileInput[]
 }
 
-export type FileInput = {
+export interface FileInput {
   /** The crate or workspace that reads it. */
   reader: string
   path: string
@@ -44,11 +44,13 @@ export type FileInput = {
   test: boolean
 }
 
-type Manifest = {scripts?: Record<string, string>}
+interface Manifest {
+  scripts?: Record<string, string>
+}
 
 /** The workspaces a script names with `--workspace <name>`. */
 function workspacesNamed(units: readonly Unit[], script: string): string[] {
-  const names = [...script.matchAll(/--workspace[= ](\S+)/g)].map(match => match[1] as string)
+  const names = [...script.matchAll(/--workspace[= ](\S+)/g)].map(match => match[1]!)
   return names.flatMap(name => findUnit(units, name)?.path ?? [])
 }
 
@@ -56,7 +58,7 @@ function workspacesNamed(units: readonly Unit[], script: string): string[] {
 export function tomlStrings(text: string, key: string): string[] {
   const body = new RegExp(`^${key}\\s*=\\s*\\[([\\s\\S]*?)^\\]`, 'm').exec(text)?.[1] ?? ''
   const lines = body.split('\n').filter(line => !line.trim().startsWith('#'))
-  return [...lines.join('\n').matchAll(/"([^"]*)"|'([^']*)'/g)].map(match => (match[1] ?? match[2]) as string)
+  return [...lines.join('\n').matchAll(/"([^"]*)"|'([^']*)'/g)].map(match => (match[1] ?? match[2])!)
 }
 
 const includes = [
@@ -76,7 +78,7 @@ export function crateFileInputs(root: string, units: readonly Unit[]): FileInput
     const text = readText(root, file) ?? ''
     for (const {pattern, fromCrate} of includes) {
       for (const match of text.matchAll(pattern)) {
-        const path = posix.normalize(posix.join(fromCrate ? crate.path : posix.dirname(file), match[1] as string)).replace(/\/$/, '')
+        const path = posix.normalize(posix.join(fromCrate ? crate.path : posix.dirname(file), match[1]!)).replace(/\/$/, '')
         if (path.startsWith('..') || path === '.' || crate.path === path || crate.path.startsWith(`${path}/`)) continue
         const test = /^(tests|benches)\//.test(posix.relative(crate.path, file))
         const key = `${crate.path} ${path}`
@@ -92,7 +94,7 @@ export function scenarioInputs(root: string, renderers: readonly string[]): File
   return renderers.flatMap(name => {
     const reader = `packages/renderers/${name}`
     const text = readText(root, `${reader}/scenarios.json`) ?? ''
-    const paths = [...text.matchAll(/"(\.\.\/[^"]+)"/g)].map(match => posix.normalize(posix.join(reader, match[1] as string)))
+    const paths = [...text.matchAll(/"(\.\.\/[^"]+)"/g)].map(match => posix.normalize(posix.join(reader, match[1]!)))
     return [...new Set(paths)].filter(path => !path.startsWith('..')).map(path => ({reader, path, test: false}))
   })
 }
@@ -127,9 +129,7 @@ export function repoFacts(root: string): RepoFacts {
     .map(entry => entry.name)
     .sort()
   const mutants = readText(root, '.cargo/mutants.toml') ?? ''
-  const coverage = [...script('.', 'test:rust:coverage').matchAll(/-p (\S+)/g)].flatMap(
-    match => findUnit(units, match[1] as string)?.path ?? [],
-  )
+  const coverage = [...script('.', 'test:rust:coverage').matchAll(/-p (\S+)/g)].flatMap(match => findUnit(units, match[1]!)?.path ?? [])
   return {
     units,
     browserSuites: units

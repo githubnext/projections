@@ -99,7 +99,7 @@ export function newestOutput(root: string, directory: string): number | undefine
 export function globToRegExp(glob: string): RegExp {
   let pattern = ''
   for (let index = 0; index < glob.length; index++) {
-    const char = glob[index] as string
+    const char = glob[index]!
     if (char === '*' && glob[index + 1] === '*') {
       const slash = glob[index + 2] === '/'
       pattern += slash ? '(?:.*/)?' : '.*'
@@ -139,9 +139,20 @@ export function git(root: string, args: readonly string[]): string | undefined {
 // ── processes ──────────────────────────────────────────────────────────────────────────────────────────────────
 
 /** `env` adds to this process's environment, or with `replaceEnv` is the whole environment. */
-export type Command = {argv: readonly string[]; env?: Readonly<Record<string, string>>; cwd?: string; replaceEnv?: boolean}
+export interface Command {
+  argv: readonly string[]
+  env?: Readonly<Record<string, string>>
+  cwd?: string
+  replaceEnv?: boolean
+}
 
-export type Ran = {command: string; exitCode: number; output: string; durationMs: number; missing?: string}
+export interface Ran {
+  command: string
+  exitCode: number
+  output: string
+  durationMs: number
+  missing?: string
+}
 
 /** The shell-like display form of a command. */
 export function display(command: Command): string {
@@ -153,9 +164,9 @@ export function display(command: Command): string {
 /** Resolves `npm` and `node` to the running Node's, so commands use the same toolchain as this process. */
 function executable(name: string): {file: string; prefix: string[]} {
   if (name === 'node') return {file: process.execPath, prefix: []}
-  if (name === 'npm' && process.env['npm_execpath']) return {file: process.execPath, prefix: [process.env['npm_execpath']]}
-  if (name === 'npx' && process.env['npm_execpath']) {
-    const npx = process.env['npm_execpath'].replace(/npm-cli\.js$/, 'npx-cli.js')
+  if (name === 'npm' && process.env.npm_execpath) return {file: process.execPath, prefix: [process.env.npm_execpath]}
+  if (name === 'npx' && process.env.npm_execpath) {
+    const npx = process.env.npm_execpath.replace(/npm-cli\.js$/, 'npx-cli.js')
     if (existsSync(npx)) return {file: process.execPath, prefix: [npx]}
   }
   return {file: name, prefix: []}
@@ -166,7 +177,7 @@ export function run(root: string, command: Command, options: {limit?: number; ec
   const limit = options.limit ?? 4 * 1024 * 1024
   const started = Date.now()
   const [name, ...args] = command.argv
-  const {file, prefix} = executable(name as string)
+  const {file, prefix} = executable(name!)
   return new Promise(resolvePromise => {
     let output = ''
     const append = (chunk: Buffer) => {
@@ -187,7 +198,7 @@ export function run(root: string, command: Command, options: {limit?: number; ec
         exitCode: 127,
         output: String(error.message),
         durationMs: Date.now() - started,
-        ...(error.code === 'ENOENT' ? {missing: name as string} : {}),
+        ...(error.code === 'ENOENT' ? {missing: name!} : {}),
       })
     })
     child.on('close', code => {
@@ -199,7 +210,7 @@ export function run(root: string, command: Command, options: {limit?: number; ec
 /** Runs a short command synchronously, returning trimmed stdout, or undefined when it fails or is missing. */
 export function probe(root: string, argv: readonly string[]): string | undefined {
   const [name, ...args] = argv
-  const {file, prefix} = executable(name as string)
+  const {file, prefix} = executable(name!)
   const result = spawnSync(file, [...prefix, ...args], {cwd: root, encoding: 'utf8', timeout: 20_000})
   return result.status === 0 ? `${result.stdout}${result.stderr}`.trim() : undefined
 }
@@ -207,7 +218,7 @@ export function probe(root: string, argv: readonly string[]): string | undefined
 /** Whether `name` resolves on PATH. */
 export function onPath(name: string): boolean {
   const extensions = process.platform === 'win32' ? ['.exe', '.cmd', ''] : ['']
-  return (process.env['PATH'] ?? '')
+  return (process.env.PATH ?? '')
     .split(process.platform === 'win32' ? ';' : ':')
     .some(directory => extensions.some(extension => directory && existsSync(join(directory, `${name}${extension}`))))
 }

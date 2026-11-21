@@ -7,7 +7,7 @@ import {expandMember, readJson, readText} from './repo.ts'
 
 export type Kind = 'npm' | 'crate'
 
-export type Unit = {
+export interface Unit {
   /** Directory relative to the workspace root (POSIX). */
   path: string
   kinds: Kind[]
@@ -24,7 +24,13 @@ export type Unit = {
   scripts: string[]
 }
 
-type Manifest = {name?: string; workspaces?: string[]; dependencies?: object; devDependencies?: object; scripts?: object}
+interface Manifest {
+  name?: string
+  workspaces?: string[]
+  dependencies?: object
+  devDependencies?: object
+  scripts?: object
+}
 
 export function npmWorkspaces(root: string): string[] {
   const manifest = readJson<Manifest>(root, 'package.json')
@@ -36,14 +42,14 @@ export function cargoMembers(root: string): string[] {
   const text = readText(root, 'Cargo.toml')
   if (!text) return []
   const members = /\[workspace\][\s\S]*?\bmembers\s*=\s*\[([\s\S]*?)\]/.exec(text)?.[1] ?? ''
-  return [...members.matchAll(/"([^"]+)"/g)].flatMap(match => expandMember(root, match[1] as string, 'Cargo.toml'))
+  return [...members.matchAll(/"([^"]+)"/g)].flatMap(match => expandMember(root, match[1]!, 'Cargo.toml'))
 }
 
 /** A crate's `[package] name` and the relative paths of its path dependencies (every dependency table). */
 export function parseCrate(text: string): {name: string | undefined; paths: string[]} {
   const name = /\[package\][^[]*?\bname\s*=\s*"([^"]+)"/.exec(text)?.[1]
   // Dependencies with a path are inline tables (`name = { path = "../x" }`); `[[bin]] path = ...` lines are not.
-  const paths = [...text.matchAll(/^\s*[\w-]+\s*=\s*\{[^}\n]*\bpath\s*=\s*"([^"]+)"/gm)].map(match => match[1] as string)
+  const paths = [...text.matchAll(/^\s*[\w-]+\s*=\s*\{[^}\n]*\bpath\s*=\s*"([^"]+)"/gm)].map(match => match[1]!)
   return {name, paths}
 }
 
@@ -103,7 +109,7 @@ export function loadUnits(root: string): Unit[] {
     )
   }
   for (const [path, names] of npmDependencies) {
-    const entry = units.get(path) as Unit
+    const entry = units.get(path)!
     for (const name of names) {
       const dependency = npmByName.get(name)
       if (dependency && dependency !== path) entry.dependsOn.push(dependency)
@@ -112,7 +118,7 @@ export function loadUnits(root: string): Unit[] {
     for (const crate of crates) if (crate !== path && path.startsWith(`${crate}/`)) entry.dependsOn.push(crate)
   }
   for (const [path, dependencies] of crateDependencies) {
-    const entry = units.get(path) as Unit
+    const entry = units.get(path)!
     for (const dependency of dependencies) if (units.has(dependency) && dependency !== path) entry.dependsOn.push(dependency)
   }
   for (const entry of units.values()) entry.dependsOn = [...new Set(entry.dependsOn)].sort()
@@ -137,13 +143,14 @@ export function findUnit(units: readonly Unit[], target: string): Unit | undefin
 /** Every unit that depends, directly or transitively, on one of `paths` (not including them). */
 export function dependantsOf(units: readonly Unit[], paths: Iterable<string>): string[] {
   const reverse = new Map<string, string[]>()
-  for (const unit of units)
+  for (const unit of units) {
     for (const dependency of unit.dependsOn) reverse.set(dependency, [...(reverse.get(dependency) ?? []), unit.path])
+  }
   const start = new Set(paths)
   const seen = new Set<string>()
   const queue = [...start]
   while (queue.length) {
-    for (const dependant of reverse.get(queue.shift() as string) ?? []) {
+    for (const dependant of reverse.get(queue.shift()!) ?? []) {
       if (!seen.has(dependant) && !start.has(dependant)) {
         seen.add(dependant)
         queue.push(dependant)

@@ -103,10 +103,12 @@ export function releaseChannels({roots, read, files, units, owner}) {
       return at < 0 ? undefined : distText.slice(0, at).split('\n').length
     }
     for (const unit of released) add(unit, 'release asset', distFile, lineOf(`"${unit.data.package}"`) ?? lineOf('packages'))
-    for (const {script, line} of actionScripts(read(`${prefix}action.yml`)))
+    for (const {script, line} of actionScripts(read(`${prefix}action.yml`))) {
       add(owner(root.path, `${prefix}${script}`), 'GitHub Action', `${prefix}action.yml`, line)
-    for (const job of dist ? (tomlList(dist.text, 'publish-jobs') ?? []) : [])
+    }
+    for (const job of dist ? (tomlList(dist.text, 'publish-jobs') ?? []) : []) {
       if (distRegistries[job]) for (const unit of released) add(unit, distRegistries[job], distFile, lineOf('publish-jobs'))
+    }
     // The workflows dist runs to build release artifacts: what they upload is attached to the release.
     const artifactJobs = new Set(
       dist
@@ -119,17 +121,19 @@ export function releaseChannels({roots, read, files, units, owner}) {
     for (const workflow of workflows) {
       const jobs = workflowJobs(read(workflow))
       for (const job of jobs) {
-        if (artifactJobs.has(workflow) && job.lines.some(({text}) => /\buses:\s*actions\/upload-artifact@/.test(text)))
-          for (const {text, line} of job.lines)
+        if (artifactJobs.has(workflow) && job.lines.some(({text}) => /\buses:\s*actions\/upload-artifact@/.test(text))) {
+          for (const {text, line} of job.lines) {
             for (const [, script] of text.matchAll(/\bnode\s+(\S*release[^\s/]*\.[cm]?js)\b/g)) {
               let unit = owner(root.path, `${prefix}${script}`)
               // A release script beside a crate dist releases packages that crate's binaries.
               unit = released.find(crate => crate.directory === unit?.directory) ?? unit
               add(unit, 'release asset', workflow, line)
             }
+          }
+        }
         if (gated(job, jobs)) continue
         const directory = job.lines.map(({text}) => /^\s+working-directory:\s*(\S+)/.exec(text)?.[1]).find(Boolean)
-        for (const {text, line} of job.lines)
+        for (const {text, line} of job.lines) {
           for (const {pattern, registry, option, vscode, crate} of registries) {
             const command = pattern.exec(text)
             if (!command) continue
@@ -143,6 +147,7 @@ export function releaseChannels({roots, read, files, units, owner}) {
                   : [owner(root.path, root.path)]
             for (const unit of targets) add(unit, registry, workflow, line)
           }
+        }
       }
     }
   }

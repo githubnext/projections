@@ -68,13 +68,15 @@ await main(request => {
     visit(program, source, node => {
       if (!ts.isCallExpression(node)) return
       const convention = matchCall(node.expression)
-      if (convention)
+      if (convention) {
         bind(literal(program, checker, node.arguments[eventArgument]), node.arguments[handlerArgument], node, convention.module)
+      }
       if (ts.isDecorator(node.parent)) {
         const decorator = matchDecorator(node.expression)
         const named = node.parent.parent.name
-        if (decorator && named && ts.isIdentifier(named))
+        if (decorator && named && ts.isIdentifier(named)) {
           bind(literal(program, checker, node.arguments[eventArgument]), named, node, decorator.module)
+        }
       }
       const publisher = matchPublish(node.expression)
       if (publisher) {
@@ -92,15 +94,17 @@ await main(request => {
       if (registry && node.arguments[0]) {
         const object = initializer(program, checker, node.arguments[0])
         if (!ts.isObjectLiteralExpression(object)) graph.warnings.add('A handler registry argument was not an object literal.')
-        else
+        else {
           for (const member of object.properties) {
-            if (ts.isPropertyAssignment(member) && (ts.isIdentifier(member.name) || ts.isStringLiteralLike(member.name)))
+            if (ts.isPropertyAssignment(member) && (ts.isIdentifier(member.name) || ts.isStringLiteralLike(member.name))) {
               bind(member.name.text, member.initializer, member, registry.module)
-            else
+            } else {
               graph.warnings.add(
                 'Registry spreads, methods and computed event keys are not supported; use explicit event-to-handler properties.',
               )
+            }
           }
+        }
       }
     })
   }

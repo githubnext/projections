@@ -4,8 +4,9 @@ export function object(value: unknown, label: string): Record<string, unknown> {
 }
 
 export function text(value: unknown, label: string): string {
-  if (typeof value !== 'string' || !value.trim() || value.includes('\0') || /[\uD800-\uDFFF]/u.test(value))
+  if (typeof value !== 'string' || !value.trim() || value.includes('\0') || /[\uD800-\uDFFF]/u.test(value)) {
     throw new Error(`${label} must be a nonempty Unicode string without NUL`)
+  }
   return value
 }
 

@@ -47,7 +47,7 @@ export function canonical(path: string): string {
 }
 
 /** The first `name` on `PATH`. */
-export function firstOnPath(name: string, path = process.env['PATH'] ?? ''): string | undefined {
+export function firstOnPath(name: string, path = process.env.PATH ?? ''): string | undefined {
   for (const directory of path.split(delimiter)) {
     const candidate = directory && join(directory, name)
     if (candidate && existsSync(candidate)) return candidate
@@ -57,11 +57,11 @@ export function firstOnPath(name: string, path = process.env['PATH'] ?? ''): str
 
 /** Paths on the command line are relative to where `npm run tools` was invoked, not the workspace root it runs in. */
 export function fromInvocation(path: string): string {
-  return resolve(process.env['INIT_CWD'] ?? process.cwd(), path)
+  return resolve(process.env.INIT_CWD ?? process.cwd(), path)
 }
 
 /** Whether `directory` is on `PATH`. */
-export function onPathList(directory: string, path = process.env['PATH'] ?? ''): boolean {
+export function onPathList(directory: string, path = process.env.PATH ?? ''): boolean {
   const wanted = canonical(directory)
   return path.split(delimiter).some(entry => entry && canonical(entry) === wanted)
 }
@@ -80,7 +80,7 @@ export function tarballSpec(projectDirectory: string, tarball: string): string {
   return `file:${path.split(sep).join('/')}`
 }
 
-type Manifest = {
+interface Manifest {
   dependencies?: Record<string, string>
   devDependencies?: Record<string, string>
   overrides?: Record<string, unknown>
@@ -116,7 +116,7 @@ export function pointAtTarball(manifest: Manifest, spec: string, directory = '.'
 /** Where an editor's command line may be: `PATH`, then the macOS application bundles. */
 export function editorCandidates(editor: 'code' | 'code-insiders', platform: string = process.platform): string[] {
   const names = platform === 'win32' ? [`${editor}.cmd`, editor] : [editor]
-  const fromPath = (process.env['PATH'] ?? '')
+  const fromPath = (process.env.PATH ?? '')
     .split(delimiter)
     .filter(Boolean)
     .flatMap(directory => names.map(name => join(directory, name)))

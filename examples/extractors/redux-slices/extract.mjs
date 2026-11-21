@@ -41,8 +41,9 @@ await main(request => {
         ts.isAsExpression(parent) ||
         ts.isSatisfiesExpression(parent) ||
         ts.isNonNullExpression(parent)
-      )
+      ) {
         parent = parent.parent
+      }
       const variable = ts.isVariableDeclaration(parent) ? symbolAt(program, checker, parent.name) : undefined
       if (variable) symbolSlices.set(variable, identity)
       slices.push({node, checker, identity})

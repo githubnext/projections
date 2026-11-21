@@ -13,12 +13,13 @@ function possibleValues(description) {
   if (at < 0) return []
   const rest = description.slice(at)
   // `One of: `a` — help; `b` — help.` names each value at the start of its part; `One of `a`, `b`.` lists them.
-  if (rest.startsWith('One of:'))
+  if (rest.startsWith('One of:')) {
     return rest
       .slice('One of:'.length)
       .split(/;\s+(?=\x60)/)
       .map(part => codeSpans(part)[0])
       .filter(Boolean)
+  }
   return codeSpans(rest.slice(0, rest.search(/\x60\.(\s|$)/) + 2))
 }
 
@@ -55,7 +56,7 @@ export function cliDeclarations({text, source, exclude = []}) {
     if (heading) {
       const path = heading[1] ?? ''
       command = excluded(path) ? undefined : {path, id: `cli:projections${path ? ` ${path}` : ''}`, global: Boolean(heading[2])}
-      if (command && !command.global)
+      if (command && !command.global) {
         entities.push({
           id: command.id,
           kind: 'command',
@@ -63,6 +64,7 @@ export function cliDeclarations({text, source, exclude = []}) {
           data: {},
           evidence: [{kind: 'reference', source, location}],
         })
+      }
       return
     }
     if (line.startsWith('## ')) {

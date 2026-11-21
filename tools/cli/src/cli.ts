@@ -26,7 +26,7 @@ import {exitCodes, guard, next, progress, settle} from './outcome.ts'
 import {ciCommands} from './ci.ts'
 import {setupCommands} from './setup.ts'
 
-const root = process.env['TOOLS_ROOT'] ?? workspaceRoot
+const root = process.env.TOOLS_ROOT ?? workspaceRoot
 const {version} = JSON.parse(readFileSync(join(import.meta.dirname, '../package.json'), 'utf8')) as {version: string}
 
 export {exitCodes}

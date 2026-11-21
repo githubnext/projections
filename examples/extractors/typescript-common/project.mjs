@@ -56,8 +56,9 @@ function files(root, prefix = '', result = []) {
 
 /** The tsconfig files to build: `inputs.tsconfig`, `inputs.tsconfigs`, the root `tsconfig.json`, or none. */
 function configFiles(root, options) {
-  if (options.tsconfig !== undefined && options.tsconfigs !== undefined)
+  if (options.tsconfig !== undefined && options.tsconfigs !== undefined) {
     throw new Error('Use inputs.tsconfig or inputs.tsconfigs, not both')
+  }
   if (options.tsconfig !== undefined) return strings([options.tsconfig], 'inputs.tsconfig')
   if (options.tsconfigs !== undefined) return strings(options.tsconfigs, 'inputs.tsconfigs')
   return existsSync(path.join(root, 'tsconfig.json')) ? ['tsconfig.json'] : []
@@ -71,14 +72,15 @@ function configurations(ts, root, configs, listed) {
     if (visited.has(file)) return
     visited.add(file)
     const loaded = ts.readConfigFile(file, ts.sys.readFile)
-    if (loaded.error)
+    if (loaded.error) {
       throw new Error(`Invalid ${slash(path.relative(root, file))}: ${ts.flattenDiagnosticMessageText(loaded.error.messageText, '\n')}`)
+    }
     const parsed = ts.parseJsonConfigFileContent(loaded.config, ts.sys, path.dirname(file), {noEmit: true}, file)
     found.push({roots: parsed.fileNames, options: parsed.options, errors: parsed.errors})
     for (const reference of parsed.projectReferences ?? []) parseConfig(ts.resolveProjectReferencePath(reference))
   }
   for (const file of configs) parseConfig(path.resolve(root, file))
-  if (!configs.length)
+  if (!configs.length) {
     found.push({
       roots: listed.filter(file => sourceExtension.test(file)).map(file => path.join(root, file)),
       options: {
@@ -93,6 +95,7 @@ function configurations(ts, root, configs, listed) {
       },
       errors: [],
     })
+  }
   return found
 }
 

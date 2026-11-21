@@ -30,12 +30,12 @@ export function playwrightBrowsers(root: string): {name: string; revision: strin
   )
   if (!manifest) return undefined
   const cache =
-    process.env['PLAYWRIGHT_BROWSERS_PATH'] ??
+    process.env.PLAYWRIGHT_BROWSERS_PATH ??
     (process.platform === 'darwin'
       ? join(homedir(), 'Library/Caches/ms-playwright')
       : process.platform === 'win32'
-        ? join(process.env['LOCALAPPDATA'] ?? homedir(), 'ms-playwright')
-        : join(process.env['XDG_CACHE_HOME'] ?? join(homedir(), '.cache'), 'ms-playwright'))
+        ? join(process.env.LOCALAPPDATA ?? homedir(), 'ms-playwright')
+        : join(process.env.XDG_CACHE_HOME ?? join(homedir(), '.cache'), 'ms-playwright'))
   const installed = existsSync(cache) ? readdirSync(cache) : []
   return manifest.browsers
     .filter(browser => ['chromium', 'webkit'].includes(browser.name))

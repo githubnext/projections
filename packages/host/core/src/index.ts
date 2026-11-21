@@ -72,6 +72,7 @@ export {
   featureOn,
   offeredModes,
   offeredViews,
+  playButton,
   recoveryView,
   rendererLabel,
   scopeChoice,
@@ -81,8 +82,19 @@ export {
   viewLabel,
   viewNotices,
 } from './view-model.js'
-export type {FeatureName, ProjectionFeatures, ScopeChoice, ScopeOption, ViewControls, ViewControlsOptions, ViewKind} from './view-model.js'
+export type {
+  FeatureName,
+  PlayButton,
+  ProjectionFeatures,
+  ScopeChoice,
+  ScopeOption,
+  ViewControls,
+  ViewControlsOptions,
+  ViewKind,
+} from './view-model.js'
 export {useViewChoice} from './view-choice.js'
+export {handlePlaybackShortcut, isPlaybackShortcut, rovingIndex, spaceKeeping} from './keyboard.js'
+export type {KeyEventLike} from './keyboard.js'
 export type {ViewChoice} from './view-choice.js'
 export {rowDetails} from './details.js'
 export {changeContextItems} from './context-items.js'

@@ -1,6 +1,6 @@
 import {useRef} from 'react'
 import {flushSync} from 'react-dom'
-import {scopeChoice, scopeHiddenText} from '@githubnext/projections-host'
+import {rovingIndex, scopeChoice, scopeHiddenText} from '@githubnext/projections-host'
 import type {ProjectionController} from '@githubnext/projections-host'
 
 /**
@@ -42,12 +42,10 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
         aria-hidden={nothingHidden || undefined}
         className="phv-scope-switch"
         onKeyDown={event => {
-          const step =
-            event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0
-          const edge = event.key === 'Home' ? 0 : event.key === 'End' ? scopes.length - 1 : undefined
-          if (!step && edge === undefined) return
+          const next = rovingIndex(event.key, index, scopes.length)
+          if (next === undefined) return
           event.preventDefault()
-          choose(edge ?? index + step)
+          choose(next)
         }}
       >
         {options.map(({scope, label, title}, position) => (

@@ -198,3 +198,25 @@ export function scopeChoice(projection: Pick<ProjectionController, 'scope' | 'sc
     })),
   }
 }
+
+/** The one play button: what pressing it does (`togglePlayback`), the way it goes, and its name. */
+export interface PlayButton {
+  /** `pause` while playing; else `play`, or under reduced motion `show`, which shows the endpoint at once. */
+  action: 'pause' | 'play' | 'show'
+  /** `nextDirection`: forward from the before end, backward from the after end, else the way playback last went. */
+  direction: 1 | -1
+  /** "Pause", "Play forward", "Play backward", or under reduced motion "Show <after label>" or "Show <before label>". */
+  label: string
+}
+
+/** The one play button for the controller's playback, naming the revisions with the host's labels. */
+export function playButton(
+  projection: Pick<ProjectionController, 'playing' | 'nextDirection' | 'reducedMotion'>,
+  beforeLabel: string,
+  afterLabel: string,
+): PlayButton {
+  const {playing, nextDirection: direction, reducedMotion} = projection
+  if (playing) return {action: 'pause', direction, label: 'Pause'}
+  if (reducedMotion) return {action: 'show', direction, label: `Show ${direction === 1 ? afterLabel : beforeLabel}`}
+  return {action: 'play', direction, label: direction === 1 ? 'Play forward' : 'Play backward'}
+}

@@ -1,7 +1,7 @@
 import {useId, useRef, useState} from 'react'
 import {flushSync} from 'react-dom'
 import type {RefObject} from 'react'
-import {comparisonModes, zoomControlGroup} from '@githubnext/projections-host'
+import {comparisonModes, rovingIndex, zoomControlGroup} from '@githubnext/projections-host'
 import type {ComparisonMode, ProjectionController} from '@githubnext/projections-host'
 import type {VscodeToolbarButton} from '@vscode-elements/elements/dist/vscode-toolbar-button/vscode-toolbar-button.js'
 import {VscodeRendererControl} from './controls.js'
@@ -90,12 +90,10 @@ export function ModeSwitch({
       aria-label="Comparison mode"
       className="phv-mode-switch"
       onKeyDown={event => {
-        const step =
-          event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0
-        const edge = event.key === 'Home' ? 0 : event.key === 'End' ? options.length - 1 : undefined
-        if (!step && edge === undefined) return
+        const next = rovingIndex(event.key, index, options.length)
+        if (next === undefined) return
         event.preventDefault()
-        choose(edge ?? index + step)
+        choose(next)
       }}
     >
       {options.map((option, position) => (

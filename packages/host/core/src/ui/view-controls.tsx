@@ -23,6 +23,7 @@ import {Button} from './components/button.js'
 import {SegmentedControl, SegmentedControlItem} from './components/segmented-control.js'
 import {cn} from './lib/utils.js'
 import type {ViewKind} from '../view-model.js'
+import {rovingIndex} from '../keyboard.js'
 import {ToolbarPopover} from './toolbar-popover.js'
 import {closeOn, MoreContext} from './toolbar.js'
 
@@ -368,17 +369,7 @@ export function ViewSwitch({
   const close = useContext(MoreContext)
   const label = (kind: ViewKind) => viewName(kind, rendererTitle)
   function keys(event: KeyboardEvent<HTMLDivElement>) {
-    const index = views.indexOf(view)
-    const next =
-      event.key === 'ArrowRight'
-        ? (index + 1) % views.length
-        : event.key === 'ArrowLeft'
-          ? (index + views.length - 1) % views.length
-          : event.key === 'Home'
-            ? 0
-            : event.key === 'End'
-              ? views.length - 1
-              : undefined
+    const next = rovingIndex(event.key, views.indexOf(view), views.length, 'horizontal')
     if (next === undefined) return
     event.preventDefault()
     onViewChange(views[next]!)

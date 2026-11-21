@@ -4,8 +4,9 @@ import type {StageState} from '../src/types.js'
 /**
  * How long one stage request may take before it fails, ms. The stage's own waits are bounded in the page (a frame's
  * arrival at its height at 60 s, a probe measurement at 10 s) and a heavy scenario loads in under 15 s on a slow
- * runner, so a request still unanswered after this is a page that no longer runs. The bound is in the test process
- * because the page's own timers then can't fire: WebKit runs the sandboxed renderer frame in the host page's process,
+ * runner, so a request still unanswered after this is stuck: a renderer that never acknowledged a paint (`seek` waits
+ * for it with no bound of its own), or a page that no longer runs. The bound is in the test process because the page's
+ * own timers can't fire in the second case: WebKit runs the sandboxed renderer frame in the host page's process,
  * so a renderer stuck in its document stops the host's event loop with it.
  */
 export const stageRequestTimeoutMs = 90_000
@@ -51,7 +52,7 @@ export async function bounded<T>(record: StageRecord, what: string, request: Pro
       const scenario = record.scenario ? ` for ${record.scenario}` : ''
       reject(
         new Error(
-          `The stage page didn't answer ${what}${scenario} within ${timeoutMs / 1000} s: the page (or the renderer frame running in its process) stopped responding. Last known: ${record.describe()}.`,
+          `The stage page didn't answer ${what}${scenario} within ${timeoutMs / 1000} s: a renderer that never acknowledged its paint, or a page (with the renderer frame in its process) that stopped running. Last known: ${record.describe()}.`,
         ),
       )
     }, timeoutMs)

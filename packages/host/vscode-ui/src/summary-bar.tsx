@@ -238,6 +238,7 @@ export function SummaryBar({
           <button
             ref={more}
             type="button"
+            data-summary-overflow=""
             className="phv-summary-button phv-summary-more"
             aria-label={`${hidden.length.toLocaleString()} more`}
             title={`${hidden.length.toLocaleString()} more`}

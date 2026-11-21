@@ -165,7 +165,7 @@ for (const scheme of ['light', 'dark'] as const) {
     for (const region of regions) expect(region.edges, `${region.element}: ${region.hue} edge`).toBeGreaterThan(0)
   })
 
-  test(`${scheme}: the legend is a header band, and a change fill swatch has its same-hue edge`, async ({page}) => {
+  test(`${scheme}: the legend sits in the stage's foot, and a change fill swatch has its same-hue edge`, async ({page}) => {
     await open(page, scheme, 'renderer=hostile&probe=legend&before=v1&after=v3')
     const legend = page.locator('.ph-legend')
     await expect(legend.locator('.ph-legend-item')).toHaveCount(5)
@@ -173,10 +173,16 @@ for (const scheme of ['light', 'dark'] as const) {
     const [header, divider, fill, edge] = await Promise.all(
       ['surface-header', 'divider', 'modified-muted', 'modified-border'].map(name => token(page, name)),
     )
+    // The foot draws the surface and the edge; the legend, its first row, draws neither, and the summary's rule under it.
+    await expect(page.locator('.ph-stage-foot > .ph-legend')).toHaveCount(1)
     const box = await paint(legend)
-    expect(box.background).toEqual(header)
-    expect(box.top).toEqual(divider)
+    expect(box.background[3]).toBe(0)
+    expect(box.top).toBeNull()
     expect(box.bottom).toBeNull()
+    const rule = await paint(page.locator('.ph-stage-foot > .ph-summary-bar'))
+    expect(rule.top).toEqual(divider)
+    expect((await paint(page.locator('.ph-stage-foot'))).top).toEqual(divider)
+    void header
     const swatch = await paint(legend.locator('.ph-legend-item', {hasText: 'Changed'}).locator('.ph-legend-swatch'))
     expect(swatch.background).toEqual(fill)
     expect(swatch.top).toEqual(edge)

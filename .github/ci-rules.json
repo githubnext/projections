@@ -1,0 +1,260 @@
+{
+  "$schema": "./ci-rules.schema.json",
+  "description": "What the Projections workflow (.github/workflows/ci.yml) runs for a change. The `changes` job maps the changed files to their workspaces and crates and everything depending on them (tools/cli/src/lib/ci-facts.ts reads the graph), then applies these rules. See CONTRIBUTING.md#what-ci-runs.",
+  "full": {
+    "description": "Pushes to main, the nightly run, a manual run and the ci:full label run everything",
+    "events": ["push", "schedule", "workflow_dispatch"],
+    "labels": ["ci:full"]
+  },
+  "files": [
+    {
+      "description": "CI itself, a toolchain, a lockfile or root manifest, or the repository's tooling: run everything",
+      "paths": [
+        ".github/workflows/**",
+        ".github/actions/**",
+        ".github/ci-rules.json",
+        ".github/ci-rules.schema.json",
+        "package.json",
+        "package-lock.json",
+        "Cargo.toml",
+        "Cargo.lock",
+        "rust-toolchain.toml",
+        ".node-version",
+        ".npmrc",
+        ".cargo/**",
+        "tools/cli/**",
+        "tools/scripts/**"
+      ],
+      "effect": "full"
+    },
+    {
+      "description": "Markdown nothing reads, outside test data and templates, is documentation",
+      "paths": ["**/*.md"],
+      "except": ["**/fixtures/**", "**/test/**", "**/tests/**", "**/templates/**", "**/snapshots/**", "**/golden/**", "**/vendor/**"],
+      "read": false,
+      "effect": "docs"
+    },
+    {
+      "description": "A file in a workspace or crate is that workspace's or crate's change",
+      "owned": true,
+      "effect": "owner"
+    },
+    {
+      "description": "A file a crate reads by path, or a generator reads or writes, is a change to what reads it",
+      "read": true,
+      "effect": "readers"
+    },
+    {
+      "description": "Documentation outside every workspace and crate",
+      "paths": ["docs/**", "LICENSE", ".github/CODEOWNERS", ".github/ISSUE_TEMPLATE/**"],
+      "except": ["**/fixtures/**", "**/test/**", "**/tests/**", "**/templates/**", "**/snapshots/**", "**/golden/**", "**/vendor/**"],
+      "effect": "docs"
+    },
+    {
+      "description": "Configuration only the checks read (file standards, formatting, lint, the self-projection), the GitHub Action and the release configuration: the Linux checks, and what the tags select",
+      "paths": [
+        ".considered.yaml",
+        ".oxfmtrc.json",
+        "eslint.config.js",
+        ".portability.yaml",
+        "rustfmt.toml",
+        ".github/actionlint.yaml",
+        ".github/dependabot.yml",
+        ".github/projections/**",
+        ".projections-bookmarks.json",
+        "action.yml",
+        "dist-workspace.toml",
+        ".github/release-build-setup.yml"
+      ],
+      "effect": "readers"
+    },
+    {
+      "description": "A file no rule recognises: run everything, to be safe",
+      "effect": "full"
+    }
+  ],
+  "tags": {
+    "action": {
+      "description": "The GitHub Action's definition",
+      "paths": ["action.yml"]
+    },
+    "release": {
+      "description": "The release configuration dist reads",
+      "paths": ["dist-workspace.toml", ".github/release-build-setup.yml", "**/Cargo.toml"]
+    }
+  },
+  "groups": {
+    "crates": {
+      "description": "Every Cargo crate",
+      "include": [{"kind": "crate"}]
+    },
+    "engine": {
+      "description": "The core Engine and the crate Verus proves",
+      "include": ["packages/engine", "packages/engine/verified"]
+    },
+    "coverage": {
+      "description": "The crates whose coverage thresholds `npm run test:rust:coverage` enforces",
+      "include": [{"facts": "coverage"}]
+    },
+    "browser-only": {
+      "description": "Workspaces whose code runs only in a browser",
+      "include": ["packages/renderers/**", "packages/host/**", "tools/storybook", "examples/renderers/**"]
+    },
+    "not-browser-only": {
+      "description": "Workspaces and crates with code outside a browser",
+      "include": ["**"],
+      "exclude": ["@browser-only"]
+    },
+    "cli": {
+      "description": "The CLI",
+      "include": ["packages/cli"]
+    },
+    "sdk": {
+      "description": "The SDK, @githubnext/projections",
+      "include": ["packages/sdk"]
+    },
+    "extractors": {
+      "description": "The built-in extractors",
+      "include": ["packages/extractors/**"]
+    },
+    "not-extractors": {
+      "description": "Everything but the extractors",
+      "include": ["**"],
+      "exclude": ["@extractors"]
+    },
+    "harness-renderers": {
+      "description": "The built-in renderers the renderer harness tests",
+      "include": [{"facts": "harnessRenderers"}]
+    },
+    "cli-served": {
+      "description": "What the CLI serves or runs, but one built-in renderer or an extractor",
+      "include": ["**"],
+      "exclude": ["@extractors", "@harness-renderers"]
+    }
+  },
+  "conditions": {
+    "rust": {
+      "description": "Rust: a Rust source, manifest, lockfile or toolchain, or any file of a crate",
+      "when": {
+        "any": ["full", {"changes": ["**/*.rs", "**/Cargo.toml", "**/Cargo.lock", "rust-toolchain.toml"]}, {"changed": "crates"}]
+      }
+    },
+    "engine": {
+      "description": "The Engine's crates",
+      "when": {"any": ["full", {"changed": "engine"}]}
+    },
+    "action": {
+      "description": "The GitHub Action",
+      "when": {"any": ["full", {"tag": "action"}]}
+    },
+    "platform": {
+      "description": "Code whose result can differ by operating system: Rust, the GitHub Action, or a workspace or crate with code outside a browser",
+      "when": {"any": ["full", {"if": "rust"}, {"if": "action"}, {"changed": "not-browser-only"}]}
+    },
+    "release": {
+      "description": "The release configuration, or the release workflow dist generates",
+      "when": {"any": ["full", {"tag": "release"}, {"generator": "release-workflow"}]}
+    },
+    "cli": {
+      "description": "The CLI, or what it depends on",
+      "when": {"any": ["full", {"reaches": "cli"}]}
+    },
+    "workflows": {
+      "description": "CI's workflows or composite actions",
+      "when": {"changes": [".github/workflows/**", ".github/actions/**"]}
+    }
+  },
+  "jobs": {
+    "docs": {
+      "description": "Documentation alone: format, lint, file standards, boundaries, casing, READMEs and links, with no build",
+      "when": "docsOnly"
+    },
+    "public-product": {
+      "description": "The full check, Node and Rust suites, generated documentation and the self-projection",
+      "matrix": [
+        {
+          "value": "ubuntu-latest",
+          "description": "Every change but documentation alone",
+          "when": {"not": "docsOnly"}
+        },
+        {
+          "value": "macos-latest",
+          "description": "Code whose result can differ by operating system",
+          "when": {"if": "platform"}
+        }
+      ]
+    },
+    "verus": {
+      "description": "Verus proofs of the Engine's verified crate",
+      "when": {"if": "engine"}
+    },
+    "windows": {
+      "description": "The Rust suites on Windows",
+      "when": {"if": "rust"}
+    },
+    "windows-node": {
+      "description": "The Node suites and file-system checks on Windows",
+      "when": {"if": "platform"}
+    },
+    "windows-integration": {
+      "description": "The CLI's browser suite, a renderer smoke test, the VS Code extension and the GitHub Action on Windows",
+      "when": {"if": "platform"}
+    },
+    "package": {
+      "description": "@githubnext/projections as published, with a scaffolded renderer the CLI checks in the Inspector: the SDK, Rust, or the CLI and what it serves",
+      "when": {"any": ["full", {"if": "rust"}, {"reaches": "sdk"}, {"reaches": "cli", "from": "cli-served"}]}
+    },
+    "release-config": {
+      "description": "The release workflow matches dist-workspace.toml, and dist plans the release",
+      "when": {"if": "release"}
+    },
+    "coverage": {
+      "description": "The Engine's and default comparator's coverage thresholds",
+      "when": {"any": ["full", {"changed": "coverage"}, {"reaches": "coverage"}]}
+    },
+    "mutants-diff": {
+      "description": "Mutation testing of the changed files .cargo/mutants.toml examines",
+      "when": {"any": ["full", {"changes": {"facts": "mutants"}}]}
+    },
+    "actions-lock": {
+      "description": "The workflow dependency lockfile verifies upstream",
+      "when": "full"
+    }
+  },
+  "browser": {
+    "description": "The browser suites: each workspace with a test:browser script. Those with shards run in their own jobs; every other affected suite runs in `browser (rest)`.",
+    "default": {
+      "description": "A suite runs when the change reaches it or a workspace its test:browser script builds",
+      "when": {"any": ["full", "reachesSuite"]}
+    },
+    "suites": {
+      "packages/host/core": {
+        "description": "The host's default UI",
+        "shards": 3
+      },
+      "tools/storybook": {
+        "description": "The Storybook",
+        "shards": 3
+      },
+      "packages/renderers/harness": {
+        "description": "Every built-in renderer in the real host frame, against the CLI's backend in fixtures mode, which runs no extractor. Shards are by measured time: about 64, 72, 40 and 70 test-minutes per project on two workers. macOS runs WebKit, the platform Safari runs on.",
+        "when": {"any": ["full", "reachesSuite", {"reaches": "cli", "from": "not-extractors"}]},
+        "shards": {"chromium-desktop": 3, "webkit-desktop": 4, "chromium-mobile": 2, "webkit-mobile": 3},
+        "macos": {"webkit-desktop": 2},
+        "narrow": {
+          "description": "A change to some built-in renderers alone leaves the other renderers' tests out (--grep-invert)",
+          "group": "harness-renderers"
+        }
+      },
+      "packages/host/inspector": {
+        "description": "The Inspector, against the CLI's backend, exploring and extracting from repositories",
+        "when": {"any": ["full", "reachesSuite", {"reaches": "cli"}]},
+        "shards": 2
+      },
+      "examples/renderers/minimal": {
+        "description": "The minimal example renderer, against the CLI's backend in fixtures mode",
+        "when": {"any": ["full", "reachesSuite", {"reaches": "cli", "from": "not-extractors"}]}
+      }
+    }
+  }
+}

@@ -141,6 +141,8 @@ function VscodeView({
                 fill={fill}
                 recoverView={recoverView}
                 setView={setView}
+                utilityArea={props.utilityArea === true}
+                playback={on('playback') && p.comparing && p.mode === 'animated'}
               />
             )}
             {view === 'table' && <VscodeTableView {...rows} total={p.rows.length} />}

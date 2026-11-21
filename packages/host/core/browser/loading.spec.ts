@@ -68,12 +68,13 @@ for (const {name, viewport} of sizes) {
   })
 }
 
-test('side by side, each pane centers its own loading status', async ({page}) => {
+test('side by side, while both panes load, one status is centered on the stage', async ({page}) => {
   await holdRenderers(page)
   await page.goto(explorer('mode=side-by-side'))
   const panes = page.locator('.ph-frame-host[data-renderer-status="loading"]')
   await expect(panes).toHaveCount(2)
-  for (const pane of await panes.all()) await expectCentered(pane.locator('.ph-loading'), pane)
+  await expect(panes.locator('.ph-loading')).toHaveCount(0)
+  await expectCentered(page.locator('.ph-stage-status .ph-loading'), page.locator('.ph-stage-body'))
 })
 
 test('under reduced motion the loading indicator is static', async ({page}) => {

@@ -122,10 +122,16 @@ export interface VscodeProjectionViewProps {
    */
   toolbarStart?: ReactNode | ((compact: boolean, form: PairForm) => ReactNode)
   /**
-   * Centre the mode and scope switches on the toolbar while it has room (default true). A VS Code tab, whose start holds
-   * only notices, passes false: its switches lead the row, as in VS Code's own editor toolbars.
+   * Centre the mode and scope switches on the toolbar while it has room (default false: they lead the row, as in VS
+   * Code's own editor toolbars and every other host).
    */
   centreModes?: boolean
+  /**
+   * Animated playback floats over the stage's top edge in its utility area (`ProjectionStage`'s `utility`), and side by
+   * side and swipe label their panes with chips on the stage, instead of a playback group in the toolbar and header
+   * bands. The table and text views keep playback in the toolbar. Default false.
+   */
+  utilityArea?: boolean
   /**
    * A notice floating over the stage, not a tool: a `StageNotice`, such as a VS Code tab's "Out of date · 3 files
    * changed · Refresh". Drawn at the stage's top centre, 12px in (12px below the panes' header bands in side by side

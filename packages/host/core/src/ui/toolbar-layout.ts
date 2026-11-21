@@ -74,9 +74,17 @@ export function useToolbarLayout(
 ): {plan: ToolbarPlan; sliderMin: number; sliderFitMin: number} {
   const {pair, modes, playback} = content
   const actions = content.actions.join()
+  const sides = Boolean(content.sides)
   const plans = useMemo(
-    () => toolbarPlans({pair, modes, playback, actions: actions ? (actions.split(',') as ToolbarAction[]) : []}),
-    [pair, modes, playback, actions],
+    () =>
+      toolbarPlans({
+        pair,
+        modes,
+        playback,
+        actions: actions ? (actions.split(',') as ToolbarAction[]) : [],
+        sides,
+      }),
+    [pair, modes, playback, actions, sides],
   )
   const {plan, width} = useFitPlan(toolbar, plans, {key, signature, locate, lock: lockOf})
   const sliderMin = width > 0 && width < narrowToolbar ? sliderMinimum.narrow : sliderMinimum.regular

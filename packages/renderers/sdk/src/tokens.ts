@@ -61,12 +61,14 @@ const same = (value: string): Pair => [value, value]
  *   `stage-inset-top` is the space between the frame's top edge and the content that the host overlays (such as a
  *   pane's label chip): a host that does sends it, so the content starts at least that far down while the renderer's
  *   background still reaches under it; the kit's stage padding is at its top the larger of the two.
+ *   `stage-inset-bottom` is the same at the frame's foot (such as a floating legend and summary).
  *   `stage-cover` says exactly what the host overlays: the rectangles of the frame it covers (a pane's label chips,
  *   a floating playback bar), each `x y width height` in CSS px from the frame's top left, separated by commas, such
  *   as `8 6 180 18, 412 6 140 18`. A host that sends it sends `stage-inset-top` too, the bottom of the lowest
- *   rectangle plus a gap, for content that scrolls (it pads by that, and scrolls under the cover). A fitted canvas
- *   can do better (the renderer kit does): it keeps clear of the rectangles only where its fitted drawing would reach
- *   them, so a flat graph centred well below the cover takes no extra room, and still pans under it.
+ *   rectangle in the frame's top half plus a gap, and `stage-inset-bottom` for those in its bottom half, for content
+ *   that scrolls (it pads by them, and scrolls under the cover). A fitted canvas can do better (the renderer kit
+ *   does): it keeps clear of the rectangles only where its fitted drawing would reach them, so a flat graph centred
+ *   well between the covers takes no extra room, and still pans under them.
  *   `stage-max-height` (`px`, or `vh` of the host's window) caps a content-sized stage that pans and zooms: a host
  *   that lays frames in its scrolling page sends it, and such a stage then pans by dragging, leaving the wheel to the page.
  *   `color-connector` is the color of lines that carry meaning, such as a graph's links: a host whose `color-divider`
@@ -186,13 +188,21 @@ export const themeTokenNames = [...Object.keys(definitions), ...iconNames.map(ic
 /**
  * Layout tokens a host may send that have no default (`resolveThemeTokens` leaves them undefined), so a renderer reads
  * each with its own value as the fallback: `stage-inset`, the space between the frame's edges and its content on every
- * side, `stage-inset-top`, the space above the content where the host overlays the frame's top, `stage-cover`, the
+ * side, `stage-inset-top` and `stage-inset-bottom`, the space above and below the content where the host overlays the
+ * frame's top or foot, `stage-cover`, the
  * rectangles of the frame the host overlays (`x y width height`, comma separated), and `stage-max-height`,
  * the most a content-sized stage that pans and zooms asks for (`px`, or `vh` of the host's window), and
  * `color-connector`, the color of lines that carry meaning (a graph's links), for a host whose `color-divider` is its
  * app's own quiet rule rather than a 3:1 edge; renderers fall back to `color-divider`.
  */
-export const optionalThemeTokenNames = ['stage-inset', 'stage-inset-top', 'stage-cover', 'stage-max-height', 'color-connector'] as const
+export const optionalThemeTokenNames = [
+  'stage-inset',
+  'stage-inset-top',
+  'stage-inset-bottom',
+  'stage-cover',
+  'stage-max-height',
+  'color-connector',
+] as const
 
 /** The default value of every token for a color mode. */
 export function defaultThemeTokens(colorMode: ColorMode): Record<ThemeTokenName, string> {

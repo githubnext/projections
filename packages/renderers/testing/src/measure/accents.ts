@@ -18,10 +18,11 @@ interface Painted {
 function svgSurface(element: Element, style: CSSStyleDeclaration): boolean {
   if (!(element instanceof SVGGeometryElement) || element instanceof SVGLineElement || element instanceof SVGPolylineElement) return false
   // A path encloses when it is filled, or closed (an outline drawn round something).
-  if (element instanceof SVGPathElement)
+  if (element instanceof SVGPathElement) {
     return (
       (style.fill !== 'none' && !/^(rgba?\(.*,\s*0\)|transparent)$/.test(style.fill)) || /[zZ]\s*$/.test(element.getAttribute('d') ?? '')
     )
+  }
   return true
 }
 
@@ -48,13 +49,14 @@ function inside(inner: DOMRect, outer: DOMRect, round: boolean, innerRound: bool
     )
     return distance + Math.max(inner.width, inner.height) / 2 <= Math.min(outer.width, outer.height) / 2 + 0.5
   }
-  if (!round)
+  if (!round) {
     return (
       inner.left >= outer.left - 0.5 &&
       inner.top >= outer.top - 0.5 &&
       inner.right <= outer.right + 0.5 &&
       inner.bottom <= outer.bottom + 0.5
     )
+  }
   const [cx, cy, rx, ry] = [outer.left + outer.width / 2, outer.top + outer.height / 2, outer.width / 2 + 0.5, outer.height / 2 + 0.5]
   return [
     [inner.left, inner.top],
@@ -80,8 +82,9 @@ export function nestedAccents(root: Element = document.body): NestedAccent[] {
       ['SCRIPT', 'STYLE', 'TEMPLATE', 'HEAD', 'defs', 'DEFS', 'title', 'desc', 'mask', 'clipPath', 'marker', 'pattern'].includes(
         element.tagName,
       )
-    )
+    ) {
       return
+    }
     const style = getComputedStyle(element)
     if (style.display === 'none') return
     if (visible(element) && !visuallyHidden(element, style)) {

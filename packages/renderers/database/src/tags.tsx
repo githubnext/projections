@@ -28,11 +28,12 @@ const resizeHysteresis = 16
 /** Every tag of either revision, in the order a single revision lists them, with every name it has. */
 function allTags(transition: Pick<DatabaseTransition, 'tagStages'>, changes: ReadonlyMap<string, EntityChange<Entity>>) {
   const names = new Map<string, string[]>()
-  for (const stage of transition.tagStages)
+  for (const stage of transition.tagStages) {
     for (const tag of stage) {
       const known = names.get(tag.id) ?? []
       if (!known.includes(tag.label)) names.set(tag.id, [...known, tag.label])
     }
+  }
   const kind = (id: string) => {
     const change = changes.get(id)
     return (change?.after ?? change?.before)?.kind ?? ''
@@ -46,7 +47,12 @@ function allTags(transition: Pick<DatabaseTransition, 'tagStages'>, changes: Rea
 }
 
 type Tag = ReturnType<typeof allTags>[number]
-type Sizes = {widths: number[]; height: number; columnGap: number; rowGap: number}
+interface Sizes {
+  widths: number[]
+  height: number
+  columnGap: number
+  rowGap: number
+}
 
 /** Measures every slot once, in content units, again as fonts load. */
 function useSlotSizes(tags: readonly Tag[], room: RefObject<HTMLDivElement | null>, measures: RefObject<HTMLDivElement | null>) {

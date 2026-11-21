@@ -80,8 +80,9 @@ test('the arrow badges are one arrow turned in quarter turns, and redeploy is a 
   for (const [x, y] of [
     [x0, y0],
     [x1, y1],
-  ])
+  ]) {
     assert.ok(Math.abs(Math.hypot(x - 12, y - 12) - radius) < 0.002, ring)
+  }
 })
 
 test('outside a frame, an icon masks as icons.css draws it: a badge is its disc with the glyph cut out', () => {
@@ -121,8 +122,9 @@ test('icon token values are percent-encoded SVG data URLs; anything else is reje
     'url("data:image/svg+xml,<svg>")',
     'url("data:image/svg+xml,%3Csvg%3E") , url("https://x")',
     `url("data:image/svg+xml,${'a'.repeat(5000)}")`,
-  ])
+  ]) {
     assert.ok(!isIconValue(invalid), invalid)
+  }
   assert.ok(isIconValue('none'))
 })
 

@@ -17,10 +17,10 @@ export function useSummaryReport(
   init: InitPayload | undefined,
   options: Pick<MountOptions, 'nouns' | 'facts'>,
   onError: (message: string) => void,
-  document: {model: ComparisonModel | Error | undefined; controls: {[id: string]: ControlValue}},
+  document: {model: ComparisonModel | Error | undefined; controls: Record<string, ControlValue>},
 ): (nouns: SummaryNouns | undefined) => void {
   const nouns = useRef<SummaryNouns | undefined>(options.nouns)
-  const summarized = useRef<{model?: ComparisonModel | Error; controls: {[id: string]: ControlValue}}>({controls: {}})
+  const summarized = useRef<{model?: ComparisonModel | Error; controls: Record<string, ControlValue>}>({controls: {}})
   const sentSummary = useRef('')
   const sendSummary = useRef(() => {})
   sendSummary.current = () => {

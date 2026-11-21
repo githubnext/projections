@@ -48,9 +48,11 @@ test('feature flags: level rows, each team straight over its flag, and passkeys 
     for (const row of [
       ['team:design', 'team:payments', 'team:identity'],
       ['flag:dark-mode', 'flag:checkout-v2', 'flag:passkeys'],
-    ])
-      for (const id of row)
+    ]) {
+      for (const id of row) {
         expect(Math.abs(drawn.cards[id]!.top - drawn.cards[row[0]!]!.top), `${id} level with ${row[0]}`).toBeLessThan(0.5)
+      }
+    }
     for (const [team, flag] of [
       ['design', 'dark-mode'],
       ['payments', 'checkout-v2'],
@@ -136,8 +138,9 @@ test('a graph too small to read fitted opens at the 8 px text floor, keeps one f
       let smallest = Infinity
       for (const text of svg.querySelectorAll<SVGTextContentElement>('text, tspan')) {
         const matrix = text.getScreenCTM()
-        if (matrix && text.textContent?.trim())
+        if (matrix && text.textContent?.trim()) {
           smallest = Math.min(smallest, parseFloat(getComputedStyle(text).fontSize) * Math.hypot(matrix.a, matrix.b))
+        }
       }
       return {
         zoom: Number(element.getAttribute('data-zoom')),
@@ -156,7 +159,7 @@ test('a graph too small to read fitted opens at the 8 px text floor, keeps one f
   expect(opening.scroll[1]).toBe(0)
   // Both endpoints share the framing: the scale, viewBox and scroll stay put through the transition and back.
   const ramp = Array.from({length: 21}, (_, index) => index / 20)
-  for (const values of [ramp, [...ramp].reverse(), [0.7, 0.25, 1, 0.45, 0]])
+  for (const values of [ramp, [...ramp].reverse(), [0.7, 0.25, 1, 0.45, 0]]) {
     await renderer.scrub(values, async () => {
       const {zoom, scale, viewBox, scroll} = await framing()
       expect({zoom, scale, viewBox, scroll}).toEqual({
@@ -166,6 +169,7 @@ test('a graph too small to read fitted opens at the 8 px text floor, keeps one f
         scroll: opening.scroll,
       })
     })
+  }
   // Fit to view still shows everything, however small.
   await renderer.action('zoom-fit')
   await expect(scroller).toHaveAttribute('data-zoom', '1')

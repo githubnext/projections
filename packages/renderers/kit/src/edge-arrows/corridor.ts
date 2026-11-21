@@ -84,8 +84,9 @@ export function corridorRoute(
   const lastBand = [above - start.y, span] as const
   const first = start.y + (firstBand[0] + firstBand[1]) / 2 + fitTrack(firstBand, tracks[0]),
     last = start.y + (lastBand[0] + lastBand[1]) / 2 + fitTrack(lastBand, tracks[1])
-  if (last - first < 2 * routeRadius || firstBand[1] - firstBand[0] < 2 * routeRadius || lastBand[1] - lastBand[0] < 2 * routeRadius)
+  if (last - first < 2 * routeRadius || firstBand[1] - firstBand[0] < 2 * routeRadius || lastBand[1] - lastBand[0] < 2 * routeRadius) {
     return undefined
+  }
   // Cards the corridor runs beside: those between the two turns.
   const beside = obstacles.filter(box => box.y + box.height > first && box.y < last)
   const edges = [...new Set(beside.flatMap(box => [box.x - clearance, box.x + box.width + clearance]))].sort((a, b) => a - b)

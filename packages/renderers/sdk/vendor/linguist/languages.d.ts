@@ -7,6 +7,6 @@ export type LinguistRow = readonly [string, LinguistType, string | null, string 
 
 export declare const release: string
 export declare const languages: readonly LinguistRow[]
-export declare const extensions: {readonly [extension: string]: number}
-export declare const filenames: {readonly [filename: string]: number}
-export declare const aliases: {readonly [alias: string]: number}
+export declare const extensions: Readonly<Record<string, number>>
+export declare const filenames: Readonly<Record<string, number>>
+export declare const aliases: Readonly<Record<string, number>>

@@ -13,13 +13,14 @@ export function shownEdges({edges, endpoints, roots, rootSet}: DependencyGraph, 
   const neighbors = new Map<string, {dependents: string[]; dependencies: string[]}>(
     [...visible].map(id => [id, {dependents: [], dependencies: []}]),
   )
-  for (const row of edges.filter(between))
+  for (const row of edges.filter(between)) {
     for (const {from, to} of endpoints(row)) {
       const source = neighbors.get(from)!,
         target = neighbors.get(to)!
       if (!source.dependencies.includes(to)) source.dependencies.push(to)
       if (!target.dependents.includes(from)) target.dependents.push(from)
     }
+  }
   for (const entry of neighbors.values()) {
     entry.dependents.sort(compareIds)
     entry.dependencies.sort(compareIds)
@@ -31,12 +32,13 @@ export function shownEdges({edges, endpoints, roots, rootSet}: DependencyGraph, 
     const reached = new Set(roots.filter(id => visible.has(id)))
     for (let queue = [...reached], index = 0; index < queue.length; index += 1) {
       const id = queue[index]!
-      for (const child of neighbors.get(id)?.dependencies ?? [])
+      for (const child of neighbors.get(id)?.dependencies ?? []) {
         if (!reached.has(child) && !rootSet.has(child)) {
           reached.add(child)
           primary.set(child, id)
           queue.push(child)
         }
+      }
     }
   }
   const onPath = (row: EntityChange<Relationship>) =>

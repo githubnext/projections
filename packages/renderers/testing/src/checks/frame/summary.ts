@@ -23,14 +23,17 @@ export const summaryChecks: Pick<Checks, 'summary'> = {
       seen.push([progress, JSON.stringify(sent ?? null)])
     }
     const [first] = seen
-    for (const [progress, summary] of seen.slice(1))
-      if (summary !== first![1])
+    for (const [progress, summary] of seen.slice(1)) {
+      if (summary !== first![1]) {
         failures.push(`The summary changes while scrubbing: ${first![1]} at ${label(first![0])} but ${summary} at ${label(progress)}.`)
+      }
+    }
     if (!sent?.length) throw new Skip("The renderer sends no summary; hosts word the summary bar from the kinds' names.")
     const counts = summaryCounts(subject)
     const known = knownIds(subject)
-    for (const item of sent)
+    for (const item of sent) {
       failures.push(...(item.type === 'fact' ? factFailures(item, subject, known) : countFailures(item, subject, counts)))
+    }
     return failures.slice(0, limit)
   },
 }

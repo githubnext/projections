@@ -49,11 +49,12 @@ const inlineChange = 48
 function pills(entry: Entry, side: Side, marked: boolean): PillItem[] {
   const diff = side === 'diff'
   if (diff && entry.mark === 'modified' && entry.was !== undefined) {
-    if (entry.was.length + entry.text.length > inlineChange)
+    if (entry.was.length + entry.text.length > inlineChange) {
       return [
         {key: `${entry.key}|was`, label: <Words>{entry.was}</Words>, change: 'removed'},
         {key: entry.key, label: <Words>{entry.text}</Words>, change: 'added'},
       ]
+    }
     return [
       {key: entry.key, label: <ValueChange layout="inline" before={<Words>{entry.was}</Words>} after={<Words>{entry.text}</Words>} />},
     ]
@@ -98,11 +99,11 @@ const record = (value: unknown): Record<string, unknown> =>
 /** A workflow's engine and model (text with inline code), whether strict mode is off, and its lock file's state. */
 function facts(entity: WorkflowItem['entity'] | undefined) {
   const data = dataOf(entity)
-  const engine = record(data['engine'])
-  const lock = record(data['lock'])['status']
+  const engine = record(data.engine)
+  const lock = record(data.lock).status
   return {
-    engine: codeSpan(String(engine['id'] ?? 'copilot')) + (engine['model'] !== undefined ? ` ${codeSpan(String(engine['model']))}` : ''),
-    strict: data['strict'] !== false,
+    engine: codeSpan(String(engine.id ?? 'copilot')) + (engine.model !== undefined ? ` ${codeSpan(String(engine.model))}` : ''),
+    strict: data.strict !== false,
     lock: typeof lock === 'string' ? lock : undefined,
   }
 }
@@ -150,9 +151,9 @@ function Meta({item, diff}: {item: WorkflowItem; diff: boolean}) {
 
 /** The extractor's warnings about the presented revision: a stale lock file, unknown or renamed fields. */
 function Notes({item}: {item: WorkflowItem}) {
-  const findings = dataOf(item.entity)['findings']
+  const findings = dataOf(item.entity).findings
   const messages = (Array.isArray(findings) ? findings : [])
-    .map(finding => (finding && typeof finding === 'object' ? (finding as Record<string, unknown>)['message'] : undefined))
+    .map(finding => (finding && typeof finding === 'object' ? (finding as Record<string, unknown>).message : undefined))
     .filter((message): message is string => typeof message === 'string')
   if (!messages.length) return null
   return (
@@ -173,14 +174,14 @@ function Notes({item}: {item: WorkflowItem}) {
 export function WorkflowCard({item, frame}: {item: WorkflowItem; frame: Frame}) {
   const strength = frame.strength(item.row)
   const data = dataOf(item.entity)
-  const name = typeof data['name'] === 'string' ? data['name'] : undefined
+  const name = typeof data.name === 'string' ? data.name : undefined
   const changed = frame.comparing && isChanged(item.row)
   const mark = frame.side === 'diff' && changed ? classifyChange(item.row) : undefined
   return (
     <EntityCard
       id={item.row.id}
       label={name ?? <code className="pk-code">{item.entity.label}</code>}
-      identifier={String(data['path'] ?? item.entity.label)}
+      identifier={String(data.path ?? item.entity.label)}
       selected={frame.props.selectedId === item.row.id}
       onSelect={frame.props.onSelect}
       {...(frame.comparing ? {change: item.row, emphasis: strength} : {})}

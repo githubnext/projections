@@ -54,11 +54,12 @@ test("the express 5 facts count packages upgraded by bump, in the cards' words, 
     ['upgraded', 'upgraded', 'upgraded', undefined],
   )
   // Each fact filters to its packages, the comparison's own changed rows, and the bumps match the cards' words.
-  for (const fact of facts.slice(0, 3))
+  for (const fact of facts.slice(0, 3)) {
     for (const id of fact.ids) {
       const row = model.entities.find(item => item.id === id)
       assert.equal(versionStatus(row, {bump: true})[0].label.toLowerCase(), fact.noun.singular)
     }
+  }
   // Packages added and removed are the bar's kind counts, not facts.
   const packages = model.entities.filter(row => row.status === 'modified' && !(row.after ?? row.before).data?.workspaceMember)
   assert.equal(

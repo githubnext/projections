@@ -93,8 +93,13 @@ for (const width of [1440, 1000, 390]) {
         for (const text of document.querySelectorAll<SVGTextElement | HTMLElement>('text, [data-entity-id] *')) {
           if (text.children.length && !(text instanceof SVGTextElement)) continue
           if (text.textContent?.includes('…')) problems.push(`"${text.textContent.trim()}" is cut off with an ellipsis`)
-          if (text instanceof HTMLElement && getComputedStyle(text).textOverflow === 'ellipsis' && text.scrollWidth > text.clientWidth + 1)
+          if (
+            text instanceof HTMLElement &&
+            getComputedStyle(text).textOverflow === 'ellipsis' &&
+            text.scrollWidth > text.clientWidth + 1
+          ) {
             problems.push(`"${text.textContent?.trim()}" is clipped`)
+          }
         }
         // Card text stays inside its card.
         for (const card of document.querySelectorAll<SVGGElement>('g.graph-node:not(.graph-group)')) {
@@ -103,8 +108,9 @@ for (const width of [1440, 1000, 390]) {
           const box = surface.getBBox()
           for (const text of card.querySelectorAll<SVGTextElement>(':scope > text, :scope > g.node-text > text')) {
             const own = text.getBBox()
-            if (own.x < box.x - 1 || own.x + own.width > box.x + box.width + 1 || own.y + own.height > box.y + box.height + 1)
+            if (own.x < box.x - 1 || own.x + own.width > box.x + box.width + 1 || own.y + own.height > box.y + box.height + 1) {
               problems.push(`"${text.textContent}" runs past its card ${card.dataset.entityId}`)
+            }
           }
         }
         // Every card is inside the opening view (the scroll container's visible area), unless it opens at the text floor.
@@ -124,10 +130,11 @@ for (const width of [1440, 1000, 390]) {
             if (
               box.width > 0 &&
               (box.left < area.left - 1 || box.top < area.top - 1 || box.right > area.right + 1 || box.bottom > area.bottom + 1)
-            )
+            ) {
               outside.push(
                 card.parentElement?.getAttribute('data-entity-id') ?? card.parentElement?.getAttribute('data-graph-synthetic') ?? '?',
               )
+            }
           }
         }
         // At the floor: the frame takes the content's height, so the opening view pans only sideways, from the top left.

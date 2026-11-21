@@ -47,7 +47,7 @@ const lineSlot = (id: string, index: number) => `${id}\u0000line:${index}`
  * sized for its word and values like any row (text.ts), leaving out a new value the row already shows.
  */
 function addChangeSlots({rows, union, lines}: Analysis) {
-  for (const [card, ids] of union.columns)
+  for (const [card, ids] of union.columns) {
     union.columns.set(
       card,
       ids.flatMap(id => {
@@ -66,6 +66,7 @@ function addChangeSlots({rows, union, lines}: Analysis) {
         return [id, ...found.map((_, index) => lineSlot(id, index))]
       }),
     )
+  }
 }
 
 /** Every card of the union, fully present, with its rows and their change line slots. */

@@ -15,8 +15,9 @@ export function invoicing({organizations}) {
     const key = `key:PK_${name}`
     entities.push({id: key, kind: 'primary-key', label: `PK_${name}`, data: {columns: keys}})
     relationships.push({id: `constraint:PK_${name}`, kind: 'constraint', from: id, to: key})
-    for (const column of keys)
+    for (const column of keys) {
       relationships.push({id: `key-column:PK_${name}.${column}`, kind: 'key-column', from: key, to: `column:${name}.${column}`})
+    }
     for (const column of indexes) {
       const index = `index:IX_${name}_${column}`
       entities.push({id: index, kind: 'index', label: `IX_${name}_${column}`, data: {columns: [column]}})

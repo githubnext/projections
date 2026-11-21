@@ -45,8 +45,9 @@ for (const scenario of ['gateway', 'languages']) {
             scenario === 'gateway' ? 2 : 1,
             1,
           ])
-          for (const change of ['added', 'removed', 'modified'])
+          for (const change of ['added', 'removed', 'modified']) {
             expect(await frame.locator(`[data-entity-id][data-change="${change}"]`).count(), change).toBeGreaterThan(0)
+          }
           // A removed language keeps its place, struck through, with its Before count.
           const removed = frame.locator('.stat-row[data-change="removed"], .stat-values-row[data-change="removed"]').first()
           await expect(removed.locator('.stat-was')).toBeVisible()

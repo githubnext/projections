@@ -40,7 +40,7 @@ function language(index: number | undefined): Language | undefined {
   return result
 }
 
-const own = (record: {readonly [key: string]: number}, key: string) => (Object.hasOwn(record, key) ? record[key] : undefined)
+const own = (record: Readonly<Record<string, number>>, key: string) => (Object.hasOwn(record, key) ? record[key] : undefined)
 
 /**
  * The language of a repository path: by its file name (`Dockerfile`,
@@ -59,7 +59,7 @@ export function languageOfPath(path: string): Language | undefined {
 }
 
 /** Names other tools use for languages Linguist names differently (tokei's, as code-statistics reports them). */
-const otherNames: {[name: string]: string} = {
+const otherNames: Record<string, string> = {
   'c header': 'C',
   'c++ header': 'C++',
   'objective-c++': 'Objective-C++',

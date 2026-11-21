@@ -93,8 +93,9 @@ export function lintRendererStyles(css: string, file = 'styles'): StyleLintResul
   const source = blankComments(css)
   const line = (offset: number) => source.slice(0, offset).split('\n').length
   for (const match of source.matchAll(/var\(\s*--projections-([a-z0-9-]+)/gi)) {
-    if (!known.has(match[1]!))
+    if (!known.has(match[1]!)) {
       errors.push(`${file}:${line(match.index!)}: --projections-${match[1]} is not a theme token, so its fallback always applies`)
+    }
   }
   // Declarations, with the selector of the block they are in.
   for (const block of innermostBlocks(source)) {
@@ -106,17 +107,20 @@ export function lintRendererStyles(css: string, file = 'styles'): StyleLintResul
       if (property.startsWith('--')) continue
       const where = `${file}:${line(bodyStart + declaration.index!)}: ${selector} { ${property}: ${value} }`
       // Turning motion off for reduced motion is what `!important` is for.
-      if (/!important/i.test(value) && !/^(?:transition|animation)(?:-|$)/.test(property))
+      if (/!important/i.test(value) && !/^(?:transition|animation)(?:-|$)/.test(property)) {
         warnings.push(`${where}: !important; order rules instead`)
+      }
       if (colorProperties.test(property)) {
         const color = literalColor(value)
         if (color) warnings.push(`${where}: the color ${color} isn't a theme token; use var(--projections-color-…) (token.color in TSX)`)
       }
       const plain = bare(value)
-      if (property === 'font-size' && /\d/.test(plain))
+      if (property === 'font-size' && /\d/.test(plain)) {
         warnings.push(`${where}: a literal font size; use var(--projections-font-size-…), or the kit's Text`)
-      if (property === 'font-family' && !/^(?:inherit|initial|unset|var\(\))$/i.test(plain.trim()))
+      }
+      if (property === 'font-family' && !/^(?:inherit|initial|unset|var\(\))$/i.test(plain.trim())) {
         warnings.push(`${where}: a font family of its own; use var(--projections-font-family) or var(--projections-font-family-mono)`)
+      }
     }
   }
   return {errors, warnings}

@@ -110,8 +110,9 @@ export function buildDiModel(state: Pick<DependencyInjectionExtraction, 'entitie
       claimed.add(implementationId)
       unitOfImplementation.set(implementationId, service.id)
     }
-    if (alias)
+    if (alias) {
       dependencies.push({id: alias.id, from: service.id, to: alias.to, collection: false, optional: false, resolution: false, alias: true})
+    }
     const lifetime = lifetimeOf(registration?.data.lifetime)
     const declaredLifetime = registration?.data.declaredLifetime === undefined ? undefined : lifetimeOf(registration.data.declaredLifetime)
     const name = text(service.data.name)

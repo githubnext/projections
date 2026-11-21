@@ -86,8 +86,9 @@ const dependencySpeech = (dependency: DiDependencyChange) => `${dependency.kind}
 export function unitStatusParts(unit: Pick<DiDiffUnit, 'status' | 'renamed' | 'facets' | 'dependencies'>): StatusPart[] {
   const generic = statusParts(unit)
   const modified = (label: string): StatusPart => ({status: 'modified', glyph: '~', icon: statusIcons.modified, label})
-  if (unit.status === 'unchanged' && !unit.renamed)
+  if (unit.status === 'unchanged' && !unit.renamed) {
     return unit.dependencies.length ? [modified(dependencyWords(unit.dependencies))] : generic
+  }
   const words = facetWords(unit.facets, unit.dependencies.length > 0)
   if (!words || unit.status !== 'modified') return generic
   const parts = unit.renamed ? [...generic.filter(part => part.status === 'renamed'), modified(words)] : [modified(words)]

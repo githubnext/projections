@@ -90,16 +90,19 @@ export function parseAccepts(value: unknown): RendererAccepts[] | undefined {
  */
 export function parseRendererManifest(value: unknown): RendererManifest {
   if (!record(value) || value.format !== 'projections.renderer' || value.version !== 0) throw new Error('Unsupported renderer manifest')
-  if (!keys(value, ['format', 'version', 'name', 'title', 'handles', 'comparisonModes', 'accepts']))
+  if (!keys(value, ['format', 'version', 'name', 'title', 'handles', 'comparisonModes', 'accepts'])) {
     throw new Error('Renderer manifest has unknown fields')
+  }
   const name = value.name
   const title = value.title
   const handles = value.handles
-  if (typeof name !== 'string' || !/^[a-z0-9][a-z0-9-]{0,63}$/.test(name))
+  if (typeof name !== 'string' || !/^[a-z0-9][a-z0-9-]{0,63}$/.test(name)) {
     throw new Error('Renderer manifest name must be a lowercase identifier')
+  }
   // Characters (code points), as the manifest schema's maxLength counts them.
-  if (typeof title !== 'string' || !title.trim() || [...title].length > 200)
+  if (typeof title !== 'string' || !title.trim() || [...title].length > 200) {
     throw new Error('Renderer manifest title must be 1-200 characters')
+  }
   if (
     !Array.isArray(handles) ||
     handles.length > 100 ||
@@ -110,8 +113,9 @@ export function parseRendererManifest(value: unknown): RendererManifest {
   const modes = value.comparisonModes === undefined ? undefined : parseComparisonModes(value.comparisonModes)
   if (value.comparisonModes !== undefined && !modes) throw new Error('Renderer manifest comparisonModes must be distinct comparison modes')
   const accepts = value.accepts === undefined ? undefined : parseAccepts(value.accepts)
-  if (value.accepts !== undefined && !accepts)
+  if (value.accepts !== undefined && !accepts) {
     throw new Error('Renderer manifest accepts must be distinct domain schemas, each with an optional vocabulary')
+  }
   return {
     format: 'projections.renderer',
     version: 0,

@@ -47,7 +47,11 @@ export interface CornerMeasure {
 /** Measures each corner's border across its curve and on its sides; runs in a page. */
 export function measureCorners([probes, scale]: [CornerProbe[], number]): Promise<CornerMeasure[]> {
   type Rgb = [number, number, number]
-  type Picture = {width: number; height: number; data: Uint8ClampedArray}
+  interface Picture {
+    width: number
+    height: number
+    data: Uint8ClampedArray
+  }
   const load = async (url: string): Promise<Picture> => {
     const image = new Image()
     image.src = url
@@ -109,16 +113,18 @@ export function measureCorners([probes, scale]: [CornerProbe[], number]): Promis
         for (let t = -1; t <= width + 1; t += step) if (distance(point(t), far) > distance(border, far)) border = point(t)
         const contrast = distance(border, far)
         let edge = 0
-        for (let t = -1.75; t <= width + 1; t += step)
+        for (let t = -1.75; t <= width + 1; t += step) {
           if (distance(point(t), far) >= contrast / 2) {
             edge = t
             break
           }
+        }
         const outside = point(edge - 0.75),
           inside = point(edge + width + 1.5)
         border = point(edge + width / 2)
-        if (contrast < faint || distance(border, outside) < faint || distance(border, inside) < faint)
+        if (contrast < faint || distance(border, outside) < faint || distance(border, inside) < faint) {
           return {edge, outside, border, thickness: null}
+        }
         let thickness = 0
         for (let t = edge - 1; t <= edge + width + 1.5; t += step) thickness += membership(point(t), outside, border, inside).weight * step
         return {edge, outside, border, thickness}

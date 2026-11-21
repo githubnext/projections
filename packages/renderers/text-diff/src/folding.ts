@@ -7,7 +7,11 @@ export function digits(count: number): number {
 export const contextLines = 3
 
 /** A run of rows to show, a folded run of unchanged rows, or the fold of an opened run, which comes before its rows. */
-export type Segment = {kind: 'rows' | 'gap' | 'open'; start: number; end: number}
+export interface Segment {
+  kind: 'rows' | 'gap' | 'open'
+  start: number
+  end: number
+}
 
 /**
  * Folds unchanged runs longer than twice the context into gaps, keeping

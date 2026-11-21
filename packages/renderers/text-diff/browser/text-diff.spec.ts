@@ -27,8 +27,9 @@ function sides(frame: FrameLocator) {
         }
       }
       const rows = [...section.querySelectorAll('.td-lines > .td-row:not(.td-gap):not(.td-empty)')]
-      if (!section.querySelector('.td-diff'))
+      if (!section.querySelector('.td-diff')) {
         return {id: section.getAttribute('data-entity-id')!, before: rows.map(text), after: rows.map(text)}
+      }
       return {
         id: section.getAttribute('data-entity-id')!,
         before: rows.filter(row => !row.classList.contains('td-insert')).map(text),
@@ -80,7 +81,7 @@ for (const layout of ['split', 'unified'] as const) {
       width: 1100,
     })
     // A phone frame is narrower than two columns need, so the diff reads as one column there.
-    const shown = /mobile/.test(info.project.name) ? 'unified' : layout
+    const shown = info.project.name.includes('mobile') ? 'unified' : layout
     await expect(renderer.frame.locator('[data-entity-id="report"] .td-body').first()).toHaveAttribute('data-layout', shown)
     expect(await sides(renderer.frame)).toEqual(['report', 'notes', 'legacy', 'late'].map(expected))
     const decorated = await decoration(renderer.frame)
@@ -142,7 +143,7 @@ test('with highlighting off the diff keeps every line, marker and box but loses 
 })
 
 test('two columns keep unchanged lines aligned, and a narrow frame reads as one column', async ({page}, info) => {
-  test.skip(/mobile/.test(info.project.name), 'A phone frame is always narrow: the 390px half of this test covers it.')
+  test.skip(info.project.name.includes('mobile'), 'A phone frame is always narrow: the 390px half of this test covers it.')
   const renderer = await openRenderer(page, {renderer: 'text-diff', before, after, comparisonMode: 'diff', width: 1100})
   // The layout is a host-drawn control, declared once there is a comparison to lay out.
   await expect.poll(async () => (await renderer.state()).controls.map(control => control.id)).toEqual(['textDiffLayout'])

@@ -33,9 +33,10 @@ async function check(stage: StageHandle, label: string) {
 
 // One test per scenario, so each has its own time and the suite's shards and workers share them: a renderer with many
 // large scenarios (the graph renderer's) took longer than one test's time on CI WebKit.
-for (const {key} of scenarios.filter(item => !item.customComparator))
+for (const {key} of scenarios.filter(item => !item.customComparator)) {
   test(`${key}: hover and selection stay inside their unit`, async ({page}) => {
     test.slow()
     const stage = await openStage(page, harnessInspector(), {scenario: key, progress: 1})
     await check(stage, key)
   })
+}

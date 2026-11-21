@@ -87,8 +87,9 @@ test('language colors keep their hue, calibrated to the theme: muted, one lightn
     const other = defaultThemeTokens(mode)['color-border-emphasis']
     for (const [index, name] of common.entries()) {
       assert.ok(distance(color(name)[mode], other) >= separation.wide - 1e-9, `${name} ${mode} is apart from "other"`)
-      for (const later of common.slice(index + 1))
+      for (const later of common.slice(index + 1)) {
         assert.ok(distance(color(name)[mode], color(later)[mode]) >= separation.wide - 1e-9, `${mode}: ${name} and ${later} are apart`)
+      }
     }
   }
 })
@@ -108,8 +109,9 @@ test('the chart palette is sixteen distinct hues on the same calibration, none g
       )
       assert.ok(L >= band[0] - 0.03 && L <= band[1] + 0.03, `${mode} chart-${index + 1} lightness ${L.toFixed(3)} is in the band`)
       assert.ok(distance(value, tokens['color-border-emphasis']) >= 0.08, `${mode} chart-${index + 1} is apart from "other"`)
-      for (const [later, other] of chart.entries())
+      for (const [later, other] of chart.entries()) {
         if (later > index) assert.ok(distance(value, other) >= 0.06, `${mode} chart-${index + 1} and chart-${later + 1} are apart`)
+      }
     }
   }
 })
@@ -117,9 +119,11 @@ test('the chart palette is sixteen distinct hues on the same calibration, none g
 test('the shipped tokens and table are what the calibration scripts generate', () => {
   const backgrounds = {light: defaultThemeTokens('light')['color-bg'], dark: defaultThemeTokens('dark')['color-bg']}
   const generated = chartPalette(profiles.default, backgrounds)
-  for (const mode of ['light', 'dark'])
-    for (const [index, pair] of generated.entries())
+  for (const mode of ['light', 'dark']) {
+    for (const [index, pair] of generated.entries()) {
       assert.equal(defaultThemeTokens(mode)[`chart-${index + 1}`], pair[mode === 'light' ? 0 : 1])
+    }
+  }
 })
 
 test('vendored third-party data in a bundle is attributed with its license', async () => {

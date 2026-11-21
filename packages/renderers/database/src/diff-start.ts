@@ -18,7 +18,7 @@ export function changesStart(view: RefObject<HTMLElement | null>, content: RefOb
     if (!scroller || !drawn || !drawn.offsetWidth) return {left: 0, top: 0}
     const box = drawn.getBoundingClientRect()
     const unit = box.width / drawn.offsetWidth
-    const marked = [...drawn.querySelectorAll<Element>('[data-change]')].filter(element => !element.closest('.database-tags-measure'))
+    const marked = [...drawn.querySelectorAll('[data-change]')].filter(element => !element.closest('.database-tags-measure'))
     const places = marked
       .map(element => corner(element))
       .filter(place => place !== undefined)

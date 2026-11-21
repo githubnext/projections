@@ -16,18 +16,22 @@ export function knownIds(subject: StageSubject): Set<string> {
 export function factFailures(item: SummaryFactItem, subject: StageSubject, known: ReadonlySet<string>): string[] {
   const failures: string[] = []
   const missing = (item.ids ?? []).filter(id => !known.has(id))
-  if (missing.length)
+  if (missing.length) {
     failures.push(
       `The summary fact "${item.id}" names ${missing.length} item${missing.length === 1 ? '' : 's'} neither document has: ${missing.slice(0, 3).join(', ')}.`,
     )
+  }
   const changes = summaryDeltas.filter(delta => (item[delta] ?? 0) > 0)
-  if (subject.mode === 'extraction' && changes.length)
+  if (subject.mode === 'extraction' && changes.length) {
     failures.push(`The summary fact "${item.id}" reports ${changes.join(' and ')} counts for one extraction, which has no changes.`)
-  for (const delta of ['added', 'modified'] as const)
-    if ((item[delta] ?? 0) > item.count)
+  }
+  for (const delta of ['added', 'modified'] as const) {
+    if ((item[delta] ?? 0) > item.count) {
       failures.push(
         `The summary fact "${item.id}" reports ${item[delta]} ${delta} of a count of ${item.count}; what was ${delta} is part of the count.`,
       )
+    }
+  }
   return failures
 }
 
@@ -47,10 +51,11 @@ export function countFailures(item: SummaryCountItem, subject: StageSubject, cou
       if (reported) failures.push(`The summary reports ${reported} ${field} ${name} for one extraction, which has no changes.`)
       continue
     }
-    if (reported !== expected[field])
+    if (reported !== expected[field]) {
       failures.push(
         `The summary reports ${field === 'count' ? 'a total of ' : ''}${reported}${field === 'count' ? '' : ` ${field}`} for ${name}; the documents have ${expected[field]}.`,
       )
+    }
   }
   return failures
 }

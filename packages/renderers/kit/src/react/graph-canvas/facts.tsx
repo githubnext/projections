@@ -128,13 +128,14 @@ export function CardAccentBand({node, drawing}: {node: TransitionNode; drawing: 
       </clipPath>
     </defs>
   )
-  if (diff || !node.before || !node.after || before?.paint === after?.paint)
+  if (diff || !node.before || !node.after || before?.paint === after?.paint) {
     return (
       <>
         {shapes}
         {band(after ?? before, 1, 'accent')}
       </>
     )
+  }
   return (
     <>
       {shapes}

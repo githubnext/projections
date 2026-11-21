@@ -161,12 +161,12 @@ export function draftingIssues(route, radius) {
  */
 export function crowdedRuns(routes, spacing) {
   const issues = []
-  for (let i = 0; i < routes.length; i++)
+  for (let i = 0; i < routes.length; i++) {
     for (let j = i + 1; j < routes.length; j++) {
       const a = routes[i],
         b = routes[j]
       const trunk = Math.hypot(a.points[0].x - b.points[0].x, a.points[0].y - b.points[0].y) < 0.5
-      for (const s of stretches(a.points).filter(part => part.kind === 'straight' && part.aligned))
+      for (const s of stretches(a.points).filter(part => part.kind === 'straight' && part.aligned)) {
         for (const t of stretches(b.points).filter(part => part.kind === 'straight' && part.aligned)) {
           const horizontal = part => Math.abs(part.to.y - part.from.y) < 0.01
           if (horizontal(s) !== horizontal(t)) continue
@@ -179,7 +179,9 @@ export function crowdedRuns(routes, spacing) {
           if (overlap <= 2 || (trunk && distance < 0.75)) continue
           if (distance < spacing - 0.01) issues.push(`${a.key} and ${b.key}: runs ${distance.toFixed(1)} apart`)
         }
+      }
     }
+  }
   return issues
 }
 
@@ -202,8 +204,9 @@ export function portIssues(ports, middle, length, spacing, inset) {
     const steps = sorted.slice(1).map((port, index) => port - sorted[index])
     if (Math.max(...steps) - Math.min(...steps) > 0.5) issues.push(`uneven spacing ${steps.map(step => step.toFixed(1)).join(', ')}`)
     if (steps[0] > spacing + 0.5) issues.push(`spacing ${steps[0].toFixed(1)} over ${spacing}`)
-    if (sorted[0] - (middle - length / 2) < inset - 0.5 || middle + length / 2 - sorted.at(-1) < inset - 0.5)
+    if (sorted[0] - (middle - length / 2) < inset - 0.5 || middle + length / 2 - sorted.at(-1) < inset - 0.5) {
       issues.push('port too near a corner')
+    }
   }
   return issues
 }

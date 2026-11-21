@@ -18,8 +18,9 @@ export function affordanceFailures(root: Element): string[] {
       let cursor = element.parentElement?.closest('[data-entity-id]');
       cursor;
       cursor = cursor.parentElement?.closest('[data-entity-id]')
-    )
+    ) {
       unit = cursor
+    }
     return unit
   }
   const marked = new Set([
@@ -36,8 +37,9 @@ export function affordanceFailures(root: Element): string[] {
       outer = unit.getBoundingClientRect()
     if (box.width === 0 && box.height === 0) continue
     if (unit !== element) {
-      if (outline > 0 && !element.matches(':focus-visible'))
+      if (outline > 0 && !element.matches(':focus-visible')) {
         failures.push(`part ${id} draws an outline inside unit ${unit.getAttribute('data-entity-id')}`)
+      }
       if (/(^|,\s*)(rgba?\([^)]*\)\s+)?0px 0px 0px [1-9]/.test(style.boxShadow)) failures.push(`part ${id} draws a ring-shaped box shadow`)
       if (
         element instanceof SVGGeometryElement &&

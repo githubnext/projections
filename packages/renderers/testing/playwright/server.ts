@@ -176,8 +176,9 @@ function send(response: ServerResponse, status: number, type: string, body: stri
 function payload({contentType, body}: RequestResult): string | Buffer {
   if (body === null || body === undefined) return ''
   if (/^application\/([\w.-]+\+)?json\b/i.test(contentType)) return JSON.stringify(body)
-  if (typeof body === 'object' && typeof (body as {base64?: unknown}).base64 === 'string')
+  if (typeof body === 'object' && typeof (body as {base64?: unknown}).base64 === 'string') {
     return Buffer.from((body as {base64: string}).base64, 'base64')
+  }
   return String(body)
 }
 
@@ -213,19 +214,22 @@ export async function startInspector(options: InspectorOptions): Promise<Fixture
     throw error
   }
 
-  let hosts: Set<string> = new Set()
+  let hosts = new Set<string>()
   const server = createServer((request, response) => {
     void (async () => {
       // Only this address: a page on another site that rebinds a name to loopback can't reach the backend.
       if (!hosts.has(request.headers.host ?? '')) return send(response, 403, 'text/plain', 'Forbidden')
       const path = (request.url ?? '/').split('?')[0]!
       const url = request.method === 'GET' && path === probe.path ? probe.asset : (request.url ?? '/')
-      if (request.method === 'GET' && path === '/')
+      if (request.method === 'GET' && path === '/') {
         return send(response, 200, 'text/html; charset=utf-8', page, {'content-security-policy': pageCsp})
-      if (request.method === 'GET' && path === '/__projections/workbench.js')
+      }
+      if (request.method === 'GET' && path === '/__projections/workbench.js') {
         return send(response, 200, 'text/javascript; charset=utf-8', script, {'content-security-policy': pageCsp})
-      if ((request.method !== 'GET' && request.method !== 'POST') || !relayed.some(prefix => url.startsWith(prefix)))
+      }
+      if ((request.method !== 'GET' && request.method !== 'POST') || !relayed.some(prefix => url.startsWith(prefix))) {
         return send(response, 404, 'text/plain', 'Not found')
+      }
       const aborted = new AbortController()
       response.on('close', () => {
         if (!response.writableFinished) aborted.abort()

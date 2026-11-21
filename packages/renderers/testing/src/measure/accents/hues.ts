@@ -92,12 +92,15 @@ export function paintsOf(element: Element, style: CSSStyleDeclaration, hues: Map
     return paints
   }
   add('background-color', style.backgroundColor)
-  for (const side of ['top', 'right', 'bottom', 'left'])
-    if (style.getPropertyValue(`border-${side}-style`) !== 'none' && px(style.getPropertyValue(`border-${side}-width`)) > 0)
+  for (const side of ['top', 'right', 'bottom', 'left']) {
+    if (style.getPropertyValue(`border-${side}-style`) !== 'none' && px(style.getPropertyValue(`border-${side}-width`)) > 0) {
       add(`border-${side}-color`, style.getPropertyValue(`border-${side}-color`))
+    }
+  }
   // An inset shadow draws an edge inside the box, as `pk-region` does.
-  for (const shadow of style.boxShadow === 'none' ? [] : style.boxShadow.split(/,(?![^(]*\))/))
+  for (const shadow of style.boxShadow === 'none' ? [] : style.boxShadow.split(/,(?![^(]*\))/)) {
     if (/\binset\b/.test(shadow)) add('inset box-shadow', /rgba?\([^)]*\)|#[0-9a-f]{6,8}\b/i.exec(normalizeColors(shadow))?.[0] ?? '')
+  }
   if (ownText(element)) add('color', style.color)
   return paints
 }

@@ -76,8 +76,9 @@ export function flowingRoute(
               2,
             ),
           )
-        )
+        ) {
           return undefined
+        }
       }
       path.push(`C${control1.x},${control1.y} ${control2.x},${control2.y} ${end.x},${end.y}`)
     }

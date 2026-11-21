@@ -41,7 +41,7 @@ interface Containment {
   kinds?: readonly string[]
   ends?: readonly (readonly [from: string, to: string])[]
 }
-const containmentByName: {readonly [name: string]: Containment} = {
+const containmentByName: Readonly<Record<string, Containment>> = {
   // A table holds its columns, its primary key and its indexes.
   'database/v0': {kinds: ['constraint', 'index']},
   // A service holds its registrations, and a registration the implementation it produces (the vocabulary's structure is
@@ -84,7 +84,10 @@ export interface ChangesScope {
 type Side = 'before' | 'after'
 const sides: readonly Side[] = ['before', 'after']
 
-type Revisions = {before: ContainmentSource; after: ContainmentSource}
+interface Revisions {
+  before: ContainmentSource
+  after: ContainmentSource
+}
 
 /** A change row's context: the rows that give it context, and the comparator rules that added any. */
 export interface RowContext {
@@ -163,8 +166,8 @@ export function changeContext(rows: readonly ScopeRow[], revisions: Revisions, c
   let pending = [...shown]
   while (pending.length) {
     const next: string[] = []
-    for (const side of sides)
-      for (const rowId of pending)
+    for (const side of sides) {
+      for (const rowId of pending) {
         for (const id of traverse(structure[side], byId.get(rowId)!, side, reached[side])) {
           const found = rowOf[side].get(id)
           if (found !== undefined && !shown.has(found)) {
@@ -172,6 +175,8 @@ export function changeContext(rows: readonly ScopeRow[], revisions: Revisions, c
             next.push(found)
           }
         }
+      }
+    }
     pending = next
   }
   return {changes: changed, context: new Set([...shown].filter(id => !changed.has(id))), shown}

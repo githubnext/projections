@@ -48,8 +48,8 @@ export function DependencyGraph(props: RendererProps) {
     useMemo(() => dependencyNouns(model), [model]),
   )
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
-  const all = props.controls['transitive'] === true
-  const paths = props.controls['paths'] === true ? 'all' : 'primary'
+  const all = props.controls.transitive === true
+  const paths = props.controls.paths === true ? 'all' : 'primary'
   const view = useMemo(() => dependencyView(model, schedule, all ? 'all' : expanded, paths), [model, schedule, all, expanded, paths])
   const emphasis = useMemo(
     () => stepEmphasis(view.schedule, progress, highlighting, props.pane),
@@ -69,7 +69,7 @@ export function DependencyGraph(props: RendererProps) {
   // A summary card names what it opens or closes: `Collapse 6 transitive packages of body-parser`.
   const syntheticAction = (entity: Entity) => {
     if (!isTransitiveSummary(entity.id)) return undefined
-    const count = typeof entity.data?.['count'] === 'number' ? entity.data['count'] : 0
+    const count = typeof entity.data?.count === 'number' ? entity.data.count : 0
     const owner = view.model.entities.find(row => row.id === summaryOwner(entity.id))
     const name = (owner?.after ?? owner?.before)?.label ?? summaryOwner(entity.id)
     const open = isCollapseCard(entity)

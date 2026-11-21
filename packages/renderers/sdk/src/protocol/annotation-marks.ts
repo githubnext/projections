@@ -13,8 +13,9 @@ function annotationMark(item: unknown): AnnotationMark | undefined {
   if (
     count !== undefined &&
     !(Number.isSafeInteger(count) && (count as number) >= 0 && (count as number) <= rendererLimits.annotationCount)
-  )
+  ) {
     return undefined
+  }
   if (label !== undefined && !(typeof label === 'string' && label.length <= rendererLimits.annotationLabel)) return undefined
   if (tone !== undefined && !annotationTones.includes(tone as AnnotationTone)) return undefined
   return {

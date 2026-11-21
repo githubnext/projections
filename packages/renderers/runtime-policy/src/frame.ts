@@ -28,7 +28,10 @@ export const markOf = (item: Item, frame: Frame, inherited = false) =>
  * (`pk-region-run`), as text diff marks a run of changed lines: edged on its leading side throughout, and above and
  * below where it starts and ends.
  */
-export type Run = {start: boolean; end: boolean}
+export interface Run {
+  start: boolean
+  end: boolean
+}
 export const runs = (marks: readonly (string | undefined)[]): Run[] =>
   marks.map((mark, index) => ({start: marks[index - 1] !== mark, end: marks[index + 1] !== mark}))
 export const runAttributes = (run: Run = {start: true, end: true}) => ({

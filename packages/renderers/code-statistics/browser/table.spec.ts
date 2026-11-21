@@ -127,7 +127,7 @@ function tableLineProbes(): LineProbe[] {
     const edge = over(rgb(style.borderRightColor), surface, opacity)
     const gray = {above: line(above, 'borderBottomColor'), below: line(below, 'borderTopColor')}
     // The rule under the heading is the heading's, the frame's color (checked on its own below).
-    if (!fading(above) && !above?.matches('.pk-table-head'))
+    if (!fading(above) && !above?.matches('.pk-table-head')) {
       probes.push({
         gray: gray.above,
         what: `the line above ${name}`,
@@ -136,7 +136,8 @@ function tableLineProbes(): LineProbe[] {
         across: 'y',
         rgb: over(rgb(style.borderTopColor), line(above, 'borderBottomColor'), opacity),
       })
-    if (!fading(below))
+    }
+    if (!fading(below)) {
       probes.push({
         gray: gray.below,
         what: `the line below ${name}`,
@@ -145,9 +146,11 @@ function tableLineProbes(): LineProbe[] {
         across: 'y',
         rgb: over(rgb(style.borderBottomColor), line(below, 'borderTopColor'), opacity),
       })
+    }
     probes.push({what: `the left edge beside ${name}`, x: scroll.left + 0.5, y, across: 'x', rgb: edge, gray: divider})
-    if (box.right <= scroll.right + 0.5)
+    if (box.right <= scroll.right + 0.5) {
       probes.push({what: `the right edge beside ${name}`, x: box.right - 0.5, y, across: 'x', rgb: edge, gray: divider})
+    }
   })
   return probes
 }
@@ -170,8 +173,9 @@ async function pixelsAt({png, width, points}: {png: string; width: number; point
     const pixels: number[][] = []
     for (let device = Math.floor((at - 1) * scale); device <= Math.ceil((at + 1) * scale); device++) {
       const [px, py] = across === 'y' ? [Math.floor(x * scale), device] : [device, Math.floor(y * scale)]
-      if (px >= 0 && py >= 0 && px < bitmap.width && py < bitmap.height)
+      if (px >= 0 && py >= 0 && px < bitmap.width && py < bitmap.height) {
         pixels.push([...context.getImageData(px, py, 1, 1).data.slice(0, 3)])
+      }
     }
     return pixels
   })
@@ -180,8 +184,8 @@ async function pixelsAt({png, width, points}: {png: string; width: number; point
 // A gray line and a change-colored one never compete: wherever a row whose lines carry its hue meets another line, a
 // row neutral because it holds changed cells, an unchanged row, the heading, the foot or the frame's sides, the hue is
 // what paints. Sorting changes which rows are neighbours, so every sort is checked both ways.
-for (const comparisonMode of ['diff', 'animated'] as const)
-  for (const colorMode of ['light', 'dark'] as const)
+for (const comparisonMode of ['diff', 'animated'] as const) {
+  for (const colorMode of ['light', 'dark'] as const) {
     test(`${comparisonMode}, ${colorMode}: a change's hue wins every line it shares`, async ({page}) => {
       test.setTimeout(240_000)
       test.skip(
@@ -190,7 +194,7 @@ for (const comparisonMode of ['diff', 'animated'] as const)
       )
       const inspector = harnessInspector()
       const failures: string[] = []
-      for (const sort of ['code:descending', 'name:ascending', 'files:ascending', 'lines:descending'])
+      for (const sort of ['code:descending', 'name:ascending', 'files:ascending', 'lines:descending']) {
         for (const sortChangesFirst of [false, true]) {
           const stage = await openStage(page, inspector, {
             scenario: 'code-statistics/gateway',
@@ -218,16 +222,20 @@ for (const comparisonMode of ['diff', 'animated'] as const)
               // The line's own pixel: the one across it most like either color it could paint.
               const near = (pixel: number[]) => Math.min(distance(pixel, probe.rgb), distance(pixel, probe.gray))
               const color = painted[index]!.reduce((best, pixel) => (near(pixel) < near(best) ? pixel : best))
-              if (distance(color, probe.rgb) >= distance(color, probe.gray))
+              if (distance(color, probe.rgb) >= distance(color, probe.gray)) {
                 failures.push(
                   `${sort}${sortChangesFirst ? ', changes first' : ''} at ${progress}: ${probe.what} is rgb(${color}), not rgb(${probe.rgb})`,
                 )
+              }
             })
           }
           expect(probed, `${sort}: probes`).toBeGreaterThan(0)
         }
+      }
       expect(failures).toEqual([])
     })
+  }
+}
 
 /**
  * The heading's lines, in the renderer document: the rule under it and the frame's top and left edges beside it, each
@@ -249,7 +257,7 @@ function headingLines() {
 
 // The heading is the frame's: the rule under it is the frame's color, never a row's, whichever row the sort puts under
 // it, changed or not.
-for (const colorMode of ['light', 'dark'] as const)
+for (const colorMode of ['light', 'dark'] as const) {
   test(`${colorMode}: the rule under the heading is the frame's color`, async ({page}) => {
     test.setTimeout(120_000)
     test.skip(
@@ -258,7 +266,7 @@ for (const colorMode of ['light', 'dark'] as const)
     )
     const inspector = harnessInspector()
     const firsts = new Set<string>()
-    for (const sort of ['none', 'code:descending', 'name:ascending', 'files:ascending'])
+    for (const sort of ['none', 'code:descending', 'name:ascending', 'files:ascending']) {
       for (const sortChangesFirst of [false, true]) {
         const stage = await openStage(page, inspector, {
           scenario: 'code-statistics/gateway',
@@ -283,6 +291,7 @@ for (const colorMode of ['light', 'dark'] as const)
         expect(rule, `${where}: the rule under the heading against the frame's left edge`).toEqual(side)
         expect(top, `${where}: the frame's top edge against its left edge`).toEqual(side)
       }
+    }
     // The sorts put both an unchanged or neutral row and a changed one under the heading.
     expect([...firsts].some(change => change === 'removed' || change === 'added')).toBe(true)
 
@@ -316,3 +325,4 @@ for (const colorMode of ['light', 'dark'] as const)
       expect(exact[0], `${sort}: a focused heading's rule over a ${first} row`).toEqual(exact[2])
     }
   })
+}

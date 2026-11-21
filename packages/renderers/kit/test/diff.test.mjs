@@ -192,10 +192,13 @@ test('the graph diff frame is the union layout: every card at full presence, rew
     top: node.y - node.height / 2,
     bottom: node.y + node.height / 2,
   }))
-  for (const a of boxes)
-    for (const b of boxes)
-      if (a.id < b.id)
+  for (const a of boxes) {
+    for (const b of boxes) {
+      if (a.id < b.id) {
         assert.ok(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top, `${a.id} overlaps ${b.id}`)
+      }
+    }
+  }
   // Diff only: one layout, with cards grown for their field changes, and the same frame at any progress.
   const grown = await createGraphTransition(model, [], {diffOnly: {heights: new Map([['b', 124]])}})
   assert.equal(grown.layouts.length, 1)
@@ -225,13 +228,16 @@ test('every graph scenario has a readable union: no two cards overlap in its dif
     const {diff} = await createGraphTransition(model, [], {...options[scenario.renderer], diffOnly: {}})
     assert.equal(diff.nodes.length, model.entities.length, scenario.id)
     const cards = diff.nodes.filter(node => !node.group)
-    for (const a of cards)
-      for (const b of cards)
-        if (a.id < b.id)
+    for (const a of cards) {
+      for (const b of cards) {
+        if (a.id < b.id) {
           assert.ok(
             Math.abs(a.x - b.x) * 2 >= a.width + b.width - 0.5 || Math.abs(a.y - b.y) * 2 >= a.height + b.height - 0.5,
             `${scenario.id}: ${a.id} overlaps ${b.id}`,
           )
+        }
+      }
+    }
   }
 })
 
@@ -244,8 +250,9 @@ test('long data wraps after its separators and is never cut off', () => {
     'com"]',
   ])
   assert.deepEqual(wrapText('abcdefghijklmnop', 6), ['abcdef', 'ghijkl', 'mnop'])
-  for (const text of ['a_b.c/d-e,f:g h', 'x'.repeat(50), 'module.database.aws_db_instance.main'])
+  for (const text of ['a_b.c/d-e,f:g h', 'x'.repeat(50), 'module.database.aws_db_instance.main']) {
     assert.equal(wrapText(text, 7).join(''), text, 'joining the lines gives the text back')
+  }
 })
 
 test('a diff card lays out its text whole and grows to hold it', () => {
@@ -281,8 +288,9 @@ test('a diff card lays out its text whole and grows to hold it', () => {
     '(known after apply)',
     '1.0.0',
     '2.0.0',
-  ])
+  ]) {
     assert.ok(all.replaceAll('|', '').includes(whole), whole)
+  }
   assert.ok(all.includes('db|database'), 'the old name, then the new one')
   assert.ok(all.endsWith('and 1 more change'))
   // Every line is below the one before, and the card holds the last one above its footer.

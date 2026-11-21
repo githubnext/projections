@@ -5,7 +5,7 @@ const prepositions = new Set(['on', 'to', 'by', 'of', 'from', 'in', 'for', 'with
 /** Words whose plural is the same word. */
 const invariant = new Set(['many', 'data', 'metadata', 'info', 'information', 'series', 'species', 'news', 'software', 'code'])
 /** Whole kinds (as words) English names with another noun. */
-const phrases: {readonly [words: string]: SummaryNoun} = {
+const phrases: Readonly<Record<string, SummaryNoun>> = {
   'depends on': {singular: 'dependency', plural: 'dependencies'},
   'depends upon': {singular: 'dependency', plural: 'dependencies'},
   person: {singular: 'person', plural: 'people'},

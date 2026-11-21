@@ -95,11 +95,12 @@ test('every change and the path that pulls it in stays visible; summaries change
     const view = dependencyView(model, [], new Set())
     const shown = new Set(ids(view))
     for (const change of model.entities.filter(isChanged)) assert.ok(shown.has(change.id), `${from}: ${change.id}`)
-    for (const change of model.relationships.filter(isChanged))
+    for (const change of model.relationships.filter(isChanged)) {
       assert.ok(
         view.model.relationships.some(edge => edge.id === change.id),
         `${from}: relationship ${change.id}`,
       )
+    }
     for (const summary of summaries(view)) {
       if (summary.status === 'unchanged') continue
       assert.equal(summary.status, model.entities.find(item => item.id === ownerOf(summary)).status, summary.id)
@@ -192,8 +193,9 @@ function crossings(transition, progresses) {
           card.y - card.height / 2 + 2,
           card.y + card.height / 2 - 2,
         ]
-        if (points.some(point => point.x > left && point.x < right && point.y > top && point.y < bottom))
+        if (points.some(point => point.x > left && point.x < right && point.y > top && point.y < bottom)) {
           failures.add(`${edge.key} through ${card.id} at ${progress}`)
+        }
       }
     }
   }
@@ -245,16 +247,20 @@ test('primary paths: each package keeps the edge that pulls it in and every adde
         .map(side => ({from: model.entityRow[side].get(row[side].from), to: model.entityRow[side].get(row[side].to)}))
     const drawn = new Set(primary.model.relationships.flatMap(row => pairs(row).map(({from, to}) => `${from}>${to}`)))
     const targets = new Map()
-    for (const row of dropped)
-      for (const {from: source, to: id} of pairs(row))
+    for (const row of dropped) {
+      for (const {from: source, to: id} of pairs(row)) {
         if (!drawn.has(`${source}>${id}`)) targets.set(id, new Set([...(targets.get(id) ?? []), source]))
+      }
+    }
     for (const [id, sources] of targets) assert.deepEqual(new Set(primary.otherDependents.get(id)), sources, id)
     assert.equal(primary.otherDependents.size, targets.size)
     // Every shown package but the roots still has a drawn edge into it.
     const into = new Set(primary.model.relationships.flatMap(row => pairs(row).map(({to}) => to)))
-    for (const row of primary.model.entities)
-      if (!primary.roots.has(row.id) && every.model.relationships.some(edge => pairs(edge).some(({to}) => to === row.id)))
+    for (const row of primary.model.entities) {
+      if (!primary.roots.has(row.id) && every.model.relationships.some(edge => pairs(edge).some(({to}) => to === row.id))) {
         assert.ok(into.has(row.id), `${row.id} lost every edge into it`)
+      }
+    }
   }
   // Express 5 shares many packages: a third of the edges go, all of them range updates.
   const model = await compare(fixture('npm-workspace-v1'), fixture('npm-workspace-v2'))

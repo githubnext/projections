@@ -45,10 +45,12 @@ export function swapTrunks(ctx: RoutingContext, a: Segment, b: Segment): boolean
 
 /** Last, two direct routes into one card that still cross change places with their trunks. */
 export function swapCrossingTrunks(ctx: RoutingContext): void {
-  for (const list of ctx.incoming.values())
-    for (let i = 0; i < list.length; i++)
+  for (const list of ctx.incoming.values()) {
+    for (let i = 0; i < list.length; i++) {
       for (let j = i + 1; j < list.length; j++) {
         const [a, b] = [list[i]!, list[j]!]
         if (a.band && b.band && ctx.quickCross(a.route!, b.route!, [a.end!, b.end!], 3)) swapTrunks(ctx, a, b)
       }
+    }
+  }
 }

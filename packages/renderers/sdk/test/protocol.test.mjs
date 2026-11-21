@@ -89,8 +89,9 @@ test('parseRendererMessage rejects foreign envelopes and malformed messages', ()
     {type: 'ready', capabilities: {changeHighlighting: 'none', network: true}},
     {type: 'ready', capabilities: {changeHighlighting: 'none'}, extra: 1},
   ]
-  for (const message of invalid)
+  for (const message of invalid) {
     assert.equal(parseRendererMessage(envelope(message), channel), undefined, JSON.stringify(message).slice(0, 120))
+  }
 })
 
 test('parseRendererMessage truncates oversized error text instead of forwarding it', () => {
@@ -152,8 +153,9 @@ test('parseRendererMessage validates hover, anchor and viewport strictly', () =>
     {type: 'viewport', x: 0, y: 0, key: null},
     {type: 'viewport', x: 0, y: 0, width: 10},
   ]
-  for (const message of invalid)
+  for (const message of invalid) {
     assert.equal(parseRendererMessage(envelope(message), channel), undefined, JSON.stringify(message).slice(0, 120))
+  }
 })
 
 test("parseHostMessage keeps the filter's Changes scope apart from its matches, and older hosts' filters without it", () => {
@@ -161,8 +163,9 @@ test("parseHostMessage keeps the filter's Changes scope apart from its matches, 
   assert.deepEqual(parseHostMessage(envelope(filter), channel), filter)
   assert.deepEqual(parseHostMessage(envelope({...filter, scope: ['a', 'b']}), channel), {...filter, scope: ['a', 'b']})
   assert.deepEqual(parseHostMessage(envelope({...filter, scope: null}), channel), {...filter, scope: null})
-  for (const scope of [4, ['a', 4], Array.from({length: rendererLimits.filterIds + 1}, (_, index) => `${index}`)])
+  for (const scope of [4, ['a', 4], Array.from({length: rendererLimits.filterIds + 1}, (_, index) => `${index}`)]) {
     assert.equal(parseHostMessage(envelope({...filter, scope}), channel), undefined, String(scope).slice(0, 20))
+  }
 })
 
 test('parseHostMessage validates hover and scroll', () => {
@@ -186,8 +189,9 @@ test('parseHostMessage validates hover and scroll', () => {
     {x: 0, y: 0, key: 'a"]'},
     {x: 0, y: 0, key: 7},
     {x: 0, y: 0, behavior: 'smooth'},
-  ])
+  ]) {
     assert.equal(parseHostMessage(envelope({type: 'scroll', ...invalid}), channel), undefined, JSON.stringify(invalid))
+  }
   assert.equal(parseHostMessage(envelope({type: 'hover', id: 'a'}), 'zyxwvutsrqponmlk9876'), undefined)
 })
 
@@ -226,8 +230,9 @@ test('parseHostMessage validates structure and envelope', () => {
   // A focus for the opening view: changes or everything, one item, fitted whatever its text size.
   const focused = {...init, focus: {on: 'changes', id: 'service:api', fit: true}}
   assert.deepEqual(parseHostMessage(envelope(focused), channel), focused)
-  for (const focus of [{on: 'middle'}, {id: 7}, {fit: 'yes'}, {on: 'all', zoom: 2}, 'changes'])
+  for (const focus of [{on: 'middle'}, {id: 7}, {fit: 'yes'}, {on: 'all', zoom: 2}, 'changes']) {
     assert.equal(parseHostMessage(envelope({...init, focus}), channel), undefined, JSON.stringify(focus))
+  }
   assert.deepEqual(parseHostMessage(envelope({type: 'progress', progress: 0.5, highlighting: 1, direction: -1}), channel), {
     type: 'progress',
     progress: 0.5,
@@ -248,20 +253,22 @@ test('parseHostMessage validates structure and envelope', () => {
   })
   assert.deepEqual(parseHostMessage(envelope({type: 'environment', ...environment}), channel), {type: 'environment', ...environment})
   // A held pane of side by side or swipe says which; anything else is refused.
-  for (const pane of ['before', 'after'])
+  for (const pane of ['before', 'after']) {
     assert.deepEqual(parseHostMessage(envelope({type: 'environment', ...environment, pane}), channel), {
       type: 'environment',
       ...environment,
       pane,
     })
+  }
   assert.equal(parseHostMessage(envelope({type: 'environment', ...environment, pane: 'main'}), channel), undefined)
   // How the host sizes the frame, when it says; anything else is refused, in an environment update and in init.
-  for (const sizing of ['content', 'fill'])
+  for (const sizing of ['content', 'fill']) {
     assert.deepEqual(parseHostMessage(envelope({type: 'environment', ...environment, sizing}), channel), {
       type: 'environment',
       ...environment,
       sizing,
     })
+  }
   assert.equal(parseHostMessage(envelope({type: 'environment', ...environment, sizing: 'auto'}), channel), undefined)
   // The renderer's handler receives it too, so a content-sized frame stays one after a later environment.
   let handled
@@ -319,8 +326,9 @@ test('parseRendererManifest validates bundle manifests', () => {
     {...manifest, handles: 'graph'},
     {...manifest, handles: ['Graph']},
     {...manifest, handles: Array.from({length: 101}, (_, i) => `h${i}`)},
-  ])
+  ]) {
     assert.throws(() => parseRendererManifest(invalid), Error, JSON.stringify(invalid)?.slice(0, 80))
+  }
 })
 
 test('manifests declare the extractions they accept: domain schemas, each with an optional vocabulary', () => {
@@ -340,8 +348,9 @@ test('manifests declare the extractions they accept: domain schemas, each with a
     [{schema: 'graph/v0', vocabulary: 'unknown/v0'}],
     [{schema: 'graph/v0'}, {schema: 'graph/v0'}],
     [{schema: 'graph/v0', extra: true}],
-  ])
+  ]) {
     assert.throws(() => parseRendererManifest({...manifest, accepts}), /accepts/, JSON.stringify(accepts))
+  }
   const di = manifest.accepts
   assert.equal(acceptsExtraction(undefined, {schema: 'metrics/v0'}), true)
   assert.equal(acceptsExtraction(di, {schema: 'graph/v0', vocabularies: ['infrastructure/v0']}), true)
@@ -390,8 +399,9 @@ test('comparison modes: declarations, manifests and diff-mode init', () => {
     type: 'ready',
     capabilities: {changeHighlighting: 'supported', comparisonModes: ['diff', 'side-by-side']},
   })
-  for (const comparisonModes of [[], ['diff', 'diff'], ['morph'], 'diff'])
+  for (const comparisonModes of [[], ['diff', 'diff'], ['morph'], 'diff']) {
     assert.equal(ready({changeHighlighting: 'supported', comparisonModes}), undefined)
+  }
   assert.deepEqual(ready({changeHighlighting: 'supported', pace: {stepMs: 1800}}), {
     type: 'ready',
     capabilities: {changeHighlighting: 'supported', pace: {stepMs: 1800}},
@@ -710,8 +720,9 @@ test('annotation reports and annotations marks validate strictly', () => {
     {type: 'annotation', id: 4},
     {type: 'annotation', id: 'x'.repeat(rendererLimits.textLength + 1)},
     {type: 'annotation', id: 'a', count: 2},
-  ])
+  ]) {
     assert.equal(parseRendererMessage(envelope(invalid), channel), undefined, JSON.stringify(invalid).slice(0, 80))
+  }
   const valid = [
     [],
     [{id: 'a'}],
@@ -725,8 +736,9 @@ test('annotation reports and annotations marks validate strictly', () => {
     [{id: 'a', label: 'x'.repeat(rendererLimits.annotationLabel)}],
     Array.from({length: rendererLimits.annotations}, (_, index) => ({id: `i${index}`})),
   ]
-  for (const items of valid)
+  for (const items of valid) {
     assert.deepEqual(parseHostMessage(envelope({type: 'annotations', items}), channel), {type: 'annotations', items})
+  }
   const invalid = [
     undefined,
     null,
@@ -860,8 +872,9 @@ test('legends are validated strictly: theme tokens or plain CSS colors, bounded 
     [{label: 'Shape', token: 'color-added', shape: 'star'}],
     [{label: 'Extra', token: 'color-added', extra: true}],
     Array.from({length: rendererLimits.legendItems + 1}, (_, index) => ({label: `Item ${index}`, token: 'chart-2'})),
-  ])
+  ]) {
     assert.equal(parseRendererMessage(legend(items), channel), undefined, JSON.stringify(items).slice(0, 80))
+  }
   assert.equal(parseRendererMessage(envelope({type: 'legend', title: '', items: []}), channel), undefined)
   assert.equal(parseRendererMessage(envelope({type: 'legend', items: [], extra: 1}), channel), undefined)
 })
@@ -914,8 +927,9 @@ test('summaries are validated strictly: distinct kinds, bounded nouns and non-ne
       {collection: 'entities', kind: 'index', noun, count: 1},
     ],
     Array.from({length: rendererLimits.summaryItems + 1}, (_, index) => ({kind: `kind-${index}`, noun, count: index})),
-  ])
+  ]) {
     assert.equal(parseRendererMessage(summary(items), channel), undefined, JSON.stringify(items)?.slice(0, 80))
+  }
   assert.equal(parseRendererMessage(envelope({type: 'summary', items: [], extra: 1}), channel), undefined)
   assert.deepEqual(parseSummaryItems([{kind: 'package', noun, count: 3, removed: 0}]), [{kind: 'package', noun, count: 3, removed: 0}])
 })
@@ -945,8 +959,9 @@ test('summary items are counts or facts; an item of an unknown type is dropped, 
     [{...fact, kind: 'route'}],
     [{...count, id: 'x'}],
     [{...count, type: 7}],
-  ])
+  ]) {
     assert.equal(summary(items), undefined, JSON.stringify(items).slice(0, 80))
+  }
   assert.ok(summary([{...fact, ids: Array.from({length: rendererLimits.summaryFactIds}, (_, index) => `id-${index}`)}]))
 })
 
@@ -973,16 +988,18 @@ test('a summary fact may carry its changes and a description', () => {
     [{...measure, description: 'x'.repeat(rendererLimits.summaryDescription + 1)}],
     [{...measure, description: 7}],
     [{...measure, was: 37826}],
-  ])
+  ]) {
     assert.equal(summary(items), undefined, JSON.stringify(items).slice(0, 80))
+  }
   assert.ok(summary([{...measure, description: 'x'.repeat(rendererLimits.summaryDescription)}]))
   // A count item has no description.
   assert.equal(summary([{kind: 'route', noun, count: 1, description: 'Routes'}]), undefined)
 })
 
 test('a control value from the renderer validates strictly', () => {
-  for (const value of ['lines:descending', true, 0.5])
+  for (const value of ['lines:descending', true, 0.5]) {
     assert.deepEqual(parseRendererMessage(envelope({type: 'control', id: 'sort', value}), channel), {type: 'control', id: 'sort', value})
+  }
   for (const message of [
     {id: 'sort', value: ''},
     {id: 'sort', value: 'x'.repeat(65)},
@@ -991,8 +1008,9 @@ test('a control value from the renderer validates strictly', () => {
     {id: 'has space', value: true},
     {id: 'sort'},
     {id: 'sort', value: true, extra: 1},
-  ])
+  ]) {
     assert.equal(parseRendererMessage(envelope({type: 'control', ...message}), channel), undefined, JSON.stringify(message))
+  }
 })
 
 test('document-request and document validate strictly', () => {
@@ -1000,8 +1018,9 @@ test('document-request and document validate strictly', () => {
     type: 'document-request',
     renderer: 'graph',
   })
-  for (const renderer of ['', 'Graph', '../graph', 'https://example.com/index.html', 'a'.repeat(65), 7])
+  for (const renderer of ['', 'Graph', '../graph', 'https://example.com/index.html', 'a'.repeat(65), 7]) {
     assert.equal(parseRendererMessage(envelope({type: 'document-request', renderer}), channel), undefined, String(renderer))
+  }
   assert.equal(parseRendererMessage(envelope({type: 'document-request', renderer: 'graph', url: 'x'}), channel), undefined)
   assert.deepEqual(parseHostMessage(envelope({type: 'document', renderer: 'graph', html: '<p>'}), channel), {
     type: 'document',
@@ -1019,8 +1038,9 @@ test('document-request and document validate strictly', () => {
     {type: 'document', renderer: 'Graph', html: '<p>'},
     {type: 'document', renderer: 'graph', html: 1},
     {type: 'document', renderer: 'graph', html: '<p>', url: 'x'},
-  ])
+  ]) {
     assert.equal(parseHostMessage(envelope(message), channel), undefined, JSON.stringify(message))
+  }
 })
 
 test('requestDocument asks the host once per name and settles with its answer', async () => {

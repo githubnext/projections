@@ -129,8 +129,9 @@ function crossingsBetween(pa: readonly Point[], pb: readonly Point[], ignore: re
         distance(at(b, j), point) >= 0.5 &&
         (j + 1 >= b.length || segmentDistance(point, at(b, j), at(b, j + 1)) >= 0.5) &&
         (j === 0 || segmentDistance(point, at(b, j - 1), at(b, j)) >= 0.5)
-      )
+      ) {
         break
+      }
       count++
     }
     return count
@@ -165,8 +166,9 @@ function crossingsBetween(pa: readonly Point[], pb: readonly Point[], ignore: re
         for (const {from, to, box} of reach) {
           if (ax1 < box[0] || ax0 > box[1] || ay1 < box[2] || ay0 > box[3]) continue
           for (let j = from; j < to; j++) {
-            if (ax1 < cb.bounds[4 * j]! || cb.bounds[4 * j + 1]! < ax0 || ay1 < cb.bounds[4 * j + 2]! || cb.bounds[4 * j + 3]! < ay0)
+            if (ax1 < cb.bounds[4 * j]! || cb.bounds[4 * j + 1]! < ax0 || ay1 < cb.bounds[4 * j + 2]! || cb.bounds[4 * j + 3]! < ay0) {
               continue
+            }
             if (shared(pb, j, headB, tailB)) continue
             crossingWork.compared++
             const b1 = pb[j]!,

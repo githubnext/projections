@@ -8,7 +8,7 @@ test('the gallery has every built-in scenario', () => {
   expect(scenarios.length).toBeGreaterThanOrEqual(40)
 })
 
-for (const {key} of scenarios)
+for (const {key} of scenarios) {
   test(`${key} opens in the gallery (fixtures mode) without renderer errors`, async ({page}) => {
     await openWorkbench(page, harnessInspector(), {scenario: key})
     const view = page.locator('.ph')
@@ -26,3 +26,4 @@ for (const {key} of scenarios)
     }
     await expect(page.locator('main').getByRole('alert'), `${key} reports no renderer or comparator problem`).toHaveCount(0)
   })
+}

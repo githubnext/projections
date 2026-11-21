@@ -198,7 +198,7 @@ export const badgeDiscValue = svgIconValue(
  * Camel-cased CSS properties for a style object; give the element a size and a `currentColor` background. A name the
  * theme lacks draws nothing.
  */
-export function iconMaskStyle(name: string): {[property: string]: string} {
+export function iconMaskStyle(name: string): Record<string, string> {
   // Without the token, an empty layer rather than no mask, which would paint the whole box.
   const glyph = `var(--projections-icon-${name}, linear-gradient(transparent, transparent))`
   const badge = (badgeIconNames as readonly string[]).includes(name)

@@ -42,8 +42,8 @@ export interface FactFields {
  */
 export function factFields(model: ComparisonModel): FactFields {
   const seen = new Map<string, {badge: boolean; color: boolean; number: boolean; text: boolean; icon: boolean}>()
-  for (const row of model.entities)
-    for (const entity of [row.before, row.after])
+  for (const row of model.entities) {
+    for (const entity of [row.before, row.after]) {
       for (const [field, value] of Object.entries(entity?.data ?? {})) {
         const known = seen.get(field) ?? {badge: true, color: true, number: true, text: true, icon: false}
         const list = Array.isArray(value) && value.every(scalar)
@@ -55,6 +55,8 @@ export function factFields(model: ComparisonModel): FactFields {
           icon: known.icon || isCardIconName(value),
         })
       }
+    }
+  }
   const fields = [...seen].filter(([field]) => fieldPointer(field).length <= choiceLength).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
   return {
     badges: fields.filter(([, use]) => use.badge).map(([field]) => field),

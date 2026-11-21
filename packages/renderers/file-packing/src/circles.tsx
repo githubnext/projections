@@ -102,7 +102,7 @@ function FlagDots({flags, r}: {flags: readonly DrawnFlag[]; r: number}) {
   )
 }
 
-export type Drawn = {
+export interface Drawn {
   circle: Circle
   id: string
   row: Circle['row']

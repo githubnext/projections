@@ -5,8 +5,8 @@ const sides = ['top', 'right', 'bottom', 'left'] as const
 const corners = ['top-left', 'top-right', 'bottom-right', 'bottom-left'] as const
 
 /** The widths of the borders an element draws, by side. */
-export function borderWidths(style: CSSStyleDeclaration): {[side: string]: number} {
-  const borders: {[side: string]: number} = {}
+export function borderWidths(style: CSSStyleDeclaration): Record<string, number> {
+  const borders: Record<string, number> = {}
   for (const side of sides) {
     const width = px(style.getPropertyValue(`border-${side}-width`))
     if (width > 0 && !['none', 'hidden'].includes(style.getPropertyValue(`border-${side}-style`))) borders[side] = width
@@ -15,8 +15,8 @@ export function borderWidths(style: CSSStyleDeclaration): {[side: string]: numbe
 }
 
 /** Padding, margins and flex or grid gaps, in px; auto and percentage values are layout, not spacing, and left out. */
-export function spacingOf(element: Element, style: CSSStyleDeclaration, box: DOMRect): {[property: string]: number} {
-  const spacing: {[property: string]: number} = {}
+export function spacingOf(element: Element, style: CSSStyleDeclaration, box: DOMRect): Record<string, number> {
+  const spacing: Record<string, number> = {}
   // Auto margins and percentages are layout, not spacing: computed values (CSS Typed OM) keep them as written,
   // where getComputedStyle reports the used length.
   const computed = (
@@ -50,8 +50,8 @@ export function spacingOf(element: Element, style: CSSStyleDeclaration, box: DOM
 }
 
 /** Corner radii in px, or `pill` when fully rounded (a percentage, or at least half the shorter side). */
-export function radiiOf(style: CSSStyleDeclaration, box: DOMRect): {[corner: string]: number | 'pill'} {
-  const radii: {[corner: string]: number | 'pill'} = {}
+export function radiiOf(style: CSSStyleDeclaration, box: DOMRect): Record<string, number | 'pill'> {
+  const radii: Record<string, number | 'pill'> = {}
   for (const corner of corners) {
     const value = style.getPropertyValue(`border-${corner}-radius`)
     if (!value || value === '0px') continue

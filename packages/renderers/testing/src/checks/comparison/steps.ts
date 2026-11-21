@@ -55,8 +55,9 @@ export const stepChecks: Pick<Checks, 'step-holds' | 'highlight-scope'> = {
     const ends = state.steps.filter(end => end > 0 && end < 1)
     const ordered = steps(subject)
     if (!ordered.length) throw new Skip('The comparison has no steps.')
-    if (ends.length !== ordered.length)
+    if (ends.length !== ordered.length) {
       throw new Skip(`The renderer reports ${ends.length} holds for ${ordered.length} steps, so holds can't be matched to steps.`)
+    }
     const touches = touched(subject)
     const varied = variedWithin(subject)
     const stepOf = (id: string) => touches.findIndex(set => set.has(id))

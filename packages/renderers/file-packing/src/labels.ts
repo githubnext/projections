@@ -36,7 +36,12 @@ export interface Decoration {
   statusY: number
 }
 
-type Box = {left: number; right: number; top: number; bottom: number}
+interface Box {
+  left: number
+  right: number
+  top: number
+  bottom: number
+}
 
 /** A filled circle's name as drawn: whole when it fits, truncated, or nothing on small circles. */
 function nameText(circle: Circle, name: string, entity: Entity, charWidth: number, font: number): string | undefined {
@@ -62,13 +67,14 @@ export function folderText(r: number, name: string, charWidth: number): string |
 /** The box a name takes: across a filled circle's middle, or along the top or bottom of a folder's outline. */
 function nameBox(circle: Circle, width: number, labelY: number, font: number, arc: 'top' | 'bottom' = 'top'): Box {
   const {r} = circle
-  if (circle.filled)
+  if (circle.filled) {
     return {
       left: circle.x - width / 2,
       right: circle.x + width / 2,
       top: circle.y + labelY - font * 0.7,
       bottom: circle.y + labelY + font * 0.7,
     }
+  }
   // Along the arc: the text spans an angle of width / r, and its ends turn in from the top (or bottom) of the circle.
   const half = Math.min(Math.PI / 2, width / r / 2)
   const reach = r * Math.sin(half) + font * 0.5

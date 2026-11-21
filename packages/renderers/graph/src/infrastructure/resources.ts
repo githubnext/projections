@@ -59,8 +59,9 @@ export function infrastructureStatus(node: Pick<TransitionNode, 'status' | 'rena
   const action = plannedAction(node.after)
   if (node.status === 'added') parts.push((action === 'import' && actionPart(action)) || actionPart('create')!)
   else if (node.status === 'removed') parts.push(actionPart('delete')!)
-  else if (node.status === 'modified')
+  else if (node.status === 'modified') {
     parts.push((action && actionPart(action, node.after)) || {status: 'modified', glyph: '~', icon: 'modified', label: 'Modified'})
+  }
   return parts
 }
 
@@ -80,7 +81,7 @@ export function resourceType(entity: Entity): {text: string; identifier: boolean
 /** A changed resource's attribute changes (`data.values`), verbatim, for its diff card. */
 export function attributeChanges(row: EntityChange<Entity>): FieldLine[] {
   // What forces a replacement comes first, then values the plan knows, then ones known only after apply.
-  const forcing = row.after?.data?.['replacePaths']
+  const forcing = row.after?.data?.replacePaths
   const first = new Set(Array.isArray(forcing) ? forcing.map(String) : [])
   const rank = (line: FieldLine) => (first.has(line.key) ? 0 : line.after === unknownValue ? 2 : 1)
   return fieldLines(row, {object: 'values'}).sort((a, b) => rank(a) - rank(b))

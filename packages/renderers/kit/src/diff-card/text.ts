@@ -10,7 +10,10 @@ import type {CardLines, KindLine} from './lines.js'
 import {diffCardMetrics} from './metrics.js'
 import type {DiffCardInput, DiffCardText} from './metrics.js'
 
-type Label = {text: string; tone?: 'was' | 'now'}
+interface Label {
+  text: string
+  tone?: 'was' | 'now'
+}
 
 /** The kind line of a card that isn't a file's: the kind, its note and its detail per revision. */
 function kindLine(input: DiffCardInput): KindLine {

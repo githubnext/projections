@@ -22,8 +22,9 @@ test('a development page keeps the renderer policy, adding only its server and a
   assert.equal(directives['connect-src'], 'connect-src http://localhost:5173 ws://localhost:5173')
   assert.equal(directives['script-src'], `${bundle['script-src']} http://localhost:5173 http://127.0.0.1:* http://localhost:*`)
   assert.equal(directives['style-src'], `${bundle['style-src']} http://localhost:5173`)
-  for (const name of ['default-src', 'object-src', 'frame-src', 'base-uri', 'form-action', 'worker-src'])
+  for (const name of ['default-src', 'object-src', 'frame-src', 'base-uri', 'form-action', 'worker-src']) {
     assert.equal(directives[name], bundle[name])
+  }
   assert.ok(!policy.includes('sandbox'), 'the host frame applies the sandbox')
 })
 

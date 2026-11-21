@@ -43,7 +43,7 @@ test('an expanded package collapses again from the card in its summary’s place
   const renderer = await openRenderer(page, {renderer: 'dependencies', extraction: after})
   const frame = renderer.frame
   const card = frame.locator('[data-graph-synthetic="transitive:package:express"]')
-  const count = Number((await card.locator('.node-label').textContent())!.match(/\d+/)![0])
+  const count = Number(/\d+/.exec((await card.locator('.node-label').textContent())!)![0])
   await expect(card).toHaveAttribute('aria-label', `Show ${count} transitive packages of express`)
   await expect(card).toHaveAttribute('aria-expanded', 'false')
   await card.focus()
@@ -84,8 +84,9 @@ test('every change is shown with the path that pulls it in, and version bumps re
   const renderer = await openRenderer(page, {renderer: 'dependencies', before, after, progress: 0})
   const frame = renderer.frame
   // body-parser is transitive but changed: it and express, which pulls it in, are cards.
-  for (const id of ['package:express', 'package:body-parser', 'package:lodash', 'package:react'])
+  for (const id of ['package:express', 'package:body-parser', 'package:lodash', 'package:react']) {
     await expect(frame.locator(`[data-entity-id="${id}"]`)).toHaveCount(1)
+  }
   await renderer.seek(1)
   await expect(frame.locator('[data-entity-id="package:zod"]')).toHaveCount(1)
   await expect(frame.locator('[data-entity-id="package:lodash"]')).toHaveCount(0)

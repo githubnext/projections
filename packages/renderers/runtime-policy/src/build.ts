@@ -7,7 +7,7 @@ import type {Context} from './links.js'
 import {categories, interpretationsOf, isEnforcing, byLabel, collator, text} from './model.js'
 import type {CategoryView, HookItem, Item, PolicyItem, Revision, RuntimePolicyModel, Side, Tally, WorkloadItem} from './model.js'
 
-const known = (hook: Item) => categories.some(category => category.id === text(hook.entity.data?.['category']))
+const known = (hook: Item) => categories.some(category => category.id === text(hook.entity.data?.category))
 
 /** Hooks grouped by category, in the categories' order; empty categories are left out. */
 function groupHooks(hooks: Map<string, HookItem>): CategoryView[] {
@@ -15,7 +15,7 @@ function groupHooks(hooks: Map<string, HookItem>): CategoryView[] {
     .map(category => ({
       ...category,
       hooks: [...hooks.values()]
-        .filter(hook => (text(hook.entity.data?.['category']) ?? 'other') === category.id || (category.id === 'other' && !known(hook)))
+        .filter(hook => (text(hook.entity.data?.category) ?? 'other') === category.id || (category.id === 'other' && !known(hook)))
         .sort(byLabel),
     }))
     .filter(category => category.hooks.length > 0)
@@ -61,7 +61,7 @@ export function buildModel(model: ComparisonModel, side: Side, metadata?: unknow
     else if (kind === 'workload') workloads.push({...item, coveredBy: chipsOf(context, item, 'coveredBy')})
   }
   deployment.sort((a, b) => Number(a.entity.kind === 'kernel') - Number(b.entity.kind === 'kernel') || byLabel(a, b))
-  const place = (item: Item) => `${text(item.entity.data?.['namespace']) ?? ''}/${item.entity.label}`
+  const place = (item: Item) => `${text(item.entity.data?.namespace) ?? ''}/${item.entity.label}`
   workloads.sort((a, b) => collator.compare(place(a), place(b)) || compareIds(a.row.id, b.row.id))
   attachProbes(context, hooks)
   const grouped = groupHooks(hooks)

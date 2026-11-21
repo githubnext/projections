@@ -36,11 +36,12 @@ export function separateBundles(ctx: RoutingContext, all: readonly Segment[], ru
   const mean = group.reduce((sum, segment) => sum + runs.get(segment)!.along, 0) / group.length
   const centre = highest - lowest >= need ? Math.max(lowest + need / 2, Math.min(highest - need / 2, mean)) : (lowest + highest) / 2
   const place = () => {
-    for (const [index, bundle] of order.entries())
+    for (const [index, bundle] of order.entries()) {
       for (const segment of bundle) {
         segment.run = centre + (index - (order.length - 1) / 2) * trackSpacing - along(segment.start)
         build(ctx, segment)
       }
+    }
   }
   const related = relatedCrossings(ctx, all, group)
   const saved = new Map(group.map(segment => [segment, segment.run]))
@@ -80,9 +81,9 @@ function bundleCrossings(order: readonly Segment[][]): number {
   const places = new Set<string>()
   // Routes into one card or out of one must never cross: any such crossing outweighs every other.
   let converging = 0
-  for (let i = 0; i < order.length; i++)
-    for (let j = i + 1; j < order.length; j++)
-      for (const a of order[i]!)
+  for (let i = 0; i < order.length; i++) {
+    for (let j = i + 1; j < order.length; j++) {
+      for (const a of order[i]!) {
         for (const b of order[j]!) {
           const p = sampled.get(a)!,
             q = sampled.get(b)!
@@ -92,6 +93,9 @@ function bundleCrossings(order: readonly Segment[][]): number {
           if (found.length && (a.to === b.to || a.from === b.from)) converging++
           for (const point of found) places.add(`${Math.round(point.x / 4)},${Math.round(point.y / 4)}`)
         }
+      }
+    }
+  }
   return places.size + converging * 1000
 }
 

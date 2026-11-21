@@ -96,10 +96,11 @@ test('scrubbing a new table forward and back keeps cards apart, links attached a
       expect(frame.width, 'framing is stable').toBeCloseTo(first.width, 0)
       expect(frame.height, 'framing is stable').toBeCloseTo(first.height, 0)
       const visible = frame.tables.filter(table => table.opacity > 0.01)
-      for (const [index, a] of visible.entries())
+      for (const [index, a] of visible.entries()) {
         for (const b of visible.slice(index + 1)) {
           expect(overlaps(a, b), `${a.id} overlaps ${b.id} at ${progress}`).toBe(false)
         }
+      }
       for (const link of frame.links) {
         const dependent = 'table:' + link.key.replace(/^column:/, '').split('.')[0]
         const card = frame.tables.find(table => table.id === dependent)!
@@ -179,10 +180,11 @@ test('tags make room, rename and arrive without overlapping', async ({page}) => 
   await renderer.scrub(samples(50, {roundTrip: true}), async progress => {
     const {tags} = await geometry(renderer.frame)
     const visible = tags.filter(tag => tag.opacity > 0.01)
-    for (const [index, x] of visible.entries())
+    for (const [index, x] of visible.entries()) {
       for (const y of visible.slice(index + 1)) {
         expect(overlaps(x, y), `${x.id} overlaps ${y.id} at ${progress}`).toBe(false)
       }
+    }
     if (progress === 0) expect(visible.map(tag => tag.id).sort()).toEqual(['index:IX_B', 'index:IX_New'])
     if (progress === 1) expect(visible.map(tag => tag.id).sort()).toEqual(['index:IX_B', 'index:IX_C', 'index:IX_New'])
   })
@@ -226,12 +228,14 @@ test('keys and indexes are rows of their own tables, single-column keys are colu
     await renderer.seek(progress)
     const {tags, cards} = await read()
     expect(tags, `nothing floats free of its table at ${progress}`).toBe(0)
-    for (const card of cards)
-      for (const row of card.rows.filter(row => row.visible))
+    for (const card of cards) {
+      for (const row of card.rows.filter(row => row.visible)) {
         expect(
           row.top >= card.box.top - 0.5 && row.bottom <= card.box.bottom + 0.5,
           `${card.id}'s settled rows stay inside it at ${progress}`,
         ).toBe(true)
+      }
+    }
   }
   await renderer.seek(1)
   const {cards} = await read()
@@ -283,8 +287,9 @@ test('keys of no table wrap centered and balanced, with no holes', async ({page}
     })
     for (const line of lines.lines) {
       // No holes: neighbours sit one gap apart; the line is centered in the room.
-      for (let index = 1; index < line.length; index++)
+      for (let index = 1; index < line.length; index++) {
         expect(line[index]![0]! - (line[index - 1]![0]! + line[index - 1]![1]!), `no hole at ${progress}`).toBeCloseTo(lines.gap, 0)
+      }
       const left = line[0]![0]!,
         right = lines.width - (line.at(-1)![0]! + line.at(-1)![1]!)
       expect(Math.abs(left - right), `centered at ${progress}`).toBeLessThan(2)
@@ -420,8 +425,9 @@ test('status appears in reserved space: nothing moves with highlighting, and eve
       ).toEqual([])
     }
     // A tinted tag always says why.
-    for (const tag of shown.filter(item => item.tinted))
+    for (const tag of shown.filter(item => item.tinted)) {
       expect(tag.text, `${tag.id} states its status at ${progress}`).toMatch(/Added|Removed|Modified|Renamed/)
+    }
   }
   const state = await renderer.state()
   let named = 0
@@ -461,12 +467,13 @@ test("a column row's status is a two-character icon cell, so names and types kee
   for (const row of measured) {
     // Two characters and the row's gap: all a type gives up for its status.
     expect(row.room, `${row.id}'s glyph cell`).toBeLessThanOrEqual(2 * row.ch + 8.5)
-    if (row.glyph)
+    if (row.glyph) {
       expect([row.glyph, row.title, row.word], `${row.id} shows its icon and keeps the word`).toEqual([
         expect.stringMatching(/^(added|removed|modified|renamed)$/),
         row.title,
         row.title,
       ])
+    }
     if (row.glyph) expect(row.title).toMatch(/Added|Removed|Modified|Renamed/)
   }
   expect(measured.filter(row => row.glyph).map(row => `${row.glyph} ${row.title}`)).toContain('added Added')
@@ -489,7 +496,8 @@ test('every name, type, key and value shows whole in every scenario and mode (an
   const {scenarios} = (await read('scenarios.json')) as {scenarios: {id: string; before?: unknown; after?: unknown; extraction?: unknown}[]}
   let checked = 0
   for (const scenario of scenarios)
-    // 1000px is where four ranks of cards sit side by side at their narrowest, which once ellipsized names.
+  // 1000px is where four ranks of cards sit side by side at their narrowest, which once ellipsized names.
+  {
     for (const width of [1440, 1000, 390]) {
       await page.setViewportSize({width: width + 80, height: 1000})
       const subject = scenario.extraction
@@ -524,10 +532,12 @@ test('every name, type, key and value shows whole in every scenario and mode (an
               if (element.closest('svg, .sr-only') || !shown(element) || !element.textContent?.trim()) continue
               const style = getComputedStyle(element)
               // Data (identifiers and everything in them) never ellipsizes; status words are labels, not data.
-              if (element.closest('[data-projections-identifier]') && style.textOverflow === 'ellipsis' && style.overflow !== 'visible')
+              if (element.closest('[data-projections-identifier]') && style.textOverflow === 'ellipsis' && style.overflow !== 'visible') {
                 problems.push(`${describe(element)} can ellipsize`)
-              if (element.scrollWidth > element.clientWidth + 1)
+              }
+              if (element.scrollWidth > element.clientWidth + 1) {
                 problems.push(`${describe(element)} overflows: ${element.scrollWidth} > ${element.clientWidth}`)
+              }
               // Text a card or row holds stays inside it.
               if (![...element.childNodes].some(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())) continue
               const box = element.getBoundingClientRect()
@@ -544,8 +554,9 @@ test('every name, type, key and value shows whole in every scenario and mode (an
                   box.right > outer.right + 0.5 ||
                   box.top < outer.top - 0.5 ||
                   box.bottom > outer.bottom + 0.5
-                )
+                ) {
                   problems.push(`${describe(element)} is clipped by ${holder.className}`)
+                }
               }
             }
             return problems
@@ -553,10 +564,12 @@ test('every name, type, key and value shows whole in every scenario and mode (an
           checked++
           expect(failures, `${scenario.id} at ${width}px, ${comparisonMode ?? 'animated'}, progress ${progress}`).toEqual([])
         }
-        if (comparisonMode)
+        if (comparisonMode) {
           expect(await renderer.frame.locator('.database-view[data-diff]').count(), `${scenario.id} draws the diff`).toBe(1)
+        }
       }
     }
+  }
   expect(checked).toBeGreaterThan(10)
 })
 
@@ -636,8 +649,9 @@ function drawnLinks(view: Element) {
     // The shaft ends at the arrowhead's base; the head's tip is on the target's side.
     const head = view.querySelector(`path.database-arrowhead[data-head-of-link="${CSS.escape(key)}"]`)
     const tip = (head?.getAttribute('d')?.match(/-?[\d.]+/g) ?? []).map(Number)
-    if (to && tip.length >= 2 && !(tip[1]! > place(to).top && tip[1]! < place(to).top + place(to).height))
+    if (to && tip.length >= 2 && !(tip[1]! > place(to).top && tip[1]! < place(to).top + place(to).height)) {
       issues.push(`${key}: enters off its table's ${sides[1]} side`)
+    }
     if (sides[0] === sides[1]) continue
     const along = sides[0] === 'left' ? -1 : 1
     for (let index = 0; index + 3 < points.length; index += 3) {
@@ -658,8 +672,8 @@ function drawnLinks(view: Element) {
   return issues
 }
 
-for (const name of ['prisma-shop', 'django-library'])
-  for (const width of [1440, 390])
+for (const name of ['prisma-shop', 'django-library']) {
+  for (const width of [1440, 390]) {
     test(`${name} at ${width}px: scrubbed both ways in 1% steps, every link leaves and enters its tables' sides, never doubles back, and its head touches the border`, async ({
       page,
     }) => {
@@ -675,9 +689,11 @@ for (const name of ['prisma-shop', 'django-library'])
       })
       expect([...issues].slice(0, 12)).toEqual([])
     })
+  }
+}
 
-for (const name of ['prisma-shop', 'django-library'])
-  for (const width of [1440, 390])
+for (const name of ['prisma-shop', 'django-library']) {
+  for (const width of [1440, 390]) {
     test(`${name} at ${width}px in diff mode: the union's links are drafted like a revision's, and every head touches its table's border`, async ({
       page,
     }) => {
@@ -692,3 +708,5 @@ for (const name of ['prisma-shop', 'django-library'])
       expect(contacts.length).toBeGreaterThan(0)
       expect(contactIssues(contacts)).toEqual([])
     })
+  }
+}

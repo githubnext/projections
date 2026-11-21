@@ -67,8 +67,8 @@ export function moveTrunksOff(ctx: RoutingContext, all: readonly Segment[], runs
     let moved = false
     // The nearest free places first; a few attempts at most.
     let attempts = 0
-    for (let step = 0.5; step <= span && !moved && attempts < 6; step += 0.5)
-      for (const position of [now + step, now - step])
+    for (let step = 0.5; step <= span && !moved && attempts < 6; step += 0.5) {
+      for (const position of [now + step, now - step]) {
         if (fitsBands(ctx, trunk, position) && !close(position)) {
           attempts++
           if (place(position)) {
@@ -76,6 +76,8 @@ export function moveTrunksOff(ctx: RoutingContext, all: readonly Segment[], runs
             break
           }
         }
+      }
+    }
     // No room to move off: the gap must grow by a track.
     if (!moved) ctx.crowding = Math.max(ctx.crowding, trackSpacing)
   }

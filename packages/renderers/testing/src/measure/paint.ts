@@ -62,7 +62,7 @@ export function visuallyHidden(element: Element, style: CSSStyleDeclaration): bo
   const box = element.getBoundingClientRect()
   return (
     (box.width <= 1 && box.height <= 1 && style.overflow === 'hidden') ||
-    /inset\(50%\)/.test(style.clipPath) ||
+    style.clipPath.includes('inset(50%)') ||
     /rect\(0(px)?,? 0(px)?,? 0(px)?,? 0(px)?\)/.test(style.clip)
   )
 }
@@ -92,10 +92,10 @@ export function describe(element: Element): string {
  * Paint and visible text of an entity element and its parts, excluding nested entity elements. A part marked
  * `data-projections-category` paints a categorical colour: its fill and background are recorded by key instead.
  */
-export function paintOf(element: Element): {paint: string; text: string; categories: {[key: string]: string}} {
+export function paintOf(element: Element): {paint: string; text: string; categories: Record<string, string>} {
   const paint: string[] = []
   const text: string[] = []
-  const categories: {[key: string]: string} = {}
+  const categories: Record<string, string> = {}
   const visit = (node: Element, root: boolean) => {
     if (!root && node.hasAttribute('data-entity-id')) return
     // Tooltips, metadata and SVG definitions aren't painted themselves.
@@ -116,8 +116,9 @@ export function paintOf(element: Element): {paint: string; text: string; categor
         'symbol',
         'marker',
       ].includes(node.localName)
-    )
+    ) {
       return
+    }
     const opacity = effectiveOpacity(node)
     if (opacity <= 0.01) return
     const style = getComputedStyle(node)
@@ -129,13 +130,15 @@ export function paintOf(element: Element): {paint: string; text: string; categor
       !(node instanceof SVGElement) &&
       (box.width === 0 || box.height === 0) &&
       (!node.children.length || style.overflow !== 'visible')
-    )
+    ) {
       return
+    }
     if (style.visibility !== 'hidden') {
       const category = node.getAttribute('data-projections-category')
       const categorical = (name: string) => category !== null && (name === 'background-color' || name === 'fill')
-      if (category !== null)
+      if (category !== null) {
         categories[category] = ['background-color', 'fill'].map(name => normalizeColors(style.getPropertyValue(name))).join('|')
+      }
       paint.push(
         `${node.tagName}:${paintProperties
           .map(name =>

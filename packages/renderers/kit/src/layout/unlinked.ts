@@ -32,7 +32,12 @@ interface Stretch extends Span {
   cardAfter: boolean
 }
 
-export type Axes = {flow: 'x' | 'y'; across: 'x' | 'y'; depth: 'width' | 'height'; breadth: 'width' | 'height'}
+export interface Axes {
+  flow: 'x' | 'y'
+  across: 'x' | 'y'
+  depth: 'width' | 'height'
+  breadth: 'width' | 'height'
+}
 
 const span = (a: number, b: number): Span => ({start: Math.min(a, b), end: Math.max(a, b)})
 
@@ -263,12 +268,13 @@ function obstacles(input: ElkInput, boxes: ReadonlyMap<string, Box>, polylines: 
       card: id !== undefined && !input.groups.has(id),
     })
   }
-  for (const chain of polylines.values())
+  for (const chain of polylines.values()) {
     for (let index = 1; index < chain.length; index++) {
       const from = chain[index - 1]!,
         to = chain[index]!
       blocks.push({flow: span(from[flow], to[flow]), across: span(from[across], to[across]), card: false})
     }
+  }
   return blocks
 }
 

@@ -18,16 +18,18 @@ export const contentChecks: Pick<Checks, 'legend' | 'phone-overflow' | 'relation
       // The legend message travels beside the paint acknowledgement; give it a moment.
       await driver.sleep(50)
       const found = await driver.measure<string[]>('legends')
-      if (found.length)
+      if (found.length) {
         failures.push(
           `At ${label(progress)}, the renderer draws ${found.length} legend${found.length === 1 ? '' : 's'} in its frame (${found.join(', ')}); send it to the host instead, which draws it once beside every pane.`,
         )
+      }
       sent.push([progress, JSON.stringify((await driver.state()).legend ?? null)])
     }
     const [first] = sent
     for (const [progress, legend] of sent.slice(1)) {
-      if (legend !== first![1])
+      if (legend !== first![1]) {
         failures.push(`The legend changes while scrubbing: ${first![1]} at ${label(first![0])} but ${legend} at ${label(progress)}.`)
+      }
     }
     return failures
   },
@@ -67,8 +69,9 @@ export const contentChecks: Pick<Checks, 'legend' | 'phone-overflow' | 'relation
   async relationships(driver, subject, {modes, rendererOptions}) {
     if (rendererOptions.showRelationships === false) throw new Skip('The presentation turns relationships off (showRelationships: false).')
     const state = await driver.load(subject, {progress: 1, ...primaryMode(subject, modes)})
-    if (state.capabilities?.drawsRelationships === false)
+    if (state.capabilities?.drawsRelationships === false) {
       throw new Skip('The renderer declares drawsRelationships: false: it deliberately draws no relationships.')
+    }
     await driver.measure('settle')
     const drawn = new Set(await driver.measure<string[]>('entities'))
     const shown = subject.mode === 'comparison' ? subject.after : subject.extraction
@@ -78,12 +81,13 @@ export const contentChecks: Pick<Checks, 'legend' | 'phone-overflow' | 'relation
         ? rendererOptions.relationships
         : undefined
     const expected = shown.relationships.filter(link => drawn.has(link.from) && drawn.has(link.to) && (!kind || link.kind === kind))
-    if (!expected.length)
+    if (!expected.length) {
       throw new Skip(
         kind
           ? `No ${kind} relationship, the kind the presentation draws, connects two entities the renderer draws.`
           : 'No relationship connects two entities the renderer draws.',
       )
+    }
     if (expected.some(link => drawn.has(link.id))) return []
     return [
       `The extraction has ${expected.length} relationship${expected.length === 1 ? '' : 's'} between drawn entities (for example "${expected[0]!.id}"), but no element is marked as one: put the relationship's ID in data-entity-id on what draws it, or declare capabilities.drawsRelationships: false if the renderer deliberately draws none.`,

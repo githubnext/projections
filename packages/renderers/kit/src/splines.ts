@@ -188,8 +188,9 @@ export function followEndpoints(points: Spline, source: Point, target: Point): S
   // its direction. With more than one segment, the first and last (the tail stub and the arrowhead's lead-in) move
   // wholly with their cards, so they keep their length and direction.
   const distances = [0]
-  for (let index = 1; index < points.length; index++)
+  for (let index = 1; index < points.length; index++) {
     distances.push(distances[index - 1]! + Math.hypot(points[index]!.x - points[index - 1]!.x, points[index]!.y - points[index - 1]!.y))
+  }
   const ends = points.length >= 10
   const first = ends ? distances[3]! : 0,
     last = ends ? distances.at(-4)! : distances.at(-1)!
@@ -264,8 +265,9 @@ export function arrowEnding(
       // Snapped onto the axis exactly (a morph between two such tails can stray by a fraction of a unit).
       const onAxis = {x: tip.x - direction.x * run, y: tip.y - direction.y * run}
       const shaft = [...points.slice(0, -4), onAxis, ...lineSpline(onAxis, base).slice(1)]
-      if (points.length > 4)
+      if (points.length > 4) {
         shaft[shaft.length - 5] = {x: shaft[shaft.length - 5]!.x + onAxis.x - p.x, y: shaft[shaft.length - 5]!.y + onAxis.y - p.y}
+      }
       return {shaft, tip, direction, base, head: head.path}
     }
   }

@@ -52,11 +52,11 @@ const record = (value: unknown): Record<string, unknown> =>
  */
 export function agenticWorkflowsFacts({init, model}: SummaryFactContext): SummaryFactItem[] {
   const stale = model.entities.filter(row => {
-    const status = record(record(row.after?.data)['lock'])['status']
+    const status = record(record(row.after?.data).lock).status
     return row.after?.kind === 'workflow' && (status === 'stale' || status === 'missing')
   })
   const facts: SummaryFactItem[] = []
-  if (stale.length)
+  if (stale.length) {
     facts.push({
       type: 'fact',
       id: 'lock-stale',
@@ -65,6 +65,7 @@ export function agenticWorkflowsFacts({init, model}: SummaryFactContext): Summar
       noun: noun('lock file out of date', 'lock files out of date'),
       ids: stale.map(row => row.id),
     })
+  }
   const findings = init.mode === 'comparison' ? findingsOf(init.comparison.metadata) : undefined
   for (const label of warningLabels) {
     const ids = [...(findings ?? [])].filter(([, found]) => found.some(finding => finding.name === label.id)).map(([id]) => id)

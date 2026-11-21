@@ -149,7 +149,7 @@ function Rule({rule, frame, region, run}: {rule: SelectorItem; frame: Frame; reg
   const changed = (read: (entity: Entity) => string) => before && after && read(before) !== read(after)
   const conditionsOf = (entity: Entity) => conditionLines(entity).join('\n')
   const effectOf = (entity: Entity) => effectProse(entity)
-  const labelled = rule.entity.data?.['implicit'] !== true
+  const labelled = rule.entity.data?.implicit !== true
   return (
     <Row
       item={rule}
@@ -161,10 +161,7 @@ function Rule({rule, frame, region, run}: {rule: SelectorItem; frame: Frame; reg
       main={
         <>
           {labelled && (
-            <span
-              className={`rp-name${rule.entity.data?.['label'] ? ' rp-code' : ''}`}
-              {...(rule.entity.data?.['label'] ? identifier : {})}
-            >
+            <span className={`rp-name${rule.entity.data?.label ? ' rp-code' : ''}`} {...(rule.entity.data?.label ? identifier : {})}>
               {rule.entity.label}
             </span>
           )}
@@ -179,7 +176,7 @@ function Rule({rule, frame, region, run}: {rule: SelectorItem; frame: Frame; reg
         <>
           <span
             className="rp-cell rp-effect"
-            data-effect={typeof rule.entity.data?.['effect'] === 'string' ? rule.entity.data['effect'] : undefined}
+            data-effect={typeof rule.entity.data?.effect === 'string' ? rule.entity.data.effect : undefined}
           >
             {changed(effectOf) ? (
               <Changed before={<Effect entity={before} />} after={<Effect entity={after} />} />

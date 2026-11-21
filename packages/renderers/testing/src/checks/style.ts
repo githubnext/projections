@@ -108,8 +108,9 @@ function themed(theme: ThemeColors, light: Rgba | undefined, dark: Rgba | undefi
         const token = tokens.get(name)!
         return distance(color, token) <= colorTolerance && color[3] <= token[3] + 0.02
       })
-    )
+    ) {
       return true
+    }
   }
   // One mix of two opaque tokens, in the same proportion in both modes.
   const opaque = theme.names.filter(name => theme.light.get(name)![3] > 0.99 && theme.dark.get(name)![3] > 0.99)
@@ -184,26 +185,29 @@ function typeFailures(measured: StyleMeasurement, where: string, findings: Findi
     const font = element.font
     if (!font) continue
     const text = `${element.element} ("${font.text}")`
-    if (font.size < textFloor - 0.25)
+    if (font.size < textFloor - 0.25) {
       findings.add(
         `${element.element}|size|${font.size}`,
         `${where}, ${text} is ${font.size}px, below the ${textFloor}px floor; use --projections-font-size-xs or larger.`,
       )
-    else if (!near(font.size, sizes, 0.25))
+    } else if (!near(font.size, sizes, 0.25)) {
       findings.add(
         `${element.element}|size|${font.size}`,
         `${where}, ${text} is ${font.size}px, not on the type scale (${listed(sizes)} px); use --projections-font-size tokens, such as the nearest, ${nearest(font.size, sizes)}px.`,
       )
-    if (families.length && !families.includes(family(font.family)))
+    }
+    if (families.length && !families.includes(family(font.family))) {
       findings.add(
         `${element.element}|family|${font.family}`,
         `${where}, ${text} is set in ${font.family}, not the theme's text or monospace font; use --projections-font-family (buttons and inputs need font: inherit).`,
       )
-    if (tokens.fontWeights.length && !near(font.weight, tokens.fontWeights, 0.5))
+    }
+    if (tokens.fontWeights.length && !near(font.weight, tokens.fontWeights, 0.5)) {
       findings.add(
         `${element.element}|weight|${font.weight}`,
         `${where}, ${text} has font-weight ${font.weight}, not a weight token (${listed(tokens.fontWeights)}).`,
       )
+    }
   }
 }
 

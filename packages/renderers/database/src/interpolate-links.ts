@@ -34,8 +34,9 @@ function linkShapeAt(staged: Staged, key: string, {from, to, mix}: Stage): {shap
 function turnFit(points: readonly {x: number}[], sides: FrameLink['sides']): number {
   const axis = sides[0] === 'left' ? -1 : 1
   let room = Infinity
-  for (let index = 0; index + 1 < points.length; index += 2)
+  for (let index = 0; index + 1 < points.length; index += 2) {
     room = Math.min(room, (points[index + 1]!.x - points[index]!.x) * axis - (index + 2 === points.length ? arrowHeadReach : 0))
+  }
   return smooth((room - turnRoom / 2) / (turnRoom / 2))
 }
 

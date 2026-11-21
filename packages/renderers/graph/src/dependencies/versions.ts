@@ -4,7 +4,7 @@ import type {StatusPart} from '@githubnext/projections-renderer-kit'
 
 /** A package's version: `data.version` (`1.2.3`, `^18.3.0`), if it has one. */
 export function versionOf(entity: Entity | undefined): string | undefined {
-  const version = entity?.data?.['version']
+  const version = entity?.data?.version
   return typeof version === 'string' && version.length > 0 ? version : undefined
 }
 

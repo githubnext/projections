@@ -89,7 +89,7 @@ export interface RendererTheme {
    * Token values by name, at most `rendererLimits.themeTokens`, each at most `rendererLimits.tokenLength` characters;
    * `icon-*` tokens hold icon values (`isIconValue`). Read them through `resolveThemeTokens`, which fills in defaults.
    */
-  tokens: {[name: string]: string}
+  tokens: Record<string, string>
   /** The token set the host follows (`themeTokenSetVersion`). Missing tokens fall back to that set's defaults. */
   version?: number
 }
@@ -111,7 +111,7 @@ export interface RendererProjection {
    * color items by kind (a meaning or a categorical hue, painted with theme tokens) and the summary bar's noun. Hosts
    * send it when the definition sets it; renderers ignore kinds they don't draw.
    */
-  kinds?: {[kind: string]: RendererKind}
+  kinds?: Record<string, RendererKind>
 }
 
 /** How the definition presents one extraction kind (see `RendererProjection.kinds`). */

@@ -112,7 +112,7 @@ export function useStageHeightCap(): number | undefined {
 
 /** The `stage-inset` token's value (or `name`'s, another length token) in CSS px, if it is one. */
 export function stageInsetOf(
-  tokens: {[name: string]: string} | undefined,
+  tokens: Record<string, string> | undefined,
   name: 'stage-inset' | 'stage-inset-top' | 'stage-inset-bottom' = 'stage-inset',
 ): number | undefined {
   const match = /^\s*(\d+(?:\.\d+)?)(px)?\s*$/.exec(tokens?.[name] ?? '')

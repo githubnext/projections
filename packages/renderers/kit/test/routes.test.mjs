@@ -132,8 +132,9 @@ test('every route is drafted: perpendicular stubs, quarter-circle turns as wide 
         // It leaves its source and enters its target perpendicular to their faces.
         const [first] = straightSegments(route.slice(0, 4)),
           [last] = straightSegments(route.slice(-4))
-        if (first)
+        if (first) {
           assert.ok(Math.abs(first.direction.x * axis.x + first.direction.y * axis.y) > 0.9999, `${label}: tail stub not perpendicular`)
+        }
         assert.ok(last && Math.abs(last.direction.x * axis.x + last.direction.y * axis.y) > 0.9999, `${label}: lead not perpendicular`)
         const turn = turnOf(route, layout.ports.get(edge.id), axis)
         if (turn) {
@@ -141,8 +142,9 @@ test('every route is drafted: perpendicular stubs, quarter-circle turns as wide 
           const limit = Math.min(routeRadius, turn.middle - turn.band[0], turn.band[1] - turn.middle)
           assert.ok(minimumRadius(route) >= limit - 0.5, `${label}: radius ${minimumRadius(route).toFixed(1)} < ${limit.toFixed(1)}`)
           // Quarter circles, unless the offset is under two radii (then two shallower arcs meet, with no run between).
-          if (Math.abs(turn.across) >= 2 * turn.radius + 0.5)
+          if (Math.abs(turn.across) >= 2 * turn.radius + 0.5) {
             assert.ok(Math.abs(largestTurn(route) - 90) < 1, `${label}: turns ${largestTurn(route).toFixed(1)}°, not 90°`)
+          }
         } else if (route.length > 4) assert.ok(minimumRadius(route) >= 4, `${label}: radius ${minimumRadius(route).toFixed(1)}`)
         if (inflections(route) <= 1) continue
         // More than one inflection only where a single S between the same ports would cross a card.
@@ -173,8 +175,9 @@ test("an S crosses its gap in the gap's middle (shifted only by a track it share
         `${name} ${edge.id}: run at ${along.toFixed(1)}, not its middle ${turn.middle.toFixed(1)}`,
       )
       // Alone in its gap, it crosses at the middle of the room it may turn in.
-      if (!ports.track)
+      if (!ports.track) {
         assert.ok(Math.abs(turn.middle - (turn.band[0] + turn.band[1]) / 2) < 0.5, `${name} ${edge.id}: run off its band's middle`)
+      }
       checked++
     }
   }
@@ -192,7 +195,7 @@ test('routes converging on one card never cross each other', async () => {
         into.set(edge.to, [...(into.get(edge.to) ?? []), edge])
       }
       for (const [target, edges] of into) {
-        for (let i = 0; i < edges.length; i++)
+        for (let i = 0; i < edges.length; i++) {
           for (let j = i + 1; j < edges.length; j++) {
             const [a, b] = [layout.routes.get(edges[i].id), layout.routes.get(edges[j].id)]
             const shared = edges[i].from === edges[j].from ? [a[0]] : []
@@ -201,6 +204,7 @@ test('routes converging on one card never cross each other', async () => {
               `${name}-${side}: into ${target}, ${edges[i].id} crosses ${edges[j].id}`,
             )
           }
+        }
         // Ports into one card are distinct.
         const ends = edges.map(edge => layout.routes.get(edge.id).at(-1))
         assert.equal(
@@ -226,8 +230,9 @@ test('while scrubbing, every visible route stays tangent-continuous and never wi
         widths: await cardWidths(model.entities, true),
       })
       const atRest = new Map()
-      for (const layout of transition.layouts)
+      for (const layout of transition.layouts) {
         for (const [key, route] of layout.routes) atRest.set(key, Math.max(atRest.get(key) ?? 0, inflections(route)))
+      }
       const issues = new Set()
       for (let index = 0; index <= 200; index++) {
         for (const edge of transition(index / 200).edges) {
@@ -272,8 +277,9 @@ function arrowIssues(name, drawn, box, tolerance = 1e-6, outset = 0) {
     lead = route.at(-4)
   // The shaft ends exactly at the middle of the head's flat base, an arrowhead's length from the tip.
   if (Math.hypot(end.x - drawn.base.x, end.y - drawn.base.y) > tolerance) issues.push(`${name}: shaft ends off the base`)
-  if (Math.abs(Math.hypot(drawn.tip.x - drawn.base.x, drawn.tip.y - drawn.base.y) - arrowHeadLength) > 1e-6)
+  if (Math.abs(Math.hypot(drawn.tip.x - drawn.base.x, drawn.tip.y - drawn.base.y) - arrowHeadLength) > 1e-6) {
     issues.push(`${name}: head length`)
+  }
   // Its last stretch is straight, collinear with the head's axis, and at least the lead-in long.
   const axis = drawn.direction
   for (const point of route.slice(-4)) {
@@ -370,16 +376,18 @@ test('arrowheads stay attached through every frame of every graph scenario, in b
             previous = shaft.at(-2)
           if (Math.hypot(end.x - drawn.base.x, end.y - drawn.base.y) > 0.01) issues.add(`${edge.key} ends off its base at ${index / 200}`)
           const length = Math.hypot(end.x - previous.x, end.y - previous.y)
-          if (length > 0.5 && (drawn.direction.x * (end.x - previous.x) + drawn.direction.y * (end.y - previous.y)) / length < 0.999)
+          if (length > 0.5 && (drawn.direction.x * (end.x - previous.x) + drawn.direction.y * (end.y - previous.y)) / length < 0.999) {
             issues.add(`${edge.key} enters its head at an angle at ${index / 200}`)
+          }
           for (const issue of arrowIssues(
             `${edge.key} at ${index / 200}`,
             {...drawn, points: shaftOf(drawn)},
             cardBox(target),
             0.02,
             cardBorderOutset(),
-          ))
+          )) {
             issues.add(issue)
+          }
         }
       }
       assert.deepEqual([...issues].slice(0, 8), [], `${name}${from === after ? ' (reverse)' : ''}`)
@@ -480,13 +488,14 @@ test("diff mode, as drafted: every stretch an axis-aligned line or a quarter cir
     const issues = []
     for (const edge of edges) for (const issue of draftingIssues(edge.points, routeRadius)) issues.push(`${edge.key}: ${issue}`)
     issues.push(...crowdedRuns(edges, trackSpacing))
-    for (let i = 0; i < edges.length; i++)
+    for (let i = 0; i < edges.length; i++) {
       for (let j = i + 1; j < edges.length; j++) {
         const [a, b] = [edges[i], edges[j]]
         if (a.fromId !== b.fromId) continue
         const shared = [a.points[0], b.points[0], ...(a.toId === b.toId ? [a.points.at(-1), b.points.at(-1)] : [])]
         if (routesCross(a.points, b.points, shared, 6)) issues.push(`${a.key} crosses ${b.key}, which leaves the same card`)
       }
+    }
     assert.deepEqual(issues.slice(0, 8), [], name)
   }
 })
@@ -540,8 +549,9 @@ test('ports on a side divide it evenly (two routes enter at its thirds), clear o
         // As far apart as the side allows: its equal parts, or as many as fit between the corners' insets.
         const sorted = [...ports].sort((a, b) => a - b)
         const step = Math.min(length / (ports.length + 1), (length - 2 * portInset) / (ports.length - 1))
-        if (ports.length > 1 && Math.abs(sorted[1] - sorted[0] - step) > 0.5)
+        if (ports.length > 1 && Math.abs(sorted[1] - sorted[0] - step) > 0.5) {
           issues.push(`spacing ${(sorted[1] - sorted[0]).toFixed(1)}, not ${step.toFixed(1)}`)
+        }
         assert.deepEqual(issues, [], `${name} ${label}: into ${target}`)
       }
     }

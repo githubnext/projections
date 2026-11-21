@@ -112,18 +112,21 @@ const overlaps = (a, b) =>
   a.x < b.x + b.width - 1e-6 && b.x < a.x + a.width - 1e-6 && a.y < b.y + b.height - 1e-6 && b.y < a.y + a.height - 1e-6
 
 test('the diff lays out both revisions once, without overlap', async () => {
-  for (const id of ['prisma-shop', 'django-library', 'organizations', 'cleanup'])
+  for (const id of ['prisma-shop', 'django-library', 'organizations', 'cleanup']) {
     for (const available of [1300, 360]) {
       const model = await modelOf(id)
       const {frame} = createDatabaseDiff(model, {available})
       const cards = frame.tables.map(table => table.change.id)
       // Every card of either revision is drawn.
-      for (const entity of model.entities)
-        if (['table', 'view', 'enum'].includes((entity.after ?? entity.before).kind))
+      for (const entity of model.entities) {
+        if (['table', 'view', 'enum'].includes((entity.after ?? entity.before).kind)) {
           assert.ok(cards.includes(entity.id), `${id}: ${entity.id}`)
+        }
+      }
       for (const [index, table] of frame.tables.entries()) {
-        for (const other of frame.tables.slice(index + 1))
+        for (const other of frame.tables.slice(index + 1)) {
           assert.ok(!overlaps(table.box, other.box), `${id} at ${available}: ${table.change.id}`)
+        }
         // Rows, with their change lines, stay inside their card and never share a slot.
         let bottom = schemaMetrics.header
         for (const item of [...table.columns].sort((a, b) => a.top - b.top)) {
@@ -133,6 +136,7 @@ test('the diff lays out both revisions once, without overlap', async () => {
         assert.ok(bottom <= table.box.height, `${id}: ${table.change.id} holds its rows`)
       }
     }
+  }
 })
 
 test('the diff keeps removed things where they were and marks links by revision', async () => {

@@ -80,11 +80,12 @@ test('cards keep one width through a transition, and one revision has no status 
   const width = graphCardsWidth(model.entities, {comparing: true})
   const widths = new Map(model.entities.map(row => [row.id, width]))
   const transition = await createGraphTransition(model, scheduleSteps(model), {widths})
-  for (let index = 0; index <= 50; index++)
+  for (let index = 0; index <= 50; index++) {
     for (const node of transition(index / 50).nodes) {
       assert.equal(node.width, width, `${node.id} at ${index / 50}`)
       assert.equal(node.height, cardHeight(node.after?.kind ?? node.before.kind), `${node.id} has its footer`)
     }
+  }
   const single = await createGraphTransition(extractionModel(after), [], {widths})
   for (const node of single(1).nodes) assert.equal(node.height, cardHeight(node.after.kind) - cardFooterHeight, `${node.id}: no footer`)
 })
@@ -138,8 +139,9 @@ test('a kind reads in sentence case, except a name written in lowercase', () => 
 
 test("a card's kind line makes room for its icon, and only a known icon takes room", () => {
   assert.ok(isCardIconName('terminal') && cardIconNames.includes('git-compare'))
-  for (const name of ['', 'Terminal', 'not-an-icon', '<svg>', 'constructor', 'toString', 42, null])
+  for (const name of ['', 'Terminal', 'not-an-icon', '<svg>', 'constructor', 'toString', 42, null]) {
     assert.equal(isCardIconName(name), false, name)
+  }
   const kindLine = () => ({text: 'Rust crate component'})
   const plain = graphCardWidth(one(), {kindLine})
   assert.equal(graphCardWidth(one(), {kindLine, icon: () => 'terminal'}), Math.ceil((32 + cardIconRoom + 20 * 6.6) / 4) * 4)

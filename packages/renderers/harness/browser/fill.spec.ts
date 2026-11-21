@@ -100,8 +100,9 @@ for (const {key, content, stage: stageSelector, fit} of cases) {
       expect(m.content.top - m.stage.top, 'opens at the top of the content').toBeGreaterThanOrEqual(-1)
     }
     // How small the text is drawn is information.
-    if (Number.isFinite(m.smallestText))
+    if (Number.isFinite(m.smallestText)) {
       testInfo.annotations.push({type: 'smallest text', description: `${m.smallestText.toFixed(1)}px at scale ${m.scale.toFixed(3)}`})
+    }
     if (!m.overflows) {
       // Centred both ways, with no more than the padding between it and the stage on the fitted axis.
       expect(Math.abs((m.content.left + m.content.right) / 2 - (m.stage.left + m.stage.right) / 2)).toBeLessThan(2)

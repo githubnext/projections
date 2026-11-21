@@ -45,10 +45,11 @@ export function attachProbes(context: Context, hooks: Map<string, HookItem>) {
     if (item.entity.kind !== 'selector') continue
     probes.get(placed(context, item).probeOf.get(item.row.id) ?? '')?.selectors.push({...item, chips: chipsOf(context, item)})
   }
-  const ordinal = (item: Item) => (typeof item.entity.data?.['ordinal'] === 'number' ? item.entity.data['ordinal'] : 0)
+  const ordinal = (item: Item) => (typeof item.entity.data?.ordinal === 'number' ? item.entity.data.ordinal : 0)
   for (const probe of probes.values()) probe.selectors.sort((a, b) => ordinal(a) - ordinal(b) || compareIds(a.row.id, b.row.id))
-  for (const hook of hooks.values())
+  for (const hook of hooks.values()) {
     hook.probes.sort(
       (a, b) => collator.compare(a.policy?.entity.label ?? '', b.policy?.entity.label ?? '') || compareIds(a.row.id, b.row.id),
     )
+  }
 }

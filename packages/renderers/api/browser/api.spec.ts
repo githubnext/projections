@@ -257,8 +257,9 @@ for (const [mode, width] of [
     ])
     for (const line of lines) {
       expect(line.status.length, line.id).toBeGreaterThan(0)
-      for (const part of line.status)
+      for (const part of line.status) {
         expect(part, `${line.id} ${part.text}`).toEqual({text: part.text, belowName: true, inside: true, whole: true})
+      }
     }
     expect(lines.find(line => line.id === 'getJson')!.status.map(part => part.text)).toEqual(['Renamed', 'Modified'])
     const long = lines.find(line => line.id === 'RequestConfiguration.maximumRedirectsBeforeFailing')!
@@ -290,8 +291,9 @@ for (const [mode, width] of [
     expect(lines.length).toBeGreaterThan(10)
     expect(lines.filter(line => line.ellipsis).map(line => line.id)).toEqual([])
     for (const line of lines) {
-      for (const part of line.status)
+      for (const part of line.status) {
         expect(part, `${line.id} ${part.text}`).toEqual({text: part.text, belowName: true, inside: true, whole: true})
+      }
     }
     const previous = await renderer.frame
       .locator('.api-previous-label [data-projections-identifier]')

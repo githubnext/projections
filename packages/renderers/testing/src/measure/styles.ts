@@ -27,7 +27,7 @@ export function styleTokens(): StyleTokens {
   }
   const lengths = (names: readonly string[]) => [...new Set(names.map(name => parseFloat(tokenValue(name))).filter(Number.isFinite))]
   const names = themeTokenNames as readonly string[]
-  const colors: {[name: string]: string} = {}
+  const colors: Record<string, string> = {}
   // Theme colors, and the categorical palette (`chart-*`).
   for (const name of names) if (/^(color|chart)-/.test(name) && tokenValue(name)) colors[name] = resolveColor(tokenValue(name))
   const tokens: StyleTokens = {
@@ -64,11 +64,13 @@ export function styleSystem(root: Element = document.body): StyleMeasurement {
     if (
       element.hasAttribute('data-projections-host-overlay') ||
       ['SCRIPT', 'STYLE', 'TEMPLATE', 'HEAD', 'DEFS', 'defs'].includes(element.tagName)
-    )
+    ) {
       return
+    }
     if (element.hasAttribute('data-projections-off-system')) {
-      if (visible(element))
+      if (visible(element)) {
         exemptions.push(`${describe(element)}: ${element.getAttribute('data-projections-off-system') || '(no reason given)'}`)
+      }
       return
     }
     const style = getComputedStyle(element)

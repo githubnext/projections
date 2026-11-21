@@ -59,8 +59,9 @@ export function readableId(id: string): string {
 export function qualifiedNames(extraction: Extraction): Map<string, string> {
   const labels = new Map(extraction.entities.map(entity => [entity.id, entity.label]))
   const parent = new Map<string, string>()
-  for (const relationship of extraction.relationships)
+  for (const relationship of extraction.relationships) {
     if (relationship.kind === 'contains' && labels.has(relationship.from)) parent.set(relationship.to, relationship.from)
+  }
   const names = new Map<string, string>()
   for (const {id, label} of extraction.entities) {
     const parts = [label]

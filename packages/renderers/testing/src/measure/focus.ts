@@ -18,8 +18,13 @@ export async function focusFailures(id: string): Promise<string[]> {
   const target = (element.matches(focusable) ? element : element.querySelector(focusable)) as (HTMLElement | SVGElement) | null
   if (!target) return []
   let outermost: Element = element
-  for (let cursor = element.parentElement?.closest('[data-entity-id]'); cursor; cursor = cursor.parentElement?.closest('[data-entity-id]'))
+  for (
+    let cursor = element.parentElement?.closest('[data-entity-id]');
+    cursor;
+    cursor = cursor.parentElement?.closest('[data-entity-id]')
+  ) {
     outermost = cursor
+  }
   const unit = target.closest('[data-projections-unit][data-entity-id]') ?? outermost
   const properties = [
     'outline-style',
@@ -53,10 +58,11 @@ export async function focusFailures(id: string): Promise<string[]> {
     const failures: string[] = []
     const style = getComputedStyle(target)
     const outline = style.outlineStyle !== 'none' ? parseFloat(style.outlineWidth) || 0 : 0
-    if (outline > 0 && target instanceof SVGElement)
+    if (outline > 0 && target instanceof SVGElement) {
       failures.push(
         `${id} draws an outline on an SVG element, around its bounding box; the SDK rings its marked edge (data-projections-edge) instead`,
       )
+    }
     if (outline > 0) {
       const grow = Math.max(0, outline + (parseFloat(style.outlineOffset) || 0))
       const box = target.getBoundingClientRect(),
@@ -66,15 +72,17 @@ export async function focusFailures(id: string): Promise<string[]> {
         box.top - grow < outer.top - 0.5 ||
         box.right + grow > outer.right + 0.5 ||
         box.bottom + grow > outer.bottom + 0.5
-      )
+      ) {
         failures.push(
           `the focus ring of ${id} extends outside its item (the nearest data-projections-unit element around the focused element, or the outermost entity element); the SDK rings the item: draw no outline of your own`,
         )
+      }
     }
-    if (signature() === before)
+    if (signature() === before) {
       failures.push(
         `focusing ${id} changes nothing painted: give its focusable element (<${target.tagName.toLowerCase()}>, the entity element or its first focusable descendant) a :focus-visible style`,
       )
+    }
     return failures
   } finally {
     target.blur()

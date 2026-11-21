@@ -16,12 +16,13 @@ export function checkTransitionFrame(frame, {width = 300, height = 100} = {}) {
   const errors = []
   const cards = new Map(frame.units.map(unit => [unit.id, unit]))
   const visible = frame.units.filter(unit => unit.opacity > 0.01)
-  for (let i = 0; i < visible.length; i++)
+  for (let i = 0; i < visible.length; i++) {
     for (let j = i + 1; j < visible.length; j++) {
       const a = {...visible[i], width, height},
         b = {...visible[j], width, height}
       if (overlaps(a, b)) errors.push(`cards overlap: ${a.id} / ${b.id}`)
     }
+  }
   for (const link of frame.links) {
     const from = cards.get(link.fromId),
       to = cards.get(link.toId)
@@ -103,13 +104,14 @@ export function checkRenderedFrame(frame, {tolerance = 1.5} = {}) {
   const errors = []
   const cards = new Map(frame.cards.map(card => [card.id, card]))
   const visible = frame.cards.filter(card => card.opacity > 0.01)
-  for (let i = 0; i < visible.length; i++)
+  for (let i = 0; i < visible.length; i++) {
     for (let j = i + 1; j < visible.length; j++) {
       const a = visible[i].box,
         b = visible[j].box
       const centre = rect => ({x: rect.x + rect.width / 2, y: rect.y + rect.height / 2, width: rect.width, height: rect.height})
       if (overlaps(centre(a), centre(b), 0.5)) errors.push(`cards overlap: ${visible[i].id} / ${visible[j].id}`)
     }
+  }
   for (const link of frame.links) {
     const from = cards.get(link.from),
       to = cards.get(link.to)
@@ -142,7 +144,8 @@ export function checkRenderedFrame(frame, {tolerance = 1.5} = {}) {
       }
     }
   }
-  if ((frame.progress === 0 || frame.progress === 1) && frame.emphasis)
+  if ((frame.progress === 0 || frame.progress === 1) && frame.emphasis) {
     errors.push(`${frame.emphasis} emphasized elements at endpoint ${frame.progress}`)
+  }
   return errors
 }

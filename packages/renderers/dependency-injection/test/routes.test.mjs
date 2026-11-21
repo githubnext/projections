@@ -18,7 +18,7 @@ function pathSpline(d) {
     const points = []
     for (let index = 0; index + 1 < numbers.length; index += 2) points.push({x: Number(numbers[index]), y: Number(numbers[index + 1])})
     if (command === 'M') chain.push(points[0])
-    else if (command === 'L')
+    else if (command === 'L') {
       for (const point of points) {
         const last = chain.at(-1)
         chain.push(
@@ -27,7 +27,7 @@ function pathSpline(d) {
           point,
         )
       }
-    else if (command === 'C') chain.push(...points)
+    } else if (command === 'C') chain.push(...points)
     numbers = []
   }
   for (const token of tokens) {
@@ -59,13 +59,14 @@ test("diff mode, as drafted: every arrow is axis-aligned lines and quarter circl
     const issues = []
     for (const arrow of arrows) for (const issue of draftingIssues(arrow.points, routeRadius)) issues.push(`${arrow.key}: ${issue}`)
     issues.push(...crowdedRuns(arrows, trackSpacing))
-    for (let i = 0; i < arrows.length; i++)
+    for (let i = 0; i < arrows.length; i++) {
       for (let j = i + 1; j < arrows.length; j++) {
         const [a, b] = [arrows[i], arrows[j]]
         if (a.fromId !== b.fromId) continue
         const shared = [a.points[0], b.points[0], ...(a.toId === b.toId ? [a.points.at(-1), b.points.at(-1)] : [])]
         if (routesCross(a.points, b.points, shared, 6)) issues.push(`${a.key} crosses ${b.key}, which leaves the same card`)
       }
+    }
     // Arrows into a card from above meet its top spread evenly over a centred band, in the order they come from.
     const into = new Map()
     for (const link of diff.links) {
@@ -82,8 +83,9 @@ test("diff mode, as drafted: every arrow is axis-aligned lines and quarter circl
         box.width,
         portSpacing,
         portInset,
-      ))
+      )) {
         issues.push(`into ${id}: ${issue}`)
+      }
     }
     assert.deepEqual(issues.slice(0, 8), [], name)
   }

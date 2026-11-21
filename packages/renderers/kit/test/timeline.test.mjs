@@ -93,7 +93,7 @@ test('compiled step windows never overlap and stay inside [0, 1]', () => {
 })
 
 test('entities move continuously and the reverse comparison mirrors the motion exactly', async () => {
-  for (const [fixture, states] of fixtures)
+  for (const [fixture, states] of fixtures) {
     for (const [removed, added] of shapes) {
       const {before, after} = states(removed, added)
       const shape = `${fixture} ${removed}/${added}`
@@ -121,6 +121,7 @@ test('entities move continuously and the reverse comparison mirrors the motion e
       // A full lane is 228px wide; a teleport shows up as a jump of that magnitude.
       assert.ok(worst < 48, `${shape}: nodes jumped ${worst.toFixed(1)}px in one 1/2000 step`)
     }
+  }
 })
 
 test('visible cards never overlap while the layout reflows, in either orientation', async () => {
@@ -159,7 +160,7 @@ test('visible cards never overlap while the layout reflows, in either orientatio
         assert.ok(Math.hypot(node.x - other.x, node.y - other.y) < 1e-8)
       }
       const cards = frame.nodes.filter(node => node.opacity > 0.01)
-      for (let i = 0; i < cards.length; i++)
+      for (let i = 0; i < cards.length; i++) {
         for (let j = i + 1; j < cards.length; j++) {
           const a = cards[i],
             b = cards[j]
@@ -168,6 +169,7 @@ test('visible cards never overlap while the layout reflows, in either orientatio
             `${orientation} collision at ${progress}: ${a.id} / ${b.id}`,
           )
         }
+      }
     }
   }
 })
@@ -262,7 +264,7 @@ test('dropping a link between survivors never strands a card in a rank neither r
       right = Math.max(...boxes.map(box => box.x + box.width / 2))
     const top = Math.min(...boxes.map(box => box.y - box.height / 2)),
       bottom = Math.max(...boxes.map(box => box.y + box.height / 2))
-    for (let index = 0; index <= 400; index++)
+    for (let index = 0; index <= 400; index++) {
       for (const node of transition(index / 400).nodes) {
         assert.ok(
           node.x - node.width / 2 >= left - 1e-6 &&
@@ -272,11 +274,12 @@ test('dropping a link between survivors never strands a card in a rank neither r
           `${name}: ${node.id} leaves the framing`,
         )
       }
+    }
   }
 })
 
 test('holds produce zero motion: graph and staged frames are constant inside every hold', async () => {
-  for (const [fixture, states] of fixtures)
+  for (const [fixture, states] of fixtures) {
     for (const [removed, added] of [
       [3, 3],
       [5, 0],
@@ -303,6 +306,7 @@ test('holds produce zero motion: graph and staged frames are constant inside eve
         }
       }
     }
+  }
 })
 
 test('a custom comparator order changes the visual order', async () => {
@@ -376,11 +380,12 @@ test('an explicit reverse order is presented when playing backward, through the 
   )
   assert.ok(!mirrored.has('old0') && !mirrored.has('new0'))
   // Endpoints agree whichever schedule is presented.
-  for (const t of [0, 1])
+  for (const t of [0, 1]) {
     assert.equal(
       JSON.stringify(graph(t).nodes.map(node => [node.id, node.opacity])),
       JSON.stringify((await createGraphTransition(model, scheduleSteps(model, 1)))(t).nodes.map(node => [node.id, node.opacity])),
     )
+  }
   assert.equal(latch.update(0.5, 1), -1, 'the latch keeps the backward timeline until an endpoint')
 })
 
@@ -398,12 +403,14 @@ test("change emphasis is scoped to each change's own step, neutral at the endpoi
     const emphasis = stepEmphasis(schedule, t, diffEmphasis(t))
     if (t < addition.time - addition.radius) assert.equal(emphasis(row('new0')), 0, `an arrival is not tinted before its step at ${t}`)
     if (t < removal.time - removal.radius) assert.equal(emphasis(row('old0')), 0, `a removal is not tinted before its step at ${t}`)
-    if (t > addition.time - addition.radius * 0.4 && t < 0.88)
+    if (t > addition.time - addition.radius * 0.4 && t < 0.88) {
       assert.ok(emphasis(row('new0')) > 0.99 * diffEmphasis(t), `rises with its window at ${t}`)
+    }
     assert.equal(emphasis(row('keep')), 0, 'unchanged rows are never tinted')
   }
-  for (const t of [0, 1])
+  for (const t of [0, 1]) {
     for (const id of ['old0', 'new0']) assert.equal(stepEmphasis(schedule, t, diffEmphasis(t))(row(id)), 0, `neutral at ${t}`)
+  }
   // Explicit reverse order: travelling backward, a change is untinted until its backward step begins.
   const explicit = comparisonModel(before, after, {...comparison, order: {reverse: 'explicit'}, reverseSteps: [...comparison.steps]})
   const backward = scheduleSteps(explicit, -1)

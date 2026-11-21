@@ -43,7 +43,7 @@ export function mountRenderer<const A extends readonly RendererAccepts[] | undef
  * Runs `handlers[id]` when the host activates the declared action control
  * `id`, for as long as the component is mounted.
  */
-export function useControlActions(onAction: RendererProps['onAction'], handlers: {[id: string]: () => void}): void {
+export function useControlActions(onAction: RendererProps['onAction'], handlers: Record<string, () => void>): void {
   const latest = useRef(handlers)
   useEffect(() => {
     latest.current = handlers

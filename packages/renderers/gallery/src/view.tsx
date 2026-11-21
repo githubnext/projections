@@ -118,8 +118,9 @@ export function GalleryView(props: Props) {
   const eager = content || total <= eagerScenarios
   const [playing, setPlaying] = useState<string | null>(null)
   const [sides, setSides] = useState<Record<string, 'before' | 'after'>>({})
-  if (!shown.length)
+  if (!shown.length) {
     return <EmptyDomain>No scenarios. Add a scenarios.json beside a renderer, or widen the extractor's include.</EmptyDomain>
+  }
 
   const select = (id: string) => {
     if (selectedId !== id) onSelect(id)

@@ -94,11 +94,12 @@ test("a link's source dot takes its line's color while the link is hovered or se
     await (state === 'hover' ? renderer.hover(id) : renderer.select(id))
     await expect.poll(async () => (await colors()).line, `${state}: the line takes the ring's color`).not.toBe(resting)
     // Close-ups for review: SOURCE_DOT_SHOTS=<directory>.
-    if (process.env.SOURCE_DOT_SHOTS && state === 'hover')
+    if (process.env.SOURCE_DOT_SHOTS && state === 'hover') {
       await page.screenshot({
         path: `${process.env.SOURCE_DOT_SHOTS}/dependency-injection-${info.project.name}.png`,
         clip: await clipAround(ring),
       })
+    }
     const {line, dot} = await colors()
     expect(dot, `${state}: the source dot takes the line's color`).toBe(line)
     await (state === 'hover' ? renderer.hover(null) : renderer.select(null))

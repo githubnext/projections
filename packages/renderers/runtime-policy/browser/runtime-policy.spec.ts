@@ -25,10 +25,11 @@ async function layout(renderer: RendererHandle) {
     overflow: document.documentElement.scrollWidth > innerWidth + 1,
   }))
   const sorted = [...read.units].sort((a, b) => a.top - b.top)
-  for (let index = 1; index < sorted.length; index++)
+  for (let index = 1; index < sorted.length; index++) {
     expect(sorted[index]!.top, `${sorted[index]!.id} overlaps ${sorted[index - 1]!.id}`).toBeGreaterThanOrEqual(
       sorted[index - 1]!.bottom - 0.5,
     )
+  }
   expect(read.overflow, 'horizontal overflow').toBe(false)
   return read
 }
@@ -246,8 +247,9 @@ test('panels clip their rows to their corners, rows are divided, and a removed l
     ['', true],
     ['', true],
   ])
-  for (const code of ['arg0', 'file', '/root/.ssh', '/home', '/var/run/secrets/kubernetes.io/serviceaccount', '10.0.0.0/8', '127.0.0.1'])
+  for (const code of ['arg0', 'file', '/root/.ssh', '/home', '/var/run/secrets/kubernetes.io/serviceaccount', '10.0.0.0/8', '127.0.0.1']) {
     expect(read.code).toContain(code)
+  }
 })
 
 test('each section is a titled panel: its title in the UI font in a band inside its edge, then its table', async ({page}) => {

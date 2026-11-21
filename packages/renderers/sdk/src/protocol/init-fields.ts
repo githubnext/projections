@@ -6,16 +6,17 @@ import type {RendererKind} from './frame.js'
 import {label, record} from './validation.js'
 
 /** A definition's kind presentation, keeping only well-formed entries (see `RendererProjection.kinds`). */
-export function parseKinds(value: unknown): {[kind: string]: RendererKind} | undefined {
+export function parseKinds(value: unknown): Record<string, RendererKind> | undefined {
   if (!record(value)) return undefined
-  const kinds: {[kind: string]: RendererKind} = {}
+  const kinds: Record<string, RendererKind> = {}
   for (const [kind, entry] of Object.entries(value).slice(0, 64)) {
     if (!kind || kind.length > rendererLimits.summaryKind || !record(entry)) continue
     const {color, noun} = entry
     const parsed: RendererKind = {}
     if (typeof color === 'string' && (kindColors as readonly string[]).includes(color)) parsed.color = color as KindColor
-    if (record(noun) && label(noun.singular, rendererLimits.summaryNoun) && label(noun.plural, rendererLimits.summaryNoun))
+    if (record(noun) && label(noun.singular, rendererLimits.summaryNoun) && label(noun.plural, rendererLimits.summaryNoun)) {
       parsed.noun = {singular: noun.singular, plural: noun.plural}
+    }
     if (parsed.color || parsed.noun) kinds[kind] = parsed
   }
   return Object.keys(kinds).length ? kinds : undefined

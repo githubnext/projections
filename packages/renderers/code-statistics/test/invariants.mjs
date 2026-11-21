@@ -49,11 +49,13 @@ export function checkRenderedFrame(frame, {rowHeight} = {}) {
     if (!(slot.opacity >= 0 && slot.opacity <= 1)) errors.push(`${slot.id} opacity ${slot.opacity}`)
     if (slot.width !== null && !(slot.width >= 0 && slot.width <= 100 + 1e-9)) errors.push(`${slot.id} bar width ${slot.width}%`)
     if (slot.opacity > slot.size + 1e-9) errors.push(`${slot.id} is visible (${slot.opacity}) beyond its slot (${slot.size})`)
-    if (rowHeight && Math.abs(slot.height - rowHeight * slot.size) > 1.5)
+    if (rowHeight && Math.abs(slot.height - rowHeight * slot.size) > 1.5) {
       errors.push(`${slot.id} slot height ${slot.height} for size ${slot.size}`)
+    }
   }
-  if ((frame.progress === 0 || frame.progress === 1) && frame.emphasis)
+  if ((frame.progress === 0 || frame.progress === 1) && frame.emphasis) {
     errors.push(`${frame.emphasis} emphasized elements at endpoint ${frame.progress}`)
+  }
   return errors
 }
 

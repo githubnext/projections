@@ -31,16 +31,18 @@ export function inkBounds([shownUrl, hiddenUrl, within]: [string, string, InkBou
     const rows = new Array<number>(height).fill(0)
     const columns = new Array<number>(width).fill(0)
     const differences: number[] = []
-    for (let y = Math.max(0, Math.floor(within.top)); y < Math.min(height, Math.ceil(within.bottom)); y++)
+    for (let y = Math.max(0, Math.floor(within.top)); y < Math.min(height, Math.ceil(within.bottom)); y++) {
       for (let x = Math.max(0, Math.floor(within.left)); x < Math.min(width, Math.ceil(within.right)); x++) {
         const at = (y * width + x) * 4
         let difference = 0
-        for (let channel = 0; channel < 3; channel++)
+        for (let channel = 0; channel < 3; channel++) {
           difference = Math.max(difference, Math.abs(shown.data[at + channel]! - hidden.data[at + channel]!))
+        }
         rows[y] = Math.max(rows[y]!, difference)
         columns[x] = Math.max(columns[x]!, difference)
         if (difference > 2) differences.push(difference)
       }
+    }
     if (!differences.length) return null
     // Full coverage: most of what is drawn covers its pixels whole (a fill, a glyph's stems at a device scale of 2), so a
     // high percentile of the differences, not their maximum, which a stray antialiased pixel can set.

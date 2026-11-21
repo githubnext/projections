@@ -14,9 +14,9 @@ export function cleanPolyline(polyline: readonly Point[]): Point[] {
     const last = points.at(-1)
     if (last && Math.hypot(point.x - last.x, point.y - last.y) < 0.01) continue
     const previous = points.at(-2)
-    if (previous && last && Math.abs((last.x - previous.x) * (point.y - last.y) - (last.y - previous.y) * (point.x - last.x)) < 0.01)
+    if (previous && last && Math.abs((last.x - previous.x) * (point.y - last.y) - (last.y - previous.y) * (point.x - last.x)) < 0.01) {
       points[points.length - 1] = point
-    else points.push(point)
+    } else points.push(point)
   }
   return points
 }

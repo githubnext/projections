@@ -106,11 +106,12 @@ test('routes rank-skipping links around cards', async () => {
   const frame = transition(1)
   const skip = frame.links.find(link => name(link.dependent) === 'Invoices' && name(link.principal) === 'Organizations')
   assert.ok(skip.points.length > 2, 'skip link has interior waypoints')
-  for (const point of skip.points.slice(1, -1))
+  for (const point of skip.points.slice(1, -1)) {
     for (const card of frame.tables) {
       const {x, y, width, height} = card.box
       assert.ok(!(point.x > x && point.x < x + width && point.y > y && point.y < y + height), `waypoint inside ${card.change.id}`)
     }
+  }
 })
 
 test('the status glyph cell costs no card width: ranks stay side by side, cards at least the usual width', async () => {
@@ -172,10 +173,11 @@ for (const available of [1100, 980, 480]) {
       assert.equal(frame.width, final.width, 'framing is stable')
       assert.equal(frame.height, final.height, 'framing is stable')
       const visible = frame.tables.filter(item => item.opacity > 0)
-      for (let i = 0; i < visible.length; i++)
+      for (let i = 0; i < visible.length; i++) {
         for (let j = i + 1; j < visible.length; j++) {
           assert.ok(!overlaps(visible[i].box, visible[j].box), `${visible[i].change.id} overlaps ${visible[j].change.id} at ${progress}`)
         }
+      }
       for (const card of frame.tables) {
         assert.ok(card.box.x >= -1e-9 && card.box.y >= -1e-9, 'cards stay inside the canvas')
         assert.ok(card.box.x + card.box.width <= frame.width + 1e-6 && card.box.y + card.box.height <= frame.height + 1e-6)
@@ -196,10 +198,11 @@ for (const available of [1100, 980, 480]) {
       // Readable rows never sit on top of each other, even when a column becomes a key and moves up.
       for (const card of frame.tables) {
         const readable = card.columns.filter(column => column.opacity > 0.5)
-        for (const [index, a] of readable.entries())
+        for (const [index, a] of readable.entries()) {
           for (const b of readable.slice(index + 1)) {
             assert.ok(Math.abs(a.top - b.top) >= schemaMetrics.row - 0.5, `${a.change.id} overlaps ${b.change.id} at ${progress}`)
           }
+        }
       }
       // Links never outlive (or precede) their cards and rows.
       for (const link of frame.links) {
@@ -250,8 +253,9 @@ test('the reverse comparison mirrors the motion', async () => {
     )
     for (const card of a.tables) {
       const other = b.tables.find(item => item.change.id === card.change.id)
-      for (const key of ['x', 'y', 'width', 'height'])
+      for (const key of ['x', 'y', 'width', 'height']) {
         assert.ok(Math.abs(card.box[key] - other.box[key]) < 1e-6, `${card.change.id}.${key} at ${progress}`)
+      }
       assert.ok(Math.abs(card.opacity - other.opacity) < 1e-6)
     }
   }
@@ -293,8 +297,9 @@ test('tags rename and arrive in their own steps', async () => {
   assert.equal(tag(1, 'index:IX_C').opacity, 1)
   assert.deepEqual(tag(0, 'index:IX_New').label, {from: 'IX_Old', to: 'IX_Old', mix: 0})
   assert.deepEqual(tag(1, 'index:IX_New').label, {from: 'IX_NewLongerName', to: 'IX_NewLongerName', mix: 0})
-  for (const progress of samples(100))
+  for (const progress of samples(100)) {
     assert.deepEqual(transition(progress).tables[0].box, transition(0).tables[0].box, 'tag changes never move a table')
+  }
 })
 
 const props = (model, progress, highlighting) => ({
@@ -403,8 +408,9 @@ test('Prisma and Django: keys live in their tables, single-column keys are colum
       assert.match(column.marker.key, /foreign-key/)
     }
     // Single-column primary keys are their column's PK marker, never a row.
-    for (const card of frame.tables.filter(card => card.entity.kind === 'table'))
+    for (const card of frame.tables.filter(card => card.entity.kind === 'table')) {
       assert.ok(!card.columns.some(row => row.kind === 'key' && row.key.text === 'id'), `${card.entity.label} has no id key row`)
+    }
   }
   const statusAt = progress => table(prisma.transition(progress), 'enum:OrderStatus'.replace(/^table:/, ''))
   assert.deepEqual(
@@ -451,23 +457,26 @@ test('cards every stage shares keep their relative columns and order: added card
   )
   assert.ok(pairs.some(pair => pair.id === 'prisma-shop') && pairs.some(pair => pair.id === 'django-library'))
   const sign = value => (Math.abs(value) < 0.5 ? 0 : Math.sign(value))
-  for (const pair of pairs)
+  for (const pair of pairs) {
     for (const available of [1100, 1440, 360]) {
       const {transition} = await transitionOf(pair.before, pair.after, {available})
       const layouts = transition.layouts
       for (const [a, b] of [...layouts.slice(1).map((layout, index) => [layouts[index], layout]), [layouts[0], layouts.at(-1)]]) {
         const shared = [...a.tables.keys()].filter(id => b.tables.has(id))
-        for (const [index, first] of shared.entries())
+        for (const [index, first] of shared.entries()) {
           for (const second of shared.slice(index + 1)) {
             const box = (layout, id) => layout.tables.get(id)
             const column = layout => sign(box(layout, first).x - box(layout, second).x)
             const where = `${pair.id} at ${available}px: ${first} and ${second}`
             assert.equal(column(a), column(b), `${where} keep their relative columns`)
-            if (column(a) === 0)
+            if (column(a) === 0) {
               assert.equal(sign(box(a, first).y - box(a, second).y), sign(box(b, first).y - box(b, second).y), `${where} keep their order`)
+            }
           }
+        }
       }
     }
+  }
   // The case that prompted this: Prisma's OrderStatus and Customer share a column and keep their order while Address arrives.
   const {transition} = await transitionOf(await read('fixtures/prisma-shop-before.json'), await read('fixtures/prisma-shop-after.json'))
   const order = progress => {
@@ -507,7 +516,7 @@ test('every link in every frame is drafted from its tables where they are: legal
   for (const name of ['prisma-shop', 'django-library']) {
     const [a, b] = await Promise.all([load(`${name}-before`), load(`${name}-after`)])
     // Desktop (columns) and a phone's width (one stack with gutter lanes), each way.
-    for (const available of [1100, 360])
+    for (const available of [1100, 360]) {
       for (const [from, to, direction] of [
         [a, b, 'forward'],
         [b, a, 'reverse'],
@@ -532,16 +541,18 @@ test('every link in every frame is drafted from its tables where they are: legal
             ]) {
               if (!table) continue
               const x = side === 'left' ? table.box.x : table.box.x + table.box.width
-              if (Math.abs(point.x - x) > 0.01 || point.y <= table.box.y || point.y >= table.box.y + table.box.height)
+              if (Math.abs(point.x - x) > 0.01 || point.y <= table.box.y || point.y >= table.box.y + table.box.height) {
                 issues.add(`${label}: port off its table's ${side} side`)
+              }
             }
             if (link.opacity < 0.05) continue
             // At rest, every turn is as wide as its room allows: a gap's S, or a lane's corner.
             if ((index === 0 || index === 100) && link.shape === 'curved' && link.points.length === 2) {
               const span = Math.abs(link.points[1].x - link.points[0].x) - arrowHeadReach
               const limit = Math.min(linkRadius, (span - 8) / 2 - Math.abs(link.tracks[0] ?? 0))
-              if (Math.abs(link.points[1].y - link.points[0].y) > 0.5 && minimumRadius(route) < limit - 0.5)
+              if (Math.abs(link.points[1].y - link.points[0].y) > 0.5 && minimumRadius(route) < limit - 0.5) {
                 issues.add(`${label}: radius ${minimumRadius(route).toFixed(1)} < ${limit.toFixed(1)}`)
+              }
             }
             for (const other of frame.tables) {
               if (other.opacity < 0.05) continue
@@ -560,6 +571,7 @@ test('every link in every frame is drafted from its tables where they are: legal
         }
         assert.deepEqual([...issues].slice(0, 10), [])
       }
+    }
   }
 })
 
@@ -569,7 +581,7 @@ test("diff mode's union draws every link as a revision does: legal ports, drafte
   const {createDatabaseDiff} = await import('../node_modules/.cache/test/diff.js')
   const {diagonalStraights, largestDeviation, largestKink} = await import('../../kit/test/quality.mjs')
   const load = async name => JSON.parse(await readFile(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
-  for (const name of ['prisma-shop', 'django-library'])
+  for (const name of ['prisma-shop', 'django-library']) {
     for (const available of [1100, 360]) {
       const [a, b] = await Promise.all([load(`${name}-before`), load(`${name}-after`)])
       const model = comparisonModel(a, b, await engine.compare(a, b))
@@ -580,8 +592,9 @@ test("diff mode's union draws every link as a revision does: legal ports, drafte
       for (const link of frame.links) {
         const label = `${name} ${available} diff ${link.key}`
         const route = linkRoute(link)
-        if (link.sides[0] !== link.sides[1] && largestDeviation(route, {x: link.sides[0] === 'left' ? -1 : 1, y: 0}) > 90.5)
+        if (link.sides[0] !== link.sides[1] && largestDeviation(route, {x: link.sides[0] === 'left' ? -1 : 1, y: 0}) > 90.5) {
           issues.push(`${label}: doubles back`)
+        }
         if (largestKink(route) >= 0.5) issues.push(`${label}: kink`)
         if (diagonalStraights(route).length) issues.push(`${label}: diagonal straight`)
         if (link.shape === 'curved' && link.tracks.length !== link.points.length / 2) issues.push(`${label}: tracks`)
@@ -603,12 +616,14 @@ test("diff mode's union draws every link as a revision does: legal ports, drafte
                 point.y > box.y + 1 &&
                 point.y < box.y + box.height - 1,
             )
-          )
+          ) {
             issues.push(`${label}: passes through ${id}`)
+          }
         }
       }
       assert.deepEqual(issues.slice(0, 10), [])
     }
+  }
 })
 
 test('links meeting one row on one side spread evenly over a band centred on its anchor, in the order they come from', async () => {
@@ -619,7 +634,7 @@ test('links meeting one row on one side spread evenly over a band centred on its
   const {portSpacing} = await import('@githubnext/projections-renderer-kit')
   const load = async name => JSON.parse(await readFile(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
   let spread = 0
-  for (const name of ['prisma-shop', 'django-library'])
+  for (const name of ['prisma-shop', 'django-library']) {
     for (const available of [1100, 360]) {
       const [a, b] = await Promise.all([load(`${name}-before`), load(`${name}-after`)])
       const {transition, model} = await transitionOf(a, b, {available})
@@ -631,7 +646,7 @@ test('links meeting one row on one side spread evenly over a band centred on its
       for (const [label, frame] of frames) {
         const tables = new Map(frame.tables.map(item => [item.change.id, item]))
         const groups = new Map()
-        for (const link of frame.links)
+        for (const link of frame.links) {
           for (const [end, table, column, side, point, next] of [
             ['from', link.dependent, link.dependentColumn, link.sides[0], link.points[0], link.points[1]],
             ['to', link.principal, link.principalColumn, link.sides[1], link.points.at(-1), link.points.at(-2)],
@@ -639,6 +654,7 @@ test('links meeting one row on one side spread evenly over a band centred on its
             const key = `${table}\u0000${column ?? ''}\u0000${side}`
             groups.set(key, [...(groups.get(key) ?? []), {table, column, y: point.y, approach: next.y, end, link: link.key}])
           }
+        }
         for (const [key, ends] of groups) {
           const card = tables.get(ends[0].table)
           if (!card) continue
@@ -663,6 +679,7 @@ test('links meeting one row on one side spread evenly over a band centred on its
         }
       }
     }
+  }
   assert.ok(spread > 0, 'some row has several links')
 })
 
@@ -684,8 +701,9 @@ test('tables that reference each other still take ranks of their own, so no link
   for (const [from, to] of [
     ['users', 'licenses'],
     ['users', 'stores'],
-  ])
+  ]) {
     assert.notEqual(depth.get(from), depth.get(to), `${from} and ${to} share a rank`)
+  }
   assert.ok(depth.get('purchases') > Math.max(depth.get('users'), depth.get('stores'), depth.get('licenses')))
 })
 

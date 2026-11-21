@@ -14,8 +14,9 @@ function visibleText(element: Element): string {
       !(node instanceof Element) ||
       node.getAttribute('aria-hidden') === 'true' ||
       ['STYLE', 'SCRIPT', 'TEMPLATE', 'defs', 'title'].includes(node.tagName)
-    )
+    ) {
       return
+    }
     for (const child of node.childNodes) walk(child)
   }
   walk(element)

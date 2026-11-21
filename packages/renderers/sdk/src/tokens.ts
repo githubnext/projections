@@ -217,7 +217,7 @@ export function defaultThemeTokens(colorMode: ColorMode): Record<ThemeTokenName,
 }
 
 /** A host's tokens over the defaults, so every token of the current set is defined. */
-export function resolveThemeTokens(theme: {colorMode: ColorMode; tokens: {[name: string]: string}}): Record<string, string> {
+export function resolveThemeTokens(theme: {colorMode: ColorMode; tokens: Record<string, string>}): Record<string, string> {
   return {...defaultThemeTokens(theme.colorMode), ...theme.tokens}
 }
 

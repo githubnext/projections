@@ -41,7 +41,7 @@ async function delayResizes(page: Page, delay: number): Promise<void> {
   }, delay)
 }
 
-for (const delay of [1500, 10_000])
+for (const delay of [1500, 10_000]) {
   test(`checks measure a frame at its height even when the resize reaches the renderer ${delay / 1000} s late`, async ({page}, info) => {
     test.skip(info.project.name !== 'chromium-desktop', 'One host timing case, in desktop Chromium.')
     test.slow()
@@ -50,6 +50,7 @@ for (const delay of [1500, 10_000])
     expect(result!.details).toEqual([])
     expect(result!.status).toBe('pass')
   })
+}
 
 /**
  * A renderer frame that is slow to reach a rendering opportunity (a loaded machine) observes resizes late, while its

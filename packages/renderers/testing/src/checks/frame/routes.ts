@@ -20,10 +20,11 @@ export const routeChecks: Pick<Checks, 'link-routes'> = {
       const measured = await driver.measure<RouteMeasurement | undefined>('routes')
       if (!measured) throw new Skip("The probe doesn't measure link routes (the 'routes' call).")
       count += measured.count
-      for (const link of measured.crossing)
+      for (const link of measured.crossing) {
         failures.push(
           `${where}, no route around the cards exists for ${link.id}: it is drawn across ${link.crosses.join(', ') || 'a card'}, the way that overlaps them least.`,
         )
+      }
     }
     if (!count) throw new Skip('The renderer routes no links between cards (data-projections-route).')
     return failures.slice(0, limit)

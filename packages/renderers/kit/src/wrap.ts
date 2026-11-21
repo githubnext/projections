@@ -63,11 +63,12 @@ export function balancedWrap(widths: readonly number[], gap: number, available: 
   // Every line width a break set can produce is a contiguous run's width: the smallest that still gives `count` lines is exact.
   const candidates = new Set<number>()
   const widest = Math.max(...widths)
-  for (let start = 0; start < widths.length; start++)
+  for (let start = 0; start < widths.length; start++) {
     for (let end = start + 1; end <= widths.length; end++) {
       const width = lineWidth(widths, start, end, gap)
       if (width >= widest - 1e-6 && width <= Math.max(available, widest) + 1e-6) candidates.add(width)
     }
+  }
   // Greedy line count only falls as the limit grows: binary search for the smallest candidate that keeps `count` lines.
   const sorted = [...candidates].sort((a, b) => a - b)
   let low = 0,

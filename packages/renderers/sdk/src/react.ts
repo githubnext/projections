@@ -123,7 +123,7 @@ export function useRenderer<const A extends readonly RendererAccepts[] | undefin
   client: RendererClient | undefined
   failure: string | undefined
   /** The value of each declared control (from `capabilities.controls` or `useDeclaredOptions`), defaults filled in. */
-  controlValues: {[id: string]: ControlValue}
+  controlValues: Record<string, ControlValue>
 } {
   const [state, setState] = useState<RendererState>({
     init: undefined,
@@ -256,7 +256,7 @@ export function useDeclaredOptions(
   client: RendererClient | undefined,
   controls: readonly RendererControl[],
   options: RendererOptions,
-): {[id: string]: ControlValue} {
+): Record<string, ControlValue> {
   const key = JSON.stringify(controls)
   useEffect(() => {
     if (client) client.declareOptions(JSON.parse(key) as RendererControl[])

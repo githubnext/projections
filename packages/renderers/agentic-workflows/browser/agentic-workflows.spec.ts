@@ -41,12 +41,13 @@ async function layout(renderer: RendererHandle) {
     }),
     overflow: document.documentElement.scrollWidth > innerWidth + 1,
   }))
-  for (const [index, card] of read.cards.entries())
+  for (const [index, card] of read.cards.entries()) {
     for (const other of read.cards.slice(index + 1)) {
       const apart =
         card.right <= other.left + 0.5 || other.right <= card.left + 0.5 || card.bottom <= other.top + 0.5 || other.bottom <= card.top + 0.5
       expect(apart, `${card.id} overlaps ${other.id}`).toBe(true)
     }
+  }
   expect(read.overflow, 'horizontal overflow').toBe(false)
   return read
 }

@@ -9,8 +9,9 @@ export const interactionChecks: Pick<Checks, 'affordances' | 'rings' | 'selectio
     const passes: {mode: {comparisonMode?: ComparisonMode}; where: string; count: number}[] = [
       {mode: primaryMode(subject, modes), where: '', count: maxEntities},
     ]
-    if (subject.mode === 'comparison' && modes.includes('diff') && primaryMode(subject, modes).comparisonMode !== 'diff')
+    if (subject.mode === 'comparison' && modes.includes('diff') && primaryMode(subject, modes).comparisonMode !== 'diff') {
       passes.push({mode: {comparisonMode: 'diff'}, where: 'In diff mode, ', count: Math.ceil(maxEntities / 2)})
+    }
     const failures: string[] = []
     let drawn = 0
     for (const {mode, where, count} of passes) {
@@ -21,9 +22,9 @@ export const interactionChecks: Pick<Checks, 'affordances' | 'rings' | 'selectio
       for (const id of ids) {
         if (state.capabilities?.hover) {
           await driver.hover(id)
-          if (!(await until(async () => (await driver.measure<string[]>('hovered')).includes(id), driver)))
+          if (!(await until(async () => (await driver.measure<string[]>('hovered')).includes(id), driver))) {
             failures.push(`${where}${lower(`Hovering "${id}" from the host isn't shown (no data-projections-hovered element).`)}`)
-          else failures.push(...(await driver.measure<string[]>('affordances')).map(failure => `${where}${lower('Hover')}: ${failure}.`))
+          } else failures.push(...(await driver.measure<string[]>('affordances')).map(failure => `${where}${lower('Hover')}: ${failure}.`))
           await driver.hover(null)
         }
         // Keyboard focus before selection: focus must show on its own.
@@ -48,8 +49,9 @@ export const interactionChecks: Pick<Checks, 'affordances' | 'rings' | 'selectio
     const passes: {mode: {comparisonMode?: ComparisonMode}; where: string; count: number}[] = [
       {mode: primaryMode(subject, modes), where: '', count: maxEntities},
     ]
-    if (subject.mode === 'comparison' && modes.includes('diff') && primaryMode(subject, modes).comparisonMode !== 'diff')
+    if (subject.mode === 'comparison' && modes.includes('diff') && primaryMode(subject, modes).comparisonMode !== 'diff') {
       passes.push({mode: {comparisonMode: 'diff'}, where: 'In diff mode, ', count: Math.ceil(maxEntities / 2)})
+    }
     let drawn = 0
     for (const {mode, where, count} of passes) {
       const state = await driver.load(subject, {progress: 1, ...mode})
@@ -103,20 +105,23 @@ export const interactionChecks: Pick<Checks, 'affordances' | 'rings' | 'selectio
       // Clicking the selected item again clears the selection, as a toggle does; so does a click on the background.
       before = (await reports()).length
       await driver.measure<boolean>('click', id)
-      if (!(await reportsAfter(before, null)) || !(await cleared()))
+      if (!(await reportsAfter(before, null)) || !(await cleared())) {
         failures.push(`Clicking the selected "${id}" again doesn't clear the selection.`)
+      }
       before = (await reports()).length
       await driver.measure<boolean>('click', id)
       if (await reportsAfter(before, id)) {
         before = (await reports()).length
         const background = await driver.measure<boolean>('clickBackground')
-        if (background && (!(await reportsAfter(before, null)) || !(await cleared())))
+        if (background && (!(await reportsAfter(before, null)) || !(await cleared()))) {
           failures.push(`Clicking the background doesn't clear the selection of "${id}".`)
+        }
       }
     }
     await driver.select(null)
-    if (!(await until(async () => !(await driver.measure<string[]>('selected')).includes(id), driver)))
+    if (!(await until(async () => !(await driver.measure<string[]>('selected')).includes(id), driver))) {
       failures.push(`Clearing the host's selection leaves "${id}" marked as selected.`)
+    }
     await driver.select(id)
     if (!(await until(async () => (await driver.measure<string[]>('selected')).includes(id), driver))) {
       failures.push(

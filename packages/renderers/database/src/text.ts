@@ -76,11 +76,12 @@ const separator = /[_./\-,: ]/
 function split(text: string, boundary: (previous: string, current: string) => boolean): string[] {
   const pieces: string[] = []
   let start = 0
-  for (let index = 1; index < text.length; index++)
+  for (let index = 1; index < text.length; index++) {
     if (boundary(text[index - 1]!, text[index]!)) {
       pieces.push(text.slice(start, index))
       start = index
     }
+  }
   pieces.push(text.slice(start))
   return pieces.filter(piece => piece.length > 0)
 }
@@ -270,7 +271,8 @@ export function createTextSizer(
           ...rows(id).map(row => {
             if (rowText(row) + slack <= room.row) return line + 2 * rowPad
             if (row.kind === 'change')
-              // The word, then each value pill under it: its lines, its border and a gap.
+            // The word, then each value pill under it: its lines, its border and a gap.
+            {
               return (
                 2 * rowPad +
                 line +
@@ -279,6 +281,7 @@ export function createTextSizer(
                   0,
                 )
               )
+            }
             const count =
               row.kind === 'column'
                 ? lines('column', row.name, room.row) + lines('type', row.type, room.row)

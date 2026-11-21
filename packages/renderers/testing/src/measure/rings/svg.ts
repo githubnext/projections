@@ -14,12 +14,13 @@ export function svgRingFailures(unit: Element, edges: Element[], name: string, s
   const failures: string[] = []
   const body = largestClosedShape(unit)
   // The topmost shape that draws the edge must be marked: one painted over the marked edge hides its ring.
-  if (body && !edges.includes(body))
+  if (body && !edges.includes(body)) {
     failures.push(
       `${name}'s visible edge is ${describe(body)}, drawn over its marked edge, so it hides the ring: add data-projections-edge to ${describe(body)}`,
     )
+  }
   // A line is highlighted as itself: no outline, shadow or second stroke around it.
-  if (edges.some(edge => edge.getAttribute('data-projections-edge') === 'line'))
+  if (edges.some(edge => edge.getAttribute('data-projections-edge') === 'line')) {
     for (const element of [unit, ...unit.querySelectorAll('*')]) {
       const style = getComputedStyle(element)
       const outlined = style.outlineStyle !== 'none' && px(style.outlineWidth) > 0
@@ -28,6 +29,7 @@ export function svgRingFailures(unit: Element, edges: Element[], name: string, s
         break
       }
     }
+  }
   const changed = edges.some(edge => neutral?.edges.get(edge) !== paintSignature(edge))
   if (neutral && !changed) failures.push(`${name} shows no ${state} ring: its marked edge's stroke doesn't change`)
   return failures

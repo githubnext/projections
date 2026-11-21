@@ -8,10 +8,11 @@ import {format} from './units.js'
 export function ownershipFailures(unit: Element, rest: EdgeInfo, name: string): string[] {
   const failures: string[] = []
   const tolerance = 0.5
-  if (rest.outside > tolerance)
+  if (rest.outside > tolerance) {
     failures.push(
       `${name} draws its edge ${format(rest.outside)} outside its box (a spread box-shadow or an outline with a positive offset), where its ring can't cover it: draw the edge as a border, or as an outline with outline-offset equal to minus its width`,
     )
+  }
   // A bare wrapper: the edge belongs to the card it holds.
   if (!edged(rest) && !rest.surface) {
     const box = rest.box
@@ -48,10 +49,11 @@ export function ownershipFailures(unit: Element, rest: EdgeInfo, name: string): 
     if (gaps.some(gap => gap < -tolerance)) break
     const flush = gaps.map(gap => gap <= tolerance)
     if (!flush.some(Boolean)) {
-      if (gaps.every(gap => gap <= 8))
+      if (gaps.every(gap => gap <= 8)) {
         failures.push(
           `${name} sits ${format(Math.min(...gaps))} inside the edge of ${describe(cursor)}: two concentric edges around its ring. Make ${describe(cursor)} the unit (data-projections-unit), or let ${name} fill it`,
         )
+      }
       break
     }
     const borders = [
@@ -72,10 +74,11 @@ export function ownershipFailures(unit: Element, rest: EdgeInfo, name: string): 
       const outer = ancestor.box.radii[index]!
       const inner: [number, number] = [Math.max(0, outer[0] - borders[b]!), Math.max(0, outer[1] - borders[a]!)]
       const own = box.radii[index]!
-      if (Math.abs(own[0] - inner[0]) > tolerance || Math.abs(own[1] - inner[1]) > tolerance)
+      if (Math.abs(own[0] - inner[0]) > tolerance || Math.abs(own[1] - inner[1]) > tolerance) {
         failures.push(
           `${name} fills the ${corner} corner of ${describe(cursor)} with a ${format(own[0])} radius, but that corner's inner radius is ${format(inner[0])}: give ${name} border-${corner}-radius ${format(inner[0])}, so its ring follows the corner`,
         )
+      }
     })
     break
   }
@@ -84,10 +87,11 @@ export function ownershipFailures(unit: Element, rest: EdgeInfo, name: string): 
     const info = edgeOf(child)
     if (!info.inside) continue
     const gaps = [info.box.top - box.top, box.right - info.box.right, box.bottom - info.box.bottom, info.box.left - box.left]
-    if (gaps.every(gap => gap > 3 + tolerance && gap <= 8))
+    if (gaps.every(gap => gap > 3 + tolerance && gap <= 8)) {
       failures.push(
         `${describe(child)} draws an edge ${format(Math.min(...gaps))} inside ${name}: a second edge inside its ring; make it the unit, or drop its edge`,
       )
+    }
   }
   return failures
 }

@@ -127,12 +127,14 @@ export function scopedModel<X extends Extraction>(
   const contained = parts === 'omit' ? undefined : partsOf(model)
   if (parts === 'whole' && contained) {
     const stack = [...entities]
-    for (let id = stack.pop(); id !== undefined; id = stack.pop())
-      for (const child of contained.get(id) ?? [])
+    for (let id = stack.pop(); id !== undefined; id = stack.pop()) {
+      for (const child of contained.get(id) ?? []) {
         if (!entities.has(child)) {
           entities.add(child)
           stack.push(child)
         }
+      }
+    }
   }
   // Each shown entity's left-out parts fold into one more part; an open fold shows them, and stays as the way back.
   const {
@@ -153,7 +155,7 @@ export function scopedModel<X extends Extraction>(
   const allEntities = [...entityRows, ...foldRows]
   const allRelationships = [...relationships, ...foldLinks]
   const extraction = (side: Side): X => {
-    const items = <T extends {id: string}>(rows: readonly {[key in Side]?: T}[]) => rows.flatMap(row => (row[side] ? [row[side]] : []))
+    const items = <T extends {id: string}>(rows: readonly Partial<Record<Side, T>>[]) => rows.flatMap(row => (row[side] ? [row[side]] : []))
     return {...model[side], entities: items(allEntities), relationships: items(allRelationships)}
   }
   const keepStep = (step: PresentedStep): PresentedStep[] => {

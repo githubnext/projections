@@ -46,12 +46,13 @@ export function htmlRingFailures(unit: Element, box: DOMRect, name: string, stat
   const failures: string[] = []
   const style = getComputedStyle(unit)
   const width = style.outlineStyle !== 'none' ? px(style.outlineWidth) : 0
-  if (width <= 0)
+  if (width <= 0) {
     failures.push(`${name} shows no ${state} ring: the SDK draws it as the unit's outline; don't override outline on the unit`)
-  else if (Math.abs(px(style.outlineOffset) + width) > 0.5)
+  } else if (Math.abs(px(style.outlineOffset) + width) > 0.5) {
     failures.push(
       `the ${state} ring on ${name} isn't drawn inside the unit (outline-offset ${style.outlineOffset}, width ${style.outlineWidth})`,
     )
+  }
   failures.push(...coveredRing(unit, box, name, style.isolation === 'isolate'))
   if (rest) {
     // The neutral edge's style, at the unit's current place (the state may have scrolled it into view).

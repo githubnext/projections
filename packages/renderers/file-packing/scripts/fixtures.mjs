@@ -225,11 +225,12 @@ function settings() {
   }
   const kindOf = flags => (flags.includes('secret') ? 'secret' : (flags[0] ?? 'setting'))
   const keys = []
-  for (const [group, count] of groups)
+  for (const [group, count] of groups) {
     for (let index = 0; index < count; index++) {
       const word = words[(index * 5 + group.length) % words.length]
       keys.push({group, index, name: index < words.length ? word : `${word}${index}`, flags: attributes(group, index)})
     }
+  }
   const document = list => {
     const entities = [{id: 'settings', kind: 'group', label: 'settings'}]
     const relationships = []

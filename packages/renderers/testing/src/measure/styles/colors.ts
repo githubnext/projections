@@ -8,7 +8,7 @@ function shadowColors(value: string): string[] {
 }
 
 /** The fill and stroke an SVG element paints itself. */
-function svgPaints(element: Element, style: CSSStyleDeclaration, text: string, colors: {[property: string]: string}): void {
+function svgPaints(element: Element, style: CSSStyleDeclaration, text: string, colors: Record<string, string>): void {
   for (const property of ['fill', 'stroke'] as const) {
     const value = style.getPropertyValue(property)
     // Text and shapes paint their fill; containers (svg, g) only pass it on.
@@ -30,9 +30,9 @@ export function paintedColors(
   element: Element,
   style: CSSStyleDeclaration,
   text: string,
-  borders: {[side: string]: number},
-): {[property: string]: string} {
-  const colors: {[property: string]: string} = {}
+  borders: Record<string, number>,
+): Record<string, string> {
+  const colors: Record<string, string> = {}
   const svg = element instanceof SVGElement
   if (text && !svg) colors.color = normalizeColors(style.color)
   const background = normalizeColors(style.backgroundColor)

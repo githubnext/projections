@@ -104,9 +104,11 @@ export function routeBoxEdge(
    */
   tracks: readonly number[] = [],
 ): BoxEdge | BlockedBoxEdge {
-  for (const box of [from, target, ...obstacles])
-    if (![box.x, box.y, box.width, box.height].every(Number.isFinite) || box.width < 0 || box.height < 0)
+  for (const box of [from, target, ...obstacles]) {
+    if (![box.x, box.y, box.width, box.height].every(Number.isFinite) || box.width < 0 || box.height < 0) {
       throw new RangeError(`Cannot route an arrow with the card box ${JSON.stringify(box)}: boxes need finite coordinates and sizes.`)
+    }
+  }
   const to = {x: target.x - outset, y: target.y - outset, width: target.width + 2 * outset, height: target.height + 2 * outset}
   if (ports.end) {
     const [nx, ny] = outward(target, ports.end.x, ports.end.y)
@@ -182,8 +184,9 @@ export function routeBoxEdge(
           },
           1,
         )
-      )
+      ) {
         return true
+      }
     }
     return false
   })
@@ -226,7 +229,7 @@ export function routeBoxEdge(
   // Nothing clears the cards: offer the direct arrow, or one from another side, whichever overlaps them least. Each
   // is sampled every `overlapSpacing` px along its curve, so no card it crosses falls between two samples.
   const candidates = [{route: direct, samples: sampleSpline(s ?? [start, control1, control2, end], overlapSpacing)}]
-  for (const targetContact of targetContacts)
+  for (const targetContact of targetContacts) {
     for (const sourceContact of sourceContacts) {
       const reach = Math.min(
         64,
@@ -245,6 +248,7 @@ export function routeBoxEdge(
         samples: sampleSpline([sourceContact.point, c1, c2, targetContact.point], overlapSpacing),
       })
     }
+  }
   const scored = candidates.map(({route, samples}) => {
     const crossed = obstacles.flatMap((box, index) => (samples.some(point => contains(box, point)) ? [index] : []))
     const inside = samples.filter(point => obstacles.some(box => contains(box, point))).length

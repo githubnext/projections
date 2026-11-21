@@ -35,7 +35,7 @@ export function inspectorCommands(services: Services): vscode.Disposable[] {
         await panel.control({op: 'setPair', before, after: 'HEAD'})
         output.info(`Comparing ${base} (merge base ${before.slice(0, 8)}) → HEAD`)
       } catch (error) {
-        void vscode.window.showErrorMessage(`Projections: ${error instanceof Error ? error.message : error}`)
+        void vscode.window.showErrorMessage(`Projections: ${error instanceof Error ? error.message : String(error)}`)
       }
     }),
     // A saved extraction, comparison or pull request review (`projections show --output`, `projections pr`), presented

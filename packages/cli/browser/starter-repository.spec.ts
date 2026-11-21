@@ -33,7 +33,7 @@ test('the repository Inspector presents the renderer package scenarios beside th
     await expect(scenarios.getByRole('button', {name: /^Checkout splits out payments/})).toHaveAttribute('aria-pressed', 'true')
     // Its pair, compared in the browser and drawn by the package's renderer; no extractor ran.
     await expect(page.locator('.ph[data-mode="comparison"]')).toBeVisible()
-    const frame = page.frameLocator('iframe').first()
+    const frame = page.locator('iframe').first().contentFrame()
     await expect(frame.locator('[data-entity-id="service:payments"]')).toBeAttached()
     await expect(page.locator('.pi-titlebar').getByRole('status')).toHaveAttribute('data-activity', 'scenario')
 
@@ -76,7 +76,7 @@ test('the viewer opens on a renderer package scenario', async ({page}) => {
     await page.goto(url)
     await expect.poll(shown, {timeout: 30_000}).toMatchObject({scenario: 'split', source: 'artifact'})
     await expect(page.locator('.ph[data-mode="comparison"]')).toBeVisible()
-    await expect(page.frameLocator('iframe').first().locator('[data-entity-id="service:payments"]')).toBeAttached()
+    await expect(page.locator('iframe').first().contentFrame().locator('[data-entity-id="service:payments"]')).toBeAttached()
 
     // The agent shows the other scenario.
     const show = (body: unknown) =>

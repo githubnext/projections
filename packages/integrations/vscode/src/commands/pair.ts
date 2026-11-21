@@ -76,7 +76,8 @@ export function pairCommands(services: Services, viewingView: ViewingView): vsco
       if (!chosen) return
       if (chosen.refresh) return front?.refresh()
       const command = chosen.command ?? {title: 'Show in Side Bar', command: 'projections.viewing.focus'}
-      await vscode.commands.executeCommand(command.command, ...(command.arguments ?? []))
+      const args: unknown[] = command.arguments ?? []
+      await vscode.commands.executeCommand(command.command, ...args)
     }),
     vscode.commands.registerCommand('projections.choosePair', async (argument?: unknown) => {
       const folder = await folderFrom(argument)

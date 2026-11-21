@@ -70,7 +70,8 @@ export function parseRenderers(value: unknown): BuiltinRenderer[] {
   return list.flatMap(item => {
     const entry = item as Record<string, unknown> | null
     if (!entry || typeof entry.name !== 'string' || !entry.name) return []
-    const handles = [entry.name, ...(Array.isArray(entry.handles) ? entry.handles : [])].filter(
+    const listed: unknown[] = Array.isArray(entry.handles) ? entry.handles : []
+    const handles = [entry.name, ...listed].filter(
       (name, index, all): name is string => typeof name === 'string' && all.indexOf(name) === index,
     )
     const accepts = Array.isArray(entry.accepts)

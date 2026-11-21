@@ -151,7 +151,9 @@ export function definitionItem(node: DefinitionNode, context: ItemContext, id: s
     case 'environment':
       environmentItem(item, node, context)
       break
-    default:
+    case 'extractor':
+    case 'comparator':
+    case 'renderer':
       partItem(item, {...node, kind: node.kind}, context)
   }
   return item

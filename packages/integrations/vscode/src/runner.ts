@@ -109,7 +109,12 @@ function parseResponse({result, size}: {result: unknown; size: number}): RunnerR
 /** Validates a `tools/list` result. */
 export function parseTools(value: unknown): ToolDescription[] {
   const tools = (value as {tools?: unknown} | null)?.tools
-  if (!Array.isArray(tools) || !tools.every(tool => typeof tool?.name === 'string' && typeof tool.inputSchema === 'object')) {
+  if (
+    !Array.isArray(tools) ||
+    !tools.every(
+      (tool: {name?: unknown; inputSchema?: unknown} | null) => typeof tool?.name === 'string' && typeof tool.inputSchema === 'object',
+    )
+  ) {
     throw new Error('The backend listed invalid tools')
   }
   return tools as ToolDescription[]

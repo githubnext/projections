@@ -22,7 +22,7 @@ export const saved = ((vscode.getState() as TabState | undefined) ?? {}) satisfi
 export const tabState: TabState = {...saved}
 export const keep = (patch: {[K in keyof TabState]?: TabState[K] | undefined}) => {
   Object.assign(tabState, patch)
-  for (const key of Object.keys(patch) as (keyof TabState)[]) if (patch[key] === undefined) delete tabState[key]
+  for (const key of Object.keys(patch) as (keyof TabState)[]) if (patch[key] === undefined) Reflect.deleteProperty(tabState, key)
   vscode.setState(tabState)
 }
 

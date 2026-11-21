@@ -92,7 +92,7 @@ export function sweepProgress(
 export function parseScenarios(text: string): {title?: string; renderer?: string; scenarios: {id: string; title: string}[]} | undefined {
   let document: {format?: unknown; title?: unknown; renderer?: unknown; scenarios?: unknown}
   try {
-    document = JSON.parse(text)
+    document = JSON.parse(text) as typeof document
   } catch {
     return undefined
   }

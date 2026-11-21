@@ -26,8 +26,7 @@ for (const theme of themes.filter(item => !only || only.includes(item.id))) {
     const captured = await frame.evaluate(() => {
       const style = document.documentElement.style
       const variables = {}
-      for (let index = 0; index < style.length; index++) {
-        const name = style[index]
+      for (const name of style) {
         if (name.startsWith('--vscode-')) variables[name] = style.getPropertyValue(name).trim()
       }
       return {

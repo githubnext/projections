@@ -39,7 +39,8 @@ export async function launch(context: vscode.ExtensionContext, output: vscode.Lo
     extensionPath: context.extensionPath,
   })
   if (cli.source === 'bundled') ensureExecutable(cli.path)
-  const version = String((context.extension.packageJSON as {version?: unknown}).version ?? '0.0.0')
+  const {version: declared} = context.extension.packageJSON as {version?: unknown}
+  const version = typeof declared === 'string' ? declared : '0.0.0'
   const path = source.kind === 'document' ? source.file.fsPath : source.kind === 'fixtures' ? source.directory.fsPath : undefined
   const scenarios = source.kind === 'fixtures' && path ? scenarioRenderer(path, vscode.workspace.isTrusted) : undefined
   if (scenarios?.withheld) {

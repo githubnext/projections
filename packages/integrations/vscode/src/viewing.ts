@@ -188,7 +188,8 @@ export class ViewingView implements vscode.TreeDataProvider<Node>, vscode.Dispos
     if (action === 'remove') return this.remove(node)
     const command = this.getTreeItem(node).command
     if (!command) throw new Error(`The ${key} row does nothing on a click`)
-    return vscode.commands.executeCommand(command.command, ...(command.arguments ?? []))
+    const args: unknown[] = command.arguments ?? []
+    return vscode.commands.executeCommand(command.command, ...args)
   }
 
   dispose() {

@@ -28,6 +28,7 @@ process.env.PROJECTIONS_TEST_EVENT_LOG = log
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 /** Records each distinct state of `read()` once a frame, in the page it runs in, as `globalThis[key]`. */
 function sampler({key, read}) {
+  // eslint-disable-next-line no-new-func -- `read` crosses into the page as source; this makes it a function again there.
   const reader = new Function(`return (${read})()`)
   const state = {frames: [], last: '', messages: []}
   globalThis[key] = state

@@ -87,6 +87,7 @@ export const tokenModifiers = ['declaration', 'readonly', 'defaultLibrary'] as c
 
 /** The 1-based code-point column of a 0-based UTF-16 character offset on a line. */
 export function codePointColumn(text: string, character: number): number {
+  // eslint-disable-next-line @typescript-eslint/no-misused-spread -- Spreading a string yields its code points, which this counts.
   return [...text.slice(0, character)].length + 1
 }
 

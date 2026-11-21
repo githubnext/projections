@@ -198,11 +198,11 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.commands.executeCommand('projections.adopt', node?.candidate?.id ? {projections: [node.candidate.id]} : undefined),
     ),
     // An invalid definition's diagnostic, at its line.
-    vscode.commands.registerCommand('projections.openDefinitionProblem', async (folderUri: vscode.Uri, path: string, index = 0) => {
+    vscode.commands.registerCommand('projections.openDefinitionProblem', async (folderUri: vscode.Uri, path: string, index?: number) => {
       const folder = vscode.workspace.getWorkspaceFolder(folderUri)
       const relative = relativePath(path)
       if (!folder || !relative) return
-      const diagnostic = sidebar.model(folder).invalid.find(item => item.path === path)?.diagnostics[index]
+      const diagnostic = sidebar.model(folder).invalid.find(item => item.path === path)?.diagnostics[index ?? 0]
       const line = Math.max(0, (diagnostic?.location?.line ?? 1) - 1)
       const column = Math.max(0, (diagnostic?.location?.column ?? 1) - 1)
       await vscode.window.showTextDocument(vscode.Uri.joinPath(folder.uri, ...relative.split('/')), {

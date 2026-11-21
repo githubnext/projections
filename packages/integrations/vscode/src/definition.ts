@@ -261,7 +261,8 @@ export class DefinitionView implements vscode.TreeDataProvider<Node>, vscode.Dis
     const node = all(this.getChildren()).find(item => item.node.kind === kind && (!label || item.node.label === label))
     const command = node && this.getTreeItem(node).command
     if (!command) throw new Error(`No ${kind} row to activate`)
-    await vscode.commands.executeCommand(command.command, ...(command.arguments ?? []))
+    const args: unknown[] = command.arguments ?? []
+    await vscode.commands.executeCommand(command.command, ...args)
   }
 
   getChildren(node?: Node): Node[] {

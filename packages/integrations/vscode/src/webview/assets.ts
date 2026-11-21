@@ -46,7 +46,7 @@ export async function webviewAssets(): Promise<InspectorAssets> {
           }),
         )
       } catch (error) {
-        console.error('Projections: built-in renderers are unavailable', error)
+        reportError(new Error('Projections: built-in renderers are unavailable', {cause: error}))
         return []
       }
     },

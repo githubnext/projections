@@ -32,7 +32,7 @@ export function createRpcClient({input, output, log}: {input: Readable; output: 
   createInterface({input, crlfDelay: Infinity}).on('line', line => {
     let message: {id?: unknown; method?: unknown; params?: unknown; result?: unknown; error?: {code?: unknown; message?: unknown}}
     try {
-      message = JSON.parse(line)
+      message = JSON.parse(line) as typeof message
     } catch {
       log?.(`The backend wrote a line that isn't JSON: ${line.slice(0, 200)}`)
       return
@@ -48,8 +48,10 @@ export function createRpcClient({input, output, log}: {input: Readable; output: 
     const call = pending.get(message.id)
     if (!call) return
     pending.delete(message.id)
-    if (message.error) call.reject(new RpcError(String(message.error.message ?? 'Backend error'), Number(message.error.code)))
-    else call.resolve({result: message.result, size: line.length})
+    if (message.error) {
+      const text = message.error.message ?? 'Backend error'
+      call.reject(new RpcError(typeof text === 'string' ? text : JSON.stringify(text), Number(message.error.code)))
+    } else call.resolve({result: message.result, size: line.length})
   })
   return {
     call(method, params, signal) {

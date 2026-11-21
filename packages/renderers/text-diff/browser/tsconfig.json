@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
     "allowJs": true,
@@ -8,5 +8,5 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["node"]
   },
-  "include": ["browser/**/*.ts"]
+  "include": ["**/*.ts"]
 }

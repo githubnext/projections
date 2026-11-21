@@ -100,6 +100,8 @@ runs:
       env:
         PROJECTIONS_CHECK_NATIVE: ${{ inputs.native }}
         PART: ${{ inputs.part }}
+        # npm run lint prints each workspace's ten slowest rules, so a slow type-aware rule shows in the log.
+        TIMING: '10'
       run: |
         if [ "$PROJECTIONS_CHECK_NATIVE" = true ]; then
           python -m venv "$RUNNER_TEMP/projections-public-django"

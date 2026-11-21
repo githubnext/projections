@@ -4,7 +4,7 @@ import {cp, mkdir, rm, symlink, writeFile} from 'node:fs/promises'
 import path from 'node:path'
 import {fileURLToPath, pathToFileURL} from 'node:url'
 import {test, type TestContext} from 'node:test'
-import {installToolchain, runHelper, toolchain} from './support.mjs'
+import {installToolchain, runHelper, toolchain} from './support.ts'
 
 const fixtures = fileURLToPath(new URL('./fixtures/', import.meta.url))
 

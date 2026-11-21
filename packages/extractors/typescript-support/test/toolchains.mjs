@@ -12,7 +12,7 @@ import {existsSync} from 'node:fs'
 import {mkdir, readFile, rm, writeFile} from 'node:fs/promises'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
-import {runHelper} from './support.mjs'
+import {runHelper} from './support.ts'
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url))
 // Downloads are cached with other tool caches, outside linted and checked sources.

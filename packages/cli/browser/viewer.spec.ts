@@ -641,7 +641,7 @@ test('at a canvas width, every mode and toolbar control works', async ({page}) =
     ['Animated', 'animated'],
     ['Swipe', 'swipe'],
     ['Diff', 'diff'],
-  ]) {
+  ] as const) {
     await modes.getByRole('radio', {name, exact: true}).click()
     await expect(view).toHaveAttribute('data-comparison-mode', mode)
     await expect.poll(async () => (await state()).state.mode, {timeout: 10_000}).toBe(mode)

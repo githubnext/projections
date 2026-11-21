@@ -205,7 +205,8 @@ export const paneChipClearance = chipTop + chipHeight + chipTop
  * renderer's content: the band surface with a divider rule, in the token set's shared surface scale. Band and frame
  * sit inside one pane card (`paneCard`), whose single edge is the outline of both. `hidden` keeps the band only for
  * assistive technology: it takes no space and still names its pane. A host restyles it with `--pj-pane-band-bg`,
- * `--pj-pane-band-fg` and `--pj-pane-band-rule`, as the default UI does to match its own bands.
+ * `--pj-pane-band-fg` and `--pj-pane-band-rule`, as the default UI does to match its own bands, and lines its label up
+ * with its own layout with `--pj-pane-band-inset` (10px), or `--pj-pane-band-inset-start` and `-end` apart.
  */
 export function PaneBand({
   side,
@@ -247,7 +248,10 @@ export function PaneBand({
         // The card's top edge is the band's other pixel.
         height: paneGeometry.band - 1,
         margin: 0,
-        padding: '0 10px',
+        padding: 0,
+        // A host lines the label up with its own layout through these, without overriding the band's style.
+        paddingInlineStart: 'var(--pj-pane-band-inset-start, var(--pj-pane-band-inset, 10px))',
+        paddingInlineEnd: 'var(--pj-pane-band-inset-end, var(--pj-pane-band-inset, 10px))',
         fontSize: '0.8em',
         fontWeight: 600,
         lineHeight: 1.5,

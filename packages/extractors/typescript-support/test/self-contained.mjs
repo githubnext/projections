@@ -8,7 +8,7 @@ import {cp, mkdir, readFile, rm, writeFile} from 'node:fs/promises'
 import {builtinModules} from 'node:module'
 import path from 'node:path'
 import {fileURLToPath, pathToFileURL} from 'node:url'
-import {installToolchain} from './support.mjs'
+import {installToolchain} from './support.ts'
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url))
 const root = path.join(packageRoot, `.runtime-self-contained-${randomUUID()}`)

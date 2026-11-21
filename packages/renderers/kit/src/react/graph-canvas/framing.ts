@@ -149,7 +149,11 @@ export function useGraphZoom(
   // The bands the host's overlays take at the view's ends, which a focus is fitted and centred clear of.
   const covered = Boolean(useStageCover()?.length)
   const insetTop = useStageInsetTop()
-  const bands = useMemo(() => ({top: covered ? (insetTop ?? 0) : 0, bottom: 0}), [covered, insetTop])
+  const insetBottom = useStageInsetBottom()
+  const bands = useMemo(
+    () => ({top: covered ? (insetTop ?? 0) : 0, bottom: covered ? (insetBottom ?? 0) : 0}),
+    [covered, insetTop, insetBottom],
+  )
   const opening = useMemo(
     () =>
       focusOpening({

@@ -83,7 +83,10 @@ export function runningIndicator(
         }
         return
       }
-      if (!shown) return cancel()
+      if (!shown) {
+        cancel()
+        return
+      }
       const left = since + minimumMs - timers.now()
       if (left <= 0) {
         cancel()

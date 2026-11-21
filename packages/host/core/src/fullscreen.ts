@@ -1,6 +1,8 @@
 import {useCallback, useEffect, useState} from 'react'
 import type {RefObject} from 'react'
 
+const noop = () => undefined
+
 /** What `useFullscreen` returns: whether the target is full screen and how, and `toggle` to enter or leave it. */
 export interface FullscreenState {
   /** Whether the target is full screen, natively or through the fallback. */
@@ -27,7 +29,7 @@ export function useFullscreen(target: RefObject<HTMLElement | null>, {fallbackCl
   }, [target])
   useEffect(() => {
     const element = target.current
-    if (!fallback || !element) return
+    if (!fallback || !element) return undefined
     const view = element.ownerDocument.defaultView ?? window
     const scroll = {x: view.scrollX, y: view.scrollY}
     element.classList.add(fallbackClass)
@@ -57,7 +59,7 @@ export function useFullscreen(target: RefObject<HTMLElement | null>, {fallbackCl
       return
     }
     if (document.fullscreenElement) {
-      void document.exitFullscreen().catch(() => {})
+      void document.exitFullscreen().catch(noop)
       return
     }
     if (document.fullscreenEnabled && typeof element.requestFullscreen === 'function') {

@@ -21,6 +21,8 @@ import {OpenedDocument} from './frame/opened.js'
 import type {RendererFrameEvent, RendererFrameOptions, RendererFrameStatus} from './frame/types.js'
 import type {RendererDocuments} from './registry.js'
 
+const noop = () => undefined
+
 /**
  * Hosts one renderer bundle in a sandboxed frame and speaks the renderer
  * frame protocol with it.
@@ -75,7 +77,7 @@ export class RendererFrame {
 
   constructor(options: RendererFrameOptions) {
     this.view = options.window ?? options.container.ownerDocument.defaultView ?? window
-    this.onEvent = options.onEvent ?? (() => {})
+    this.onEvent = options.onEvent ?? noop
     this.init = options.init
     this.progress = options.progress
     this.selection = options.selection ?? null

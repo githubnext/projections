@@ -5,6 +5,8 @@ import {renderToStaticMarkup} from 'react-dom/server'
 import {Prose, TableView, TextView} from '../dist/ui/index.js'
 import {subjectRows} from '../dist/index.js'
 
+const noop = () => undefined
+
 test('Prose draws marked inline code in the code font and never shows the markers', () => {
   const markup = renderToStaticMarkup(createElement(Prose, null, 'Parameter `currency` was renamed to `<b>`'))
   assert.equal(
@@ -34,7 +36,7 @@ test('the table and text views draw change and step summaries as prose with inli
   }
   const subject = {mode: 'comparison', before, after, comparison}
   const rows = subjectRows(subject)
-  const props = {subject, rows, selectedId: null, onSelect() {}, progress: 1}
+  const props = {subject, rows, selectedId: null, onSelect: noop, progress: 1}
   const code = '<code class="ph-code pj:font-mono pj:text-[0.92em]">currency</code>'
   for (const view of [TableView, TextView]) {
     const markup = renderToStaticMarkup(createElement(view, props))

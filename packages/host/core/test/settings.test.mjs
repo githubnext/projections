@@ -2,6 +2,8 @@ import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {maxRendererSubmenus, settingsLabels, settingsModel} from '../dist/index.js'
 
+const noop = () => undefined
+
 /** The parts of a projection controller the Settings model reads. */
 const projection = (overrides = {}) => ({
   comparing: true,
@@ -23,18 +25,18 @@ const projection = (overrides = {}) => ({
   rendererStatus: 'ready',
   controls: [],
   controlValues: {},
-  setChangesOnly() {},
-  setScope() {},
-  setHighlighting() {},
-  setRenderer() {},
-  setLoop() {},
-  setHolds() {},
-  setSpeed() {},
-  setControl() {},
-  runAction() {},
+  setChangesOnly: noop,
+  setScope: noop,
+  setHighlighting: noop,
+  setRenderer: noop,
+  setLoop: noop,
+  setHolds: noop,
+  setSpeed: noop,
+  setControl: noop,
+  runAction: noop,
   ...overrides,
 })
-const showAs = {view: 'renderer', views: ['renderer', 'table', 'text'], onViewChange() {}, rendererTitle: 'Graph'}
+const showAs = {view: 'renderer', views: ['renderer', 'table', 'text'], onViewChange: noop, rendererTitle: 'Graph'}
 const toggle = (id, label, extra = {}) => ({id, label, type: 'toggle', default: false, ...extra})
 const zoom = [
   {id: 'zoom-out', label: 'Zoom out', type: 'action', icon: 'zoom-out', group: 'zoom'},

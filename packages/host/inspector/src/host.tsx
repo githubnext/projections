@@ -1,5 +1,6 @@
 import {createContext, useContext, useSyncExternalStore} from 'react'
 import type {ReactNode} from 'react'
+import {noop} from './noop.js'
 
 /**
  * The embedding host's theme: its light or dark mode and, where it has them, its accent color (any CSS color) and the
@@ -67,7 +68,7 @@ export function useInspectorHost(): InspectorHost {
   return useContext(HostContext)
 }
 
-const noTheme = {get: () => undefined, subscribe: () => () => {}}
+const noTheme = {get: () => undefined, subscribe: () => noop}
 /** The host's names for revisions, following its changes; `undefined` without any. */
 export function useHostRevisionLabels(): Record<string, string> | undefined {
   const labels = useInspectorHost().revisionLabels ?? noTheme

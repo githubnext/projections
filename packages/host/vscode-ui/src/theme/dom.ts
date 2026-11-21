@@ -61,7 +61,7 @@ export function useVscodeTheme(ref: RefObject<Element | null>): VscodeTheme {
   const [theme, setTheme] = useState<VscodeTheme>({kind: 'light', colorMode: 'light', vscode: false, tokens: undefined})
   useLayoutEffect(() => {
     const element = ref.current
-    if (!element) return
+    if (!element) return undefined
     const update = () => {
       const next = vscodeTheme(element)
       setTheme(previous => (sameTheme(previous, next) ? previous : next))

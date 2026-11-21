@@ -7,6 +7,8 @@ import {dirname, extname, join} from 'node:path'
 import {createInterface} from 'node:readline'
 import {fileURLToPath} from 'node:url'
 
+const noop = () => undefined
+
 /**
  * The browser suite's host: a page at a reserved origin that mounts the Inspector's built bundle (`dist/client`,
  * `mount.js`) with a same-origin fetch transport, as the CLI's headless pages do. Nothing listens: Playwright answers
@@ -88,9 +90,13 @@ export async function startHarness(context: BrowserContext, args: string[]): Pro
     stdio: ['pipe', 'pipe', 'pipe'],
   })
   let diagnostics = ''
-  child.stderr.on('data', bytes => (diagnostics += String(bytes)))
-  child.stdin.on('error', () => {})
-  const exited = new Promise<void>(done => child.once('exit', () => done()))
+  child.stderr.on('data', bytes => {
+    diagnostics += String(bytes)
+  })
+  child.stdin.on('error', noop)
+  const exited = new Promise<void>(done => {
+    child.once('exit', () => done())
+  })
   const pending = new Map<
     number,
     (message: {result?: {status: number; contentType: string; body: unknown}; error?: {message: string}}) => void
@@ -106,9 +112,9 @@ export async function startHarness(context: BrowserContext, args: string[]): Pro
   const send = (message: object) => child.stdin.write(`${JSON.stringify({jsonrpc: '2.0', ...message})}\n`)
   const call = (method: string, params?: unknown) => {
     const id = next++
-    const reply = new Promise<{result?: {status: number; contentType: string; body: unknown}; error?: {message: string}}>(done =>
-      pending.set(id, done),
-    )
+    const reply = new Promise<{result?: {status: number; contentType: string; body: unknown}; error?: {message: string}}>(done => {
+      pending.set(id, done)
+    })
     send({id, method, ...(params === undefined ? {} : {params})})
     return {id, reply}
   }
@@ -142,7 +148,7 @@ export async function startHarness(context: BrowserContext, args: string[]): Pro
     }
     const {reply} = call('request', {method: request.method(), path, ...(parsed === undefined ? {} : {body: parsed})})
     const message = await reply
-    if (!message.result) return route.fulfill({status: 502, body: message.error?.message ?? 'The backend failed'}).catch(() => {})
+    if (!message.result) return route.fulfill({status: 502, body: message.error?.message ?? 'The backend failed'}).catch(noop)
     const {status, contentType, body: answer} = message.result
     const base64 = (answer as {base64?: unknown} | null)?.base64
     const bytes =
@@ -152,7 +158,7 @@ export async function startHarness(context: BrowserContext, args: string[]): Pro
     // Renderer bundles keep the renderer policy the backend sends with them over HTTP-like hosts.
     const headers: Record<string, string> = {'content-type': contentType || 'application/octet-stream'}
     if (!url.pathname.startsWith('/api/')) headers['content-security-policy'] = rendererPolicy
-    await route.fulfill({status, headers, body: bytes}).catch(() => {})
+    return route.fulfill({status, headers, body: bytes}).catch(noop)
   }
   await context.route(`${origin}/**`, handler)
   // The page frames a renderer's development server on loopback, as the VS Code extension's webview may. Chromium's
@@ -161,9 +167,11 @@ export async function startHarness(context: BrowserContext, args: string[]): Pro
   return {
     url: `${origin}/#harness`,
     async close() {
-      await context.unroute(`${origin}/**`, handler).catch(() => {})
+      await context.unroute(`${origin}/**`, handler).catch(noop)
       child.stdin.end()
-      const timer = setTimeout(() => child.kill('SIGKILL'), 10_000)
+      const timer = setTimeout(() => {
+        child.kill('SIGKILL')
+      }, 10_000)
       await exited
       clearTimeout(timer)
       lines.close()

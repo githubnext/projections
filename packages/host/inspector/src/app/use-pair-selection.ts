@@ -68,7 +68,7 @@ export function usePairSelection({
   // The runner's pairs for this projection: bookmarks, branch and tags, and the default. Asked again when HEAD moves.
   const headCommit = revisions.find(item => item.ref !== workingTree)?.commit
   useEffect(() => {
-    if (!api || !projection) return
+    if (!api || !projection) return undefined
     const abort = new AbortController()
     api
       .pairs(projection, abort.signal)

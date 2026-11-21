@@ -123,7 +123,12 @@ export async function chooseMode(scope: Scope, name: string) {
   if (!inMenu) return
   await settled(scope)
   // The popover's focus scope hands focus on in a timer it starts as it unmounts; one started now runs after it.
-  await pageOf(scope).evaluate(() => new Promise(resolve => setTimeout(resolve, 0)))
+  await pageOf(scope).evaluate(
+    () =>
+      new Promise(resolve => {
+        setTimeout(resolve, 0)
+      }),
+  )
 }
 /** Asserts the checked mode, closing the menu again if it had to be opened. */
 export async function expectMode(scope: Scope, name: string) {
@@ -154,7 +159,10 @@ export async function pairSelect(scope: Scope, label: 'Compare from' | 'To' | 'S
 /** Swaps the pair with the picker's Swap button, inline or in the "Revisions" popover. */
 export async function swapPair(scope: Scope) {
   const inline = scope.getByRole('button', {name: 'Swap', exact: true}).first()
-  if (await inline.isVisible()) return inline.click()
+  if (await inline.isVisible()) {
+    await inline.click()
+    return
+  }
   await (await pairSelect(scope, 'Compare from')).waitFor()
   await openDialog(scope, 'Revisions').getByRole('button', {name: 'Swap', exact: true}).click()
 }

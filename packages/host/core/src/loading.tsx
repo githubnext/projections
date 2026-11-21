@@ -8,7 +8,7 @@ export const loadingStageHeight = 480
 export function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false)
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
     const update = () => setReduced(media.matches)
     update()
@@ -72,7 +72,7 @@ export function LoadingStatus({label, description, reducedMotion = false, fill =
   const indicator = useRef<SVGSVGElement>(null)
   useEffect(() => {
     const element = indicator.current
-    if (still || !element?.animate) return
+    if (still || !element?.animate) return undefined
     const spin = element.animate([{transform: 'rotate(0turn)'}, {transform: 'rotate(1turn)'}], {duration: 900, iterations: Infinity})
     return () => spin.cancel()
   }, [still])

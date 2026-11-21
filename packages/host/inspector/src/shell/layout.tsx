@@ -83,7 +83,7 @@ export function useLayout(scope: string, sidebar = defaults.sidebar): [Layout, (
 export function useNarrow(): boolean {
   const [narrow, setNarrow] = useState(isNarrow)
   useEffect(() => {
-    if (typeof matchMedia !== 'function') return
+    if (typeof matchMedia !== 'function') return undefined
     const list = matchMedia(narrowQuery)
     const changed = () => setNarrow(list.matches)
     list.addEventListener('change', changed)

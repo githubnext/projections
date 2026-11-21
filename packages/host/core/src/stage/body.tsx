@@ -88,7 +88,7 @@ export function StageBody({
 
   useEffect(() => {
     const element = container.current
-    if (!element || mode !== 'side-by-side') return
+    if (!element || mode !== 'side-by-side') return undefined
     const bump = () => setLayout(value => value + 1)
     const observer = new ResizeObserver(bump)
     observer.observe(element)

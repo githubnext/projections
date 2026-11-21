@@ -77,7 +77,9 @@ export function useToolbarLayout(toolbar: RefObject<HTMLElement | null>, content
     // step needs without changing the toolbar's width.
     regions: ':scope > .phv-toolbar-start',
     focusFallbacks,
-    focusControl,
+    focusControl: element => {
+      focusControl(element)
+    },
   })
   return {...plan, step: index}
 }

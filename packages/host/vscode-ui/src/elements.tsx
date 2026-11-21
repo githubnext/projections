@@ -78,7 +78,7 @@ function useEvents(ref: RefObject<HTMLElement | null>, events: Record<string, Ha
     .join(' ')
   useEffect(() => {
     const element = ref.current
-    if (!element || !names) return
+    if (!element || !names) return undefined
     const listeners = names.split(' ').map(name => [name, (event: Event) => latest.current[name]?.(event)] as const)
     for (const [name, listener] of listeners) element.addEventListener(name, listener)
     return () => {
@@ -267,7 +267,7 @@ export function VscCollapsible({
   latest.current = onOpenChange
   useLayoutEffect(() => {
     const element = ref.current
-    if (!element) return
+    if (!element) return undefined
     const label = () => {
       const header = element.shadowRoot?.querySelector('.collapsible-header')
       if (!header) return
@@ -392,7 +392,7 @@ export function ActionButton({
   // The element flips `checked` itself when a toggleable button is pressed; a choice stays as its owner says.
   useEffect(() => {
     const element = own.current
-    if (!element || !controlled) return
+    if (!element || !controlled) return undefined
     const keep = () => {
       element.checked = Boolean(checked ?? pressed)
     }

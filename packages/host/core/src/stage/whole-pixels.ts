@@ -10,7 +10,7 @@ import type {RefObject} from 'react'
 export function useWholePixels(ref: RefObject<HTMLElement | null>, {width: round = false}: {width?: boolean} = {}): void {
   useLayoutEffect(() => {
     const element = ref.current
-    if (!element) return
+    if (!element) return undefined
     const align = () => {
       element.style.translate = ''
       // A width its text decides can be fractional, which leaves one edge between pixels however it's nudged: `width`

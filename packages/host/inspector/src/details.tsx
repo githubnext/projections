@@ -27,7 +27,9 @@ export function createControllerStore(): ControllerStore {
     },
     subscribe(listener) {
       listeners.add(listener)
-      return () => listeners.delete(listener)
+      return () => {
+        listeners.delete(listener)
+      }
     },
     get: () => current,
   }

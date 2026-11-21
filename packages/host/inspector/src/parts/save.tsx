@@ -6,6 +6,7 @@ import {copyText, useInspectorHost} from '../host.js'
 import {lineDiff} from './line-diff.js'
 import {changedParts} from './model.js'
 import type {DefinitionWriter} from './model.js'
+import {noop} from '../noop.js'
 
 /**
  * Save to definition: the definition file's exact edit for the overrides, written by the local runner (behind its
@@ -31,7 +32,7 @@ export function SaveToDefinition({
   const parts = useMemo(() => changedParts(definition, saved), [definition, saved])
   const partsKey = JSON.stringify(parts)
   useEffect(() => {
-    if (!open || !writer) return
+    if (!open || !writer) return undefined
     let cancelled = false
     setPreview(undefined)
     setStatus(undefined)
@@ -140,7 +141,7 @@ export function SaveToDefinition({
               onClick={() => {
                 void copyText(host, json)
                   .then(() => setCopied(true))
-                  .catch(() => {})
+                  .catch(noop)
                 setTimeout(() => setCopied(false), 2000)
               }}
             >

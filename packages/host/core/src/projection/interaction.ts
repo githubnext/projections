@@ -52,6 +52,7 @@ export function interaction(state: Interaction, event: InteractionEvent): Intera
     case 'restarted':
       return state === initialInteraction ? state : initialInteraction
   }
+  return state
 }
 
 function sameRect(a: AnchorRect | null, b: AnchorRect | null): boolean {

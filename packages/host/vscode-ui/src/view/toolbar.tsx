@@ -73,7 +73,9 @@ export function ViewToolbar(toolbarProps: ViewToolbarProps) {
         ref={toolbar}
         layout={layout}
         style={toolbarGrid(layout, {start: Boolean(start), mode: modeRegion, playback: showPlayback})}
-        onKeyDown={event => handlePlaybackKey(event, p, showPlayback)}
+        onKeyDown={event => {
+          handlePlaybackKey(event, p, showPlayback)
+        }}
       >
         {start && <div className="phv-toolbar-start">{start}</div>}
         {modeRegion && (

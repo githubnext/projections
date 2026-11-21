@@ -6,8 +6,10 @@ import assert from 'node:assert/strict'
 import {FrameLifecycle} from '../dist/frame/lifecycle.js'
 import {OpenedDocument} from '../dist/frame/opened.js'
 
+const noop = () => undefined
+
 /** A window whose timers never fire on their own. */
-const view = {setTimeout: () => 1, clearTimeout: () => {}}
+const view = {setTimeout: () => 1, clearTimeout: noop}
 
 /** A frame showing `src`, whose `load` the test fires. */
 class Frame extends EventTarget {
@@ -26,13 +28,7 @@ class Frame extends EventTarget {
 function setup() {
   const iframe = new Frame()
   const events = []
-  const lifecycle = new FrameLifecycle(
-    view,
-    iframe,
-    10_000,
-    event => events.push(event),
-    () => {},
-  )
+  const lifecycle = new FrameLifecycle(view, iframe, 10_000, event => events.push(event), noop)
   let settle
   const opened = new OpenedDocument(
     () =>
@@ -44,7 +40,10 @@ function setup() {
   return {iframe, events, lifecycle, open, settle: () => settle}
 }
 
-const tick = () => new Promise(resolve => setTimeout(resolve))
+const tick = () =>
+  new Promise(resolve => {
+    setTimeout(resolve)
+  })
 
 test("a load of the frame's own document while the opened one is fetched counts against it, not the opened one", async () => {
   const {iframe, lifecycle, open, settle} = setup()

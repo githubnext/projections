@@ -2,6 +2,8 @@ import {test, expect} from '@playwright/test'
 import type {Locator, Page} from '@playwright/test'
 import {explorer} from './harness.js'
 
+const noop = () => undefined
+
 // Loading states are centered in the box they stand in for and fill it, so nothing moves when the content arrives.
 
 /**
@@ -37,7 +39,7 @@ async function expectCentered(status: Locator, area: Locator) {
 }
 
 /** Holds every renderer bundle's page, so its frame stays loading (until the host's ready deadline). */
-const holdRenderers = (page: Page) => page.route(/\/renderers\/[^/]+\/index\.html/, () => {})
+const holdRenderers = (page: Page) => page.route(/\/renderers\/[^/]+\/index\.html/, noop)
 
 const sizes = [
   {name: 'at this viewport', viewport: undefined},
@@ -60,7 +62,7 @@ for (const {name, viewport} of sizes) {
 
   test(`starting the engine is centered in the explorer's place ${name}`, async ({page}) => {
     if (viewport) await page.setViewportSize(viewport)
-    await page.route(/\.wasm(\?|$)/, () => {})
+    await page.route(/\.wasm(\?|$)/, noop)
     await page.goto(explorer())
     const status = page.locator('.demo-sized .ph-loading')
     await expect(status).toContainText('Starting the engine…')

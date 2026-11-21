@@ -91,7 +91,7 @@ export function TitleActivity({
   const {level, place} = useTitleBar()
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
-    if (at === undefined) return
+    if (at === undefined) return undefined
     setNow(Date.now())
     const timer = setInterval(() => setNow(Date.now()), 5000)
     return () => clearInterval(timer)

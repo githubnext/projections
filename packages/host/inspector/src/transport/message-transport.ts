@@ -4,6 +4,9 @@ import {requestErrorMessage} from './errors.js'
 import {isApiPath, transportTag} from './messages.js'
 import type {TransportMessage, TransportReply} from './messages.js'
 
+/** Why `signal` aborted: its reason, else an AbortError. */
+const abortReason = (signal: AbortSignal | undefined): unknown => signal?.reason ?? new DOMException('Aborted', 'AbortError')
+
 /**
  * A transport over a message channel, such as an editor webview's `postMessage` to its extension. The other end (a
  * bridge) proxies each request to the runner, adding the startup token itself, so the UI holds no token and needs no
@@ -46,13 +49,13 @@ export function createMessageTransport({
   })
   /** Posts `message` (with a fresh id) and settles with its reply, or rejects when `signal` aborts. */
   function send(message: (id: number) => TransportMessage, blob: boolean, signal?: AbortSignal): Promise<unknown> {
-    if (signal?.aborted) return Promise.reject(signal.reason ?? new DOMException('Aborted', 'AbortError'))
+    if (signal?.aborted) return Promise.reject(abortReason(signal))
     const id = nextId++
     return new Promise((resolve, reject) => {
       const abort = () => {
         if (!pending.delete(id)) return
         post({tag: transportTag, type: 'abort', id})
-        reject(signal?.reason ?? new DOMException('Aborted', 'AbortError'))
+        reject(abortReason(signal))
       }
       pending.set(id, {
         blob,

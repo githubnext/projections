@@ -1,3 +1,5 @@
+import {noop} from './noop.js'
+
 /**
  * Custom renderer frames in a host whose frames may only be Blob documents (an editor webview). The Inspector loads a
  * repository's custom renderer bundle from `<runner origin>/custom-renderers/…`, which such a page can't load. So the
@@ -7,7 +9,7 @@
  */
 export function relayRendererFrames(prefix: string, open: (url: URL) => Promise<string>, frame = globalThis.HTMLIFrameElement): () => void {
   const descriptor = Object.getOwnPropertyDescriptor(frame.prototype, 'src')
-  if (!descriptor?.set || !descriptor.get) return () => {}
+  if (!descriptor?.set || !descriptor.get) return noop
   const {get, set} = descriptor
   Object.defineProperty(frame.prototype, 'src', {
     configurable: true,
@@ -15,14 +17,19 @@ export function relayRendererFrames(prefix: string, open: (url: URL) => Promise<
     get,
     set(this: HTMLIFrameElement, value: string) {
       const text = String(value)
-      if (!text.startsWith(prefix)) return set.call(this, value)
+      if (!text.startsWith(prefix)) {
+        set.call(this, value)
+        return
+      }
       const url = new URL(text)
       // Until the Blob document is ready the frame loads nothing; the renderer host times out if it never is.
       void open(url).then(
         blob => set.call(this, `${blob}${url.hash}`),
-        error => console.error(`Projections: the custom renderer ${url.pathname} is unavailable`, error),
+        (error: unknown) => console.error(`Projections: the custom renderer ${url.pathname} is unavailable`, error),
       )
     },
   })
-  return () => Object.defineProperty(frame.prototype, 'src', descriptor)
+  return () => {
+    Object.defineProperty(frame.prototype, 'src', descriptor)
+  }
 }

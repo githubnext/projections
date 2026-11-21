@@ -8,6 +8,8 @@ import {ActionButton} from './elements.js'
 import {Menu} from './overlay/menu.js'
 import {uiCodicons} from './codicons.js'
 
+const noop = () => undefined
+
 /**
  * The one play button's name, codicon and icon name (`data-icon`), by `playButton`: "Pause" while playing, else "Play
  * forward" or "Play backward" in `nextDirection`; under reduced motion "Show <after>" or "Show <before>".
@@ -185,7 +187,7 @@ export function Playback({
                     },
                   ]
                 : []),
-              {id: 'position', label: 'Position', detail: `${percent}%`, group: 'position', disabled: true, onSelect: () => {}},
+              {id: 'position', label: 'Position', detail: `${percent}%`, group: 'position', disabled: true, onSelect: noop},
             ]}
           />
         </>

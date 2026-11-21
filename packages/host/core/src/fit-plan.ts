@@ -211,7 +211,7 @@ export function useFitPlan<T>(
   const observer = useRef<ResizeObserver | undefined>(undefined)
   useLayoutEffect(() => {
     const element = bar.current
-    if (!element) return
+    if (!element) return undefined
     const resize = new ResizeObserver(entries => {
       // A region that resized changed what the shown plan needs; one that isn't as wide as when the bar settled changed
       // from outside, not as part of the plan it settled on.
@@ -245,7 +245,7 @@ export function useFitPlan<T>(
   // Focus moving and a pointer's press and release, for the lock (`fitPlanLifecycle`).
   useEffect(() => {
     const document = bar.current?.ownerDocument
-    if (!document) return
+    if (!document) return undefined
     const moved = () => send({type: 'moved'})
     const press = () => send({type: 'pressed'})
     const release = () => send({type: 'released'})

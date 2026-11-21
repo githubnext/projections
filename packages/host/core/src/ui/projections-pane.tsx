@@ -100,7 +100,9 @@ export function ProjectionsPane({
                 data-projection={item.id}
                 aria-current={isCurrent ? 'page' : undefined}
                 disabled={!onChoose}
-                onClick={() => !isCurrent && onChoose?.(item.id)}
+                onClick={() => {
+                  if (!isCurrent) onChoose?.(item.id)
+                }}
                 className={cn(
                   'pj:flex pj:w-full pj:min-w-0 pj:items-center pj:gap-2 pj:rounded-md pj:px-2 pj:py-1.5 pj:text-left pj:outline-hidden pj:focus-visible:ring-2 pj:focus-visible:ring-ring',
                   isCurrent ? 'pj:bg-accent pj:text-accent-foreground' : 'pj:hover:bg-accent/60',

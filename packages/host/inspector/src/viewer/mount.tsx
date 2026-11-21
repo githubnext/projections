@@ -27,12 +27,20 @@ import {pageView} from './page-view.js'
 import {statusText} from './state.js'
 import type {MountedViewer, MountViewerOptions, ViewerState} from './state.js'
 import {markStatusBar, viewerTheme} from './theme.js'
+import {noop} from '../noop.js'
 
 /** Waits `ms`, or until `signal` aborts. */
 const sleep = (ms: number, signal: AbortSignal) =>
   new Promise<void>(resolve => {
     const timer = setTimeout(resolve, ms)
-    signal.addEventListener('abort', () => (clearTimeout(timer), resolve()), {once: true})
+    signal.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer)
+        resolve()
+      },
+      {once: true},
+    )
   })
 
 /** The transport to the viewer's server: plain `fetch` under its base. */
@@ -143,7 +151,7 @@ export function mountViewer(element: HTMLElement, options: MountViewerOptions = 
       post: ({body}, {send, signal}) =>
         transport
           .request({method: 'POST', path: '/view/report', body, signal})
-          .catch(() => {})
+          .catch(noop)
           .finally(() => send({type: 'posted'})),
       // One long poll per page: the state, and the build phase with it (browsers allow few connections per host).
       poll: async ({since, build, delayMs}, {send, signal}) => {

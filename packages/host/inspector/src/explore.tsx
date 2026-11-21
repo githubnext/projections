@@ -192,12 +192,12 @@ function AddToCiPanel() {
         <Button
           size="sm"
           variant="outline"
-          onClick={() =>
-            copyText(host, addToCiPrompt).then(
+          onClick={() => {
+            void copyText(host, addToCiPrompt).then(
               () => setCopied('copied'),
               () => setCopied('failed'),
             )
-          }
+          }}
         >
           Copy the prompt
         </Button>

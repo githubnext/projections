@@ -96,6 +96,7 @@ function SettingsEntries({entries, openRange}: {entries: readonly (SettingsEntry
       case 'submenu':
         return <SettingsSubmenuItem key={entry.id} entry={entry} openRange={openRange} />
     }
+    return null
   })
 }
 
@@ -162,7 +163,12 @@ export function SettingsMenu({
   if (!hasSettingsModel(model)) return null
   const ranged = range ? p.controls.find(control => control.id === range && control.type === 'range') : undefined
   return (
-    <Popover open={ranged !== undefined} onOpenChange={open => !open && setRange(null)}>
+    <Popover
+      open={ranged !== undefined}
+      onOpenChange={open => {
+        if (!open) setRange(null)
+      }}
+    >
       <DropdownMenu modal={false}>
         <PopoverAnchor asChild>
           <DropdownMenuTrigger asChild>

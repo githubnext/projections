@@ -32,7 +32,14 @@ async function open(page: Page, query: string, size?: {width: number; height: nu
   if (size) await page.setViewportSize(size)
   await page.goto(explorer(query))
   await expect(view(page)).toHaveAttribute('data-renderer-status', 'ready')
-  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  await page.evaluate(
+    () =>
+      new Promise(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(resolve)
+        })
+      }),
+  )
 }
 
 /** The stage's share of the view's height, and of its box. */

@@ -158,7 +158,12 @@ export const reachableNames = (page: Page) =>
     .locator('.ph-toolbar')
     .first()
     .evaluate(async toolbar => {
-      const frame = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      const frame = () =>
+        new Promise(resolve => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(resolve)
+          })
+        })
       const shown = (element: Element) => {
         const rect = element.getBoundingClientRect()
         return rect.width > 1 && rect.height > 1
@@ -173,7 +178,9 @@ export const reachableNames = (page: Page) =>
       const settle = async () => {
         ;(toolbar.ownerDocument.activeElement as HTMLElement | null)?.blur()
         await frame()
-        await new Promise(resolve => setTimeout(resolve, 0))
+        await new Promise(resolve => {
+          setTimeout(resolve, 0)
+        })
         await frame()
       }
       await settle()

@@ -1,6 +1,8 @@
 import {expect, test} from '@playwright/test'
 import type {Page} from '@playwright/test'
 
+const noop = () => undefined
+
 /**
  * Watches every renderer frame on every animation frame: a frame that is
  * visible before the host revealed it (its first themed paint) is a
@@ -143,7 +145,16 @@ export async function expectNoFlash(page: Page, steps: () => Promise<void>): Pro
         const phase = await page.evaluate(() => document.querySelector('.ph')?.getAttribute('data-comparison-mode') ?? '').catch(() => '')
         shares.push(...(await lightShares(page, analyzer).catch(() => [])).map(sample => ({...sample, phase})))
         // Let the page render between screenshots, so slow engines still reach the stable frames actions wait for.
-        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))).catch(() => {})
+        await page
+          .evaluate(
+            () =>
+              new Promise(resolve => {
+                requestAnimationFrame(() => {
+                  requestAnimationFrame(resolve)
+                })
+              }),
+          )
+          .catch(noop)
       }
     })()
     try {

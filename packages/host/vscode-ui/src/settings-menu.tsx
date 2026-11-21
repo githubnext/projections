@@ -14,6 +14,8 @@ import type {PopoverControl} from './toolbar-popover.js'
 import {viewIcons} from './view-controls.js'
 import type {ShowAsProps} from './view-controls.js'
 
+const noop = () => undefined
+
 /** Settings' features: the renderer's declared controls only while they apply. */
 const modelFeatures = (features: VscodeProjectionFeatures | undefined) => ({
   changesOnly: on(features, 'changesOnly'),
@@ -27,7 +29,7 @@ const modelFeatures = (features: VscodeProjectionFeatures | undefined) => ({
 
 /** What `SettingsMenu` would offer for a projection, so a toolbar can omit an empty menu; pass `views` when it offers "Show as". */
 export function hasSettings(p: ProjectionController, features?: VscodeProjectionFeatures, views: readonly ViewKind[] = []): boolean {
-  const showAs = views.length > 1 ? {view: views[0]!, views, onViewChange: () => {}} : undefined
+  const showAs = views.length > 1 ? {view: views[0]!, views, onViewChange: noop} : undefined
   return hasSettingsModel(settingsModel(p, modelFeatures(features), showAs))
 }
 
@@ -91,6 +93,7 @@ function settingsItems(entries: readonly (SettingsEntry | SettingsSubmenu)[], gr
         ]
       }
     }
+    return []
   })
 }
 

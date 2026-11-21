@@ -53,6 +53,7 @@ function controlEntry(p: ProjectionController, control: RendererControl): Settin
     case 'range':
       return {type: 'range', id: control.id, label: control.label, description, control}
   }
+  throw new TypeError('Unknown renderer control type')
 }
 
 /**

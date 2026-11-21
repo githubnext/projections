@@ -84,7 +84,10 @@ function MenuLevel({
   }
   const choose = (item: MenuItem) => {
     if (item.disabled) return
-    if (item.submenu) return openSub(item.id)
+    if (item.submenu) {
+      openSub(item.id)
+      return
+    }
     done()
     item.onSelect?.()
   }

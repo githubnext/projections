@@ -5,6 +5,8 @@ import {renderToStaticMarkup} from 'react-dom/server'
 import {failureMessage, missingInputNotice, missingInputNotices, reported} from '../dist/ui/notices.js'
 import {FailureCard} from '../dist/ui/app/cards.js'
 
+const noop = () => undefined
+
 const before = '07f32353aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 const after = 'd9ac67b0bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
 const schema = 'packages/api/prisma/schema.prisma'
@@ -57,8 +59,8 @@ test("the failure panel shows the extractor's message once, never the runner exe
       job,
       previous: false,
       other: 'after (main)',
-      onDiagnostics: () => {},
-      onRawOutput: () => {},
+      onDiagnostics: noop,
+      onRawOutput: noop,
     }),
   )
   assert.ok(!html.includes(binary), html)

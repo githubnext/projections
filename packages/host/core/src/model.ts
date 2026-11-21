@@ -98,7 +98,11 @@ export function subjectRows(subject: ViewSubject): Row[] {
   // Endpoint labels come from the extraction the relationship is taken from.
   const labels = {before: entityLabels(before), after: entityLabels(after)}
   const stepOf = new Map<string, number>()
-  comparison.steps.forEach((step, index) => step.changes.forEach(id => stepOf.set(id, index)))
+  comparison.steps.forEach((step, index) =>
+    step.changes.forEach(id => {
+      stepOf.set(id, index)
+    }),
+  )
   const referenced = {before: new Set<string>(), after: new Set<string>()}
   const changes: Row[] = comparison.changes
     .map(change => {

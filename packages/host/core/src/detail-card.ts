@@ -109,7 +109,7 @@ export function useDetailCard(
     else setPlaced(null)
   }, [row, measure, anchors])
   useEffect(() => {
-    if (!row) return
+    if (!row) return undefined
     let frame = 0
     const schedule = () => {
       if (!frame) {

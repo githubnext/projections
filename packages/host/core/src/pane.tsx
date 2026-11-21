@@ -138,7 +138,7 @@ export function RendererPane(props: RendererPaneProps) {
   titleRef.current = title
   useEffect(() => {
     const host = container.current
-    if (!host) return
+    if (!host) return undefined
     send({type: 'reloaded'})
     const onEvent = (event: RendererFrameEvent) => {
       const current = callbacks.current

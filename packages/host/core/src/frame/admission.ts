@@ -39,6 +39,8 @@ export type Admission =
   | {type: 'rejected'; reason: 'invalid' | 'oversized' | 'rate-limited'}
   /** Dropped silently: over the rate limit again. */
   | {type: 'dropped'}
+  /** Dropped silently: a paint of an earlier document, sent before the renderer received the frame's latest `init`. */
+  | {type: 'stale'}
   /** The frame must be stopped. */
   | {type: 'failed'; message: string}
 
@@ -49,6 +51,8 @@ export type Admission =
 export class MessageGate {
   private readonly rate: MessageRate
   private dropped = 0
+  /** The generation of the frame's latest `init`, which the renderer's `rendered` echoes (see `HostMessage`). */
+  generation = 0
 
   constructor(
     view: Window,
@@ -71,7 +75,10 @@ export class MessageGate {
     }
     if (size(event.data) > rendererLimits.messageBytes) return {type: 'rejected', reason: 'oversized'}
     const message = parseRendererMessage(event.data, this.channel)
-    return message ? {type: 'message', message} : {type: 'rejected', reason: 'invalid'}
+    if (!message) return {type: 'rejected', reason: 'invalid'}
+    // A renderer that echoes no generation is taken at its word.
+    const stale = message.type === 'rendered' && message.generation !== undefined && message.generation !== this.generation
+    return stale ? {type: 'stale'} : {type: 'message', message}
   }
 }
 

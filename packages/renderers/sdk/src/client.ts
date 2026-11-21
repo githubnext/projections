@@ -9,7 +9,7 @@ import {
 } from './protocol.js'
 import {documentRings} from './rings.js'
 import {optionalThemeTokenNames, resolveThemeTokens} from './tokens.js'
-import {dispatch, replayed, resumeSession, type RendererHandlers} from './client/host-messages.js'
+import {dispatch, echoedGeneration, replayed, resumeSession, type RendererHandlers} from './client/host-messages.js'
 import {documentRequests} from './client/documents.js'
 import type {
   AnchorRect,
@@ -206,7 +206,7 @@ export function connectRenderer(handlers: RendererHandlers, options: ConnectOpti
   const clamp = (value: number) => Math.min(rendererLimits.maxHeight, Math.max(0, Math.ceil(value)))
   const client: RendererClient = {
     channel,
-    rendered: progress => post({type: 'rendered', progress: Math.min(1, Math.max(0, progress))}),
+    rendered: progress => post({type: 'rendered', progress: Math.min(1, Math.max(0, progress)), ...echoedGeneration(messages.get('init'))}),
     select(id, path) {
       if (path !== undefined && !isPropertyPath(path))
         throw new RendererConnectionError('A selection path must be an RFC 6901 JSON pointer')

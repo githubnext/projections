@@ -118,8 +118,10 @@ export class RendererFrame {
     this.progress = progress
     this.flow.reset()
     this.renderedProgress = undefined
+    // Numbered, so the gate drops a renderer's acknowledgement of an earlier one.
+    this.gate.generation++
     if (this.status !== 'ready') return
-    this.send(initMessage(init, this.capabilities))
+    this.send(initMessage(init, this.capabilities, this.gate.generation))
     if (progress) this.setProgress(progress)
   }
 
@@ -246,7 +248,7 @@ export class RendererFrame {
       case 'rendered':
         this.renderedProgress = message.progress
         this.flow.acknowledged(message.progress)
-        this.onEvent(message)
+        this.onEvent({type: 'rendered', progress: message.progress})
         this.lifecycle.reveal()
         return
       case 'height': {
@@ -302,7 +304,9 @@ export class RendererFrame {
     this.declared = capabilities.controls ?? []
     this.onEvent({type: 'ready', capabilities})
     const {init, options, selection, selectionPath, marks, hovered, filtering} = this
-    for (const message of replay({init, options, selection, selectionPath, marks, hovered, filtering}, capabilities)) this.send(message)
+    const {generation} = this.gate
+    for (const message of replay({init, generation, options, selection, selectionPath, marks, hovered, filtering}, capabilities))
+      this.send(message)
     this.send({type: 'viewport', ...viewportOf(this.iframe, this.view)})
     if (this.progress) this.flow.send(this.progress)
   }

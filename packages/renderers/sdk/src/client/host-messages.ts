@@ -63,11 +63,16 @@ export function resumeSession(view: Window, channel: string) {
   return {messages: session.messages, replay}
 }
 
+/** What a renderer's `rendered` echoes of the latest `init`: its generation, when it had one (see `HostMessage`). */
+export function echoedGeneration(init: HostMessage | undefined): {generation?: number} {
+  return init?.type === 'init' && init.generation !== undefined ? {generation: init.generation} : {}
+}
+
 /** Hands a host message to its handler, as the handler's own payload. */
 export function dispatch(handlers: RendererHandlers, message: HostMessage) {
   switch (message.type) {
     case 'init': {
-      const {type: _type, ...payload} = message
+      const {type: _type, generation: _generation, ...payload} = message
       handlers.init?.(payload as InitPayload)
       break
     }

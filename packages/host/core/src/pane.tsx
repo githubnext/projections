@@ -129,7 +129,8 @@ export function RendererPane(props: RendererPaneProps) {
     onState(state)
   }, [state, onState])
 
-  // The init the frame was last given, so an acknowledgement records the one it answers.
+  // The init the frame was last given, so an acknowledgement records the one it answers: the frame drops a renderer's
+  // acknowledgement of an earlier init (renderers that echo its generation), and the ref changes with `setInit`.
   const initialized = useRef(init)
   const url = renderer.url
   const title = props.label ? `${renderer.title} renderer, ${props.label}` : `${renderer.title} renderer`

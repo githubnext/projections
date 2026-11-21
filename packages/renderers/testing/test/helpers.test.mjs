@@ -25,7 +25,7 @@ test('connectInspector builds page URLs on the workbench origin', () => {
 })
 
 test('check failures are flattened with their titles; samples round trip', () => {
-  assert.equal(allChecks.length, 25)
+  assert.equal(allChecks.length, 26)
   const failures = checkFailures([
     {id: 'legend', title: checkTitles.legend, status: 'fail', details: ['two legends'], durationMs: 1},
     {id: 'selection', title: checkTitles.selection, status: 'pass', details: [], durationMs: 1},
@@ -602,6 +602,31 @@ test('nested-accents fails a change color inside another, and lets an item keep 
     'In the diff: span.row[data-entity-id="b"] (modified background-color) is drawn inside li.card[data-entity-id="a"] (modified background-color)',
     'In the diff: span.name (modified color) is drawn inside li.card[data-entity-id="a"] (modified background-color)',
   ])
+})
+
+test('link-routes reports a link drawn across cards, and skips a renderer that routes none', async () => {
+  const routesDriver = measurement => ({
+    async load() {
+      return {status: 'ready', steps: [], capabilities: {changeHighlighting: 'supported', comparisonModes: ['diff']}}
+    },
+    async measure(call) {
+      return call === 'routes' ? measurement : undefined
+    },
+    sleep: async () => {},
+  })
+  const [clear] = await runChecks(routesDriver({count: 3, crossing: []}), subject, {checks: ['link-routes']})
+  assert.equal(clear.status, 'pass', clear.details.join('\n'))
+  const [crossing] = await runChecks(routesDriver({count: 3, crossing: [{id: 'orders->payments', crosses: ['cache', 'audit']}]}), subject, {
+    checks: ['link-routes'],
+  })
+  assert.equal(crossing.status, 'fail')
+  assert.match(crossing.details[0], /^In the diff, no route around the cards exists for orders->payments: it is drawn across cache, audit/)
+  const [none] = await runChecks(routesDriver({count: 0, crossing: []}), subject, {checks: ['link-routes']})
+  assert.equal(none.status, 'skip')
+  // A probe without the routes call skips, rather than failing the run.
+  const [unmeasured] = await runChecks(routesDriver(undefined), subject, {checks: ['link-routes']})
+  assert.equal(unmeasured.status, 'skip')
+  assert.match(unmeasured.details.join('\n'), /doesn't measure link routes/)
 })
 
 test('nested-accents measures the animation in animated mode, after the diff', async () => {

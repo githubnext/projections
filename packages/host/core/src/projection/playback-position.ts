@@ -1,4 +1,4 @@
-import {useCallback, useMemo, useRef, useState} from 'react'
+import {useCallback, useMemo} from 'react'
 import type {ComparisonMode} from '../modes.js'
 import type {PaneState} from '../pane.js'
 import {
@@ -24,28 +24,14 @@ export type PlaybackPositionInput = {
   speed: number
   /** The core's own slider position, for when the embedder controls neither position nor progress. */
   internalPosition: number
-  reducedMotion: boolean
 }
 
 /**
  * The playback timeline (the renderer's steps, the travel time and the holds), the slider position and the
  * presentation progress it shows, and the steps either side of it.
  */
-export function usePlaybackPosition({
-  options,
-  comparing,
-  mode,
-  panes,
-  holds,
-  speed,
-  internalPosition,
-  reducedMotion,
-}: PlaybackPositionInput) {
+export function usePlaybackPosition({options, comparing, mode, panes, holds, speed, internalPosition}: PlaybackPositionInput) {
   const {subject} = options
-  const [ownDirection, setDirection] = useState<1 | -1>(1)
-  const direction = options.direction ?? ownDirection
-  /** Whether the slider has moved (playback, a seek or a step) since this subject was shown. */
-  const travelled = useRef(false)
   const stepEnds = mode === 'animated' ? panes.main.steps : []
   const stepCount =
     panes.main.stepSlots ?? (panes.main.steps.length || (subject.mode === 'comparison' ? subject.comparison.steps.length : 0))
@@ -83,8 +69,6 @@ export function usePlaybackPosition({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [timeline, stepsKey],
   )
-  // Until anything has travelled, the play button plays forward (from the start); after reaching the end, backward.
-  const nextDirection: 1 | -1 = position <= 0 ? 1 : position >= 1 ? (travelled.current || reducedMotion ? -1 : 1) : direction
   // Step navigation stops at both ends too; a step's hold counts as that step.
   const stops = useMemo(
     () => stepStops(mode === 'animated' ? stepEnds : [], timeline),
@@ -92,9 +76,6 @@ export function usePlaybackPosition({
     [stepsKey, timeline, mode],
   )
   return {
-    direction,
-    setDirection,
-    travelled,
     stepEnds,
     baseDurationMs,
     durationMs,
@@ -104,7 +85,6 @@ export function usePlaybackPosition({
     position,
     progress,
     stepPositions,
-    nextDirection,
     nextStep: comparing ? adjacentStop(stops, position, 1) : undefined,
     previousStep: comparing ? adjacentStop(stops, position, -1) : undefined,
   }

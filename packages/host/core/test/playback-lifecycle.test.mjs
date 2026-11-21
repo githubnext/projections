@@ -8,7 +8,15 @@ import {nextDirection, playbackLifecycle} from '../dist/projection/playback-life
 const plan = {stops: [0.5], travelMs: 1000, stepHoldMs: 0, endpointHoldMs: 0, loop: false, timeline: undefined, speed: 1}
 const looping = {...plan, loop: true, endpointHoldMs: 600}
 const timeline = {...plan, timeline: {stops: [], travelMs: 1000, stepHoldMs: 0, endpointHoldMs: 0}}
-const paused = (position = 0.5, extra = {}) => ({kind: 'paused', position, direction: 1, travelled: false, armed: null, ...extra})
+const paused = (position = 0.5, extra = {}) => ({
+  kind: 'paused',
+  position,
+  direction: 1,
+  travelled: false,
+  armed: null,
+  stopping: false,
+  ...extra,
+})
 
 /** Sends events in order, collecting the effects. */
 function run(state, ...events) {
@@ -63,8 +71,31 @@ test('playback stops at the end once, from its frames, and the button then plays
   ])
   assert.equal(ended.state.kind, 'paused')
   assert.equal(nextDirection(ended.state, false), -1)
-  // The stop's echo changes nothing.
-  assert.deepEqual(run(ended.state, {type: 'playingShown', playing: false, plan, reducedMotion: false}).state, ended.state)
+  // An embedder that applies the stop a render later still shows playing: playback waits for it rather than playing on.
+  const waiting = run(ended.state, {type: 'playingShown', playing: true, plan, reducedMotion: false})
+  assert.deepEqual(waiting, {state: ended.state, effects: []})
+  const echoed = run(waiting.state, {type: 'playingShown', playing: false, plan, reducedMotion: false})
+  assert.deepEqual(echoed, {state: paused(1, {direction: 1, travelled: true}), effects: []})
+})
+
+test('a pause the embedder declines leaves playback shown playing, and Pause asks again rather than playing', () => {
+  const playing = run(paused(), {type: 'playingShown', playing: true, plan, reducedMotion: false}).state
+  const declined = run(playing, {type: 'pause'}, {type: 'playingShown', playing: true, plan, reducedMotion: false})
+  assert.deepEqual(declined.effects, [{type: 'requestPlaying', playing: false}])
+  assert.deepEqual(run(declined.state, {type: 'togglePlayback', plan, reducedMotion: false}).effects, [
+    {type: 'requestPlaying', playing: false},
+  ])
+})
+
+test('pause then play in one event, shown playing throughout, plays on', () => {
+  const playing = run(paused(), {type: 'playingShown', playing: true, plan, reducedMotion: false}).state
+  const again = run(
+    playing,
+    {type: 'pause'},
+    {type: 'play', direction: 1, plan, reducedMotion: false},
+    {type: 'playingShown', playing: true, plan, reducedMotion: false},
+  )
+  assert.equal(again.state.kind, 'playing')
 })
 
 test('playback an embedder starts at an end goes away from it; under reduced motion it shows the other end at once', () => {
@@ -125,8 +156,10 @@ test('every state playback reaches is consistent, and every request leaves it wh
       'playback that plays has travelled': state => state.kind !== 'playing' || state.travelled,
     },
     transitions: {
-      'asking to stop leaves it paused, with nothing armed': ({to, effects}) =>
-        !asked(effects, false) || (to.kind === 'paused' && to.armed === null),
+      'asking to stop leaves it paused and stopping, with nothing armed': ({to, effects}) =>
+        !asked(effects, false) || (to.kind === 'paused' && to.armed === null && to.stopping),
+      'a stop waiting to be shown never plays again on its own': ({from, event, to}) =>
+        from.kind !== 'paused' || !from.stopping || to.kind === 'paused' || ['play', 'toggle', 'togglePlayback'].includes(event.type),
       'asking to play arms a play': ({to, effects}) => !asked(effects, true) || (to.kind === 'paused' && to.armed !== null),
       'a frame that reaches the end it goes to without looping stops': ({from, event, to}) =>
         event.type !== 'tick' ||

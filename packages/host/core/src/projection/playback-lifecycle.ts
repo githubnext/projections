@@ -20,9 +20,12 @@ type Course = {
   readonly travelled: boolean
 }
 
-/** Paused, or playing frame by frame from `run`. A play asked for while paused is `armed` until it is shown. */
+/**
+ * Paused, or playing frame by frame from `run`. While paused, a play asked for is `armed` until the view shows it, and a
+ * stop asked for is `stopping` until the view stops showing playback.
+ */
 export type PlaybackLifecycle =
-  | (Course & {readonly kind: 'paused'; readonly armed: PlaybackState | null})
+  | (Course & {readonly kind: 'paused'; readonly armed: PlaybackState | null; readonly stopping: boolean})
   | (Course & {readonly kind: 'playing'; readonly run: PlaybackState})
 
 /** What happens to playback. */
@@ -35,10 +38,10 @@ export type PlaybackEvent =
   | {readonly type: 'togglePlayback'; readonly plan: PlaybackRun; readonly reducedMotion: boolean}
   | {readonly type: 'seek'; readonly to: number}
   | {readonly type: 'tick'; readonly elapsedMs: number; readonly plan: PlaybackRun}
-  /** The view shows playback playing, or not. */
+  /** Whether the view shows playback playing, after every render: a request it doesn't show yet was declined, or waits. */
   | {readonly type: 'playingShown'; readonly playing: boolean; readonly plan: PlaybackRun; readonly reducedMotion: boolean}
   | {readonly type: 'positionShown'; readonly position: number}
-  /** An embedder controls the direction, and changed it. */
+  /** An embedder controls the direction, and it isn't the one playback has. */
   | {readonly type: 'directionShown'; readonly direction: 1 | -1}
   | {readonly type: 'motionShown'; readonly reduced: boolean}
   | {readonly type: 'modeChanged'}
@@ -72,13 +75,17 @@ export function nextDirection(state: PlaybackLifecycle, reducedMotion: boolean):
 /** A transition's result. */
 type Next = PlaybackLifecycle | Step<PlaybackLifecycle, PlaybackEffect>
 
-const active = (state: PlaybackLifecycle) => state.kind === 'playing' || state.armed !== null
+/** Whether playback plays, or will once a request is shown, or still shows until a stop is. */
+const active = (state: PlaybackLifecycle) => state.kind === 'playing' || state.armed !== null || state.stopping
 
-/** Stops playback, asking for it to stop only when it plays or a play is armed. */
+/** Paused at the same place, with nothing asked for. */
+const resting = ({position, direction, travelled}: PlaybackLifecycle) =>
+  ({kind: 'paused', position, direction, travelled, armed: null, stopping: false}) as const
+
+/** Stops playback. It asks for it to stop when it plays, or might, and is `stopping` until the view shows that. */
 function stop(state: PlaybackLifecycle, ...effects: PlaybackEffect[]): Next {
-  const {position, direction, travelled} = state
-  const paused = {kind: 'paused', position, direction, travelled, armed: null} as const
-  return active(state) ? emit(paused, ...effects, {type: 'requestPlaying', playing: false}) : emit(paused, ...effects)
+  if (!active(state)) return emit(resting(state), ...effects)
+  return emit({...resting(state), stopping: true}, ...effects, {type: 'requestPlaying', playing: false})
 }
 
 /** Moves the slider to `to`, stopping playback; the direction follows the move. */
@@ -95,7 +102,7 @@ function play(state: PlaybackLifecycle, direction: 1 | -1, plan: PlaybackRun, re
   const moved: PlaybackEffect[] = at === state.position ? [] : [{type: 'requestPosition', position: at}]
   const run = beginPlayback(at, direction, plan)
   if (state.kind === 'playing') return emit({...state, position: at, direction, run}, ...moved)
-  const armed = {...state, position: at, direction, armed: run}
+  const armed = {...state, position: at, direction, armed: run, stopping: false}
   return state.armed ? emit(armed, ...moved) : emit(armed, ...moved, {type: 'requestPlaying', playing: true})
 }
 
@@ -104,7 +111,7 @@ function started(state: Extract<PlaybackLifecycle, {kind: 'paused'}>, plan: Play
   // Motion is reduced: the end it goes to, at once.
   if (reducedMotion)
     return emit(
-      {...state, armed: null},
+      {...resting(state), stopping: true},
       {type: 'requestPosition', position: endpoint(state.direction)},
       {type: 'requestPlaying', playing: false},
     )
@@ -143,8 +150,10 @@ const common = {
       : play(state, event.direction, event.plan, event.reducedMotion),
   togglePlayback: (state: PlaybackLifecycle, event: {plan: PlaybackRun; reducedMotion: boolean}) =>
     active(state) ? stop(state) : play(state, nextDirection(state, event.reducedMotion), event.plan, event.reducedMotion),
-  positionShown: <S extends PlaybackLifecycle>(state: S, {position}: {position: number}): S => ({...state, position: unit(position)}),
-  directionShown: <S extends PlaybackLifecycle>(state: S, {direction}: {direction: 1 | -1}): S => ({...state, direction}),
+  positionShown: <S extends PlaybackLifecycle>(state: S, {position}: {position: number}): S =>
+    unit(position) === state.position ? state : {...state, position: unit(position)},
+  directionShown: <S extends PlaybackLifecycle>(state: S, {direction}: {direction: 1 | -1}): S =>
+    direction === state.direction ? state : {...state, direction},
   modeChanged: (state: PlaybackLifecycle) => stop(state),
 }
 
@@ -155,12 +164,16 @@ export const playbackLifecycle = defineMachine<PlaybackLifecycle, PlaybackEvent,
       on: {
         ...common,
         tick: state => state,
-        // Still not playing after a play was asked for: the embedder declined it, so the next play asks again.
-        playingShown: (state, {playing, plan, reducedMotion}) =>
-          playing ? started(state, plan, reducedMotion) : state.armed ? {...state, armed: null} : state,
+        playingShown: (state, {playing, plan, reducedMotion}) => {
+          // Not shown playing: a stop asked for took; a play asked for was declined, so the next one asks again.
+          if (!playing) return state.armed || state.stopping ? resting(state) : state
+          // Still shown playing after a stop was asked for: it waits for the embedder, and Pause asks again.
+          if (state.stopping) return state
+          return started(state, plan, reducedMotion)
+        },
         // An embedder may start playback while motion is reduced: that is handled as it is shown.
         motionShown: state => state,
-        subjectChanged: (state, {position}) => ({kind: 'paused', position, direction: state.direction, travelled: false, armed: null}),
+        subjectChanged: (state, {position}) => ({...resting(state), position, travelled: false}),
       },
     },
     playing: {
@@ -168,12 +181,10 @@ export const playbackLifecycle = defineMachine<PlaybackLifecycle, PlaybackEvent,
         ...common,
         tick: (state, {elapsedMs, plan}) => tick(state, elapsedMs, plan),
         // The embedder stopped it.
-        playingShown: (state, {playing}) =>
-          playing ? state : {kind: 'paused', position: state.position, direction: state.direction, travelled: state.travelled, armed: null},
+        playingShown: (state, {playing}) => (playing ? state : resting(state)),
         motionShown: (state, {reduced}) => (reduced ? stop(state, {type: 'requestPosition', position: endpoint(state.direction)}) : state),
         // Playback the embedder keeps playing goes on travelling through the new subject.
-        subjectChanged: (state, {position, stops}) =>
-          stops ? {kind: 'paused', position, direction: state.direction, travelled: false, armed: null} : {...state, position},
+        subjectChanged: (state, {position, stops}) => (stops ? {...resting(state), position, travelled: false} : {...state, position}),
       },
       activities: () => [{type: 'frames', key: 'frames'}],
     },

@@ -46,7 +46,7 @@ export function usePlaybackControl(input: PlaybackControlInput) {
   const current = useRef({plan, reducedMotion, toProgress})
   current.current = {plan, reducedMotion, toProgress}
   const [state, send, actor] = useMachine(playbackLifecycle, {
-    state: {kind: 'paused', position, direction: input.direction ?? 1, travelled: false, armed: null},
+    state: {kind: 'paused', position, direction: input.direction ?? 1, travelled: false, armed: null, stopping: false},
     effects: {
       requestPlaying: ({playing: next}) => request('playing', next),
       // A slider position: `onPositionChange`, and `onProgressChange` when the embedder controls progress.
@@ -73,21 +73,20 @@ export function usePlaybackControl(input: PlaybackControlInput) {
     },
   })
 
-  // What the view shows reaches the lifecycle when it changes. Playing starts as not shown, so playback playing from
-  // the start (`initialPlaying`, or an embedder's) starts.
-  const shown = useRef({playing: false, position, direction: input.direction, reducedMotion, mode, subject})
+  // After every render, the lifecycle is reconciled with what the view shows: the subject, the mode and reduced motion
+  // when they change; the position, a controlled direction and whether it plays when they differ from the lifecycle's,
+  // so a request an embedder declined (or hasn't applied yet) never leaves the two apart.
+  const shown = useRef({reducedMotion, mode, subject})
   useLayoutEffect(() => {
     const last = shown.current
-    shown.current = {playing, position, direction: input.direction, reducedMotion, mode, subject}
+    shown.current = {reducedMotion, mode, subject}
     if (last.subject !== subject) send({type: 'subjectChanged', position, stops: latest.current.playing === undefined})
-    if (last.position !== position) send({type: 'positionShown', position})
-    if (input.direction !== undefined && last.direction !== input.direction) send({type: 'directionShown', direction: input.direction})
+    if (actor.getState().position !== position) send({type: 'positionShown', position})
+    if (input.direction !== undefined && actor.getState().direction !== input.direction)
+      send({type: 'directionShown', direction: input.direction})
     if (last.mode !== mode) send({type: 'modeChanged'})
     if (last.reducedMotion !== reducedMotion) send({type: 'motionShown', reduced: reducedMotion})
-    // A play asked for that this render still doesn't show was declined.
-    const now = actor.getState()
-    const declined = !playing && now.kind === 'paused' && now.armed !== null
-    if (last.playing !== playing || declined) send({type: 'playingShown', playing, plan: current.current.plan, reducedMotion})
+    send({type: 'playingShown', playing, plan: current.current.plan, reducedMotion})
   })
 
   // Uncontrolled progress reports every change, including resets.
@@ -96,7 +95,7 @@ export function usePlaybackControl(input: PlaybackControlInput) {
   }, [progress, latest])
   // A paused slider keeps showing the same progress when the timeline changes, for example when the renderer reports its steps.
   const kept = useRef({progress, timeline})
-  const still = state.kind === 'paused' && state.armed === null
+  const still = state.kind === 'paused' && state.armed === null && !state.stopping
   useEffect(() => {
     const before = kept.current
     kept.current = {progress, timeline}

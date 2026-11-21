@@ -74,7 +74,7 @@ for (const [name, id] of [
     expect(foot.borderColor).toBe(paint.divider)
     expect(foot.radius).not.toBe('0px')
     expect(stage.bottom - foot.bottom).toBeCloseTo(12, 0)
-    expect(foot.left - stage.left - (stage.right - foot.right)).toBeLessThanOrEqual(1)
+    expect(Math.abs(foot.left - stage.left - (stage.right - foot.right))).toBeLessThanOrEqual(1)
     for (const edge of [foot.left, foot.right, foot.top, foot.bottom]) expect(edge).toBe(Math.round(edge))
     const single = page.locator('.ph-single')
     if (await single.count()) {

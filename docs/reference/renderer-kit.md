@@ -2677,6 +2677,18 @@ to show more of it.
 | `expand` | `"expand"(ids: Iterable<string, any, any>): void` | Shows these items too, or opens these folds (`isFold`), until the host's scope changes. A canvas lays them out with the rest; an open fold stays, as the way to fold its parts again. |
 | `shown` | `"shown": ReadonlySet<string>` | Both: every row the scope shows. |
 
+### `scrolledPadding`
+
+```ts
+scrolledPadding(__0: { "height": number; "inset": { "bottom": number; "top": number }; "own": { "top": number; "y": number }; "view": number }): { "top": number; "y": number }
+```
+
+The top and bottom (`y`) padding of a drawing drawn larger than its fit, CSS px, so it clears bands of `inset.top`
+and `inset.bottom` at the ends of a stage `view` px tall: `height` is the drawing's own height at the drawn scale.
+While it still fits the stage's height it sits centred (`margin: auto`) and keeps `own` where that leaves it clear,
+else just enough more at the end it reaches to clear the band; once that padding no longer fits, the drawing scrolls
+and each end is padded at least its band, so its first and last rows can scroll clear.
+
 ### `ScrollStart`
 
 ```ts
@@ -4536,8 +4548,9 @@ at its fitted scale (`fitScale`), and once it is drawn larger and scrolls down (
 in: `drawnScale`), under a cover a top of at least the host's `stage-inset-top` and a bottom (`y`) of at least its
 `stage-inset-bottom`, so its first row opens, and its last row scrolls, clear of what the host overlays at the
 frame's top and foot. `height` is the content's height (content units) and the stage's inner height (`Fit.height`):
-a drawing drawn larger that still fits the stage's height (a flat graph zoomed in) doesn't scroll down, keeps its
-padding, and so doesn't move as it zooms. The fit never reads it.
+a drawing drawn larger that still fits the stage's height (a flat graph zoomed in) keeps its padding where, centred,
+it clears the bands, and takes just enough more where it doesn't (`scrolledPadding`), so it moves no more than it
+must as it zooms. The fit never reads it.
 
 ### `useStageCover`
 

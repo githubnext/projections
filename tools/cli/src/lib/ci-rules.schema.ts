@@ -81,10 +81,13 @@ const FileRule = Type.Object(
         description: 'Whether a crate reads the file by path or a generator reads or writes it (true), or nothing does (false)',
       }),
     ),
-    effect: Type.Union([Type.Literal('full'), Type.Literal('docs'), Type.Literal('owner'), Type.Literal('readers')], {
-      description:
-        'full: run everything. docs: documentation only. owner: a change to the workspace or crate containing the file. readers: a change only to what reads it (the crates and generators found for every file); with none, the Linux checks still run',
-    }),
+    effect: Type.Union(
+      [Type.Literal('full'), Type.Literal('docs'), Type.Literal('checks'), Type.Literal('owner'), Type.Literal('readers')],
+      {
+        description:
+          "full: run everything. docs: documentation only. checks: the Linux checks only, which run every crate's tests and generator's check, without counting it a change to what reads it. owner: a change to the workspace or crate containing the file. readers: a change only to what reads it (the crates and generators found for every file); with none, the Linux checks still run",
+      },
+    ),
   },
   Strict,
 )

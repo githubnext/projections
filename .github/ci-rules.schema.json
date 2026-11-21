@@ -103,6 +103,10 @@
               },
               {
                 "type": "string",
+                "const": "checks"
+              },
+              {
+                "type": "string",
                 "const": "owner"
               },
               {
@@ -110,7 +114,7 @@
                 "const": "readers"
               }
             ],
-            "description": "full: run everything. docs: documentation only. owner: a change to the workspace or crate containing the file. readers: a change only to what reads it (the crates and generators found for every file); with none, the Linux checks still run"
+            "description": "full: run everything. docs: documentation only. checks: the Linux checks only, which run every crate's tests and generator's check, without counting it a change to what reads it. owner: a change to the workspace or crate containing the file. readers: a change only to what reads it (the crates and generators found for every file); with none, the Linux checks still run"
           }
         },
         "additionalProperties": false

@@ -25,15 +25,28 @@
       }
     },
     {
-      "name": "Markdown a generator reads or writes, or a crate embeds, is not documentation alone",
+      "name": "Markdown a crate embeds or a generator reads or writes runs the Linux checks alone",
       "each": true,
-      "files": ["docs/reference/cli.md", "docs/setup/install.md", "packages/cli/templates/SKILL.md", "docs/agents/ci.md"],
+      "files": [
+        "docs/reference/cli.md",
+        "docs/setup/install.md",
+        "docs/agents/ci.md",
+        "docs/builtins/renderers/graph.md",
+        "packages/cli/src/commands/help/serve.after-help.md"
+      ],
       "expect": {
         "docsOnly": false,
         "jobs": {
-          "docs": false
+          "docs": false,
+          "public-product": ["ubuntu-latest"],
+          "windows": false,
+          "windows-node": false,
+          "windows-integration": false,
+          "package": false,
+          "coverage": false
         },
-        "productIncludes": ["ubuntu-latest"]
+        "browser": [],
+        "macos": []
       }
     },
     {
@@ -214,7 +227,7 @@
     },
     {
       "name": "The package check runs for what the CLI serves",
-      "files": ["packages/host/inspector/src/app/app.tsx"],
+      "files": ["packages/host/inspector/src/app/activity.tsx"],
       "expect": {
         "jobs": {
           "package": true
@@ -242,6 +255,92 @@
           "windows-node": true,
           "windows-integration": true
         }
+      }
+    },
+    {
+      "name": "Hand-written documentation that crates embed and generators read, with plain documentation, runs the Linux checks alone",
+      "files": [
+        "CONTRIBUTING.md",
+        "docs/agents/ci.md",
+        "docs/agents/explore.md",
+        "docs/builtins/extractors/prisma-schema.md",
+        "packages/cli/README.md"
+      ],
+      "expect": {
+        "jobs": {
+          "docs": false,
+          "public-product": ["ubuntu-latest"],
+          "windows": false,
+          "windows-node": false,
+          "package": false
+        },
+        "browser": []
+      }
+    },
+    {
+      "name": "A template a crate embeds is still that crate's change",
+      "files": ["packages/cli/templates/SKILL.md"],
+      "expect": {
+        "jobs": {
+          "windows": true
+        },
+        "changedInclude": ["packages/cli"]
+      }
+    },
+    {
+      "name": "macOS runs for Rust, the GitHub Action and the CLI's packaging scripts",
+      "each": true,
+      "files": [
+        "packages/engine/src/lib.rs",
+        "packages/extractors/django-schema/Cargo.toml",
+        "action.yml",
+        "packages/cli/scripts/build.mjs",
+        "Cargo.lock"
+      ],
+      "expect": {
+        "productIncludes": ["macos-latest"]
+      }
+    },
+    {
+      "name": "macOS doesn't run for other code, though Windows does",
+      "each": true,
+      "files": [
+        "packages/sdk/src/extractor.ts",
+        "packages/cli/src/headless.js",
+        "packages/extractors/github-agentic-workflows/vendor/gh-aw/fields.json"
+      ],
+      "expect": {
+        "jobs": {
+          "public-product": ["ubuntu-latest"],
+          "windows-node": true
+        }
+      }
+    },
+    {
+      "name": "A CLI change runs the Inspector, which explores through it, but not the renderer harness",
+      "files": ["packages/cli/src/main.rs"],
+      "expect": {
+        "suitesInclude": ["packages/host/inspector", "packages/cli"],
+        "suitesExclude": ["packages/renderers/harness"],
+        "macos": []
+      }
+    },
+    {
+      "name": "The renderer SDK, the schemas and the Engine's Wasm build run the whole harness",
+      "each": true,
+      "files": ["packages/renderers/sdk/src/protocol.ts", "packages/schemas/src/domains.ts", "packages/engine/js/src/index.ts"],
+      "expect": {
+        "renderers": [],
+        "harnessJobs": 12
+      }
+    },
+    {
+      "name": "The Inspector and host the harness draws renderers in run it",
+      "each": true,
+      "files": ["packages/host/core/src/frame.ts", "packages/host/inspector/src/fixtures/stage.ts"],
+      "expect": {
+        "suitesInclude": ["packages/renderers/harness"],
+        "renderers": []
       }
     }
   ]

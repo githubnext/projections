@@ -187,7 +187,8 @@ of the rules that made it run.
 The rules file holds every decision; the code holds none:
 
 - `files`: how each changed file counts, by the first rule that matches it:
-  everything runs, documentation alone, a change to the workspace or crate
+  everything runs, documentation alone, the Linux checks alone (Markdown a crate
+  embeds or a generator reads or writes), a change to the workspace or crate
   containing it, or a change only to what reads it.
 - `tags`: labels a file gets by its path, whichever rule decided it, such as
   `release` for dist's configuration.

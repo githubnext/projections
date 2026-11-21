@@ -57,7 +57,7 @@ export interface Actor<S, E> {
   readonly running: boolean
 }
 
-type Runner = (task: never, context: ActorContext<never>) => unknown
+type Runner<E> = (task: never, context: ActorContext<E>) => unknown
 
 interface Generation<E> {
   readonly context: ActorContext<E>
@@ -68,10 +68,10 @@ interface Generation<E> {
   end: () => void
 }
 
-const timer: Runner = ((activity: After<MachineEvent>, context: ActorContext<MachineEvent>) => {
+function timer<E extends MachineEvent>(activity: After<E>, context: ActorContext<E>) {
   const id = setTimeout(() => context.send(activity.event), activity.ms)
   return () => clearTimeout(id)
-}) as Runner
+}
 
 /** Reports an error with `reportError`, else `console.error`: where an actor's errors go by default. */
 export function defaultReport(error: unknown) {
@@ -94,8 +94,8 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
   const activities = new Map<string, Generation<E>>()
   const keyed = new Map<string, Generation<E>>()
   const report = options.onError ?? defaultReport
-  const effectRunners = (options.effects ?? {}) as Record<string, Runner | undefined>
-  const activityRunners = {...options.activities, 'machine.after': timer} as Record<string, Runner | undefined>
+  const effectRunners = (options.effects ?? {}) as Record<string, Runner<E> | undefined>
+  const activityRunners = {...options.activities, 'machine.after': timer} as Record<string, Runner<E> | undefined>
 
   const generation = (): Generation<E> => {
     const controller = new AbortController()
@@ -140,14 +140,14 @@ export function createActor<S extends MachineState, E extends MachineEvent, F ex
   let run = generation()
   run.end()
 
-  const invoke = (runners: Record<string, Runner | undefined>, task: {type: string}, into: Generation<E>) => {
+  const invoke = (runners: Record<string, Runner<E> | undefined>, task: {type: string}, into: Generation<E>) => {
     const runner = runners[task.type]
     if (!runner) {
       report(new TypeError(`No runner for "${task.type}"`))
       return
     }
     try {
-      into.settle(runner(task as never, into.context as ActorContext<never>))
+      into.settle(runner(task as never, into.context))
     } catch (error) {
       report(error)
     }

@@ -33,6 +33,12 @@ test('a job the plan skipped is a likely miss when it passed on the parent commi
     ],
   )
   assert.deepEqual(misses({failed: ['windows']}), [{job: 'windows', verdict: 'no plan'}])
+  // Only a failure on the parent says the job was already broken; a skipped or cancelled one says nothing.
+  for (const conclusion of ['skipped', 'cancelled'])
+    assert.deepEqual(misses({failed: ['windows'], plan, parent: {windows: conclusion}}), [
+      {job: 'windows', verdict: 'skipped, no baseline'},
+    ])
+  assert.deepEqual(misses({failed: ['windows'], plan, parent: {windows: 'timed_out'}}), [{job: 'windows', verdict: 'failing before'}])
 })
 
 test('the miss detector runs on pushes to main after every other job, and never fails the run', () => {

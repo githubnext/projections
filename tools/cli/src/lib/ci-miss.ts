@@ -6,9 +6,9 @@
 export type Verdict =
   /** The plan skipped it and it passed on the parent commit: the rules probably missed what this change reaches. */
   | 'likely miss'
-  /** The plan skipped it, and there's no run of the parent to compare with. */
+  /** The plan skipped it, and the parent commit gives no evidence either way: no run, or the job didn't finish there. */
   | 'skipped, no baseline'
-  /** It also failed on the parent commit: it was already broken. */
+  /** It also failed or timed out on the parent commit: it was already broken. */
   | 'failing before'
   /** The pull request ran it: not a rules question (a flaky test, or the merge with other changes). */
   | 'ran on the pull request'
@@ -40,7 +40,9 @@ export function misses({failed, plan, parent}: MissInput): Miss[] {
     if (!plan.gated.includes(jobId(job))) return {job, verdict: 'not gated'}
     if (ran(plan.checks, job)) return {job, verdict: 'ran on the pull request'}
     const before = parent?.[job]
-    if (before === undefined) return {job, verdict: 'skipped, no baseline'}
-    return {job, verdict: before === 'success' ? 'likely miss' : 'failing before'}
+    if (before === 'success') return {job, verdict: 'likely miss'}
+    // Skipped, cancelled or missing on the parent (say its `changes` job failed): no baseline, not a known failure.
+    if (before === 'failure' || before === 'timed_out') return {job, verdict: 'failing before'}
+    return {job, verdict: 'skipped, no baseline'}
   })
 }

@@ -1,10 +1,11 @@
 # Gallery
 
-Renderer fixture scenarios, each drawn by its own built-in renderer inside a
-card. The [`renderer-scenarios`](../extractors/renderer-scenarios.md) extractor
-reads them from the `scenarios.json` documents renderer authors already keep, so
-a gallery is a living catalog of what your renderers draw, built from synthetic
-data alone: viewing it runs no repository code and needs no `--trust`.
+This renderer displays renderer fixture scenarios as a visual catalog, drawing
+each scenario inside its own card using its built-in renderer. The
+[`renderer-scenarios`](../extractors/renderer-scenarios.md) extractor reads
+these from the `scenarios.json` documents renderer authors already maintain.
+Because everything runs on synthetic fixture data, viewing a gallery executes no
+repository code and doesn't require `--trust`.
 
 <!-- generated: facts -->
 
@@ -18,10 +19,11 @@ data alone: viewing it runs no repository code and needs no `--trust`.
 
 ## When to use it
 
-Use it for a repository that has renderers and their scenarios, such as
-Projections itself (its `renderer-gallery` projection). In review, it shows
-which scenarios a pull request added, removed or redrew, each drawn by the
-renderer that draws it, so a fixture change reads as the picture it changes.
+Use gallery in repositories that maintain renderers and fixture scenarios—like
+Projections itself (via its `renderer-gallery` projection). During code review,
+it shows which scenarios a pull request added, removed, or redrew, each rendered
+by its own built-in renderer, so you can review fixture updates as actual
+visuals instead of raw JSON.
 
 <!-- generated: extractors -->
 
@@ -33,29 +35,31 @@ renderer that draws it, so a fixture change reads as the picture it changes.
 
 ## What it draws
 
-Each scenarios document is a group, titled with the document's title, and each
-scenario a card: its title and ID, the drawing, its description, its renderer,
-how many changes its comparison has and the comparator file that made it. The
-renderer draws inside the card in a sandboxed frame nested in the gallery's,
-with the host's theme: a comparison in its diff when the renderer has one,
-otherwise resting on its after revision, emphasized, and playing from before to
-after while the pointer or focus is on the card. Selecting inside a drawing
-selects its scenario.
+Each scenarios document becomes a titled group, and each scenario inside it
+becomes a card showing its title and ID, the rendered diagram, its description,
+the renderer name, its change count, and the comparator file that produced it.
 
-Hosts supply only built-in renderers for nesting, so a scenario drawn by a
-custom bundle is named, with its directory, and not drawn. A card whose renderer
-the host refuses, or that reports an error or doesn't draw, says why.
+Each nested renderer runs in its own sandboxed frame inside the card using the
+host's theme. Comparisons open in Diff mode when the renderer supports it;
+otherwise the card rests on the After revision with changes highlighted, and
+animates from Before to After when hovered or focused. Clicking inside a
+scenario's drawing selects that scenario.
+
+Hosts only supply built-in renderers for nesting, so any scenario targeting a
+custom bundle is listed by name and directory rather than rendered. If a host
+refuses a renderer, or a nested renderer errors out or fails to draw, the card
+explains why.
 
 ## Options
 
-The gallery declares no controls.
+Gallery declares no controls.
 
 ## What a comparison shows
 
-Added, removed and redrawn scenarios are marked like any kit card, and a
-document whose scenario list changed is marked too. Each card draws the revision
-it is in at that moment; in diff mode a redrawn scenario's card offers both of
-its revisions.
+Added, removed, and redrawn scenarios are marked like any other kit card, and
+documents whose scenario list changed are marked as well. Each card renders the
+revision active at that moment; in Diff mode, a redrawn scenario's card lets you
+inspect both revisions.
 
 ## Start from this definition
 
@@ -74,22 +78,24 @@ its revisions.
 
 ## Limitations
 
-- Only built-in renderers draw nested; custom bundles are named.
-- A long gallery in a scrolling view runs only the renderers near the view, so
-  cards far from it load as you scroll to them. An image of a long gallery draws
-  its first two scenario sets (up to 12 scenarios each) and names the rest.
-- Nested comparisons are computed when the gallery is extracted, so they are the
-  scenario's comparator's, not the host's comparator choice.
+- Only built-in renderers render inside nested cards; custom renderer bundles
+  are listed by name only.
+- In a long scrolling gallery, only renderers near the viewport run, loading
+  more cards as you scroll. Static image exports of a long gallery render the
+  first two scenario sets (up to 12 scenarios each) and list the rest by name.
+- Nested comparisons are computed at extraction time using each scenario's own
+  comparator, rather than the host's comparator selection.
 
 ## Related
 
-- [`renderer-scenarios`](../extractors/renderer-scenarios.md), which reads the
-  scenarios.
-- [Renderer frames](../../contracts/renderer-frames.md), on nested renderers.
-- [Develop a renderer](../../guides/develop-a-renderer.md), where scenarios come
-  from.
+- [`renderer-scenarios`](../extractors/renderer-scenarios.md) — reads the
+  scenario documents.
+- [Renderer frames](../../contracts/renderer-frames.md) — covers how nested
+  renderers work.
+- [Develop a renderer](../../guides/develop-a-renderer.md) — explains how to
+  author scenarios.
 
 ## How it works
 
-The [package README](../../../packages/renderers/gallery/README.md) covers
-nesting, loading and the comparison modes.
+See the [package README](../../../packages/renderers/gallery/README.md) for
+details on frame nesting, lazy loading, and comparison modes.

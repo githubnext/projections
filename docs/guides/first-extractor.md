@@ -1,29 +1,29 @@
 # Write your first extractor
 
-Projections includes extractors for common ecosystems. When your repository has
-a concept they don't understand—feature flags, message topics, a home-grown
-plugin system—you can write your own.
+Projections ships with built-in extractors for common ecosystems. Whenever your
+repository has a concept they don't know about—feature flags, message topics, or
+a custom plugin system—you can write an extractor of your own.
 
-An extractor is any program that:
+An extractor is any executable program that:
 
-- reads a **request** from standard input;
-- examines the repository at `request.repository.root`, and, when it needs the
-  project's installed dependencies such as `node_modules`, reads them from
-  `request.repository.checkout` (treat it as read-only);
-- writes one **extraction** to standard output.
+- Reads a **request** from standard input.
+- Inspects the repository at `request.repository.root`, reading any installed
+  dependencies (such as `node_modules`) from `request.repository.checkout`
+  without modifying it.
+- Writes a single **extraction** to standard output.
 
-Make its output a function of the revision: the same revision should always
-produce the same extraction. Read declared or resolved structure (manifests,
-lockfiles, compiler output, schemas) rather than timings, profiles or live
-services, sort what you emit, and keep clocks, absolute paths and versions out
-of IDs. Projections doesn't enforce this, but a non-deterministic extractor
-makes every comparison noisy: declare `execution.determinism` honestly (`pure`,
-`environmental` or `observed`) and `projections check` measures it by rerunning;
-see
+Aim to make your extractor's output a pure function of the revision so the same
+commit always produces the same extraction. Read declared or resolved structure
+(manifests, lockfiles, compiler output, schemas) instead of timings, profiles,
+or live services; sort what you emit; and keep clocks, absolute paths, and tool
+versions out of IDs. Projections won't block a non-deterministic extractor, but
+uncontrolled variation makes every diff noisy. Declare `execution.determinism`
+honestly (`pure`, `environmental`, or `observed`), and `projections check` will
+measure reproducibility by rerunning it; see
 [determinism and authority](../models/domain-model/extension-points.md#determinism-and-authority).
 
-This example describes the feature flags declared in `flags.yaml` and the teams
-that own them.
+In this walkthrough, we'll build an extractor that reads feature flags from
+`flags.yaml` along with the teams that own them.
 
 ## 1. Write the program
 
@@ -58,27 +58,33 @@ for name, flag in flags.items():
 result(entities=entities, relationships=relationships)
 ```
 
-Projections provides the `projections` module to the extractors it runs, on
-`PYTHONPATH`, so there is nothing to install. `request` is the request:
-`request.root` is the examined revision (the project's directory in it, for a
+When Projections runs a Python extractor, it puts the `projections` helper
+module on `PYTHONPATH` automatically, so there's nothing to install. The
+`request` object wraps the JSON request (it's still a `dict`) and exposes
+convenient attributes: `request.root` points to the examined revision (or the
+project subdirectory for a
 [nested project](../runner/execution.md#nested-projects)), `request.checkout`
-where its dependencies are installed and `request.inputs` the definition's
-`inputs`; it is still the request's JSON object as a `dict`. `result()` writes
-the extraction: entities and relationships as lists with an `id` each, or as
-dicts keyed by ID, in the general `graph/v0` schema unless `schema="..."` names
-another, with optional `metadata`, `volatile` and `missing_inputs`. It sorts
-them by ID, checks each has what it needs and fails with a clear message when
-one doesn't. To run the extractor by hand, put the module on `PYTHONPATH` and
-pipe a request in:
+points to where dependencies are installed, and `request.inputs` holds the
+definition's `inputs`.
+
+`result()` serializes the extraction for you. Pass entities and relationships
+either as lists where each entry has an `id`, or as dicts keyed by ID. It
+defaults to the general `graph/v0` schema unless you pass `schema="..."`, and
+accepts optional `metadata`, `volatile`, and `missing_inputs`. Before writing
+output, it sorts items by ID, checks required fields, and fails with a clear
+error if anything is missing.
+
+If you want to run the script directly from your shell while debugging, put the
+helper module on `PYTHONPATH` and pipe in a request:
 `PYTHONPATH="$(projections __python-path)" python3 tools/extract-flags.py < request.json`
-(in PowerShell,
+(or in PowerShell,
 `$env:PYTHONPATH = projections __python-path; Get-Content request.json | python tools/extract-flags.py`).
 
-In JavaScript or TypeScript, `@githubnext/projections/extractor` does the same,
-and Projections provides it to the extractors it runs with `node`, so there is
-nothing to install here either. Its accessors are camelCase (`request.root`,
-`request.repositoryRoot`), and `result()` takes one object. With the flags in
-JSON, which Node reads without a package:
+In JavaScript or TypeScript, `@githubnext/projections/extractor` gives you the
+same helpers, and Projections injects it automatically for extractors run with
+`node`—so there's nothing to install here either. Its accessors use camelCase
+(`request.root`, `request.repositoryRoot`), and `result()` takes a single
+object. With the flags stored in JSON, which Node reads natively:
 
 ```js
 // tools/extract-flags.mjs
@@ -97,14 +103,14 @@ result({
 })
 ```
 
-Install the `@githubnext/projections` package as a development dependency only
-if you want its types. To run the extractor by hand, preload the module the way
-Projections does:
+You only need to install `@githubnext/projections` as a development dependency
+if you want its TypeScript types. To run the extractor by hand while debugging,
+preload the module the same way Projections does:
 `node --require "$(projections __node-require)" tools/extract-flags.mjs < request.json`.
 
-Underneath, the request and the extraction are JSON on stdin and stdout
-([the extractor contract](../contracts/extractors.md)), so an extractor in any
-language can write them directly.
+Under the hood, the request and extraction are plain JSON over stdin and stdout
+([the extractor contract](../contracts/extractors.md)), so you can write an
+extractor in any language.
 
 ## 2. Define the projection
 
@@ -119,16 +125,16 @@ language can write them directly.
 }
 ```
 
-`python3` works on every platform: Projections runs a bare `python3` or `python`
-with whichever Python 3 the machine has, including `python` or the `py -3`
-launcher on Windows ([process](../contracts/extractors.md#process)).
+Using `python3` works across platforms: Projections resolves a bare `python3` or
+`python` to whichever Python 3 installation is available, including `python` or
+the `py -3` launcher on Windows ([process](../contracts/extractors.md#process)).
 
-`execution.scope` lists what the extractor reads. It is optional, but declare
-it: `--workspace sparse` then checks out only those files for a revision that
-isn't checked out, a revision too large to copy whole copies just them, an edit
-elsewhere reuses the cached extraction, and `projections check` verifies that
-the extractor reads nothing else. In a large repository that turns a comparison
-of seconds per revision into a fraction of one
+`execution.scope` tells Projections which files the extractor reads. It's
+optional, but worth declaring early: `--workspace sparse` checks out only those
+files for non-checked-out revisions, oversized revisions copy just those files,
+edits outside the scope reuse cached extractions, and `projections check`
+verifies your extractor doesn't read anything else. In a large repository, that
+can turn a multi-second comparison into a fraction of a second
 ([scopes](../runner/execution.md#scopes)).
 
 ## 3. Show the extraction
@@ -137,116 +143,119 @@ of seconds per revision into a fraction of one
 projections show -p feature-flags --trust
 ```
 
-Projections runs the extractor against your working tree, validates the
-extraction against the [extraction schema](schemas.md#extraction-schema) and
-renders the result. Add `--json` to print the extraction itself.
+Projections runs the extractor against your working tree, validates its output
+against the [extraction schema](schemas.md#extraction-schema), and renders the
+result. Pass `--json` if you want to inspect the raw extraction instead.
 
-If the extraction is invalid—a relationship pointing at a missing entity, or two
-entities with the same ID—Projections reports what's wrong and where.
+If anything in the extraction is invalid—like a relationship pointing to a
+missing entity, or two entities sharing an ID—Projections tells you exactly what
+went wrong and where.
 
-For larger extractors that analyze code with the project's own compiler, see the
-TypeScript samples in
-[`examples/extractors`](../../examples/extractors/README.md): feature flags,
-HTTP routes, message handlers and Redux slices, each targeting a built-in
-renderer.
+For more involved extractors that analyze source code with your project's
+compiler, browse the TypeScript samples in
+[`examples/extractors`](../../examples/extractors/README.md). They cover feature
+flags, HTTP routes, message handlers, and Redux slices, each targeting a
+built-in renderer.
 
-> **Why `--trust`?** A custom extractor runs code from your repository with
-> access to your files. Extractors, including the built-in ones that run your
-> build or your application's startup code, are not network or filesystem
-> sandboxed: they run with your privileges. Projections only runs them when you
-> explicitly allow it. When comparing revisions, `--trust` applies to the code
-> in _both_ revisions. Comparators don't need `--trust`, because they run in a
-> sandbox. Built-in extractors that only read files, such as
-> `workspace-dependencies`, don't need it either; `projections list` shows which
-> projections do. See [Trust](how-it-works.md#trust).
+> **Why `--trust`?** A custom extractor executes code from your repository with
+> access to your files. Extractors—including built-ins that run your build or
+> application startup code—aren't sandboxed from the filesystem or network; they
+> run with your privileges. Projections therefore asks for explicit permission
+> first. In a comparison, `--trust` covers _both_ revisions. Comparators never
+> need `--trust` because they run in a sandbox, and built-in extractors that
+> only read files (like `workspace-dependencies`) don't need it either. Run
+> `projections list` to see which projections require trust, or read
+> [Trust](how-it-works.md#trust) for details.
 
-To iterate on the extractor with its extraction, diagnostics and rendering
-together, open the repository in VS Code (in a trusted workspace, since the
-extractor is repository code) and open the projection from the **Projections**
-side bar: its tab applies your uncommitted edits ("Your edits") and says **Out
-of date** with **Refresh** when a save changes what it shows. The **Definition**
-view lists its parts, **Show Extraction Output** writes the extraction to the
-Projections output channel, problems go to Problems, and the **Testing** view
-runs its checks.
+For a tight feedback loop with the extraction, diagnostics, and rendered view
+side by side, open the repository in VS Code (in a trusted workspace, since the
+extractor is repository code) and select the projection from the **Projections**
+side bar. The tab automatically applies your uncommitted changes ("Your edits")
+and displays **Out of date** with a **Refresh** button whenever a save affects
+what it shows. From there, the **Definition** view lists the projection's parts,
+**Show Extraction Output** sends the raw JSON to the Projections output channel,
+validation errors appear in Problems, and the **Testing** view runs the
+projection's checks.
 
 ## 4. Compare two revisions (optional)
 
-Once the extraction looks right, see how it changes:
+Once the extraction looks right, compare how it changes across revisions:
 
 ```sh
 projections compare main..HEAD -p feature-flags --trust
 ```
 
-A comparison uses one projection definition for both revisions: by default, the
-definition from the base revision. If the head revision changes the projection's
-definition or its extractor, or doesn't define the projection at all,
-Projections tells you with a notice, and `--definition head` compares both
-revisions using the head's version instead. Notices are printed with the
-comparison and saved in its document, so every viewer shows them.
+A comparison evaluates both revisions using a single projection definition—by
+default, the base revision's. If the head revision changes the definition or
+extractor, or removes the projection altogether, Projections attaches a notice
+to the comparison (printed in the CLI and stored in the document so every viewer
+displays it). Pass `--definition head` if you want to compare both revisions
+using the head's version instead.
 
-A file the projection's inputs name may not exist at one of the revisions: the
-base predates the commit that added it, or the head removed it. A built-in
-extractor then extracts that revision as empty and records the file in the
-extraction's `missingInputs`, so the comparison shows its contents as added (or
-removed), with a notice such as "`packages/api/prisma/schema.prisma` doesn't
-exist at `07f32353`, so its contents show as added." This applies only to a
-file, folder or glob that isn't there: one that exists but can't be read or
-parsed still fails. `projections show` of such a revision says the projection
-has nothing to show there, and `projections check` still fails, because at the
-revision you check a missing input is a mistake in the definition. A custom
-extractor decides for itself, and may set `missingInputs` the same way.
+Sometimes a file named in the projection's inputs only exists at one of the two
+revisions—maybe the base predates it, or the head deleted it. Built-in
+extractors handle this gracefully by emitting an empty extraction for the
+missing side and recording the path in `missingInputs`, so the comparison shows
+the contents as added or removed alongside a notice like
+"`packages/api/prisma/schema.prisma` doesn't exist at `07f32353`, so its
+contents show as added." That only applies when a file, folder, or glob is
+absent; a file that exists but fails to read or parse still raises an error. On
+its own, `projections show` notes that there is nothing to display at that
+revision, and `projections check` still fails since a missing input at the
+checked revision indicates a broken definition. Custom extractors can opt into
+the same behavior by setting `missingInputs`.
 
-The default comparator matches entities by `id`, so choose IDs that stay stable
-when unrelated things change. `flag:checkout-v2` is a good ID; `flag:3` (a list
-position) is not. Keep changing attributes such as versions out of IDs and in
-`data`: a package ID without its version lets the comparison report a version
-bump as one modified package. When something is genuinely renamed, list its old
-ID in `previousIds` so the comparison shows a rename rather than a removal and
-an addition.
+Because the default comparator matches entities by `id`, pick IDs that stay
+stable when unrelated code changes. `flag:checkout-v2` is durable; `flag:3` (an
+array index) isn't. Keep mutable attributes like version numbers out of IDs and
+inside `data` instead, so a version bump shows up as one modified package rather
+than a removal and an addition. When something genuinely gets renamed, list its
+old ID in `previousIds` so the comparison reports a rename.
 
-Keep in `data` only facts about the item itself. The default comparator marks an
-item modified whenever its `data` changes, so a value that changes when
-something else does makes the item modified on changes that never touched it.
-Counts and lists of things elsewhere are the usual trap: "files importing this
-module" on a relationship changes whenever any importing file is added, and a
-module's line count on every edit. Line numbers are another: they change
-whenever code above them moves. Leave counts out, or draw what they count as
-relationships. Say where a fact came from in `evidence` instead, the file in
-`source` and a position in `location`
+Keep `data` focused on facts about the item itself. The default comparator marks
+an item modified whenever its `data` changes, so fields that depend on other
+files will cause false positives on unrelated commits. Common culprits are
+counts or lists of callers ("files importing this module" changes whenever any
+file adds an import), file line counts, and line numbers (which shift whenever
+code above them moves). Omit derived counts—or model them as relationships—and
+record source locations in `evidence` instead, with the file in `source` and the
+position in `location`
 (`{"kind": "file", "source": "flags.yaml", "location": {"line": 12}}`; a
-top-level `line` is rejected): the default comparator ignores evidence, so
-moving code isn't a change. `projections check` warns about count-, list- and
-line-like `data` fields in a custom extractor's output, unless the definition
-reads the field or declares it `volatile`, and
-`projections explore --sweep -p <id> --trust` marks a projection that changes on
-nearly every recent change as likely noise.
+top-level `line` is rejected). Because the default comparator ignores
+`evidence`, shifting lines won't show up as a change. To help catch noisy fields
+early, `projections check` warns about count-, list-, and line-like `data`
+fields in custom extractor output unless the definition reads them or marks them
+`volatile`, and `projections explore --sweep -p <id> --trust` flags any
+projection that changes on nearly every recent commit.
 
 ## 5. Make it correct in place
 
-Projections extracts the working tree in place, in your own checkout, the way
-your tests run: `request.repository.root` is then your checkout, holding ignored
-files (installed dependencies, build output, editor files) that aren't part of
-the revision. A clean commit that is `HEAD` (as in CI) is extracted in place
-too; other commits are read from Git objects (built-ins that only read files) or
-checked out in a workspace Projections keeps. So:
+Projections extracts your working tree directly in place inside your checkout,
+just like running a test suite. That means `request.repository.root` is your
+working directory and contains ignored files—installed dependencies, build
+artifacts, editor files—that aren't part of the Git revision. A clean commit at
+`HEAD` (such as in CI) is extracted in place too, while other commits are read
+from Git objects (for file-only built-ins) or checked out in a managed
+workspace. To stay accurate in both cases:
 
-- list the revision's files the way Git does
+- List the revision's files the way Git does
   (`git ls-files --cached --others --exclude-standard`), or through the Rust
-  SDK's context, rather than walking `root`;
-- write nothing to `root` except ignored scratch or build output;
-- never put `root` itself in the extraction;
-- never read the repository relative to the working directory or the extractor's
-  own location: in a comparison that is the definition's revision on both sides,
-  so the comparison would show no change. Declare the extractor's own code and
-  configuration in `extractor.sources`; `projections check` warns when it reads
-  anything else there.
+  SDK's context, rather than recursively walking `root`.
+- Don't write to `root` except ignored scratch or build files.
+- Never include the `root` path itself in your extraction.
+- Never read repository files relative to the current working directory or the
+  extractor script's own path. During a comparison, those point to the
+  definition's revision on both sides, so you'd end up comparing a revision to
+  itself. Declare the extractor's own code and config in `extractor.sources`;
+  `projections check` warns if it reads anything else there.
 
 ## 6. Declare its environment (when it needs dependencies)
 
-An extractor that runs the project's toolchain (`tsc`, `go list`, a build, the
-project's own code) needs installed dependencies. In the working tree they are
-yours, as for tests. For another commit, declare how to install them, as your CI
-does, in `.github/projections/environment.json`:
+If your extractor runs a project toolchain (`tsc`, `go list`, a build step, or
+the project's own code), it needs installed dependencies. In your working tree,
+it uses the ones you already have installed. For other commits, tell Projections
+how to install them in `.github/projections/environment.json`, just as you would
+in CI:
 
 ```json
 {
@@ -258,25 +267,28 @@ does, in `.github/projections/environment.json`:
 }
 ```
 
-Before a toolchain extractor runs in a workspace, Projections runs each step
-there, but only when the hash of its `key` files changed since it last ran in
-that workspace, so switching between commits with the same lockfile installs
-nothing. Steps are repository code: they need `--trust`, may use the network,
-have a timeout (`timeoutMs`, default ten minutes), and write a log that a
-failure names. Nothing ever runs in your working tree by itself;
-`projections prepare --trust` runs the steps there on demand, and
-`projections doctor` shows what is declared, prepared and stale. Without an
-environment file, other commits borrow your working tree's dependencies, and an
-extraction is labelled _approximate_ when their lockfiles differ. The
-[runner](../runner/environments.md#environments-and-workspaces) describes every
-field and the workspace strategies.
+Before running a toolchain extractor in a managed workspace, Projections runs
+each prepare step—but only when the hash of its `key` files has changed since
+the last run in that workspace. Switching between commits with the same lockfile
+skips installation completely. Prepare steps are repository code, so they
+require `--trust`, may access the network, run under a timeout (`timeoutMs`, ten
+minutes by default), and write a log whose path is shown if a step fails.
+
+Projections never runs prepare steps in your working tree automatically; run
+`projections prepare --trust` when you want to execute them locally, and use
+`projections doctor` to see what's declared, prepared, or stale. If you don't
+provide an environment file, other commits borrow your working tree's installed
+dependencies, and any extraction whose lockfile differs is marked _approximate_.
+See
+[environments and workspaces](../runner/environments.md#environments-and-workspaces)
+for all available fields and workspace strategies.
 
 ## 7. Build on built-in extractions (optional)
 
-An extractor that adds facts to what a built-in already reads, such as
-capabilities for each crate and npm package, doesn't have to read Cargo
-metadata, manifests and lockfiles again. Name the built-ins in
-`extractor.upstream`, each with its own `inputs`:
+If your extractor enriches information a built-in already collects—say, adding
+capability metadata to each Cargo crate and npm package—you don't need to
+re-parse Cargo metadata, manifests, and lockfiles yourself. Declare those
+built-ins in `extractor.upstream`, each with its own `inputs`:
 
 ```json
 {
@@ -293,11 +305,12 @@ metadata, manifests and lockfiles again. Name the built-ins in
 }
 ```
 
-Before your extractor runs, Projections extracts the same revision with each
-built-in, as the projection `<id>.<name>` (`topology.crates`), under the
-definition's `execution.scope` and `timeoutMs`. Each upstream extraction is
-trust-gated, supervised, normalized and cached like any other. Your extractor
-receives them in the request, keyed by the same names:
+Before invoking your extractor, Projections runs each upstream built-in on the
+same revision as `<id>.<name>` (for example, `topology.crates`), using your
+definition's `execution.scope` and `timeoutMs`. Every upstream extraction goes
+through the same trust checks, supervision, normalization, and caching as any
+other extraction. Your extractor then receives them in the request under the
+names you chose:
 
 ```js
 const request = JSON.parse(readFileSync(0, 'utf8'))
@@ -306,23 +319,24 @@ const {crates, packages} = request.upstream
 // (prefix their IDs to keep them apart), filter and add facts to.
 ```
 
-The Rust SDK reads them with `cx.upstream("crates")`. Your extractor writes the
-final extraction, so it decides how the upstream extractions combine: with an ID
-prefix per name to merge them, or with only the parts it needs. Only built-in
-extractors can be upstream, up to eight, and not under container isolation.
-Their versions belong to the Projections executable, so a cached extraction is
-reused only by the same version.
+In the Rust SDK, read them with `cx.upstream("crates")`. Because your extractor
+emits the final extraction, you're in full control of how to combine the
+upstream data—merging everything with an ID prefix per upstream, or pulling out
+only the pieces you need. You can declare up to eight upstream built-in
+extractors (custom extractors can't be upstream, and upstream isn't supported
+under container isolation). Because built-in versions are tied to the
+Projections executable, cached upstream extractions are reused only by the same
+version.
 
 ## Write an extractor in Rust
 
-Any language works, but Rust has an SDK:
-[`projections-extractor-sdk`](../../packages/extractors/sdk/README.md). It is
-the same library every built-in extractor is written with, and the built-ins get
-nothing from Projections that it doesn't give you: they run as processes that
-read the same request and write the same extraction. It reads the request, lists
-the revision's files, checks trust before you run tools, runs tools under the
-runner's supervision, reads repository files without following symlinks, and
-builds extractions with stable IDs:
+You can write an extractor in any language, though Rust comes with an official
+SDK: [`projections-extractor-sdk`](../../packages/extractors/sdk/README.md).
+Every built-in extractor is built on this exact library, and built-ins get no
+special privileges—they run as processes reading the same request and writing
+the same extraction. The SDK handles request parsing, listing revision files,
+checking trust before running external tools, supervising child processes,
+reading files safely without following symlinks, and generating stable IDs:
 
 ```rust
 use projections_extractor_sdk::{Context, extraction, key, read_source, relationship};
@@ -346,9 +360,8 @@ fn main() -> std::process::ExitCode {
 }
 ```
 
-Point `extractor.command` at the built executable and list its crate in
-`sources`.
-[`examples/extractors/cargo-features`](../../examples/extractors/cargo-features/README.md)
-is a complete example with tests.
+Point `extractor.command` at the compiled binary and list its crate in
+`sources`. For a complete example with tests, see
+[`examples/extractors/cargo-features`](../../examples/extractors/cargo-features/README.md).
 
 ---

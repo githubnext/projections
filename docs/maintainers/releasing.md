@@ -1,51 +1,56 @@
 # Releasing
 
-How the product is versioned, how to bump the version, and how to cut a release.
+This guide covers how Projections is versioned, how to bump versions across the
+monorepo, and how to cut and verify a release.
 
 ## One version
 
-Everything in `packages/` releases together at one version, the **release
-version**. [Layout](../../CONTRIBUTING.md#layout) puts there everything that
-ships or that something shipped depends on, so the rule needs no list:
+Everything under `packages/` ships together under a single **release version**.
+Because the repository [layout](../../CONTRIBUTING.md#layout) places everything
+that ships (and everything a shipped artifact depends on) inside `packages/`,
+the rule is automatic and needs no manual allowlist:
 
-- the Cargo workspace's `[workspace.package] version` in `Cargo.toml`, which
-  every crate in `packages/` inherits (`version.workspace = true`). It is the
-  CLI's version (`projections --version`) and the version dist releases;
-- the `version` of every npm workspace in `packages/`: `@githubnext/projections`
-  (`packages/sdk`), the renderers and their harness and testing workspaces, the
-  host, the Inspector, the schemas, the Engine's and the comparator runtime's
-  JavaScript, the CLI wrapper, the VS Code extension (the `.vsix` is
-  `projections-vscode-<version>-<target>.vsix`, and the CLI it bundles must be
-  that version) and the GitHub Action's scripts;
-- every dependency between them. Workspaces depend on each other at their exact
-  version (`"@githubnext/projections-schemas": "0.1.0"`), and so do path
-  dependencies between crates that name a version;
-- `Cargo.lock` and `package-lock.json`, which record them.
+- The Cargo workspace's `[workspace.package] version` in `Cargo.toml`, inherited
+  by every crate in `packages/` via `version.workspace = true`. This is the
+  version `projections --version` prints and the version dist releases.
+- The `version` field of every npm workspace in `packages/` —
+  `@githubnext/projections` (`packages/sdk`), the renderers along with their
+  harness and testing workspaces, the host, the Inspector, the schemas, the
+  JavaScript packages for the Engine and comparator runtime, the CLI wrapper,
+  the VS Code extension (whose `.vsix` is named
+  `projections-vscode-<version>-<target>.vsix` and bundles the matching CLI),
+  and the GitHub Action's scripts.
+- Every internal dependency between those packages. Workspaces pin each other to
+  the exact release version (`"@githubnext/projections-schemas": "0.1.0"`), as
+  do versioned Cargo path dependencies.
+- `Cargo.lock` and `package-lock.json`, which reflect those versions.
 
-Workspaces and crates outside `packages/` (`tools/`, `examples/`) are never
-released: they stay `private` (`publish = false` for crates) at `0.0.0`, and
-depend on the packages at the release version. The repository root's
-`package.json` is not a package and stays `0.0.0`. The Action has no version of
-its own: `uses: githubnext/projections@v0.1.0` (or `@v0`) is its version, and it
-installs that release's CLI.
+Workspaces and crates outside `packages/` (`tools/`, `examples/`) never ship:
+they stay `private` (`publish = false` for Rust crates) at `0.0.0`, while
+depending on `packages/` at the release version. The repository root's
+`package.json` isn't a published package and stays at `0.0.0` too. The GitHub
+Action has no separate version — `uses: githubnext/projections@v0.1.0` (or
+`@v0`) _is_ its version, and it installs the matching CLI release.
 
-The release version is not the protocol's or the schemas' version. Those are
-[contracts](../contracts.md#versioning-and-publishing) with their own major
-version (`v0` in `$id`s, `protocolVersion: 0`), which a release does not change.
+Note that the release version is separate from the protocol and schema versions.
+Those are [contracts](../contracts.md#versioning-and-publishing) with their own
+major version (`v0` in `$id`s, `protocolVersion: 0`) that normal releases do not
+bump.
 
 ## Bumping the version
 
-One command sets the release version everywhere listed above, both lockfiles
-included, exactly as `cargo update --workspace` and
-`npm install --package-lock-only` would record it:
+A single command updates the release version across all manifests and both
+lockfiles, matching what `cargo update --workspace` and
+`npm install --package-lock-only` produce:
 
 ```sh
 npm run tools -- version 0.2.0
 npm ci && cargo check --workspace --locked   # confirm both lockfiles
 ```
 
-It prints the files it changed. Commit them, and nothing else, as one change
-("Release 0.2.0") and merge it like any other. A prerelease is `0.2.0-beta.1`.
+It prints every file it touched. Commit those files on their own (for example,
+"Release 0.2.0") and merge through the normal PR flow. For a prerelease, use a
+tag like `0.2.0-beta.1`.
 
 ## Checking the version
 
@@ -54,43 +59,48 @@ npm run tools -- version                 # every shipped manifest agrees
 npm run tools -- version --tag v0.2.0    # ... and is the tag's version
 ```
 
-It only reads files, so it takes a moment and needs no build or network. It
-fails, naming each file and line, when a shipped manifest, a dependency between
-them or a lockfile disagrees, or when anything outside `packages/` is not
-private at `0.0.0`. `npm run check` runs it (`npm run check:versions`, the
-`versions` gate of `tools check`), so CI fails on a partial bump. The release
-workflow runs it with the release tag before it builds anything (the release
-inputs job), again before packing `@githubnext/projections` (the release proof),
-and before publishing to npm (`publish-npm.yml`). dist itself refuses a tag that
-is not the CLI's version.
+This check only reads files, so it finishes almost instantly with no build or
+network calls. If any shipped manifest, inter-package dependency, or lockfile is
+out of sync — or if anything outside `packages/` isn't private at `0.0.0` — it
+fails and prints the exact file and line.
+
+`npm run check` runs this automatically via `npm run check:versions` (the
+`versions` gate of `tools check`), so CI catches partial bumps right away. The
+release workflow also runs it against the release tag before building (in the
+release inputs job), before packing `@githubnext/projections` (in the release
+proof), and before publishing to npm (`publish-npm.yml`). dist itself rejects
+any tag that doesn't match the CLI's version.
 
 ## Release notes
 
-A release's notes are its section of [`CHANGELOG.md`](../../CHANGELOG.md),
-headed with its tag (`## v0.2.0`). dist reads the section when it plans the
-release, titles the GitHub release with its heading and puts the notes above the
-install instructions it writes. A prerelease without a section of its own uses
-its version's (`v0.2.0-beta.1` uses `## v0.2.0`, titled `v0.2.0-beta.1`), so a
-release candidate and the release share one set of notes. A version with no
-section gets dist's install instructions alone.
+Each release pulls its notes from its section in
+[`CHANGELOG.md`](../../CHANGELOG.md), headed by its tag (`## v0.2.0`). When dist
+plans the release, it uses that heading as the GitHub release title and places
+the section body above its auto-generated install instructions. A prerelease
+without its own section falls back to its base version's section
+(`v0.2.0-beta.1` uses `## v0.2.0`, titled `v0.2.0-beta.1`), so release
+candidates and the final release share one set of notes. If no section exists,
+the release shows only dist's install instructions.
 
-Write the section as changes merge, in the same pull request or soon after, and
-lead with **Behaviour changes**: anything that can make a passing check, command
-or workflow fail or act differently, and what to change. Keep each paragraph and
-list item on one line (`.oxfmtrc.json` doesn't wrap this file): GitHub can
-render a single line break as a break, as it does in comments. dist also packs
-`CHANGELOG.md` into each CLI archive, beside the README and licence.
+Add entries to the changelog as changes merge (in the same PR or right after)
+and lead with **Behaviour changes** — anything that might make a previously
+passing check, command, or workflow fail or behave differently, along with what
+users need to adjust. Keep each paragraph and list item on a single line
+(`.oxfmtrc.json` leaves this file unwrapped) because GitHub can treat hard line
+breaks as visible line breaks. dist also bundles `CHANGELOG.md` into every CLI
+archive next to the README and license.
 
-Check the title and body before tagging, with the dist version
-`dist-workspace.toml` pins (its default output lists only the artifacts):
+To preview the title and body before tagging, run the dist version pinned in
+`dist-workspace.toml` (its default output only lists artifacts):
 
 ```sh
 dist plan --tag v0.2.0 --allow-dirty --output-format=json \
   | jq -r '.announcement_title, .announcement_github_body'
 ```
 
-Notes stay editable after publishing, unlike assets. The body holds dist's
-install instructions as well as the notes, so edit the whole of it:
+Unlike release assets, notes can still be edited after publishing. Because the
+body includes dist's install instructions alongside your notes, fetch and edit
+the full body rather than overwriting it from scratch:
 
 ```sh
 gh release view v0.2.0 --json body --jq .body > body.md   # edit body.md
@@ -99,49 +109,51 @@ gh release edit v0.2.0 --notes-file body.md
 
 ## Repository settings
 
-A release depends on these settings of the repository, which a repository
-administrator makes once, before the first release:
+A repository administrator needs to configure these settings once before the
+first release:
 
-- **`release` environment**: required reviewers (a maintainers' team or named
-  maintainers), and deployment limited to selected tags, with the one tag rule
-  `v*.*.*`. Every release waits for one of them to approve it. GitHub creates an
-  environment a job names that doesn't exist, without protection, so the release
-  fails closed instead: its first approval job checks the environment exists,
-  requires a reviewer and lets only `v*.*.*` tags deploy, and publishes nothing
-  otherwise.
-- **Tag rulesets**: one lets only maintainers create `v*.*.*` tags, and nobody
-  update or delete them. A second targets `v*` but not `v*.*` (the major version
-  tags, `v0`), blocks their creation, update and deletion, and lets only a
-  deploy key bypass it. GitHub doesn't accept the Actions app as a bypass actor
-  there, so the workflow's own token can't move them.
-- **Deploy key** with write access (titled, for example, "Release: move major
-  version tag"), the major tag ruleset's bypass. Its private key is the
-  `MAJOR_TAG_DEPLOY_KEY` secret of the **`major-tag` environment**, whose
-  deployment is limited to `v*.*.*` tags, with no reviewers: the release was
-  already approved.
-- **Immutable releases**, so a published release's assets and tag can't change.
+- **`release` environment:** add required reviewers (a maintainers team or named
+  maintainers) and restrict deployments to selected tags with the single rule
+  `v*.*.*`. Every release pauses here for human approval. Because GitHub
+  silently creates an unprotected environment if a workflow references one that
+  doesn't exist, the release workflow fails closed: its first approval job
+  verifies the environment exists, requires a reviewer, and allows only `v*.*.*`
+  tags before publishing anything.
+- **Tag rulesets:** create one ruleset so only maintainers can create `v*.*.*`
+  tags and nobody can move or delete them. Create a second ruleset targeting
+  `v*` excluding `v*.*` (for major-version tags like `v0`) that blocks creation,
+  updates, and deletion except via a deploy key — GitHub doesn't allow the
+  Actions app as a bypass actor here, so the workflow token can't move major
+  tags on its own.
+- **Deploy key:** add a write-enabled deploy key (for instance, "Release: move
+  major version tag") as the bypass for the major-tag ruleset. Store its private
+  key as the `MAJOR_TAG_DEPLOY_KEY` secret in the **`major-tag` environment**,
+  restricted to `v*.*.*` tags with no required reviewers (the release itself was
+  already approved).
+- **Immutable releases:** enable immutable releases so published tags and assets
+  can't be modified after the fact.
 
 ## Cutting a release
 
-1. Bump the version (above) and merge it, with the version's
+1. Merge the version bump (above) with the release's
    [release notes](#release-notes) already on `main`. The release is cut from
-   that commit on `main`.
-2. Tag it and push the tag. Tag rulesets let only maintainers create `v*.*.*`
-   tags, and nobody move or delete them:
+   that commit.
+2. Create and push the tag. Tag rulesets restrict `v*.*.*` creation to
+   maintainers and prevent moving or deleting tags afterward:
 
    ```sh
    git tag v0.2.0 <commit>
    git push origin v0.2.0
    ```
 
-3. The **Release** workflow (`.github/workflows/release.yml`, which
-   `dist generate` writes from `dist-workspace.toml`) plans the release, checks
-   the version against the tag, builds the CLI for every target, proves each
-   executable on its own platform, packages the VS Code extension and packs
-   `@githubnext/projections`. When every proof passes, it waits for a reviewer
-   of the `release` environment to approve the run's **Release approval /
-   Approve and attest** job (`release-approval.yml`, a dist publish job). Only
-   then does it attest the assets and create the GitHub release `v0.2.0`, with:
+3. The **Release** workflow (`.github/workflows/release.yml`, generated by
+   `dist generate` from `dist-workspace.toml`) plans the release, verifies the
+   version matches the tag, builds the CLI for every target, verifies each
+   binary on its native platform, packages the VS Code extension, and packs
+   `@githubnext/projections`. Once all checks pass, it pauses at **Release
+   approval / Approve and attest** (`release-approval.yml`, a dist publish job)
+   until a `release` environment reviewer approves it. Only after approval does
+   it attest the assets and create the `v0.2.0` GitHub release containing:
 
    | Asset                                                           | What                                                                      |
    | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
@@ -151,41 +163,42 @@ administrator makes once, before the first release:
    | `projections-vscode-<version>-<vsce target>.vsix`               | the VS Code extension with that platform's executable inside              |
    | `githubnext-projections-<version>.tgz`                          | `@githubnext/projections`, which renderers install by URL                 |
 
-   Each has an attestation, made in the approved job; dist also attests its
-   archives as it builds them. Each but the installers has a `.sha256`: dist
-   builds the installers in its own job, which doesn't checksum them; each
-   installer holds its archives' SHA-256s and checks a download against them.
-   The CLI's archive and `gh` asset names carry no version, so installers,
-   `gh extension install` and the Action find them in any release; the release's
-   tag is their version.
+   Every asset receives an attestation in the approved job, and dist also
+   attests its archives as they are built. Every asset except the installers
+   also gets a `.sha256` file (dist generates the installers in a separate job
+   without checksums, and each installer embeds its archives' SHA-256 hashes to
+   verify downloads). Notice that the CLI archive and `gh` asset names omit the
+   version number so installers, `gh extension install`, and the Action can
+   locate them reliably in any release; the release tag carries the version.
 
-   `githubnext-projections-<version>.tgz` carries the renderer SDK and the
-   renderer kit in all three of the kit's entries (`/kit`, framework-free;
-   `/kit/react`; `/kit/base.css` and `/kit/react.css`), so the kit has no asset
-   of its own. Before it is attached, the release proof checks the tarball with
-   `node packages/sdk/scripts/check-pack.mjs --tarball`: its contents, every
-   entry and its types, a renderer without React that installs it with Vite
-   alone and bundles no React, and a renderer the release's CLI scaffolds on its
-   release URL.
+   `githubnext-projections-<version>.tgz` bundles both the renderer SDK and all
+   three renderer kit entry points (`/kit`, framework-free; `/kit/react`;
+   `/kit/base.css` and `/kit/react.css`), so the kit doesn't need its own
+   release asset. Before attaching it, the release proof validates the tarball
+   with `node packages/sdk/scripts/check-pack.mjs --tarball` — checking its
+   contents, every entry point and its types, a framework-free renderer built
+   with Vite alone (confirming React isn't bundled), and a renderer scaffolded
+   by the release CLI against the release URL.
 
-4. After the announcement, the post-announce jobs publish the JSON Schemas
+4. After the announcement, post-announce jobs publish the JSON Schemas
    ([schema publishing](schema-publishing.md)), publish
-   `@githubnext/projections` to npm once that is approved
-   ([npm publishing](npm-publishing.md)), and for a stable release move the
-   major version tag (`v0`) that `uses: githubnext/projections@v0` follows
-   (`move-major-tag.yml`, in the `major-tag` environment, pushes it over SSH
-   with the deploy key, the major tag ruleset's only bypass). It never moves the
-   tag backwards or to a prerelease, and creates it if missing. To move it for a
-   release again, run it on that release's tag:
+   `@githubnext/projections` to npm once approved
+   ([npm publishing](npm-publishing.md)), and — for stable releases — advance
+   the major-version tag (`v0`) that `uses: githubnext/projections@v0` tracks.
+   That last step runs in `move-major-tag.yml` inside the `major-tag`
+   environment, pushing over SSH with the deploy key. It never moves the tag
+   backward or onto a prerelease, and creates it if it doesn't exist yet. If you
+   ever need to re-run it for a release, invoke:
    `gh workflow run move-major-tag.yml --ref v0.2.0 -f tag=v0.2.0`.
 
-A tag with a prerelease (`v0.2.0-beta.1`) makes a prerelease: npm's `next` tag,
-and `v0` doesn't move.
+Prerelease tags like `v0.2.0-beta.1` publish as GitHub prereleases under npm's
+`next` tag and leave `v0` untouched.
 
 ## Trying a release locally
 
-Without pushing a tag or publishing anything, with the dist version
-`dist-workspace.toml` pins (`cargo-dist-version`):
+You can dry-run the release pipeline locally without pushing a tag or publishing
+anything, using the dist version pinned in `dist-workspace.toml`
+(`cargo-dist-version`):
 
 ```sh
 npm run tools -- version --tag v0.2.0
@@ -198,9 +211,10 @@ node packages/integrations/vscode/scripts/release-asset.mjs --target darwin-arm6
 node packages/sdk/scripts/release-asset.mjs dist/release
 ```
 
-`--allow-dirty` stops dist comparing `.github/workflows/release.yml` with the
-one it would generate, so these work while you edit `dist-workspace.toml`, or
-when this workspace is nested in another repository;
-`node tools/scripts/dist.mjs --check` checks the workflow. The `.vsix` script
-installs the package with VS Code's own CLI and checks the installed extension
-and its bundled CLI are the version.
+Passing `--allow-dirty` stops dist from comparing
+`.github/workflows/release.yml` against what it would freshly generate, which is
+handy while editing `dist-workspace.toml` or working inside a nested repository.
+Run `node tools/scripts/dist.mjs --check` to verify the generated workflow
+matches. The `.vsix` script installs the built extension with VS Code's own CLI
+and confirms that both the extension and its bundled CLI report the expected
+version.

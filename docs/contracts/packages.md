@@ -1,24 +1,25 @@
 # Packages
 
-The first open-source release is the CLI, the VS Code extension and the GitHub
-Action. One npm package is prepared: **`@githubnext/projections`**, for people
-who write renderers.
+The first open-source release ships the CLI, the VS Code extension, and the
+GitHub Action, along with a single npm package—**`@githubnext/projections`**—for
+developers building custom renderers.
 
 > [!NOTE]
-> **Decided: a release asset, not npm, at first.** npm publishing awaits
-> security approval, so the npm publishing workflow stays inert
-> ([npm publishing](../maintainers/npm-publishing.md)). Instead, every GitHub
-> release attaches the packed package, `githubnext-projections-<version>.tgz`,
-> beside the CLI's executables, with a `.sha256` and a build provenance
-> attestation, and renderers depend on it by URL
+> **Decided: a release asset, not npm, at first.** Because npm publishing is
+> still awaiting security approval, the npm publishing workflow remains inert
+> (see [npm publishing](../maintainers/npm-publishing.md)). In the meantime,
+> every GitHub release attaches the packed tarball,
+> `githubnext-projections-<version>.tgz`, alongside the CLI executables with a
+> `.sha256` checksum and a build provenance attestation. Renderers depend on it
+> by URL
 > (`https://github.com/githubnext/projections/releases/download/v<version>/githubnext-projections-<version>.tgz`),
-> which `projections init --renderer custom` writes. People who can't download
-> release assets add this repository as a Git submodule and build and pack the
-> package from it.
+> which `projections init --renderer custom` writes automatically. If your
+> environment cannot download release assets, you can add this repository as a
+> Git submodule and build and pack the tarball locally.
 > [Install @githubnext/projections](../guides/develop-a-renderer.md#install-githubnextprojections)
-> describes both.
+> walks through both approaches.
 
-Its entries:
+Here is what each entry point in `@githubnext/projections` exports:
 
 <!-- prettier-ignore -->
 | Entry | Contents |
@@ -32,45 +33,50 @@ Its entries:
 | `@githubnext/projections/testing` | The built-in renderer checks and Playwright fixtures (Node; loads Playwright) |
 | `@githubnext/projections/schemas` | The document types |
 
-- **Why one package.** Authors, mostly of custom renderers, install one
-  dependency at one version, and `projections init --renderer custom` scaffolds
-  a renderer that depends on it with its checks already wired into `npm test`.
-  The kit is the default path, so a renderer starts out meeting the checks every
-  built-in renderer is held to. Inside this repository the code stays in
-  separate workspaces (`packages/renderers/sdk`, `packages/renderers/kit`,
-  `packages/renderers/testing`, `schemas`); `packages/sdk/` bundles them with
-  [tsdown](https://tsdown.dev), JavaScript and declarations alike, so nothing
-  published names an internal workspace.
-- **Dependencies.** React and react-dom are optional peer dependencies, never
-  bundled: `/kit/react` and `/renderer/react` need them, and a renderer without
-  React (`/kit`, `/kit/base.css` and `/renderer`) installs and builds without
-  them. Vite is a peer of `/vite`; Playwright is an optional peer, loaded only
-  by `/testing`. Third-party libraries the kit and SDK use (ELK, Lucide, TypeBox
-  and others) stay ordinary dependencies, so a renderer's own build attributes
-  them in its `THIRD_PARTY_NOTICES.txt`. GitHub Linguist's language data ships
-  as a file of its own, `vendor/linguist/`, with its license.
-- **Version.** The package and the CLI release together at one version: install
-  the package version that matches `projections --version`. `projections doctor`
-  and `projections check` warn when a renderer's package is another version.
-  Every release attaches it, and once npm publishing is approved and configured,
-  also publishes it to npm with provenance
-  ([npm publishing](../maintainers/npm-publishing.md)).
-- **Not published.** Every other workspace is private: the hosts (`host`,
-  `host-vscode`), the engine, the comparator runtime, the Action's scripts, the
-  built-in renderers (built into the CLI, which serves them), and the internal
-  SDK, kit, testing and schemas workspaces the package is made from. They are
-  implementation, free to change between releases. The CLI is a native
-  executable, released through installers and GitHub Releases, never npm, and no
-  Rust crate is published (`publish = false`). The JSON Schemas are published to
-  their own host, as above.
+- **Why one package.** Authors—mostly of custom renderers—only need to install a
+  single dependency at a single version. Running
+  `projections init --renderer custom` scaffolds a renderer wired up to it, with
+  the built-in checks already hooked into `npm test`. Because the kit is the
+  default starting point, new renderers begin compliant with the same checks
+  every built-in renderer passes. Inside this repository, the code remains split
+  across internal workspaces (`packages/renderers/sdk`,
+  `packages/renderers/kit`, `packages/renderers/testing`, `schemas`), and
+  `packages/sdk/` bundles both their JavaScript and type declarations with
+  [tsdown](https://tsdown.dev) so nothing in the published package references an
+  internal workspace.
+- **Dependencies.** React and react-dom are optional peer dependencies and are
+  never bundled. `/kit/react` and `/renderer/react` require them, while a
+  framework-free renderer using `/kit`, `/kit/base.css`, and `/renderer`
+  installs and builds without React at all. Vite is a peer dependency of
+  `/vite`, and Playwright is an optional peer loaded only by `/testing`.
+  Third-party libraries used by the kit and SDK (ELK, Lucide, TypeBox, and
+  others) remain regular dependencies so a renderer's own build attributes them
+  in `THIRD_PARTY_NOTICES.txt`. GitHub Linguist's language data ships as its own
+  file under `vendor/linguist/` with its license.
+- **Version.** The package and the CLI always release together at the same
+  version, so install the package version that matches `projections --version`.
+  Both `projections doctor` and `projections check` warn if a renderer's package
+  version drifts. Every release attaches the tarball, and once npm publishing is
+  approved and configured, releases will also publish it to npm with provenance
+  (see [npm publishing](../maintainers/npm-publishing.md)).
+- **Not published.** Every other workspace in this repository stays private: the
+  hosts (`host`, `host-vscode`), the engine, the comparator runtime, the
+  Action's scripts, the built-in renderers (which are embedded in and served by
+  the CLI), and the internal SDK, kit, testing, and schemas workspaces that feed
+  the published package. Those are implementation details and may change freely
+  between releases. The CLI itself ships as a native executable through
+  installers and GitHub Releases—never npm—and no Rust crate is published
+  (`publish = false`). JSON Schemas are published separately on their own host,
+  as described in the contracts overview.
 
-CI checks the package as it would be published
-(`npm run check:pack --workspace packages/sdk`): the tarball's contents, every
-entry and its types under `moduleResolution` `bundler` and `node16`, a renderer
-without React that installs the tarball with Vite alone and builds on `/kit`,
-`/kit/base.css` and `/renderer` with no React in its bundle, and a renderer
-scaffolded by `projections init --renderer custom` that installs the tarball,
-builds and passes its checks. The release proves the tarball it attaches the
-same way, with the release's own Linux executable, which must scaffold the
-renderer on the tarball's release URL
+CI verifies the package in the exact form it will be shipped by running
+`npm run check:pack --workspace packages/sdk`. That check inspects the tarball's
+contents, validates every entry point and its types under both
+`moduleResolution` `bundler` and `node16`, builds a React-free renderer with
+Vite alone on `/kit`, `/kit/base.css`, and `/renderer` to confirm no React leaks
+into the bundle, and scaffolds a renderer with
+`projections init --renderer custom` that installs the tarball, builds, and
+passes all checks. The release workflow runs the same verification against the
+attached tarball using the release's own Linux executable, ensuring the
+scaffolded renderer works against the tarball's release URL
 (`node packages/sdk/scripts/check-pack.mjs --tarball FILE`).

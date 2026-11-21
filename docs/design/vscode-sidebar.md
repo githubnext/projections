@@ -1,27 +1,25 @@
 # Organizing the VS Code side bar
 
 Status: **built, then redesigned around three jobs** (see
-[Jobs to be done](#jobs-to-be-done-decided), decided and in progress; it
-supersedes the Compare section and pair-first tabs described below). The
-recommended layout below was built; see [What was built](#what-was-built) for
-where it differs. The VS Code extension is now the authoring experience and the
-web Inspector is retired (see [Desktop surfaces](desktop-surfaces.md)); the
-"Before" column below records where each job lived in the web app. This compares
-ways to lay out the Projections VS Code extension once it does more than open
-the Inspector. It assumes the extension grows to cover the whole loop: setup
-(explore, sweep, adopt, add to CI), the example gallery, the Inspector,
-authoring a projection's parts, reviewing a branch or pull request, and renderer
-development with scenarios. The extension spike
-(`packages/integrations/vscode/`) and [Desktop surfaces](desktop-surfaces.md)
-describe how the Inspector itself runs in a webview.
+[Jobs to be done](#jobs-to-be-done-decided), which superseded the Compare
+section and pair-first tabs described earlier). The recommended layout below was
+built (see [What was built](#what-was-built) for minor differences), and VS Code
+is now the primary interactive authoring experience while the web Inspector is
+retired (see [Desktop surfaces](desktop-surfaces.md); the "Before" column below
+shows where each workflow lived in the web app). This doc explores how to
+structure the Projections extension (`packages/integrations/vscode/`, see
+[Desktop surfaces](desktop-surfaces.md) for how the Inspector runs in a webview)
+as it covers the full loop: setup (explore, sweep, adopt, add to CI), the
+gallery, inspection, authoring projection parts, branch/PR review, and renderer
+development with scenarios.
 
-Decided so far:
+Decided up front:
 
 - **Projections gets its own activity bar item.** That rules out option 3 as the
-  main layout, though its Source Control and Problems integrations still apply.
-- **A projection is a document.** Each projection is the subject of its own
-  editor tab, the way a file is, rather than a selection inside one Inspector
-  tab per repository. The recommendation below works this through.
+  primary layout, though its Source Control and Problems integrations still fit
+  well.
+- **A projection is a document.** Each projection opens in its own editor tab —
+  just like a file — rather than sharing one Inspector tab per repository.
 
 ## What has to fit
 
@@ -36,17 +34,15 @@ Decided so far:
 | **Review** | On a feature branch or pull request | What changed structurally in this branch, across every adopted projection | `Compare Branch With Default`; the GitHub Action's comment |
 | **Develop a renderer** | Renderer authors | Scenarios, the renderer's development server, checks | Fixtures workbench (then `inspect --fixtures`; now **Open Renderer Scenarios…** or `npm run workbench`) |
 
-Two facts shape every option:
+Two practical constraints shape every option:
 
-- **Big content needs the editor area.** The Inspector's diff, the sweep grid
-  and gallery examples are wide, animated, and run sandboxed renderers. A side
-  bar is 250–400px wide, so these belong in editor tabs (webview panels), not in
-  the side bar.
-- **Each webview costs memory.** Each Inspector webview starts its own engine
-  and comparator Workers and renderer frames. The side bar should be cheap
-  native UI (tree views, welcome content, quick picks) that opens editor
-  webviews, sharing one runner per repository. It should not become a second
-  copy of the Inspector.
+- **Wide content belongs in editor tabs.** Diffs, sweep grids, and gallery
+  examples are wide, animated, and host sandboxed renderers; they can't fit in a
+  250–400px side bar.
+- **Webviews aren't free.** Each Inspector webview runs its own engine,
+  comparator Workers, and renderer frames. The side bar should stay lightweight
+  native UI (tree views, welcome content, quick picks) sharing one runner per
+  repository, rather than duplicating the Inspector.
 
 ## VS Code's building blocks
 
@@ -67,8 +63,8 @@ Two facts shape every option:
 
 ## Option 1: One container with fixed sections
 
-One "Projections" activity bar container holds every job as a collapsible view,
-always present:
+One "Projections" activity bar container keeps every job visible as a
+collapsible view:
 
 ```
 PROJECTIONS
@@ -81,18 +77,15 @@ PROJECTIONS
 ▸ GALLERY
 ```
 
-- **For:** simple, and easy to find. It mirrors the web Inspector's Explorer, so
+- **Pros:** simple and discoverable, mirroring the web Inspector's Explorer so
   one mental model covers both.
-- **Against:** seven sections compete for one column. Setup sections stay around
-  long after setup is done. People will collapse most views and never reopen
-  them. "Compare" and "Parts" duplicate the Inspector's own controls, so there
-  are two places to change the same state, and they have to stay in sync.
+- **Cons:** seven sections crowd one column, setup views linger forever, and
+  Compare/Parts duplicate Inspector controls that have to stay in sync.
 
 ## Option 2: Organized by lifecycle stage
 
-Still one container, but its views change with the repository's state through
-`when` clauses on context keys the extension sets (`projections.hasDefinitions`,
-`projections.exploring`, `projections.renderer`):
+One container whose views adapt to repository state via `when` clauses
+(`projections.hasDefinitions`, `projections.exploring`, `projections.renderer`):
 
 <!-- prettier-ignore -->
 | Stage | Context | Views shown |
@@ -102,59 +95,43 @@ Still one container, but its views change with the repository's state through
 | Adopted | definitions exist | **Projections**, **Pairs & bookmarks**, **History**; setup moves to a "Setup" walkthrough and a `…` menu |
 | Renderer package | a `renderer.json` or scenarios file in the workspace | **Scenarios**, **Checks** |
 
-- **For:** each stage sees only what applies, and the side bar stays short.
-  Setup fades away once the work is done but is still reachable. This matches
-  the onboarding loop: explore, then adopt, then use.
-- **Against:** views that appear and disappear can disorient people, and
-  documentation has to describe each state. Multi-root workspaces can mix
-  stages, so the context has to be per folder (or the views group by folder). It
-  needs careful welcome content so an empty view always says what to do next.
+- **Pros:** keeps the side bar short and focused on what applies right now,
+  matching the explore → adopt → use onboarding loop.
+- **Cons:** views appearing and disappearing can be jarring, multi-root
+  workspaces can mix stages across folders, and empty states need careful copy.
 
 ## Option 3: Spread into native containers (ruled out as the main layout)
 
-There is no container of our own. Projections shows up wherever the job already
-lives:
+No dedicated activity bar icon — Projections lives inside existing containers: a
+collapsed "Projections" view in **Explorer**, "Projection changes" plus an
+`scm/title` action in **Source Control**, renderer scenarios in **Testing**,
+diagnostics in **Problems**, raw logs in **Output**, setup in a **Walkthrough**,
+and gallery/switching in **Quick Picks**.
 
-- **Explorer:** a "Projections" view listing definitions, collapsed by default.
-- **Source Control:** a "Projection changes" view for the current branch (each
-  adopted projection with its change counts against the default branch; opening
-  one opens the Inspector on that pair), plus an `scm/title` action.
-- **Testing-style checks:** renderer scenarios as tests (Test Explorer), if
-  renderer development is in scope.
-- **Problems:** extractor and definition diagnostics. **Output:** raw runner
-  output.
-- **Walkthrough:** setup. **Command palette / quick picks:** gallery and
-  switching.
-
-- **For:** feels the most native. Review lands where people already review
-  changes. Nothing new to discover, and no activity bar icon.
-- **Against:** no single home, so the product feels scattered and is hard to
-  explain or screenshot. Setup and the gallery have no lasting place. It depends
-  on tolerance for our views in shared containers. The Testing mapping is a
-  stretch for renderers that aren't really tests.
+- **Pros:** feels completely native, placing review right inside Source Control
+  with zero extra activity bar clutter.
+- **Cons:** scatters the product with no single home, leaves setup and the
+  gallery homeless, competes for space in shared containers, and stretches the
+  Testing metaphor for renderers.
 
 ## Option 4: A side bar webview running the Inspector shell
 
-The container holds one webview view running the Inspector's own Explorer (the
-React shell, styled by `host-vscode`). Selecting an item drives an editor-area
-Inspector webview.
+A single webview view inside the Projections container runs the Inspector's
+React Explorer (styled via `host-vscode`) and drives editor-area webviews.
 
-- **For:** maximum reuse; the side bar is identical to the web Inspector's
-  Explorer and gets features for free.
-- **Against:** not native (keyboard, screen readers, density, drag and drop,
-  context menus all differ subtly from VS Code's). It's a second webview and
-  engine to keep alive (`retainContextWhenHidden` or rebuild on every reveal).
-  Two webviews have to sync state over messages. VS Code's guidance is to prefer
-  tree views for navigation.
+- **Pros:** maximum code reuse and instant feature parity with the web Explorer.
+- **Cons:** subtly non-native keyboard, accessibility, density, and context
+  menus; a second persistent webview (`retainContextWhenHidden` or constant
+  rebuilds); cross-webview state sync; and directly against VS Code's guidance
+  to prefer native tree views for navigation.
 
 ## Recommended: projections as documents, with a Projections activity bar item
 
-Treat each projection the way VS Code treats a file. The activity bar item opens
-a Projections view that lists them like the Explorer lists files. Opening one
-opens a tab whose subject is that projection: its title, an icon for its kind,
-preview (italic) until it's kept, split, moved, closed, and restored with the
-window. The web Inspector's job (one projection at a time, with a switcher)
-becomes VS Code's own tab model.
+Treat every projection like a file. The Projections activity bar container lists
+them just like the Explorer lists files, and clicking one opens a dedicated
+editor tab with its own title, icon, preview behavior, splits, and window
+restoration — turning the web Inspector's projection switcher into VS Code's own
+tab bar.
 
 ```
 ┌──┬──────────────────────────────┬───────────────────────────────────────────────────────────────┐
@@ -173,44 +150,32 @@ becomes VS Code's own tab model.
 
 ### The document
 
-- **What a tab is.** A projection of a repository: `projection:/<folder>/<id>`,
-  a read-only custom editor (`CustomReadonlyEditorProvider`) on a virtual URI.
-  Because it's an editor on a resource, it gets VS Code's document behavior for
-  free: preview tabs (single click opens in the reused italic tab, double click
-  or any edit keeps it), Open to the Side, split and grid layouts, Reopen Closed
-  Editor, editor history and Go Back, and restoring the window's tabs (a
-  `WebviewPanelSerializer` / custom editor restore).
-- **Title and icon.** The tab title is the projection's title ("Packages"). Its
-  icon is a codicon for the renderer's kind (graph, database, API, file map),
-  from the same icon map `host-vscode` uses. When two folders define the same
-  projection, the description adds the folder, as VS Code does for files with
-  the same name.
-- **Editor title actions instead of a toolbar.** The projection's controls
-  become `editor/title` actions, the native row at the top right of a tab: the
-  comparison mode as a toggle (like the diff editor's inline and side by side
-  toggle), swap Before and After, play, and settings and "Show as table or text"
-  in the `…` menu. The webview then shows only the projection and its notices;
-  the in-page toolbar stays for the web Inspector.
-- **Dirty state is authoring.** Changing a part (extractor, comparator,
-  renderer) is an edit: the tab shows as modified, Save writes
-  `.github/projections/<id>.json` (previewed first, as Save to definition does
-  today), and Revert drops the session overrides. The definition file can also
-  open _as_ the projection: `Open With… → Projection`, with `Reopen as text` to
-  get back to the JSON, the way Markdown preview and the settings editor pair a
-  document with a view of it.
-- **The pair is the data axis.** The Compare section, the status bar and a quick
-  pick set one Before → After pair for the folder, and every open projection tab
-  follows it, as the web Inspector keeps the pair when switching projections. A
-  tab can pin its own pair (like a diff editor between two named revisions), and
-  its title then carries it ("Packages · v1 → v2").
-- **Details.** The selection's details show as a hover card in the tab and in an
-  optional "Details" view (users can move it to the secondary side bar).
-  Evidence opens the file beside the projection.
+- **What a tab is.** A virtual URI `projection:/<folder>/<id>` backed by a
+  `CustomReadonlyEditorProvider`. Being a real editor gives us preview tabs
+  (single-click reuses, double-click keeps), Open to the Side, splits, Reopen
+  Closed Editor, editor history, and window restore (`WebviewPanelSerializer`)
+  for free.
+- **Title and icon.** Uses the projection's title ("Packages") and a renderer
+  codicon from `host-vscode`'s icon map, disambiguating duplicate names across
+  folders with the folder name.
+- **Editor title actions instead of a toolbar.** Controls move to native
+  `editor/title` actions (mode toggle, swap, play, plus settings and "Show as
+  table or text" in `…`), leaving the webview to show just the projection and
+  notices.
+- **Dirty state is authoring.** Changing an extractor, comparator, or renderer
+  marks the tab dirty; Save previews and writes `.github/projections/<id>.json`,
+  and Revert drops overrides. Definition files also support
+  `Open With… → Projection` and `Reopen as text`, just like Markdown preview.
+- **The pair is the data axis.** One folder-level Before → After pair drives all
+  open tabs, while individual tabs can pin their own pair ("Packages · v1 →
+  v2").
+- **Details.** Selection details appear in a hover card and an optional moveable
+  "Details" view; evidence links open source files beside the projection.
 
 ### The activity bar item
 
-The Projections container (its own codicon, with a badge for the number of
-projections that changed in the current pair) holds:
+The Projections container (with a custom codicon and a badge counting changed
+projections) holds:
 
 <!-- prettier-ignore -->
 | Section | Contents | When |
@@ -221,197 +186,130 @@ projections that changed in the current pair) holds:
 | **Set up** | Candidates from `explore` with their detection reason; Sweep, Adopt and Add to CI actions | Always; expanded while there are no definitions |
 | **Scenarios** | A renderer package's scenarios | A renderer package is open |
 
-With no definitions, welcome content leads: "Explore this repository", "Browse
-the gallery", and a link to the setup walkthrough. The gallery is an editor
-opened from there and from the `…` menu, not a permanent section. Diagnostics go
-to Problems on the definition files, raw output to an output channel, and a
-"Projection changes" view in Source Control serves branch review.
+When a repo has no definitions yet, welcome content highlights "Explore this
+repository", "Browse the gallery" (which opens an editor rather than taking a
+permanent section), and the setup walkthrough. Diagnostics go to Problems, raw
+logs go to Output, and branch review surfaces in Source Control's "Projection
+changes" view.
 
 ### Costs and how to contain them
 
-- **Memory per tab.** Each projection tab is a webview with its own engine
-  Worker and renderer frames. Preview tabs keep the count low (browsing reuses
-  one tab). Hidden tabs drop their webview (no `retainContextWhenHidden`) and
-  restore from saved state. A further step is to compute comparisons in the
-  runner (it already runs comparison jobs) so a tab only renders.
-- **One runner per folder.** It's shared by every tab and the side bar, which
-  read it through the extension's bridge; the extension holds its token.
-- **State ownership.** The runner owns definitions, pairs, bookmarks and
-  changes; the extension owns the folder's current pair and each tab's pinned
-  pair; a tab's webview owns only view state (mode, selection, playback), saved
-  with `setState` so a restored tab comes back as it was.
-- **Two UIs.** The web Inspector keeps its Explorer, switcher and toolbar. In VS
-  Code those become the side bar, tabs and editor title actions, built on the
-  same runner API and the mountable view. That's a native projection of the same
-  model, not a port of the React shell.
-
-- **Trust, remote and multi-root.** In Restricted Mode a projection whose
-  extractor needs trust says so in its row and tab, with "Manage Workspace
-  Trust" instead of a run action; granting trust restarts the runner with
-  `--trust`. Nothing needs localhost from the webview, so remote workspaces and
-  Codespaces work as locally. With several folders, the Projections view groups
-  by folder, each with its own runner and pair.
+- **Memory per tab.** Preview tabs limit tab sprawl, hidden tabs release their
+  webviews (no `retainContextWhenHidden`) and restore from saved state, and
+  running comparisons in the backend lets tabs focus purely on rendering.
+- **One runner per folder.** Shared across the side bar and all tabs through the
+  extension's bridge (which holds the session token).
+- **State ownership.** The runner owns definitions, pairs, bookmarks, and
+  changes; the extension owns folder/pinned pairs; each webview owns only its
+  view state (mode, selection, playback) persisted via `setState`.
+- **Two UIs, one model.** The web Inspector keeps its Explorer and toolbar; VS
+  Code projects the same runner API and mountable view into native side bar
+  trees, tabs, and editor title actions.
+- **Trust, remote, and multi-root.** Restricted Mode shows "Manage Workspace
+  Trust" on trusted extractors and restarts with `--trust` once granted. Because
+  webviews never hit localhost directly, remote workspaces and Codespaces work
+  out of the box. Multi-root workspaces group Projections by folder, each with
+  its own runner and pair.
 
 ## Jobs to be done (decided)
 
-Status: **decided; built** (D1–D6). The extension serves three jobs, and the tab
-and side bar are shaped around them rather than around a Before → After pair:
+Status: **decided; built** (D1–D6). Real usage showed the extension serves three
+distinct jobs rather than a generic Before → After pair picker:
 
-1. **Now: see the system while you work.** One view of the working tree, not a
-   comparison.
-2. **My changes: review before pushing.** The working tree (or `HEAD`) against a
-   base.
-3. **Authoring: build or tune a projection.** Your edited definition applied to
-   fixed, interesting commits.
+1. **Now:** inspect the current working tree on its own, without comparing.
+2. **My changes:** review your working tree (or `HEAD`) against a base before
+   pushing.
+3. **Authoring:** build or tune a projection by running your edited definition
+   against fixed, interesting commits.
 
-The decisions:
+The resulting decisions:
 
-- **D1. A tab's top control is one choice of what you're looking at.** Not two
-  pickers. The choices:
-  - **Now**: the working tree alone, no comparison; Swap is hidden.
-  - **Uncommitted**: `HEAD` → working tree.
-  - **My branch**: the merge base with the default branch → working tree.
-  - **Pull request…**: pick a pull request; uses its CI artifacts when they
-    exist.
-  - **More**: Last commit, a release range, bookmarks.
-  - **Custom pair…**: the Before and After pickers, kept as the escape hatch.
+- **D1. One choice control instead of two pickers.** A single control chooses
+  what you're viewing: **Now** (working tree only, Swap hidden), **Uncommitted**
+  (`HEAD` → working tree), **My branch** (merge base → working tree), **Pull
+  request…** (using CI artifacts when available), **More** (Last commit, release
+  range, bookmarks), and **Custom pair…** as the escape hatch — displayed as one
+  line like "My branch · 3 commits + uncommitted".
+- **D2. Smart default, remembered per repo.** New tabs default automatically to
+  My branch (if ahead of default), else Uncommitted (if dirty), else Now — until
+  you pick something else, which is then remembered per repository.
+- **D3. A separate "Develop projection" tab** (opened from a row's Develop
+  action or Open With… → Develop projection): applies the working-tree
+  definition to a thumbnail grid of fixed pairs (bookmarks and sweep picks)
+  alongside checks, comparator tests, raw extraction, and diagnostics, with
+  tiered invalidation (renderer edits reload, comparator edits re-compare,
+  extractor/definition edits re-extract with a cancellable queue).
+- **D4. Notice for uncommitted definition edits.** Normal tabs warned "You've
+  edited this projection. These results use the committed version." with
+  **Develop it** and **Use my edits here**
+  (`--definition-revision working-tree`, labeled "Your edits"), while Now always
+  used working-tree edits. _(Superseded: edits now apply automatically — see
+  **Revised: your edits apply** below.)_
+- **D5. Manual refresh with an out-of-date notice.** Nothing re-extracts
+  automatically (not even hidden tabs). When a result goes stale, the tab floats
+  "Out of date · N files changed · Refresh" over the stage (not in the toolbar),
+  the side bar row reads "Out of date", and the status bar shows `$(warning)`
+  when the active tab is stale (with total stale count in the tooltip). There is
+  no auto-refresh setting; adaptive auto-refresh was considered and rejected.
+- **D6. Streamlined side bar.** One clickable choice header at the top driving
+  counts and new tabs; flat **Projections** rows with counts ("7 changes", "no
+  change", "Out of date") plus inline Develop and Refresh; collapsed **Pairs &
+  Bookmarks**, **Set up**, and **Scenarios**; and removal of the Compare section
+  and `compareStyle` prototypes (`control`, `rows`).
 
-  The control reads as one line, for example "My branch · 3 commits +
-  uncommitted", with Swap and the mode beside it.
-
-- **D2. New tabs open on an automatic choice, remembered per repository.**
-  Automatically: My branch when the branch is ahead of the default branch, else
-  Uncommitted when there are edits, else Now. Once a person picks, that pick is
-  remembered for the repository and new tabs open on it.
-- **D3. A separate "Develop projection" tab** for authoring.
-  - **Opens from:** a Projections row's Develop action, or Open With… → Develop
-    projection on a definition file.
-  - **Uses** the working-tree definition, applied to fixed pairs.
-  - **A grid of interesting pairs** (bookmarks and the sweep's picks) as
-    thumbnails. Clicking one opens it large; adding a pair or saving it as a
-    bookmark is one click.
-  - **Beside the grid:** checks, comparator tests, the raw extraction and
-    diagnostics.
-  - **Edits invalidate by tier:**
-    - a renderer edit only reloads;
-    - a comparator edit only re-compares;
-    - an extractor or definition edit re-extracts the pairs, with a visible
-      queue and Cancel.
-- **D4. A notice when edits aren't applied.** A normal tab on a projection whose
-  definition has uncommitted edits says "You've edited this projection. These
-  results use the committed version." with two actions:
-  - **Develop it**;
-  - **Use my edits here**, which applies the working-tree definition to both
-    sides, as `--definition-revision working-tree` does. A tab doing that shows
-    "Your edits" beside its choice.
-
-  Now always uses the working-tree definition. (Replaced: edits now apply on
-  their own; see **Revised: your edits apply** below.)
-
-- **D5. Refresh is always manual, with an out-of-date notice.** Nothing
-  re-extracts on its own; hidden tabs neither. When a result no longer matches
-  the working tree:
-  - the tab says "Out of date · N files changed · Refresh" in a pill floating
-    over its stage (not in its toolbar: it isn't a tool);
-  - the side bar row says "Out of date";
-  - the status bar counts out-of-date projections (since: the status bar item
-    ends with `$(warning)` while the tab in front is out of date; its tooltip
-    says how many).
-
-  A hidden tab shows the notice when it comes into view. There is no refresh
-  setting. (Adaptive auto-refresh was proposed and rejected.)
-
-- **D6. The side bar is a header line and a list.**
-  - **Header:** one line for the repository's current choice; clicking it opens
-    the same picker as a tab's control. It drives the side bar's counts and new
-    tabs' default.
-  - **Projections:** each row has its count ("7 changes", "no change", "Out of
-    date") and inline Develop and Refresh actions.
-  - **Pairs & Bookmarks, Set up and Scenarios:** unchanged, collapsed.
-  - **Removed:** the Compare section, the `compareStyle` setting and its
-    `control` and `rows` prototypes.
-
-**Built so far: D1, D2 and D6** (the extension's
-[README](../guides/vscode-side-bar.md#the-choice)). A tab's toolbar starts with
-the choice ("My branch · 1 commit + uncommitted") and Swap, hidden on Now; the
-picker lists Now, Uncommitted, My branch, Pull request… (open pull requests from
-`gh`, compared locally from their merge base to their head and labelled `local`;
-the CLI's isolated `projections pr` review and CI artifacts aren't used yet),
-then Last commit, the release range and bookmarks, and Custom pair…. A choice
-keeps its identity (`now`, `uncommitted`, `branch`, `pr:<n>`, `last-commit`,
-`release`, `bookmark:<id>`, `custom`) and resolves to a pair, again whenever
-refs move. New tabs open on the automatic choice until a pick, which is
-remembered per repository; a pinned tab keeps its own choice. The side bar has
-the header line above the Projections rows, each with its count and inline
-Develop (a stub that opens the normal tab and says the Develop tab is coming)
-and Refresh. The status bar names the choice.
+**Built so far: D1, D2, and D6** (see
+[The choice](../guides/vscode-side-bar.md#the-choice)). Tabs open with the
+choice control and Swap (hidden on Now), supporting `now`, `uncommitted`,
+`branch`, `pr:<n>` (open PRs from `gh`, compared locally and labeled `local`
+until `projections pr` CI-artifact review wires in), `last-commit`, `release`,
+`bookmark:<id>`, and `custom`, re-resolving whenever refs move. New tabs follow
+the remembered repo choice while pinned tabs keep their own, and the side bar
+header and status bar mirror it.
 
 ![The side bar's header line and Projections rows beside a projection tab with its choice control, in Dark Modern](images/desktop-surfaces/jobs-tab-dark.png)
 
-**Built: D5** (the README's
-[Out of date](../guides/vscode-side-bar.md#out-of-date)). Projection tabs mount
-the Inspector with `refresh: 'manual'` (its default stays `auto` for other
-hosts) and keep their webview while hidden, so nothing extracts again on its
-own. The extension stamps each result with the `changes` generation its jobs
-started at and decides with a small pure module
-(`packages/integrations/vscode/src/staleness.ts`) that takes the identity when
-the backend reports one (below) and the changes rule until then. M1's
-extractions already carry `provenance.execution` (`source`, `fidelity`, `tree`
-for an in-place run) and `provenance.definitionDigest`; `fidelity: "stale"` is
-out of date at once, the result's tree is what "N files changed" counts from,
-and `GET /api/identity` is asked once and used as soon as it answers. Renderer
-changes reload the renderer (a view) without making the result out of date; a
-comparator change makes only the comparison out of date, and Refresh compares
-again. A choice whose pair moves with the refs makes the tab out of date instead
-of following at once.
+**Built: D5** (see [Out of date](../guides/vscode-side-bar.md#out-of-date)).
+Tabs mount the Inspector with `refresh: 'manual'` and stay mounted while hidden
+so nothing re-extracts unexpectedly. Staleness is decided in a pure module
+(`packages/integrations/vscode/src/staleness.ts`) using `GET /api/identity` plus
+`provenance.execution` (`source`, `fidelity`, `tree`) and
+`provenance.definitionDigest` (falling back to the `changes` generation rule):
+`fidelity: "stale"` is immediately out of date, renderer edits reload without
+marking results stale, comparator edits re-compare on Refresh, and ref moves
+mark tabs out of date instead of auto-re-extracting.
 
-**Built: one switch, one update.** Picking another choice in the Viewing view
-changed the open tabs in several uncoalesced steps, so the renderer drew the
-graph blank and again a varying number of times (zero to nine in the acme demo,
-depending on timing) and the Projections row stepped through its badge, "Not
-compared yet", "comparing…" and back. Now a switch is one change everywhere:
+**Built: one switch, one update.** Switching choices used to flicker through
+multiple intermediate renders and row badges (0–9 blank frames in the acme
+demo). Switches now apply atomically:
 
-- The side bar updates once a turn
-  (`packages/integrations/vscode/src/updates.ts`'s `coalesce`) and tells a tree
-  only when what it shows changed; each projection's tab reports are kept by
-  pair, so a pair shown again has its count at once, and a pair being extracted
-  says "comparing…" from the pick. The tab posts its pair to the page only when
-  it changed.
-- Each switch is numbered: the page reports the switch it shows, and a report
-  sent before it applied the latest is ignored. A pair switched away from before
-  it was extracted isn't extracted.
-- The Inspector keeps presenting the pair it showed whole until the new pair's
-  extractions are ready (never one side alone, nothing, or a loading state),
-  compares by documents rather than by their labels, and keeps each projection's
-  recent extractions by the definition they applied, so Now (the working tree's
-  definition) and the other choices (the committed one) don't extract again on
-  every switch between them.
-- The graph canvas keeps the graph it drew while the next document is laid out,
-  instead of an empty frame.
+- Side bar updates coalesce per turn
+  (`packages/integrations/vscode/src/updates.ts`'s `coalesce`), caching tab
+  reports by pair so revisiting a pair shows its count immediately and active
+  extractions read "comparing…" from the click.
+- Numbered switches ignore stale page reports and skip extracting pairs switched
+  away from mid-flight.
+- The Inspector keeps showing the previous pair whole until the new extractions
+  are ready, compares by documents instead of labels, and caches recent
+  extractions by definition so toggling between Now and other choices avoids
+  redundant runs.
+- The graph canvas retains its previous frame while laying out the next.
 
 `packages/integrations/vscode/scripts/screenshots/switch-frames.mjs` records
-each switch in real VS Code: what the extension did, every state the page and
-side bar drew, and the screencast's frames, with how many show the view blank.
+real VS Code switches end to end, counting any blank frames.
 
 ![A projection tab out of date after an edit: the notice and Refresh in a pill over its stage, the row and the status bar item's warning](images/desktop-surfaces/jobs-out-of-date-dark.png)
 
-**Revised: the out-of-date notice floats over the stage.** It was a pill at the
-toolbar's start (one warning button in a narrow toolbar), but it isn't a tool,
-so it moved onto the canvas: a pill at the stage's top centre, 12px in, with a
-widget shadow (in side by side and swipe, 12px below the panes' header bands, so
-it covers no revision name), drawn by the VS Code UI (`VscodeProjectionView`'s
-`stageNotice`, a `StageNotice`) rather than by each renderer. It overlays the
-stage's container, outside the renderer's frame, so it takes no layout space
-(fit-to-view framing is unchanged), never covers a toolbar control, and stays
-put while a document-style view (API, code statistics, runtime policy, text
-diff, the table and text views) scrolls under it. It keeps the `warning`
-codicon, "Out of date · N files changed" and Refresh (the same command). Its
-tinted fill is VS Code's warning validation background with an edge in the same
-hue held to at least 3:1 against it (the contrast border in high contrast), and
-its text is centred by cap height. On a narrow tab the count truncates first and
-Refresh stays whole. Only VS Code's tabs show it; no other host has an
-out-of-date notice. `packages/host/vscode-ui/browser/stage-notice.spec.ts`
-measures it.
+**Revised: the out-of-date notice floats over the stage.** Because it isn't a
+toolbar tool, it moved from the toolbar onto the canvas as a centered pill 12px
+from the top of the stage (or 12px below pane headers in side-by-side and swipe
+so it never covers revision names), rendered by `VscodeProjectionView`'s
+`stageNotice` (`StageNotice`) outside the renderer frame. That way it never
+shifts fit-to-view layout, never crowds the toolbar, and stays pinned while
+document-style views scroll underneath. It keeps the `warning` codicon, "Out of
+date · N files changed", and Refresh, styled with VS Code's warning validation
+background, a 3:1 contrast border, and cap-height centering; on narrow tabs the
+count truncates first so Refresh stays intact. Verified in
+`packages/host/vscode-ui/browser/stage-notice.spec.ts`.
 
 <!-- prettier-ignore -->
 | | Dark Modern | Light Modern |
@@ -421,223 +319,112 @@ measures it.
 
 ![A 360px wide view: the pill fits the stage, the count truncating first if it must, and Refresh whole](images/desktop-surfaces/stale-notice-after-narrow-dark.png)
 
-Side by side and swipe have a header band over the panes naming each revision;
-centred over the stage's top the pill would cover both names. It sits 12px below
-the bands instead (below the top pane's when side by side stacks the panes),
-still centred over the whole stage, rather than in the gap between the panes: in
-an editor tab the panes meet at a 1px divider, so there is no gap to sit in, and
-below the bands keeps the same 12px from the content as in every other mode.
+In side-by-side and swipe modes, sitting 12px below the Before/After header
+bands keeps both revision titles legible and preserves the same 12px offset used
+in every other mode (even when panes stack narrowly).
 
 ![Side by side in Dark Modern: the pill 12px below the Before and After header bands, centred over the stage](images/desktop-surfaces/stale-notice-after-side-by-side-dark.png)
 
-**Built: D4** (the README's
-[Your edits](../guides/vscode-side-bar.md#your-edits)). Normal tabs apply the
-committed definition (`HEAD`, through the Inspector's new `definitionRevision`
-mount option and `setDefinitionRevision` handle); Now and a never-committed
-definition apply the working tree's. When the definition or a file it declares
-has uncommitted edits (git status, `packages/integrations/vscode/src/edits.ts`),
-the tab shows the notice with Use my edits here (this tab then applies the
-working tree's definition and says "Your edits") and Develop it.
+**Built: D4** (see [Your edits](../guides/vscode-side-bar.md#your-edits)).
+Initially, normal tabs applied the committed `HEAD` definition (via
+`definitionRevision` and `setDefinitionRevision`), showing a notice with Use my
+edits here and Develop it whenever `packages/integrations/vscode/src/edits.ts`
+detected uncommitted changes.
 
-**Revised: your edits apply (replaces D4).** Status: **decided; built** (the
-README's [Your edits](../guides/vscode-side-bar.md#your-edits)). Chosen by the
-user from the options: "once a projection's files have uncommitted edits, its
-tabs use them and show 'Your edits' with a one-click 'Show committed'".
-
-- **When:** the definition, or a file it declares (extractor script, comparator
-  file, renderer bundle or sources), has uncommitted edits. Every tab of the
-  projection then applies the working tree's definition to both sides
-  (`definitionRevision: 'working-tree'`).
-- **Indicator:** quiet text beside the choice, **Your edits · Show committed**
-  (a codicon and muted text, like the provenance badge, not the badge-colored
-  pill D4's "Your edits" was), with one action. **Show committed** sets this tab
-  to the committed definition ("Committed version · Use my edits") until the
-  edits change again (their `editKey`: each touched file's status and content
-  hash) or the person switches back. It is kept with the tab's state while the
-  edits are the same.
-- **After a commit or a discard** there are no edits, and tabs return to the
-  committed definition (Refresh applies it: the definition changed, so the
-  result is out of date). A definition never committed works as before.
-- **Out of date:** a definition change makes out of date every result whose tab
-  applies the edits now, including a committed-definition result taken before
-  the edits (Refresh applies them, and its tooltip says so). Only a tab on Show
-  committed ignores definition edits. Refresh stays manual; the row keeps "·
-  edited".
-
-Why it changed from D4: D4 assumed people view far more than they author, so a
-tab should say what the repository's projection shows until asked otherwise. In
-use, the one who edits a projection's files is almost always developing it, and
-D4 made them click **Use my edits here** in every tab, once per tab, after every
-reload of the choice, while the notice above the toolbar took space and read as
-an error. VS Code is now the only interactive authoring surface (the browser
-Inspector is being retired), so the tab has to be the authoring loop: edits
-apply by default, and the committed version is one click away for the rarer
-check "what does the repository show?".
+**Revised: your edits apply (replaces D4).** Status: **decided; built**
+([Your edits](../guides/vscode-side-bar.md#your-edits)). Whenever a projection's
+definition or declared files (extractor, comparator, renderer) have uncommitted
+edits, all of its tabs automatically apply them
+(`definitionRevision: 'working-tree'`) and display a quiet **Your edits · Show
+committed** indicator beside the choice. Clicking **Show committed** flips that
+tab back to `HEAD` ("Committed version · Use my edits") until the edits change
+again (`editKey`) or you switch back. Committing or discarding returns tabs to
+the committed definition and marks them out of date until Refresh; rows keep "·
+edited". Since anyone editing projection files is actively authoring — and VS
+Code is now the sole interactive authoring surface — applying edits by default
+removes repetitive clicks while keeping the committed view one click away.
 
 ![A tab applying its projection's uncommitted edits: "Your edits · Show committed" beside the choice](images/desktop-surfaces/jobs-edited-dark.png)
 
 **Built: D3, since replaced** (see
-[the side bar model](#the-side-bar-model-decided-reversible)). The Develop tab
-was a custom editor on definition files with the grid (bookmarks, pairs added
-and the sweep's picks, swept together through `POST /api/sweep`, which gained
-`pairs` and `cancel`; its thumbnails are now kept per sweep, so a sweep after a
-renderer edit renders them again), the Inspector large on the working tree's
-definition with its own tiered refresh, and checks, comparator tests, the raw
-extraction and diagnostics beside it. Edits sweep the grid again by tier. Its
-pieces live on: the checks in the Checks view, the grid's pairs and thumbnails
-in Pairs & Bookmarks, `/api/sweep`'s `pairs` and `cancel` and its per-theme
-thumbnails behind Find Recent Changes….
+[the side bar model](#the-side-bar-model-decided-reversible)). The standalone
+Develop tab (with `POST /api/sweep`'s `pairs`, `cancel`, and per-sweep
+thumbnails) was replaced by collapsible side bar sections, though its underlying
+pieces live on in Checks, Pairs & Bookmarks, and Find Recent Changes…. The old
+`compare-*.png` images in `images/desktop-surfaces/` document the removed
+`compareStyle` prototypes (`control`, `rows`, `tabs`).
 
-The `compare-*.png` images in `images/desktop-surfaces/` were the Compare
-section's prototypes (`control`, `rows` and `tabs`), which were removed with the
-`compareStyle` setting.
+**Out of date** builds on the identity contract from
+[Local execution](local-execution.md#identity-from-git-and-a-persistent-cache):
 
-**Out of date** depends on identity, agreed with the local execution work
-([Local execution](local-execution.md#identity-from-git-and-a-persistent-cache)):
-
-- **A result's identity:** every extraction carries `provenance.execution`
+- **Result identity:** every extraction records `provenance.execution`
   (`{source, fidelity, tree?, strategy?, prepared?, scope?, ci?}`) and
-  `provenance.definitionDigest`; a comparison carries both sides'. `tree` is the
-  examined Git tree (for the working tree, what `git add -A` would commit, taken
-  before the run). `fidelity: "stale"` means the tree changed during the run:
-  out of date at once.
-- **The working tree's identity:** `GET /api/identity?projection=ID` returns
-  `{tree, definitionDigest, scope?, scopedTree?, scopeVerified?}` and runs
-  nothing. `scopedTree` is compared instead of `tree` only when `scopeVerified`
-  is true; otherwise `tree`.
-- **Changes push it:** the `changes` notification carries `tree` (computed after
-  the quiet period, at most once per generation, omitted if it can't be
-  computed).
-- **What `tree` can't see:** a toolchain extractor run in place can also read
-  ignored files (installed dependencies, generated code). For those results the
-  extension also keeps the `changes` rule below.
-
-Until that lands in `serve --stdio`, the extension uses the existing `changes`
-notification: a result taken before a generation whose changes touch its
-projection (`working-tree`, `definitions`, `extractor:<id>`, …) is out of date.
+  `provenance.definitionDigest`, where `tree` is the examined Git tree (what
+  `git add -A` would commit for the working tree). `fidelity: "stale"` flags
+  out-of-date immediately.
+- **Working-tree identity:** `GET /api/identity?projection=ID` returns
+  `{tree, definitionDigest, scope?, scopedTree?, scopeVerified?}` without
+  running extractors (comparing `scopedTree` when `scopeVerified` is true, else
+  `tree`).
+- **Push updates:** `changes` notifications include `tree` after the quiet
+  period; until identity lands in `serve --stdio` (and for in-place toolchain
+  extractors that can read ignored files), the extension also keeps the
+  `changes` generation rule (`working-tree`, `definitions`, `extractor:<id>`,
+  …).
 
 ## The side bar model (decided, reversible)
 
-After D1–D6, use showed the side bar mixing viewing and developing. These
-decisions replace the scattered ones before them; each is reversible. Its views
-(Show, Configuration, Checks, Pairs & Bookmarks, Set up) have since become
-[four sections](#four-sections-decided-reversible); what follows records how
-they got there.
+Using D1–D6 in practice revealed that the side bar was still mixing viewing and
+authoring. These reversible decisions cleaned that up before evolving into the
+current [four sections](#four-sections-decided-reversible):
 
-- **Every tool is its own view in the Projections view container**, so each can
-  be dragged to the panel or the secondary side bar, as Ports can ("things like
-  ports, which by default show up as a standalone um tab in a pane can actually
-  be dragged over … into a left um panel section … many of the development
-  controls fall into this category"). In order: **Show** (open), **Projections**
-  (open), **Configuration** (open), **Checks** (collapsed), **Pairs &
-  Bookmarks** (collapsed), **Set up** (shown as before); Configuration is
-  collapsed too, so only Show and Projections are open by default. Each has an
-  empty state, and none assumes its width or location: they are all native
-  trees, which assume nothing about where they are.
-- **Rows are flat leaves.** "If the main workflow … is viewing projections, then
-  I'm less convinced we want the projections to have the carrots and to expand
-  to these configurations underneath them … that sort of feels like it's mixing
-  the viewing and the developing." A projection row has no chevron and no part
-  children; a click opens it, Refresh stays inline, and its context menu has
-  Open Definition.
-- **Configuration**, a native tree like Outline ("similar to how the outline
-  panel … shows details about the currently selected editor"): it follows the
-  active projection tab (and stays while one of the projection's own files is
-  the active editor), with a pin, like the Markdown preview's lock. Definition,
-  Extractor (Show Extraction Output), Comparator (Configure…, the valid-JSON
-  quick pick), Renderer (its `scenarios.json` as a Scenarios child: the side
-  bar's Scenarios view is gone), Environment and Provenance
-  (`provenanceBadge()`, and the pair shown).
-- **Checks** is its own tree on the same projection and pin: each check and the
-  comparator tests with status icons and their messages in tooltips, Run in its
-  title.
-- **No Develop tab (replaces D3).** "I was less sure there should be a specific
-  tab type for um developing a projection separate from viewing it it seems like
-  at least some of the infrastructure for developing a projection could be um in
-  collapsed sections uh of the panel … and then you develop it by expanding
-  those and getting access to the controls and then putting them away when you
-  don't need them … where we don't necessarily have a separate development tab
-  anymore." (Earlier: "it kind of feels here like we put a pane inside a tab
-  which is a little bit odd".) The projection tab is the one tab type, and the
-  Show view's choice the one state. Developing is the collapsed sections:
-  Configuration, Checks, and **Pairs & Bookmarks**, which lists the projection
-  in front's candidate pairs (bookmarks, pairs added with Add Pair…, and Find
-  Recent Changes…' recent commits that change it, through `/api/sweep` with the
-  pairs), each with its change count and a thumbnail in its tooltip; a click
-  makes it the Show view's choice (a `bookmark:<id>` or `pair:<before>..<after>`
-  choice), and Bookmark and Remove are inline. Extraction output goes to the
-  **Projections** output channel and its diagnostics to Problems, on the
-  definition file. Edit tiers apply in projection tabs: a renderer edit reloads,
-  a comparator edit compares again, a definition edit shows D4's notice, whose
-  Develop it is now **Show Configuration** (Configuration and Checks, focused
-  and expanded). (Since revised: a definition edit applies, and the result is
-  out of date; see **Revised: your edits apply** under
-  [Jobs to be done](#jobs-to-be-done-decided).) (A bottom-panel webview for
-  these details was considered and dropped for the native trees.)
-- **Controls that open a quick pick look like VS Code's pickers:** a flat
-  toolbar text button (icon, label, muted detail, the toolbar's hover and a
-  focus outline), not a bordered drop-down with a chevron ("I'm not sure that
-  things which trigger the VS Code QuickPick menu should look like drop downs").
-- **The Viewing control (an experiment).** "I'd like to make a dedicated special
-  control for controlling exactly what's being viewed and put it at the top of
-  the projections panel at the left and remove it from within the tab … I'm not
-  sure whether it's right, but I'd like to try it." The side bar's header line
-  read as a list item but acted as a status indicator, and each tab had its own
-  control. Now one repository-wide choice (remembered per repository, with the
-  automatic default) is the Viewing view's control, every tab follows it, and
-  the status bar mirrors it. Tabs have no choice control and no per-tab
-  Pin/Follow for this experiment (an agent tool can still open a tab on its own
-  pair). The Configuration view's pin, which is about which projection it
-  follows, stays.
-- **The Show view replaced the webview control.** The experiment's webview
-  "Viewing" control became a native list, **Show**, first in the container: a
-  native look, nothing to load, accessible (the current row's label ends ",
-  selected"; state is its check, never the tree's selection or focus), and it
-  reads correctly when collapsed (its description is the current choice). Rows:
-  Current state; Uncommitted changes, Branch changes, Pull request…; a
-  collapsible More (Last commit, Since <tag>, bookmarks); Custom pair… (Swap
-  inline when it is the choice). A click sets the choice; Refresh is in its
-  title; the status bar mirrors it and its click reveals the view. The tab's old
-  choice control, its Pin/Follow and the `projections.experimental.choiceInTab`
-  setting are gone.
-- **The Viewing quick pick reads as a choice, not three look-alikes** ("my brain
-  just has a hard time choosing between these three options"). Items are
-  grouped: **Show** (Current state: "your files as they are now", formerly Now)
-  and **Show changes** (Uncommitted changes, Branch changes, Pull request…, then
-  More and Custom pair…). Each detail states the span with real ref names, then
-  the size ("last commit → your files · 1 file", "main → your files · 3
-  commits + 1 uncommitted"). Choices that resolve to the same pair are listed
-  once (Branch changes on the default branch, or with no commits ahead, is
-  Uncommitted changes), except the selected one, and the automatic default never
-  picks a hidden one. The placeholder asks "What should projections show?"; the
-  current item has only its check. The Show view and the status bar use the same
-  names; the identities stay internal.
-- **Swap only for Custom pair….** Reversing a named choice makes no sense; Swap
-  stays in the command palette.
-- **A provenance badge only when unusual** (From CI, Approximate, Stale,
-  Observed), quiet as a codicon and muted text; an ordinary local result shows
-  none, and Configuration's Provenance names it either way.
-- **Loading from the first paint, small and late.** A tab shows VS Code's thin
-  progress bar at its top, one per tab, after 300 ms; never the web Inspector's
-  "No extraction loaded" or a ring that scales with a pane ("these are
-  obnoxious"); a custom renderer is named by its projection, never "the Custom
-  renderer".
-- **A tab is never blank** ("when a projections tab is opened it shows a
-  completely blank for a while. I'm wondering if there's anything we can show
-  literally immediately, such as a centered spinner or even the skeleton of the
-  toolbar since we know the toolbar is going to be there"). The editor gets its
-  skeleton at once, before the folder's facts and the backend, and its page
-  loads while the backend starts (requests wait for the bridge; nothing reloads
-  when it arrives): the toolbar strip, empty, the summary bar's strip, and a
-  centered 16px `loading` codicon with "Loading Packages…", at 0 ms (the
-  skeleton is the real layout, so it doesn't flash). The page replaces it in
-  place.
-- **No stand-ins for controls while loading** ("there's a weird grayed out,
-  poorly aligned version of the view switcher… this probably doesn't need to be
-  there at all while the projection is loading"). The strip is the real
-  toolbar's height and hairline, and nothing in it: no dimmed mode group, no
-  dimmed actions. The smoke test's probe checks that it never held an element
-  and is exactly as tall as the toolbar that replaces it.
+- **Every tool is its own native tree view** inside the Projections container,
+  so users can drag any section to the panel or secondary side bar like Ports.
+  By default only Show and Projections start expanded; Configuration, Checks,
+  Pairs & Bookmarks, and Set up stay collapsed.
+- **Projection rows are flat leaves.** Clicking opens the tab, Refresh stays
+  inline, and Open Definition lives in the context menu — no expandable part
+  children mixing viewing with authoring.
+- **Configuration** acts like Outline: a native tree following the active
+  projection tab (and its files) with a pin, listing Definition, Extractor (Show
+  Extraction Output), Comparator (Configure…), Renderer (with `scenarios.json`
+  underneath, replacing the separate Scenarios view), Environment, and
+  Provenance (`provenanceBadge()`).
+- **Checks** tracks checks and comparator tests for the active/pinned projection
+  with a Run button in its title.
+- **No separate Develop tab (replaces D3).** The projection tab is the only tab
+  type; authoring lives in the collapsible sections (Configuration, Checks, and
+  **Pairs & Bookmarks** with Add Pair…, Find Recent Changes… via `/api/sweep`,
+  change counts, hover thumbnails, and inline Bookmark/Remove, selecting
+  `bookmark:<id>` or `pair:<before>..<after>`). Extraction output goes to the
+  **Projections** output channel, diagnostics to Problems, and edit tiers apply
+  right inside projection tabs (with **Show Configuration** replacing Develop
+  it, later simplified by **Revised: your edits apply** under
+  [Jobs to be done](#jobs-to-be-done-decided)).
+- **Quick-pick triggers look like VS Code buttons,** not bordered dropdowns with
+  chevrons.
+- **One repository-wide choice in Show** (replacing an earlier experimental
+  webview "Viewing" control and removing per-tab choice controls, Pin/Follow,
+  and `projections.experimental.choiceInTab`). Show is a fast, accessible native
+  list (Current state; Uncommitted changes, Branch changes, Pull request…;
+  collapsible More with Last commit, Since <tag>, bookmarks; Custom pair… with
+  inline Swap) that sets the repo-wide choice, puts Refresh in its title, and
+  mirrors to the status bar.
+- **Grouped Viewing quick pick:** **Show** (Current state: "your files as they
+  are now") vs. **Show changes** (Uncommitted changes, Branch changes, Pull
+  request…, More, Custom pair…), with real ref spans and sizes ("last commit →
+  your files · 1 file", "main → your files · 3 commits + 1 uncommitted"),
+  deduplicating equivalent choices and asking "What should projections show?".
+- **Swap only for Custom pair…** (plus the command palette), since reversing a
+  named choice makes no sense.
+- **Provenance badges only when unusual** (From CI, Approximate, Stale,
+  Observed); ordinary local runs stay quiet.
+- **Subtle, immediate loading states.** Tabs show VS Code's thin top progress
+  bar after 300 ms — never "No extraction loaded", giant rings, or "the Custom
+  renderer". Opening a tab paints its real layout skeleton at 0 ms (empty
+  toolbar strip, summary strip, and centered 16px `loading` codicon with
+  "Loading Packages…") with zero dimmed stand-in controls while the backend
+  starts, then swaps cleanly in place.
 
   ![A projection tab before its backend is ready, Dark Modern](images/desktop-surfaces/tab-skeleton-dark.png)
 
@@ -651,103 +438,68 @@ they got there.
 
   ![After, Light Modern](images/desktop-surfaces/tab-skeleton-after-light.png)
 
-- **Side by side fills the tab:** no margin or gap around the panes, one 1px
-  divider in the editor group border.
-- **Swipe's divider is one control**, the same color as the grip's outline: its
-  1px line takes the grip's outline color, VS Code's link foreground, and both
-  change together, to the sash hover color (and a tinted grip) while pointed at
-  or dragged and to the focus border under keyboard focus. Side by side keeps
-  its neutral editor group border; the Default UI follows the same rule with its
-  own accent, emphasis and focus colors.
+- **Edge-to-edge side-by-side panes** with one 1px editor-group divider, and a
+  **unified Swipe divider** whose 1px line matches its grip outline (VS Code's
+  link foreground, shifting together to sash hover or focus border on
+  interaction — mirrored in the Default UI with its own accent/emphasis/focus
+  tokens).
 
   ![Swipe's divider and grip in one color, Dark Modern](images/desktop-surfaces/swipe-divider-vscode-dark.png)
 
-- **The UI never says "sweep"**, which means nothing to people in this context:
-  **Find Recent Changes** (in Pairs & Bookmarks then, Viewing's Recent changes
-  now, not Set up) checks the last commits and lists the ones that change a
-  projection, saying "Checking recent commits… 4 of 10" meanwhile. `/api/sweep`
-  and internal names stay.
+- **Plain language over "sweep".** The UI says **Find Recent Changes**
+  ("Checking recent commits… 4 of 10"), keeping `/api/sweep` internal.
 
 ## Four sections (decided, reversible)
 
-The side bar had grown six views (Show, Projections, Configuration, Checks,
-Pairs & Bookmarks, Set up), several following the active tab and two listing the
-same kind of thing (Show's More and Pairs & Bookmarks both listed comparisons to
-look at). The decision: make it clear which section to look in for whatever
-someone is trying to do. **Each section answers one question, and only one
-follows the active tab.** They replace the views above.
+Six views (Show, Projections, Configuration, Checks, Pairs & Bookmarks, Set up)
+proved two too many, with Show's More and Pairs & Bookmarks overlapping. We
+consolidated into **four sections — each answering one clear question, with only
+one following the active tab:**
 
-- **Viewing** (What am I looking at?): Everything that changes what the tabs
-  show: Current state, Uncommitted changes, Branch changes, Pull request…;
-  **Bookmarks**; **Recent changes** (Last commit, Since <tag>, and the recent
-  commits that change any projection); **Compare two revisions…**. It absorbed
-  Pairs & Bookmarks: bookmarks are choices, and "Find Recent Changes" checks the
-  last commits with every projection (`/api/sweep` over all of them) and lists
-  each commit that changes one, by its subject and short commit, with what it
-  changes and a thumbnail in its tooltip. The commit at `HEAD` stands for Last
-  commit. Compare two revisions… replaces both Custom pair… and Add pair….
-  Bookmark and Remove are inline (Bookmark also on the current row); Swap only
-  on Compare two revisions… when it is the choice.
-- **Projections** (What is there, and what changed?): Unchanged flat rows in
-  alphabetical order of the title they show (not their IDs, which are file
-  names: "API database schema" before "CI pipeline"), with their counts as
-  badges (below), **New Projection…** (`+`) in its title (below) and Add to CI…
-  in the view's `…` menu.
-- **Definition** (What is this projection made of?): Formerly Configuration, and
-  the one section that follows the active tab (with the pin): the definition
-  file by its name, Extractor, Comparator (its `.comparator.test.yaml` under
-  it), Renderer (its scenarios under it), Environment. Provenance left the tree:
-  it is the tab's badge when unusual. It shares one item model
-  (`definitionModel`) with Go to Source…
-- **Suggested** (What else could I add?): Formerly Set up: only the candidates
-  not yet defined, each with Adopt inline, and shown only while there are some.
-  With no definitions the Projections welcome carries the getting-started copy,
-  so the two don't repeat each other; after the first adoption, Suggested's
-  welcome offers Add to CI…
+- **Viewing** (_What am I looking at?_): Current state, Uncommitted changes,
+  Branch changes, Pull request…, **Bookmarks**, **Recent changes** (Last commit
+  at `HEAD`, Since <tag>, and recent commits that change any projection via
+  `/api/sweep` with subjects, short hashes, and hover thumbnails), and **Compare
+  two revisions…** (replacing Custom pair… and Add pair…, with inline
+  Bookmark/Remove and Swap when active).
+- **Projections** (_What is there, and what changed?_): Flat rows sorted
+  alphabetically by title ("API database schema" before "CI pipeline") with
+  right-edge count badges, **New Projection…** (`+`) in the title bar, and Add
+  to CI… in `…`.
+- **Definition** (_What is this projection made of?_): Renamed from
+  Configuration and the sole section following the active tab (with pin):
+  definition file, Extractor, Comparator (with `.comparator.test.yaml` under
+  it), Renderer (with scenarios under it), and Environment — sharing
+  `definitionModel` with Go to Source….
+- **Suggested** (_What else could I add?_): Renamed from Set up; shows only
+  unadopted candidates with inline Adopt, hiding itself once empty (after first
+  adoption, its welcome offers Add to CI…).
 
-**Checks are tests.** The Checks view is gone; VS Code's **Testing** view has a
-"Projections" controller with an item per projection whose children are its
-checks (`projections check`'s steps: definition valid, extraction, determinism,
-scope, renderer checks) and its comparator tests, one per case at its line in
-the `.comparator.test.yaml`, so the editor's gutter runs a case. Runs go through
-the same backend (`check`, `POST /api/comparator-tests/run`); results are in
-Test Results; definition problems stay in Problems. This is VS Code's idiom for
-"does it pass?", with its gutter, filters, history and keybindings, and nothing
-to learn. There is no debug profile: there is nothing to step through.
+**Checks moved to VS Code's Testing view.** A "Projections" test controller
+lists each projection's `projections check` steps and individual
+`.comparator.test.yaml` cases right at their source lines with gutter run
+buttons, backed by `check` and `POST /api/comparator-tests/run`, reporting into
+Test Results while definition errors stay in Problems (no debug profile needed).
 
-**The word "pair" left the UI** (commands, tooltips, notifications and the
-README): "Compare two revisions…", "Two revisions" as the choice's name,
-"Compare These Revisions". Internal names (`setPair`, `pair:<before>..<after>`,
-`/api/pairs`, `/api/sweep`) stay.
+**Retired the word "pair" from the UI** in favor of "Compare two revisions…",
+"Two revisions", and "Compare These Revisions", keeping internal names
+(`setPair`, `pair:<before>..<after>`, `/api/pairs`, `/api/sweep`).
 
-**Static titles; the status bar item names the choice (revised).** VS Code hides
-a view's description while its section is collapsed
-(`.pane-header:not(.expanded) .description {display: none}` in the workbench's
-pane CSS), so a collapsed Show view no longer said what was shown, and for a
-while Viewing and Definition set `TreeView.title` instead: "Viewing: Uncommitted
-changes" and "Definition: Package cards". That workaround is reverted: both
-titles are static again, "Viewing" and "Definition", so the side bar's headers
-stay put while the choice or the active tab changes. The status bar item is the
-readout of what is shown ("this is probably a better place to display what the
-user is currently viewing rather than using dynamic text in the sidebar list
-section"), and the editor tab names the projection the Definition view follows
-("I think we can also remove this dynamic text and go back to a static label").
-The pin is the one state the tab doesn't show, so while pinned the Definition
-view's message names the projection ("Pinned to Packages"); a `view/title`
-action's tooltip is its command's static title, so it can't. The current Viewing
-row keeps its check. Their descriptions stay unset.
+**Static section titles; choice lives in the status bar.** Because VS Code hides
+view descriptions when collapsed
+(`.pane-header:not(.expanded) .description {display: none}`), we briefly tried
+dynamic `TreeView.title` text ("Viewing: Uncommitted changes"), then reverted to
+clean static "Viewing" and "Definition" headers (with Definition showing "Pinned
+to Packages" in its message when pinned, since a `view/title` action's tooltip
+is static). The status bar now carries the choice readout, and the active editor
+tab already names the projection.
 
 ![The four sections collapsed with their static titles; the status bar item names the choice, Dark Modern](images/desktop-surfaces/sidebar-collapsed-dark.png)
 
-**The status bar item (decided).** "In the context of the status bar, it is not
-obvious that this applies to us, so probably we want to use the projector icon",
-and space there is tight, with "a high bar for text": commit hashes are
-something "most users don't memorize", and nothing the editor tab already shows
-(the projection, its change counts) is repeated. So the item is the Projections
-mark, a product icon (`$(projections-mark)`, glyph U+E000 of the font
-`tools/scripts/product-icons.mjs` writes from `brand/projections-mark.svg`; VS
-Code only takes icon IDs of two segments or more), and the choice's short human
-name:
+**The status bar item (decided).** Shows the Projections product icon
+(`$(projections-mark)`, U+E000 generated by `tools/scripts/product-icons.mjs`
+from `brand/projections-mark.svg`) plus the short choice name, without repeating
+the tab title or raw hashes:
 
 <!-- prettier-ignore -->
 | Choice | Text |
@@ -759,74 +511,31 @@ name:
 | The tab in front out of date | the same and `$(warning)`, in the item's normal colours |
 | The tab in front extracting or comparing | the same and `$(sync~spin)` in the warning's place (`$(sync)` under reduced motion) |
 
-Its Markdown tooltip carries the rest: the name in full, the revisions with
-their commits (``main `a1b2c3d` → your files``), the span's size and the files
-changed, why results are out of date, and a pinned tab in front. It is shown
-only while the folder defines projections, and (decided: "does our status bar
-item need to always be visible?") only where projections are in view: while a
-projection tab is the active editor tab (`tabGroups`, the custom editor
-`projections.projection`) or any of the four views is visible
-(`onDidChangeVisibility`). Editing other code with the side bar closed, it is
-hidden. Tab and visibility changes are coalesced into one placement a turn, so
-focus moving between a projection tab and the side bar never hides and shows it
-again; the quick pick (Choose What to Show…, with Show in Side Bar) stays in the
-Command Palette.
+Its Markdown tooltip carries full details (``main `a1b2c3d` → your files``, span
+size, changed files, staleness reasons, pinned tab note). It appears only when
+projections are defined _and_ either a `projections.projection` tab is active
+(`tabGroups`) or any of the four side bar views is visible
+(`onDidChangeVisibility`), coalesced per turn so switching focus between tab and
+side bar never flickers. Clicking it opens the **Viewing** quick pick
+(`ViewingView.present` from `viewingRows`, shared with Choose What to Show…),
+starting with `$(refresh) Refresh · 19 files changed` when stale and ending with
+**Show in Side Bar**.
 
-**Out of date in the status bar (decided).** "If the projection is stale, I'd
-kind of like a warning icon on the right edge of the status item. We'll have to
-just cram it in with the View options." The stable API has no multi-segment item
-(Git's are SCM `statusBarCommands`), so it stays one item: `$(warning)` at its
-end replaces the earlier dot while the tab in front is out of date (the warning
-follows that tab; the tooltip keeps the count of all), without
-`statusBarItem.warningBackground`. Its one click still opens the Viewing quick
-pick, which then starts with `$(refresh) Refresh · 19 files changed` and a
-separator: the same Refresh as the stage's pill.
-
-**Running in the status bar areas (decided).** "If an extractor is currently
-running, that might make sense to add a little refreshing icon into our status
-bar areas?" Both get one, and nothing else changes:
-
-- **The status bar item** ends with `$(sync~spin)` while the tab in front's job
-  runs (extracting a side of its pair, or its page comparing the two), in the
-  warning's slot. Running takes precedence: during a Refresh the spinner
-  replaces the warning until the job ends, and the warning comes back only if
-  the new result is still out of date. Its tooltip says "Packages: Extracting…"
-  (or "Comparing…") and its accessible name ends with ", extracting". Jobs in
-  other tabs don't spin it; the tooltip counts them ("2 other tabs extracting").
-- **The tab's summary bar** shows a small spinning `sync` codicon at its end, in
-  a slot kept while nothing runs, so no figure moves or reflows; "Extracting…"
-  or "Comparing…" is its tooltip and in a polite live region.
-- **No flash.** Both show only once a job has run 300 ms and, once shown, stay
-  at least 400 ms: one pure rule with injectable timers (`runningIndicator` in
-  `packages/host/vscode-ui/src/running.ts`), which the extension host imports
-  from `@githubnext/projections-host-vscode/running` and the summary bar uses as
-  a hook.
-- **Reduced motion** holds the icon still: in the webview by
-  `prefers-reduced-motion` and VS Code's `vscode-reduce-motion` class; in the
-  status bar by the extension, since VS Code's `workbench.reduceMotion` doesn't
-  stop a status bar item's `~spin` (it only stops some of its own spinners):
-  `$(sync)` while the setting is `on`, or `auto` and the tab's page reports that
-  it moves less.
-- **Where it comes from**: the Inspector knows what the shown pair's job is
-  doing (a side queued or running, or the comparison computing). It passes it to
-  the projection view as `running` and reports it in its summary, which the
-  tab's page sends the extension every half second (with whether the page moves
-  less); the extension puts it on the active tab (`ActiveTab.running`) for the
-  status bar item.
-- **Only the VS Code UI.** The headless controller has no job state, so the
-  Default UI's summary bar shows none: the standalone Inspector already says
-  "Extracting…" with Cancel in its own status.
-- **Renderer builds** stay in the Definition view's Renderer row, not here: one
-  signal for each.
-
-"This control definitely needs to do something": its click opens the **Viewing**
-quick pick, the same options and grouping as the side bar, from one item model
-(`ViewingView.present` builds both the tree items and the quick pick's items
-from `viewingRows`): Current state, Uncommitted changes, Branch changes, Pull
-request…; Bookmarks and Recent changes under separators; Compare two revisions…;
-and last **Show in Side Bar**, which reveals and focuses the Viewing view. It
-opens on the current choice, which has the check; equivalents are hidden as in
-the view. Choose What to Show… is the same pick.
+**Out of date and running indicators (decided).** Because VS Code's stable API
+has no multi-segment status items (`statusBarCommands` is SCM-only), the single
+item appends `$(warning)` when the front tab is stale (without
+`statusBarItem.warningBackground`) or `$(sync~spin)` while its job is extracting
+or comparing (taking precedence over warning during Refresh, with other active
+tabs counted in the tooltip). Inside the tab, the summary bar reserves a slot at
+the far end for a spinning `sync` codicon with a polite live region. Both share
+`runningIndicator` (`packages/host/vscode-ui/src/running.ts`, imported via
+`@githubnext/projections-host-vscode/running`), waiting 300 ms before appearing
+and staying at least 400 ms to avoid flicker. Reduced motion stops the spin
+(`prefers-reduced-motion` and `vscode-reduce-motion` in the webview; `$(sync)`
+instead of `~spin` in the status bar when `workbench.reduceMotion` is `on` or
+`auto` with reduced motion reported). Job state flows from the Inspector
+(`running`) into `ActiveTab.running` every half second (VS Code UI only;
+renderer builds stay in Definition's Renderer row).
 
 ![The status bar item on Current state, Branch changes, a pull request, a recent change, a bookmark whose name is cut, two revisions, out of date, and extracting, Dark Modern](images/desktop-surfaces/status-bar-choices-dark.png)
 
@@ -836,22 +545,14 @@ the view. Choose What to Show… is the same pick.
 
 ![The Viewing quick pick the item opens: the side bar's rows grouped, then Show in Side Bar](images/desktop-surfaces/status-bar-quick-pick-dark.png)
 
-**Short facts, and counts as badges**, since most secondary text is truncated at
-a default side bar width. A row's description is a short fact or nothing, about
-12 characters at a 300 px side bar: `2 files`, `3 commits`, `#123` (this
-branch's open pull request), a bookmark's or recent commit's short commit,
-`a1b2c3d → e4f5a6b` when Compare two revisions… is the choice. Spans and
-explanations ("last commit → your files", what the choice means) are in a
-Markdown tooltip. A Projections row's change count is a badge at its right edge,
-as a modified file's is: a `FileDecorationProvider` on the row's
-`projections-row:/<folder>/<id>` resource (`TreeItem.resourceUri`, beside its
-own `iconPath`), at most two characters (`9+`), in
-`gitDecoration.modifiedResourceForeground`, which tints the label too. No
-change, no badge; not compared yet, no badge and a muted label
-(`disabledForeground`). The description says only what is unusual (Out of date,
-needs trust, failed, edited); the tooltip has the full status ("3 changes
-(Uncommitted changes)", "Not compared yet"). Definition and Suggested follow the
-same rule.
+**Short descriptions and right-edge count badges.** At a 300 px side bar width,
+row descriptions stay under ~12 characters (`2 files`, `3 commits`, `#123`,
+`a1b2c3d → e4f5a6b`) with full spans in Markdown tooltips. Projections rows show
+change counts as 1–2 character badges (`9+`) via a `FileDecorationProvider` on
+`projections-row:/<folder>/<id>` (`TreeItem.resourceUri` alongside `iconPath`)
+tinted with `gitDecoration.modifiedResourceForeground`; uncompared rows have no
+badge and use `disabledForeground`, and descriptions surface only unusual states
+(Out of date, needs trust, failed, edited).
 
 ![The four sections at a 300 px side bar beside a projection tab, Dark Modern: Viewing with Recent changes open, the Packages row's badge, Definition and Suggested](images/desktop-surfaces/sidebar-four-sections-dark.png)
 
@@ -861,60 +562,38 @@ same rule.
 
 ![A comparator test file with a run button in the gutter at each case, Dark Modern](images/desktop-surfaces/comparator-test-gutter-dark.png)
 
-Every section is a native tree and works when dragged to another container. The
-contributed order is Viewing, Projections, Definition, Suggested; VS Code keeps
-an order a person changed (View: Reset View Locations restores it).
+Every section is a native tree and can be dragged freely (default order:
+Viewing, Projections, Definition, Suggested; resettable with View: Reset View
+Locations).
 
-**Starting a projection: New Projection… (decided).** "Wants to get started on a
-new projection. Where exactly do they go": once a repository had projections,
-nowhere. The Projections welcome offered Explore only while there were none,
-Suggested listed only what explore found, and writing your own was
-`projections init` or an agent. The decision: a **New Projection…** (`$(add)`)
-button in the Projections section's title bar, first among its actions. It is
-also in the command palette and, beside Explore, in the Projections welcome
-while the repository defines none. Suggested stays as it is, always present
-while it has candidates. The button opens one guided quick pick:
+**Starting a projection: New Projection… (decided).** Adding a **New
+Projection…** (`$(add)`) button to the Projections title bar (plus the command
+palette and empty-state welcome) gives developers a clear entry point even after
+initial setup. It opens a guided quick pick with four paths:
 
-- **Start from a suggestion**: Suggested's own candidates (the same source,
-  `GET /api/explore` through the folder's model). With none, this item is
-  **Explore this repository** instead.
-- **Start from a built-in extractor and renderer**: The extractors in the CLI's
-  catalog (`projections extractor list --json`), then the built-in renderers
-  that present the extractor's schema (the backend's `GET /api/renderers`, their
-  manifests' `accepts`). The extractor's default comes first, under the name its
-  template uses (`dependencies`, a preset of the graph bundle). A renderer that
-  needs a vocabulary fits only as the default, since the catalog doesn't say
-  which vocabularies an extractor declares.
-- **Write a custom extractor, renderer or comparator**: Which parts: a starter
-  extractor (in the repository's toolchain, Node.js, Python or Go), a renderer
-  package, both, or a comparator file. A custom renderer or comparator runs on a
-  built-in extractor you pick.
-- **Ask an agent to write it**: What it should show, then the projection is
-  scaffolded. The chat opens in agent mode with the prompt `projections init`
-  printed, your description in place of its placeholder, for you to send.
-  Without a chat, the prompt is copied.
+- **Start from a suggestion** (`GET /api/explore`, or **Explore this
+  repository** when none exist yet).
+- **Start from a built-in extractor and renderer**
+  (`projections extractor list --json` and `GET /api/renderers`' `accepts`,
+  listing the extractor's default first, e.g. `dependencies`).
+- **Write a custom extractor, renderer, or comparator** (starter extractor in
+  Node.js, Python, or Go; renderer package; both; or a comparator file over a
+  built-in extractor).
+- **Ask an agent to write it** (scaffolds the projection and opens agent chat
+  prefilled with `projections init`'s prompt, or copies it if chat isn't
+  available).
 
-Then an ID, checked as you type against the definition schema's ID pattern (the
-bundled `definition/v0.json`, the schema `projections init` validates with), the
-environment file's name and the repository's projections and files. Then a
-title, which may be left empty for the CLI's default from the ID. The extension
-never writes the files itself: it runs the CLI's `projections init` with the
-flags a person would pass (`--extractor`, `--renderer`, `--language`,
-`--comparator custom`, `--definition-directory` where the repository keeps
-definitions in `.projections`), behind a progress notification. It then opens
-the definition, opens the projection's tab and selects its row
-(`TreeView.reveal`). The CLI's output, with its next steps, goes to the
-Projections output channel.
-
-Errors say what to do. A Restricted Mode window is refused up front with
-**Manage Workspace Trust**: init writes into the repository. A missing CLI
-offers **Open Settings** on `projections.cliPath`. An ID that exists is refused
-in the input box, or by the CLI if it appears meanwhile, with **Open
-Definition**. A starter extractor whose toolchain the CLI can't tell offers
-**Choose a Language…** and runs again. The model (`new-projection-model.ts`)
-imports nothing, so its picks, renderer fit, ID checks and `init` arguments are
-unit-tested. The smoke test runs the flow in real VS Code on a temporary
-repository.
+Next it prompts for an ID (validated live against `definition/v0.json`,
+environment file names, and existing projections/files) and an optional title,
+then runs `projections init` (`--extractor`, `--renderer`, `--language`,
+`--comparator custom`, `--definition-directory` when definitions live in
+`.projections`) rather than writing files directly, opens the definition and
+projection tab, reveals the row (`TreeView.reveal`), and logs next steps to the
+Projections output channel. Clear error actions cover Restricted Mode (**Manage
+Workspace Trust**), missing CLI (**Open Settings** for `projections.cliPath`),
+existing IDs (**Open Definition**), and ambiguous toolchains (**Choose a
+Language…**). Pure model logic (including `init` arguments) lives in
+`new-projection-model.ts` with unit tests and a real-VS-Code smoke test.
 
 ![New Projection… from the Projections section's title bar: start from a suggestion, built-ins, custom parts or an agent, Dark Modern](images/desktop-surfaces/new-projection-pick-dark.png)
 
@@ -928,81 +607,44 @@ repository.
 
 ![The same in Light Modern](images/desktop-surfaces/new-projection-created-light.png)
 
-**The parts have their own icons (decided).** Definition drew Extractor,
-Comparator and Renderer as codicons that mean something else: `inspect` reads as
-the developer tools' element picker, `git-compare` implies a code diff, and
-`eye` is show and hide everywhere in VS Code (and assumes the output is visual).
-No codicon, Octicon or Lucide icon shows the three as one pipeline, so they are
-drawn as one family ([brand/parts](../../brand/README.md#part-icons), derived
-from no icon library):
+**Custom part icons (decided).** Generic codicons (`inspect`, `git-compare`,
+`eye`) carried misleading meanings, so we designed one cohesive three-icon
+pipeline family ([brand/parts](../../brand/README.md#part-icons)):
 
-- **The dot is the extraction,** the same size in all three icons, so it reads
-  as the same thing; no stroke touches it, and every stroke stops the same
-  distance from it.
-- **Extract converges:** three strokes converge on the dot at the right, a
-  larger thing abstracted into it.
-- **Compare divides:** two dots, in the renderer's and the extractor's places,
-  either side of a dashed divider: two extractions related, not overlaid.
-- **Render diverges:** the extractor mirrored, three strokes leaving the dot at
-  the left.
+- **The dot is the extraction** — identical size and clearance in all three.
+- **Extract converges:** three strokes converging onto the dot on the right.
+- **Compare divides:** two dots flanking a three-dash divider.
+- **Render diverges:** three strokes fanning out from the dot on the left.
 
-They are VS Code product icons (`projections-extractor`,
-`projections-comparator`, `projections-renderer`, from a small generated font),
-so they take the theme's icon color like a codicon, and icon tokens
-(`--projections-icon-<part>`) wherever the Inspector shows the parts, which the
-VS Code UI draws at codicon weight. The choices before them (thirty metaphors
-and four families, from sieves to light paths, then shapes and dots) were
-reviewed on a page of concepts; the chosen set is the dot family's D4 with a
-three-dash divider.
+Shipped as VS Code product icons (`projections-extractor`,
+`projections-comparator`, `projections-renderer`) and Inspector icon tokens
+(`--projections-icon-<part>`), adopting dot-family D4 after reviewing thirty
+metaphors across four families.
 
 ![The Definition section with the part icons, Dark Modern](images/desktop-surfaces/definition-part-icons-dark.png)
 
 ![The same in Light Modern](images/desktop-surfaces/definition-part-icons-light.png)
 
-**Selecting a row never leaves VS Code (decided).** Definition's breakdown of
-the projection into files and settings read as intended, but some of its rows
-opened the browser: a built-in extractor, comparator or renderer linked to its
-README on GitHub. "I generally don't expect selecting a list item to take me out
-of the current application … I just don't think these should behave like
-external launch links." So no row or quick pick item's primary action leaves VS
-Code, in any of the side bar's views, the Testing view or the quick picks:
+**Selecting a row never leaves VS Code (decided).** Clicking a side bar row
+shouldn't unexpectedly launch a browser, so no row or quick-pick primary action
+leaves VS Code:
 
-- A file row opens the file in an editor, as before.
-- A built-in part's row (and Go to Source…'s built-in item, from the same item
-  model) opens the part's documentation inside VS Code: a read-only Markdown
-  preview of pages bundled with the extension. The default comparator's row
-  reads its docs too; its gear stays Configure… (in Go to Source…, the item
-  stays Configure…, with an Open Documentation button).
-- The page on GitHub is only an explicit secondary action, **Open Documentation
-  on GitHub** with the `link-external` icon: inline on the row's hover, in its
-  context menu, and a button on Go to Source…'s item. A link clicked inside a
-  page or a renderer is an explicit link click, so it may still open the
-  browser.
-- The welcome's "renderer catalog" link opens the bundled reference page too.
+- File rows open in an editor.
+- Built-in parts (and Go to Source… items, plus the welcome's "renderer catalog"
+  link) open bundled documentation inside VS Code's Markdown preview (the
+  default comparator keeps its Configure… gear).
+- **Open Documentation on GitHub** (`link-external`) is strictly a secondary
+  hover/context/quick-pick action, while explicit links clicked inside a
+  renderer or page still open the browser (`openExternal`).
 
-The audit found two row clicks that launched the browser, both built-ins' docs:
-the Definition view's built-in rows (`vscode.open` on a GitHub URL) and Go to
-Source…'s built-in items (`env.openExternal`). Viewing, Projections, Suggested
-and the Testing view's rows open tabs, files or quick picks, and the other quick
-picks (Viewing, pull requests, revisions, comparison mode, adopt) choose rather
-than open; the webview's `openExternal` serves only links clicked inside a
-renderer.
-
-The mechanism: the build bundles the two generated reference pages, every
-built-in extractor's and renderer's README they list, the default comparator's
-README and the Markdown those link to directly into `dist/docs/` (about 50
-pages, 0.6 MB, shipped in the package), each README named after its directory so
-the preview's tab names the part (`renderers/graph.md`). Relative links between
-bundled pages are rewritten to their bundled names and open in the preview;
-links to anything else go to GitHub. A read-only file system provider serves
-them on `projections-docs:` (the preview resolves relative links through the
-workspace file system, which a text document content provider doesn't offer),
-and they open in the Markdown preview editor (`vscode.markdown.preview.editor`),
-whose tab carries the page's URI, so Definition stays on its projection while
-the docs are open, as it does for the projection's own files. `index.json` maps
-each extractor id, renderer handle and the default comparator to its page, so a
-renderer named by an alias (`dependencies`) opens its renderer's page (`graph`),
-which the old `renderers.md#dependencies` anchor missed.
+During the audit, only Definition's built-in rows (`vscode.open`) and Go to
+Source…'s built-in items (`env.openExternal`) launched externally. To fix both,
+the build bundles ~50 reference pages (~0.6 MB) into `dist/docs/` (named after
+each part, e.g., `renderers/graph.md`), served via a read-only
+`projections-docs:` file system provider so `vscode.markdown.preview.editor`
+resolves relative links in-app while keeping Definition locked on the active
+projection. `index.json` maps aliases like `dependencies` straight to `graph`
+(fixing the old `renderers.md#dependencies` miss).
 
 ![The Definition view with the Renderer row selected and the graph renderer's documentation open in the Markdown preview beside the projection tab, Dark Modern](images/desktop-surfaces/definition-docs-preview-dark.png)
 
@@ -1012,89 +654,48 @@ which the old `renderers.md#dependencies` anchor missed.
 
 ## The summary bar (decided, reversible)
 
-The row the dependency graph drew under the toolbar in a diff ("⊕ 1 workspace
-added · ⊖ 1 workspace removed") became a summary bar along the bottom of every
-projection view. At the top it competed with the toolbar; at the bottom it can
-always show, for one revision (counts of the domain's own nouns, such as
-workspaces and dependencies) and for a comparison (the same counts with their
-changes).
+The dependency graph's old top summary line ("⊕ 1 workspace added · ⊖ 1
+workspace removed") became a standardized bottom summary bar across every host
+and view (renderer, table, and text):
 
-- **Always shown, at the bottom**, in every host and under the renderer, table
-  and text alike: VS Code's status bar strip (22px, description foreground over
-  the side bar background, a hairline above), the Default UI at its own small
-  size. The plain count row the graph drew under the toolbar is gone, and so is
-  every renderer's own summary line: findings the counts can't say are summary
-  facts (below).
-- **Totals per domain noun** for one revision, `7 workspaces · 7 dependencies`;
-  **totals with deltas** for a comparison,
-  `7 workspaces +3 · 7 dependencies +5 −1`, only the delta figures in their
-  change colors (VS Code's Git decoration colors).
-- **Every figure filters**, as "Changes only" does: the total to those items, a
-  delta to those changed that way.
-- **The varied toggle** ("N varied within tolerance") moves from the toolbar to
-  the bar's end.
-- **A running job** (the VS Code UI, in a tab): a spinning `sync` codicon in a
-  slot kept at the very end (Running in the status bar areas, under
-  [Four sections](#four-sections-decided-reversible)).
-- **Narrow widths** collapse figures from the end into a "…" popover.
-- **Text centred by its cap height**, not its line box: in the strip (its
-  hairline included, as in VS Code's status bar) and in a figure's pill, a
-  capital E has the same space above, below and to its left. The labels are
-  trimmed to the cap height and baseline (`text-box: trim-both cap alphabetic`;
-  VS Code 1.145's Chromium 150 and Safari 18.2+ have it), with a line box one
-  cap high where it's missing; the toolbar's text labels follow the same rule.
-  Each host's `cap-height.spec.ts` measures the E's ink at 2×.
-- **The toolbar's edge controls are inset evenly** ("This control should have
-  the same spacing on the top left and bottom"): the leading control has the
-  same space to its left as above and below it, the trailing one the same to its
-  right, measured inside the toolbar's bottom hairline (its edge, as the summary
-  bar's is). In the VS Code UI the 26px mode group or pickers sit 4px in and a
-  22px action 6px; the playback row's controls 4px; a first row of two keeps the
-  one row's height; and a tab's start slot, empty for an ordinary result, no
-  longer adds its gap (the mode group sat 16px in). The Default UI already held
-  to it on its first row (4px around 32px controls, inside its border), and now
-  on its playback row too, the lens leading it 4px in. Each UI's
-  `toolbar-insets.spec.ts` measures border boxes in every mode at 320 to 1280px.
-- **The vocabulary is the renderer's**: an optional `summary` message
-  ([contracts](../contracts/renderer-frames.md)) names each kind in its words,
-  and the kit sends it for every kit renderer (the dependency graph says
-  workspaces, packages and dependencies). Bundles that send nothing get the
-  host's words from the kind names (`depends-on` → dependencies). The host
-  counts; the renderer checks hold a renderer's counts to the documents'. Items
-  are counts or domain facts (`type: 'fact'`), so later findings join the bar
-  additively.
+- **Always at the bottom** (22px status-bar strip in VS Code, compact band in
+  the Default UI), replacing every renderer's ad-hoc summary line.
+- **Domain totals and colored deltas:** `7 workspaces · 7 dependencies` for one
+  revision, or `7 workspaces +3 · 7 dependencies +5 −1` for comparisons (only
+  deltas use Git change colors). Every figure acts as a filter toggle, and the
+  "N varied within tolerance" toggle sits at the end alongside the VS Code tab's
+  reserved `sync` spinner slot (see
+  [Four sections](#four-sections-decided-reversible)); narrow widths overflow
+  cleanly into a "…" popover.
+- **Cap-height centering and even toolbar insets.** Text trims to cap height and
+  baseline (`text-box: trim-both cap alphabetic`, verified by
+  `cap-height.spec.ts`), and leading/trailing toolbar controls sit at equal
+  insets from top, bottom, and edge (4px for 26px mode groups and playback
+  controls, 6px for 22px actions in VS Code; 4px around 32px controls in Default
+  UI, verified by `toolbar-insets.spec.ts`).
+- **Renderer-supplied vocabulary.** Renderers send an optional `summary` message
+  ([contracts](../contracts/renderer-frames.md)) naming domain nouns and
+  classified facts (`type: 'fact'`), with host fallbacks from kind names
+  (`depends-on` → dependencies).
 
 ### Every renderer's summary in the bar (decided, reversible)
 
-The summary bar applies to every renderer with summary statistics, the runtime
-policy renderer included, so each renderer's summary is standardized and moved
-to the bottom.
+Every built-in renderer — including runtime policy — now sends its summary to
+the bottom bar and renders no top-line totals or `(was n)` headers of its own:
 
-Every built-in renderer now sends its summary and draws none of its own: no line
-over a diff, header total or `(was n)`.
-
-- **Counts in the domain's nouns**: the renderer names the kinds a reader counts
-  (API declarations, runtime policy rules, database foreign keys) and leaves out
-  structure the view draws rather than counts (`false`: containment drawn as
-  boundaries, a column attached to its table, the relationships folding a
-  service's parts into one card).
-- **Facts for classifications**: an icon token, a count and a noun, muted like
-  the counts: API compatibility levels (`2 breaking changes`), runtime policy
-  verdicts (`1 newly enforced`), the infrastructure plan (`1 to replace`),
-  dependency bumps (`18 major upgrades`), database and dependency injection
-  changes in words (`2 column types changed`, `1 lifetime changed`). A fact with
-  IDs filters like a count; its tooltip may name what decided it (the API
-  rules).
-- **Facts with changes**: a measure or a set has a value in each revision, so a
-  comparison draws its change after it as a count's, in the change colors only
-  (`39,882 lines of code +2,056`, `1 enforcing rule +1`, `5 enum values +2`).
-- **The same everywhere**: one summary per document, the same at every progress
-  and pane, and the text view opens with the bar's sentence.
-- **What stays in the renderer**: legends that decode an encoding the figures
-  can't (file packing's colors, dependency injection's instance lines) and
-  notices that qualify a figure (the API classification's notices, entity
-  limits). Legends that only listed words (architecture's component kinds,
-  infrastructure's planned actions) are gone.
+- **Domain counts** list what a reader actually counts (API declarations,
+  runtime policy rules, foreign keys) and omit structural scaffolding (`false`
+  for containment boundaries, columns, or folded cards).
+- **Classification facts** pair an icon token, count, and muted noun
+  (`2 breaking changes`, `1 newly enforced`, `1 to replace`,
+  `18 major upgrades`, `2 column types changed`, `1 lifetime changed`),
+  filtering when given IDs.
+- **Measured facts** show colored comparison deltas
+  (`39,882 lines of code +2,056`, `1 enforcing rule +1`, `5 enum values +2`),
+  staying consistent across all playback points and opening the text view.
+- **What remains inside renderers:** encoding legends (file-packing colors, DI
+  instance lines) and qualifying notices (API notices, entity limits); redundant
+  word-only legends are removed.
 
 ![The summary bar in VS Code, one revision then a comparison, Dark Modern](images/desktop-surfaces/summary-bar-vscode-dark.png)
 
@@ -1104,9 +705,7 @@ over a diff, header total or `(was n)`.
 
 ![The same, light](images/desktop-surfaces/summary-bar-default-light.png)
 
-Before and after centring by cap height, a figure hovered (2×, Dark Modern then
-Light Modern): the text sat low under the hairline with twice the space to its
-left; now a capital E has the same space above, below and beside it.
+Before and after cap-height centering (2×, Dark Modern then Light Modern):
 
 ![Before: the summary bar's text low in its strip, Dark Modern](images/desktop-surfaces/summary-bar-cap-before-dark.png)
 
@@ -1116,11 +715,7 @@ left; now a capital E has the same space above, below and beside it.
 
 ![After, Light Modern](images/desktop-surfaces/summary-bar-cap-after-light.png)
 
-Before and after insetting the toolbar's edge controls evenly, a tab's toolbar
-side by side (2×, Dark Modern then Light Modern): the mode group sat 16px from
-the start and 4px from the top and bottom, the last action 8px from the end and
-6px from the top and bottom; now the mode group is 4px from the start, top and
-bottom, and the last action 6px from the end, top and bottom.
+Before and after even toolbar insets (2×, Dark Modern then Light Modern):
 
 ![Before: the mode group far from the toolbar's start, Dark Modern](images/desktop-surfaces/toolbar-insets-before-dark.png)
 
@@ -1132,101 +727,71 @@ bottom, and the last action 6px from the end, top and bottom.
 
 ## Follow-ups (not scheduled)
 
-An editor-title idea, recorded as a follow-up; none of it is built:
+An unscheduled editor-title concept for later:
 
-1. **The projection view as a custom editor** for `.github/projections/*.json`
-   (`priority: option`), whose tab's identity becomes its definition file. Its
-   title bar has **Show Projection** (toggles in place through reopen-with, as
-   the Markdown preview does), **Open Projection to the Side** (the JSON beside
-   a live projection) and **Show Definition** (toggles back).
-2. **Native `editor/title` actions** replacing most of the in-webview toolbar:
-   Refresh, a comparison-mode submenu (with `toggled`) and Swap.
-3. **Open Projection to the Side** on `*.comparator.yaml` and renderer source
-   files too.
+1. Making the projection view an optional custom editor (`priority: option`) for
+   `.github/projections/*.json` with **Show Projection**, **Open Projection to
+   the Side**, and **Show Definition** toggles.
+2. Moving Refresh, a `toggled` comparison-mode submenu, and Swap to native
+   `editor/title` actions.
+3. Adding **Open Projection to the Side** on `*.comparator.yaml` and renderer
+   source files.
 
-**Done as a slice: Go to Source….** "If I'm currently viewing a projection How
-do I get to the code behind it? … there could be a little code icon … there can
-be multiple code files behind a projection so maybe it takes you to a quick pick
-and you can jump to the config file or maybe like the implementation file for
-the renderer." A native `editor/title` button (`$(code)`) on projection tabs,
-and the palette's **Projections: Go to Source…**: one real file (the definition,
-when the parts are built-ins) opens directly; several are a quick pick grouped
-as Definition, Extractor, Comparator (with its tests, or Configure… the
-built-in), Renderer (a custom renderer's source entry and `scenarios.json`, or a
-built-in's docs, in VS Code's Markdown preview) and Environment, opening to the
-side with an "Open in this group" button (and, on a built-in, Open Documentation
-on GitHub). It is built on the Definition view's item model (`sourceParts`,
-`definitionModel`, flattened by `sourceItems`).
+**Already shipped: Go to Source….** A native `editor/title` button (`$(code)`)
+and **Projections: Go to Source…** command let you jump straight from a
+projection tab to its backing files. When there's only one file (the definition
+with all built-in parts), it opens immediately; otherwise it opens a grouped
+quick pick (Definition, Extractor, Comparator, Renderer, Environment — built on
+`sourceParts`, `definitionModel`, and `sourceItems`) that opens to the side,
+with buttons for "Open in this group" and Open Documentation on GitHub for
+built-ins.
 
 ## What was built
 
-The extension (`packages/integrations/vscode/`;
-[its README](../guides/vscode-side-bar.md)) implements the recommended layout:
+The extension (`packages/integrations/vscode/`,
+[README](../guides/vscode-side-bar.md)) ships the recommended design:
 
 ![The Projections side bar beside a projection tab in Light Modern](images/desktop-surfaces/sidebar-four-sections-light.png)
 
-- The **Projections** activity bar container (the brand glyph), with **Compare**
-  (since replaced by the header line, D6, then by the Show view, now Viewing),
-  **Projections**, **Pairs & Bookmarks** (since folded into Viewing), **Set up**
-  (now Suggested) and **Scenarios** (since moved under Definition's Renderer;
-  see [four sections](#four-sections-decided-reversible)), the badge,
-  `viewsWelcome`, the status bar item and Problems diagnostics on definition
-  files that don't load (each invalid file fails alone, at the offending field).
-- **Projection tabs:** a read-only custom editor on `projection:` resources,
-  preview on a single click and kept on a double click, restored with the
-  window, following the folder's pair unless pinned, with the mode toggle, Swap,
-  Play and Pin as `editor/title` actions and the rest in `…`. The webview mounts
-  the Inspector with `chrome: 'none'` and the VS Code UI's projection view
-  without its toolbar, and keeps its view state with `setState`.
-- One backend per folder (`src/backends.ts`), shared by the side bar, every tab,
-  the Inspector panel and the Testing view. Jobs from all of them queue in the
-  runner.
+- The **Projections** activity bar container with its evolved
+  [four sections](#four-sections-decided-reversible) (Viewing, Projections,
+  Definition, Suggested), Testing view integration, badge, `viewsWelcome`,
+  status bar item, and per-file Problems diagnostics.
+- **Projection tabs:** read-only custom editors on `projection:` URIs with
+  preview/keep behavior, window restore, `editor/title` actions (mode, Swap,
+  Play, Pin, `…`), `chrome: 'none'` Inspector mount, and `setState` persistence.
+- **One shared backend per folder** (`src/backends.ts`) serving the side bar,
+  tabs, Inspector panel, and Testing view.
 
-Where it differs from the proposal:
+Notable differences from the initial proposal:
 
-- **Tab icon.** VS Code takes a custom editor tab's icon from the file icon
-  theme, so tabs can't show the renderer kind's codicon; the rows in the side
-  bar do.
-- **Resource.** `projection:/<folder>/<title>?folder&id` rather than
-  `projection:/<folder>/<id>`: VS Code titles a custom editor by its resource's
-  name, so the title is the last segment and the ID is in the query.
-- **A pinned tab's title** doesn't carry its pair ("Packages · v1 → v2"): the
-  title is the resource's, which doesn't change while the tab is open. The
-  status bar item's tooltip says the tab in front is pinned instead.
-- **Change counts** aren't computed in the background (that would extract every
-  projection twice per comparison): a row is muted, with no badge, until its tab
-  or **Compare All** compared the folder's choice, and the view's badge counts
-  what has been compared.
-- **Opening framing.** A tab opens fitted, with the whole projection in view, as
-  every host does, unless that draws text below the renderers' 8 px opening
-  floor: then it opens at that floor, at the content's top left (or top centre),
-  and scrolls. Fit to view, Zoom In and Zoom Out are in `…`. Until 2026-11-10 a
-  tab opened at the renderer's 11 px readable floor when fitting drew smaller
-  text, and asked graph renderers to frame the changes (their `framing` setting,
-  now removed). The user superseded that on 2026-11-10: a tab that opened
-  cropped needed scrolling before the change could be seen whole (the Package
-  dependencies graph cut off its last column under an empty band), so
-  projections always open fitted (always fit, 2026-11-10), and denser graph
-  layouts keep their text readable wherever the content allows. Later that day
-  measurements showed always-fit drawing the largest graphs' text at 1.6-7 px in
-  a 1000×650 tab and 2-9 px at 390×700, so the user kept always-fit and added a
-  minimum zoom: never below 8 px text, scrolling beyond it ("Keep always-fit;
-  add a minimum zoom (e.g. never below 8px text) and scroll beyond it"). The
-  Package dependencies tab still opens fitted at tab size.
-- **Details** stay in the projection's own detail card; there is no separate
-  Details view yet.
-- **Scenarios** open the renderer workbench on the scenario file's directory,
-  not at the scenario.
-- **Not built yet:** parts as edits (dirty state, Save writes the definition,
-  Revert), `Open With… → Projection` for definition files, the setup walkthrough
-  and the gallery editor and "Projection changes" in Source Control.
+- **Tab icon:** custom editors inherit file-icon theme icons, so renderer
+  codicons appear on side bar rows instead of tabs.
+- **Resource URI:** `projection:/<folder>/<title>?folder&id` (not
+  `projection:/<folder>/<id>`) so VS Code uses the projection title as the tab
+  name.
+- **Pinned tab titles** stay fixed to the projection title; the status bar
+  tooltip notes the pinned pair instead.
+- **Change counts** populate lazily when a tab opens or **Compare All** runs,
+  avoiding background extraction of every projection.
+- **Opening framing:** tabs always open fitted to the viewport — unless fitting
+  would shrink text below an 8 px readability floor, in which case they open at
+  that floor at top-left/top-center and scroll (with Fit to view, Zoom In, and
+  Zoom Out in `…`). This replaced an earlier 11 px / `framing`-setting approach
+  on 2026-11-10 after testing showed cropped initial views on Package
+  dependencies and unreadable 1.6–7 px text on huge graphs.
+- **Details** remain in the projection's detail card (no separate Details view
+  yet), and **Scenarios** open the workbench on the scenario directory.
+- **Still to build:** parts as dirty edits (Save/Revert),
+  `Open With… → Projection`, the setup walkthrough, the gallery editor, and
+  "Projection changes" in Source Control.
 
 ## Next steps
 
 1. ~~The activity bar container and its sections~~, ~~the `projection:` custom
-   editor~~ and ~~editor title actions~~ are built (above).
-2. Parts as edits: dirty state, Save and Revert, and `Open With… → Projection`
-   for definition files.
-3. The setup walkthrough (candidates, the sweep editor, adopt with diff-editor
-   previews, and Add to CI, are built).
-4. "Projection changes" in Source Control, then the gallery editor.
+   editor~~, and ~~editor title actions~~ are built.
+2. Parts as edits (dirty state, Save/Revert) and `Open With… → Projection` for
+   definition files.
+3. Setup walkthrough (candidates, sweep editor, adopt diff previews, and Add to
+   CI are already built).
+4. "Projection changes" in Source Control, followed by the gallery editor.

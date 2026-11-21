@@ -2,13 +2,13 @@
 
 Suppose your monorepo's _Package dependencies_ projection uses the built-in
 `workspace-dependencies` extractor and the generic `dag` renderer. When a pull
-request touches many packages, you want the most widely used package to appear
-first.
+request touches dozens of packages, you want reviewers to see the most widely
+depended-on packages first.
 
 ## Use configuration first
 
-Common ordering needs don't require code. Configure the default comparator in
-the projection definition:
+You don't need custom rules for common ordering tweaks. Configure the default
+comparator directly in your projection definition:
 
 ```json
 {
@@ -24,34 +24,37 @@ the projection definition:
 
 ## Write a custom comparator for domain-specific logic
 
-[Custom comparators: what they make possible](comparators.md) shows what else a
-comparator can do with real examples: domain verdicts, compatibility levels and
-recognizing moved items.
+If you're curious what else comparators can do—like domain verdicts, API
+compatibility levels, and detecting moved components—see
+[Custom comparators: what they make possible](comparators.md).
 
-When the order depends on knowledge only your team has—for example, a list of
-platform packages that should always be reviewed first—write a custom
-comparator.
+When the right review order depends on knowledge only your team has—such as a
+curated list of core platform packages that should always come first—reach for a
+custom comparator.
 
-A custom comparator is a comparator file, `<name>.comparator.yaml`: YAML
-declarations, its comparator rules, over the default comparator. The default
-comparator always runs first; the comparator file adds what only your domain
-knows:
+A custom comparator lives in a comparator file (`<name>.comparator.yaml`) made
+of YAML declarations layered on top of the default comparator. The default
+comparator always runs first, and your file adds what only your domain knows:
 
-- **`identity`** pairs items the default matching left unmatched: renames,
-  moves, splits and merges;
-- **`classify`** writes a sentence, and any annotation, per change;
-- **`steps`** orders the changes, with declarative operations: rank them, or
-  gather some into a new step;
-- **`metadata`** adds verdicts and counts a renderer or a workflow reads.
+- **`identity`** links items the default matcher couldn't pair, including
+  renames, moves, splits, and merges.
+- **`classify`** attaches a summary sentence and optional annotations to each
+  change.
+- **`steps`** controls ordering declaratively—either ranking steps or gathering
+  matching changes into a new step.
+- **`metadata`** records verdicts and counts that renderers or CI workflows can
+  consume.
 
-Expressions are [CEL](https://cel.dev), the expression language of Kubernetes
-admission policies: small, side-effect free and always terminating. Comparator
-files are data, not code, so they run sandboxed wherever comparisons are viewed,
-the same everywhere, and never need `--trust`.
+Expressions use [CEL](https://cel.dev), the same expression language behind
+Kubernetes admission policies: small, side-effect free, and guaranteed to
+terminate. Because comparator files are data rather than code, they run
+sandboxed everywhere comparisons are viewed, behave identically on every
+machine, and never require `--trust`.
 
 ### Write a custom comparator
 
-This comparator file moves steps that change platform packages to the front:
+This comparator file pulls any step touching your priority platform packages to
+the front:
 
 ```yaml
 # .github/projections/dependencies/priority.comparator.yaml
@@ -82,52 +85,54 @@ steps:
 }
 ```
 
-Without options, name the file alone:
+If you don't need `options`, pass the file path as a string instead:
 `"comparator": ".github/projections/dependencies/priority.comparator.yaml"`.
-Comparator files must end in `.comparator.yaml` (or `.yml`); an object without
-`file` is the default comparator. `projections init <id> --comparator custom`
-scaffolds a commented starter, `<id>.comparator.yaml`, and its tests. There is
-nothing to build or install:
+Comparator files must end in `.comparator.yaml` (or `.yml`), and any object
+without `file` configures the default comparator. To scaffold a commented
+starter (`<id>.comparator.yaml`) along with its test file, run
+`projections init <id> --comparator custom`. There is nothing to build or
+install:
 
-- In VS Code, the Projections extension highlights the CEL in
-  `*.comparator.yaml` files by what each name is, reports the checker's errors
-  and lint warnings as you type, at their line and column, and shows signatures,
-  types and documentation on hover and completions in context
+- **Editor support:** In VS Code, the Projections extension adds semantic
+  highlighting for CEL inside `*.comparator.yaml` files, surfaces type errors
+  and lint warnings inline as you type, and provides hover docs and
+  context-aware completions
   ([Editing comparator files](../design/declarative-comparators.md#editing-comparator-files)).
-  It validates comparator files and their `*.comparator.test.yaml` tests offline
-  against its bundled schemas (with the YAML extension installed), and lists the
-  tests in the Testing view. In other editors, put
+  With the YAML extension installed, it also validates comparator files and
+  `*.comparator.test.yaml` files offline against bundled schemas and lists your
+  tests in the Testing view. In other editors, add
   `# yaml-language-server: $schema=https://schemas.projections.githubnext.com/comparator/v0.json`
-  at the top.
-- Comparator files are checked when they load: an unknown field or function, a
-  call with the wrong arguments, or operands of the wrong type are reported with
-  their line and column, all at once. `projections check -p <id>` reports them
-  too.
-- Expressions see `before` and `after`, the two extractions, `options` and
-  `baseline`, the default comparison; each section adds its own, such as
-  `change` in `steps` and `classify`. `variables` name values once
-  (`variables.<name>`), and `functions` name typed, reusable expressions. A
-  standard library covers graph navigation (`graph.parents`, `graph.entity`), ID
-  order (`ids.sort`), maps, findings and quoting text as code (`prose.code`).
-- Steps keep the default order unless the comparator changes it: `rank` sorts
-  steps by their best-ranked change, stably, and `add` gathers the changes a
-  predicate selects into a new step. The engine moves them out of other steps
-  and drops steps left empty.
-- Evaluation is bounded by a cost budget that is the same on every machine, and
-  runs in a sandbox with memory limits. The comparator's identity covers the
-  file's meaning, not its layout: editing a comment doesn't change it.
+  at the top of the file.
+- **Load-time checking:** Comparator files are type-checked when loaded, so
+  unknown fields, unknown functions, bad arguments, and type mismatches are all
+  reported at once with line and column numbers. Running
+  `projections check -p <id>` reports the same diagnostics.
+- **Inputs and standard library:** Every expression can read `before`, `after`,
+  `options`, and `baseline` (the default comparison), and individual sections
+  expose extra bindings like `change` in `steps` and `classify`. Define shared
+  values in `variables` (referenced as `variables.<name>`) and reusable typed
+  helpers in `functions`. The built-in standard library covers graph traversal
+  (`graph.parents`, `graph.entity`), ID sorting (`ids.sort`), maps, findings,
+  and formatting code in prose (`prose.code`).
+- **Step ordering:** Steps keep their default order unless you adjust them.
+  `rank` stably sorts steps by their highest-ranked change, while `add` pulls
+  changes matching a predicate into a new step (removing them from earlier steps
+  and dropping any step left empty).
+- **Sandboxed and semantic:** Evaluation runs in a memory-capped sandbox under a
+  machine-independent cost budget. A comparator's identity hashes its meaning
+  rather than its formatting, so editing a comment never changes its digest.
 
-The [comparator file schema](../reference/schemas/comparator.md) lists every
-field, and [Custom comparators](../design/declarative-comparators.md) is the
-full reference: sections, inputs, types, the standard library and how the cost
-budget works.
+See the [comparator file schema](../reference/schemas/comparator.md) for every
+field, and [Custom comparators](../design/declarative-comparators.md) for the
+full reference on sections, inputs, types, standard library helpers, and the
+cost budget.
 
 ### Test a custom comparator
 
-Say what the comparator must do in a test file beside it:
-`priority.comparator.test.yaml` for `priority.comparator.yaml`. Each case gives
-two extractions and what the comparison of them must be. There is no code to
-write, and nothing but the `projections` CLI to run:
+Write tests in a sibling file right next to your comparator—for example,
+`priority.comparator.test.yaml` beside `priority.comparator.yaml`. Each case
+supplies two extractions and states what the resulting comparison should look
+like, with no test code to write and only the `projections` CLI required:
 
 ```yaml
 # .github/projections/dependencies/priority.comparator.test.yaml
@@ -153,69 +158,72 @@ cases:
       order: ['workspace:@acme/core', 'workspace:@acme/web']
 ```
 
-- `before` and `after` are a fixture file (an extraction, or a document
-  `projections show --json` saved), an extraction written inline
-  (`{extraction: {...}}`), or the projection extracted at a revision
-  (`{revision: main}`, `{revision: working-tree}`) with the working tree's
+- `before` and `after` can point to a fixture file (either a raw extraction or a
+  document saved by `projections show --json`), embed an extraction inline
+  (`{extraction: {...}}`), or extract the projection at a Git revision
+  (`{revision: main}`, `{revision: working-tree}`) using the working tree's
   definition.
-- Expectations are partial: `order` (each item or change is in an earlier step
-  than the next), `steps` (every step, in order, with the fields you list),
-  `changes` (one change each, selected by `item` or `id`), `count`, a subset of
-  `metadata`, or the `error` the comparator must fail with. A case's `options`
-  replace the file's; without either, the projection's own.
-- `snapshot` keeps the whole comparison in a JSON file. Prefer expectations that
-  say what you mean; a snapshot catches everything else.
+- Expectations are partial, so you only assert what matters: `order` (each item
+  or change appears in an earlier step than the next), `steps` (exact step
+  sequence with only the fields you list), `changes` (individual changes matched
+  by `item` or `id`), `count`, a subset of `metadata`, or an expected `error`.
+  Case-level `options` override file-level options; if neither is set, the
+  projection's own options apply.
+- `snapshot` saves the full comparison to a JSON file. Prefer targeted
+  expectations to document intent, and use snapshots as a safety net for
+  everything else.
 
-`projections check -p dependencies --no-render` runs the cases with the other
-checks, in the sandbox viewers use, and fails when one fails, with its line and
-column, the expectation and a diff. `projections check --update` writes
-snapshots, or rewrites them after a change you meant; it never edits
-expectations. `projections check -p dependencies --no-render --coverage` also
-reports [rule coverage](../contracts/comparisons.md#rule-coverage): the
-functions, expressions and each outcome of each decision the cases never ran, by
-line, so you can see which rules no case pins. Add a case for each, or remove a
-branch nothing can take. Editors list and run the cases through
-`projections serve --stdio`
-([the API](../runner/stdio-backend.md#comparator-tests)), for a test view. Tests
-never change the comparator's identity, and hosts never read them.
+Run `projections check -p dependencies --no-render` to execute your test cases
+inside the same sandbox viewers use; any failure points to the exact line and
+column along with the expected value and a diff. When you intentionally change
+behavior, `projections check --update` creates or refreshes snapshots without
+ever touching your written expectations.
+
+Run `projections check -p dependencies --no-render --coverage` to inspect
+[rule coverage](../contracts/comparisons.md#rule-coverage): it lists every
+function, expression, and branch outcome your test cases never hit, by line
+number, so you can add a missing case or trim dead branches. Editors can also
+discover and run cases through `projections serve --stdio`
+([the API](../runner/stdio-backend.md#comparator-tests)). Test files never
+affect a comparator's identity, and hosts never read them.
 
 ### Where heavy logic goes
 
-Comparator files can do what every comparator in this repository does, from
-moved components to API compatibility across four ecosystems. Logic that needs a
-compiler, a parser or a resolver belongs elsewhere:
+Comparator files handle everything built into this repository, from tracking
+moved components to checking API compatibility across four ecosystems. When
+logic genuinely needs a compiler, parser, or dependency resolver, put it where
+that toolchain lives:
 
-- **In the extractor**, computed per revision into `data`, in your own
-  toolchain: whether a type is assignable to another, a package's resolved
-  version. The comparator then compares facts.
-- **In the engine**, as a standard library operation, when it is generic and
-  more than one comparator needs it.
-  [Contributing an operation](../../packages/comparators/rules/README.md#contributing-an-operation)
-  explains how.
+- **In the extractor**, computed per revision and saved in `data` using your own
+  toolchain—for example, whether one type is assignable to another, or a
+  package's resolved version. The comparator then simply compares those facts.
+- **In the engine**, as a standard library operation, when the logic is generic
+  and useful across multiple comparators. See
+  [Contributing an operation](../../packages/comparators/rules/README.md#contributing-an-operation).
 
-The `dag` renderer knows nothing about your platform packages. It simply
-presents the comparison's steps in the order your comparator chose, and so does
-every other renderer, including the text summary.
+The `dag` renderer doesn't know anything about your platform packages. It simply
+walks through the steps in the order your comparator chose—and every other
+renderer, including the text summary, does the exact same thing.
 
 ## Rules every comparison must follow
 
-Projections validates each comparison against both extractions before rendering
-it:
+Before rendering any comparison, Projections validates it against both
+extractions:
 
-- every entity or relationship a change refers to must exist in the extraction
-  it names;
-- every change must appear in exactly one step, except a change that is only
-  [volatile](how-it-works.md#volatile-data) variation within tolerance, which
-  appears in none;
-- a change's status must be consistent with the extractions—an entity can't be
-  reported as unchanged if its data differs beyond its declared variation, and
-  variation within tolerance must still be listed.
+- Every entity or relationship referenced by a change must exist in the
+  extraction it names.
+- Every change must belong to exactly one step, except a change that consists
+  solely of [volatile](how-it-works.md#volatile-data) variation within
+  tolerance, which belongs to no step.
+- Each change's status must match the underlying extractions—an entity can't be
+  marked unchanged if its data differs beyond declared variation, and any
+  variation within tolerance must still be recorded.
 
-When a comparison is played backward, Projections presents its steps in reverse
-order. Comparisons made by custom comparators always play backward as the mirror
-of their steps.
+When a viewer plays a comparison backward, Projections reverses the steps;
+comparisons from custom comparators always play backward as the mirror of their
+steps.
 
-A comparison describes and orders changes. It never contains positions, colors
-or timing; those belong to renderers.
+Finally, a comparison only describes and orders changes. Layout positions,
+colors, and timing belong strictly to renderers.
 
 ---

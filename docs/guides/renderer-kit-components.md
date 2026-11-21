@@ -2,221 +2,226 @@
 
 ## Presentation helpers and components
 
-- `stepEmphasis(schedule, progress, highlighting, pane?)` (passed to components
-  as `emphasis`): change emphasis scoped to each change's own step. A change
-  shows none until its step's window begins (in the direction the schedule is
-  travelled, so explicit reverse orders mirror it), then the host's
-  highlighting, which is 0 at both endpoints; earlier steps never pre-tint later
-  changes. A held pane of side by side or swipe (`pane`) is a static comparison:
-  every change it shows takes the host's highlighting alike, so Before marks its
-  removals as After marks its additions. Use it for all change decoration.
-  `presentedEmphasis(change, highlighting)` is the unscoped form.
-- `classifyChange`, `describeChange`, `statusLabels`, `isChanged`, `edgePaint`,
-  `current(row, progress)`, `entityPresence`, `numericValue`, `isKind`,
-  `edgeKind`, `edgePresence`.
-- `useDomainIndex(model, progress, {include, presence})` / `domainIndex(model)`:
-  rows keyed by identity with relationships resolved to entity rows (`changeOf`,
-  `out`, `into`, `visible`).
-- Components: `Badge`, `EmptyDomain`, `Notice`, `KindLegend`, `EdgeArrowMarker`,
-  `edgeMarkerId`, `RendererBoundary`.
-- Volatile data: a `modified` change with a volatile value beyond its tolerance
-  (`variedBeyond`, re-exported from the SDK) gets `VariedMarker`, the `varied`
-  icon in the text color (never a change color) named "Volatile field changed
-  beyond tolerance", beside its status. `Badge`, `ChangeFooter`, `ChangeStatus`,
-  `StatusTab` and `SvgChangeStatus` draw it themselves, in every mode (diff
-  included), from the row's `varied`, and it fades with the status. A change
-  that varied only within tolerance is `unchanged`: no status, emphasis or
-  motion.
-- Generated values: `GeneratedText({name, before?, after, entry?, bases?})`
-  draws a [generated value](../design/generated-values.md) with its name in mono
-  and the quiet `GeneratedMark` (the `generated` icon and "Generated"). Without
-  `entry`, the value; reworded from an equal basis (`entry.within`), After's
-  text with "Regenerated from the same inputs" and a toggle for Before's
-  wording, never a word diff; with a moved basis, why (`generatedWords`) and
-  both passages side by side, with a toggle for a word diff of strings. Toggles
-  never shift layout. `generatedPaths(extraction, item)` (from the SDK) finds an
-  item's generated values.
-- Legends: renderers draw no legend in the frame.
-  `useLegend(props.reportLegend, legend)` sends one to the host, which draws it
-  once beside every pane (also side by side and swipe); `KindLegend` sends
-  entity kinds as plain labels (and draws them as chips only outside a kit
-  renderer), and `boundedLegend` fits any legend to the protocol's limits.
-  Describe the whole document (both revisions), so the legend never changes
-  while scrubbing, and use the same tokens the frame paints (`chart-n` in the
-  frame's order).
-- Summary bar: the host draws a bar along the bottom of every view with a figure
-  per extraction kind (`12 workspaces · 18 dependencies`, and the changes of
-  each in a comparison), then the renderer's facts. The shell counts every kind
-  and posts the `summary` for each document itself (`rendererSummary`), so a
-  renderer only names its kinds and states its facts. Renderers draw no summary
-  or statistics row of their own.
-  - Kinds: `nouns` in the view's `options` or `mountRenderer`'s
-    (`MountOptions.nouns`: `{kind: {singular, plural}}`, `false` to leave a
-    structural kind such as `contains` out, `relationships:kind` for one
-    collection's kind; listed kinds come first, in order; kinds named alike are
-    one figure), or `useSummaryNouns(props.declareNouns, nouns)` for words that
-    depend on the document (the dependency graph's workspaces). Unnamed kinds
-    take the host's words (`humanizeKind`).
-  - Facts: `facts(context)` (`MountOptions.facts`) returns the findings no kind
-    count says, from `{init, model, controls, rendererName}` only, so the
-    summary is the same at every progress and in both panes:
-    `{type: 'fact', id, icon?, count, noun, ids?, added?, removed?, modified?, description?}`
-    (`SummaryFactItem`). An `icon` names the SDK's icon vocabulary (`breaking`,
-    `upgraded`, `enforced`); `ids` (change or item IDs) make it a filter;
-    `added`, `removed` and `modified` are its changes in a comparison, drawn in
-    the change colors, and `summaryChange(was, now)` words a measure's net
-    change (`39,882 lines of code +2,056`); `description` is its tooltip, such
-    as the rules that classified it. The shell posts facts after the kind counts
-    and keeps the summary within the protocol's bounds (a fact naming too many
-    items keeps its count and loses its filter).
+The kit bundles a set of presentation utilities and React primitives so you do
+not have to reinvent change emphasis, legends, summary bars, or styling rules:
 
-- Hover, focus and selection rings are the renderer SDK's (`connectRings`,
-  started by `connectRenderer`; see [Item rings](#item-rings)): styling on each
-  unit's own element (an outline inside an HTML unit's border, the stroke of an
-  SVG unit's `data-projections-edge` shape), so the kit has no ring class or
-  component and renderers draw no ring, outline or selection border of their
-  own. Kit components mark their SVG edges. A part of a unit (an entity nested
-  in another: a column in a table, a row in a card) takes `pk-part` (HTML) and
-  gets a quieter inset tint, never a second ring. SVG elements never take an
-  outline (browsers ring their bounding box). `arrowheadPath(x, y, angle, size)`
-  draws an equilateral, rounded arrowhead (fill and stroke it in one color with
-  `.pk-arrowhead`).
-- Casing: data (identifiers, names, kinds, enum values) appears exactly as the
-  data has it; labels, headings, legends and status words are written in
-  sentence case. No style recases text (`npm run check:casing` fails on
-  `text-transform: uppercase` or `capitalize` and on small caps); quiet a label
-  with the type scale and the muted tone.
+- **Step-scoped emphasis.**
+  `stepEmphasis(schedule, progress, highlighting, pane?)` (passed to components
+  as `emphasis`) scopes change emphasis to each change's own step. A change
+  stays neutral until its step's window opens (following the schedule's
+  traversal direction so reverse orders mirror it), then takes the host's
+  highlighting (0 at both endpoints) without pre-tinting later changes. In a
+  held side-by-side or swipe pane (`pane`), every visible change receives the
+  host's highlighting equally so Before marks removals and After marks
+  additions. Use this for all change decoration;
+  `presentedEmphasis(change, highlighting)` is the unscoped alternative.
+- **Model and change helpers.** `classifyChange`, `describeChange`,
+  `statusLabels`, `isChanged`, `edgePaint`, `current(row, progress)`,
+  `entityPresence`, `numericValue`, `isKind`, `edgeKind`, and `edgePresence`
+  cover common per-entity and per-edge calculations. For lookup tables,
+  `useDomainIndex(model, progress, {include, presence})` and
+  `domainIndex(model)` key rows by identity and resolve relationships to entity
+  rows (`changeOf`, `out`, `into`, `visible`).
+- **Basic UI pieces.** `Badge`, `EmptyDomain`, `Notice`, `KindLegend`,
+  `EdgeArrowMarker`, `edgeMarkerId`, and `RendererBoundary`.
+- **Volatile data.** When a `modified` change includes a volatile value outside
+  its tolerance (`variedBeyond`, re-exported from the SDK), it displays
+  `VariedMarker`—the `varied` icon in neutral text color (never a change color),
+  labeled "Volatile field changed beyond tolerance"—next to its status. `Badge`,
+  `ChangeFooter`, `ChangeStatus`, `StatusTab`, and `SvgChangeStatus` render it
+  automatically in every mode (including diff) from the row's `varied` flag and
+  fade it alongside the status. Changes within tolerance stay `unchanged`, with
+  no status, emphasis, or motion.
+- **Generated values.** `GeneratedText({name, before?, after, entry?, bases?})`
+  displays a [generated value](../design/generated-values.md) with its name in
+  monospace and a quiet `GeneratedMark` (`generated` icon plus "Generated").
+  Without `entry`, it renders the value directly. When regenerated from an
+  unchanged basis (`entry.within`), it shows After's text with "Regenerated from
+  the same inputs" and a toggle for Before's wording—never a word diff. When the
+  basis moved, it explains why (`generatedWords`), puts both passages side by
+  side, and offers a toggle for a string word diff. None of these toggles shift
+  layout. Use `generatedPaths(extraction, item)` (from the SDK) to locate an
+  item's generated values.
+- **Legends.** Never draw a legend inside your frame. Instead, call
+  `useLegend(props.reportLegend, legend)` to hand it to the host, which draws it
+  once beside the panes (including side-by-side and swipe). `KindLegend` reports
+  entity kinds as plain labels (rendering chips only outside a kit renderer),
+  and `boundedLegend` trims any legend to protocol limits. Always describe the
+  entire document across both revisions so the legend stays stable during
+  scrubbing, and reuse the exact `chart-n` tokens painted in the frame.
+- **Summary bar.** The host renders a bottom bar with a figure per extraction
+  kind (`12 workspaces · 18 dependencies`, plus per-kind deltas in a comparison)
+  followed by your renderer's facts. Because the shell counts kinds and sends
+  `summary` automatically (`rendererSummary`), renderers never draw their own
+  summary or statistics row—just name your kinds and provide any domain facts:
+  - **Kinds:** pass `nouns` in view `options` or `mountRenderer`
+    (`MountOptions.nouns`: `{kind: {singular, plural}}`, `false` to omit
+    structural kinds like `contains`, or `relationships:kind` for a single
+    collection; listed kinds come first in order, and kinds with identical names
+    merge into one figure). When wording depends on document contents (such as
+    workspaces in the dependency graph), call
+    `useSummaryNouns(props.declareNouns, nouns)`. Unnamed kinds fall back to
+    `humanizeKind`.
+  - **Facts:** `facts(context)` (`MountOptions.facts`) computes findings that no
+    kind count captures from `{init, model, controls, rendererName}` alone,
+    ensuring the summary stays constant across progress and panes. Each
+    `SummaryFactItem` has the shape
+    `{type: 'fact', id, icon?, count, noun, ids?, added?, removed?, modified?, description?}`.
+    `icon` picks from the SDK vocabulary (`breaking`, `upgraded`, `enforced`),
+    `ids` makes the fact clickable as a filter, `added`/`removed`/`modified`
+    show comparison deltas in change colors (use `summaryChange(was, now)` for a
+    net measure delta like `39,882 lines of code +2,056`), and `description`
+    sets the tooltip (for example, the classification rules). The shell appends
+    facts after kind counts and enforces protocol limits—if a fact references
+    too many items, it keeps its count and drops its filter.
+- **Rings and arrowheads.** Hover, focus, and selection rings belong to the SDK
+  (`connectRings`, started by `connectRenderer`; see [Item rings](#item-rings)).
+  They style each unit's own element (an inset outline on HTML units, or the
+  stroke of an SVG unit's `data-projections-edge` shape), so the kit has no ring
+  component and renderers should never draw their own selection borders. Kit
+  components mark their SVG edges automatically. Nested sub-items (a table
+  column, a row inside a card) take `pk-part` in HTML for a subtle inset tint
+  rather than a second ring, and SVG elements never use CSS outlines (which ring
+  the bounding box). `arrowheadPath(x, y, angle, size)` builds an equilateral
+  rounded arrowhead styled with `.pk-arrowhead`.
+- **Casing.** Keep data (identifiers, names, kinds, enum values) exactly as
+  extracted, and write UI copy (labels, headings, legends, status text) in
+  sentence case. Never recase text in CSS—`npm run check:casing` fails on
+  `text-transform: uppercase`, `capitalize`, or small caps. Quiet a label using
+  the type scale and muted tone instead.
 
 ## No nested change colors
 
-Only the innermost changed elements take a change hue (or the accent). An item
-that shows changes inside it (a modified card around its added and removed
-pills, a table around its changed columns, a boundary around changed cards)
-stays neutral: no tinted fill or change edge, just a neutral edge and its status
-words muted, so it can still be found while only what changed inside it is
-colored. The kit's styles do this. An item marked `data-change` (or a
-progress-mode card's `data-status`) that holds changed parts marked
-`data-change` (as a `ValueChange`'s pills are) or an `SvgValueChange` is drawn
-neutral, as is a `Group` holding changed items and a graph boundary with changed
-cards or links inside it (`boundariesHoldingChanges`). Mark `pk-holds-changes`
-on anything that has changes drawn over it rather than inside it, as the file
-packing does for a folder around changed files; `EntityCard` and `Group` take
-`holdsChanges` for changes no `data-change` marks, as the gallery's do around a
-nested renderer drawing a comparison. Status words (`.pk-status-part`) follow
-the nearest changed element around them. The `nested-accents` renderer check
-fails any change or accent color drawn inside another.
+Only the innermost changed elements should carry a change color or accent. Any
+container showing changes inside it—a modified card holding added and removed
+pills, a table containing changed columns, or a boundary wrapping changed
+cards—stays neutral: no tinted fill or change-colored border, just a neutral
+edge and muted status text so it remains easy to spot while color stays focused
+on what actually changed.
+
+The kit's stylesheets handle most cases automatically. Any element with
+`data-change` (or a progress-mode card with `data-status`) that contains
+`data-change` children (like a `ValueChange`'s pills) or an `SvgValueChange`
+turns neutral, as do `Group` containers holding changed items and graph
+boundaries containing changed cards or links (`boundariesHoldingChanges`). When
+changes are drawn over a container rather than nested inside it (such as a
+folder around changed files in file packing), add `pk-holds-changes`. When
+changes are not marked with `data-change` (like a gallery card wrapping a nested
+comparison renderer), pass `holdsChanges` to `EntityCard` or `Group`. Status
+text (`.pk-status-part`) follows its nearest enclosing changed element, and the
+`nested-accents` check fails any change or accent color painted inside another.
 
 ## One line per boundary
 
-Rows, cards and panels that meet share one line between them, never two drawn
-side by side, and where a change region meets a neutral line its edge is that
-line, in the change's hue. The kit's change runs (`pk-region-run`, for rows that
-meet edge to edge) draw their edges on the lines around them: one stroke outside
-the run, over a neighbouring row's line, a header's bottom line or the
-container's edge. Where two runs meet, the later one's top edge is the boundary.
-`Group` clips to its outer edge (`clip-path`), so a run at its edge covers the
-group's border there. So a run needs that stroke to stay visible: a scrolling
-container reaches over its card's edge by the line's width and pads itself by it
-(as text diff's output does), and a row that draws a line of its own on a side
-gives that line the hue (`--pk-region-line`, fading to `--pk-line`) instead of
-an edge beside it (as runtime policy's rows, whose lines are their bottom
-borders, and text diff's After column do). A changed `EntityCard` that is a
-change region takes the hue on its own border, and a pill whose label is a
-`ValueChange` draws no frame around its two pills.
+Adjacent rows, cards, and panels share a single boundary line—never two parallel
+lines sitting side by side—and wherever a change region meets a neutral rule,
+the change color owns that line.
+
+The kit's `pk-region-run` helper (for contiguous rows) draws its border on the
+surrounding lines, painting one stroke outside the run over a neighbor's rule, a
+header's bottom edge, or the container border. When two runs touch, the later
+run's top edge draws the shared line. Because `Group` clips to its outer edge
+(`clip-path`), a run flush against the group's edge cleanly replaces the group's
+border there. To keep that outer stroke visible inside a scrolling container,
+extend the scroll box over the card edge by one border width and pad it back in
+(as text diff does). For rows that draw their own side borders (like runtime
+policy's bottom-bordered rows or text diff's After column), color that border
+with `--pk-region-line` (fading to `--pk-line`) instead of adding a second edge
+next to it. A changed `EntityCard` acting as a change region colors its own
+border, and a pill containing a `ValueChange` draws no outer frame around its
+two inner pills.
 
 ## Item rings
 
-Hover, keyboard focus and selection show as one ring per unit, drawn by the
-renderer SDK (its rings module, in `@githubnext/projections/renderer`, started
-by `connectRenderer`) for every renderer, first-party or not, as **styling on
-the unit's own element**. Because the ring is the element's own paint, it moves,
-scales, scrolls, clips and fades with the item on the same frame, through any
-transform, zoom or animation.
+Hover, keyboard focus, and selection appear as a single ring per unit, drawn by
+the renderer SDK's rings module (in `@githubnext/projections/renderer`, started
+by `connectRenderer`) for every renderer. Because the ring is **styling on the
+unit's own element**, it moves, scales, scrolls, clips, and fades on the exact
+same frame through any transform, zoom, or animation:
 
-- **Unit.** An entity element (`data-entity-id`) not inside another, or one
-  marked `data-projections-unit`. A nested entity is a part: hovering, focusing
-  or selecting it rings its unit; renderers tint parts (`pk-part`), never ring
-  them.
-- **HTML units** take an `outline` at a negative `outline-offset` equal to its
-  width: it follows `border-radius` (per corner and elliptical), covers the
-  unit's border from its outer edge inwards and is never clipped by the unit's
-  own `overflow`. Focusables inside a unit hand their outline to it.
-- **SVG units** restyle the shape that draws their edge, marked
-  `data-projections-edge` (a card's surface rect, a circle): its stroke takes
-  the ring's color and width in screen pixels. No second shape is drawn. The
-  stroke is centered on the shape, so a ring heavier than the edge reaches half
-  the difference further out.
-- **Lines** (relationships, arrows, connectors) are highlighted as themselves,
-  never outlined: their path is marked `data-projections-edge="line"` and takes
-  the accent, a little heavier on hover, at the selection width when selected
-  and heavier still (solid) under focus. A changed line (green, red) takes the
-  accent while selected and its change color again after; the change stays in
-  the card status and summary. Its arrowhead (`data-projections-edge="fill"`,
-  which keeps its shape and takes the color as fill and stroke, also on an
-  `EdgeArrowMarker`) follows; a head drawn in another layer joins with
-  `data-projections-ring-with="<id>"`.
-- **States.** Hover (the pointer, or the host's mirrored hover), selection
-  (heavier) and keyboard focus in the focus color: a double outline on HTML, a
-  dashed stroke on SVG, so focus differs from selection. Focus wins over
-  selection, selection over hover. Widths come from the border tokens (hover
-  `border-width-thick`, selection thick + thin, focus 3 × thick), so focus meets
-  WCAG 2.2 focus appearance. Forced colors use `Highlight` and `CanvasText`. The
-  SDK marks the host's hover and the selection on units
-  (`data-projections-ring-hover`, `data-projections-ring-selected`); the rest is
-  CSS.
+- **Units** — A top-level `data-entity-id` element, or an element explicitly
+  marked `data-projections-unit`. Any nested entity is a part: hovering,
+  focusing, or selecting it rings its parent unit, while parts take a quiet tint
+  (`pk-part`) instead of a second ring.
+- **HTML units** — Styled with an `outline` at a negative `outline-offset` equal
+  to its width, so it follows per-corner and elliptical `border-radius`, covers
+  the unit's border inward from its outer edge, and is never clipped by
+  `overflow`. Focusable controls inside a unit hand their focus outline up to
+  the unit.
+- **SVG units** — Restyle the stroke of the shape marked `data-projections-edge`
+  (such as a card rect or circle) in screen pixels, without creating a second
+  shape. Because SVG strokes center on the path, a ring thicker than the resting
+  border extends outward by half the difference.
+- **Lines** — Relationships, arrows, and connectors highlight directly rather
+  than taking an outline. Mark their path `data-projections-edge="line"` so it
+  switches to the accent color (slightly heavier on hover, selection width when
+  selected, heavier solid stroke on focus). Changed lines (green or red) turn
+  accent while selected and return to their change color afterward, while the
+  card status and summary retain the change state. Their arrowhead
+  (`data-projections-edge="fill"`, including on `EdgeArrowMarker`) updates its
+  fill and stroke to match; an arrowhead rendered in a separate layer links up
+  with `data-projections-ring-with="<id>"`.
+- **States** — Hover (pointer or mirrored host hover), selection (heavier), and
+  keyboard focus (focus color, using a double outline on HTML and a dashed
+  stroke on SVG so focus is distinct from selection). Priority is focus >
+  selection > hover. Ring widths derive from border tokens (`border-width-thick`
+  for hover, thick + thin for selection, 3 × thick for focus) to satisfy WCAG
+  2.2 focus appearance, and forced-colors mode uses `Highlight` and
+  `CanvasText`. The SDK toggles `data-projections-ring-hover` and
+  `data-projections-ring-selected` on units; CSS handles everything else.
 
 **The contract.** The unit (or its marked SVG edge) must be the element that
-draws the item's visible edge. The built-in `rings` check (renderer testing,
-`projections check`, the Inspector and the harness) holds every unit to it in
-hover, focus and selection, in the default mode and the diff, and names the fix
-when it doesn't hold:
+paints the item's visible edge. The built-in `rings` check—run by renderer
+testing, `projections check`, the Inspector, and the harness—verifies every unit
+across hover, focus, and selection in both default and diff modes, flagging the
+specific fix whenever any of these break:
 
-- the edge is drawn by a child of a bare wrapper: put `data-entity-id` (or
-  `data-projections-unit`) on that child;
-- the edge is drawn outside the box (a spread `box-shadow`, an outline with a
-  positive offset): draw it as a border, or an outline at minus its width;
-- a positioned descendant paints over the ring (browsers paint outlines under
-  positioned descendants): keep it in normal flow, or inset it;
-- a row fills a corner of its rounded group without the group's inner radius:
-  give it that radius;
-- the unit sits a few pixels inside another edge, or another edge sits a few
-  pixels inside it: two concentric edges;
-- an SVG unit marks no edge shape, or not its visible one;
-- a line is outlined (an outline, shadow or halo around it);
-- the renderer draws a ring, outline or edge of its own for the state.
+- The visible edge lives on a child inside a bare wrapper (move `data-entity-id`
+  or `data-projections-unit` onto that child).
+- The edge is painted outside the box via a spread `box-shadow` or positive
+  outline offset (use a real border or a negative-offset outline instead).
+- A positioned descendant paints over the outline (keep it in normal flow or
+  inset it).
+- A row touches a rounded group's corner without inheriting the group's inner
+  radius (apply that radius).
+- The unit sits a few pixels inside another edge, or vice versa, creating double
+  concentric edges.
+- An SVG unit has no marked edge shape, or marks the wrong shape.
+- A line carries an outline, shadow, or halo around it.
+- The renderer draws its own ring, outline, or state border.
 
-A row flush inside an edged group keeps the group's edge outside its ring on the
-sides it shares, and a separator a neighbor draws against it stays too; the
-check allows both. The harness's `ring-pixels` suite (every built-in renderer),
-`rings` suite (the adversarial fixture `harness/browser/fixtures/rings.html`)
-and Storybook's `rings` suite (the infrastructure story in diff mode, at the
-opening scale, scrolled, zoomed in and out) confirm it in pixels.
+A row sitting flush inside an edged group may keep the group's outer edge on
+shared sides, and a neighbor's separator rule may remain against it; the check
+permits both. Pixel-level coverage comes from the harness's `ring-pixels` suite
+(every built-in renderer), its `rings` suite
+(`harness/browser/fixtures/rings.html`), and Storybook's `rings` suite (the
+infrastructure story in diff mode at opening scale, scrolled, and zoomed).
 
 ### Decision
 
-Three designs were tried:
+We evaluated three approaches before settling on this one:
 
-1. **The kit ring**, an inset `::after` with `border-radius: inherit` on items
-   that took `pk-item`: right only when the author put the class on the element
-   that owns the edge, and even then 1–2 px inside a bordered item, with the
-   outer radius on the inner box.
-2. **An SDK overlay** that measured each item (border box and radii, or the SVG
-   shape's screen matrix) and drew the ring in a layer above the document. It
-   matched every case of the adversarial fixture, but as a separate thing it
-   fell behind the item it followed: on the live infrastructure story (diff
-   mode, cards in a scaled `translate … scale` group, the stage opening zoomed
-   and scrolled) the ring sat about 20 px off its card. Rejected: "if the
-   highlight is a 'separate thing' this will almost certainly not work. It needs
-   to be styling on the actual element."
-3. **Styling on the element** (this design): an outline on HTML units, the
-   marked edge's own stroke on SVG. It is the item's paint, so nothing can fall
-   out of step with it, and the cases the overlay papered over (a wrapper, an
-   outside shadow, a positioned header, a row's corners) become author errors
-   the `rings` check explains.
+1. **The kit ring** used an inset `::after` pseudo-element with
+   `border-radius: inherit` on `pk-item`. It only aligned when authors placed
+   the class on the exact border-owning element, and even then sat 1–2 px inside
+   a bordered item with the outer radius on an inner box.
+2. **An SDK overlay** measured each item's border box and radii (or SVG screen
+   matrix) and painted the ring in a separate top layer. It passed the
+   adversarial fixture, but being detached from the element meant it drifted
+   behind live transforms—on the infrastructure story (diff mode, scaled
+   `translate … scale` groups, opened zoomed and scrolled), the ring sat roughly
+   20 px off its card. We rejected it: "if the highlight is a 'separate thing'
+   this will almost certainly not work. It needs to be styling on the actual
+   element."
+3. **Styling on the element** (the current design) uses CSS `outline` on HTML
+   units and restyles the marked SVG edge's stroke. Because it is the element's
+   own paint, it can never drift out of sync, and edge cases the overlay used to
+   mask (bare wrappers, spread shadows, positioned headers, unrounded corners)
+   become explicit, actionable `rings` check diagnostics.
 
-Measured on the fixture before the overlay was chosen (`outline` is design 3's
-HTML half; an outline can't ring SVG shapes, which is why SVG edges restyle
-their stroke instead):
+Measurements from the adversarial fixture comparing the HTML half of design 3
+against the earlier kit ring (SVG shapes cannot use CSS `outline`, which is why
+design 3 restyles their stroke instead):
 
 <!-- prettier-ignore -->
 | Fixture item | `outline`, negative offset | inset `::after` (the kit ring) |
@@ -232,53 +237,49 @@ their stroke instead):
 
 ## Layout components
 
-A renderer composed from these needs no CSS of its own: they carry every color,
-size and space from the theme, so they meet the renderer checks (`palette`,
-`type-scale`, `spacing`) as they are. Their props take steps of the theme's
-scales, never lengths or colors. The custom renderer
-`projections init --renderer custom` scaffolds is built from them, with no
-stylesheet.
+If you compose your renderer from these primitives, you do not need any custom
+CSS. Every color, font size, and spacing step comes from the theme tokens, so
+your view passes `palette`, `type-scale`, and `spacing` automatically. Props
+accept token scale steps rather than raw lengths or colors—this is how
+`projections init --renderer custom` scaffolds a stylesheet-free renderer.
 
-- `ContentView`: The content root: the host's main scroll container, starting at
-  the top of the frame, on the stage that groups and cards stand on, set in from
-  the frame's edges by the same stage padding on all four sides (the host's
-  `stage-inset`, else 12 px), so a card or table sits evenly in the frame. A
-  renderer with a root of its own gets the same by giving it the class
-  `pk-stage`; give the outer cards no margins.
-- `Group`: A titled panel, the one pattern for a titled table, list or set of
-  cards: raised and edged, its title in a header band inside its edge, then its
-  body, which reaches its sides (a card grid keeps the band's inset).
-  `titleFont="code"` draws a title that is code (a command, a kind, a path) in
-  the monospace font, marked as an identifier; a title in words keeps the UI
-  font. `icon` names the group's subject (`file`, `workload`; an icon from the
-  vocabulary) with a muted icon before the title, centred on its capitals; give
-  every group of a view one, or none. `meta` adds muted text after the title and
-  `actions` content buttons at the band's end. In a comparison, `change` and
-  `emphasis` state the change in words in a status cell at the end
-  (`--pk-status-width`, reserved on every group), and in diff mode `mark` marks
-  the group, striking a removed group's title through. With `id`, `selected` and
-  `onSelect` the group presents an item: a ring unit whose title is the button
-  that selects it.
-- `CardGrid`: Cards in as many columns as fit, one on a phone.
-- `EntityCard`: One entity: a ring unit with `data-entity-id`, a select button,
-  its name (`label`) and `identifier`, `children`, and its change status in
-  words. In the progress modes its leading edge takes the change's hue as
-  `emphasis` rises, and `presence` fades it in or out; in diff mode
-  `mark={change}` fills and edges it like any kit region.
-- `RelationshipList`, `RelationshipItem`: A card's relationships, each a
-  selectable unit with its own ID, `presence` and, in the diff, `mark` and
+- `ContentView` is the root scroll container on the stage surface, inset evenly
+  on all four sides by the host's `stage-inset` (defaulting to 12 px) so cards
+  and tables sit cleanly in the frame. Custom root elements can get the same
+  framing by adding `pk-stage` and leaving margins off outer cards.
+- `Group` renders a raised, edged panel with a header band and full-bleed body
+  (card grids inside keep the band's inset)—the standard container for a titled
+  table, list, or card set. Set `titleFont="code"` for code identifiers (a
+  command, kind, or path) in monospace while keeping prose titles in the UI
+  font. `icon` places a muted subject icon (`file`, `workload`, or any
+  vocabulary icon) before the title, centered on its capitals—use icons on every
+  group in a view or none at all. `meta` adds muted trailing text and `actions`
+  places buttons at the end of the header band. In comparisons, `change` and
+  `emphasis` render status text in a reserved `--pk-status-width` cell, and in
+  diff mode `mark` styles the group and strikes through removed titles. Passing
+  `id`, `selected`, and `onSelect` turns the group itself into a selectable ring
+  unit whose title acts as the select button.
+- `CardGrid` lays cards out in as many columns as fit, collapsing to one column
+  on phones.
+- `EntityCard` renders a single entity as a ring unit with `data-entity-id`, a
+  select button, `label`, `identifier`, `children`, and worded change status. In
+  progress modes, its leading edge picks up the change hue as `emphasis` rises
+  while `presence` fades it in or out; in diff mode, `mark={change}` applies
+  standard kit change-region styling.
+- `RelationshipList` and `RelationshipItem` list a card's relationships, each a
+  selectable unit with its own ID, `presence`, and (in diff mode) `mark` and
   `changeText`.
-- `Fields`, `Field`: Name and value rows; names are identifiers.
-- `Stack`, `Inline`: Children in a column or a wrapping row, `gap={1…8}` steps
-  of the space scale apart.
-- `Text`: Text with `size` (`xs`, `sm`, `md`, `lg`, `xl`), `weight` and a `tone`
-  (`default`, `muted`, `subtle`).
+- `Fields` and `Field` display name-value pairs with identifier-styled names.
+- `Stack` and `Inline` arrange children in a vertical column or wrapping row
+  with `gap={1…8}` steps from the spacing scale.
+- `Text` renders typography using `size` (`xs`, `sm`, `md`, `lg`, `xl`),
+  `weight`, and `tone` (`default`, `muted`, `subtle`).
 
 ## Data tables
 
-`DataTable` draws items with comparable properties as a table: a row per item, a
-column per property. Use it rather than table markup of your own; it meets the
-checks as it is.
+When your entities share comparable properties, reach for `DataTable` instead of
+hand-rolling table markup—it handles sorting, diffing, folding, and theme checks
+out of the box:
 
 ```tsx
 import {tableSortControls} from '@githubnext/projections/kit'
@@ -298,55 +299,51 @@ export function View(props: RendererProps) {
 }
 ```
 
-- **Columns.** `value(item)` reads a cell from one version of a row: what the
-  column sorts by and, unless it has `render(item)`, shows (numbers in the
-  host's locale). `font: 'code'` sets identifiers and other symbols in the
-  monospace font; headings are words, in the UI font. `align` (`end` for a
-  numeric sort by default) and `width` (`fill` for the first column, `fit` for
-  the rest) shape it. A cell changed when its `value` differs between the row's
-  two versions, or as `changed(before, after)` says.
-- **Rows.** The kit model's rows (`model.entities`) or any rows like them
-  (`TableRow`: `id`, `before`, `after`, `status`). Each row is a ring unit with
-  `data-entity-id`; its first cell is the button that selects it.
-- **Sorting.** Every heading of a sortable column is a button (`aria-sort` on
-  the sorted one): activating it sorts by that column, then the other way.
-  `sort: 'number' | 'string' | (a, b) => number | false` says how; strings
-  compare naturally (`v2` before `v10`) and missing values go last in either
-  direction, with the row's label and ID breaking ties. The sort is a renderer
-  control: `tableSortControls({columns, default})` declares a "Sort by" choice
-  (each column both ways, or the rows' own order) and a "Changes first" toggle
-  in the host's settings, so the host remembers the sort and agents read and set
-  it like any control. `useTableProps(props)` reads them and passes a heading's
-  activation to the host (`RendererProps.setControl`), so the heading, the
-  settings menu and an agent all set the same value. Without `onSortChange`,
-  headings don't sort.
-- **Comparisons.** A row sorts by After's version (Before's for a removed row),
-  so the order is the same at every point of the transition and rows never move
-  while it plays. A status column says each change in words. In diff mode a
-  changed cell is a `ValueChange` (was, now) and an added or removed row is a
-  change region; a row around changed cells stays neutral (no nested change
-  colors). In the progress modes a row shows the version it has reached
-  (`rowProgress`, a staged timeline's `local`, for per-row steps), an entering
-  or leaving row fades in its slot, and a changed cell is a pill that takes its
-  side's hue as the change is emphasized and is plain text at the endpoints.
-- **Lines.** The rows draw the table's frame and every line in it, one per
-  boundary, and a row paints the same wherever the sort puts it. Where a gray
-  line and a change-colored one meet, the change's hue wins: a row whose lines
-  carry its hue (added, removed, renamed) sits above a row drawn neutral because
-  it holds changed cells, which sits above unchanged rows and the frame, so the
-  line between a changed row and any neighbour, and the frame's edge beside it,
-  is the change's. The heading is the frame's: its rule is the frame's color and
-  wins over any row under it, changed or not. In a `Group` the table is the
-  body: the group draws no edge of its own and its header band joins the table's
-  frame.
-- **Changes scope.** With `scope` (`RendererProps.scope`, which `useTableProps`
-  passes), each run of rows the scope doesn't show, in the sorted order, folds
-  into one `Fold` row ("12 unchanged languages", with `noun`) that opens in
-  place; its line is the table's, not a second one.
-- **Scrolling.** A table wider than the frame scrolls sideways in its own box,
-  its first column frozen (`frozen={false}` lets it scroll away).
+- **Columns** — `value(item)` extracts the sortable value for one version of a
+  row and formats it for display (using the host's locale for numbers) unless
+  `render(item)` overrides it. Set `font: 'code'` for identifiers while keeping
+  column headings in the UI font. `align` defaults to `end` for numeric columns,
+  and `width` defaults to `fill` for the first column and `fit` for the rest. A
+  cell counts as changed when `value` differs between revisions or when
+  `changed(before, after)` returns true.
+- **Rows** — Pass `model.entities` or any compatible `TableRow` list (`id`,
+  `before`, `after`, `status`). Each row is a ring unit with `data-entity-id`,
+  and its first cell serves as the select button.
+- **Sorting** — Every sortable column header is a button (with `aria-sort` on
+  the active column) that toggles sort direction. Configure sorting with
+  `sort: 'number' | 'string' | (a, b) => number | false`. Strings use natural
+  ordering (`v2` before `v10`), missing values sort last in both directions, and
+  label plus ID break ties. `tableSortControls({columns, default})` registers a
+  "Sort by" choice and a "Changes first" toggle in the host's settings so the
+  host persists the sort and agents can inspect or change it.
+  `useTableProps(props)` wires those controls up and forwards header clicks via
+  `RendererProps.setControl` so headers, settings, and agents stay in sync.
+  Without `onSortChange`, headers remain static.
+- **Comparisons** — Rows sort by their After version (or Before for removed
+  rows), keeping row order fixed throughout playback. A status column explains
+  each change in words. In diff mode, changed cells render a `ValueChange` (was
+  → now), added and removed rows render as change regions, and rows containing
+  changed cells stay neutral to avoid nested change colors. In progress modes,
+  each row reflects its current version (`rowProgress`, a staged timeline's
+  `local`), entering or leaving rows fade in place, and changed cells tint as
+  pills during emphasis before returning to plain text at the endpoints.
+- **Lines** — Rows own the table's outer frame and internal rules—one line per
+  boundary—and paint identically in any sort order. Where a neutral rule meets a
+  change-colored rule, the change hue wins: fully colored rows (added, removed,
+  renamed) stack above neutral rows holding changed cells, which stack above
+  unchanged rows and the frame. The header row's rule belongs to the frame and
+  always wins over the first row beneath it. Inside a `Group`, the table serves
+  as the body: the group omits its own border and its header band joins directly
+  onto the table's frame.
+- **Changes scope** — When `scope` (`RendererProps.scope`, wired through
+  `useTableProps`) hides unchanged rows, each contiguous hidden run collapses in
+  sorted order into a single `Fold` row ("12 unchanged languages", using `noun`)
+  that expands in place and shares the table's border rule.
+- **Scrolling** — Tables wider than the frame scroll horizontally in their own
+  container with the first column frozen (pass `frozen={false}` to let it scroll
+  with the rest).
 
-For an inline style these don't cover, `token` (re-exported from the SDK) writes
-a theme token as a CSS value, typed so a name that isn't a token doesn't
-compile: `token.space(2)`, `token.color('fg-muted')`, `token.fontSize('sm')`,
-`token.radius('sm')`, `token.chart(index)`.
+When you occasionally need an inline style that these components do not cover,
+use `token` (re-exported from the SDK) for compile-time-checked CSS values:
+`token.space(2)`, `token.color('fg-muted')`, `token.fontSize('sm')`,
+`token.radius('sm')`, and `token.chart(index)`.

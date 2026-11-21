@@ -1,10 +1,10 @@
 # Spring dependency injection
 
-The beans of a Spring Boot application and what each one injects, as the
-application's own bean factory resolves them: every bean with its scope and
-class, and the bean Spring chose for each dependency. Compared across a pull
-request, it answers "which beans did this change add, remove or rewire, and did
-any scope or `@Primary` choice change?"
+This extractor captures the beans in a Spring Boot application and what each one
+injects, exactly as Spring's own bean factory resolves them: every bean's scope
+and implementation class, along with the concrete bean chosen for each
+dependency. Compared across a pull request, it shows which beans were added,
+removed, or rewired, and whether any scope or `@Primary` selection changed.
 
 <!-- generated: facts -->
 
@@ -22,57 +22,61 @@ any scope or `@Primary` choice change?"
 
 ## When to use it
 
-Use it for Spring Boot applications, where component scanning,
-auto-configuration and `@Bean` methods decide what every class receives: a new
-bean and what it injects, a `@Bean` method that now returns another
-implementation, a prototype made a singleton, `@Primary` moved from one bean to
-another so every consumer of the type is rewired. It reads the composition
-Spring itself made, including auto-configuration, not annotations parsed from
-source.
+Use this extractor in Spring Boot applications where component scanning,
+auto-configuration, and `@Bean` methods determine what every class actually
+receives. It makes wiring changes obvious at a glance—a new bean and its
+dependencies, a `@Bean` method returning a different implementation, a prototype
+switched to a singleton, or `@Primary` moving to another bean and rewiring every
+consumer of that type. Instead of guessing from source annotations, it inspects
+the real bean graph Spring builds, including auto-configuration.
 
-It runs the application's main method, so it needs `--trust` (see
-[What it reads](#what-it-reads)). For .NET use [`dotnet-di`](dotnet-di.md), for
-NestJS [`nestjs-di`](nestjs-di.md); all three write the same model.
+Because it runs your application's main method, it requires `--trust` (see
+[What it reads](#what-it-reads)). For .NET use [`dotnet-di`](dotnet-di.md) and
+for NestJS use [`nestjs-di`](nestjs-di.md); all three produce the same model.
 
 ## What it reads
 
-The application at `project` (default the repository root):
+Targeting the application at `project` (defaulting to the repository root), the
+extractor uses:
 
-- **The project's own build.** Gradle (the project's `gradlew`, else `gradle`)
-  runs `classes` with its build directories redirected to a scratch directory;
-  Maven (`mvnw`, else `mvn`) runs `process-classes` and reports the classpath,
-  writing `target/` as its own build would. Gradle is used when both builds are
-  present, unless `build` says `maven`. Dependencies come from your usual Gradle
-  or Maven caches; the first build may download them, so grant
-  `execution.network` and a generous `execution.timeoutMs`.
-- **The project's own JDK**, 17 or newer with `javac` (`JAVA_HOME`, else `java`
-  and `javac` on `PATH`), and Spring Boot 3.0 or newer. An extractor sees only
-  the variables its definition grants, so list `JAVA_HOME` (and
-  `GRADLE_USER_HOME` if you set it) in `execution.environment`. A small
-  first-party helper ships with Projections as source and is compiled against
-  your classpath, so it uses your application's own Spring.
-- **The application's main method**, `mainClass` (default the one
-  `@SpringBootApplication` class with a `main` method), run with web serving
-  off, `profiles` active and `properties` overriding its configuration. The
-  context refreshes, every dependency the bean factory resolves is recorded, and
-  the run stops: no web server starts and no `CommandLineRunner` runs.
-  Constructors, `@PostConstruct`, `@Bean` methods and auto-configuration do run,
-  which is why it needs `--trust`.
-- **Or a file.** `snapshot` imports an extraction exported earlier; nothing
-  runs, and no trust or JDK is needed.
+- **Your project's build tool.** For Gradle (using `gradlew` if present, else
+  `gradle`), it runs `classes` with build outputs redirected to a scratch
+  directory. For Maven (`mvnw` or `mvn`), it runs `process-classes` and queries
+  the classpath, writing to `target/` as usual. When both exist, Gradle wins
+  unless `build` is set to `maven`. Dependencies come from your local Gradle or
+  Maven caches; if a first run needs to download artifacts, enable
+  `execution.network` and give `execution.timeoutMs` plenty of headroom.
+- **Your JDK** (17 or newer, including `javac` via `JAVA_HOME` or `java` and
+  `javac` on `PATH`) and Spring Boot 3.0+. Because extractors only see
+  environment variables explicitly allowed by the definition, add `JAVA_HOME`
+  (and `GRADLE_USER_HOME` if needed) to `execution.environment`. Projections
+  ships a small helper as source and compiles it against your classpath so it
+  runs directly against your app's version of Spring.
+- **Your application's main method**, identified by `mainClass` (defaulting to
+  the sole `@SpringBootApplication` class with a `main` method), launched with
+  web serving disabled, `profiles` active, and `properties` applied. Once the
+  context refreshes and every resolved dependency is recorded, the process
+  exits—no web server starts and no `CommandLineRunner` executes. Constructors,
+  `@PostConstruct`, `@Bean` methods, and auto-configuration still run, which is
+  why `--trust` is required.
+- **A saved snapshot.** Setting `snapshot` imports a previously exported
+  extraction instead—nothing runs and neither `--trust` nor a JDK is needed.
 
-Each bean becomes a `service` (its name and registered type: a `@Bean` method's
-return type, or the component class), a `registration` (its scope, how it was
-defined, and `@Primary`, `@Fallback`, qualifiers, `@Lazy`, `@DependsOn` and the
-conditions that matched) and an `implementation` (the instance's class, with
-proxies unwrapped). A scoped proxy and its target are one registration. Each
-injection is a `dependsOn` relationship to the bean Spring chose, keeping the
-type that was asked for; a collection injection has one per element bean. Beans
-the context didn't create (prototypes never requested, request-scoped targets,
-`@Lazy` beans) are resolved with the bean factory's own rules, without creating
-them, and marked `derived`. By default (`include: application`) it keeps beans
-in the application's packages and the beans they inject; `include: all` adds
-Spring's infrastructure.
+Each bean is modeled as three linked pieces: a `service` (its name and
+registered type, either the `@Bean` return type or component class), a
+`registration` (its scope, definition source, `@Primary`, `@Fallback`,
+qualifiers, `@Lazy`, `@DependsOn`, and matched conditions), and an
+`implementation` (the concrete class with proxies unwrapped; a scoped proxy and
+its target share one registration).
+
+Every injection becomes a `dependsOn` edge pointing to the bean Spring selected
+while preserving the requested type (collection injections emit one edge per
+element). Beans that the context didn't instantiate—unrequested prototypes,
+request-scoped targets, and `@Lazy` beans—are resolved using the bean factory's
+own rules without creating instances and marked `derived`. By default
+(`include: application`), only beans in your application's packages and the
+beans they inject are kept; `include: all` adds Spring's own infrastructure
+beans.
 
 ## Options
 
@@ -93,28 +97,27 @@ Spring's infrastructure.
 ## What a comparison shows
 
 The [`dependency-injection`](../renderers/dependency-injection.md) renderer
-folds each bean's service, registration and implementation into one card,
-showing the bean name when it says more than the type, with its lifetime drawn
-as a line (continuous for a singleton, broken per request or session, dotted for
-a prototype) and an arrow for each injection:
+combines each bean's service, registration, and implementation into a single
+card. It displays the bean name whenever it adds context beyond the type, draws
+its lifetime as a line style (solid for singletons, dashed for request or
+session scope, dotted for prototypes), and connects each injection with an
+arrow:
 
-- **Beans** added or removed, with their dependencies.
-- **Scope changes**, as lifetime changes, labelled with Spring's own scope name
-  when it says more than the lifetime (a `prototype` bean made a singleton).
-- **Implementations** replaced behind an unchanged bean (a `@Bean` method now
-  returning `AdyenGateway`): the card says so.
-- **Dependencies** rewired: moving `@Primary` or a qualifier moves the arrows of
-  every bean that injects the type, listed on each card by the cards they point
-  at.
+- **Added or removed beans**, along with their dependency arrows.
+- **Scope changes**, shown as lifetime updates and labeled with Spring's own
+  scope name when helpful (such as a `prototype` bean becoming a singleton).
+- **Swapped implementations** behind an unchanged bean—for instance, a `@Bean`
+  method that now returns `AdyenGateway`.
+- **Rewired dependencies**, where moving `@Primary` or changing a qualifier
+  shifts the arrows on every bean injecting that type.
 
-The summary bar counts the composition (services, registrations, implementations
-and dependencies, each with what was added, removed and modified), then what
-changed about cards in both revisions: lifetimes, implementations, service types
-and registration counts changed, each filtering to its cards. A comparison
-starts as one diff, and plays as side by side, animated or swipe too. It opens
-fitted to the frame unless that would draw text smaller than 8 px; a large
-application then opens at that size, at its root, and scrolls, with zoom
-controls.
+The summary bar counts services, registrations, implementations, and
+dependencies with their deltas, followed by clickable filters for cards that
+changed lifetime, implementation, service type, or registration count across
+revisions. Comparisons open in unified diff mode and also support side-by-side,
+animated, and swipe views. Graphs fit to the frame unless text would drop below
+8 px, in which case large apps open at readable zoom near the root with scroll
+and zoom controls.
 
 ## Start from this definition
 
@@ -133,62 +136,65 @@ controls.
 
 ## Limitations
 
-- The context isn't a web application context, so web-only auto-configuration
-  (the embedded server's beans) is absent.
-- Dependencies that aren't beans (`BeanFactory`, `ApplicationContext`,
+- Because the application runs without a web context, web-only
+  auto-configuration (such as embedded server beans) isn't present.
+- Non-bean framework dependencies (`BeanFactory`, `ApplicationContext`,
   `ApplicationEventPublisher`) and `@Value` injections aren't drawn, and an
-  `ObjectProvider` that resolves nothing has no arrow.
-- A bean's identity is its name: renaming a component class renames its default
-  bean name, which is a removal and an addition.
-- The main method must run `SpringApplication`; whatever it does first runs too.
-  A Maven `project` builds with `-f <project>/pom.xml`, so sibling modules come
-  from the local repository.
-- One set of profiles and properties per projection; beans excluded by a
-  condition are simply absent. Aspects and interception aren't modelled.
+  `ObjectProvider` that resolves to nothing produces no arrow.
+- Beans are identified by name, so renaming a component class changes its
+  default bean name and shows up as a removal and an addition.
+- Your main method must invoke `SpringApplication`, and any setup code before
+  that call runs as well. Maven builds with `project` run
+  `-f <project>/pom.xml`, so sibling modules are resolved from your local Maven
+  repository.
+- Each projection reflects a single set of profiles and properties; beans
+  excluded by conditions simply don't appear. AOP aspects and interception
+  aren't modeled.
 
 ## Related
 
-- [`dependency-injection`](../renderers/dependency-injection.md), the renderer
-  that draws it.
-- [`dotnet-di`](dotnet-di.md) and [`nestjs-di`](nestjs-di.md), the same model
+- [`dependency-injection`](../renderers/dependency-injection.md) — the renderer
+  that draws the bean graph.
+- [`dotnet-di`](dotnet-di.md) and [`nestjs-di`](nestjs-di.md) — the same model
   for .NET and NestJS.
-- [The default comparator](../comparators/default.md), which compares it.
-- [One model for dependency injection](../../models/dependency-injection-model.md),
-  how containers map onto services, registrations and implementations.
+- [The default comparator](../comparators/default.md) — compares bean graphs
+  across revisions.
+- [One model for dependency injection](../../models/dependency-injection-model.md)
+  — how different DI containers map onto services, registrations, and
+  implementations.
 
 ## How it works
 
-The [package README](../../../packages/extractors/spring-di/README.md) details
-the build, the run and how each bean is recorded.
+See the [package README](../../../packages/extractors/spring-di/README.md) for
+details on the build step, context execution, and how each bean is recorded.
 
 ## Build your own
 
-Write your own extractor when Spring's bean factory isn't the composition you
-need to review:
+Consider writing a custom extractor if Spring Boot's bean factory isn't the
+graph you need:
 
-- **Another container**: Micronaut, Quarkus (CDI), Guice or Dagger, or a Spring
-  application that isn't a Boot application. An extractor that writes the same
-  services, registrations and implementations (the `dependency-injection/v0`
-  vocabulary) is drawn by the same renderer.
-- **Facts the bean factory doesn't have**: the endpoints each controller maps,
-  the aspects that apply to a bean, the configuration properties bound into it,
-  or the team that owns each package.
-- **No code execution**: when CI can't run the application with `--trust`,
-  export the graph from a test and import it with `snapshot`.
+- **Another DI container**, such as Micronaut, Quarkus (CDI), Guice, Dagger, or
+  a non-Boot Spring app. Emit the same `dependency-injection/v0` vocabulary of
+  services, registrations, and implementations and the built-in renderer works
+  out of the box.
+- **Additional metadata**, like HTTP endpoints per controller, AOP aspects
+  applied to beans, bound configuration properties, or package ownership.
+- **No code execution in CI**, by exporting the bean graph during your test
+  suite and loading it via `snapshot` without `--trust`.
 
-Try the lighter options first: `profiles` and `properties` pick the
-configuration, `include` widens or narrows what's shown, and `snapshot` imports
-a graph your tests already export. To flag changes that matter to you (a
-singleton that now injects a prototype, say), keep this extractor and add a
-comparator file; to group beans by package or layer, write a renderer.
+Check the built-in options first: `profiles` and `properties` select the active
+configuration, `include` widens or narrows the graph, and `snapshot` imports
+pre-exported data. To flag risky wiring changes (like a singleton injecting a
+prototype), add a comparator file; to group beans by package or layer, keep this
+extractor and write a custom renderer.
 
-**In VS Code**, choose **+ New Projection…** in the Projections view, then
+**In VS Code**, open the Projections view, select **+ New Projection…**, choose
 **Write a custom extractor, renderer or comparator** › **Custom extractor** (or
-**Custom extractor and renderer**), and pick its language: the repository's
-toolchain, Node.js, Python or Go. It writes the definition and a starter
-extractor under `.github/projections/<id>/`, drawn by the built-in graph
-renderer. Or choose **Ask an agent to write it** and describe what the
-projection should show.
+**Custom extractor and renderer**), and pick a language (your repository's
+toolchain, Node.js, Python, or Go). That creates the definition and a starter
+extractor under `.github/projections/<id>/`, paired with the built-in graph
+renderer. You can also choose **Ask an agent to write it** and describe what you
+want to see.
 
 **With the CLI**, keep the `dependency-injection` renderer:
 
@@ -196,9 +202,10 @@ projection should show.
 projections init <id> --language node --renderer dependency-injection
 ```
 
-Run it with `projections show -p <id> --trust` as you change it; an open
-projection tab uses your uncommitted edits ("Your edits") and says when its
-results are out of date, and the Testing view runs the projection's checks.
-[Write your first extractor](../../guides/first-extractor.md) walks through one,
-and [Extraction schema](../../guides/schemas.md#extraction-schema) describes
-what it prints.
+Test changes as you go with `projections show -p <id> --trust`. An open
+projection tab picks up your uncommitted edits ("Your edits") and flags stale
+results, and the Testing view runs your projection's checks.
+[Write your first extractor](../../guides/first-extractor.md) walks through a
+complete example, and
+[Extraction schema](../../guides/schemas.md#extraction-schema) documents the
+output format.

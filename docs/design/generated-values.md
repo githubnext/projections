@@ -1,68 +1,69 @@
 # Generated values
 
 Status: **decided; implemented.** This extends
-[volatile data](../contracts/extractions.md#volatile-data) to values an
-extractor generates from an identifiable input, such as a language model's
-summary of a class.
+[volatile data](../contracts/extractions.md#volatile-data) to cover values an
+extractor generates from an identifiable input — for example, a language model's
+one-line summary of a class.
 
 ## Why
 
-Extractors should be deterministic, and most are. But some useful facts are
-easier to generate than to extract: what a package is responsible for, what a
-class does, a one-line description of a route. An extractor can send a class's
-source to a language model and record the summary it gets back. That fits
-projections well: a reviewer sees a change's meaning, not only its structure.
+Most extractors are deterministic, and they should be. Still, some of the most
+helpful context for a reviewer is easier to generate than to parse: what a
+package is responsible for, what a class does, or a plain-English description of
+an HTTP route. Sending a class's source to a language model and storing its
+summary lets reviewers see a change's _meaning_, not just its structure.
 
-It breaks one assumption, though. Ask a model the same question twice and the
-wording changes. Without help, every rerun "modifies" every summary, and a pull
-request that touched one class shows a hundred changed summaries.
+The catch is wording drift. Ask a model the same question twice and it phrases
+the answer slightly differently. Without special handling, every re-run flags
+every summary as "modified", burying a one-class PR under a hundred noisy
+rewordings.
 
-Timings had the same problem, and
-[volatile data](../contracts/extractions.md#volatile-data) solved it: an
-extraction declares which values may vary, the engine judges each difference
-within or beyond a tolerance, and variation within tolerance is never a change.
-Generated values need the same thing with a different tolerance. A number is
-within tolerance when it's close enough. A generated value is within tolerance
-when **it was generated from the same inputs**, whatever its wording. Only the
-extractor knows those inputs, so it records them beside the value as a
-**basis**: a few named hashes (the source text, the prompt, the model). The
-engine never reads text to guess whether it means the same thing. It compares
-bases.
+Timings had the exact same problem, and
+[volatile data](../contracts/extractions.md#volatile-data) solved it: the
+extraction marks which values may vary, the engine checks whether each
+difference stays within tolerance, and anything within tolerance never counts as
+a change. Generated values use the same mechanism with a different kind of
+tolerance. A number is within tolerance when it is numerically close; a
+generated value is within tolerance when **it came from the same inputs**, no
+matter how the wording shifted. Because only the extractor knows what those
+inputs were, it records them alongside the value as a **basis** — a small object
+of named hashes (source text, prompt, model). The engine never tries to guess
+whether two sentences mean the same thing; it simply compares bases.
 
-The term is **generated values**, not "nondeterministic values" or "AI values".
-They come from an identifiable input, and nothing here depends on how they were
-generated.
+We call these **generated values** rather than "nondeterministic values" or "AI
+values" because the mechanism depends only on having an identifiable input, not
+on how the value was produced.
 
 ## Decisions at a glance
 
-1. A volatile declaration may carry `"generated": true` and
-   `"basis": "<pointer>"`. The basis is a small object of named parts in the
-   item's own `data`, and it can't itself be volatile.
-2. When the bases are equal, a difference in the value is within tolerance: the
-   item is `unchanged` with `varied`, in no step, and reproducible in `check`.
-   When the bases differ, the item is `modified`, and the varied entry names the
-   parts that moved in `because`. What counts is the extractor's choice of
-   basis: a part it leaves out can't make a change.
-3. Comparator rules see `generated` and `because` on every `Varied`, plus two
-   library functions: `generated.because(change)` and
-   `generated.only(change, parts)`. Rules can classify, summarize and order
-   regenerated changes. They can't change a status.
-4. The runner keeps a **generation store** keyed by the declared path and the
-   basis digest. It fills the store from validated extractions, including
-   verified CI artifacts, and hands a read-only snapshot to the extractor. An
-   extractor that reuses a stored value for an equal basis gets byte-identical
-   text, so reruns and pull request comparisons usually show no variation at
-   all. The SDK helpers are `basis()` and `generations()`.
-5. Hosts and the kit mark every generated field with a quiet **Generated** label
-   and a new `generated` icon. With an equal basis they show After's text, the
-   neutral `varied` icon and "Regenerated from the same inputs", with a toggle
-   for Before's wording. With a changed basis they show both passages side by
-   side, say why ("Regenerated because the input changed") and offer a word
-   diff.
-6. An extractor that calls a model is repository code under `--trust`, with
-   `network` and its credential variables declared. The saved extraction records
-   `provenance.generated`, and agents' `compare` and `current_view` results
-   mention generated fields.
+1. A volatile declaration can set `"generated": true` with
+   `"basis": "<pointer>"`. The basis is a small object of named parts inside the
+   item's own `data` and cannot itself be volatile.
+2. When both sides share an equal basis, a difference in text counts as within
+   tolerance: the item stays `unchanged` with `varied`, appears in no step, and
+   passes `check`. When the bases differ, the item is `modified` and the varied
+   entry lists which parts moved in `because`. The extractor controls what
+   matters by choosing what goes into the basis — anything omitted can never
+   trigger a change.
+3. Comparator rules can read `generated` and `because` on every `Varied` entry,
+   plus two helpers: `generated.because(change)` and
+   `generated.only(change, parts)`. Rules can classify, summarize, and reorder
+   regenerated changes, though they can never change an item's status.
+4. The runner maintains a **generation store** keyed by declared path and basis
+   digest, populated from validated extractions (including verified CI
+   artifacts) and handed to extractors as a read-only snapshot. Reusing stored
+   values for matching bases produces byte-identical text across re-runs and PR
+   comparisons. The SDK exposes `basis()` and `generations()` to make this easy.
+5. Hosts and the kit tag every generated field with a subtle **Generated** label
+   and a `generated` icon. When bases match, they display After's text with the
+   neutral `varied` icon, "Regenerated from the same inputs", and a toggle to
+   inspect Before's wording. When bases differ, they show both passages side by
+   side, explain why ("Regenerated because the input changed"), and offer an
+   optional word diff.
+6. An extractor that calls a model is repository code requiring `--trust`, with
+   `network` and credential variables declared. Saved extractions record
+   `provenance.generated`, and agent tools (`compare`, `current_view`) note
+   generated fields so models don't present summaries as ground-truth facts.
 
 ## 1. Declaration
 
@@ -75,23 +76,22 @@ generated.
 ]
 ```
 
-- `generated: true` marks a generated value. It is the only value `generated`
-  takes. Omit it for any other volatile value.
-- `basis` is required when `generated` is set and not allowed otherwise. It is a
-  pointer under `/data/` into the same item, with the same `*` rule as a
-  tolerance's `spread`: it may use only the `*` segments its `path` has, and its
-  first `*` takes the key the path's first `*` matched, and so on. In the
-  example, each method's summary has its own basis.
-- A generated declaration has no `tolerance`: the basis is its tolerance. A
-  change to any part is beyond. An extractor that doesn't want a part to count
-  (a model upgrade, say) leaves it out of the basis.
+- `generated: true` marks a generated value (and `true` is the only valid value;
+  omit it for other volatile fields).
+- `basis` is required whenever `generated` is set and forbidden otherwise. It is
+  a pointer under `/data/` on the same item, following the same `*` rule as a
+  tolerance's `spread`: it can only reference `*` segments present in `path`,
+  matching them positionally so each method's summary gets its own basis.
+- Generated declarations carry no `tolerance` — the basis _is_ the tolerance,
+  and any change to a basis part puts the value beyond tolerance. If a part
+  shouldn't trigger changes (like a model upgrade), leave it out of the basis.
 
-`collection` and `kinds` work as for any volatile declaration. Generated
-declarations count toward the 256-declaration limit.
+`collection` and `kinds` behave just like any other volatile declaration, and
+generated declarations count toward the 256-declaration limit.
 
 ### The basis value
 
-The basis is ordinary data in the item, one small object of named parts:
+The basis lives in the item's regular `data` as a small object of named parts:
 
 ```json
 "data": {
@@ -104,21 +104,22 @@ The basis is ordinary data in the item, one small object of named parts:
 }
 ```
 
-- 1 to 16 parts. Part names match `^[A-Za-z][A-Za-z0-9_-]{0,63}$`, the pattern
-  renderer control IDs use. Their meaning is up to the extractor; `input`,
-  `prompt` and `model` are the conventional names, and hosts have words for them
+- A basis has 1 to 16 parts whose names match `^[A-Za-z][A-Za-z0-9_-]{0,63}$`
+  (the same rule as renderer control IDs). Extractors choose the names, though
+  `input`, `prompt`, and `model` are conventional and have tailored UI phrasing
   (see [presentation](#5-presentation)).
-- Each part's value is a nonempty string of at most 256 UTF-8 bytes. Usually
-  that's a hash (`sha256:` and 64 lowercase hex digits). A model ID stays
-  readable, so a change can say which model replaced which.
-- An item has a basis exactly when it has the generated value. A value without a
-  basis can't be judged, and a basis without a value describes nothing.
+- Every part value is a non-empty string up to 256 UTF-8 bytes — typically a
+  `sha256:` hash with 64 lowercase hex digits. Keeping a model ID human-readable
+  lets the UI explain which model replaced which.
+- An item must have a basis if and only if it has the generated value: a value
+  without a basis can't be judged, and a basis without a value describes
+  nothing.
 
 ### Validation
 
-The engine checks declarations when it normalizes an extraction, and checks
-basis values in every item a generated declaration matches. Errors use the
-existing paths (`/volatile/0/basis`, `/entities/12/data/summaryBasis`):
+During normalization, the engine validates both the declarations and every
+matched item's basis, reporting errors at the usual paths (`/volatile/0/basis`,
+`/entities/12/data/summaryBasis`):
 
 <!-- prettier-ignore -->
 | Code | When |
@@ -132,29 +133,28 @@ existing paths (`/volatile/0/basis`, `/entities/12/data/summaryBasis`):
 | `missing-basis` | An item with the generated value and no basis |
 | `orphan-basis` | An item with a basis and no generated value |
 
-The basis must not be volatile because it's how the engine decides whether
-variation is expected. If the basis could vary freely, nothing would ever be
-judged.
+A basis can never be volatile itself — if the yardstick could move freely, we
+could never tell expected variation from real change.
 
 ### Normalization and digests
 
-The normalized declaration keeps `generated` and `basis`. The sort order
-(collection, path, kinds) and the duplicate rule (same collection, kinds and
-path) don't change. A plain declaration and a generated one at the same place
-are duplicates.
+Normalized declarations preserve `generated` and `basis`, keeping the existing
+sort order (collection, path, kinds) and duplicate check (same collection,
+kinds, and path — a plain declaration and a generated one at the same path
+collide).
 
-Canonical bytes already include the normalized `volatile` list, so extraction
-digests change only for extractions that use the new fields. **Extractions
-without them are byte-for-byte unchanged**, and so are their digests and
-comparisons. Generated text is data like any other: two extractions whose
-summaries are worded differently have different digests, as two runs with
-different timings do. The generation store is what usually makes them identical.
+Because canonical bytes already include the normalized `volatile` list,
+**extractions that don't use these fields remain byte-for-byte identical**,
+along with their digests and comparisons. Generated text is ordinary data: two
+extractions with differently worded summaries have different digests (just like
+two runs with different timings), which is why the generation store exists to
+keep them identical across runs.
 
 ## 2. Comparison
 
 ### Judging one generated value
 
-For a matched pair and one concrete path a generated declaration matches, with
+For a matched pair and a concrete path matching a generated declaration, with
 values `v` and bases `b` on each side:
 
 <!-- prettier-ignore -->
@@ -166,20 +166,18 @@ values `v` and bases `b` on each side:
 | Different bases, values equal or not | `{path, within: false, generated: true, because}` | `modified` |
 | The value on one side only | `{path, within: false, generated: true, reason}` | `modified` |
 
-`because` is the names of the parts whose values differ, including parts present
-on one side only, sorted by UTF-16 code units. It is omitted when empty. The
-basis path belongs to its generated value: a basis difference is reported
-through the value's entry, never as a plain data difference or as a separate
-varied path. So a pair whose only difference is a regenerated summary is
-`unchanged` or `modified` according to its basis, never because the hashes in
-`summaryBasis` changed.
+`because` lists every basis part whose value changed (including parts present on
+only one side), sorted by UTF-16 code units, and is omitted when empty. The
+basis path is judged exclusively through its generated value — never as a plain
+data diff or a separate varied path — so a pair whose only edit is a regenerated
+summary is judged solely by its basis, not by hash noise in `summaryBasis`.
 
-When the values are equal but the basis changed, the pair is `modified`. The
-input moved, so the summarized thing changed, even if the model happened to
-produce the same sentence. Presentation says "Regenerated because the input
+Even if both sides produced identical wording, a changed basis still marks the
+pair `modified`: the underlying input moved, even if the model happened to emit
+the same sentence. The UI explains this as "Regenerated because the input
 changed; the wording is the same."
 
-The comparison's `varied` entry gains two optional fields:
+In `comparison/v0`, `varied` entries gain two optional fields:
 
 ```json
 {"id": "class:OrderService", "collection": "entities", "before": ["class:OrderService"],
@@ -190,63 +188,64 @@ The comparison's `varied` entry gains two optional fields:
  "varied": [{"path": "/data/summary", "within": false, "generated": true, "because": ["input"]}]}
 ```
 
-The comparison's `variation` counts don't change shape: an `unchanged` change
-with generated `varied` counts toward `within`, and a `modified` one with a
-`within: false` entry toward `beyond`. Hosts count regenerated values separately
-from the changes (see [where it appears](#where-it-appears)).
+The comparison's `variation` summary keeps the same shape: `unchanged` items
+with generated `varied` count under `within`, and `modified` items with
+`within: false` count under `beyond`. Hosts break out regenerated counts
+separately in the summary bar (see [where it appears](#where-it-appears)).
 
 ### Several declarations at one path
 
-Both sides' declarations apply to a pair, as now. When several apply at one
-concrete path, the tighter one still wins:
+Both sides' declarations apply to a pair as usual. When multiple declarations
+match one concrete path, the stricter one wins:
 
-- A generated declaration is tighter than a plain one, with or without numeric
-  bounds, because a plain declaration without a tolerance accepts any difference
-  and a numeric tolerance doesn't apply to text.
-- When the two name different basis pointers, the after side's wins, as for
-  different spreads.
+- A generated declaration beats a plain declaration (with or without numeric
+  bounds), since an unbounded plain declaration accepts any change and numeric
+  tolerances don't apply to text.
+- Originally, when two declarations named different basis pointers, the after
+  side won (matching spreads).
 
-  Superseded in November 2026: so that a reversed comparison judges every value
-  the same way, every basis counts (the value is beyond when any differs) and
-  every spread must hold. The Engine proves the combination symmetric
+  Superseded in November 2026: to keep reversed comparisons completely
+  symmetric, every basis now counts (any differing basis puts the value beyond
+  tolerance) and every spread must hold. The Engine proves this symmetry
   ([extraction contract](../contracts/extractions.md#volatile-data),
   `packages/engine/VERIFICATION.md`).
 
-If either side's generated declaration covers a path, the paths its basis names
-are judged only through it, even where the other side declares them volatile.
+Whenever either side covers a path with a generated declaration, its basis path
+is judged strictly through that declaration — even if the other side marked that
+basis path volatile.
 
 ### Rules for every comparator
 
-The engine's `volatility` module stays the one definition of these rules, shared
-by the default comparator, rules comparators, `validate-comparison` and `vary`.
-Validation checks `generated` and `because` like the rest of `varied`
-(`inconsistent-variation`), so no comparator can call a basis change expected or
-hide one.
+The engine's `volatility` module remains the single source of truth shared by
+the default comparator, rules comparators, `validate-comparison`, and `vary`.
+Validation verifies `generated` and `because` alongside the rest of `varied`
+(`inconsistent-variation`), so no comparator can suppress a basis change or pass
+it off as expected.
 
 ### `vary` and `check`
 
-`vary`'s `within` and `beyond` entries gain `generated` and `because`. A rerun
-that reworded a summary from an equal basis is `within`, so the runs are
-reproducible. A rerun whose basis moved (most often `model`, when a provider
-updated a model behind an unpinned name) is `beyond`, with a reason such as
-"Regenerated because the model changed".
+`vary`'s `within` and `beyond` entries also include `generated` and `because`. A
+re-run that reworded a summary from the same basis lands in `within`
+(reproducible), while a re-run whose basis shifted — most commonly `model`, when
+a provider silently updated an unpinned alias — lands in `beyond` with a message
+like "Regenerated because the model changed".
 
-`projections check` reruns with the generation store the first run filled, so a
-well-behaved extractor's rerun is byte-identical. When the rerun's generated
-values are equal only within tolerance, the check still passes, with a note: "12
+`projections check` feeds the generation store populated by the first run into
+the second run, so a well-behaved extractor produces byte-identical output. If a
+re-run only agrees within tolerance, `check` still passes and prints a tip: "12
 generated values were regenerated from the same inputs. Reuse them through the
 generation store for identical reruns."
 
 ## 3. Comparator rules
 
-`Varied` gains two fields. Both are always present, so rules never need a guard:
+`Varied` gains two always-present fields so rules don't need null guards:
 
 | Field       | Type           | Value                                                                                          |
 | ----------- | -------------- | ---------------------------------------------------------------------------------------------- |
 | `generated` | `bool`         | Whether the path is a generated value. `false` for every other volatile value                  |
 | `because`   | `list<string>` | The basis parts that moved, sorted. `[]` when the bases are equal or the value isn't generated |
 
-Two functions join the library, under a new `generated` namespace:
+Two helpers are added under the `generated` namespace:
 
 <!-- prettier-ignore -->
 | Function | Signature | Why it's in the engine |
@@ -254,8 +253,7 @@ Two functions join the library, under a new `generated` namespace:
 | `generated.because(change)` | `Change -> list<string>` | The parts that moved across all of a change's generated values, unique and sorted by UTF-16 code units. Deduplicating and sorting a list is list surgery CEL can't do in order |
 | `generated.only(change, parts)` | `Change, list<string> -> bool` | Whether the pair differs only in generated values whose bases moved only in `parts`: the change would be `unchanged` if those parts were ignored. It needs the core's content comparison modulo paths, which CEL can't express |
 
-A file that treats model upgrades as minor puts them in a step of their own,
-last, and says so:
+For example, a comparator can group model-only upgrades into a final step:
 
 ```yaml
 classify:
@@ -270,25 +268,23 @@ steps:
       summary: "'Regenerated with a different model'"
 ```
 
-Rules classify and order; they can't make such a change `unchanged`. The core
-judges variation, and
-["a comparator cannot hide a change"](../contracts/comparisons.md) stays true.
-An extractor that doesn't want a model upgrade to count leaves the model out of
-the basis. Then the core judges it the same way in every comparator and every
-host, and `check` agrees.
+Rules can classify and order these changes, but never demote them to `unchanged`
+— preserving ["a comparator cannot hide a change"](../contracts/comparisons.md).
+If an extractor doesn't want model upgrades to count as changes, it simply omits
+the model from the basis so every comparator, host, and `check` run agrees.
 
 ## 4. Bases and the generation store
 
 ### Hashing a basis
 
-A basis is plain data, so any language can produce one. Its **digest**, half of
-the store's key, is `sha256:` followed by the lowercase hex SHA-256 of the basis
-object's [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785) canonical JSON, the
-same canonicalization the engine uses for extractions. Since every part is a
-string, that is the object's keys sorted by UTF-16 code units, each string
-escaped as `JSON.stringify` escapes it, with no whitespace.
+Because a basis is plain JSON, any language can build one. Its **digest** (half
+of the generation store's key) is `sha256:` followed by the lowercase hex
+SHA-256 of its [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785) canonical JSON
+— the same canonicalizer the engine uses for extractions. Since every value is a
+string, that boils down to UTF-16-sorted keys, `JSON.stringify`-style string
+escaping, and no whitespace.
 
-The SDK helpers do this. In JavaScript, a new entry of the published package,
+The SDK provides helpers for this. In JavaScript, they live at
 `@githubnext/projections/extractor`:
 
 ```js
@@ -301,121 +297,115 @@ const summaryBasis = basis({input: classSource, prompt: SYSTEM_PROMPT, model: 'f
 const summary = await store.generate('/data/summary', summaryBasis, () => model.summarize(classSource))
 ```
 
-- `basis(parts, {verbatim = ['model']} = {})` hashes each part: a string as its
-  UTF-8 bytes, anything else as its canonical JSON. It returns `sha256:<hex>`.
-  Parts named in `verbatim` are kept as written and must be strings of at most
-  256 bytes, so a model ID stays readable. It checks the part limits and throws
-  on a violation.
-- `basisDigest(basis)` returns the basis digest.
-- `generations(request)` loads the snapshot the request names, if any. Its
-  `get(path, basis)` returns a stored value or `undefined`, where `path` is the
-  declaration's `path` (with its `*` segments, not a concrete index).
-  `generate(path, basis, produce)` returns the stored value when there is one,
-  and otherwise awaits `produce()`.
+- `basis(parts, {verbatim = ['model']} = {})` hashes each part (UTF-8 bytes for
+  strings, canonical JSON for anything else) into `sha256:<hex>`, keeps any
+  `verbatim` parts untouched (up to 256 bytes, so model IDs stay readable), and
+  throws if part limits are exceeded.
+- `basisDigest(basis)` computes the basis digest.
+- `generations(request)` loads the snapshot referenced in the request (if any).
+  `get(path, basis)` returns a stored value or `undefined` for the declaration's
+  `path` pattern (including `*` segments, not a concrete index), and
+  `generate(path, basis, produce)` returns the cached value or awaits
+  `produce()`.
 
-The Rust extractor SDK gets the same pieces (`Basis`, `basis_digest`,
-`Context::generations`) so the engine, the CLI and the SDK share one tested
-definition. Rust extractors are built-ins today, and none of them generates
-values.
+The Rust extractor SDK ships the matching helpers (`Basis`, `basis_digest`,
+`Context::generations`) so the engine, CLI, and SDK share one tested
+implementation. (Today's built-in Rust extractors don't generate values.)
 
 ### What belongs in a basis
 
-The basis says what the value was generated from, so that the engine can tell a
-real change from rewording. Put in it everything that should regenerate the
-value when it changes, and nothing else. The guide will carry this guidance:
+Put everything into the basis that _should_ trigger regeneration when it
+changes, and leave out everything else. Our authoring guide recommends:
 
-- **The input, narrowly.** Hash exactly what the model reads about the subject:
-  the class's source, not the whole file, so an edit elsewhere in the file
-  doesn't regenerate the class's summary. If formatting-only edits shouldn't
-  count, normalize the text (line endings, trailing whitespace) before hashing
-  it **and** before sending it, so the model and the hash see the same thing.
-- **The prompt.** Hash the full system prompt and template, few-shot examples
-  included. A prompt edit then regenerates every value, which is what a prompt
-  edit means. Retrieved context the model reads is input too: hash it under its
-  own part (`context`) so a change can say which moved.
-- **The model, when a model change should count.** Use a dated or versioned
-  model ID (`gpt-4o-2024-08-06`), not an alias that silently moves. If a model
-  upgrade shouldn't regenerate anything, leave the model out: the store keeps
-  serving the earlier text until the input or prompt changes. Include generation
-  parameters that change what comes back (temperature, maximum length) in the
-  prompt part, or in a `parameters` part.
-- **Not** sampling seeds, timestamps, request IDs, the commit or revision, file
-  paths the model never sees, or the extractor's version. If the extractor
-  changed how it builds the prompt, the prompt part already changed.
-- **Never** credentials, endpoints or account names, not even hashed. A basis is
-  data: it's saved, published in CI artifacts and shown in hosts.
+- **Scope the input tightly.** Hash only what the model actually reads — the
+  class's source, not the entire file — so editing another class in the same
+  file doesn't regenerate this summary. If whitespace-only edits shouldn't
+  trigger regeneration, normalize line endings and trailing whitespace before
+  _both_ hashing and sending to the model.
+- **Include the prompt.** Hash the full system prompt, template, and few-shot
+  examples so prompt changes regenerate every value as expected. Any retrieved
+  context the model sees is also an input — put it under its own part
+  (`context`) so changes explain what moved.
+- **Include the model only if upgrades should count.** Pin a dated or versioned
+  model ID (`gpt-4o-2024-08-06`) rather than a floating alias. If model upgrades
+  shouldn't regenerate anything, leave `model` out and the store will keep
+  serving earlier text until the input or prompt changes. Generation parameters
+  that alter output (temperature, max length) belong in the prompt part or a
+  `parameters` part.
+- **Leave out incidental metadata:** sampling seeds, timestamps, request IDs,
+  commit hashes, file paths the model never sees, or extractor versions (if the
+  extractor changed how it builds the prompt, the prompt hash already moved).
+- **Never include secrets:** no credentials, endpoints, or account names, not
+  even hashed. Bases are plain data that get saved, uploaded in CI artifacts,
+  and displayed in hosts.
 
-Name parts after what can move, so the reason reads well: "Regenerated because
-the input changed" is the point of having parts. One opaque hash would work for
-equality and say nothing.
+Naming parts after what can move is what makes reasons readable ("Regenerated
+because the input changed"); a single opaque hash would check equality but say
+nothing.
 
 ### The generation store
 
-The runner, not the extractor, owns the store:
+The runner owns the store, not the extractor:
 
-- **Where.** The per-user cache directory, beside the extraction cache:
-  `generations/<repository>/<SHA-256 of the projection ID>.jsonl`. The
-  repository is named by its Git common directory, as for extractions. Each line
-  is
+- **Location.** Stored in the per-user cache directory beside extractions:
+  `generations/<repository>/<SHA-256 of the projection ID>.jsonl` (keyed by the
+  repo's Git common directory). Each line has the form
   `{"path": "/data/summary", "basis": "sha256:<hex>", "value": <JSON>, "used": "<UTC time>"}`,
-  keyed by the declaration's `path` (its pattern, `*` segments and all) and the
-  basis digest. Two fields with equal bases don't share a value, and a field
-  whose declared path moves is regenerated once.
-- **Filling it.** After an extraction is validated, the runner records every
-  generated value it holds under its declared path and basis digest. A key
-  already stored keeps its earlier value, so text converges on the first
-  generation instead of drifting with each rerun. Extractions the runner reuses
-  or loads are harvested too: cached extractions, and extractions from verified
+  keyed by the declaration's `path` pattern (including `*` segments) and basis
+  digest. Two different fields with identical bases don't share a value, and
+  renaming a declared path simply regenerates once.
+- **Harvesting.** Whenever an extraction passes validation, the runner records
+  all of its generated values under their declared path and basis digest.
+  Existing keys keep their first recorded value so wording converges instead of
+  drifting. Cached extractions and verified
   [CI artifacts](../runner/caches.md#ci-artifacts-as-a-source) (`--ci`,
-  `--artifact`). Stale extractions aren't harvested.
-- **Handing it over.** When the projection's store isn't empty, the runner
-  writes a read-only snapshot of it to a private temporary file (`0600`, removed
-  after the run) and names it in the request:
-  `"generations": {"file": "/abs/path/generations.jsonl"}`. Under container
-  isolation it's mounted read-only at `/generations.jsonl` and the request names
-  that path. The snapshot is at most 32 MiB. An extractor must work without it.
-- **Bounds.** 16 MiB per projection, with the least recently used entries
-  evicted first. An entry is used when an extraction carries its key.
-  `PROJECTIONS_GENERATION_CACHE_BYTES` caps the whole store (default 128 MiB).
-  Removing it is always safe; the next run regenerates.
-- **Starting fresh.** `--regenerate` on `show`, `compare` and `check` sends no
-  snapshot for that run. Its results are still harvested, but earlier keys keep
-  their earlier values.
+  `--artifact`) are harvested too; stale extractions are skipped.
+- **Passing snapshots to extractors.** When the store has entries, the runner
+  writes a private read-only snapshot (`0600`, deleted after the run, capped at
+  32 MiB) and passes `"generations": {"file": "/abs/path/generations.jsonl"}` in
+  the request (inside containers, mounted read-only at `/generations.jsonl`).
+  Extractors must still work if no snapshot is provided.
+- **Bounds.** Each projection is capped at 16 MiB (LRU eviction, refreshed
+  whenever an extraction uses a key), and the global store defaults to 128 MiB
+  (`PROJECTIONS_GENERATION_CACHE_BYTES`). Deleting the store is always safe; the
+  next run simply regenerates.
+- **Fresh runs.** Passing `--regenerate` to `show`, `compare`, or `check` omits
+  the snapshot for that run. Results are still harvested, while previously
+  stored keys retain their original values.
 
-In a comparison the runner extracts the before side first and harvests it before
-extracting the after side, so a pull request's unchanged classes get the base's
-exact text even on a cold cache, including in CI, where every job starts with an
-empty cache. With `--ci`, local runs reuse CI's text, so a local working-tree
-comparison with CI's official extraction shows no rewording.
+During a comparison, the runner extracts and harvests the before side before
+running the after side. That means unchanged classes in a PR reuse the base's
+exact text even on a cold cache — including in CI, where every job starts clean.
+With `--ci`, local runs reuse CI's text too, eliminating spurious rewording in
+working-tree comparisons.
 
-The extractor can't write to the store. It needs no home directory, works in a
-read-only container, and can't poison another projection's or revision's values.
-Every stored value came out of an extraction that passed validation.
+Because extractors never write to the store, they need no home directory, work
+inside read-only containers, and can't poison another projection or revision.
+Every stored value comes exclusively from an extraction that passed validation.
 
 ## 5. Presentation
 
 ### The Generated mark
 
-Every generated field carries a quiet **Generated** label next to its name: the
-new `generated` icon and the word, in the muted foreground color, at the field
-label's size. A summary is never mistaken for an extracted fact. Like every
-icon, it accompanies its word and never stands alone. It is a field label, not a
-change badge, so it never goes in the `NameLine` beside the status.
+Every generated field carries a quiet **Generated** label beside its name — the
+`generated` icon paired with the word in muted foreground color at field-label
+size — so a generated summary is never mistaken for a parsed fact. Like every
+icon in the system, it always accompanies its label, and because it is a field
+marker rather than a change badge, it never appears in `NameLine` next to change
+status.
 
-The icon joins the SDK vocabulary as `generated`, Lucide's `Sparkle` outline
-(the single four-point star), in the same pipeline as `varied`
-(`packages/renderers/sdk/src/icons.ts`, the theme token `icon-generated` and the
-VS Code host's codicon map, where it's `sparkle`). In the vocabulary's
-documentation it's listed under volatile data: "`generated`, a value an
+The `generated` icon uses Lucide's `Sparkle` outline (single four-point star)
+through the same pipeline as `varied` (`packages/renderers/sdk/src/icons.ts`,
+theme token `icon-generated`, and `sparkle` in VS Code's codicon map). In the
+vocabulary docs under volatile data, it is defined as: "`generated`, a value an
 extractor generated from a recorded basis. Neutral, never a change kind."
 
 ### Equal basis, different text
 
-The value is expected variation: the item is `unchanged`, with no emphasis,
-status or motion at any progress or in any mode (`highlight-scope` and
-`diff-neutral` still hold). Where a field is shown (the host's detail card, or a
-renderer that draws the text with the kit), it shows After's text, never a word
-diff:
+When bases match, rewording is expected variation: the item stays `unchanged`
+with no emphasis, status badge, or motion in any mode (`highlight-scope` and
+`diff-neutral` still apply). In the detail card or kit-rendered field, we show
+After's text with no word diff:
 
 ```
  Summary  ✦ Generated
@@ -424,17 +414,16 @@ diff:
  ∿ Regenerated from the same inputs          [ Before's wording ]
 ```
 
-`∿` is the `varied` icon in the text color. The toggle is a pressed-state button
-(`aria-pressed`) that swaps the passage for Before's text in place, labeled
-"After's wording" while pressed. Both passages are laid out in one grid cell,
-the inactive one hidden, so the box always has the taller one's height and
-toggling shifts nothing.
+`∿` is the `varied` icon in body text color. Clicking the pressed-state toggle
+(`aria-pressed`) swaps in Before's text and relabels the button "After's
+wording". Both passages share a single grid cell (with the inactive one hidden)
+so the container keeps the taller height and toggling causes zero layout shift.
 
 ### Changed basis
 
-The value changed for a reason. The item is `modified` and animates as any
-modified item does. The field shows both passages whole, side by side (stacked
-when narrow), with the reason above them:
+When the basis changed, the item is `modified` and animates like any modified
+item. The field displays both passages side by side (stacked on narrow widths)
+beneath the reason:
 
 ```
  Summary  ✦ Generated                                      ~ Modified
@@ -447,184 +436,169 @@ when narrow), with the reason above them:
  [ Word diff ]
 ```
 
-"Word diff" is an optional toggle that replaces the pair with one passage marked
-up as the text-diff renderer marks words. It's off by default, because a
-regenerated passage usually rewords more than it changes. The two layouts share
-one grid cell like the equal-basis toggle, so switching never moves what's
-below.
+"Word diff" toggles to a single inline-marked passage styled like the text-diff
+renderer. It starts off by default because regenerated prose usually rewords
+more than it semantically changes, and both layouts share one grid cell so
+toggling doesn't shift anything below.
 
-The reason names the moved parts: `input` is "the input changed", `prompt` "the
-prompt changed", `model` "the model changed (`fake-summarizer@1` →
-`fake-summarizer@2`)", using a verbatim part's values. Any other part is its
-name in mono, "`context` changed". Several join in a sentence: "Regenerated
-because the input and the prompt changed." When the wording is equal, the
-passages collapse to one, with "the wording is the same". A value present on one
-side only reads "Generated only after" or "Generated only before".
+The reason sentence translates conventional part names: `input` becomes "the
+input changed", `prompt` becomes "the prompt changed", and `model` becomes "the
+model changed (`fake-summarizer@1` → `fake-summarizer@2`)" using the verbatim
+model IDs. Custom part names appear in monospace ("`context` changed"), and
+multiple parts join naturally ("Regenerated because the input and the prompt
+changed."). If the text happens to be identical, the two panes collapse into one
+with "the wording is the same"; one-sided values say "Generated only after" or
+"Generated only before".
 
-A generated value that isn't a string is shown as formatted JSON in mono, in the
-same two forms, without a word diff.
+Non-string generated values render as formatted monospace JSON in the same two
+layouts without a word diff.
 
 ### Where it appears
 
-- **Renderer SDK.** `generatedPaths(extraction, item)` returns the item's
-  generated paths from the extraction's declarations. `generatedWords(entry)`
-  returns the reason sentence above. `VariedChange` already carries `varied`, so
-  `generated` and `because` arrive with no new messages.
-- **Kit.** `GeneratedText` (`{before?, after, entry?}`) draws a generated field
-  in both forms, with the mark and the toggles. Renderers that show summaries
-  use it and draw nothing of their own for the states, as for every other kit
-  state.
-- **Hosts** (web and VS Code). The detail card lists a selected item's generated
-  fields first, in these forms. The basis object is hidden from the plain field
-  list, because it's judged through its value. Its parts appear in a collapsed
-  "Basis" disclosure, hashes shortened (`sha256:5b0e…`, the full value as the
-  title) and model IDs in mono. The summary bar counts regenerated values on
-  their own, as a neutral "N regenerated" toggle beside "N varied within
-  tolerance", that shows only them the way "varied only" does (as filter IDs). N
-  is the number of `unchanged` changes with a generated `varied` entry; "varied
-  within tolerance" counts the `unchanged` changes with any other `varied`
-  entry, so a change with both is in both.
-- **Agent viewer.** It follows the hosts, with no editing.
+- **Renderer SDK.** `generatedPaths(extraction, item)` lists an item's generated
+  paths from the extraction declarations, and `generatedWords(entry)` formats
+  the reason sentence. Because `VariedChange` already carries `varied`,
+  `generated` and `because` flow through with no new protocol messages.
+- **Kit.** `GeneratedText` (`{before?, after, entry?}`) renders both states, the
+  Generated mark, and the toggles so renderers don't reimplement them.
+- **Hosts** (web and VS Code). The detail card puts a selected item's generated
+  fields at the top and hides the raw basis object from the plain field list,
+  tucking its parts inside a collapsed "Basis" disclosure with shortened hashes
+  (`sha256:5b0e…`, full hash on hover) and monospace model IDs. The summary bar
+  shows a neutral "N regenerated" filter toggle next to "N varied within
+  tolerance", where N counts `unchanged` items with a generated `varied` entry
+  and "varied within tolerance" counts `unchanged` items with any non-generated
+  `varied` entry (an item with both counts in both).
+- **Agent viewer.** Matches the hosts without editing controls.
 
-Casing follows the house rule: the words are sentence case, part names and model
-IDs are data shown verbatim in mono, and nothing is recased in CSS.
+Labels follow our sentence-case rule, while part names and model IDs render
+verbatim in monospace with no CSS recasing.
 
 ## 6. Trust, provenance and agents
 
-An extractor that calls a model needs credentials and the network, so it's
-repository code like any custom command, and it runs only under `--trust`. Its
-definition declares `execution.network: true` and its credential variables in
-`execution.environment`. Generated values don't change any trust rule. Hosted
-views never run extractors, so they never generate. They show the generated
-values CI published and compare bases like every host.
+Because an extractor calling a model needs credentials and network access, it is
+ordinary trusted repository code (`--trust`) declaring `execution.network: true`
+and its credential variable names in `execution.environment`. Generated values
+don't alter any trust boundary: hosted views never run extractors, they simply
+display CI-published values and compare bases.
 
-Recommend `execution.determinism: environmental`. Note that the environment
-fingerprint hashes granted variables' values, so rotating an API key invalidates
-cached extractions, but not the generation store, which is keyed by basis.
-`check` warns when a definition that declares `pure` produces generated values:
-a `pure` extraction is cached by tree alone and a rerun is expected to match,
-which a model call can't promise.
+We recommend `execution.determinism: environmental`. Note that the environment
+fingerprint hashes granted environment variable values, so rotating an API key
+invalidates cached extractions without invalidating the basis-keyed generation
+store. `check` warns if a `pure` definition produces generated values, since
+`pure` extractions cache by tree alone and are expected to reproduce identically
+— something a model call can't guarantee.
 
-The runner adds `provenance.generated` to every saved extraction that has
-generated values:
+Every saved extraction with generated values gets a `provenance.generated`
+block:
 
 ```json
 "generated": {"values": 128, "reused": 126, "sources": ["local", "ci"]}
 ```
 
-`values` is the number of concrete generated values in the extraction, and
-`reused` how many carry a key and value that were already in the snapshot.
-`sources` lists which stores contributed. Like the rest of provenance, it
-describes the run and grants nothing.
+`values` is the total number of generated values emitted, `reused` is how many
+matched an existing key and value from the snapshot, and `sources` lists which
+stores contributed. Like all provenance, it is informational and grants nothing.
 
-Agents' tools mention generated fields so a model doesn't present a summary as a
-fact:
+Agent tools surface generated fields explicitly so a model won't mistake a
+summary for an extracted code fact:
 
 - `compare`: "3 generated values changed (input: 2, model: 1); 41 were
-  regenerated from the same inputs (within tolerance)". Each listed change says
-  which of its fields were generated, and `structuredContent` carries `varied`.
-- `current_view`: the selection's generated fields and the view's counts.
-- `check`: the reuse note above.
+  regenerated from the same inputs (within tolerance)", with each changed item
+  noting which fields were generated and `structuredContent` carrying `varied`.
+- `current_view`: the selected item's generated fields and the view's counts.
+- `check`: the generation-store reuse hint above.
 
 ## 7. Example
 
-`examples/extractors/class-summaries` is a sample custom extractor that
-summarizes TypeScript classes with a stubbed model. It finds classes through
-`typescript-common`, and asks a deterministic fake model, `fake-summarizer@1`,
-for a summary built from the class's members. It makes no network or paid calls.
-The fake chooses among a few phrasings by hashing the input with
-`FAKE_SUMMARIZER_SAMPLE`, so tests can produce different wording from an equal
-basis without randomness. It uses `@githubnext/projections/extractor` for
-`basis()` and the store, and declares:
+`examples/extractors/class-summaries` demonstrates the flow by summarizing
+TypeScript classes with a deterministic stub model (`fake-summarizer@1`) via
+`typescript-common`, making zero network or paid calls. The stub picks among
+several phrasings by hashing the input with `FAKE_SUMMARIZER_SAMPLE`, letting
+tests exercise equal-basis rewording without randomness. It uses
+`@githubnext/projections/extractor` for `basis()` and the store, declaring:
 
 ```json
 {"kinds": ["class"], "path": "/data/summary", "generated": true, "basis": "/data/summaryBasis"}
 ```
 
-Its fixtures cover equal-basis rewording, an input change and a model-only
-change. The graph renderer's `class-summaries` scenario
-(`packages/renderers/graph/scenarios.json`) compares such classes, whose detail
-cards show each summary with `GeneratedText`, with an example comparator,
-`examples/comparators/model-upgrades`, which uses `generated.only` to collect
-model-only changes in a final step.
+Its fixtures exercise equal-basis rewording, input changes, and model-only
+changes. The graph renderer's `class-summaries` scenario
+(`packages/renderers/graph/scenarios.json`) renders those detail cards with
+`GeneratedText`, paired with `examples/comparators/model-upgrades` using
+`generated.only` to group model-only updates into a final step.
 
 ### Tests
 
-- Engine unit tests: equal and unequal bases, `because` (including parts present
-  on one side), the after side's basis pointer winning, every validation code,
-  and unchanged digests and comparisons for extractions without the fields.
-- Rules tests for the new `Varied` fields, `generated.because` and
+- Engine unit tests covering equal and unequal bases, `because` (including
+  one-sided parts), after-side basis precedence, every validation error code,
+  and byte-identical digests/comparisons when the fields aren't used.
+- Rules tests for the new `Varied` fields, `generated.because`, and
   `generated.only`.
-- SDK tests: basis hashing (golden digests shared by the JavaScript and Rust
-  implementations), the store's lookup and `generate`, and the runner's harvest,
-  keep-first, eviction and `--regenerate`.
-- Renderer harness and host browser specs for both presentations: the toggle
-  swaps text without layout shift, word diff, the reason sentence, and the
-  Generated mark on every generated field.
-- A CLI compare test across a basis change, a `check` test that a reworded rerun
-  from an equal basis passes, and the `pure` warning.
+- SDK tests for basis hashing (golden digests shared between JS and Rust), store
+  lookups and `generate`, plus runner harvesting, keep-first semantics,
+  eviction, and `--regenerate`.
+- Renderer harness and host browser specs verifying both presentations:
+  layout-shift-free toggles, word diff, reason phrasing, and the Generated mark.
+- CLI tests for `compare` across a basis change, `check` passing on equal-basis
+  rewording, and the `pure` warning.
 
 ## Alternatives rejected
 
-- **A separate `generated` list beside `volatile`.** It would duplicate
-  pointers, kinds, the tighter-wins rule, `vary`, `check` and the hosts'
-  variation filters. A generated value is exactly what volatile already means, a
-  value that may differ between runs at one revision. Only the tolerance is new.
-- **Judging text semantically** with similarity thresholds, embeddings or a
-  model as judge in the comparator. Comparators are pure and deterministic, and
-  run in browsers and on github.com without network. Any threshold would be
-  arbitrary and unexplainable. The basis gives an exact answer the extractor
-  controls.
-- **Letting the engine compute the basis** from the item's evidence or source
-  files. The engine can't know what the model read or what the prompt was. Only
-  the extractor does.
-- **One opaque hash.** It's enough for equality, but it can't say why a value
-  regenerated, and neither a tolerance nor a rule can tell a model upgrade from
-  an input change. Named parts cost a few bytes.
-- **Letting rules demote model-only changes to `unchanged`.** That breaks "a
-  comparator cannot hide a change", and two comparators would disagree about the
-  same pair. The extractor decides what counts by what it puts in the basis.
-- **A tolerance that ignores some basis parts**
-  (`tolerance: {ignore: ["model"]}`). It would let an extraction say "the model
-  is recorded but doesn't count", but the extractor already controls the basis:
-  a part that shouldn't count is left out. One mechanism is simpler to explain,
-  and nothing needs a recorded-but-ignored part yet.
-- **Word-diffing equal-basis variation, or always showing both texts.**
-  Rewording from the same inputs carries no information, and a diff of it is
-  noise that looks like a change. One quiet toggle is enough for the curious.
-- **An extractor-owned cache directory.** Extractors get no home directory, may
-  run in read-only containers, and a writable shared cache would let repository
-  code plant text in other revisions' extractions. A runner-owned store filled
-  from validated extractions avoids all three, and makes CI artifacts a source
-  with no new artifact format.
-- **Relying on the extraction cache alone.** It reuses whole extractions keyed
-  by tree, so any edit regenerates every value. Reuse per value is what keeps
-  untouched classes' text identical.
-- **The basis outside `data`**, as a new per-item field. That changes the item
-  model for every extraction. A pointer into `data` reuses the `spread`
-  machinery and keeps items as they are.
+- **A separate `generated` list beside `volatile`.** That would duplicate path
+  pointers, kinds, tighter-wins precedence, `vary`, `check`, and variation
+  filters. A generated value _is_ a volatile value — only its tolerance rule is
+  new.
+- **Semantic text comparison** using similarity thresholds, embeddings, or an
+  LLM judge inside the comparator. Comparators must stay pure, deterministic,
+  and network-free across browsers and github.com, and similarity thresholds are
+  arbitrary and opaque. Comparing bases gives an exact, extractor-controlled
+  answer.
+- **Having the engine compute the basis** from source files or evidence. Only
+  the extractor knows what prompt and slice of input the model actually saw.
+- **One opaque hash.** Enough for equality, but useless for explaining _why_ a
+  value regenerated or distinguishing a model upgrade from a code edit. Named
+  parts cost only a few bytes.
+- **Letting rules demote model-only changes to `unchanged`.** That breaks the
+  guarantee that comparators can't hide changes and would let two comparators
+  disagree on the same pair. The extractor decides what counts by choosing what
+  goes into the basis.
+- **Ignoring selected basis parts in a tolerance**
+  (`tolerance: {ignore: ["model"]}`). Since the extractor already controls the
+  basis, leaving a part out is simpler than recording and ignoring it.
+- **Word-diffing equal-basis variation or always showing both texts.**
+  Rewordings from identical inputs carry no signal, and diffing them looks like
+  a real change. One quiet toggle is plenty.
+- **An extractor-owned cache directory.** Extractors have no home directory, may
+  run in read-only containers, and shouldn't be able to poison other revisions.
+  A runner-owned store populated from validated extractions avoids all three and
+  reuses CI artifacts with no new artifact format.
+- **Relying on the extraction cache alone.** Whole-extraction caching is keyed
+  by Git tree, so any unrelated edit would regenerate every summary. Per-value
+  reuse keeps untouched classes stable.
+- **Putting the basis outside `data`** as a new top-level item field. That would
+  change the core item schema for every extraction; a pointer into `data` reuses
+  the existing `spread` machinery cleanly.
 
 ## Decided questions
 
-The first draft left these open. The coordinator decided them before
-implementation:
+These were open in the first draft and decided before implementation:
 
-1. **No `tolerance.ignore`.** The extractor controls what goes in the basis. If
-   a model change shouldn't count, it leaves the model out. Rules may classify
-   and order changes only.
-2. **The store is keyed by path and basis**, the declaration's path pattern and
-   the basis digest, so two fields with equal bases never share a value.
-   Regenerating a field whose path moved is an acceptable cost.
-3. **No built-in renderer draws generated text yet.** It appears in detail cards
-   and custom renderers.
-4. **The icon is Lucide's `Sparkle`.**
-5. **Regenerated values have their own count** in the summary bar, "N
-   regenerated", separate from "varied within tolerance".
-6. **Any JSON value may be generated.** Non-strings show as JSON, without a word
+1. **No `tolerance.ignore`.** Extractors decide what counts by choosing what
+   goes into the basis; rules only classify and order changes.
+2. **Store keyed by path and basis** (declaration path pattern + basis digest),
+   so two fields with identical bases never collide and moving a path simply
+   regenerates once.
+3. **No built-in renderer renders generated text yet** — it lives in detail
+   cards and custom renderers for now.
+4. **Icon is Lucide's `Sparkle`.**
+5. **Dedicated summary count:** "N regenerated" appears alongside "varied within
+   tolerance".
+6. **Any JSON value can be generated**; non-strings render as JSON without word
    diff.
-7. **CI relies on extracting the base first in the same job.** The Action
-   downloads no artifact by default and needs no `actions: read`.
-8. **`check` warns when a `pure` definition produces generated values.**
+7. **CI extracts the base first in the same job** rather than downloading
+   artifacts by default, avoiding `actions: read`.
+8. **`check` warns when a `pure` definition emits generated values.**
 
 ## Schema and interface changes
 
@@ -641,5 +615,5 @@ implementation:
 | CLI                      | The generation store, harvesting, `--regenerate` and `PROJECTIONS_GENERATION_CACHE_BYTES`                   |
 | Agent tools              | `compare`, `current_view` and `check` mention generated values                                              |
 
-Every addition is optional, so extractions, comparisons and requests without
-generated values keep their bytes, their digests and their meaning.
+Every addition is optional, so extractions, comparisons, and requests without
+generated values keep their exact bytes, digests, and semantics.

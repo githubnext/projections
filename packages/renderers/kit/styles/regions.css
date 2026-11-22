@@ -85,6 +85,10 @@
   --projections-ringed: inherit;
   opacity: calc(1 - var(--projections-ringed, 0));
 }
+/* The same value again, for WebKit, which restyles a pseudo-element for `:has()` only when its own rule depends on it. */
+.pk .pk-region.pk-region-run[data-change]:has(:focus-visible)::before {
+  --projections-ringed: inherit;
+}
 /*
  * Chromium places a `clip-path` up to half a pixel from where it paints a box on a half pixel, cutting a stroke in
  * half or leaking one where a side is off; a mask is painted with the box. WebKit's clip is exact, and it parses

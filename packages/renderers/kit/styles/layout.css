@@ -64,6 +64,13 @@
   --projections-ringed: inherit;
   opacity: calc(1 - var(--projections-ringed, 0));
 }
+/*
+ * The same value again, for WebKit: it doesn't restyle a pseudo-element when only `:has()` changes its element's
+ * style (focus inside a group rings it), unless the pseudo-element's own rule depends on that `:has()`.
+ */
+.pk .pk-group:has(:focus-visible)::after {
+  --projections-ringed: inherit;
+}
 .pk .pk-content-view > .pk-group + .pk-group {
   margin-top: var(--projections-space-3);
 }

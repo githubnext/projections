@@ -28,7 +28,7 @@ test('connectInspector builds page URLs on the workbench origin', () => {
 })
 
 test('check failures are flattened with their titles; samples round trip', () => {
-  assert.equal(allChecks.length, 26)
+  assert.equal(allChecks.length, 27)
   const failures = checkFailures([
     {id: 'legend', title: checkTitles.legend, status: 'fail', details: ['two legends'], durationMs: 1},
     {id: 'selection', title: checkTitles.selection, status: 'pass', details: [], durationMs: 1},
@@ -569,6 +569,32 @@ test("one extraction's facts have no changes, and the summary is the same at eve
   const [moving] = await runChecks(scrubbed.driver, subject, {checks: ['summary']})
   assert.equal(moving.status, 'fail')
   assert.match(moving.details.join('\n'), /The summary changes while scrubbing/u)
+})
+
+test('frame-edges fails a rounded corner whose fill is painted over its edge, in either color mode, once', async () => {
+  const frameDriver = covered => ({
+    async load() {
+      return {status: 'ready', steps: [], capabilities: {changeHighlighting: 'supported', comparisonModes: ['diff']}}
+    },
+    async measure(call) {
+      return call === 'frames' ? covered : undefined
+    },
+    sleep: () => Promise.resolve(),
+  })
+  const [passing] = await runChecks(frameDriver([]), subject, {checks: ['frame-edges']})
+  assert.equal(passing.status, 'pass', passing.details.join('\n'))
+  const [failing] = await runChecks(frameDriver([{element: 'div.stage', fill: 'p.note'}]), subject, {checks: ['frame-edges']})
+  assert.equal(failing.status, 'fail')
+  // The same finding in light and dark is one line.
+  assert.deepEqual(failing.details, [
+    "p.note fills a rounded corner of div.stage over its edge: draw the edge over it (the kit's `pk-frame`) (2 like it)",
+  ])
+  const [claimed] = await runChecks(frameDriver([{element: 'section.pk-group', rule: '.card::after { content }'}]), subject, {
+    checks: ['frame-edges'],
+  })
+  assert.deepEqual(claimed.details, [
+    '`.card::after { content }` draws in the `::after` of section.pk-group, a kit frame, which is its edge: draw it in an element of its own (2 like it)',
+  ])
 })
 
 test('nested-accents fails a change color inside another, and lets an item keep its own emphasis', async () => {

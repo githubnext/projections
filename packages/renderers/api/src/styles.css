@@ -6,12 +6,14 @@
   min-width: 0;
   container-type: inline-size;
 }
+/*
+ * The kit's frame (`pk-frame`): its notices and rows, which fill it to its edge, never thin its border round its
+ * corners. The frame clips them to its curve.
+ */
 .api-panel {
   min-width: 0;
-  overflow: hidden;
   background: var(--raised);
   border: var(--projections-border-width) solid var(--divider);
-  border-radius: var(--projections-radius);
 }
 .api-declaration:last-child {
   border-bottom: 0;

@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test'
-import {type CornerReport, cornerReport, openStage} from '@githubnext/projections-renderer-testing/playwright'
+import {type CornerReport, type CoveredFrame, cornerReport, openStage} from '@githubnext/projections-renderer-testing/playwright'
 import {harnessInspector} from '@githubnext/projections-renderer-harness/playwright'
 import {scenarios} from './scenarios.js'
 
@@ -119,3 +119,77 @@ for (const {what, scenario, selector, options, css} of [
     ).toBe(true)
   })
 }
+
+// The `frame-edges` check's probe, on the gallery's scenario stage: a rounded, bordered box its note and nested drawing
+// fill to its edge. As a kit frame its border is drawn over them; as it was before (its own border, clipping them
+// itself), they are painted over it, and the probe finds it.
+test("the frame-edges probe finds a stage filled over its rounded edge, and none once it is the kit's frame", async ({page}, info) => {
+  test.skip(info.project.name !== 'chromium-desktop', 'The probe reads computed styles, the same in every engine.')
+  const stage = await openStage(page, harnessInspector(), {scenario: 'gallery/fixture-change', progress: 1, comparisonMode: 'diff'})
+  await stage.measure('settle')
+  const stages = async () => (await stage.measure<CoveredFrame[]>('frames')).filter(found => found.element.startsWith('div.gl-stage'))
+  expect(await stages()).toEqual([])
+  await stage.frame.locator('.gl-stage').evaluateAll(all => {
+    for (const element of all) {
+      element.classList.remove('pk-frame')
+      if (element instanceof HTMLElement) {
+        element.style.position = 'relative'
+        element.style.overflow = 'hidden'
+        element.style.borderRadius = 'var(--projections-radius-sm)'
+      }
+    }
+  })
+  expect((await stages()).length).toBeGreaterThan(0)
+})
+
+// A kit frame's `::after` is its edge: a renderer's rule drawing there (a badge, a label) loses to the kit's, or moves
+// the edge. The probe finds such a rule; one that only recolors the edge is fine.
+test("the frame-edges probe finds a rule drawing in a kit frame's ::after, and lets one recolor its edge", async ({page}, info) => {
+  test.skip(info.project.name !== 'chromium-desktop', 'The probe reads stylesheets, the same in every engine.')
+  const stage = await openStage(page, harnessInspector(), {scenario: 'gallery/fixture-change', progress: 1, comparisonMode: 'diff'})
+  await stage.measure('settle')
+  const claimed = async () => (await stage.measure<CoveredFrame[]>('frames')).filter(found => found.rule !== undefined)
+  expect(await claimed()).toEqual([])
+  const add = (css: string) =>
+    stage.frame.locator('head').evaluate((head, text) => {
+      const style = document.createElement('style')
+      style.textContent = text
+      head.append(style)
+    }, css)
+  await add('.gl-stage::after { border-color: var(--projections-color-accent) }')
+  expect(await claimed()).toEqual([])
+  await add(".gl-stage::after { content: 'New'; background: var(--projections-color-accent) }")
+  expect((await claimed()).map(found => found.rule)).toEqual(
+    expect.arrayContaining([expect.stringMatching(/^\.gl-stage::after \{ content, background/u)]),
+  )
+})
+
+// The probe's edge cases: modern transparent colors, inset shadows that draw no edge, fitted pill radii, a nested
+// renderer's frame, and overlays that can't draw over a fill.
+test('the frame-edges probe reads transparency, shadows, fitted radii, frames and overlay stacking', async ({page}, info) => {
+  test.skip(info.project.name !== 'chromium-desktop', 'The probe reads computed styles, the same in every engine.')
+  const stage = await openStage(page, harnessInspector(), {scenario: 'gallery/fixture-change', progress: 1, comparisonMode: 'diff'})
+  await stage.measure('settle')
+  await stage.frame.locator('.pk').evaluate(root => {
+    const probe = document.createElement('div')
+    const box = 'width: 160px; height: 60px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 8px'
+    const fill = 'display: block; width: 100%; height: 100%; background: var(--band)'
+    probe.innerHTML = `
+      <style>
+        .fe-under, .fe-faded { position: relative; isolation: isolate; }
+        .fe-under::after, .fe-faded::after { content: ''; position: absolute; inset: -1px; border: 1px solid var(--border); border-radius: inherit; }
+        .fe-under::after { z-index: -1; }
+        .fe-under > span { position: relative; z-index: 1; }
+        .fe-faded::after { opacity: 0; }
+      </style>
+      <div class="fe-clear" style="${box}; border-color: color(srgb 0 0 0 / 0)"><span style="${fill}"></span></div>
+      <div class="fe-shadow" style="${box}"><span style="${fill}; box-shadow: inset 0 0 0 1px transparent"></span></div>
+      <div class="fe-pill" style="${box}; height: 40px; border-radius: 9999px"><span style="${fill}"></span></div>
+      <div class="fe-frame" style="${box}"><iframe style="display: block; width: 100%; height: 100%; border: 0" srcdoc="<p>nested</p>"></iframe></div>
+      <div class="fe-under" style="${box}"><span style="${fill}"></span></div>
+      <div class="fe-faded" style="${box}"><span style="${fill}"></span></div>`
+    root.prepend(probe)
+  })
+  const found = (await stage.measure<CoveredFrame[]>('frames')).map(frame => frame.element).filter(element => element.includes('.fe-'))
+  expect(found.toSorted()).toEqual(['div.fe-faded', 'div.fe-frame', 'div.fe-pill', 'div.fe-shadow', 'div.fe-under'])
+})

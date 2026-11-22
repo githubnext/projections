@@ -317,7 +317,7 @@ test('a classified diff keeps its notices, lists breaking changes first and stat
   assert.doesNotMatch(markup, /api-compatibility-counts|2 breaking|Test rules/u)
   assert.match(
     markup,
-    /^<div class="api-view pk-stage"[^>]*><div class="api-panel" data-projections-content=""><div class="api-compatibility-notices" data-projections-content="">/u,
+    /^<div class="api-view pk-stage"[^>]*><div class="api-panel pk-frame" data-projections-content=""><div class="api-compatibility-notices" data-projections-content="">/u,
   )
   const rows = rowsOf(markup)
   assert.deepEqual(Object.keys(rows), ['legacy', 'parse', 'added', 'greet', 'stable'])

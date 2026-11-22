@@ -25,6 +25,8 @@ import {
   ringFailures,
   ringFocusFailures,
   ringNeutral,
+  coveredFrames,
+  claimedOverlays,
   settle,
   stageInsets,
   stageSurface,
@@ -58,6 +60,7 @@ const calls: Record<ProbeCall, (args: unknown) => unknown> = {
   stageInsets: () => stageInsets(),
   viewport: () => ({width: innerWidth, height: innerHeight}),
   accents: () => nestedAccents(),
+  frames: () => [...coveredFrames(), ...claimedOverlays()],
   routes: () => linkRoutes(),
 }
 

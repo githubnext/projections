@@ -35,7 +35,7 @@ Built-in Projections API renderer: exported declarations with before and after s
 - Handles: `api`
 - Comparison modes: `diff`, `side-by-side`
 - Package: `@githubnext/projections-renderer-api`
-- Example scenarios ([`scenarios.json`](../../packages/renderers/api/scenarios.json)): Payments library 2.0 (.NET); Rate limiter 2.0 (Rust); Ledger 2.0 (Go); Job queue 2.0 (TypeScript); HTTP client 2.0; Parser options; HTTP client surface
+- Example scenarios ([`scenarios.json`](../../packages/renderers/api/scenarios.json)): Payments library 2.0 (.NET); Rate limiter 2.0 (Rust); Ledger 2.0 (Go); Job queue 2.0 (TypeScript); HTTP client 2.0; Parser options; HTTP client surface; A large surface
 
 ## `code-statistics`
 

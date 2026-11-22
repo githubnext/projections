@@ -168,7 +168,7 @@ export function NestedStage({
   usePaintGate(near === false || (near === true && drawn))
 
   return (
-    <div className="gl-stage" data-state={custom ? 'custom' : state.status}>
+    <div className="gl-stage pk-frame" data-state={custom ? 'custom' : state.status}>
       {custom ? (
         <p className="gl-stage-note">
           <span>

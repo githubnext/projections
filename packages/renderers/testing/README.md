@@ -163,6 +163,13 @@ Build the bundle before the tests. The checks:
   painted in one, text and lines included. An item's own status words, icon and
   marks in its own hue are allowed. Checked in the diff and after the
   animation's steps (or at progress 0.5), with the host's highlighting on.
+- `frame-edges`: A box with rounded corners and an edge (a border, or an outline
+  inside it) whose painted contents reach a corner draws its edge over them: as
+  the kit's frame (`pk-frame`, or a `Group`, which draws its border again above
+  its contents), or as an outline its contents sit under. Where a fill's curve
+  meets the edge's, whichever is painted last dilutes the other's antialiased
+  pixels, so an edge painted first is thinner around the curve than along its
+  sides. Checked in the primary view, in light and dark.
 - `link-routes`: Every link a renderer routes between cards (marked
   `data-projections-route`) goes around the cards in its way. When none can, the
   renderer draws the route that overlaps them least, marks it

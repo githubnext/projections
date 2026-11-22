@@ -1,0 +1,4807 @@
+{
+  "protocolVersion": 0,
+  "schema": "api/v0",
+  "entities": [
+    {
+      "id": "Module01",
+      "kind": "class",
+      "label": "Module01",
+      "data": {
+        "signature": "export class Module01"
+      }
+    },
+    {
+      "id": "Module01.operation01",
+      "kind": "method",
+      "label": "Module01.operation01",
+      "data": {
+        "signature": "operation01(input: Input01): Promise<Output01>"
+      }
+    },
+    {
+      "id": "Module01.operation02",
+      "kind": "method",
+      "label": "Module01.operation02",
+      "data": {
+        "signature": "operation02(input: Input02): Promise<Output02>"
+      }
+    },
+    {
+      "id": "Module01.operation03",
+      "kind": "method",
+      "label": "Module01.operation03",
+      "data": {
+        "signature": "operation03(input: Input03): Promise<Output03>"
+      }
+    },
+    {
+      "id": "Module01.operation04",
+      "kind": "method",
+      "label": "Module01.operation04",
+      "data": {
+        "signature": "operation04(input: Input04): Promise<Output04>"
+      }
+    },
+    {
+      "id": "Module01.operation05",
+      "kind": "method",
+      "label": "Module01.operation05",
+      "data": {
+        "signature": "operation05(input: Input05): Promise<Output05>"
+      }
+    },
+    {
+      "id": "Module01.operation06",
+      "kind": "method",
+      "label": "Module01.operation06",
+      "data": {
+        "signature": "operation06(input: Input06): Promise<Output06>"
+      }
+    },
+    {
+      "id": "Module01.operation07",
+      "kind": "method",
+      "label": "Module01.operation07",
+      "data": {
+        "signature": "operation07(input: Input07): Promise<Output07>"
+      }
+    },
+    {
+      "id": "Module01.operation08",
+      "kind": "method",
+      "label": "Module01.operation08",
+      "data": {
+        "signature": "operation08(input: Input08): Promise<Output08>"
+      }
+    },
+    {
+      "id": "Module01.operation09",
+      "kind": "method",
+      "label": "Module01.operation09",
+      "data": {
+        "signature": "operation09(input: Input09): Promise<Output09>"
+      }
+    },
+    {
+      "id": "Module01.operation10",
+      "kind": "method",
+      "label": "Module01.operation10",
+      "data": {
+        "signature": "operation10(input: Input10): Promise<Output10>"
+      }
+    },
+    {
+      "id": "Module01.operation11",
+      "kind": "method",
+      "label": "Module01.operation11",
+      "data": {
+        "signature": "operation11(input: Input11): Promise<Output11>"
+      }
+    },
+    {
+      "id": "Module01.operation12",
+      "kind": "method",
+      "label": "Module01.operation12",
+      "data": {
+        "signature": "operation12(input: Input12): Promise<Output12>"
+      }
+    },
+    {
+      "id": "Module01.operation13",
+      "kind": "method",
+      "label": "Module01.operation13",
+      "data": {
+        "signature": "operation13(input: Input13): Promise<Output13>"
+      }
+    },
+    {
+      "id": "Module01.operation14",
+      "kind": "method",
+      "label": "Module01.operation14",
+      "data": {
+        "signature": "operation14(input: Input14): Promise<Output14>"
+      }
+    },
+    {
+      "id": "Module01.operation15",
+      "kind": "method",
+      "label": "Module01.operation15",
+      "data": {
+        "signature": "operation15(input: Input15): Promise<Output15>"
+      }
+    },
+    {
+      "id": "Module01.operation16",
+      "kind": "method",
+      "label": "Module01.operation16",
+      "data": {
+        "signature": "operation16(input: Input16): Promise<Output16>"
+      }
+    },
+    {
+      "id": "Module01.operation17",
+      "kind": "method",
+      "label": "Module01.operation17",
+      "data": {
+        "signature": "operation17(input: Input17): Promise<Output17>"
+      }
+    },
+    {
+      "id": "Module01.operation18",
+      "kind": "method",
+      "label": "Module01.operation18",
+      "data": {
+        "signature": "operation18(input: Input18): Promise<Output18>"
+      }
+    },
+    {
+      "id": "Module01.operation19",
+      "kind": "method",
+      "label": "Module01.operation19",
+      "data": {
+        "signature": "operation19(input: Input19): Promise<Output19>"
+      }
+    },
+    {
+      "id": "Module01.operation20",
+      "kind": "method",
+      "label": "Module01.operation20",
+      "data": {
+        "signature": "operation20(input: Input20): Promise<Output20>"
+      }
+    },
+    {
+      "id": "Module01.operation21",
+      "kind": "method",
+      "label": "Module01.operation21",
+      "data": {
+        "signature": "operation21(input: Input21): Promise<Output21>"
+      }
+    },
+    {
+      "id": "Module01.operation22",
+      "kind": "method",
+      "label": "Module01.operation22",
+      "data": {
+        "signature": "operation22(input: Input22): Promise<Output22>"
+      }
+    },
+    {
+      "id": "Module01.operation23",
+      "kind": "method",
+      "label": "Module01.operation23",
+      "data": {
+        "signature": "operation23(input: Input23): Promise<Output23>"
+      }
+    },
+    {
+      "id": "Module01.operation24",
+      "kind": "method",
+      "label": "Module01.operation24",
+      "data": {
+        "signature": "operation24(input: Input24): Promise<Output24>"
+      }
+    },
+    {
+      "id": "Module01.operation25",
+      "kind": "method",
+      "label": "Module01.operation25",
+      "data": {
+        "signature": "operation25(input: Input25): Promise<Output25>"
+      }
+    },
+    {
+      "id": "Module01.operation26",
+      "kind": "method",
+      "label": "Module01.operation26",
+      "data": {
+        "signature": "operation26(input: Input26): Promise<Output26>"
+      }
+    },
+    {
+      "id": "Module01.operation27",
+      "kind": "method",
+      "label": "Module01.operation27",
+      "data": {
+        "signature": "operation27(input: Input27): Promise<Output27>"
+      }
+    },
+    {
+      "id": "Module01.operation28",
+      "kind": "method",
+      "label": "Module01.operation28",
+      "data": {
+        "signature": "operation28(input: Input28): Promise<Output28>"
+      }
+    },
+    {
+      "id": "Module01.operation29",
+      "kind": "method",
+      "label": "Module01.operation29",
+      "data": {
+        "signature": "operation29(input: Input29): Promise<Output29>"
+      }
+    },
+    {
+      "id": "Module01.operation30",
+      "kind": "method",
+      "label": "Module01.operation30",
+      "data": {
+        "signature": "operation30(input: Input30): Promise<Output30>"
+      }
+    },
+    {
+      "id": "Module01.operation31",
+      "kind": "method",
+      "label": "Module01.operation31",
+      "data": {
+        "signature": "operation31(input: Input31): Promise<Output31>"
+      }
+    },
+    {
+      "id": "Module01.operation32",
+      "kind": "method",
+      "label": "Module01.operation32",
+      "data": {
+        "signature": "operation32(input: Input32): Promise<Output32>"
+      }
+    },
+    {
+      "id": "Module01.operation33",
+      "kind": "method",
+      "label": "Module01.operation33",
+      "data": {
+        "signature": "operation33(input: Input33): Promise<Output33>"
+      }
+    },
+    {
+      "id": "Module01.operation34",
+      "kind": "method",
+      "label": "Module01.operation34",
+      "data": {
+        "signature": "operation34(input: Input34): Promise<Output34>"
+      }
+    },
+    {
+      "id": "Module01.operation35",
+      "kind": "method",
+      "label": "Module01.operation35",
+      "data": {
+        "signature": "operation35(input: Input35): Promise<Output35>"
+      }
+    },
+    {
+      "id": "Module01.operation36",
+      "kind": "method",
+      "label": "Module01.operation36",
+      "data": {
+        "signature": "operation36(input: Input36): Promise<Output36>"
+      }
+    },
+    {
+      "id": "Module01.operation37",
+      "kind": "method",
+      "label": "Module01.operation37",
+      "data": {
+        "signature": "operation37(input: Input37): Promise<Output37>"
+      }
+    },
+    {
+      "id": "Module01.operation38",
+      "kind": "method",
+      "label": "Module01.operation38",
+      "data": {
+        "signature": "operation38(input: Input38): Promise<Output38>"
+      }
+    },
+    {
+      "id": "Module01.operation39",
+      "kind": "method",
+      "label": "Module01.operation39",
+      "data": {
+        "signature": "operation39(input: Input39): Promise<Output39>"
+      }
+    },
+    {
+      "id": "Module01.operation40",
+      "kind": "method",
+      "label": "Module01.operation40",
+      "data": {
+        "signature": "operation40(input: Input40): Promise<Output40>"
+      }
+    },
+    {
+      "id": "Module01.operation41",
+      "kind": "method",
+      "label": "Module01.operation41",
+      "data": {
+        "signature": "operation41(input: Input41): Promise<Output41>"
+      }
+    },
+    {
+      "id": "Module01.operation42",
+      "kind": "method",
+      "label": "Module01.operation42",
+      "data": {
+        "signature": "operation42(input: Input42): Promise<Output42>"
+      }
+    },
+    {
+      "id": "Module01.operation43",
+      "kind": "method",
+      "label": "Module01.operation43",
+      "data": {
+        "signature": "operation43(input: Input43): Promise<Output43>"
+      }
+    },
+    {
+      "id": "Module01.operation44",
+      "kind": "method",
+      "label": "Module01.operation44",
+      "data": {
+        "signature": "operation44(input: Input44): Promise<Output44>"
+      }
+    },
+    {
+      "id": "Module01.operation45",
+      "kind": "method",
+      "label": "Module01.operation45",
+      "data": {
+        "signature": "operation45(input: Input45): Promise<Output45>"
+      }
+    },
+    {
+      "id": "Module01.operation46",
+      "kind": "method",
+      "label": "Module01.operation46",
+      "data": {
+        "signature": "operation46(input: Input46): Promise<Output46>"
+      }
+    },
+    {
+      "id": "Module01.operation47",
+      "kind": "method",
+      "label": "Module01.operation47",
+      "data": {
+        "signature": "operation47(input: Input47): Promise<Output47>"
+      }
+    },
+    {
+      "id": "Module01.operation48",
+      "kind": "method",
+      "label": "Module01.operation48",
+      "data": {
+        "signature": "operation48(input: Input48): Promise<Output48>"
+      }
+    },
+    {
+      "id": "Module01.operation49",
+      "kind": "method",
+      "label": "Module01.operation49",
+      "data": {
+        "signature": "operation49(input: Input49): Promise<Output49>"
+      }
+    },
+    {
+      "id": "Module02",
+      "kind": "class",
+      "label": "Module02",
+      "data": {
+        "signature": "export class Module02"
+      }
+    },
+    {
+      "id": "Module02.operation01",
+      "kind": "method",
+      "label": "Module02.operation01",
+      "data": {
+        "signature": "operation01(input: Input01): Promise<Output01>"
+      }
+    },
+    {
+      "id": "Module02.operation02",
+      "kind": "method",
+      "label": "Module02.operation02",
+      "data": {
+        "signature": "operation02(input: Input02): Promise<Output02>"
+      }
+    },
+    {
+      "id": "Module02.operation03",
+      "kind": "method",
+      "label": "Module02.operation03",
+      "data": {
+        "signature": "operation03(input: Input03): Promise<Output03>"
+      }
+    },
+    {
+      "id": "Module02.operation04",
+      "kind": "method",
+      "label": "Module02.operation04",
+      "data": {
+        "signature": "operation04(input: Input04): Promise<Output04>"
+      }
+    },
+    {
+      "id": "Module02.operation05",
+      "kind": "method",
+      "label": "Module02.operation05",
+      "data": {
+        "signature": "operation05(input: Input05): Promise<Output05>"
+      }
+    },
+    {
+      "id": "Module02.operation06",
+      "kind": "method",
+      "label": "Module02.operation06",
+      "data": {
+        "signature": "operation06(input: Input06): Promise<Output06>"
+      }
+    },
+    {
+      "id": "Module02.operation07",
+      "kind": "method",
+      "label": "Module02.operation07",
+      "data": {
+        "signature": "operation07(input: Input07): Promise<Output07>"
+      }
+    },
+    {
+      "id": "Module02.operation08",
+      "kind": "method",
+      "label": "Module02.operation08",
+      "data": {
+        "signature": "operation08(input: Input08): Promise<Output08>"
+      }
+    },
+    {
+      "id": "Module02.operation09",
+      "kind": "method",
+      "label": "Module02.operation09",
+      "data": {
+        "signature": "operation09(input: Input09): Promise<Output09>"
+      }
+    },
+    {
+      "id": "Module02.operation10",
+      "kind": "method",
+      "label": "Module02.operation10",
+      "data": {
+        "signature": "operation10(input: Input10): Promise<Output10>"
+      }
+    },
+    {
+      "id": "Module02.operation11",
+      "kind": "method",
+      "label": "Module02.operation11",
+      "data": {
+        "signature": "operation11(input: Input11): Promise<Output11>"
+      }
+    },
+    {
+      "id": "Module02.operation12",
+      "kind": "method",
+      "label": "Module02.operation12",
+      "data": {
+        "signature": "operation12(input: Input12): Promise<Output12>"
+      }
+    },
+    {
+      "id": "Module02.operation13",
+      "kind": "method",
+      "label": "Module02.operation13",
+      "data": {
+        "signature": "operation13(input: Input13): Promise<Output13>"
+      }
+    },
+    {
+      "id": "Module02.operation14",
+      "kind": "method",
+      "label": "Module02.operation14",
+      "data": {
+        "signature": "operation14(input: Input14): Promise<Output14>"
+      }
+    },
+    {
+      "id": "Module02.operation15",
+      "kind": "method",
+      "label": "Module02.operation15",
+      "data": {
+        "signature": "operation15(input: Input15): Promise<Output15>"
+      }
+    },
+    {
+      "id": "Module02.operation16",
+      "kind": "method",
+      "label": "Module02.operation16",
+      "data": {
+        "signature": "operation16(input: Input16): Promise<Output16>"
+      }
+    },
+    {
+      "id": "Module02.operation17",
+      "kind": "method",
+      "label": "Module02.operation17",
+      "data": {
+        "signature": "operation17(input: Input17): Promise<Output17>"
+      }
+    },
+    {
+      "id": "Module02.operation18",
+      "kind": "method",
+      "label": "Module02.operation18",
+      "data": {
+        "signature": "operation18(input: Input18): Promise<Output18>"
+      }
+    },
+    {
+      "id": "Module02.operation19",
+      "kind": "method",
+      "label": "Module02.operation19",
+      "data": {
+        "signature": "operation19(input: Input19): Promise<Output19>"
+      }
+    },
+    {
+      "id": "Module02.operation20",
+      "kind": "method",
+      "label": "Module02.operation20",
+      "data": {
+        "signature": "operation20(input: Input20): Promise<Output20>"
+      }
+    },
+    {
+      "id": "Module02.operation21",
+      "kind": "method",
+      "label": "Module02.operation21",
+      "data": {
+        "signature": "operation21(input: Input21): Promise<Output21>"
+      }
+    },
+    {
+      "id": "Module02.operation22",
+      "kind": "method",
+      "label": "Module02.operation22",
+      "data": {
+        "signature": "operation22(input: Input22): Promise<Output22>"
+      }
+    },
+    {
+      "id": "Module02.operation23",
+      "kind": "method",
+      "label": "Module02.operation23",
+      "data": {
+        "signature": "operation23(input: Input23): Promise<Output23>"
+      }
+    },
+    {
+      "id": "Module02.operation24",
+      "kind": "method",
+      "label": "Module02.operation24",
+      "data": {
+        "signature": "operation24(input: Input24): Promise<Output24>"
+      }
+    },
+    {
+      "id": "Module02.operation25",
+      "kind": "method",
+      "label": "Module02.operation25",
+      "data": {
+        "signature": "operation25(input: Input25): Promise<Output25>"
+      }
+    },
+    {
+      "id": "Module02.operation26",
+      "kind": "method",
+      "label": "Module02.operation26",
+      "data": {
+        "signature": "operation26(input: Input26): Promise<Output26>"
+      }
+    },
+    {
+      "id": "Module02.operation27",
+      "kind": "method",
+      "label": "Module02.operation27",
+      "data": {
+        "signature": "operation27(input: Input27): Promise<Output27>"
+      }
+    },
+    {
+      "id": "Module02.operation28",
+      "kind": "method",
+      "label": "Module02.operation28",
+      "data": {
+        "signature": "operation28(input: Input28): Promise<Output28>"
+      }
+    },
+    {
+      "id": "Module02.operation29",
+      "kind": "method",
+      "label": "Module02.operation29",
+      "data": {
+        "signature": "operation29(input: Input29): Promise<Output29>"
+      }
+    },
+    {
+      "id": "Module02.operation30",
+      "kind": "method",
+      "label": "Module02.operation30",
+      "data": {
+        "signature": "operation30(input: Input30): Promise<Output30>"
+      }
+    },
+    {
+      "id": "Module02.operation31",
+      "kind": "method",
+      "label": "Module02.operation31",
+      "data": {
+        "signature": "operation31(input: Input31): Promise<Output31>"
+      }
+    },
+    {
+      "id": "Module02.operation32",
+      "kind": "method",
+      "label": "Module02.operation32",
+      "data": {
+        "signature": "operation32(input: Input32): Promise<Output32>"
+      }
+    },
+    {
+      "id": "Module02.operation33",
+      "kind": "method",
+      "label": "Module02.operation33",
+      "data": {
+        "signature": "operation33(input: Input33): Promise<Output33>"
+      }
+    },
+    {
+      "id": "Module02.operation34",
+      "kind": "method",
+      "label": "Module02.operation34",
+      "data": {
+        "signature": "operation34(input: Input34): Promise<Output34>"
+      }
+    },
+    {
+      "id": "Module02.operation35",
+      "kind": "method",
+      "label": "Module02.operation35",
+      "data": {
+        "signature": "operation35(input: Input35): Promise<Output35>"
+      }
+    },
+    {
+      "id": "Module02.operation36",
+      "kind": "method",
+      "label": "Module02.operation36",
+      "data": {
+        "signature": "operation36(input: Input36): Promise<Output36>"
+      }
+    },
+    {
+      "id": "Module02.operation37",
+      "kind": "method",
+      "label": "Module02.operation37",
+      "data": {
+        "signature": "operation37(input: Input37): Promise<Output37>"
+      }
+    },
+    {
+      "id": "Module02.operation38",
+      "kind": "method",
+      "label": "Module02.operation38",
+      "data": {
+        "signature": "operation38(input: Input38): Promise<Output38>"
+      }
+    },
+    {
+      "id": "Module02.operation39",
+      "kind": "method",
+      "label": "Module02.operation39",
+      "data": {
+        "signature": "operation39(input: Input39): Promise<Output39>"
+      }
+    },
+    {
+      "id": "Module02.operation40",
+      "kind": "method",
+      "label": "Module02.operation40",
+      "data": {
+        "signature": "operation40(input: Input40): Promise<Output40>"
+      }
+    },
+    {
+      "id": "Module02.operation41",
+      "kind": "method",
+      "label": "Module02.operation41",
+      "data": {
+        "signature": "operation41(input: Input41): Promise<Output41>"
+      }
+    },
+    {
+      "id": "Module02.operation42",
+      "kind": "method",
+      "label": "Module02.operation42",
+      "data": {
+        "signature": "operation42(input: Input42): Promise<Output42>"
+      }
+    },
+    {
+      "id": "Module02.operation43",
+      "kind": "method",
+      "label": "Module02.operation43",
+      "data": {
+        "signature": "operation43(input: Input43): Promise<Output43>"
+      }
+    },
+    {
+      "id": "Module02.operation44",
+      "kind": "method",
+      "label": "Module02.operation44",
+      "data": {
+        "signature": "operation44(input: Input44): Promise<Output44>"
+      }
+    },
+    {
+      "id": "Module02.operation45",
+      "kind": "method",
+      "label": "Module02.operation45",
+      "data": {
+        "signature": "operation45(input: Input45): Promise<Output45>"
+      }
+    },
+    {
+      "id": "Module02.operation46",
+      "kind": "method",
+      "label": "Module02.operation46",
+      "data": {
+        "signature": "operation46(input: Input46): Promise<Output46>"
+      }
+    },
+    {
+      "id": "Module02.operation47",
+      "kind": "method",
+      "label": "Module02.operation47",
+      "data": {
+        "signature": "operation47(input: Input47): Promise<Output47>"
+      }
+    },
+    {
+      "id": "Module02.operation48",
+      "kind": "method",
+      "label": "Module02.operation48",
+      "data": {
+        "signature": "operation48(input: Input48): Promise<Output48>"
+      }
+    },
+    {
+      "id": "Module02.operation49",
+      "kind": "method",
+      "label": "Module02.operation49",
+      "data": {
+        "signature": "operation49(input: Input49): Promise<Output49>"
+      }
+    },
+    {
+      "id": "Module03",
+      "kind": "class",
+      "label": "Module03",
+      "data": {
+        "signature": "export class Module03"
+      }
+    },
+    {
+      "id": "Module03.operation01",
+      "kind": "method",
+      "label": "Module03.operation01",
+      "data": {
+        "signature": "operation01(input: Input01): Promise<Output01>"
+      }
+    },
+    {
+      "id": "Module03.operation02",
+      "kind": "method",
+      "label": "Module03.operation02",
+      "data": {
+        "signature": "operation02(input: Input02): Promise<Output02>"
+      }
+    },
+    {
+      "id": "Module03.operation03",
+      "kind": "method",
+      "label": "Module03.operation03",
+      "data": {
+        "signature": "operation03(input: Input03): Promise<Output03>"
+      }
+    },
+    {
+      "id": "Module03.operation04",
+      "kind": "method",
+      "label": "Module03.operation04",
+      "data": {
+        "signature": "operation04(input: Input04): Promise<Output04>"
+      }
+    },
+    {
+      "id": "Module03.operation05",
+      "kind": "method",
+      "label": "Module03.operation05",
+      "data": {
+        "signature": "operation05(input: Input05): Promise<Output05>"
+      }
+    },
+    {
+      "id": "Module03.operation06",
+      "kind": "method",
+      "label": "Module03.operation06",
+      "data": {
+        "signature": "operation06(input: Input06): Promise<Output06>"
+      }
+    },
+    {
+      "id": "Module03.operation07",
+      "kind": "method",
+      "label": "Module03.operation07",
+      "data": {
+        "signature": "operation07(input: Input07): Promise<Output07>"
+      }
+    },
+    {
+      "id": "Module03.operation08",
+      "kind": "method",
+      "label": "Module03.operation08",
+      "data": {
+        "signature": "operation08(input: Input08): Promise<Output08>"
+      }
+    },
+    {
+      "id": "Module03.operation09",
+      "kind": "method",
+      "label": "Module03.operation09",
+      "data": {
+        "signature": "operation09(input: Input09): Promise<Output09>"
+      }
+    },
+    {
+      "id": "Module03.operation10",
+      "kind": "method",
+      "label": "Module03.operation10",
+      "data": {
+        "signature": "operation10(input: Input10): Promise<Output10>"
+      }
+    },
+    {
+      "id": "Module03.operation11",
+      "kind": "method",
+      "label": "Module03.operation11",
+      "data": {
+        "signature": "operation11(input: Input11): Promise<Output11>"
+      }
+    },
+    {
+      "id": "Module03.operation12",
+      "kind": "method",
+      "label": "Module03.operation12",
+      "data": {
+        "signature": "operation12(input: Input12): Promise<Output12>"
+      }
+    },
+    {
+      "id": "Module03.operation13",
+      "kind": "method",
+      "label": "Module03.operation13",
+      "data": {
+        "signature": "operation13(input: Input13): Promise<Output13>"
+      }
+    },
+    {
+      "id": "Module03.operation14",
+      "kind": "method",
+      "label": "Module03.operation14",
+      "data": {
+        "signature": "operation14(input: Input14): Promise<Output14>"
+      }
+    },
+    {
+      "id": "Module03.operation15",
+      "kind": "method",
+      "label": "Module03.operation15",
+      "data": {
+        "signature": "operation15(input: Input15): Promise<Output15>"
+      }
+    },
+    {
+      "id": "Module03.operation16",
+      "kind": "method",
+      "label": "Module03.operation16",
+      "data": {
+        "signature": "operation16(input: Input16): Promise<Output16>"
+      }
+    },
+    {
+      "id": "Module03.operation17",
+      "kind": "method",
+      "label": "Module03.operation17",
+      "data": {
+        "signature": "operation17(input: Input17): Promise<Output17>"
+      }
+    },
+    {
+      "id": "Module03.operation18",
+      "kind": "method",
+      "label": "Module03.operation18",
+      "data": {
+        "signature": "operation18(input: Input18): Promise<Output18>"
+      }
+    },
+    {
+      "id": "Module03.operation19",
+      "kind": "method",
+      "label": "Module03.operation19",
+      "data": {
+        "signature": "operation19(input: Input19): Promise<Output19>"
+      }
+    },
+    {
+      "id": "Module03.operation20",
+      "kind": "method",
+      "label": "Module03.operation20",
+      "data": {
+        "signature": "operation20(input: Input20): Promise<Output20>"
+      }
+    },
+    {
+      "id": "Module03.operation21",
+      "kind": "method",
+      "label": "Module03.operation21",
+      "data": {
+        "signature": "operation21(input: Input21): Promise<Output21>"
+      }
+    },
+    {
+      "id": "Module03.operation22",
+      "kind": "method",
+      "label": "Module03.operation22",
+      "data": {
+        "signature": "operation22(input: Input22): Promise<Output22>"
+      }
+    },
+    {
+      "id": "Module03.operation23",
+      "kind": "method",
+      "label": "Module03.operation23",
+      "data": {
+        "signature": "operation23(input: Input23): Promise<Output23>"
+      }
+    },
+    {
+      "id": "Module03.operation24",
+      "kind": "method",
+      "label": "Module03.operation24",
+      "data": {
+        "signature": "operation24(input: Input24): Promise<Output24>"
+      }
+    },
+    {
+      "id": "Module03.operation25",
+      "kind": "method",
+      "label": "Module03.operation25",
+      "data": {
+        "signature": "operation25(input: Input25): Promise<Output25>"
+      }
+    },
+    {
+      "id": "Module03.operation26",
+      "kind": "method",
+      "label": "Module03.operation26",
+      "data": {
+        "signature": "operation26(input: Input26): Promise<Output26>"
+      }
+    },
+    {
+      "id": "Module03.operation27",
+      "kind": "method",
+      "label": "Module03.operation27",
+      "data": {
+        "signature": "operation27(input: Input27): Promise<Output27>"
+      }
+    },
+    {
+      "id": "Module03.operation28",
+      "kind": "method",
+      "label": "Module03.operation28",
+      "data": {
+        "signature": "operation28(input: Input28): Promise<Output28>"
+      }
+    },
+    {
+      "id": "Module03.operation29",
+      "kind": "method",
+      "label": "Module03.operation29",
+      "data": {
+        "signature": "operation29(input: Input29): Promise<Output29>"
+      }
+    },
+    {
+      "id": "Module03.operation30",
+      "kind": "method",
+      "label": "Module03.operation30",
+      "data": {
+        "signature": "operation30(input: Input30): Promise<Output30>"
+      }
+    },
+    {
+      "id": "Module03.operation31",
+      "kind": "method",
+      "label": "Module03.operation31",
+      "data": {
+        "signature": "operation31(input: Input31): Promise<Output31>"
+      }
+    },
+    {
+      "id": "Module03.operation32",
+      "kind": "method",
+      "label": "Module03.operation32",
+      "data": {
+        "signature": "operation32(input: Input32): Promise<Output32>"
+      }
+    },
+    {
+      "id": "Module03.operation33",
+      "kind": "method",
+      "label": "Module03.operation33",
+      "data": {
+        "signature": "operation33(input: Input33): Promise<Output33>"
+      }
+    },
+    {
+      "id": "Module03.operation34",
+      "kind": "method",
+      "label": "Module03.operation34",
+      "data": {
+        "signature": "operation34(input: Input34): Promise<Output34>"
+      }
+    },
+    {
+      "id": "Module03.operation35",
+      "kind": "method",
+      "label": "Module03.operation35",
+      "data": {
+        "signature": "operation35(input: Input35): Promise<Output35>"
+      }
+    },
+    {
+      "id": "Module03.operation36",
+      "kind": "method",
+      "label": "Module03.operation36",
+      "data": {
+        "signature": "operation36(input: Input36): Promise<Output36>"
+      }
+    },
+    {
+      "id": "Module03.operation37",
+      "kind": "method",
+      "label": "Module03.operation37",
+      "data": {
+        "signature": "operation37(input: Input37): Promise<Output37>"
+      }
+    },
+    {
+      "id": "Module03.operation38",
+      "kind": "method",
+      "label": "Module03.operation38",
+      "data": {
+        "signature": "operation38(input: Input38): Promise<Output38>"
+      }
+    },
+    {
+      "id": "Module03.operation39",
+      "kind": "method",
+      "label": "Module03.operation39",
+      "data": {
+        "signature": "operation39(input: Input39): Promise<Output39>"
+      }
+    },
+    {
+      "id": "Module03.operation40",
+      "kind": "method",
+      "label": "Module03.operation40",
+      "data": {
+        "signature": "operation40(input: Input40): Promise<Output40>"
+      }
+    },
+    {
+      "id": "Module03.operation41",
+      "kind": "method",
+      "label": "Module03.operation41",
+      "data": {
+        "signature": "operation41(input: Input41): Promise<Output41>"
+      }
+    },
+    {
+      "id": "Module03.operation42",
+      "kind": "method",
+      "label": "Module03.operation42",
+      "data": {
+        "signature": "operation42(input: Input42): Promise<Output42>"
+      }
+    },
+    {
+      "id": "Module03.operation43",
+      "kind": "method",
+      "label": "Module03.operation43",
+      "data": {
+        "signature": "operation43(input: Input43): Promise<Output43>"
+      }
+    },
+    {
+      "id": "Module03.operation44",
+      "kind": "method",
+      "label": "Module03.operation44",
+      "data": {
+        "signature": "operation44(input: Input44): Promise<Output44>"
+      }
+    },
+    {
+      "id": "Module03.operation45",
+      "kind": "method",
+      "label": "Module03.operation45",
+      "data": {
+        "signature": "operation45(input: Input45): Promise<Output45>"
+      }
+    },
+    {
+      "id": "Module03.operation46",
+      "kind": "method",
+      "label": "Module03.operation46",
+      "data": {
+        "signature": "operation46(input: Input46): Promise<Output46>"
+      }
+    },
+    {
+      "id": "Module03.operation47",
+      "kind": "method",
+      "label": "Module03.operation47",
+      "data": {
+        "signature": "operation47(input: Input47): Promise<Output47>"
+      }
+    },
+    {
+      "id": "Module03.operation48",
+      "kind": "method",
+      "label": "Module03.operation48",
+      "data": {
+        "signature": "operation48(input: Input48): Promise<Output48>"
+      }
+    },
+    {
+      "id": "Module03.operation49",
+      "kind": "method",
+      "label": "Module03.operation49",
+      "data": {
+        "signature": "operation49(input: Input49): Promise<Output49>"
+      }
+    },
+    {
+      "id": "Module04",
+      "kind": "class",
+      "label": "Module04",
+      "data": {
+        "signature": "export class Module04"
+      }
+    },
+    {
+      "id": "Module04.operation01",
+      "kind": "method",
+      "label": "Module04.operation01",
+      "data": {
+        "signature": "operation01(input: Input01): Promise<Output01>"
+      }
+    },
+    {
+      "id": "Module04.operation02",
+      "kind": "method",
+      "label": "Module04.operation02",
+      "data": {
+        "signature": "operation02(input: Input02): Promise<Output02>"
+      }
+    },
+    {
+      "id": "Module04.operation03",
+      "kind": "method",
+      "label": "Module04.operation03",
+      "data": {
+        "signature": "operation03(input: Input03): Promise<Output03>"
+      }
+    },
+    {
+      "id": "Module04.operation04",
+      "kind": "method",
+      "label": "Module04.operation04",
+      "data": {
+        "signature": "operation04(input: Input04): Promise<Output04>"
+      }
+    },
+    {
+      "id": "Module04.operation05",
+      "kind": "method",
+      "label": "Module04.operation05",
+      "data": {
+        "signature": "operation05(input: Input05): Promise<Output05>"
+      }
+    },
+    {
+      "id": "Module04.operation06",
+      "kind": "method",
+      "label": "Module04.operation06",
+      "data": {
+        "signature": "operation06(input: Input06): Promise<Output06>"
+      }
+    },
+    {
+      "id": "Module04.operation07",
+      "kind": "method",
+      "label": "Module04.operation07",
+      "data": {
+        "signature": "operation07(input: Input07): Promise<Output07>"
+      }
+    },
+    {
+      "id": "Module04.operation08",
+      "kind": "method",
+      "label": "Module04.operation08",
+      "data": {
+        "signature": "operation08(input: Input08): Promise<Output08>"
+      }
+    },
+    {
+      "id": "Module04.operation09",
+      "kind": "method",
+      "label": "Module04.operation09",
+      "data": {
+        "signature": "operation09(input: Input09): Promise<Output09>"
+      }
+    },
+    {
+      "id": "Module04.operation10",
+      "kind": "method",
+      "label": "Module04.operation10",
+      "data": {
+        "signature": "operation10(input: Input10): Promise<Output10>"
+      }
+    },
+    {
+      "id": "Module04.operation11",
+      "kind": "method",
+      "label": "Module04.operation11",
+      "data": {
+        "signature": "operation11(input: Input11): Promise<Output11>"
+      }
+    },
+    {
+      "id": "Module04.operation12",
+      "kind": "method",
+      "label": "Module04.operation12",
+      "data": {
+        "signature": "operation12(input: Input12): Promise<Output12>"
+      }
+    },
+    {
+      "id": "Module04.operation13",
+      "kind": "method",
+      "label": "Module04.operation13",
+      "data": {
+        "signature": "operation13(input: Input13): Promise<Output13>"
+      }
+    },
+    {
+      "id": "Module04.operation14",
+      "kind": "method",
+      "label": "Module04.operation14",
+      "data": {
+        "signature": "operation14(input: Input14): Promise<Output14>"
+      }
+    },
+    {
+      "id": "Module04.operation15",
+      "kind": "method",
+      "label": "Module04.operation15",
+      "data": {
+        "signature": "operation15(input: Input15): Promise<Output15>"
+      }
+    },
+    {
+      "id": "Module04.operation16",
+      "kind": "method",
+      "label": "Module04.operation16",
+      "data": {
+        "signature": "operation16(input: Input16): Promise<Output16>"
+      }
+    },
+    {
+      "id": "Module04.operation17",
+      "kind": "method",
+      "label": "Module04.operation17",
+      "data": {
+        "signature": "operation17(input: Input17): Promise<Output17>"
+      }
+    },
+    {
+      "id": "Module04.operation18",
+      "kind": "method",
+      "label": "Module04.operation18",
+      "data": {
+        "signature": "operation18(input: Input18): Promise<Output18>"
+      }
+    },
+    {
+      "id": "Module04.operation19",
+      "kind": "method",
+      "label": "Module04.operation19",
+      "data": {
+        "signature": "operation19(input: Input19): Promise<Output19>"
+      }
+    },
+    {
+      "id": "Module04.operation20",
+      "kind": "method",
+      "label": "Module04.operation20",
+      "data": {
+        "signature": "operation20(input: Input20): Promise<Output20>"
+      }
+    },
+    {
+      "id": "Module04.operation21",
+      "kind": "method",
+      "label": "Module04.operation21",
+      "data": {
+        "signature": "operation21(input: Input21): Promise<Output21>"
+      }
+    },
+    {
+      "id": "Module04.operation22",
+      "kind": "method",
+      "label": "Module04.operation22",
+      "data": {
+        "signature": "operation22(input: Input22): Promise<Output22>"
+      }
+    },
+    {
+      "id": "Module04.operation23",
+      "kind": "method",
+      "label": "Module04.operation23",
+      "data": {
+        "signature": "operation23(input: Input23): Promise<Output23>"
+      }
+    },
+    {
+      "id": "Module04.operation24",
+      "kind": "method",
+      "label": "Module04.operation24",
+      "data": {
+        "signature": "operation24(input: Input24): Promise<Output24>"
+      }
+    },
+    {
+      "id": "Module04.operation25",
+      "kind": "method",
+      "label": "Module04.operation25",
+      "data": {
+        "signature": "operation25(input: Input25): Promise<Output25>"
+      }
+    },
+    {
+      "id": "Module04.operation26",
+      "kind": "method",
+      "label": "Module04.operation26",
+      "data": {
+        "signature": "operation26(input: Input26): Promise<Output26>"
+      }
+    },
+    {
+      "id": "Module04.operation27",
+      "kind": "method",
+      "label": "Module04.operation27",
+      "data": {
+        "signature": "operation27(input: Input27): Promise<Output27>"
+      }
+    },
+    {
+      "id": "Module04.operation28",
+      "kind": "method",
+      "label": "Module04.operation28",
+      "data": {
+        "signature": "operation28(input: Input28): Promise<Output28>"
+      }
+    },
+    {
+      "id": "Module04.operation29",
+      "kind": "method",
+      "label": "Module04.operation29",
+      "data": {
+        "signature": "operation29(input: Input29): Promise<Output29>"
+      }
+    },
+    {
+      "id": "Module04.operation30",
+      "kind": "method",
+      "label": "Module04.operation30",
+      "data": {
+        "signature": "operation30(input: Input30): Promise<Output30>"
+      }
+    },
+    {
+      "id": "Module04.operation31",
+      "kind": "method",
+      "label": "Module04.operation31",
+      "data": {
+        "signature": "operation31(input: Input31): Promise<Output31>"
+      }
+    },
+    {
+      "id": "Module04.operation32",
+      "kind": "method",
+      "label": "Module04.operation32",
+      "data": {
+        "signature": "operation32(input: Input32): Promise<Output32>"
+      }
+    },
+    {
+      "id": "Module04.operation33",
+      "kind": "method",
+      "label": "Module04.operation33",
+      "data": {
+        "signature": "operation33(input: Input33): Promise<Output33>"
+      }
+    },
+    {
+      "id": "Module04.operation34",
+      "kind": "method",
+      "label": "Module04.operation34",
+      "data": {
+        "signature": "operation34(input: Input34): Promise<Output34>"
+      }
+    },
+    {
+      "id": "Module04.operation35",
+      "kind": "method",
+      "label": "Module04.operation35",
+      "data": {
+        "signature": "operation35(input: Input35): Promise<Output35>"
+      }
+    },
+    {
+      "id": "Module04.operation36",
+      "kind": "method",
+      "label": "Module04.operation36",
+      "data": {
+        "signature": "operation36(input: Input36): Promise<Output36>"
+      }
+    },
+    {
+      "id": "Module04.operation37",
+      "kind": "method",
+      "label": "Module04.operation37",
+      "data": {
+        "signature": "operation37(input: Input37): Promise<Output37>"
+      }
+    },
+    {
+      "id": "Module04.operation38",
+      "kind": "method",
+      "label": "Module04.operation38",
+      "data": {
+        "signature": "operation38(input: Input38): Promise<Output38>"
+      }
+    },
+    {
+      "id": "Module04.operation39",
+      "kind": "method",
+      "label": "Module04.operation39",
+      "data": {
+        "signature": "operation39(input: Input39): Promise<Output39>"
+      }
+    },
+    {
+      "id": "Module04.operation40",
+      "kind": "method",
+      "label": "Module04.operation40",
+      "data": {
+        "signature": "operation40(input: Input40): Promise<Output40>"
+      }
+    },
+    {
+      "id": "Module04.operation41",
+      "kind": "method",
+      "label": "Module04.operation41",
+      "data": {
+        "signature": "operation41(input: Input41): Promise<Output41>"
+      }
+    },
+    {
+      "id": "Module04.operation42",
+      "kind": "method",
+      "label": "Module04.operation42",
+      "data": {
+        "signature": "operation42(input: Input42): Promise<Output42>"
+      }
+    },
+    {
+      "id": "Module04.operation43",
+      "kind": "method",
+      "label": "Module04.operation43",
+      "data": {
+        "signature": "operation43(input: Input43): Promise<Output43>"
+      }
+    },
+    {
+      "id": "Module04.operation44",
+      "kind": "method",
+      "label": "Module04.operation44",
+      "data": {
+        "signature": "operation44(input: Input44): Promise<Output44>"
+      }
+    },
+    {
+      "id": "Module04.operation45",
+      "kind": "method",
+      "label": "Module04.operation45",
+      "data": {
+        "signature": "operation45(input: Input45): Promise<Output45>"
+      }
+    },
+    {
+      "id": "Module04.operation46",
+      "kind": "method",
+      "label": "Module04.operation46",
+      "data": {
+        "signature": "operation46(input: Input46): Promise<Output46>"
+      }
+    },
+    {
+      "id": "Module04.operation47",
+      "kind": "method",
+      "label": "Module04.operation47",
+      "data": {
+        "signature": "operation47(input: Input47): Promise<Output47>"
+      }
+    },
+    {
+      "id": "Module04.operation48",
+      "kind": "method",
+      "label": "Module04.operation48",
+      "data": {
+        "signature": "operation48(input: Input48): Promise<Output48>"
+      }
+    },
+    {
+      "id": "Module04.operation49",
+      "kind": "method",
+      "label": "Module04.operation49",
+      "data": {
+        "signature": "operation49(input: Input49): Promise<Output49>"
+      }
+    },
+    {
+      "id": "Module05",
+      "kind": "class",
+      "label": "Module05",
+      "data": {
+        "signature": "export class Module05"
+      }
+    },
+    {
+      "id": "Module05.operation01",
+      "kind": "method",
+      "label": "Module05.operation01",
+      "data": {
+        "signature": "operation01(input: Input01): Promise<Output01>"
+      }
+    },
+    {
+      "id": "Module05.operation02",
+      "kind": "method",
+      "label": "Module05.operation02",
+      "data": {
+        "signature": "operation02(input: Input02): Promise<Output02>"
+      }
+    },
+    {
+      "id": "Module05.operation03",
+      "kind": "method",
+      "label": "Module05.operation03",
+      "data": {
+        "signature": "operation03(input: Input03): Promise<Output03>"
+      }
+    },
+    {
+      "id": "Module05.operation04",
+      "kind": "method",
+      "label": "Module05.operation04",
+      "data": {
+        "signature": "operation04(input: Input04): Promise<Output04>"
+      }
+    },
+    {
+      "id": "Module05.operation05",
+      "kind": "method",
+      "label": "Module05.operation05",
+      "data": {
+        "signature": "operation05(input: Input05): Promise<Output05>"
+      }
+    },
+    {
+      "id": "Module05.operation06",
+      "kind": "method",
+      "label": "Module05.operation06",
+      "data": {
+        "signature": "operation06(input: Input06): Promise<Output06>"
+      }
+    },
+    {
+      "id": "Module05.operation07",
+      "kind": "method",
+      "label": "Module05.operation07",
+      "data": {
+        "signature": "operation07(input: Input07): Promise<Output07>"
+      }
+    },
+    {
+      "id": "Module05.operation08",
+      "kind": "method",
+      "label": "Module05.operation08",
+      "data": {
+        "signature": "operation08(input: Input08): Promise<Output08>"
+      }
+    },
+    {
+      "id": "Module05.operation09",
+      "kind": "method",
+      "label": "Module05.operation09",
+      "data": {
+        "signature": "operation09(input: Input09): Promise<Output09>"
+      }
+    },
+    {
+      "id": "Module05.operation10",
+      "kind": "method",
+      "label": "Module05.operation10",
+      "data": {
+        "signature": "operation10(input: Input10): Promise<Output10>"
+      }
+    },
+    {
+      "id": "Module05.operation11",
+      "kind": "method",
+      "label": "Module05.operation11",
+      "data": {
+        "signature": "operation11(input: Input11): Promise<Output11>"
+      }
+    },
+    {
+      "id": "Module05.operation12",
+      "kind": "method",
+      "label": "Module05.operation12",
+      "data": {
+        "signature": "operation12(input: Input12): Promise<Output12>"
+      }
+    },
+    {
+      "id": "Module05.operation13",
+      "kind": "method",
+      "label": "Module05.operation13",
+      "data": {
+        "signature": "operation13(input: Input13): Promise<Output13>"
+      }
+    },
+    {
+      "id": "Module05.operation14",
+      "kind": "method",
+      "label": "Module05.operation14",
+      "data": {
+        "signature": "operation14(input: Input14): Promise<Output14>"
+      }
+    },
+    {
+      "id": "Module05.operation15",
+      "kind": "method",
+      "label": "Module05.operation15",
+      "data": {
+        "signature": "operation15(input: Input15): Promise<Output15>"
+      }
+    },
+    {
+      "id": "Module05.operation16",
+      "kind": "method",
+      "label": "Module05.operation16",
+      "data": {
+        "signature": "operation16(input: Input16): Promise<Output16>"
+      }
+    },
+    {
+      "id": "Module05.operation17",
+      "kind": "method",
+      "label": "Module05.operation17",
+      "data": {
+        "signature": "operation17(input: Input17): Promise<Output17>"
+      }
+    },
+    {
+      "id": "Module05.operation18",
+      "kind": "method",
+      "label": "Module05.operation18",
+      "data": {
+        "signature": "operation18(input: Input18): Promise<Output18>"
+      }
+    },
+    {
+      "id": "Module05.operation19",
+      "kind": "method",
+      "label": "Module05.operation19",
+      "data": {
+        "signature": "operation19(input: Input19): Promise<Output19>"
+      }
+    },
+    {
+      "id": "Module05.operation20",
+      "kind": "method",
+      "label": "Module05.operation20",
+      "data": {
+        "signature": "operation20(input: Input20): Promise<Output20>"
+      }
+    },
+    {
+      "id": "Module05.operation21",
+      "kind": "method",
+      "label": "Module05.operation21",
+      "data": {
+        "signature": "operation21(input: Input21): Promise<Output21>"
+      }
+    },
+    {
+      "id": "Module05.operation22",
+      "kind": "method",
+      "label": "Module05.operation22",
+      "data": {
+        "signature": "operation22(input: Input22): Promise<Output22>"
+      }
+    },
+    {
+      "id": "Module05.operation23",
+      "kind": "method",
+      "label": "Module05.operation23",
+      "data": {
+        "signature": "operation23(input: Input23): Promise<Output23>"
+      }
+    },
+    {
+      "id": "Module05.operation24",
+      "kind": "method",
+      "label": "Module05.operation24",
+      "data": {
+        "signature": "operation24(input: Input24): Promise<Output24>"
+      }
+    },
+    {
+      "id": "Module05.operation25",
+      "kind": "method",
+      "label": "Module05.operation25",
+      "data": {
+        "signature": "operation25(input: Input25): Promise<Output25>"
+      }
+    },
+    {
+      "id": "Module05.operation26",
+      "kind": "method",
+      "label": "Module05.operation26",
+      "data": {
+        "signature": "operation26(input: Input26): Promise<Output26>"
+      }
+    },
+    {
+      "id": "Module05.operation27",
+      "kind": "method",
+      "label": "Module05.operation27",
+      "data": {
+        "signature": "operation27(input: Input27): Promise<Output27>"
+      }
+    },
+    {
+      "id": "Module05.operation28",
+      "kind": "method",
+      "label": "Module05.operation28",
+      "data": {
+        "signature": "operation28(input: Input28): Promise<Output28>"
+      }
+    },
+    {
+      "id": "Module05.operation29",
+      "kind": "method",
+      "label": "Module05.operation29",
+      "data": {
+        "signature": "operation29(input: Input29): Promise<Output29>"
+      }
+    },
+    {
+      "id": "Module05.operation30",
+      "kind": "method",
+      "label": "Module05.operation30",
+      "data": {
+        "signature": "operation30(input: Input30): Promise<Output30>"
+      }
+    },
+    {
+      "id": "Module05.operation31",
+      "kind": "method",
+      "label": "Module05.operation31",
+      "data": {
+        "signature": "operation31(input: Input31): Promise<Output31>"
+      }
+    },
+    {
+      "id": "Module05.operation32",
+      "kind": "method",
+      "label": "Module05.operation32",
+      "data": {
+        "signature": "operation32(input: Input32): Promise<Output32>"
+      }
+    },
+    {
+      "id": "Module05.operation33",
+      "kind": "method",
+      "label": "Module05.operation33",
+      "data": {
+        "signature": "operation33(input: Input33): Promise<Output33>"
+      }
+    },
+    {
+      "id": "Module05.operation34",
+      "kind": "method",
+      "label": "Module05.operation34",
+      "data": {
+        "signature": "operation34(input: Input34): Promise<Output34>"
+      }
+    },
+    {
+      "id": "Module05.operation35",
+      "kind": "method",
+      "label": "Module05.operation35",
+      "data": {
+        "signature": "operation35(input: Input35): Promise<Output35>"
+      }
+    },
+    {
+      "id": "Module05.operation36",
+      "kind": "method",
+      "label": "Module05.operation36",
+      "data": {
+        "signature": "operation36(input: Input36): Promise<Output36>"
+      }
+    },
+    {
+      "id": "Module05.operation37",
+      "kind": "method",
+      "label": "Module05.operation37",
+      "data": {
+        "signature": "operation37(input: Input37): Promise<Output37>"
+      }
+    },
+    {
+      "id": "Module05.operation38",
+      "kind": "method",
+      "label": "Module05.operation38",
+      "data": {
+        "signature": "operation38(input: Input38): Promise<Output38>"
+      }
+    },
+    {
+      "id": "Module05.operation39",
+      "kind": "method",
+      "label": "Module05.operation39",
+      "data": {
+        "signature": "operation39(input: Input39): Promise<Output39>"
+      }
+    },
+    {
+      "id": "Module05.operation40",
+      "kind": "method",
+      "label": "Module05.operation40",
+      "data": {
+        "signature": "operation40(input: Input40): Promise<Output40>"
+      }
+    },
+    {
+      "id": "Module05.operation41",
+      "kind": "method",
+      "label": "Module05.operation41",
+      "data": {
+        "signature": "operation41(input: Input41): Promise<Output41>"
+      }
+    },
+    {
+      "id": "Module05.operation42",
+      "kind": "method",
+      "label": "Module05.operation42",
+      "data": {
+        "signature": "operation42(input: Input42): Promise<Output42>"
+      }
+    },
+    {
+      "id": "Module05.operation43",
+      "kind": "method",
+      "label": "Module05.operation43",
+      "data": {
+        "signature": "operation43(input: Input43): Promise<Output43>"
+      }
+    },
+    {
+      "id": "Module05.operation44",
+      "kind": "method",
+      "label": "Module05.operation44",
+      "data": {
+        "signature": "operation44(input: Input44): Promise<Output44>"
+      }
+    },
+    {
+      "id": "Module05.operation45",
+      "kind": "method",
+      "label": "Module05.operation45",
+      "data": {
+        "signature": "operation45(input: Input45): Promise<Output45>"
+      }
+    },
+    {
+      "id": "Module05.operation46",
+      "kind": "method",
+      "label": "Module05.operation46",
+      "data": {
+        "signature": "operation46(input: Input46): Promise<Output46>"
+      }
+    },
+    {
+      "id": "Module05.operation47",
+      "kind": "method",
+      "label": "Module05.operation47",
+      "data": {
+        "signature": "operation47(input: Input47): Promise<Output47>"
+      }
+    },
+    {
+      "id": "Module05.operation48",
+      "kind": "method",
+      "label": "Module05.operation48",
+      "data": {
+        "signature": "operation48(input: Input48): Promise<Output48>"
+      }
+    },
+    {
+      "id": "Module05.operation49",
+      "kind": "method",
+      "label": "Module05.operation49",
+      "data": {
+        "signature": "operation49(input: Input49): Promise<Output49>"
+      }
+    },
+    {
+      "id": "Module06",
+      "kind": "class",
+      "label": "Module06",
+      "data": {
+        "signature": "export class Module06"
+      }
+    },
+    {
+      "id": "Module06.operation01",
+      "kind": "method",
+      "label": "Module06.operation01",
+      "data": {
+        "signature": "operation01(input: Input01): Promise<Output01>"
+      }
+    },
+    {
+      "id": "Module06.operation02",
+      "kind": "method",
+      "label": "Module06.operation02",
+      "data": {
+        "signature": "operation02(input: Input02): Promise<Output02>"
+      }
+    },
+    {
+      "id": "Module06.operation03",
+      "kind": "method",
+      "label": "Module06.operation03",
+      "data": {
+        "signature": "operation03(input: Input03): Promise<Output03>"
+      }
+    },
+    {
+      "id": "Module06.operation04",
+      "kind": "method",
+      "label": "Module06.operation04",
+      "data": {
+        "signature": "operation04(input: Input04): Promise<Output04>"
+      }
+    },
+    {
+      "id": "Module06.operation05",
+      "kind": "method",
+      "label": "Module06.operation05",
+      "data": {
+        "signature": "operation05(input: Input05): Promise<Output05>"
+      }
+    },
+    {
+      "id": "Module06.operation06",
+      "kind": "method",
+      "label": "Module06.operation06",
+      "data": {
+        "signature": "operation06(input: Input06): Promise<Output06>"
+      }
+    },
+    {
+      "id": "Module06.operation07",
+      "kind": "method",
+      "label": "Module06.operation07",
+      "data": {
+        "signature": "operation07(input: Input07): Promise<Output07>"
+      }
+    },
+    {
+      "id": "Module06.operation08",
+      "kind": "method",
+      "label": "Module06.operation08",
+      "data": {
+        "signature": "operation08(input: Input08): Promise<Output08>"
+      }
+    },
+    {
+      "id": "Module06.operation09",
+      "kind": "method",
+      "label": "Module06.operation09",
+      "data": {
+        "signature": "operation09(input: Input09): Promise<Output09>"
+      }
+    },
+    {
+      "id": "Module06.operation10",
+      "kind": "method",
+      "label": "Module06.operation10",
+      "data": {
+        "signature": "operation10(input: Input10): Promise<Output10>"
+      }
+    },
+    {
+      "id": "Module06.operation11",
+      "kind": "method",
+      "label": "Module06.operation11",
+      "data": {
+        "signature": "operation11(input: Input11): Promise<Output11>"
+      }
+    },
+    {
+      "id": "Module06.operation12",
+      "kind": "method",
+      "label": "Module06.operation12",
+      "data": {
+        "signature": "operation12(input: Input12): Promise<Output12>"
+      }
+    },
+    {
+      "id": "Module06.operation13",
+      "kind": "method",
+      "label": "Module06.operation13",
+      "data": {
+        "signature": "operation13(input: Input13): Promise<Output13>"
+      }
+    },
+    {
+      "id": "Module06.operation14",
+      "kind": "method",
+      "label": "Module06.operation14",
+      "data": {
+        "signature": "operation14(input: Input14): Promise<Output14>"
+      }
+    },
+    {
+      "id": "Module06.operation15",
+      "kind": "method",
+      "label": "Module06.operation15",
+      "data": {
+        "signature": "operation15(input: Input15): Promise<Output15>"
+      }
+    },
+    {
+      "id": "Module06.operation16",
+      "kind": "method",
+      "label": "Module06.operation16",
+      "data": {
+        "signature": "operation16(input: Input16): Promise<Output16>"
+      }
+    },
+    {
+      "id": "Module06.operation17",
+      "kind": "method",
+      "label": "Module06.operation17",
+      "data": {
+        "signature": "operation17(input: Input17): Promise<Output17>"
+      }
+    },
+    {
+      "id": "Module06.operation18",
+      "kind": "method",
+      "label": "Module06.operation18",
+      "data": {
+        "signature": "operation18(input: Input18): Promise<Output18>"
+      }
+    },
+    {
+      "id": "Module06.operation19",
+      "kind": "method",
+      "label": "Module06.operation19",
+      "data": {
+        "signature": "operation19(input: Input19): Promise<Output19>"
+      }
+    },
+    {
+      "id": "Module06.operation20",
+      "kind": "method",
+      "label": "Module06.operation20",
+      "data": {
+        "signature": "operation20(input: Input20): Promise<Output20>"
+      }
+    },
+    {
+      "id": "Module06.operation21",
+      "kind": "method",
+      "label": "Module06.operation21",
+      "data": {
+        "signature": "operation21(input: Input21): Promise<Output21>"
+      }
+    },
+    {
+      "id": "Module06.operation22",
+      "kind": "method",
+      "label": "Module06.operation22",
+      "data": {
+        "signature": "operation22(input: Input22): Promise<Output22>"
+      }
+    },
+    {
+      "id": "Module06.operation23",
+      "kind": "method",
+      "label": "Module06.operation23",
+      "data": {
+        "signature": "operation23(input: Input23): Promise<Output23>"
+      }
+    },
+    {
+      "id": "Module06.operation24",
+      "kind": "method",
+      "label": "Module06.operation24",
+      "data": {
+        "signature": "operation24(input: Input24): Promise<Output24>"
+      }
+    },
+    {
+      "id": "Module06.operation25",
+      "kind": "method",
+      "label": "Module06.operation25",
+      "data": {
+        "signature": "operation25(input: Input25): Promise<Output25>"
+      }
+    },
+    {
+      "id": "Module06.operation26",
+      "kind": "method",
+      "label": "Module06.operation26",
+      "data": {
+        "signature": "operation26(input: Input26): Promise<Output26>"
+      }
+    },
+    {
+      "id": "Module06.operation27",
+      "kind": "method",
+      "label": "Module06.operation27",
+      "data": {
+        "signature": "operation27(input: Input27): Promise<Output27>"
+      }
+    },
+    {
+      "id": "Module06.operation28",
+      "kind": "method",
+      "label": "Module06.operation28",
+      "data": {
+        "signature": "operation28(input: Input28): Promise<Output28>"
+      }
+    },
+    {
+      "id": "Module06.operation29",
+      "kind": "method",
+      "label": "Module06.operation29",
+      "data": {
+        "signature": "operation29(input: Input29): Promise<Output29>"
+      }
+    },
+    {
+      "id": "Module06.operation30",
+      "kind": "method",
+      "label": "Module06.operation30",
+      "data": {
+        "signature": "operation30(input: Input30): Promise<Output30>"
+      }
+    },
+    {
+      "id": "Module06.operation31",
+      "kind": "method",
+      "label": "Module06.operation31",
+      "data": {
+        "signature": "operation31(input: Input31): Promise<Output31>"
+      }
+    },
+    {
+      "id": "Module06.operation32",
+      "kind": "method",
+      "label": "Module06.operation32",
+      "data": {
+        "signature": "operation32(input: Input32): Promise<Output32>"
+      }
+    },
+    {
+      "id": "Module06.operation33",
+      "kind": "method",
+      "label": "Module06.operation33",
+      "data": {
+        "signature": "operation33(input: Input33): Promise<Output33>"
+      }
+    },
+    {
+      "id": "Module06.operation34",
+      "kind": "method",
+      "label": "Module06.operation34",
+      "data": {
+        "signature": "operation34(input: Input34): Promise<Output34>"
+      }
+    },
+    {
+      "id": "Module06.operation35",
+      "kind": "method",
+      "label": "Module06.operation35",
+      "data": {
+        "signature": "operation35(input: Input35): Promise<Output35>"
+      }
+    },
+    {
+      "id": "Module06.operation36",
+      "kind": "method",
+      "label": "Module06.operation36",
+      "data": {
+        "signature": "operation36(input: Input36): Promise<Output36>"
+      }
+    },
+    {
+      "id": "Module06.operation37",
+      "kind": "method",
+      "label": "Module06.operation37",
+      "data": {
+        "signature": "operation37(input: Input37): Promise<Output37>"
+      }
+    },
+    {
+      "id": "Module06.operation38",
+      "kind": "method",
+      "label": "Module06.operation38",
+      "data": {
+        "signature": "operation38(input: Input38): Promise<Output38>"
+      }
+    },
+    {
+      "id": "Module06.operation39",
+      "kind": "method",
+      "label": "Module06.operation39",
+      "data": {
+        "signature": "operation39(input: Input39): Promise<Output39>"
+      }
+    },
+    {
+      "id": "Module06.operation40",
+      "kind": "method",
+      "label": "Module06.operation40",
+      "data": {
+        "signature": "operation40(input: Input40): Promise<Output40>"
+      }
+    },
+    {
+      "id": "Module06.operation41",
+      "kind": "method",
+      "label": "Module06.operation41",
+      "data": {
+        "signature": "operation41(input: Input41): Promise<Output41>"
+      }
+    },
+    {
+      "id": "Module06.operation42",
+      "kind": "method",
+      "label": "Module06.operation42",
+      "data": {
+        "signature": "operation42(input: Input42): Promise<Output42>"
+      }
+    },
+    {
+      "id": "Module06.operation43",
+      "kind": "method",
+      "label": "Module06.operation43",
+      "data": {
+        "signature": "operation43(input: Input43): Promise<Output43>"
+      }
+    },
+    {
+      "id": "Module06.operation44",
+      "kind": "method",
+      "label": "Module06.operation44",
+      "data": {
+        "signature": "operation44(input: Input44): Promise<Output44>"
+      }
+    },
+    {
+      "id": "Module06.operation45",
+      "kind": "method",
+      "label": "Module06.operation45",
+      "data": {
+        "signature": "operation45(input: Input45): Promise<Output45>"
+      }
+    },
+    {
+      "id": "Module06.operation46",
+      "kind": "method",
+      "label": "Module06.operation46",
+      "data": {
+        "signature": "operation46(input: Input46): Promise<Output46>"
+      }
+    },
+    {
+      "id": "Module06.operation47",
+      "kind": "method",
+      "label": "Module06.operation47",
+      "data": {
+        "signature": "operation47(input: Input47): Promise<Output47>"
+      }
+    },
+    {
+      "id": "Module06.operation48",
+      "kind": "method",
+      "label": "Module06.operation48",
+      "data": {
+        "signature": "operation48(input: Input48): Promise<Output48>"
+      }
+    },
+    {
+      "id": "Module06.operation49",
+      "kind": "method",
+      "label": "Module06.operation49",
+      "data": {
+        "signature": "operation49(input: Input49): Promise<Output49>"
+      }
+    },
+    {
+      "id": "Module07",
+      "kind": "class",
+      "label": "Module07",
+      "data": {
+        "signature": "export class Module07"
+      }
+    },
+    {
+      "id": "Module07.operation01",
+      "kind": "method",
+      "label": "Module07.operation01",
+      "data": {
+        "signature": "operation01(input: Input01): Promise<Output01>"
+      }
+    },
+    {
+      "id": "Module07.operation02",
+      "kind": "method",
+      "label": "Module07.operation02",
+      "data": {
+        "signature": "operation02(input: Input02): Promise<Output02>"
+      }
+    },
+    {
+      "id": "Module07.operation03",
+      "kind": "method",
+      "label": "Module07.operation03",
+      "data": {
+        "signature": "operation03(input: Input03): Promise<Output03>"
+      }
+    },
+    {
+      "id": "Module07.operation04",
+      "kind": "method",
+      "label": "Module07.operation04",
+      "data": {
+        "signature": "operation04(input: Input04): Promise<Output04>"
+      }
+    },
+    {
+      "id": "Module07.operation05",
+      "kind": "method",
+      "label": "Module07.operation05",
+      "data": {
+        "signature": "operation05(input: Input05): Promise<Output05>"
+      }
+    },
+    {
+      "id": "Module07.operation06",
+      "kind": "method",
+      "label": "Module07.operation06",
+      "data": {
+        "signature": "operation06(input: Input06): Promise<Output06>"
+      }
+    },
+    {
+      "id": "Module07.operation07",
+      "kind": "method",
+      "label": "Module07.operation07",
+      "data": {
+        "signature": "operation07(input: Input07): Promise<Output07>"
+      }
+    },
+    {
+      "id": "Module07.operation08",
+      "kind": "method",
+      "label": "Module07.operation08",
+      "data": {
+        "signature": "operation08(input: Input08): Promise<Output08>"
+      }
+    },
+    {
+      "id": "Module07.operation09",
+      "kind": "method",
+      "label": "Module07.operation09",
+      "data": {
+        "signature": "operation09(input: Input09): Promise<Output09>"
+      }
+    },
+    {
+      "id": "Module07.operation10",
+      "kind": "method",
+      "label": "Module07.operation10",
+      "data": {
+        "signature": "operation10(input: Input10): Promise<Output10>"
+      }
+    },
+    {
+      "id": "Module07.operation11",
+      "kind": "method",
+      "label": "Module07.operation11",
+      "data": {
+        "signature": "operation11(input: Input11): Promise<Output11>"
+      }
+    },
+    {
+      "id": "Module07.operation12",
+      "kind": "method",
+      "label": "Module07.operation12",
+      "data": {
+        "signature": "operation12(input: Input12): Promise<Output12>"
+      }
+    },
+    {
+      "id": "Module07.operation13",
+      "kind": "method",
+      "label": "Module07.operation13",
+      "data": {
+        "signature": "operation13(input: Input13): Promise<Output13>"
+      }
+    },
+    {
+      "id": "Module07.operation14",
+      "kind": "method",
+      "label": "Module07.operation14",
+      "data": {
+        "signature": "operation14(input: Input14): Promise<Output14>"
+      }
+    },
+    {
+      "id": "Module07.operation15",
+      "kind": "method",
+      "label": "Module07.operation15",
+      "data": {
+        "signature": "operation15(input: Input15): Promise<Output15>"
+      }
+    },
+    {
+      "id": "Module07.operation16",
+      "kind": "method",
+      "label": "Module07.operation16",
+      "data": {
+        "signature": "operation16(input: Input16): Promise<Output16>"
+      }
+    },
+    {
+      "id": "Module07.operation17",
+      "kind": "method",
+      "label": "Module07.operation17",
+      "data": {
+        "signature": "operation17(input: Input17): Promise<Output17>"
+      }
+    },
+    {
+      "id": "Module07.operation18",
+      "kind": "method",
+      "label": "Module07.operation18",
+      "data": {
+        "signature": "operation18(input: Input18): Promise<Output18>"
+      }
+    },
+    {
+      "id": "Module07.operation19",
+      "kind": "method",
+      "label": "Module07.operation19",
+      "data": {
+        "signature": "operation19(input: Input19): Promise<Output19>"
+      }
+    },
+    {
+      "id": "Module07.operation20",
+      "kind": "method",
+      "label": "Module07.operation20",
+      "data": {
+        "signature": "operation20(input: Input20): Promise<Output20>"
+      }
+    },
+    {
+      "id": "Module07.operation21",
+      "kind": "method",
+      "label": "Module07.operation21",
+      "data": {
+        "signature": "operation21(input: Input21): Promise<Output21>"
+      }
+    },
+    {
+      "id": "Module07.operation22",
+      "kind": "method",
+      "label": "Module07.operation22",
+      "data": {
+        "signature": "operation22(input: Input22): Promise<Output22>"
+      }
+    },
+    {
+      "id": "Module07.operation23",
+      "kind": "method",
+      "label": "Module07.operation23",
+      "data": {
+        "signature": "operation23(input: Input23): Promise<Output23>"
+      }
+    },
+    {
+      "id": "Module07.operation24",
+      "kind": "method",
+      "label": "Module07.operation24",
+      "data": {
+        "signature": "operation24(input: Input24): Promise<Output24>"
+      }
+    },
+    {
+      "id": "Module07.operation25",
+      "kind": "method",
+      "label": "Module07.operation25",
+      "data": {
+        "signature": "operation25(input: Input25): Promise<Output25>"
+      }
+    },
+    {
+      "id": "Module07.operation26",
+      "kind": "method",
+      "label": "Module07.operation26",
+      "data": {
+        "signature": "operation26(input: Input26): Promise<Output26>"
+      }
+    },
+    {
+      "id": "Module07.operation27",
+      "kind": "method",
+      "label": "Module07.operation27",
+      "data": {
+        "signature": "operation27(input: Input27): Promise<Output27>"
+      }
+    },
+    {
+      "id": "Module07.operation28",
+      "kind": "method",
+      "label": "Module07.operation28",
+      "data": {
+        "signature": "operation28(input: Input28): Promise<Output28>"
+      }
+    },
+    {
+      "id": "Module07.operation29",
+      "kind": "method",
+      "label": "Module07.operation29",
+      "data": {
+        "signature": "operation29(input: Input29): Promise<Output29>"
+      }
+    },
+    {
+      "id": "Module07.operation30",
+      "kind": "method",
+      "label": "Module07.operation30",
+      "data": {
+        "signature": "operation30(input: Input30): Promise<Output30>"
+      }
+    },
+    {
+      "id": "Module07.operation31",
+      "kind": "method",
+      "label": "Module07.operation31",
+      "data": {
+        "signature": "operation31(input: Input31): Promise<Output31>"
+      }
+    },
+    {
+      "id": "Module07.operation32",
+      "kind": "method",
+      "label": "Module07.operation32",
+      "data": {
+        "signature": "operation32(input: Input32): Promise<Output32>"
+      }
+    },
+    {
+      "id": "Module07.operation33",
+      "kind": "method",
+      "label": "Module07.operation33",
+      "data": {
+        "signature": "operation33(input: Input33): Promise<Output33>"
+      }
+    },
+    {
+      "id": "Module07.operation34",
+      "kind": "method",
+      "label": "Module07.operation34",
+      "data": {
+        "signature": "operation34(input: Input34): Promise<Output34>"
+      }
+    },
+    {
+      "id": "Module07.operation35",
+      "kind": "method",
+      "label": "Module07.operation35",
+      "data": {
+        "signature": "operation35(input: Input35): Promise<Output35>"
+      }
+    },
+    {
+      "id": "Module07.operation36",
+      "kind": "method",
+      "label": "Module07.operation36",
+      "data": {
+        "signature": "operation36(input: Input36): Promise<Output36>"
+      }
+    },
+    {
+      "id": "Module07.operation37",
+      "kind": "method",
+      "label": "Module07.operation37",
+      "data": {
+        "signature": "operation37(input: Input37): Promise<Output37>"
+      }
+    },
+    {
+      "id": "Module07.operation38",
+      "kind": "method",
+      "label": "Module07.operation38",
+      "data": {
+        "signature": "operation38(input: Input38): Promise<Output38>"
+      }
+    },
+    {
+      "id": "Module07.operation39",
+      "kind": "method",
+      "label": "Module07.operation39",
+      "data": {
+        "signature": "operation39(input: Input39): Promise<Output39>"
+      }
+    },
+    {
+      "id": "Module07.operation40",
+      "kind": "method",
+      "label": "Module07.operation40",
+      "data": {
+        "signature": "operation40(input: Input40): Promise<Output40>"
+      }
+    },
+    {
+      "id": "Module07.operation41",
+      "kind": "method",
+      "label": "Module07.operation41",
+      "data": {
+        "signature": "operation41(input: Input41): Promise<Output41>"
+      }
+    },
+    {
+      "id": "Module07.operation42",
+      "kind": "method",
+      "label": "Module07.operation42",
+      "data": {
+        "signature": "operation42(input: Input42): Promise<Output42>"
+      }
+    },
+    {
+      "id": "Module07.operation43",
+      "kind": "method",
+      "label": "Module07.operation43",
+      "data": {
+        "signature": "operation43(input: Input43): Promise<Output43>"
+      }
+    },
+    {
+      "id": "Module07.operation44",
+      "kind": "method",
+      "label": "Module07.operation44",
+      "data": {
+        "signature": "operation44(input: Input44): Promise<Output44>"
+      }
+    },
+    {
+      "id": "Module07.operation45",
+      "kind": "method",
+      "label": "Module07.operation45",
+      "data": {
+        "signature": "operation45(input: Input45): Promise<Output45>"
+      }
+    },
+    {
+      "id": "Module07.operation46",
+      "kind": "method",
+      "label": "Module07.operation46",
+      "data": {
+        "signature": "operation46(input: Input46): Promise<Output46>"
+      }
+    },
+    {
+      "id": "Module07.operation47",
+      "kind": "method",
+      "label": "Module07.operation47",
+      "data": {
+        "signature": "operation47(input: Input47): Promise<Output47>"
+      }
+    },
+    {
+      "id": "Module07.operation48",
+      "kind": "method",
+      "label": "Module07.operation48",
+      "data": {
+        "signature": "operation48(input: Input48): Promise<Output48>"
+      }
+    },
+    {
+      "id": "Module07.operation49",
+      "kind": "method",
+      "label": "Module07.operation49",
+      "data": {
+        "signature": "operation49(input: Input49): Promise<Output49>"
+      }
+    },
+    {
+      "id": "Module08",
+      "kind": "class",
+      "label": "Module08",
+      "data": {
+        "signature": "export class Module08"
+      }
+    },
+    {
+      "id": "Module08.operation01",
+      "kind": "method",
+      "label": "Module08.operation01",
+      "data": {
+        "signature": "operation01(input: Input01): Promise<Output01>"
+      }
+    },
+    {
+      "id": "Module08.operation02",
+      "kind": "method",
+      "label": "Module08.operation02",
+      "data": {
+        "signature": "operation02(input: Input02): Promise<Output02>"
+      }
+    },
+    {
+      "id": "Module08.operation03",
+      "kind": "method",
+      "label": "Module08.operation03",
+      "data": {
+        "signature": "operation03(input: Input03): Promise<Output03>"
+      }
+    },
+    {
+      "id": "Module08.operation04",
+      "kind": "method",
+      "label": "Module08.operation04",
+      "data": {
+        "signature": "operation04(input: Input04): Promise<Output04>"
+      }
+    },
+    {
+      "id": "Module08.operation05",
+      "kind": "method",
+      "label": "Module08.operation05",
+      "data": {
+        "signature": "operation05(input: Input05): Promise<Output05>"
+      }
+    },
+    {
+      "id": "Module08.operation06",
+      "kind": "method",
+      "label": "Module08.operation06",
+      "data": {
+        "signature": "operation06(input: Input06): Promise<Output06>"
+      }
+    },
+    {
+      "id": "Module08.operation07",
+      "kind": "method",
+      "label": "Module08.operation07",
+      "data": {
+        "signature": "operation07(input: Input07): Promise<Output07>"
+      }
+    },
+    {
+      "id": "Module08.operation08",
+      "kind": "method",
+      "label": "Module08.operation08",
+      "data": {
+        "signature": "operation08(input: Input08): Promise<Output08>"
+      }
+    },
+    {
+      "id": "Module08.operation09",
+      "kind": "method",
+      "label": "Module08.operation09",
+      "data": {
+        "signature": "operation09(input: Input09): Promise<Output09>"
+      }
+    },
+    {
+      "id": "Module08.operation10",
+      "kind": "method",
+      "label": "Module08.operation10",
+      "data": {
+        "signature": "operation10(input: Input10): Promise<Output10>"
+      }
+    },
+    {
+      "id": "Module08.operation11",
+      "kind": "method",
+      "label": "Module08.operation11",
+      "data": {
+        "signature": "operation11(input: Input11): Promise<Output11>"
+      }
+    },
+    {
+      "id": "Module08.operation12",
+      "kind": "method",
+      "label": "Module08.operation12",
+      "data": {
+        "signature": "operation12(input: Input12): Promise<Output12>"
+      }
+    },
+    {
+      "id": "Module08.operation13",
+      "kind": "method",
+      "label": "Module08.operation13",
+      "data": {
+        "signature": "operation13(input: Input13): Promise<Output13>"
+      }
+    },
+    {
+      "id": "Module08.operation14",
+      "kind": "method",
+      "label": "Module08.operation14",
+      "data": {
+        "signature": "operation14(input: Input14): Promise<Output14>"
+      }
+    },
+    {
+      "id": "Module08.operation15",
+      "kind": "method",
+      "label": "Module08.operation15",
+      "data": {
+        "signature": "operation15(input: Input15): Promise<Output15>"
+      }
+    },
+    {
+      "id": "Module08.operation16",
+      "kind": "method",
+      "label": "Module08.operation16",
+      "data": {
+        "signature": "operation16(input: Input16): Promise<Output16>"
+      }
+    },
+    {
+      "id": "Module08.operation17",
+      "kind": "method",
+      "label": "Module08.operation17",
+      "data": {
+        "signature": "operation17(input: Input17): Promise<Output17>"
+      }
+    },
+    {
+      "id": "Module08.operation18",
+      "kind": "method",
+      "label": "Module08.operation18",
+      "data": {
+        "signature": "operation18(input: Input18): Promise<Output18>"
+      }
+    },
+    {
+      "id": "Module08.operation19",
+      "kind": "method",
+      "label": "Module08.operation19",
+      "data": {
+        "signature": "operation19(input: Input19): Promise<Output19>"
+      }
+    },
+    {
+      "id": "Module08.operation20",
+      "kind": "method",
+      "label": "Module08.operation20",
+      "data": {
+        "signature": "operation20(input: Input20): Promise<Output20>"
+      }
+    },
+    {
+      "id": "Module08.operation21",
+      "kind": "method",
+      "label": "Module08.operation21",
+      "data": {
+        "signature": "operation21(input: Input21): Promise<Output21>"
+      }
+    },
+    {
+      "id": "Module08.operation22",
+      "kind": "method",
+      "label": "Module08.operation22",
+      "data": {
+        "signature": "operation22(input: Input22): Promise<Output22>"
+      }
+    },
+    {
+      "id": "Module08.operation23",
+      "kind": "method",
+      "label": "Module08.operation23",
+      "data": {
+        "signature": "operation23(input: Input23): Promise<Output23>"
+      }
+    },
+    {
+      "id": "Module08.operation24",
+      "kind": "method",
+      "label": "Module08.operation24",
+      "data": {
+        "signature": "operation24(input: Input24): Promise<Output24>"
+      }
+    },
+    {
+      "id": "Module08.operation25",
+      "kind": "method",
+      "label": "Module08.operation25",
+      "data": {
+        "signature": "operation25(input: Input25): Promise<Output25>"
+      }
+    },
+    {
+      "id": "Module08.operation26",
+      "kind": "method",
+      "label": "Module08.operation26",
+      "data": {
+        "signature": "operation26(input: Input26): Promise<Output26>"
+      }
+    },
+    {
+      "id": "Module08.operation27",
+      "kind": "method",
+      "label": "Module08.operation27",
+      "data": {
+        "signature": "operation27(input: Input27): Promise<Output27>"
+      }
+    },
+    {
+      "id": "Module08.operation28",
+      "kind": "method",
+      "label": "Module08.operation28",
+      "data": {
+        "signature": "operation28(input: Input28): Promise<Output28>"
+      }
+    },
+    {
+      "id": "Module08.operation29",
+      "kind": "method",
+      "label": "Module08.operation29",
+      "data": {
+        "signature": "operation29(input: Input29): Promise<Output29>"
+      }
+    },
+    {
+      "id": "Module08.operation30",
+      "kind": "method",
+      "label": "Module08.operation30",
+      "data": {
+        "signature": "operation30(input: Input30): Promise<Output30>"
+      }
+    },
+    {
+      "id": "Module08.operation31",
+      "kind": "method",
+      "label": "Module08.operation31",
+      "data": {
+        "signature": "operation31(input: Input31): Promise<Output31>"
+      }
+    },
+    {
+      "id": "Module08.operation32",
+      "kind": "method",
+      "label": "Module08.operation32",
+      "data": {
+        "signature": "operation32(input: Input32): Promise<Output32>"
+      }
+    },
+    {
+      "id": "Module08.operation33",
+      "kind": "method",
+      "label": "Module08.operation33",
+      "data": {
+        "signature": "operation33(input: Input33): Promise<Output33>"
+      }
+    },
+    {
+      "id": "Module08.operation34",
+      "kind": "method",
+      "label": "Module08.operation34",
+      "data": {
+        "signature": "operation34(input: Input34): Promise<Output34>"
+      }
+    },
+    {
+      "id": "Module08.operation35",
+      "kind": "method",
+      "label": "Module08.operation35",
+      "data": {
+        "signature": "operation35(input: Input35): Promise<Output35>"
+      }
+    },
+    {
+      "id": "Module08.operation36",
+      "kind": "method",
+      "label": "Module08.operation36",
+      "data": {
+        "signature": "operation36(input: Input36): Promise<Output36>"
+      }
+    },
+    {
+      "id": "Module08.operation37",
+      "kind": "method",
+      "label": "Module08.operation37",
+      "data": {
+        "signature": "operation37(input: Input37): Promise<Output37>"
+      }
+    },
+    {
+      "id": "Module08.operation38",
+      "kind": "method",
+      "label": "Module08.operation38",
+      "data": {
+        "signature": "operation38(input: Input38): Promise<Output38>"
+      }
+    },
+    {
+      "id": "Module08.operation39",
+      "kind": "method",
+      "label": "Module08.operation39",
+      "data": {
+        "signature": "operation39(input: Input39): Promise<Output39>"
+      }
+    },
+    {
+      "id": "Module08.operation40",
+      "kind": "method",
+      "label": "Module08.operation40",
+      "data": {
+        "signature": "operation40(input: Input40): Promise<Output40>"
+      }
+    },
+    {
+      "id": "Module08.operation41",
+      "kind": "method",
+      "label": "Module08.operation41",
+      "data": {
+        "signature": "operation41(input: Input41): Promise<Output41>"
+      }
+    },
+    {
+      "id": "Module08.operation42",
+      "kind": "method",
+      "label": "Module08.operation42",
+      "data": {
+        "signature": "operation42(input: Input42): Promise<Output42>"
+      }
+    },
+    {
+      "id": "Module08.operation43",
+      "kind": "method",
+      "label": "Module08.operation43",
+      "data": {
+        "signature": "operation43(input: Input43): Promise<Output43>"
+      }
+    },
+    {
+      "id": "Module08.operation44",
+      "kind": "method",
+      "label": "Module08.operation44",
+      "data": {
+        "signature": "operation44(input: Input44): Promise<Output44>"
+      }
+    },
+    {
+      "id": "Module08.operation45",
+      "kind": "method",
+      "label": "Module08.operation45",
+      "data": {
+        "signature": "operation45(input: Input45): Promise<Output45>"
+      }
+    },
+    {
+      "id": "Module08.operation46",
+      "kind": "method",
+      "label": "Module08.operation46",
+      "data": {
+        "signature": "operation46(input: Input46): Promise<Output46>"
+      }
+    },
+    {
+      "id": "Module08.operation47",
+      "kind": "method",
+      "label": "Module08.operation47",
+      "data": {
+        "signature": "operation47(input: Input47): Promise<Output47>"
+      }
+    },
+    {
+      "id": "Module08.operation48",
+      "kind": "method",
+      "label": "Module08.operation48",
+      "data": {
+        "signature": "operation48(input: Input48): Promise<Output48>"
+      }
+    },
+    {
+      "id": "Module08.operation49",
+      "kind": "method",
+      "label": "Module08.operation49",
+      "data": {
+        "signature": "operation49(input: Input49): Promise<Output49>"
+      }
+    },
+    {
+      "id": "Module09",
+      "kind": "class",
+      "label": "Module09",
+      "data": {
+        "signature": "export class Module09"
+      }
+    },
+    {
+      "id": "Module09.operation01",
+      "kind": "method",
+      "label": "Module09.operation01",
+      "data": {
+        "signature": "operation01(input: Input01): Promise<Output01>"
+      }
+    },
+    {
+      "id": "Module09.operation02",
+      "kind": "method",
+      "label": "Module09.operation02",
+      "data": {
+        "signature": "operation02(input: Input02): Promise<Output02>"
+      }
+    },
+    {
+      "id": "Module09.operation03",
+      "kind": "method",
+      "label": "Module09.operation03",
+      "data": {
+        "signature": "operation03(input: Input03): Promise<Output03>"
+      }
+    },
+    {
+      "id": "Module09.operation04",
+      "kind": "method",
+      "label": "Module09.operation04",
+      "data": {
+        "signature": "operation04(input: Input04): Promise<Output04>"
+      }
+    },
+    {
+      "id": "Module09.operation05",
+      "kind": "method",
+      "label": "Module09.operation05",
+      "data": {
+        "signature": "operation05(input: Input05): Promise<Output05>"
+      }
+    },
+    {
+      "id": "Module09.operation06",
+      "kind": "method",
+      "label": "Module09.operation06",
+      "data": {
+        "signature": "operation06(input: Input06): Promise<Output06>"
+      }
+    },
+    {
+      "id": "Module09.operation07",
+      "kind": "method",
+      "label": "Module09.operation07",
+      "data": {
+        "signature": "operation07(input: Input07): Promise<Output07>"
+      }
+    },
+    {
+      "id": "Module09.operation08",
+      "kind": "method",
+      "label": "Module09.operation08",
+      "data": {
+        "signature": "operation08(input: Input08): Promise<Output08>"
+      }
+    },
+    {
+      "id": "Module09.operation09",
+      "kind": "method",
+      "label": "Module09.operation09",
+      "data": {
+        "signature": "operation09(input: Input09): Promise<Output09>"
+      }
+    },
+    {
+      "id": "Module09.operation10",
+      "kind": "method",
+      "label": "Module09.operation10",
+      "data": {
+        "signature": "operation10(input: Input10): Promise<Output10>"
+      }
+    },
+    {
+      "id": "Module09.operation11",
+      "kind": "method",
+      "label": "Module09.operation11",
+      "data": {
+        "signature": "operation11(input: Input11): Promise<Output11>"
+      }
+    },
+    {
+      "id": "Module09.operation12",
+      "kind": "method",
+      "label": "Module09.operation12",
+      "data": {
+        "signature": "operation12(input: Input12): Promise<Output12>"
+      }
+    },
+    {
+      "id": "Module09.operation13",
+      "kind": "method",
+      "label": "Module09.operation13",
+      "data": {
+        "signature": "operation13(input: Input13): Promise<Output13>"
+      }
+    },
+    {
+      "id": "Module09.operation14",
+      "kind": "method",
+      "label": "Module09.operation14",
+      "data": {
+        "signature": "operation14(input: Input14): Promise<Output14>"
+      }
+    },
+    {
+      "id": "Module09.operation15",
+      "kind": "method",
+      "label": "Module09.operation15",
+      "data": {
+        "signature": "operation15(input: Input15): Promise<Output15>"
+      }
+    },
+    {
+      "id": "Module09.operation16",
+      "kind": "method",
+      "label": "Module09.operation16",
+      "data": {
+        "signature": "operation16(input: Input16): Promise<Output16>"
+      }
+    },
+    {
+      "id": "Module09.operation17",
+      "kind": "method",
+      "label": "Module09.operation17",
+      "data": {
+        "signature": "operation17(input: Input17): Promise<Output17>"
+      }
+    },
+    {
+      "id": "Module09.operation18",
+      "kind": "method",
+      "label": "Module09.operation18",
+      "data": {
+        "signature": "operation18(input: Input18): Promise<Output18>"
+      }
+    },
+    {
+      "id": "Module09.operation19",
+      "kind": "method",
+      "label": "Module09.operation19",
+      "data": {
+        "signature": "operation19(input: Input19): Promise<Output19>"
+      }
+    },
+    {
+      "id": "Module09.operation20",
+      "kind": "method",
+      "label": "Module09.operation20",
+      "data": {
+        "signature": "operation20(input: Input20): Promise<Output20>"
+      }
+    },
+    {
+      "id": "Module09.operation21",
+      "kind": "method",
+      "label": "Module09.operation21",
+      "data": {
+        "signature": "operation21(input: Input21): Promise<Output21>"
+      }
+    },
+    {
+      "id": "Module09.operation22",
+      "kind": "method",
+      "label": "Module09.operation22",
+      "data": {
+        "signature": "operation22(input: Input22): Promise<Output22>"
+      }
+    },
+    {
+      "id": "Module09.operation23",
+      "kind": "method",
+      "label": "Module09.operation23",
+      "data": {
+        "signature": "operation23(input: Input23): Promise<Output23>"
+      }
+    },
+    {
+      "id": "Module09.operation24",
+      "kind": "method",
+      "label": "Module09.operation24",
+      "data": {
+        "signature": "operation24(input: Input24): Promise<Output24>"
+      }
+    },
+    {
+      "id": "Module09.operation25",
+      "kind": "method",
+      "label": "Module09.operation25",
+      "data": {
+        "signature": "operation25(input: Input25): Promise<Output25>"
+      }
+    },
+    {
+      "id": "Module09.operation26",
+      "kind": "method",
+      "label": "Module09.operation26",
+      "data": {
+        "signature": "operation26(input: Input26): Promise<Output26>"
+      }
+    },
+    {
+      "id": "Module09.operation27",
+      "kind": "method",
+      "label": "Module09.operation27",
+      "data": {
+        "signature": "operation27(input: Input27): Promise<Output27>"
+      }
+    },
+    {
+      "id": "Module09.operation28",
+      "kind": "method",
+      "label": "Module09.operation28",
+      "data": {
+        "signature": "operation28(input: Input28): Promise<Output28>"
+      }
+    },
+    {
+      "id": "Module09.operation29",
+      "kind": "method",
+      "label": "Module09.operation29",
+      "data": {
+        "signature": "operation29(input: Input29): Promise<Output29>"
+      }
+    },
+    {
+      "id": "Module09.operation30",
+      "kind": "method",
+      "label": "Module09.operation30",
+      "data": {
+        "signature": "operation30(input: Input30): Promise<Output30>"
+      }
+    },
+    {
+      "id": "Module09.operation31",
+      "kind": "method",
+      "label": "Module09.operation31",
+      "data": {
+        "signature": "operation31(input: Input31): Promise<Output31>"
+      }
+    },
+    {
+      "id": "Module09.operation32",
+      "kind": "method",
+      "label": "Module09.operation32",
+      "data": {
+        "signature": "operation32(input: Input32): Promise<Output32>"
+      }
+    },
+    {
+      "id": "Module09.operation33",
+      "kind": "method",
+      "label": "Module09.operation33",
+      "data": {
+        "signature": "operation33(input: Input33): Promise<Output33>"
+      }
+    },
+    {
+      "id": "Module09.operation34",
+      "kind": "method",
+      "label": "Module09.operation34",
+      "data": {
+        "signature": "operation34(input: Input34): Promise<Output34>"
+      }
+    },
+    {
+      "id": "Module09.operation35",
+      "kind": "method",
+      "label": "Module09.operation35",
+      "data": {
+        "signature": "operation35(input: Input35): Promise<Output35>"
+      }
+    },
+    {
+      "id": "Module09.operation36",
+      "kind": "method",
+      "label": "Module09.operation36",
+      "data": {
+        "signature": "operation36(input: Input36): Promise<Output36>"
+      }
+    },
+    {
+      "id": "Module09.operation37",
+      "kind": "method",
+      "label": "Module09.operation37",
+      "data": {
+        "signature": "operation37(input: Input37): Promise<Output37>"
+      }
+    },
+    {
+      "id": "Module09.operation38",
+      "kind": "method",
+      "label": "Module09.operation38",
+      "data": {
+        "signature": "operation38(input: Input38): Promise<Output38>"
+      }
+    },
+    {
+      "id": "Module09.operation39",
+      "kind": "method",
+      "label": "Module09.operation39",
+      "data": {
+        "signature": "operation39(input: Input39): Promise<Output39>"
+      }
+    },
+    {
+      "id": "Module09.operation40",
+      "kind": "method",
+      "label": "Module09.operation40",
+      "data": {
+        "signature": "operation40(input: Input40): Promise<Output40>"
+      }
+    },
+    {
+      "id": "Module09.operation41",
+      "kind": "method",
+      "label": "Module09.operation41",
+      "data": {
+        "signature": "operation41(input: Input41): Promise<Output41>"
+      }
+    },
+    {
+      "id": "Module09.operation42",
+      "kind": "method",
+      "label": "Module09.operation42",
+      "data": {
+        "signature": "operation42(input: Input42): Promise<Output42>"
+      }
+    },
+    {
+      "id": "Module09.operation43",
+      "kind": "method",
+      "label": "Module09.operation43",
+      "data": {
+        "signature": "operation43(input: Input43): Promise<Output43>"
+      }
+    },
+    {
+      "id": "Module09.operation44",
+      "kind": "method",
+      "label": "Module09.operation44",
+      "data": {
+        "signature": "operation44(input: Input44): Promise<Output44>"
+      }
+    },
+    {
+      "id": "Module09.operation45",
+      "kind": "method",
+      "label": "Module09.operation45",
+      "data": {
+        "signature": "operation45(input: Input45): Promise<Output45>"
+      }
+    },
+    {
+      "id": "Module09.operation46",
+      "kind": "method",
+      "label": "Module09.operation46",
+      "data": {
+        "signature": "operation46(input: Input46): Promise<Output46>"
+      }
+    },
+    {
+      "id": "Module09.operation47",
+      "kind": "method",
+      "label": "Module09.operation47",
+      "data": {
+        "signature": "operation47(input: Input47): Promise<Output47>"
+      }
+    },
+    {
+      "id": "Module09.operation48",
+      "kind": "method",
+      "label": "Module09.operation48",
+      "data": {
+        "signature": "operation48(input: Input48): Promise<Output48>"
+      }
+    },
+    {
+      "id": "Module09.operation49",
+      "kind": "method",
+      "label": "Module09.operation49",
+      "data": {
+        "signature": "operation49(input: Input49): Promise<Output49>"
+      }
+    },
+    {
+      "id": "Module10",
+      "kind": "class",
+      "label": "Module10",
+      "data": {
+        "signature": "export class Module10"
+      }
+    },
+    {
+      "id": "Module10.operation01",
+      "kind": "method",
+      "label": "Module10.operation01",
+      "data": {
+        "signature": "operation01(input: Input01): Promise<Output01>"
+      }
+    },
+    {
+      "id": "Module10.operation02",
+      "kind": "method",
+      "label": "Module10.operation02",
+      "data": {
+        "signature": "operation02(input: Input02): Promise<Output02>"
+      }
+    },
+    {
+      "id": "Module10.operation03",
+      "kind": "method",
+      "label": "Module10.operation03",
+      "data": {
+        "signature": "operation03(input: Input03): Promise<Output03>"
+      }
+    },
+    {
+      "id": "Module10.operation04",
+      "kind": "method",
+      "label": "Module10.operation04",
+      "data": {
+        "signature": "operation04(input: Input04): Promise<Output04>"
+      }
+    },
+    {
+      "id": "Module10.operation05",
+      "kind": "method",
+      "label": "Module10.operation05",
+      "data": {
+        "signature": "operation05(input: Input05): Promise<Output05>"
+      }
+    },
+    {
+      "id": "Module10.operation06",
+      "kind": "method",
+      "label": "Module10.operation06",
+      "data": {
+        "signature": "operation06(input: Input06): Promise<Output06>"
+      }
+    },
+    {
+      "id": "Module10.operation07",
+      "kind": "method",
+      "label": "Module10.operation07",
+      "data": {
+        "signature": "operation07(input: Input07): Promise<Output07>"
+      }
+    },
+    {
+      "id": "Module10.operation08",
+      "kind": "method",
+      "label": "Module10.operation08",
+      "data": {
+        "signature": "operation08(input: Input08): Promise<Output08>"
+      }
+    },
+    {
+      "id": "Module10.operation09",
+      "kind": "method",
+      "label": "Module10.operation09",
+      "data": {
+        "signature": "operation09(input: Input09): Promise<Output09>"
+      }
+    },
+    {
+      "id": "Module10.operation10",
+      "kind": "method",
+      "label": "Module10.operation10",
+      "data": {
+        "signature": "operation10(input: Input10): Promise<Output10>"
+      }
+    },
+    {
+      "id": "Module10.operation11",
+      "kind": "method",
+      "label": "Module10.operation11",
+      "data": {
+        "signature": "operation11(input: Input11): Promise<Output11>"
+      }
+    },
+    {
+      "id": "Module10.operation12",
+      "kind": "method",
+      "label": "Module10.operation12",
+      "data": {
+        "signature": "operation12(input: Input12): Promise<Output12>"
+      }
+    },
+    {
+      "id": "Module10.operation13",
+      "kind": "method",
+      "label": "Module10.operation13",
+      "data": {
+        "signature": "operation13(input: Input13): Promise<Output13>"
+      }
+    },
+    {
+      "id": "Module10.operation14",
+      "kind": "method",
+      "label": "Module10.operation14",
+      "data": {
+        "signature": "operation14(input: Input14): Promise<Output14>"
+      }
+    },
+    {
+      "id": "Module10.operation15",
+      "kind": "method",
+      "label": "Module10.operation15",
+      "data": {
+        "signature": "operation15(input: Input15): Promise<Output15>"
+      }
+    },
+    {
+      "id": "Module10.operation16",
+      "kind": "method",
+      "label": "Module10.operation16",
+      "data": {
+        "signature": "operation16(input: Input16): Promise<Output16>"
+      }
+    },
+    {
+      "id": "Module10.operation17",
+      "kind": "method",
+      "label": "Module10.operation17",
+      "data": {
+        "signature": "operation17(input: Input17): Promise<Output17>"
+      }
+    },
+    {
+      "id": "Module10.operation18",
+      "kind": "method",
+      "label": "Module10.operation18",
+      "data": {
+        "signature": "operation18(input: Input18): Promise<Output18>"
+      }
+    },
+    {
+      "id": "Module10.operation19",
+      "kind": "method",
+      "label": "Module10.operation19",
+      "data": {
+        "signature": "operation19(input: Input19): Promise<Output19>"
+      }
+    },
+    {
+      "id": "Module10.operation20",
+      "kind": "method",
+      "label": "Module10.operation20",
+      "data": {
+        "signature": "operation20(input: Input20): Promise<Output20>"
+      }
+    },
+    {
+      "id": "Module10.operation21",
+      "kind": "method",
+      "label": "Module10.operation21",
+      "data": {
+        "signature": "operation21(input: Input21): Promise<Output21>"
+      }
+    },
+    {
+      "id": "Module10.operation22",
+      "kind": "method",
+      "label": "Module10.operation22",
+      "data": {
+        "signature": "operation22(input: Input22): Promise<Output22>"
+      }
+    },
+    {
+      "id": "Module10.operation23",
+      "kind": "method",
+      "label": "Module10.operation23",
+      "data": {
+        "signature": "operation23(input: Input23): Promise<Output23>"
+      }
+    },
+    {
+      "id": "Module10.operation24",
+      "kind": "method",
+      "label": "Module10.operation24",
+      "data": {
+        "signature": "operation24(input: Input24): Promise<Output24>"
+      }
+    },
+    {
+      "id": "Module10.operation25",
+      "kind": "method",
+      "label": "Module10.operation25",
+      "data": {
+        "signature": "operation25(input: Input25): Promise<Output25>"
+      }
+    },
+    {
+      "id": "Module10.operation26",
+      "kind": "method",
+      "label": "Module10.operation26",
+      "data": {
+        "signature": "operation26(input: Input26): Promise<Output26>"
+      }
+    },
+    {
+      "id": "Module10.operation27",
+      "kind": "method",
+      "label": "Module10.operation27",
+      "data": {
+        "signature": "operation27(input: Input27): Promise<Output27>"
+      }
+    },
+    {
+      "id": "Module10.operation28",
+      "kind": "method",
+      "label": "Module10.operation28",
+      "data": {
+        "signature": "operation28(input: Input28): Promise<Output28>"
+      }
+    },
+    {
+      "id": "Module10.operation29",
+      "kind": "method",
+      "label": "Module10.operation29",
+      "data": {
+        "signature": "operation29(input: Input29): Promise<Output29>"
+      }
+    },
+    {
+      "id": "Module10.operation30",
+      "kind": "method",
+      "label": "Module10.operation30",
+      "data": {
+        "signature": "operation30(input: Input30): Promise<Output30>"
+      }
+    },
+    {
+      "id": "Module10.operation31",
+      "kind": "method",
+      "label": "Module10.operation31",
+      "data": {
+        "signature": "operation31(input: Input31): Promise<Output31>"
+      }
+    },
+    {
+      "id": "Module10.operation32",
+      "kind": "method",
+      "label": "Module10.operation32",
+      "data": {
+        "signature": "operation32(input: Input32): Promise<Output32>"
+      }
+    },
+    {
+      "id": "Module10.operation33",
+      "kind": "method",
+      "label": "Module10.operation33",
+      "data": {
+        "signature": "operation33(input: Input33): Promise<Output33>"
+      }
+    },
+    {
+      "id": "Module10.operation34",
+      "kind": "method",
+      "label": "Module10.operation34",
+      "data": {
+        "signature": "operation34(input: Input34): Promise<Output34>"
+      }
+    },
+    {
+      "id": "Module10.operation35",
+      "kind": "method",
+      "label": "Module10.operation35",
+      "data": {
+        "signature": "operation35(input: Input35): Promise<Output35>"
+      }
+    },
+    {
+      "id": "Module10.operation36",
+      "kind": "method",
+      "label": "Module10.operation36",
+      "data": {
+        "signature": "operation36(input: Input36): Promise<Output36>"
+      }
+    },
+    {
+      "id": "Module10.operation37",
+      "kind": "method",
+      "label": "Module10.operation37",
+      "data": {
+        "signature": "operation37(input: Input37): Promise<Output37>"
+      }
+    },
+    {
+      "id": "Module10.operation38",
+      "kind": "method",
+      "label": "Module10.operation38",
+      "data": {
+        "signature": "operation38(input: Input38): Promise<Output38>"
+      }
+    },
+    {
+      "id": "Module10.operation39",
+      "kind": "method",
+      "label": "Module10.operation39",
+      "data": {
+        "signature": "operation39(input: Input39): Promise<Output39>"
+      }
+    },
+    {
+      "id": "Module10.operation40",
+      "kind": "method",
+      "label": "Module10.operation40",
+      "data": {
+        "signature": "operation40(input: Input40): Promise<Output40>"
+      }
+    },
+    {
+      "id": "Module10.operation41",
+      "kind": "method",
+      "label": "Module10.operation41",
+      "data": {
+        "signature": "operation41(input: Input41): Promise<Output41>"
+      }
+    },
+    {
+      "id": "Module10.operation42",
+      "kind": "method",
+      "label": "Module10.operation42",
+      "data": {
+        "signature": "operation42(input: Input42): Promise<Output42>"
+      }
+    },
+    {
+      "id": "Module10.operation43",
+      "kind": "method",
+      "label": "Module10.operation43",
+      "data": {
+        "signature": "operation43(input: Input43): Promise<Output43>"
+      }
+    },
+    {
+      "id": "Module10.operation44",
+      "kind": "method",
+      "label": "Module10.operation44",
+      "data": {
+        "signature": "operation44(input: Input44): Promise<Output44>"
+      }
+    },
+    {
+      "id": "Module10.operation45",
+      "kind": "method",
+      "label": "Module10.operation45",
+      "data": {
+        "signature": "operation45(input: Input45): Promise<Output45>"
+      }
+    },
+    {
+      "id": "Module10.operation46",
+      "kind": "method",
+      "label": "Module10.operation46",
+      "data": {
+        "signature": "operation46(input: Input46): Promise<Output46>"
+      }
+    },
+    {
+      "id": "Module10.operation47",
+      "kind": "method",
+      "label": "Module10.operation47",
+      "data": {
+        "signature": "operation47(input: Input47): Promise<Output47>"
+      }
+    },
+    {
+      "id": "Module10.operation48",
+      "kind": "method",
+      "label": "Module10.operation48",
+      "data": {
+        "signature": "operation48(input: Input48): Promise<Output48>"
+      }
+    },
+    {
+      "id": "Module10.operation49",
+      "kind": "method",
+      "label": "Module10.operation49",
+      "data": {
+        "signature": "operation49(input: Input49): Promise<Output49>"
+      }
+    },
+    {
+      "id": "Module11",
+      "kind": "class",
+      "label": "Module11",
+      "data": {
+        "signature": "export class Module11"
+      }
+    },
+    {
+      "id": "Module11.operation01",
+      "kind": "method",
+      "label": "Module11.operation01",
+      "data": {
+        "signature": "operation01(input: Input01): Promise<Output01>"
+      }
+    },
+    {
+      "id": "Module11.operation02",
+      "kind": "method",
+      "label": "Module11.operation02",
+      "data": {
+        "signature": "operation02(input: Input02): Promise<Output02>"
+      }
+    },
+    {
+      "id": "Module11.operation03",
+      "kind": "method",
+      "label": "Module11.operation03",
+      "data": {
+        "signature": "operation03(input: Input03): Promise<Output03>"
+      }
+    },
+    {
+      "id": "Module11.operation04",
+      "kind": "method",
+      "label": "Module11.operation04",
+      "data": {
+        "signature": "operation04(input: Input04): Promise<Output04>"
+      }
+    },
+    {
+      "id": "Module11.operation05",
+      "kind": "method",
+      "label": "Module11.operation05",
+      "data": {
+        "signature": "operation05(input: Input05): Promise<Output05>"
+      }
+    },
+    {
+      "id": "Module11.operation06",
+      "kind": "method",
+      "label": "Module11.operation06",
+      "data": {
+        "signature": "operation06(input: Input06): Promise<Output06>"
+      }
+    },
+    {
+      "id": "Module11.operation07",
+      "kind": "method",
+      "label": "Module11.operation07",
+      "data": {
+        "signature": "operation07(input: Input07): Promise<Output07>"
+      }
+    },
+    {
+      "id": "Module11.operation08",
+      "kind": "method",
+      "label": "Module11.operation08",
+      "data": {
+        "signature": "operation08(input: Input08): Promise<Output08>"
+      }
+    },
+    {
+      "id": "Module11.operation09",
+      "kind": "method",
+      "label": "Module11.operation09",
+      "data": {
+        "signature": "operation09(input: Input09): Promise<Output09>"
+      }
+    },
+    {
+      "id": "Module11.operation10",
+      "kind": "method",
+      "label": "Module11.operation10",
+      "data": {
+        "signature": "operation10(input: Input10): Promise<Output10>"
+      }
+    },
+    {
+      "id": "Module11.operation11",
+      "kind": "method",
+      "label": "Module11.operation11",
+      "data": {
+        "signature": "operation11(input: Input11): Promise<Output11>"
+      }
+    },
+    {
+      "id": "Module11.operation12",
+      "kind": "method",
+      "label": "Module11.operation12",
+      "data": {
+        "signature": "operation12(input: Input12): Promise<Output12>"
+      }
+    },
+    {
+      "id": "Module11.operation13",
+      "kind": "method",
+      "label": "Module11.operation13",
+      "data": {
+        "signature": "operation13(input: Input13): Promise<Output13>"
+      }
+    },
+    {
+      "id": "Module11.operation14",
+      "kind": "method",
+      "label": "Module11.operation14",
+      "data": {
+        "signature": "operation14(input: Input14): Promise<Output14>"
+      }
+    },
+    {
+      "id": "Module11.operation15",
+      "kind": "method",
+      "label": "Module11.operation15",
+      "data": {
+        "signature": "operation15(input: Input15): Promise<Output15>"
+      }
+    },
+    {
+      "id": "Module11.operation16",
+      "kind": "method",
+      "label": "Module11.operation16",
+      "data": {
+        "signature": "operation16(input: Input16): Promise<Output16>"
+      }
+    },
+    {
+      "id": "Module11.operation17",
+      "kind": "method",
+      "label": "Module11.operation17",
+      "data": {
+        "signature": "operation17(input: Input17): Promise<Output17>"
+      }
+    },
+    {
+      "id": "Module11.operation18",
+      "kind": "method",
+      "label": "Module11.operation18",
+      "data": {
+        "signature": "operation18(input: Input18): Promise<Output18>"
+      }
+    },
+    {
+      "id": "Module11.operation19",
+      "kind": "method",
+      "label": "Module11.operation19",
+      "data": {
+        "signature": "operation19(input: Input19): Promise<Output19>"
+      }
+    },
+    {
+      "id": "Module11.operation20",
+      "kind": "method",
+      "label": "Module11.operation20",
+      "data": {
+        "signature": "operation20(input: Input20): Promise<Output20>"
+      }
+    },
+    {
+      "id": "Module11.operation21",
+      "kind": "method",
+      "label": "Module11.operation21",
+      "data": {
+        "signature": "operation21(input: Input21): Promise<Output21>"
+      }
+    },
+    {
+      "id": "Module11.operation22",
+      "kind": "method",
+      "label": "Module11.operation22",
+      "data": {
+        "signature": "operation22(input: Input22): Promise<Output22>"
+      }
+    },
+    {
+      "id": "Module11.operation23",
+      "kind": "method",
+      "label": "Module11.operation23",
+      "data": {
+        "signature": "operation23(input: Input23): Promise<Output23>"
+      }
+    },
+    {
+      "id": "Module11.operation24",
+      "kind": "method",
+      "label": "Module11.operation24",
+      "data": {
+        "signature": "operation24(input: Input24): Promise<Output24>"
+      }
+    },
+    {
+      "id": "Module11.operation25",
+      "kind": "method",
+      "label": "Module11.operation25",
+      "data": {
+        "signature": "operation25(input: Input25): Promise<Output25>"
+      }
+    },
+    {
+      "id": "Module11.operation26",
+      "kind": "method",
+      "label": "Module11.operation26",
+      "data": {
+        "signature": "operation26(input: Input26): Promise<Output26>"
+      }
+    },
+    {
+      "id": "Module11.operation27",
+      "kind": "method",
+      "label": "Module11.operation27",
+      "data": {
+        "signature": "operation27(input: Input27): Promise<Output27>"
+      }
+    },
+    {
+      "id": "Module11.operation28",
+      "kind": "method",
+      "label": "Module11.operation28",
+      "data": {
+        "signature": "operation28(input: Input28): Promise<Output28>"
+      }
+    },
+    {
+      "id": "Module11.operation29",
+      "kind": "method",
+      "label": "Module11.operation29",
+      "data": {
+        "signature": "operation29(input: Input29): Promise<Output29>"
+      }
+    },
+    {
+      "id": "Module11.operation30",
+      "kind": "method",
+      "label": "Module11.operation30",
+      "data": {
+        "signature": "operation30(input: Input30): Promise<Output30>"
+      }
+    },
+    {
+      "id": "Module11.operation31",
+      "kind": "method",
+      "label": "Module11.operation31",
+      "data": {
+        "signature": "operation31(input: Input31): Promise<Output31>"
+      }
+    },
+    {
+      "id": "Module11.operation32",
+      "kind": "method",
+      "label": "Module11.operation32",
+      "data": {
+        "signature": "operation32(input: Input32): Promise<Output32>"
+      }
+    },
+    {
+      "id": "Module11.operation33",
+      "kind": "method",
+      "label": "Module11.operation33",
+      "data": {
+        "signature": "operation33(input: Input33): Promise<Output33>"
+      }
+    },
+    {
+      "id": "Module11.operation34",
+      "kind": "method",
+      "label": "Module11.operation34",
+      "data": {
+        "signature": "operation34(input: Input34): Promise<Output34>"
+      }
+    },
+    {
+      "id": "Module11.operation35",
+      "kind": "method",
+      "label": "Module11.operation35",
+      "data": {
+        "signature": "operation35(input: Input35): Promise<Output35>"
+      }
+    },
+    {
+      "id": "Module11.operation36",
+      "kind": "method",
+      "label": "Module11.operation36",
+      "data": {
+        "signature": "operation36(input: Input36): Promise<Output36>"
+      }
+    },
+    {
+      "id": "Module11.operation37",
+      "kind": "method",
+      "label": "Module11.operation37",
+      "data": {
+        "signature": "operation37(input: Input37): Promise<Output37>"
+      }
+    },
+    {
+      "id": "Module11.operation38",
+      "kind": "method",
+      "label": "Module11.operation38",
+      "data": {
+        "signature": "operation38(input: Input38): Promise<Output38>"
+      }
+    },
+    {
+      "id": "Module11.operation39",
+      "kind": "method",
+      "label": "Module11.operation39",
+      "data": {
+        "signature": "operation39(input: Input39): Promise<Output39>"
+      }
+    },
+    {
+      "id": "Module11.operation40",
+      "kind": "method",
+      "label": "Module11.operation40",
+      "data": {
+        "signature": "operation40(input: Input40): Promise<Output40>"
+      }
+    },
+    {
+      "id": "Module11.operation41",
+      "kind": "method",
+      "label": "Module11.operation41",
+      "data": {
+        "signature": "operation41(input: Input41): Promise<Output41>"
+      }
+    },
+    {
+      "id": "Module11.operation42",
+      "kind": "method",
+      "label": "Module11.operation42",
+      "data": {
+        "signature": "operation42(input: Input42): Promise<Output42>"
+      }
+    },
+    {
+      "id": "Module11.operation43",
+      "kind": "method",
+      "label": "Module11.operation43",
+      "data": {
+        "signature": "operation43(input: Input43): Promise<Output43>"
+      }
+    },
+    {
+      "id": "Module11.operation44",
+      "kind": "method",
+      "label": "Module11.operation44",
+      "data": {
+        "signature": "operation44(input: Input44): Promise<Output44>"
+      }
+    },
+    {
+      "id": "Module11.operation45",
+      "kind": "method",
+      "label": "Module11.operation45",
+      "data": {
+        "signature": "operation45(input: Input45): Promise<Output45>"
+      }
+    },
+    {
+      "id": "Module11.operation46",
+      "kind": "method",
+      "label": "Module11.operation46",
+      "data": {
+        "signature": "operation46(input: Input46): Promise<Output46>"
+      }
+    },
+    {
+      "id": "Module11.operation47",
+      "kind": "method",
+      "label": "Module11.operation47",
+      "data": {
+        "signature": "operation47(input: Input47): Promise<Output47>"
+      }
+    },
+    {
+      "id": "Module11.operation48",
+      "kind": "method",
+      "label": "Module11.operation48",
+      "data": {
+        "signature": "operation48(input: Input48): Promise<Output48>"
+      }
+    },
+    {
+      "id": "Module11.operation49",
+      "kind": "method",
+      "label": "Module11.operation49",
+      "data": {
+        "signature": "operation49(input: Input49): Promise<Output49>"
+      }
+    },
+    {
+      "id": "Module12",
+      "kind": "class",
+      "label": "Module12",
+      "data": {
+        "signature": "export class Module12"
+      }
+    },
+    {
+      "id": "Module12.operation01",
+      "kind": "method",
+      "label": "Module12.operation01",
+      "data": {
+        "signature": "operation01(input: Input01): Promise<Output01>"
+      }
+    },
+    {
+      "id": "Module12.operation02",
+      "kind": "method",
+      "label": "Module12.operation02",
+      "data": {
+        "signature": "operation02(input: Input02): Promise<Output02>"
+      }
+    },
+    {
+      "id": "Module12.operation03",
+      "kind": "method",
+      "label": "Module12.operation03",
+      "data": {
+        "signature": "operation03(input: Input03): Promise<Output03>"
+      }
+    },
+    {
+      "id": "Module12.operation04",
+      "kind": "method",
+      "label": "Module12.operation04",
+      "data": {
+        "signature": "operation04(input: Input04): Promise<Output04>"
+      }
+    },
+    {
+      "id": "Module12.operation05",
+      "kind": "method",
+      "label": "Module12.operation05",
+      "data": {
+        "signature": "operation05(input: Input05): Promise<Output05>"
+      }
+    },
+    {
+      "id": "Module12.operation06",
+      "kind": "method",
+      "label": "Module12.operation06",
+      "data": {
+        "signature": "operation06(input: Input06): Promise<Output06>"
+      }
+    },
+    {
+      "id": "Module12.operation07",
+      "kind": "method",
+      "label": "Module12.operation07",
+      "data": {
+        "signature": "operation07(input: Input07): Promise<Output07>"
+      }
+    },
+    {
+      "id": "Module12.operation08",
+      "kind": "method",
+      "label": "Module12.operation08",
+      "data": {
+        "signature": "operation08(input: Input08): Promise<Output08>"
+      }
+    },
+    {
+      "id": "Module12.operation09",
+      "kind": "method",
+      "label": "Module12.operation09",
+      "data": {
+        "signature": "operation09(input: Input09): Promise<Output09>"
+      }
+    },
+    {
+      "id": "Module12.operation10",
+      "kind": "method",
+      "label": "Module12.operation10",
+      "data": {
+        "signature": "operation10(input: Input10): Promise<Output10>"
+      }
+    },
+    {
+      "id": "Module12.operation11",
+      "kind": "method",
+      "label": "Module12.operation11",
+      "data": {
+        "signature": "operation11(input: Input11): Promise<Output11>"
+      }
+    },
+    {
+      "id": "Module12.operation12",
+      "kind": "method",
+      "label": "Module12.operation12",
+      "data": {
+        "signature": "operation12(input: Input12): Promise<Output12>"
+      }
+    },
+    {
+      "id": "Module12.operation13",
+      "kind": "method",
+      "label": "Module12.operation13",
+      "data": {
+        "signature": "operation13(input: Input13): Promise<Output13>"
+      }
+    },
+    {
+      "id": "Module12.operation14",
+      "kind": "method",
+      "label": "Module12.operation14",
+      "data": {
+        "signature": "operation14(input: Input14): Promise<Output14>"
+      }
+    },
+    {
+      "id": "Module12.operation15",
+      "kind": "method",
+      "label": "Module12.operation15",
+      "data": {
+        "signature": "operation15(input: Input15): Promise<Output15>"
+      }
+    },
+    {
+      "id": "Module12.operation16",
+      "kind": "method",
+      "label": "Module12.operation16",
+      "data": {
+        "signature": "operation16(input: Input16): Promise<Output16>"
+      }
+    },
+    {
+      "id": "Module12.operation17",
+      "kind": "method",
+      "label": "Module12.operation17",
+      "data": {
+        "signature": "operation17(input: Input17): Promise<Output17>"
+      }
+    },
+    {
+      "id": "Module12.operation18",
+      "kind": "method",
+      "label": "Module12.operation18",
+      "data": {
+        "signature": "operation18(input: Input18): Promise<Output18>"
+      }
+    },
+    {
+      "id": "Module12.operation19",
+      "kind": "method",
+      "label": "Module12.operation19",
+      "data": {
+        "signature": "operation19(input: Input19): Promise<Output19>"
+      }
+    },
+    {
+      "id": "Module12.operation20",
+      "kind": "method",
+      "label": "Module12.operation20",
+      "data": {
+        "signature": "operation20(input: Input20): Promise<Output20>"
+      }
+    },
+    {
+      "id": "Module12.operation21",
+      "kind": "method",
+      "label": "Module12.operation21",
+      "data": {
+        "signature": "operation21(input: Input21): Promise<Output21>"
+      }
+    },
+    {
+      "id": "Module12.operation22",
+      "kind": "method",
+      "label": "Module12.operation22",
+      "data": {
+        "signature": "operation22(input: Input22): Promise<Output22>"
+      }
+    },
+    {
+      "id": "Module12.operation23",
+      "kind": "method",
+      "label": "Module12.operation23",
+      "data": {
+        "signature": "operation23(input: Input23): Promise<Output23>"
+      }
+    },
+    {
+      "id": "Module12.operation24",
+      "kind": "method",
+      "label": "Module12.operation24",
+      "data": {
+        "signature": "operation24(input: Input24): Promise<Output24>"
+      }
+    },
+    {
+      "id": "Module12.operation25",
+      "kind": "method",
+      "label": "Module12.operation25",
+      "data": {
+        "signature": "operation25(input: Input25): Promise<Output25>"
+      }
+    },
+    {
+      "id": "Module12.operation26",
+      "kind": "method",
+      "label": "Module12.operation26",
+      "data": {
+        "signature": "operation26(input: Input26): Promise<Output26>"
+      }
+    },
+    {
+      "id": "Module12.operation27",
+      "kind": "method",
+      "label": "Module12.operation27",
+      "data": {
+        "signature": "operation27(input: Input27): Promise<Output27>"
+      }
+    },
+    {
+      "id": "Module12.operation28",
+      "kind": "method",
+      "label": "Module12.operation28",
+      "data": {
+        "signature": "operation28(input: Input28): Promise<Output28>"
+      }
+    },
+    {
+      "id": "Module12.operation29",
+      "kind": "method",
+      "label": "Module12.operation29",
+      "data": {
+        "signature": "operation29(input: Input29): Promise<Output29>"
+      }
+    },
+    {
+      "id": "Module12.operation30",
+      "kind": "method",
+      "label": "Module12.operation30",
+      "data": {
+        "signature": "operation30(input: Input30): Promise<Output30>"
+      }
+    },
+    {
+      "id": "Module12.operation31",
+      "kind": "method",
+      "label": "Module12.operation31",
+      "data": {
+        "signature": "operation31(input: Input31): Promise<Output31>"
+      }
+    },
+    {
+      "id": "Module12.operation32",
+      "kind": "method",
+      "label": "Module12.operation32",
+      "data": {
+        "signature": "operation32(input: Input32): Promise<Output32>"
+      }
+    },
+    {
+      "id": "Module12.operation33",
+      "kind": "method",
+      "label": "Module12.operation33",
+      "data": {
+        "signature": "operation33(input: Input33): Promise<Output33>"
+      }
+    },
+    {
+      "id": "Module12.operation34",
+      "kind": "method",
+      "label": "Module12.operation34",
+      "data": {
+        "signature": "operation34(input: Input34): Promise<Output34>"
+      }
+    },
+    {
+      "id": "Module12.operation35",
+      "kind": "method",
+      "label": "Module12.operation35",
+      "data": {
+        "signature": "operation35(input: Input35): Promise<Output35>"
+      }
+    },
+    {
+      "id": "Module12.operation36",
+      "kind": "method",
+      "label": "Module12.operation36",
+      "data": {
+        "signature": "operation36(input: Input36): Promise<Output36>"
+      }
+    },
+    {
+      "id": "Module12.operation37",
+      "kind": "method",
+      "label": "Module12.operation37",
+      "data": {
+        "signature": "operation37(input: Input37): Promise<Output37>"
+      }
+    },
+    {
+      "id": "Module12.operation38",
+      "kind": "method",
+      "label": "Module12.operation38",
+      "data": {
+        "signature": "operation38(input: Input38): Promise<Output38>"
+      }
+    },
+    {
+      "id": "Module12.operation39",
+      "kind": "method",
+      "label": "Module12.operation39",
+      "data": {
+        "signature": "operation39(input: Input39): Promise<Output39>"
+      }
+    },
+    {
+      "id": "Module12.operation40",
+      "kind": "method",
+      "label": "Module12.operation40",
+      "data": {
+        "signature": "operation40(input: Input40): Promise<Output40>"
+      }
+    },
+    {
+      "id": "Module12.operation41",
+      "kind": "method",
+      "label": "Module12.operation41",
+      "data": {
+        "signature": "operation41(input: Input41): Promise<Output41>"
+      }
+    },
+    {
+      "id": "Module12.operation42",
+      "kind": "method",
+      "label": "Module12.operation42",
+      "data": {
+        "signature": "operation42(input: Input42): Promise<Output42>"
+      }
+    },
+    {
+      "id": "Module12.operation43",
+      "kind": "method",
+      "label": "Module12.operation43",
+      "data": {
+        "signature": "operation43(input: Input43): Promise<Output43>"
+      }
+    },
+    {
+      "id": "Module12.operation44",
+      "kind": "method",
+      "label": "Module12.operation44",
+      "data": {
+        "signature": "operation44(input: Input44): Promise<Output44>"
+      }
+    },
+    {
+      "id": "Module12.operation45",
+      "kind": "method",
+      "label": "Module12.operation45",
+      "data": {
+        "signature": "operation45(input: Input45): Promise<Output45>"
+      }
+    },
+    {
+      "id": "Module12.operation46",
+      "kind": "method",
+      "label": "Module12.operation46",
+      "data": {
+        "signature": "operation46(input: Input46): Promise<Output46>"
+      }
+    },
+    {
+      "id": "Module12.operation47",
+      "kind": "method",
+      "label": "Module12.operation47",
+      "data": {
+        "signature": "operation47(input: Input47): Promise<Output47>"
+      }
+    },
+    {
+      "id": "Module12.operation48",
+      "kind": "method",
+      "label": "Module12.operation48",
+      "data": {
+        "signature": "operation48(input: Input48): Promise<Output48>"
+      }
+    },
+    {
+      "id": "Module12.operation49",
+      "kind": "method",
+      "label": "Module12.operation49",
+      "data": {
+        "signature": "operation49(input: Input49): Promise<Output49>"
+      }
+    }
+  ],
+  "relationships": []
+}

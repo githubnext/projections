@@ -4,6 +4,7 @@ import {
   changeMark,
   classifyChange,
   describeChange,
+  edgesInOrder,
   emphasisInset,
   cardTextMetrics,
   statusIcons,
@@ -17,6 +18,7 @@ import {
 import {
   CardChangeMarks,
   cardCornerRadius,
+  EdgeOrigins,
   useBorderWidths,
   useCoveredPadding,
   useScrolledPadding,
@@ -34,8 +36,8 @@ import {lifetimeDash, markSpan} from './lifetime-mark.js'
 import {facetNouns, type DiFacetChange} from './facets.js'
 import {
   LifetimeMark,
-  LinkOrigins,
   LinkView,
+  linkOrigins,
   activate,
   diLegend,
   useDiPadding,
@@ -380,7 +382,7 @@ function DiffCard({
  * or lost are listed on it, and drawn green, or red and dashed; a rewired
  * link shows both.
  */
-export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, onAction}: RendererProps<typeof accepts>) {
+export function DiffView({model, emphasis, selectedId, hoveredId, onSelect, reportLegend, onAction}: RendererProps<typeof accepts>) {
   const diff = useMemo(() => createDiDiff(model), [model])
   const legend = useMemo(() => diLegend(diff.runtimeResolution, diff.aliases), [diff.runtimeResolution, diff.aliases])
   useLegend(reportLegend, legend)
@@ -399,7 +401,11 @@ export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, o
   const routes = useMemo(() => routeLinks(boxes, diff.links, outset), [boxes, diff, outset])
   const units = diff.units.slice(0, diUnitLimit)
   const shown = new Set(units.map(unit => unit.id))
-  const links = diff.links.filter(link => shown.has(link.fromId) && shown.has(link.toId))
+  const links = edgesInOrder(
+    diff.links.filter(link => shown.has(link.fromId) && shown.has(link.toId)),
+    link => link,
+    [hoveredId, selectedId],
+  )
   const selectedUnits = new Set(units.filter(unit => selectedId !== null && unitParts(unit.unit).includes(selectedId)).map(unit => unit.id))
   const bounds = useMemo(() => {
     const all = [...boxes.values()]
@@ -477,7 +483,7 @@ export function DiffView({model, emphasis, selectedId, onSelect, reportLegend, o
               diff
             />
           ))}
-          <LinkOrigins links={links} routes={routes} />
+          <EdgeOrigins edges={linkOrigins(links, routes, link => emphasis(link, link.id))} />
         </svg>
       </div>
     </div>

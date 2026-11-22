@@ -81,11 +81,12 @@ test('a card is one focus and selection ring: parts never outline, nothing overf
 test("a link's source dot takes its line's color while the link is hovered or selected", async ({page}, info) => {
   const renderer = await openRenderer(page, {renderer: 'dependency-injection', extraction: after})
   // Each link's clear copy of its origin dot, drawn over every link, takes the ring's color with the link.
-  const ring = renderer.frame.locator('.di-link-origin-ring').first()
-  const id = (await ring.getAttribute('data-projections-ring-with'))!
+  const id = (await renderer.frame.locator('.graph-edge-origin-ring').first().getAttribute('data-projections-ring-with'))!
+  // Its own copy, wherever a ringed link moves it: ringed links are drawn last.
+  const ring = renderer.frame.locator(`.graph-edge-origin-ring[data-projections-ring-with="${id}"]`).first()
   const link = renderer.frame.locator(`g[data-entity-id="${id}"]`)
   const colors = async () => ({
-    line: await link.locator('.di-link').evaluate(line => getComputedStyle(line).stroke),
+    line: await link.locator('.graph-edge').evaluate(line => getComputedStyle(line).stroke),
     dot: await ring.evaluate(dot => getComputedStyle(dot).fill),
   })
   const resting = (await colors()).line
@@ -108,15 +109,15 @@ test("a link's source dot takes its line's color while the link is hovered or se
 test("a link's origin dot shows its ring color where later links leave the same point", async ({page}) => {
   const renderer = await openRenderer(page, {renderer: 'dependency-injection', extraction: after})
   // A link whose origin a later link shares: the later link's dot is drawn after it.
-  const shared = await renderer.frame.locator('.di-link-origins').evaluate(layer => {
-    const copies = [...layer.querySelectorAll<SVGCircleElement>('.di-link-origin-ring')]
+  const shared = await renderer.frame.locator('.graph-edge-origins').evaluate(layer => {
+    const copies = [...layer.querySelectorAll<SVGCircleElement>('.graph-edge-origin-ring')]
     const at = (copy: SVGCircleElement) => `${copy.getAttribute('cx')},${copy.getAttribute('cy')}`
     const first = copies.find((copy, index) => copies.slice(index + 1).some(later => at(later) === at(copy)))
     return first?.getAttribute('data-projections-ring-with') ?? null
   })
   expect(shared, 'the fixture has links leaving a card at one point').not.toBeNull()
   await renderer.hover(shared)
-  const ring = renderer.frame.locator(`.di-link-origin-ring[data-projections-ring-with="${shared}"]`)
+  const ring = renderer.frame.locator(`.graph-edge-origin-ring[data-projections-ring-with="${shared}"]`)
   const read = () => ring.evaluate(dot => getComputedStyle(dot).fill)
   await expect.poll(read, 'the hovered link takes the ring').not.toBe('rgba(0, 0, 0, 0)')
   const fill = await read()

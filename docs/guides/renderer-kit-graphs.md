@@ -55,16 +55,20 @@ the whole graph does not fit at the floor, the view opens on the changed region
 at the floor so a content-sized frame still matches the content's height.
 
 Hubs widen automatically to provide a separate port for each incoming
-relationship (`fanInWidths`), and any links incident to a selected or hovered
-card receive `data-incident` to display their halo. A held pane lays out only
-its own revision (`GraphTransitionOptions.held`). Fit is always the minimum zoom
-level: `useStageZoom` multiplies the fitted scale, Fit resets it, and scroll
-positions keep their center point across zoom changes. The canvas finishes
-layout before its first paint and holds the shell's `rendered` acknowledgement
-via `usePaintGate` so the host never reveals an unlaid-out frame. If layout
-takes a while, a delayed status message appears; when step order changes, the
-previous layout stays on screen until the next one is ready. Framing is computed
-across all layouts so the view never zooms while scrubbing.
+relationship (`fanInWidths`). A hovered, focused or selected relationship is
+drawn over the others, and a selected or hovered card's relationships over the
+rest, so each can be traced whole into a hub. Every relationship has an origin
+dot where it leaves its source (`EdgeOrigins`, one dot per shared start), and
+while it is ringed its line, origin dot and arrowhead all take the ring's color,
+synthetic relationships included. A held pane lays out only its own revision
+(`GraphTransitionOptions.held`). Fit is always the minimum zoom level:
+`useStageZoom` multiplies the fitted scale, Fit resets it, and scroll positions
+keep their center point across zoom changes. The canvas finishes layout before
+its first paint and holds the shell's `rendered` acknowledgement via
+`usePaintGate` so the host never reveals an unlaid-out frame. If layout takes a
+while, a delayed status message appears; when step order changes, the previous
+layout stays on screen until the next one is ready. Framing is computed across
+all layouts so the view never zooms while scrubbing.
 
 In the DOM, cards carry `data-entity-id`, while links carry `data-entity-id`
 (the relationship ID), `data-edge-key`, `data-from`, `data-to`, and `data-end`

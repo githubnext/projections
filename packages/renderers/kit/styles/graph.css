@@ -208,14 +208,6 @@
   fill: none;
   pointer-events: none;
 }
-.graph-edge-halo {
-  stroke: var(--accent-soft);
-  stroke-width: calc(var(--projections-space-2) - var(--stroke));
-  stroke-linecap: round;
-  fill: none;
-  pointer-events: none;
-  opacity: 0;
-}
 /* Drawn over its shaft; its fill, stroke and round-joined stroke width come from the kit's arrowHeadStyle. */
 .graph-arrowhead {
   pointer-events: none;
@@ -227,13 +219,20 @@
 .graph-link-head.receded {
   filter: opacity(0.28);
 }
-/* A selected or hovered card's relationships show their whole course under a halo, so each can be traced into a hub. */
-.graph-link[data-incident] > .graph-edge-halo {
-  opacity: 1;
+/*
+ * Synthetic relationships (no entity ID) aren't ringed by the SDK: under the pointer or keyboard focus (`hot`) the
+ * line, arrowhead and origin dot take the hover ring's color and width, as the SDK draws an entity's.
+ */
+.graph-link.hot > .graph-edge {
+  stroke: var(--pr-hover) !important;
+  stroke-width: var(--pr-hover-width) !important;
 }
-/* Synthetic relationships (no entity ID) aren't ringed by the SDK: their halo shows hover and focus. */
-[data-graph-synthetic] > .edge-hit:is(:hover, :focus-visible) + .graph-edge-halo {
-  opacity: 1;
+.graph-link-head.hot > .graph-arrowhead {
+  fill: var(--pr-hover) !important;
+  stroke: var(--pr-hover) !important;
+}
+.graph-edge-origin-ring.hot {
+  fill: var(--pr-hover);
 }
 .graph-edge-emphasis {
   pointer-events: none;
@@ -246,6 +245,18 @@
 }
 .graph-junction {
   fill: var(--edge);
+  pointer-events: none;
+}
+/* An edge's origin dot (`EdgeOrigins`), over the cards with its arrowhead; a shared dot's color is its edges'. */
+.graph-edge-origin {
+  fill: var(--edge);
+  pointer-events: none;
+}
+/* An edge's copy of its origin dot: clear until the edge is ringed, then the ring's color. */
+.graph-edge-origin-ring {
+  fill: transparent;
+  stroke: none;
+  stroke-width: 0;
   pointer-events: none;
 }
 /* A relationship's copy of its junction dot: clear until the relationship is ringed, then the ring's color. */

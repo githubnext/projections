@@ -110,62 +110,19 @@
   fill: var(--pk-part-tint);
 }
 
-.di-link {
-  stroke: var(--edge);
-  stroke-width: calc(var(--stroke) * 1.4);
-  stroke-linecap: round;
-  fill: none;
-  pointer-events: none;
-}
-.di-link.collection {
+/* A link's own line styles, on the kit's edge (`graph-edge`): a collection, a runtime resolution, an alias. */
+.graph-edge.collection {
   stroke-dasharray: 6 3;
 }
-.di-link.resolution {
+.graph-edge.resolution {
   stroke-dasharray: 4 4;
 }
 /* An alias forwards to another registration: dotted, so it never reads as an injection. */
-.di-link.alias {
+.graph-edge.alias {
   stroke-dasharray: 1 4;
 }
-.di-link.optional {
+.graph-edge.optional {
   opacity: 0.45;
-}
-.di-link-emphasis {
-  pointer-events: none;
-  stroke-width: var(--stroke-strong);
-}
-.di-link-emphasis.added {
-  stroke: var(--green);
-}
-.di-link-emphasis.removed {
-  stroke: var(--red);
-  stroke-dasharray: 5 3;
-}
-.di-link-emphasis.modified {
-  stroke: var(--amber);
-}
-.di-link-emphasis.renamed {
-  stroke: var(--violet);
-}
-.di-link-origin {
-  fill: var(--edge);
-  pointer-events: none;
-}
-/* A link's copy of its origin dot (`LinkOrigins`): clear until the link is ringed, then the ring's color. */
-.di-link-origin-ring {
-  fill: transparent;
-  stroke: none;
-  stroke-width: 0;
-  pointer-events: none;
-}
-.di-link-hit {
-  stroke: transparent;
-  stroke-width: var(--projections-space-4);
-  fill: none;
-  cursor: pointer;
-}
-.di-link-hit:focus-visible {
-  outline: none;
 }
 .di-parameter {
   fill: var(--muted);

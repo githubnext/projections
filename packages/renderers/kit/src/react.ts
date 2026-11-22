@@ -30,6 +30,7 @@ export type {DataTableColumn, DataTableProps, TablePropsSource} from './react/da
 export {graphCanvasControls, graphCanvasPace, graphEntityLimit} from './react/graph-canvas/props.js'
 export type {GraphAnchor, GraphCanvasProps} from './react/graph-canvas/props.js'
 export {GraphCanvas} from './react/graph-canvas/canvas.js'
+export {EdgeOrigins, edgeOriginRadius, type EdgeOrigin} from './react/graph-canvas/edge-origins.js'
 export {CardChangeMarks, cardCornerRadius} from './react/graph-canvas/card-change.js'
 export {useBorderWidths} from './react/border.js'
 export {useDomainIndex} from './react/domain.js'

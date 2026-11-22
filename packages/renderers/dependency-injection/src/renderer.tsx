@@ -6,12 +6,14 @@ import {
   classifyChange,
   contentStart,
   describeChange,
+  edgesInOrder,
   textPill,
   type ScrollStart,
 } from '@githubnext/projections-renderer-kit'
 import {
   CardChangeMarks,
   cardCornerRadius,
+  EdgeOrigins,
   EmptyDomain,
   useBorderWidths,
   useCoveredPadding,
@@ -28,8 +30,8 @@ import {diCardHeight, diMetrics, selfRegistered} from './geometry.js'
 import {markSpan} from './lifetime-mark.js'
 import {
   LifetimeMark,
-  LinkOrigins,
   LinkView,
+  linkOrigins,
   diLegend,
   activate,
   advance,
@@ -385,6 +387,7 @@ function TransitionView({
   progress,
   emphasis: emphasize,
   selectedId,
+  hoveredId,
   onSelect,
   reportLegend,
   onAction,
@@ -421,7 +424,11 @@ function TransitionView({
   )
   const units = frame.units.slice(0, diUnitLimit)
   const shown = new Set(units.map(unit => unit.id))
-  const links = frame.links.filter(link => shown.has(link.fromId) && shown.has(link.toId))
+  const links = edgesInOrder(
+    frame.links.filter(link => shown.has(link.fromId) && shown.has(link.toId)),
+    link => link,
+    [hoveredId, selectedId],
+  )
   const selectedUnits = new Set(
     frame.units.filter(unit => selectedId !== null && unitParts(unit.unit).includes(selectedId)).map(unit => unit.id),
   )
@@ -525,7 +532,7 @@ function TransitionView({
                 onSelect={onSelect}
               />
             ))}
-            <LinkOrigins links={links} routes={routes} />
+            <EdgeOrigins edges={linkOrigins(links, routes, link => emphasize(link, transition.linkStepRow(link.key)))} />
           </svg>
         )}
       </div>

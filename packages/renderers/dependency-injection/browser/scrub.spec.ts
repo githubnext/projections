@@ -101,7 +101,7 @@ test('a custom comparator order changes the painted order', async ({page}) => {
 
 test('change emphasis follows the host highlighting and is gone at both endpoints', async ({page}) => {
   const renderer = await openRenderer(page, {renderer: 'dependency-injection', before, after, progress: 0})
-  const emphasis = renderer.frame.locator('.node-emphasis, .node-footer-band, .node-status, .di-link-emphasis')
+  const emphasis = renderer.frame.locator('.node-emphasis, .node-footer-band, .node-status, .graph-edge-emphasis')
   await expect(emphasis).toHaveCount(0)
   const added = (await renderer.state()).steps.at(-1)!
   await renderer.seek(added)
@@ -217,7 +217,7 @@ test('a single revision presents the composition with no steps and no emphasis',
   expect(await renderer.state()).toMatchObject({rendered: 1, steps: []})
   await expect(renderer.frame.locator('.di-card')).toHaveCount(10)
   await expect(renderer.frame.locator('.di-card-emphasis, .di-change-marker')).toHaveCount(0)
-  await expect(renderer.frame.locator('svg.di-canvas .di-link.resolution')).toHaveCount(1)
+  await expect(renderer.frame.locator('svg.di-canvas .graph-edge.resolution')).toHaveCount(1)
 })
 
 test('the scoring pair rewires through an inserted unit with every frame coherent', async ({page}, testInfo) => {
@@ -308,7 +308,7 @@ for (const [scenario, units] of [
       ).toBeVisible()
       if (scenario === 'nestjs-orders') {
         expect((await renderer.state()).legend?.items.map(item => item.label)).toContain('Alias: the same instance')
-        await expect(renderer.frame.locator('svg.di-canvas .di-link.alias')).toHaveCount(1)
+        await expect(renderer.frame.locator('svg.di-canvas .graph-edge.alias')).toHaveCount(1)
       }
     }
   })
@@ -321,7 +321,7 @@ test('arrows are painted over the cards, so a head stays whole where it meets a 
     .first()
     .evaluate(svg => {
       const cards = [...svg.querySelectorAll('.di-card-surface')]
-      return [...svg.querySelectorAll('.di-link')].filter(link =>
+      return [...svg.querySelectorAll('.graph-edge')].filter(link =>
         cards.some(card => !(card.compareDocumentPosition(link) & Node.DOCUMENT_POSITION_FOLLOWING)),
       ).length
     })

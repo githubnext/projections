@@ -1143,7 +1143,7 @@ out between `fade.from` and `fade.to` CSS px apart, before it is dense enough to
 ### `drawnEdge`
 
 ```ts
-drawnEdge(edge: Pick<TransitionEdge, "points">, from: TransitionNode, to: TransitionNode, outset?: number): { "base": Point; "d": string; "direction": Point; "head": string; "tip": Point }
+drawnEdge(edge: Pick<TransitionEdge, "points">, from: TransitionNode, to: TransitionNode, outset?: number): { "base": Point; "d": string; "direction": Point; "head": string; "start": Point; "tip": Point }
 ```
 
 A relationship as drawn: its route with each end on its card's face at the
@@ -1228,6 +1228,16 @@ edgePresence(edge: EntityChange<Relationship>, progress: number): number
 ```
 
 Whether a relationship is present at this point, so lists match the timeline.
+
+### `edgesInOrder`
+
+```ts
+edgesInOrder<T>(items: Array<T>, edgeOf: { (item: T): OrderedEdge }, ringed: Array<null | string | undefined>, hot?: null | string): Array<T>
+```
+
+Edges in drawing order: one ringed now (`ringed`: the hovered and selected IDs; or `hot`, by key, a synthetic edge
+under the pointer or keyboard focus, which the SDK doesn't ring) last, and before it those a ringed card at either
+end has, so each is traced whole over the others it runs beside. Otherwise the order is kept.
 
 ### `EdgeTurn`
 
@@ -1603,6 +1613,14 @@ The width a graph card's text needs: its widest line in either revision (the kin
 the detail at its right, the label, and in a comparison the status footer), between `cardWidthRange.min` and `.max`,
 rounded up to a multiple of 4. A graph's cards share the widest of their widths (see `graphCardsWidth`), the same
 at every progress, so no card resizes while scrubbing.
+
+### `graphEdgeWeight`
+
+```ts
+graphEdgeWeight: 1.4
+```
+
+How much heavier than a border a graph's relationship line is drawn, at rest: every graph renderer's edges.
 
 ### `GraphFrame`
 
@@ -2139,6 +2157,21 @@ openingZoom(fit: number, floor: number): number
 The zoom multiple a stage fitted at `fit` opens at, given the scale `floor` at which its smallest text reaches
 `openingFloorPx` (see `useOpeningFloor`; 0 when unknown): 1 (fitted) when the fit draws text at least that large,
 else the multiple that brings it there.
+
+### `OrderedEdge`
+
+```ts
+interface OrderedEdge
+```
+
+What `edgesInOrder` reads from an edge: its key, its entity's ID and the cards at its ends.
+
+| Member | Signature | Description |
+|---|---|---|
+| `fromId` | `"fromId": string` | The card it leaves. |
+| `id` | `"id": string` | Its entity's ID, which the hovered and selected IDs name. |
+| `key` | `"key": string` | Its stable key, which `hot` names. |
+| `toId` | `"toId": string` | The card it reaches. |
 
 ### `otherToken`
 
@@ -3769,6 +3802,43 @@ EdgeArrowMarker(__0: { "color": string; "highlight"?: false | true; "id": string
 The kit's arrowhead (see `arrowHead`) as an SVG marker, for paths that end
 at the head's base after a straight lead-in, such as `boxEdge`'s: the base
 sits on the path's end and the tip `arrowHeadLength` beyond it.
+
+### `EdgeOrigin`
+
+```ts
+interface EdgeOrigin
+```
+
+An edge as its origin dot needs it.
+
+| Member | Signature | Description |
+|---|---|---|
+| `hot` | `"hot"?: false \| true` | Hovered or focused while synthetic, which the SDK doesn't ring: drawn in the hover color. |
+| `id` | `"id"?: string \| undefined` | The entity it rings with (`data-projections-ring-with`), unless it is synthetic. |
+| `key` | `"key": string` | Its stable key. |
+| `opacity` | `"opacity": number` | Its presence now, which its dot fades with. |
+| `start` | `"start": Point` | Where its line starts, on its source's edge. |
+| `stroke` | `"stroke": string` | Its line's color as drawn now: a change's hue while it is emphasized. |
+
+### `edgeOriginRadius`
+
+```ts
+edgeOriginRadius: 2.6
+```
+
+The radius of an edge's origin dot, in the drawing's units.
+
+### `EdgeOrigins`
+
+```ts
+EdgeOrigins(__0: { "edges": Array<EdgeOrigin> }): Element
+```
+
+The edges' origin dots, over the cards like their arrowheads: one at each start point, in its edges' color when they
+agree (a change's hue only when every edge leaving there has it, so a hue never stands for edges it doesn't), else
+the neutral edge color. Then a clear copy for each edge, which the SDK fills in the ring's color while that edge is
+hovered, focused or selected (`data-projections-ring-with`), so the dot takes its edge's state whichever edge
+shares it.
 
 ### `EmptyDomain`
 

@@ -4506,12 +4506,12 @@ legend never changes while scrubbing.
 ### `useOpeningFloor`
 
 ```ts
-useOpeningFloor(root: RefObject<Element | null>, key: unknown): number
+useOpeningFloor(rootRef: RefObject<Element | null>, key: unknown): number
 ```
 
-The scale at which the smallest text in `root` is drawn at `openingFloorPx`, or 0 before there is any: SVG text
+The scale at which the smallest text in `rootRef` is drawn at `openingFloorPx`, or 0 before there is any: SVG text
 and HTML text (including HTML in a `foreignObject`), whatever its opacity (text that fades in while scrubbing
-counts), in content units, so `root` is the content the stage scales, whether by an SVG's size or a CSS transform.
+counts), in content units, so `rootRef` is the content the stage scales, whether by an SVG's size or a CSS transform.
 Visually hidden HTML text (laid out at most 1 px wide or high, like `.sr-only`) doesn't count. Measured before paint
 whenever `key` changes, for example the content's layout, never while scrubbing.
 
@@ -4540,7 +4540,7 @@ returns to release. Outside a kit renderer it holds nothing.
 ### `useScrollAnchor`
 
 ```ts
-useScrollAnchor(scroller: RefObject<HTMLElement | null>, scale: number, opening?: false | true, start?: { "x": number; "y": number } | { (view: { "height": number; "scale": number; "width": number }): { "left": number; "top": number } }, onMove?: undefined | { (): void }, clearCover?: false | true): { (): void }
+useScrollAnchor(scrollerRef: RefObject<HTMLElement | null>, scale: number, opening?: false | true, start?: { "x": number; "y": number } | { (view: { "height": number; "scale": number; "width": number }): { "left": number; "top": number } }, onMove?: undefined | { (): void }, clearCover?: false | true): { (): void }
 ```
 
 Keeps the point at the middle of a scroll container in the middle when the

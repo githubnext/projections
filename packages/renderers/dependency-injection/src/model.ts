@@ -1,5 +1,4 @@
-import {isKind} from '@githubnext/projections-schemas'
-import type {DependencyInjectionExtraction} from '@githubnext/projections-schemas'
+import {isKind, type DependencyInjectionExtraction} from '@githubnext/projections-schemas'
 import {compareIds} from '@githubnext/projections-renderer-kit'
 import {
   conventionalName,

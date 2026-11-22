@@ -6,24 +6,22 @@ import {
   readRendererFragment,
   rendererLimits,
   rendererProtocolVersion,
+  type AnchorRect,
+  type ControlValue,
+  type HostMessage,
+  type InitPayload,
+  type RendererControl,
+  type RendererEnvironment,
+  type RendererCapabilities,
+  type RendererLegend,
+  type RendererSummary,
+  type RendererMessage,
+  type ScrollPosition,
 } from './protocol.js'
 import {documentRings} from './rings.js'
 import {optionalThemeTokenNames, resolveThemeTokens} from './tokens.js'
 import {dispatch, echoedGeneration, replayed, resumeSession, type RendererHandlers} from './client/host-messages.js'
 import {documentRequests} from './client/documents.js'
-import type {
-  AnchorRect,
-  ControlValue,
-  HostMessage,
-  InitPayload,
-  RendererControl,
-  RendererEnvironment,
-  RendererCapabilities,
-  RendererLegend,
-  RendererSummary,
-  RendererMessage,
-  ScrollPosition,
-} from './protocol.js'
 
 export type {RendererHandlers} from './client/host-messages.js'
 export {embedRenderer} from './embed.js'

@@ -1,6 +1,6 @@
 // `ci explain`: what CI runs for a change and why, from the plan CI's `changes` job makes (CONTRIBUTING.md#what-ci-runs);
 // `ci replay`: how a change to the rules or planner changes the plans of recent pull requests and of each file.
-import {join} from 'node:path'
+import {join, posix} from 'node:path'
 import {repoFacts} from '../../lib/ci-facts.ts'
 import {changeSince, contentsSince} from '../../lib/ci-change.ts'
 import {explain} from '../../lib/ci-explain.ts'
@@ -8,7 +8,6 @@ import {ciPlan, executions} from '../../lib/ci-plan.ts'
 import {checkoutPlanner, loadPlanner, mergedCommits, replay} from '../../lib/ci-replay.ts'
 import {loadCiRules} from '../../lib/ci-rules.ts'
 import {TOOLS} from '../../lib/gates.ts'
-import {posix} from 'node:path'
 import {git, relativeTo} from '../../lib/repo.ts'
 
 export interface ExplainOptions {

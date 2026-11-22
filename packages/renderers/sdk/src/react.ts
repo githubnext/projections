@@ -1,23 +1,22 @@
-import {useEffect, useMemo, useRef, useState} from 'react'
+import {useEffect, useMemo, useRef, useState, type RefObject} from 'react'
 import type {Extraction} from '@githubnext/projections-schemas'
-import type {RefObject} from 'react'
-import {connectInteractions} from './interactions.js'
-import type {InteractionController, InteractionOptions} from './interactions.js'
-import {afterPaint, applyEnvironment, connectRenderer} from './client.js'
-import type {RendererClient} from './client.js'
-import {acceptsExtraction, controlValues, describeAccepts} from './protocol.js'
-import type {
-  AcceptedExtraction,
-  RendererAccepts,
-  AnnotationMark,
-  ControlValue,
-  FilterPayload,
-  InitPayload,
-  ProgressPayload,
-  RendererCapabilities,
-  RendererControl,
-  RendererEnvironment,
-  RendererOptions,
+import {connectInteractions, type InteractionController, type InteractionOptions} from './interactions.js'
+import {afterPaint, applyEnvironment, connectRenderer, type RendererClient} from './client.js'
+import {
+  acceptsExtraction,
+  controlValues,
+  describeAccepts,
+  type AcceptedExtraction,
+  type RendererAccepts,
+  type AnnotationMark,
+  type ControlValue,
+  type FilterPayload,
+  type InitPayload,
+  type ProgressPayload,
+  type RendererCapabilities,
+  type RendererControl,
+  type RendererEnvironment,
+  type RendererOptions,
 } from './protocol.js'
 
 /** The host state `useRenderer` keeps, each field as the host last sent it. */

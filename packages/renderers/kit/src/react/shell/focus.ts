@@ -1,6 +1,5 @@
 // The host's find and "changes only" settings, and the first focused item of a list scrolled into view.
-import {useEffect, useMemo, useState} from 'react'
-import type {RefObject} from 'react'
+import {useEffect, useMemo, useState, type RefObject} from 'react'
 import type {FilterPayload} from '@githubnext/projections-renderer-sdk/protocol'
 import {afterPaint} from '@githubnext/projections-renderer-sdk/client'
 import {placedAttribute} from '../../focus.js'

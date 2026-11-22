@@ -1,14 +1,14 @@
 // A bar's planned layout, headless: the bar's UI owns its plans, how they are measured and its policy; this owns the
 // measurement cache, the observation, the settled marker, the interaction lock and focus retention.
 
-import {useEffect, useLayoutEffect, useRef, type RefObject} from 'react'
-import {useMachine} from '@githubnext/projections-machine/react'
+import {useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject} from 'react'
+import {createActor} from '@githubnext/projections-machine'
 import {flushSync} from 'react-dom'
 import {chooseFitPlan, toolbarHysteresis} from './fit-plan/choose.js'
 import {fitWidth} from './fit-plan/fit-width.js'
 import {useFocusRetention} from './fit-plan/focus.js'
 import {carryNeeds, shiftNeeds} from './fit-plan/needs.js'
-import {fitPlanLifecycle} from './fit-plan/lifecycle.js'
+import {fitPlanLifecycle, fitPlanView, sameView, type FitPlanEvent, type FitPlanState} from './fit-plan/lifecycle.js'
 
 export {chooseFitPlan, toolbarHysteresis} from './fit-plan/choose.js'
 export type {FitChoice, FitHysteresis} from './fit-plan/choose.js'
@@ -97,21 +97,39 @@ export function useFitPlan<T>(
       const index = list.findIndex(item => signature(item) === signature(plan))
       return index < 0 ? 0 : index
     })
-  const [state, send, actor] = useMachine(fitPlanLifecycle, {
-    state: {kind: 'planning', plan: plans[0]!, settled: plans[0]!, width: 0, run: 0, hand: 'free', frame: false},
-    activities: {
-      // Replanning inside the observer's callback would resize observed elements mid-delivery (a ResizeObserver loop),
-      // so it waits for the next frame, and renders synchronously there, before that frame's layout and paint.
-      frame: (_activity, context) => {
-        const handle = requestAnimationFrame(() => {
-          const element = bar.current
-          // eslint-disable-next-line @eslint-react/dom-no-flush-sync -- the replanned bar must render in this frame, before its layout and paint.
-          if (element) flushSync(() => context.send({type: 'frame', width: Math.round(element.getBoundingClientRect().width)}))
-        })
-        return () => cancelAnimationFrame(handle)
+  const [actor] = useState(() =>
+    createActor(fitPlanLifecycle, {
+      state: {kind: 'planning', plan: plans[0]!, settled: plans[0]!, width: 0, run: 0, hand: 'free', frame: false},
+      activities: {
+        // Replanning inside the observer's callback would resize observed elements mid-delivery (a ResizeObserver loop),
+        // so it waits for the next frame, and renders synchronously there, before that frame's layout and paint.
+        frame: (_activity, context) => {
+          // The frame only asks to plan again: the planning effect measures the bar the caller passes now (a replaced ref
+          // included), and renders it at its new width first.
+          const handle = requestAnimationFrame(() => {
+            // eslint-disable-next-line @eslint-react/dom-no-flush-sync -- the replanned bar must render in this frame, before its layout and paint.
+            flushSync(() => context.send({type: 'frame'}))
+          })
+          return () => cancelAnimationFrame(handle)
+        },
       },
-    },
-  })
+    }),
+  )
+  const send = useCallback((event: FitPlanEvent) => actor.send(event), [actor])
+  // The bar renders again only when what it shows changes (`fitPlanView`), never for a press or its release alone: WebKit
+  // drops a tap's click when the page renders between its touch and its click. Subscribed and started in a layout
+  // effect, so a plan an event chooses there renders before paint.
+  const [state, setState] = useState(() => fitPlanView(actor.getState()))
+  useLayoutEffect(() => {
+    const update = (next: FitPlanState) => setState(previous => (sameView(previous, next) ? previous : fitPlanView(next)))
+    const unsubscribe = actor.subscribe(update)
+    actor.start()
+    update(actor.getState())
+    return () => {
+      unsubscribe()
+      actor.stop()
+    }
+  }, [actor])
   const key = typeof options.key === 'function' ? options.key(state.width) : options.key
   const memo = useRef({
     key,
@@ -210,9 +228,9 @@ export function useFitPlan<T>(
   useLayoutEffect(() => {
     const element = bar.current
     if (!element) return
-    if (state.kind === 'planning') element.removeAttribute('data-fit-settled')
+    if (state.planning) element.removeAttribute('data-fit-settled')
     else element.setAttribute('data-fit-settled', String(state.width))
-  }, [bar, state.kind, state.width])
+  }, [bar, state.planning, state.width])
 
   // Replan when the bar or one of its regions changes size.
   const observer = useRef<ResizeObserver | undefined>(undefined)

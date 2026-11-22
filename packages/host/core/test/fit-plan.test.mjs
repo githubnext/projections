@@ -115,6 +115,8 @@ test('a resize waits for the next frame, and the bar is measured again at its wi
   assert.equal(run(observed, {type: 'observed'}), observed)
   const {locked: _, ...planned} = settled
   assert.deepEqual(run(observed, {type: 'frame', width: 400}), {...planned, kind: 'planning', width: 400, run: 1, frame: false})
+  // A frame without a width keeps it: the planning effect measures the bar and sends `resized` if it changed.
+  assert.deepEqual(run(observed, {type: 'frame'}), {...planned, kind: 'planning', width: observed.width, run: 1, frame: false})
 })
 
 test("every state of the bar's lifecycle", () => {
@@ -258,4 +260,22 @@ test('a control kept for its open popup is forgotten when the popup closes with 
   notify?.()
   await settle()
   assert.equal(forgotten, 1)
+})
+
+test('a press and its release change nothing the bar renders, so they never render it again', async () => {
+  const {fitPlanView, sameView} = await import('../dist/fit-plan/lifecycle.js')
+  // WebKit drops a tap's click when the page renders between its touch and its click.
+  let state = {kind: 'settled', plan: 'wide', settled: 'wide', width: 640, run: 3, hand: 'free', frame: false, locked: false}
+  const view = fitPlanView(state)
+  for (const type of ['pressed', 'released']) {
+    state = fitPlanLifecycle.transition(state, {type}).state
+    assert.ok(sameView(view, state), `${type} keeps the view`)
+  }
+  // Nor does holding the plan for a press when focus leaves a locked bar, and releasing it for the replan.
+  const locked = {...state, locked: true}
+  const held = [{type: 'pressed'}, {type: 'moved'}].reduce((current, event) => fitPlanLifecycle.transition(current, event).state, locked)
+  assert.equal(held.kind, 'held')
+  assert.ok(sameView(view, held))
+  // What the bar shows still renders: another plan tried.
+  assert.ok(!sameView(view, fitPlanLifecycle.transition(state, {type: 'tried', plan: 'narrow'}).state))
 })

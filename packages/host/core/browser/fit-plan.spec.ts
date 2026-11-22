@@ -95,3 +95,61 @@ test('a press is not replanned away before its click, and the bar replans once i
   // Released, with focus out of the bar, it plans freely again.
   await expect(bar(page)).toHaveAttribute('data-plan', 'wide')
 })
+
+/** How many times the harness has committed (`data-commits`). */
+const commits = (page: Page) => page.locator('main[data-commits]').evaluate(element => Number(element.getAttribute('data-commits')))
+/**
+ * The commits once the harness is quiet: none for five frames, so a resize observation still on its way (the observer's
+ * first notice, a settle) has landed.
+ */
+const quietCommits = (page: Page) =>
+  page.locator('main[data-commits]').evaluate(async element => {
+    const read = () => element.getAttribute('data-commits')
+    const frame = () =>
+      new Promise(resolve => {
+        requestAnimationFrame(resolve)
+      })
+    let last = read()
+    for (let still = 0; still < 5;) {
+      await frame()
+      const now = read()
+      still = now === last ? still + 1 : 0
+      last = now
+    }
+    return Number(last)
+  })
+
+test('a press and its release never render the bar’s owner again, even when they hold its plan; a new plan does', async ({page}) => {
+  // WebKit drops a tap's click when the page renders between its touch and its click.
+  await page.goto(story('harness-default-ui--fit-plan', 'lock'))
+  await setWidth(page, 800)
+  await expect(bar(page)).toHaveAttribute('data-plan', 'wide')
+  // A press elsewhere and its release.
+  const settled = await quietCommits(page)
+  const clicks = await page.getByText('Clicks:').boundingBox()
+  await page.mouse.move(clicks!.x + 4, clicks!.y + 4)
+  await page.mouse.down()
+  await page.mouse.up()
+  expect(await quietCommits(page)).toBe(settled)
+
+  // A bar locked by focus in it (the wide plan fits, but the narrow one is kept), pressed as WebKit presses: focus leaves
+  // the bar, and the plan is held for the press, without rendering.
+  await setWidth(page, 400)
+  await bar(page).getByRole('button', {name: 'Apply'}).focus()
+  await setWidth(page, 800)
+  await expect(bar(page)).toHaveAttribute('data-plan', 'narrow')
+  await bar(page).evaluate(element => {
+    element.addEventListener('pointerdown', () => (document.activeElement as HTMLElement | null)?.blur())
+    element.addEventListener('mousedown', event => event.preventDefault())
+  })
+  const held = await quietCommits(page)
+  const apply = await bar(page).getByRole('button', {name: 'Apply'}).boundingBox()
+  await page.mouse.move(apply!.x + apply!.width / 2, apply!.y + apply!.height / 2)
+  await page.mouse.down()
+  expect(await quietCommits(page)).toBe(held)
+  await page.mouse.up()
+  await expect(page.getByRole('status', {name: 'Clicks'})).toHaveText('1')
+  // Released, it plans again: the new plan renders.
+  await expect(bar(page)).toHaveAttribute('data-plan', 'wide')
+  expect(await commits(page)).toBeGreaterThan(held)
+})

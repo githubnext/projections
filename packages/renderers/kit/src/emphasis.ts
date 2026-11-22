@@ -123,6 +123,9 @@ const edgeColors: Record<ChangeClassification, string> = {
   unchanged: 'var(--edge)',
 }
 
+/** How much heavier than a border a graph's relationship line is drawn, at rest: every graph renderer's edges. */
+export const graphEdgeWeight = 1.4
+
 /**
  * Explicit stroke paint for a relationship, blended toward its change color by
  * emphasis. `weight` is the line's weight relative to the host's border width

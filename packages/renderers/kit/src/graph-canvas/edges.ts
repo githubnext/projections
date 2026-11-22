@@ -26,7 +26,7 @@ export function drawnEdge(
   from: TransitionNode,
   to: TransitionNode,
   outset = cardBorderOutset(),
-): {d: string; tip: Point; base: Point; head: string; direction: Point} {
+): {d: string; start: Point; tip: Point; base: Point; head: string; direction: Point} {
   const points = [...edge.points]
   // Entering and leaving cards scale about their centre; the route's ends (and their tangents) follow the faces.
   // The arrowhead's straight lead-in (the last segment) and the handle before it move together, so the run stays straight.
@@ -40,5 +40,40 @@ export function drawnEdge(
   follow(0, [0, 1], from)
   follow(last, last >= 5 ? [last, last - 1, last - 2, last - 3, last - 4] : [last, last - 1], to)
   const {shaft, tip, base, head, direction} = arrowEnding(points, cardBox(to), outset)
-  return {d: splinePath(shaft), tip, base, head, direction}
+  const [start = base] = shaft
+  return {d: splinePath(shaft), start, tip, base, head, direction}
+}
+
+/** What `raisedEdges` reads from an edge: its key, its entity's ID and the cards at its ends. */
+export interface OrderedEdge {
+  /** Its stable key, which `hot` names. */
+  key: string
+  /** Its entity's ID, which the hovered and selected IDs name. */
+  id: string
+  /** The card it leaves. */
+  fromId: string
+  /** The card it reaches. */
+  toId: string
+}
+
+/**
+ * The edges drawn again over the others, in drawing order, so each is traced whole however many it runs beside: those
+ * a ringed card at either end has, then the ringed ones (`ringed`: the hovered and selected IDs, a card's own and the
+ * card's that a ringed part belongs to; or `hot`, by key, synthetic edges under the pointer or keyboard focus, which
+ * the SDK doesn't ring). Only their artwork is drawn again: the edges themselves, and their hit targets, keep their
+ * order, so keyboard focus moves through them in a stable order.
+ */
+export function raisedEdges<T>(
+  items: readonly T[],
+  edgeOf: (item: T) => OrderedEdge,
+  ringed: readonly (string | null | undefined)[],
+  hot: ReadonlySet<string> = new Set(),
+): T[] {
+  const ids = ringed.filter((id): id is string => typeof id === 'string')
+  const rank = (item: T) => {
+    const edge = edgeOf(item)
+    if (hot.has(edge.key) || ids.includes(edge.id)) return 2
+    return ids.some(id => id === edge.fromId || id === edge.toId) ? 1 : 0
+  }
+  return items.filter(item => rank(item) > 0).toSorted((a, b) => rank(a) - rank(b))
 }

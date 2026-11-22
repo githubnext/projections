@@ -10,11 +10,19 @@ import {
   describeChange,
   edgeMarkerId,
   edgePaint,
+  graphEdgeWeight,
+  raisedEdges,
   type BoxEdge,
   type Point,
   type RendererLegend,
 } from '@githubnext/projections-renderer-kit'
-import {EdgeArrowMarker, useStageCover, useStageInsetBottom, useStageInsetTop} from '@githubnext/projections-renderer-kit/react'
+import {
+  EdgeArrowMarker,
+  type EdgeOrigin,
+  useStageCover,
+  useStageInsetBottom,
+  useStageInsetTop,
+} from '@githubnext/projections-renderer-kit/react'
 import {lifetimeNames} from './facets.js'
 import type {DiUnit, Lifetime} from './model.js'
 import type {DiLinkFrame} from './transition.js'
@@ -180,54 +188,101 @@ export function routeLinks(
   return new Map(links.map(link => [link.key, route(link, tracks.get(link.key) ?? [])] as const))
 }
 
+/** Each link's origin dot, for the kit's `EdgeOrigins`: where its route starts, in its line's color as drawn now. */
+export function linkOrigins(
+  links: readonly DiLinkFrame[],
+  routes: ReadonlyMap<string, {start: Point}>,
+  emphasisOf: (link: DiLinkFrame) => number,
+): EdgeOrigin[] {
+  return links.flatMap(link => {
+    const route = routes.get(link.key)
+    return route
+      ? [
+          {
+            key: link.key,
+            id: link.id,
+            start: route.start,
+            opacity: link.opacity,
+            stroke: edgePaint(link, emphasisOf(link), graphEdgeWeight).stroke,
+          },
+        ]
+      : []
+  })
+}
+
+/** A link's line, in its paint, with its arrowhead (the marker its `LinkView` defines, `arrowId`). */
+function LinkLine({link, d, arrowId, emphasis, diff}: {link: DiLinkFrame; d: string; arrowId: string; emphasis: number; diff: boolean}) {
+  const dashed = (diff || emphasis > 0.01) && link.status === 'removed'
+  return (
+    <g style={edgePaint(link, emphasis, graphEdgeWeight)}>
+      <path
+        d={d}
+        data-projections-edge="line"
+        className={`graph-edge ${link.collection ? 'collection' : ''} ${link.optional ? 'optional' : ''} ${link.resolution ? 'resolution' : ''} ${link.alias ? 'alias' : ''} ${emphasis > 0.01 ? `graph-edge-emphasis ${classifyChange(link)}` : ''}`}
+        style={{stroke: 'inherit', strokeWidth: 'inherit'}}
+        markerEnd={`url(#${arrowId})`}
+        strokeDasharray={dashed ? '5 3' : undefined}
+      />
+    </g>
+  )
+}
+
 /**
- * The links' origin dots, over the links: one at each start point, which links leaving a card at the same point share,
- * then a clear copy for each link that the SDK fills in the ring's color while that link is hovered, focused or
- * selected (`data-projections-ring-with`). So the dot takes its link's state whichever link drew it last.
+ * A link's line drawn again over the others (the kit's `raisedEdges`: a ringed card's links, then the ringed one), so
+ * it is traced whole: artwork only, ringing with its link (`data-projections-ring-with`). The links themselves, and
+ * their hit paths, keep their order, so keyboard focus moves through them in a stable order.
  */
-export function LinkOrigins({
+export function RaisedLinkView({
+  link,
+  route,
+  markerId,
+  emphasis,
+  diff = false,
+}: {
+  link: DiLinkFrame
+  route: LinkRoute
+  markerId: string
+  emphasis: number
+  diff?: boolean
+}) {
+  return (
+    <g className="graph-link-raised" opacity={link.opacity} data-edge-key={link.key} data-projections-ring-with={link.id}>
+      <LinkLine link={link} d={route.d} arrowId={edgeMarkerId(markerId, link.key)} emphasis={emphasis} diff={diff} />
+    </g>
+  )
+}
+
+/** The layer of raised links (`RaisedLinkView`), over the links, for those `ringed` IDs raise (the kit's `raisedEdges`). */
+export function RaisedLinks({
   links,
   routes,
+  markerId,
+  ringed,
+  emphasisOf,
+  diff = false,
 }: {
-  links: readonly Pick<DiLinkFrame, 'id' | 'key' | 'opacity'>[]
-  routes: ReadonlyMap<string, {start: Point}>
+  links: readonly DiLinkFrame[]
+  routes: ReadonlyMap<string, LinkRoute>
+  markerId: string
+  ringed: readonly (string | null)[]
+  emphasisOf: (link: DiLinkFrame) => number
+  diff?: boolean
 }) {
-  const starts = new Map<string, Point & {opacity: number}>()
-  for (const link of links) {
-    const start = routes.get(link.key)?.start
-    if (!start) continue
-    const at = `${start.x.toFixed(2)},${start.y.toFixed(2)}`
-    starts.set(at, {...start, opacity: Math.max(starts.get(at)?.opacity ?? 0, link.opacity)})
-  }
   return (
-    <g className="di-link-origins" aria-hidden="true">
-      {[...starts].map(([at, start]) => (
-        <circle key={at} cx={start.x} cy={start.y} r="2.6" className="di-link-origin" opacity={start.opacity} />
-      ))}
-      {links.map(link => {
-        const start = routes.get(link.key)?.start
-        return (
-          start && (
-            <circle
-              key={link.key}
-              cx={start.x}
-              cy={start.y}
-              r="2.6"
-              className="di-link-origin-ring"
-              data-projections-edge="fill"
-              data-projections-ring-with={link.id}
-              opacity={link.opacity}
-            />
-          )
-        )
+    <g className="graph-links-raised" aria-hidden="true">
+      {raisedEdges(links, link => link, ringed).flatMap(link => {
+        const route = routes.get(link.key)
+        return route
+          ? [<RaisedLinkView key={link.key} link={link} route={route} markerId={markerId} emphasis={emphasisOf(link)} diff={diff} />]
+          : []
       })}
     </g>
   )
 }
 
 /**
- * One link: a focusable hit path and the arrow (its origin dot is
- * `LinkOrigins`'), and its parameter while either card is selected. In diff mode it carries
+ * One link, in the kit's edge style: a focusable hit path and the arrow (its
+ * origin dot is the kit's `EdgeOrigins`), and its parameter while either card is selected. In diff mode it carries
  * its change (`data-change`), a removed link stays dashed and a rewired
  * link's two parts say which endpoints they show.
  */
@@ -251,14 +306,14 @@ export function LinkView({
   diff?: boolean
 }) {
   const {d, start, end} = route
-  const paint = edgePaint(link, emphasis, 1.4)
+  const paint = edgePaint(link, emphasis, graphEdgeWeight)
   const arrowId = edgeMarkerId(markerId, link.key)
   const kind = link.alias ? 'alias' : link.resolution ? 'runtime resolution' : 'constructor dependency'
   const part = diff && link.key.endsWith(':before') ? ', old endpoints' : diff && link.key.endsWith(':after') ? ', new endpoints' : ''
-  const dashed = (diff || emphasis > 0.01) && link.status === 'removed'
   // A link's annotation badge sits at its target end, clear of the source card's status footer.
   return (
     <g
+      className="graph-link"
       opacity={link.opacity}
       data-entity-id={link.id}
       data-from-id={link.fromId}
@@ -274,7 +329,7 @@ export function LinkView({
       </defs>
       <path
         d={d}
-        className="di-link-hit"
+        className="edge-hit"
         role="button"
         tabIndex={0}
         aria-label={`Inspect ${kind}${link.parameter ? ` ${link.parameter}` : ''}, ${describeChange(link)}${part}`}
@@ -290,16 +345,7 @@ export function LinkView({
               : `${link.parameter ? `${link.parameter}: ` : ''}constructor dependency`}
         </title>
       </path>
-      <g style={paint}>
-        <path
-          d={d}
-          data-projections-edge="line"
-          className={`di-link ${link.collection ? 'collection' : ''} ${link.optional ? 'optional' : ''} ${link.resolution ? 'resolution' : ''} ${link.alias ? 'alias' : ''} ${emphasis > 0.01 ? `di-link-emphasis ${classifyChange(link)}` : ''}`}
-          style={{stroke: 'inherit', strokeWidth: 'inherit'}}
-          markerEnd={`url(#${arrowId})`}
-          strokeDasharray={dashed ? '5 3' : undefined}
-        />
-      </g>
+      <LinkLine link={link} d={d} arrowId={arrowId} emphasis={emphasis} diff={diff} />
       {labelled && (!!link.parameter || link.resolution || link.alias) && (
         <text
           x={(start.x + end.x) / 2}

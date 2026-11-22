@@ -57,7 +57,7 @@ export function measureRenderedFrame(root = document) {
     opacity: Number(card.getAttribute('opacity')),
     box: box(card.querySelector('.di-card-surface')),
   }))
-  const links = [...svg.querySelectorAll('.di-link')].map(path => {
+  const links = [...svg.querySelectorAll('.graph-edge')].map(path => {
     const group = path.closest('[data-edge-key]')
     const length = path.getTotalLength(),
       matrix = path.getScreenCTM()
@@ -86,7 +86,7 @@ export function measureRenderedFrame(root = document) {
       points,
     }
   })
-  const emphasis = svg.querySelectorAll('.node-emphasis, .node-footer-band, .node-status, .di-link-emphasis').length
+  const emphasis = svg.querySelectorAll('.node-emphasis, .node-footer-band, .node-status, .graph-edge-emphasis').length
   // Attribute-level serialization: identical progress must paint an identical document.
   const html = JSON.stringify(
     [...svg.querySelectorAll('*')].map(element => [

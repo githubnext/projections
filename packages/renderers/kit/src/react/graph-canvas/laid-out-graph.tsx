@@ -10,7 +10,8 @@ import {focusArea, type FocusArea} from '../../graph-canvas/focus.js'
 import {boundariesHoldingChanges} from '../../graph-canvas/holds-changes.js'
 import {EntityCard} from './entity-card.js'
 import {GraphFooter} from './graph-footer.js'
-import {Arrowheads, drawnLinks, GraphLink} from './graph-link.js'
+import {EdgeOrigins} from './edge-origins.js'
+import {Arrowheads, drawnLinks, GraphLink, linkRecedes, RaisedLink, raisedLinks} from './graph-link.js'
 import {GroupNode} from './group-node.js'
 import type {TransitionEdge} from '../../graph-transition.js'
 import {provisional, useViewChange, type Drawn} from './moving-view.js'
@@ -25,6 +26,9 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
   const scroller = useRef<HTMLDivElement>(null)
   // What was drawn last, as of the last render: a new view moves from it.
   const [drawnLast, setDrawnLast] = useState<Drawn>()
+  // The synthetic relationships under the pointer and under keyboard focus, by key: the SDK rings only entities.
+  const [pointed, setPointed] = useState<string | null>(null)
+  const [focused, setFocused] = useState<string | null>(null)
   // The scope the layout shows: changing it (Changes and All) moves the cards between the two layouts.
   // Before the host's filter, every item is drawn provisionally: the first scope it chooses is drawn at once.
   const scopeKey = props.filtered === false ? provisional : props.scope ? `changes:${props.scope.shown.size}` : 'all'
@@ -79,6 +83,10 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
   const draw = drawing(props, diff, emphasisInset(borders), borders.normal)
   const caption = props.focus ? props.focus.label : ''
   const links = drawnLinks(edges, nodeById, draw, labelsIn, borders)
+  const hot = new Set([pointed, focused].filter(key => key !== null))
+  // Sets a key while it is entered and clears it when the same one is left.
+  const track = (set: typeof setPointed, key: string) => (entered: boolean) =>
+    set(current => (entered ? key : current === key ? null : current))
   const holding = boundariesHoldingChanges(nodes, edges, props.emphasis)
   return (
     <div className="graph-container" data-diff={diff ? '' : undefined}>
@@ -123,9 +131,25 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
               .map(node => (
                 <GroupNode key={node.id} node={node} drawing={draw} holdsChanges={holding.has(node.id)} />
               ))}
-            {links.map(link => (
-              <GraphLink key={link.edge.key} link={link} drawing={draw} sharedOpen={sharedOpen} inspect={inspectEdge} />
-            ))}
+            {links.map(link => {
+              const synthetic = draw.props.synthetic?.(link.edge.id) ?? false
+              return (
+                <GraphLink
+                  key={link.edge.key}
+                  link={link}
+                  drawing={draw}
+                  sharedOpen={sharedOpen}
+                  inspect={inspectEdge}
+                  hot={hot.has(link.edge.key)}
+                  {...(synthetic ? {onPointer: track(setPointed, link.edge.key), onFocusChange: track(setFocused, link.edge.key)} : {})}
+                />
+              )
+            })}
+            <g className="graph-links-raised" aria-hidden="true">
+              {raisedLinks(links, draw, hot).map(link => (
+                <RaisedLink key={link.edge.key} link={link} drawing={draw} hot={hot.has(link.edge.key)} />
+              ))}
+            </g>
             {keyed(frame.junctions, point => `${point.x},${point.y}`).map(([key, point]) => (
               <circle key={key} className="graph-junction" cx={point.x} cy={point.y} r="2.5" aria-hidden="true" />
             ))}
@@ -134,7 +158,18 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
               .map(node => (
                 <EntityCard key={node.id} node={node} drawing={draw} />
               ))}
-            <Arrowheads links={links} drawing={draw} junctions={frame.junctions} />
+            <Arrowheads links={links} drawing={draw} junctions={frame.junctions} hot={hot} />
+            <EdgeOrigins
+              edges={links.map(link => ({
+                key: link.edge.key,
+                id: draw.props.synthetic?.(link.edge.id) ? undefined : link.edge.id,
+                start: link.arrow.start,
+                opacity: link.edge.opacity,
+                stroke: link.paint.stroke,
+                hot: hot.has(link.edge.key),
+                receded: linkRecedes(link, draw),
+              }))}
+            />
           </svg>
         )}
       </div>

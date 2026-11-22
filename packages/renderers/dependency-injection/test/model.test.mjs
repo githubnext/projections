@@ -308,7 +308,7 @@ test('endpoints render with no change emphasis, and the midpoint marks what chan
   const props = (progress, highlighting) => rendererProps(model, scheduleSteps(model), progress, highlighting)
   for (const progress of [0, 1]) {
     const html = renderToStaticMarkup(createElement(DependencyInjectionRenderer, props(progress, 0)))
-    assert.doesNotMatch(html, /node-emphasis|node-status|di-link-emphasis|pk-svg-status/u)
+    assert.doesNotMatch(html, /node-emphasis|node-status|graph-edge-emphasis|pk-svg-status/u)
   }
   // Just after the last (adding) step, with the host's highlighting at full strength.
   const mid = renderToStaticMarkup(createElement(DependencyInjectionRenderer, props(stepEnds(scheduleSteps(model)).at(-1), 1)))

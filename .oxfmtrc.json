@@ -20,6 +20,7 @@
     "**/snapshots/*.json",
     "packages/comparators/rules/language.json",
     "package-lock.json",
+    "eslint-suppressions.json",
     "**/notices/**",
     "**/THIRD_PARTY_NOTICES.txt",
     "**/THIRD_PARTY_NOTICES.md",

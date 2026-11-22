@@ -207,7 +207,20 @@ transfer list, not an origin. The posts to windows already name their origin.
 
 ## Turning on a rule
 
-A rule this configuration turns on whose existing violations aren't fixed yet is
-listed at the end of `eslint.config.js` as `off`. The change that fixes the last
-of a rule's violations removes it from the list; nothing is added to it. A new
-rule goes in on, with its violations fixed in the same change.
+A new rule goes in on, with its violations fixed in the same change. Where a
+rule's existing violations need fixing by hand, one at a time, it goes in on
+with them recorded in `eslint-suppressions.json` (ESLint's bulk suppressions):
+each file's count of each rule's violations, which ESLint lets stand while
+reporting any more. The file only shrinks. A count higher than a file's
+violations fails the lint, so the change that fixes one also lowers its count:
+`npm run lint -- --prune-suppressions`. Nothing is added to it by hand, and a
+new file never appears in it. ESLint writes it in its own layout, so oxfmt
+leaves it alone.
+
+Two rules are suppressed this way, each for the hand work its violations need:
+
+- `no-non-null-assertion` (`!`): most mark an index or lookup the code knows is
+  there; each becomes a check that says what happens when it isn't, or a type
+  that holds it.
+- `no-unsafe-type-assertion` (`as` that narrows): most read JSON, messages or
+  DOM values; each becomes a parse or a type guard where the value enters.

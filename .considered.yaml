@@ -29,6 +29,8 @@ exclude:
     - '**/*.generated.ts'
     # Generated from packages/sdk/src/extractor.ts, which is measured.
     - 'packages/cli/node/extractor.mjs'
+    # ESLint's bulk suppressions, written by `npm run lint -- --prune-suppressions` (docs/maintainers/linting.md#turning-on-a-rule).
+    - 'eslint-suppressions.json'
     - 'packages/schemas/schemas/**'
     - 'docs/reference/**'
     - 'docs/agents/**'

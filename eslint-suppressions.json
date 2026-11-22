@@ -1,0 +1,3551 @@
+{
+  "examples/renderers/minimal/browser/renderer.spec.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/cli/browser/starter-dev.spec.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/cli/browser/starter-repository.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/cli/browser/starter.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/cli/browser/viewer.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 31
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/comparators/runtime/js/src/execute.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/comparators/runtime/js/src/host.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/comparators/runtime/js/src/module-check/inspect.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/comparators/runtime/js/src/module-check/reader.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/comparators/runtime/js/src/node-worker.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/comparators/runtime/js/src/node.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/comparators/runtime/js/src/rules.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 5
+    }
+  },
+  "packages/engine/js/src/comparator-transport.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/engine/js/src/decoding.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/engine/js/src/engine.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/engine/js/src/transport.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 10
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/engine/js/src/wasm-transport.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/engine/js/src/worker-entry.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/src/compiler.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/src/json/definition.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/src/json/fields.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/src/nestjs/application.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/extractors/typescript-support/src/nestjs/entities.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/extractors/typescript-support/src/nestjs/identity.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/extractors/typescript-support/src/nestjs/links.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/src/nestjs/loader.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/extractors/typescript-support/src/nestjs/metadata.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 7
+    }
+  },
+  "packages/extractors/typescript-support/src/nestjs/model.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/src/nestjs/parameters.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/extractors/typescript-support/src/nestjs/root.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/src/shared.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/src/toolchain.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/extractors/typescript-support/src/typescript.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/src/typescript/api.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/extractors/typescript-support/src/typescript/contracts.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/src/typescript/declaration.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/src/typescript/entries.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/extractors/typescript-support/src/typescript/files.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/src/typescript/model.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/extractors/typescript-support/src/typescript/text.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 8
+    }
+  },
+  "packages/extractors/typescript-support/src/values.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/src/worker.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/test/collectors-typescript.test.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 5
+    }
+  },
+  "packages/extractors/typescript-support/test/nestjs.test.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/extractors/typescript-support/test/support.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/extractors/typescript-support/test/toolchain.test.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/browser/cap-height.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 7
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/browser/core.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/core/browser/dense.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 24
+    }
+  },
+  "packages/host/core/browser/detail-card.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/browser/embed.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/browser/fit-plan.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/browser/flash-check.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/core/browser/flash.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/browser/flat-chrome.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/browser/generated.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/browser/harness.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/browser/holds.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    }
+  },
+  "packages/host/core/browser/host.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 18
+    }
+  },
+  "packages/host/core/browser/loading.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/browser/modes.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    }
+  },
+  "packages/host/core/browser/pane-edges.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 8
+    }
+  },
+  "packages/host/core/browser/pane-labels.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 13
+    }
+  },
+  "packages/host/core/browser/panes.spec.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/core/browser/press.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/host/core/browser/settings-menu.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/host/core/browser/stage-utility.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/host/core/browser/summary-bar.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 18
+    }
+  },
+  "packages/host/core/browser/surfaces.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/core/browser/swipe-divider.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/browser/targets.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/core/browser/text-overflow.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/browser/toolbar-geometry.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/browser/toolbar-insets.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/browser/toolbar-layout.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 18
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/core/browser/varied.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/app-theme.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/color.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/compare.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/src/comparison-session.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/detail-card.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/src/detail-card/focus.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/details/change.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/details/fields.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/core/src/details/generated.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/fit-plan.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/src/fit-plan/fit-width.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/fit-plan/focus.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/pair.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/pane-lifecycle.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/core/src/playback.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/host/core/src/projection/derive.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/src/projection/interaction.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/projection/memo.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/projection/paint.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/projection/playback-controller.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/projection/renderer-state.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/projection/selection.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/projection/settings-store.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/src/projection/store.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/registry.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/revision-label.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/running.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/scope.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/src/settings/renderer-options.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/src/stage/body.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/targets/annotations.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/src/targets/digest.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/src/targets/encoding.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/targets/pointer.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/targets/target.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/core/src/theme-seed.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/src/ui/controls.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/ui/detail-card/generated.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/src/ui/lib/tokens.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/ui/pickers.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/src/ui/scope-switch.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/ui/toolbar-layout.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/ui/view-controls.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/core/src/ui/view/notices.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/ui/view/options.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/ui/view/utility.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/ui/views.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/core/src/view-model.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/browser/explore.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/browser/harness.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/inspector/browser/inspector.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 37
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/host/inspector/browser/loading.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/inspector/src/app/activity.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/app/cards.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/app/change-set.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/inspector/src/app/extraction-coordinator.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/app/extraction-state.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/app/inspector-app.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/app/inspector-body.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/app/page.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/inspector/src/app/part-options.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/app/persistence.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/inspector/src/app/revisions.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/app/use-commands.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/app/use-live-changes.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/app/use-presented-pair.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/app/use-repository.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/client/fixtures.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/client/renderers.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/mount.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/inspector/src/notices.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/parts/default-order.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/inspector/src/parts/line-diff.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 16
+    }
+  },
+  "packages/host/inspector/src/parts/save.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/shell/layout.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/inspector/src/shell/palette.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/shell/switcher.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/shell/title-bar.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/inspector/src/snapshot/document.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/inspector/src/snapshot/readiness.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/snapshot/settings.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/inspector/src/sweep/grid.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/sweep/stats.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/inspector/src/transport/errors.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/inspector/src/transport/messages.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 6
+    }
+  },
+  "packages/host/inspector/src/viewer/apply.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/inspector/src/viewer/chrome.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/viewer/mount.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/viewer/page.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/inspector/src/viewer/theme.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/vscode-ui/browser/cap.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/vscode-ui/browser/generated.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/vscode-ui/browser/harness.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 11
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/host/vscode-ui/browser/settings-menu.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 10
+    }
+  },
+  "packages/host/vscode-ui/browser/stage-notice.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/vscode-ui/browser/summary-bar.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 21
+    }
+  },
+  "packages/host/vscode-ui/browser/swipe-divider.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/vscode-ui/browser/toolbar-insets.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/vscode-ui/browser/varied.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/vscode-ui/browser/vscode.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/vscode-ui/src/controls.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/host/vscode-ui/src/elements.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/vscode-ui/src/frame.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/vscode-ui/src/layout/measure.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/vscode-ui/src/layout/use-toolbar-layout.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/vscode-ui/src/loading.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/vscode-ui/src/overlay/menu.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/vscode-ui/src/overlay/overlay.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/host/vscode-ui/src/overlay/quick-pick.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/vscode-ui/src/pickers.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/vscode-ui/src/scope-switch.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/vscode-ui/src/settings-menu.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/vscode-ui/src/theme/tokens.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/vscode-ui/src/toolbar.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/vscode-ui/src/varied.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/vscode-ui/src/view-controls.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/host/vscode-ui/src/view.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/vscode-ui/src/views/details.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/host/vscode-ui/src/views/text.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/backend-sources.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/bridge/responses.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/integrations/vscode/src/choices/model.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/choices/recent.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/commands/row.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/comparator-tests/wire.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 6
+    }
+  },
+  "packages/integrations/vscode/src/configuration-model.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/integrations/vscode/src/current-view/revision-notes.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/current-view/tool-input.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/definition.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/definition/tree-item.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/integrations/vscode/src/develop-model.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 6
+    }
+  },
+  "packages/integrations/vscode/src/docs.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/integrations/vscode/src/edits.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 5
+    }
+  },
+  "packages/integrations/vscode/src/environment-model.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 6
+    }
+  },
+  "packages/integrations/vscode/src/environment.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/integrations/vscode/src/extension.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/extension/test-api.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/folder-model/changes.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/folder-model/identity.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/integrations/vscode/src/folder-model/requests.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 5
+    }
+  },
+  "packages/integrations/vscode/src/language-model-tools.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/integrations/vscode/src/language-model-tools/cli-tool.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/language-model-tools/open-projection.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/language-model-tools/view-tools.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/new-projection-model.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 6
+    }
+  },
+  "packages/integrations/vscode/src/new-projection.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/new-projection/wizard.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/onboarding.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/panels/inspector-webview.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/panels/projection-editor.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/integrations/vscode/src/panels/projection-tab.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/integrations/vscode/src/panels/projection-tab/facts.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/panels/projection-tab/freshness.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/integrations/vscode/src/panels/projection-tab/kept.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/integrations/vscode/src/panels/projection-tab/revision.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/pickers.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/integrations/vscode/src/projection-sources.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/projections/definition-entry.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/integrations/vscode/src/projections/definitions.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/integrations/vscode/src/projections/pair-list.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 12
+    }
+  },
+  "packages/integrations/vscode/src/pulls.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/integrations/vscode/src/refs.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/renderer-builds.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/rules-service.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 5
+    }
+  },
+  "packages/integrations/vscode/src/rules-worker.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/integrations/vscode/src/runner.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 7
+    }
+  },
+  "packages/integrations/vscode/src/runner/rpc.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/sidebar/items.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/sources.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/staleness/notices.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/status-bar.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/test-items.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/testing/api.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/updates.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/viewing.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/viewing/recent-commits.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/integrations/vscode/src/webview/assets.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/webview/control.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/integrations/vscode/src/webview/host.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/webview/main.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/integrations/vscode/src/webview/probe.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/webview/tab-pair.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/integrations/vscode/src/webview/tab-state.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/integrations/vscode/src/webview/views.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/integrations/vscode/src/writes.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/machine/src/actor.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/machine/src/machine.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 6
+    }
+  },
+  "packages/machine/src/react.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/machine/src/testing.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/agentic-workflows/browser/agentic-workflows.spec.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/agentic-workflows/src/card.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/agentic-workflows/src/facts.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/agentic-workflows/src/matrix.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/agentic-workflows/src/model.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/agentic-workflows/src/sections.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/agentic-workflows/src/summary.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/api/browser/api.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 11
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/api/src/compatibility.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/api/src/model.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/api/src/signature-view.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/api/src/signature.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 8
+    }
+  },
+  "packages/renderers/api/src/view.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/code-statistics/browser/diff.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/code-statistics/browser/scrub.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 23
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 7
+    }
+  },
+  "packages/renderers/code-statistics/browser/table.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 18
+    }
+  },
+  "packages/renderers/code-statistics/src/presentation.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/code-statistics/src/renderer.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/code-statistics/src/series.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 7
+    }
+  },
+  "packages/renderers/code-statistics/src/share.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/database/browser/database.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 51
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/database/browser/diff-start.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/database/browser/diff.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/database/browser/links.spec.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/database/browser/status-tabs.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/database/src/change-lines.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/database/src/columns-layout.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 12
+    }
+  },
+  "packages/renderers/database/src/diff-links.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 11
+    }
+  },
+  "packages/renderers/database/src/diff-start.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/database/src/diff-states.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/database/src/diff.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 21
+    }
+  },
+  "packages/renderers/database/src/facts.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 12
+    }
+  },
+  "packages/renderers/database/src/fading.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    }
+  },
+  "packages/renderers/database/src/geometry.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 17
+    }
+  },
+  "packages/renderers/database/src/interpolate-links.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 15
+    }
+  },
+  "packages/renderers/database/src/interpolate.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 29
+    }
+  },
+  "packages/renderers/database/src/layout.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/database/src/link-geometry.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 18
+    }
+  },
+  "packages/renderers/database/src/links.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 8
+    }
+  },
+  "packages/renderers/database/src/measure.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/database/src/morph.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 16
+    }
+  },
+  "packages/renderers/database/src/schema-keys.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 13
+    }
+  },
+  "packages/renderers/database/src/schema-links.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    }
+  },
+  "packages/renderers/database/src/schema-model.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 22
+    }
+  },
+  "packages/renderers/database/src/stack-layout.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 7
+    }
+  },
+  "packages/renderers/database/src/stages.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 13
+    }
+  },
+  "packages/renderers/database/src/table.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/database/src/tags.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 8
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/database/src/text.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/database/src/transition.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/database/src/types.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/database/src/view.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/dependency-injection/browser/diff.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/dependency-injection/browser/focus.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 8
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/dependency-injection/browser/lifetime-pill.spec.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/dependency-injection/browser/scrub.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 12
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 6
+    }
+  },
+  "packages/renderers/dependency-injection/src/card.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 10
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/dependency-injection/src/diff-lines.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/dependency-injection/src/diff-model.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/dependency-injection/src/diff.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/dependency-injection/src/facts.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/dependency-injection/src/geometry.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 12
+    }
+  },
+  "packages/renderers/dependency-injection/src/layout.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 31
+    }
+  },
+  "packages/renderers/dependency-injection/src/renderer.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/dependency-injection/src/summary.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/dependency-injection/src/transition.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 11
+    }
+  },
+  "packages/renderers/dependency-injection/src/type-name.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/dependency-injection/src/union.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/file-packing/browser/file-packing.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/file-packing/src/circles.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/file-packing/src/document.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/file-packing/src/files.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/file-packing/src/labels.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/file-packing/src/pack/arrange.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/file-packing/src/pack/hierarchy.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/file-packing/src/pack/packing.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/file-packing/src/snapshots.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 9
+    }
+  },
+  "packages/renderers/file-packing/src/transition.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 11
+    }
+  },
+  "packages/renderers/file-packing/src/view.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/gallery/browser/gallery.spec.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/gallery/src/model.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/gallery/src/stage.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/gallery/src/view.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 7
+    }
+  },
+  "packages/renderers/graph/browser/architecture.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 18
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/graph/browser/dag.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/graph/browser/dependencies.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/graph/browser/graph.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 18
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/graph/browser/infrastructure.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/graph/src/architecture/collapse.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 8
+    }
+  },
+  "packages/renderers/graph/src/architecture/view.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/graph/src/dependencies/collapse.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    }
+  },
+  "packages/renderers/graph/src/dependencies/facts.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/graph/src/dependencies/graph.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/graph/src/dependencies/kinds.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/graph/src/dependencies/model.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/graph/src/dependencies/paths.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/graph/src/dependencies/versions.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/graph/src/facts.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/graph/src/facts/controls.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/graph/src/facts/fields.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/graph/src/infrastructure/dependents.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/graph/src/infrastructure/facts.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/graph/src/infrastructure/resources.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/harness/browser/annotations.spec.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/harness/browser/corners.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/harness/browser/fill.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/harness/browser/late-resize.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/harness/browser/legends.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 7
+    }
+  },
+  "packages/renderers/harness/browser/ring-pixels.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/harness/browser/rings.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 7
+    }
+  },
+  "packages/renderers/harness/browser/scenarios.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/harness/browser/scope-opening.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 7
+    }
+  },
+  "packages/renderers/kit/browser/badge-page.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/browser/badges.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 27
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/browser/fixtures.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/browser/invariants/contacts.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 10
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/browser/invariants/frame.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 24
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/kit/browser/painted-scales.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/browser/status.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/browser/suite.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/src/arrowhead.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/card-icons.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/card-text.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/diff-card/lines.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 7
+    }
+  },
+  "packages/renderers/kit/src/diff-card/text.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/src/diff/fields.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/kit/src/diff/lines.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/src/diff/model.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/domain.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/kit/src/edge-arrows/box-edge.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    }
+  },
+  "packages/renderers/kit/src/edge-arrows/corridor.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/kit/src/edge-arrows/flowing.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 24
+    }
+  },
+  "packages/renderers/kit/src/edge-arrows/grid.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    }
+  },
+  "packages/renderers/kit/src/edge-arrows/paths.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 9
+    }
+  },
+  "packages/renderers/kit/src/emphasis.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/src/engine/browser.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/kit/src/fit.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/graph-canvas/badges.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/kit/src/graph-canvas/edges.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/kit/src/graph-transition/bands.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/src/graph-transition/collisions.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/kit/src/graph-transition/create.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 10
+    }
+  },
+  "packages/renderers/kit/src/graph-transition/crossing.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/kit/src/graph-transition/diff-frame.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/kit/src/graph-transition/frame-edges.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 8
+    }
+  },
+  "packages/renderers/kit/src/graph-transition/frame.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/kit/src/graph-transition/layouts.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/kit/src/graph-transition/morph.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 9
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/graph-transition/quality.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 11
+    }
+  },
+  "packages/renderers/kit/src/graph-transition/timing.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/kit/src/identifiers.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/kit/src/layout/alignment.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 10
+    }
+  },
+  "packages/renderers/kit/src/layout/elk-input.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    }
+  },
+  "packages/renderers/kit/src/layout/elk-placement.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 9
+    }
+  },
+  "packages/renderers/kit/src/layout/elk-run.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 8
+    }
+  },
+  "packages/renderers/kit/src/layout/geometry.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 16
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/layout/grid.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 18
+    }
+  },
+  "packages/renderers/kit/src/layout/lay-out.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 14
+    }
+  },
+  "packages/renderers/kit/src/layout/layout-graph.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/src/layout/placement.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/kit/src/layout/routing.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    }
+  },
+  "packages/renderers/kit/src/layout/routing/build.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 12
+    }
+  },
+  "packages/renderers/kit/src/layout/routing/bundles.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 25
+    }
+  },
+  "packages/renderers/kit/src/layout/routing/context.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 8
+    }
+  },
+  "packages/renderers/kit/src/layout/routing/converge.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    }
+  },
+  "packages/renderers/kit/src/layout/routing/corridor.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 10
+    }
+  },
+  "packages/renderers/kit/src/layout/routing/ports.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/layout/routing/runs.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/kit/src/layout/routing/separate.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 10
+    }
+  },
+  "packages/renderers/kit/src/layout/routing/trunk-moves.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 7
+    }
+  },
+  "packages/renderers/kit/src/layout/routing/trunk-swaps.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 7
+    }
+  },
+  "packages/renderers/kit/src/layout/unlinked-columns.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/src/layout/unlinked.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 22
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/palette.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 7
+    }
+  },
+  "packages/renderers/kit/src/react/components.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/react/data-table-row.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/src/react/data-table.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/react/diff-components.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/react/drag-pan.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/src/react/fit.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/kit/src/react/graph-canvas/canvas.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/kit/src/react/graph-canvas/card-lines.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/react/graph-canvas/cards.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/src/react/graph-canvas/drawing.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/react/graph-canvas/facts.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 16
+    }
+  },
+  "packages/renderers/kit/src/react/graph-canvas/framing.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/react/graph-canvas/graph-footer.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/src/react/graph-canvas/graph-link.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/kit/src/react/graph-canvas/laid-out-graph.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/react/graph-canvas/subtitle.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/src/react/layout-components.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/react/legend.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/react/shell/kit-renderer.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/react/shell/mount.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/routes/crossings.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 16
+    }
+  },
+  "packages/renderers/kit/src/routes/s-bend.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/routes/smooth.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 17
+    }
+  },
+  "packages/renderers/kit/src/routes/tracks.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 11
+    }
+  },
+  "packages/renderers/kit/src/routes/turns.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    }
+  },
+  "packages/renderers/kit/src/scope-parts.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 8
+    }
+  },
+  "packages/renderers/kit/src/scope.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/splines.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 38
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/kit/src/stages.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/kit/src/summary.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/kit/src/table.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/kit/src/wrap.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 9
+    }
+  },
+  "packages/renderers/runtime-policy/browser/runtime-policy.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 22
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/runtime-policy/src/links.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/runtime-policy/src/model.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/runtime-policy/src/prose.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/runtime-policy/src/row.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/runtime-policy/src/tables.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/generated.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/icons.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/interactions/badges.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/sdk/src/interactions/connect.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/kind-nouns.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/sdk/src/presentation/context.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/presentation/filter.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/presentation/frame.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/sdk/src/presentation/structure.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/presentation/varied.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/protocol/annotation-marks.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/sdk/src/protocol/capabilities.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/protocol/controls/declaration.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/sdk/src/protocol/host-messages.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 9
+    }
+  },
+  "packages/renderers/sdk/src/protocol/init-fields.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/protocol/legend.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/sdk/src/protocol/manifest.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 6
+    }
+  },
+  "packages/renderers/sdk/src/protocol/renderer-messages.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/sdk/src/protocol/steps-message.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/protocol/summary/fact.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/sdk/src/protocol/summary/figure.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/protocol/validation.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/quantities.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/react.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/sdk/src/rings.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/sdk/src/schedule.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/sdk/src/statistics.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/sdk/src/steps.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/sdk/src/style-lint.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/sdk/src/summary.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/sdk/src/tokens.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/sdk/src/vite.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/sdk/src/word-diff.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 8
+    }
+  },
+  "packages/renderers/testing/playwright/corners.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/testing/playwright/corners/analyze.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 8
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/testing/playwright/index.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/testing/playwright/optical.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/testing/playwright/optical/analyze.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 8
+    }
+  },
+  "packages/renderers/testing/playwright/rings/analyze.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 28
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/testing/playwright/rings/geometry.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/testing/playwright/rings/judge.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 11
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/testing/playwright/server.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/testing/src/checks/catalog.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/testing/src/checks/comparison/status.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/testing/src/checks/comparison/steps.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/testing/src/checks/comparison/support.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/testing/src/checks/frame/content.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    }
+  },
+  "packages/renderers/testing/src/checks/frame/opening.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/testing/src/checks/frame/summary-figures.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/testing/src/checks/frame/summary.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/testing/src/checks/interaction.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/testing/src/checks/style.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 25
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/testing/src/measure/accents.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/testing/src/measure/accents/hues.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/testing/src/measure/entities.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/testing/src/measure/focus.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/testing/src/measure/interaction.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/testing/src/measure/opening.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/testing/src/measure/rings.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/testing/src/measure/rings/edges.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/testing/src/measure/rings/ownership.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "packages/renderers/testing/src/measure/stage-insets.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/renderers/testing/src/measure/styles/box.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "packages/renderers/testing/src/probe.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/renderers/text-diff/browser/text-diff.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 21
+    }
+  },
+  "packages/renderers/text-diff/src/diff.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/text-diff/src/myers.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    }
+  },
+  "packages/renderers/text-diff/src/rows.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 11
+    }
+  },
+  "packages/renderers/text-diff/src/summary.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/renderers/text-diff/src/view.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "packages/schemas/src/comparator.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/schemas/src/index.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "packages/schemas/src/repository/index.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/schemas/src/runner/decode.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/schemas/src/static-checks.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "packages/schemas/src/typebox/domains.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "packages/schemas/src/typebox/emit.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "packages/schemas/src/typebox/support.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "packages/sdk/src/extractor.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/sdk/src/extractor/request.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 4
+    }
+  },
+  "packages/sdk/src/extractor/result.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 7
+    }
+  },
+  "packages/sdk/test/extractor.test.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 7
+    }
+  },
+  "tools/cli/src/cli.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/commands/doctor.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/commands/feedback.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/commands/info.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/commands/install.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "tools/cli/src/commands/update.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/commands/verify.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/commands/work/affected.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/commands/work/build.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "tools/cli/src/commands/work/test.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/lib/builds.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "tools/cli/src/lib/ci-builds.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "tools/cli/src/lib/ci-explain.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/lib/ci-facts.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "tools/cli/src/lib/ci-lockfiles.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "tools/cli/src/lib/ci-replay.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "tools/cli/src/lib/ci-rules.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/lib/docs.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "tools/cli/src/lib/feedback.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "tools/cli/src/lib/gates.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "tools/cli/src/lib/git.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/lib/link.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/lib/links.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "tools/cli/src/lib/markdown.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "tools/cli/src/lib/modules/cycles.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 7
+    }
+  },
+  "tools/cli/src/lib/modules/syntax.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "tools/cli/src/lib/packages.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 5
+    }
+  },
+  "tools/cli/src/lib/problems.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 19
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/lib/release-bump.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "tools/cli/src/lib/release-check.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "tools/cli/src/lib/release.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/lib/repo.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/src/lib/toolchains.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "tools/cli/src/lib/typed-gates.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "tools/cli/test/build.test.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 7
+    }
+  },
+  "tools/cli/test/ci-plan.test.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 5
+    }
+  },
+  "tools/cli/test/cli.test.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/test/link.test.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "tools/cli/test/problems.test.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/cli/test/release.test.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "tools/cli/test/verify.test.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 3
+    }
+  },
+  "tools/storybook/browser/arrangement.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 6
+    }
+  },
+  "tools/storybook/browser/icons.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "tools/storybook/browser/rings.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 21
+    }
+  },
+  "tools/storybook/browser/scope.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 28
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "tools/storybook/browser/smoke.spec.ts": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/storybook/browser/space.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 3
+    }
+  },
+  "tools/storybook/browser/zoom.spec.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/storybook/harness/host/core.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "tools/storybook/harness/host/explorer.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "tools/storybook/harness/host/fixtures.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 2
+    }
+  },
+  "tools/storybook/harness/host/params.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "tools/storybook/src/default-render.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/storybook/src/fixtures.ts": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 9
+    }
+  },
+  "tools/storybook/src/icon-gallery.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/storybook/src/stories.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 4
+    }
+  },
+  "tools/storybook/src/vscode-frame.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    }
+  },
+  "tools/storybook/src/vscode-render.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/storybook/stories/core/custom-host.stories.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/storybook/stories/core/stage.stories.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 2
+    }
+  },
+  "tools/storybook/stories/default/building-blocks.stories.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 9
+    }
+  },
+  "tools/storybook/stories/default/view.stories.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/storybook/stories/vscode/building-blocks.stories.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 10
+    }
+  },
+  "tools/storybook/stories/vscode/inspector.stories.tsx": {
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  },
+  "tools/storybook/stories/vscode/view.stories.tsx": {
+    "@typescript-eslint/no-unsafe-type-assertion": {
+      "count": 1
+    }
+  }
+}

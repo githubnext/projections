@@ -353,3 +353,38 @@
 .pk .pk-group > .pk-table-frame > .pk-table-scroll > .pk-table > .pk-table-head > .pk-table-cell:first-child {
   border-radius: 0;
 }
+
+/*
+ * Slanted column headings (`SlantedHeading`): each reads up and to the right at 45° from its column's bottom centre,
+ * a gap above the column, so the column is as narrow as its cells. The heading's box is turned about its bottom-left
+ * corner, which sits the gap above the column, shifted right so the box's middle line starts over the column's centre;
+ * the heading row is as tall as the longest heading rises (`--pk-slant-length`, from `useSlantedHeadings`): its length
+ * and its line, times sin 45°, and the gap.
+ */
+.pk .pk-slanted-column {
+  --pk-slant-line: 1.25em;
+  --pk-slant-gap: var(--projections-space-1);
+  position: relative;
+  width: var(--pk-slant-column, 1.75rem);
+  min-width: var(--pk-slant-column, 1.75rem);
+  max-width: var(--pk-slant-column, 1.75rem);
+  height: calc((var(--pk-slant-length, 0px) + var(--pk-slant-line)) * 0.7072 + var(--pk-slant-gap));
+  padding: 0;
+  vertical-align: bottom;
+}
+.pk .pk-slanted-heading {
+  position: absolute;
+  left: 50%;
+  bottom: var(--pk-slant-gap);
+  width: 0;
+  height: 0;
+}
+.pk .pk-slanted-heading-label {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  line-height: var(--pk-slant-line);
+  white-space: nowrap;
+  transform-origin: 0 100%;
+  transform: translateX(calc(var(--pk-slant-line) * 0.3536)) rotate(-45deg);
+}

@@ -13,6 +13,7 @@ set -euo pipefail
 LIMIT_SECONDS=${INSTALL_BROWSERS_LIMIT_SECONDS:-480}
 MIRRORS=/etc/apt/apt-mirrors.txt
 linux=$([ "$(uname -s)" = Linux ] && echo 1 || true)
+windows=$(uname -s | grep -qE '^(MINGW|MSYS|CYGWIN)' && echo 1 || true)
 log=$(mktemp)
 trap 'rm -f "$log"' EXIT
 
@@ -51,6 +52,9 @@ for attempt in 1 2 3; do
     fi
     [ "$status" = 0 ] && npm exec -- playwright install "$@" && exit 0
     [ "$status" = 124 ] && drop_mirror "$(busiest_mirror)"
+  elif [ "$windows" ]; then
+    # On Windows, --with-deps enables the Media Foundation feature, which takes three minutes and only plays media.
+    npm exec -- playwright install "$@" && exit 0
   elif npm exec -- playwright install --with-deps "$@"; then
     exit 0
   fi

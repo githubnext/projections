@@ -16,6 +16,12 @@ env:
   # Vulnerabilities are gated by dependency review and Dependabot (SECURITY.md), not npm's audit endpoint.
   npm_config_audit: 'false'
   PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple/
+  # The build's release profile without fat LTO and one codegen unit: CI tests what the code does, not the shipped
+  # binary's size, and the link alone took 3 minutes on Linux and 6 on Windows. Every job here builds the same way, so
+  # the Rust caches main saves fit pull requests. Releases (release.yml) build the real profile, and release-proof.yml
+  # tests those binaries.
+  CARGO_PROFILE_RELEASE_LTO: 'false'
+  CARGO_PROFILE_RELEASE_CODEGEN_UNITS: '16'
 # A newer commit on a pull request cancels the older one's run; runs on main are never cancelled.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -116,8 +122,8 @@ jobs:
       fail-fast: false
       matrix:
         # The entries the rules choose: public-product's matrix in .github/ci-rules.json. Each names its runner (os)
-        # and the parts of the check it runs (.github/actions/check): on Linux the checks, the Node suites and the Rust
-        # suites as three parallel jobs; on macOS, the Rust suites and the rest.
+        # and the parts of the check it runs (.github/actions/check): on Linux the checks, the Node suites (and the
+        # generated reference docs) and the Rust suites as three parallel jobs; on macOS, the Rust suites and the rest.
         include: ${{ fromJson(needs.changes.outputs.public-product) }}
     runs-on: ${{ matrix.os }}
     steps:
@@ -127,7 +133,7 @@ jobs:
       - uses: $/.github/actions/check
         with:
           native: ${{ runner.os == 'Linux' && contains(matrix.part, 'rust') }}
-          reference-docs: ${{ runner.os == 'Linux' && contains(matrix.part, 'checks') }}
+          reference-docs: ${{ runner.os == 'Linux' && contains(matrix.part, 'node') }}
           part: ${{ matrix.part }}
       # The GitHub Action itself, with the CLI the check built: a pull request in a small repository.
       - if: contains(matrix.part, 'node')

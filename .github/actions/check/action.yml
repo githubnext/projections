@@ -13,8 +13,8 @@ inputs:
   part:
     description: >-
       The parts to run, space-separated; each builds the workspace first. checks: the static checks, types, lint and the
-      Storybook build, and on Linux the generated reference docs and the self-projection. node: the Node suites and the
-      installed CLI proofs. rust: the Rust suites (cargo-nextest, doctests, rules coverage, rustfmt, Clippy). Jobs run
+      Storybook build, and on Linux the self-projection. node: the Node suites and the installed CLI proofs (and the
+      generated reference docs, with reference-docs). rust: the Rust suites (cargo-nextest, doctests, rules coverage, rustfmt, Clippy). Jobs run
       them in parallel, one or two parts each, so no one job is the run's long pole.
     default: checks node rust
 runs:

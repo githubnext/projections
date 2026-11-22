@@ -145,7 +145,6 @@
 }
 .aw-matrix {
   border-collapse: collapse;
-  min-width: 100%;
   font-size: var(--projections-font-size-xs);
 }
 .aw-matrix :is(th, td) {
@@ -154,37 +153,34 @@
   text-align: center;
   vertical-align: middle;
 }
-/* The group header's bottom line is the matrix's top edge, so its first row draws none of its own. */
-.aw-matrix > thead > tr:first-child > :is(th, td) {
+/* The heading is open above the rows: its cells draw no lines, and the first row's top line is the rule under it. */
+.aw-matrix thead :is(th, td) {
   border-top: 0;
 }
 .aw-matrix thead th {
-  background: color-mix(in srgb, var(--band) 45%, var(--raised));
   color: var(--muted);
   font-weight: var(--projections-font-weight-semibold);
 }
-.aw-matrix-category {
-  border-inline-start: var(--projections-border-width) solid var(--divider);
-}
-/* Column headings read upwards, unwrapped, so each column is as narrow as its marks. */
-.aw-matrix-column {
+/* The row and change headings sit on the heading's foot, level with the capabilities' slanted headings. */
+.aw-matrix thead :is(.aw-matrix-corner, .aw-matrix-status) {
   vertical-align: bottom;
+  padding-bottom: var(--projections-space-1);
 }
+/* A category's name over its columns, with a rule as wide as they are, set in a little so neighbours' rules part. */
+.aw-matrix thead .aw-matrix-category {
+  padding: 0 var(--projections-space-1);
+}
+.aw-matrix-category-title {
+  display: block;
+  padding-bottom: var(--projections-space-1);
+  border-bottom: var(--projections-border-width) solid var(--divider);
+}
+/* Capability columns are as narrow as their marks; their headings slant (the kit's `SlantedHeading`). */
 .aw-matrix thead .aw-matrix-column {
   font-weight: var(--projections-font-weight-normal);
 }
 .aw-matrix thead .aw-matrix-column[data-gate] {
   color: var(--text);
-}
-.aw-matrix-heading {
-  display: inline-block;
-  max-height: 14rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  text-align: start;
 }
 .aw-matrix .aw-matrix-corner,
 .aw-matrix .aw-matrix-row,
@@ -201,6 +197,14 @@
   text-align: start;
   white-space: nowrap;
 }
+/* In a comparison the change column takes the width to spare, so the rows run across the panel and the last
+   capabilities' headings rise over the change column's heading; the capability columns stay as narrow as their marks. */
+.aw-matrix:has(> thead .aw-matrix-status) {
+  width: 100%;
+}
+.aw-matrix thead .aw-matrix-status {
+  width: 100%;
+}
 /* Every body row is one fixed line high, whatever its status shows, so emphasis never moves a row. */
 .aw-matrix tbody tr {
   height: 1.5rem;
@@ -209,16 +213,14 @@
   padding-block: 0;
   line-height: var(--projections-line-height-tight);
 }
-.aw-matrix :is(.aw-matrix-status, .aw-matrix-group-line) > .pk-change-status,
-.aw-matrix-group-line {
+.aw-matrix tbody .aw-matrix-cell {
+  padding-inline: 0;
+}
+.aw-matrix .aw-matrix-status > .pk-change-status {
   display: flex;
   align-items: center;
   height: 1.5rem;
   overflow: hidden;
-}
-.aw-matrix-group-line {
-  justify-content: space-between;
-  gap: var(--projections-space-3);
 }
 .aw-matrix-select {
   appearance: none;

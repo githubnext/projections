@@ -1,5 +1,5 @@
-import type {CSSProperties} from 'react'
-import {ChangeStatus, Group, Prose} from '@githubnext/projections-renderer-kit/react'
+import {useRef, type CSSProperties} from 'react'
+import {ChangeStatus, Group, Prose, SlantedHeading, useSlantedHeadings} from '@githubnext/projections-renderer-kit/react'
 import {changeMark, isChanged} from '@githubnext/projections-renderer-kit'
 import {dataOf, sectionSpecs} from './sections.js'
 import type {AgenticModel, Column, GroupView, MatrixCategory, WorkflowItem} from './model.js'
@@ -64,29 +64,22 @@ function Row({item, view, frame}: {item: WorkflowItem; view: AgenticModel; frame
   )
 }
 
-/** A group's heading row, spanning the table, selectable, with its change in words. */
+/** A group's heading row, across the capabilities, selectable, with its change in words in the change column. */
 function GroupRow({group, span, frame}: {group: GroupView; span: number; frame: Frame}) {
   const row = group.row
   const selected = frame.props.selectedId === row?.id
   return (
-    <tr className="aw-matrix-group">
-      <th
-        scope="rowgroup"
-        colSpan={span + (frame.comparing ? 1 : 0)}
-        className="aw-matrix-group-title"
-        {...(row ? {'data-entity-id': row.id} : {})}
-      >
-        <span className="aw-matrix-group-line">
-          {row ? (
-            <button type="button" className="aw-matrix-select" aria-pressed={selected} onClick={() => frame.props.onSelect(row.id)}>
-              <code className="pk-code">{group.title}</code>
-            </button>
-          ) : (
-            group.title
-          )}
-          {row && frame.comparing && <ChangeStatus change={row} emphasis={frame.strength(row)} />}
-        </span>
+    <tr className="aw-matrix-group" {...(row ? {'data-entity-id': row.id} : {})}>
+      <th scope="rowgroup" colSpan={span} className="aw-matrix-group-title">
+        {row ? (
+          <button type="button" className="aw-matrix-select" aria-pressed={selected} onClick={() => frame.props.onSelect(row.id)}>
+            <code className="pk-code">{group.title}</code>
+          </button>
+        ) : (
+          group.title
+        )}
       </th>
+      {frame.comparing && <td className="aw-matrix-status">{row && <ChangeStatus change={row} emphasis={frame.strength(row)} />}</td>}
     </tr>
   )
 }
@@ -98,10 +91,12 @@ function GroupRow({group, span, frame}: {group: GroupView; span: number; frame: 
  */
 export function Matrix({view, frame}: {view: AgenticModel; frame: Frame}) {
   const span = 1 + view.categories.reduce((sum, category) => sum + category.columns.length, 0)
+  const table = useRef<HTMLTableElement>(null)
+  useSlantedHeadings(table)
   return (
     <Group title="Capabilities" icon="agent" className="aw-matrix-panel">
       <div className="aw-matrix-scroll">
-        <table className="aw-matrix">
+        <table className="aw-matrix" ref={table}>
           <thead>
             <tr>
               <th rowSpan={2} scope="col" className="aw-matrix-corner">
@@ -109,7 +104,7 @@ export function Matrix({view, frame}: {view: AgenticModel; frame: Frame}) {
               </th>
               {view.categories.map(category => (
                 <th key={category.section} colSpan={category.columns.length} scope="colgroup" className="aw-matrix-category">
-                  {category.title}
+                  <span className="aw-matrix-category-title">{category.title}</span>
                 </th>
               ))}
               {frame.comparing && (
@@ -124,12 +119,12 @@ export function Matrix({view, frame}: {view: AgenticModel; frame: Frame}) {
                   <th
                     key={`${category.section}:${column.key}`}
                     scope="col"
-                    className="aw-matrix-column"
+                    className="aw-matrix-column pk-slanted-column"
                     data-gate={column.gate ? '' : undefined}
                   >
-                    <span className="aw-matrix-heading">
+                    <SlantedHeading>
                       <Prose>{column.label}</Prose>
-                    </span>
+                    </SlantedHeading>
                   </th>
                 )),
               )}

@@ -196,6 +196,7 @@ export const generators: Generator[] = [
       'tools/cli/test/ci-plan.cases.json',
       'tools/cli/src/lib/*.ts',
       'tools/scripts/ci-table.mjs',
+      'tools/scripts/reference-docs/shared.mjs',
       'package.json',
       'Cargo.toml',
       '.cargo/mutants.toml',

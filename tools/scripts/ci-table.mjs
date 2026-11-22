@@ -5,14 +5,13 @@
 //
 //   node tools/scripts/ci-table.mjs           write it
 //   node tools/scripts/ci-table.mjs --check   fail if it differs from what the cases and rules give
-import {spawnSync} from 'node:child_process'
-import {mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs'
-import {tmpdir} from 'node:os'
+import {readFileSync, writeFileSync} from 'node:fs'
 import {join} from 'node:path'
 import {fileURLToPath} from 'node:url'
 import {repoFacts} from '../cli/src/lib/ci-facts.ts'
 import {ciPlan, executions} from '../cli/src/lib/ci-plan.ts'
 import {loadCiRules} from '../cli/src/lib/ci-rules.ts'
+import {formatMarkdown} from './reference-docs/shared.mjs'
 
 const root = fileURLToPath(new URL('../../', import.meta.url))
 const output = 'docs/maintainers/ci-plan.md'
@@ -75,14 +74,8 @@ const text = [
   '',
 ].join('\n')
 
-// Formatted as the repository formats Markdown, so format:check and this check agree.
-const scratch = mkdtempSync(join(tmpdir(), 'ci-table-'))
-const draft = join(scratch, 'ci-plan.md')
-writeFileSync(draft, text)
-const format = spawnSync(join(root, 'node_modules/.bin/oxfmt'), ['-c', join(root, '.oxfmtrc.json'), draft], {encoding: 'utf8'})
-if (format.status !== 0) throw new Error(`oxfmt failed (run npm ci first): ${format.stderr}`)
-const formatted = readFileSync(draft, 'utf8')
-rmSync(scratch, {recursive: true, force: true})
+// Formatted as the generated reference pages are, so format:check and this check agree.
+const formatted = await formatMarkdown(output, text)
 
 if (!process.argv.includes('--check')) writeFileSync(join(root, output), formatted)
 else if (readFileSync(join(root, output), 'utf8') !== formatted) {

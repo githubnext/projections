@@ -24,18 +24,19 @@ runs:
   steps:
     # The build (native engine, CLI and helpers), the browsers and the suites' artifacts outgrow a hosted runner's free
     # disk (ENOSPC in the Inspector and Storybook suites). As in the check action: no incremental caches, line tables
-    # only, and the preinstalled toolchains no suite uses removed (which takes a minute or two).
+    # only, and the preinstalled toolchains no suite uses removed. The removal takes a minute or two, so it runs in the
+    # background while the job installs and builds.
     - shell: bash
       run: |
         echo CARGO_INCREMENTAL=0 >> "$GITHUB_ENV"
         echo CARGO_PROFILE_DEV_DEBUG=line-tables-only >> "$GITHUB_ENV"
     - if: runner.os == 'Linux' && runner.environment == 'github-hosted'
+      name: Free disk space (in the background)
       shell: bash
       run: |
         df -h /
-        sudo rm -rf /usr/local/lib/android /usr/local/.ghcup /opt/ghc /usr/share/swift \
-          /usr/local/julia* /opt/hostedtoolcache/PyPy /opt/hostedtoolcache/CodeQL
-        df -h /
+        nohup sudo rm -rf /usr/local/lib/android /usr/local/.ghcup /opt/ghc /usr/share/swift \
+          /usr/local/julia* /opt/hostedtoolcache/PyPy /opt/hostedtoolcache/CodeQL >/dev/null 2>&1 &
     - uses: actions/setup-node@v6.5.0
       with:
         node-version-file: ${{ inputs.workspace }}/.node-version

@@ -12,10 +12,11 @@ inputs:
     default: 'false'
   part:
     description: >-
-      all: every check and suite. rust: the build and the Rust suites (cargo-nextest, doctests, rules coverage, rustfmt,
-      Clippy). node: everything else (the static checks, the build, types, lint, the Node suites and the installed CLI
-      proofs). The two parts run as parallel jobs where one job would take too long.
-    default: all
+      The parts to run, space-separated; each builds the workspace first. checks: the static checks, types, lint and the
+      Storybook build, and on Linux the self-projection. node: the Node suites and the installed CLI proofs (and the
+      generated reference docs, with reference-docs). rust: the Rust suites (cargo-nextest, doctests, rules coverage, rustfmt, Clippy). Jobs run
+      them in parallel, one or two parts each, so no one job is the run's long pole.
+    default: checks node rust
 runs:
   using: composite
   steps:
@@ -27,14 +28,15 @@ runs:
         echo CARGO_INCREMENTAL=0 >> "$GITHUB_ENV"
         echo CARGO_PROFILE_DEV_DEBUG=line-tables-only >> "$GITHUB_ENV"
     # On Linux, also remove preinstalled toolchains no check uses (Android, Haskell, Swift, Julia,
-    # PyPy and CodeQL); Node, Rust, .NET, Java, Go, Python, Terraform, Docker and Chrome stay.
+    # PyPy and CodeQL); Node, Rust, .NET, Java, Go, Python, Terraform, Docker and Chrome stay. The runner starts with
+    # ~85 GB free and the removal takes two minutes, so it runs in the background while the job sets up.
     - if: runner.os == 'Linux' && runner.environment == 'github-hosted'
+      name: Free disk space (in the background)
       shell: bash
       run: |
         df -h /
-        sudo rm -rf /usr/local/lib/android /usr/local/.ghcup /opt/ghc /usr/share/swift \
-          /usr/local/julia* /opt/hostedtoolcache/PyPy /opt/hostedtoolcache/CodeQL
-        df -h /
+        nohup sudo rm -rf /usr/local/lib/android /usr/local/.ghcup /opt/ghc /usr/share/swift \
+          /usr/local/julia* /opt/hostedtoolcache/PyPy /opt/hostedtoolcache/CodeQL >/dev/null 2>&1 &
     - uses: actions/setup-node@v6.5.0
       with:
         node-version-file: ${{ inputs.workspace }}/.node-version
@@ -43,15 +45,15 @@ runs:
     # The file standards in .considered.yaml, early because they need no install or build. tools/scripts/considered.mjs
     # downloads the pinned Considered release from GitHub and verifies its checksum; npm run check runs it again.
     - name: Considered
-      if: inputs.part != 'rust'
+      if: contains(inputs.part, 'checks')
       shell: bash
       working-directory: ${{ inputs.workspace }}
       run: |
         node tools/scripts/considered.mjs install
         node tools/scripts/considered.mjs check
     # The toolchain rust-toolchain.toml pins, then the build cache: the dependencies' build output (not the workspace's own
-    # crates), keyed on the toolchain, Cargo.lock and the job's part. Only pushes to main save it; pull requests restore
-    # main's.
+    # crates), keyed on the toolchain, Cargo.lock and what the job compiles: the build alone, or the build and the Rust
+    # suites. Only pushes to main save it; pull requests restore main's.
     - shell: bash
       working-directory: ${{ inputs.workspace }}
       run: |
@@ -60,9 +62,9 @@ runs:
     - uses: Swatinem/rust-cache@v2.9.3
       with:
         workspaces: ${{ inputs.workspace }} -> target
-        key: ${{ inputs.part }}
+        key: ${{ contains(inputs.part, 'rust') && 'rust' || 'build' }}
         save-if: ${{ github.ref == 'refs/heads/main' }}
-    - if: inputs.part != 'node'
+    - if: contains(inputs.part, 'rust')
       uses: taiki-e/install-action@v2.90.0
       with:
         tool: cargo-nextest@0.9.152
@@ -121,13 +123,17 @@ runs:
           tar -xzf "$RUNNER_TEMP/$maven.tar.gz" -C "$RUNNER_TEMP"
           export PATH="$RUNNER_TEMP/$maven/bin:$PATH"
         fi
+        part() { [[ " $PART " == *" $1 "* ]]; }
         npm ci
-        if [ "$PART" = rust ]; then
-          npm run build
-        else
-          # Includes the Storybook build (tools/storybook/), which fails on any story or config error.
+        if part checks; then
+          # The static checks, the build, types and lint. The build includes the Storybook's (tools/storybook/),
+          # which fails on any story or config error.
           npm run check:no-test
-          # The Node suites. packages/cli's test script also runs the CLI's Rust suites, which run below with the rest.
+        else
+          npm run build
+        fi
+        if part node; then
+          # The Node suites. packages/cli's test script also runs the CLI's Rust suites, which run with the rest.
           npm test -- --except packages/cli
           (cd packages/cli && node --test test/*.test.mjs)
         fi
@@ -138,16 +144,16 @@ runs:
           export PROJECTIONS_SCIP_TYPESCRIPT="$RUNNER_TEMP/projections-scip/node_modules/.bin/scip-typescript"
           export RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}" CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
         fi
-        if [ "$PART" != node ]; then
+        if part rust; then
           npm run test:rust:nextest
         fi
-        if [ "$PART" != rust ]; then
+        if part node; then
           npm run test:gh
           npm run test:packed
         fi
     # The repository's own projection (.github/projections/self-topology): its extractor's tests, then the CLI's
     # check of it end to end (extraction, determinism, scope, comparator tests and the renderer's checks in Chrome).
-    - if: runner.os == 'Linux' && inputs.part == 'all'
+    - if: runner.os == 'Linux' && contains(inputs.part, 'checks')
       name: Self-projection
       shell: bash
       working-directory: ${{ inputs.workspace }}

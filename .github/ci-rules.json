@@ -151,17 +151,39 @@
       "when": "docsOnly"
     },
     "public-product": {
-      "description": "The full check, Node and Rust suites, generated documentation and the self-projection. On macOS, the Rust suites and the rest run as two jobs in parallel.",
+      "description": "The full check: static checks, types and lint, the Node and Rust suites, generated documentation and the self-projection. Each runner's parts run as parallel jobs (three on Linux, two on macOS), so none is the run's long pole.",
       "matrix": [
         {
-          "name": "ubuntu-latest",
-          "description": "Every change but documentation alone",
+          "name": "ubuntu-latest, checks",
+          "description": "Every change but documentation alone: the static checks, types, lint, the Storybook build and the self-projection",
           "when": {
             "not": "docsOnly"
           },
           "with": {
             "os": "ubuntu-latest",
-            "part": "all"
+            "part": "checks"
+          }
+        },
+        {
+          "name": "ubuntu-latest, Node",
+          "description": "Every change but documentation alone: the Node suites, the installed CLI proofs, the GitHub Action end to end and the generated reference docs",
+          "when": {
+            "not": "docsOnly"
+          },
+          "with": {
+            "os": "ubuntu-latest",
+            "part": "node"
+          }
+        },
+        {
+          "name": "ubuntu-latest, Rust",
+          "description": "Every change but documentation alone: the Rust suites, the native tool suites and the container proof",
+          "when": {
+            "not": "docsOnly"
+          },
+          "with": {
+            "os": "ubuntu-latest",
+            "part": "rust"
           }
         },
         {
@@ -183,7 +205,7 @@
           },
           "with": {
             "os": "macos-latest",
-            "part": "node"
+            "part": "checks node"
           }
         }
       ]
@@ -207,10 +229,29 @@
       }
     },
     "windows-integration": {
-      "description": "The CLI's browser suite, a renderer smoke test, the VS Code extension and the GitHub Action on Windows",
-      "when": {
-        "if": "platform"
-      }
+      "description": "The CLI's browser suite, a renderer smoke test, the VS Code extension and the GitHub Action on Windows, as two parallel jobs",
+      "matrix": [
+        {
+          "name": "browser",
+          "description": "The CLI's browser suite, a renderer smoke test and the GitHub Action",
+          "when": {
+            "if": "platform"
+          },
+          "with": {
+            "part": "browser"
+          }
+        },
+        {
+          "name": "VS Code",
+          "description": "The VS Code extension's smoke test",
+          "when": {
+            "if": "platform"
+          },
+          "with": {
+            "part": "vscode"
+          }
+        }
+      ]
     },
     "package": {
       "description": "@githubnext/projections as published, with a scaffolded renderer the CLI checks in the Inspector: the SDK, Rust, or the CLI and what it serves",

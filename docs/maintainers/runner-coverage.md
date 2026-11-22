@@ -101,10 +101,15 @@ run on Linux and macOS.
 | VS Code extension                                          | unit suites; release proof installs it | the same                   | unit suites; smoke test in VS Code (`test:vscode`)  |
 | GitHub Action end to end (`.github/actions/action-e2e`)    | `public-product`                       | `public-product`           | `windows-integration`                               |
 
-`public-product` runs as a single job on Linux and as two parallel jobs on
-macOS: `macos-latest, Rust` (the build and Rust suites) and `macos-latest, Node`
-(everything else). This table describes what pushes to `main` and the nightly
-run cover; pull requests run only the jobs their changes reach
+`public-product` runs as parallel jobs, each building the workspace first: on
+Linux, `ubuntu-latest, checks` (static checks, types, lint and the
+self-projection), `ubuntu-latest, Node` (the Node suites, installed proofs, the
+Action end to end and generated documentation) and `ubuntu-latest, Rust` (the
+Rust, native tool and Docker suites); on macOS, `macos-latest, Rust` and
+`macos-latest, Node` (everything else). `windows-integration` runs as two
+parallel jobs too: `browser` (the browser suites and the Action) and `VS Code`.
+This table describes what pushes to `main` and the nightly run cover; pull
+requests run only the jobs their changes reach
 ([what CI runs](../../CONTRIBUTING.md#what-ci-runs)). Browser suites run in full
 and sharded on Linux. On Windows, we run the full CLI browser suite (which
 exercises the CLI server and process handling) plus one renderer suite as a

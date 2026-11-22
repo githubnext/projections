@@ -13,7 +13,7 @@
           "verus": false,
           "windows": false,
           "windows-node": false,
-          "windows-integration": false,
+          "windows-integration": [],
           "package": false,
           "release-config": false,
           "coverage": false,
@@ -38,10 +38,10 @@
         "docsOnly": false,
         "jobs": {
           "docs": false,
-          "public-product": ["ubuntu-latest"],
+          "public-product": ["ubuntu-latest, checks", "ubuntu-latest, Node", "ubuntu-latest, Rust"],
           "windows": false,
           "windows-node": false,
-          "windows-integration": false,
+          "windows-integration": [],
           "package": false,
           "coverage": false
         },
@@ -55,7 +55,7 @@
       "expect": {
         "renderers": ["database"],
         "jobs": {
-          "public-product": ["ubuntu-latest"],
+          "public-product": ["ubuntu-latest, checks", "ubuntu-latest, Node", "ubuntu-latest, Rust"],
           "windows": false,
           "windows-node": false,
           "verus": false,
@@ -103,7 +103,13 @@
       "expect": {
         "full": false,
         "jobs": {
-          "public-product": ["ubuntu-latest", "macos-latest, Rust", "macos-latest, Node"],
+          "public-product": [
+            "ubuntu-latest, checks",
+            "ubuntu-latest, Node",
+            "ubuntu-latest, Rust",
+            "macos-latest, Rust",
+            "macos-latest, Node"
+          ],
           "windows": true,
           "windows-node": true,
           "verus": true,
@@ -241,7 +247,7 @@
         "full": false,
         "jobs": {
           "release-config": true,
-          "public-product": ["ubuntu-latest"]
+          "public-product": ["ubuntu-latest, checks", "ubuntu-latest, Node", "ubuntu-latest, Rust"]
         },
         "browser": []
       }
@@ -251,9 +257,15 @@
       "files": ["action.yml"],
       "expect": {
         "jobs": {
-          "public-product": ["ubuntu-latest", "macos-latest, Rust", "macos-latest, Node"],
+          "public-product": [
+            "ubuntu-latest, checks",
+            "ubuntu-latest, Node",
+            "ubuntu-latest, Rust",
+            "macos-latest, Rust",
+            "macos-latest, Node"
+          ],
           "windows-node": true,
-          "windows-integration": true
+          "windows-integration": ["browser", "VS Code"]
         }
       }
     },
@@ -269,7 +281,7 @@
       "expect": {
         "jobs": {
           "docs": false,
-          "public-product": ["ubuntu-latest"],
+          "public-product": ["ubuntu-latest, checks", "ubuntu-latest, Node", "ubuntu-latest, Rust"],
           "windows": false,
           "windows-node": false,
           "package": false
@@ -311,7 +323,7 @@
       ],
       "expect": {
         "jobs": {
-          "public-product": ["ubuntu-latest"],
+          "public-product": ["ubuntu-latest, checks", "ubuntu-latest, Node", "ubuntu-latest, Rust"],
           "windows-node": true
         }
       }
@@ -357,7 +369,7 @@
         "docsOnly": false,
         "jobs": {
           "docs": false,
-          "public-product": ["ubuntu-latest"],
+          "public-product": ["ubuntu-latest, checks", "ubuntu-latest, Node", "ubuntu-latest, Rust"],
           "windows": false,
           "package": false
         },
@@ -372,7 +384,7 @@
         "classes": ["code"],
         "full": false,
         "jobs": {
-          "public-product": ["ubuntu-latest"],
+          "public-product": ["ubuntu-latest, checks", "ubuntu-latest, Node", "ubuntu-latest, Rust"],
           "windows": false,
           "package": false
         },

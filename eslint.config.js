@@ -3,6 +3,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import globals from 'globals'
 import {defineConfig} from 'eslint/config'
 import tseslint from 'typescript-eslint'
+import {consideredPlugin} from './tools/scripts/considered-rule.mjs'
 import {engineContractsRule} from './tools/scripts/engine-contracts.mjs'
 import {lifecycleFiles, machinesPlugin} from './tools/scripts/check-machines/lifecycle-rule.mjs'
 
@@ -178,6 +179,11 @@ export default defineConfig(
     files: ['packages/**/src/**/*.{ts,tsx}'],
     ignores: ['packages/integrations/github-action/**'],
     rules: {'no-console': 'error'},
+  },
+  {
+    // What Considered measures (.considered.yaml) has to be readable by its scc provider (tools/scripts/considered-rule.mjs).
+    plugins: {considered: consideredPlugin},
+    rules: {'considered/regex-backtick': 'error'},
   },
   {
     // JavaScript has no annotations, so type-aware rules would only report `any`; every other rule still applies.

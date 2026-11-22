@@ -67,6 +67,13 @@ Each option allows one defined idiom and nothing else.
 - Style without a bug class: `no-plusplus`, `no-nested-ternary`,
   `no-negated-condition`, `prefer-destructuring`, `prefer-named-capture-group`.
 
+## Rules of our own
+
+- `considered/regex-backtick` (`tools/scripts/considered-rule.mjs`): a backtick
+  in a regular expression literal is written `\x60`. Considered's scc provider
+  reads a bare one as the start of a template string and stops counting the
+  file, so its size and complexity limits would quietly not apply.
+
 ## Turning on a rule
 
 A rule this configuration turns on whose existing violations aren't fixed yet is

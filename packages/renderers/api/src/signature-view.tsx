@@ -1,7 +1,7 @@
 import {useMemo} from 'react'
 import type {ReactNode} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
-import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
 import {signatureLayout, signatureOf, signatureSegments, signatureTokens} from './signature.js'
 import type {Segment, Side, Token} from './signature.js'
@@ -25,7 +25,9 @@ function Line({tone, children}: {tone?: Tone | undefined; children: ReactNode}) 
 
 /** A revision's runs, marking the ones the other revision lacks. */
 function Marked({tokens}: {tokens: Token[]}) {
-  return tokens.map((token, index) => (token.changed ? <mark key={index}>{token.text}</mark> : <span key={index}>{token.text}</span>))
+  return keyed(tokens, token => `${token.changed ? 'changed' : 'same'}:${token.text}`).map(([key, token]) =>
+    token.changed ? <mark key={key}>{token.text}</mark> : <span key={key}>{token.text}</span>,
+  )
 }
 
 const segmentElement = (segment: Segment, index: number) =>

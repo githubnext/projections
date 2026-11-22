@@ -445,7 +445,9 @@ function TransitionView({
   // The composition hangs from its root, centred at the top: a view that opens at the text floor opens there, on the
   // cards drawn when it is placed, with no card cut at its left edge (see `contentStart`).
   const drawn = useRef(units)
-  drawn.current = units
+  useLayoutEffect(() => {
+    drawn.current = units
+  })
   const start = useMemo(
     (): ScrollStart => view =>
       contentStart(
@@ -463,7 +465,7 @@ function TransitionView({
     [bounds, transition, drawnPadding],
   )
   const {zoom, scale} = useStageZoom(scroller, onAction, fit.scale, {floor, start})
-  useLayoutEffect(() => setDrawnScale(scale), [scale])
+  if (drawnScale !== scale) setDrawnScale(scale)
 
   return (
     <div className="di-view">

@@ -19,12 +19,17 @@ export function IconStyles({children}: {children: ReactNode}) {
     // The kit's SvgIcon reads the icons' computed styles once, as it mounts: WebKit leaves them out while a stylesheet
     // (such as the VS Code frame's codicons) is still loading, so the gallery waits for every one.
     const pending = [...document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')].filter(link => !link.sheet)
-    let current = true
+    const abort = new AbortController()
     void Promise.all(
-      pending.map(link => new Promise(settle => ['load', 'error'].forEach(event => link.addEventListener(event, settle, {once: true})))),
-    ).then(() => current && setReady(true))
+      pending.map(
+        link =>
+          new Promise(settle => {
+            for (const event of ['load', 'error']) link.addEventListener(event, settle, {once: true, signal: abort.signal})
+          }),
+      ),
+    ).then(() => !abort.signal.aborted && setReady(true))
     return () => {
-      current = false
+      abort.abort()
       style.remove()
     }
   }, [])

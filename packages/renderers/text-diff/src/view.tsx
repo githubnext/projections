@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react'
+import {Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react'
 import type {CSSProperties, ReactNode} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
 import type {EntityChange} from '@githubnext/projections-renderer-sdk/presentation'
@@ -15,6 +15,7 @@ import type {Cell, LineKind, OutputDiff, Word} from './rows.js'
 import type {Segment} from './folding.js'
 import {splitLines} from './diff.js'
 import type {accepts} from './accepts.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 type Style = CSSProperties & Record<`--${string}`, string | number>
 
@@ -64,13 +65,13 @@ function LineText({kind, text, ending, words}: {kind: LineKind; text: string; en
       {kind !== 'equal' && <span className="sr-only">{spoken[kind]}</span>}
       <span className="td-text">
         {words
-          ? words.map((word, index) =>
+          ? keyed(words, word => `${word.changed ? 'changed' : 'same'}:${word.text}`).map(([key, word]) =>
               word.changed ? (
-                <span key={index} className="td-word">
+                <span key={key} className="td-word">
                   {word.text}
                 </span>
               ) : (
-                word.text
+                <Fragment key={key}>{word.text}</Fragment>
               ),
             )
           : text}
@@ -101,8 +102,8 @@ function PlainLines({text, presentation}: {text: string; presentation: TextPrese
             <span className="td-text td-placeholder">(no output)</span>
           </div>
         )}
-        {shown.map((line, index) => (
-          <div className="td-row" key={index}>
+        {keyed(shown, line => line.text).map(([key, line], index) => (
+          <div className="td-row" key={key}>
             <Gutter number={index + 1} />
             <span className="td-text">{line.text}</span>
           </div>
@@ -157,7 +158,7 @@ function UnifiedDiff({diff, presentation, expanded, expand, collapse}: DiffProps
             rows.slice(part.start, part.end).map((line, offset, run) => (
               <div
                 className={`td-row td-${line.kind}${line.kind === 'equal' ? '' : ' pk-region pk-region-run'}`}
-                key={part.start + offset}
+                key={`${line.kind}:${line.old ?? ''}:${line.new ?? ''}`}
                 {...region(line.kind, run[offset - 1]?.kind, run[offset + 1]?.kind)}
               >
                 <Gutter number={line.old} side="old" />
@@ -237,7 +238,7 @@ function SplitDiff({diff, presentation, expanded, expand, collapse}: DiffProps) 
             />
           ) : (
             rows.slice(part.start, part.end).map((row, offset, run) => (
-              <div className="td-pair" key={part.start + offset}>
+              <div className="td-pair" key={`${row.left?.number ?? ''}:${row.right?.number ?? ''}`}>
                 <SplitCell cell={row.left} side="before" previous={run[offset - 1]?.left} next={run[offset + 1]?.left} />
                 <SplitCell cell={row.right} side="after" previous={run[offset - 1]?.right} next={run[offset + 1]?.right} />
               </div>
@@ -340,8 +341,10 @@ function useNarrow() {
  */
 export function TextDiffView(props: RendererProps<typeof accepts>) {
   const {model, comparing, controls, declareControls, highlighting} = props
-  useMemo(() => validateModel(model), [model])
-  const rows = useMemo(() => outputOrder(model), [model])
+  const rows = useMemo(() => {
+    validateModel(model)
+    return outputOrder(model)
+  }, [model])
   const diffs = diffCache.get(model) ?? diffCache.set(model, new Map()).get(model)!
   // Two columns or one is a host-drawn control, offered only when there is a comparison to lay out.
   const offered = comparing && rows.length > 0

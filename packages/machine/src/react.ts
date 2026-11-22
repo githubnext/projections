@@ -24,6 +24,7 @@ export function useMachine<S extends MachineState, E extends MachineEvent, F ext
   useLifecycleEffect(() => {
     latest.current = options
   })
+  // eslint-disable-next-line react-hooks/refs -- the actor keeps the runners, which read `latest` when they run: none runs before `start`, in the effect below.
   const [actor] = useState(() => {
     const delegate = (field: 'effects' | 'activities') => {
       const initial = options[field] as Runners | undefined

@@ -21,6 +21,7 @@ import {documentOrder, scenarioOf, subjectWords} from './model.js'
 import type {Scenario} from './model.js'
 import {eagerScenarios, NestedStage} from './stage.js'
 import type {accepts} from './accepts.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 type Row = EntityChange<Entity>
 type Props = RendererProps<typeof accepts>
@@ -150,6 +151,7 @@ export function GalleryView(props: Props) {
         holdsChanges={nestedComparison(scenario)}
       >
         <div
+          role="presentation"
           className="gl-card-body"
           onPointerEnter={() => setPlaying(row.id)}
           onPointerLeave={() => setPlaying(playing => (playing === row.id ? null : playing))}
@@ -200,8 +202,8 @@ export function GalleryView(props: Props) {
                 : {})}
               holdsChanges={runs.some(run => run.rows.some(row => nestedComparison(scenarioOf((row.after ?? row.before)!))))}
             >
-              {runs.map(({group, rows}, index) => (
-                <section key={`${group ?? ''}:${index}`} className="gl-run" aria-label={group ?? entity?.label ?? 'Scenarios'}>
+              {keyed(runs, run => run.group ?? '').map(([key, {group, rows}]) => (
+                <section key={key} className="gl-run" aria-label={group ?? entity?.label ?? 'Scenarios'}>
                   {group && <h3 className="gl-run-title">{group}</h3>}
                   <CardGrid label={group ?? entity?.label ?? 'Scenarios'}>{rows.map(card)}</CardGrid>
                 </section>

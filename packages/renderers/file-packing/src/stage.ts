@@ -52,10 +52,11 @@ export function useStageSize(stage: RefObject<HTMLDivElement | null>) {
 
 /** The theme's extra-small type size in CSS px, which labels are drawn in and fitted to. */
 export function useLabelSize(): number {
-  const [size, setSize] = useState(12)
-  useLayoutEffect(() => {
+  // Read once, as the stage mounts: the host's theme is applied by then.
+  const [size] = useState(() => {
+    if (typeof document === 'undefined') return 12
     const value = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--projections-font-size-xs'))
-    if (Number.isFinite(value) && value > 0) setSize(value)
-  }, [])
+    return Number.isFinite(value) && value > 0 ? value : 12
+  })
   return size
 }

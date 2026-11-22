@@ -1,6 +1,6 @@
 import {useLayoutEffect, useRef, useState} from 'react'
 import type {ReactNode} from 'react'
-import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import {ChangeStatus} from '@githubnext/projections-renderer-kit/react'
 import {defaultChrome} from './text.js'
 import type {MeasureText, TextChrome, TextRole} from './text.js'
@@ -11,8 +11,8 @@ import type {MeasureText, TextChrome, TextRole} from './text.js'
  * layout's and the text reads (and copies) as one string.
  */
 export function Breakable({lines}: {lines: readonly string[]}): ReactNode {
-  return lines.map((line, index) => (
-    <span key={index} className="database-line">
+  return keyed(lines, line => line).map(([key, line], index) => (
+    <span key={key} className="database-line">
       {index > 0 && <wbr />}
       {line}
     </span>

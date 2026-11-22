@@ -1,6 +1,6 @@
 import {escapeProse} from '@githubnext/projections-schemas'
 import type {Entity} from '@githubnext/projections-schemas'
-import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import {classifyChange, isChanged} from '@githubnext/projections-renderer-kit'
 import {Icon} from '@githubnext/projections-renderer-kit/react'
 import {effectIcon} from './model.js'
@@ -133,8 +133,8 @@ function Effect({entity}: {entity: Entity | undefined}) {
 function Conditions({lines}: {lines: string[]}) {
   return (
     <span className="rp-conditions">
-      {lines.map((terms, index) => (
-        <span key={index} className="rp-condition">
+      {keyed(lines, terms => terms).map(([key, terms], index) => (
+        <span key={key} className="rp-condition">
           {index > 0 && 'and '}
           <Prose>{terms}</Prose>
         </span>

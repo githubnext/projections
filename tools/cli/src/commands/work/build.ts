@@ -6,10 +6,20 @@ import {createHash} from 'node:crypto'
 import {existsSync, readdirSync, readFileSync, statSync, utimesSync} from 'node:fs'
 import {join, relative, sep} from 'node:path'
 import {bound, TOOLS} from '../../lib/gates.ts'
-import {buildInputs, buildRecords, buildStatus, dependenciesOf, inputSignature, outputTime, recordBuild} from '../../lib/builds.ts'
+import {
+  buildInputs,
+  buildRecords,
+  buildStatus,
+  changeTime,
+  dependenciesOf,
+  inputsChanged,
+  inputSignature,
+  outputTime,
+  recordBuild,
+} from '../../lib/builds.ts'
 import {findUnit, inDependencyOrder, loadUnits, type Unit} from '../../lib/packages.ts'
 import {parseProblems, tail, type Problem} from '../../lib/problems.ts'
-import {newestOutput, run} from '../../lib/repo.ts'
+import {run} from '../../lib/repo.ts'
 import {changeSet, UsageError} from './change-set.ts'
 
 export interface BuildOptions {
@@ -88,7 +98,15 @@ export function recordSuccess(root: string, unit: Unit, inputs: string, before: 
   const after = snapshot(root, unit)
   const unchanged = restoreIfUnchanged(before, after)
   const outputs = [...after.files.keys()].map(path => relative(join(root, unit.path), path).split(sep).join('/')).toSorted()
-  recordBuild(root, unit.path, {...(unchanged ? {checked: started} : {}), inputs, outputs, recorded: Date.now()})
+  const previous = buildRecords(root)[unit.path]
+  const changed = inputsChanged(previous, inputs) ? started : previous?.changed
+  recordBuild(root, unit.path, {
+    ...(unchanged ? {checked: started} : {}),
+    ...(changed === undefined ? {} : {changed}),
+    inputs,
+    outputs,
+    recorded: Date.now(),
+  })
   return unchanged
 }
 
@@ -107,10 +125,7 @@ export function staleness(root: string, units: readonly Unit[], unit: Unit, rebu
   const changed = unit.dependsOn.find(path => rebuilt.has(path))
   if (changed) return `${changed} was rebuilt`
   const output = outputTime(root, unit, records) ?? 0
-  const newer = unit.dependsOn.find(path => {
-    const dependency = units.find(entry => entry.path === path)
-    return builds(dependency) && (newestOutput(root, `${path}/dist`) ?? 0) > output
-  })
+  const newer = unit.dependsOn.find(path => builds(units.find(entry => entry.path === path)) && changeTime(root, path, records) > output)
   return newer ? `${newer} was built after it` : undefined
 }
 
@@ -175,7 +190,8 @@ export async function buildReport(root: string, options: BuildOptions, progress?
     const seconds = Math.round(ran.durationMs / 100) / 10
     if (ran.exitCode === 0) {
       const unchanged = recordSuccess(root, unit, inputs, before, started)
-      if (!unchanged) rebuilt.add(unit.path)
+      // Unchanged outputs from changed inputs still change what a dependant reads of it (see `BuildRecord.changed`).
+      if (!unchanged || inputsChanged(previous, inputs)) rebuilt.add(unit.path)
       progress?.(`  ${unchanged ? 'unchanged' : 'built'} (${Math.round(ran.durationMs / 1000)}s)`)
       steps.push({workspace: unit.path, status: unchanged ? 'unchanged' : 'built', reason, seconds})
       continue

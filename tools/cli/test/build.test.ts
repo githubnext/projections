@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {spawnSync} from 'node:child_process'
 import {mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, unlinkSync, utimesSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
-import {join} from 'node:path'
+import {dirname, join} from 'node:path'
 import {fileURLToPath} from 'node:url'
 import test from 'node:test'
 import type {Affected} from '../src/lib/affected.ts'
@@ -272,6 +272,92 @@ test('build: an edit to a build script or configuration outside src makes a buil
   writeFileSync(join(root, 'lib/dist/index.js'), 'rebuilt')
   utimesSync(join(root, 'lib/dist/index.js'), Date.now() / 1000 + 60, Date.now() / 1000 + 60)
   assert.equal(buildState(root, lib), 'current')
+})
+
+test('build: stylesheets, assets and templates outside src are inputs; test scaffolding, docs and nested packages are not', () => {
+  const root = mkdtempSync(join(tmpdir(), 'tools-files-'))
+  const lib = unit('lib')
+  configured(root, 'lib', {src: 100, dist: 200})
+  for (const file of ['styles/base.css', 'icons.css', 'templates/page.html', 'test/a.test.mjs', 'browser/a.spec.ts', 'fixtures/a.json']) {
+    mkdirSync(dirname(join(root, 'lib', file)), {recursive: true})
+    writeFileSync(join(root, 'lib', file), '')
+  }
+  writeFileSync(join(root, 'lib/scenarios.json'), '{}')
+  writeFileSync(join(root, 'lib/README.md'), '')
+  mkdirSync(join(root, 'lib/nested/src'), {recursive: true})
+  writeFileSync(join(root, 'lib/nested/package.json'), '{}')
+  writeFileSync(join(root, 'lib/nested/src/index.ts'), '')
+  assert.deepEqual(buildInputs(root, lib), [
+    'lib/build/assets.mjs',
+    'lib/icons.css',
+    'lib/package.json',
+    'lib/scripts/css.mjs',
+    'lib/styles/base.css',
+    'lib/templates/page.html',
+    'lib/tsconfig.json',
+    'tsconfig.base.json',
+  ])
+  built(root, lib, () => writeFileSync(join(root, 'lib/dist/index.js'), 'built'))
+  utimesSync(join(root, 'lib/dist/index.js'), 200, 200)
+  // Recorded, its inputs' content decides: an edited stylesheet makes it stale.
+  assert.equal(buildState(root, lib), 'current')
+  writeFileSync(join(root, 'lib/styles/base.css'), '.a {}')
+  assert.equal(staleness(root, [lib], lib, new Set()), 'its build inputs changed since its last build')
+  writeFileSync(join(root, 'lib/styles/base.css'), '')
+  for (const file of ['test/a.test.mjs', 'browser/a.spec.ts', 'fixtures/a.json', 'scenarios.json', 'README.md', 'nested/src/index.ts']) {
+    writeFileSync(join(root, 'lib', file), 'edited')
+    assert.equal(buildState(root, lib), 'current', file)
+  }
+})
+
+test('build: a dependency rebuilt from changed inputs into the same outputs still makes what depends on it stale', () => {
+  const root = mkdtempSync(join(tmpdir(), 'tools-changed-'))
+  const lib = unit('lib')
+  const app = unit('app', {dependsOn: ['lib']})
+  const units = [lib, app]
+  configured(root, 'lib', {src: 100, dist: 200})
+  mkdirSync(join(root, 'lib/styles'), {recursive: true})
+  writeFileSync(join(root, 'lib/styles/base.css'), '.a {}')
+  workspace(root, 'app', {src: 100, dist: 300})
+  // Its first recorded build: no earlier inputs to compare, so what depends on it stays current.
+  built(root, lib, () => writeFileSync(join(root, 'lib/dist/index.js'), 'built'))
+  utimesSync(join(root, 'lib/dist/index.js'), 200, 200)
+  assert.equal(staleness(root, units, app, new Set()), undefined)
+  // A stylesheet edit: built again, its dist comes out the same and keeps its times, but app may bundle the stylesheet.
+  writeFileSync(join(root, 'lib/styles/base.css'), '.a { color: red }')
+  assert.equal(
+    built(root, lib, () => writeFileSync(join(root, 'lib/dist/index.js'), 'built')),
+    true,
+  )
+  assert.equal(statSync(join(root, 'lib/dist/index.js')).mtimeMs, 200_000)
+  assert.equal(staleness(root, units, app, new Set()), 'lib was built after it')
+  // Built again from the same inputs, it changes nothing more: app, rebuilt since, stays current.
+  utimesSync(join(root, 'app/dist/index.js'), Date.now() / 1000 + 60, Date.now() / 1000 + 60)
+  built(root, lib, () => writeFileSync(join(root, 'lib/dist/index.js'), 'built'))
+  assert.equal(staleness(root, units, app, new Set()), undefined)
+})
+
+test("build: a shared tsconfig a workspace's own config extends through another of its files is an input", () => {
+  const root = mkdtempSync(join(tmpdir(), 'tools-extends-'))
+  const lib = unit('lib')
+  configured(root, 'lib', {src: 100, dist: 200})
+  mkdirSync(join(root, 'lib/config'), {recursive: true})
+  writeFileSync(join(root, 'lib/tsconfig.json'), '{"extends": "./config/compiler.json"}')
+  writeFileSync(join(root, 'lib/config/compiler.json'), '{"extends": "../../tsconfig.base.json"}')
+  assert.ok(buildInputs(root, lib).includes('lib/config/compiler.json'))
+  assert.ok(buildInputs(root, lib).includes('tsconfig.base.json'))
+})
+
+test('build: in a git checkout, files git ignores are not inputs', () => {
+  const root = mkdtempSync(join(tmpdir(), 'tools-git-'))
+  const lib = unit('lib')
+  configured(root, 'lib', {src: 100, dist: 200})
+  writeFileSync(join(root, '.gitignore'), 'dist/\ngenerated.css\n')
+  writeFileSync(join(root, 'lib/styles.css'), '')
+  writeFileSync(join(root, 'lib/generated.css'), '')
+  assert.equal(spawnSync('git', ['init', '--quiet'], {cwd: root}).status, 0)
+  assert.ok(buildInputs(root, lib).includes('lib/styles.css'))
+  assert.ok(!buildInputs(root, lib).includes('lib/generated.css'))
 })
 
 test('build: a recorded output gone missing, or a deleted source, makes a built workspace stale', () => {

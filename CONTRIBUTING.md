@@ -225,8 +225,8 @@ The planner evaluates in this order:
    - `lockfile` (`package-lock.json`, `Cargo.lock`): `code` for the workspaces
      and crates whose resolved dependencies changed compared with the merge
      base, and `full` when the root's own tooling changed.
-2. **A full run runs every job**, whatever its `when` says: pushes to `main`,
-   the nightly run, manual runs, the `ci:full` label, and any `full` file.
+2. **A full run runs every job** but those limited to other `events`: pushes to
+   `main`, nightly, manual runs, the `ci:full` label and any `full` file.
 3. **Touched and reached units.** The `code` files give the touched workspaces
    and crates. Those, and everything depending on one that contains or builds in
    a changed file, are reached. A crate whose tests alone read a file is touched

@@ -53,7 +53,8 @@ The planner evaluates a change in this order:
 
 2. **Full runs.** A push to `main`, the nightly run, a manual run, the `ci:full`
    label or any `full` file runs every job, matrix entry and suite, whatever its
-   `when` says.
+   `when` says, except a job limited to some `events` (`mutants-diff`, which
+   diffs a pull request against its base, runs on pull requests alone).
 3. **Touched and reached units.** The touched units are those the `code` files
    touch. The reached units are the touched ones and everything depending on a
    unit that contains or builds in a changed file: _reaches = built ∪ tested ∪
@@ -114,7 +115,8 @@ noise. What they cost is runner-minutes.
 
 ### 1. A full run runs every job
 
-Instead of `"full"` in nearly every condition, a full run runs every job, and
+Instead of `"full"` in nearly every condition, a full run runs every job (but
+one limited to some `events`, such as the pull-request-only `mutants-diff`), and
 `when` describes only pull requests that follow their change. `actions-lock`,
 which runs only in full runs, says `"when": "never"`. Cost: the `docs` job also
 runs in full runs, 0.6 minutes each. **Adopted.**
@@ -195,9 +197,12 @@ No cost: no file changes class.
   each reached unit's witness (the dependency that reached it), and for each job
   the conditions that held or, when it's skipped, the ones that didn't. The run
   summary prints the same.
-- **A generated "what runs for what" table** in CONTRIBUTING.md, from
-  `ci-plan.cases.json`, registered as a generator so `docs:check` keeps it
-  current.
+- **A generated "what runs for what" table**,
+  [`docs/maintainers/ci-plan.md`](../../maintainers/ci-plan.md), from
+  `ci-plan.cases.json`. It's the `ci-table` generator, checked by
+  `node tools/scripts/ci-table.mjs --check` (run by the tools package's tests).
+  A page of its own, not a region of CONTRIBUTING.md: a generator's output is a
+  `checks` file, so every CONTRIBUTING edit would have run the Linux checks.
 - **The plan as an artifact.** The `changes` job uploads its plan, so anyone
   (and the miss detector) can see what a run decided and why.
 - **`tools ci replay`.** A local command that replays the last merged pull
@@ -206,9 +211,10 @@ No cost: no file changes class.
   the rules; it isn't a CI step.
 - **A miss detector, report-only.** When a job fails on `main` that the merged
   pull request's plan skipped, and the same job passed on the parent commit's
-  run, the run's summary reports a likely miss: the job, the pull request and
-  the plan's reasons. No issues are filed and nothing is re-run; once it has a
-  record, it can do more.
+  run, the run's summary reports a likely miss with a warning: the job, its
+  verdict, and the pull request and run whose plan it read. That run's `ci-plan`
+  artifact (or `tools ci explain`) gives the reasons the plan skipped it. No
+  issues are filed and nothing is re-run; once it has a record, it can do more.
 
 ## Summary
 

@@ -110,7 +110,9 @@ export function useSelection(
   }
   // The selection as of the latest change, read by handlers that run before the next render.
   const current = useRef(selected)
-  current.current = selected
+  useLayoutEffect(() => {
+    current.current = selected
+  })
   // Whether the click being dispatched has already changed the selection, and its click count (see `selectionClicks`).
   const handled = useRef(false)
   const clicks = useRef(0)

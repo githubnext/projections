@@ -11,6 +11,8 @@ export interface MenuProps extends Omit<OverlayProps, 'role' | 'children' | 'man
   groupLabels?: Readonly<Record<string, string>> | undefined
 }
 
+const noLabels: Readonly<Record<string, string>> = {}
+
 const enabledItems = (root: ParentNode | null | undefined, selector: string) => [
   ...(root?.querySelectorAll<HTMLElement>(`${selector}:not([aria-disabled=true])`) ?? []),
 ]
@@ -30,7 +32,7 @@ export function Menu(props: MenuProps) {
 function MenuLevel({
   items,
   label,
-  groupLabels = {},
+  groupLabels = noLabels,
   open,
   onClose,
   onDone,
@@ -55,12 +57,9 @@ function MenuLevel({
   const choices = items.some(item => item.checked !== undefined)
   const nested = back !== undefined
   const enabled = () => enabledItems(list.current, ':scope [role^=menuitem]')
+  if (!open && sub !== null) setSub(null)
   useLayoutEffect(() => {
-    if (!open) {
-      setSub(null)
-      return
-    }
-    if (focusFirst) show(openingItem(enabled()))
+    if (open && focusFirst) show(openingItem(enabled()))
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only opening focuses an item; a later focusFirst change doesn't.
   }, [open])
   const openSub = (id: string, focus = true) => {
@@ -141,8 +140,8 @@ function MenuLevel({
           }
         : {})}
     >
-      <div ref={list} role="menu" aria-label={label} className="phv-menu" onKeyDown={move}>
-        {nested && inPlace && <MenuBack label={label} choices={choices} onClose={onClose} />}
+      <div ref={list} role="menu" aria-label={label} className="phv-menu">
+        {nested && inPlace && <MenuBack label={label} choices={choices} onClose={onClose} onKeys={move} />}
         <MenuGroups
           items={items}
           groupLabels={groupLabels}
@@ -152,6 +151,7 @@ function MenuLevel({
           register={register}
           onChoose={choose}
           onHover={hover}
+          onKeys={move}
         />
       </div>
       {opened?.submenu && (

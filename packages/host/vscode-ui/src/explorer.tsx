@@ -4,6 +4,7 @@ import {LoadingStatus} from './loading.js'
 import {Notice} from './notice.js'
 import {VscodeProjectionView} from './view.js'
 import type {VscodeProjectionViewProps} from './view/props.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /**
  * The props of `VscodeComparisonExplorer`: the extractions to pair and their controlled pair (`ComparisonPairOptions`),
@@ -113,8 +114,8 @@ export function VscodeComparisonExplorer(props: VscodeComparisonExplorerProps) {
             {outcome.error.message}
             {outcome.error instanceof ComparisonError && outcome.error.details.length > 0 && (
               <ul className="phv-list">
-                {outcome.error.details.map((detail, index) => (
-                  <li key={index}>{detail}</li>
+                {keyed(outcome.error.details, detail => detail).map(([key, detail]) => (
+                  <li key={key}>{detail}</li>
                 ))}
               </ul>
             )}

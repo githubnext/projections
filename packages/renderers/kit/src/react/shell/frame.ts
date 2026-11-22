@@ -1,5 +1,5 @@
 // The contexts a kit renderer's components reach the shell through: the paint gate, frame fill and sizing, and content aspect.
-import {createContext, useContext, useEffect, useLayoutEffect} from 'react'
+import {createContext, use, useEffect, useLayoutEffect} from 'react'
 import type {RendererEnvironment} from '@githubnext/projections-renderer-sdk/protocol'
 import {contentHeightCap, type CoverRect} from '../../fit.js'
 
@@ -23,7 +23,7 @@ export const FrameFill = createContext<FrameFillControl>({start: () => noop, pre
  * the frame. Nothing is reported while `preferredHeight` is undefined.
  */
 export function useFrameFill(preferredHeight: number | undefined): void {
-  const control = useContext(FrameFill)
+  const control = use(FrameFill)
   useLayoutEffect(() => control.start(), [control])
   // Before paint, so the host has the height before the paint it is acknowledged with (see `useFrameFillReport`).
   useLayoutEffect(() => {
@@ -39,7 +39,7 @@ export const FrameSizing = createContext<RendererEnvironment['sizing']>(undefine
  * when the host doesn't say.
  */
 export function useFrameSizing(): RendererEnvironment['sizing'] {
-  return useContext(FrameSizing)
+  return use(FrameSizing)
 }
 
 export const FrameViewport = createContext<{width: number; height: number} | undefined>(undefined)
@@ -50,7 +50,7 @@ export const FrameViewport = createContext<{width: number; height: number} | und
  * stage that pans and zooms should ask to be (see `useFitScale`).
  */
 export function useFrameViewport(): {width: number; height: number} | undefined {
-  return useContext(FrameViewport)
+  return use(FrameViewport)
 }
 
 export const StageInset = createContext<number | undefined>(undefined)
@@ -62,7 +62,7 @@ export const StageInset = createContext<number | undefined>(undefined)
  * padding.
  */
 export function useStageInset(): number | undefined {
-  return useContext(StageInset)
+  return use(StageInset)
 }
 
 export const StageInsetTop = createContext<number | undefined>(undefined)
@@ -75,7 +75,7 @@ export const StageInsetTop = createContext<number | undefined>(undefined)
  * fitted canvas's padding.
  */
 export function useStageInsetTop(): number | undefined {
-  return useContext(StageInsetTop)
+  return use(StageInsetTop)
 }
 
 export const StageInsetBottom = createContext<number | undefined>(undefined)
@@ -86,7 +86,7 @@ export const StageInsetBottom = createContext<number | undefined>(undefined)
  * sends none. CSS reads it through the kit's stage padding (`--pk-stage-padding-bottom`).
  */
 export function useStageInsetBottom(): number | undefined {
-  return useContext(StageInsetBottom)
+  return use(StageInsetBottom)
 }
 
 export const StageCover = createContext<readonly CoverRect[] | undefined>(undefined)
@@ -97,7 +97,7 @@ export const StageCover = createContext<readonly CoverRect[] | undefined>(undefi
  * would reach them (`useCoveredPadding`); content that scrolls pads by `stage-inset-top` instead.
  */
 export function useStageCover(): readonly CoverRect[] | undefined {
-  return useContext(StageCover)
+  return use(StageCover)
 }
 
 export const StageMaxHeight = createContext<string | undefined>(undefined)
@@ -108,7 +108,7 @@ export const StageMaxHeight = createContext<string | undefined>(undefined)
  * that sends it lays the frame in its scrolling page: such a stage also pans by dragging, leaving the wheel to the page.
  */
 export function useStageHeightCap(): number | undefined {
-  return contentHeightCap(useContext(StageMaxHeight), useContext(FrameViewport))
+  return contentHeightCap(use(StageMaxHeight), use(FrameViewport))
 }
 
 /** The `stage-inset` token's value (or `name`'s, another length token) in CSS px, if it is one. */
@@ -128,7 +128,7 @@ export const ContentAspect = createContext<(ratio: number | undefined) => void>(
  * this from a renderer that fits content another way. Nothing is reported while `ratio` is undefined.
  */
 export function useContentAspect(ratio: number | undefined): void {
-  const report = useContext(ContentAspect)
+  const report = use(ContentAspect)
   useEffect(() => {
     if (ratio !== undefined && Number.isFinite(ratio) && ratio > 0) report(ratio)
   }, [report, ratio])
@@ -141,7 +141,7 @@ export function useContentAspect(ratio: number | undefined): void {
  * sees a half-drawn first frame, and waits for each one before the next seek.
  */
 export function usePaintGate(ready: boolean): void {
-  const hold = useContext(PaintGate)
+  const hold = use(PaintGate)
   useEffect(() => (ready ? undefined : hold()), [ready, hold])
 }
 
@@ -152,5 +152,5 @@ export function usePaintGate(ready: boolean): void {
  * returns to release. Outside a kit renderer it holds nothing.
  */
 export function usePaintHold(): () => () => void {
-  return useContext(PaintGate)
+  return use(PaintGate)
 }

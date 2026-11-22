@@ -812,6 +812,16 @@ isScopeChange(row: Pick<ScopeRow, "correspondence" | "status">): false | true
 
 Whether a row is one of a comparison's changes: its status, or its identity (a rename, split or merge), changed.
 
+### `keyed`
+
+```ts
+keyed<T>(items: Array<T>, keyOf: { (item: T): string }): Array<[string, T]>
+```
+
+Each item with a React key: its occurrence among the items with the same `keyOf`, then that (`1:a`, `1:b`, `2:a`).
+For lists whose items have no id of their own (text runs, lines, diagnostics): a key stays with its item when others
+are added or removed before it, as an index wouldn't, and no two items share one, whatever their text.
+
 ### `kindWords`
 
 ```ts

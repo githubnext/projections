@@ -1,4 +1,5 @@
 import {Prose} from '../prose.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /** A view's notices beside their icon: none draws nothing, one is a sentence, and only several are a bulleted list. */
 export function Notices({notices}: {notices: readonly string[]}) {
@@ -12,8 +13,8 @@ export function Notices({notices}: {notices: readonly string[]}) {
   }
   return (
     <ul className="ph-notice ph-notices pj:flex pj:list-disc pj:flex-col pj:gap-1 pj:pl-4" aria-label="Notices">
-      {notices.map((notice, index) => (
-        <li key={index}>
+      {keyed(notices, notice => notice).map(([key, notice]) => (
+        <li key={key}>
           <Prose>{notice}</Prose>
         </li>
       ))}

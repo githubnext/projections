@@ -16,7 +16,9 @@ export function useTextAdvances(
 ): (text: string) => number {
   const [advances, setAdvances] = useState<ReadonlyMap<string, number>>(new Map())
   const latest = useRef(advances)
-  latest.current = advances
+  useLayoutEffect(() => {
+    latest.current = advances
+  })
   useLayoutEffect(() => {
     const element = group.current
     if (!element) return undefined

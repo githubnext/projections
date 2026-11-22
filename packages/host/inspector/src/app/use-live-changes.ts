@@ -96,20 +96,22 @@ export function useLiveChanges({
     recompare,
     definitionRevision,
   })
-  latest.current = {
-    live,
-    runnable,
-    projection,
-    rows,
-    revisions,
-    marked,
-    extract,
-    refreshDefinitions,
-    retry,
-    manual,
-    recompare,
-    definitionRevision,
-  }
+  useLayoutEffect(() => {
+    latest.current = {
+      live,
+      runnable,
+      projection,
+      rows,
+      revisions,
+      marked,
+      extract,
+      refreshDefinitions,
+      retry,
+      manual,
+      recompare,
+      definitionRevision,
+    }
+  })
   useEffect(() => {
     if (!api) return undefined
     const abort = new AbortController()

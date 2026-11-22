@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useState} from 'react'
+import {useCallback, useMemo, useState} from 'react'
 import type {ExtractionDocument} from '@githubnext/projections-schemas'
 import type {ExtractionChoice} from '@githubnext/projections-host'
 import type {InspectorApi} from '../client/api.js'
@@ -60,14 +60,7 @@ export function usePresentedPair({
     [overrides, definitions],
   )
   // One derived document per extraction while the overrides stay, so relabelling the choices never recomputes the pair.
-  const effectiveDocument = useMemo(() => {
-    const derived = new WeakMap<ExtractionDocument, ExtractionDocument>()
-    return (document: ExtractionDocument): ExtractionDocument => {
-      let found = derived.get(document)
-      if (!found) derived.set(document, (found = overridden(document)))
-      return found
-    }
-  }, [overridden])
+  const effectiveDocument = useMemo(() => kept(overridden), [overridden])
   // What the main view presents: the live extractions of this projection, or a saved artifact.
   // The host's names for the pair's revisions (an editor names them as its own pickers do).
   const hostLabels = useHostRevisionLabels()
@@ -104,11 +97,20 @@ export function usePresentedPair({
     lastChoice: choices.at(-1)?.key,
   })
   // The chosen pair, once ready, is the pair held through the next switch.
-  useEffect(() => {
-    if (showing !== 'live' || switching || !after) return
-    setHeld(current =>
-      current?.projection === projection && current.before === before && current.after === after ? current : {projection, before, after},
-    )
-  }, [showing, switching, projection, before, after])
+  if (showing === 'live' && !switching && after && (held?.projection !== projection || held.before !== before || held.after !== after)) {
+    setHeld({projection, before, after})
+  }
   return {revisionRows, projectionRows, showing, choices, before, after, switching}
+}
+
+/** `derive`, each result kept for the document it was derived from. */
+function kept(derive: (document: ExtractionDocument) => ExtractionDocument): (document: ExtractionDocument) => ExtractionDocument {
+  const derived = new WeakMap<ExtractionDocument, ExtractionDocument>()
+  return document => {
+    const found = derived.get(document)
+    if (found) return found
+    const made = derive(document)
+    derived.set(document, made)
+    return made
+  }
 }

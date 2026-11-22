@@ -86,7 +86,9 @@ function FoldGlyph({open}: {open: boolean}) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      {(open ? ChevronsDownUp : ChevronsUpDown).map(([tag, attributes], index) => createElement(tag, {key: index, ...attributes}))}
+      {keyed(open ? ChevronsDownUp : ChevronsUpDown, ([tag, attributes]) => `${tag}${JSON.stringify(attributes)}`).map(
+        ([key, [tag, attributes]]) => createElement(tag, {key, ...attributes}),
+      )}
     </svg>
   )
 }

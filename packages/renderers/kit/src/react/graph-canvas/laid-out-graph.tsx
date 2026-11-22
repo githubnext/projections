@@ -36,20 +36,21 @@ const corner = (node: {x: number; y: number; width: number; height: number}): Po
 export function LaidOutGraph(props: LaidOutGraphProps) {
   const {progress, onSelect, comparing, transition, orientation, count} = props
   const diff = props.diff && props.comparing
-  const target = diff ? transition.diff : transition(progress)
+  // One frame per progress: what was drawn last (below) compares frames by identity.
+  const target = useMemo(() => (diff ? transition.diff : transition(progress)), [diff, transition, progress])
   const {framing, bounds, flush} = useFraming(transition, diff)
   const scroller = useRef<HTMLDivElement>(null)
-  const drawnScale = useRef(0)
+  // What was drawn last, as of the last render: a new view moves from it.
+  const [drawnLast, setDrawnLast] = useState<Drawn>()
   // The scope the layout shows: changing it (Changes and All) moves the cards between the two layouts.
   // Before the host's filter, every item is drawn provisionally: the first scope it chooses is drawn at once.
   const scopeKey = props.filtered === false ? provisional : props.scope ? `changes:${props.scope.shown.size}` : 'all'
   const {frame, hold, overflow, change} = useViewChange(
     scroller,
+    drawnLast,
     props.anchor,
     transition,
     target,
-    bounds,
-    drawnScale,
     props.reducedMotion,
     scopeKey,
   )
@@ -69,14 +70,14 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
   // that focus within it would zoom the old drawing past its fit. Until its own layout arrives, it keeps the focus it
   // opened on, so its view doesn't move.
   const stale = props.stale === true
-  const opened = useRef<{area: FocusArea | undefined; request: RendererFocus | undefined}>(undefined)
-  const kept = stale ? opened.current : undefined
+  const [opened, setOpened] = useState<{area: FocusArea | undefined; request: RendererFocus | undefined}>()
+  const kept = stale ? opened : undefined
   const request = kept ? kept.request : props.focusRequest
   const area = useMemo(
     () => (kept ? kept.area : focusArea(transition, diff, props.model, request, shown)),
     [kept, transition, diff, props.model, request, shown],
   )
-  if (!stale) opened.current = {area, request}
+  if (!stale && (!opened || opened.area !== area || opened.request !== request)) setOpened({area, request})
   const drawn = nodes.map(node => ({x: node.x - node.width / 2, y: node.y - node.height / 2, width: node.width, height: node.height}))
   const {zoom, scale, borders, keep, top, bottom} = useGraphZoom(
     scroller,
@@ -88,7 +89,9 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
     drawn,
     hold,
   )
-  drawnScale.current = scale
+  if (drawnLast?.transition !== transition || drawnLast.target !== target || drawnLast.bounds !== bounds || drawnLast.scale !== scale) {
+    setDrawnLast({transition, target, bounds, scale})
+  }
   useAnchoredScroll(scroller, change, transition, target, bounds, scale, keep)
   const draw = drawing(props, diff, emphasisInset(borders), borders.normal)
   const caption = props.focus ? props.focus.label : ''
@@ -104,6 +107,7 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
       <div
         className="graph-scroll pk-dot-grid"
         data-projections-scroll="graph"
+        role="region"
         aria-label="Scrollable graph"
         tabIndex={0}
         ref={scroller}
@@ -139,8 +143,8 @@ export function LaidOutGraph(props: LaidOutGraphProps) {
             {links.map(link => (
               <GraphLink key={link.edge.key} link={link} drawing={draw} sharedOpen={sharedOpen} inspect={inspectEdge} />
             ))}
-            {frame.junctions.map((point, index) => (
-              <circle key={index} className="graph-junction" cx={point.x} cy={point.y} r="2.5" aria-hidden="true" />
+            {keyed(frame.junctions, point => `${point.x},${point.y}`).map(([key, point]) => (
+              <circle key={key} className="graph-junction" cx={point.x} cy={point.y} r="2.5" aria-hidden="true" />
             ))}
             {nodes
               .filter(node => !node.group)

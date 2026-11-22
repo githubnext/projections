@@ -9,8 +9,8 @@ import {defaultChrome, type MeasureText, type TextChrome, type TextRole} from '.
  * layout's and the text reads (and copies) as one string.
  */
 export function Breakable({lines}: {lines: readonly string[]}): ReactNode {
-  return lines.map((line, index) => (
-    <span key={index} className="database-line">
+  return keyed(lines, line => line).map(([key, line], index) => (
+    <span key={key} className="database-line">
       {index > 0 && <wbr />}
       {line}
     </span>

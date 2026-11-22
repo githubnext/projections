@@ -9,6 +9,14 @@ import {rovingIndex, scopeChoice, scopeHiddenText, type ProjectionController} fr
  */
 export function ScopeSwitch({projection: p}: {projection: ProjectionController}) {
   const group = useRef<HTMLDivElement>(null)
+  // The scope chosen with the keyboard, focused once it is drawn (checked, and in the tab order, unless the choice was
+  // refused); each request once, and only while focus is still in the group.
+  const [focusing, setFocusing] = useState<{scope: string}>()
+  useLayoutEffect(() => {
+    const element = group.current
+    if (!focusing || !element?.contains(element.ownerDocument.activeElement)) return
+    element.querySelector<HTMLButtonElement>(`[data-scope="${focusing.scope}"]`)?.focus()
+  }, [focusing])
   if (!p.comparing) return null
   // Every item is a change or gives one context: Changes and All show the same, so there is nothing to switch.
   const {nothingHidden, noteTitle, options} = scopeChoice(p)
@@ -16,8 +24,14 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
   const index = Math.max(0, scopes.indexOf(p.scope))
   const choose = (next: number) => {
     const scope = scopes[(next + scopes.length) % scopes.length]!
-    flushSync(() => p.setScope(scope))
-    group.current?.querySelector<HTMLButtonElement>(`[data-scope="${scope}"]`)?.focus()
+    setFocusing({scope})
+    p.setScope(scope)
+  }
+  const keys = (event: KeyboardEvent) => {
+    const next = rovingIndex(event.key, index, scopes.length)
+    if (next === undefined) return
+    event.preventDefault()
+    choose(next)
   }
   // Both forms share one cell, the other one invisible, so the slot keeps its width when the form changes.
   return (
@@ -40,12 +54,6 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
         data-inactive={nothingHidden || undefined}
         aria-hidden={nothingHidden || undefined}
         className="phv-scope-switch"
-        onKeyDown={event => {
-          const next = rovingIndex(event.key, index, scopes.length)
-          if (next === undefined) return
-          event.preventDefault()
-          choose(next)
-        }}
       >
         {options.map(({scope, label, title}, position) => (
           <button
@@ -58,6 +66,7 @@ export function ScopeSwitch({projection: p}: {projection: ProjectionController})
             className="phv-scope"
             data-scope={scope}
             onClick={() => p.setScope(scope)}
+            onKeyDown={keys}
           >
             {label}
           </button>

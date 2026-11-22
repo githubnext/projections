@@ -20,6 +20,7 @@ import {
 import {documentOrder, scenarioOf, subjectWords, type Scenario} from './model.js'
 import {eagerScenarios, NestedStage} from './stage.js'
 import type {accepts} from './accepts.js'
+import {keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 type Row = EntityChange<Entity>
 type Props = RendererProps<typeof accepts>
@@ -149,6 +150,7 @@ export function GalleryView(props: Props) {
         holdsChanges={nestedComparison(scenario)}
       >
         <div
+          role="presentation"
           className="gl-card-body"
           onPointerEnter={() => setPlaying(row.id)}
           onPointerLeave={() => setPlaying(playingId => (playingId === row.id ? null : playingId))}

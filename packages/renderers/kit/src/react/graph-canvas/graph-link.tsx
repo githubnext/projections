@@ -10,6 +10,9 @@ import {drawnEdge} from '../../graph-canvas/edges.js'
 import type {Point} from '../../edge-arrows.js'
 import {edgeDescription, type Drawing} from './drawing.js'
 
+/** The default for an optional list prop: one array, so a default never changes between renders. */
+const none: readonly never[] = []
+
 export interface DrawnLink {
   edge: TransitionEdge
   arrow: ReturnType<typeof drawnEdge>
@@ -131,7 +134,7 @@ function junctionOf(edge: TransitionEdge, junctions: readonly Point[]): Point | 
 export function Arrowheads({
   links,
   drawing,
-  junctions = [],
+  junctions = none,
 }: {
   links: readonly DrawnLink[]
   drawing: Drawing

@@ -1,5 +1,5 @@
 import type {CSSProperties} from 'react'
-import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, keyed} from '@githubnext/projections-renderer-sdk/presentation'
 import {rightX, textX} from './card.js'
 import {pillGap, type DiDependencyPiece, type DiSpan, type DiTextLine} from './geometry.js'
 import type {DiDependencyChange} from './diff-model.js'
@@ -66,11 +66,11 @@ export function DependencyLine({
   return (
     <text className="di-dependencies" x={textX} y={y}>
       <title>{dependencies.map(item => `${item.change === 'added' ? '+' : '−'} ${item.name}`).join(', ')}</title>
-      {pieces.map((piece, index) => {
+      {keyed(pieces, piece => dependencies[piece.index]?.key ?? piece.text).map(([key, piece], index) => {
         const dependency = dependencies[piece.index]!
         return (
           <tspan
-            key={`${dependency.key}:${index}`}
+            key={key}
             className="di-dependency"
             data-change={dependency.change}
             dx={index ? pillGap : 0}

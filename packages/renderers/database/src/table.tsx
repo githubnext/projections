@@ -81,7 +81,9 @@ function ValueRow({card, row}: {card: Card; row: FrameColumn}) {
   const valueEmphasis = diff ? props.emphasis(column) : rowBadges ? props.emphasis(column, change.id) : 0
   const marked = mark(card, column, undefined, valueEmphasis)
   return (
+    // A row is a click target as wide as the card; the keyboard reaches its card's or its own button.
     <div
+      role="presentation"
       onClick={select(props, change.id)}
       className={`database-column database-row database-value${marked.className}`}
       style={{top, height, opacity, ...marked.style}}
@@ -110,6 +112,7 @@ function KeyRow({card, row, keyRow}: {card: Card; row: FrameColumn; keyRow: NonN
   const classes = `database-column database-row database-keyrow pk-part${top === firstKey ? ' first' : ''}${selected ? ' selected' : ''}`
   return (
     <div
+      role="presentation"
       data-entity-id={column.id}
       onClick={select(props, column.id)}
       className={`${classes}${marked.className}`}
@@ -235,6 +238,7 @@ function ColumnRow({card, row}: {card: Card; row: FrameColumn}) {
       : {change: column, emphasis: columnEmphasis}
   return (
     <div
+      role="presentation"
       data-entity-id={column.id}
       onClick={() => props.onSelect(column.id)}
       className={`database-column database-row pk-part${selected ? ' selected' : ''}${marked.className}`}
@@ -279,6 +283,7 @@ function CardHeader({card, entity, header, status}: {card: Card; entity: Entity;
   const renamed = diff && change.before && change.after && change.before.label !== change.after.label ? change.before.label : undefined
   return (
     <header
+      role="presentation"
       className={`database-row${headerFits ? '' : ' wrapped'}`}
       style={{height: header, '--database-status-width': `${status}px`} as CSSProperties}
       onClick={() => props.onSelect(change.id)}

@@ -1,6 +1,6 @@
 import {Fragment} from 'react'
 import {proseSpans} from '@githubnext/projections-renderer-kit'
-import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
+import {identifier, keyed} from '@githubnext/projections-renderer-sdk/presentation'
 
 /**
  * Where a long code value may wrap: after a path separator or punctuation (`/`, `.`, `-`, `=`, `,`, `:`) that ends a
@@ -16,8 +16,8 @@ export function BreakableCode({children}: {children: string}) {
   const parts = children.split(separator)
   return (
     <>
-      {parts.map((part, index) => (
-        <Fragment key={index}>
+      {keyed(parts, part => part).map(([key, part], index) => (
+        <Fragment key={key}>
           {index > 0 && <wbr />}
           {part}
         </Fragment>
@@ -30,13 +30,13 @@ export function BreakableCode({children}: {children: string}) {
 export function Prose({children}: {children: string}) {
   return (
     <>
-      {proseSpans(children).map((span, index) =>
+      {keyed(proseSpans(children), span => `${span.code ? 'code' : 'text'}:${span.text}`).map(([key, span]) =>
         span.code ? (
-          <code key={index} className="pk-code" {...identifier}>
+          <code key={key} className="pk-code" {...identifier}>
             <BreakableCode>{span.text}</BreakableCode>
           </code>
         ) : (
-          <Fragment key={index}>{span.text}</Fragment>
+          <Fragment key={key}>{span.text}</Fragment>
         ),
       )}
     </>

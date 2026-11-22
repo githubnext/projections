@@ -238,19 +238,21 @@ export function FailureCard({
       </div>
       {shown.length > 0 && (
         <ul className="pi-failure-diagnostics pj:flex pj:flex-col pj:gap-1">
-          {shown.slice(0, 8).map((diagnostic, index) => (
-            <li key={index} className="pj:flex pj:min-w-0 pj:flex-col">
-              <span className="pj:flex pj:flex-wrap pj:items-baseline pj:gap-x-2">
-                <span className="pj:font-semibold">{diagnostic.severity === 'error' ? 'Error' : 'Warning'}</span>
-                <span className="pj:font-mono">{diagnostic.code}</span>
-                {diagnostic.path && <code className="pj:break-all pj:font-mono pj:text-muted-foreground">{diagnostic.path}</code>}
-              </span>
-              {/* What the extractor reported, without the path of the process that ran it; Raw output has its stderr. */}
-              <span className="pj:line-clamp-2 pj:break-words" title={failureMessage(diagnostic.message)}>
-                {failureMessage(diagnostic.message)}
-              </span>
-            </li>
-          ))}
+          {keyed(shown.slice(0, 8), diagnostic => `${diagnostic.code}:${diagnostic.path ?? ''}:${diagnostic.message}`).map(
+            ([key, diagnostic]) => (
+              <li key={key} className="pj:flex pj:min-w-0 pj:flex-col">
+                <span className="pj:flex pj:flex-wrap pj:items-baseline pj:gap-x-2">
+                  <span className="pj:font-semibold">{diagnostic.severity === 'error' ? 'Error' : 'Warning'}</span>
+                  <span className="pj:font-mono">{diagnostic.code}</span>
+                  {diagnostic.path && <code className="pj:break-all pj:font-mono pj:text-muted-foreground">{diagnostic.path}</code>}
+                </span>
+                {/* What the extractor reported, without the path of the process that ran it; Raw output has its stderr. */}
+                <span className="pj:line-clamp-2 pj:break-words" title={failureMessage(diagnostic.message)}>
+                  {failureMessage(diagnostic.message)}
+                </span>
+              </li>
+            ),
+          )}
           {shown.length > 8 && <li className="pj:text-muted-foreground">{shown.length - 8} more in the Diagnostics panel</li>}
         </ul>
       )}
@@ -270,8 +272,8 @@ export function InvalidDefinitions({invalid}: {invalid: readonly InspectorInvali
       <AlertDescription>
         <ul className="pj:list-disc pj:pl-4">
           {invalid.flatMap(item =>
-            item.diagnostics.map((diagnostic, index) => (
-              <li key={`${item.path}:${index}`} className="pj:break-words" data-invalid-definition={item.id ?? item.path}>
+            keyed(item.diagnostics, diagnostic => diagnostic.message).map(([key, diagnostic]) => (
+              <li key={`${item.path}:${key}`} className="pj:break-words" data-invalid-definition={item.id ?? item.path}>
                 <span className="pj:font-mono">
                   {diagnostic.location ? `${diagnostic.location.path}:${diagnostic.location.line}` : item.path}
                 </span>

@@ -115,13 +115,16 @@ export function RendererPane(props: RendererPaneProps) {
   // Counts the renderer's `control` messages, each answered with the options once the host has applied it.
   const [controlAnswer, setControlAnswer] = useState(0)
   const callbacks = useRef(props)
-  callbacks.current = props
   const options = props.options
   const selectedPath = props.selectedPath
   const annotations = props.annotations
   const fill = props.fill ?? false
   const latest = useRef({init, progress, selectedId, hoveredId, options, selectedPath, annotations, fill})
-  latest.current = {init, progress, selectedId, hoveredId, options, selectedPath, annotations, fill}
+  // The committed render's props, for the frame's events and messages.
+  useLayoutEffect(() => {
+    callbacks.current = props
+    latest.current = {init, progress, selectedId, hoveredId, options, selectedPath, annotations, fill}
+  })
   // A pane can move between roles (the animated frame becomes the after pane), so a new `onState` gets the current state.
   const onState = props.onState
   useEffect(() => {
@@ -134,7 +137,9 @@ export function RendererPane(props: RendererPaneProps) {
   const url = renderer.url
   const title = props.label ? `${renderer.title} renderer, ${props.label}` : `${renderer.title} renderer`
   const titleRef = useRef(title)
-  titleRef.current = title
+  useLayoutEffect(() => {
+    titleRef.current = title
+  })
   useEffect(() => {
     const host = container.current
     if (!host) return undefined

@@ -99,14 +99,13 @@ export function useScenarios({
   // A host's request (`InspectorHandle.showScenario`), often made as the page opens: before the definitions, the
   // projection switch or its scenarios have loaded, when showing it at once would find no scenario and show the pair.
   const loaded = Boolean(scenarioFile && scenarioLists[projection])
+  // A request for another projection waits for the switch to it, and goes when the Inspector moves elsewhere instead.
+  if (requested && requested.projection !== projection && projection !== requested.from) setRequested(undefined)
+  const shownRequest = useRef<ScenarioRequest>(undefined)
   useEffect(() => {
-    if (!requested) return
-    if (requested.projection !== projection) {
-      if (projection !== requested.from) setRequested(undefined)
-      return
-    }
+    if (!requested || requested === shownRequest.current || requested.projection !== projection) return
     if (!known || (scenarioFile && !loaded)) return
-    setRequested(undefined)
+    shownRequest.current = requested
     showScenario(requested.id)
   }, [requested, projection, known, scenarioFile, loaded, showScenario])
   const requestScenario = useCallback((request: ScenarioRequest) => setRequested(request), [])

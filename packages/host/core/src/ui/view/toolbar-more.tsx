@@ -65,7 +65,7 @@ export function ToolbarMore({
           {info}
           {fullscreen}
         </div>
-      )}
+      ) : null}
     </MoreMenu>
   )
 }

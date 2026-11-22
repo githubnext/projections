@@ -44,7 +44,7 @@ export function subjectLimitations(p: Pick<ProjectionController, 'subject'>): st
 export function InfoButton({
   projection: p,
   comparator,
-  diagnostics = [],
+  diagnostics = none,
   control,
 }: {
   projection: ProjectionController
@@ -96,8 +96,8 @@ export function InfoButton({
                 </span>
               </li>
             ))}
-            {limitations.map((limitation, index) => (
-              <li key={`limitation-${index}`} data-severity="limitation">
+            {keyed(limitations, limitation => limitation).map(([key, limitation]) => (
+              <li key={`limitation-${key}`} data-severity="limitation">
                 <span className="codicon codicon-info" aria-hidden="true" />
                 <span>{limitation}</span>
               </li>

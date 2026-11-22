@@ -49,7 +49,7 @@ export interface DetailCard {
  */
 export function useDetailCard(
   projection: ProjectionController,
-  {container, view, enabled = true, sheetBelow = 640}: DetailCardOptions,
+  {container: containerRef, view, enabled = true, sheetBelow = 640}: DetailCardOptions,
 ): DetailCard {
   const selected = enabled ? (projection.selectedRow ?? null) : null
   const target = projection.selection?.target
@@ -65,12 +65,15 @@ export function useDetailCard(
   const [card, setCard] = useState<HTMLElement | null>(null)
   const [placed, setPlaced] = useState<{placement: DetailCardPlacement; left: number; top: number} | null>(null)
   const placement = placed?.placement ?? null
+  // The committed render's, for measuring; reading it there doesn't measure again when it changes.
   const anchorFor = useRef(projection.anchorFor)
-  anchorFor.current = projection.anchorFor
+  useLayoutEffect(() => {
+    anchorFor.current = projection.anchorFor
+  })
 
   const rowId = row?.id
   const measure = useCallback(() => {
-    const box = container.current
+    const box = containerRef.current
     if (!box || !card || rowId === undefined) return
     const rect = box.getBoundingClientRect()
     const viewport = {x: 0, y: 0, width: document.documentElement.clientWidth || innerWidth, height: innerHeight}
@@ -98,13 +101,13 @@ export function useDetailCard(
         ? previous
         : {placement: next, left, top},
     )
-  }, [container, card, rowId, sheetBelow])
+  }, [containerRef, card, rowId, sheetBelow])
 
   // The anchor moves when the renderer reports it, and the views' rows as they lay out (observed below).
   const anchors = projection.anchorFor
+  if (!row && placed) setPlaced(null)
   useLayoutEffect(() => {
     if (row) measure()
-    else setPlaced(null)
   }, [row, measure, anchors])
   useEffect(() => {
     if (!row) return undefined
@@ -122,9 +125,9 @@ export function useDetailCard(
     const observer = new ResizeObserver(schedule)
     // A view switch, filter or playback step changes the rows a table or text view draws.
     const mutations = new MutationObserver(schedule)
-    if (container.current) {
-      observer.observe(container.current)
-      mutations.observe(container.current, {
+    if (containerRef.current) {
+      observer.observe(containerRef.current)
+      mutations.observe(containerRef.current, {
         childList: true,
         subtree: true,
         attributes: true,
@@ -139,9 +142,9 @@ export function useDetailCard(
       observer.disconnect()
       mutations.disconnect()
     }
-  }, [row, measure, container, card])
+  }, [row, measure, containerRef, card])
 
-  const {close, select} = useCardFocus({projection, container, view, card, row, key, setDismissed, shown: placement !== null})
+  const {close, select} = useCardFocus({projection, container: containerRef, view, card, row, key, setDismissed, shown: placement !== null})
 
   const style: CSSProperties = placed
     ? {position: 'absolute', left: placed.left, top: placed.top, width: placement!.width, maxHeight: placement!.maxHeight, zIndex: 20}

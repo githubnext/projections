@@ -223,8 +223,9 @@ export function explorerSections({
           children: (
             <>
               <div className="pi-compare pj:flex pj:flex-col pj:gap-2">
-                <label className="pi-x-block pj:flex pj:min-h-6 pj:items-center pj:gap-1.5 pj:text-xs">
+                <label htmlFor="pi-show-one" className="pi-x-block pj:flex pj:min-h-6 pj:items-center pj:gap-1.5 pj:text-xs">
                   <Checkbox
+                    id="pi-show-one"
                     checked={one}
                     disabled={!projection || !marked.b}
                     onCheckedChange={value => toggleOne(value === true)}

@@ -101,6 +101,7 @@ function Fact({
   menu?: boolean
 }) {
   const {pressed, next} = summaryToggle(p.summaryFilter, figure)
+  const descriptionId = useId()
   const tone = figure.tone && figure.tone !== 'neutral' ? deltaTone[figure.tone] : undefined
   const content = (
     <>
@@ -117,7 +118,7 @@ function Fact({
           type="button"
           className={cn(buttonClass(menu), 'pj:gap-1', tone)}
           aria-pressed={pressed}
-          aria-description={figure.description}
+          aria-describedby={figure.description ? descriptionId : undefined}
           title={summaryFactTitle(figure, pressed)}
           data-summary-total={figure.count}
           data-tone={figure.tone}
@@ -125,6 +126,11 @@ function Fact({
           onClick={() => p.setSummaryFilter(next)}
         >
           {content}
+          {figure.description && (
+            <span id={descriptionId} hidden>
+              {figure.description}
+            </span>
+          )}
         </button>
       ) : (
         <span

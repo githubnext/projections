@@ -1,5 +1,5 @@
 // One scenario drawn by its own renderer, in a sandboxed frame nested in the gallery's.
-import {useEffect, useMemo, useRef, useState} from 'react'
+import {useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react'
 import type {Entity} from '@githubnext/projections-schemas'
 import {usePaintGate} from '@githubnext/projections-renderer-kit/react'
 import {embedRenderer, type EmbeddedRenderer} from '@githubnext/projections-renderer-sdk/client'
@@ -55,6 +55,8 @@ type StageState = ({status: 'idle' | 'loading' | 'ready'} | {status: 'failed'; m
 /** Whether the element intersects the view, grown by `margin`; undefined until first known. */
 function useInView(element: React.RefObject<HTMLElement | null>, margin: string, always: boolean): boolean | undefined {
   const [inView, setInView] = useState<boolean | undefined>(always || undefined)
+  // Without an observer to ask, everything is in view.
+  const observed = !always && typeof IntersectionObserver !== 'undefined'
   useEffect(() => {
     const target = element.current
     if (always) {
@@ -69,8 +71,8 @@ function useInView(element: React.RefObject<HTMLElement | null>, margin: string,
     const observer = new IntersectionObserver(entries => setInView(entries.some(entry => entry.isIntersecting)), {rootMargin: margin})
     observer.observe(target)
     return () => observer.disconnect()
-  }, [element, margin, always])
-  return inView
+  }, [element, margin, observed])
+  return observed ? inView : true
 }
 
 /**
@@ -112,7 +114,9 @@ export function NestedStage({
   const animated = useRef(false)
   const label = `${title}, drawn by the ${scenario.renderer} renderer`
   const latest = useRef({environment, onSelect, scenario, title, label})
-  latest.current = {environment, onSelect, scenario, title, label}
+  useLayoutEffect(() => {
+    latest.current = {environment, onSelect, scenario, title, label}
+  })
 
   // One frame per scenario document: a new subject loads it again.
   useEffect(() => {

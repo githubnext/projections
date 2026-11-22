@@ -6,6 +6,7 @@ import {
   generatedTitle,
   generatedWords,
   identifier,
+  keyed,
   wordDiff,
   type BasisValue,
 } from '@githubnext/projections-renderer-sdk/presentation'
@@ -158,15 +159,15 @@ export function GeneratedText({
           first={pair}
           second={
             <div className="pk-generated-passage pk-generated-diff" data-word-diff="">
-              {runs.map((run, index) =>
+              {keyed(runs, run => `${run.op}:${run.text}`).map(([key, run]) =>
                 run.op === 'same' ? (
-                  <span key={index}>{run.text}</span>
+                  <span key={key}>{run.text}</span>
                 ) : run.op === 'removed' ? (
-                  <del key={index} className="pk-generated-removed">
+                  <del key={key} className="pk-generated-removed">
                     {run.text}
                   </del>
                 ) : (
-                  <ins key={index} className="pk-generated-added">
+                  <ins key={key} className="pk-generated-added">
                     {run.text}
                   </ins>
                 ),

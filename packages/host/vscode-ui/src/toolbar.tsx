@@ -15,6 +15,9 @@ import {hasSettings, SettingsMenu} from './settings-menu.js'
 import {InfoButton} from './about.js'
 import {fallbackClass, noTarget} from './fullscreen-button.js'
 
+/** The default for an optional list prop: one array, so a default never changes between renders. */
+const none: readonly never[] = []
+
 /** What `MoreMenu` can hold. */
 export type MoreMenuItem = 'steps' | 'varied' | 'zoom' | 'filter' | 'settings' | 'info' | 'fullscreen'
 
@@ -30,7 +33,7 @@ export function MoreMenu({
   projection: p,
   features,
   view,
-  views = [],
+  views = none,
   onViewChange,
   rendererTitle,
   fullscreenTarget,
@@ -60,11 +63,18 @@ export function MoreMenu({
   const [popover, setPopover] = useState<'filter' | 'settings' | 'info' | null>(null)
   const own = useFullscreen(fullscreenState ? noTarget : (fullscreenTarget ?? noTarget), {fallbackClass})
   const fullscreen = fullscreenState ?? own
-  const control = (name: 'filter' | 'settings' | 'info'): PopoverControl => ({
-    open: popover === name,
-    onOpenChange: open => setPopover(open ? name : null),
+  // The popovers in the menu open from the More button.
+  const filterControl: PopoverControl = {
+    open: popover === 'filter',
+    onOpenChange: open => setPopover(open ? 'filter' : null),
     anchorRef: anchor,
-  })
+  }
+  const settingsControl: PopoverControl = {
+    open: popover === 'settings',
+    onOpenChange: open => setPopover(open ? 'settings' : null),
+    anchorRef: anchor,
+  }
+  const infoControl: PopoverControl = {open: popover === 'info', onOpenChange: open => setPopover(open ? 'info' : null), anchorRef: anchor}
   const has = (item: MoreMenuItem) => items.includes(item)
   const zoom =
     has('zoom') &&
@@ -187,10 +197,10 @@ export function MoreMenu({
         items={entries}
         groupLabels={{steps: 'Steps', variation: 'Variation', zoom: 'Zoom'}}
       />
-      {has('filter') && on(features, 'search') && <FilterButton projection={p} control={control('filter')} />}
-      {has('settings') && <SettingsMenu projection={p} features={settingsFeatures} control={control('settings')} {...showAs} />}
+      {has('filter') && on(features, 'search') && <FilterButton projection={p} control={filterControl} />}
+      {has('settings') && <SettingsMenu projection={p} features={settingsFeatures} control={settingsControl} {...showAs} />}
       {has('info') && on(features, 'info') && (
-        <InfoButton projection={p} comparator={comparator} diagnostics={diagnostics} control={control('info')} />
+        <InfoButton projection={p} comparator={comparator} diagnostics={diagnostics} control={infoControl} />
       )}
     </>
   )

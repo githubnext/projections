@@ -2,13 +2,16 @@ import {identifier} from '@githubnext/projections-renderer-sdk/presentation'
 import type {Circle} from './transition.js'
 import {listWords} from './document.js'
 
+/** The default for an optional list prop: one array, so a default never changes between renders. */
+const none: readonly never[] = []
+
 /** Hover details: path, size and change; positioned above the circle and kept inside the area. */
 export function Tooltip({
   circle,
   path,
   sizes,
   category,
-  flags = [],
+  flags = none,
   view,
   area,
 }: {

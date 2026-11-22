@@ -1,14 +1,12 @@
 // Where a diff that opens zoomed starts: on its first change, so a change is in view even when it is far from the top.
-import type {RefObject} from 'react'
-import type {ScrollStart} from '@githubnext/projections-renderer-kit'
 
 /** Room left above and beside the change a diff opens on, CSS px. */
 const margin = 16
 
 /**
- * The scroll offsets that put the diff's first change (the topmost, then leftmost, of the cards, rows, tags and links it
+ * The scroll offsets, at `scale`, that put the diff's first change (the topmost, then leftmost, of the cards, rows, tags and links it
  * marks with `data-change`, a link at the row it leaves) at the view's top left, `margin` clear of it: read from
- * `content` (the drawn schema, scaled by a transform) in content units, so the start is the same at every scale. The
+ * `drawn` (the drawn schema, scaled by a transform) in content units, so the start is the same at every scale. The
  * hidden copies tags are measured from don't count, and a tag waiting for its slot counts as the tag block. The top
  * left without a change.
  */

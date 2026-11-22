@@ -60,11 +60,11 @@ export function reach(units: readonly Unit[], touched: Iterable<string>, tested:
   }
   const witness = new Map<string, string>()
   for (const unit of touched) witness.set(unit, unit)
-  const queue = [...witness.keys()].filter(unit => !tested.has(unit)).sort()
+  const queue = [...witness.keys()].filter(unit => !tested.has(unit)).toSorted()
   const expanded = new Set(queue)
   while (queue.length) {
     const unit = queue.shift()!
-    for (const dependant of (reverse.get(unit) ?? []).sort()) {
+    for (const dependant of (reverse.get(unit) ?? []).toSorted()) {
       if (!witness.has(dependant)) witness.set(dependant, unit)
       if (expanded.has(dependant)) continue
       expanded.add(dependant)

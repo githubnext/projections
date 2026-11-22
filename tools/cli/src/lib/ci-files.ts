@@ -51,11 +51,11 @@ export function classifyFile(facts: RepoFacts, rules: CiRules, path: string, con
     tested,
   })
   const code = (why: string) => {
-    const built = [...new Set([...(owner ? [owner] : []), ...readers.build])].sort()
+    const built = [...new Set([...(owner ? [owner] : []), ...readers.build])].toSorted()
     return file(
       'code',
       why,
-      [...new Set([...built, ...readers.test])].sort(),
+      [...new Set([...built, ...readers.test])].toSorted(),
       readers.test.filter(unit => !built.includes(unit)),
     )
   }

@@ -63,7 +63,7 @@ export function createProjection(options: ProjectionOptions): ProjectionStore {
     } finally {
       settling = undefined
     }
-    for (const listener of [...listeners]) listener()
+    for (const listener of Array.from(listeners)) listener()
   }
   return {
     getSnapshot: () => snapshot,

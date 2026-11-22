@@ -103,7 +103,7 @@ function narrowed(facts: RepoFacts, rules: CiRules, files: readonly ClassifiedFi
   for (const [path, suite] of Object.entries(rules.browser.suites)) {
     if (!suite.narrow || !affected.includes(path)) continue
     const members = context.groups.get(suite.narrow.group) ?? new Set<string>()
-    const kept = [...context.touched].filter(unit => members.has(unit)).sort()
+    const kept = [...context.touched].filter(unit => members.has(unit)).toSorted()
     if (!kept.length || kept.length === members.size) continue
     const others = files.map(file => ({...file, touches: file.touches.filter(unit => !kept.includes(unit))}))
     const {touched, reached} = evaluate(rules, facts, others, false)
@@ -159,13 +159,15 @@ export function ciPlan(facts: RepoFacts, rules: CiRules, change: Change): CiPlan
     layouts(rules),
     narrow,
   )
-  const changed = [...state.touched].sort()
+  const changed = [...state.touched].toSorted()
   return {
     full,
     files,
     docsOnly,
     changed,
-    dependants: Object.fromEntries([...state.reached].filter(([unit]) => !state.touched.has(unit)).sort(([a], [b]) => a.localeCompare(b))),
+    dependants: Object.fromEntries(
+      [...state.reached].filter(([unit]) => !state.touched.has(unit)).toSorted(([a], [b]) => a.localeCompare(b)),
+    ),
     conditions: Object.fromEntries(Object.entries(rules.conditions).map(([name, {when}]) => [name, decide(when)])),
     jobs,
     matrices,

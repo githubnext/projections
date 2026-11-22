@@ -26,7 +26,7 @@ export function createComparisonModes({memo}: Memos) {
   return ({comparing, renderer, chosenMode, declaredModes}: ComparisonModesInput) => {
     // Shown in canonical order, whatever order the renderer declares them in.
     const declared = (renderer && (declaredModes[renderer.url] ?? renderer.comparisonModes)) || defaultComparisonModes
-    const availableModes = orderedOf(declared.join())
+    const availableModes = orderedOf(declared.join(','))
     // Until a renderer is resolved and says which modes it supports (its manifest or its ready message), a chosen mode
     // is trusted and kept pending: a host mounted before its renderer catalog loads must not clamp `initialMode: 'diff'`
     // to the defaults (which have no diff) and lose it.
@@ -54,14 +54,8 @@ export function declaredModesWith(
 
 /** Whether the shown panes' renderer is loading, ready or failed (`none` without a renderer), and its errors. */
 export function rendererState(renderer: RendererEntry | undefined, panes: Record<PaneKey, PaneState>, paneKeys: PaneKey[]) {
-  const statuses = paneKeys.map(key => panes[key].status)
-  const status: RendererStatus = !renderer
-    ? 'none'
-    : statuses.includes('failed')
-      ? 'failed'
-      : statuses.includes('loading')
-        ? 'loading'
-        : 'ready'
+  const statuses = new Set(paneKeys.map(key => panes[key].status))
+  const status: RendererStatus = !renderer ? 'none' : statuses.has('failed') ? 'failed' : statuses.has('loading') ? 'loading' : 'ready'
   const errors = paneKeys.flatMap(key => [
     ...panes[key].rendererErrors,
     ...(panes[key].status === 'failed' && panes[key].message ? [panes[key].message!] : []),

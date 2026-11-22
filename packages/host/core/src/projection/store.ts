@@ -50,7 +50,7 @@ export function projectionPhases(initial: ProjectionOptions, frames?: FrameSched
   const batch = {depth: 0, changed: false}
   const notify = () => {
     if (batch.depth) batch.changed = true
-    else for (const listener of [...listeners]) listener()
+    else for (const listener of Array.from(listeners)) listener()
   }
   const batched = <T>(act: () => T): T => {
     batch.depth++
@@ -193,7 +193,7 @@ export function projectionPhases(initial: ProjectionOptions, frames?: FrameSched
         return declared === current.declaredModes ? current : {...current, declaredModes: declared}
       })
       // A chosen mode the renderer doesn't offer becomes the one shown, once its modes are known.
-      const mode = [view.comparing, view.modesKnown, view.chosenMode, view.mode].join()
+      const mode = [view.comparing, view.modesKnown, view.chosenMode, view.mode].join(',')
       if (reported.mode !== mode) {
         reported.mode = mode
         if (view.comparing && view.modesKnown && view.chosenMode !== undefined && view.chosenMode !== view.mode) request('mode', view.mode)

@@ -21,9 +21,9 @@ export const noMedia: Media = {prefersDark: false, reducedMotion: false}
  * the function that stops watching. Without `matchMedia` it tells nothing.
  */
 export function watchMedia(onChange: (media: Media) => void): () => void {
-  if (typeof window === 'undefined' || typeof globalThis.matchMedia !== 'function') return () => {}
-  const dark = globalThis.matchMedia('(prefers-color-scheme: dark)')
-  const motion = globalThis.matchMedia('(prefers-reduced-motion: reduce)')
+  if (typeof window === 'undefined' || typeof globalThis.window.matchMedia !== 'function') return () => {}
+  const dark = globalThis.window.matchMedia('(prefers-color-scheme: dark)')
+  const motion = globalThis.window.matchMedia('(prefers-reduced-motion: reduce)')
   const update = () => onChange({prefersDark: dark.matches, reducedMotion: motion.matches})
   update()
   dark.addEventListener('change', update)

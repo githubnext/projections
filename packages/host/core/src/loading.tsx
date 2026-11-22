@@ -8,8 +8,8 @@ export const loadingStageHeight = 480
 export function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false)
   useEffect(() => {
-    if (typeof window === 'undefined' || !globalThis.matchMedia) return
-    const media = globalThis.matchMedia('(prefers-reduced-motion: reduce)')
+    if (typeof window === 'undefined' || !globalThis.window.matchMedia) return
+    const media = globalThis.window.matchMedia('(prefers-reduced-motion: reduce)')
     const update = () => setReduced(media.matches)
     update()
     media.addEventListener('change', update)
